@@ -229,11 +229,7 @@ export default function UserPageSubscriptions(
       });
   }
 
-  const refresh = (): void => {
-    if (!profileKey) {
-      return;
-    }
-    void coverageQuery.refetch();
+  const fetchSubscriptionData = (): void => {
     fetchDetails();
     fetchAirdropAddress();
     fetchTopUpHistory(1);
@@ -242,14 +238,17 @@ export default function UserPageSubscriptions(
     fetchLogs(1);
   };
 
+  const refresh = (): void => {
+    if (!profileKey) {
+      return;
+    }
+    void coverageQuery.refetch();
+    fetchSubscriptionData();
+  };
+
   useEffect(() => {
     const fetchTimeout = window.setTimeout(() => {
-      fetchDetails();
-      fetchAirdropAddress();
-      fetchTopUpHistory(1);
-      fetchMemeSubscriptions();
-      fetchRedeemHistory(1);
-      fetchLogs(1);
+      fetchSubscriptionData();
     }, 0);
 
     return () => {

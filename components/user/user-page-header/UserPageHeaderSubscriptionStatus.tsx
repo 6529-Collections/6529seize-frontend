@@ -9,6 +9,7 @@ import {
   getSubscriptionCoverageAnchor,
   getSubscriptionCoverageCompactLine,
   getSubscriptionCoveragePresentation,
+  type SubscriptionCoverageTone,
 } from "@/components/user/subscriptions/coverage/subscriptionCoverage.helpers";
 import { useSubscriptionCoverage } from "@/components/user/subscriptions/coverage/useSubscriptionCoverage";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -17,13 +18,40 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCapacitor from "@/hooks/useCapacitor";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowRightIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  InformationCircleIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import Link from "next/link";
+import type { ComponentType, SVGProps } from "react";
 
-function getProfileKey(profile: ApiIdentity): string {
-  return profile.consolidation_key;
-}
+type StatusIcon = ComponentType<SVGProps<SVGSVGElement>>;
+
+const STATUS_ICONS: Record<SubscriptionCoverageTone, StatusIcon> = {
+  positive: CheckCircleIcon,
+  caution: ClockIcon,
+  danger: XCircleIcon,
+  neutral: InformationCircleIcon,
+};
+
+const STATUS_CONTAINER_RING_CLASSES: Record<SubscriptionCoverageTone, string> = {
+  positive: "tw-ring-emerald-400/25",
+  caution: "tw-ring-amber-300/30",
+  danger: "tw-ring-red-300/35",
+  neutral: "tw-ring-white/10",
+};
+
+const STATUS_ICON_CLASSES: Record<SubscriptionCoverageTone, string> = {
+  positive:
+    "tw-bg-emerald-400/10 tw-text-emerald-300 tw-ring-emerald-400/25",
+  caution: "tw-bg-amber-300/10 tw-text-amber-200 tw-ring-amber-300/25",
+  danger: "tw-bg-red-300/10 tw-text-red-200 tw-ring-red-300/30",
+  neutral: "tw-bg-iron-800 tw-text-iron-300 tw-ring-iron-700",
+};
 
 export default function UserPageHeaderSubscriptionStatus({
   profile,
@@ -37,7 +65,7 @@ export default function UserPageHeaderSubscriptionStatus({
     capacitorIsIos: isIos,
     country,
   });
-  const profileKey = getProfileKey(profile);
+  const profileKey = profile.consolidation_key.trim();
   const profileHref = getProfileSubscriptionsHref(profile);
   const coverageQuery = useSubscriptionCoverage({
     enabled: !hideSubscriptions,
@@ -98,6 +126,7 @@ export default function UserPageHeaderSubscriptionStatus({
   const isUrgentTopUp =
     coverage.status === ApiSubscriptionCoverageStatus.RunningLow ||
     coverage.status === ApiSubscriptionCoverageStatus.ActionRequired;
+  const StatusIcon = STATUS_ICONS[presentation.tone];
   const secondaryLine = coverage.funded_through
     ? t(locale, "subscriptions.coverage.header.through", {
         status: presentation.label,
@@ -115,25 +144,18 @@ export default function UserPageHeaderSubscriptionStatus({
     <div
       className={clsx(
         "tw-flex tw-min-h-[68px] tw-w-full tw-items-center tw-gap-3 tw-rounded-xl tw-bg-black/65 tw-p-3 tw-shadow-lg tw-ring-1 tw-backdrop-blur-sm focus-within:tw-ring-2 focus-within:tw-ring-primary-300 sm:tw-w-auto sm:tw-min-w-80",
-        presentation.tone === "positive" && "tw-ring-emerald-400/25",
-        presentation.tone === "caution" && "tw-ring-amber-300/30",
-        presentation.tone === "danger" && "tw-ring-red-300/35",
-        presentation.tone === "neutral" && "tw-ring-white/10"
+        STATUS_CONTAINER_RING_CLASSES[presentation.tone]
       )}
     >
       <span
         aria-hidden="true"
         className={clsx(
-          "tw-size-2.5 tw-flex-none tw-rounded-full tw-ring-4",
-          presentation.tone === "positive" &&
-            "tw-bg-emerald-300 tw-ring-emerald-400/10",
-          presentation.tone === "caution" &&
-            "tw-bg-amber-300 tw-ring-amber-400/10",
-          presentation.tone === "danger" && "tw-bg-red-300 tw-ring-red-400/10",
-          presentation.tone === "neutral" &&
-            "tw-bg-iron-400 tw-ring-iron-400/10"
+          "tw-inline-flex tw-size-7 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-ring-1",
+          STATUS_ICON_CLASSES[presentation.tone]
         )}
-      />
+      >
+        <StatusIcon className="tw-size-4" />
+      </span>
       <span className="tw-min-w-0 tw-flex-1">
         <span className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
           {getSubscriptionCoverageCompactLine(locale, coverage)}

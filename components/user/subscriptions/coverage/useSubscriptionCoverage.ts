@@ -16,7 +16,9 @@ export function useSubscriptionCoverage({
     queryKey: [QueryKey.SUBSCRIPTION_COVERAGE, profileKey],
     queryFn: async ({ signal }) =>
       await commonApiFetch<ApiSubscriptionCoverage>({
-        endpoint: `subscriptions/consolidation/coverage/${profileKey}`,
+        endpoint: `subscriptions/consolidation/coverage/${encodeURIComponent(
+          profileKey ?? ""
+        )}`,
         cache: "no-store",
         signal,
       }),

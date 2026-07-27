@@ -245,12 +245,13 @@ const mapSubscriptionCoverageNotification = (
 
 const mapDropReactedNotification = (
   notification: ApiNotificationV2,
-  relatedDrops: ApiDrop[]
+  relatedDrops: ApiDrop[],
+  relatedIdentity: NonNullable<ApiNotificationV2["related_identity"]>
 ): INotificationDropReacted[] => {
   const reaction = notification.additional_context.reaction ?? "";
   const reactors = notification.additional_context.reactors ?? [];
   const base = {
-    ...mapBaseNotification(notification, notification.related_identity!),
+    ...mapBaseNotification(notification, relatedIdentity),
     cause: ApiNotificationCause.DropReacted,
     related_drops: relatedDrops,
     additional_context: {
@@ -388,7 +389,11 @@ const mapNotificationV2 = (
         } satisfies INotificationDropPollVoted,
       ];
     case ApiNotificationCause.DropReacted:
-      return mapDropReactedNotification(notification, relatedDrops);
+      return mapDropReactedNotification(
+        notification,
+        relatedDrops,
+        notification.related_identity
+      );
     case ApiNotificationCause.DropBoosted:
       return [
         {

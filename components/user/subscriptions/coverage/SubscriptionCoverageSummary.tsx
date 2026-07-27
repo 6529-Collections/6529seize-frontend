@@ -111,7 +111,9 @@ function CoveragePoint({
           href={`/the-memes/${tokenId}`}
           className="tw-font-semibold tw-text-iron-100 tw-no-underline focus-visible:tw-rounded-sm focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-primary-300"
         >
-          The Memes #{formatInteger(locale, tokenId)}
+          {t(locale, "subscriptions.coverage.memeToken", {
+            token: formatInteger(locale, tokenId),
+          })}
         </Link>
         <span className="tw-text-sm tw-text-iron-500">
           · {formatSubscriptionCoverageDate(locale, date)}
@@ -272,7 +274,10 @@ export default function SubscriptionCoverageSummary({
             {t(locale, getDescriptionKey(coverage.status))}
           </p>
           {isError ? (
-            <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-text-amber-200">
+            <div
+              role="status"
+              className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-text-amber-200"
+            >
               <span>{t(locale, "subscriptions.coverage.stale")}</span>
               {isOwner ? (
                 <button

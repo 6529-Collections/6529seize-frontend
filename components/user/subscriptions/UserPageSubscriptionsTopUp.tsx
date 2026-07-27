@@ -10,7 +10,7 @@ import {
   useSyncExternalStore,
 } from "react";
 import { Tooltip } from "react-tooltip";
-import { parseEther } from "viem";
+import { formatEther, parseEther } from "viem";
 import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
@@ -38,7 +38,7 @@ import {
   SUBSCRIPTIONS_CHAIN,
 } from "@/constants/constants";
 import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
-import { formatAddress, numberWithCommasFromString } from "@/helpers/Helpers";
+import { formatAddress } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
@@ -47,8 +47,23 @@ import styles from "./UserPageSubscriptions.module.css";
 import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
 import { formatSubscriptionEth } from "./coverage/subscriptionCoverage.helpers";
 
-function getEthForCards(count: number): number {
-  return Math.round(count * MEMES_MINT_PRICE * 1e10) / 1e10;
+const MEMES_MINT_PRICE_WEI = parseEther(MEMES_MINT_PRICE.toString());
+
+function getEthForCards(count: number): string {
+  return formatEther(BigInt(count) * MEMES_MINT_PRICE_WEI);
+}
+
+function getCardCountLabel(
+  locale: ReturnType<typeof useBrowserLocale>,
+  count: number
+): string {
+  const messageKey =
+    count === 1
+      ? "subscriptions.topUp.cardCount.one"
+      : "subscriptions.topUp.cardCount.many";
+  return t(locale, messageKey, {
+    count: formatInteger(locale, count),
+  });
 }
 
 function getTopUpTransactionErrorMessage(
@@ -168,7 +183,7 @@ function getTopUpSelection({
     const count = Number.parseInt(customCount, 10);
     return Number.isNaN(count) || count < 1
       ? null
-      : { amountEth: getEthForCards(count).toString(), count };
+      : { amountEth: getEthForCards(count), count };
   }
   if (option === null) {
     return null;
@@ -176,7 +191,7 @@ function getTopUpSelection({
   const count = optionCounts[option];
   return count === undefined || count < 1
     ? null
-    : { amountEth: getEthForCards(count).toString(), count };
+    : { amountEth: getEthForCards(count), count };
 }
 
 function getTopUpOptionStateClass(
@@ -364,11 +379,11 @@ export default function UserPageSubscriptionsTopUp({
   function handleSend(): void {
     setError("");
     if (selectedTopUp === null) {
-      setError("Select a top-up option");
+      setError(t(locale, "subscriptions.topUp.validation.selectOption"));
       return;
     }
     if (!isConnected) {
-      setError("You must have an active wallet connection to top up");
+      setError(t(locale, "subscriptions.topUp.validation.wallet"));
       return;
     }
     setTopUpAmount(selectedTopUp.amountEth);
@@ -409,10 +424,17 @@ export default function UserPageSubscriptionsTopUp({
     }
   }, [transactionModal.closable, sendTransaction]);
 
-  const modalSubtitle =
-    topUpAmount === null || topUpCardCount === null
-      ? undefined
-      : `${formatInteger(locale, topUpCardCount)} Cards - ${numberWithCommasFromString(topUpAmount)} ETH`;
+  let modalSubtitle: string | undefined;
+  if (topUpAmount !== null && topUpCardCount !== null) {
+    const modalSubtitleKey =
+      topUpCardCount === 1
+        ? "subscriptions.topUp.modalSubtitle.one"
+        : "subscriptions.topUp.modalSubtitle.many";
+    modalSubtitle = t(locale, modalSubtitleKey, {
+      amount: formatSubscriptionEth(locale, topUpAmount),
+      count: formatInteger(locale, topUpCardCount),
+    });
+  }
 
   if (hideSubscriptions) {
     return <></>;
@@ -571,7 +593,14 @@ export default function UserPageSubscriptionsTopUp({
                   {!Number.isNaN(Number.parseInt(memeCount, 10)) &&
                     Number.parseInt(memeCount, 10) > 0 && (
                       <>
-                        ({getEthForCards(Number.parseInt(memeCount, 10))} ETH)
+                        (
+                        {t(locale, "subscriptions.coverage.balanceEth", {
+                          amount: formatSubscriptionEth(
+                            locale,
+                            getEthForCards(Number.parseInt(memeCount, 10))
+                          ),
+                        })}
+                        )
                       </>
                     )}
                 </span>
@@ -603,7 +632,7 @@ export default function UserPageSubscriptionsTopUp({
         className="tw-scroll-mt-24 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-pb-4 tw-pt-8"
         action={
           <span className="tw-inline-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-0.5 tw-rounded-full tw-bg-iron-900/60 tw-px-2.5 tw-py-1 tw-text-xs tw-leading-4 tw-text-iron-500 tw-ring-1 tw-ring-white/10">
-            <span>Sending to</span>
+            <span>{t(locale, "subscriptions.topUp.sendingTo")}</span>
             <span
               className="tw-break-all tw-text-iron-300"
               data-tooltip-id="subscription-address"
@@ -654,12 +683,19 @@ function CardCountOption(
   }>
 ) {
   const locale = useBrowserLocale();
-  const cardLabel = props.count > 1 ? "Cards" : "Card";
+  const cardCountLabel = getCardCountLabel(locale, props.count);
   const displayLabel = props.badge ?? props.display;
+  const cardOptionMessageKey =
+    props.count === 1
+      ? "subscriptions.topUp.cardOption.one"
+      : "subscriptions.topUp.cardOption.many";
   const labelText = displayLabel
-    ? `${displayLabel} - ${formatInteger(locale, props.count)} Cards`
-    : `${formatInteger(locale, props.count)} ${cardLabel}`;
-  const amountEth = props.amountEth ?? getEthForCards(props.count).toString();
+    ? t(locale, cardOptionMessageKey, {
+        count: formatInteger(locale, props.count),
+        label: displayLabel,
+      })
+    : cardCountLabel;
+  const amountEth = props.amountEth ?? getEthForCards(props.count);
   const optionStateClass = getTopUpOptionStateClass(
     props.selected,
     props.featured === true
@@ -699,13 +735,15 @@ function CardCountOption(
         )}
         <div className="tw-mt-auto tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
           <span className="tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100">
-            {formatInteger(locale, props.count)} Card{props.count > 1 && "s"}
+            {cardCountLabel}
           </span>
           <span className="tw-flex tw-items-center tw-gap-1.5">
             <span className="tw-text-sm tw-leading-5 tw-text-iron-400">
               {formatSubscriptionEth(locale, amountEth)}
             </span>
-            <span className="tw-text-xs tw-text-iron-600">ETH</span>
+            <span className="tw-text-xs tw-text-iron-600">
+              {t(locale, "subscriptions.balance.ethUnit")}
+            </span>
           </span>
           {props.description ? (
             <span className="tw-mt-1 tw-text-xs tw-leading-4 tw-text-iron-500">

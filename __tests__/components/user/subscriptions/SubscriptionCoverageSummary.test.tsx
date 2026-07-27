@@ -1,6 +1,9 @@
 import SubscriptionCoverageSummary from "@/components/user/subscriptions/coverage/SubscriptionCoverageSummary";
 import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
+import { ApiSubscriptionCoverageDeadlineBasis } from "@/generated/models/ApiSubscriptionCoverageDeadlineBasis";
+import { ApiSubscriptionCoverageEligibilityBasis } from "@/generated/models/ApiSubscriptionCoverageEligibilityBasis";
 import { ApiSubscriptionCoverageMode } from "@/generated/models/ApiSubscriptionCoverageMode";
+import { ApiSubscriptionCoverageScheduleBasis } from "@/generated/models/ApiSubscriptionCoverageScheduleBasis";
 import { ApiSubscriptionCoverageSource } from "@/generated/models/ApiSubscriptionCoverageSource";
 import { ApiSubscriptionCoverageStatus } from "@/generated/models/ApiSubscriptionCoverageStatus";
 import { render, screen } from "@testing-library/react";
@@ -51,7 +54,19 @@ function createCoverage(
         mint_at: new Date("2026-10-26T15:40:00Z"),
       },
     },
-    forecast: {} as ApiSubscriptionCoverage["forecast"],
+    forecast: {
+      eligibility_basis:
+        ApiSubscriptionCoverageEligibilityBasis.CurrentEligibility,
+      schedule_basis: ApiSubscriptionCoverageScheduleBasis.Projected,
+      deadline_basis: ApiSubscriptionCoverageDeadlineBasis.Authoritative,
+      forecast_truncated: false,
+      horizon_start_token_id: 561,
+      horizon_end_token_id: 567,
+      horizon_drop_count: 7,
+      calculation_version: 1,
+      forecast_fingerprint: "forecast-fingerprint",
+      unknown_reason: null,
+    },
     ...overrides,
   };
 }
@@ -237,6 +252,9 @@ describe("SubscriptionCoverageSummary", () => {
     expect(
       screen.getByText("Last known coverage is shown and may be out of date.")
     ).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Last known coverage is shown and may be out of date."
+    );
     await user.click(screen.getByRole("button", { name: "Refresh coverage" }));
     expect(onRefresh).toHaveBeenCalledTimes(1);
   });

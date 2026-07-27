@@ -1704,6 +1704,7 @@ export const EN_US_MESSAGES = {
   "subscriptions.coverage.fundedThrough": "Funded through",
   "subscriptions.coverage.nextUnfunded": "Next unfunded",
   "subscriptions.coverage.projected": "Projected",
+  "subscriptions.coverage.memeToken": "The Memes #{token}",
   "subscriptions.coverage.topUpBy":
     "Top up by {deadline} to receive The Memes #{token}.",
   "subscriptions.coverage.noDeadline":
@@ -1736,6 +1737,7 @@ export const EN_US_MESSAGES = {
   "subscriptions.page.learnMore": "Learn more",
   "subscriptions.page.topUpTitle": "Top up",
   "subscriptions.balance.title": "Subscription balance",
+  "subscriptions.balance.ethUnit": "ETH",
   "subscriptions.balance.mintCapacity.one": "{count} mint available",
   "subscriptions.balance.mintCapacity.many": "{count} mints available",
   "subscriptions.balance.mintCapacity.unknown": "mint capacity unavailable",
@@ -1747,6 +1749,16 @@ export const EN_US_MESSAGES = {
     "Funds {count} intended drops through The Memes #{token}",
   "subscriptions.topUp.chooseAmount": "Choose a top-up amount",
   "subscriptions.topUp.submit": "Top up {amount} ETH",
+  "subscriptions.topUp.cardCount.one": "{count} Card",
+  "subscriptions.topUp.cardCount.many": "{count} Cards",
+  "subscriptions.topUp.cardOption.one": "{label} - {count} Card",
+  "subscriptions.topUp.cardOption.many": "{label} - {count} Cards",
+  "subscriptions.topUp.modalSubtitle.one": "{count} Card - {amount} ETH",
+  "subscriptions.topUp.modalSubtitle.many": "{count} Cards - {amount} ETH",
+  "subscriptions.topUp.validation.selectOption": "Select a top-up option",
+  "subscriptions.topUp.validation.wallet":
+    "You must have an active wallet connection to top up",
+  "subscriptions.topUp.sendingTo": "Sending to",
   "subscriptions.notification.title": "Subscription coverage",
   "subscriptions.notification.earlyWarning":
     "Your subscription balance is getting low.",

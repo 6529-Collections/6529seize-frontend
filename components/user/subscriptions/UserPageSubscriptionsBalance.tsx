@@ -100,7 +100,9 @@ export default function UserPageSubscriptionsBalance(
               </b>
               <span className="tw-inline-flex tw-h-5 tw-w-3 tw-flex-shrink-0 tw-self-center tw-text-iron-500">
                 <EthereumIcon />
-                <span className="tw-sr-only">ETH</span>
+                <span className="tw-sr-only">
+                  {t(locale, "subscriptions.balance.ethUnit")}
+                </span>
               </span>
             </span>
             {numericBalance > 0 && (

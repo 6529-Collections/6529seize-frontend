@@ -63,6 +63,20 @@ describe("UserPageSubscriptionsBalance", () => {
     expect(screen.queryByText("99")).not.toBeInTheDocument();
   });
 
+  it("falls back to the legacy balance when coverage is unavailable", () => {
+    render(
+      <UserPageSubscriptionsBalance
+        details={{ balance: 0.2 } as any}
+        show_refresh={false}
+        fetching={false}
+        refresh={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("0.2")).toBeInTheDocument();
+    expect(screen.getByText("(3 mints available)")).toBeInTheDocument();
+  });
+
   it("does not infer capacity when the coverage service marks it unknown", () => {
     render(
       <UserPageSubscriptionsBalance
