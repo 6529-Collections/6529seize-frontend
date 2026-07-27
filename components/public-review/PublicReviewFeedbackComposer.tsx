@@ -534,7 +534,7 @@ export default function PublicReviewFeedbackComposer({
               <span
                 id={`${formId}-comment-error`}
                 aria-live="polite"
-                className="tw-text-red-300 tw-mt-1.5 tw-block tw-text-sm tw-font-normal"
+                className="tw-sr-only"
               >
                 {commentError}
               </span>
