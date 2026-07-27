@@ -10,8 +10,8 @@ jest.mock("@/components/utils/calendar/CommonCalendar", () => {
   MockCommonCalendar.displayName = "MockCommonCalendar";
   return MockCommonCalendar;
 });
-jest.mock("@/components/common/DateAccordion", () => {
-  const MockDateAccordion = (props: any) => (
+jest.mock("@/components/common/CollapsibleCard", () => {
+  const MockCollapsibleCard = (props: any) => (
     <div>
       <div onClick={props.onToggle}>
         {props.title}
@@ -20,8 +20,8 @@ jest.mock("@/components/common/DateAccordion", () => {
       {props.isExpanded ? props.children : props.collapsedContent}
     </div>
   );
-  MockDateAccordion.displayName = "MockDateAccordion";
-  return MockDateAccordion;
+  MockCollapsibleCard.displayName = "MockCollapsibleCard";
+  return MockCollapsibleCard;
 });
 
 const baseDates: CreateWaveDatesConfig = {
@@ -44,7 +44,9 @@ describe("StartDates", () => {
         setIsExpanded={() => {}}
       />
     );
-    expect(container.querySelectorAll("button").length).toBe(3);
+    // Two mocked calendar buttons, one per date (the header info tooltip that
+    // used to add a third button has been removed).
+    expect(container.querySelectorAll("button").length).toBe(2);
   });
 
   it("calls setDates when calendar clicked", () => {
