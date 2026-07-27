@@ -9,7 +9,7 @@ all current contract behavior.
 ### IMPLEMENTED
 
 Both sale paths begin with a
-[`DropAuthorization`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamDrops.sol#L24-L61).
+[`DropAuthorization`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamDrops.sol#L24-L61).
 Its EIP-712 domain binds the chain and verifying contract. Its payload binds the
 intended collection, participant values, price, pricing or auction mode,
 deadline, signer epoch, and replay identifier.
@@ -21,6 +21,13 @@ need to bind the token address separately from price. Signature validity is only
 one condition. Mint policy, supply, pause state, payment, and sale-specific
 checks still apply.
 
+### CURRENTLY WIRED BASELINE
+
+The signed paths use the legacy `StreamMinter`, not `StreamMintManager`. The
+rehearsal passes that legacy minter to both Drops and Auctions while separately
+installing the newer manager in Core. See
+[`RehearseDeployment.s.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseDeployment.s.sol#L218-L269).
+
 ## Fixed-price mint
 
 A fixed-price authorization can describe a free or paid mint.
@@ -29,9 +36,16 @@ A fixed-price authorization can describe a free or paid mint.
 
 The submitted native-ETH value must match the authorized economics. The
 execution does not trust an unbound frontend price, and the UI must describe the
-currency as ETH rather than imply that the authorization selected a token. The
-resulting proceeds are credited according to the configured revenue path rather
-than blindly pushed to arbitrary recipients during mint.
+currency as ETH rather than imply that the authorization selected a token.
+
+The current Drop contract does not call `StreamRevenueResolver` or
+`StreamPrimarySaleSettlement`. It selects a Drop-local proceeds split in this
+order: token, collection, then contract default. It creates separate poster,
+protocol, and curator-reserve credits instead of pushing arbitrary recipients
+during mint. See
+[`proceedsSplitFor`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamDrops.sol#L542-L558)
+and
+[`_creditFixedPriceProceeds`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamDrops.sol#L635-L680).
 
 ### FREE PATH
 
@@ -52,7 +66,7 @@ auction contract owns its bidding and custody state. Registration should happen
 once for the authorized item and cannot be replayed as another auction.
 
 Relevant source:
-[`AuctionContract.sol`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/AuctionContract.sol).
+[`AuctionContract.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/AuctionContract.sol).
 
 ## Custody and bids
 
@@ -112,13 +126,20 @@ Settlement must:
 1. confirm the auction is eligible to settle;
 2. identify the recorded winning bid;
 3. execute the authorized mint or delivery exactly once;
-4. credit sale proceeds through the correct revenue profile;
+4. apply the Auction contract's token, collection, or contract-default proceeds
+   split and create poster, protocol, and curator credits;
 5. preserve bidder and seller accounting;
 6. emit reconstructable events;
 7. prevent later cancellation or second settlement.
 
-If minting fails at settlement, the recovery state must be explicit. Funds and
-the winning bidder's rights cannot be left ambiguous.
+If crediting or token transfer fails at settlement, the transaction must not
+leave funds or the winning bidder's rights ambiguous.
+
+In the current baseline, the auction token is minted into auction custody during
+registration. Winner settlement credits the Auction contract's local balances
+and transfers the held token. It does not call the revenue resolver or split
+wallets. The exact credit path is
+[`_creditAuctionProceeds`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/AuctionContract.sol#L471-L508).
 
 ## No-bid settlement
 

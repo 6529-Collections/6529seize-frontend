@@ -4,10 +4,26 @@ This is community feedback week for Stream. The objective is to improve the
 contract before it is finalized, not to collect endorsements.
 
 The reviewed source is
-[`e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8`](https://github.com/6529-Collections/6529Stream/tree/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8).
+[`513bd7e079eafe109df6ae1ae21bfbca6fec6786`](https://github.com/6529-Collections/6529Stream/tree/513bd7e079eafe109df6ae1ae21bfbca6fec6786).
 The review version is `2026-07-26.1`. Check both values before commenting. A
 comment about another commit may still be useful, but it must say which code it
 examined.
+
+## Staging integration gate
+
+### KNOWN LIMITATION
+
+This review shell intentionally keeps feedback submission disabled. The
+feedback composer, structured code-reference submission, community-review
+views, and audience-path UI are supplied by the separate reference
+implementation branch; they are not implemented by this shell patch.
+
+Before staging can be shown as an interactive community review, that reference
+branch must be integrated and its destination configuration, public
+vulnerability type, structured fields, code-reference behavior, and end-to-end
+tests must pass against this exact review version. Until then, the descriptions
+below specify the required review experience but the current shell does not
+submit a Wave comment.
 
 ## Who should comment
 
@@ -29,8 +45,9 @@ workflow, missing recovery case, or authority you would not accept.
 
 ## Comment from the page you are reading
 
-Each review page has a feedback box. Submitting there records the page,
-review version, and relevant context so other reviewers can find the discussion.
+After the reference-branch integration gate is complete, each review page has a
+feedback box. Submitting there records the page, review version, and relevant
+context so other reviewers can find the discussion.
 
 When the page points to generated code, you can attach a specific definition,
 function, event, error, or source range. Technical links use stable semantic

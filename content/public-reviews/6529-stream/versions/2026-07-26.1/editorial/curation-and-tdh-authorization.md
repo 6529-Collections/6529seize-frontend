@@ -28,19 +28,27 @@ cryptographic and contractual.
 ### IMPLEMENTED
 
 The signed drop path in
-[`StreamDrops.sol`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamDrops.sol)
-uses EIP-712 typed data. The payload binds values including:
+[`StreamDrops.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamDrops.sol#L24-L60)
+uses EIP-712 typed data. Its domain binds the chain ID and verifying contract.
+The signed `DropAuthorization` has exactly these fields:
 
-- the chain and verifying contract;
-- signer epoch;
-- collection;
-- payer and recipient;
-- quantity;
-- price;
-- sale mode;
-- deadline;
-- drop identifier or replay nullifier;
-- other execution-specific fields in the signed structure.
+| Field                 | What it fixes                                                     |
+| --------------------- | ----------------------------------------------------------------- |
+| `dropId`              | The authorization identity consumed or cancelled by the contract. |
+| `poster`              | The sale poster and current native-sale proceeds recipient.       |
+| `recipient`           | The account that receives the token.                              |
+| `payer`               | The account allowed to fund the execution.                        |
+| `collectionId`        | The collection that may be minted or auctioned.                   |
+| `saleMode`            | Fixed price or auction.                                           |
+| `tokenDataHash`       | The hash of the token data supplied at execution.                 |
+| `price`               | Fixed-price amount.                                               |
+| `quantity`            | Authorized quantity.                                              |
+| `auctionReservePrice` | Minimum auction price.                                            |
+| `auctionEndTime`      | Intended auction end.                                             |
+| `salt`                | Additional signed uniqueness.                                     |
+| `nonce`               | Signer-scoped sequence input used to derive the drop identity.    |
+| `deadline`            | Last valid execution time.                                        |
+| `signerEpoch`         | Signing-key era that must still be current.                       |
 
 The exact generated function and struct inventory is available in the Technical
 Reference. Reviewers should compare the typed-data definition, Solidity
@@ -67,7 +75,10 @@ changing the intended beneficiary.
 
 ### Collection and quantity
 
-An authorization for one collection or quantity must not mint another.
+An authorization for one collection must not mint into another. Although the
+signed structure includes `quantity`, the current Drop validator requires
+`quantity == 1`; one authorization cannot currently mint a batch. See
+[`StreamDrops._validateAuthorization`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamDrops.sol#L561-L581).
 
 ### Price and sale mode
 
@@ -109,15 +120,17 @@ No private key, seed, or recovery secret belongs in public review feedback.
 
 ## Fixed-price execution
 
-### IMPLEMENTED
+### CURRENTLY WIRED BASELINE
 
-A valid fixed-price authorization can execute a free or paid mint, subject to
-mint policy, supply, phase, counters, payment, and Core state. Signature
-validity does not override those checks.
+A valid fixed-price authorization can execute a free or paid mint. The current
+signed path checks Drop pause and replay state, token-data hash, deadline, payer,
+recipient, sale mode, native payment, legacy minter pause/time/supply, and Core
+freeze state. Signature validity does not override those checks.
 
-If a later step fails, the transaction should revert or follow the explicit
-abort path so the authorization, counters, supply, and payment credits do not
-become inconsistent.
+This baseline does not call `StreamMintManager`, consume
+`StreamMintLedger` counters, or use the manager's prepared-mint entries. If a
+later step fails, the transaction reverts atomically. The manager lane is a
+separate source-implemented foundation.
 
 ## Auction registration
 
@@ -211,4 +224,3 @@ inspectable before execution and reconstructable afterward.
 4. Should issued authorizations survive signer rotation?
 5. Are cancellation and replay rules clear under every revert path?
 6. Which parts of the curation process should be independently reproducible?
-

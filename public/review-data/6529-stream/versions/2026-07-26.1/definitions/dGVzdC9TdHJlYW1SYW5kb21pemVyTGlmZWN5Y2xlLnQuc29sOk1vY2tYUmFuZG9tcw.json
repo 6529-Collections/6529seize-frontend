@@ -1,0 +1,202 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:MockXRandoms#function:0xccbac9f5",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:MockXRandoms",
+          "inherited": false,
+          "inputs": [],
+          "name": "randomNumber",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xccbac9f5",
+          "signature": "randomNumber()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:MockXRandoms#function:0xf5684183",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:MockXRandoms",
+          "inherited": false,
+          "inputs": [],
+          "name": "randomWord",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0xf5684183",
+          "signature": "randomWord()",
+          "stateMutability": "pure"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "randomNumber()",
+          "displaySignature": "randomNumber()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:MockXRandoms#function:0xccbac9f5",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOk1vY2tYUmFuZG9tcyNmdW5jdGlvbjoweGNjYmFjOWY1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "randomNumber",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 81,
+            "byteStart": 43256,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerLifecycle.t.sol#L1021-L1023",
+            "lineEnd": 1023,
+            "lineStart": 1021,
+            "snippetSha256": "sha256:6c7f78a062c04b7181b99e5d22c90300138785def4cf1192ad9838c4a93abdce",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0xccbac9f5",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "randomWord()",
+          "displaySignature": "randomWord()",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:MockXRandoms#function:0xf5684183",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOk1vY2tYUmFuZG9tcyNmdW5jdGlvbjoweGY1Njg0MTgz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "randomWord",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 90,
+            "byteStart": 43343,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerLifecycle.t.sol#L1025-L1027",
+            "lineEnd": 1027,
+            "lineStart": 1025,
+            "snippetSha256": "sha256:039aabda3764071890fe35baece6f3f0ca88f4470f0414aea383b76b32032963",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0xf5684183",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamRandomizerLifecycle.t.sol:MockXRandoms",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/IXRandoms.sol:IXRandoms",
+        "name": "IXRandoms"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOk1vY2tYUmFuZG9tcw",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamRandomizerLifecycle.t.sol:MockXRandoms",
+      "smart-contracts/IXRandoms.sol:IXRandoms"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "MockXRandoms",
+    "natspec": "",
+    "range": {
+      "byteLength": 220,
+      "byteStart": 43215,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerLifecycle.t.sol#L1020-L1028",
+      "lineEnd": 1028,
+      "lineStart": 1020,
+      "snippetSha256": "sha256:7029719208569bb16ff40c03b23df210aa4fcadc34af08a9475596d5b427d443",
+      "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamRandomizerLifecycle.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 3
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 2
+    },
+    "totalCount": 3
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:MockXRandoms",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:MockXRandoms#function:0xccbac9f5",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:MockXRandoms",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:MockXRandoms#function:0xf5684183",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:MockXRandoms",
+      "severity": "advisory"
+    }
+  ]
+}

@@ -55,11 +55,14 @@ const EXACT_EXCLUDED_PATHS = new Set([
   "/notifications",
   "/open-mobile",
   "/restricted",
+  "/stream",
   "/sentry-example-page",
   "/tools/app-wallets",
   "/tools/app-wallets/import-wallet",
   "/waves/create",
 ]);
+
+const PREFIX_EXCLUDED_PATHS = ["/reviews/"] as const;
 
 type SitemapPathOptions = {
   readonly changefreq: NonNullable<ISitemapField["changefreq"]>;
@@ -423,7 +426,10 @@ export async function buildAdditionalSitemapPaths(
 
 export function shouldExcludeSitemapPath(path: string): boolean {
   const [pathname = path] = path.split(/[?#]/);
-  return EXACT_EXCLUDED_PATHS.has(pathname);
+  return (
+    EXACT_EXCLUDED_PATHS.has(pathname) ||
+    PREFIX_EXCLUDED_PATHS.some((prefix) => pathname.startsWith(prefix))
+  );
 }
 
 function getRouteOverride(path: string): RouteOverride {
@@ -476,7 +482,7 @@ const config: IConfig = {
   sitemapSize: 50_000,
   changefreq: "weekly",
   priority: 0.65,
-  exclude: Array.from(EXACT_EXCLUDED_PATHS),
+  exclude: [...EXACT_EXCLUDED_PATHS, "/reviews/*"],
   additionalPaths: async () => buildAdditionalSitemapPaths(),
   transform: async (_config, path): Promise<ISitemapField | undefined> => {
     if (shouldExcludeSitemapPath(path)) {

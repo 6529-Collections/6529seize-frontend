@@ -38,6 +38,31 @@ describe("useSidebarSections", () => {
     ]);
   });
 
+  it("inserts the Stream review after live collections only when enabled", () => {
+    const { result } = renderHook(() =>
+      useSidebarSections(false, false, "US", true)
+    );
+
+    const nftsSection = result.current.find(
+      (section) => section.key === "nfts"
+    );
+    expect(nftsSection?.items.map((item) => item.name)).toEqual([
+      "The Memes",
+      "6529 Gradient",
+      "NextGen",
+      "Meme Lab",
+      "ReMemes",
+      "6529 Stream — Review",
+      "NFT Activity",
+      "Memes Calendar",
+    ]);
+    expect(nftsSection?.items[5]).toEqual({
+      name: "6529 Stream — Review",
+      href: "/reviews/6529-stream",
+      activePathPrefixes: ["/reviews/6529-stream/"],
+    });
+  });
+
   it("does not include retired release notes links", () => {
     const { result } = renderHook(() => useSidebarSections(false, false, "US"));
 
