@@ -36,6 +36,8 @@ type ClaimWriteResult = ReturnType<typeof useWriteContract>;
 type PayArtistWriteResult = ReturnType<typeof useSendTransaction>;
 type WaitReceiptResult = ReturnType<typeof useWaitForTransactionReceipt>;
 
+const FAILED_SUBMIT_TRANSACTION_MESSAGE = "Failed to submit transaction";
+
 interface UseLaunchClaimWritesParams {
   claimId: number;
   setToast: AuthContextValue["setToast"];
@@ -235,7 +237,7 @@ export function useLaunchClaimWrites({
           pendingMintingClaimActionRef.current = null;
           setClaimTxModal({
             status: "error",
-            message: getErrorMessage(error, "Failed to submit transaction"),
+            message: getErrorMessage(error, FAILED_SUBMIT_TRANSACTION_MESSAGE),
             actionLabel,
           });
         }
@@ -262,7 +264,7 @@ export function useLaunchClaimWrites({
       actionLabel,
       mintingClaimAction,
     }: {
-      entries: PhaseAirdrop[] | null;
+      entries: Array<Partial<PhaseAirdrop>> | null;
       actionLabel:
         | "Airdrop Artist"
         | "Airdrop Team"
@@ -331,7 +333,7 @@ export function useLaunchClaimWrites({
           pendingMintingClaimActionRef.current = null;
           setClaimTxModal({
             status: "error",
-            message: getErrorMessage(error, "Failed to submit transaction"),
+            message: getErrorMessage(error, FAILED_SUBMIT_TRANSACTION_MESSAGE),
             actionLabel,
           });
         }
@@ -454,7 +456,7 @@ export function useLaunchClaimWrites({
           pendingPayArtistMintingClaimActionRef.current = null;
           setPayArtistTxModal({
             status: "error",
-            message: getErrorMessage(error, "Failed to submit transaction"),
+            message: getErrorMessage(error, FAILED_SUBMIT_TRANSACTION_MESSAGE),
             actionLabel: "Pay Artist",
           });
         }
@@ -576,7 +578,7 @@ export function useLaunchClaimWrites({
         status: "error",
         message: getErrorMessage(
           claimWrite.error,
-          "Failed to submit transaction"
+          FAILED_SUBMIT_TRANSACTION_MESSAGE
         ),
         txHash: prev?.txHash,
         actionLabel: prev?.actionLabel,
@@ -591,7 +593,7 @@ export function useLaunchClaimWrites({
         status: "error",
         message: getErrorMessage(
           payArtistWrite.error,
-          "Failed to submit transaction"
+          FAILED_SUBMIT_TRANSACTION_MESSAGE
         ),
         txHash: prev?.txHash,
         actionLabel: prev?.actionLabel,

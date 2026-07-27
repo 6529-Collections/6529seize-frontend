@@ -64,6 +64,8 @@ function getTransactionModalMessage(
   errorMessage: string
 ): string | undefined {
   switch (status) {
+    case null:
+      return undefined;
     case "confirm_wallet":
       return t(locale, "theMemes.mint.transaction.confirmWallet");
     case "submitted":
@@ -76,9 +78,35 @@ function getTransactionModalMessage(
             message: errorMessage,
           })
         : t(locale, "theMemes.mint.transaction.error");
-    default:
-      return undefined;
   }
+}
+
+function resolveTransactionModalStatus({
+  isOpen,
+  hasError,
+  hasTransactionHash,
+  receiptPending,
+  receiptSuccess,
+}: Readonly<{
+  isOpen: boolean;
+  hasError: boolean;
+  hasTransactionHash: boolean;
+  receiptPending: boolean;
+  receiptSuccess: boolean;
+}>): OnchainTransactionModalStatus | null {
+  if (!isOpen) {
+    return null;
+  }
+  if (hasError) {
+    return "error";
+  }
+  if (hasTransactionHash && receiptPending) {
+    return "submitted";
+  }
+  if (hasTransactionHash && receiptSuccess) {
+    return "success";
+  }
+  return "confirm_wallet";
 }
 
 function MintSummaryRow({
@@ -140,8 +168,6 @@ export default function ManifoldMintingWidget(
   const [feeWei, setFeeWei] = useState<bigint>(0n);
   const mintCountControlId = useId();
 
-  const [transactionModalStatus, setTransactionModalStatus] =
-    useState<OnchainTransactionModalStatus | null>(null);
   const [mintError, setMintError] = useState<string>("");
   const mintWrite = useWriteContract();
   const waitMintWrite = useWaitForTransactionReceipt({
@@ -149,9 +175,23 @@ export default function ManifoldMintingWidget(
     confirmations: 1,
     hash: mintWrite.data,
   });
-  const hasOnchainTransactionError = Boolean(
-    mintWrite.error || waitMintWrite.error
+  const waitMintWritePending = waitMintWrite.isPending;
+  const waitMintWriteSuccess = waitMintWrite.isSuccess;
+  const onchainMintError = waitMintWrite.error ?? mintWrite.error;
+  const hasOnchainTransactionError = Boolean(onchainMintError);
+  const resolvedMintError = onchainMintError
+    ? resolveMintErrorMessage(onchainMintError.message)
+    : mintError;
+  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(() =>
+    Boolean(mintWrite.data ?? mintWrite.error ?? waitMintWrite.error)
   );
+  const transactionModalStatus = resolveTransactionModalStatus({
+    isOpen: isTransactionModalOpen,
+    hasError: hasOnchainTransactionError,
+    hasTransactionHash: Boolean(mintWrite.data),
+    receiptPending: waitMintWritePending,
+    receiptSuccess: waitMintWriteSuccess,
+  });
   const hasValidMintForAddress = Boolean(
     mintForAddress && isAddress(mintForAddress)
   );
@@ -170,7 +210,8 @@ export default function ManifoldMintingWidget(
     }
 
     mintWrite.reset();
-    setTransactionModalStatus(null);
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-chain-state-updates, react-you-might-not-need-an-effect/no-derived-state, react-you-might-not-need-an-effect/no-pass-data-to-parent -- A changed recipient or claim invalidates the active transaction presentation.
+    setIsTransactionModalOpen(false);
     setMintError("");
     setIsError(false);
     setFetchingMerkle(true);
@@ -368,7 +409,7 @@ export default function ManifoldMintingWidget(
       availableMerkleProofs: merkleProofs.length,
       selectedMerkleProofs: selectedProofs.length,
       mintedProofs: merkleProofsMints.filter(Boolean).length,
-      mintError: mintError || null,
+      mintError: resolvedMintError.length > 0 ? resolvedMintError : null,
       txHash: mintWrite.data ?? null,
       txPending: waitMintWritePending,
       txSuccess: waitMintWriteSuccess,
@@ -390,7 +431,7 @@ export default function ManifoldMintingWidget(
   const onMint = () => {
     mintWrite.reset();
     setMintError("");
-    setTransactionModalStatus(null);
+    setIsTransactionModalOpen(false);
 
     if (safeMintCount <= 0) {
       setMintError("Enter a valid mint count");
@@ -417,7 +458,7 @@ export default function ManifoldMintingWidget(
       return;
     }
     runConnectedAction(() => {
-      setTransactionModalStatus("confirm_wallet");
+      setIsTransactionModalOpen(true);
       mintWrite.writeContract({
         address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
         abi: props.abi,
@@ -428,38 +469,6 @@ export default function ManifoldMintingWidget(
       });
     });
   };
-
-  useEffect(() => {
-    if (mintWrite.error) {
-      setMintError(resolveMintErrorMessage(mintWrite.error.message));
-      setTransactionModalStatus("error");
-    }
-  }, [mintWrite.error]);
-
-  useEffect(() => {
-    if (waitMintWrite.error) {
-      setMintError(resolveMintErrorMessage(waitMintWrite.error.message));
-      setTransactionModalStatus("error");
-    }
-  }, [waitMintWrite.error]);
-
-  const waitMintWritePending = waitMintWrite.isPending;
-  const waitMintWriteSuccess = waitMintWrite.isSuccess;
-
-  useEffect(() => {
-    if (!mintWrite.data) {
-      return;
-    }
-
-    if (waitMintWritePending) {
-      setTransactionModalStatus("submitted");
-      return;
-    }
-
-    if (waitMintWriteSuccess) {
-      setTransactionModalStatus("success");
-    }
-  }, [mintWrite.data, waitMintWritePending, waitMintWriteSuccess]);
 
   function getButtonText() {
     if (props.claim.status === ManifoldClaimStatus.ACTIVE) {
@@ -691,7 +700,7 @@ export default function ManifoldMintingWidget(
   const transactionModalMessage = getTransactionModalMessage(
     locale,
     transactionModalStatus,
-    mintError
+    resolvedMintError
   );
 
   return (
@@ -716,7 +725,7 @@ export default function ManifoldMintingWidget(
           message={transactionModalMessage}
           transactionHash={mintWrite.data}
           chain={props.chain}
-          onClose={() => setTransactionModalStatus(null)}
+          onClose={() => setIsTransactionModalOpen(false)}
         />
       ) : null}
     </>
