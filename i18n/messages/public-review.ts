@@ -487,6 +487,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "No comments for this page are present in the loaded feedback.",
   "publicReview.comments.status": "{count} page comments loaded.",
   "publicReview.comments.byline": "{author} · {date} at {time}",
+  "publicReview.comments.avatarAlt": "{author}'s profile picture",
   "publicReview.feedback.categories.question": "Question",
   "publicReview.feedback.categories.artistWorkflow": "Artist workflow",
   "publicReview.feedback.categories.productOrUx": "Product or UX",

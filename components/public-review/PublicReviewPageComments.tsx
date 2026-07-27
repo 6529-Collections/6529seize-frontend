@@ -169,7 +169,9 @@ export function PublicReviewPageComments({
                     <ProfileAvatar
                       pfpUrl={record.author.pfp}
                       size={ProfileBadgeSize.SMALL}
-                      alt={`${author}'s profile picture`}
+                      alt={t(locale, "publicReview.comments.avatarAlt", {
+                        author,
+                      })}
                       fallbackContent={
                         <span
                           aria-hidden="true"

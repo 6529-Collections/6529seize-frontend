@@ -93,14 +93,13 @@ function createMarkdownComponents(): Components {
       </code>
     ),
     pre: ({ children }) => (
-      <pre
+      <section
         aria-label={t(DEFAULT_LOCALE, "publicReview.markdown.codeRegion")}
         className="tw-my-7 tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-950 tw-p-4 tw-text-sm tw-leading-6 tw-text-iron-100 tw-shadow-inner focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
-        role="region"
         tabIndex={0}
       >
-        {children}
-      </pre>
+        <pre className="tw-m-0">{children}</pre>
+      </section>
     ),
     table: ({ children }) => (
       <div

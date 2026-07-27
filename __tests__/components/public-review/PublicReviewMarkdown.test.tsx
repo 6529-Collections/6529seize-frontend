@@ -74,6 +74,20 @@ describe("PublicReviewMarkdown", () => {
     expect(tableRegion.querySelector("table")).toBeInTheDocument();
   });
 
+  it("uses a semantic region for independently scrollable code", () => {
+    render(
+      <PublicReviewMarkdown
+        markdown={"## Example\n\n```solidity\nfunction mint() external {}\n```"}
+      />
+    );
+
+    const codeRegion = screen.getByRole("region", {
+      name: "Scrollable code example",
+    });
+    expect(codeRegion).toHaveAttribute("tabindex", "0");
+    expect(codeRegion.querySelector("pre")).toBeInTheDocument();
+  });
+
   it("allows long inline source identities to wrap on narrow screens", () => {
     const sourceCommit = "513bd7e079eafe109df6ae1ae21bfbca6fec6786";
     render(
