@@ -132,11 +132,10 @@ export function SolidityDefinitionExplorer({
   }, [resultLimit]);
 
   const showMoreDefinitions = (): void => {
-    setResultLimit((current) => {
-      const next = current + INITIAL_RESULT_LIMIT;
-      focusResultsAfterExpansion.current = next >= filteredItems.length;
-      return next;
-    });
+    const nextResultLimit = resultLimit + INITIAL_RESULT_LIMIT;
+    focusResultsAfterExpansion.current =
+      nextResultLimit >= filteredItems.length;
+    setResultLimit(nextResultLimit);
   };
 
   return (
