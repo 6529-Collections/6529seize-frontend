@@ -49,7 +49,7 @@ export function PublicReviewEditorialFeedback({
           page={page}
         />
       </div>
-      <div className="tw-max-h-[65vh] tw-flex-none tw-overflow-y-auto tw-overscroll-contain tw-bg-[#08080a] tw-px-5 tw-pb-5 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
+      <div className="tw-max-h-[65vh] tw-flex-none tw-overflow-y-auto tw-overscroll-contain tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-bg-[#08080a] tw-px-5 tw-pb-5 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500 [&>section]:tw-border-t-0">
         <PublicReviewFeedbackComposer
           locale={DEFAULT_LOCALE}
           config={config}
