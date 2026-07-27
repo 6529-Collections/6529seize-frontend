@@ -54,6 +54,10 @@ const NotificationFilters: NotificationFilter[] = [
     title: "Reactions",
   },
   { cause: [ApiNotificationCause.WaveCreated], title: "Invites" },
+  {
+    cause: [ApiNotificationCause.SubscriptionCoverage],
+    title: "Subscriptions",
+  },
 ];
 
 export default function NotificationsCauseFilter({
@@ -87,7 +91,7 @@ export default function NotificationsCauseFilter({
     if (!container) return;
 
     checkScroll();
-    container.addEventListener("scroll", checkScroll);
+    container.addEventListener("scroll", checkScroll, { passive: true });
     window.addEventListener("resize", checkScroll);
 
     let resizeObserver: ResizeObserver | null = null;

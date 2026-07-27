@@ -2,6 +2,8 @@
 
 import type { InitialConfigType } from "@lexical/react/LexicalComposer";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type { EditorState } from "lexical";
 import { MentionNode } from "../lexical/nodes/MentionNode";
 import { HashtagNode } from "../lexical/nodes/HashtagNode";
@@ -193,7 +195,9 @@ const CreateDropContent = forwardRef<
     const getPlaceHolderText = () => {
       switch (type) {
         case CreateDropType.DROP:
-          return "Drop a post";
+          // This legacy editor's only remaining consumer is the create-wave
+          // Description step, so the placeholder speaks to that context.
+          return t(DEFAULT_LOCALE, "waves.create.description.placeholder");
         case CreateDropType.QUOTE:
           return "Quote a drop";
         default:

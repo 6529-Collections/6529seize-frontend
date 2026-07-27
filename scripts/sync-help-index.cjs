@@ -1,5 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const prettier = require("prettier");
 
 const repoRoot = path.resolve(__dirname, "..");
 const appDir = path.join(repoRoot, "app");
@@ -29,6 +30,23 @@ const LEGACY_WORDPRESS_MARKERS = [
   "wp-json/wp/v2/",
   "wp-content/",
 ];
+const ALLOWED_PUBLICATION_ENVIRONMENTS = new Set(["local", "staging"]);
+
+// Keep this build-time allowlist aligned with config/publicReviews.ts.
+function getPublicationEnvironment(baseEndpoint) {
+  try {
+    const hostname = new URL(baseEndpoint).hostname.toLowerCase();
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return "local";
+    }
+    if (hostname === "staging.6529.io") {
+      return "staging";
+    }
+  } catch {
+    // Missing or invalid build configuration must fail closed to production.
+  }
+  return "production";
+}
 
 function fail(message) {
   console.error(message);
@@ -134,7 +152,11 @@ function pathSegmentMatchesRouteSegment(
   usesPlaceholder
 ) {
   if (routeSegment.kind === "dynamic") {
-    return pathSegmentMatchesDynamic(pathSegment, routeSegment, usesPlaceholder);
+    return pathSegmentMatchesDynamic(
+      pathSegment,
+      routeSegment,
+      usesPlaceholder
+    );
   }
   if (routeSegment.kind === "static") {
     return routeSegment.value === pathSegment;
@@ -218,7 +240,9 @@ function validateInternalPath(value, field, recordId, routePatterns) {
     pathMatchesRoute(value, routePattern)
   );
   if (!matchingRoutes.length) {
-    fail(`${recordId}: ${field} does not resolve to a known app route: ${value}`);
+    fail(
+      `${recordId}: ${field} does not resolve to a known app route: ${value}`
+    );
   }
   if (matchingRoutes.some(isLegacyWordPressRoute)) {
     fail(
@@ -231,7 +255,9 @@ function validateSourceRefs(record) {
   for (const sourceRef of record.source_refs || []) {
     if (isExternalOrProtocolRelativeUrl(sourceRef)) {
       if (!sourceRef.startsWith("https://")) {
-        fail(`${record.id}: source_refs external URL must use https: ${sourceRef}`);
+        fail(
+          `${record.id}: source_refs external URL must use https: ${sourceRef}`
+        );
       }
       continue;
     }
@@ -291,8 +317,23 @@ function validateRecord(record, ids, routePatterns) {
       requireStringArray(record[field], field, record.id);
     }
   }
+  if (record.environments !== undefined) {
+    requireStringArray(record.environments, "environments", record.id);
+    for (const environment of record.environments) {
+      if (!ALLOWED_PUBLICATION_ENVIRONMENTS.has(environment)) {
+        fail(
+          `${record.id}: environments contains unsupported value ${environment}`
+        );
+      }
+    }
+  }
   for (const relatedPath of record.related_paths || []) {
-    validateInternalPath(relatedPath, "related_paths", record.id, routePatterns);
+    validateInternalPath(
+      relatedPath,
+      "related_paths",
+      record.id,
+      routePatterns
+    );
   }
   validateSourceRefs(record);
 }
@@ -304,7 +345,10 @@ function validateIndex(index) {
   requireString(index.generated_at, "generated_at", "index");
   requireString(index.commit_sha, "commit_sha", "index");
   requireString(index.base_url, "base_url", "index");
-  if (!Array.isArray(index.records) || index.records.length < MIN_HELP_RECORDS) {
+  if (
+    !Array.isArray(index.records) ||
+    index.records.length < MIN_HELP_RECORDS
+  ) {
     fail(`records must contain at least ${MIN_HELP_RECORDS} records`);
   }
   const ids = new Set();
@@ -318,9 +362,31 @@ function validateIndex(index) {
   }
 }
 
-const index = readJson(sourcePath);
-validateIndex(index);
-fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-const source = fs.readFileSync(sourcePath, "utf8");
-fs.writeFileSync(outputPath, source.endsWith("\n") ? source : `${source}\n`);
-console.log(`Synced ${index.records.length} help records to public/help-index.json`);
+async function publishHelpIndex() {
+  const index = readJson(sourcePath);
+  validateIndex(index);
+  const publicationEnvironment = getPublicationEnvironment(
+    process.env.BASE_ENDPOINT
+  );
+  const publishedIndex = {
+    ...index,
+    records: index.records
+      .filter(
+        (record) =>
+          record.environments === undefined ||
+          record.environments.includes(publicationEnvironment)
+      )
+      .map(({ environments: _environments, ...record }) => record),
+  };
+  const output = await prettier.format(JSON.stringify(publishedIndex), {
+    parser: "json",
+  });
+
+  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+  fs.writeFileSync(outputPath, output);
+  console.log(
+    `Synced ${publishedIndex.records.length} ${publicationEnvironment} help records to public/help-index.json`
+  );
+}
+
+publishHelpIndex().catch((error) => fail(error.message));

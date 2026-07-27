@@ -1,8 +1,7 @@
 # Simple Release Bus v2
 
 Simple Release Bus v2 is the deployment authority for exact frontend/backend
-candidate SHAs when its live mode enables a lane. Release Bus v1 stays disabled
-as rollback reference.
+candidate SHAs when its live mode enables a lane.
 
 ## Route every request from live state
 
@@ -12,18 +11,17 @@ Run:
 ./bin/6529 exec node ops/scripts/release-bus-status.mjs
 ```
 
-The helper prefers `/deploy/release-bus-v2/controls` and temporarily falls back
-to the v1 endpoint only before the additive v2 API exists.
+The helper reads `/deploy/release-bus-v2/controls` and fails closed when the
+authenticated status request is unavailable or malformed.
 
-| Mode | Staging | Production |
-| --- | --- | --- |
-| `OFF` | Serialized legacy manual route | Serialized manual route with explicit owner authority and exact staging evidence |
-| `STAGING` | V2 readiness | Production remains manual/disabled |
-| `PRODUCTION` | V2 readiness | Separate explicit v2 action for an exact `STAGING_VALIDATED` candidate |
+| Mode         | Staging                 | Production                                                                                    |
+| ------------ | ----------------------- | --------------------------------------------------------------------------------------------- |
+| `OFF`        | Serialized manual route | Serialized manual route with explicit owner authority; prior staging evidence is not required |
+| `STAGING`    | V2 readiness            | Production remains manual/disabled                                                            |
+| `PRODUCTION` | V2 readiness            | Separate explicit v2 action for an exact `STAGING_VALIDATED` candidate                        |
 
 For an active mode, `ALL` and the target lane must be running. In `OFF`, paused
-v2 controls are expected and the manual fallback remains available when
-`RELEASE_BUS_ENFORCEMENT` is absent or `false`.
+v2 controls are expected and the serialized manual fallback remains available.
 
 ## Candidate contract
 
@@ -85,13 +83,13 @@ V2 does not publish release notes.
 
 ## Failure behavior
 
-| Class | Behavior |
-| --- | --- |
-| Candidate merge/test | Mark the direct candidate `NEEDS_REBASE` or failed; hold only transitive dependants |
-| Infrastructure | Bounded idempotent retry; no candidate isolation |
-| Retryable deployment | Retry only the failed operation; preserve successful sibling evidence |
-| Control plane | Fail the train, requeue candidates, pause automated claiming, retain manual fallback |
-| E2E | Keep the manifest unvalidated; do not globally pause unless state is unverifiable |
+| Class                | Behavior                                                                             |
+| -------------------- | ------------------------------------------------------------------------------------ |
+| Candidate merge/test | Mark the direct candidate `NEEDS_REBASE` or failed; hold only transitive dependants  |
+| Infrastructure       | Bounded idempotent retry; no candidate isolation                                     |
+| Retryable deployment | Retry only the failed operation; preserve successful sibling evidence                |
+| Control plane        | Fail the train, requeue candidates, pause automated claiming, retain manual fallback |
+| E2E                  | Keep the manifest unvalidated; do not globally pause unless state is unverifiable    |
 
 Every pending GitHub status must map to a visible candidate/train/operation state
 and recovery message. Duplicate callbacks and worker invocations reuse immutable
@@ -111,6 +109,6 @@ Rollback:
 2. allow any already-dispatched exact operation to reach a safe terminal state;
 3. verify no v2 train owns staging or production;
 4. use the serialized manual fallback;
-5. preserve v2 rows and v1 code for diagnosis—do not destructively delete them.
+5. preserve v2 rows for diagnosis—do not destructively delete them.
 
 Never cancel another actor's shared workflow or force-push a shared ref.

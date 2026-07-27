@@ -18,45 +18,23 @@ export default function DecisionsFirst({
   minTimestamp,
 }: DecisionsFirstProps) {
   const [selectedTimestamp, setSelectedTimestamp] = useState(firstDecisionTime);
-  const [minTimeObj, setMinTimeObj] = useState<{
-    hours: number;
-    minutes: number;
-  } | null>(null);
+
+  // The min time-of-day is derived straight from minTimestamp (voting start);
+  // no need to mirror it into state. The safe default for firstDecisionTime is
+  // owned by the config/date layer (getDefaultFirstDecisionTime), so this step
+  // never seeds it back up to its parent.
+  const minTimeObj =
+    minTimestamp !== null
+      ? {
+          hours: new Date(minTimestamp).getHours(),
+          minutes: new Date(minTimestamp).getMinutes(),
+        }
+      : null;
 
   // Update local state if the prop changes
   useEffect(() => {
     setSelectedTimestamp(firstDecisionTime);
   }, [firstDecisionTime]);
-
-  // Calculate min time object and handle initial/default date setting
-  useEffect(() => {
-    if (minTimestamp) {
-      // Create a date from minTimestamp to get hours and minutes
-      const minDate = new Date(minTimestamp);
-      setMinTimeObj({
-        hours: minDate.getHours(),
-        minutes: minDate.getMinutes(),
-      });
-
-      // Only adjust times on initial load or when min timestamp changes
-      // We don't want to reset on every render or prop change
-      const isInitialOrChange =
-        !firstDecisionTime || // Initial load
-        firstDecisionTime < minTimestamp || // Current time is before min time
-        firstDecisionTime === minTimestamp; // Exact match (likely coming from a prop update)
-
-      if (isInitialOrChange) {
-        // Set default to same day at 11:59 PM
-        const defaultDate = new Date(minTimestamp);
-        defaultDate.setHours(23, 59, 0, 0);
-
-        setSelectedTimestamp(defaultDate.getTime());
-        setFirstDecisionTime(defaultDate.getTime());
-      }
-    } else {
-      setMinTimeObj(null);
-    }
-  }, [minTimestamp, setFirstDecisionTime, firstDecisionTime]);
 
   const getHours = useCallback(() => {
     return new Date(selectedTimestamp).getHours();
@@ -127,7 +105,7 @@ export default function DecisionsFirst({
 
   return (
     <div className="tw-col-span-2">
-      <div className="tw-flex tw-items-center tw-gap-x-2 tw-mb-3">
+      <div className="tw-mb-3 tw-flex tw-items-center tw-gap-x-2">
         <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
           First Winners Announcement
         </p>
@@ -139,7 +117,7 @@ export default function DecisionsFirst({
         />
       </div>
 
-      <div className="tw-grid tw-grid-cols-1 tw-gap-y-8 tw-gap-x-10 md:tw-grid-cols-2">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-8 md:tw-grid-cols-2">
         {/* Date selection */}
         <div className="tw-w-full">
           <p className="tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-300">

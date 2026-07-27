@@ -1,0 +1,552 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0x1f001561",
+          "declaringDefinitionId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testComponentTypeVocabulary",
+          "outputs": [],
+          "selector": "0x1f001561",
+          "signature": "testComponentTypeVocabulary()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0x7e8b9155",
+          "declaringDefinitionId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testContentRootSubjectDerivations",
+          "outputs": [],
+          "selector": "0x7e8b9155",
+          "signature": "testContentRootSubjectDerivations()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0x0be5e2c0",
+          "declaringDefinitionId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFinalityRecordDomains",
+          "outputs": [],
+          "selector": "0x0be5e2c0",
+          "signature": "testFinalityRecordDomains()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0x723a4ee1",
+          "declaringDefinitionId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testNumericVocabularyPins",
+          "outputs": [],
+          "selector": "0x723a4ee1",
+          "signature": "testNumericVocabularyPins()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0xa532d76d",
+          "declaringDefinitionId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRegistryHostedParameterConstants",
+          "outputs": [],
+          "selector": "0xa532d76d",
+          "signature": "testRegistryHostedParameterConstants()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0x176605aa",
+          "declaringDefinitionId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRolesAndGovernedGasDomain",
+          "outputs": [],
+          "selector": "0x176605aa",
+          "signature": "testRolesAndGovernedGasDomain()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0x1f71d8eb",
+          "declaringDefinitionId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSplitPreimagesMatchSingleEncode",
+          "outputs": [],
+          "selector": "0x1f71d8eb",
+          "signature": "testSplitPreimagesMatchSingleEncode()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0xba37a1d6",
+          "declaringDefinitionId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSubjectAndSanctionDomains",
+          "outputs": [],
+          "selector": "0xba37a1d6",
+          "signature": "testSubjectAndSanctionDomains()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_golden(bytes32,string,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:_golden(bytes32,string,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "constantValue",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "preimage",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "name": "documentedValue",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaW5hbGl0eURvbWFpbnNHb2xkZW4udC5zb2w6U3RyZWFtRmluYWxpdHlEb21haW5zR29sZGVuVGVzdCNmdW5jdGlvbjpfZ29sZGVuKGJ5dGVzMzIsc3RyaW5nLGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_golden",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 291,
+            "byteStart": 795,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFinalityDomainsGolden.t.sol#L19-L25",
+            "lineEnd": 25,
+            "lineStart": 19,
+            "snippetSha256": "sha256:2797f0630e09773b9c3d678274c560a3bcd936c6fad069d611e5a71ff246e790",
+            "sourceSha256": "sha256:90b92d27e41a8123dfc3cc98785f2d060e529a59484dec58a2933a60f7026ae4"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": "testFinalityRecordDomains()",
+          "displaySignature": "testFinalityRecordDomains()",
+          "functionKind": "function",
+          "id": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0x0be5e2c0",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1GaW5hbGl0eURvbWFpbnNHb2xkZW4udC5zb2w6U3RyZWFtRmluYWxpdHlEb21haW5zR29sZGVuVGVzdCNmdW5jdGlvbjoweDBiZTVlMmMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFinalityRecordDomains",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1831,
+            "byteStart": 1092,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFinalityDomainsGolden.t.sol#L27-L68",
+            "lineEnd": 68,
+            "lineStart": 27,
+            "snippetSha256": "sha256:583a7b40263a77c2556471793f7afab753d46c02b36493c3b4e6f47e2d9e231a",
+            "sourceSha256": "sha256:90b92d27e41a8123dfc3cc98785f2d060e529a59484dec58a2933a60f7026ae4"
+          },
+          "selector": "0x0be5e2c0",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSubjectAndSanctionDomains()",
+          "displaySignature": "testSubjectAndSanctionDomains()",
+          "functionKind": "function",
+          "id": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0xba37a1d6",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1GaW5hbGl0eURvbWFpbnNHb2xkZW4udC5zb2w6U3RyZWFtRmluYWxpdHlEb21haW5zR29sZGVuVGVzdCNmdW5jdGlvbjoweGJhMzdhMWQ2",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSubjectAndSanctionDomains",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 911,
+            "byteStart": 2929,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFinalityDomainsGolden.t.sol#L70-L91",
+            "lineEnd": 91,
+            "lineStart": 70,
+            "snippetSha256": "sha256:31dd68e3e3a664d142a88c8f41abbec86920a9cce8c2afecf460a83508f6af2e",
+            "sourceSha256": "sha256:90b92d27e41a8123dfc3cc98785f2d060e529a59484dec58a2933a60f7026ae4"
+          },
+          "selector": "0xba37a1d6",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testComponentTypeVocabulary()",
+          "displaySignature": "testComponentTypeVocabulary()",
+          "functionKind": "function",
+          "id": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0x1f001561",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1GaW5hbGl0eURvbWFpbnNHb2xkZW4udC5zb2w6U3RyZWFtRmluYWxpdHlEb21haW5zR29sZGVuVGVzdCNmdW5jdGlvbjoweDFmMDAxNTYx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testComponentTypeVocabulary",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2479,
+            "byteStart": 3846,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFinalityDomainsGolden.t.sol#L93-L154",
+            "lineEnd": 154,
+            "lineStart": 93,
+            "snippetSha256": "sha256:4b622bed9856fdfe640f008e282a2dafe105bc11640d7e2b7a25575fb38b7a66",
+            "sourceSha256": "sha256:90b92d27e41a8123dfc3cc98785f2d060e529a59484dec58a2933a60f7026ae4"
+          },
+          "selector": "0x1f001561",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRolesAndGovernedGasDomain()",
+          "displaySignature": "testRolesAndGovernedGasDomain()",
+          "functionKind": "function",
+          "id": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0x176605aa",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1GaW5hbGl0eURvbWFpbnNHb2xkZW4udC5zb2w6U3RyZWFtRmluYWxpdHlEb21haW5zR29sZGVuVGVzdCNmdW5jdGlvbjoweDE3NjYwNWFh",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRolesAndGovernedGasDomain",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 715,
+            "byteStart": 6331,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFinalityDomainsGolden.t.sol#L156-L172",
+            "lineEnd": 172,
+            "lineStart": 156,
+            "snippetSha256": "sha256:b328aaea63b518a045508091904b871362cdaabafbfb6d823d64271353f519ca",
+            "sourceSha256": "sha256:90b92d27e41a8123dfc3cc98785f2d060e529a59484dec58a2933a60f7026ae4"
+          },
+          "selector": "0x176605aa",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testNumericVocabularyPins()",
+          "displaySignature": "testNumericVocabularyPins()",
+          "functionKind": "function",
+          "id": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0x723a4ee1",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1GaW5hbGl0eURvbWFpbnNHb2xkZW4udC5zb2w6U3RyZWFtRmluYWxpdHlEb21haW5zR29sZGVuVGVzdCNmdW5jdGlvbjoweDcyM2E0ZWUx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testNumericVocabularyPins",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1097,
+            "byteStart": 7052,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFinalityDomainsGolden.t.sol#L174-L189",
+            "lineEnd": 189,
+            "lineStart": 174,
+            "snippetSha256": "sha256:d62cf0aea83cdbdf81f3ef9fc063d904104f1c913d06da562e445c2f99671422",
+            "sourceSha256": "sha256:90b92d27e41a8123dfc3cc98785f2d060e529a59484dec58a2933a60f7026ae4"
+          },
+          "selector": "0x723a4ee1",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRegistryHostedParameterConstants()",
+          "displaySignature": "testRegistryHostedParameterConstants()",
+          "functionKind": "function",
+          "id": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0xa532d76d",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1GaW5hbGl0eURvbWFpbnNHb2xkZW4udC5zb2w6U3RyZWFtRmluYWxpdHlEb21haW5zR29sZGVuVGVzdCNmdW5jdGlvbjoweGE1MzJkNzZk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRegistryHostedParameterConstants",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 938,
+            "byteStart": 8155,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFinalityDomainsGolden.t.sol#L191-L203",
+            "lineEnd": 203,
+            "lineStart": 191,
+            "snippetSha256": "sha256:6dc3c489dce5d53b13b9baff89c03d29036969ff38f702994dd41c6e3ccf3385",
+            "sourceSha256": "sha256:90b92d27e41a8123dfc3cc98785f2d060e529a59484dec58a2933a60f7026ae4"
+          },
+          "selector": "0xa532d76d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSplitPreimagesMatchSingleEncode()",
+          "displaySignature": "testSplitPreimagesMatchSingleEncode()",
+          "functionKind": "function",
+          "id": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0x1f71d8eb",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1GaW5hbGl0eURvbWFpbnNHb2xkZW4udC5zb2w6U3RyZWFtRmluYWxpdHlEb21haW5zR29sZGVuVGVzdCNmdW5jdGlvbjoweDFmNzFkOGVi",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSplitPreimagesMatchSingleEncode",
+          "natspec": "@notice The registry splits wide static-argument preimages into bytes.concat halves to\n         stay under legacy-codegen stack limits; this golden test recomputes each pinned\n         preimage as a single abi.encode and asserts hash equality.",
+          "outputs": [],
+          "range": {
+            "byteLength": 5477,
+            "byteStart": 9365,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFinalityDomainsGolden.t.sol#L208-L336",
+            "lineEnd": 336,
+            "lineStart": 208,
+            "snippetSha256": "sha256:01e0078266dea2394980c839cff60605b924aeda1d328a702f571dd55482474d",
+            "sourceSha256": "sha256:90b92d27e41a8123dfc3cc98785f2d060e529a59484dec58a2933a60f7026ae4"
+          },
+          "selector": "0x1f71d8eb",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertRecordAndSubjectPreimages(StreamArtworkFinalityRegistry,StreamFinalityScope,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:_assertRecordAndSubjectPreimages(StreamArtworkFinalityRegistry,StreamFinalityScope,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "registry",
+              "type": "StreamArtworkFinalityRegistry"
+            },
+            {
+              "index": 1,
+              "name": "scope",
+              "storageLocation": "memory",
+              "type": "StreamFinalityScope"
+            },
+            {
+              "index": 2,
+              "name": "coreFactsHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaW5hbGl0eURvbWFpbnNHb2xkZW4udC5zb2w6U3RyZWFtRmluYWxpdHlEb21haW5zR29sZGVuVGVzdCNmdW5jdGlvbjpfYXNzZXJ0UmVjb3JkQW5kU3ViamVjdFByZWltYWdlcyhTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeSxTdHJlYW1GaW5hbGl0eVNjb3BlLGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertRecordAndSubjectPreimages",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3588,
+            "byteStart": 14848,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFinalityDomainsGolden.t.sol#L338-L425",
+            "lineEnd": 425,
+            "lineStart": 338,
+            "snippetSha256": "sha256:07fd25d34bf1e4373a71927b2ead7dd4c1599ee2b44ef962abdb93bd76cf288d",
+            "sourceSha256": "sha256:90b92d27e41a8123dfc3cc98785f2d060e529a59484dec58a2933a60f7026ae4"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": "testContentRootSubjectDerivations()",
+          "displaySignature": "testContentRootSubjectDerivations()",
+          "functionKind": "function",
+          "id": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0x7e8b9155",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1GaW5hbGl0eURvbWFpbnNHb2xkZW4udC5zb2w6U3RyZWFtRmluYWxpdHlEb21haW5zR29sZGVuVGVzdCNmdW5jdGlvbjoweDdlOGI5MTU1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testContentRootSubjectDerivations",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1916,
+            "byteStart": 18442,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFinalityDomainsGolden.t.sol#L427-L477",
+            "lineEnd": 477,
+            "lineStart": 427,
+            "snippetSha256": "sha256:6d1363f3d561516f0d8d68028310dc15981c627519ff8e087ce15f34ccec611d",
+            "sourceSha256": "sha256:90b92d27e41a8123dfc3cc98785f2d060e529a59484dec58a2933a60f7026ae4"
+          },
+          "selector": "0x7e8b9155",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_deployRegistry()",
+          "functionKind": "function",
+          "id": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:_deployRegistry()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1GaW5hbGl0eURvbWFpbnNHb2xkZW4udC5zb2w6U3RyZWFtRmluYWxpdHlEb21haW5zR29sZGVuVGVzdCNmdW5jdGlvbjpfZGVwbG95UmVnaXN0cnkoKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_deployRegistry",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "StreamArtworkFinalityRegistry"
+            }
+          ],
+          "range": {
+            "byteLength": 828,
+            "byteStart": 20364,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFinalityDomainsGolden.t.sol#L479-L495",
+            "lineEnd": 495,
+            "lineStart": 479,
+            "snippetSha256": "sha256:c25d294b35bb4243508a64e37ab3996b4b78dbdf4626faa0c35cfdf89e1f7a77",
+            "sourceSha256": "sha256:90b92d27e41a8123dfc3cc98785f2d060e529a59484dec58a2933a60f7026ae4"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1GaW5hbGl0eURvbWFpbnNHb2xkZW4udC5zb2w6U3RyZWFtRmluYWxpdHlEb21haW5zR29sZGVuVGVzdA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamFinalityDomainsGoldenTest",
+    "natspec": "@notice Golden tests: every pinned finality domain constant is recomputed from its spec\n         preimage string and asserted against both the library constant and the literal\n         hash value mirrored in docs/launch-v1-target-architecture.md.",
+    "range": {
+      "byteLength": 20574,
+      "byteStart": 620,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFinalityDomainsGolden.t.sol#L14-L496",
+      "lineEnd": 496,
+      "lineStart": 14,
+      "snippetSha256": "sha256:2136d9ea890fbc065fec8bfb1555e5ec0055f897e3e0d5ffdf0d8ed0d02a83db",
+      "sourceSha256": "sha256:90b92d27e41a8123dfc3cc98785f2d060e529a59484dec58a2933a60f7026ae4"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamFinalityDomainsGolden.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 7
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 7
+    },
+    "totalCount": 7
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0x0be5e2c0",
+      "definitionId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0x176605aa",
+      "definitionId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0x1f001561",
+      "definitionId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0x723a4ee1",
+      "definitionId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0x7e8b9155",
+      "definitionId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0xa532d76d",
+      "definitionId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest#function:0xba37a1d6",
+      "definitionId": "test/StreamFinalityDomainsGolden.t.sol:StreamFinalityDomainsGoldenTest",
+      "severity": "advisory"
+    }
+  ]
+}

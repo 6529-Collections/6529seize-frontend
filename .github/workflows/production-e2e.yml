@@ -97,7 +97,19 @@ jobs:
         id: e2e
         if: steps.playwright.outcome == 'success'
         continue-on-error: true
-        run: ./bin/6529 run test:e2e:production:readonly
+        run: >-
+          ./bin/6529 run e2e:packs --
+          --env production
+          --trigger post-deploy
+          --artifact-root production-e2e-artifacts
+      - name: Upload Playwright artifacts on failure
+        if: always() && steps.e2e.outcome == 'failure'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: production-e2e-artifacts-${{ inputs.release_train_id }}
+          path: production-e2e-artifacts/
+          retention-days: 7
+          if-no-files-found: ignore
       - name: Report structured Release Bus E2E result
         if: always()
         env:
