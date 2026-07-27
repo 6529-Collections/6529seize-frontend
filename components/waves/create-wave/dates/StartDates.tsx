@@ -2,14 +2,12 @@
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarDays } from "@fortawesome/free-regular-svg-icons";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import CommonCalendar from "@/components/utils/calendar/CommonCalendar";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
 import { CREATE_WAVE_START_DATE_LABELS } from "@/helpers/waves/waves.constants";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { Time } from "@/helpers/time";
-import DateAccordion from "@/components/common/DateAccordion";
-import TooltipIconButton from "@/components/common/TooltipIconButton";
+import CollapsibleCard from "@/components/common/CollapsibleCard";
 
 interface StartDatesProps {
   readonly waveType: ApiWaveType;
@@ -62,51 +60,43 @@ export default function StartDates({
   const votingDateFormatted = formatShortDate(dates.votingStartDate);
 
   return (
-    <DateAccordion
+    <CollapsibleCard
       title="Wave Timeline"
-      titleActions={
-        <TooltipIconButton
-          icon={faInfoCircle}
-          tooltipText="Set when your wave begins accepting submissions and when voting starts. These dates create the foundational timeline for your wave."
-          tooltipPosition="bottom"
-          tooltipWidth="tw-w-80"
-        />
-      }
       isExpanded={isExpanded}
       onToggle={() => setIsExpanded(!isExpanded)}
       collapsedContent={
-        <div className="tw-flex tw-items-center tw-space-x-4">
-          <div className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-shadow-md tw-transition-transform tw-duration-200 hover:tw-translate-y-[-1px]">
+        <span className="tw-flex tw-items-center tw-space-x-4">
+          <span className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-shadow-md tw-transition-transform tw-duration-200 hover:tw-translate-y-[-1px]">
             <FontAwesomeIcon
               icon={faCalendarDays}
               className="tw-mr-2 tw-size-4 tw-text-primary-400"
             />
-            <div>
-              <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">
+            <span className="tw-block">
+              <span className="tw-block tw-text-xs tw-text-iron-300/70">
                 Drops Submission Opens
-              </p>
-              <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
+              </span>
+              <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-50">
                 {submissionDateFormatted}
-              </p>
-            </div>
-          </div>
+              </span>
+            </span>
+          </span>
           {isRankWave && (
-            <div className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-shadow-md tw-transition-transform tw-duration-200 hover:tw-translate-y-[-1px]">
+            <span className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-shadow-md tw-transition-transform tw-duration-200 hover:tw-translate-y-[-1px]">
               <FontAwesomeIcon
                 icon={faCalendarDays}
                 className="tw-mr-2 tw-size-4 tw-text-primary-400"
               />
-              <div>
-                <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">
+              <span className="tw-block">
+                <span className="tw-block tw-text-xs tw-text-iron-300/70">
                   Drops Voting Begins
-                </p>
-                <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
+                </span>
+                <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-50">
                   {votingDateFormatted}
-                </p>
-              </div>
-            </div>
+                </span>
+              </span>
+            </span>
           )}
-        </div>
+        </span>
       }
     >
       {/* Calendar Selection */}
@@ -151,6 +141,6 @@ export default function StartDates({
           </div>
         )}
       </div>
-    </DateAccordion>
+    </CollapsibleCard>
   );
 }

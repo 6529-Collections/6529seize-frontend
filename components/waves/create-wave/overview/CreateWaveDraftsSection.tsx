@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import DateAccordion from "@/components/common/DateAccordion";
+import CollapsibleCard from "@/components/common/CollapsibleCard";
 import { getTimeAgo } from "@/helpers/Helpers";
 import type { CreateWaveDraft } from "@/helpers/waves/create-wave-draft.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -30,7 +30,7 @@ export default function CreateWaveDraftsSection({
     t(locale, "wave.create.drafts.untitled");
 
   return (
-    <DateAccordion
+    <CollapsibleCard
       title={t(locale, "wave.create.drafts.heading")}
       titleActions={
         <span
@@ -44,7 +44,6 @@ export default function CreateWaveDraftsSection({
       }
       isExpanded={isExpanded}
       onToggle={() => setIsExpanded((previous) => !previous)}
-      fullHeaderToggle
     >
       <div className="tw-px-5 tw-pb-5">
         <p className="tw-mb-3 tw-mt-0 tw-text-xs tw-font-normal tw-text-iron-400">
@@ -106,6 +105,6 @@ export default function CreateWaveDraftsSection({
           ))}
         </ul>
       </div>
-    </DateAccordion>
+    </CollapsibleCard>
   );
 }
