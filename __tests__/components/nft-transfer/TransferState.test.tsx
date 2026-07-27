@@ -3,6 +3,7 @@ import { act, renderHook } from "@testing-library/react";
 import {
   buildTransferKey,
   TransferProvider,
+  useIsTransferModeActive,
   useTransfer,
 } from "@/components/nft-transfer/TransferState";
 import { ContractType } from "@/types/enums";
@@ -12,6 +13,28 @@ function renderTransfer() {
 }
 
 describe("TransferState", () => {
+  it("publishes transfer-mode visibility while transfer is enabled", () => {
+    const { result } = renderHook(
+      () => ({
+        transfer: useTransfer(),
+        isTransferModeActive: useIsTransferModeActive(),
+      }),
+      { wrapper: TransferProvider }
+    );
+
+    expect(result.current.isTransferModeActive).toBe(false);
+
+    act(() => {
+      result.current.transfer.setEnabled(true);
+    });
+    expect(result.current.isTransferModeActive).toBe(true);
+
+    act(() => {
+      result.current.transfer.setEnabled(false);
+    });
+    expect(result.current.isTransferModeActive).toBe(false);
+  });
+
   it("initialises with transfer disabled and no selections", () => {
     const { result } = renderTransfer();
 

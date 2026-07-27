@@ -15,22 +15,20 @@ describe("createCompoundPlan", () => {
     jest.clearAllMocks();
   });
 
-  it("creates a tx plan for the main Etherscan domain", () => {
+  it("does not claim Etherscan transaction URLs", () => {
     const plan = createCompoundPlan(
       new URL(`https://etherscan.io/tx/${txHash}`)
     );
 
-    expect(plan).not.toBeNull();
-    expect(plan?.cacheKey).toBe(`compound:tx:${txHash}`);
+    expect(plan).toBeNull();
   });
 
-  it("creates a tx plan for Etherscan subdomains", () => {
+  it("does not claim the canonical www Etherscan host", () => {
     const plan = createCompoundPlan(
       new URL(`https://www.etherscan.io/tx/${txHash}`)
     );
 
-    expect(plan).not.toBeNull();
-    expect(plan?.cacheKey).toBe(`compound:tx:${txHash}`);
+    expect(plan).toBeNull();
   });
 
   it("returns null for hosts that only end with the Etherscan domain text", () => {

@@ -16,7 +16,6 @@
     "__tests__/app/api/og-metadata.drops.image.test.tsx": 18,
     "__tests__/app/api/og-metadata.nfts.route.test.ts": 2,
     "__tests__/app/api/og-metadata.waves.image.test.tsx": 4,
-    "__tests__/app/api/open-graph.ens.test.ts": 1,
     "__tests__/app/api/open-graph.route.test.ts": 2,
     "__tests__/app/api/profile-cms.assets.route.test.ts": 1,
     "__tests__/app/blogCategoryPage.test.tsx": 1,

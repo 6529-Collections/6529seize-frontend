@@ -1,15 +1,11 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarPlus } from "@fortawesome/free-regular-svg-icons";
-import {
-  faInfoCircle,
-  faTriangleExclamation,
-} from "@fortawesome/free-solid-svg-icons";
+import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
-import DateAccordion from "@/components/common/DateAccordion";
+import CollapsibleCard from "@/components/common/CollapsibleCard";
 import DecisionsFirst from "./DecisionsFirst";
 import SubsequentDecisions from "./SubsequentDecisions";
 import { calculateDecisionTimes } from "../services/waveDecisionService";
-import TooltipIconButton from "@/components/common/TooltipIconButton";
 import CommonSwitch from "@/components/utils/switch/CommonSwitch";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 
@@ -32,14 +28,14 @@ function DecisionsCollapsedContent({
   isRollingMode,
 }: DecisionsCollapsedContentProps) {
   return (
-    <div className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-shadow-md tw-transition-transform tw-duration-200 hover:tw-translate-y-[-1px]">
+    <span className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-shadow-md tw-transition-transform tw-duration-200 hover:tw-translate-y-[-1px]">
       <FontAwesomeIcon
         icon={faCalendarPlus}
         className="tw-mr-2 tw-size-4 tw-text-primary-400"
       />
-      <div className="tw-flex tw-flex-col">
-        <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">Winners</p>
-        <div className="tw-flex tw-items-center">
+      <span className="tw-flex tw-flex-col">
+        <span className="tw-block tw-text-xs tw-text-iron-300/70">Winners</span>
+        <span className="tw-flex tw-items-center">
           <span className="tw-text-sm tw-font-medium tw-text-iron-50">
             {totalDecisionPoints} announcement
             {totalDecisionPoints !== 1 ? "s" : ""}
@@ -49,9 +45,9 @@ function DecisionsCollapsedContent({
               Recurring
             </span>
           )}
-        </div>
-      </div>
-    </div>
+        </span>
+      </span>
+    </span>
   );
 }
 
@@ -130,16 +126,8 @@ export default function Decisions({
   };
 
   return (
-    <DateAccordion
+    <CollapsibleCard
       title="Winners Announcements"
-      titleActions={
-        <TooltipIconButton
-          icon={faInfoCircle}
-          tooltipText="Schedule when winners will be announced during your wave. With recurring cycles, announcements repeat until an optional end date."
-          tooltipPosition="bottom"
-          tooltipWidth="tw-w-80"
-        />
-      }
       isExpanded={shouldShowExpandedContent}
       onToggle={() => setIsExpanded(!shouldShowExpandedContent)}
       collapsedContent={
@@ -268,6 +256,6 @@ export default function Decisions({
           </div>
         )}
       </div>
-    </DateAccordion>
+    </CollapsibleCard>
   );
 }
