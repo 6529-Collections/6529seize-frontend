@@ -1,0 +1,332 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamRandomizerRetry.t.sol:RetryArrngController#function:0x55c7bfb1",
+          "declaringDefinitionId": "test/StreamRandomizerRetry.t.sol:RetryArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "contract NextGenRandomizerRNG",
+              "name": "randomizer",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256[]",
+              "name": "words",
+              "type": "uint256[]"
+            }
+          ],
+          "name": "fulfill",
+          "outputs": [],
+          "selector": "0x55c7bfb1",
+          "signature": "fulfill(address,uint256,uint256[])",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerRetry.t.sol:RetryArrngController#function:0x6a84a985",
+          "declaringDefinitionId": "test/StreamRandomizerRetry.t.sol:RetryArrngController",
+          "inherited": false,
+          "inputs": [],
+          "name": "nextRequestId",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x6a84a985",
+          "signature": "nextRequestId()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamRandomizerRetry.t.sol:RetryArrngController#function:0xd4e0f337",
+          "declaringDefinitionId": "test/StreamRandomizerRetry.t.sol:RetryArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "requestRandomWords",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xd4e0f337",
+          "signature": "requestRandomWords(uint256,address)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "nextRequestId()",
+          "displaySignature": "nextRequestId()",
+          "functionKind": "getter",
+          "id": "test/StreamRandomizerRetry.t.sol:RetryArrngController#function:0x6a84a985",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUmV0cnkudC5zb2w6UmV0cnlBcnJuZ0NvbnRyb2xsZXIjZnVuY3Rpb246MHg2YTg0YTk4NQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "nextRequestId",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 32,
+            "byteStart": 27055,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerRetry.t.sol#L639",
+            "lineEnd": 639,
+            "lineStart": 639,
+            "snippetSha256": "sha256:c7015688cea9d50a6e063a7567b715d0c68802cb091f77014a5213efc709c785",
+            "sourceSha256": "sha256:5bf93d012570d62b7a1b1131ce4f708b424f5ca2d3834bd9e6a33b30dfdc027c"
+          },
+          "selector": "0x6a84a985",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "requestRandomWords(uint256,address)",
+          "displaySignature": "requestRandomWords(uint256,address)",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerRetry.t.sol:RetryArrngController#function:0xd4e0f337",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUmV0cnkudC5zb2w6UmV0cnlBcnJuZ0NvbnRyb2xsZXIjZnVuY3Rpb246MHhkNGUwZjMzNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestRandomWords",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 150,
+            "byteStart": 27094,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerRetry.t.sol#L641-L644",
+            "lineEnd": 644,
+            "lineStart": 641,
+            "snippetSha256": "sha256:b944c4b33f93629ce8cd32d2feb37e0111126943d6b8ec9085ba856d25c4b2c9",
+            "sourceSha256": "sha256:5bf93d012570d62b7a1b1131ce4f708b424f5ca2d3834bd9e6a33b30dfdc027c"
+          },
+          "selector": "0xd4e0f337",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "fulfill(address,uint256,uint256[])",
+          "displaySignature": "fulfill(NextGenRandomizerRNG,uint256,uint256[])",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerRetry.t.sol:RetryArrngController#function:0x55c7bfb1",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "randomizer",
+              "type": "NextGenRandomizerRNG"
+            },
+            {
+              "index": 1,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "words",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUmV0cnkudC5zb2w6UmV0cnlBcnJuZ0NvbnRyb2xsZXIjZnVuY3Rpb246MHg1NWM3YmZiMQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "fulfill",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 177,
+            "byteStart": 27250,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerRetry.t.sol#L646-L650",
+            "lineEnd": 650,
+            "lineStart": 646,
+            "snippetSha256": "sha256:b427db1601976c229056c0e3d59c7d637b3134d320431ab47e244034f8dbe0cf",
+            "sourceSha256": "sha256:5bf93d012570d62b7a1b1131ce4f708b424f5ca2d3834bd9e6a33b30dfdc027c"
+          },
+          "selector": "0x55c7bfb1",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamRandomizerRetry.t.sol:RetryArrngController#function:0x6a84a985",
+          "immutable": false,
+          "name": "nextRequestId",
+          "natspec": "",
+          "range": {
+            "byteLength": 32,
+            "byteStart": 27055,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerRetry.t.sol#L639",
+            "lineEnd": 639,
+            "lineStart": 639,
+            "snippetSha256": "sha256:c7015688cea9d50a6e063a7567b715d0c68802cb091f77014a5213efc709c785",
+            "sourceSha256": "sha256:5bf93d012570d62b7a1b1131ce4f708b424f5ca2d3834bd9e6a33b30dfdc027c"
+          },
+          "selector": "0x6a84a985",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 27086,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerRetry.t.sol#L639",
+            "lineEnd": 639,
+            "lineStart": 639,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:5bf93d012570d62b7a1b1131ce4f708b424f5ca2d3834bd9e6a33b30dfdc027c"
+          },
+          "valueSource": "1",
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamRandomizerRetry.t.sol:RetryArrngController",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUmV0cnkudC5zb2w6UmV0cnlBcnJuZ0NvbnRyb2xsZXI",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamRandomizerRetry.t.sol:RetryArrngController"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "RetryArrngController",
+    "natspec": "",
+    "range": {
+      "byteLength": 410,
+      "byteStart": 27019,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerRetry.t.sol#L638-L651",
+      "lineEnd": 651,
+      "lineStart": 638,
+      "snippetSha256": "sha256:042f9be30286d11735a88dc09eed776868fc31fe5885ec722f24c457f54c10d5",
+      "sourceSha256": "sha256:5bf93d012570d62b7a1b1131ce4f708b424f5ca2d3834bd9e6a33b30dfdc027c"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamRandomizerRetry.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamRandomizerRetry.t.sol:RetryArrngController",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerRetry.t.sol:RetryArrngController#function:0x55c7bfb1",
+      "definitionId": "test/StreamRandomizerRetry.t.sol:RetryArrngController",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerRetry.t.sol:RetryArrngController#function:0x6a84a985",
+      "definitionId": "test/StreamRandomizerRetry.t.sol:RetryArrngController",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerRetry.t.sol:RetryArrngController#function:0xd4e0f337",
+      "definitionId": "test/StreamRandomizerRetry.t.sol:RetryArrngController",
+      "severity": "advisory"
+    }
+  ]
+}
