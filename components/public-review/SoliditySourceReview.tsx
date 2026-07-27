@@ -193,7 +193,7 @@ function SourceSelectionControls({
           <input
             aria-describedby={rangeStatusId}
             aria-invalid={!selectionValid}
-            className="tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-white tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40"
+            className="tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-white tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40"
             max={maximumLine}
             min={minimumLine}
             type="number"
@@ -213,7 +213,7 @@ function SourceSelectionControls({
           <input
             aria-describedby={rangeStatusId}
             aria-invalid={!selectionValid}
-            className="tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-white tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40"
+            className="tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-white tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40"
             max={maximumLine}
             min={minimumLine}
             type="number"
@@ -265,7 +265,7 @@ function SourceSelectionControls({
             type="button"
             disabled={!selectionValid}
             onClick={focusFeedback}
-            className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+            className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-600 tw-px-4 tw-py-2 tw-font-semibold tw-text-white tw-transition hover:tw-ring-2 hover:tw-ring-inset hover:tw-ring-primary-300/60 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
           >
             {t(DEFAULT_LOCALE, "publicReview.reference.commentSelection")}
           </button>

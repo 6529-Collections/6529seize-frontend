@@ -122,7 +122,7 @@ function getFeedbackContextFingerprint({
 }
 
 const INPUT_CLASSES =
-  "tw-min-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-50 tw-outline-none tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition focus:tw-bg-black focus:tw-ring-1 focus:tw-ring-primary-400 focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400";
+  "tw-min-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-50 tw-outline-none tw-ring-1 tw-ring-inset tw-ring-iron-600 tw-transition focus:tw-bg-black focus:tw-ring-1 focus:tw-ring-primary-400 focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400";
 
 function getFeedbackGate({
   authenticated,
@@ -516,7 +516,7 @@ export default function PublicReviewFeedbackComposer({
                 commentError ? ` ${formId}-comment-error` : ""
               }`}
               aria-invalid={Boolean(commentError)}
-              className={`${INPUT_CLASSES} tw-min-h-24 tw-resize-y tw-leading-6 placeholder:tw-text-iron-600`}
+              className={`${INPUT_CLASSES} aria-[invalid=true]:tw-ring-red-400 aria-[invalid=true]:focus:tw-ring-red-400 aria-[invalid=true]:focus-visible:tw-ring-red-400 tw-min-h-24 tw-resize-y tw-leading-6 placeholder:tw-text-iron-400`}
               placeholder={t(locale, "publicReview.feedback.commentHint")}
               required
               value={draft.comment}
@@ -529,7 +529,7 @@ export default function PublicReviewFeedbackComposer({
               <span
                 id={`${formId}-comment-error`}
                 aria-live="polite"
-                className="tw-sr-only"
+                className="tw-text-red-300 tw-mt-1.5 tw-block tw-text-xs tw-font-medium"
               >
                 {commentError}
               </span>
@@ -667,7 +667,7 @@ export default function PublicReviewFeedbackComposer({
             <button
               type="submit"
               disabled={busy || !referenceReady || Boolean(feedbackGate)}
-              className="tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition-colors hover:tw-bg-primary-400 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+              className="tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-600 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-ring-2 hover:tw-ring-inset hover:tw-ring-primary-300/60 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
             >
               {isSubmitting
                 ? t(locale, "publicReview.feedback.submitting")

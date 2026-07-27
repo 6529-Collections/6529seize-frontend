@@ -41,13 +41,14 @@ export function PublicReviewEditorialFeedback({
   );
 
   return (
-    <div className="tw-flex tw-min-h-0 tw-flex-col @[960px]:tw-h-full">
+    <div className="tw-flex tw-min-h-0 tw-flex-col @[760px]:tw-h-full">
       <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-px-5 tw-py-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
         <PublicReviewPageComments
           config={config}
           destination={destination}
           locale={DEFAULT_LOCALE}
           page={page}
+          sections={sections}
         />
       </div>
       <div className="tw-max-h-[65vh] tw-flex-none tw-overflow-y-auto tw-overscroll-contain tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-bg-[#0D0D0F] tw-px-5 tw-pb-5 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500 [&>section]:tw-border-t-0">
@@ -68,7 +69,7 @@ export function PublicReviewEditorialFeedback({
                   id="public-review-feedback-section"
                   value={sectionId}
                   onChange={(event) => setSectionId(event.target.value)}
-                  className="tw-min-h-11 tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-3 tw-py-2 tw-pr-9 tw-text-sm tw-text-iron-50 tw-outline-none tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition focus:tw-bg-black focus:tw-ring-1 focus:tw-ring-primary-400 focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
+                  className="tw-min-h-11 tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-3 tw-py-2 tw-pr-9 tw-text-sm tw-text-iron-50 tw-outline-none tw-ring-1 tw-ring-inset tw-ring-iron-600 tw-transition focus:tw-bg-black focus:tw-ring-1 focus:tw-ring-primary-400 focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
                 >
                   <option value="">
                     {t(DEFAULT_LOCALE, "publicReview.feedback.wholePage")}

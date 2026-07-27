@@ -207,6 +207,7 @@ export function PublicReviewShell({
                 {page.id === "overview" && (
                   <div className="tw-mt-10 tw-w-full">
                     <PublicReviewAudiencePaths
+                      entryPageIds={reviewVersion.audienceEntryPageIds}
                       pages={reviewVersion.pages}
                       routes={routes}
                       version={routeVersion}
@@ -216,7 +217,10 @@ export function PublicReviewShell({
 
                 <div className="tw-mt-12 tw-w-full tw-max-w-[52rem] sm:tw-mt-16">
                   <article className="tw-pb-8">
-                    <PublicReviewMarkdown markdown={editorialMarkdown} />
+                    <PublicReviewMarkdown
+                      internalLinkBasePath={routes.getRootHref(routeVersion)}
+                      markdown={editorialMarkdown}
+                    />
                   </article>
 
                   <div className="tw-mt-8">

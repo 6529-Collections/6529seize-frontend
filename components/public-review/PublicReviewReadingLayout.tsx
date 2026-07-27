@@ -116,8 +116,11 @@ export function PublicReviewReadingLayout({
     }
     handledFocusRequestRef.current = focusRequest;
     panelElement.focus({ preventScroll: true });
+    const prefersReducedMotion =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     panelElement.scrollIntoView({
-      behavior: "smooth",
+      behavior: prefersReducedMotion ? "auto" : "smooth",
       block: "start",
     });
   }, [feedbackAvailable, focusRequest, isPanelOpen]);
@@ -164,7 +167,7 @@ export function PublicReviewReadingLayout({
             aria-controls={COMMENT_PANEL_ID}
             aria-expanded={isPanelOpen}
             onClick={() => updatePanelPreference(!isPanelOpen)}
-            className="tw-inline-flex tw-min-h-11 tw-flex-none tw-items-center tw-gap-2 tw-border-0 tw-bg-transparent tw-px-0 tw-text-xs tw-font-semibold tw-text-iron-400 tw-transition-colors hover:tw-text-primary-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-white"
+            className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-flex-none tw-items-center tw-gap-2 tw-border-0 tw-bg-transparent tw-px-0 tw-text-xs tw-font-semibold tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-white"
           >
             {isPanelOpen ? (
               <XMarkIcon className="tw-size-4" aria-hidden="true" />

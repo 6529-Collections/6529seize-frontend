@@ -102,6 +102,12 @@ describe("6529 Stream public review definition", () => {
         PUBLIC_REVIEW_EVIDENCE_STATES.filter((state) => pageStates.has(state))
       );
     }
+    for (const [audience, pageId] of Object.entries(
+      STREAM_REVIEW_DEFINITION.versions[0]!.audienceEntryPageIds
+    )) {
+      const entryPage = STREAM_REVIEW_PAGES.find((page) => page.id === pageId);
+      expect(entryPage?.audiences).toContain(audience);
+    }
   });
 
   it("contains no feedback transport identifiers in shared review data", () => {

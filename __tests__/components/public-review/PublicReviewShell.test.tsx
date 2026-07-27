@@ -78,7 +78,7 @@ describe("PublicReviewShell", () => {
     ).toHaveLength(2);
     expect(
       screen.getByRole("link", { name: "Start the Artists path" })
-    ).toHaveAttribute("href", "/reviews/6529-stream/artwork-lifecycle");
+    ).toHaveAttribute("href", "/reviews/6529-stream/for-artists");
     expect(
       screen.queryByText("View all 12 pages in this path")
     ).not.toBeInTheDocument();
@@ -217,7 +217,27 @@ describe("PublicReviewShell", () => {
       screen.getByRole("link", { name: "Start the Artists path" })
     ).toHaveAttribute(
       "href",
-      "/reviews/another-contract/versions/candidate-2/artwork-lifecycle"
+      "/reviews/another-contract/versions/candidate-2/for-artists"
+    );
+    expect(
+      screen.getByRole("link", { name: "Start the Community path" })
+    ).toHaveAttribute(
+      "href",
+      "/reviews/another-contract/versions/candidate-2/community-review"
+    );
+    expect(
+      screen.getByRole("link", {
+        name: "Start the Technical reviewers path",
+      })
+    ).toHaveAttribute(
+      "href",
+      "/reviews/another-contract/versions/candidate-2/roles-and-trust"
+    );
+    expect(
+      screen.getByRole("link", { name: "Start the Auditors path" })
+    ).toHaveAttribute(
+      "href",
+      "/reviews/another-contract/versions/candidate-2/security-testing-and-known-limitations"
     );
     expect(
       screen.getAllByRole("link", { name: /Artwork Lifecycle/ })[0]

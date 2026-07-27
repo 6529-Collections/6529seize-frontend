@@ -61,7 +61,11 @@ describe("SoliditySourceReview", () => {
 
   it("hashes exactly the visible whole-line selection for feedback", async () => {
     render(
-      <SoliditySourceReview source={SOURCE} feedbackSlot={<SelectionProbe />} />
+      <SoliditySourceReview
+        source={SOURCE}
+        feedbackSlot={<SelectionProbe />}
+        feedbackSubmissionsOpen
+      />
     );
 
     const selectedSource = SOURCE.lines[1];
@@ -85,6 +89,12 @@ describe("SoliditySourceReview", () => {
     expect(
       screen.getByRole("link", { name: "Open selected lines on GitHub" })
     ).toHaveAttribute("href", expect.stringContaining("#L2"));
+    expect(
+      screen.getByRole("button", { name: "Comment on selected lines" })
+    ).toHaveClass("tw-bg-primary-600", "hover:tw-ring-primary-300/60");
+    expect(screen.getByLabelText("Start line")).toHaveClass(
+      "tw-border-iron-600"
+    );
   });
 
   it("uses explicit keyboard ranges without adding a tab stop per source line", async () => {

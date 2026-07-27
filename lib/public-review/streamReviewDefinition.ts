@@ -301,6 +301,13 @@ export const STREAM_REVIEW_PAGES = [
   definePage("community-review", "communityReview", ALL_AUDIENCES, []),
 ] as const;
 
+const STREAM_REVIEW_AUDIENCE_ENTRY_PAGE_IDS = {
+  community: "community-review",
+  artists: "for-artists",
+  technical: "roles-and-trust",
+  auditors: "security-testing-and-known-limitations",
+} as const;
+
 export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
   id: "stream",
   slug: STREAM_REVIEW_SLUG,
@@ -320,6 +327,7 @@ export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
         commit: STREAM_REVIEW_SOURCE_COMMIT,
       },
       pages: STREAM_REVIEW_PAGES,
+      audienceEntryPageIds: STREAM_REVIEW_AUDIENCE_ENTRY_PAGE_IDS,
     },
     {
       version: STREAM_REVIEW_PREVIOUS_VERSION,
@@ -333,6 +341,7 @@ export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
         commit: STREAM_REVIEW_SOURCE_COMMIT,
       },
       pages: STREAM_REVIEW_2026_07_26_PAGES,
+      audienceEntryPageIds: STREAM_REVIEW_AUDIENCE_ENTRY_PAGE_IDS,
     },
   ],
   status: STREAM_REVIEW_LIFECYCLE_STATE,

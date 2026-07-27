@@ -51,7 +51,7 @@ const EMPTY_FILTERS: PublicReviewLedgerFilters = {
 };
 
 const SELECT_CLASSES =
-  "tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-iron-50 tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40";
+  "tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-iron-50 tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40";
 const LEDGER_ALL_MESSAGE = "publicReview.ledger.all" as const;
 
 function getInternalSourceLink({
@@ -385,15 +385,11 @@ export default function PublicReviewLedger({
                   className="tw-py-5"
                 >
                   <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.1em]">
-                    <span className="tw-text-sky-300">
-                      {categoryLabel}
-                    </span>
+                    <span className="tw-text-sky-300">{categoryLabel}</span>
                     <span aria-hidden="true" className="tw-text-iron-700">
                       ·
                     </span>
-                    <span className="tw-text-iron-400">
-                      {severityLabel}
-                    </span>
+                    <span className="tw-text-iron-400">{severityLabel}</span>
                     <span aria-hidden="true" className="tw-text-iron-700">
                       ·
                     </span>

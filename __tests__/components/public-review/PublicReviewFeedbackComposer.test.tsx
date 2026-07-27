@@ -1,5 +1,6 @@
 import PublicReviewFeedbackComposer from "@/components/public-review/PublicReviewFeedbackComposer";
 import type { PublicReviewReferenceIntegrityStatus } from "@/components/public-review/PublicReviewFeedbackComposer";
+import { FeedbackConnectPrompt } from "@/components/public-review/PublicReviewFeedbackComposerStatus";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
@@ -155,6 +156,37 @@ describe("PublicReviewFeedbackComposer", () => {
         authenticated_user_eligible: true,
       },
     } as Awaited<ReturnType<typeof fetchWaveById>>);
+  });
+
+  it("keeps primary feedback text and actions on AA-contrast tokens", async () => {
+    renderComposer(jest.fn());
+
+    const comment = await screen.findByLabelText("Comment (required)", {
+      selector: "textarea",
+    });
+    expect(comment).toHaveClass("placeholder:tw-text-iron-400");
+    expect(comment).toHaveClass("tw-ring-iron-600");
+    expect(screen.getByRole("button", { name: "Post feedback" })).toHaveClass(
+      "tw-bg-primary-600",
+      "hover:tw-ring-primary-300/60"
+    );
+  });
+
+  it("keeps the wallet connection action on AA-contrast tokens", () => {
+    render(
+      <FeedbackConnectPrompt
+        busy={false}
+        connected={false}
+        connecting={false}
+        handleConnect={jest.fn(async () => undefined)}
+        locale="en-US"
+        visible
+      />
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Connect wallet to comment" })
+    ).toHaveClass("tw-bg-primary-600", "hover:tw-ring-primary-300/60");
   });
 
   it("preserves the draft after a recoverable submission failure", async () => {
@@ -439,7 +471,9 @@ describe("PublicReviewFeedbackComposer", () => {
     expect(describedBy).toContain("comment-error");
     const requiredMessage = screen.getByText("Enter a comment.");
     expect(requiredMessage).toHaveAttribute("aria-live", "polite");
-    expect(requiredMessage).toHaveClass("tw-sr-only");
+    expect(requiredMessage).toHaveClass("tw-text-red-300");
+    expect(requiredMessage).not.toHaveClass("tw-sr-only");
+    expect(comment).toHaveClass("aria-[invalid=true]:tw-ring-red-400");
   });
 
   it("explains how to recover when the rendered Wave message is too long", async () => {

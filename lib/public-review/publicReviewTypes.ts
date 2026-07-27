@@ -47,6 +47,7 @@ export interface PublicReviewVersionDefinition {
   readonly version: string;
   readonly source: PublicReviewSource;
   readonly pages: readonly PublicReviewPageDefinition[];
+  readonly audienceEntryPageIds: Readonly<Record<PublicReviewAudience, string>>;
   readonly status: PublicReviewLifecycleState;
   readonly deploymentStatus: "NOT_DEPLOYED" | "DEPLOYED";
   readonly auditStatus: "PRE_AUDIT" | "AUDIT_IN_PROGRESS" | "AUDIT_COMPLETE";

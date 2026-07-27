@@ -96,4 +96,32 @@ describe("PublicReviewMarkdown", () => {
 
     expect(screen.getByText(sourceCommit)).toHaveClass("tw-break-all");
   });
+
+  it("resolves review-relative links from active and immutable review roots", () => {
+    const markdown =
+      "[Readiness](./security-testing-and-known-limitations#known-limitations)";
+    const { rerender } = render(
+      <PublicReviewMarkdown
+        internalLinkBasePath="/reviews/6529-stream"
+        markdown={markdown}
+      />
+    );
+
+    expect(screen.getByRole("link", { name: "Readiness" })).toHaveAttribute(
+      "href",
+      "/reviews/6529-stream/security-testing-and-known-limitations#known-limitations"
+    );
+
+    rerender(
+      <PublicReviewMarkdown
+        internalLinkBasePath="/reviews/6529-stream/versions/2026-07-27.1"
+        markdown={markdown}
+      />
+    );
+
+    expect(screen.getByRole("link", { name: "Readiness" })).toHaveAttribute(
+      "href",
+      "/reviews/6529-stream/versions/2026-07-27.1/security-testing-and-known-limitations#known-limitations"
+    );
+  });
 });

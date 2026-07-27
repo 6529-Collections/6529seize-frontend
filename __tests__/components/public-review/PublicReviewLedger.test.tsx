@@ -1,8 +1,27 @@
+import PublicReviewLedger from "@/components/public-review/PublicReviewLedger";
 import {
   createPublicReviewLedgerCsv,
   createPublicReviewLedgerMarkdown,
 } from "@/lib/public-review/publicReviewLedgerExport";
-import type { PublicReviewFeedbackRecord } from "@/services/api/public-review/types";
+import {
+  getPublicReviewLedgerQueryKey,
+  type PublicReviewLedgerApi,
+} from "@/services/api/public-review/ledger";
+import type {
+  PublicReviewFeedbackConfig,
+  PublicReviewFeedbackRecord,
+} from "@/services/api/public-review/types";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { render, screen } from "@testing-library/react";
+
+jest.mock("next/link", () => ({
+  __esModule: true,
+  default: ({ href, children, ...props }: React.ComponentProps<"a">) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
 
 const record: PublicReviewFeedbackRecord = {
   feedbackId: "=auditor-formula",
@@ -42,6 +61,18 @@ const record: PublicReviewFeedbackRecord = {
   discussionPath: "/waves/stream-review?serialNo=1",
 };
 
+const config: PublicReviewFeedbackConfig = {
+  reviewId: record.reviewId,
+  reviewVersion: record.reviewVersion,
+  reviewTitle: "6529 Stream",
+  feedbackSchemaVersion: "1",
+  submissionsOpen: false,
+  acceptsPublicExploitReports: true,
+  categories: [{ value: record.category, label: "Security vulnerability" }],
+  severityOptions: [{ value: record.severity, label: "Critical" }],
+  pages: [{ value: record.pageId, label: "Technical reference" }],
+};
+
 describe("PublicReviewLedger auditor exports", () => {
   it("exports exact source provenance and neutralizes spreadsheet formulas", () => {
     const csv = createPublicReviewLedgerCsv([
@@ -70,5 +101,54 @@ describe("PublicReviewLedger auditor exports", () => {
     expect(markdown).toContain("Source: `src/StreamCore.sol:10-12`");
     expect(markdown).toContain(`Snippet checksum: \`${"b".repeat(64)}\``);
     expect(markdown).toContain("> The exact invariant can fail.");
+  });
+
+  it("renders one immutable review route without duplicating the version path", () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    queryClient.setQueryData(
+      getPublicReviewLedgerQueryKey({
+        config,
+        destination: record.destination,
+      }),
+      {
+        pages: [
+          {
+            destination: record.destination,
+            records: [record],
+            warnings: [],
+            nextCursor: null,
+            rawDropCount: 1,
+          },
+        ],
+        pageParams: [null],
+      }
+    );
+    const api: PublicReviewLedgerApi = {
+      fetchFeed: jest.fn(),
+      fetchMetadata: jest.fn(),
+    };
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <PublicReviewLedger
+          api={api}
+          config={config}
+          destination={record.destination}
+          internalSourceBasePath="/reviews/6529-stream"
+          locale="en-US"
+        />
+      </QueryClientProvider>
+    );
+
+    expect(
+      screen.getByRole("link", {
+        name: "Open this selection in the review",
+      })
+    ).toHaveAttribute(
+      "href",
+      "/reviews/6529-stream/versions/2026-07-26.1/reference/sources/src/StreamCore.sol#L10-L12"
+    );
   });
 });

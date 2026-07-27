@@ -12,6 +12,7 @@ import { usePublicReviewCommentPanelOpen } from "@/components/public-review/Publ
 import { formatDate, formatInteger, formatTime } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import type { PublicReviewSectionDefinition } from "@/lib/public-review/publicReviewTypes";
 import {
   dedupePublicReviewLedgerRecords,
   fetchPublicReviewLedgerPage,
@@ -33,6 +34,7 @@ export function PublicReviewPageComments({
   locale,
   page,
   pageSize = PUBLIC_REVIEW_LEDGER_PAGE_SIZE,
+  sections,
 }: {
   readonly api?: PublicReviewLedgerApi | undefined;
   readonly config: PublicReviewFeedbackConfig;
@@ -40,6 +42,7 @@ export function PublicReviewPageComments({
   readonly locale: SupportedLocale;
   readonly page: PublicReviewPageContext;
   readonly pageSize?: number | undefined;
+  readonly sections: readonly PublicReviewSectionDefinition[];
 }) {
   const isPanelOpen = usePublicReviewCommentPanelOpen();
   const ledgerQuery = useInfiniteQuery({
@@ -92,9 +95,9 @@ export function PublicReviewPageComments({
 
       {ledgerQuery.isPending ? (
         <div aria-hidden="true" className="tw-mt-4 tw-space-y-2 tw-py-3">
-          <div className="tw-h-3 tw-w-2/3 tw-animate-pulse tw-rounded tw-bg-iron-800" />
-          <div className="tw-h-3 tw-w-full tw-animate-pulse tw-rounded tw-bg-iron-800" />
-          <div className="tw-h-3 tw-w-4/5 tw-animate-pulse tw-rounded tw-bg-iron-800" />
+          <div className="tw-h-3 tw-w-2/3 tw-animate-pulse tw-rounded tw-bg-iron-800 motion-reduce:tw-animate-none" />
+          <div className="tw-h-3 tw-w-full tw-animate-pulse tw-rounded tw-bg-iron-800 motion-reduce:tw-animate-none" />
+          <div className="tw-h-3 tw-w-4/5 tw-animate-pulse tw-rounded tw-bg-iron-800 motion-reduce:tw-animate-none" />
           <span className="tw-sr-only">
             {t(locale, "publicReview.comments.loading")}
           </span>
@@ -153,6 +156,10 @@ export function PublicReviewPageComments({
             const primaryComment = getPublicReviewFeedbackPrimaryComment(
               record.body
             );
+            const sectionLabel = record.sectionId
+              ? (sections.find((section) => section.id === record.sectionId)
+                  ?.title ?? record.sectionId)
+              : undefined;
 
             return (
               <li key={record.dropId}>
@@ -188,13 +195,18 @@ export function PublicReviewPageComments({
                           })}
                         </p>
                       </div>
+                      {sectionLabel ? (
+                        <p className="tw-mb-0 tw-mt-2 tw-text-[0.68rem] tw-font-medium tw-leading-4 tw-text-iron-400">
+                          {t(locale, "publicReview.feedback.sectionContext", {
+                            section: sectionLabel,
+                          })}
+                        </p>
+                      ) : null}
                       <p className="tw-mb-0 tw-mt-2 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-leading-6 tw-text-iron-200">
                         {primaryComment || record.body}
                       </p>
                       <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-text-[0.61rem] tw-font-semibold tw-uppercase tw-tracking-[0.1em]">
-                        <span className="tw-text-sky-300">
-                          {categoryLabel}
-                        </span>
+                        <span className="tw-text-sky-300">{categoryLabel}</span>
                         <span aria-hidden="true" className="tw-text-iron-700">
                           ·
                         </span>

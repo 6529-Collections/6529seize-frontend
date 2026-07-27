@@ -54,7 +54,7 @@ describe("renderStreamReviewFeedbackPage", () => {
     );
   });
 
-  it("keeps immutable ledger source links inside the requested version", async () => {
+  it("lets the ledger build immutable source links from the review root", async () => {
     render(
       await renderStreamReviewFeedbackPage({
         baseEndpoint: "https://staging.6529.io",
@@ -63,7 +63,7 @@ describe("renderStreamReviewFeedbackPage", () => {
     );
 
     expect(screen.getByTestId("source-base")).toHaveTextContent(
-      "/reviews/6529-stream/versions/2026-07-26.1"
+      "/reviews/6529-stream"
     );
   });
 });

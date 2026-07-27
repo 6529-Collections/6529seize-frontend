@@ -53,10 +53,12 @@ const AUDIENCE_ICON_CLASSES: Record<PublicReviewAudience, string> = {
 };
 
 export function PublicReviewAudiencePaths({
+  entryPageIds,
   pages,
   routes,
   version,
 }: {
+  readonly entryPageIds: Readonly<Record<PublicReviewAudience, string>>;
   readonly pages: readonly PublicReviewPageDefinition[];
   readonly routes: PublicReviewRouteBuilder;
   readonly version?: string | undefined;
@@ -81,7 +83,8 @@ export function PublicReviewAudiencePaths({
           const AudienceIcon = AUDIENCE_ICONS[audience];
           const firstPage = pages.find(
             (page) =>
-              page.id !== "overview" && page.audiences.includes(audience)
+              page.id === entryPageIds[audience] &&
+              page.audiences.includes(audience)
           );
           return (
             <article

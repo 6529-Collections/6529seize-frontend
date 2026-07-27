@@ -35,7 +35,19 @@ function getHeadingText(children: ReactNode): string {
     .join("");
 }
 
-function createMarkdownComponents(): Components {
+function resolveReviewRelativeHref(
+  href: string | undefined,
+  internalLinkBasePath: string | undefined
+): string | undefined {
+  if (!href?.startsWith("./") || !internalLinkBasePath) {
+    return href;
+  }
+  return `${internalLinkBasePath.replace(/\/+$/, "")}/${href.slice(2)}`;
+}
+
+function createMarkdownComponents(
+  internalLinkBasePath: string | undefined
+): Components {
   const headingCounts = new Map<string, number>();
 
   return {
@@ -105,10 +117,14 @@ function createMarkdownComponents(): Components {
       </blockquote>
     ),
     a: ({ href, children }) => {
-      const isExternal = href?.startsWith("http") ?? false;
+      const resolvedHref = resolveReviewRelativeHref(
+        href,
+        internalLinkBasePath
+      );
+      const isExternal = resolvedHref?.startsWith("http") ?? false;
       return (
         <a
-          href={href}
+          href={resolvedHref}
           {...(isExternal
             ? { target: "_blank", rel: "noreferrer noopener" }
             : {})}
@@ -167,8 +183,10 @@ function createMarkdownComponents(): Components {
 }
 
 export function PublicReviewMarkdown({
+  internalLinkBasePath,
   markdown,
 }: {
+  readonly internalLinkBasePath?: string | undefined;
   readonly markdown: string;
 }) {
   return (
@@ -176,7 +194,7 @@ export function PublicReviewMarkdown({
       <Markdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeSanitize]}
-        components={createMarkdownComponents()}
+        components={createMarkdownComponents(internalLinkBasePath)}
       >
         {markdown}
       </Markdown>
