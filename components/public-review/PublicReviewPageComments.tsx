@@ -91,10 +91,7 @@ export function PublicReviewPageComments({
       ) : null}
 
       {ledgerQuery.isPending ? (
-        <div
-          aria-hidden="true"
-          className="tw-mt-3 tw-space-y-2 tw-rounded-md tw-border tw-border-solid tw-border-white/[0.07] tw-bg-white/[0.018] tw-p-3"
-        >
+        <div aria-hidden="true" className="tw-mt-4 tw-space-y-2 tw-py-3">
           <div className="tw-h-3 tw-w-2/3 tw-animate-pulse tw-rounded tw-bg-iron-800" />
           <div className="tw-h-3 tw-w-full tw-animate-pulse tw-rounded tw-bg-iron-800" />
           <div className="tw-h-3 tw-w-4/5 tw-animate-pulse tw-rounded tw-bg-iron-800" />
@@ -129,7 +126,7 @@ export function PublicReviewPageComments({
       {!ledgerQuery.isPending &&
       !ledgerQuery.isError &&
       records.length === 0 ? (
-        <p className="tw-mb-0 tw-mt-3 tw-rounded-md tw-border tw-border-dashed tw-border-white/10 tw-bg-white/[0.015] tw-p-4 tw-text-sm tw-leading-6 tw-text-iron-400">
+        <p className="tw-mb-0 tw-mt-4 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08] tw-py-5 tw-text-sm tw-leading-6 tw-text-iron-400">
           {t(
             locale,
             ledgerQuery.hasNextPage
@@ -194,11 +191,14 @@ export function PublicReviewPageComments({
                       <p className="tw-mb-0 tw-mt-2 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-leading-6 tw-text-iron-200">
                         {primaryComment || record.body}
                       </p>
-                      <div className="tw-mt-3 tw-flex tw-flex-wrap tw-gap-1.5">
-                        <span className="tw-rounded-full tw-border tw-border-solid tw-border-blue-400/15 tw-bg-blue-400/[0.08] tw-px-2 tw-py-0.5 tw-text-[0.61rem] tw-font-medium tw-uppercase tw-tracking-[0.08em] tw-text-blue-400/90">
+                      <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-text-[0.61rem] tw-font-semibold tw-uppercase tw-tracking-[0.1em]">
+                        <span className="tw-text-sky-300">
                           {categoryLabel}
                         </span>
-                        <span className="tw-rounded-full tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.03] tw-px-2 tw-py-0.5 tw-text-[0.61rem] tw-font-medium tw-uppercase tw-tracking-[0.08em] tw-text-iron-400">
+                        <span aria-hidden="true" className="tw-text-iron-700">
+                          ·
+                        </span>
+                        <span className="tw-text-iron-500">
                           {severityLabel}
                         </span>
                       </div>

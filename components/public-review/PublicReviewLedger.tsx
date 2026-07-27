@@ -181,7 +181,7 @@ export default function PublicReviewLedger({
   return (
     <section
       aria-labelledby={`${ledgerId}-title`}
-      className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/70 tw-p-4 sm:tw-p-6"
+      className="tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.09] tw-py-6"
     >
       <h2
         id={`${ledgerId}-title`}
@@ -353,7 +353,7 @@ export default function PublicReviewLedger({
       ) : null}
 
       {visibleRecords.length > 0 ? (
-        <ol className="tw-mb-0 tw-mt-6 tw-list-none tw-space-y-4 tw-p-0">
+        <ol className="tw-mb-0 tw-mt-6 tw-list-none tw-divide-y tw-divide-white/[0.09] tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.09] tw-p-0">
           {visibleRecords.map((record) => {
             const author =
               record.author.handle ??
@@ -382,16 +382,22 @@ export default function PublicReviewLedger({
                   aria-label={t(locale, "publicReview.ledger.itemLabel", {
                     author,
                   })}
-                  className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-4"
+                  className="tw-py-5"
                 >
-                  <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide">
-                    <span className="tw-rounded-full tw-bg-primary-500/15 tw-px-2.5 tw-py-1 tw-text-primary-300">
+                  <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.1em]">
+                    <span className="tw-text-sky-300">
                       {categoryLabel}
                     </span>
-                    <span className="tw-rounded-full tw-bg-iron-800 tw-px-2.5 tw-py-1 tw-text-iron-200">
+                    <span aria-hidden="true" className="tw-text-iron-700">
+                      ·
+                    </span>
+                    <span className="tw-text-iron-400">
                       {severityLabel}
                     </span>
-                    <span className="tw-rounded-full tw-bg-iron-800 tw-px-2.5 tw-py-1 tw-text-iron-200">
+                    <span aria-hidden="true" className="tw-text-iron-700">
+                      ·
+                    </span>
+                    <span className="tw-text-iron-500">
                       {t(locale, "publicReview.ledger.new")}
                     </span>
                   </div>

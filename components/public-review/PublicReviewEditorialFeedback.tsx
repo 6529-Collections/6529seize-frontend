@@ -42,7 +42,7 @@ export function PublicReviewEditorialFeedback({
 
   return (
     <div className="tw-flex tw-min-h-0 tw-flex-col @[960px]:tw-h-full">
-      <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-bg-iron-950/40 tw-px-5 tw-py-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
+      <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-px-5 tw-py-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
         <PublicReviewPageComments
           config={config}
           destination={destination}
@@ -50,7 +50,7 @@ export function PublicReviewEditorialFeedback({
           page={page}
         />
       </div>
-      <div className="tw-max-h-[65vh] tw-flex-none tw-overflow-y-auto tw-overscroll-contain tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-bg-[#08080a] tw-px-5 tw-pb-5 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500 [&>section]:tw-border-t-0">
+      <div className="tw-max-h-[65vh] tw-flex-none tw-overflow-y-auto tw-overscroll-contain tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-bg-[#0D0D0F] tw-px-5 tw-pb-5 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500 [&>section]:tw-border-t-0">
         <PublicReviewFeedbackComposer
           locale={DEFAULT_LOCALE}
           config={config}

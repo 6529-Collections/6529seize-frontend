@@ -5,7 +5,21 @@ import remarkGfm from "remark-gfm";
 
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { getUniquePublicReviewHeadingId } from "@/lib/public-review/editorialSections";
+import {
+  extractPublicReviewEvidenceStates,
+  getUniquePublicReviewHeadingId,
+} from "@/lib/public-review/editorialSections";
+import type { PublicReviewEvidenceState } from "@/lib/public-review/publicReviewTypes";
+
+const EVIDENCE_DOT_CLASSES: Record<PublicReviewEvidenceState, string> = {
+  IMPLEMENTED: "tw-bg-emerald-400",
+  TESTED: "tw-bg-sky-400",
+  PROPOSED: "tw-bg-violet-400",
+  OPEN_FOR_FEEDBACK: "tw-bg-amber-400",
+  AUDIT_PENDING: "tw-bg-orange-400",
+  DEFERRED: "tw-bg-iron-500",
+  KNOWN_LIMITATION: "tw-bg-red-400",
+};
 
 function getHeadingText(children: ReactNode): string {
   return Children.toArray(children)
@@ -32,16 +46,39 @@ function createMarkdownComponents(): Components {
           getHeadingText(children),
           headingCounts
         )}
-        className="tw-mb-0 tw-mt-12 tw-scroll-mt-24 tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl"
+        className="tw-mb-0 tw-mt-14 tw-scroll-mt-24 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-8 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl"
       >
         {children}
       </h2>
     ),
-    h3: ({ children }) => (
-      <h3 className="tw-mb-0 tw-mt-8 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100">
-        {children}
-      </h3>
-    ),
+    h3: ({ children }) => {
+      const headingText = getHeadingText(children);
+      const evidenceStates = extractPublicReviewEvidenceStates(
+        `### ${headingText}`
+      );
+      const isEvidenceHeading =
+        evidenceStates.length > 0 &&
+        headingText.length > 0 &&
+        headingText === headingText.toUpperCase();
+      const dotClassName =
+        evidenceStates.length === 1
+          ? EVIDENCE_DOT_CLASSES[evidenceStates[0]!]
+          : "tw-bg-iron-500";
+
+      return isEvidenceHeading ? (
+        <h3 className="tw-mb-0 tw-mt-8 tw-flex tw-items-center tw-gap-2 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.12em] tw-text-iron-300">
+          <span
+            aria-hidden="true"
+            className={`tw-size-1.5 tw-flex-none ${dotClassName}`}
+          />
+          {children}
+        </h3>
+      ) : (
+        <h3 className="tw-mb-0 tw-mt-8 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100">
+          {children}
+        </h3>
+      );
+    },
     p: ({ children }) => (
       <p className="tw-mb-0 tw-mt-4 tw-text-base tw-font-light tw-leading-7 tw-text-iron-400">
         {children}
@@ -63,7 +100,7 @@ function createMarkdownComponents(): Components {
     ),
     em: ({ children }) => <em className="tw-text-iron-200">{children}</em>,
     blockquote: ({ children }) => (
-      <blockquote className="tw-my-7 tw-border-y-0 tw-border-b-0 tw-border-l-2 tw-border-r-0 tw-border-solid tw-border-primary-400/60 tw-bg-primary-400/[0.035] tw-px-5 tw-py-1">
+      <blockquote className="tw-my-7 tw-border-y-0 tw-border-b-0 tw-border-l-2 tw-border-r-0 tw-border-solid tw-border-primary-400/60 tw-px-5 tw-py-1">
         {children}
       </blockquote>
     ),

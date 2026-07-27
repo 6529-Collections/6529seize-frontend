@@ -51,3 +51,42 @@
   routes collision-proof and explicit for historical versions, using durable
   repository-wrapper validation commands, recording the mandatory Release Bus
   status/deploy flow, and correcting workstream reload and deadline wording.
+
+## 2026-07-27
+
+- Accepted the follow-up mandate to remove generic dashboard styling and
+  redeploy a clean, 6529-native review experience to staging.
+- Compared the live review visually with `/about/mission`, `/waves`,
+  `/the-memes`, and a Meme detail page. The review rendered nineteen
+  pill-shaped elements and eight framed or rounded panels, while the closest
+  native editorial and dense-list references use typography, rows, and
+  dividers with little metadata framing.
+- Selected a protocol-dossier direction: compact lifecycle metadata, borderless
+  evidence annotations, a ruled contents rail, direct-on-canvas editorial
+  content, row-based audience paths, and one dominant feedback action.
+- Confirmed PR #3475 had advanced remotely and fast-forwarded the clean
+  worktree to head `9800daff976d657f31714d9f850b70481fc7e161`
+  before editing, preserving newer mainline and review feedback work.
+- Confirmed live Release Bus v2 mode `PRODUCTION`; staging is running while
+  `ALL` and production are paused. No environment mutation will occur unless
+  the staging lane is authoritatively available.
+- Merged the already-reviewed Stream comment-rail work with signed merge commit
+  `1c821faee`, preserving its authenticated Wave projection and feedback
+  interaction behavior.
+- Confirmed staging already has a dedicated "Stream review (staging)" Wave,
+  `19d4bbf5-86ec-4053-a5f2-bb28d7a2f780`, and recorded
+  `06e69198-eea7-40c5-95d3-7c1bf5051aba` only as the future production
+  destination. No production configuration or Wave was changed.
+- Replaced decorative cards and pills across the reusable status, evidence,
+  navigation, audience path, article, reference, ledger, and feedback surfaces
+  with native 6529 typography, hairline rules, compact metadata, and functional
+  containment only where interaction requires it.
+- Corrected the feedback rail breakpoint after local browser QA showed it
+  stacking above the article at a 1280px desktop viewport. The ordinary desktop
+  layout now preserves the site rail, article, and a 20rem feedback rail.
+- Local browser QA passed for feedback open, feedback closed, audience path
+  rows, and long-form section hierarchy using live staging feedback data.
+- Validation passed: 26 focused component tests, targeted ESLint, changed-file
+  typecheck across the stacked branch, scoped whitespace and credential scans,
+  React Doctor 99/100 with only the pre-existing ledger-size advisory, and a
+  complete Next.js production build covering 12,840 static pages.

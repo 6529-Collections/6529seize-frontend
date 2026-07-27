@@ -64,7 +64,7 @@ export function PublicReviewAudiencePaths({
   return (
     <section
       aria-labelledby="review-audiences-heading"
-      className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-10"
+      className="tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08] tw-py-10"
     >
       <h2
         id="review-audiences-heading"
@@ -75,7 +75,7 @@ export function PublicReviewAudiencePaths({
       <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-font-light tw-leading-6 tw-text-iron-400">
         {t(DEFAULT_LOCALE, "publicReview.audiences.description")}
       </p>
-      <div className="tw-mt-6 tw-grid tw-gap-4 sm:tw-grid-cols-2">
+      <div className="tw-mt-7 tw-divide-y tw-divide-white/[0.08] tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08]">
         {PUBLIC_REVIEW_AUDIENCES.map((audience) => {
           const copy = AUDIENCE_COPY[audience];
           const AudienceIcon = AUDIENCE_ICONS[audience];
@@ -86,7 +86,7 @@ export function PublicReviewAudiencePaths({
           return (
             <article
               key={audience}
-              className="tw-group/card tw-flex tw-h-full tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.05] tw-bg-white/[0.025] tw-p-4 tw-transition-colors tw-duration-200 tw-ease-out hover:tw-border-white/[0.08] hover:tw-bg-white/[0.035] sm:tw-p-5"
+              className="tw-group/row tw-grid tw-gap-3 tw-py-5 sm:tw-grid-cols-[10rem_minmax(0,1fr)_auto] sm:tw-items-center sm:tw-gap-6"
             >
               <h3 className="tw-m-0 tw-flex tw-items-center tw-gap-2.5 tw-text-[0.9375rem] tw-font-medium tw-text-iron-200">
                 <AudienceIcon
@@ -95,24 +95,22 @@ export function PublicReviewAudiencePaths({
                 />
                 {t(DEFAULT_LOCALE, copy.title)}
               </h3>
-              <p className="tw-mb-0 tw-mt-2 tw-flex-1 tw-text-[0.8125rem] tw-font-light tw-leading-5 tw-text-iron-400">
+              <p className="tw-m-0 tw-text-[0.8125rem] tw-font-light tw-leading-5 tw-text-iron-400">
                 {t(DEFAULT_LOCALE, copy.description)}
               </p>
               {firstPage ? (
-                <div className="tw-mt-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-pt-1">
-                  <Link
-                    href={routes.getPageHref(firstPage, version)}
-                    className="tw-flex tw-min-h-11 tw-items-center tw-justify-between tw-gap-4 tw-rounded-md tw-text-xs tw-font-medium tw-text-iron-300 tw-no-underline tw-transition-colors tw-duration-200 tw-ease-out hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-                  >
-                    {t(DEFAULT_LOCALE, "publicReview.audiences.startPath", {
-                      audience: t(DEFAULT_LOCALE, copy.title),
-                    })}
-                    <ArrowRightIcon
-                      className="tw-size-3 tw-flex-none tw-text-iron-500 tw-transition-colors tw-duration-200 tw-ease-out group-hover/card:tw-text-primary-300"
-                      aria-hidden="true"
-                    />
-                  </Link>
-                </div>
+                <Link
+                  href={routes.getPageHref(firstPage, version)}
+                  className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-justify-self-start tw-text-xs tw-font-semibold tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-justify-self-end"
+                >
+                  {t(DEFAULT_LOCALE, "publicReview.audiences.startPath", {
+                    audience: t(DEFAULT_LOCALE, copy.title),
+                  })}
+                  <ArrowRightIcon
+                    className="tw-size-3 tw-flex-none tw-text-iron-600 tw-transition-colors group-hover/row:tw-text-primary-300"
+                    aria-hidden="true"
+                  />
+                </Link>
               ) : null}
             </article>
           );

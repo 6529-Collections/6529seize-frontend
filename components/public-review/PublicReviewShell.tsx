@@ -8,10 +8,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { PublicReviewAudiencePaths } from "@/components/public-review/PublicReviewAudiencePaths";
-import {
-  PublicReviewEvidenceBadge,
-  PublicReviewEvidenceLegend,
-} from "@/components/public-review/PublicReviewEvidence";
+import { PublicReviewEvidenceLegend } from "@/components/public-review/PublicReviewEvidence";
 import { PublicReviewMarkdown } from "@/components/public-review/PublicReviewMarkdown";
 import { PublicReviewNavigation } from "@/components/public-review/PublicReviewNavigation";
 import { PublicReviewReadingLayout } from "@/components/public-review/PublicReviewReadingLayout";
@@ -33,7 +30,7 @@ import {
 import { getSolidityReferenceRootHref } from "@/lib/public-review/solidityReferenceRoutes";
 
 const REVIEW_ACTION_LINK =
-  "tw-group tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-text-[0.8125rem] tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+  "tw-group tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 
 function PublicReviewPageStepper({
   currentPage,
@@ -59,14 +56,12 @@ function PublicReviewPageStepper({
       {previousPage ? (
         <Link
           href={routes.getPageHref(previousPage, version)}
-          className="tw-group tw-inline-flex tw-min-h-11 tw-items-center tw-gap-4 tw-justify-self-start tw-text-left tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-white"
+          className="tw-group tw-inline-flex tw-min-h-11 tw-items-center tw-gap-3 tw-justify-self-start tw-text-left tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-white"
         >
-          <span className="tw-flex tw-size-10 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-transition-colors tw-duration-200 tw-ease-out group-hover:tw-border-primary-400/30 group-hover:tw-bg-primary-400/[0.1]">
-            <ArrowLeftIcon
-              className="tw-size-4 tw-text-iron-500 tw-transition-colors tw-duration-200 tw-ease-out group-hover:tw-text-primary-300"
-              aria-hidden="true"
-            />
-          </span>
+          <ArrowLeftIcon
+            className="tw-size-4 tw-flex-none tw-text-iron-600 tw-transition-colors group-hover:tw-text-primary-300"
+            aria-hidden="true"
+          />
           <span>
             <span className="tw-block tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
               {t(DEFAULT_LOCALE, "publicReview.navigation.previous")}
@@ -82,7 +77,7 @@ function PublicReviewPageStepper({
       {nextPage && (
         <Link
           href={routes.getPageHref(nextPage, version)}
-          className="tw-group tw-inline-flex tw-min-h-11 tw-items-center tw-justify-end tw-gap-4 tw-justify-self-end tw-text-right tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-white"
+          className="tw-group tw-inline-flex tw-min-h-11 tw-items-center tw-justify-end tw-gap-3 tw-justify-self-end tw-text-right tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-white"
         >
           <span>
             <span className="tw-block tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
@@ -92,12 +87,10 @@ function PublicReviewPageStepper({
               {t(DEFAULT_LOCALE, nextPage.titleKey)}
             </span>
           </span>
-          <span className="tw-flex tw-size-10 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-transition-colors tw-duration-200 tw-ease-out group-hover:tw-border-primary-400/30 group-hover:tw-bg-primary-400/[0.1]">
-            <ArrowRightIcon
-              className="tw-size-4 tw-text-iron-500 tw-transition-colors tw-duration-200 tw-ease-out group-hover:tw-text-primary-300"
-              aria-hidden="true"
-            />
-          </span>
+          <ArrowRightIcon
+            className="tw-size-4 tw-flex-none tw-text-iron-600 tw-transition-colors group-hover:tw-text-primary-300"
+            aria-hidden="true"
+          />
         </Link>
       )}
     </nav>
@@ -158,7 +151,7 @@ export function PublicReviewShell({
               </p>
             }
             content={
-              <div className="tw-mx-auto tw-w-full tw-max-w-[72rem] tw-px-4 tw-pb-20 sm:tw-px-7 lg:tw-px-10">
+              <div className="tw-mx-auto tw-w-full tw-max-w-[68rem] tw-px-4 tw-pb-20 sm:tw-px-7 lg:tw-px-10">
                 <div className="tw-pt-6 sm:tw-pt-8">
                   <PublicReviewStatusBanner
                     review={review}
@@ -167,30 +160,19 @@ export function PublicReviewShell({
                   />
                 </div>
 
-                <header className="tw-mt-10 tw-w-full sm:tw-mt-12">
+                <header className="tw-mt-12 tw-w-full tw-max-w-[52rem] sm:tw-mt-16">
                   <p className="tw-m-0 tw-text-[0.7rem] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-primary-300">
                     {t(DEFAULT_LOCALE, "publicReview.eyebrow", {
                       contract: review.contractName,
                     })}
                   </p>
-                  <h1 className="tw-mb-0 tw-mt-4 tw-max-w-3xl tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
+                  <h1 className="tw-mb-0 tw-mt-4 tw-max-w-3xl tw-text-4xl tw-font-semibold tw-leading-[1.05] tw-tracking-[-0.03em] tw-text-white sm:tw-text-5xl">
                     {t(DEFAULT_LOCALE, page.titleKey)}
                   </h1>
-                  <p className="tw-mb-0 tw-mt-3 tw-text-base tw-font-light tw-leading-7 tw-text-iron-400">
+                  <p className="tw-mb-0 tw-mt-5 tw-max-w-3xl tw-text-lg tw-font-light tw-leading-8 tw-text-iron-400">
                     {t(DEFAULT_LOCALE, page.summaryKey)}
                   </p>
-                  <div
-                    aria-label={t(
-                      DEFAULT_LOCALE,
-                      "publicReview.evidence.heading"
-                    )}
-                    className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-2"
-                  >
-                    {page.evidenceStates.map((state) => (
-                      <PublicReviewEvidenceBadge key={state} state={state} />
-                    ))}
-                  </div>
-                  <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-center tw-gap-x-6 tw-gap-y-1 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-pt-2">
+                  <div className="tw-mt-8 tw-flex tw-flex-wrap tw-items-center tw-gap-x-7 tw-gap-y-1 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08]">
                     <Link
                       href={getSolidityReferenceRootHref({
                         reviewSlug: review.slug,
@@ -232,8 +214,8 @@ export function PublicReviewShell({
                   </div>
                 )}
 
-                <div className="tw-mt-10 tw-w-full sm:tw-mt-12">
-                  <article className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pb-8 tw-pt-1">
+                <div className="tw-mt-12 tw-w-full tw-max-w-[52rem] sm:tw-mt-16">
+                  <article className="tw-pb-8">
                     <PublicReviewMarkdown markdown={editorialMarkdown} />
                   </article>
 

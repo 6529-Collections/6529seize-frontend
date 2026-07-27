@@ -68,27 +68,27 @@ function FeedbackPageShell({
   readonly version: string;
 }) {
   return (
-    <div className="tailwind-scope tw-min-h-screen tw-bg-[#0b0b0d] tw-text-white">
-      <PublicReviewStatusBanner
-        review={STREAM_REVIEW_DEFINITION}
-        displayedVersion={version}
-        source={{
-          repository: manifest.source.repository,
-          commit: manifest.source.commit,
-        }}
-      />
-      <div className="tw-mx-auto tw-w-full tw-max-w-[88rem] tw-px-4 tw-pb-20 tw-pt-8 sm:tw-px-6 lg:tw-px-8 lg:tw-pt-12">
+    <div className="tailwind-scope tw-min-h-screen tw-bg-[#0D0D0F] tw-text-white">
+      <div className="tw-mx-auto tw-w-full tw-max-w-[88rem] tw-px-4 tw-pb-20 tw-pt-6 sm:tw-px-6 lg:tw-px-8">
+        <PublicReviewStatusBanner
+          review={STREAM_REVIEW_DEFINITION}
+          displayedVersion={version}
+          source={{
+            repository: manifest.source.repository,
+            commit: manifest.source.commit,
+          }}
+        />
         <Link
           href={
             immutable
               ? `/reviews/${STREAM_REVIEW_SLUG}/versions/${version}`
               : `/reviews/${STREAM_REVIEW_SLUG}`
           }
-          className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-font-semibold tw-text-iron-100 tw-no-underline focus-visible:tw-ring-2 focus-visible:tw-ring-white/30"
+          className="tw-mt-8 tw-inline-flex tw-min-h-11 tw-items-center tw-font-semibold tw-text-iron-400 tw-no-underline hover:tw-text-white focus-visible:tw-ring-2 focus-visible:tw-ring-white/30"
         >
           {t(DEFAULT_LOCALE, "publicReview.reference.backToReview")}
         </Link>
-        <header className="tw-mt-8 tw-max-w-4xl">
+        <header className="tw-mt-10 tw-max-w-4xl">
           <h1 className="tw-m-0 tw-text-4xl tw-font-semibold tw-tracking-tight sm:tw-text-5xl">
             {t(DEFAULT_LOCALE, "publicReview.ledger.pageTitle")}
           </h1>
@@ -117,14 +117,14 @@ export async function renderStreamReviewFeedbackPage({
   ) {
     throw new Error("Public review feedback is disabled.");
   }
-  const { manifest } =
-    await getStreamSolidityReferenceReader().loadManifest(resolvedVersion);
+  const [{ manifest }, destination] = await Promise.all([
+    getStreamSolidityReferenceReader().loadManifest(resolvedVersion),
+    resolveStreamReviewFeedbackDestination(baseEndpoint),
+  ]);
   const config = await createStreamReviewFeedbackConfig({
     manifest,
     sourcePaths: "all",
   });
-  const destination =
-    await resolveStreamReviewFeedbackDestination(baseEndpoint);
 
   return (
     <FeedbackPageShell

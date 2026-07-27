@@ -32,10 +32,10 @@ function ReviewPageLinks({
             <Link
               href={routes.getPageHref(page, version)}
               aria-current={isCurrent ? "page" : undefined}
-              className={`tw-flex tw-min-h-11 tw-items-start tw-gap-3 tw-rounded-r-md tw-border-y-0 tw-border-b-0 tw-border-l-2 tw-border-r-0 tw-border-solid tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white ${
+              className={`tw-flex tw-min-h-11 tw-items-start tw-gap-3 tw-border-y-0 tw-border-b-0 tw-border-l-2 tw-border-r-0 tw-border-solid tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white ${
                 isCurrent
-                  ? "tw-border-primary-300 tw-bg-primary-400/[0.07] tw-font-semibold tw-text-white hover:tw-bg-primary-400/[0.1]"
-                  : "tw-border-transparent tw-text-iron-400 hover:tw-border-white/15 hover:tw-bg-white/[0.04] hover:tw-text-iron-100"
+                  ? "tw-border-primary-300 tw-font-semibold tw-text-white"
+                  : "tw-border-transparent tw-text-iron-400 hover:tw-border-white/20 hover:tw-text-iron-100"
               }`}
             >
               <span
@@ -74,7 +74,7 @@ function ReviewSectionLinks({
         <li key={section.id}>
           <a
             href={`#${section.id}`}
-            className="tw--ml-2 tw-block tw-rounded-md tw-px-2 tw-py-1.5 tw-text-xs tw-leading-5 tw-text-iron-500 tw-no-underline tw-transition-colors tw-duration-150 hover:tw-bg-white/[0.035] hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+            className="tw--ml-2 tw-block tw-px-2 tw-py-1.5 tw-text-xs tw-leading-5 tw-text-iron-500 tw-no-underline tw-transition-colors tw-duration-150 hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
           >
             {section.title}
           </a>
@@ -103,7 +103,7 @@ export function PublicReviewNavigation({
   );
   return (
     <>
-      <details className="tw-m-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-[#08080a] tw-px-4 tw-py-3 sm:tw-mx-7 lg:tw-hidden">
+      <details className="tw-mx-4 tw-mt-4 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/10 tw-py-2 sm:tw-mx-7 lg:tw-hidden">
         <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-sm tw-font-semibold tw-text-white marker:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
           {t(DEFAULT_LOCALE, "publicReview.navigation.contents")}
         </summary>
