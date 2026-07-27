@@ -22,11 +22,11 @@ function UserPageBrainSidebarLoading() {
 
   return (
     <>
-      <div
-        aria-label={loadingLabel}
-        className="tw-mb-4 lg:tw-hidden"
-        role="status"
-      >
+      <output className="tw-sr-only" aria-live="polite">
+        {loadingLabel}
+      </output>
+
+      <div className="tw-mb-4 lg:tw-hidden">
         <div className="tw-mb-2 tw-h-2.5 tw-w-24 tw-animate-pulse tw-rounded tw-bg-white/[0.06] motion-reduce:tw-animate-none" />
         <div className="tw-flex tw-gap-2 tw-overflow-hidden">
           {SIDEBAR_SKELETON_ITEMS.map((key) => (
@@ -41,11 +41,7 @@ function UserPageBrainSidebarLoading() {
         </div>
       </div>
 
-      <div
-        aria-label={loadingLabel}
-        className="tw-hidden lg:tw-block"
-        role="status"
-      >
+      <div className="tw-hidden lg:tw-block">
         <div className="tw-mb-3 tw-h-3 tw-w-28 tw-animate-pulse tw-rounded tw-bg-white/[0.06] motion-reduce:tw-animate-none" />
         <div className="tw-space-y-2.5">
           {SIDEBAR_SKELETON_ITEMS.map((key) => (

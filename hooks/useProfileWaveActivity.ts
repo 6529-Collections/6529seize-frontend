@@ -15,24 +15,28 @@ const combineProfileWaveActivityTimestamps = (
 ): readonly (number | null)[] =>
   results.map(({ data }) => data?.[0]?.created_at ?? null);
 
+const getBrowserWindow = (): Window | undefined =>
+  (globalThis as { readonly window?: Window }).window;
+
 const getDesktopViewportSnapshot = (): boolean => {
-  if (typeof globalThis.window === "undefined") {
+  const browserWindow = getBrowserWindow();
+  if (browserWindow === undefined) {
     return false;
   }
 
-  return globalThis.window.matchMedia(
-    `(min-width: ${SIDEBAR_MOBILE_BREAKPOINT}px)`
-  ).matches;
+  return browserWindow.matchMedia(`(min-width: ${SIDEBAR_MOBILE_BREAKPOINT}px)`)
+    .matches;
 };
 
 const subscribeToDesktopViewport = (
   onStoreChange: () => void
 ): (() => void) => {
-  if (typeof globalThis.window === "undefined") {
+  const browserWindow = getBrowserWindow();
+  if (browserWindow === undefined) {
     return () => undefined;
   }
 
-  const mediaQuery = globalThis.window.matchMedia(
+  const mediaQuery = browserWindow.matchMedia(
     `(min-width: ${SIDEBAR_MOBILE_BREAKPOINT}px)`
   );
   mediaQuery.addEventListener("change", onStoreChange);
