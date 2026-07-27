@@ -50,7 +50,7 @@ import { formatSubscriptionEth } from "./coverage/subscriptionCoverage.helpers";
 const MEMES_MINT_PRICE_WEI = parseEther(MEMES_MINT_PRICE.toString());
 
 function getEthForCards(count: number): string {
-  return formatEther(BigInt(count) * MEMES_MINT_PRICE_WEI);
+  return formatEther(BigInt(Math.trunc(count)) * MEMES_MINT_PRICE_WEI);
 }
 
 function getCardCountLabel(

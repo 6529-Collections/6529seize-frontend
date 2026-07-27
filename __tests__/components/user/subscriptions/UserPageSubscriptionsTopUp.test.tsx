@@ -209,6 +209,29 @@ describe("UserPageSubscriptionsTopUp", () => {
     });
   });
 
+  it("treats a decimal custom count as whole cards without throwing", async () => {
+    const user = userEvent.setup();
+    render(<UserPageSubscriptionsTopUp />);
+
+    await user.click(
+      screen.getByRole("radio", {
+        name: "Other card count",
+      })
+    );
+    await user.type(screen.getByPlaceholderText("count"), "1.8");
+    await user.click(
+      screen.getByRole("button", {
+        name: "Top up 0.06529 ETH",
+      })
+    );
+
+    expect(sendTransaction.sendTransaction).toHaveBeenCalledWith({
+      chainId: SUBSCRIPTIONS_CHAIN.id,
+      to: SUBSCRIPTIONS_ADDRESS,
+      value: parseEther(MEMES_MINT_PRICE.toString()),
+    });
+  });
+
   it("uses the exact backend recommendation for the primary top-up", async () => {
     const user = userEvent.setup();
     const coverage = {
