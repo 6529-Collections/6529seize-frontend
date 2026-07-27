@@ -8,6 +8,10 @@ import stormComposerEsMessages from "@/i18n/messages/stormComposer.es-ES.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const ES_ES_MESSAGES = {
+  "linkPreview.twitter.kind.article": "Artículo",
+  "linkPreview.twitter.kind.post": "Publicación",
+  "linkPreview.twitter.article.provider": "Artículo en X",
+  "linkPreview.twitter.article.read": "Leer artículo: {title}",
   "waves.drop.actions.copyText": "Copiar texto",
   "waves.drop.actions.copyLink": "Copiar enlace",
   "waves.drop.actions.copied": "Copiado!",
