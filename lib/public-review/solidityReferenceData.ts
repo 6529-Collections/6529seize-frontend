@@ -157,9 +157,7 @@ type SourceBufferLoader = (
   file: SoliditySourceFileReference
 ) => Promise<Buffer>;
 
-function createSourceBufferLoader(
-  publicRoot: string
-): SourceBufferLoader {
+function createSourceBufferLoader(publicRoot: string): SourceBufferLoader {
   const cache = new Map<string, Promise<Buffer>>();
   return (file) => {
     let pending = cache.get(file.publicPath);

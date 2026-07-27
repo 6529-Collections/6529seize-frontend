@@ -226,12 +226,10 @@ function assertTopLevelVariable(value: Record<string, unknown>): void {
     typeof value["constant"] !== "boolean" ||
     typeof value["immutable"] !== "boolean" ||
     typeof value["type"] !== "string" ||
-    (value["typeString"] !== null &&
-      typeof value["typeString"] !== "string") ||
+    (value["typeString"] !== null && typeof value["typeString"] !== "string") ||
     (value["storageLocation"] !== null &&
       typeof value["storageLocation"] !== "string") ||
-    (value["visibility"] !== null &&
-      typeof value["visibility"] !== "string") ||
+    (value["visibility"] !== null && typeof value["visibility"] !== "string") ||
     (value["valueRange"] !== null && !isRecord(value["valueRange"])) ||
     (value["valueSource"] !== null && typeof value["valueSource"] !== "string")
   ) {
@@ -366,8 +364,7 @@ function assertDeclarationIndexEntry(
     value["definitionShardPath"],
   ];
   if (
-    (value["topLevel"] &&
-      definitionFields.some((entry) => entry !== null)) ||
+    (value["topLevel"] && definitionFields.some((entry) => entry !== null)) ||
     (!value["topLevel"] &&
       definitionFields.some((entry) => typeof entry !== "string"))
   ) {
@@ -514,10 +511,7 @@ function assertManifestDefinitionsAndFiles(
   readonly definitionsById: ReadonlyMap<string, SolidityDefinitionIndexEntry>;
   readonly filesByPath: ReadonlyMap<string, SoliditySourceFileReference>;
 } {
-  const versionRoot = getVersionRoot(
-    manifest.reviewId,
-    manifest.reviewVersion
-  );
+  const versionRoot = getVersionRoot(manifest.reviewId, manifest.reviewVersion);
   const definitionsById = new Map<string, SolidityDefinitionIndexEntry>();
   let previousDefinitionId: string | undefined;
   for (const definition of manifest.definitionIndex) {
@@ -604,10 +598,7 @@ function crossCheckDefinitions(
         repository: manifest.source.repository,
         sourcePath: file.path,
       });
-      if (
-        declaration.kind === "variable" &&
-        declaration.valueRange !== null
-      ) {
+      if (declaration.kind === "variable" && declaration.valueRange !== null) {
         assertRangeForFile({
           commit: manifest.source.commit,
           file,
@@ -713,10 +704,7 @@ export function assertSolidityReferenceManifest(
   const manifest = value as unknown as SolidityReferenceManifest;
   const { definitionsById, filesByPath } =
     assertManifestDefinitionsAndFiles(manifest);
-  assertAuditorEvidence(
-    manifest.auditorEvidence,
-    new Set(filesByPath.keys())
-  );
+  assertAuditorEvidence(manifest.auditorEvidence, new Set(filesByPath.keys()));
   if (
     manifest.source.artifactChecksums[
       "release-artifacts/latest/release-manifest.json"

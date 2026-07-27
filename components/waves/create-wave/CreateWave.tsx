@@ -46,12 +46,20 @@ export default function CreateWave({
 
   // On the native /waves/create route the create flow has no height-bounding
   // ancestor, so we hand CreateWaveFlow the layout system's measured content
-  // height (viewport minus header/nav/safe-area). That makes its scroll region
-  // a real bounded scrollport the sticky footer can pin to — inside the app
-  // shell's transformed wrappers, where document-level sticky fails. The web
-  // modal bounds its own height, so it passes no style. `100dvh` is a safety
-  // fallback for the brief window before the layout system reports a measured
-  // height (keeps the footer reachable, never clipped).
+  // height: the viewport minus the measured app header (create-wave hides the
+  // bottom nav, so nothing else is subtracted). This bounds the scrollport
+  // EXACTLY to the space below the header, so the surface never grows past the
+  // viewport and the app-shell scroller can't ride the header (its back arrow)
+  // up under the status bar.
+  //
+  // Deliberately NOT keyboard-aware (contentContainerStyle, not the wave views'
+  // keyboard-following height): that height is stable regardless of keyboard
+  // state, so the sticky footer sits in the SAME place whether or not the
+  // keyboard has been opened — no shrink that gets stuck short and leaves a
+  // black gap under the footer after moving between steps. Focused inputs are
+  // kept visible by useKeyboardFocusScroll inside the scrollport; the bottom
+  // safe-area is handled by the footer's own inset. The web modal bounds its
+  // own height (no style); 100dvh is a brief pre-measurement fallback.
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
   const { contentContainerStyle } = useLayout();
@@ -64,24 +72,12 @@ export default function CreateWave({
     ? measuredOrFallbackStyle
     : undefined;
 
-  // Each step renders fresh content, but the layout's scroll container keeps
-  // the offset where the user tapped Next (the bottom of the previous step),
-  // landing them mid-page on taller steps like the announce-wave Dates step.
-  // That scroller is the shared layout content container — the very element
-  // holding the stale offset — so anchoring the create flow to its top is
-  // exactly the fix, and is a no-op when the user is already at the top
-  // (so it never yanks an unscrolled desktop page).
-  const previousStepRef = useRef(step);
-  useEffect(() => {
-    if (previousStepRef.current === step) {
-      return;
-    }
-    previousStepRef.current = step;
-    const frame = requestAnimationFrame(() => {
-      containerRef.current?.scrollIntoView({ block: "start" });
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [step]);
+  // On step change, snap the create-wave scrollport back to its top so a new
+  // (taller) step doesn't start mid-page. This is handled inside CreateWaveFlow
+  // via scrollResetKey={step} — it resets THAT scrollport, not the app-shell
+  // scroller. (The old approach, containerRef.scrollIntoView({block:"start"}),
+  // scrolled the shell instead — riding the app header up under the status bar
+  // and leaving a black gap at the bottom.)
 
   // The Next button can sit a full screen below the offending field on
   // phones, where a validation failure with no visible reaction reads as a
@@ -144,7 +140,7 @@ export default function CreateWave({
     // field) up above the keyboard instead of trapping it underneath.
     <div
       ref={containerRef}
-      className="create-wave-flow tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-pb-[calc(env(safe-area-inset-bottom,0px)+var(--native-keyboard-inset-bottom,0px))]"
+      className="create-wave-flow tw-flex tw-min-h-0 tw-flex-1 tw-flex-col"
     >
       <CreateWaveFlow
         title={`${parentWaveId ? "Create subwave" : "Create Wave"} ${
@@ -152,6 +148,7 @@ export default function CreateWave({
         }`}
         onBack={onBack}
         nativeBoundedStyle={nativeBoundedStyle}
+        scrollResetKey={step}
       >
         <CreateWaveLayout
           config={config}

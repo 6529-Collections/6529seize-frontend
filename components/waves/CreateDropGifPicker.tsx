@@ -224,7 +224,7 @@ function GiphyResults({
   return (
     <div
       ref={containerRef}
-      className="tw-min-h-0 tw-flex-1 tw-overflow-x-hidden tw-overflow-y-auto tw-p-3"
+      className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overflow-x-hidden tw-p-3"
     >
       <Grid
         key={searchKey}
@@ -253,11 +253,12 @@ function GifPickerDialog({
   onSelect,
   onClose,
 }: {
-  readonly giphyApiKey: string;
+  readonly giphyApiKey?: string | undefined;
   readonly onSelect: (gif: string) => void;
   readonly onClose: () => void;
 }) {
   const locale = useBrowserLocale();
+  const normalizedGiphyApiKey = giphyApiKey?.trim();
   const dialogTitle = t(locale, "waves.gifPicker.dialogTitle");
   const poweredByLabel = t(locale, "waves.gifPicker.poweredBy", {
     brandName: GIPHY_BRAND_NAME,
@@ -278,6 +279,25 @@ function GifPickerDialog({
     setStatusMessage(t(locale, "waves.gifPicker.status.ready"));
   }, [locale]);
 
+  if (!normalizedGiphyApiKey) {
+    return (
+      <MobileWrapperDialog
+        title={dialogTitle}
+        isOpen={true}
+        onClose={onClose}
+        noPadding={true}
+        headerClassName="tw-sr-only"
+      >
+        <GifPickerUnavailable
+          title={t(locale, "waves.gifPicker.unavailable.title")}
+          hint={t(locale, "waves.gifPicker.unavailable.hint")}
+          closeLabel={t(locale, "common.close")}
+          onClose={onClose}
+        />
+      </MobileWrapperDialog>
+    );
+  }
+
   return (
     <MobileWrapperDialog
       title={dialogTitle}
@@ -295,7 +315,7 @@ function GifPickerDialog({
         {statusMessage}
       </div>
       <SearchContextManager
-        apiKey={giphyApiKey}
+        apiKey={normalizedGiphyApiKey}
         shouldDefaultToTrending={true}
         shouldFetchChannels={false}
         options={{ rating: GIPHY_RATING, type: "gifs" }}
@@ -345,7 +365,7 @@ export default function CreateDropGifPicker({
   setShow,
   onSelect,
 }: {
-  readonly giphyApiKey: string;
+  readonly giphyApiKey?: string | undefined;
   readonly show: boolean;
   readonly setShow: (show: boolean) => void;
   readonly onSelect: (gif: string) => void;

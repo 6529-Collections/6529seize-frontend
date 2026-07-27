@@ -31,11 +31,7 @@ describe("sync-help-index publication policy", () => {
 
   it("leaves unrelated records governed only by their environment", () => {
     expect(
-      isHelpRecordPublished(
-        { environments: ["staging"] },
-        "staging",
-        new Set()
-      )
+      isHelpRecordPublished({ environments: ["staging"] }, "staging", new Set())
     ).toBe(true);
     expect(isHelpRecordPublished({}, "production", new Set())).toBe(true);
   });

@@ -67,7 +67,10 @@ function isSafeArtifactPath(value: unknown): value is string {
   );
 }
 
-function assertArtifactPath(value: unknown, label: string): asserts value is string {
+function assertArtifactPath(
+  value: unknown,
+  label: string
+): asserts value is string {
   if (!isSafeArtifactPath(value)) {
     throw new Error(`Invalid ${label} path in Solidity auditor evidence.`);
   }
@@ -170,9 +173,7 @@ function assertGovernedParameterCore(
   }
 }
 
-function assertGovernedValueEvidence(
-  value: Record<string, unknown>
-): void {
+function assertGovernedValueEvidence(value: Record<string, unknown>): void {
   const groups = [
     ["gas", ["genesis_value", "immutable_floor"]],
     [
@@ -197,8 +198,7 @@ function assertGovernedValueEvidence(
       if (
         !isRecord(record) ||
         !isNonEmptyString(record["status"]) ||
-        (record["value"] !== null &&
-          !isNonNegativeInteger(record["value"]))
+        (record["value"] !== null && !isNonNegativeInteger(record["value"]))
       ) {
         throw new Error("Invalid governed-parameter value evidence.");
       }
@@ -230,10 +230,8 @@ function assertGovernedSupportingEvidence(
   if (
     !isRecord(measurement) ||
     !isNonEmptyString(measurement["status"]) ||
-    (measurement["path"] !== null &&
-      !isNonEmptyString(measurement["path"])) ||
-    (measurement["sha256"] !== null &&
-      !isSha256(measurement["sha256"])) ||
+    (measurement["path"] !== null && !isNonEmptyString(measurement["path"])) ||
+    (measurement["sha256"] !== null && !isSha256(measurement["sha256"])) ||
     !isRecord(compatibility) ||
     !isNonEmptyString(compatibility["status"]) ||
     !isNonEmptyString(compatibility["disposition"]) ||
@@ -244,10 +242,7 @@ function assertGovernedSupportingEvidence(
   ) {
     throw new Error("Invalid governed-parameter supporting evidence.");
   }
-  assertStringArray(
-    compatibility["consumers"],
-    "fixed-stipend consumers"
-  );
+  assertStringArray(compatibility["consumers"], "fixed-stipend consumers");
 }
 
 function assertGovernedParameter(
@@ -265,10 +260,7 @@ function assertGovernedParameter(
   ) {
     throw new Error("Invalid governed-parameter nested evidence.");
   }
-  assertArtifactPath(
-    normativeSource["path"],
-    "governed-parameter source"
-  );
+  assertArtifactPath(normativeSource["path"], "governed-parameter source");
   for (const profile of expectedHosts["profiles"]) {
     if (
       !isRecord(profile) ||
@@ -436,10 +428,7 @@ function assertNatSpecEvidence(
   let previousId: string | undefined;
   value["gaps"].forEach((gap) => {
     assertNatSpecGap(gap, sourcePaths);
-    if (
-      ids.has(gap.id) ||
-      (previousId !== undefined && previousId >= gap.id)
-    ) {
+    if (ids.has(gap.id) || (previousId !== undefined && previousId >= gap.id)) {
       throw new Error("Duplicate or unsorted normalized NatSpec gap.");
     }
     ids.add(gap.id);
@@ -494,8 +483,7 @@ export function assertAuditorEvidence(
     !isNonEmptyString(value["readiness"]["status"]["production_release"]) ||
     !Array.isArray(value["readiness"]["requirements"]) ||
     !isRecord(value["riskRegister"]) ||
-    value["riskRegister"]["schema_version"] !==
-      "6529stream.risk-register.v1" ||
+    value["riskRegister"]["schema_version"] !== "6529stream.risk-register.v1" ||
     !isNonEmptyString(value["riskRegister"]["maturity"]) ||
     !isNonEmptyString(value["riskRegister"]["readiness_boundary"]) ||
     !isNonEmptyString(value["riskRegister"]["risk_acceptance_policy"]) ||
@@ -507,10 +495,7 @@ export function assertAuditorEvidence(
   ) {
     throw new Error("Invalid Solidity auditor evidence identity.");
   }
-  assertStringArray(
-    value["release"]["protocol_versions"],
-    "protocol versions"
-  );
+  assertStringArray(value["release"]["protocol_versions"], "protocol versions");
   assertStringArray(
     value["release"]["deployment_versions"],
     "deployment versions"
@@ -552,7 +537,9 @@ export function assertAuditorEvidence(
     throw new Error("Invalid governed-parameter summary.");
   }
   const parameters = parameterValues as readonly SolidityGovernedParameter[];
-  const parameterIds = new Set(parameters.map((parameter) => parameter.parameter_id));
+  const parameterIds = new Set(
+    parameters.map((parameter) => parameter.parameter_id)
+  );
   const orders = new Set(parameters.map((parameter) => parameter.order));
   const expectedHosts = parameters.reduce(
     (total, parameter) => total + parameter.expected_hosts.count,

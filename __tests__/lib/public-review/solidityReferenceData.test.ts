@@ -130,9 +130,7 @@ describeFixture("generated Stream Solidity reference fixture", () => {
     expect(versionEntry.commit).toBe(REVIEW_VERSION.source.commit);
     expect(manifest.reviewId).toBe(STREAM_REVIEW_SLUG);
     expect(manifest.reviewVersion).toBe(STREAM_REVIEW_VERSION);
-    expect(manifest.source.repository).toBe(
-      REVIEW_VERSION.source.repository
-    );
+    expect(manifest.source.repository).toBe(REVIEW_VERSION.source.repository);
     expect(manifest.summary.definitionCount).toBe(
       manifest.definitionIndex.length
     );

@@ -71,7 +71,8 @@ function DeclarationMembers({
       )}
       className="tw-mt-3 tw-overflow-x-auto focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
       role="region"
-      tabIndex={0}>
+      tabIndex={0}
+    >
       <table className="tw-w-full tw-border-collapse tw-text-left tw-text-sm">
         <thead>
           <tr className="tw-border-b tw-border-solid tw-border-iron-700 tw-text-xs tw-uppercase tw-tracking-wide tw-text-iron-500">
@@ -85,8 +86,7 @@ function DeclarationMembers({
         </thead>
         <tbody>
           {members.map((member, index) => {
-            const parameter =
-              typeof member === "string" ? undefined : member;
+            const parameter = typeof member === "string" ? undefined : member;
             const name = typeof member === "string" ? member : member.name;
             return (
               <tr

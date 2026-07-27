@@ -42,7 +42,10 @@ register backend first and declare it as the frontend prerequisite.
 
 ## Staging lifecycle
 
-1. The scheduler claims a dependency-closed set with zero fixed batch delay.
+1. The scheduler starts from the authoritative cumulative admitted-staging set,
+   carries every unchanged exact live candidate forward, and adds a
+   dependency-closed set of newly ready candidates with zero fixed batch
+   delay. A later ordinary train cannot omit or evict an admitted candidate.
 2. Frontend/backend composition and preparation run concurrently.
 3. A single exact PR merge-tree artifact is reused when eligible. Otherwise,
    each application runs one combined sharded preflight and one immutable build.
@@ -59,6 +62,23 @@ register backend first and declare it as the frontend prerequisite.
 9. Only E2E success produces `STAGING_VALIDATED`.
 
 `STAGING_DEPLOYED` and `STAGING_VALIDATED` are separate milestones.
+`STAGING_VALIDATED` is historical certification; it is not a current-presence
+marker. The Deploy UI's current-live badge, the candidate
+`staging_live_state`/`staging_live_manifest_id`, and the controls response
+`staging_state` identify the authoritative current shared staging manifest.
+
+The first cumulative claim after rollout bootstraps only from the exact current
+pair of `1a-staging` refs, a matching terminal validated manifest, its
+successful manifest-bound E2E operation, and every immutable candidate identity
+recorded in that manifest. Missing or ambiguous evidence blocks a new claim.
+An already-claimed legacy train finishes under its immutable policy first.
+
+Supersession replaces an admitted exact SHA only after the cumulative
+replacement manifest validates. Explicit audited removal and safe absorption
+into `main` are the only other ordinary ways to leave the admitted set.
+The departing candidate's declared units are redeployed from the new
+candidate-free composition so prior runtime bytes cannot survive. Production
+selection never changes shared staging membership.
 
 ## Production lifecycle
 
@@ -85,11 +105,11 @@ V2 does not publish release notes.
 
 | Class                | Behavior                                                                             |
 | -------------------- | ------------------------------------------------------------------------------------ |
-| Candidate merge/test | Mark the direct candidate `NEEDS_REBASE` or failed; hold only transitive dependants  |
+| Candidate merge/test | Before shared mutation, fail closed and leave the last validated admitted manifest live; mark only the new direct candidate `NEEDS_REBASE` as applicable |
 | Infrastructure       | Bounded idempotent retry; no candidate isolation                                     |
 | Retryable deployment | Retry only the failed operation; preserve successful sibling evidence                |
 | Control plane        | Fail the train, requeue candidates, pause automated claiming, retain manual fallback |
-| E2E                  | Keep the manifest unvalidated; do not globally pause unless state is unverifiable    |
+| E2E                  | Keep the failed manifest unvalidated and restore, deploy, and E2E the exact last validated live manifest under the same staging lock before committing any membership change |
 
 Every pending GitHub status must map to a visible candidate/train/operation state
 and recovery message. Duplicate callbacks and worker invocations reuse immutable
@@ -98,10 +118,19 @@ operation identities and never repeat completed mutations.
 ## Operator rollout and rollback
 
 Deploy additive changes in this order: database migrations, API/UI, then the v2
-reconciler. Keep `RELEASE_BUS_V2_MODE=OFF` and controls paused during offline
-and synthetic validation. For staging beta, set mode `STAGING`, resume `STAGING`
-and `ALL`, and keep `PRODUCTION` paused. Enable `PRODUCTION` only after staging
-acceptance passes; production remains explicit.
+reconciler. Run the old status helper before migration/API mutation; after the
+API is live, use the new helper, which requires and displays authoritative
+`staging_state`. Do not deploy the cumulative reconciler before both migration
+and API are live. Keep `RELEASE_BUS_V2_MODE=OFF` and controls paused during
+offline and synthetic validation. For staging beta, set mode `STAGING`, resume
+`STAGING` and `ALL`, and keep `PRODUCTION` paused. Enable `PRODUCTION` only after
+staging acceptance passes; production remains explicit.
+
+The cumulative-staging migration has an intentionally non-destructive `down`.
+Migration rollback leaves the additive table and columns in place so an older
+worker cannot erase the authoritative admitted set. A genuine schema teardown
+requires a separate destructive migration and is allowed only while v2 is
+confirmed `OFF`.
 
 Rollback:
 

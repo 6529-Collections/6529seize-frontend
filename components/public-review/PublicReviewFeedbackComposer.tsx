@@ -41,7 +41,9 @@ interface PublicReviewFeedbackComposerProps {
   readonly page: PublicReviewPageContext;
   readonly referenceSelection?: PublicReviewReferenceSelection | undefined;
   readonly referenceIntegrityMessage?: string | undefined;
-  readonly referenceIntegrityStatus?: PublicReviewReferenceIntegrityStatus | undefined;
+  readonly referenceIntegrityStatus?:
+    | PublicReviewReferenceIntegrityStatus
+    | undefined;
   readonly submitter?: PublicReviewFeedbackSubmitter | undefined;
 }
 export type { PublicReviewReferenceIntegrityStatus } from "@/components/public-review/PublicReviewFeedbackComposerStatus";
@@ -87,8 +89,7 @@ function getFeedbackValidationMessage({
   ) {
     if (
       error.issues.length === 1 &&
-      error.issues[0] ===
-        t(locale, "publicReview.feedback.commentRequired")
+      error.issues[0] === t(locale, "publicReview.feedback.commentRequired")
     ) {
       return null;
     }
@@ -208,11 +209,13 @@ function useFeedbackComposerState({
     createEmptyDraft(config)
   );
   const [submissionId, setSubmissionId] = useState(createSubmissionId);
-  const [preview, setPreview] =
-    useState<ContextBoundValue<string> | null>(null);
+  const [preview, setPreview] = useState<ContextBoundValue<string> | null>(
+    null
+  );
   const [commentError, setCommentError] = useState<string | null>(null);
-  const [formError, setFormError] =
-    useState<ContextBoundValue<string> | null>(null);
+  const [formError, setFormError] = useState<ContextBoundValue<string> | null>(
+    null
+  );
   const [successPath, setSuccessPath] =
     useState<ContextBoundValue<string> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -229,9 +232,7 @@ function useFeedbackComposerState({
   }, [contextFingerprint]);
   const setCurrentFormError = (message: string | null): void => {
     setFormError(
-      message === null
-        ? null
-        : { contextFingerprint, value: message }
+      message === null ? null : { contextFingerprint, value: message }
     );
   };
   const authenticated = Boolean(
@@ -392,9 +393,7 @@ function useFeedbackComposerState({
     handleSubmit,
     isSubmitting,
     preview:
-      preview?.contextFingerprint === contextFingerprint
-        ? preview.value
-        : null,
+      preview?.contextFingerprint === contextFingerprint ? preview.value : null,
     successPath:
       successPath?.contextFingerprint === contextFingerprint
         ? successPath.value
@@ -631,11 +630,7 @@ export default function PublicReviewFeedbackComposer({
             </div>
           </details>
 
-          <FeedbackPreview
-            formId={formId}
-            locale={locale}
-            preview={preview}
-          />
+          <FeedbackPreview formId={formId} locale={locale} preview={preview} />
 
           <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row">
             <button
@@ -648,9 +643,7 @@ export default function PublicReviewFeedbackComposer({
             </button>
             <button
               type="submit"
-              disabled={
-                busy || !referenceReady || Boolean(feedbackGate)
-              }
+              disabled={busy || !referenceReady || Boolean(feedbackGate)}
               className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
             >
               {isSubmitting

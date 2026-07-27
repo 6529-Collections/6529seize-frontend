@@ -25,9 +25,7 @@ function assertRangeBytes(
   }
 }
 
-function getDefinitionRanges(
-  shard: SolidityDefinitionShard
-): readonly {
+function getDefinitionRanges(shard: SolidityDefinitionShard): readonly {
   readonly label: string;
   readonly range: SoliditySourceRange;
 }[] {
@@ -66,10 +64,7 @@ function getDefinitionRanges(
 function getTopLevelRanges(
   declaration: SolidityTopLevelDeclaration
 ): readonly SoliditySourceRange[] {
-  if (
-    declaration.kind === "variable" &&
-    declaration.valueRange !== null
-  ) {
+  if (declaration.kind === "variable" && declaration.valueRange !== null) {
     return [declaration.range, declaration.valueRange];
   }
   return [declaration.range];

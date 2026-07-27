@@ -24,6 +24,7 @@ import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { EN_US_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
+import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { PUBLIC_REVIEW_MESSAGES } from "@/i18n/messages/public-review";
 
 type MessageEntry = readonly [key: string, value: string];
@@ -119,6 +120,27 @@ const USER_COLLECTED_STATS_MESSAGES = namespaceMessages(
     ["seasonTile.setComplete", "Set {count} complete"],
   ] as const
 );
+
+const USER_BRAIN_SIDEBAR_MESSAGES = objectMessages("user.brain.sidebar", {
+  createdHeading: "Created Waves",
+  createdMobileHeading: "Created",
+  createdScope: "Wave posts",
+  mostActiveHeading: "Most Active In",
+  rankingBasis: "All time",
+  waveLastActivityShort: "Last activity {time}",
+  identityLastPostShort: "Last post {time}",
+  latestWavePost: "Last wave post {time} ago",
+  lastPosted: "Last posted {time} ago",
+  loadingWaveContext: "Loading profile wave context",
+  mobileStripLabel: "Brain waves",
+  noDropsYet: "No drops yet",
+  showLess: "Show less",
+  "showMore.one": "Show {count} more",
+  "showMore.other": "Show {count} more",
+  viewAllCreatedWaves: "View all created waves",
+  waveImageAlt: "Wave {waveName}",
+  wavePictureAlt: "Wave picture",
+} as const);
 
 const USER_COLLECTED_STATS_DETAILS_MESSAGES = objectMessages(
   "user.collected.stats.details",
@@ -274,7 +296,7 @@ const CREATE_WAVE_DRAFTS_MESSAGES = objectMessages("wave.create.drafts", {
   savedAt: "Saved {timeAgo}",
   untitled: "Untitled wave",
   deleteLabel: 'Delete draft "{name}"',
-  newWave: "New Wave",
+  newWave: "Create a Wave",
   count: "{count} saved drafts",
 } as const);
 
@@ -1035,6 +1057,7 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
 );
 
 const WAVE_GIF_PICKER_MESSAGES = objectMessages("waves.gifPicker", {
+  open: "Add GIF",
   dialogTitle: "GIF search",
   searchPlaceholder: "Search GIFs",
   noResults: "No GIFs found.",
@@ -1664,6 +1687,115 @@ export const EN_US_MESSAGES = {
     "You are not subscribed for this drop.",
   "home.mintSubscriptions.tooltip.proxy":
     "Manage subscriptions from your own profile, not a proxy session.",
+  "subscriptions.coverage.title": "Subscription coverage",
+  "subscriptions.coverage.loading": "Loading subscription coverage",
+  "subscriptions.coverage.unavailable":
+    "Coverage is temporarily unavailable. Your subscription settings have not changed.",
+  "subscriptions.coverage.stale":
+    "Last known coverage is shown and may be out of date.",
+  "subscriptions.coverage.refresh": "Refresh coverage",
+  "subscriptions.coverage.status.covered": "Covered",
+  "subscriptions.coverage.status.planTopUp": "Plan a top up",
+  "subscriptions.coverage.status.runningLow": "Running low",
+  "subscriptions.coverage.status.actionRequired": "Action required",
+  "subscriptions.coverage.status.notSetUp": "Not set up",
+  "subscriptions.coverage.status.noEligibility": "No current eligibility",
+  "subscriptions.coverage.status.noSelections": "No upcoming drops selected",
+  "subscriptions.coverage.status.unknown": "Coverage unavailable",
+  "subscriptions.coverage.action.setUp": "Set up",
+  "subscriptions.coverage.action.chooseDrops": "Choose drops",
+  "subscriptions.coverage.action.topUp": "Top up",
+  "subscriptions.coverage.action.topUpSubscriptions": "Top up subscriptions",
+  "subscriptions.coverage.action.manage": "Manage",
+  "subscriptions.coverage.action.reviewSettings": "Review settings",
+  "subscriptions.coverage.mode.automatic": "Automatic",
+  "subscriptions.coverage.mode.manual": "Manual",
+  "subscriptions.coverage.mode.notConfigured": "Not configured",
+  "subscriptions.coverage.balanceEth": "{amount} ETH",
+  "subscriptions.coverage.dropsFunded.one": "{count} drop funded",
+  "subscriptions.coverage.dropsFunded.many": "{count} drops funded",
+  "subscriptions.coverage.eligibility": "Eligibility ×{count}",
+  "subscriptions.coverage.eligibilityUnknown": "Eligibility unavailable",
+  "subscriptions.coverage.editions.one": "One edition",
+  "subscriptions.coverage.editions.all": "All eligible editions",
+  "subscriptions.coverage.capacity": "Balance capacity",
+  "subscriptions.coverage.capacityUnit": "mints",
+  "subscriptions.coverage.allocated": "Forecast use",
+  "subscriptions.coverage.allocatedUnit": "allocated",
+  "subscriptions.coverage.basis":
+    "Projected from current eligibility, settings, balance, and the published Meme schedule.",
+  "subscriptions.coverage.fundedThrough": "Funded through",
+  "subscriptions.coverage.nextUnfunded": "Next unfunded",
+  "subscriptions.coverage.projected": "Projected",
+  "subscriptions.coverage.memeToken": "The Memes #{token}",
+  "subscriptions.coverage.topUpBy":
+    "Top up by {deadline} to receive The Memes #{token}.",
+  "subscriptions.coverage.noDeadline":
+    "No authoritative top-up deadline is available yet.",
+  "subscriptions.coverage.recommended":
+    "Recommended: add {amount} ETH for {count} funded drops.",
+  "subscriptions.coverage.recommendedThrough":
+    "Recommended: add {amount} ETH for {count} funded drops through The Memes #{token}.",
+  "subscriptions.coverage.notSetUp.description":
+    "Set up subscription minting so eligible Meme drops can be handled automatically or one at a time.",
+  "subscriptions.coverage.noEligibility.description":
+    "This profile is not currently eligible for an upcoming Meme mint. Subscription balance does not create eligibility.",
+  "subscriptions.coverage.noSelections.description":
+    "Manual mode has no upcoming drops selected. Choose a drop to see how long the balance will last.",
+  "subscriptions.coverage.unknown.description":
+    "The forecast inputs are incomplete. Review settings or refresh when the schedule is available.",
+  "subscriptions.coverage.covered.description":
+    "Your immediate intended drops are fully funded.",
+  "subscriptions.coverage.earlyWarning.description":
+    "You are covered for now. Plan a top up before the funded runway ends.",
+  "subscriptions.coverage.runningLow.description":
+    "Only a few intended drops remain fully funded.",
+  "subscriptions.coverage.actionRequired.description":
+    "The immediate next intended drop is not fully funded.",
+  "subscriptions.coverage.header.through":
+    "{status} · through The Memes #{token}, {date}",
+  "subscriptions.coverage.header.noFundedThrough": "{status}",
+  "subscriptions.page.title": "Subscription minting",
+  "subscriptions.page.settingsTitle": "Minting settings",
+  "subscriptions.page.learnMore": "Learn more",
+  "subscriptions.page.topUpTitle": "Top up",
+  "subscriptions.balance.title": "Subscription balance",
+  "subscriptions.balance.ethUnit": "ETH",
+  "subscriptions.balance.mintCapacity.one": "{count} mint available",
+  "subscriptions.balance.mintCapacity.many": "{count} mints available",
+  "subscriptions.balance.mintCapacity.unknown": "mint capacity unavailable",
+  "subscriptions.topUp.recommended": "Recommended",
+  "subscriptions.topUp.minimum": "Minimum for next drop",
+  "subscriptions.topUp.coversDrops.one":
+    "Funds {count} intended drop through The Memes #{token}",
+  "subscriptions.topUp.coversDrops.many":
+    "Funds {count} intended drops through The Memes #{token}",
+  "subscriptions.topUp.chooseAmount": "Choose a top-up amount",
+  "subscriptions.topUp.submit": "Top up {amount} ETH",
+  "subscriptions.topUp.cardCount.one": "{count} Card",
+  "subscriptions.topUp.cardCount.many": "{count} Cards",
+  "subscriptions.topUp.cardOption.one": "{label} - {count} Card",
+  "subscriptions.topUp.cardOption.many": "{label} - {count} Cards",
+  "subscriptions.topUp.modalSubtitle.one": "{count} Card - {amount} ETH",
+  "subscriptions.topUp.modalSubtitle.many": "{count} Cards - {amount} ETH",
+  "subscriptions.topUp.validation.selectOption": "Select a top-up option",
+  "subscriptions.topUp.validation.wallet":
+    "You must have an active wallet connection to top up",
+  "subscriptions.topUp.sendingTo": "Sending to",
+  "subscriptions.notification.title": "Subscription coverage",
+  "subscriptions.notification.earlyWarning":
+    "Your subscription balance is getting low.",
+  "subscriptions.notification.runningLow":
+    "Only a few intended drops remain fully funded.",
+  "subscriptions.notification.actionRequired":
+    "Your immediate next intended drop is not fully funded.",
+  "subscriptions.notification.through":
+    "{count} · funded through The Memes #{token}, {date}",
+  "subscriptions.notification.noRunway": "{count}",
+  "subscriptions.notification.topUpBy":
+    "Top up by {deadline} to receive The Memes #{token}.",
+  "subscriptions.notification.nextUnfunded":
+    "Next unfunded: The Memes #{token}, {date}.",
   "home.nextMint.status": "Next mint",
   "home.nextMint.noImage": "No image",
   "home.nextMint.untitled": "Untitled",
@@ -2136,6 +2268,7 @@ export const EN_US_MESSAGES = {
     "Server validation completed.",
   "profileCms.builder.api.draftSaved": "Draft saved.",
   ...USER_COLLECTED_STATS_MESSAGES,
+  ...USER_BRAIN_SIDEBAR_MESSAGES,
   ...USER_COLLECTED_STATS_DETAILS_MESSAGES,
   ...USER_COLLECTED_STATS_BOOST_MESSAGES,
   ...USER_COLLECTED_STATS_ACTIVITY_MESSAGES,
@@ -2257,6 +2390,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_VOTE_MESSAGES,
   ...WAVE_POLL_MESSAGES,
   ...WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES,
+  ...TRANSFER_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;

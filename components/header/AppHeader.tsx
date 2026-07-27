@@ -749,15 +749,17 @@ export default function AppHeader() {
               <HeaderPageShareButton isCapacitor={isCapacitor} />
             </div>
           )}
-          <div className="tw-flex-shrink-0">
-            <HeaderSearchButton
-              wave={
-                isInsideWave && (isWavesRoute || isMessagesRoute)
-                  ? activeWave
-                  : null
-              }
-            />
-          </div>
+          {!isCreateRoute && (
+            <div className="tw-flex-shrink-0">
+              <HeaderSearchButton
+                wave={
+                  isInsideWave && (isWavesRoute || isMessagesRoute)
+                    ? activeWave
+                    : null
+                }
+              />
+            </div>
+          )}
           <HeaderMoreMenu items={appHeaderMoreMenuItems} />
         </div>
       </div>

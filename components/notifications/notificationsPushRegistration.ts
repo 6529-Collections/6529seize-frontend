@@ -37,7 +37,13 @@ function parseDevicePushData(raw: unknown): DevicePushData | null {
   const handle = o["handle"];
   if (typeof handle === "string") data.handle = handle;
   const subroute = o["subroute"];
-  if (subroute === "rep" || subroute === "identity") data.subroute = subroute;
+  if (
+    subroute === "rep" ||
+    subroute === "identity" ||
+    subroute === "subscriptions"
+  ) {
+    data.subroute = subroute;
+  }
   const wave_id = o["wave_id"];
   if (typeof wave_id === "string") data.wave_id = wave_id;
   const drop_id = o["drop_id"];

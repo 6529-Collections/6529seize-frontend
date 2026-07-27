@@ -24,9 +24,7 @@ export function PublicReviewEditorialFeedback({
   readonly sections: readonly PublicReviewSectionDefinition[];
 }) {
   const [sectionId, setSectionId] = useState("");
-  const selectedSection = sections.find(
-    (section) => section.id === sectionId
-  );
+  const selectedSection = sections.find((section) => section.id === sectionId);
   const pageContext = useMemo<PublicReviewPageContext>(
     () => ({
       ...page,

@@ -17,10 +17,9 @@ describe("PublicReviewMarkdown", () => {
     );
 
     expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "First section" })).toHaveAttribute(
-      "id",
-      "first-section"
-    );
+    expect(
+      screen.getByRole("heading", { name: "First section" })
+    ).toHaveAttribute("id", "first-section");
     expect(
       screen.getByRole("heading", { name: "Second section" })
     ).toHaveAttribute("id", "second-section");

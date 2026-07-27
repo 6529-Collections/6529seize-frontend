@@ -9,13 +9,8 @@ describe("SolidityInheritance", () => {
   it("preserves the compiler's exact linearized definition order", () => {
     const shard = {
       definition: {
-        inheritance: [
-          { definitionId: "src/Base.sol:Base", name: "Base" },
-        ],
-        linearizedDefinitionIds: [
-          "src/Child.sol:Child",
-          "src/Base.sol:Base",
-        ],
+        inheritance: [{ definitionId: "src/Base.sol:Base", name: "Base" }],
+        linearizedDefinitionIds: ["src/Child.sol:Child", "src/Base.sol:Base"],
       },
     } as unknown as SolidityDefinitionShard;
     const manifest = {

@@ -80,7 +80,7 @@ export function SolidityNatSpecGapExplorer({
     >
       <h2
         id="solidity-natspec-gaps"
-        className="tw-scroll-mt-28 tw-m-0 tw-text-2xl tw-font-semibold tw-text-white"
+        className="tw-m-0 tw-scroll-mt-28 tw-text-2xl tw-font-semibold tw-text-white"
       >
         {t(DEFAULT_LOCALE, "publicReview.reference.natSpecGaps")}
       </h2>
@@ -90,7 +90,10 @@ export function SolidityNatSpecGapExplorer({
       <div className="tw-mt-5 tw-grid tw-gap-4 tw-rounded-xl tw-bg-iron-900/70 tw-p-4 md:tw-grid-cols-3">
         <label className="tw-block tw-text-sm tw-font-medium tw-text-iron-200">
           <span className="tw-mb-1.5 tw-block">
-            {t(DEFAULT_LOCALE, "publicReview.reference.searchDocumentationGaps")}
+            {t(
+              DEFAULT_LOCALE,
+              "publicReview.reference.searchDocumentationGaps"
+            )}
           </span>
           <input
             className={INPUT_CLASSES}

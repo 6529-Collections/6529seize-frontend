@@ -7,11 +7,10 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { SolidityReadinessRequirement } from "@/lib/public-review/solidityReferenceTypes";
 
-export interface SolidityReadinessListItem
-  extends Pick<
-    SolidityReadinessRequirement,
-    "id" | "notes" | "owner" | "phase" | "status"
-  > {
+export interface SolidityReadinessListItem extends Pick<
+  SolidityReadinessRequirement,
+  "id" | "notes" | "owner" | "phase" | "status"
+> {
   readonly evidence: readonly {
     readonly href: string;
     readonly path: string;
@@ -63,7 +62,7 @@ export function SolidityReadinessExplorer({
     >
       <h2
         id="solidity-release-readiness"
-        className="tw-scroll-mt-28 tw-m-0 tw-text-2xl tw-font-semibold tw-text-white"
+        className="tw-m-0 tw-scroll-mt-28 tw-text-2xl tw-font-semibold tw-text-white"
       >
         {t(DEFAULT_LOCALE, "publicReview.reference.releaseReadiness")}
       </h2>
@@ -177,7 +176,10 @@ export function SolidityReadinessExplorer({
                 </ul>
               ) : (
                 <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-500">
-                  {t(DEFAULT_LOCALE, "publicReview.reference.noEvidenceRetained")}
+                  {t(
+                    DEFAULT_LOCALE,
+                    "publicReview.reference.noEvidenceRetained"
+                  )}
                 </p>
               )}
             </details>

@@ -105,10 +105,7 @@ export function FeedbackConnectPrompt({
       >
         {getConnectButtonLabel({ connected, connecting, locale })}
       </button>
-      <ReviewFeedbackConnectionStatus
-        connecting={connecting}
-        locale={locale}
-      />
+      <ReviewFeedbackConnectionStatus connecting={connecting} locale={locale} />
     </>
   );
 }
@@ -184,7 +181,7 @@ export function FeedbackResultMessages({
           tabIndex={-1}
           aria-live="polite"
           aria-atomic="true"
-          className="tw-border-green-500/40 tw-bg-green-950/30 tw-text-green-100 tw-mb-0 tw-mt-4 tw-block tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-text-sm focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-green-300"
+          className="tw-border-green-500/40 tw-bg-green-950/30 tw-text-green-100 focus-visible:tw-ring-green-300 tw-mb-0 tw-mt-4 tw-block tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-text-sm focus:tw-outline-none focus-visible:tw-ring-2"
         >
           {t(locale, "publicReview.feedback.success")}{" "}
           <Link

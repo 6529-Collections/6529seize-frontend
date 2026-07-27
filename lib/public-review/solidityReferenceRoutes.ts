@@ -137,9 +137,7 @@ export interface SolidityReferenceRouteInventory {
   }[];
 }
 
-function isSafeSoliditySourceSegments(
-  segments: readonly string[]
-): boolean {
+function isSafeSoliditySourceSegments(segments: readonly string[]): boolean {
   return (
     segments.length > 0 &&
     segments.every(
