@@ -654,15 +654,17 @@ export default function PublicReviewFeedbackComposer({
             </div>
           </details>
 
-          <button
-            type="submit"
-            disabled={busy || !referenceReady || Boolean(feedbackGate)}
-            className="tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition-colors hover:tw-bg-primary-400 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
-          >
-            {isSubmitting
-              ? t(locale, "publicReview.feedback.submitting")
-              : t(locale, "publicReview.feedback.submit")}
-          </button>
+          <div className="tw-sticky tw-bottom-0 tw-z-10 tw-bg-[#08080a] tw-pt-1">
+            <button
+              type="submit"
+              disabled={busy || !referenceReady || Boolean(feedbackGate)}
+              className="tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition-colors hover:tw-bg-primary-400 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+            >
+              {isSubmitting
+                ? t(locale, "publicReview.feedback.submitting")
+                : t(locale, "publicReview.feedback.submit")}
+            </button>
+          </div>
         </form>
       ) : null}
 
