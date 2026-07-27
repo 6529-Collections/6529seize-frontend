@@ -64,7 +64,7 @@ describe("PublicReviewShell", () => {
       screen.getAllByRole("link", { name: /Community Review/ })
     ).not.toHaveLength(0);
     const commentsToggle = screen.getByRole("button", {
-      name: "Show comments",
+      name: "Show feedback",
     });
     expect(commentsToggle).toHaveAttribute(
       "aria-controls",

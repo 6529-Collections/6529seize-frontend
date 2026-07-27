@@ -475,8 +475,8 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "Preparing the tamper-evident checksum for this exact code selection…",
   "publicReview.feedback.hashUnavailable":
     "This browser could not verify the selected code checksum. Code-linked feedback is disabled; reload in a current browser and try again.",
-  "publicReview.comments.show": "Show comments",
-  "publicReview.comments.hide": "Hide comments",
+  "publicReview.comments.show": "Show feedback",
+  "publicReview.comments.hide": "Hide feedback",
   "publicReview.comments.title": "Page comments",
   "publicReview.comments.viewLedger": "View the full feedback ledger",
   "publicReview.comments.loading": "Loading page comments…",
