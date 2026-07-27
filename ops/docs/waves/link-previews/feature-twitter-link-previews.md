@@ -50,10 +50,12 @@ Links that do not match these rules stay regular links.
 1. Open a surface with a supported Twitter/X status link.
 2. The renderer validates the link and extracts the tweet ID.
 3. A tweet-shaped loading state appears.
-4. The app requests `/api/twitter/preview`, which fetches
-   `https://publish.twitter.com/oembed` server-side and parses the returned HTML.
-5. If oEmbed metadata loads, the source, author, post text, media, timestamp,
-   and available engagement facts render inline.
+4. The app requests `/api/twitter/preview`, which loads X's server-side
+   syndication metadata and falls back to Twitter oEmbed when needed.
+5. If preview metadata loads, the source, author, post text, media, timestamp,
+   and available engagement facts render inline. X Articles render their
+   canonical title, excerpt, cover image, and article link instead of exposing
+   the raw redirect URL used by X.
 6. Engagement facts are passive labels. The card links to the original post,
    while wave side actions provide open/copy controls where that layout supports
    them.
@@ -63,6 +65,8 @@ Links that do not match these rules stay regular links.
 ## Common Scenarios
 
 - Multiple supported Twitter/X links in one drop each render their own tweet card.
+- X Article posts render as article cards. Commentary added to the post remains
+  visible above the article, while X's article redirect URL is hidden.
 - If previews are hidden for a drop, Twitter/X links stay plain until previews are
   shown again.
 - Hidden previews can be restored from the desktop `More` menu on eligible
@@ -78,6 +82,9 @@ Links that do not match these rules stay regular links.
   regular links.
 - Supported links render with the local Twitter preview card instead of the generic
   OpenGraph card.
+- A post is treated as an X Article only when X's preview payload includes
+  canonical article metadata. Ordinary posts containing `t.co` links keep their
+  existing post and link behavior.
 
 ## Failure and Recovery
 

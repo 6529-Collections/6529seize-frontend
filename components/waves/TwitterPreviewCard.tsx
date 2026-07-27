@@ -4,7 +4,11 @@ import { LinkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useMemo, useState, type MouseEvent, type ReactNode } from "react";
 import XIcon from "@/components/user/utils/icons/XIcon";
-import type { TweetPreview, TweetPreviewMedia } from "@/lib/twitter";
+import type {
+  TweetPreview,
+  TweetPreviewArticle,
+  TweetPreviewMedia,
+} from "@/lib/twitter";
 import { parseTweetUrl } from "@/lib/twitter/url";
 import { useTwitterPreview } from "@/hooks/useTwitterPreview";
 import {
@@ -358,10 +362,12 @@ function TweetHeader({
 
 function TweetKicker({
   href,
+  isArticle,
   timestamp,
   xPostPath,
 }: {
   readonly href: string;
+  readonly isArticle: boolean;
   readonly timestamp: string | undefined;
   readonly xPostPath: string;
 }) {
@@ -371,7 +377,7 @@ function TweetKicker({
         X
       </span>
       <span className="tw-inline-flex tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-sky-400/30 tw-bg-sky-400/10 tw-px-2 tw-py-1 tw-text-[11px] tw-font-semibold tw-leading-none tw-text-sky-100">
-        Post
+        {isArticle ? "Article" : "Post"}
       </span>
       <Link
         href={href}
@@ -388,6 +394,7 @@ function TweetKicker({
 
 function TweetBodyText({
   authorName,
+  hasArticle,
   href,
   replyToHandle,
   text,
@@ -396,6 +403,7 @@ function TweetBodyText({
   readonly href: string;
   readonly replyToHandle: string | undefined;
   readonly text: string | undefined;
+  readonly hasArticle: boolean;
 }) {
   if (text) {
     return (
@@ -412,6 +420,10 @@ function TweetBodyText({
     );
   }
 
+  if (hasArticle) {
+    return null;
+  }
+
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-2">
       <p className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50">
@@ -421,6 +433,45 @@ function TweetBodyText({
         {href || authorName}
       </p>
     </div>
+  );
+}
+
+function TweetArticle({ article }: { readonly article: TweetPreviewArticle }) {
+  return (
+    <Link
+      href={article.url}
+      target="_blank"
+      rel="noopener noreferrer nofollow"
+      onClick={stopCardEvent}
+      aria-label={`Read article: ${article.title}`}
+      className="tw-group tw-block tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/60 tw-text-inherit tw-no-underline tw-transition hover:tw-border-sky-400/40 hover:tw-bg-iron-900"
+      data-testid="twitter-article-preview"
+    >
+      {article.coverImageUrl && (
+        <div className="tw-aspect-video tw-w-full tw-overflow-hidden tw-bg-black">
+          {/* eslint-disable-next-line @next/next/no-img-element -- X cover URLs are validated raw embed assets, matching existing tweet media handling. */}
+          <img
+            src={article.coverImageUrl}
+            alt=""
+            className="tw-h-full tw-w-full tw-object-cover tw-transition tw-duration-300 group-hover:tw-scale-[1.01]"
+            loading="lazy"
+          />
+        </div>
+      )}
+      <div className="tw-flex tw-flex-col tw-gap-y-1.5 tw-p-3">
+        <p className="tw-m-0 tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wide tw-text-sky-200">
+          Article on X
+        </p>
+        <h3 className="tw-m-0 tw-line-clamp-2 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 group-hover:tw-text-white">
+          {article.title}
+        </h3>
+        {article.previewText && (
+          <p className="tw-m-0 tw-line-clamp-3 tw-text-sm tw-leading-5 tw-text-iron-300">
+            {article.previewText}
+          </p>
+        )}
+      </div>
+    </Link>
   );
 }
 
@@ -700,7 +751,12 @@ export default function TwitterPreviewCard({
         className="tw-absolute tw-inset-0 tw-z-0 tw-rounded-lg"
       />
       <div className="tw-pointer-events-none tw-relative tw-z-10 tw-flex tw-flex-col tw-gap-y-3 tw-p-3 tw-pl-4 sm:tw-p-4 sm:tw-pl-5 [&_a]:tw-pointer-events-auto [&_button]:tw-pointer-events-auto [&_video]:tw-pointer-events-auto">
-        <TweetKicker href={href} timestamp={timestamp} xPostPath={xPostPath} />
+        <TweetKicker
+          href={href}
+          isArticle={preview.article !== undefined}
+          timestamp={timestamp}
+          xPostPath={xPostPath}
+        />
 
         <TweetHeader
           authorHref={authorHref}
@@ -713,7 +769,10 @@ export default function TwitterPreviewCard({
           href={href}
           replyToHandle={preview.replyToHandle}
           text={preview.text}
+          hasArticle={preview.article !== undefined}
         />
+
+        {preview.article && <TweetArticle article={preview.article} />}
 
         <TweetMedia authorName={authorName} href={href} preview={preview} />
 

@@ -2,6 +2,7 @@ import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
 import type {
   TweetPreview,
+  TweetPreviewArticle,
   TweetPreviewMedia,
   TweetPreviewVideoVariant,
 } from "./types";
@@ -207,6 +208,74 @@ const isTwitterMediaUrl = (value: string): boolean => {
   } catch {
     return false;
   }
+};
+
+const isNumericId = (value: string): boolean => /^\d+$/u.test(value);
+
+const readArticle = (
+  record: Record<string, unknown>
+): TweetPreviewArticle | undefined => {
+  const article = readRecord(record["article"]);
+  const restId = readString(article?.["rest_id"]);
+  const title = readString(article?.["title"]);
+  if (!article || !restId || !isNumericId(restId) || !title) {
+    return undefined;
+  }
+
+  const mediaInfo = readRecord(
+    readRecord(article["cover_media"])?.["media_info"]
+  );
+  const coverImageCandidate = readString(mediaInfo?.["original_img_url"]);
+  const coverImageUrl =
+    coverImageCandidate &&
+    isImageUrl(coverImageCandidate) &&
+    isTwitterMediaUrl(coverImageCandidate)
+      ? coverImageCandidate
+      : undefined;
+  const previewText = readString(article["preview_text"]);
+
+  return {
+    url: `https://x.com/i/article/${restId}`,
+    title,
+    ...(previewText ? { previewText } : {}),
+    ...(coverImageUrl ? { coverImageUrl } : {}),
+  };
+};
+
+const isMatchingArticleEntity = (
+  value: unknown,
+  article: TweetPreviewArticle
+): boolean => {
+  const entity = readRecord(value);
+  const expandedUrl = readString(entity?.["expanded_url"]);
+  if (!expandedUrl) {
+    return false;
+  }
+
+  try {
+    const parsedExpandedUrl = new URL(expandedUrl);
+    const parsedArticleUrl = new URL(article.url);
+    return (
+      matchesDomainOrSubdomain(parsedExpandedUrl.hostname, "x.com") &&
+      parsedExpandedUrl.pathname === parsedArticleUrl.pathname
+    );
+  } catch {
+    return false;
+  }
+};
+
+const findArticleRedirectUrl = (
+  entities: Record<string, unknown>,
+  article: TweetPreviewArticle | undefined
+): string | undefined => {
+  if (!article) {
+    return undefined;
+  }
+
+  const entity = readArray(entities["urls"]).find((candidate) =>
+    isMatchingArticleEntity(candidate, article)
+  );
+  return readString(readRecord(entity)?.["url"]);
 };
 
 const findFirstImageInArray = (
@@ -715,6 +784,8 @@ function buildSyndicationPreview(
   const firstMedia = getFirstSyndicationMedia(entities);
   const authorHandle = readString(user["screen_name"]);
   const mediaLink = readString(firstMedia["url"]);
+  const article = readArticle(record);
+  const articleRedirectUrl = findArticleRedirectUrl(entities, article);
   const mediaItems = findMediaItems(record);
   const firstImageMedia = findFirstMedia(mediaItems, "image");
   const firstVideoMedia = findFirstMedia(mediaItems, "video");
@@ -749,7 +820,10 @@ function buildSyndicationPreview(
   setPreviewValue(
     preview,
     "text",
-    removeTrailingMediaUrl(previewText, mediaLink)
+    removeTrailingMediaUrl(
+      removeTrailingMediaUrl(previewText, articleRedirectUrl),
+      mediaLink
+    )
   );
   setPreviewValue(preview, "mediaLink", mediaLink);
   setPreviewValue(
@@ -788,6 +862,7 @@ function buildSyndicationPreview(
     readNumberish(record["bookmark_count"])
   );
   setPreviewValue(preview, "viewCount", readNumberish(record["view_count"]));
+  setPreviewValue(preview, "article", article);
 
   return preview;
 }

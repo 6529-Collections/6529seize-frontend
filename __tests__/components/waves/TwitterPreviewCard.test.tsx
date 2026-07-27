@@ -125,6 +125,53 @@ describe("TwitterPreviewCard", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("renders canonical X Article metadata instead of the redirect URL", async () => {
+    mockedFetchTwitterPreview.mockResolvedValue({
+      tweetId: "2081708447628959923",
+      url: "https://x.com/intrepid_p/status/2081708447628959923",
+      authorName: "Intrepid",
+      authorHandle: "intrepid_p",
+      article: {
+        url: "https://x.com/i/article/2081571498809298944",
+        title: "Intrepid Ocean - Season Two",
+        previewText:
+          "The Intrepid Ocean has taken me through twenty-four countries and territories over four years.",
+        coverImageUrl: "https://pbs.twimg.com/media/HOM6eO9asAAiZJi.jpg",
+      },
+      favoriteCount: 5,
+      conversationCount: 1,
+    });
+
+    const { container } = render(
+      <TwitterPreviewCard
+        href="https://x.com/intrepid_p/status/2081708447628959923"
+        tweetId="2081708447628959923"
+      />
+    );
+
+    await screen.findByTestId("twitter-article-preview");
+
+    expect(screen.getByText("Article")).toBeInTheDocument();
+    expect(screen.queryByText("Post")).not.toBeInTheDocument();
+    expect(screen.getByText("Intrepid Ocean - Season Two")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "The Intrepid Ocean has taken me through twenty-four countries and territories over four years."
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText("https://t.co/DQJw6K0lUm")).toBeNull();
+    expect(
+      screen.getByRole("link", {
+        name: "Read article: Intrepid Ocean - Season Two",
+      })
+    ).toHaveAttribute("href", "https://x.com/i/article/2081571498809298944");
+    expect(
+      container.querySelector(
+        'img[src="https://pbs.twimg.com/media/HOM6eO9asAAiZJi.jpg"]'
+      )
+    ).toBeInTheDocument();
+  });
+
   it("deduplicates duplicate tweet preview requests by tweet id", async () => {
     mockedFetchTwitterPreview.mockResolvedValue({
       tweetId: "2049202644879565155",
