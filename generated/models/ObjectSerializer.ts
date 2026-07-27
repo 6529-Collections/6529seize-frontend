@@ -381,6 +381,20 @@ export * from '../models/ApiSubmissionDropContext';
 export * from '../models/ApiSubmissionDropStatus';
 export * from '../models/ApiSubmissionDropVoting';
 export * from '../models/ApiSubmissionDropVotingContextProfileContext';
+export * from '../models/ApiSubscriptionCoverage';
+export * from '../models/ApiSubscriptionCoverageDeadlineBasis';
+export * from '../models/ApiSubscriptionCoverageEligibilityBasis';
+export * from '../models/ApiSubscriptionCoverageForecast';
+export * from '../models/ApiSubscriptionCoverageMinimumTopUp';
+export * from '../models/ApiSubscriptionCoverageMode';
+export * from '../models/ApiSubscriptionCoverageNextUnfunded';
+export * from '../models/ApiSubscriptionCoverageNotificationRisk';
+export * from '../models/ApiSubscriptionCoveragePoint';
+export * from '../models/ApiSubscriptionCoverageRecommendedTopUp';
+export * from '../models/ApiSubscriptionCoverageScheduleBasis';
+export * from '../models/ApiSubscriptionCoverageSource';
+export * from '../models/ApiSubscriptionCoverageStatus';
+export * from '../models/ApiSubscriptionCoverageUnknownReason';
 export * from '../models/ApiSubwavesSort';
 export * from '../models/ApiTargetAndSubscriptionActions';
 export * from '../models/ApiTdhEdition';
@@ -854,7 +868,7 @@ import { ApiNftOwnerPage } from '../models/ApiNftOwnerPage';
 import { ApiNftsPage } from '../models/ApiNftsPage';
 import { ApiNonceResponse } from '../models/ApiNonceResponse';
 import { ApiNotification        } from '../models/ApiNotification';
-import { ApiNotificationAdditionalContextV2 } from '../models/ApiNotificationAdditionalContextV2';
+import { ApiNotificationAdditionalContextV2                                } from '../models/ApiNotificationAdditionalContextV2';
 import { ApiNotificationCause } from '../models/ApiNotificationCause';
 import { ApiNotificationDropReactedReactor } from '../models/ApiNotificationDropReactedReactor';
 import { ApiNotificationPollVoteOption } from '../models/ApiNotificationPollVoteOption';
@@ -956,6 +970,20 @@ import { ApiSubmissionDropContext        } from '../models/ApiSubmissionDropCont
 import { ApiSubmissionDropStatus } from '../models/ApiSubmissionDropStatus';
 import { ApiSubmissionDropVoting } from '../models/ApiSubmissionDropVoting';
 import { ApiSubmissionDropVotingContextProfileContext } from '../models/ApiSubmissionDropVotingContextProfileContext';
+import { ApiSubscriptionCoverage                 } from '../models/ApiSubscriptionCoverage';
+import { ApiSubscriptionCoverageDeadlineBasis } from '../models/ApiSubscriptionCoverageDeadlineBasis';
+import { ApiSubscriptionCoverageEligibilityBasis } from '../models/ApiSubscriptionCoverageEligibilityBasis';
+import { ApiSubscriptionCoverageForecast           } from '../models/ApiSubscriptionCoverageForecast';
+import { ApiSubscriptionCoverageMinimumTopUp } from '../models/ApiSubscriptionCoverageMinimumTopUp';
+import { ApiSubscriptionCoverageMode } from '../models/ApiSubscriptionCoverageMode';
+import { ApiSubscriptionCoverageNextUnfunded          } from '../models/ApiSubscriptionCoverageNextUnfunded';
+import { ApiSubscriptionCoverageNotificationRisk } from '../models/ApiSubscriptionCoverageNotificationRisk';
+import { ApiSubscriptionCoveragePoint } from '../models/ApiSubscriptionCoveragePoint';
+import { ApiSubscriptionCoverageRecommendedTopUp } from '../models/ApiSubscriptionCoverageRecommendedTopUp';
+import { ApiSubscriptionCoverageScheduleBasis } from '../models/ApiSubscriptionCoverageScheduleBasis';
+import { ApiSubscriptionCoverageSource } from '../models/ApiSubscriptionCoverageSource';
+import { ApiSubscriptionCoverageStatus } from '../models/ApiSubscriptionCoverageStatus';
+import { ApiSubscriptionCoverageUnknownReason } from '../models/ApiSubscriptionCoverageUnknownReason';
 import { ApiSubwavesSort } from '../models/ApiSubwavesSort';
 import { ApiTargetAndSubscriptionActions } from '../models/ApiTargetAndSubscriptionActions';
 import { ApiTdhEdition } from '../models/ApiTdhEdition';
@@ -1248,6 +1276,13 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiSessionRefreshWebRequestClientTypeEnum",
     "ApiSessionWebResponseClientTypeEnum",
     "ApiSubmissionDropStatus",
+    "ApiSubscriptionCoverageDeadlineBasis",
+    "ApiSubscriptionCoverageEligibilityBasis",
+    "ApiSubscriptionCoverageMode",
+    "ApiSubscriptionCoverageScheduleBasis",
+    "ApiSubscriptionCoverageSource",
+    "ApiSubscriptionCoverageStatus",
+    "ApiSubscriptionCoverageUnknownReason",
     "ApiSubwavesSort",
     "ApiUpcomingMemeSubscriptionStatusSourceEnum",
     "ApiWaveCreditScope",
@@ -1630,6 +1665,13 @@ let typeMap: {[index: string]: any} = {
     "ApiSubmissionDropContext": ApiSubmissionDropContext,
     "ApiSubmissionDropVoting": ApiSubmissionDropVoting,
     "ApiSubmissionDropVotingContextProfileContext": ApiSubmissionDropVotingContextProfileContext,
+    "ApiSubscriptionCoverage": ApiSubscriptionCoverage,
+    "ApiSubscriptionCoverageForecast": ApiSubscriptionCoverageForecast,
+    "ApiSubscriptionCoverageMinimumTopUp": ApiSubscriptionCoverageMinimumTopUp,
+    "ApiSubscriptionCoverageNextUnfunded": ApiSubscriptionCoverageNextUnfunded,
+    "ApiSubscriptionCoverageNotificationRisk": ApiSubscriptionCoverageNotificationRisk,
+    "ApiSubscriptionCoveragePoint": ApiSubscriptionCoveragePoint,
+    "ApiSubscriptionCoverageRecommendedTopUp": ApiSubscriptionCoverageRecommendedTopUp,
     "ApiTargetAndSubscriptionActions": ApiTargetAndSubscriptionActions,
     "ApiTdhEdition": ApiTdhEdition,
     "ApiTdhEditionsPage": ApiTdhEditionsPage,

@@ -13,6 +13,9 @@
 
 import { ApiNotificationDropReactedReactor } from '../models/ApiNotificationDropReactedReactor';
 import { ApiNotificationPollVoteOption } from '../models/ApiNotificationPollVoteOption';
+import { ApiSubscriptionCoverageNotificationRisk } from '../models/ApiSubscriptionCoverageNotificationRisk';
+import { ApiSubscriptionCoveragePoint } from '../models/ApiSubscriptionCoveragePoint';
+import { ApiSubscriptionCoverageStatus } from '../models/ApiSubscriptionCoverageStatus';
 import { HttpFile } from '../http/http';
 
 /**
@@ -37,6 +40,19 @@ export class ApiNotificationAdditionalContextV2 {
     'replied_drop_id'?: string;
     'replied_drop_part'?: number;
     'wave_id'?: string;
+    'recipient_profile_id'?: string;
+    'profile_handle'?: string;
+    'status'?: ApiSubscriptionCoverageStatus;
+    'consolidation_key'?: string;
+    'mint_capacity'?: number;
+    'allocated_mints'?: number;
+    'fully_funded_drops'?: number;
+    'funded_through'?: ApiSubscriptionCoveragePoint | null;
+    'next_unfunded'?: ApiSubscriptionCoverageNotificationRisk | null;
+    'minimum_top_up_eth'?: string | null;
+    'top_up_deadline'?: Date | null;
+    'calculation_version'?: number;
+    'forecast_fingerprint'?: string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -150,6 +166,84 @@ export class ApiNotificationAdditionalContextV2 {
             "baseName": "wave_id",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "recipient_profile_id",
+            "baseName": "recipient_profile_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "profile_handle",
+            "baseName": "profile_handle",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "status",
+            "baseName": "status",
+            "type": "ApiSubscriptionCoverageStatus",
+            "format": ""
+        },
+        {
+            "name": "consolidation_key",
+            "baseName": "consolidation_key",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "mint_capacity",
+            "baseName": "mint_capacity",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "allocated_mints",
+            "baseName": "allocated_mints",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "fully_funded_drops",
+            "baseName": "fully_funded_drops",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "funded_through",
+            "baseName": "funded_through",
+            "type": "ApiSubscriptionCoveragePoint",
+            "format": ""
+        },
+        {
+            "name": "next_unfunded",
+            "baseName": "next_unfunded",
+            "type": "ApiSubscriptionCoverageNotificationRisk",
+            "format": ""
+        },
+        {
+            "name": "minimum_top_up_eth",
+            "baseName": "minimum_top_up_eth",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "top_up_deadline",
+            "baseName": "top_up_deadline",
+            "type": "Date",
+            "format": "date-time"
+        },
+        {
+            "name": "calculation_version",
+            "baseName": "calculation_version",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "forecast_fingerprint",
+            "baseName": "forecast_fingerprint",
+            "type": "string",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
@@ -159,3 +253,5 @@ export class ApiNotificationAdditionalContextV2 {
     public constructor() {
     }
 }
+
+

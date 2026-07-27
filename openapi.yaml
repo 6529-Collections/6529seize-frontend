@@ -7999,6 +7999,68 @@ paths:
               schema:
                 type: object
                 additionalProperties: true
+  /deploy/release-bus-v2/maintenance/recover-stalled-qualifications:
+    post:
+      tags:
+        - Release Bus v2
+      summary: >-
+        Safely yield unsatisfiable production qualifications while production
+        automation is disabled
+      operationId: recoverStalledReleaseBusV2ProductionQualifications
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: >-
+            Unsatisfiable parent and qualification trains were terminalized
+            transactionally and their explicit candidates retained for replan.
+            Recovery commits at most one yield per request; has_more means the
+            caller must invoke the endpoint again, and only a response with no
+            recovered item and has_more=false proves the drain pass is complete
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /subscriptions/consolidation/coverage/{consolidation_key}:
+    get:
+      tags:
+        - Subscriptions
+      summary: Get projected subscription coverage for a consolidation
+      description: >-
+        Returns the authoritative backend forecast for The Memes subscription
+        minting. Monetary values are lossless decimal ETH strings. Future Meme
+        timing is projected from the canonical calendar provider and does not
+        represent a top-up deadline. This public access policy matches the
+        existing subscription details and upcoming-Meme endpoints. The response
+        is intentionally uncached because background top-ups, redemptions,
+        eligibility changes, and time can change coverage.
+      operationId: getSubscriptionCoverage
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/subscriptions/get-subscription-coverage.handler"
+          name: handleGetSubscriptionCoverage
+      parameters:
+        - name: consolidation_key
+          in: path
+          description: Normalized consolidation key
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+      responses:
+        "200":
+          description: Current projected subscription coverage
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiSubscriptionCoverage"
+        "400":
+          description: Invalid consolidation key
   /subscriptions/consolidation/details/{consolidation_key}:
     get:
       tags:
@@ -18097,7 +18159,9 @@ components:
           format: int64
           nullable: true
         related_identity:
-          $ref: "#/components/schemas/ApiProfileMin"
+          allOf:
+            - $ref: "#/components/schemas/ApiProfileMin"
+          nullable: true
         related_drops:
           type: array
           items:
@@ -18156,6 +18220,47 @@ components:
           format: int64
         wave_id:
           type: string
+        recipient_profile_id:
+          type: string
+        profile_handle:
+          type: string
+        status:
+          $ref: "#/components/schemas/ApiSubscriptionCoverageStatus"
+        consolidation_key:
+          type: string
+        mint_capacity:
+          type: integer
+          format: int64
+          minimum: 0
+        allocated_mints:
+          type: integer
+          format: int64
+          minimum: 0
+        fully_funded_drops:
+          type: integer
+          format: int64
+          minimum: 0
+        funded_through:
+          allOf:
+            - $ref: "#/components/schemas/ApiSubscriptionCoveragePoint"
+          nullable: true
+        next_unfunded:
+          allOf:
+            - $ref: "#/components/schemas/ApiSubscriptionCoverageNotificationRisk"
+          nullable: true
+        minimum_top_up_eth:
+          type: string
+          nullable: true
+        top_up_deadline:
+          type: string
+          format: date-time
+          nullable: true
+        calculation_version:
+          type: integer
+          format: int64
+          minimum: 1
+        forecast_fingerprint:
+          type: string
       description: >-
         Notification-specific additional context. For DROP_REACTED notifications
         this includes reaction and reactors, where each reactor only has handle,
@@ -18176,6 +18281,7 @@ components:
         - WAVE_CREATED
         - ALL_DROPS
         - PRIORITY_ALERT
+        - SUBSCRIPTION_COVERAGE
     ApiNotificationDropReactedReactor:
       type: object
       required:
@@ -18249,7 +18355,9 @@ components:
           format: int64
           nullable: true
         related_identity:
-          $ref: "#/components/schemas/ApiIdentityOverview"
+          allOf:
+            - $ref: "#/components/schemas/ApiIdentityOverview"
+          nullable: true
         related_drops:
           type: array
           items:
@@ -19776,6 +19884,7 @@ components:
         - drop_reacted
         - drop_boosted
         - wave_created
+        - subscription_coverage
       properties:
         identity_subscribed:
           type: boolean
@@ -19807,6 +19916,9 @@ components:
         wave_created:
           type: boolean
           description: Notify when you are invited to a wave
+        subscription_coverage:
+          type: boolean
+          description: Notify when The Memes subscription coverage becomes low
     ApiPushNotificationSettingsUpdate:
       type: object
       properties:
@@ -19829,6 +19941,8 @@ components:
         drop_boosted:
           type: boolean
         wave_created:
+          type: boolean
+        subscription_coverage:
           type: boolean
     ApiQuotedDrop:
       type: object
@@ -20513,6 +20627,299 @@ components:
         current:
           type: integer
           format: int64
+    ApiSubscriptionCoverage:
+      type: object
+      required:
+        - consolidation_key
+        - calculated_at
+        - status
+        - mode
+        - subscribe_all_editions
+        - eligibility_count
+        - balance_eth
+        - mint_price_eth
+        - mint_capacity
+        - allocated_mints
+        - fully_funded_drops
+        - funded_through
+        - next_unfunded
+        - minimum_top_up
+        - recommended_top_up
+        - forecast
+      properties:
+        consolidation_key:
+          type: string
+        calculated_at:
+          type: string
+          format: date-time
+        status:
+          $ref: "#/components/schemas/ApiSubscriptionCoverageStatus"
+        mode:
+          allOf:
+            - $ref: "#/components/schemas/ApiSubscriptionCoverageMode"
+          nullable: true
+        subscribe_all_editions:
+          type: boolean
+          nullable: true
+        eligibility_count:
+          type: integer
+          format: int64
+          minimum: 0
+          nullable: true
+        balance_eth:
+          type: string
+          description: Exact current subscription balance in ETH
+        mint_price_eth:
+          type: string
+          description: Exact price of one subscription mint in ETH
+        mint_capacity:
+          type: integer
+          format: int64
+          minimum: 0
+          nullable: true
+          description: Raw floor of balance divided by mint price
+        allocated_mints:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Mints allocated to forecasted intended drops
+        fully_funded_drops:
+          type: integer
+          format: int64
+          minimum: 0
+          description: >-
+            Consecutive fully funded intended drops beginning with the immediate
+            next intended drop
+        funded_through:
+          allOf:
+            - $ref: "#/components/schemas/ApiSubscriptionCoveragePoint"
+          nullable: true
+        next_unfunded:
+          allOf:
+            - $ref: "#/components/schemas/ApiSubscriptionCoverageNextUnfunded"
+          nullable: true
+        minimum_top_up:
+          allOf:
+            - $ref: "#/components/schemas/ApiSubscriptionCoverageMinimumTopUp"
+          nullable: true
+        recommended_top_up:
+          allOf:
+            - $ref: "#/components/schemas/ApiSubscriptionCoverageRecommendedTopUp"
+          nullable: true
+        forecast:
+          $ref: "#/components/schemas/ApiSubscriptionCoverageForecast"
+    ApiSubscriptionCoverageDeadlineBasis:
+      type: string
+      enum:
+        - AUTHORITATIVE
+        - UNAVAILABLE
+    ApiSubscriptionCoverageEligibilityBasis:
+      type: string
+      enum:
+        - CURRENT_ELIGIBILITY
+    ApiSubscriptionCoverageForecast:
+      type: object
+      required:
+        - eligibility_basis
+        - schedule_basis
+        - deadline_basis
+        - forecast_truncated
+        - horizon_start_token_id
+        - horizon_end_token_id
+        - horizon_drop_count
+        - calculation_version
+        - forecast_fingerprint
+        - unknown_reason
+      properties:
+        eligibility_basis:
+          $ref: "#/components/schemas/ApiSubscriptionCoverageEligibilityBasis"
+        schedule_basis:
+          $ref: "#/components/schemas/ApiSubscriptionCoverageScheduleBasis"
+        deadline_basis:
+          $ref: "#/components/schemas/ApiSubscriptionCoverageDeadlineBasis"
+        forecast_truncated:
+          type: boolean
+        horizon_start_token_id:
+          type: integer
+          format: int64
+          nullable: true
+        horizon_end_token_id:
+          type: integer
+          format: int64
+          nullable: true
+        horizon_drop_count:
+          type: integer
+          format: int64
+          minimum: 0
+        calculation_version:
+          type: integer
+          format: int64
+          minimum: 1
+        forecast_fingerprint:
+          type: string
+        unknown_reason:
+          allOf:
+            - $ref: "#/components/schemas/ApiSubscriptionCoverageUnknownReason"
+          nullable: true
+    ApiSubscriptionCoverageMinimumTopUp:
+      type: object
+      required:
+        - additional_mints
+        - amount_eth
+        - resulting_fully_funded_drops
+        - projected_through
+      properties:
+        additional_mints:
+          type: integer
+          format: int64
+          minimum: 1
+        amount_eth:
+          type: string
+          description: Exact additional ETH required
+        resulting_fully_funded_drops:
+          type: integer
+          format: int64
+          minimum: 1
+        projected_through:
+          $ref: "#/components/schemas/ApiSubscriptionCoveragePoint"
+    ApiSubscriptionCoverageMode:
+      type: string
+      enum:
+        - AUTOMATIC
+        - MANUAL
+    ApiSubscriptionCoverageNextUnfunded:
+      type: object
+      required:
+        - token_id
+        - mint_at
+        - requested_mints
+        - funded_mints
+        - missing_mints
+        - required_eth
+        - shortfall_eth
+        - top_up_deadline
+        - source
+      properties:
+        token_id:
+          type: integer
+          format: int64
+        mint_at:
+          type: string
+          format: date-time
+        requested_mints:
+          type: integer
+          format: int64
+          minimum: 1
+        funded_mints:
+          type: integer
+          format: int64
+          minimum: 0
+        missing_mints:
+          type: integer
+          format: int64
+          minimum: 1
+        required_eth:
+          type: string
+          description: Exact total ETH required for this intended drop
+        shortfall_eth:
+          type: string
+          description: Exact additional ETH needed to fully fund this drop
+        top_up_deadline:
+          type: string
+          format: date-time
+          nullable: true
+          description: >-
+            Authoritative subscription-finalization cutoff, or null when the
+            backend has no such cutoff
+        source:
+          $ref: "#/components/schemas/ApiSubscriptionCoverageSource"
+    ApiSubscriptionCoverageNotificationRisk:
+      type: object
+      required:
+        - token_id
+        - mint_at
+        - requested_mints
+        - funded_mints
+        - missing_mints
+      properties:
+        token_id:
+          type: integer
+          format: int64
+        mint_at:
+          type: string
+          format: date-time
+        requested_mints:
+          type: integer
+          format: int64
+          minimum: 1
+        funded_mints:
+          type: integer
+          format: int64
+          minimum: 0
+        missing_mints:
+          type: integer
+          format: int64
+          minimum: 1
+    ApiSubscriptionCoveragePoint:
+      type: object
+      required:
+        - token_id
+        - mint_at
+      properties:
+        token_id:
+          type: integer
+          format: int64
+        mint_at:
+          type: string
+          format: date-time
+    ApiSubscriptionCoverageRecommendedTopUp:
+      type: object
+      required:
+        - target_fully_funded_drops
+        - additional_mints
+        - amount_eth
+        - projected_through
+      properties:
+        target_fully_funded_drops:
+          type: integer
+          format: int64
+          minimum: 1
+        additional_mints:
+          type: integer
+          format: int64
+          minimum: 1
+        amount_eth:
+          type: string
+          description: Exact additional ETH required
+        projected_through:
+          $ref: "#/components/schemas/ApiSubscriptionCoveragePoint"
+    ApiSubscriptionCoverageScheduleBasis:
+      type: string
+      enum:
+        - PROJECTED
+    ApiSubscriptionCoverageSource:
+      type: string
+      enum:
+        - AUTOMATIC
+        - MANUAL
+    ApiSubscriptionCoverageStatus:
+      type: string
+      enum:
+        - NOT_SET_UP
+        - NO_CURRENT_ELIGIBILITY
+        - NO_UPCOMING_SELECTIONS
+        - COVERED
+        - EARLY_WARNING
+        - RUNNING_LOW
+        - ACTION_REQUIRED
+        - UNKNOWN
+    ApiSubscriptionCoverageUnknownReason:
+      type: string
+      enum:
+        - BALANCE_INVALID
+        - MODE_UNAVAILABLE
+        - SCHEDULE_UNAVAILABLE
+        - INPUT_INCONSISTENT
     ApiSubwavesSort:
       type: string
       enum:
@@ -23757,6 +24164,7 @@ components:
         - STAGING_VALIDATING
         - STAGING_VALIDATED
         - READY_FOR_PRODUCTION
+        - WAITING_FOR_PRODUCTION_REPLAN
         - PRODUCTION_IN_TRAIN
         - PRODUCTION_BUILDING_OR_QUALIFYING
         - PRODUCTION_DEPLOYING
@@ -23986,7 +24394,9 @@ components:
         candidate_id:
           type: string
           format: uuid
-          description: Exact synthetic candidate id required only for the operator-only beta while global mode is OFF.
+          description: >-
+            Exact synthetic candidate id required only for the operator-only
+            beta while global mode is OFF.
         repository:
           type: string
           enum:

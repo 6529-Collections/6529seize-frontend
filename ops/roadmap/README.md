@@ -89,9 +89,8 @@ Triggers:
 - PR merged to `main`.
 - Manual dispatch.
 - Applying a staging queue label.
-- A scheduled bus that follows the cadence in
-  `ops/docs/developer/deployment-bus-process.md` so the process doc stays the
-  source of truth when the team tunes the batching window.
+- A scheduled bus that follows the current release authority documented in
+  `ops/docs/developer/simple-release-bus-v2.md`.
 
 Behavior:
 

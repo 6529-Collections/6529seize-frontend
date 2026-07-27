@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -13,6 +13,8 @@ import CreateWaveOutcomes from "./outcomes/CreateWaveOutcomes";
 import CreateWaveOverview from "./overview/CreateWaveOverview";
 import CreateWaveRules from "./CreateWaveRules";
 import CreateWaveVoting from "./voting/CreateWaveVoting";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 type WaveConfigController = ReturnType<typeof useWaveConfig>;
 
@@ -22,6 +24,7 @@ export default function CreateWaveStepContent({
   descriptionRef,
   submitting,
   showDropError,
+  overviewLeading,
   onHaveDropToSubmitChange,
   onInlineGroupCreate,
 }: {
@@ -30,11 +33,14 @@ export default function CreateWaveStepContent({
   readonly descriptionRef: RefObject<CreateWaveDescriptionHandles | null>;
   readonly submitting: boolean;
   readonly showDropError: boolean;
+  /** Rendered above the Overview step's fields (e.g. saved drafts). */
+  readonly overviewLeading?: ReactNode;
   readonly onHaveDropToSubmitChange: (haveDrop: boolean) => void;
   readonly onInlineGroupCreate: (
     payload: ApiCreateGroup
   ) => Promise<ApiGroupFull | null>;
 }) {
+  const locale = useBrowserLocale();
   const {
     config,
     step,
@@ -68,17 +74,30 @@ export default function CreateWaveStepContent({
   switch (step) {
     case CreateWaveStep.OVERVIEW:
       return (
-        <CreateWaveOverview
-          overview={config.overview}
-          display={config.display}
-          errors={errors}
-          ongoingRanking={config.dates.ongoingRanking ?? false}
-          setOverview={setOverview}
-          setDisplay={setDisplay}
-          onOngoingRankingChange={(ongoingRanking) =>
-            setDates({ ...config.dates, ongoingRanking })
-          }
-        />
+        <div className="tw-flex tw-flex-col tw-gap-y-4">
+          {overviewLeading}
+          {/* Mirror the Dates-step card chrome so New Wave reads as a
+              sibling of the collapsible Saved Drafts card — but it stays
+              open (it is the step the user is actively filling) and its
+              label is a static heading, not a fixed-height toggle header,
+              so it doesn't waste vertical space on phones. */}
+          <div className="tw-rounded-xl tw-bg-iron-900 tw-p-5 tw-shadow-sm tw-ring-1 tw-ring-iron-700/50">
+            <h3 className="tw-mb-4 tw-text-base tw-font-semibold tw-text-iron-300">
+              {t(locale, "wave.create.drafts.newWave")}
+            </h3>
+            <CreateWaveOverview
+              overview={config.overview}
+              display={config.display}
+              errors={errors}
+              ongoingRanking={config.dates.ongoingRanking ?? false}
+              setOverview={setOverview}
+              setDisplay={setDisplay}
+              onOngoingRankingChange={(ongoingRanking) =>
+                setDates({ ...config.dates, ongoingRanking })
+              }
+            />
+          </div>
+        </div>
       );
     case CreateWaveStep.GROUPS:
       return (

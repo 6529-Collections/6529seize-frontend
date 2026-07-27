@@ -65,7 +65,7 @@ function getTimeoutMs() {
   return timeoutMs;
 }
 
-function getStatusUrls() {
+function getStatusUrl() {
   const override = process.env.RELEASE_BUS_API_URL?.trim();
   const configured = override || DEFAULT_API_URL;
   let baseUrl;
@@ -82,10 +82,7 @@ function getStatusUrls() {
       "RELEASE_BUS_API_URL override may target only a loopback test server."
     );
   }
-  return [
-    new URL("/deploy/release-bus-v2/controls", baseUrl),
-    new URL("/deploy/release-bus/controls", baseUrl),
-  ];
+  return new URL("/deploy/release-bus-v2/controls", baseUrl);
 }
 
 function normalizePaused(value) {
@@ -129,7 +126,7 @@ function sanitizeStatus(payload) {
   return { mode: payload.mode, controls };
 }
 
-async function requestStatus(token, statusUrl, timeoutMs, allowMissing = false) {
+async function requestStatus(token, statusUrl, timeoutMs) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   timeout.unref();
@@ -158,7 +155,6 @@ async function requestStatus(token, statusUrl, timeoutMs, allowMissing = false) 
       `Release Bus status authentication failed (HTTP ${response.status}).`
     );
   }
-  if (allowMissing && response.status === 404) return null;
   if (!response.ok) {
     throw new SafeStatusError(
       `Release Bus status API returned HTTP ${response.status}.`
@@ -178,11 +174,9 @@ async function requestStatus(token, statusUrl, timeoutMs, allowMissing = false) 
 
 try {
   const timeoutMs = getTimeoutMs();
-  const [v2StatusUrl, legacyStatusUrl] = getStatusUrls();
+  const statusUrl = getStatusUrl();
   const token = getGitHubToken();
-  const status =
-    (await requestStatus(token, v2StatusUrl, timeoutMs, true)) ??
-    (await requestStatus(token, legacyStatusUrl, timeoutMs));
+  const status = await requestStatus(token, statusUrl, timeoutMs);
   process.stdout.write(`${JSON.stringify(status, null, 2)}\n`);
 } catch (error) {
   const message =

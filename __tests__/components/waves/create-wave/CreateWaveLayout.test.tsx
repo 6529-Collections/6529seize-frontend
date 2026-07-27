@@ -28,6 +28,9 @@ const { useNativeKeyboard } = require("@/hooks/useNativeKeyboard") as {
 
 const config = {
   overview: { type: "CHAT" },
+  // dates is required on CreateWaveConfig; the mobile progress header reads
+  // ongoingRanking from it.
+  dates: { ongoingRanking: false },
 } as any;
 
 describe("CreateWaveLayout", () => {

@@ -1,0 +1,357 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm#function:0xffa18649",
+          "declaringDefinitionId": "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "privateKey",
+              "type": "uint256"
+            }
+          ],
+          "name": "addr",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0xffa18649",
+          "signature": "addr(uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm#function:0xe341eaa4",
+          "declaringDefinitionId": "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "privateKey",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "digest",
+              "type": "bytes32"
+            }
+          ],
+          "name": "sign",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "v",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "r",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "s",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xe341eaa4",
+          "signature": "sign(uint256,bytes32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm#function:0x7fec2a8d",
+          "declaringDefinitionId": "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "broadcaster",
+              "type": "address"
+            }
+          ],
+          "name": "startBroadcast",
+          "outputs": [],
+          "selector": "0x7fec2a8d",
+          "signature": "startBroadcast(address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm#function:0x76eadd36",
+          "declaringDefinitionId": "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm",
+          "inherited": false,
+          "inputs": [],
+          "name": "stopBroadcast",
+          "outputs": [],
+          "selector": "0x76eadd36",
+          "signature": "stopBroadcast()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "deployment_or_operational_source",
+    "classificationReason": "Declared under the pinned deployment-script source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "addr(uint256)",
+          "displaySignature": "addr(uint256)",
+          "functionKind": "function",
+          "id": "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm#function:0xffa18649",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "privateKey",
+              "type": "uint256"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlTWV0YWRhdGFCcm93c2VyLnMuc29sOk1ldGFkYXRhU2NyaXB0Vm0jZnVuY3Rpb246MHhmZmExODY0OQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "addr",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 61,
+            "byteStart": 308,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseMetadataBrowser.s.sol#L11",
+            "lineEnd": 11,
+            "lineStart": 11,
+            "snippetSha256": "sha256:90592f7a981dd7cf5a212def0eeb231fd721bcbbba8ce127db1b80e2add5bcea",
+            "sourceSha256": "sha256:17feafd5ac208982493239ed0bd02797a74155c917b35f2b09c7191f93cb5be4"
+          },
+          "selector": "0xffa18649",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "sign(uint256,bytes32)",
+          "displaySignature": "sign(uint256,bytes32)",
+          "functionKind": "function",
+          "id": "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm#function:0xe341eaa4",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "privateKey",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "digest",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlTWV0YWRhdGFCcm93c2VyLnMuc29sOk1ldGFkYXRhU2NyaXB0Vm0jZnVuY3Rpb246MHhlMzQxZWFhNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "sign",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "v",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "r",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "s",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 115,
+            "byteStart": 374,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseMetadataBrowser.s.sol#L12-L14",
+            "lineEnd": 14,
+            "lineStart": 12,
+            "snippetSha256": "sha256:93ff16ad639306c175d05a7b466bd61590c04569e564e179347995a448226dc8",
+            "sourceSha256": "sha256:17feafd5ac208982493239ed0bd02797a74155c917b35f2b09c7191f93cb5be4"
+          },
+          "selector": "0xe341eaa4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "startBroadcast(address)",
+          "displaySignature": "startBroadcast(address)",
+          "functionKind": "function",
+          "id": "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm#function:0x7fec2a8d",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "broadcaster",
+              "type": "address"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlTWV0YWRhdGFCcm93c2VyLnMuc29sOk1ldGFkYXRhU2NyaXB0Vm0jZnVuY3Rpb246MHg3ZmVjMmE4ZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "startBroadcast",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 54,
+            "byteStart": 494,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseMetadataBrowser.s.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:b70216c0d1ecd7ba3688da2f3da14931c2ea14d174bfeff5c89dd2c1a116d40b",
+            "sourceSha256": "sha256:17feafd5ac208982493239ed0bd02797a74155c917b35f2b09c7191f93cb5be4"
+          },
+          "selector": "0x7fec2a8d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "stopBroadcast()",
+          "displaySignature": "stopBroadcast()",
+          "functionKind": "function",
+          "id": "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm#function:0x76eadd36",
+          "inputs": [],
+          "key": "c2NyaXB0L1JlaGVhcnNlTWV0YWRhdGFCcm93c2VyLnMuc29sOk1ldGFkYXRhU2NyaXB0Vm0jZnVuY3Rpb246MHg3NmVhZGQzNg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "stopBroadcast",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 34,
+            "byteStart": 553,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseMetadataBrowser.s.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:18810af604c8419a23308dd4206bdc86582b67243348d5cdc2aaf95eadcfeb83",
+            "sourceSha256": "sha256:17feafd5ac208982493239ed0bd02797a74155c917b35f2b09c7191f93cb5be4"
+          },
+          "selector": "0x76eadd36",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c2NyaXB0L1JlaGVhcnNlTWV0YWRhdGFCcm93c2VyLnMuc29sOk1ldGFkYXRhU2NyaXB0Vm0",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "MetadataScriptVm",
+    "natspec": "",
+    "range": {
+      "byteLength": 314,
+      "byteStart": 275,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseMetadataBrowser.s.sol#L10-L17",
+      "lineEnd": 17,
+      "lineStart": 10,
+      "snippetSha256": "sha256:5c001b2997f121a0cceb4d2056356dc1631bb282cb2009c6f2dde7a1cbe5c368",
+      "sourceSha256": "sha256:17feafd5ac208982493239ed0bd02797a74155c917b35f2b09c7191f93cb5be4"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "script",
+    "sourcePath": "script/RehearseMetadataBrowser.s.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 5
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 4
+    },
+    "totalCount": 5
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm#function:0x76eadd36",
+      "definitionId": "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm#function:0x7fec2a8d",
+      "definitionId": "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm#function:0xe341eaa4",
+      "definitionId": "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm#function:0xffa18649",
+      "definitionId": "script/RehearseMetadataBrowser.s.sol:MetadataScriptVm",
+      "severity": "advisory"
+    }
+  ]
+}
