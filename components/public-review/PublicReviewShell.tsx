@@ -217,7 +217,7 @@ export function PublicReviewShell({
                           className="tw-size-3.5 tw-flex-none tw-text-iron-500 tw-transition-colors tw-duration-200 tw-ease-out group-hover:tw-text-iron-300"
                           aria-hidden="true"
                         />
-                        {t(DEFAULT_LOCALE, "publicReview.ledger.navigation")}
+                        {t(DEFAULT_LOCALE, "publicReview.comments.viewLedger")}
                       </Link>
                     ) : null}
                   </div>
