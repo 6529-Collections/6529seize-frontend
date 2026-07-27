@@ -436,8 +436,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.feedback.severity": "Suspected severity",
   "publicReview.feedback.comment": "Comment",
   "publicReview.feedback.required": "required",
-  "publicReview.feedback.commentHint":
-    "Describe what you found and be as specific as possible.",
+  "publicReview.feedback.commentHint": "Write a comment…",
   "publicReview.feedback.advanced": "Add technical detail",
   "publicReview.feedback.whyItMatters": "Why this matters",
   "publicReview.feedback.suggestedChange": "Suggested change",

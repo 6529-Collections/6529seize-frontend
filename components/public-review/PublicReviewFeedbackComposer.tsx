@@ -519,7 +519,7 @@ export default function PublicReviewFeedbackComposer({
                 commentError ? ` ${formId}-comment-error` : ""
               }`}
               aria-invalid={Boolean(commentError)}
-              className={`${INPUT_CLASSES} tw-min-h-24 tw-resize-y tw-leading-6 placeholder:tw-text-iron-500`}
+              className={`${INPUT_CLASSES} tw-min-h-24 tw-resize-y tw-leading-6 placeholder:tw-text-iron-600`}
               placeholder={t(locale, "publicReview.feedback.commentHint")}
               required
               value={draft.comment}
