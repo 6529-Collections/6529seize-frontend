@@ -10,6 +10,7 @@ on:
       expected_sha: { type: string, required: true }
       candidate_shas: { type: string, required: true }
       release_branch: { type: string, required: true }
+      release_parent_sha: { type: string, required: false, default: "" }
 
 permissions:
   contents: read
@@ -28,6 +29,7 @@ jobs:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
           OPERATION_KEY: ${{ inputs.operation_key }}
           RELEASE_BRANCH: ${{ inputs.release_branch }}
+          RELEASE_PARENT_SHA: ${{ inputs.release_parent_sha }}
           TRAIN_ID: ${{ inputs.release_train_id }}
         run: |
           set -euo pipefail
@@ -35,7 +37,8 @@ jobs:
           test "$BASE_SHA" = "$EXPECTED_SHA"
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
           [[ "$OPERATION_KEY" =~ ^rb2:[A-Za-z0-9:._-]+:a[1-9][0-9]*$ ]]
-          [[ "$RELEASE_BRANCH" =~ ^release-bus-v2/(staging|production|qualification)-train-[A-Za-z0-9._-]+$ ]]
+          [[ "$RELEASE_BRANCH" =~ ^release-bus-v2/(staging|production|qualification|rollback)-train-[A-Za-z0-9._-]+$ ]]
+          test -z "$RELEASE_PARENT_SHA" || [[ "$RELEASE_PARENT_SHA" =~ ^[a-f0-9]{40}$ ]]
           jq -e 'type == "array" and length > 0 and all(.[]; test("^[a-f0-9]{40}$"))' <<< "$CANDIDATE_SHAS"
       - name: Authorize exact v2 operation
         env:
@@ -64,6 +67,7 @@ jobs:
           BASE_SHA: ${{ inputs.base_sha }}
           CANDIDATE_SHAS: ${{ inputs.candidate_shas }}
           RELEASE_BRANCH: ${{ inputs.release_branch }}
+          RELEASE_PARENT_SHA: ${{ inputs.release_parent_sha }}
           RELEASE_BUS_GIT_EMAIL: ${{ vars.RELEASE_BUS_GIT_EMAIL || 'release-bus@users.noreply.github.com' }}
           RELEASE_BUS_GIT_NAME: ${{ vars.RELEASE_BUS_GIT_NAME || '6529 Release Bus' }}
           TRAIN_ID: ${{ inputs.release_train_id }}
@@ -73,6 +77,12 @@ jobs:
           if [ -n "$existing" ]; then
             git fetch --no-tags origin "$existing"
             git merge-base --is-ancestor "$BASE_SHA" "$existing"
+            if [ -n "${RELEASE_PARENT_SHA:-}" ]; then
+              git fetch --no-tags origin "$RELEASE_PARENT_SHA"
+              if [ "$existing" != "$RELEASE_PARENT_SHA" ]; then
+                test "$(git rev-parse "$existing^1")" = "$RELEASE_PARENT_SHA"
+              fi
+            fi
             excluded='[]'
             while IFS= read -r sha; do
               if ! git merge-base --is-ancestor "$sha" "$existing"; then
@@ -88,6 +98,14 @@ jobs:
           excluded='[]'
           while IFS= read -r sha; do
             git fetch --no-tags origin "$sha"
+            ancestor_status=0
+            git merge-base --is-ancestor "$sha" HEAD || ancestor_status=$?
+            if [ "$ancestor_status" -eq 0 ]; then
+              continue
+            fi
+            if [ "$ancestor_status" -ne 1 ]; then
+              exit "$ancestor_status"
+            fi
             if git merge --no-ff --no-commit "$sha"; then
               git -c core.hooksPath=/dev/null commit -s \
                 -m "Release Bus v2 train $TRAIN_ID: merge frontend candidate" \
@@ -98,6 +116,22 @@ jobs:
               excluded="$(jq -c --arg sha "$sha" '. + [$sha]' <<< "$excluded")"
             fi
           done < <(jq -r '.[]' <<< "$CANDIDATE_SHAS")
+          scratch_sha="$(git rev-parse HEAD)"
+          if [ -n "${RELEASE_PARENT_SHA:-}" ] && [ "$scratch_sha" != "$RELEASE_PARENT_SHA" ]; then
+            git fetch --no-tags origin "$RELEASE_PARENT_SHA"
+            tree_sha="$(git rev-parse "$scratch_sha^{tree}")"
+            release_sha="$(
+              git commit-tree "$tree_sha" \
+                -p "$RELEASE_PARENT_SHA" \
+                -p "$scratch_sha" \
+                -m "Release Bus v2 train $TRAIN_ID: bind frontend staging release" \
+                -m "Release-Parent-SHA: $RELEASE_PARENT_SHA" \
+                -m "Release-Composition-SHA: $scratch_sha" \
+                -m "Release-Bus-v2-Train: $TRAIN_ID" \
+                -m "Signed-off-by: $RELEASE_BUS_GIT_NAME <$RELEASE_BUS_GIT_EMAIL>"
+            )"
+            git reset --hard "$release_sha"
+          fi
           git fsck --no-dangling
           jq -n --arg composed_sha "$(git rev-parse HEAD)" --argjson excluded_shas "$excluded" '{composed_sha:$composed_sha,excluded_shas:$excluded_shas,reused:false}' > "$RUNNER_TEMP/composition.json"
       - name: Create scoped GitHub App token
