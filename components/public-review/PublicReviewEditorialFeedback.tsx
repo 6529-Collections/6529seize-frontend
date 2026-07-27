@@ -41,7 +41,7 @@ export function PublicReviewEditorialFeedback({
 
   return (
     <div className="tw-flex tw-min-h-0 tw-flex-col @[960px]:tw-h-full">
-      <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-px-5 tw-py-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
+      <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-bg-iron-950/40 tw-px-5 tw-py-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
         <PublicReviewPageComments
           config={config}
           destination={destination}

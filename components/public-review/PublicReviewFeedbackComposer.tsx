@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   type ReactNode,
@@ -538,12 +539,16 @@ export default function PublicReviewFeedbackComposer({
             ) : null}
           </div>
 
-          <details className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.012] tw-px-3">
-            <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors hover:tw-text-iron-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40">
+          <details className="tw-group tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/50 tw-transition-colors open:tw-border-white/[0.09] open:tw-bg-iron-950/70">
+            <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-3 tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors tw-duration-200 hover:tw-bg-white/[0.018] hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
               {t(locale, "publicReview.feedback.advanced")}
+              <ChevronDownIcon
+                className="tw-size-3.5 tw-flex-none tw-text-iron-500 tw-transition-transform tw-duration-200 group-open:tw-rotate-180 motion-reduce:tw-transition-none"
+                aria-hidden="true"
+              />
             </summary>
 
-            <div className="tw-space-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pb-3 tw-pt-4">
+            <div className="tw-space-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-3 tw-pb-3 tw-pt-4">
               {contextControl}
 
               <div className="tw-grid tw-gap-3 @[340px]:tw-grid-cols-2">
