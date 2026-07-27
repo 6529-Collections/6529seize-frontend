@@ -272,7 +272,11 @@ export function getPublicReviewFeedbackPrimaryComment(body: string): string {
   const visibleBody =
     reviewMetadataStart >= 0 ? body.slice(0, reviewMetadataStart) : body;
   const headingEnd = visibleBody.indexOf("\n\n");
-  if (visibleBody.startsWith("## ") && headingEnd >= 0) {
+  if (
+    reviewMetadataStart >= 0 &&
+    visibleBody.startsWith("## ") &&
+    headingEnd >= 0
+  ) {
     return visibleBody.slice(headingEnd + 2).trim();
   }
   return visibleBody.trim();

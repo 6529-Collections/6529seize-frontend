@@ -209,6 +209,9 @@ describe("public review feedback codec", () => {
     expect(
       getPublicReviewFeedbackPrimaryComment("  Plain Wave comment  ")
     ).toBe("Plain Wave comment");
+    expect(
+      getPublicReviewFeedbackPrimaryComment("## Summary\n\nDetails")
+    ).toBe("## Summary\n\nDetails");
   });
 
   it.each(["0", "01", "-1", "1.5", " 1"])(

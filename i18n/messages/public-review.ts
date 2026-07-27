@@ -65,8 +65,6 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.audiences.auditors.description":
     "Use the editorial map alongside generated reference and retained evidence.",
   "publicReview.audiences.startPath": "Start the {audience} path",
-  "publicReview.audiences.showPath": "View all {count} pages in this path",
-  "publicReview.audiences.pathLabel": "{audience} review reading path",
   "publicReview.navigation.label": "Contract review pages",
   "publicReview.navigation.contentsLabel": "All contract review pages",
   "publicReview.navigation.sequenceLabel":
