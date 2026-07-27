@@ -1,0 +1,357 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm#function:0xffa18649",
+          "declaringDefinitionId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "privateKey",
+              "type": "uint256"
+            }
+          ],
+          "name": "addr",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0xffa18649",
+          "signature": "addr(uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm#function:0xe341eaa4",
+          "declaringDefinitionId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "privateKey",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "digest",
+              "type": "bytes32"
+            }
+          ],
+          "name": "sign",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "v",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "r",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "s",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xe341eaa4",
+          "signature": "sign(uint256,bytes32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm#function:0x7fec2a8d",
+          "declaringDefinitionId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "broadcaster",
+              "type": "address"
+            }
+          ],
+          "name": "startBroadcast",
+          "outputs": [],
+          "selector": "0x7fec2a8d",
+          "signature": "startBroadcast(address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm#function:0x76eadd36",
+          "declaringDefinitionId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm",
+          "inherited": false,
+          "inputs": [],
+          "name": "stopBroadcast",
+          "outputs": [],
+          "selector": "0x76eadd36",
+          "signature": "stopBroadcast()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "deployment_or_operational_source",
+    "classificationReason": "Declared under the pinned deployment-script source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "addr(uint256)",
+          "displaySignature": "addr(uint256)",
+          "functionKind": "function",
+          "id": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm#function:0xffa18649",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "privateKey",
+              "type": "uint256"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50LnMuc29sOkVtZXJnZW5jeVJlZGVwbG95bWVudFZtI2Z1bmN0aW9uOjB4ZmZhMTg2NDk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "addr",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 61,
+            "byteStart": 361,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:90592f7a981dd7cf5a212def0eeb231fd721bcbbba8ce127db1b80e2add5bcea",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "selector": "0xffa18649",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "sign(uint256,bytes32)",
+          "displaySignature": "sign(uint256,bytes32)",
+          "functionKind": "function",
+          "id": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm#function:0xe341eaa4",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "privateKey",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "digest",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50LnMuc29sOkVtZXJnZW5jeVJlZGVwbG95bWVudFZtI2Z1bmN0aW9uOjB4ZTM0MWVhYTQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "sign",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "v",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "r",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "s",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 115,
+            "byteStart": 427,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L13-L15",
+            "lineEnd": 15,
+            "lineStart": 13,
+            "snippetSha256": "sha256:93ff16ad639306c175d05a7b466bd61590c04569e564e179347995a448226dc8",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "selector": "0xe341eaa4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "startBroadcast(address)",
+          "displaySignature": "startBroadcast(address)",
+          "functionKind": "function",
+          "id": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm#function:0x7fec2a8d",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "broadcaster",
+              "type": "address"
+            }
+          ],
+          "key": "c2NyaXB0L1JlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50LnMuc29sOkVtZXJnZW5jeVJlZGVwbG95bWVudFZtI2Z1bmN0aW9uOjB4N2ZlYzJhOGQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "startBroadcast",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 54,
+            "byteStart": 547,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:b70216c0d1ecd7ba3688da2f3da14931c2ea14d174bfeff5c89dd2c1a116d40b",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "selector": "0x7fec2a8d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "stopBroadcast()",
+          "displaySignature": "stopBroadcast()",
+          "functionKind": "function",
+          "id": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm#function:0x76eadd36",
+          "inputs": [],
+          "key": "c2NyaXB0L1JlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50LnMuc29sOkVtZXJnZW5jeVJlZGVwbG95bWVudFZtI2Z1bmN0aW9uOjB4NzZlYWRkMzY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "stopBroadcast",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 34,
+            "byteStart": 606,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:18810af604c8419a23308dd4206bdc86582b67243348d5cdc2aaf95eadcfeb83",
+            "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+          },
+          "selector": "0x76eadd36",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c2NyaXB0L1JlaGVhcnNlRW1lcmdlbmN5UmVkZXBsb3ltZW50LnMuc29sOkVtZXJnZW5jeVJlZGVwbG95bWVudFZt",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "EmergencyRedeploymentVm",
+    "natspec": "",
+    "range": {
+      "byteLength": 321,
+      "byteStart": 321,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/script/RehearseEmergencyRedeployment.s.sol#L11-L18",
+      "lineEnd": 18,
+      "lineStart": 11,
+      "snippetSha256": "sha256:167464be2624a6e25268fac9691375d8f106d7b8b0eef2b7ad6bf4e0a3e07dbf",
+      "sourceSha256": "sha256:87cc785be24f95a3f3745f7350399f503e51328c5b4f541f96acd91012f3aa92"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "script",
+    "sourcePath": "script/RehearseEmergencyRedeployment.s.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 5
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 4
+    },
+    "totalCount": 5
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm#function:0x76eadd36",
+      "definitionId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm#function:0x7fec2a8d",
+      "definitionId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm#function:0xe341eaa4",
+      "definitionId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm#function:0xffa18649",
+      "definitionId": "script/RehearseEmergencyRedeployment.s.sol:EmergencyRedeploymentVm",
+      "severity": "advisory"
+    }
+  ]
+}
