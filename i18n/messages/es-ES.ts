@@ -403,6 +403,7 @@ export const ES_ES_MESSAGES = {
     "Área de carga de archivos del chat de wave",
   ...stormComposerEsMessages,
   "waves.loadingStatus": "Cargando waves",
+  "waves.gifPicker.open": "Añadir GIF",
   "waves.gifPicker.dialogTitle": "Busqueda de GIF",
   "waves.gifPicker.searchPlaceholder": "Buscar GIF",
   "waves.gifPicker.noResults": "No se encontraron GIFs.",

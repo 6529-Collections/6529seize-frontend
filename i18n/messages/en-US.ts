@@ -1056,6 +1056,7 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
 );
 
 const WAVE_GIF_PICKER_MESSAGES = objectMessages("waves.gifPicker", {
+  open: "Add GIF",
   dialogTitle: "GIF search",
   searchPlaceholder: "Search GIFs",
   noResults: "No GIFs found.",

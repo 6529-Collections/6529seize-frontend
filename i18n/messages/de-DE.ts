@@ -401,6 +401,7 @@ export const DE_DE_MESSAGES = {
     "Datei-Upload-Bereich für den Wave-Chat",
   ...stormComposerDeMessages,
   "waves.loadingStatus": "Waves werden geladen",
+  "waves.gifPicker.open": "GIF hinzufügen",
   "waves.gifPicker.dialogTitle": "GIF-Suche",
   "waves.gifPicker.searchPlaceholder": "GIFs suchen",
   "waves.gifPicker.noResults": "Keine GIFs gefunden.",
