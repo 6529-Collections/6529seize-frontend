@@ -104,7 +104,6 @@ describe("NotificationItem", () => {
         }}
         activeDrop={null}
         onReply={jest.fn()}
-        onQuote={jest.fn()}
       />
     );
     expect(screen.getByTestId("subscription-coverage")).toBeInTheDocument();

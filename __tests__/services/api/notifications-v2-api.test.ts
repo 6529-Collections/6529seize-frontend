@@ -5,6 +5,7 @@ import { ApiProfileClassification } from "@/generated/models/ApiProfileClassific
 import { ApiSubscriptionCoverageStatus } from "@/generated/models/ApiSubscriptionCoverageStatus";
 import { commonApiFetch } from "@/services/api/common-api";
 import { fetchNotificationsV2 } from "@/services/api/notifications-v2-api";
+import type { INotificationDropReacted } from "@/types/feed.types";
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
@@ -127,17 +128,20 @@ describe("fetchNotificationsV2", () => {
     expect(response.unread_count).toBe(1);
     expect(response.notifications).toHaveLength(2);
     expect(response.notifications.map((n) => n.id)).toEqual([7, 7]);
+    const reactionNotifications = response.notifications.filter(
+      (notification): notification is INotificationDropReacted =>
+        notification.cause === ApiNotificationCause.DropReacted
+    );
     expect(
-      response.notifications.map((n) => n.related_identity.handle)
+      reactionNotifications.map((n) => n.related_identity.handle)
     ).toEqual(["alice", "bob"]);
     expect(
-      response.notifications.map((n) => n.related_identity.subscribed_actions)
+      reactionNotifications.map(
+        (n) => n.related_identity.subscribed_actions
+      )
     ).toEqual([[ApiIdentitySubscriptionTargetAction.WaveCreated], []]);
-    const [firstNotification] = response.notifications;
-    if (
-      firstNotification?.cause === ApiNotificationCause.DropReacted &&
-      "related_drops" in firstNotification
-    ) {
+    const [firstNotification] = reactionNotifications;
+    if (firstNotification) {
       const mappedDrop = firstNotification.related_drops[0]!;
       expect(mappedDrop.wave.id).toBe("wave-1");
       expect(mappedDrop.wave).toMatchObject({ is_direct_message: true });
@@ -176,7 +180,11 @@ describe("fetchNotificationsV2", () => {
     });
 
     expect(response.notifications).toHaveLength(1);
-    expect(response.notifications[0]?.related_identity).toEqual(
+    const [notification] = response.notifications;
+    if (notification?.cause !== ApiNotificationCause.DropReacted) {
+      throw new Error("Expected drop reacted notification");
+    }
+    expect(notification.related_identity).toEqual(
       expect.objectContaining({
         handle: "alice",
         pfp: "alice-new.png",
