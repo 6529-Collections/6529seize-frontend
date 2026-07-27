@@ -9,6 +9,7 @@ import {
   getStreamReviewFeedbackHref,
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_PAGES,
+  STREAM_REVIEW_PREVIOUS_VERSION,
   STREAM_REVIEW_SOURCE_COMMIT,
   STREAM_REVIEW_VERSION,
 } from "@/lib/public-review/streamReviewDefinition";
@@ -26,13 +27,14 @@ const EXPECTED_PAGE_TITLES = [
   "Metadata, Scripts, and Dependencies",
   "Freezing, Preservation, and Artwork Finality",
   "Governance, Pausing, and Successors",
-  "Security, Testing, and Known Limitations",
+  "Current Implementation and Readiness",
   "Community Review",
 ] as const;
 
 describe("6529 Stream public review definition", () => {
-  it("pins the initial review version and exact source commit", () => {
-    expect(STREAM_REVIEW_VERSION).toBe("2026-07-26.1");
+  it("pins the active review version and exact source commit", () => {
+    expect(STREAM_REVIEW_VERSION).toBe("2026-07-27.1");
+    expect(STREAM_REVIEW_PREVIOUS_VERSION).toBe("2026-07-26.1");
     expect(STREAM_REVIEW_SOURCE_COMMIT).toBe(
       "513bd7e079eafe109df6ae1ae21bfbca6fec6786"
     );
@@ -54,6 +56,26 @@ describe("6529 Stream public review definition", () => {
     expect(STREAM_REVIEW_DEFINITION.versions[0]?.auditStatus).toBe(
       STREAM_REVIEW_DEFINITION.auditStatus
     );
+  });
+
+  it("retains the superseded editorial snapshot with feedback closed", () => {
+    const previous = STREAM_REVIEW_DEFINITION.versions.find(
+      (version) => version.version === STREAM_REVIEW_PREVIOUS_VERSION
+    );
+
+    expect(previous).toMatchObject({
+      version: "2026-07-26.1",
+      status: "REVIEW_CLOSED",
+      deploymentStatus: "NOT_DEPLOYED",
+      auditStatus: "PRE_AUDIT",
+      source: {
+        commit: STREAM_REVIEW_SOURCE_COMMIT,
+      },
+    });
+    expect(previous?.pages).toHaveLength(14);
+    expect(
+      previous?.pages.map((page) => t(DEFAULT_LOCALE, page.titleKey))
+    ).toContain("Security, Testing, and Known Limitations");
   });
 
   it("keeps active and immutable feedback ledgers version-addressable", () => {

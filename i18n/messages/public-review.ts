@@ -79,6 +79,9 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.pages.overview.title": "Overview",
   "publicReview.pages.overview.summary":
     "A map of the full protocol, its present review state, and the decisions the community is being asked to examine.",
+  "publicReview.pages.overviewNarrative.title": "Overview",
+  "publicReview.pages.overviewNarrative.summary":
+    "Why Stream exists, which guarantees its architecture protects, and what a superficially simpler design would leave elsewhere.",
   "publicReview.pages.artworkLifecycle.title": "Artwork Lifecycle",
   "publicReview.pages.artworkLifecycle.summary":
     "How an artwork moves from preparation through minting, preservation, and finality.",
@@ -123,6 +126,10 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "Security, Testing, and Known Limitations",
   "publicReview.pages.securityTestingAndKnownLimitations.summary":
     "Current engineering evidence, unresolved findings, constraints, and pre-audit caveats.",
+  "publicReview.pages.currentImplementationAndReadiness.title":
+    "Current Implementation and Readiness",
+  "publicReview.pages.currentImplementationAndReadiness.summary":
+    "The authoritative record of what is connected, implemented, proposed, tested, audited, and still required before release.",
   "publicReview.pages.communityReview.title": "Community Review",
   "publicReview.pages.communityReview.summary":
     "How to examine the proposal, frame actionable feedback, and follow the review record.",
