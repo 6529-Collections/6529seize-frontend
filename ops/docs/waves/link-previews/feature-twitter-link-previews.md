@@ -104,6 +104,18 @@ Links that do not match these rules stay regular links.
 - Real-time X engagement counts are not fetched. Any engagement facts shown come
   from the preview payload and are not interactive X intent actions.
 
+### Localization fallback debt
+
+- Component: `TwitterPreviewCard`.
+- Article-specific labels and accessible names use the supported locale message
+  dictionaries.
+- Remaining post-card copy and date/count formatting still use the card's
+  established `en-US` fallback, so non-English users can see English text around
+  otherwise localized article labels.
+- Ownership and remediation: frontend localization follow-up should migrate the
+  remaining X preview copy and formatting through the shared message and `Intl`
+  helpers as one coherent surface.
+
 ## Related Pages
 
 - [Wave Link Previews Index](README.md)

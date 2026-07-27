@@ -1,8 +1,7 @@
-import { matchesDomainOrSubdomain } from "@/lib/url/domains";
-
+import { parseSyndicationArticle } from "./article";
+import { isImageUrl, isTwitterMediaUrl } from "./media-url";
 import type {
   TweetPreview,
-  TweetPreviewArticle,
   TweetPreviewMedia,
   TweetPreviewVideoVariant,
 } from "./types";
@@ -183,99 +182,6 @@ const excerptTweetText = (text: string | undefined): string | undefined => {
       ? candidate.slice(0, wordBoundaryIndex)
       : candidate;
   return `${trimTrailingPreviewPunctuation(excerpt)}...`;
-};
-
-const isImageUrl = (value: string): boolean => {
-  try {
-    const url = new URL(value);
-    const pathname = url.pathname.toLowerCase();
-    return (
-      matchesDomainOrSubdomain(url.hostname, "twimg.com") ||
-      pathname.endsWith(".jpg") ||
-      pathname.endsWith(".jpeg") ||
-      pathname.endsWith(".png") ||
-      pathname.endsWith(".webp")
-    );
-  } catch {
-    return false;
-  }
-};
-
-const isTwitterMediaUrl = (value: string): boolean => {
-  try {
-    const url = new URL(value);
-    return matchesDomainOrSubdomain(url.hostname, "twimg.com");
-  } catch {
-    return false;
-  }
-};
-
-const isNumericId = (value: string): boolean => /^\d+$/u.test(value);
-
-const readArticle = (
-  record: Record<string, unknown>
-): TweetPreviewArticle | undefined => {
-  const article = readRecord(record["article"]);
-  const restId = readString(article?.["rest_id"]);
-  const title = readString(article?.["title"]);
-  if (!article || !restId || !isNumericId(restId) || !title) {
-    return undefined;
-  }
-
-  const mediaInfo = readRecord(
-    readRecord(article["cover_media"])?.["media_info"]
-  );
-  const coverImageCandidate = readString(mediaInfo?.["original_img_url"]);
-  const coverImageUrl =
-    coverImageCandidate &&
-    isImageUrl(coverImageCandidate) &&
-    isTwitterMediaUrl(coverImageCandidate)
-      ? coverImageCandidate
-      : undefined;
-  const previewText = readString(article["preview_text"]);
-
-  return {
-    url: `https://x.com/i/article/${restId}`,
-    title,
-    ...(previewText ? { previewText } : {}),
-    ...(coverImageUrl ? { coverImageUrl } : {}),
-  };
-};
-
-const isMatchingArticleEntity = (
-  value: unknown,
-  article: TweetPreviewArticle
-): boolean => {
-  const entity = readRecord(value);
-  const expandedUrl = readString(entity?.["expanded_url"]);
-  if (!expandedUrl) {
-    return false;
-  }
-
-  try {
-    const parsedExpandedUrl = new URL(expandedUrl);
-    const parsedArticleUrl = new URL(article.url);
-    return (
-      matchesDomainOrSubdomain(parsedExpandedUrl.hostname, "x.com") &&
-      parsedExpandedUrl.pathname === parsedArticleUrl.pathname
-    );
-  } catch {
-    return false;
-  }
-};
-
-const findArticleRedirectUrl = (
-  entities: Record<string, unknown>,
-  article: TweetPreviewArticle | undefined
-): string | undefined => {
-  if (!article) {
-    return undefined;
-  }
-
-  const entity = readArray(entities["urls"]).find((candidate) =>
-    isMatchingArticleEntity(candidate, article)
-  );
-  return readString(readRecord(entity)?.["url"]);
 };
 
 const findFirstImageInArray = (
@@ -749,14 +655,6 @@ const setPreviewValue = <Key extends keyof TweetPreview>(
   }
 };
 
-export const extractMetaImage = (html: string): string | undefined => {
-  const match =
-    /<meta[^>]+(?:property|name)=["'](?:og:image|twitter:image|twitter:image:src)["'][^>]+content=["']([^"']+)["'][^>]*>/i.exec(
-      html
-    );
-  return match?.[1] && isImageUrl(match[1]) ? match[1] : undefined;
-};
-
 export function parseSyndicationPreview(
   payload: unknown,
   href: string,
@@ -784,8 +682,10 @@ function buildSyndicationPreview(
   const firstMedia = getFirstSyndicationMedia(entities);
   const authorHandle = readString(user["screen_name"]);
   const mediaLink = readString(firstMedia["url"]);
-  const article = readArticle(record);
-  const articleRedirectUrl = findArticleRedirectUrl(entities, article);
+  const { article, redirectUrl: articleRedirectUrl } = parseSyndicationArticle(
+    record,
+    entities
+  );
   const mediaItems = findMediaItems(record);
   const firstImageMedia = findFirstMedia(mediaItems, "image");
   const firstVideoMedia = findFirstMedia(mediaItems, "video");
