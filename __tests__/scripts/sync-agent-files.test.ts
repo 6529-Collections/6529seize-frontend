@@ -199,19 +199,38 @@ describe("sync-agent-files", () => {
   });
 
   describe("published help-index.json", () => {
-    it("matches the corpus (run `6529 run help-index:sync` after editing it)", () => {
-      const source = fs.readFileSync(
-        path.join(repoRoot, "ops/help/help-index.json"),
-        "utf8"
+    it("keeps the committed production corpus aligned with environment-filtered source records", () => {
+      const source = JSON.parse(
+        fs.readFileSync(path.join(repoRoot, "ops/help/help-index.json"), "utf8")
       );
-      const published = fs.readFileSync(
-        path.join(repoRoot, "public/help-index.json"),
-        "utf8"
+      const published = JSON.parse(
+        fs.readFileSync(path.join(repoRoot, "public/help-index.json"), "utf8")
       );
-      // scripts/sync-help-index.cjs publishes the corpus as a byte-for-byte
-      // copy, normalizing only a missing trailing newline. If the publish
-      // step ever reserializes instead, update this assertion with it.
-      expect(published).toBe(source.endsWith("\n") ? source : `${source}\n`);
+      const expectedProduction = {
+        ...source,
+        records: source.records
+          .filter(
+            (record: { environments?: string[] }) =>
+              record.environments === undefined ||
+              record.environments.includes("production")
+          )
+          .map(
+            ({
+              environments: _environments,
+              ...record
+            }: {
+              environments?: string[];
+              [key: string]: unknown;
+            }) => record
+          ),
+      };
+
+      expect(
+        source.records.find(
+          (record: { id: string }) => record.id === "public-reviews.stream"
+        )?.environments
+      ).toEqual(["local", "staging"]);
+      expect(published).toEqual(expectedProduction);
     });
   });
 

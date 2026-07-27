@@ -1,0 +1,133 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IStreamArtworkFinalityComponents.sol:IStreamArtworkScopedFinalityComponent#function:0x8004d4f5",
+          "declaringDefinitionId": "smart-contracts/IStreamArtworkFinalityComponents.sol:IStreamArtworkScopedFinalityComponent",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamFinalityScope",
+              "name": "scope",
+              "type": "(uint8,uint256,uint256,bytes32)"
+            }
+          ],
+          "name": "finalityStateForScope",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamFinalityComponentState",
+              "name": "",
+              "type": "(bool,bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)"
+            }
+          ],
+          "selector": "0x8004d4f5",
+          "signature": "finalityStateForScope((uint8,uint256,uint256,bytes32))",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "finalityStateForScope((uint8,uint256,uint256,bytes32))",
+          "displaySignature": "finalityStateForScope(StreamFinalityScope)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamArtworkFinalityComponents.sol:IStreamArtworkScopedFinalityComponent#function:0x8004d4f5",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scope",
+              "storageLocation": "calldata",
+              "type": "StreamFinalityScope"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1BcnR3b3JrRmluYWxpdHlDb21wb25lbnRzLnNvbDpJU3RyZWFtQXJ0d29ya1Njb3BlZEZpbmFsaXR5Q29tcG9uZW50I2Z1bmN0aW9uOjB4ODAwNGQ0ZjU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "finalityStateForScope",
+          "natspec": "@notice Reports the component's finality state for one scope.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "StreamFinalityComponentState"
+            }
+          ],
+          "range": {
+            "byteLength": 151,
+            "byteStart": 814,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamArtworkFinalityComponents.sol#L20-L23",
+            "lineEnd": 23,
+            "lineStart": 20,
+            "snippetSha256": "sha256:9ecaff935a8ee7eac17b109e2e2761ef8582762e6107da6ab798b4555d489674",
+            "sourceSha256": "sha256:9b54941cc9ec170631e27ca89df8f0d3db4b40df13409b15504d70405ef08496"
+          },
+          "selector": "0x8004d4f5",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IStreamArtworkFinalityComponents.sol:IStreamArtworkScopedFinalityComponent",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1BcnR3b3JrRmluYWxpdHlDb21wb25lbnRzLnNvbDpJU3RyZWFtQXJ0d29ya1Njb3BlZEZpbmFsaXR5Q29tcG9uZW50",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IStreamArtworkFinalityComponents.sol:IStreamArtworkScopedFinalityComponent"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "IStreamArtworkScopedFinalityComponent",
+    "natspec": "@notice Scoped finality read surface (Scoped Finality For Open Series).",
+    "range": {
+      "byteLength": 277,
+      "byteStart": 690,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamArtworkFinalityComponents.sol#L18-L24",
+      "lineEnd": 24,
+      "lineStart": 18,
+      "snippetSha256": "sha256:afaed4e0dd879f05e9d3fa44181abc7719d349016f4de0e15ebc7f3dd79ad6c0",
+      "sourceSha256": "sha256:9b54941cc9ec170631e27ca89df8f0d3db4b40df13409b15504d70405ef08496"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IStreamArtworkFinalityComponents.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

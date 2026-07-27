@@ -29,6 +29,7 @@ import UserPageHeaderName from "./name/UserPageHeaderName";
 import UserPageHeaderPfp from "./pfp/UserPageHeaderPfp";
 import UserPageHeaderPfpWrapper from "./pfp/UserPageHeaderPfpWrapper";
 import UserPageHeaderStats from "./stats/UserPageHeaderStats";
+import UserPageHeaderSubscriptionStatus from "./UserPageHeaderSubscriptionStatus";
 import {
   getUserProfileHeaderDisplayName,
   getUserProfileHeaderMessage,
@@ -151,6 +152,7 @@ export default function UserPageHeaderClient({
     !isMyProfile && profile.handle && connectedProfile?.handle
       ? profile.handle
       : null;
+  const showSubscriptionStatus = isMyProfile && !activeProfileProxy;
 
   const handleCreateDirectMessage = async (
     primaryWallet: string | undefined
@@ -239,24 +241,21 @@ export default function UserPageHeaderClient({
                   </div>
                 </div>
 
-                {websiteAction || followHandle ? (
-                  <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
+                {websiteAction || followHandle || showSubscriptionStatus ? (
+                  <div className="tw-flex tw-w-full tw-flex-shrink-0 tw-flex-col tw-items-stretch tw-gap-2 sm:tw-w-auto sm:tw-flex-row sm:tw-items-center">
+                    {showSubscriptionStatus ? (
+                      <UserPageHeaderSubscriptionStatus profile={profile} />
+                    ) : null}
                     {websiteAction ? (
                       <Link
                         className="tw-inline-flex tw-h-9 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 tw-transition hover:tw-border-primary-400 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 md:tw-h-10"
                         href={websiteAction.href}
-                        aria-label={t(
-                          locale,
-                          "profileCms.header.openWebsite",
-                          {
-                            handle: websiteAction.handle,
-                          }
-                        )}
+                        aria-label={t(locale, "profileCms.header.openWebsite", {
+                          handle: websiteAction.handle,
+                        })}
                       >
                         <WebsiteIcon />
-                        <span>
-                          {t(locale, "profileCms.header.website")}
-                        </span>
+                        <span>{t(locale, "profileCms.header.website")}</span>
                       </Link>
                     ) : null}
                     {followHandle ? (

@@ -223,6 +223,8 @@ function SubscribersCountText({
 export default function MemeSubscriptionAwarenessRow({
   appearance = "default",
   onProfileSubscriptionsAction,
+  profileCoverageSummary,
+  profileSubscriptionsActionLabel,
   profileSubscriptionsActionPending,
   profileSubscriptionsHref,
   subscribed,
@@ -233,6 +235,8 @@ export default function MemeSubscriptionAwarenessRow({
 }: Readonly<{
   appearance?: "default" | "featured" | "quiet" | undefined;
   onProfileSubscriptionsAction?: (() => void | Promise<void>) | undefined;
+  profileCoverageSummary?: string | undefined;
+  profileSubscriptionsActionLabel?: string | undefined;
   profileSubscriptionsActionPending?: boolean | undefined;
   profileSubscriptionsHref?: string | undefined;
   subscribed: boolean;
@@ -250,12 +254,14 @@ export default function MemeSubscriptionAwarenessRow({
     Number.isFinite(subscribersCount) && (subscribersCount ?? -1) >= 0
       ? subscribersCount
       : undefined;
-  const actionLabel = t(
-    locale,
-    subscribed
-      ? "home.mintSubscriptions.action.manage"
-      : "home.mintSubscriptions.action.setUp"
-  );
+  const actionLabel =
+    profileSubscriptionsActionLabel ??
+    t(
+      locale,
+      subscribed
+        ? "home.mintSubscriptions.action.manage"
+        : "home.mintSubscriptions.action.setUp"
+    );
   const isFeatured = appearance === "featured";
 
   return (
@@ -335,12 +341,23 @@ export default function MemeSubscriptionAwarenessRow({
 
         <div
           className={clsx(
-            "tw-flex tw-min-h-7 tw-min-w-0 tw-items-center tw-text-xs tw-leading-4",
+            "tw-flex tw-min-h-7 tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-text-xs tw-leading-4",
             isFeatured
               ? "tw-font-medium tw-text-primary-300/70"
               : "tw-text-primary-300/70 md:tw-text-sm"
           )}
         >
+          {profileCoverageSummary ? (
+            <span className="tw-font-semibold tw-text-iron-200">
+              {profileCoverageSummary}
+            </span>
+          ) : null}
+          {profileCoverageSummary &&
+          (safeSubscribersCount !== undefined || subscribersCountLoading) ? (
+            <span aria-hidden="true" className="tw-text-iron-600">
+              ·
+            </span>
+          ) : null}
           <SubscribersCountText
             loading={subscribersCountLoading}
             safeSubscribersCount={safeSubscribersCount}

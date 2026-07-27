@@ -11,10 +11,14 @@ interchangeable.
   remaining artwork mutation paths.
 
 The relevant implementations include
-[`StreamCore.sol`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamCore.sol),
-[`StreamPreservationRecords.sol`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamPreservationRecords.sol),
+[`StreamCore.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol),
+[`StreamPreservationRecords.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPreservationRecords.sol),
 and
-[`StreamArtworkFinalityRegistry.sol`](https://github.com/6529-Collections/6529Stream/blob/e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8/smart-contracts/StreamArtworkFinalityRegistry.sol).
+[`StreamArtworkFinalityRegistry.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityRegistry.sol).
+
+The Core and preservation contracts are part of the current rehearsal.
+`StreamArtworkFinalityRegistry` is **SOURCE IMPLEMENTED**, but it is not in the
+rehearsal's deployed contract set. Its source is not candidate wiring evidence.
 
 ## Final supply
 
@@ -55,6 +59,38 @@ some of these can still move:
 The contract and UI should enumerate the frozen fields and the remaining
 writers.
 
+### Exact Core-freeze boundary at this commit
+
+| Blocked after Core freeze                        | Still possible after Core freeze                                                                     |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| Legacy and manager mint entries                  | Ordinary ERC-721 transfers and approvals                                                             |
+| Burning a live token                             | Append-only preservation records                                                                     |
+| Changing the collection randomizer               | Shared contract-level metadata changes                                                               |
+| Changing artist approval                         | Post-burn randomness audit evidence for an already burned token                                      |
+| Changing token data, images, or attributes       | Collection-metadata snapshot publication if the snapshot locks remain open                           |
+| Creating or revising collection-metadata records | Nonreserved record-specific locks                                                                    |
+| Reserved collection-metadata lock changes        | Reads, exports, and historical event reconstruction                                                  |
+|                                                  | Global module, successor, or governance actions unless a separate terminal-finality rule blocks them |
+
+Core freeze finalizes supply and stores a freeze-manifest hash
+([`freezeCollection`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L826-L841)).
+Minting, burn, artist approval, and live-token metadata mutation check that
+freeze
+([`mint entries`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L445-L503),
+[`burn`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L628-L640),
+[`artist approval`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L734-L761)).
+Normal ERC-721 transfer behavior remains open
+([`transfer posture`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L1008-L1011)).
+
+Collection-metadata record revisions check Core freeze, but snapshot publication
+does not. Reserved lock changes are blocked after freeze; nonreserved
+record-specific locks remain available
+([`metadata mutation checks`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCollectionMetadata.sol#L363-L397)).
+
+Core freeze is therefore not the same as terminal artwork finality. It closes a
+defined collection boundary; it does not automatically freeze every shared or
+successor module.
+
 ## Preservation records
 
 ### IMPLEMENTED
@@ -73,6 +109,24 @@ when the bytes themselves are stored elsewhere. They should answer:
 - where those bytes were expected to be found;
 - whether the record replaces, supplements, or deprecates another record;
 - whether the record can still change.
+
+### Append-only does not mean one final record
+
+Preservation records intentionally remain appendable after Core freeze. An old
+record is never overwritten, but a new record can update the
+collection/type/subject `latest` pointer. `Latest` means last recorded onchain,
+not greatest `effectiveAt`.
+
+The signature fields are hash commitments only. The preservation contract does
+not verify a signature. A reader must distinguish:
+
+- the original final package;
+- later preservation evidence;
+- the current latest pointer;
+- a signature hash from a signature that another verifier has actually checked.
+
+These semantics are explicit in
+[`IStreamPreservationRecords`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamPreservationRecords.sol#L106-L126).
 
 ### IMPORTANT LIMIT
 
@@ -179,10 +233,44 @@ fallback path can reach the same storage effect.
 
 ### KNOWN LIMITATION
 
-The current governance risk register reports selector-level authorization gaps
-for several metadata and preservation record families. Those gaps are directly
-relevant to finality: a ceremony cannot be considered terminal while an
-unaccounted writer remains.
+Record-family authorization is now source implemented. The remaining blocker is
+candidate-bound evidence: exact admissions, live providers, grants, deployed
+runtime/code-hash bindings, rotation/revocation evidence, and independent
+review. Finality cannot rely on an intended writer matrix until those bindings
+are published and every effective mutation path is included in the terminal
+inventory.
+
+## Proposed append-only finality recovery
+
+### PROPOSED
+
+The repository contains a proposal for a recovery companion if a frozen
+renderer, dependency, or serving route later fails. It is not accepted or
+implemented.
+
+Under the proposal:
+
+- the original permanent finality registry and record never change;
+- Governance V2 is the only scheduler and executor authority;
+- a separate companion appends a recovery record and maintains a separate
+  lineage;
+- the replacement commits the exact scope, predecessor, old route, replacement
+  component, manifest, and reason;
+- every route replacement is treated as changing artwork bytes unless a future
+  accepted equivalence verifier proves otherwise;
+- artist and owner evidence is read from separately owned append-only sources;
+- the metadata router would serve the recovered route only after exact pointer,
+  interface, and route checks.
+
+This proposal can preserve access while changing the bytes that a viewer is
+served. Community feedback should address artist consent, owner notice,
+guardian veto, objection time, stale competing recoveries, and whether any
+byte-changing recovery should exist.
+
+See
+[`ADR 0020 status and blockers`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/docs/adr/0020-executor-only-finality-recovery.md#L3-L24)
+and its
+[`proposed decision`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/docs/adr/0020-executor-only-finality-recovery.md#L75-L138).
 
 ## Separate ceremonies
 
