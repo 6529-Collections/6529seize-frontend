@@ -5,7 +5,7 @@
 The `Brain` tab can show a companion wave surface for the viewed profile:
 
 - `Created Waves` on desktop and `Created` in the mobile strip
-- `Most Active In` on desktop and `Active In` in the mobile strip
+- `Most Active In` on desktop and in the mobile strip
 
 This surface lets users jump from a profile's Brain tab into waves the profile
 created, or into the waves where that profile is most active.
@@ -30,10 +30,11 @@ created, or into the waves where that profile is most active.
 3. Desktop shows:
    - `Created Waves`: up to three created waves plus a `Show N more` toggle
      when more created waves exist
-   - `Most Active In`: up to three waves
-4. Small screens show `Created` and `Active In` pill rows above the feed.
-5. If more created waves exist on small screens, select the overflow chip to
-   open `Waves by {profile}`.
+   - `Most Active In`: up to five waves ranked by the identity's all-time posts
+4. Small screens show `Created` and up to five `Most Active In` pills above the
+   feed in a horizontally scrollable row.
+5. If more created waves exist on small screens, select the created-waves
+   overflow chip to open `Waves by {profile}`.
 6. Select any wave row or pill to open that wave:
    - standard wave: `/waves/{waveId}`
    - direct-message result: `/messages/{waveId}`
@@ -41,12 +42,20 @@ created, or into the waves where that profile is most active.
 
 ## Common Scenarios
 
-- Loading states render skeleton rows or pills before data arrives.
+- Initial loading renders one neutral sidebar skeleton until both wave queries
+  resolve, then renders only the sections that have data.
 - Wave rows show a wave picture when available, otherwise a wave or chat icon
   fallback.
 - Private non-direct-message waves show a lock icon.
-- Row metadata shows relative last-drop time plus total drop count; waves
-  without drops show `No drops yet`.
+- `Created Waves` is qualified with `Wave posts`. Its compact `Last activity
+  {time}` metadata is the newest post by anyone in the wave, followed by the
+  wave's total drop count. Screen-reader text expands this to `Last wave post
+  {time} ago`. Waves without drops show `No drops yet`.
+- `Most Active In` is qualified with `All time`. This explains the API's
+  ranking independently from per-row recency. Each desktop row's compact
+  `Last post {time}` is the viewed identity's latest post in that
+  specific wave. The UI does not substitute a wave-wide timestamp when that
+  identity-specific lookup is unavailable.
 - The created-waves modal shows `Loading waves...`, `Showing N wave(s)`,
   `No waves created yet.`, or an inline error message when loading fails.
 - The created-waves modal title uses the profile handle when available, or a
@@ -58,7 +67,7 @@ created, or into the waves where that profile is most active.
 - `Created Waves` excludes direct-message threads.
 - `Created Waves` resolves authored waves from the profile handle when
   available, then falls back to the resolved profile query or primary wallet.
-- `Most Active In` is capped at three items in the inline surface.
+- `Most Active In` is capped at five results and displays all available results.
 - Desktop uses inline expansion for created waves; the mobile overflow chip is
   the Brain tab entry point into the full created-waves modal.
 
@@ -76,8 +85,9 @@ created, or into the waves where that profile is most active.
 
 - Desktop inline created-waves view shows up to three items until expanded,
   even when more authored waves exist.
-- The mobile strip surfaces only the first created wave inline, plus up to
-  three `Most Active In` items.
+- On desktop, profile-specific posting activity is loaded after the five-wave
+  list resolves with one `limit=1` lookup per displayed wave. The compact
+  mobile strip does not show the metadata and does not make these lookups.
 - The full modal lists created waves only; it does not provide a full-screen
   `Most Active In` list.
 

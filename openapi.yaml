@@ -234,13 +234,14 @@ paths:
     get:
       tags:
         - Authentication
-      summary: Get a structured wallet auth session message to sign
+      summary: Get a wallet auth session message to sign
       description: >
-        V2 wallet session nonce endpoint. Web session challenges derive their
-        domain and client origin from the request Origin header and require a
-        configured first-party origin. Native challenges are selected
-        explicitly. Desktop challenges are selected explicitly and require a
-        loopback localhost Origin, which is signed into the challenge.
+        V2 wallet session nonce endpoint. Web clients receive a canonical
+        ERC-4361 Sign-In with Ethereum message whose scheme, domain, and URI are
+        derived from the validated request Origin. Native clients continue to
+        receive the 6529 structured version-2 session message. Desktop clients
+        also retain the structured version-2 message and require a loopback
+        localhost Origin. The response shape is identical for every client type.
       operationId: getWalletAuthSessionNonce
       security: []
       parameters:
@@ -261,9 +262,9 @@ paths:
               - desktop
             default: web
           description: >
-            Web challenges require an allowed Origin header. Desktop challenges
-            require a localhost Origin. Native challenges are explicitly
-            requested by refresh-token clients.
+            Web challenges use ERC-4361 SIWE and require an allowed Origin
+            header. Desktop challenges require a localhost Origin. Native and
+            desktop challenges use the 6529 structured version-2 format.
         - name: chain_id
           in: query
           required: false
@@ -291,12 +292,12 @@ paths:
         - Authentication
       summary: Authenticate and create a wallet auth session
       description: >
-        V2 wallet sessions require structured authentication signatures. Web
-        cookie sessions require Session Type first_party_web; native and desktop
-        refresh-token sessions require matching Session Type values. Desktop
-        sessions also require the signed Client Origin to be a localhost
-        loopback origin. External clients should use the non-cookie bearer-token
-        login flow.
+        V2 web cookie sessions accept canonical ERC-4361 SIWE challenges and,
+        during rollout, valid outstanding first_party_web structured challenges.
+        Native and desktop refresh-token sessions continue to require matching
+        6529 structured version-2 Session Type values. Desktop sessions also
+        require the signed Client Origin to be a localhost loopback origin.
+        External clients should use the non-cookie bearer-token login flow.
       operationId: createWalletAuthSession
       security: []
       requestBody:
@@ -7994,6 +7995,29 @@ paths:
           description: >-
             Reconciliation queued on the reserved worker, or safely disabled
             while OFF
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /deploy/release-bus-v2/maintenance/recover-stalled-qualifications:
+    post:
+      tags:
+        - Release Bus v2
+      summary: >-
+        Safely yield unsatisfiable production qualifications while production
+        automation is disabled
+      operationId: recoverStalledReleaseBusV2ProductionQualifications
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: >-
+            Unsatisfiable parent and qualification trains were terminalized
+            transactionally and their explicit candidates retained for replan.
+            Recovery commits at most one yield per request; has_more means the
+            caller must invoke the endpoint again, and only a response with no
+            recovered item and has_more=false proves the drain pass is complete
           content:
             application/json:
               schema:
@@ -20303,11 +20327,13 @@ components:
         server_signature:
           type: string
           description: >-
-            Server-signed structured challenge token. /auth/session-login only
-            accepts first_party_web challenges for web cookie sessions and
-            matching native or desktop challenges for refresh-token sessions;
-            external_client challenges use /auth/login bearer-token auth
-            instead.
+            Opaque server-signed challenge token. New web tokens bind the exact
+            SIWE message, web client type, frontend Origin, API audience, and
+            expiration. /auth/session-login temporarily accepts valid
+            outstanding first_party_web structured challenges for web cookie
+            sessions and continues to require matching native or desktop
+            challenges for refresh-token sessions. external_client challenges
+            use /auth/login bearer-token auth instead.
         role:
           type: string
           nullable: true
@@ -20324,6 +20350,10 @@ components:
             - 1
             - 2
           default: 2
+          description: >-
+            Optional 6529 session-signature protocol compatibility field. This
+            is not the ERC-4361 SIWE Version field; SIWE messages always use
+            Version 1.
     ApiSessionLogoutNativeRequest:
       type: object
       required:
@@ -20422,8 +20452,12 @@ components:
       properties:
         signable_message:
           type: string
+          description: >-
+            Canonical ERC-4361 SIWE for web clients, or the 6529 structured
+            version-2 session message for native and desktop clients.
         server_signature:
           type: string
+          description: Opaque server-signed challenge token.
     ApiSessionRefreshNativeRequest:
       type: object
       required:

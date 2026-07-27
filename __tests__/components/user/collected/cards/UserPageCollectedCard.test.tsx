@@ -49,6 +49,23 @@ describe("UserPageCollectedCard", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows a dash instead of rank zero when rank data is missing", () => {
+    render(
+      <UserPageCollectedCard
+        card={{ ...memeCard, rank: null }}
+        contractType={ContractType.ERC1155}
+        showDataRow={true}
+        onToggle={() => {}}
+        onIncQty={() => {}}
+        onDecQty={() => {}}
+        copiesMax={1}
+      />
+    );
+
+    expect(screen.getByText("Rank -")).toBeInTheDocument();
+    expect(screen.queryByText("Rank 0")).not.toBeInTheDocument();
+  });
+
   it("hides seized count for zero balance by default", () => {
     render(
       <UserPageCollectedCard

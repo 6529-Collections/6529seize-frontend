@@ -95,7 +95,9 @@ describe("MentionNode", () => {
     const newNode = Array.isArray(convertedNode) ? null : convertedNode;
     expect($isMentionNode(newNode)).toBe(true);
     if (!$isMentionNode(newNode)) {
-      throw new Error("Expected mention DOM conversion to create a MentionNode");
+      throw new Error(
+        "Expected mention DOM conversion to create a MentionNode"
+      );
     }
     expect(newNode.__mention).toBe("@alice");
     expect(conv.priority).toBe(1);

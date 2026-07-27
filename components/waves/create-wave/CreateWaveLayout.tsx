@@ -39,11 +39,19 @@ export default function CreateWaveLayout({
       </div>
       <div className="tw-min-w-0 tw-flex-1 tw-bg-iron-950 tw-shadow-[-10px_0_30px_rgba(0,0,0,0.5)]">
         <div className="tw-relative tw-flex tw-min-h-[34rem] tw-w-full tw-flex-col tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06]">
-          <CreateWaveMobileProgress
-            activeStep={step}
-            ongoingRanking={config.dates.ongoingRanking ?? false}
-            waveType={config.overview.type}
-          />
+          {/* Joined to the top of the flow: the compact step progress pins to
+              the top of the create-wave scrollport (mirror of the sticky
+              footer), so it reads as one header row with the app shell's back
+              arrow and never scrolls away underneath it. It carries its own
+              opaque background + bottom border so scrolled content passes
+              cleanly behind it. */}
+          <div className="tw-sticky tw-top-0 tw-z-20 tw-flex-shrink-0">
+            <CreateWaveMobileProgress
+              activeStep={step}
+              ongoingRanking={config.dates.ongoingRanking ?? false}
+              waveType={config.overview.type}
+            />
+          </div>
           <div className="tw-w-full tw-flex-1 tw-p-4 lg:tw-p-8">{children}</div>
           {showActions ? (
             // Sticky liquid-glass footer: pins to the live scroller (modal
@@ -56,7 +64,14 @@ export default function CreateWaveLayout({
             // content sits below the fold and dims at the end of the step, and
             // a soft light glow rides above the edge as an extra hint.
             <div
-              className={`tw-sticky tw-bottom-0 tw-z-10 tw-mt-auto tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-bg-iron-950/10 tw-px-4 tw-pb-[calc(1rem+env(safe-area-inset-bottom,0px))] tw-pt-4 tw-shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] tw-backdrop-blur-md tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none lg:tw-pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] lg:tw-pl-8 lg:tw-pr-28 lg:tw-pt-5 ${
+              // Bottom inset: clear the iOS home affordance without the
+              // oversized gap the full inset + 1rem produced. Mirrors the app's
+              // BottomNavigation approach (trim the inset rather than add to
+              // it), but a touch more conservative — subtract 0.5rem with a
+              // 0.5rem floor so home-indicator devices tighten up (~env-8px)
+              // while home-button/Android-button devices still keep breathing
+              // room. Scales per device via env(); never goes flush.
+              className={`tw-sticky tw-bottom-0 tw-z-10 tw-mt-auto tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-bg-iron-950/10 tw-px-4 tw-pb-[max(calc(env(safe-area-inset-bottom,0px)_-_0.5rem),0.5rem)] tw-pt-4 tw-shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] tw-backdrop-blur-md tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none lg:tw-pb-5 lg:tw-pl-8 lg:tw-pr-28 lg:tw-pt-5 ${
                 canScrollDown ? "tw-border-white/25" : "tw-border-white/[0.08]"
               }`}
             >

@@ -24,6 +24,7 @@ import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { EN_US_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
+import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { PUBLIC_REVIEW_MESSAGES } from "@/i18n/messages/public-review";
 
 type MessageEntry = readonly [key: string, value: string];
@@ -119,6 +120,27 @@ const USER_COLLECTED_STATS_MESSAGES = namespaceMessages(
     ["seasonTile.setComplete", "Set {count} complete"],
   ] as const
 );
+
+const USER_BRAIN_SIDEBAR_MESSAGES = objectMessages("user.brain.sidebar", {
+  createdHeading: "Created Waves",
+  createdMobileHeading: "Created",
+  createdScope: "Wave posts",
+  mostActiveHeading: "Most Active In",
+  rankingBasis: "All time",
+  waveLastActivityShort: "Last activity {time}",
+  identityLastPostShort: "Last post {time}",
+  latestWavePost: "Last wave post {time} ago",
+  lastPosted: "Last posted {time} ago",
+  loadingWaveContext: "Loading profile wave context",
+  mobileStripLabel: "Brain waves",
+  noDropsYet: "No drops yet",
+  showLess: "Show less",
+  "showMore.one": "Show {count} more",
+  "showMore.other": "Show {count} more",
+  viewAllCreatedWaves: "View all created waves",
+  waveImageAlt: "Wave {waveName}",
+  wavePictureAlt: "Wave picture",
+} as const);
 
 const USER_COLLECTED_STATS_DETAILS_MESSAGES = objectMessages(
   "user.collected.stats.details",
@@ -274,7 +296,7 @@ const CREATE_WAVE_DRAFTS_MESSAGES = objectMessages("wave.create.drafts", {
   savedAt: "Saved {timeAgo}",
   untitled: "Untitled wave",
   deleteLabel: 'Delete draft "{name}"',
-  newWave: "New Wave",
+  newWave: "Create a Wave",
   count: "{count} saved drafts",
 } as const);
 
@@ -1100,6 +1122,7 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
 );
 
 const WAVE_GIF_PICKER_MESSAGES = objectMessages("waves.gifPicker", {
+  open: "Add GIF",
   dialogTitle: "GIF search",
   searchPlaceholder: "Search GIFs",
   noResults: "No GIFs found.",
@@ -2310,6 +2333,7 @@ export const EN_US_MESSAGES = {
     "Server validation completed.",
   "profileCms.builder.api.draftSaved": "Draft saved.",
   ...USER_COLLECTED_STATS_MESSAGES,
+  ...USER_BRAIN_SIDEBAR_MESSAGES,
   ...USER_COLLECTED_STATS_DETAILS_MESSAGES,
   ...USER_COLLECTED_STATS_BOOST_MESSAGES,
   ...USER_COLLECTED_STATS_ACTIVITY_MESSAGES,
@@ -2434,6 +2458,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_VOTE_MESSAGES,
   ...WAVE_POLL_MESSAGES,
   ...WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES,
+  ...TRANSFER_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;

@@ -1063,6 +1063,9 @@
       "facts": [
         "The Profile Brain tab surfaces Brain-related profile activity and wave context.",
         "Brain views include activity and wave sidebar surfaces where available.",
+        "Created Waves is labeled Wave posts, and each row's Last activity time refers to the newest post by anyone in that wave.",
+        "Most Active In is labeled All time and ranks accessible non-direct-message waves by how many posts the identity has written in them across all time.",
+        "Most Active In shows up to five ranked waves and labels each desktop row Last post with when the viewed identity last posted in that specific wave.",
         "Use /{user}/brain for profile-specific Brain context."
       ],
       "canonical_path": "/{user}/brain",
@@ -5046,6 +5049,44 @@
       "related_paths": ["/waves"],
       "tags": ["waves", "drop", "links"],
       "source_refs": ["ops/docs/waves/drop-actions/feature-quote-link-cards.md"]
+    },
+    {
+      "id": "waves.link-previews.etherscan",
+      "kind": "ui_affordance",
+      "title": "Etherscan link preview cards",
+      "aliases": [
+        "Etherscan card",
+        "Ethereum explorer preview",
+        "transaction preview",
+        "address preview",
+        "block explorer card"
+      ],
+      "keywords": [
+        "waves",
+        "link",
+        "preview",
+        "etherscan",
+        "ethereum",
+        "transaction",
+        "address",
+        "token",
+        "nft",
+        "block"
+      ],
+      "facts": [
+        "Supported Etherscan links in Waves and DMs render dedicated cards for transactions, addresses, tokens, NFTs, blocks, explorer lists, analytics, and tools.",
+        "Transaction cards can show status, action, participants, fee, block/finality context, and timestamp; recognized Compound events add Compound action context inside the Etherscan card.",
+        "Address, token, NFT, and block cards show bounded on-chain summaries when live RPC data is available.",
+        "Partial data, route-only pages, and retired explorer networks are labeled explicitly; the original canonical Etherscan link remains available.",
+        "Only exact approved HTTPS Etherscan hosts receive structured cards. Unknown subdomains and lookalike domains use the ordinary external-link behavior.",
+        "Bare .eth names and app.ens.domains URLs remain ENS previews rather than Etherscan previews."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves", "/messages"],
+      "tags": ["waves", "links", "etherscan", "ethereum"],
+      "source_refs": [
+        "ops/docs/waves/link-previews/feature-web3-preview-cards.md"
+      ]
     },
     {
       "id": "waves.drop.selection-copy",

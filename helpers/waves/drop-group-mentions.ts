@@ -9,8 +9,7 @@ export const GROUP_MENTION_TEXT: Readonly<Record<ApiDropGroupMention, string>> =
   };
 
 const GROUP_MENTION_PATTERNS: Readonly<Record<ApiDropGroupMention, RegExp>> = {
-  [ApiDropGroupMention.All]:
-    /(^|[^\p{L}\p{N}_@])(@all)(?![\p{L}\p{N}_@])/iu,
+  [ApiDropGroupMention.All]: /(^|[^\p{L}\p{N}_@])(@all)(?![\p{L}\p{N}_@])/iu,
   [ApiDropGroupMention.Contributors]:
     /(^|[^\p{L}\p{N}_@])(@contributors)(?![\p{L}\p{N}_@])/iu,
   [ApiDropGroupMention.Admins]:
@@ -22,8 +21,7 @@ const GROUP_MENTION_PATTERNS: Readonly<Record<ApiDropGroupMention, RegExp>> = {
 const GROUP_MENTION_MARK_PATTERNS: Readonly<
   Record<ApiDropGroupMention, RegExp>
 > = {
-  [ApiDropGroupMention.All]:
-    /(?<![\p{L}\p{N}_@])(@all)(?![\p{L}\p{N}_@])/giu,
+  [ApiDropGroupMention.All]: /(?<![\p{L}\p{N}_@])(@all)(?![\p{L}\p{N}_@])/giu,
   [ApiDropGroupMention.Contributors]:
     /(?<![\p{L}\p{N}_@])(@contributors)(?![\p{L}\p{N}_@])/giu,
   [ApiDropGroupMention.Admins]:
