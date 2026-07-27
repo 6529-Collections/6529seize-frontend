@@ -18,7 +18,7 @@ description: Route and execute 6529 frontend, backend, or coupled staging and pr
 | ------------ | ------------------------------------ | ---------------------------------------------------------------------------------------------- |
 | `OFF`        | Serialized manual fallback           | Serialized manual fallback with explicit owner authorization; staging evidence is not required |
 | `STAGING`    | Register the exact candidate with v2 | Manual fallback only; production automation is disabled                                        |
-| `PRODUCTION` | Register the exact candidate with v2 | Explicitly mark an exact `STAGING_VALIDATED` candidate ready for v2 production                 |
+| `PRODUCTION` | Register the exact candidate with v2 | Explicitly select a dependency-closed set of exact `STAGING_VALIDATED` candidates for production |
 
 When mode is active, stop if `ALL` or the target lane is paused. In `OFF`, v2
 controls are non-authoritative and do not prohibit manual staging or production
@@ -37,15 +37,20 @@ through the documented fallback.
    manual deploy after v2 accepts the candidate.
 5. Wait for `STAGING_VALIDATED`. `STAGING_DEPLOYED` means manifest-bound E2E is
    still pending and is not production evidence.
-6. Production is a separate explicit action. Re-resolve the branch and mark
-   ready only when it still equals the exact staging-validated SHA. Staging
-   validation never schedules production automatically.
+6. Production is a separate explicit action. Select the exact unchanged
+   candidate SHAs together, including every dependency that is not already
+   terminally deployed at the required identity. Re-resolve every branch before
+   submitting the selection. Staging validation never schedules production
+   automatically.
 
 V2 reuses the exact green PR merge-tree dual-profile artifact when eligible;
 otherwise it runs one combined preflight and builds staging and production
-profiles concurrently into one checksummed artifact. It owns shared staging
-only for deploy plus E2E, reuses the exact qualified artifact for production,
-and never publishes release notes.
+profiles concurrently into one checksummed artifact. For production it maps
+every selected candidate to successful staging E2E evidence, composes only that
+dependency-closed set freshly against fenced `main`, preflights the exact
+composition, advances `main` by non-force compare-and-swap, and deploys the
+exact resulting `main` SHA. A matching combined staging manifest is not
+required. It never publishes release notes.
 
 ## Manual fallback while OFF
 
@@ -80,11 +85,13 @@ and never publishes release notes.
   disables v2, and resume explicitly after repair.
 - Failed E2E never creates staging validation. Do not mutate staging while the
   manifest owner still holds the environment lock.
-- If production `main` moved, v2 must recompose and requalify; never force the
-  recorded composition over a newer ref.
+- If production `main` moved, v2 must recompose and preflight again; never force
+  the recorded composition over a newer ref.
 
 ## Closeout
 
-Report exact candidate SHAs/dependencies, train and operation states, deployed
-versions, manifest/E2E evidence, failures or holds, and live mode/controls. Do
-not expose credentials, signed URLs, raw production data, or hidden prompts.
+Report exact candidate SHAs/dependencies, each candidate's staging
+train/manifest/E2E mapping, train and operation states, resulting `main` and
+deployed SHAs, production E2E evidence, failures or holds, and live
+mode/controls. Do not expose credentials, signed URLs, raw production data, or
+hidden prompts.
