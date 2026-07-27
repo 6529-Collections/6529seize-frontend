@@ -98,10 +98,10 @@ export function PublicReviewStatusBanner({
     >
       <div className="tw-flex tw-w-full tw-flex-col tw-gap-3 xl:tw-flex-row xl:tw-items-center xl:tw-justify-between">
         <div>
-          <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-50">
+          <p className="tw-m-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100">
             {t(DEFAULT_LOCALE, "publicReview.status.heading")}
           </p>
-          <p className="tw-mb-0 tw-mt-1 tw-max-w-2xl tw-text-xs tw-leading-5 tw-text-iron-400">
+          <p className="tw-mb-0 tw-mt-1 tw-max-w-2xl tw-text-sm tw-leading-6 tw-text-iron-400">
             {t(DEFAULT_LOCALE, lifecycleCopy.explanation)}
           </p>
         </div>

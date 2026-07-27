@@ -44,7 +44,7 @@ export function PublicReviewAudiencePaths({
   return (
     <section
       aria-labelledby="review-audiences-heading"
-      className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.018] tw-p-5 sm:tw-p-6"
+      className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/55 tw-p-5 sm:tw-p-6"
     >
       <h2
         id="review-audiences-heading"
@@ -66,7 +66,7 @@ export function PublicReviewAudiencePaths({
           return (
             <article
               key={audience}
-              className="tw-rounded-md tw-border tw-border-solid tw-border-white/[0.07] tw-bg-[#070708] tw-p-4"
+              className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-950/70 tw-p-4"
             >
               <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
                 {t(DEFAULT_LOCALE, copy.title)}

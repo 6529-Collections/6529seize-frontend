@@ -68,7 +68,7 @@ export function PublicReviewEvidenceBadge({
 
 export function PublicReviewEvidenceLegend() {
   return (
-    <details className="tw-rounded-md tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.018] tw-p-4">
+    <details className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/55 tw-p-4">
       <summary className="tw-cursor-pointer tw-rounded tw-text-sm tw-font-semibold tw-text-iron-100 marker:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
         {t(DEFAULT_LOCALE, "publicReview.evidence.summary")}
       </summary>

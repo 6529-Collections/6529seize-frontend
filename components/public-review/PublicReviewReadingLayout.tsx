@@ -132,7 +132,7 @@ export function PublicReviewReadingLayout({
   if (!feedbackAvailable) {
     return (
       <section className="tw-min-w-0">
-        <div className="tw-sticky tw-top-0 tw-z-30 tw-flex tw-min-h-16 tw-items-center tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-bg-[#050506]/95 tw-px-4 tw-backdrop-blur-xl sm:tw-px-7 lg:tw-px-10">
+        <div className="tw-sticky tw-top-0 tw-z-30 tw-flex tw-min-h-16 tw-items-center tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.07] tw-bg-[#0D0D0F]/95 tw-px-4 tw-backdrop-blur-xl sm:tw-px-7 lg:tw-px-10">
           {toolbar}
         </div>
         {content}
@@ -142,7 +142,7 @@ export function PublicReviewReadingLayout({
 
   return (
     <section className="tw-min-w-0 tw-@container">
-      <div className="tw-sticky tw-top-0 tw-z-30 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-bg-[#050506]/95 tw-backdrop-blur-xl">
+      <div className="tw-sticky tw-top-0 tw-z-30 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.07] tw-bg-[#0D0D0F]/95 tw-backdrop-blur-xl">
         <div className="tw-flex tw-min-h-16 tw-items-center tw-justify-between tw-gap-4 tw-px-4 sm:tw-px-7 lg:tw-px-10">
           {toolbar}
           <button
@@ -150,7 +150,7 @@ export function PublicReviewReadingLayout({
             aria-controls={COMMENT_PANEL_ID}
             aria-expanded={isPanelOpen}
             onClick={() => updatePanelPreference(!isPanelOpen)}
-            className="tw-inline-flex tw-min-h-11 tw-flex-none tw-items-center tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-primary-400/25 tw-bg-primary-400/[0.07] tw-px-3.5 tw-py-2 tw-text-xs tw-font-semibold tw-text-primary-100 tw-transition-colors hover:tw-border-primary-300/50 hover:tw-bg-primary-400/[0.12] hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+            className="tw-inline-flex tw-min-h-11 tw-flex-none tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/25 tw-bg-primary-400/[0.07] tw-px-3.5 tw-py-2 tw-text-xs tw-font-semibold tw-text-primary-100 tw-transition-colors hover:tw-border-primary-300/50 hover:tw-bg-primary-400/[0.12] hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
           >
             {isPanelOpen ? (
               <XMarkIcon className="tw-size-4" aria-hidden="true" />
