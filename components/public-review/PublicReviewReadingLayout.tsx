@@ -189,14 +189,14 @@ export function PublicReviewReadingLayout({
         >
           <PublicReviewCommentPanelOpenContext.Provider value={isPanelOpen}>
             <div className="tw-bg-[#08080a] @[960px]:tw-flex @[960px]:tw-h-full @[960px]:tw-flex-col">
-              <header className="tw-flex tw-flex-none tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-px-5 tw-py-4">
-                <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-tracking-tight tw-text-white">
-                  {t(DEFAULT_LOCALE, "publicReview.comments.title")}
-                </h2>
+              <header className="tw-flex tw-flex-none tw-items-center tw-gap-2.5 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-px-5 tw-py-4">
                 <ChatBubbleLeftRightIcon
                   className="tw-size-4 tw-flex-none tw-text-iron-500"
                   aria-hidden="true"
                 />
+                <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-tracking-tight tw-text-white">
+                  {t(DEFAULT_LOCALE, "publicReview.comments.title")}
+                </h2>
               </header>
               <div className="tw-min-h-0 tw-flex-1">{panel}</div>
               <footer className="tw-flex-none tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-px-5">
