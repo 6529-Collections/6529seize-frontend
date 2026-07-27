@@ -113,3 +113,31 @@
   one-diagnostic reduction in the repository's Jest typecheck baseline.
 - The exact `typecheck:tests` gate now passes, including the Jest ratchet and
   Playwright TypeScript; both affected suites pass 7 assertions.
+
+## 2026-07-27 — Exact staging validation and shared-environment handoff
+
+- Merged spec PR #3460 after its refreshed exact merge-tree checks passed, then
+  merged the resulting `main` into implementation PR #3464 at signed head
+  `94634025d1654879ae79cb6e865f4e322e01fcec`.
+- Passed all 15 current-head PR checks, including the dual-profile artifact,
+  related Jest, both Playwright packs, CodeQL, CodeRabbit, DCO, SonarCloud,
+  Snyk, secret scanning, and the debt and public-review ratchets. 6529bot
+  reported no new findings on the exact head.
+- Registered Release Bus v2 candidate
+  `f1367301-114b-4f27-ae89-1179252d7bcd`. Staging train
+  `496de9ad-deb4-42cd-8aa3-065792e5d50c` reused artifact digest
+  `d17b5b1b988c8ae604d4337c31620e2e7b29b756b2985ca027540a8db9517380`
+  and deployed composed frontend SHA
+  `10217eac49aa970f82c98b3827137437a15e87e6`.
+- Manifest `e756147f-d8bf-47de-b56a-fd1ab517c314` reached
+  `STAGING_VALIDATED` after manifest-bound E2E workflow `30240372732` passed.
+- While that exact staging composition was live, the Etherscan-specific API
+  matrix passed for transaction, account, token, NFT, block, gas tracker, ENS
+  search, legacy Goerli, and overview URL families.
+- A subsequent staging train claimed the shared environment immediately after
+  the lock was released and deployed unrelated SHA
+  `48909f822ffb224b07c386e3f2b7dae2ad6ee038`. The later rendered-card probe
+  correctly detected the changed `/api/version`; its legacy Compound result is
+  not evidence against the validated candidate. Production readiness remains
+  held until the rendered Wave card is exercised while an exact Etherscan
+  candidate owns staging.
