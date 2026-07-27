@@ -1,9 +1,9 @@
 import LruTtlCache from "@/lib/cache/lruTtl";
 import { parseTwitterOEmbed } from "./parser";
+import { extractMetaImage } from "./meta";
 import type { TweetPreview, TwitterOEmbedResponse } from "./types";
 import { parseTweetUrl } from "./url";
 import {
-  extractMetaImage,
   findFirstImageUrl,
   getSyndicationToken,
   parseSyndicationPreview,
