@@ -43,9 +43,7 @@ export default function UserPageBrainSidebarCreated({
           id="brain-created-waves-heading"
           className="tw-shrink-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500"
         >
-          {getUserPageBrainSidebarMessage(
-            "user.brain.sidebar.createdHeading"
-          )}
+          {getUserPageBrainSidebarMessage("user.brain.sidebar.createdHeading")}
         </span>
         <span
           id="brain-created-waves-scope"

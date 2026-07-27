@@ -114,7 +114,7 @@ export default function ParticipationDropHeader({
             <Link
               onClick={(e) => e.stopPropagation()}
               href={waveHref}
-              className="tw-mb-0 tw-mt-1 tw-block tw-text-[11px] tw-leading-0 tw-text-iron-500 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-300"
+              className="tw-leading-0 tw-mb-0 tw-mt-1 tw-block tw-text-[11px] tw-text-iron-500 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-300"
             >
               {drop.wave.name}
             </Link>

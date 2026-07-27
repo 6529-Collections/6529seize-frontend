@@ -139,17 +139,13 @@ describe("UserPageBrainSidebar", () => {
     expect(
       within(desktopSidebar).getByText("Most Active In")
     ).toBeInTheDocument();
-    expect(
-      within(desktopSidebar).getByText(/All time/)
-    ).toBeInTheDocument();
+    expect(within(desktopSidebar).getByText(/All time/)).toBeInTheDocument();
     expect(
       within(desktopSidebar).getByText("Meme Card Curation")
     ).toBeInTheDocument();
     expect(within(mobileStrip).getByText("Created")).toBeInTheDocument();
     expect(within(mobileStrip).getByText("Most Active In")).toBeInTheDocument();
-    expect(
-      within(mobileStrip).getByText(/All time/)
-    ).toBeInTheDocument();
+    expect(within(mobileStrip).getByText(/All time/)).toBeInTheDocument();
     expect(mockedUseWaves).toHaveBeenCalledTimes(1);
     expect(mockedUseWaves).toHaveBeenCalledWith({
       identity: "kanetix",
