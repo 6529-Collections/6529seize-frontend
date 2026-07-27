@@ -147,9 +147,7 @@ describe("CreateDropGifPicker", () => {
     );
     expect(screen.getByText("Powered by")).toBeVisible();
     expect(screen.getByText("GIPHY")).toBeVisible();
-    expect(
-      screen.getByRole("textbox", { name: "Search GIFs" })
-    ).toBeVisible();
+    expect(screen.getByRole("textbox", { name: "Search GIFs" })).toBeVisible();
     expect(screen.getByLabelText("Powered by GIPHY")).toBeVisible();
     expect(screen.getByText("No GIFs found.")).toBeVisible();
     expect(screen.getByRole("status")).toHaveTextContent(
@@ -198,6 +196,30 @@ describe("CreateDropGifPicker", () => {
       "GIF search is temporarily unavailable."
     );
     expect(screen.getByRole("status")).toHaveTextContent(
+      "GIF search is temporarily unavailable."
+    );
+
+    const closeButton = screen.getByRole("button", { name: "Close" });
+    expect(closeButton).toHaveFocus();
+
+    fireEvent.click(closeButton);
+    expect(setShow).toHaveBeenCalledWith(false);
+  });
+
+  it("shows an unavailable state when GIPHY is not configured", () => {
+    const setShow = jest.fn();
+    render(
+      <CreateDropGifPicker
+        {...defaultProps}
+        giphyApiKey=" "
+        setShow={setShow}
+      />
+    );
+
+    expect(
+      screen.queryByTestId("giphy-search-context")
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent(
       "GIF search is temporarily unavailable."
     );
 

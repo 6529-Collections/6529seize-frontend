@@ -81,6 +81,13 @@ describe("public-review artifact workflow contract", () => {
 
   it("preserves production identity and staging help and agent regeneration", () => {
     expect(appPrCi).toContain('BASE_ENDPOINT: "https://6529.io"');
+    expect(appPrCi).toContain("GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY }}");
+    expect(releaseBusPreflight).toContain(
+      "GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY }}"
+    );
+    expect(legacyProduction).toContain(
+      "GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY || secrets.GIPHY_API_KEY }}"
+    );
     expect(appPrCi).toContain("./bin/6529 run help-index:sync");
     expect(appPrCi).toContain("./bin/6529 run agent-files:sync");
   });

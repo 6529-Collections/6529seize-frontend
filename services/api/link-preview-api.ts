@@ -3,6 +3,8 @@ import type { EnsPreview } from "@/components/waves/ens/types";
 import type { ExternalFileKind } from "@/lib/link-preview/fileKinds";
 import { getManifoldPreviewImageUrl } from "@/lib/link-preview/manifoldMedia";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
+import { parseEtherscanUrl } from "@/lib/link-preview/etherscan/parse";
+import type { EtherscanPreview } from "@/lib/link-preview/etherscan/types";
 
 export interface LinkPreviewMedia {
   readonly url?: string | null | undefined;
@@ -184,6 +186,7 @@ type EnsLinkPreviewResponse = EnsPreview & LinkPreviewBase;
 export type LinkPreviewResponse =
   | GenericLinkPreviewResponse
   | EnsLinkPreviewResponse
+  | EtherscanPreview
   | ManifoldListingLinkPreview
   | ExternalFileLinkPreviewResponse
   | SeizeCollectionLinkPreview
@@ -211,6 +214,11 @@ const normalizeUrl = (url: string): string => url.trim();
 
 const buildCacheKey = (url: string): string => {
   try {
+    const etherscanTarget = parseEtherscanUrl(url);
+    if (etherscanTarget) {
+      return etherscanTarget.cacheKey;
+    }
+
     const parsed = new URL(url);
     const hostname = parsed.hostname.toLowerCase();
     if (matchesDomainOrSubdomain(hostname, "opensea.io")) {
@@ -240,6 +248,19 @@ const hasOwnRecordKey = <T>(
   key: string
 ): record is Record<string, T | undefined> =>
   record !== undefined && Object.hasOwn(record, key);
+
+const getResponseTtlMs = (result: LinkPreviewResponse): number | undefined => {
+  const responseCache = result["cache"];
+  if (
+    typeof responseCache !== "object" ||
+    responseCache === null ||
+    !("maxAgeSeconds" in responseCache) ||
+    typeof responseCache.maxAgeSeconds !== "number"
+  ) {
+    return undefined;
+  }
+  return responseCache.maxAgeSeconds * 1000;
+};
 
 const normalizeLinkPreviewMedia = (
   media: LinkPreviewMedia | null | undefined
@@ -488,6 +509,11 @@ const resolveBatchChunk = async (
       : undefined;
     if (result !== undefined) {
       request.resolve(result);
+      linkPreviewCache.set(
+        request.cacheKey,
+        Promise.resolve(result),
+        getResponseTtlMs(result)
+      );
       continue;
     }
 

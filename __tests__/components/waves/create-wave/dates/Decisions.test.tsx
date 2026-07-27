@@ -24,7 +24,7 @@ jest.mock("@/components/waves/create-wave/services/waveDecisionService", () => {
     calculateEndDateForCycles: jest.fn(() => 3),
   };
 });
-jest.mock("@/components/common/DateAccordion", () => (props: any) => (
+jest.mock("@/components/common/CollapsibleCard", () => (props: any) => (
   <div data-testid="accordion" data-expanded={String(props.isExpanded)}>
     {props.isExpanded ? props.children : props.collapsedContent}
   </div>

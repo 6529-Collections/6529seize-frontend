@@ -25,12 +25,6 @@ const extractEnsNameFromUrl = (url: URL): string | null => {
     }
   }
 
-  if (hostname === "etherscan.io" && segments.length >= 2) {
-    if (segments[0] === "address") {
-      return decodeURIComponent(segments[1]!);
-    }
-  }
-
   return null;
 };
 
@@ -103,6 +97,8 @@ export const detectEnsTarget = (
   return null;
 };
 
-export const isLikelyEnsTarget = (value: string | null | undefined): boolean => {
+export const isLikelyEnsTarget = (
+  value: string | null | undefined
+): boolean => {
   return detectEnsTarget(value) !== null;
 };
