@@ -44,10 +44,12 @@ export function PublicReviewAudiencePaths({
   return (
     <section
       aria-labelledby="review-audiences-heading"
-      className="tw-rounded-2xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/60 tw-p-5 sm:tw-p-6">
+      className="tw-border-x-0 tw-border-y tw-border-solid tw-border-white/10 tw-bg-white/[0.02] tw-px-0 tw-py-6 sm:tw-px-6"
+    >
       <h2
         id="review-audiences-heading"
-        className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white">
+        className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white"
+      >
         {t(DEFAULT_LOCALE, "publicReview.audiences.heading")}
       </h2>
       <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">
@@ -64,7 +66,8 @@ export function PublicReviewAudiencePaths({
           return (
             <article
               key={audience}
-              className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-black/30 tw-p-4">
+              className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/30 tw-p-4"
+            >
               <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
                 {t(DEFAULT_LOCALE, copy.title)}
               </h3>
@@ -75,12 +78,13 @@ export function PublicReviewAudiencePaths({
                 <>
                   <Link
                     href={routes.getPageHref(firstPage, version)}
-                    className="tw-mt-4 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-400/10 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-primary-100 tw-no-underline hover:tw-border-primary-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
+                    className="tw-text-primary-100 tw-mt-4 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-400/[0.07] tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-no-underline tw-transition-colors hover:tw-border-primary-300/60 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+                  >
                     {t(DEFAULT_LOCALE, "publicReview.audiences.startPath", {
                       audience: t(DEFAULT_LOCALE, copy.title),
                     })}
                   </Link>
-                  <details className="tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-3">
+                  <details className="tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-white/[0.02] tw-p-3">
                     <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 marker:tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
                       {t(DEFAULT_LOCALE, "publicReview.audiences.showPath", {
                         count: formatInteger(
@@ -94,13 +98,15 @@ export function PublicReviewAudiencePaths({
                         DEFAULT_LOCALE,
                         "publicReview.audiences.pathLabel",
                         { audience: t(DEFAULT_LOCALE, copy.title) }
-                      )}>
+                      )}
+                    >
                       <ol className="tw-mb-0 tw-mt-2 tw-space-y-2 tw-pl-5 tw-text-sm tw-text-iron-300">
                         {audiencePages.map((page) => (
                           <li key={page.id}>
                             <Link
                               href={routes.getPageHref(page, version)}
-                              className="tw-text-sky-300 tw-underline tw-decoration-sky-400/50 tw-underline-offset-4 hover:tw-text-sky-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
+                              className="tw-text-sky-300 tw-underline tw-decoration-sky-400/50 tw-underline-offset-4 hover:tw-text-sky-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+                            >
                               {t(DEFAULT_LOCALE, page.titleKey)}
                             </Link>
                           </li>

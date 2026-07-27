@@ -116,12 +116,12 @@
         "The review describes a proposed multi-collection ERC-721 protocol, not only a one-of-one mint contract.",
         "Stream is not deployed, is pre-audit, and is not presented as final or production-ready.",
         "Fourteen editorial pages explain artwork lifecycle, artist controls, roles, curation and TDH authorization, minting, sales, revenue, randomness, metadata, freezing, governance, security, and community review.",
-        "Every page shows the review version, exact source link, evidence labels, page navigation, and on-page contents.",
+        "Every page shows the review version, exact source link, evidence labels, page navigation, on-page contents, and a collapsible page-comments rail.",
         "Active and historical routes read immutable versioned editorial content and validate its manifest before rendering.",
         "Each immutable version has its own lifecycle, deployment status, and audit status: superseded versions can remain readable as REVIEW_CLOSED, stop accepting submissions, link back to the current review, and avoid inheriting newer deployment or audit claims.",
         "The generated technical reference exposes the exact versioned Solidity source, definitions, functions, events, errors, and other declarations.",
         "The all-declarations explorer applies its text, kind, scope, and location filters on the server and returns at most 100 matches per page instead of sending the complete declaration inventory to the browser.",
-        "Every editorial and technical page includes one structured feedback composer bound to the immutable displayed review version.",
+        "Every editorial page combines its version-scoped comments and structured feedback composer in a collapsible rail that docks beside wide documents and reflows as a normal stacked section on narrower layouts.",
         "The reusable lifecycle map supports draft, scheduled, public review, review closed, remediation, audit, final candidate, deployed, and archived states; only public review accepts new feedback.",
         "While the lifecycle is DRAFT, navigation and all editorial, technical-reference, source, declaration-search, and feedback-ledger routes are unavailable, and raw generated evidence plus editorial content are omitted from staging packages.",
         "When enabled, NFTs > 6529 Stream — Review appears after ReMemes and before NFT Activity."
@@ -174,6 +174,8 @@
       ],
       "facts": [
         "Every Stream editorial and technical reference page has one structured feedback composer connected to the server-resolved Stream review Wave destination.",
+        "Editorial pages place the current page's loaded comments and composer in one collapsible rail; closing and reopening it preserves the current draft, and the browser remembers the open or closed preference.",
+        "The page-comments rail reads the most recent 50 Wave messages for the exact review version, shows entries attached to the current page, and can load older 50-message pages on request.",
         "Editorial feedback can reference a stable page section; technical feedback can reference an exact Solidity file and line range.",
         "A code-reference submission remains unavailable until the browser computes the exact selected snippet checksum; changing the selection invalidates any earlier preview but preserves the written draft.",
         "If a reviewer edits the draft or changes its attached page, section, or source range while a post is in flight, a successful response preserves the newer work and the next post uses a fresh submission ID.",

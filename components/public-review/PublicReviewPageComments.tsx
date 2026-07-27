@@ -1,0 +1,232 @@
+"use client";
+
+import { useInfiniteQuery } from "@tanstack/react-query";
+import Link from "next/link";
+import { useId, useMemo } from "react";
+
+import { usePublicReviewCommentPanelOpen } from "@/components/public-review/PublicReviewReadingLayout";
+import { formatDate, formatInteger, formatTime } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import {
+  dedupePublicReviewLedgerRecords,
+  fetchPublicReviewLedgerPage,
+  getPublicReviewLedgerQueryKey,
+  PUBLIC_REVIEW_LEDGER_PAGE_SIZE,
+  type PublicReviewLedgerApi,
+} from "@/services/api/public-review/ledger";
+import type {
+  PublicReviewDiscussionDestination,
+  PublicReviewFeedbackConfig,
+  PublicReviewPageContext,
+} from "@/services/api/public-review/types";
+
+function getPrimaryComment(body: string): string {
+  const reviewMetadataStart = body.indexOf("\n\n**Review:**");
+  const visibleBody =
+    reviewMetadataStart >= 0 ? body.slice(0, reviewMetadataStart) : body;
+  const headingEnd = visibleBody.indexOf("\n\n");
+  if (visibleBody.startsWith("## ") && headingEnd >= 0) {
+    return visibleBody.slice(headingEnd + 2).trim();
+  }
+  return visibleBody.trim();
+}
+
+export function PublicReviewPageComments({
+  api,
+  config,
+  destination,
+  locale,
+  page,
+  pageSize = PUBLIC_REVIEW_LEDGER_PAGE_SIZE,
+}: {
+  readonly api?: PublicReviewLedgerApi | undefined;
+  readonly config: PublicReviewFeedbackConfig;
+  readonly destination: PublicReviewDiscussionDestination;
+  readonly locale: SupportedLocale;
+  readonly page: PublicReviewPageContext;
+  readonly pageSize?: number | undefined;
+}) {
+  const commentsTitleId = useId();
+  const isPanelOpen = usePublicReviewCommentPanelOpen();
+  const ledgerQuery = useInfiniteQuery({
+    queryKey: getPublicReviewLedgerQueryKey({ config, destination }),
+    queryFn: ({ pageParam, signal }) =>
+      fetchPublicReviewLedgerPage({
+        api,
+        config,
+        cursor: pageParam,
+        destination,
+        limit: pageSize,
+        signal,
+      }),
+    initialPageParam: null as number | null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    enabled: isPanelOpen,
+  });
+  const records = useMemo(
+    () =>
+      dedupePublicReviewLedgerRecords(
+        ledgerQuery.data?.pages.flatMap((ledgerPage) => ledgerPage.records) ??
+          []
+      ).filter((record) => record.pageId === page.pageId),
+    [ledgerQuery.data, page.pageId]
+  );
+  const warnings = useMemo(
+    () =>
+      ledgerQuery.data?.pages.flatMap((ledgerPage) => ledgerPage.warnings) ??
+      [],
+    [ledgerQuery.data]
+  );
+
+  return (
+    <section aria-labelledby={commentsTitleId}>
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
+        <h3
+          id={commentsTitleId}
+          className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100"
+        >
+          {t(locale, "publicReview.comments.listTitle")}
+        </h3>
+        {!ledgerQuery.isPending && !ledgerQuery.isError ? (
+          <span className="tw-flex-none tw-font-mono tw-text-xs tw-text-iron-500">
+            {formatInteger(locale, records.length)}
+          </span>
+        ) : null}
+      </div>
+
+      <output className="tw-sr-only" aria-live="polite" aria-atomic="true">
+        {ledgerQuery.isPending
+          ? t(locale, "publicReview.comments.loading")
+          : t(locale, "publicReview.comments.status", {
+              count: formatInteger(locale, records.length),
+            })}
+      </output>
+
+      {warnings.length > 0 ? (
+        <p className="tw-mb-0 tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-amber-500/30 tw-bg-amber-950/20 tw-p-3 tw-text-xs tw-leading-5 tw-text-amber-100">
+          {t(locale, "publicReview.ledger.warning", {
+            count: formatInteger(locale, warnings.length),
+          })}
+        </p>
+      ) : null}
+
+      {ledgerQuery.isPending ? (
+        <div
+          aria-hidden="true"
+          className="tw-mt-3 tw-space-y-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.025] tw-p-3"
+        >
+          <div className="tw-h-3 tw-w-2/3 tw-animate-pulse tw-rounded tw-bg-iron-800" />
+          <div className="tw-h-3 tw-w-full tw-animate-pulse tw-rounded tw-bg-iron-800" />
+          <div className="tw-h-3 tw-w-4/5 tw-animate-pulse tw-rounded tw-bg-iron-800" />
+          <span className="tw-sr-only">
+            {t(locale, "publicReview.comments.loading")}
+          </span>
+        </div>
+      ) : null}
+
+      {ledgerQuery.isError ? (
+        <div
+          className="tw-border-red-500/30 tw-bg-red-950/20 tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-p-3"
+          role="alert"
+        >
+          <p className="tw-text-red-200 tw-m-0 tw-text-sm tw-leading-5">
+            {t(locale, "publicReview.comments.loadError")}
+          </p>
+          <button
+            type="button"
+            onClick={() => void ledgerQuery.refetch()}
+            className="tw-border-red-300/40 tw-text-red-100 focus-visible:tw-outline-red-200 tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-semibold focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2"
+          >
+            {t(locale, "publicReview.ledger.retry")}
+          </button>
+        </div>
+      ) : null}
+
+      {!ledgerQuery.isPending &&
+      !ledgerQuery.isError &&
+      records.length === 0 ? (
+        <p className="tw-mb-0 tw-mt-3 tw-rounded-lg tw-border tw-border-dashed tw-border-iron-700 tw-p-4 tw-text-sm tw-leading-5 tw-text-iron-400">
+          {t(
+            locale,
+            ledgerQuery.hasNextPage
+              ? "publicReview.comments.emptyLoaded"
+              : "publicReview.comments.empty"
+          )}
+        </p>
+      ) : null}
+
+      {records.length > 0 ? (
+        <ol className="tw-mb-0 tw-mt-3 tw-list-none tw-space-y-3 tw-p-0">
+          {records.map((record) => {
+            const author =
+              record.author.handle ??
+              t(locale, "publicReview.ledger.unknownAuthor");
+            const categoryLabel =
+              config.categories.find(
+                (category) => category.value === record.category
+              )?.label ?? record.category;
+            const severityLabel =
+              config.severityOptions.find(
+                (severity) => severity.value === record.severity
+              )?.label ?? record.severity;
+            const primaryComment = getPrimaryComment(record.body);
+
+            return (
+              <li key={record.dropId}>
+                <article
+                  aria-label={t(locale, "publicReview.ledger.itemLabel", {
+                    author,
+                  })}
+                  className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.025] tw-p-3"
+                >
+                  <div className="tw-flex tw-flex-wrap tw-gap-1.5">
+                    <span className="tw-text-primary-200 tw-rounded-full tw-border tw-border-solid tw-border-primary-400/20 tw-bg-primary-400/10 tw-px-2 tw-py-0.5 tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-tracking-wide">
+                      {categoryLabel}
+                    </span>
+                    <span className="tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-2 tw-py-0.5 tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-300">
+                      {severityLabel}
+                    </span>
+                  </div>
+                  <p className="tw-mb-0 tw-mt-3 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-leading-6 tw-text-iron-100">
+                    {primaryComment || record.body}
+                  </p>
+                  <p className="tw-mb-0 tw-mt-3 tw-font-mono tw-text-[0.65rem] tw-leading-4 tw-text-iron-500">
+                    {t(locale, "publicReview.comments.byline", {
+                      author,
+                      date: formatDate(locale, record.createdAt),
+                      time: formatTime(locale, record.createdAt),
+                    })}
+                  </p>
+                  <Link
+                    href={record.discussionPath}
+                    className="hover:tw-text-primary-200 tw-mt-2 tw-inline-flex tw-min-h-11 tw-items-center tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline tw-decoration-primary-400/40 tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+                  >
+                    {t(locale, "publicReview.ledger.openDiscussion")}
+                  </Link>
+                </article>
+              </li>
+            );
+          })}
+        </ol>
+      ) : null}
+
+      {ledgerQuery.hasNextPage ? (
+        <button
+          type="button"
+          aria-busy={ledgerQuery.isFetchingNextPage}
+          disabled={ledgerQuery.isFetchingNextPage}
+          onClick={() => void ledgerQuery.fetchNextPage()}
+          className="tw-mt-3 tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 hover:tw-border-white/20 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white disabled:tw-cursor-wait disabled:tw-opacity-60"
+        >
+          {t(
+            locale,
+            ledgerQuery.isFetchingNextPage
+              ? "publicReview.ledger.loadingMore"
+              : "publicReview.ledger.loadMore"
+          )}
+        </button>
+      ) : null}
+    </section>
+  );
+}

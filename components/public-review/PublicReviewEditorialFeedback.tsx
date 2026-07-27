@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import PublicReviewFeedbackComposer from "@/components/public-review/PublicReviewFeedbackComposer";
+import { PublicReviewPageComments } from "@/components/public-review/PublicReviewPageComments";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { PublicReviewSectionDefinition } from "@/lib/public-review/publicReviewTypes";
@@ -24,9 +25,7 @@ export function PublicReviewEditorialFeedback({
   readonly sections: readonly PublicReviewSectionDefinition[];
 }) {
   const [sectionId, setSectionId] = useState("");
-  const selectedSection = sections.find(
-    (section) => section.id === sectionId
-  );
+  const selectedSection = sections.find((section) => section.id === sectionId);
   const pageContext = useMemo<PublicReviewPageContext>(
     () => ({
       ...page,
@@ -41,11 +40,14 @@ export function PublicReviewEditorialFeedback({
   );
 
   return (
-    <section
-      aria-labelledby="public-review-editorial-feedback-context"
-      className="tw-space-y-4"
-    >
-      <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/60 tw-p-4">
+    <div className="tw-space-y-5">
+      <PublicReviewPageComments
+        config={config}
+        destination={destination}
+        locale={DEFAULT_LOCALE}
+        page={page}
+      />
+      <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-5">
         <label
           id="public-review-editorial-feedback-context"
           htmlFor="public-review-feedback-section"
@@ -57,7 +59,7 @@ export function PublicReviewEditorialFeedback({
           id="public-review-feedback-section"
           value={sectionId}
           onChange={(event) => setSectionId(event.target.value)}
-          className="tw-mt-2 tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-iron-50 tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40"
+          className="tw-mt-2 tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black tw-px-3 tw-py-2 tw-text-base tw-text-iron-50 tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40"
         >
           <option value="">
             {t(DEFAULT_LOCALE, "publicReview.feedback.wholePage")}
@@ -75,6 +77,6 @@ export function PublicReviewEditorialFeedback({
         destination={destination}
         page={pageContext}
       />
-    </section>
+    </div>
   );
 }

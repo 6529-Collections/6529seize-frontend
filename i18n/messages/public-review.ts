@@ -480,6 +480,22 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "Preparing the tamper-evident checksum for this exact code selection…",
   "publicReview.feedback.hashUnavailable":
     "This browser could not verify the selected code checksum. Code-linked feedback is disabled; reload in a current browser and try again.",
+  "publicReview.comments.show": "Show page comments",
+  "publicReview.comments.hide": "Hide page comments",
+  "publicReview.comments.eyebrow": "Version {version}",
+  "publicReview.comments.title": "Page comments",
+  "publicReview.comments.intro":
+    "Read and add feedback attached to this exact page and review version.",
+  "publicReview.comments.viewLedger": "View the full feedback ledger",
+  "publicReview.comments.listTitle": "Discussion",
+  "publicReview.comments.loading": "Loading page comments…",
+  "publicReview.comments.loadError":
+    "Comments could not be loaded from the review Wave.",
+  "publicReview.comments.empty": "No comments yet for this page.",
+  "publicReview.comments.emptyLoaded":
+    "No comments for this page are present in the loaded feedback.",
+  "publicReview.comments.status": "{count} page comments loaded.",
+  "publicReview.comments.byline": "{author} · {date} at {time}",
   "publicReview.feedback.categories.question": "Question",
   "publicReview.feedback.categories.artistWorkflow": "Artist workflow",
   "publicReview.feedback.categories.productOrUx": "Product or UX",
