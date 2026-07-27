@@ -145,7 +145,6 @@ export function PublicReviewShell({
         <div className="tw-min-h-screen tw-min-w-0 tw-border-y-0 tw-border-b-0 tw-border-l-0 tw-border-r tw-border-t-0 tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F]">
           <PublicReviewReadingLayout
             feedbackAvailable={review.feedbackAvailable}
-            ledgerHref={routes.getFeedbackHref(routeVersion)}
             panel={feedbackSlot}
             toolbar={
               <p className="tw-m-0 tw-font-mono tw-text-[0.68rem] tw-font-medium tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">

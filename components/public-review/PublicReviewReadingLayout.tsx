@@ -4,7 +4,6 @@ import {
   ChatBubbleLeftRightIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import {
   createContext,
   type ReactNode,
@@ -83,13 +82,11 @@ function updatePanelPreference(isOpen: boolean): void {
 export function PublicReviewReadingLayout({
   content,
   feedbackAvailable,
-  ledgerHref,
   panel,
   toolbar,
 }: {
   readonly content: ReactNode;
   readonly feedbackAvailable: boolean;
-  readonly ledgerHref: string;
   readonly panel: ReactNode;
   readonly toolbar: ReactNode;
 }) {
@@ -199,14 +196,6 @@ export function PublicReviewReadingLayout({
                 </h2>
               </header>
               <div className="tw-min-h-0 tw-flex-1">{panel}</div>
-              <footer className="tw-flex-none tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-px-5">
-                <Link
-                  href={ledgerHref}
-                  className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-[0.6875rem] tw-font-medium tw-text-iron-500 tw-no-underline tw-transition-colors hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-                >
-                  {t(DEFAULT_LOCALE, "publicReview.comments.viewLedger")}
-                </Link>
-              </footer>
             </div>
           </PublicReviewCommentPanelOpenContext.Provider>
         </aside>
