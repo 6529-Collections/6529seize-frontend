@@ -408,10 +408,10 @@ describe("CreateDropActions", () => {
     publicEnv.GIPHY_API_KEY = undefined;
     render(<CreateDropActions {...defaultProps} />);
 
-    const gifButtons = screen.getAllByLabelText("Add GIF");
-    expect(gifButtons).not.toHaveLength(0);
+    const gifButton = screen.getByRole("button", { name: "Add GIF" });
+    expect(gifButton).toBeVisible();
 
-    await userEvent.click(gifButtons[0]);
+    await userEvent.click(gifButton);
 
     expect(screen.getByTestId("gif-picker")).not.toHaveAttribute(
       "data-api-key"
