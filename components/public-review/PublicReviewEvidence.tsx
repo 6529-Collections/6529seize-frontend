@@ -19,7 +19,8 @@ const EVIDENCE_PRESENTATION: Record<
   TESTED: {
     labelKey: "publicReview.evidence.labels.tested",
     descriptionKey: "publicReview.evidence.tested",
-    className: "tw-border-blue-400/15 tw-bg-blue-400/[0.08] tw-text-blue-400/90",
+    className:
+      "tw-border-blue-400/15 tw-bg-blue-400/[0.08] tw-text-blue-400/90",
   },
   PROPOSED: {
     labelKey: "publicReview.evidence.labels.proposed",
@@ -42,8 +43,7 @@ const EVIDENCE_PRESENTATION: Record<
   DEFERRED: {
     labelKey: "publicReview.evidence.labels.deferred",
     descriptionKey: "publicReview.evidence.deferred",
-    className:
-      "tw-border-white/[0.08] tw-bg-white/[0.03] tw-text-iron-400",
+    className: "tw-border-white/[0.08] tw-bg-white/[0.03] tw-text-iron-400",
   },
   KNOWN_LIMITATION: {
     labelKey: "publicReview.evidence.labels.knownLimitation",

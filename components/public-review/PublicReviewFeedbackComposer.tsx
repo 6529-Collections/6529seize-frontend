@@ -496,9 +496,7 @@ export default function PublicReviewFeedbackComposer({
       {authenticated && config.submissionsOpen ? (
         <form
           aria-describedby={!referenceReady ? referenceStatusId : undefined}
-          className={`tw-space-y-3 ${
-            referenceReady ? "tw-mt-0" : "tw-mt-4"
-          }`}
+          className={`tw-space-y-3 ${referenceReady ? "tw-mt-0" : "tw-mt-4"}`}
           noValidate
           onSubmit={(event) => {
             event.preventDefault();
@@ -506,12 +504,9 @@ export default function PublicReviewFeedbackComposer({
           }}
         >
           <div>
-            <label
-              htmlFor={`${formId}-comment`}
-              className="tw-sr-only"
-            >
-              {t(locale, "publicReview.feedback.comment")}{" "}
-              ({t(locale, "publicReview.feedback.required")})
+            <label htmlFor={`${formId}-comment`} className="tw-sr-only">
+              {t(locale, "publicReview.feedback.comment")} (
+              {t(locale, "publicReview.feedback.required")})
             </label>
             <textarea
               ref={commentRef}

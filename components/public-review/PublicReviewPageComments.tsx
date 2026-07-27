@@ -125,7 +125,7 @@ export function PublicReviewPageComments({
           <button
             type="button"
             onClick={() => void ledgerQuery.refetch()}
-            className="tw-mt-1 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-0 tw-pr-2 tw-text-xs tw-font-medium tw-text-primary-300 tw-transition-colors hover:tw-text-primary-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+            className="hover:tw-text-primary-200 tw-mt-1 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-0 tw-pr-2 tw-text-xs tw-font-medium tw-text-primary-300 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
           >
             <ArrowPathIcon
               className="tw-size-3.5 tw-flex-none"
@@ -201,7 +201,7 @@ export function PublicReviewPageComments({
                         {primaryComment || record.body}
                       </p>
                       <div className="tw-mt-3 tw-flex tw-flex-wrap tw-gap-1.5">
-                        <span className="tw-rounded-full tw-border tw-border-solid tw-border-primary-400/20 tw-bg-primary-400/[0.07] tw-px-2 tw-py-0.5 tw-text-[0.61rem] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-primary-200">
+                        <span className="tw-text-primary-200 tw-rounded-full tw-border tw-border-solid tw-border-primary-400/20 tw-bg-primary-400/[0.07] tw-px-2 tw-py-0.5 tw-text-[0.61rem] tw-font-semibold tw-uppercase tw-tracking-wide">
                           {categoryLabel}
                         </span>
                         <span className="tw-rounded-full tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.025] tw-px-2 tw-py-0.5 tw-text-[0.61rem] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">

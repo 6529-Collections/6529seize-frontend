@@ -126,7 +126,7 @@ export function PublicReviewNavigation({
       </details>
 
       <aside className="tw-hidden tw-min-w-0 tw-border-y-0 tw-border-b-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-white/[0.08] tw-bg-[#050506] lg:tw-block">
-        <div className="tw-sticky tw-top-0 tw-h-[100dvh] tw-overflow-y-auto tw-overscroll-contain tw-px-5 tw-pb-8 tw-pt-7 tw-[scrollbar-gutter:stable] tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
+        <div className="tw-[scrollbar-gutter:stable] tw-sticky tw-top-0 tw-h-[100dvh] tw-overflow-y-auto tw-overscroll-contain tw-px-5 tw-pb-8 tw-pt-7 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
           <nav
             aria-label={t(
               DEFAULT_LOCALE,

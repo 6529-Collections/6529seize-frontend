@@ -95,7 +95,7 @@ export function PublicReviewStatusBanner({
   return (
     <section
       aria-label={t(DEFAULT_LOCALE, "publicReview.status.heading")}
-      className="tw-@container tw-rounded-xl tw-border tw-border-solid tw-border-amber-400/15 tw-bg-amber-400/[0.025] tw-px-4 tw-py-3.5 sm:tw-px-5 sm:tw-py-4"
+      className="tw-rounded-xl tw-border tw-border-solid tw-border-amber-400/15 tw-bg-amber-400/[0.025] tw-px-4 tw-py-3.5 tw-@container sm:tw-px-5 sm:tw-py-4"
     >
       <div className="tw-flex tw-w-full tw-flex-col tw-gap-4 @[720px]:tw-flex-row @[720px]:tw-items-center @[720px]:tw-justify-between">
         <div className="tw-min-w-0 @[720px]:tw-max-w-xl">

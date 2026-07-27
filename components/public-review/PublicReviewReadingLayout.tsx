@@ -145,7 +145,7 @@ export function PublicReviewReadingLayout({
             aria-controls={COMMENT_PANEL_ID}
             aria-expanded={isPanelOpen}
             onClick={() => updatePanelPreference(!isPanelOpen)}
-            className="tw-inline-flex tw-min-h-10 tw-flex-none tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/20 tw-bg-primary-400/[0.08] tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-primary-300 tw-transition-colors tw-duration-200 tw-ease-out hover:tw-border-primary-300/35 hover:tw-bg-primary-400/[0.12] hover:tw-text-primary-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+            className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-10 tw-flex-none tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/20 tw-bg-primary-400/[0.08] tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-primary-300 tw-transition-colors tw-duration-200 tw-ease-out hover:tw-border-primary-300/35 hover:tw-bg-primary-400/[0.12] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
           >
             {isPanelOpen ? (
               <XMarkIcon className="tw-size-4" aria-hidden="true" />
@@ -167,9 +167,7 @@ export function PublicReviewReadingLayout({
 
       <div
         className={`tw-grid tw-min-w-0 ${
-          isPanelOpen
-            ? "@[960px]:tw-grid-cols-[minmax(0,1fr)_24rem]"
-            : ""
+          isPanelOpen ? "@[960px]:tw-grid-cols-[minmax(0,1fr)_24rem]" : ""
         }`}
       >
         <div className="tw-order-2 tw-min-w-0 @[960px]:tw-order-1">

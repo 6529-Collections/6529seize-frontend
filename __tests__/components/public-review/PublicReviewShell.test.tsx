@@ -64,14 +64,17 @@ describe("PublicReviewShell", () => {
       screen.getAllByRole("link", { name: /Community Review/ })
     ).not.toHaveLength(0);
     expect(
-      screen.getByRole("link", { name: "Jump to send feedback" })
-    ).toHaveAttribute("href", "#public-review-feedback");
+      screen.getByRole("button", { name: "Show comments" })
+    ).toHaveAttribute("aria-controls", "public-review-feedback");
     expect(
-      screen.getAllByRole("navigation", { name: "On this page" })
+      screen.getAllByRole("link", { name: "The short answer" })
     ).toHaveLength(2);
     expect(
       screen.getByRole("link", { name: "Start the Artists path" })
     ).toHaveAttribute("href", "/reviews/6529-stream/artwork-lifecycle");
+    expect(
+      screen.queryByText("View all 12 pages in this path")
+    ).not.toBeInTheDocument();
     expect(document.querySelector("main")).not.toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { name: "Review status" })
@@ -122,7 +125,7 @@ describe("PublicReviewShell", () => {
       `https://github.com/6529-Collections/6529Stream/tree/${historicalCommit}`
     );
     expect(
-      screen.getByRole("link", { name: "View public feedback" })
+      screen.getByRole("link", { name: "View the full feedback ledger" })
     ).toHaveAttribute(
       "href",
       "/reviews/6529-stream/versions/2026-07-25.1/feedback"
@@ -162,7 +165,7 @@ describe("PublicReviewShell", () => {
     );
 
     expect(
-      screen.getByRole("link", { name: "View public feedback" })
+      screen.getByRole("link", { name: "View the full feedback ledger" })
     ).toHaveAttribute(
       "href",
       "/reviews/another-contract/versions/candidate-2/feedback"
@@ -217,7 +220,7 @@ describe("PublicReviewShell", () => {
     );
 
     expect(
-      screen.getByRole("link", { name: "View public feedback" })
+      screen.getByRole("link", { name: "View the full feedback ledger" })
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: "Jump to send feedback" })
