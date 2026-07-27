@@ -33,6 +33,10 @@ jest.mock(
   "@/components/user/user-page-header/stats/UserPageHeaderStats",
   () => () => <div data-testid="stats" />
 );
+jest.mock(
+  "@/components/user/user-page-header/UserPageHeaderSubscriptionStatus",
+  () => () => <div data-testid="subscription-status" />
+);
 jest.mock("@/components/user/utils/UserFollowBtn", () => ({
   __esModule: true,
   default: () => <div data-testid="follow" />,
@@ -100,6 +104,7 @@ describe("UserPageHeader", () => {
     );
     expect(screen.getByTestId("follow")).toBeInTheDocument();
     expect(screen.getByTestId("about")).toBeInTheDocument();
+    expect(screen.queryByTestId("subscription-status")).not.toBeInTheDocument();
   });
 
   it("does not render follow or DM actions on your own profile", () => {
@@ -125,6 +130,7 @@ describe("UserPageHeader", () => {
     );
 
     expect(screen.queryByTestId("follow")).not.toBeInTheDocument();
+    expect(screen.getByTestId("subscription-status")).toBeInTheDocument();
   });
 
   it("renders profile website link when a primary CMS site exists", () => {

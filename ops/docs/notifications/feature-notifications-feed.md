@@ -47,7 +47,8 @@ with cause filters, grouped reactions, and inline drop previews.
 ## Feed Filters
 
 - Cause filters are horizontal chips:
-  `All`, `Mentions`, `Replies`, `Identity`, `Reactions`, `Invites`.
+  `All`, `Mentions`, `Replies`, `Identity`, `Reactions`, `Invites`,
+  `Subscriptions`.
 - Filter mapping:
   - `All`: all notification causes, including priority alerts, all-drops rows,
     and unknown causes.
@@ -57,6 +58,8 @@ with cause filters, grouped reactions, and inline drop previews.
   - `Reactions`: voted, reacted, and boosted drop notifications.
   - `Invites`: wave-created notifications, including standard waves the user
     can access and direct-message waves started with the user.
+  - `Subscriptions`: coverage alerts as a profile moves into plan-a-top-up,
+    running-low, or action-required state.
 
 ## Row and Action Behavior
 
@@ -77,6 +80,11 @@ with cause filters, grouped reactions, and inline drop previews.
   and can include `Join wave` plus `Follow creator` controls.
 - Direct-message wave-created rows say the creator started a DM with the user
   and expose `Open DM` instead of the wave join control.
+- Subscription coverage rows show the severity, consecutive funded runway,
+  funded-through or next-unfunded Meme context, an authoritative deadline when
+  available, and an exact minimum top-up action when supplied.
+- Coverage alerts are transition-based so routine balance recalculation does
+  not repeatedly nag the user without a meaningful risk-state change.
 - Unknown causes render a generic row (formatted cause/context) instead of
   failing feed render.
 
