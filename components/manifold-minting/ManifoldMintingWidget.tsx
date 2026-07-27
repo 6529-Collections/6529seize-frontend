@@ -1,7 +1,13 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { type ReactNode, useEffect, useId, useState } from "react";
+import {
+  type ReactNode,
+  useEffect,
+  useId,
+  useReducer,
+  useState,
+} from "react";
 import {
   useReadContract,
   useReadContracts,
@@ -115,6 +121,17 @@ interface MintTransactionAttempt {
   readonly ignoredReceiptError: Error | null;
 }
 
+type MintTransactionAttemptAction =
+  | Readonly<{ type: "clear" }>
+  | Readonly<{ type: "start"; attempt: MintTransactionAttempt }>;
+
+function reduceMintTransactionAttempt(
+  _currentAttempt: MintTransactionAttempt | null,
+  action: MintTransactionAttemptAction
+): MintTransactionAttempt | null {
+  return action.type === "start" ? action.attempt : null;
+}
+
 function MintSummaryRow({
   title,
   value,
@@ -183,8 +200,10 @@ export default function ManifoldMintingWidget(
   });
   const waitMintWritePending = waitMintWrite.isPending;
   const waitMintWriteSuccess = waitMintWrite.isSuccess;
-  const [transactionAttempt, setTransactionAttempt] =
-    useState<MintTransactionAttempt | null>(null);
+  const [transactionAttempt, dispatchTransactionAttempt] = useReducer(
+    reduceMintTransactionAttempt,
+    null
+  );
   const hasCurrentTransactionHash = Boolean(
     transactionAttempt &&
     mintWrite.data &&
@@ -232,8 +251,7 @@ export default function ManifoldMintingWidget(
     }
 
     mintWrite.reset();
-    // eslint-disable-next-line react-you-might-not-need-an-effect/no-adjust-state-on-prop-change, react-you-might-not-need-an-effect/no-chain-state-updates -- A changed recipient or claim invalidates the active transaction presentation.
-    setTransactionAttempt(null);
+    dispatchTransactionAttempt({ type: "clear" });
     setMintError("");
     setIsError(false);
     setFetchingMerkle(true);
@@ -453,7 +471,7 @@ export default function ManifoldMintingWidget(
   const onMint = () => {
     mintWrite.reset();
     setMintError("");
-    setTransactionAttempt(null);
+    dispatchTransactionAttempt({ type: "clear" });
 
     if (safeMintCount <= 0) {
       setMintError("Enter a valid mint count");
@@ -480,10 +498,13 @@ export default function ManifoldMintingWidget(
       return;
     }
     runConnectedAction(() => {
-      setTransactionAttempt({
-        ignoredTransactionHash: mintWrite.data,
-        ignoredMintWriteError: mintWrite.error,
-        ignoredReceiptError: waitMintWrite.error,
+      dispatchTransactionAttempt({
+        type: "start",
+        attempt: {
+          ignoredTransactionHash: mintWrite.data,
+          ignoredMintWriteError: mintWrite.error,
+          ignoredReceiptError: waitMintWrite.error,
+        },
       });
       mintWrite.writeContract({
         address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
@@ -753,7 +774,7 @@ export default function ManifoldMintingWidget(
             hasCurrentTransactionHash ? mintWrite.data : undefined
           }
           chain={props.chain}
-          onClose={() => setTransactionAttempt(null)}
+          onClose={() => dispatchTransactionAttempt({ type: "clear" })}
         />
       ) : null}
     </>
