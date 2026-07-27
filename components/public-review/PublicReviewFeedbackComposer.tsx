@@ -539,7 +539,7 @@ export default function PublicReviewFeedbackComposer({
             ) : null}
           </div>
 
-          <details className="tw-group tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/50 tw-transition-colors open:tw-border-white/[0.09] open:tw-bg-iron-950/70">
+          <details className="tw-group tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#0a0a0c] tw-transition-colors open:tw-border-white/[0.11]">
             <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-3 tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors tw-duration-200 hover:tw-bg-white/[0.018] hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
               {t(locale, "publicReview.feedback.advanced")}
               <ChevronDownIcon
@@ -548,7 +548,7 @@ export default function PublicReviewFeedbackComposer({
               />
             </summary>
 
-            <div className="tw-space-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-3 tw-pb-3 tw-pt-4">
+            <div className="tw-space-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-bg-white/[0.012] tw-px-3 tw-pb-3 tw-pt-4">
               {contextControl}
 
               <div className="tw-grid tw-gap-3 @[340px]:tw-grid-cols-2">
@@ -654,7 +654,7 @@ export default function PublicReviewFeedbackComposer({
             </div>
           </details>
 
-          <div className="tw-sticky tw-bottom-0 tw-z-10 tw-bg-[#08080a] tw-pt-1">
+          <div className="tw-sticky tw-bottom-0 tw-z-10 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-[#050506] tw-pb-1 tw-pt-3 tw-shadow-[0_-12px_24px_rgba(0,0,0,0.28)]">
             <button
               type="submit"
               disabled={busy || !referenceReady || Boolean(feedbackGate)}
