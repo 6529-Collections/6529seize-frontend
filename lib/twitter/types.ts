@@ -16,6 +16,13 @@ export interface TweetPreviewMedia {
   readonly videoVariants?: readonly TweetPreviewVideoVariant[];
 }
 
+export interface TweetPreviewArticle {
+  readonly url: string;
+  readonly title: string;
+  readonly previewText?: string;
+  readonly coverImageUrl?: string;
+}
+
 export interface TweetPreview {
   readonly tweetId: string;
   readonly url: string;
@@ -40,6 +47,7 @@ export interface TweetPreview {
   readonly retweetCount?: number;
   readonly bookmarkCount?: number;
   readonly viewCount?: number;
+  readonly article?: TweetPreviewArticle;
 }
 
 export interface TwitterOEmbedResponse {
