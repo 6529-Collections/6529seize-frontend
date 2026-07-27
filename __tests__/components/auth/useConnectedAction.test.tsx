@@ -9,17 +9,29 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 const useSeizeConnectContextMock = jest.mocked(useSeizeConnectContext);
 const seizeConnect = jest.fn();
 
+function createConnectionState({
+  canSignActiveWallet,
+}: Readonly<{
+  canSignActiveWallet: boolean;
+}>): ReturnType<typeof useSeizeConnectContext> {
+  return {
+    canSignActiveWallet,
+    seizeConnect,
+    seizeConnectOpen: false,
+  } as unknown as ReturnType<typeof useSeizeConnectContext>;
+}
+
 describe("useConnectedAction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it("runs the action immediately when the active wallet can sign", () => {
-    useSeizeConnectContextMock.mockReturnValue({
-      canSignActiveWallet: true,
-      seizeConnect,
-      seizeConnectOpen: false,
-    } as ReturnType<typeof useSeizeConnectContext>);
+    useSeizeConnectContextMock.mockReturnValue(
+      createConnectionState({
+        canSignActiveWallet: true,
+      })
+    );
     const action = jest.fn();
     const { result } = renderHook(() => useConnectedAction());
 
@@ -30,11 +42,9 @@ describe("useConnectedAction", () => {
   });
 
   it("opens connect and runs the pending action once after connection", () => {
-    let connectionState = {
+    let connectionState = createConnectionState({
       canSignActiveWallet: false,
-      seizeConnect,
-      seizeConnectOpen: false,
-    } as ReturnType<typeof useSeizeConnectContext>;
+    });
     useSeizeConnectContextMock.mockImplementation(() => connectionState);
     const action = jest.fn();
     const { result, rerender } = renderHook(() => useConnectedAction());
@@ -61,11 +71,9 @@ describe("useConnectedAction", () => {
   });
 
   it("discards the pending action when connect closes without connecting", () => {
-    let connectionState = {
+    let connectionState = createConnectionState({
       canSignActiveWallet: false,
-      seizeConnect,
-      seizeConnectOpen: false,
-    } as ReturnType<typeof useSeizeConnectContext>;
+    });
     useSeizeConnectContextMock.mockImplementation(() => connectionState);
     const action = jest.fn();
     const { result, rerender } = renderHook(() => useConnectedAction());
@@ -91,11 +99,9 @@ describe("useConnectedAction", () => {
   });
 
   it("does not run when signing becomes available before connect opens", () => {
-    let connectionState = {
+    let connectionState = createConnectionState({
       canSignActiveWallet: false,
-      seizeConnect,
-      seizeConnectOpen: false,
-    } as ReturnType<typeof useSeizeConnectContext>;
+    });
     useSeizeConnectContextMock.mockImplementation(() => connectionState);
     const action = jest.fn();
     const { result, rerender } = renderHook(() => useConnectedAction());
@@ -111,11 +117,9 @@ describe("useConnectedAction", () => {
   });
 
   it("keeps the first pending action and opens connect once", () => {
-    let connectionState = {
+    let connectionState = createConnectionState({
       canSignActiveWallet: false,
-      seizeConnect,
-      seizeConnectOpen: false,
-    } as ReturnType<typeof useSeizeConnectContext>;
+    });
     useSeizeConnectContextMock.mockImplementation(() => connectionState);
     const firstAction = jest.fn();
     const secondAction = jest.fn();
