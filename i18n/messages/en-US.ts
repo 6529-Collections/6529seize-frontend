@@ -1537,6 +1537,10 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
 } as const);
 
 export const EN_US_MESSAGES = {
+  "linkPreview.twitter.kind.article": "Article",
+  "linkPreview.twitter.kind.post": "Post",
+  "linkPreview.twitter.article.provider": "Article on X",
+  "linkPreview.twitter.article.read": "Read article: {title}",
   ...IDENTITY_FILTER_MESSAGES,
   ...XTDH_COLLECTION_MESSAGES,
   ...COLLECTION_DELEGATION_MESSAGES,

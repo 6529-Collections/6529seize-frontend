@@ -7873,6 +7873,34 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ReleaseBusV2CandidateResponse"
+  /deploy/release-bus-v2/candidates/{id}/staging-transition:
+    post:
+      tags:
+        - Release Bus v2
+      summary: Request an audited removal or main-absorption transition
+      operationId: transitionReleaseBusV2CandidateStagingPresence
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReleaseBusV2StagingTransitionRequest"
+      responses:
+        "202":
+          description: Candidate transition queued for cumulative staging
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReleaseBusV2CandidateResponse"
   /deploy/release-bus-v2/trains:
     get:
       tags:
@@ -24104,6 +24132,39 @@ components:
           type: string
           format: uuid
           nullable: true
+        staging_live_state:
+          type: string
+          enum:
+            - NOT_LIVE
+            - LIVE
+        staging_live_manifest_id:
+          type: string
+          format: uuid
+          nullable: true
+        staging_admitted_at:
+          type: integer
+          format: int64
+          nullable: true
+        staging_live_updated_at:
+          type: integer
+          format: int64
+          nullable: true
+        staging_transition_request:
+          type: string
+          enum:
+            - REMOVE
+            - ABSORB
+          nullable: true
+        staging_transition_requested_at:
+          type: integer
+          format: int64
+          nullable: true
+        staging_transition_requested_by:
+          type: string
+          nullable: true
+        staging_transition_reason:
+          type: string
+          nullable: true
         production_requested_at:
           type: integer
           format: int64
@@ -24210,6 +24271,7 @@ components:
         - controls
         - locks
         - mode
+        - staging_state
       properties:
         controls:
           type: array
@@ -24221,6 +24283,8 @@ components:
             $ref: "#/components/schemas/ReleaseBusV2Lock"
         mode:
           $ref: "#/components/schemas/ReleaseBusV2Mode"
+        staging_state:
+          $ref: "#/components/schemas/ReleaseBusV2StagingState"
     ReleaseBusV2ControlUpdateResponse:
       type: object
       required:
@@ -24432,6 +24496,85 @@ components:
           maxItems: 100
           items:
             $ref: "#/components/schemas/ReleaseBusV2DependencyRequest"
+    ReleaseBusV2StagingState:
+      type: object
+      required:
+        - id
+        - status
+        - clean_main
+        - updated_at
+        - row_version
+      properties:
+        id:
+          type: string
+          enum:
+            - current
+        status:
+          type: string
+          enum:
+            - UNINITIALIZED
+            - LIVE
+            - CLEAN_MAIN
+            - ROLLBACK_FAILED
+        current_manifest_id:
+          type: string
+          format: uuid
+          nullable: true
+        last_validated_manifest_id:
+          type: string
+          format: uuid
+          nullable: true
+        frontend_sha:
+          type: string
+          pattern: ^[a-f0-9]{40}$
+          nullable: true
+        backend_sha:
+          type: string
+          pattern: ^[a-f0-9]{40}$
+          nullable: true
+        frontend_staging_ref_sha:
+          type: string
+          pattern: ^[a-f0-9]{40}$
+          nullable: true
+        backend_staging_ref_sha:
+          type: string
+          pattern: ^[a-f0-9]{40}$
+          nullable: true
+        clean_main:
+          type: boolean
+        last_transition_train_id:
+          type: string
+          format: uuid
+          nullable: true
+        updated_at:
+          type: integer
+          format: int64
+        row_version:
+          type: integer
+          minimum: 1
+    ReleaseBusV2StagingTransitionRequest:
+      type: object
+      required:
+        - expected_head_sha
+        - expected_row_version
+        - transition
+        - reason
+      properties:
+        expected_head_sha:
+          type: string
+          pattern: ^[a-f0-9]{40}$
+        expected_row_version:
+          type: integer
+          minimum: 1
+        transition:
+          type: string
+          enum:
+            - REMOVE
+            - ABSORB
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 1000
     ReleaseBusV2Train:
       type: object
       required:
@@ -24463,6 +24606,8 @@ components:
             - STAGING_DEPLOYED
             - E2E_RUNNING
             - STAGING_VALIDATED
+            - STAGING_ROLLING_BACK
+            - STAGING_ROLLBACK_FAILED
             - MERGING_PRODUCTION
             - PRODUCTION_DEPLOYING
             - PRODUCTION_DEPLOYED
@@ -24495,6 +24640,20 @@ components:
           type: string
           format: uuid
           nullable: true
+        staging_policy:
+          type: string
+          enum:
+            - CUMULATIVE_ADMITTED_SET_V1
+            - RESTORE_VALIDATED_STAGING_V1
+          nullable: true
+        staging_baseline_manifest_id:
+          type: string
+          format: uuid
+          nullable: true
+        staging_transition_json:
+          type: object
+          nullable: true
+          additionalProperties: true
         manifest_id:
           type: string
           format: uuid

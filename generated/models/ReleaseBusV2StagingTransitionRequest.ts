@@ -11,15 +11,13 @@
  * Do not edit the class manually.
  */
 
-import { ReleaseBusV2Mode } from '../models/ReleaseBusV2Mode';
-import { ReleaseBusV2StagingState } from '../models/ReleaseBusV2StagingState';
 import { HttpFile } from '../http/http';
 
-export class ReleaseBusV2ControlsResponse {
-    'controls': Array<{ [key: string]: any; }>;
-    'locks': Array<{ [key: string]: any; }>;
-    'mode': ReleaseBusV2Mode;
-    'staging_state': ReleaseBusV2StagingState;
+export class ReleaseBusV2StagingTransitionRequest {
+    'expected_head_sha': string;
+    'expected_row_version': number;
+    'transition': ReleaseBusV2StagingTransitionRequestTransitionEnum;
+    'reason': string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -27,36 +25,40 @@ export class ReleaseBusV2ControlsResponse {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "controls",
-            "baseName": "controls",
-            "type": "Array<{ [key: string]: any; }>",
+            "name": "expected_head_sha",
+            "baseName": "expected_head_sha",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "locks",
-            "baseName": "locks",
-            "type": "Array<{ [key: string]: any; }>",
+            "name": "expected_row_version",
+            "baseName": "expected_row_version",
+            "type": "number",
             "format": ""
         },
         {
-            "name": "mode",
-            "baseName": "mode",
-            "type": "ReleaseBusV2Mode",
+            "name": "transition",
+            "baseName": "transition",
+            "type": "ReleaseBusV2StagingTransitionRequestTransitionEnum",
             "format": ""
         },
         {
-            "name": "staging_state",
-            "baseName": "staging_state",
-            "type": "ReleaseBusV2StagingState",
+            "name": "reason",
+            "baseName": "reason",
+            "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ReleaseBusV2ControlsResponse.attributeTypeMap;
+        return ReleaseBusV2StagingTransitionRequest.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
 
+export enum ReleaseBusV2StagingTransitionRequestTransitionEnum {
+    Remove = 'REMOVE',
+    Absorb = 'ABSORB'
+}
 

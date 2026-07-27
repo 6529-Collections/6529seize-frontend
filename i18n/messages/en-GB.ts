@@ -6,6 +6,10 @@ import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const EN_GB_MESSAGES = {
+  "linkPreview.twitter.kind.article": "Article",
+  "linkPreview.twitter.kind.post": "Post",
+  "linkPreview.twitter.article.provider": "Article on X",
+  "linkPreview.twitter.article.read": "Read article: {title}",
   "media.video.captions": "Captions",
   "media.video.download": "Download media",
   "media.video.downloading": "Downloading media",

@@ -29,6 +29,14 @@ export class ReleaseBusV2Candidate {
     'current_train_id'?: string | null;
     'staging_validated_train_id'?: string | null;
     'staging_validated_manifest_id'?: string | null;
+    'staging_live_state'?: ReleaseBusV2CandidateStagingLiveStateEnum;
+    'staging_live_manifest_id'?: string | null;
+    'staging_admitted_at'?: number | null;
+    'staging_live_updated_at'?: number | null;
+    'staging_transition_request'?: ReleaseBusV2CandidateStagingTransitionRequestEnum | null;
+    'staging_transition_requested_at'?: number | null;
+    'staging_transition_requested_by'?: string | null;
+    'staging_transition_reason'?: string | null;
     'production_requested_at'?: number | null;
     'production_requested_by'?: string | null;
     'hold_reason'?: string | null;
@@ -116,6 +124,54 @@ export class ReleaseBusV2Candidate {
             "format": "uuid"
         },
         {
+            "name": "staging_live_state",
+            "baseName": "staging_live_state",
+            "type": "ReleaseBusV2CandidateStagingLiveStateEnum",
+            "format": ""
+        },
+        {
+            "name": "staging_live_manifest_id",
+            "baseName": "staging_live_manifest_id",
+            "type": "string",
+            "format": "uuid"
+        },
+        {
+            "name": "staging_admitted_at",
+            "baseName": "staging_admitted_at",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "staging_live_updated_at",
+            "baseName": "staging_live_updated_at",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "staging_transition_request",
+            "baseName": "staging_transition_request",
+            "type": "ReleaseBusV2CandidateStagingTransitionRequestEnum",
+            "format": ""
+        },
+        {
+            "name": "staging_transition_requested_at",
+            "baseName": "staging_transition_requested_at",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "staging_transition_requested_by",
+            "baseName": "staging_transition_requested_by",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "staging_transition_reason",
+            "baseName": "staging_transition_reason",
+            "type": "string",
+            "format": ""
+        },
+        {
             "name": "production_requested_at",
             "baseName": "production_requested_at",
             "type": "number",
@@ -175,5 +231,13 @@ export class ReleaseBusV2Candidate {
 export enum ReleaseBusV2CandidateRepositoryEnum {
     Frontend = 'frontend',
     Backend = 'backend'
+}
+export enum ReleaseBusV2CandidateStagingLiveStateEnum {
+    NotLive = 'NOT_LIVE',
+    Live = 'LIVE'
+}
+export enum ReleaseBusV2CandidateStagingTransitionRequestEnum {
+    Remove = 'REMOVE',
+    Absorb = 'ABSORB'
 }
 
