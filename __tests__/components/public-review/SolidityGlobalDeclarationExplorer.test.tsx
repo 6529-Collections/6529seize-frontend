@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import { SolidityGlobalDeclarationExplorer } from "@/components/public-review/SolidityGlobalDeclarationExplorer";
 import type { SolidityGlobalDeclarationListItem } from "@/lib/public-review/solidityDeclarationSearchTypes";
@@ -65,9 +65,12 @@ const mockFetchSolidityDeclarations =
   >;
 
 function TestQueryProvider({ children }: { readonly children: ReactNode }) {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: { queries: { retry: false } },
+      })
+  );
   return (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );

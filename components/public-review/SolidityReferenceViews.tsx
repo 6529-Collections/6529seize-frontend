@@ -313,13 +313,11 @@ export function SolidityReferenceOverview({
                 })
               : t(DEFAULT_LOCALE, "publicReview.reference.optimizerDisabled")}
           </KeyValue>
-          {manifest.source.compiler.viaIR !== undefined ? (
-            <KeyValue label={t(DEFAULT_LOCALE, "publicReview.reference.viaIr")}>
-              {manifest.source.compiler.viaIR
-                ? t(DEFAULT_LOCALE, "publicReview.reference.yes")
-                : t(DEFAULT_LOCALE, "publicReview.reference.no")}
-            </KeyValue>
-          ) : null}
+          <KeyValue label={t(DEFAULT_LOCALE, "publicReview.reference.viaIr")}>
+            {manifest.source.compiler.viaIR
+              ? t(DEFAULT_LOCALE, "publicReview.reference.yes")
+              : t(DEFAULT_LOCALE, "publicReview.reference.no")}
+          </KeyValue>
           <KeyValue
             label={t(DEFAULT_LOCALE, "publicReview.reference.commitTimestamp")}
           >

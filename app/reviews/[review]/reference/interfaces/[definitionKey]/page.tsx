@@ -3,10 +3,8 @@ import { notFound } from "next/navigation";
 
 import { publicEnv } from "@/config/env";
 import { getSolidityInterfaceHref } from "@/lib/public-review/solidityReferenceRoutes";
-import {
-  getStreamSolidityReferenceMetadata,
-  renderStreamSolidityInterface,
-} from "@/lib/public-review/streamSolidityReference";
+import { renderStreamSolidityInterface } from "@/lib/public-review/streamSolidityReference";
+import { getStreamSolidityInterfaceMetadata } from "@/lib/public-review/streamSolidityReferenceMetadata";
 import {
   loadActiveStreamReferenceInventory,
   renderStreamReferenceOrNotFound,
@@ -32,14 +30,17 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params;
-  const metadata = getStreamSolidityReferenceMetadata({
-    baseEndpoint: publicEnv.BASE_ENDPOINT,
-    canonicalPath: getSolidityInterfaceHref({
+  const metadata = await renderStreamReferenceOrNotFound(() =>
+    getStreamSolidityInterfaceMetadata({
+      baseEndpoint: publicEnv.BASE_ENDPOINT,
+      canonicalPath: getSolidityInterfaceHref({
+        definitionKey: resolvedParams.definitionKey,
+        reviewSlug: resolvedParams.review,
+      }),
       definitionKey: resolvedParams.definitionKey,
-      reviewSlug: resolvedParams.review,
-    }),
-    params: resolvedParams,
-  });
+      params: resolvedParams,
+    })
+  );
   if (!metadata) {
     notFound();
   }

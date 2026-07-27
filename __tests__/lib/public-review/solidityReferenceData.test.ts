@@ -31,7 +31,11 @@ const FIXTURE_INDEX = path.join(
   STREAM_REVIEW_SLUG,
   "index.json"
 );
-const describeFixture = existsSync(FIXTURE_INDEX) ? describe : describe.skip;
+const hasFixture = existsSync(FIXTURE_INDEX);
+if (!hasFixture && process.env["CI"]) {
+  throw new Error(`Missing Solidity reference fixture: ${FIXTURE_INDEX}`);
+}
+const describeFixture = hasFixture ? describe : describe.skip;
 const REVIEW_VERSION = STREAM_REVIEW_DEFINITION.versions[0];
 if (!REVIEW_VERSION) {
   throw new Error("The Stream review fixture version is missing.");

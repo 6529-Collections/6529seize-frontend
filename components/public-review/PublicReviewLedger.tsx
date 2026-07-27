@@ -96,8 +96,13 @@ function downloadLedgerExport({
   const anchor = document.createElement("a");
   anchor.href = url;
   anchor.download = filename;
-  anchor.click();
-  URL.revokeObjectURL(url);
+  document.body.append(anchor);
+  try {
+    anchor.click();
+  } finally {
+    anchor.remove();
+    URL.revokeObjectURL(url);
+  }
 }
 
 export default function PublicReviewLedger({
@@ -163,6 +168,8 @@ export default function PublicReviewLedger({
       ].sort((left, right) => compareLocalized(locale, left, right)),
     [locale, records]
   );
+  const exportUnavailable =
+    visibleRecords.length === 0 || Boolean(ledgerQuery.hasNextPage);
 
   const setFilter = (
     field: keyof PublicReviewLedgerFilters,
@@ -188,7 +195,10 @@ export default function PublicReviewLedger({
       <div className="tw-mt-4 tw-flex tw-flex-wrap tw-gap-3">
         <button
           type="button"
-          disabled={visibleRecords.length === 0}
+          aria-describedby={
+            ledgerQuery.hasNextPage ? `${ledgerId}-export-status` : undefined
+          }
+          disabled={exportUnavailable}
           onClick={() =>
             downloadLedgerExport({
               content: createPublicReviewLedgerCsv(visibleRecords),
@@ -202,7 +212,10 @@ export default function PublicReviewLedger({
         </button>
         <button
           type="button"
-          disabled={visibleRecords.length === 0}
+          aria-describedby={
+            ledgerQuery.hasNextPage ? `${ledgerId}-export-status` : undefined
+          }
+          disabled={exportUnavailable}
           onClick={() =>
             downloadLedgerExport({
               content: createPublicReviewLedgerMarkdown(
@@ -218,6 +231,14 @@ export default function PublicReviewLedger({
           {t(locale, "publicReview.ledger.exportMarkdown")}
         </button>
       </div>
+      {ledgerQuery.hasNextPage ? (
+        <p
+          className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-400"
+          id={`${ledgerId}-export-status`}
+        >
+          {t(locale, "publicReview.ledger.exportRequiresCompleteLedger")}
+        </p>
+      ) : null}
 
       <fieldset className="tw-mt-5 tw-grid tw-gap-4 tw-border-0 tw-p-0 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
         <legend className="tw-sr-only">

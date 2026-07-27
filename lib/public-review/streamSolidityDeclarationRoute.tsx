@@ -5,10 +5,8 @@ import { notFound } from "next/navigation";
 
 import { publicEnv } from "@/config/env";
 import { getSolidityDeclarationHref } from "@/lib/public-review/solidityReferenceRoutes";
-import {
-  getStreamSolidityReferenceMetadata,
-  renderStreamSolidityDeclaration,
-} from "@/lib/public-review/streamSolidityReference";
+import { renderStreamSolidityDeclaration } from "@/lib/public-review/streamSolidityReference";
+import { getStreamSolidityDeclarationPageMetadata } from "@/lib/public-review/streamSolidityReferenceMetadata";
 import {
   loadActiveStreamReferenceInventory,
   loadVersionedStreamReferenceInventories,
@@ -56,24 +54,29 @@ export async function getVersionedSolidityDeclarationStaticParams(
   );
 }
 
-export function getSolidityDeclarationMetadata({
+export async function getSolidityDeclarationMetadata({
   kind,
   params,
 }: {
   readonly kind: SolidityDeclarationKind;
   readonly params: StreamSolidityDeclarationParams;
-}): Metadata {
-  const metadata = getStreamSolidityReferenceMetadata({
-    baseEndpoint: publicEnv.BASE_ENDPOINT,
-    canonicalPath: getSolidityDeclarationHref({
+}): Promise<Metadata> {
+  const metadata = await renderStreamReferenceOrNotFound(() =>
+    getStreamSolidityDeclarationPageMetadata({
+      baseEndpoint: publicEnv.BASE_ENDPOINT,
+      canonicalPath: getSolidityDeclarationHref({
+        declarationKey: params.declarationKey,
+        definitionKey: params.definitionKey,
+        kind,
+        reviewSlug: params.review,
+        ...(params.version ? { version: params.version } : {}),
+      }),
       declarationKey: params.declarationKey,
       definitionKey: params.definitionKey,
       kind,
-      reviewSlug: params.review,
-      ...(params.version ? { version: params.version } : {}),
-    }),
-    params,
-  });
+      params,
+    })
+  );
   if (!metadata) {
     notFound();
   }

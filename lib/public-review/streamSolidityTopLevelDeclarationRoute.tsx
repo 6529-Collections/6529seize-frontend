@@ -5,10 +5,8 @@ import { notFound } from "next/navigation";
 
 import { publicEnv } from "@/config/env";
 import { getSolidityTopLevelDeclarationHref } from "@/lib/public-review/solidityReferenceRoutes";
-import {
-  getStreamSolidityReferenceMetadata,
-  renderStreamSolidityTopLevelDeclaration,
-} from "@/lib/public-review/streamSolidityReference";
+import { renderStreamSolidityTopLevelDeclaration } from "@/lib/public-review/streamSolidityReference";
+import { getStreamSolidityTopLevelDeclarationMetadata } from "@/lib/public-review/streamSolidityReferenceMetadata";
 import {
   loadActiveStreamReferenceInventory,
   loadVersionedStreamReferenceInventories,
@@ -48,18 +46,21 @@ export async function getVersionedTopLevelDeclarationStaticParams() {
   );
 }
 
-export function getTopLevelDeclarationMetadata(
+export async function getTopLevelDeclarationMetadata(
   params: StreamSolidityTopLevelDeclarationParams
-): Metadata {
-  const metadata = getStreamSolidityReferenceMetadata({
-    baseEndpoint: publicEnv.BASE_ENDPOINT,
-    canonicalPath: getSolidityTopLevelDeclarationHref({
+): Promise<Metadata> {
+  const metadata = await renderStreamReferenceOrNotFound(() =>
+    getStreamSolidityTopLevelDeclarationMetadata({
+      baseEndpoint: publicEnv.BASE_ENDPOINT,
+      canonicalPath: getSolidityTopLevelDeclarationHref({
+        declarationKey: params.declarationKey,
+        reviewSlug: params.review,
+        ...(params.version ? { version: params.version } : {}),
+      }),
       declarationKey: params.declarationKey,
-      reviewSlug: params.review,
-      ...(params.version ? { version: params.version } : {}),
-    }),
-    params,
-  });
+      params,
+    })
+  );
   if (!metadata) {
     notFound();
   }
