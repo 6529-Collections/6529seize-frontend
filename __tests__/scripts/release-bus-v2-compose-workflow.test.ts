@@ -17,6 +17,18 @@ function git(cwd: string, ...args: string[]): string {
   }).trim();
 }
 
+function commandFailureStderr(run: () => void): string {
+  try {
+    run();
+  } catch (error) {
+    if (typeof error === "object" && error !== null && "stderr" in error) {
+      return String((error as { stderr?: unknown }).stderr ?? "");
+    }
+    throw error;
+  }
+  throw new Error("Expected compose workflow command to fail");
+}
+
 function composeScript(): string {
   const workflow = readFileSync(
     path.join(process.cwd(), ".github/workflows/release-bus-v2-compose.yml"),
@@ -36,6 +48,8 @@ function composeScript(): string {
     .join("\n");
   if (
     !script.includes('existing="$(git ls-remote') ||
+    !script.includes("release-bus-v2/rollback-train-*") ||
+    !script.includes("Release-Parent-SHA: $RELEASE_PARENT_SHA") ||
     !script.includes("git fsck --no-dangling")
   ) {
     throw new Error("Compose workflow script anchors were not preserved");
@@ -169,40 +183,48 @@ describe("Release Bus v2 frontend composition workflow", () => {
         reused: true,
       });
 
-      expect(() =>
-        execFileSync("bash", ["-c", composeScript()], {
-          cwd: repository,
-          env: {
-            ...process.env,
-            BASE_SHA: baseSha,
-            CANDIDATE_SHAS: JSON.stringify([stagingParentSha, candidateSha]),
-            RELEASE_BRANCH: releaseBranch,
-            RELEASE_BUS_GIT_EMAIL: "release-bus-test@example.com",
-            RELEASE_BUS_GIT_NAME: "Release Bus Test",
-            RUNNER_TEMP: runnerTemp,
-            TRAIN_ID: "missing-parent",
-          },
-          stdio: ["ignore", "pipe", "pipe"],
-        })
-      ).toThrow();
+      expect(
+        commandFailureStderr(() =>
+          execFileSync("bash", ["-c", composeScript()], {
+            cwd: repository,
+            env: {
+              ...process.env,
+              BASE_SHA: baseSha,
+              CANDIDATE_SHAS: JSON.stringify([stagingParentSha, candidateSha]),
+              RELEASE_BRANCH: releaseBranch,
+              RELEASE_BUS_GIT_EMAIL: "release-bus-test@example.com",
+              RELEASE_BUS_GIT_NAME: "Release Bus Test",
+              RUNNER_TEMP: runnerTemp,
+              TRAIN_ID: "missing-parent",
+            },
+            stdio: ["ignore", "pipe", "pipe"],
+          })
+        )
+      ).toContain(
+        "Existing parent-bound release branch requires release_parent_sha on every retry"
+      );
 
-      expect(() =>
-        execFileSync("bash", ["-c", composeScript()], {
-          cwd: repository,
-          env: {
-            ...process.env,
-            BASE_SHA: baseSha,
-            CANDIDATE_SHAS: JSON.stringify([stagingParentSha, candidateSha]),
-            RELEASE_BRANCH: releaseBranch,
-            RELEASE_BUS_GIT_EMAIL: "release-bus-test@example.com",
-            RELEASE_BUS_GIT_NAME: "Release Bus Test",
-            RELEASE_PARENT_SHA: baseSha,
-            RUNNER_TEMP: runnerTemp,
-            TRAIN_ID: "wrong-parent",
-          },
-          stdio: ["ignore", "pipe", "pipe"],
-        })
-      ).toThrow();
+      expect(
+        commandFailureStderr(() =>
+          execFileSync("bash", ["-c", composeScript()], {
+            cwd: repository,
+            env: {
+              ...process.env,
+              BASE_SHA: baseSha,
+              CANDIDATE_SHAS: JSON.stringify([stagingParentSha, candidateSha]),
+              RELEASE_BRANCH: releaseBranch,
+              RELEASE_BUS_GIT_EMAIL: "release-bus-test@example.com",
+              RELEASE_BUS_GIT_NAME: "Release Bus Test",
+              RELEASE_PARENT_SHA: baseSha,
+              RUNNER_TEMP: runnerTemp,
+              TRAIN_ID: "wrong-parent",
+            },
+            stdio: ["ignore", "pipe", "pipe"],
+          })
+        )
+      ).toContain(
+        "Existing release branch does not have the recorded staging ref as its first parent"
+      );
 
       git(repository, "switch", "--detach", stagingParentSha);
       execFileSync("bash", ["-c", composeScript()], {
