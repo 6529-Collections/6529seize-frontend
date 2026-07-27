@@ -25,10 +25,10 @@ export default function UserPageBrainSidebarCreated({
     waves.length - DEFAULT_VISIBLE_CREATED_WAVES,
     0
   );
-  const showMoreLabel =
-    remainingWavesCount === 1
-      ? "Show 1 more"
-      : `Show ${remainingWavesCount} more`;
+  const showMoreLabel = getUserPageBrainSidebarMessage(
+    "user.brain.sidebar.showMore",
+    { count: remainingWavesCount }
+  );
   if (waves.length === 0) {
     return null;
   }
@@ -66,7 +66,9 @@ export default function UserPageBrainSidebarCreated({
             }
             className="tw-mt-2 tw-cursor-pointer tw-border-none tw-bg-black tw-px-1 tw-text-xs tw-font-semibold tw-text-iron-500 tw-transition-colors focus-visible:tw-rounded-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none"
           >
-            {showAllWaves ? "Show less" : showMoreLabel}
+            {showAllWaves
+              ? getUserPageBrainSidebarMessage("user.brain.sidebar.showLess")
+              : showMoreLabel}
           </button>
         )}
       </div>

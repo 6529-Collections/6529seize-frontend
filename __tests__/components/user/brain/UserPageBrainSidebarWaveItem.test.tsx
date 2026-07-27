@@ -110,5 +110,6 @@ describe("UserPageBrainSidebarWaveItem", () => {
     );
 
     expect(screen.queryByText(/Last posted/i)).toBeNull();
+    expect(screen.queryByText(/Last wave post/i)).toBeNull();
   });
 });

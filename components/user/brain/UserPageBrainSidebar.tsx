@@ -13,6 +13,8 @@ import UserPageBrainSidebarMostActive from "./UserPageBrainSidebarMostActive";
 import { getProfileWaveIdentity } from "./userPageBrainSidebar.helpers";
 import { getUserPageBrainSidebarMessage } from "./userPageBrainSidebar.messages";
 
+const SIDEBAR_SKELETON_ITEMS = [0, 1, 2, 3, 4] as const;
+
 function UserPageBrainSidebarLoading() {
   const loadingLabel = getUserPageBrainSidebarMessage(
     "user.brain.sidebar.loadingWaveContext"
@@ -27,7 +29,7 @@ function UserPageBrainSidebarLoading() {
       >
         <div className="tw-mb-2 tw-h-2.5 tw-w-24 tw-animate-pulse tw-rounded tw-bg-white/[0.06] motion-reduce:tw-animate-none" />
         <div className="tw-flex tw-gap-2 tw-overflow-hidden">
-          {[0, 1, 2].map((key) => (
+          {SIDEBAR_SKELETON_ITEMS.map((key) => (
             <div
               key={key}
               className="tw-flex tw-h-9 tw-w-32 tw-shrink-0 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/70 tw-p-1 tw-pr-3"
@@ -46,7 +48,7 @@ function UserPageBrainSidebarLoading() {
       >
         <div className="tw-mb-3 tw-h-3 tw-w-28 tw-animate-pulse tw-rounded tw-bg-white/[0.06] motion-reduce:tw-animate-none" />
         <div className="tw-space-y-2.5">
-          {[0, 1, 2].map((key) => (
+          {SIDEBAR_SKELETON_ITEMS.map((key) => (
             <div
               key={key}
               className="tw-flex tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-white/5 tw-p-3 tw-shadow-inner"

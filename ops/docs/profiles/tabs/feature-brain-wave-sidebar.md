@@ -53,7 +53,7 @@ created, or into the waves where that profile is most active.
   {time} ago`. Waves without drops show `No drops yet`.
 - `Most Active In` is qualified with `All time`. This explains the API's
   ranking independently from per-row recency. Each desktop row's compact
-  `Last post {time}` is the viewed identity's latest public post in that
+  `Last post {time}` is the viewed identity's latest post in that
   specific wave. The UI does not substitute a wave-wide timestamp when that
   identity-specific lookup is unavailable.
 - The created-waves modal shows `Loading waves...`, `Showing N wave(s)`,

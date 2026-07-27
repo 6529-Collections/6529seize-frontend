@@ -94,7 +94,11 @@ export default function UserPageBrainSidebarWaveItem({
       </>
     );
   } else if (metadataMode === "activity") {
-    metaContent = <span>No drops yet</span>;
+    metaContent = (
+      <span>
+        {getUserPageBrainSidebarMessage("user.brain.sidebar.noDropsYet")}
+      </span>
+    );
   } else if (
     profileActivityTimestamp !== null &&
     profileActivityTimestamp !== undefined &&
@@ -140,7 +144,16 @@ export default function UserPageBrainSidebarWaveItem({
         {imageSrc ? (
           <Image
             src={imageSrc}
-            alt={wave.name ? `Wave ${wave.name}` : "Wave picture"}
+            alt={
+              wave.name
+                ? getUserPageBrainSidebarMessage(
+                    "user.brain.sidebar.waveImageAlt",
+                    { waveName: wave.name }
+                  )
+                : getUserPageBrainSidebarMessage(
+                    "user.brain.sidebar.wavePictureAlt"
+                  )
+            }
             fill
             sizes="40px"
             className="tw-object-cover"

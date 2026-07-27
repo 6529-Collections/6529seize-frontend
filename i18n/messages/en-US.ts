@@ -131,6 +131,13 @@ const USER_BRAIN_SIDEBAR_MESSAGES = objectMessages("user.brain.sidebar", {
   latestWavePost: "Last wave post {time} ago",
   lastPosted: "Last posted {time} ago",
   loadingWaveContext: "Loading profile wave context",
+  mobileStripLabel: "Brain waves",
+  noDropsYet: "No drops yet",
+  showLess: "Show less",
+  showMore: "Show {count} more",
+  viewAllCreatedWaves: "View all created waves",
+  waveImageAlt: "Wave {waveName}",
+  wavePictureAlt: "Wave picture",
 } as const);
 
 const USER_COLLECTED_STATS_DETAILS_MESSAGES = objectMessages(

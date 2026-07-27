@@ -41,7 +41,16 @@ function UserPageBrainSidebarMobileWavePill({
         {imageSrc ? (
           <Image
             src={imageSrc}
-            alt={wave.name ? `Wave ${wave.name}` : "Wave picture"}
+            alt={
+              wave.name
+                ? getUserPageBrainSidebarMessage(
+                    "user.brain.sidebar.waveImageAlt",
+                    { waveName: wave.name }
+                  )
+                : getUserPageBrainSidebarMessage(
+                    "user.brain.sidebar.wavePictureAlt"
+                  )
+            }
             fill
             sizes="28px"
             className="tw-object-cover"
@@ -79,7 +88,9 @@ export default function UserPageBrainSidebarMobileStrip({
           type="button"
           onClick={onOpenCreatedWaves}
           className="tw-inline-flex tw-h-9 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 tw-px-3 tw-text-xs tw-font-semibold tw-text-iron-400 tw-shadow-sm tw-transition-all tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/[0.15] desktop-hover:hover:tw-bg-white/[0.05] desktop-hover:hover:tw-text-iron-100 motion-reduce:tw-transition-none"
-          aria-label="View all created waves"
+          aria-label={getUserPageBrainSidebarMessage(
+            "user.brain.sidebar.viewAllCreatedWaves"
+          )}
         >
           <PlusIcon className="tw-h-3 tw-w-3 tw-flex-shrink-0" />
           <span>{remainingCreatedCount}</span>
@@ -90,7 +101,9 @@ export default function UserPageBrainSidebarMobileStrip({
 
   return (
     <section
-      aria-label="Brain waves strip"
+      aria-label={getUserPageBrainSidebarMessage(
+        "user.brain.sidebar.mobileStripLabel"
+      )}
       className="tw-mb-4 lg:tw-hidden"
       data-testid="brain-sidebar-mobile-strip"
     >
