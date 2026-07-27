@@ -17,6 +17,8 @@ const PROFILES = new Set(["production", "staging"]);
 const PUBLIC_REVIEW_CONFIG_DIRECTORY = "config/public-reviews";
 const PUBLIC_REVIEW_DATA_DIRECTORY = "public/review-data";
 const PUBLIC_REVIEW_EDITORIAL_DIRECTORY = "content/public-reviews";
+const PRODUCTION_BASE_ENDPOINT = "https://6529.io";
+const RUNTIME_CONFIG_PATH = ".next/PUBLIC_RUNTIME.json";
 const SHA256_URN_PATTERN = /^sha256:[0-9a-f]{64}$/;
 const SOURCE_PIN_PATTERN = /^[0-9a-f]{40}$/;
 const SOURCE_REPOSITORY_PATTERN = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
@@ -677,6 +679,39 @@ function assertPublicCopyIdentity(repoRoot, bundleRoot, profile) {
   );
 }
 
+function assertProductionRuntimeConfig(bundleRoot) {
+  const runtimeConfigPath = path.join(bundleRoot, RUNTIME_CONFIG_PATH);
+  invariant(
+    fs.existsSync(runtimeConfigPath) && fs.statSync(runtimeConfigPath).isFile(),
+    `Production bundle is missing ${RUNTIME_CONFIG_PATH}.`
+  );
+
+  let runtimeConfig;
+  try {
+    runtimeConfig = JSON.parse(fs.readFileSync(runtimeConfigPath, "utf8"));
+  } catch {
+    throw new Error(
+      `Production bundle contains invalid JSON at ${RUNTIME_CONFIG_PATH}.`
+    );
+  }
+
+  invariant(
+    runtimeConfig &&
+      typeof runtimeConfig === "object" &&
+      !Array.isArray(runtimeConfig),
+    `Production bundle contains a non-object ${RUNTIME_CONFIG_PATH}.`
+  );
+  invariant(
+    runtimeConfig.BASE_ENDPOINT === PRODUCTION_BASE_ENDPOINT,
+    `Production bundle BASE_ENDPOINT must equal ${PRODUCTION_BASE_ENDPOINT}.`
+  );
+  invariant(
+    typeof runtimeConfig.GIPHY_API_KEY === "string" &&
+      runtimeConfig.GIPHY_API_KEY.trim().length > 0,
+    "Production bundle GIPHY_API_KEY must be configured."
+  );
+}
+
 function assertProfileBundle({ repoRoot, bundleRoot, profile }) {
   invariant(PROFILES.has(profile), `Unsupported artifact profile: ${profile}`);
   invariant(fs.statSync(bundleRoot).isDirectory(), "Bundle root is missing.");
@@ -684,6 +719,7 @@ function assertProfileBundle({ repoRoot, bundleRoot, profile }) {
 
   if (profile === "production") {
     assertProductionAbsence(bundleRoot);
+    assertProductionRuntimeConfig(bundleRoot);
     return [];
   }
   return assertStagingEvidence(repoRoot, bundleRoot);

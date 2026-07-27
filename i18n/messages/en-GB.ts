@@ -2,6 +2,7 @@ import { EN_GB_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-to
 import { EN_GB_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { EN_GB_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES as EN_GB_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
+import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const EN_GB_MESSAGES = {
@@ -387,6 +388,7 @@ export const EN_GB_MESSAGES = {
   ...EN_GB_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel": "Wave chat file upload area",
   "waves.loadingStatus": "Loading waves",
+  "waves.gifPicker.open": "Add GIF",
   "waves.gifPicker.dialogTitle": "GIF search",
   "waves.gifPicker.searchPlaceholder": "Search GIFs",
   "waves.gifPicker.noResults": "No GIFs found.",
@@ -427,4 +429,5 @@ export const EN_GB_MESSAGES = {
   "theMemes.filters.season.label": "Season",
   "theMemes.filters.season.all": "All Seasons",
   "theMemes.filters.season.allForYear": "All Year {year}",
+  ...TRANSFER_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;

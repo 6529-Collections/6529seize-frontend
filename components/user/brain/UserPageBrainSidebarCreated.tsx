@@ -1,8 +1,8 @@
 "use client";
 
-import type { QueryStatus } from "@tanstack/react-query";
 import { useState } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { getUserPageBrainSidebarMessage } from "./userPageBrainSidebar.messages";
 import UserPageBrainSidebarWaveItem from "./UserPageBrainSidebarWaveItem";
 
 const DEFAULT_VISIBLE_CREATED_WAVES = 3;
@@ -10,13 +10,11 @@ const DEFAULT_VISIBLE_CREATED_WAVES = 3;
 interface UserPageBrainSidebarCreatedProps {
   readonly identity: string;
   readonly waves: ApiWave[];
-  readonly status: QueryStatus;
 }
 
 export default function UserPageBrainSidebarCreated({
   identity,
   waves,
-  status,
 }: UserPageBrainSidebarCreatedProps) {
   const [expandedIdentity, setExpandedIdentity] = useState<string | null>(null);
   const showAllWaves = expandedIdentity === identity;
@@ -27,59 +25,53 @@ export default function UserPageBrainSidebarCreated({
     waves.length - DEFAULT_VISIBLE_CREATED_WAVES,
     0
   );
-  const showMoreLabel =
+  const showMoreLabel = getUserPageBrainSidebarMessage(
     remainingWavesCount === 1
-      ? "Show 1 more"
-      : `Show ${remainingWavesCount} more`;
-  const shouldShowLoading = status === "pending" && waves.length === 0;
-  const shouldShowWaves = waves.length > 0;
-  if (!shouldShowLoading && !shouldShowWaves) {
+      ? "user.brain.sidebar.showMore.one"
+      : "user.brain.sidebar.showMore.other",
+    { count: remainingWavesCount }
+  );
+  if (waves.length === 0) {
     return null;
   }
 
   return (
-    <section aria-labelledby="brain-created-waves-heading">
-      <span
-        id="brain-created-waves-heading"
-        className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500"
-      >
-        Created Waves
-      </span>
+    <section
+      aria-labelledby="brain-created-waves-heading"
+      aria-describedby="brain-created-waves-scope"
+    >
+      <div className="tw-flex tw-min-w-0 tw-items-baseline tw-gap-1.5">
+        <span
+          id="brain-created-waves-heading"
+          className="tw-shrink-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500"
+        >
+          {getUserPageBrainSidebarMessage("user.brain.sidebar.createdHeading")}
+        </span>
+        <span
+          id="brain-created-waves-scope"
+          className="tw-min-w-0 tw-truncate tw-text-[10px] tw-font-normal tw-text-iron-600"
+        >
+          · {getUserPageBrainSidebarMessage("user.brain.sidebar.createdScope")}
+        </span>
+      </div>
       <div className="tw-mt-3 tw-space-y-2.5">
-        {shouldShowLoading ? (
-          <div className="tw-space-y-2.5" aria-label="Loading created waves">
-            {[0, 1, 2].map((key) => (
-              <div
-                key={key}
-                className="tw-flex tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-white/5 tw-p-3 tw-shadow-inner"
-              >
-                <div className="tw-h-10 tw-w-10 tw-shrink-0 tw-animate-pulse tw-rounded-full tw-bg-white/[0.06]" />
-                <div className="tw-min-w-0 tw-flex-1 tw-space-y-1.5">
-                  <div className="tw-h-3 tw-w-2/3 tw-animate-pulse tw-rounded tw-bg-white/[0.06]" />
-                  <div className="tw-h-2.5 tw-w-1/2 tw-animate-pulse tw-rounded tw-bg-white/[0.05]" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <>
-            {visibleWaves.map((wave) => (
-              <UserPageBrainSidebarWaveItem key={wave.id} wave={wave} />
-            ))}
-            {waves.length > DEFAULT_VISIBLE_CREATED_WAVES && (
-              <button
-                type="button"
-                onClick={() =>
-                  setExpandedIdentity((current) =>
-                    current === identity ? null : identity
-                  )
-                }
-                className="tw-mt-2 tw-cursor-pointer tw-border-none tw-bg-black tw-px-1 tw-text-xs tw-font-semibold tw-text-iron-500 tw-transition-colors desktop-hover:hover:tw-text-iron-300"
-              >
-                {showAllWaves ? "Show less" : showMoreLabel}
-              </button>
-            )}
-          </>
+        {visibleWaves.map((wave) => (
+          <UserPageBrainSidebarWaveItem key={wave.id} wave={wave} />
+        ))}
+        {waves.length > DEFAULT_VISIBLE_CREATED_WAVES && (
+          <button
+            type="button"
+            onClick={() =>
+              setExpandedIdentity((current) =>
+                current === identity ? null : identity
+              )
+            }
+            className="tw-mt-2 tw-cursor-pointer tw-border-none tw-bg-black tw-px-1 tw-text-xs tw-font-semibold tw-text-iron-500 tw-transition-colors focus-visible:tw-rounded-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none"
+          >
+            {showAllWaves
+              ? getUserPageBrainSidebarMessage("user.brain.sidebar.showLess")
+              : showMoreLabel}
+          </button>
         )}
       </div>
     </section>
