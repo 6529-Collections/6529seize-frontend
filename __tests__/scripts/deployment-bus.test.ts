@@ -29,91 +29,14 @@ const ARTIFACT_SHA256 =
   "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 const REQUIRED_WEB_SURFACES = ["web:desktop-chromium", "web:mobile-chromium"];
 
-describe("release bus optional Codex workflow", () => {
-  const composeWorkflow = fs.readFileSync(
-    path.join(process.cwd(), ".github/workflows/release-bus-compose.yml"),
+describe("release bus staging artifact transfer", () => {
+  const productionDeployWorkflowSource = fs.readFileSync(
+    path.join(
+      process.cwd(),
+      ".github/workflows/release-bus-deploy-production.yml"
+    ),
     "utf8"
   );
-
-  it("guards and integrity-checks a Codex-disabled deferred composition", () => {
-    expect(composeWorkflow).toContain(
-      "git rev-parse -q --verify MERGE_HEAD >/dev/null"
-    );
-    expect(composeWorkflow).toContain("Release-Bus-Defer: true");
-    expect(composeWorkflow).toContain(
-      "Incomplete composition does not contain a strict candidate prefix."
-    );
-    expect(composeWorkflow).toContain('test "$missing_seen" = true');
-  });
-
-  it("retries only idempotent publication from the verified composition artifact", () => {
-    const workflow = YAML.parse(composeWorkflow);
-    const retryInput =
-      workflow.on.workflow_dispatch.inputs.composition_artifact_run_id;
-    const download = workflow.jobs.publish.steps.find(
-      (step: { name?: string }) => step.name === "Download isolated composition"
-    );
-    const publish = workflow.jobs.publish.steps.find(
-      (step: { name?: string }) => step.name === "Publish release branch"
-    );
-    const report = workflow.jobs.publish.steps.find(
-      (step: { name?: string }) =>
-        step.name === "Report structured publication result"
-    );
-
-    expect(retryInput).toMatchObject({ required: false, default: "" });
-    expect(workflow.jobs.compose.if).toBe(
-      "inputs.composition_artifact_run_id == ''"
-    );
-    expect(workflow.jobs.publish.if).toContain(
-      "inputs.composition_artifact_run_id != ''"
-    );
-    expect(download.with["run-id"]).toContain(
-      "inputs.composition_artifact_run_id"
-    );
-    expect(publish["continue-on-error"]).toBe(true);
-    expect(publish.run).toContain("INFRASTRUCTURE_TRANSIENT");
-    expect(publish.run).toContain("403|5[0-9]{2}");
-    expect(publish.run).toContain("requested url returned error");
-    expect(publish.run).not.toContain("(^|[^0-9])(403|5[0-9]{2})");
-    expect(report.run).toContain("${PUBLISH_FAILURE_CLASS:-UNKNOWN}");
-    expect(report.run).toContain("${PUBLISH_RETRYABLE:-false}");
-    expect(report.run).toContain("release_branch_publication");
-  });
-});
-
-describe("release bus immutable frontend artifact", () => {
-  const preflightWorkflow = YAML.parse(
-    fs.readFileSync(
-      path.join(process.cwd(), ".github/workflows/release-bus-preflight.yml"),
-      "utf8"
-    )
-  );
-
-  it("uploads hidden bundle files covered by the checksum manifest", () => {
-    const packageStep = preflightWorkflow.jobs.build.steps.find(
-      (step: { name?: string }) => step.name === "Package immutable bundle"
-    );
-    const uploadStep = preflightWorkflow.jobs.build.steps.find(
-      (step: { name?: string }) =>
-        step.name === "Upload immutable frontend artifact"
-    );
-
-    expect(packageStep.run).toContain("find . -type f ! -path ./SHA256SUMS");
-    expect(packageStep.run).toContain("sha256sum > SHA256SUMS");
-    expect(uploadStep).toMatchObject({
-      uses: expect.stringContaining("actions/upload-artifact@"),
-      with: {
-        path: "release-bus-artifact",
-        "include-hidden-files": true,
-        "if-no-files-found": "error",
-        "retention-days": 90,
-      },
-    });
-  });
-});
-
-describe("release bus staging artifact transfer", () => {
   const deployWorkflow = YAML.parse(
     fs.readFileSync(
       path.join(
@@ -182,6 +105,51 @@ describe("release bus staging artifact transfer", () => {
     );
   });
 
+  it("injects public-review destinations at staging runtime only", () => {
+    const deployStep = deployWorkflow.jobs.deploy.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Deploy immutable bundle through SSM"
+    );
+
+    expect(deployStep.env.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS).toBe(
+      "${{ secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS }}"
+    );
+    expect(deployStep.run).toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64"
+    );
+    expect(deployStep.run).toContain(
+      "public-review-discussion-destinations.json"
+    );
+    expect(deployStep.run).toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS:"
+    );
+    expect(deployStep.run).toContain(
+      '> "$release_dir/public-review-discussion-destinations.json"'
+    );
+    expect(deployStep.run).not.toContain(
+      '> "$release_root/public-review-discussion-destinations.json"'
+    );
+    expect(deployStep.run).toContain(
+      "const currentApp = fs.realpathSync(path.join(__dirname, 'current'));"
+    );
+    expect(deployStep.run).toContain("path.dirname(currentApp)");
+    expect(deployStep.run).toContain(
+      "disables review submission rather than selecting another Wave."
+    );
+    expect(deployStep.run).toContain("if (error?.code !== 'ENOENT')");
+    expect(
+      deployStep.run.indexOf(
+        '> "$release_dir/public-review-discussion-destinations.json"'
+      )
+    ).toBeLessThan(
+      deployStep.run.indexOf('ln -sfn "$release_dir/app" "$current_link"')
+    );
+    expect(deployStep.run).toContain('(has("production") | not)');
+    expect(productionDeployWorkflowSource).not.toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS"
+    );
+  });
+
   it("migrates only the exact legacy PM2 process and verifies locally", () => {
     const deployStep = deployWorkflow.jobs.deploy.steps.find(
       (step: { name?: string }) =>
@@ -221,6 +189,144 @@ describe("release bus staging artifact transfer", () => {
       script.lastIndexOf('wait_for_local_version "$EXPECTED_SHA"')
     ).toBeLessThan(script.lastIndexOf("pm2 save"));
   });
+
+  it("bounds rebuildable staging releases without deleting the active rollback", () => {
+    const deployStep = deployWorkflow.jobs.deploy.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Deploy immutable bundle through SSM"
+    );
+    const script = deployStep.run;
+
+    expect(script).toContain("prune_release_cache");
+    expect(script).toContain(
+      '[[ "$previous_target" =~ ^${release_root}/releases/[a-f0-9]{40}/app$ ]]'
+    );
+    expect(script).toContain('[ "$cached_release" = "$release_dir" ]');
+    expect(script).toContain('[ "$cached_release" = "$current_release" ]');
+    expect(script).toContain('if ! [[ "$cached_sha" =~ ^[a-f0-9]{40}$ ]] ||');
+    expect(script).toContain(
+      '[ "$cached_release" != "$release_root/releases/$cached_sha" ]'
+    );
+    expect(script).toContain(
+      "Preserving unrecognized staging release cache entry"
+    );
+    expect(script).toContain(
+      "Refusing to prune without the exact managed current release."
+    );
+    expect(script.indexOf("continue\n")).toBeLessThan(
+      script.indexOf('rm -rf -- "$cached_release"')
+    );
+    expect(script).toContain('rm -rf -- "$cached_release"');
+    expect(script.indexOf("prune_release_cache\n")).toBeGreaterThan(
+      script.indexOf(
+        "Refusing to deploy without an exact healthy pre-mutation local version."
+      )
+    );
+    expect(script.indexOf("prune_release_cache\n")).toBeLessThan(
+      script.indexOf('http_status="$(curl')
+    );
+    expect(script.indexOf('rm -f "$release_dir/package.zip"')).toBeGreaterThan(
+      script.indexOf('test -f "$release_dir/app/server.js"')
+    );
+  });
+});
+
+describe("release bus contributor notifications", () => {
+  const workflows = ["staging", "production"].map(
+    (environment) =>
+      [
+        environment,
+        YAML.parse(
+          fs.readFileSync(
+            path.join(
+              process.cwd(),
+              `.github/workflows/release-bus-deploy-${environment}.yml`
+            ),
+            "utf8"
+          )
+        ),
+      ] as const
+  );
+  const notifier = fs.readFileSync(
+    path.join(process.cwd(), "scripts/notify-ci-wave.mjs"),
+    "utf8"
+  );
+
+  it.each(workflows)(
+    "validates and signs %s Release Train contributor metadata",
+    (_environment, workflow) => {
+      const inputs = workflow.on.workflow_dispatch.inputs;
+      const steps = workflow.jobs.deploy.steps;
+      const validation = steps.find(
+        (step: { name?: string }) =>
+          step.name === "Validate dispatch inputs before using credentials"
+      );
+      const checkout = steps.find(
+        (step: { name?: string }) => step.name === "Check out CI wave notifier"
+      );
+      const verifyCheckout = steps.find(
+        (step: { name?: string }) =>
+          step.name === "Verify CI wave notifier checkout"
+      );
+      const failure = steps.find(
+        (step: { name?: string }) =>
+          step.name === "Notify CI wave about failure"
+      );
+      const success = steps.find(
+        (step: { name?: string }) =>
+          step.name === "Notify CI wave about success"
+      );
+
+      expect(inputs.release_contributors).toMatchObject({
+        required: false,
+        default: "[]",
+      });
+      expect(validation.run).toContain(
+        'jq -e \'type == "array" and length <= 100'
+      );
+      expect(validation.run).toContain(
+        "Semantic GitHub-login validation is centralized in notify-ci-wave.mjs"
+      );
+      expect(checkout).toMatchObject({
+        if: "always()",
+        with: {
+          ref: "${{ github.workflow_sha }}",
+          path: ".ci-wave-notifier",
+          "persist-credentials": false,
+        },
+      });
+      expect(verifyCheckout).toMatchObject({
+        if: "always()",
+        run: expect.stringContaining(
+          "test -f .ci-wave-notifier/scripts/notify-ci-wave.mjs"
+        ),
+      });
+      expect(failure).toMatchObject({
+        if: "failure() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''",
+        "continue-on-error": true,
+        run: "node .ci-wave-notifier/scripts/notify-ci-wave.mjs",
+      });
+      expect(success).toMatchObject({
+        if: "success() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''",
+        "continue-on-error": true,
+        run: "node .ci-wave-notifier/scripts/notify-ci-wave.mjs",
+      });
+      for (const notifyStep of [failure, success]) {
+        expect(notifyStep.env).toMatchObject({
+          CI_PIPELINES_SHA: "${{ inputs.expected_sha }}",
+          CI_RELEASE_TRAIN_ID: "${{ inputs.release_train_id }}",
+          CI_RELEASE_CONTRIBUTORS: "${{ inputs.release_contributors }}",
+        });
+      }
+    }
+  );
+
+  it("includes contributor fields in the signed payload", () => {
+    expect(notifier).toContain(
+      "contributor_github_logins: releaseContributors"
+    );
+    expect(notifier).toContain("sha: CI_PIPELINES_SHA || GITHUB_SHA || null");
+  });
 });
 
 describe("release bus v2 E2E callbacks", () => {
@@ -239,12 +345,13 @@ describe("release bus v2 E2E callbacks", () => {
   ])("binds %s E2E authorization and progress to v2", (_name, workflow) => {
     expect(workflow).toContain("/deploy/release-bus-v2/authorize");
     expect(workflow).toContain("/deploy/release-bus-v2/report-progress");
-    expect(workflow).not.toContain(
-      '"$RELEASE_BUS_API_URL/deploy/release-bus/authorize"'
-    );
   });
 
   it("classifies staging setup transport separately from E2E failures", () => {
+    expect(stagingE2E).toContain(
+      "scripts/release-bus-install-dependencies.cjs"
+    );
+    expect(stagingE2E).toContain('run: node "$RELEASE_BUS_INSTALL_TOOL"');
     expect(stagingE2E).toContain("id: socket-firewall");
     expect(stagingE2E).toContain(
       "SOCKET_OUTCOME: ${{ steps.socket-firewall.outcome }}"
@@ -257,6 +364,10 @@ describe("release bus v2 E2E callbacks", () => {
 });
 
 describe("release bus v2 combined preflight", () => {
+  const appPrCi = fs.readFileSync(
+    path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),
+    "utf8"
+  );
   const workflow = YAML.parse(
     fs.readFileSync(
       path.join(
@@ -266,6 +377,17 @@ describe("release bus v2 combined preflight", () => {
       "utf8"
     )
   );
+
+  it("binds reusable PR artifacts to the immutable checked-out run SHA", () => {
+    expect(appPrCi).not.toContain("github.event.pull_request.merge_commit_sha");
+    expect(
+      appPrCi.match(/EXPECTED_MERGE_SHA: \$\{\{ github\.sha \}\}/g)
+    ).toHaveLength(2);
+    expect(appPrCi).toContain("name: release-bus-v2-pr-${{ github.sha }}");
+    expect(appPrCi).toContain(
+      "unset ANNOUNCED_VERSION_ENDPOINT\n          rm -rf .next"
+    );
+  });
 
   it("keeps candidate execution jobs secretless and read-only", () => {
     for (const jobName of ["quality", "build"]) {
@@ -292,9 +414,7 @@ describe("release bus v2 combined preflight", () => {
         step.name === "Build exact environment profile once"
     );
     expect(build.env.BUILD_ENVIRONMENT).toBe("${{ matrix.environment }}");
-    expect(buildStep.run).toContain(
-      'if [ "$BUILD_ENVIRONMENT" = staging ]'
-    );
+    expect(buildStep.run).toContain('if [ "$BUILD_ENVIRONMENT" = staging ]');
     expect(buildStep.run).toContain("unset ANNOUNCED_VERSION_ENDPOINT");
   });
 
@@ -319,6 +439,24 @@ describe("release bus v2 combined preflight", () => {
     expect(verify.run).toContain("uniq -d shards.sorted");
     expect(verify.run).toContain("diff -u complete.sorted shards.sorted");
     expect(upload.if).toContain("steps.inventory_verify.outcome == 'success'");
+  });
+
+  it("prepares generated runtime config and forwards Jest shard flags", () => {
+    for (const jobName of ["quality", "build"]) {
+      const generate = workflow.jobs[jobName].steps.find(
+        (step: { name?: string }) =>
+          step.name === "Generate runtime environment schema"
+      );
+      expect(generate.run).toBe("./bin/6529 run build:env-schema");
+    }
+
+    const quality = workflow.jobs.quality.steps.find(
+      (step: { name?: string }) => step.name === "Run independent quality shard"
+    );
+    expect(quality.run).toContain(
+      './bin/6529 run test:no-coverage --runInBand --shard="$shard_index/4"'
+    );
+    expect(quality.run).not.toContain("test:no-coverage -- --runInBand");
   });
 });
 

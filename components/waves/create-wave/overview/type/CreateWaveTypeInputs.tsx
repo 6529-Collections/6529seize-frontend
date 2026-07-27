@@ -2,11 +2,15 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { WAVE_LABELS } from "@/helpers/waves/waves.constants";
 import CommonBorderedRadioButton from "@/components/utils/radio/CommonBorderedRadioButton";
 
+// Not a real ApiWaveType: passed to the radios when nothing is selected yet so
+// none render as checked (the shared radio's `selected` prop is non-nullable).
+const NO_SELECTION = "" as ApiWaveType;
+
 export default function CreateWaveTypeInputs({
   selected,
   onChange,
 }: {
-  readonly selected: ApiWaveType;
+  readonly selected: ApiWaveType | null;
   readonly onChange: (type: ApiWaveType) => void;
 }) {
   const waveTypes: ApiWaveType[] = [
@@ -36,7 +40,7 @@ export default function CreateWaveTypeInputs({
           <CommonBorderedRadioButton
             key={waveType}
             type={waveType}
-            selected={selected}
+            selected={selected ?? NO_SELECTION}
             variant="subtle"
             onChange={onChange}
           >

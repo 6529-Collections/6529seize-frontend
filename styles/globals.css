@@ -69,7 +69,11 @@
   /* Android keyboard height adjustments */
   :root {
     --android-keyboard-height: 0px;
-    --layout-viewport-height: 100dvh;
+    /* Small viewport height: the app shell disables document scroll, so
+       mobile browser chrome never collapses; iOS still reports dvh as the
+       larger viewport in that state, pushing bottom bars behind Safari's
+       toolbar. svh always fits the visible area with chrome expanded. */
+    --layout-viewport-height: 100svh;
     --native-keyboard-inset-bottom: 0px;
     --native-keyboard-layout-transition-duration: 0ms;
     --native-keyboard-composer-bottom-padding: max(
@@ -244,6 +248,12 @@
     scrollbar-gutter: stable both-edges;
   }
 }
+html {
+  /* iOS paints the root canvas (default white) wherever the layout viewport
+     extends past the body — most visibly when the software keyboard scrolls
+     the page. Keep it dark so those regions don't flash white. */
+  background-color: #000000;
+}
 body {
   background-color: #000000 !important;
   color: white !important;
@@ -270,6 +280,19 @@ body.capacitor-native select,
 body.capacitor-native [contenteditable="true"] {
   font-size: max(1rem, 16px) !important;
   touch-action: manipulation;
+}
+
+/* iOS Safari zooms the page (and pans horizontally) when a focused control's
+   font-size is under 16px. Keep create-wave text entry at 16px on coarse
+   pointers — same rule the native shell applies globally above. */
+@media (any-pointer: coarse) {
+  body:not([data-fine-pointer]) .create-wave-flow input,
+  body:not([data-fine-pointer]) .create-wave-flow textarea,
+  body:not([data-fine-pointer]) .create-wave-flow select,
+  body:not([data-fine-pointer]) .create-wave-flow [contenteditable="true"] {
+    font-size: max(1rem, 16px) !important;
+    touch-action: manipulation;
+  }
 }
 
 textarea,

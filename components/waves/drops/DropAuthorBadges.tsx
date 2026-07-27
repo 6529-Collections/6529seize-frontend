@@ -241,6 +241,7 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
             waveName={wave.name}
             onBadgeClick={onWaveCompetitionBadgeClick}
             tooltipIdPrefix={`${tooltipIdPrefix}-competition`}
+            size={size}
           />
         )}
         {hasActivityBadge && (

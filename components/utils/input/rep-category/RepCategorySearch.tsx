@@ -20,12 +20,19 @@ export default function RepCategorySearch({
   size = RepCategorySearchSize.MD,
   disableInputCategoryAsValue = false,
   error = false,
+  hideDefaultError = false,
   setCategory,
 }: {
   readonly category: string | null;
   readonly size?: RepCategorySearchSize | undefined;
   readonly disableInputCategoryAsValue?: boolean | undefined;
   readonly error?: boolean | undefined;
+  /**
+   * Keep the error styling (ring/caret) but suppress the built-in message,
+   * for callers that render their own — e.g. the create-wave outcome field
+   * that names the exact broken category rule.
+   */
+  readonly hideDefaultError?: boolean | undefined;
   readonly setCategory: (category: string | null) => void;
 }) {
   const randomId = getRandomObjectId();
@@ -194,7 +201,7 @@ export default function RepCategorySearch({
         />
       </div>
 
-      {error && (
+      {error && !hideDefaultError && (
         <div className="tw-relative tw-flex tw-items-center tw-gap-x-2 tw-pt-1.5">
           <svg
             className="tw-size-5 tw-flex-shrink-0 tw-text-error"
@@ -212,7 +219,7 @@ export default function RepCategorySearch({
             />
           </svg>
           <div className="tw-text-xs tw-font-medium tw-text-error">
-            Please enter rep cateogry
+            Please enter rep category
           </div>
         </div>
       )}

@@ -3,7 +3,9 @@ import {
   calculateEndDate,
   validateDateSequence,
   adjustDatesAfterSubmissionChange,
+  ensureSafeFirstDecisionTime,
   formatDate,
+  getDefaultFirstDecisionTime,
   countTotalDecisions,
   calculateEndDateForCycles,
 } from "@/components/waves/create-wave/services/waveDecisionService";
@@ -50,6 +52,40 @@ describe("waveDecisionService", () => {
     );
     expect(result.votingStartDate).toBe(5);
     expect(result.firstDecisionTime).toBe(5);
+  });
+
+  it("defaults the first decision to one week out at 23:59", () => {
+    // Defaulting to the SAME day would end the whole wave within hours, so the
+    // seed lands a week later at end of day.
+    const votingStart = new Date("2023-01-01T12:00:00Z").getTime();
+    const expected = new Date(votingStart);
+    expected.setDate(expected.getDate() + 7);
+    expected.setHours(23, 59, 0, 0);
+    expect(getDefaultFirstDecisionTime(votingStart)).toBe(expected.getTime());
+  });
+
+  it("reseeds the first decision when voting start catches up to it", () => {
+    const votingStartDate = new Date("2023-01-01T12:00:00Z").getTime();
+    const reseeded = ensureSafeFirstDecisionTime({
+      submissionStartDate: votingStartDate,
+      votingStartDate,
+      // At (or before) voting start → must be pushed to the safe default.
+      firstDecisionTime: votingStartDate,
+    } as any);
+    expect(reseeded.firstDecisionTime).toBe(
+      getDefaultFirstDecisionTime(votingStartDate)
+    );
+  });
+
+  it("leaves a first decision that is already safely after voting start", () => {
+    const votingStartDate = 1000;
+    const firstDecisionTime = 999999;
+    const kept = ensureSafeFirstDecisionTime({
+      submissionStartDate: 0,
+      votingStartDate,
+      firstDecisionTime,
+    } as any);
+    expect(kept.firstDecisionTime).toBe(firstDecisionTime);
   });
 
   it("formats date", () => {

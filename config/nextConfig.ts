@@ -8,6 +8,10 @@ import { STATIC_ALLOWED_IMAGE_HOSTNAMES } from "../lib/media/static-image-hosts"
 
 const HTML_LIMITED_METADATA_BOTS =
   /facebookexternalhit|facebookcatalog|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview|TelegramBot|redditbot|Pinterestbot|opentweet/i;
+const PUBLIC_REVIEW_TRACE_EXCLUDES = [
+  "content/public-reviews/**/*",
+  "public/review-data/**/*",
+];
 
 function getAllowedDevOrigins(): string[] {
   return (
@@ -57,6 +61,9 @@ export function sharedConfig(
     poweredByHeader: false,
     logging: {
       incomingRequests: false,
+    },
+    outputFileTracingExcludes: {
+      "/*": PUBLIC_REVIEW_TRACE_EXCLUDES,
     },
     async headers() {
       return [
