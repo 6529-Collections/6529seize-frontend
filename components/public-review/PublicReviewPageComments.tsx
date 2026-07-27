@@ -195,10 +195,10 @@ export function PublicReviewPageComments({
                         {primaryComment || record.body}
                       </p>
                       <div className="tw-mt-3 tw-flex tw-flex-wrap tw-gap-1.5">
-                        <span className="tw-text-primary-200 tw-rounded-full tw-border tw-border-solid tw-border-primary-400/20 tw-bg-primary-400/[0.07] tw-px-2 tw-py-0.5 tw-text-[0.61rem] tw-font-semibold tw-uppercase tw-tracking-wide">
+                        <span className="tw-rounded-full tw-border tw-border-solid tw-border-blue-400/15 tw-bg-blue-400/[0.08] tw-px-2 tw-py-0.5 tw-text-[0.61rem] tw-font-medium tw-uppercase tw-tracking-[0.08em] tw-text-blue-400/90">
                           {categoryLabel}
                         </span>
-                        <span className="tw-rounded-full tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.025] tw-px-2 tw-py-0.5 tw-text-[0.61rem] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
+                        <span className="tw-rounded-full tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.03] tw-px-2 tw-py-0.5 tw-text-[0.61rem] tw-font-medium tw-uppercase tw-tracking-[0.08em] tw-text-iron-400">
                           {severityLabel}
                         </span>
                       </div>
