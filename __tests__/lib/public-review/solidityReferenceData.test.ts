@@ -44,11 +44,16 @@ if (!REVIEW_VERSION) {
 const IDENTITY: SolidityReferenceReviewIdentity = {
   activeSourceCommit: REVIEW_VERSION.source.commit,
   activeVersion: STREAM_REVIEW_VERSION,
-  availableVersions: [STREAM_REVIEW_VERSION],
+  availableVersions: STREAM_REVIEW_DEFINITION.versions.map(
+    (candidate) => candidate.version
+  ),
   reviewId: STREAM_REVIEW_SLUG,
-  sourceCommits: {
-    [STREAM_REVIEW_VERSION]: REVIEW_VERSION.source.commit,
-  },
+  sourceCommits: Object.fromEntries(
+    STREAM_REVIEW_DEFINITION.versions.map((candidate) => [
+      candidate.version,
+      candidate.source.commit,
+    ])
+  ),
   sourceRepository: REVIEW_VERSION.source.repository,
 };
 
