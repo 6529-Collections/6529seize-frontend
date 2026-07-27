@@ -90,6 +90,7 @@ export default function UserPageCollectedCards({
                     copiesMax={max}
                     qtySelected={qty}
                     isTransferLoading={isTransferLoading}
+                    locale={locale}
                     onToggle={() =>
                       transfer.toggleSelect({
                         key: selKey,

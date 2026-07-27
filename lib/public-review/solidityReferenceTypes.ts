@@ -492,30 +492,26 @@ interface SolidityTopLevelDeclarationBase {
   readonly range: SoliditySourceRange;
 }
 
-export interface SolidityTopLevelStruct
-  extends SolidityTopLevelDeclarationBase {
+export interface SolidityTopLevelStruct extends SolidityTopLevelDeclarationBase {
   readonly canonicalName: string;
   readonly kind: "struct";
   readonly members: readonly SolidityParameter[];
   readonly visibility: string | null;
 }
 
-export interface SolidityTopLevelEnum
-  extends SolidityTopLevelDeclarationBase {
+export interface SolidityTopLevelEnum extends SolidityTopLevelDeclarationBase {
   readonly canonicalName: string;
   readonly kind: "enum";
   readonly members: readonly string[];
 }
 
-export interface SolidityTopLevelUserDefinedValueType
-  extends SolidityTopLevelDeclarationBase {
+export interface SolidityTopLevelUserDefinedValueType extends SolidityTopLevelDeclarationBase {
   readonly canonicalName: string;
   readonly kind: "userDefinedValueType";
   readonly underlyingType: string;
 }
 
-export interface SolidityTopLevelFunction
-  extends SolidityTopLevelDeclarationBase {
+export interface SolidityTopLevelFunction extends SolidityTopLevelDeclarationBase {
   readonly canonicalSignature: string | null;
   readonly displaySignature: string;
   readonly functionKind: string;
@@ -529,8 +525,7 @@ export interface SolidityTopLevelFunction
   readonly visibility: string;
 }
 
-export interface SolidityTopLevelEvent
-  extends SolidityTopLevelDeclarationBase {
+export interface SolidityTopLevelEvent extends SolidityTopLevelDeclarationBase {
   readonly anonymous: boolean;
   readonly canonicalSignature: string | null;
   readonly displaySignature: string;
@@ -539,8 +534,7 @@ export interface SolidityTopLevelEvent
   readonly topic0: string | null;
 }
 
-export interface SolidityTopLevelError
-  extends SolidityTopLevelDeclarationBase {
+export interface SolidityTopLevelError extends SolidityTopLevelDeclarationBase {
   readonly canonicalSignature: string | null;
   readonly displaySignature: string;
   readonly inputs: readonly SolidityParameter[];
@@ -548,8 +542,7 @@ export interface SolidityTopLevelError
   readonly selector: string;
 }
 
-export interface SolidityTopLevelVariable
-  extends SolidityTopLevelDeclarationBase {
+export interface SolidityTopLevelVariable extends SolidityTopLevelDeclarationBase {
   readonly constant: boolean;
   readonly immutable: boolean;
   readonly kind: "variable";

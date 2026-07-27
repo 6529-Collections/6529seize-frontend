@@ -20,9 +20,7 @@ export const STREAM_REVIEW_SOURCE_COMMIT =
 const STREAM_REVIEW_VERSION_LIFECYCLE_STATE =
   getStreamReviewVersionLifecycleState(STREAM_REVIEW_VERSION);
 
-if (
-  STREAM_REVIEW_VERSION_LIFECYCLE_STATE !== STREAM_REVIEW_LIFECYCLE_STATE
-) {
+if (STREAM_REVIEW_VERSION_LIFECYCLE_STATE !== STREAM_REVIEW_LIFECYCLE_STATE) {
   throw new Error(
     "The active Stream review lifecycle does not match its version."
   );

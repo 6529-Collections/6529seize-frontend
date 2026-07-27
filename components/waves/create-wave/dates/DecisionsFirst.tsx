@@ -112,7 +112,10 @@ export default function DecisionsFirst({
         <TooltipIconButton
           icon={faInfoCircle}
           tooltipText="This is when you'll announce the first set of winners for your wave. It must occur after voting begins. This is when creators will find out if they've won and their work will be showcased."
-          tooltipPosition="right"
+          // Opens downward (centered) rather than to the right: a right-opening
+          // tooltip pushed a fixed-width box past the viewport edge and forced
+          // the page to scroll horizontally on mobile.
+          tooltipPosition="bottom"
           tooltipWidth="tw-w-72"
         />
       </div>

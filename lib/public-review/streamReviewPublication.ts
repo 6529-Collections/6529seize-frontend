@@ -43,8 +43,7 @@ for (const version of publication.versions) {
 export function getStreamReviewVersionLifecycleState(
   version: string
 ): PublicReviewLifecycleState {
-  const lifecycleState =
-    STREAM_REVIEW_VERSION_LIFECYCLE_STATES.get(version);
+  const lifecycleState = STREAM_REVIEW_VERSION_LIFECYCLE_STATES.get(version);
   if (!lifecycleState) {
     throw new Error(
       `The Stream public-review publication config is missing ${version}.`

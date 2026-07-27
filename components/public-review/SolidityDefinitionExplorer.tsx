@@ -116,7 +116,7 @@ export function SolidityDefinitionExplorer({
     () =>
       items.filter((item) =>
         matchesFilter(item, { classification, kind, query, scope })
-    ),
+      ),
     [classification, items, kind, query, scope]
   );
   const visibleItems = filteredItems.slice(0, resultLimit);
@@ -125,7 +125,7 @@ export function SolidityDefinitionExplorer({
     <section aria-labelledby="solidity-definition-inventory">
       <h2
         id="solidity-definition-inventory"
-        className="tw-scroll-mt-28 tw-m-0 tw-text-2xl tw-font-semibold tw-text-white"
+        className="tw-m-0 tw-scroll-mt-28 tw-text-2xl tw-font-semibold tw-text-white"
       >
         {t(DEFAULT_LOCALE, "publicReview.reference.definitions")}
       </h2>

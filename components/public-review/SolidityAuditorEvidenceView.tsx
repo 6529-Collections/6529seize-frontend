@@ -128,23 +128,21 @@ function getNatSpecItems({
 function getReadinessItems(
   manifest: SolidityReferenceManifest
 ): readonly SolidityReadinessListItem[] {
-  return manifest.auditorEvidence.readiness.requirements.map(
-    (requirement) => ({
-      evidence: requirement.evidence.map((artifact) => ({
-        ...artifact,
-        href: getPinnedRepositoryHref({
-          commit: manifest.source.commit,
-          path: artifact.path,
-          repository: manifest.source.repository,
-        }),
-      })),
-      id: requirement.id,
-      notes: requirement.notes,
-      owner: requirement.owner,
-      phase: requirement.phase,
-      status: requirement.status,
-    })
-  );
+  return manifest.auditorEvidence.readiness.requirements.map((requirement) => ({
+    evidence: requirement.evidence.map((artifact) => ({
+      ...artifact,
+      href: getPinnedRepositoryHref({
+        commit: manifest.source.commit,
+        path: artifact.path,
+        repository: manifest.source.repository,
+      }),
+    })),
+    id: requirement.id,
+    notes: requirement.notes,
+    owner: requirement.owner,
+    phase: requirement.phase,
+    status: requirement.status,
+  }));
 }
 
 function getRiskItems(
@@ -212,7 +210,7 @@ export function SolidityAuditorEvidenceView({
       <section aria-labelledby="solidity-auditor-evidence">
         <h2
           id="solidity-auditor-evidence"
-          className="tw-scroll-mt-28 tw-m-0 tw-text-2xl tw-font-semibold tw-text-white"
+          className="tw-m-0 tw-scroll-mt-28 tw-text-2xl tw-font-semibold tw-text-white"
         >
           {t(DEFAULT_LOCALE, "publicReview.reference.auditorEvidence")}
         </h2>
@@ -232,7 +230,10 @@ export function SolidityAuditorEvidenceView({
             value={evidence.readiness.status.public_beta}
           />
           <EvidenceSummaryCard
-            label={t(DEFAULT_LOCALE, "publicReview.reference.productionRelease")}
+            label={t(
+              DEFAULT_LOCALE,
+              "publicReview.reference.productionRelease"
+            )}
             value={evidence.readiness.status.production_release}
           />
           <EvidenceSummaryCard
@@ -251,14 +252,20 @@ export function SolidityAuditorEvidenceView({
             value={evidence.natSpecGaps.gapCount}
           />
           <EvidenceSummaryCard
-            label={t(DEFAULT_LOCALE, "publicReview.reference.governedParameters")}
+            label={t(
+              DEFAULT_LOCALE,
+              "publicReview.reference.governedParameters"
+            )}
             value={
               evidence.governedParameterInventory.inventory_summary
                 .logical_parameter_count
             }
           />
           <EvidenceSummaryCard
-            label={t(DEFAULT_LOCALE, "publicReview.reference.retainedArtifacts")}
+            label={t(
+              DEFAULT_LOCALE,
+              "publicReview.reference.retainedArtifacts"
+            )}
             value={Object.keys(evidence.boundArtifactDigests).length}
           />
         </dl>
@@ -270,9 +277,7 @@ export function SolidityAuditorEvidenceView({
       <SolidityReadinessExplorer items={getReadinessItems(manifest)} />
       <SolidityRiskExplorer items={getRiskItems(manifest)} />
       <SolidityGovernedParameterExplorer
-        candidateBinding={
-          evidence.governedParameterInventory.candidate_binding
-        }
+        candidateBinding={evidence.governedParameterInventory.candidate_binding}
         items={getGovernedParameterItems(manifest)}
         policy={evidence.governedParameterInventory.governance_policy}
       />

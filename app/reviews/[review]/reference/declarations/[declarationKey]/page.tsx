@@ -17,9 +17,7 @@ export async function generateMetadata({ params }: Props) {
   return getTopLevelDeclarationMetadata(await params);
 }
 
-export async function StreamSolidityTopLevelDeclarationPage({
-  params,
-}: Props) {
+export async function StreamSolidityTopLevelDeclarationPage({ params }: Props) {
   return renderTopLevelDeclarationRoute(await params);
 }
 

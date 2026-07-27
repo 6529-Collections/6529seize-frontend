@@ -11,7 +11,9 @@ describe("public review lifecycle capabilities", () => {
         (state) =>
           getPublicReviewLifecycleCapabilities(state).publicRoutesAvailable
       )
-    ).toEqual(PUBLIC_REVIEW_LIFECYCLE_STATES.filter((state) => state !== "DRAFT"));
+    ).toEqual(
+      PUBLIC_REVIEW_LIFECYCLE_STATES.filter((state) => state !== "DRAFT")
+    );
   });
 
   it("opens feedback and public exploit reports only during public review", () => {
@@ -22,16 +24,13 @@ describe("public review lifecycle capabilities", () => {
       )
     ).toEqual(["PUBLIC_REVIEW"]);
     expect(
-      PUBLIC_REVIEW_LIFECYCLE_STATES.filter(
-        acceptsPublicReviewExploitReports
-      )
+      PUBLIC_REVIEW_LIFECYCLE_STATES.filter(acceptsPublicReviewExploitReports)
     ).toEqual(["PUBLIC_REVIEW"]);
   });
 
   it("switches deployed reviews to the post-deployment disclosure policy", () => {
     expect(
-      getPublicReviewLifecycleCapabilities("DEPLOYED")
-        .securityFindingPolicy
+      getPublicReviewLifecycleCapabilities("DEPLOYED").securityFindingPolicy
     ).toBe("POST_DEPLOYMENT_POLICY");
   });
 });

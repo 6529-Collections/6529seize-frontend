@@ -240,11 +240,7 @@ function assertRoutedDeclarations(
     const declarations = definition.declarations[kind];
     const declarationKeys = new Set<string>();
     for (const declaration of declarations) {
-      assertRoutedDeclaration(
-        declaration,
-        kind,
-        indexEntry.range.sourceSha256
-      );
+      assertRoutedDeclaration(declaration, kind, indexEntry.range.sourceSha256);
       if (declarationKeys.has(declaration.key)) {
         throw new Error(`Duplicate Solidity ${kind} declaration identity.`);
       }
@@ -283,9 +279,7 @@ function assertOtherDeclarations(
 
 function assertAbiSurface(definition: SolidityDefinition): void {
   for (const kind of ["functions", "events", "errors"] as const) {
-    definition.abiSurface[kind].forEach((entry) =>
-      assertAbiEntry(entry, kind)
-    );
+    definition.abiSurface[kind].forEach((entry) => assertAbiEntry(entry, kind));
   }
 }
 

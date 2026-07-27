@@ -29,10 +29,7 @@ function humanize(value: string): string {
   return value.replaceAll("_", " ");
 }
 
-function matchesQuery(
-  item: SolidityRiskListItem,
-  query: string
-): boolean {
+function matchesQuery(item: SolidityRiskListItem, query: string): boolean {
   return [
     item.id,
     item.title,
@@ -89,7 +86,7 @@ export function SolidityRiskExplorer({
     >
       <h2
         id="solidity-risk-register"
-        className="tw-scroll-mt-28 tw-m-0 tw-text-2xl tw-font-semibold tw-text-white"
+        className="tw-m-0 tw-scroll-mt-28 tw-text-2xl tw-font-semibold tw-text-white"
       >
         {t(DEFAULT_LOCALE, "publicReview.reference.riskRegister")}
       </h2>
@@ -225,9 +222,13 @@ export function SolidityRiskExplorer({
                         rel="noreferrer"
                         target="_blank"
                       >
-                        {t(DEFAULT_LOCALE, "publicReview.reference.trackingLink", {
-                          number: index + 1,
-                        })}
+                        {t(
+                          DEFAULT_LOCALE,
+                          "publicReview.reference.trackingLink",
+                          {
+                            number: index + 1,
+                          }
+                        )}
                       </a>
                     </li>
                   ))}

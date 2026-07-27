@@ -44,10 +44,7 @@ function getStreamReviewMetadata({
       title: t(DEFAULT_LOCALE, "publicReview.metadata.title", {
         page: t(DEFAULT_LOCALE, route.page.titleKey),
       }),
-      description: t(
-        DEFAULT_LOCALE,
-        "publicReview.metadata.description"
-      ),
+      description: t(DEFAULT_LOCALE, "publicReview.metadata.description"),
     }),
     alternates: {
       canonical: new URL(route.canonicalPath, baseEndpoint).toString(),
@@ -59,9 +56,7 @@ function getStreamReviewMetadata({
   };
 }
 
-async function renderStreamReviewRoute(
-  route: StreamReviewRouteModel
-) {
+async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
   const contentVersion =
     route.version ?? STREAM_REVIEW_DEFINITION.activeVersion;
   const reviewVersion = getStreamReviewVersion(contentVersion);

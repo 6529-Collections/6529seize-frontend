@@ -37,6 +37,7 @@ import { createOpenSeaPlan } from "./opensea/service";
 import { createFirstParty6529Plan } from "./6529/service";
 import { createTransientPlan } from "./transient/service";
 import { createYoutubePlan } from "./youtube/service";
+import { createEtherscanPlan } from "./etherscan/service";
 import { buildFarcasterEmbedResponse } from "./farcaster/service";
 import { detectEnsTarget, fetchEnsPreview, EnsPreviewError } from "./ens";
 import { HTML_FETCH_HEADERS, createFetchConfig } from "./fetchConfig";
@@ -487,6 +488,18 @@ async function resolveLinkPreview(
   rawUrl: string | null,
   context?: PreviewContext
 ): Promise<LinkPreviewResponse> {
+  if (rawUrl) {
+    try {
+      const etherscanPlan = createEtherscanPlan(new URL(rawUrl));
+      if (etherscanPlan) {
+        return executePlan(etherscanPlan);
+      }
+    } catch {
+      // Bare ENS names and other non-URL inputs continue through existing
+      // provider detection below.
+    }
+  }
+
   const ensTarget = detectEnsTarget(rawUrl);
   if (ensTarget) {
     return fetchEnsPreview(ensTarget) as Promise<LinkPreviewResponse>;

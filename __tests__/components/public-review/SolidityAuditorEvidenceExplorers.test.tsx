@@ -163,7 +163,9 @@ describe("Solidity auditor-evidence explorers", () => {
     fireEvent.change(screen.getByLabelText("Documentation gap type"), {
       target: { value: "event" },
     });
-    expect(screen.getByText("StreamCore.Minted(address,uint256)")).toBeVisible();
+    expect(
+      screen.getByText("StreamCore.Minted(address,uint256)")
+    ).toBeVisible();
     expect(
       screen.queryByText("StreamCore.Unauthorized()")
     ).not.toBeInTheDocument();

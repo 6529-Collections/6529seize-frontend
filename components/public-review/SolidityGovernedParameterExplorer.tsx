@@ -10,15 +10,16 @@ import type {
   SolidityGovernedParameter,
 } from "@/lib/public-review/solidityReferenceTypes";
 
-export interface SolidityGovernedParameterListItem
-  extends Omit<SolidityGovernedParameter, "normative_source"> {
+export interface SolidityGovernedParameterListItem extends Omit<
+  SolidityGovernedParameter,
+  "normative_source"
+> {
   readonly normative_source: SolidityGovernedParameter["normative_source"] & {
     readonly href: string;
   };
 }
 
-type GovernedInventory =
-  SolidityAuditorEvidence["governedParameterInventory"];
+type GovernedInventory = SolidityAuditorEvidence["governedParameterInventory"];
 
 const INPUT_CLASSES =
   "tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-iron-50 tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40";
@@ -69,7 +70,7 @@ export function SolidityGovernedParameterExplorer({
     >
       <h2
         id="solidity-governed-parameters"
-        className="tw-scroll-mt-28 tw-m-0 tw-text-2xl tw-font-semibold tw-text-white"
+        className="tw-m-0 tw-scroll-mt-28 tw-text-2xl tw-font-semibold tw-text-white"
       >
         {t(DEFAULT_LOCALE, "publicReview.reference.governedParameters")}
       </h2>
@@ -195,7 +196,10 @@ export function SolidityGovernedParameterExplorer({
                 </div>
                 <div>
                   <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
-                    {t(DEFAULT_LOCALE, "publicReview.reference.parameterPreimage")}
+                    {t(
+                      DEFAULT_LOCALE,
+                      "publicReview.reference.parameterPreimage"
+                    )}
                   </dt>
                   <dd className="tw-m-0 tw-mt-1 tw-break-all tw-font-mono tw-text-xs tw-text-iron-200">
                     {item.preimage}
@@ -203,7 +207,10 @@ export function SolidityGovernedParameterExplorer({
                 </div>
                 <div>
                   <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
-                    {t(DEFAULT_LOCALE, "publicReview.reference.normativeSource")}
+                    {t(
+                      DEFAULT_LOCALE,
+                      "publicReview.reference.normativeSource"
+                    )}
                   </dt>
                   <dd className="tw-m-0 tw-mt-1">
                     <a
@@ -220,13 +227,13 @@ export function SolidityGovernedParameterExplorer({
                 <div className="tw-grid tw-gap-4 sm:tw-grid-cols-2">
                   <div>
                     <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
-                      {t(DEFAULT_LOCALE, "publicReview.reference.expectedHosts")}
+                      {t(
+                        DEFAULT_LOCALE,
+                        "publicReview.reference.expectedHosts"
+                      )}
                     </dt>
                     <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-200">
-                      {formatInteger(
-                        DEFAULT_LOCALE,
-                        item.expected_hosts.count
-                      )}{" "}
+                      {formatInteger(DEFAULT_LOCALE, item.expected_hosts.count)}{" "}
                       ({item.expected_hosts.status})
                     </dd>
                   </div>
@@ -348,8 +355,7 @@ function EvidenceValue({
         {label}
       </dt>
       <dd className="tw-m-0 tw-mt-1 tw-break-words tw-text-sm tw-text-iron-200">
-        {displayedValue}{" "}
-        <span className="tw-text-iron-500">({status})</span>
+        {displayedValue} <span className="tw-text-iron-500">({status})</span>
       </dd>
     </div>
   );

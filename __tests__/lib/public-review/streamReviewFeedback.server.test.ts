@@ -129,9 +129,7 @@ describe("Stream review feedback manifest binding", () => {
         page: editorialPage,
         version: "not-a-retained-version",
       })
-    ).toThrow(
-      "Feedback page does not belong to this review version."
-    );
+    ).toThrow("Feedback page does not belong to this review version.");
   });
 
   it("rejects a file that is absent from the exact manifest", async () => {
@@ -154,9 +152,7 @@ describe("Stream review feedback manifest binding", () => {
         page: editorialPage,
         version: STREAM_REVIEW_VERSION,
       }).canonicalPath
-    ).toBe(
-      `/reviews/${STREAM_REVIEW_SLUG}/versions/${STREAM_REVIEW_VERSION}`
-    );
+    ).toBe(`/reviews/${STREAM_REVIEW_SLUG}/versions/${STREAM_REVIEW_VERSION}`);
 
     expect(
       createStreamTechnicalFeedbackPageContext({

@@ -94,7 +94,7 @@ export function SolidityGlobalDeclarationExplorer({
     <section aria-labelledby="solidity-global-declarations">
       <h2
         id="solidity-global-declarations"
-        className="tw-scroll-mt-28 tw-m-0 tw-text-2xl tw-font-semibold tw-text-white"
+        className="tw-m-0 tw-scroll-mt-28 tw-text-2xl tw-font-semibold tw-text-white"
       >
         {t(DEFAULT_LOCALE, "publicReview.reference.globalDeclarations")}
       </h2>

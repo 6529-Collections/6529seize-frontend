@@ -115,10 +115,7 @@ export function SolidityWarnings({
             />
             <WarningCounts
               counts={summary.byCode}
-              heading={t(
-                DEFAULT_LOCALE,
-                "publicReview.reference.warningCodes"
-              )}
+              heading={t(DEFAULT_LOCALE, "publicReview.reference.warningCodes")}
             />
           </div>
           <WarningRecords warnings={warnings} />

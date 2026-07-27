@@ -108,10 +108,7 @@ export function assertWarningSummary(
   assertNumberRecord(value["byCode"], "warning codes");
 }
 
-export function assertSafePublicPath(
-  publicPath: string,
-  suffix: string
-): void {
+export function assertSafePublicPath(publicPath: string, suffix: string): void {
   if (
     !SAFE_PUBLIC_PATH_PATTERN.test(publicPath) ||
     publicPath.includes("//") ||

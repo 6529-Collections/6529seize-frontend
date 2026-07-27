@@ -315,9 +315,7 @@ function SourceLines({
                 selected ? "tw-bg-primary-400/15" : ""
               }`}
             >
-              <span
-                className="tw-block tw-px-3 tw-text-right tw-font-mono tw-text-xs tw-text-iron-500"
-              >
+              <span className="tw-block tw-px-3 tw-text-right tw-font-mono tw-text-xs tw-text-iron-500">
                 <span className="tw-sr-only">
                   {t(DEFAULT_LOCALE, "publicReview.reference.sourceLine", {
                     lineNumber,
