@@ -85,14 +85,12 @@ export function PublicReviewReadingLayout({
   feedbackAvailable,
   ledgerHref,
   panel,
-  reviewVersion,
   toolbar,
 }: {
   readonly content: ReactNode;
   readonly feedbackAvailable: boolean;
   readonly ledgerHref: string;
   readonly panel: ReactNode;
-  readonly reviewVersion: string;
   readonly toolbar: ReactNode;
 }) {
   const isPanelOpen = useSyncExternalStore(
@@ -150,7 +148,7 @@ export function PublicReviewReadingLayout({
             aria-controls={COMMENT_PANEL_ID}
             aria-expanded={isPanelOpen}
             onClick={() => updatePanelPreference(!isPanelOpen)}
-            className="tw-inline-flex tw-min-h-11 tw-flex-none tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/25 tw-bg-primary-400/[0.07] tw-px-3.5 tw-py-2 tw-text-xs tw-font-semibold tw-text-primary-100 tw-transition-colors hover:tw-border-primary-300/50 hover:tw-bg-primary-400/[0.12] hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+            className="tw-inline-flex tw-min-h-11 tw-flex-none tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/20 tw-bg-primary-400/[0.08] tw-px-3.5 tw-py-2 tw-text-xs tw-font-semibold tw-text-primary-300 tw-transition-colors tw-duration-200 tw-ease-out hover:tw-border-primary-300/35 hover:tw-bg-primary-400/[0.12] hover:tw-text-primary-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
           >
             {isPanelOpen ? (
               <XMarkIcon className="tw-size-4" aria-hidden="true" />
@@ -184,41 +182,31 @@ export function PublicReviewReadingLayout({
         <aside
           id={COMMENT_PANEL_ID}
           aria-label={t(DEFAULT_LOCALE, "publicReview.comments.title")}
-          className={`tw-order-1 tw-scroll-mt-20 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-bg-[#08080a] tw-outline-none @[960px]:tw-sticky @[960px]:tw-top-16 @[960px]:tw-order-2 @[960px]:tw-max-h-[calc(100vh-4rem)] @[960px]:tw-overflow-y-auto @[960px]:tw-border-b-0 @[960px]:tw-border-l ${
+          className={`tw-order-1 tw-scroll-mt-20 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-bg-[#08080a] tw-outline-none @[960px]:tw-sticky @[960px]:tw-top-16 @[960px]:tw-order-2 @[960px]:tw-h-[calc(100dvh-4rem)] @[960px]:tw-overflow-hidden @[960px]:tw-border-b-0 @[960px]:tw-border-l ${
             isPanelOpen ? "tw-block" : "tw-hidden"
           }`}
           tabIndex={-1}
         >
           <PublicReviewCommentPanelOpenContext.Provider value={isPanelOpen}>
-            <div className="tw-overflow-hidden tw-bg-[#08080a]">
-              <header className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-px-5 tw-py-5">
-                <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
-                  <div>
-                    <p className="tw-m-0 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.13em] tw-text-primary-300">
-                      {t(DEFAULT_LOCALE, "publicReview.comments.eyebrow", {
-                        version: reviewVersion,
-                      })}
-                    </p>
-                    <h2 className="tw-mb-0 tw-mt-2 tw-text-base tw-font-semibold tw-tracking-tight tw-text-white">
-                      {t(DEFAULT_LOCALE, "publicReview.comments.title")}
-                    </h2>
-                  </div>
-                  <ChatBubbleLeftRightIcon
-                    className="tw-mt-0.5 tw-size-4 tw-flex-none tw-text-iron-500"
-                    aria-hidden="true"
-                  />
-                </div>
-                <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
-                  {t(DEFAULT_LOCALE, "publicReview.comments.intro")}
-                </p>
+            <div className="tw-bg-[#08080a] @[960px]:tw-flex @[960px]:tw-h-full @[960px]:tw-flex-col">
+              <header className="tw-flex tw-flex-none tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-px-5 tw-py-4">
+                <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-tracking-tight tw-text-white">
+                  {t(DEFAULT_LOCALE, "publicReview.comments.title")}
+                </h2>
+                <ChatBubbleLeftRightIcon
+                  className="tw-size-4 tw-flex-none tw-text-iron-500"
+                  aria-hidden="true"
+                />
+              </header>
+              <div className="tw-min-h-0 tw-flex-1">{panel}</div>
+              <footer className="tw-flex-none tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-px-5">
                 <Link
                   href={ledgerHref}
-                  className="hover:tw-text-primary-200 tw-mt-2 tw-inline-flex tw-min-h-11 tw-items-center tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline tw-decoration-primary-400/40 tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+                  className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-[0.6875rem] tw-font-medium tw-text-iron-500 tw-no-underline tw-transition-colors hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                 >
                   {t(DEFAULT_LOCALE, "publicReview.comments.viewLedger")}
                 </Link>
-              </header>
-              <div className="tw-space-y-5 tw-px-5 tw-py-5">{panel}</div>
+              </footer>
             </div>
           </PublicReviewCommentPanelOpenContext.Provider>
         </aside>

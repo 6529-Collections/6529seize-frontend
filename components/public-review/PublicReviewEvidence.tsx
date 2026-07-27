@@ -14,40 +14,42 @@ const EVIDENCE_PRESENTATION: Record<
     labelKey: "publicReview.evidence.labels.implemented",
     descriptionKey: "publicReview.evidence.implemented",
     className:
-      "tw-border-emerald-400/35 tw-bg-emerald-400/[0.07] tw-text-emerald-100",
+      "tw-border-emerald-400/15 tw-bg-emerald-400/[0.08] tw-text-emerald-400/90",
   },
   TESTED: {
     labelKey: "publicReview.evidence.labels.tested",
     descriptionKey: "publicReview.evidence.tested",
-    className: "tw-border-sky-400/35 tw-bg-sky-400/[0.07] tw-text-sky-100",
+    className: "tw-border-blue-400/15 tw-bg-blue-400/[0.08] tw-text-blue-400/90",
   },
   PROPOSED: {
     labelKey: "publicReview.evidence.labels.proposed",
     descriptionKey: "publicReview.evidence.proposed",
     className:
-      "tw-border-violet-400/35 tw-bg-violet-400/[0.07] tw-text-violet-100",
+      "tw-border-violet-400/15 tw-bg-violet-400/[0.08] tw-text-violet-400/90",
   },
   OPEN_FOR_FEEDBACK: {
     labelKey: "publicReview.evidence.labels.openForFeedback",
     descriptionKey: "publicReview.evidence.openForFeedback",
     className:
-      "tw-border-amber-400/35 tw-bg-amber-400/[0.07] tw-text-amber-100",
+      "tw-border-amber-400/15 tw-bg-amber-400/[0.08] tw-text-amber-400/90",
   },
   AUDIT_PENDING: {
     labelKey: "publicReview.evidence.labels.auditPending",
     descriptionKey: "publicReview.evidence.auditPending",
     className:
-      "tw-border-orange-400/35 tw-bg-orange-400/[0.07] tw-text-orange-100",
+      "tw-border-orange-400/15 tw-bg-orange-400/[0.08] tw-text-orange-400/90",
   },
   DEFERRED: {
     labelKey: "publicReview.evidence.labels.deferred",
     descriptionKey: "publicReview.evidence.deferred",
-    className: "tw-border-iron-600 tw-bg-white/[0.04] tw-text-iron-200",
+    className:
+      "tw-border-white/[0.08] tw-bg-white/[0.03] tw-text-iron-400",
   },
   KNOWN_LIMITATION: {
     labelKey: "publicReview.evidence.labels.knownLimitation",
     descriptionKey: "publicReview.evidence.knownLimitation",
-    className: "tw-border-red-400/35 tw-bg-red-400/[0.07] tw-text-red-100",
+    className:
+      "tw-border-pink-400/15 tw-bg-pink-400/[0.08] tw-text-pink-400/90",
   },
 };
 
@@ -59,7 +61,7 @@ export function PublicReviewEvidenceBadge({
   const presentation = EVIDENCE_PRESENTATION[state];
   return (
     <span
-      className={`tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-px-2.5 tw-py-1 tw-text-[0.67rem] tw-font-semibold tw-uppercase tw-tracking-[0.07em] ${presentation.className}`}
+      className={`tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-px-3.5 tw-py-1.5 tw-text-[0.65rem] tw-font-medium tw-uppercase tw-tracking-[0.08em] ${presentation.className}`}
     >
       {t(DEFAULT_LOCALE, presentation.labelKey)}
     </span>

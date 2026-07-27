@@ -65,8 +65,6 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.audiences.auditors.description":
     "Use the editorial map alongside generated reference and retained evidence.",
   "publicReview.audiences.startPath": "Start the {audience} path",
-  "publicReview.audiences.showPath": "View all {count} pages in this path",
-  "publicReview.audiences.pathLabel": "{audience} review reading path",
   "publicReview.navigation.label": "Contract review pages",
   "publicReview.navigation.contentsLabel": "All contract review pages",
   "publicReview.navigation.sequenceLabel":
@@ -432,8 +430,6 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.reference.sourceLine": "Line {lineNumber}",
   "publicReview.feedback.title": "Send feedback",
   "publicReview.feedback.jump": "Jump to send feedback",
-  "publicReview.feedback.intro":
-    "Your feedback will be posted as a top-level message in the review Wave with structured review metadata.",
   "publicReview.feedback.category": "Feedback type",
   "publicReview.feedback.severity": "Suspected severity",
   "publicReview.feedback.comment": "Comment",
@@ -480,14 +476,10 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "Preparing the tamper-evident checksum for this exact code selection…",
   "publicReview.feedback.hashUnavailable":
     "This browser could not verify the selected code checksum. Code-linked feedback is disabled; reload in a current browser and try again.",
-  "publicReview.comments.show": "Show page comments",
-  "publicReview.comments.hide": "Hide page comments",
-  "publicReview.comments.eyebrow": "Version {version}",
+  "publicReview.comments.show": "Show comments",
+  "publicReview.comments.hide": "Hide comments",
   "publicReview.comments.title": "Page comments",
-  "publicReview.comments.intro":
-    "Read and add feedback attached to this exact page and review version.",
   "publicReview.comments.viewLedger": "View the full feedback ledger",
-  "publicReview.comments.listTitle": "Discussion",
   "publicReview.comments.loading": "Loading page comments…",
   "publicReview.comments.loadError":
     "Comments could not be loaded from the review Wave.",

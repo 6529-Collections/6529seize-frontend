@@ -1,6 +1,12 @@
+import {
+  ArrowRightIcon,
+  CodeBracketIcon,
+  PaintBrushIcon,
+  ShieldCheckIcon,
+  UsersIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 
-import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import {
@@ -32,6 +38,20 @@ const AUDIENCE_COPY: Record<
   },
 };
 
+const AUDIENCE_ICONS = {
+  community: UsersIcon,
+  artists: PaintBrushIcon,
+  technical: CodeBracketIcon,
+  auditors: ShieldCheckIcon,
+} satisfies Record<PublicReviewAudience, typeof UsersIcon>;
+
+const AUDIENCE_ICON_CLASSES: Record<PublicReviewAudience, string> = {
+  community: "tw-text-violet-400",
+  artists: "tw-text-primary-300",
+  technical: "tw-text-iron-500",
+  auditors: "tw-text-orange-400",
+};
+
 export function PublicReviewAudiencePaths({
   pages,
   routes,
@@ -44,20 +64,21 @@ export function PublicReviewAudiencePaths({
   return (
     <section
       aria-labelledby="review-audiences-heading"
-      className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/55 tw-p-5 sm:tw-p-6"
+      className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-10"
     >
       <h2
         id="review-audiences-heading"
-        className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white"
+        className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl"
       >
         {t(DEFAULT_LOCALE, "publicReview.audiences.heading")}
       </h2>
-      <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">
+      <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-font-light tw-leading-6 tw-text-iron-400">
         {t(DEFAULT_LOCALE, "publicReview.audiences.description")}
       </p>
-      <div className="tw-mt-5 tw-grid tw-gap-3 sm:tw-grid-cols-2">
+      <div className="tw-mt-6 tw-grid tw-gap-4 sm:tw-grid-cols-2">
         {PUBLIC_REVIEW_AUDIENCES.map((audience) => {
           const copy = AUDIENCE_COPY[audience];
+          const AudienceIcon = AUDIENCE_ICONS[audience];
           const audiencePages = pages.filter(
             (page) =>
               page.id !== "overview" && page.audiences.includes(audience)
@@ -66,55 +87,33 @@ export function PublicReviewAudiencePaths({
           return (
             <article
               key={audience}
-              className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-950/70 tw-p-4"
+              className="tw-group tw-flex tw-h-full tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.05] tw-bg-white/[0.025] tw-p-4 tw-transition-colors tw-duration-200 tw-ease-out hover:tw-border-white/[0.08] hover:tw-bg-white/[0.035] sm:tw-p-5"
             >
-              <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
+              <h3 className="tw-m-0 tw-flex tw-items-center tw-gap-2.5 tw-text-[0.9375rem] tw-font-medium tw-text-iron-200">
+                <AudienceIcon
+                  className={`tw-size-4 tw-flex-none ${AUDIENCE_ICON_CLASSES[audience]}`}
+                  aria-hidden="true"
+                />
                 {t(DEFAULT_LOCALE, copy.title)}
               </h3>
-              <p className="tw-mb-0 tw-mt-1.5 tw-text-sm tw-leading-6 tw-text-iron-300">
+              <p className="tw-mb-0 tw-mt-2 tw-flex-1 tw-text-[0.8125rem] tw-font-light tw-leading-5 tw-text-iron-400">
                 {t(DEFAULT_LOCALE, copy.description)}
               </p>
               {firstPage ? (
-                <>
+                <div className="tw-mt-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-pt-1">
                   <Link
                     href={routes.getPageHref(firstPage, version)}
-                    className="tw-mt-4 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-primary-400/25 tw-bg-primary-400/[0.06] tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-primary-100 tw-no-underline tw-transition-colors hover:tw-border-primary-300/50 hover:tw-bg-primary-400/[0.1] hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+                    className="tw-flex tw-min-h-11 tw-items-center tw-justify-between tw-gap-4 tw-rounded-md tw-text-xs tw-font-medium tw-text-iron-300 tw-no-underline tw-transition-colors tw-duration-200 tw-ease-out hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                   >
                     {t(DEFAULT_LOCALE, "publicReview.audiences.startPath", {
                       audience: t(DEFAULT_LOCALE, copy.title),
                     })}
+                    <ArrowRightIcon
+                      className="tw-size-3 tw-flex-none tw-text-iron-500 tw-transition-colors tw-duration-200 tw-ease-out group-hover:tw-text-primary-300"
+                      aria-hidden="true"
+                    />
                   </Link>
-                  <details className="tw-mt-3 tw-rounded-md tw-border tw-border-solid tw-border-white/[0.07] tw-bg-white/[0.015] tw-p-3">
-                    <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 marker:tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
-                      {t(DEFAULT_LOCALE, "publicReview.audiences.showPath", {
-                        count: formatInteger(
-                          DEFAULT_LOCALE,
-                          audiencePages.length
-                        ),
-                      })}
-                    </summary>
-                    <nav
-                      aria-label={t(
-                        DEFAULT_LOCALE,
-                        "publicReview.audiences.pathLabel",
-                        { audience: t(DEFAULT_LOCALE, copy.title) }
-                      )}
-                    >
-                      <ol className="tw-mb-0 tw-mt-2 tw-space-y-2 tw-pl-5 tw-text-sm tw-text-iron-300">
-                        {audiencePages.map((page) => (
-                          <li key={page.id}>
-                            <Link
-                              href={routes.getPageHref(page, version)}
-                              className="tw-text-sky-300 tw-underline tw-decoration-sky-400/50 tw-underline-offset-4 hover:tw-text-sky-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
-                            >
-                              {t(DEFAULT_LOCALE, page.titleKey)}
-                            </Link>
-                          </li>
-                        ))}
-                      </ol>
-                    </nav>
-                  </details>
-                </>
+                </div>
               ) : null}
             </article>
           );

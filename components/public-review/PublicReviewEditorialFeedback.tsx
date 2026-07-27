@@ -40,43 +40,49 @@ export function PublicReviewEditorialFeedback({
   );
 
   return (
-    <div className="tw-space-y-6">
-      <PublicReviewPageComments
-        config={config}
-        destination={destination}
-        locale={DEFAULT_LOCALE}
-        page={page}
-      />
-      <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-5">
-        <label
-          id="public-review-editorial-feedback-context"
-          htmlFor="public-review-feedback-section"
-          className="tw-block tw-text-xs tw-font-semibold tw-text-iron-300"
-        >
-          {t(DEFAULT_LOCALE, "publicReview.feedback.sectionSelector")}
-        </label>
-        <select
-          id="public-review-feedback-section"
-          value={sectionId}
-          onChange={(event) => setSectionId(event.target.value)}
-          className="tw-mt-2 tw-min-h-11 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-[#050506] tw-px-3 tw-py-2 tw-text-sm tw-text-iron-50 tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40"
-        >
-          <option value="">
-            {t(DEFAULT_LOCALE, "publicReview.feedback.wholePage")}
-          </option>
-          {sections.map((section) => (
-            <option key={section.id} value={section.id}>
-              {section.title}
-            </option>
-          ))}
-        </select>
+    <div className="tw-flex tw-min-h-0 tw-flex-col @[960px]:tw-h-full">
+      <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-px-5 tw-py-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
+        <PublicReviewPageComments
+          config={config}
+          destination={destination}
+          locale={DEFAULT_LOCALE}
+          page={page}
+        />
       </div>
-      <PublicReviewFeedbackComposer
-        locale={DEFAULT_LOCALE}
-        config={config}
-        destination={destination}
-        page={pageContext}
-      />
+      <div className="tw-max-h-[65vh] tw-flex-none tw-overflow-y-auto tw-overscroll-contain tw-bg-[#08080a] tw-px-5 tw-pb-5 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
+        <PublicReviewFeedbackComposer
+          locale={DEFAULT_LOCALE}
+          config={config}
+          contextControl={
+            <label
+              id="public-review-editorial-feedback-context"
+              htmlFor="public-review-feedback-section"
+              className="tw-block tw-text-xs tw-font-medium tw-text-iron-300"
+            >
+              <span className="tw-mb-1.5 tw-block">
+                {t(DEFAULT_LOCALE, "publicReview.feedback.sectionSelector")}
+              </span>
+              <select
+                id="public-review-feedback-section"
+                value={sectionId}
+                onChange={(event) => setSectionId(event.target.value)}
+                className="tw-min-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-50 tw-outline-none tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition focus:tw-bg-black focus:tw-ring-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40"
+              >
+                <option value="">
+                  {t(DEFAULT_LOCALE, "publicReview.feedback.wholePage")}
+                </option>
+                {sections.map((section) => (
+                  <option key={section.id} value={section.id}>
+                    {section.title}
+                  </option>
+                ))}
+              </select>
+            </label>
+          }
+          destination={destination}
+          page={pageContext}
+        />
+      </div>
     </div>
   );
 }

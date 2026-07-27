@@ -43,17 +43,17 @@ function createMarkdownComponents(): Components {
       </h3>
     ),
     p: ({ children }) => (
-      <p className="tw-mb-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">
+      <p className="tw-mb-0 tw-mt-4 tw-text-base tw-font-light tw-leading-7 tw-text-iron-400">
         {children}
       </p>
     ),
     ul: ({ children }) => (
-      <ul className="tw-mb-0 tw-mt-4 tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-iron-600">
+      <ul className="tw-mb-0 tw-mt-4 tw-space-y-2 tw-pl-5 tw-text-base tw-font-light tw-leading-7 tw-text-iron-400 marker:tw-text-iron-600">
         {children}
       </ul>
     ),
     ol: ({ children }) => (
-      <ol className="tw-mb-0 tw-mt-4 tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-iron-600">
+      <ol className="tw-mb-0 tw-mt-4 tw-space-y-2 tw-pl-5 tw-text-base tw-font-light tw-leading-7 tw-text-iron-400 marker:tw-text-iron-600">
         {children}
       </ol>
     ),
@@ -108,7 +108,7 @@ function createMarkdownComponents(): Components {
         role="region"
         tabIndex={0}
       >
-        <table className="tw-w-full tw-min-w-[38rem] tw-border-collapse tw-text-left tw-text-sm tw-text-iron-200">
+        <table className="tw-w-full tw-min-w-[38rem] tw-border-collapse tw-text-left tw-text-sm tw-font-light tw-text-iron-400">
           {children}
         </table>
       </div>

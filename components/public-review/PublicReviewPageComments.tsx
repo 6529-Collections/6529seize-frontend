@@ -2,8 +2,11 @@
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useId, useMemo } from "react";
+import { useMemo } from "react";
 
+import ProfileAvatar, {
+  ProfileBadgeSize,
+} from "@/components/common/profile/ProfileAvatar";
 import { usePublicReviewCommentPanelOpen } from "@/components/public-review/PublicReviewReadingLayout";
 import { formatDate, formatInteger, formatTime } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -47,7 +50,6 @@ export function PublicReviewPageComments({
   readonly page: PublicReviewPageContext;
   readonly pageSize?: number | undefined;
 }) {
-  const commentsTitleId = useId();
   const isPanelOpen = usePublicReviewCommentPanelOpen();
   const ledgerQuery = useInfiniteQuery({
     queryKey: getPublicReviewLedgerQueryKey({ config, destination }),
@@ -80,21 +82,7 @@ export function PublicReviewPageComments({
   );
 
   return (
-    <section aria-labelledby={commentsTitleId}>
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-        <h3
-          id={commentsTitleId}
-          className="tw-m-0 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-400"
-        >
-          {t(locale, "publicReview.comments.listTitle")}
-        </h3>
-        {!ledgerQuery.isPending && !ledgerQuery.isError ? (
-          <span className="tw-flex-none tw-font-mono tw-text-[0.65rem] tw-text-iron-500">
-            {formatInteger(locale, records.length)}
-          </span>
-        ) : null}
-      </div>
-
+    <section aria-label={t(locale, "publicReview.comments.title")}>
       <output className="tw-sr-only" aria-live="polite" aria-atomic="true">
         {ledgerQuery.isPending
           ? t(locale, "publicReview.comments.loading")
@@ -180,30 +168,49 @@ export function PublicReviewPageComments({
                   })}
                   className="tw-py-4"
                 >
-                  <div className="tw-flex tw-flex-wrap tw-gap-1.5">
-                    <span className="tw-rounded-full tw-border tw-border-solid tw-border-primary-400/20 tw-bg-primary-400/[0.07] tw-px-2 tw-py-0.5 tw-text-[0.61rem] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-primary-200">
-                      {categoryLabel}
-                    </span>
-                    <span className="tw-rounded-full tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.025] tw-px-2 tw-py-0.5 tw-text-[0.61rem] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
-                      {severityLabel}
-                    </span>
+                  <div className="tw-flex tw-items-start tw-gap-2.5">
+                    <ProfileAvatar
+                      pfpUrl={record.author.pfp}
+                      size={ProfileBadgeSize.SMALL}
+                      alt={`${author}'s profile picture`}
+                      fallbackContent={
+                        <span
+                          aria-hidden="true"
+                          className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400"
+                        >
+                          {author.slice(0, 1)}
+                        </span>
+                      }
+                    />
+                    <div className="tw-min-w-0 tw-flex-1">
+                      <div className="tw-flex tw-items-center tw-gap-1.5">
+                        <p className="tw-m-0 tw-min-w-0 tw-text-[0.68rem] tw-leading-4 tw-text-iron-500">
+                          {t(locale, "publicReview.comments.byline", {
+                            author,
+                            date: formatDate(locale, record.createdAt),
+                            time: formatTime(locale, record.createdAt),
+                          })}
+                        </p>
+                      </div>
+                      <p className="tw-mb-0 tw-mt-2 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-leading-6 tw-text-iron-200">
+                        {primaryComment || record.body}
+                      </p>
+                      <div className="tw-mt-3 tw-flex tw-flex-wrap tw-gap-1.5">
+                        <span className="tw-rounded-full tw-border tw-border-solid tw-border-primary-400/20 tw-bg-primary-400/[0.07] tw-px-2 tw-py-0.5 tw-text-[0.61rem] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-primary-200">
+                          {categoryLabel}
+                        </span>
+                        <span className="tw-rounded-full tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.025] tw-px-2 tw-py-0.5 tw-text-[0.61rem] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
+                          {severityLabel}
+                        </span>
+                      </div>
+                      <Link
+                        href={record.discussionPath}
+                        className="hover:tw-text-primary-200 tw-mt-1 tw-inline-flex tw-min-h-11 tw-items-center tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline tw-decoration-primary-400/40 tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+                      >
+                        {t(locale, "publicReview.ledger.openDiscussion")}
+                      </Link>
+                    </div>
                   </div>
-                  <p className="tw-mb-0 tw-mt-3 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-leading-6 tw-text-iron-200">
-                    {primaryComment || record.body}
-                  </p>
-                  <p className="tw-mb-0 tw-mt-3 tw-text-[0.68rem] tw-leading-4 tw-text-iron-500">
-                    {t(locale, "publicReview.comments.byline", {
-                      author,
-                      date: formatDate(locale, record.createdAt),
-                      time: formatTime(locale, record.createdAt),
-                    })}
-                  </p>
-                  <Link
-                    href={record.discussionPath}
-                    className="hover:tw-text-primary-200 tw-mt-1 tw-inline-flex tw-min-h-11 tw-items-center tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline tw-decoration-primary-400/40 tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
-                  >
-                    {t(locale, "publicReview.ledger.openDiscussion")}
-                  </Link>
                 </article>
               </li>
             );
@@ -216,7 +223,7 @@ export function PublicReviewPageComments({
           type="button"
           aria-busy={ledgerQuery.isFetchingNextPage}
           disabled={ledgerQuery.isFetchingNextPage}
-        onClick={() => void ledgerQuery.fetchNextPage()}
+          onClick={() => void ledgerQuery.fetchNextPage()}
           className="tw-mt-3 tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 hover:tw-border-white/20 hover:tw-bg-white/[0.025] hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white disabled:tw-cursor-wait disabled:tw-opacity-60"
         >
           {t(
