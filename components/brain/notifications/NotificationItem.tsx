@@ -16,6 +16,7 @@ import NotificationIdentityMentioned from "./identity-mentioned/NotificationIden
 import NotificationIdentityRating from "./identity-rating/NotificationIdentityRating";
 import NotificationIdentitySubscribed from "./identity-subscribed/NotificationIdentitySubscribed";
 import NotificationPriorityAlert from "./priority-alert/NotificationPriorityAlert";
+import NotificationSubscriptionCoverage from "./subscription-coverage/NotificationSubscriptionCoverage";
 import NotificationWaveCreated from "./wave-created/NotificationWaveCreated";
 
 import type { JSX } from "react";
@@ -98,6 +99,8 @@ function NotificationItemComponent({
             onDropContentClick={onDropContentClick}
           />
         );
+      case ApiNotificationCause.SubscriptionCoverage:
+        return <NotificationSubscriptionCoverage notification={notification} />;
       default:
         return (
           <NotificationGeneric

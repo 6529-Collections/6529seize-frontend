@@ -38,6 +38,7 @@ function getAssetPrefix(assetsFromS3: boolean, version: string): string {
 }
 
 const standaloneOutput = { output: "standalone" as const };
+// PR CI treats this config as build-sensitive so v2 can package the exact merge tree.
 const nextConfigFactory = (phase: string): NextConfig => {
   const mode = process.env.NODE_ENV;
   logOnceConfig("NODE_ENV", mode);
@@ -73,9 +74,20 @@ const nextConfigFactory = (phase: string): NextConfig => {
         ? process.env["NEXT_DEV_DIST_DIR"]?.trim()
         : undefined;
 
+    // Dev-only: hosts (e.g. a LAN IP for phone testing) allowed to load
+    // /_next/* dev assets; without this Next 403s them and pages render as
+    // an unhydrated black shell on other devices.
+    const allowedDevOrigins = process.env["ALLOWED_DEV_ORIGINS"]
+      ?.split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean);
+
     return {
       ...sharedConfig(publicEnv, assetPrefix),
       ...standaloneOutput,
+      ...(phase === PHASE_DEVELOPMENT_SERVER && allowedDevOrigins?.length
+        ? { allowedDevOrigins }
+        : {}),
       ...(developmentDistDir ? { distDir: developmentDistDir } : {}),
       env: {
         PUBLIC_RUNTIME: JSON.stringify(publicEnv),

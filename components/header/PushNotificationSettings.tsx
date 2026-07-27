@@ -26,6 +26,7 @@ const SETTINGS_LABELS: Record<keyof ApiPushNotificationSettings, string> = {
   drop_reacted: "Drops - Reacted",
   drop_boosted: "Drops - Boosted",
   wave_created: "Wave Invites",
+  subscription_coverage: "Subscription Coverage",
 };
 
 const DEFAULT_SETTINGS: ApiPushNotificationSettings = {
@@ -39,6 +40,7 @@ const DEFAULT_SETTINGS: ApiPushNotificationSettings = {
   drop_reacted: true,
   drop_boosted: true,
   wave_created: true,
+  subscription_coverage: true,
 };
 
 export default function PushNotificationSettings({
@@ -66,7 +68,7 @@ export default function PushNotificationSettings({
     };
 
     updateScrollState();
-    el.addEventListener("scroll", updateScrollState);
+    el.addEventListener("scroll", updateScrollState, { passive: true });
     const resizeObserver = new ResizeObserver(updateScrollState);
     resizeObserver.observe(el);
 

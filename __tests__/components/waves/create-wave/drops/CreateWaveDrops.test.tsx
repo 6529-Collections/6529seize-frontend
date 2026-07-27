@@ -63,7 +63,7 @@ describe("CreateWaveDrops", () => {
       />
     );
     await user.type(
-      screen.getByLabelText(/Maximum number of simultaneous submissions/i),
+      screen.getByLabelText(/Max simultaneous submissions/i),
       "3"
     );
     expect(setDrops).toHaveBeenLastCalledWith(

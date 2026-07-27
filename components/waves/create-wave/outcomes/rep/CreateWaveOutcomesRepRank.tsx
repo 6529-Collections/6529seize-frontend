@@ -9,9 +9,12 @@ import {
   CreateWaveOutcomeConfigWinnersCreditValueType,
   CreateWaveOutcomeType,
 } from "@/types/waves.types";
-import RepCategorySearch from "@/components/utils/input/rep-category/RepCategorySearch";
+import { getRepCategoryViolation } from "@/components/utils/input/rep-category/repCategoryValidation";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import CreateWaveOutcomesWinners from "../winners/CreateWaveOutcomesWinners";
 import Button from "@/components/utils/button/Button";
+import CreateWaveOutcomesRepCategoryField from "./CreateWaveOutcomesRepCategoryField";
 
 export default function CreateWaveOutcomesRepRank({
   onOutcome,
@@ -34,12 +37,28 @@ export default function CreateWaveOutcomesRepRank({
     },
   });
 
-  const [categoryError, setCategoryError] = useState<boolean>(false);
+  const locale = useBrowserLocale();
+  const [showCategoryRequired, setShowCategoryRequired] =
+    useState<boolean>(false);
   const [totalValueError, setTotalValueError] = useState<boolean>(false);
   const [percentageError, setPercentageError] = useState<boolean>(false);
 
+  // Same category rules the rep-assignment flow enforces (mirrors the
+  // backend); named live so an invalid category never survives to submit.
+  const categoryViolation = outcome.category
+    ? getRepCategoryViolation(outcome.category)
+    : null;
+  let categoryErrorMessage: string | null = null;
+  if (categoryViolation) {
+    categoryErrorMessage = t(locale, categoryViolation.key, {
+      ...categoryViolation.params,
+    });
+  } else if (showCategoryRequired) {
+    categoryErrorMessage = t(locale, "rep.categories.validation.required");
+  }
+
   const setCategory = (category: string | null) => {
-    setCategoryError(false);
+    setShowCategoryRequired(false);
     setOutcome({ ...outcome, category });
   };
 
@@ -94,10 +113,15 @@ export default function CreateWaveOutcomesRepRank({
     const dontHaveCategorySet = !outcome.category;
     const totalValueError = getTotalValueError();
     const percentageError = getPercentageError();
-    setCategoryError(dontHaveCategorySet);
+    setShowCategoryRequired(dontHaveCategorySet);
     setTotalValueError(totalValueError);
     setPercentageError(percentageError);
-    if (dontHaveCategorySet || totalValueError || percentageError) {
+    if (
+      dontHaveCategorySet ||
+      categoryViolation !== null ||
+      totalValueError ||
+      percentageError
+    ) {
       return;
     }
     onOutcome(outcome);
@@ -106,9 +130,9 @@ export default function CreateWaveOutcomesRepRank({
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-5">
       <div className="tw-flex tw-w-full tw-flex-col tw-gap-5 tw-pt-[0.5px] sm:tw-flex-row">
-        <RepCategorySearch
-          error={categoryError}
+        <CreateWaveOutcomesRepCategoryField
           category={outcome.category}
+          errorMessage={categoryErrorMessage}
           setCategory={setCategory}
         />
       </div>

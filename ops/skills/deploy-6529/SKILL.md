@@ -1,6 +1,6 @@
 ---
 name: deploy-6529
-description: Route and execute 6529 frontend, backend, or coupled staging and production releases through Simple Release Bus v2 by exact PR head SHA, or use the serialized manual fallback only while v2 reports OFF. Use for staging, deploy, promotion, release merge, pause, resume, recovery, or rollout coordination; never submit to Release Bus v1.
+description: Route and execute 6529 frontend, backend, or coupled staging and production releases through Simple Release Bus v2 by exact PR head SHA, or use the serialized manual fallback only while v2 reports OFF. Use for staging, deploy, promotion, release merge, pause, resume, recovery, or rollout coordination.
 ---
 
 # Deploy 6529
@@ -8,19 +8,17 @@ description: Route and execute 6529 frontend, backend, or coupled staging and pr
 ## Live routing gate
 
 1. Run `./bin/6529 exec node ops/scripts/release-bus-status.mjs` at the start
-   and again before any readiness or environment mutation. The helper uses
-   authenticated `gh`, prefers v2, and falls back to the disabled v1 endpoint
-   only while the additive v2 API is not deployed.
+   and again before any readiness or environment mutation. The helper uses an
+   authenticated `gh` session to read the v2 controls endpoint.
 2. Fail closed on an unavailable/malformed API, authentication failure, unknown
    mode, or incomplete controls. Never infer mode from files or old output.
-3. Never register with Release Bus v1.
-4. Route by the fresh v2 result:
+3. Route by the fresh v2 result:
 
-| Mode | Staging | Production |
-| --- | --- | --- |
-| `OFF` | Serialized manual fallback | Serialized manual fallback with explicit owner authorization; staging evidence is not required |
-| `STAGING` | Register the exact candidate with v2 | Manual fallback only; production automation is disabled |
-| `PRODUCTION` | Register the exact candidate with v2 | Explicitly mark an exact `STAGING_VALIDATED` candidate ready for v2 production |
+| Mode         | Staging                              | Production                                                                                     |
+| ------------ | ------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| `OFF`        | Serialized manual fallback           | Serialized manual fallback with explicit owner authorization; staging evidence is not required |
+| `STAGING`    | Register the exact candidate with v2 | Manual fallback only; production automation is disabled                                        |
+| `PRODUCTION` | Register the exact candidate with v2 | Explicitly mark an exact `STAGING_VALIDATED` candidate ready for v2 production                 |
 
 When mode is active, stop if `ALL` or the target lane is paused. In `OFF`, v2
 controls are non-authoritative and do not prohibit manual staging or production
@@ -51,20 +49,18 @@ and never publishes release notes.
 
 ## Manual fallback while OFF
 
-1. Require `RELEASE_BUS_ENFORCEMENT` to be absent or exactly `false` in every
-   repository in the release set.
-2. Fetch the exact remote target head and inspect active frontend/backend
+1. Fetch the exact remote target head and inspect active frontend/backend
    staging, production, and E2E workflows. Wait; never cancel another actor.
-3. Re-fetch immediately before pushing. If a shared ref moved, recompute from
+2. Re-fetch immediately before pushing. If a shared ref moved, recompute from
    the new head. Never force-push.
-4. Deploy required backend units in DAG order before merging/deploying dependent
-   frontend work to `1a-staging`. Dispatch exactly one backend `Deploy a
-   service` workflow at a time and wait for exact success before starting the
+3. Deploy required backend units in DAG order before merging/deploying dependent
+   frontend work to `1a-staging`. Dispatch exactly one backend service workflow
+   (`Deploy a service`) at a time and wait for exact success before starting the
    next; shared workflow concurrency can cancel sibling runs, even for
    independent DAG-frontier units.
-5. Record exact deployed frontend/backend SHAs before E2E and freeze staging
+4. Record exact deployed frontend/backend SHAs before E2E and freeze staging
    until E2E is terminal.
-6. In `OFF`, production requires explicit owner authorization but not prior
+5. In `OFF`, production requires explicit owner authorization but not prior
    staging deployment or validation. Re-fetch `main` and preserve dependency
    order. For backend services, pass the same merged PR number and full
    canonical service set to every sequential production run, setting
