@@ -63,6 +63,10 @@ jest.mock("@/app/api/open-graph/compound/service", () => ({
   createCompoundPlan: jest.fn(() => null),
 }));
 
+jest.mock("@/app/api/open-graph/etherscan/service", () => ({
+  createEtherscanPlan: jest.fn(() => null),
+}));
+
 jest.mock("@/app/api/open-graph/manifold/service", () => ({
   createManifoldPlan: jest.fn(() => null),
 }));
@@ -104,6 +108,9 @@ let guard: {
 };
 let compound: {
   createCompoundPlan: jest.Mock;
+};
+let etherscan: {
+  createEtherscanPlan: jest.Mock;
 };
 let manifold: {
   createManifoldPlan: jest.Mock;
@@ -178,6 +185,11 @@ async function loadRoute(): Promise<void> {
   ) as {
     createCompoundPlan: jest.Mock;
   };
+  etherscan = jest.requireMock(
+    "../../../app/api/open-graph/etherscan/service"
+  ) as {
+    createEtherscanPlan: jest.Mock;
+  };
   manifold = jest.requireMock(
     "../../../app/api/open-graph/manifold/service"
   ) as {
@@ -221,6 +233,7 @@ describe("open-graph API route", () => {
     transient.createTransientPlan.mockReturnValue(null);
     firstParty6529.createFirstParty6529Plan.mockReturnValue(null);
     compound.createCompoundPlan.mockReturnValue(null);
+    etherscan.createEtherscanPlan.mockReturnValue(null);
     utils.buildGoogleWorkspaceResponse.mockResolvedValue(null);
     mockFetch.mockReset();
     mockPreparedRequest.mockReset();
@@ -1809,6 +1822,43 @@ describe("open-graph API route", () => {
     expect(mockFetchPublicUrl).not.toHaveBeenCalled();
     expect(mockFetch).not.toHaveBeenCalled();
     expect(utils.buildResponse).not.toHaveBeenCalled();
+  });
+
+  it("uses Etherscan plans before ENS, URL guards, and other providers", async () => {
+    const etherscanData = {
+      provider: "etherscan",
+      type: "etherscan.address",
+      address: {
+        input: "0x0000000000000000000000000000000000000001",
+        subtype: "eoa",
+      },
+    } as any;
+    const execute = jest.fn(async () => ({
+      data: etherscanData,
+      ttl: 45_000,
+    }));
+    etherscan.createEtherscanPlan.mockReturnValue({
+      cacheKey: "etherscan:v1:1:address:test",
+      execute,
+    });
+    ensRouteModule.detectEnsTarget.mockReturnValue({
+      kind: "address",
+      input: "0x0000000000000000000000000000000000000001",
+    });
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://etherscan.io/address/0x0000000000000000000000000000000000000001"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(etherscanData);
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(ensRouteModule.detectEnsTarget).not.toHaveBeenCalled();
+    expect(guard.parsePublicUrl).not.toHaveBeenCalled();
+    expect(compound.createCompoundPlan).not.toHaveBeenCalled();
+    expect(mockFetchPublicUrl).not.toHaveBeenCalled();
   });
 
   it("uses foundation plan before compound when available", async () => {
