@@ -1,5 +1,6 @@
 import {
   ArrowRightIcon,
+  ChevronDownIcon,
   CodeBracketIcon,
   PaintBrushIcon,
   ShieldCheckIcon,
@@ -7,6 +8,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
+import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import {
@@ -87,7 +89,7 @@ export function PublicReviewAudiencePaths({
           return (
             <article
               key={audience}
-              className="tw-group tw-flex tw-h-full tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.05] tw-bg-white/[0.025] tw-p-4 tw-transition-colors tw-duration-200 tw-ease-out hover:tw-border-white/[0.08] hover:tw-bg-white/[0.035] sm:tw-p-5"
+              className="tw-group/card tw-flex tw-h-full tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.05] tw-bg-white/[0.025] tw-p-4 tw-transition-colors tw-duration-200 tw-ease-out hover:tw-border-white/[0.08] hover:tw-bg-white/[0.035] sm:tw-p-5"
             >
               <h3 className="tw-m-0 tw-flex tw-items-center tw-gap-2.5 tw-text-[0.9375rem] tw-font-medium tw-text-iron-200">
                 <AudienceIcon
@@ -109,10 +111,44 @@ export function PublicReviewAudiencePaths({
                       audience: t(DEFAULT_LOCALE, copy.title),
                     })}
                     <ArrowRightIcon
-                      className="tw-size-3 tw-flex-none tw-text-iron-500 tw-transition-colors tw-duration-200 tw-ease-out group-hover:tw-text-primary-300"
+                      className="tw-size-3 tw-flex-none tw-text-iron-500 tw-transition-colors tw-duration-200 tw-ease-out group-hover/card:tw-text-primary-300"
                       aria-hidden="true"
                     />
                   </Link>
+                  <details className="tw-group tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.04]">
+                    <summary className="tw-flex tw-min-h-10 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-rounded-md tw-text-[0.6875rem] tw-font-normal tw-text-iron-500 tw-transition-colors tw-duration-200 hover:tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
+                      {t(DEFAULT_LOCALE, "publicReview.audiences.showPath", {
+                        count: formatInteger(
+                          DEFAULT_LOCALE,
+                          audiencePages.length
+                        ),
+                      })}
+                      <ChevronDownIcon
+                        className="tw-size-3 tw-flex-none tw-transition-transform tw-duration-200 group-open:tw-rotate-180 motion-reduce:tw-transition-none"
+                        aria-hidden="true"
+                      />
+                    </summary>
+                    <nav
+                      aria-label={t(
+                        DEFAULT_LOCALE,
+                        "publicReview.audiences.pathLabel",
+                        { audience: t(DEFAULT_LOCALE, copy.title) }
+                      )}
+                    >
+                      <ol className="tw-mb-1 tw-mt-0 tw-list-none tw-space-y-0.5 tw-border-x-0 tw-border-b-0 tw-border-l tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-py-1 tw-pl-2">
+                        {audiencePages.map((page) => (
+                          <li key={page.id}>
+                            <Link
+                              href={routes.getPageHref(page, version)}
+                              className="tw-flex tw-min-h-9 tw-items-center tw-rounded-md tw-px-2 tw-py-1.5 tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-200 hover:tw-bg-white/[0.025] hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400"
+                            >
+                              {t(DEFAULT_LOCALE, page.titleKey)}
+                            </Link>
+                          </li>
+                        ))}
+                      </ol>
+                    </nav>
+                  </details>
                 </div>
               ) : null}
             </article>
