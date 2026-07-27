@@ -65,8 +65,6 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.audiences.auditors.description":
     "Use the editorial map alongside generated reference and retained evidence.",
   "publicReview.audiences.startPath": "Start the {audience} path",
-  "publicReview.audiences.showPath": "View all {count} pages in this path",
-  "publicReview.audiences.pathLabel": "{audience} review reading path",
   "publicReview.navigation.label": "Contract review pages",
   "publicReview.navigation.contentsLabel": "All contract review pages",
   "publicReview.navigation.sequenceLabel":
@@ -432,14 +430,11 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.reference.sourceLine": "Line {lineNumber}",
   "publicReview.feedback.title": "Send feedback",
   "publicReview.feedback.jump": "Jump to send feedback",
-  "publicReview.feedback.intro":
-    "Your feedback will be posted as a top-level message in the review Wave with structured review metadata.",
   "publicReview.feedback.category": "Feedback type",
   "publicReview.feedback.severity": "Suspected severity",
   "publicReview.feedback.comment": "Comment",
   "publicReview.feedback.required": "required",
-  "publicReview.feedback.commentHint":
-    "Describe what you found and be as specific as possible.",
+  "publicReview.feedback.commentHint": "Write a comment…",
   "publicReview.feedback.advanced": "Add technical detail",
   "publicReview.feedback.whyItMatters": "Why this matters",
   "publicReview.feedback.suggestedChange": "Suggested change",
@@ -449,7 +444,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.feedback.reproduction": "Reproduction or proof of concept",
   "publicReview.feedback.preview": "Preview Wave message",
   "publicReview.feedback.previewHeading": "Wave message preview",
-  "publicReview.feedback.submit": "Post feedback to the Wave",
+  "publicReview.feedback.submit": "Post feedback",
   "publicReview.feedback.submitting": "Posting feedback…",
   "publicReview.feedback.connect": "Connect wallet to comment",
   "publicReview.feedback.reconnect": "Re-authenticate wallet",
@@ -480,6 +475,19 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "Preparing the tamper-evident checksum for this exact code selection…",
   "publicReview.feedback.hashUnavailable":
     "This browser could not verify the selected code checksum. Code-linked feedback is disabled; reload in a current browser and try again.",
+  "publicReview.comments.show": "Show feedback",
+  "publicReview.comments.hide": "Hide feedback",
+  "publicReview.comments.title": "Page comments",
+  "publicReview.comments.viewLedger": "View the full feedback ledger",
+  "publicReview.comments.loading": "Loading page comments…",
+  "publicReview.comments.loadError":
+    "Comments could not be loaded from the review Wave.",
+  "publicReview.comments.empty": "No comments yet for this page.",
+  "publicReview.comments.emptyLoaded":
+    "No comments for this page are present in the loaded feedback.",
+  "publicReview.comments.status": "{count} page comments loaded.",
+  "publicReview.comments.byline": "{author} · {date} at {time}",
+  "publicReview.comments.avatarAlt": "{author}'s profile picture",
   "publicReview.feedback.categories.question": "Question",
   "publicReview.feedback.categories.artistWorkflow": "Artist workflow",
   "publicReview.feedback.categories.productOrUx": "Product or UX",

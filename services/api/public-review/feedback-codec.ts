@@ -36,6 +36,7 @@ export const PUBLIC_REVIEW_METADATA_KEYS = [
 
 export const PUBLIC_REVIEW_DROP_CONTENT_LIMIT = 25_000;
 export const PUBLIC_REVIEW_METADATA_VALUE_LIMIT = 5_000;
+export const PUBLIC_REVIEW_FEEDBACK_REVIEW_MARKER = "**Review:**";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -264,6 +265,23 @@ function appendOptionalSection(
   }
 }
 
+export function getPublicReviewFeedbackPrimaryComment(body: string): string {
+  const reviewMetadataStart = body.indexOf(
+    `\n\n${PUBLIC_REVIEW_FEEDBACK_REVIEW_MARKER}`
+  );
+  const visibleBody =
+    reviewMetadataStart >= 0 ? body.slice(0, reviewMetadataStart) : body;
+  const headingEnd = visibleBody.indexOf("\n\n");
+  if (
+    reviewMetadataStart >= 0 &&
+    visibleBody.startsWith("## ") &&
+    headingEnd >= 0
+  ) {
+    return visibleBody.slice(headingEnd + 2).trim();
+  }
+  return visibleBody.trim();
+}
+
 function buildFeedbackBody({
   categoryLabel,
   draft,
@@ -284,7 +302,7 @@ function buildFeedbackBody({
   const sections = [
     `## ${categoryLabel}`,
     draft.comment.trim(),
-    `**Review:** ${reviewTitle} (${reviewVersion})`,
+    `${PUBLIC_REVIEW_FEEDBACK_REVIEW_MARKER} ${reviewTitle} (${reviewVersion})`,
     `**Page:** [${page.pageTitle}](${page.canonicalPath})`,
     `**Suspected severity:** ${severityLabel}`,
   ];

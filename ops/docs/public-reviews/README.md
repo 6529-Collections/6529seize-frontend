@@ -62,7 +62,8 @@ Every page includes:
 - an on-page contents list generated from the editorial headings
 - previous and next page controls
 - an evidence-label glossary
-- a structured feedback form bound to the immutable displayed review version
+- a collapsible page-comments rail that reads and submits feedback for the
+  immutable displayed review version
 
 The overview also provides reading paths for community members, artists,
 technical reviewers, and auditors. The generated technical reference lets
@@ -140,10 +141,23 @@ routes fail closed when that version's lifecycle is not public.
 ## Feedback Status
 
 Structured feedback is enabled on every editorial and technical reference
-page. Editorial feedback can target one stable page section. Technical
-feedback can target an exact source range. The client computes the selected
-snippet checksum before enabling submission; changing the selected code
-invalidates any existing preview until the new checksum is ready.
+page. Editorial pages place the current page's loaded comments and the existing
+structured feedback form in one collapsible rail. The rail opens beside the
+document when enough width is available and becomes a normal stacked section
+on narrower layouts, so it never covers the review text. The open or closed
+preference is retained in the browser. Opening the **Jump to send feedback**
+link reveals and focuses the rail when it was closed.
+
+The rail initially reads the most recent 50 messages from the exact
+version-specific review discussion and shows entries attached to the current
+page. Reviewers can load older feedback in additional 50-message pages or open
+the full ledger for cross-page filters and exports. Closing and reopening the
+rail preserves an in-progress draft.
+
+Editorial feedback can target one stable page section. Technical feedback can
+target an exact source range. The client computes the selected snippet checksum
+before enabling submission; changing the selected code invalidates any existing
+preview until the new checksum is ready.
 
 Each submission records the immutable review version, page or section,
 category, suspected severity, and any exact code provenance. The category
@@ -195,6 +209,10 @@ server-resolved discussion destination.
   snapshot.
 - If a technical selection remains in the checksum state or reports an
   integrity failure, do not submit it; reload the exact versioned source page.
+- If page comments fail to load, use **Try again** in the rail. The feedback
+  form remains available, and the full ledger can be opened separately.
+- If no page comments appear while older Wave feedback remains available, use
+  **Load more feedback** to continue searching the bounded discussion history.
 - If a valid structured entry is omitted from the ledger, open its Wave
   discussion and report the entry link so its metadata can be inspected.
 

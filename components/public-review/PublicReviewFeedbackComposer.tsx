@@ -1,7 +1,14 @@
 "use client";
 
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useId, useLayoutEffect, useRef, useState } from "react";
+import {
+  type ReactNode,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { useAuth } from "@/components/auth/Auth";
@@ -37,6 +44,7 @@ import type {
 interface PublicReviewFeedbackComposerProps {
   readonly locale: SupportedLocale;
   readonly config: PublicReviewFeedbackConfig;
+  readonly contextControl?: ReactNode | undefined;
   readonly destination: PublicReviewDiscussionDestination;
   readonly page: PublicReviewPageContext;
   readonly referenceSelection?: PublicReviewReferenceSelection | undefined;
@@ -114,7 +122,7 @@ function getFeedbackContextFingerprint({
 }
 
 const INPUT_CLASSES =
-  "tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-iron-50 tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40";
+  "tw-min-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-50 tw-outline-none tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition focus:tw-bg-black focus:tw-ring-1 focus:tw-ring-primary-400 focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400";
 
 function getFeedbackGate({
   authenticated,
@@ -149,16 +157,20 @@ function getFeedbackGate({
 }
 
 function ReviewFeedbackContext({
+  className = "",
   locale,
   page,
   referenceSelection,
 }: {
+  readonly className?: string | undefined;
   readonly locale: SupportedLocale;
   readonly page: PublicReviewPageContext;
   readonly referenceSelection: PublicReviewReferenceSelection | undefined;
 }) {
   return (
-    <div className="tw-mt-4 tw-rounded-lg tw-bg-iron-950/70 tw-p-3 tw-text-sm tw-text-iron-300">
+    <div
+      className={`${className} tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-white/[0.018] tw-p-3 tw-text-xs tw-leading-5 tw-text-iron-400`}
+    >
       <p className="tw-m-0">
         {t(locale, "publicReview.feedback.pageContext", {
           page: page.pageTitle,
@@ -405,6 +417,7 @@ function useFeedbackComposerState({
 export default function PublicReviewFeedbackComposer({
   locale,
   config,
+  contextControl,
   destination,
   page,
   referenceIntegrityMessage,
@@ -459,30 +472,17 @@ export default function PublicReviewFeedbackComposer({
 
   return (
     <section
-      aria-labelledby={`${formId}-title`}
-      className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/70 tw-p-4 sm:tw-p-6"
+      aria-label={t(locale, "publicReview.feedback.title")}
+      className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-5 tw-@container"
     >
-      <h2
-        id={`${formId}-title`}
-        className="tw-m-0 tw-text-xl tw-font-semibold tw-text-iron-50"
-      >
-        {t(locale, "publicReview.feedback.title")}
-      </h2>
-      <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
-        {t(locale, "publicReview.feedback.intro")}
-      </p>
-
-      <ReviewFeedbackContext
-        locale={locale}
-        page={page}
-        referenceSelection={referenceSelection}
-      />
-      <ReferenceIntegrityNotice
-        id={referenceStatusId}
-        locale={locale}
-        message={referenceIntegrityMessage}
-        status={referenceIntegrityStatus}
-      />
+      {authenticated ? (
+        <ReferenceIntegrityNotice
+          id={referenceStatusId}
+          locale={locale}
+          message={referenceIntegrityMessage}
+          status={referenceIntegrityStatus}
+        />
+      ) : null}
 
       <FeedbackConnectPrompt
         busy={busy}
@@ -496,69 +496,17 @@ export default function PublicReviewFeedbackComposer({
       {authenticated && config.submissionsOpen ? (
         <form
           aria-describedby={!referenceReady ? referenceStatusId : undefined}
-          className="tw-mt-5 tw-space-y-4"
+          className={`tw-space-y-3 ${referenceReady ? "tw-mt-0" : "tw-mt-4"}`}
           noValidate
           onSubmit={(event) => {
             event.preventDefault();
             void submitAndFocusConfirmation();
           }}
         >
-          <div className="tw-grid tw-gap-4 sm:tw-grid-cols-2">
-            <label
-              htmlFor={`${formId}-category`}
-              className="tw-block tw-text-sm tw-font-medium tw-text-iron-200"
-            >
-              <span className="tw-mb-1.5 tw-block">
-                {t(locale, "publicReview.feedback.category")}
-              </span>
-              <select
-                id={`${formId}-category`}
-                className={INPUT_CLASSES}
-                value={draft.category}
-                onChange={(event) =>
-                  updateDraft("category", event.target.value)
-                }
-              >
-                {config.categories.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label
-              htmlFor={`${formId}-severity`}
-              className="tw-block tw-text-sm tw-font-medium tw-text-iron-200"
-            >
-              <span className="tw-mb-1.5 tw-block">
-                {t(locale, "publicReview.feedback.severity")}
-              </span>
-              <select
-                id={`${formId}-severity`}
-                className={INPUT_CLASSES}
-                value={draft.severity}
-                onChange={(event) =>
-                  updateDraft("severity", event.target.value)
-                }
-              >
-                {config.severityOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
           <div>
-            <label
-              htmlFor={`${formId}-comment`}
-              className="tw-mb-1.5 tw-block tw-text-sm tw-font-medium tw-text-iron-200"
-            >
-              {t(locale, "publicReview.feedback.comment")}{" "}
-              <span className="tw-text-iron-400">
-                ({t(locale, "publicReview.feedback.required")})
-              </span>
+            <label htmlFor={`${formId}-comment`} className="tw-sr-only">
+              {t(locale, "publicReview.feedback.comment")} (
+              {t(locale, "publicReview.feedback.required")})
             </label>
             <textarea
               ref={commentRef}
@@ -568,33 +516,103 @@ export default function PublicReviewFeedbackComposer({
                 commentError ? ` ${formId}-comment-error` : ""
               }`}
               aria-invalid={Boolean(commentError)}
-              className={`${INPUT_CLASSES} tw-min-h-36 tw-resize-y`}
+              className={`${INPUT_CLASSES} tw-min-h-24 tw-resize-y tw-leading-6 placeholder:tw-text-iron-600`}
+              placeholder={t(locale, "publicReview.feedback.commentHint")}
               required
               value={draft.comment}
               onChange={(event) => updateDraft("comment", event.target.value)}
             />
-            <span
-              id={`${formId}-comment-hint`}
-              className="tw-mt-1.5 tw-block tw-font-normal tw-text-iron-400"
-            >
+            <span id={`${formId}-comment-hint`} className="tw-sr-only">
               {t(locale, "publicReview.feedback.commentHint")}
             </span>
             {commentError ? (
               <span
                 id={`${formId}-comment-error`}
                 aria-live="polite"
-                className="tw-text-red-300 tw-mt-1 tw-block tw-font-normal"
+                className="tw-sr-only"
               >
                 {commentError}
               </span>
             ) : null}
           </div>
 
-          <details className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/40 tw-p-3">
-            <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-font-semibold tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40">
+          <details className="tw-group tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#0a0a0c] tw-transition-colors open:tw-border-white/[0.11]">
+            <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-3 tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors tw-duration-200 hover:tw-bg-white/[0.018] hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
               {t(locale, "publicReview.feedback.advanced")}
+              <ChevronDownIcon
+                className="tw-size-3.5 tw-flex-none tw-text-iron-500 tw-transition-transform tw-duration-200 group-open:tw-rotate-180 motion-reduce:tw-transition-none"
+                aria-hidden="true"
+              />
             </summary>
-            <div className="tw-grid tw-gap-4 tw-pt-3">
+
+            <div className="tw-max-h-[30vh] tw-space-y-4 tw-overflow-y-auto tw-overscroll-contain tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-bg-white/[0.012] tw-px-3 tw-pb-3 tw-pt-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
+              {contextControl}
+
+              <div className="tw-grid tw-gap-3 @[340px]:tw-grid-cols-2">
+                <label
+                  htmlFor={`${formId}-category`}
+                  className="tw-block tw-min-w-0 tw-text-[11px] tw-font-medium tw-text-iron-400"
+                >
+                  <span className="tw-mb-1.5 tw-block">
+                    {t(locale, "publicReview.feedback.category")}
+                  </span>
+                  <span className="tw-relative tw-block">
+                    <select
+                      id={`${formId}-category`}
+                      className={`${INPUT_CLASSES} tw-appearance-none tw-pr-9`}
+                      value={draft.category}
+                      onChange={(event) =>
+                        updateDraft("category", event.target.value)
+                      }
+                    >
+                      {config.categories.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDownIcon
+                      aria-hidden="true"
+                      className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 tw-size-4 tw--translate-y-1/2 tw-text-iron-500"
+                    />
+                  </span>
+                </label>
+                <label
+                  htmlFor={`${formId}-severity`}
+                  className="tw-block tw-min-w-0 tw-text-[11px] tw-font-medium tw-text-iron-400"
+                >
+                  <span className="tw-mb-1.5 tw-block">
+                    {t(locale, "publicReview.feedback.severity")}
+                  </span>
+                  <span className="tw-relative tw-block">
+                    <select
+                      id={`${formId}-severity`}
+                      className={`${INPUT_CLASSES} tw-appearance-none tw-pr-9`}
+                      value={draft.severity}
+                      onChange={(event) =>
+                        updateDraft("severity", event.target.value)
+                      }
+                    >
+                      {config.severityOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDownIcon
+                      aria-hidden="true"
+                      className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 tw-size-4 tw--translate-y-1/2 tw-text-iron-500"
+                    />
+                  </span>
+                </label>
+              </div>
+
+              <ReviewFeedbackContext
+                locale={locale}
+                page={page}
+                referenceSelection={referenceSelection}
+              />
+
               {(
                 [
                   ["whyItMatters", "publicReview.feedback.whyItMatters"],
@@ -614,7 +632,7 @@ export default function PublicReviewFeedbackComposer({
                 <label
                   key={field}
                   htmlFor={`${formId}-${field}`}
-                  className="tw-block tw-text-sm tw-font-medium tw-text-iron-200"
+                  className="tw-block tw-text-[11px] tw-font-medium tw-text-iron-400"
                 >
                   <span className="tw-mb-1.5 tw-block">
                     {t(locale, messageKey)}
@@ -627,24 +645,29 @@ export default function PublicReviewFeedbackComposer({
                   />
                 </label>
               ))}
+
+              <button
+                type="button"
+                disabled={busy || !referenceReady}
+                onClick={previewAndFocusError}
+                className="tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-200 hover:tw-bg-white/[0.025] hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 disabled:tw-opacity-60"
+              >
+                {t(locale, "publicReview.feedback.preview")}
+              </button>
+
+              <FeedbackPreview
+                formId={formId}
+                locale={locale}
+                preview={preview}
+              />
             </div>
           </details>
 
-          <FeedbackPreview formId={formId} locale={locale} preview={preview} />
-
-          <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row">
-            <button
-              type="button"
-              disabled={busy || !referenceReady}
-              onClick={previewAndFocusError}
-              className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-transparent tw-px-4 tw-py-2 tw-font-semibold tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 disabled:tw-opacity-60"
-            >
-              {t(locale, "publicReview.feedback.preview")}
-            </button>
+          <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-[#050506] tw-pb-3 tw-pt-3">
             <button
               type="submit"
               disabled={busy || !referenceReady || Boolean(feedbackGate)}
-              className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-semibold tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+              className="tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition-colors hover:tw-bg-primary-400 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
             >
               {isSubmitting
                 ? t(locale, "publicReview.feedback.submitting")

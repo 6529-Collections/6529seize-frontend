@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 
 import { PublicReviewShell } from "@/components/public-review/PublicReviewShell";
 import {
@@ -63,19 +63,59 @@ describe("PublicReviewShell", () => {
     expect(
       screen.getAllByRole("link", { name: /Community Review/ })
     ).not.toHaveLength(0);
+    const commentsToggle = screen.getByRole("button", {
+      name: "Show feedback",
+    });
+    expect(commentsToggle).toHaveAttribute(
+      "aria-controls",
+      "public-review-feedback"
+    );
+    expect(document.getElementById("public-review-feedback")).toHaveClass(
+      "tw-hidden"
+    );
     expect(
-      screen.getByRole("link", { name: "Jump to send feedback" })
-    ).toHaveAttribute("href", "#public-review-feedback");
-    expect(
-      screen.getAllByRole("navigation", { name: "On this page" })
+      screen.getAllByRole("link", { name: "The short answer" })
     ).toHaveLength(2);
     expect(
       screen.getByRole("link", { name: "Start the Artists path" })
     ).toHaveAttribute("href", "/reviews/6529-stream/artwork-lifecycle");
+    expect(
+      screen.queryByText("View all 12 pages in this path")
+    ).not.toBeInTheDocument();
     expect(document.querySelector("main")).not.toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { name: "Review status" })
     ).not.toBeInTheDocument();
+  });
+
+  it("focuses the comment panel only after a feedback hash reveals it", async () => {
+    const overview = ACTIVE_REVIEW_VERSION.pages[0];
+    if (!overview) {
+      throw new Error("Stream review overview is missing");
+    }
+    window.localStorage.setItem("public-review-comment-panel-open", "false");
+    window.history.replaceState(null, "", "#public-review-feedback");
+
+    render(
+      <PublicReviewShell
+        editorialMarkdown="# Editorial title"
+        page={overview}
+        review={STREAM_REVIEW_DEFINITION}
+        reviewVersion={ACTIVE_REVIEW_VERSION}
+        sections={[]}
+        displayedVersion={STREAM_REVIEW_DEFINITION.activeVersion}
+        feedbackSlot={<div>Feedback form</div>}
+        source={ACTIVE_REVIEW_VERSION.source}
+      />
+    );
+
+    const commentsPanel = document.getElementById("public-review-feedback");
+    expect(commentsPanel).toBeInTheDocument();
+    await waitFor(() => expect(commentsPanel).not.toHaveClass("tw-hidden"));
+    await waitFor(() => expect(commentsPanel).toHaveFocus());
+
+    window.localStorage.setItem("public-review-comment-panel-open", "false");
+    window.history.replaceState(null, "", window.location.pathname);
   });
 
   it("uses the exact resolved source identity instead of the active default", () => {
@@ -122,7 +162,7 @@ describe("PublicReviewShell", () => {
       `https://github.com/6529-Collections/6529Stream/tree/${historicalCommit}`
     );
     expect(
-      screen.getByRole("link", { name: "View public feedback" })
+      screen.getByRole("link", { name: "View the full feedback ledger" })
     ).toHaveAttribute(
       "href",
       "/reviews/6529-stream/versions/2026-07-25.1/feedback"
@@ -162,7 +202,7 @@ describe("PublicReviewShell", () => {
     );
 
     expect(
-      screen.getByRole("link", { name: "View public feedback" })
+      screen.getByRole("link", { name: "View the full feedback ledger" })
     ).toHaveAttribute(
       "href",
       "/reviews/another-contract/versions/candidate-2/feedback"
@@ -217,7 +257,7 @@ describe("PublicReviewShell", () => {
     );
 
     expect(
-      screen.getByRole("link", { name: "View public feedback" })
+      screen.getByRole("link", { name: "View the full feedback ledger" })
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: "Jump to send feedback" })
