@@ -119,7 +119,8 @@ export function useProfileWaveActivity({
       },
       enabled: shouldFetch,
       staleTime: PROFILE_WAVE_ACTIVITY_STALE_TIME_MS,
-      retry: 1,
+      // This is secondary profile context: cap it at one request per wave.
+      retry: false,
       refetchOnWindowFocus: false,
     })),
   });
