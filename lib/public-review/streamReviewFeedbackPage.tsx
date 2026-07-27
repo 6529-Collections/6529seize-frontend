@@ -125,6 +125,10 @@ export async function renderStreamReviewFeedbackPage({
     manifest,
     sourcePaths: "all",
   });
+  const internalSourceBasePath =
+    version === undefined
+      ? `/reviews/${STREAM_REVIEW_SLUG}`
+      : `/reviews/${STREAM_REVIEW_SLUG}/versions/${resolvedVersion}`;
 
   return (
     <FeedbackPageShell
@@ -136,7 +140,7 @@ export async function renderStreamReviewFeedbackPage({
         locale={DEFAULT_LOCALE}
         config={config}
         destination={destination}
-        internalSourceBasePath={`/reviews/${STREAM_REVIEW_SLUG}`}
+        internalSourceBasePath={internalSourceBasePath}
       />
     </FeedbackPageShell>
   );

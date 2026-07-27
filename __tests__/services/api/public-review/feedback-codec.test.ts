@@ -202,9 +202,13 @@ describe("public review feedback codec", () => {
 
   it("extracts the primary comment without exposing review metadata", () => {
     const payload = encode();
+    const primaryContent = payload.parts[0]?.content;
+    if (typeof primaryContent !== "string") {
+      throw new Error("Expected encoded feedback to contain a text part.");
+    }
 
     expect(
-      getPublicReviewFeedbackPrimaryComment(payload.parts[0]!.content)
+      getPublicReviewFeedbackPrimaryComment(primaryContent)
     ).toBe(draft.comment);
     expect(
       getPublicReviewFeedbackPrimaryComment("  Plain Wave comment  ")
