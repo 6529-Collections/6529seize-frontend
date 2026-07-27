@@ -120,6 +120,27 @@ const USER_COLLECTED_STATS_MESSAGES = namespaceMessages(
   ] as const
 );
 
+const USER_BRAIN_SIDEBAR_MESSAGES = objectMessages("user.brain.sidebar", {
+  createdHeading: "Created Waves",
+  createdMobileHeading: "Created",
+  createdScope: "Wave posts",
+  mostActiveHeading: "Most Active In",
+  rankingBasis: "All time",
+  waveLastActivityShort: "Last activity {time}",
+  identityLastPostShort: "Last post {time}",
+  latestWavePost: "Last wave post {time} ago",
+  lastPosted: "Last posted {time} ago",
+  loadingWaveContext: "Loading profile wave context",
+  mobileStripLabel: "Brain waves",
+  noDropsYet: "No drops yet",
+  showLess: "Show less",
+  "showMore.one": "Show {count} more",
+  "showMore.other": "Show {count} more",
+  viewAllCreatedWaves: "View all created waves",
+  waveImageAlt: "Wave {waveName}",
+  wavePictureAlt: "Wave picture",
+} as const);
+
 const USER_COLLECTED_STATS_DETAILS_MESSAGES = objectMessages(
   "user.collected.stats.details",
   {
@@ -2245,6 +2266,7 @@ export const EN_US_MESSAGES = {
     "Server validation completed.",
   "profileCms.builder.api.draftSaved": "Draft saved.",
   ...USER_COLLECTED_STATS_MESSAGES,
+  ...USER_BRAIN_SIDEBAR_MESSAGES,
   ...USER_COLLECTED_STATS_DETAILS_MESSAGES,
   ...USER_COLLECTED_STATS_BOOST_MESSAGES,
   ...USER_COLLECTED_STATS_ACTIVITY_MESSAGES,
