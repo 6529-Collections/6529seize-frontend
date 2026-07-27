@@ -8,8 +8,7 @@ redeploy the exact reviewed result to staging.
 
 ## Current Phase
 
-Reusable frontend visual redesign, validation, PR iteration, and staging
-redeployment.
+Combined candidate PR iteration and staging redeployment.
 
 ## Branch
 
@@ -85,11 +84,8 @@ with signed merge commit `1c821faee`.
 
 ## Next Actions
 
-1. Commit the validated reusable frontend redesign.
-2. Integrate the exact signed editorial commit
-   `25aeba9413e23ab671d6c5264f391601170f2547`.
-3. Run combined review checks, focused tests, typecheck, React Doctor, build,
-   and final browser QA.
-4. Push PR #3475 and iterate current-head bots and CI.
-5. Register the exact green combined head through Release Bus v2 and validate
-   staging.
+1. Push the combined candidate to PR #3475 and iterate current-head bots and CI.
+2. Register the exact green combined head through Release Bus v2.
+3. Validate the exact staged SHA, the active review, current implementation and
+   readiness, technical reference, feedback ledger, and staging Wave links.
+4. Finalize the staging review in the user's browser with no production action.

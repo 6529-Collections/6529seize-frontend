@@ -90,3 +90,15 @@
   typecheck across the stacked branch, scoped whitespace and credential scans,
   React Doctor 99/100 with only the pre-existing ledger-size advisory, and a
   complete Next.js production build covering 12,840 static pages.
+- Integrated the isolated signed editorial commit
+  `25aeba9413e23ab671d6c5264f391601170f2547` as `fc0ec4f1a`, retaining the
+  newer collapsible feedback rail during two documentation/help-index conflict
+  resolutions.
+- The combined candidate adds a `2026-07-27.1` immutable editorial and generated
+  reference snapshot, centralizes implementation/readiness status, rewrites all
+  fourteen pages in plain language, and leaves production disabled.
+- Combined validation passed: 64 focused tests, deterministic verification of
+  two retained versions with 420 active definitions and 206 active source
+  files, scoped ESLint with no errors, changed-file typecheck, combined diff
+  whitespace and credential scans, and a full production build generating
+  19,127 static pages.
