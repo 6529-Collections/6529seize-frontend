@@ -55,7 +55,7 @@ const EVIDENCE_PRESENTATION: Record<
   },
 };
 
-export function PublicReviewEvidenceBadge({
+function PublicReviewEvidenceBadge({
   state,
 }: {
   readonly state: PublicReviewEvidenceState;
