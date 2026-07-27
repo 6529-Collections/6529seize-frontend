@@ -1,5 +1,4 @@
 import {
-  ArrowDownIcon,
   ArrowLeftIcon,
   ArrowRightIcon,
   ChatBubbleLeftRightIcon,
@@ -27,7 +26,6 @@ import type {
   PublicReviewSource,
   PublicReviewVersionDefinition,
 } from "@/lib/public-review/publicReviewTypes";
-import { getPublicReviewLifecycleCapabilities } from "@/lib/public-review/publicReviewLifecycle";
 import {
   createPublicReviewRouteBuilder,
   type PublicReviewRouteBuilder,
@@ -132,11 +130,6 @@ export function PublicReviewShell({
   );
   const currentPageNumber = pageIndex >= 0 ? pageIndex + 1 : 1;
   const routes = createPublicReviewRouteBuilder(review.slug);
-  const lifecycleCapabilities = getPublicReviewLifecycleCapabilities(
-    reviewVersion.status
-  );
-  const feedbackSubmissionsAvailable =
-    review.feedbackAvailable && lifecycleCapabilities.feedbackSubmissionsOpen;
 
   return (
     <div className="tailwind-scope tw-min-h-screen tw-bg-[#0D0D0F] tw-text-iron-50">
@@ -226,18 +219,6 @@ export function PublicReviewShell({
                         />
                         {t(DEFAULT_LOCALE, "publicReview.ledger.navigation")}
                       </Link>
-                    ) : null}
-                    {feedbackSubmissionsAvailable ? (
-                      <a
-                        href="#public-review-feedback"
-                        className={`${REVIEW_ACTION_LINK} hover:tw-text-primary-300`}
-                      >
-                        <ArrowDownIcon
-                          className="tw-size-3.5 tw-flex-none tw-text-iron-500 tw-transition-colors tw-duration-200 tw-ease-out group-hover:tw-text-primary-300"
-                          aria-hidden="true"
-                        />
-                        {t(DEFAULT_LOCALE, "publicReview.feedback.jump")}
-                      </a>
                     ) : null}
                   </div>
                 </header>
