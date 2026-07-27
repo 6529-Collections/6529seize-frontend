@@ -84,6 +84,9 @@ jobs:
                 echo "Existing release branch does not have the recorded staging ref as its first parent" >&2
                 exit 1
               fi
+            elif git show -s --format=%B "$existing" | grep -q '^Release-Parent-SHA:'; then
+              echo "Existing parent-bound release branch requires release_parent_sha on every retry" >&2
+              exit 1
             fi
             excluded='[]'
             while IFS= read -r sha; do
@@ -111,11 +114,16 @@ jobs:
                 # about two independently-composed trees.
                 git reset --hard "$RELEASE_PARENT_SHA"
                 if ! git merge-base --is-ancestor "$BASE_SHA" HEAD; then
-                  git merge --no-ff --no-commit "$BASE_SHA"
-                  git -c core.hooksPath=/dev/null commit -s \
-                    -m "Release Bus v2 train $TRAIN_ID: merge frontend base" \
-                    -m "Base-SHA: $BASE_SHA" \
-                    -m "Release-Bus-v2-Train: $TRAIN_ID"
+                  if git merge --no-ff --no-commit "$BASE_SHA"; then
+                    git -c core.hooksPath=/dev/null commit -s \
+                      -m "Release Bus v2 train $TRAIN_ID: merge frontend base" \
+                      -m "Base-SHA: $BASE_SHA" \
+                      -m "Release-Bus-v2-Train: $TRAIN_ID"
+                  else
+                    git merge --abort || true
+                    echo "Current frontend main conflicts with the recorded staging parent" >&2
+                    exit 1
+                  fi
                 fi
                 ;;
             esac

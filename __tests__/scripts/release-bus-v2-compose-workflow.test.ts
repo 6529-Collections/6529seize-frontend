@@ -30,10 +30,17 @@ function composeScript(): string {
   if (!match) {
     throw new Error("Compose workflow script was not found");
   }
-  return match[1]!
+  const script = match[1]!
     .split("\n")
     .map((line) => line.replace(/^ {10}/, ""))
     .join("\n");
+  if (
+    !script.includes('existing="$(git ls-remote') ||
+    !script.includes("git fsck --no-dangling")
+  ) {
+    throw new Error("Compose workflow script anchors were not preserved");
+  }
+  return script;
 }
 
 describe("Release Bus v2 frontend composition workflow", () => {
@@ -62,13 +69,17 @@ describe("Release Bus v2 frontend composition workflow", () => {
       git(repository, "config", "user.name", "Release Bus Test");
       git(repository, "config", "user.email", "release-bus-test@example.com");
       git(repository, "remote", "add", "origin", origin);
-      writeFileSync(path.join(repository, "main.txt"), "main\n");
+      writeFileSync(path.join(repository, "common.txt"), "common\n");
+      git(repository, "add", "common.txt");
+      git(repository, "commit", "-m", "common");
+      const commonSha = git(repository, "rev-parse", "HEAD");
+      writeFileSync(path.join(repository, "main.txt"), "main after common\n");
       git(repository, "add", "main.txt");
-      git(repository, "commit", "-m", "main");
+      git(repository, "commit", "-m", "main after common");
       const baseSha = git(repository, "rev-parse", "HEAD");
       git(repository, "push", "origin", "main");
 
-      git(repository, "switch", "-c", "staging-parent", baseSha);
+      git(repository, "switch", "-c", "staging-parent", commonSha);
       writeFileSync(path.join(repository, "candidate-a.txt"), "candidate a\n");
       git(repository, "add", "candidate-a.txt");
       git(repository, "commit", "-m", "candidate a");
@@ -168,6 +179,23 @@ describe("Release Bus v2 frontend composition workflow", () => {
             RELEASE_BRANCH: releaseBranch,
             RELEASE_BUS_GIT_EMAIL: "release-bus-test@example.com",
             RELEASE_BUS_GIT_NAME: "Release Bus Test",
+            RUNNER_TEMP: runnerTemp,
+            TRAIN_ID: "missing-parent",
+          },
+          stdio: ["ignore", "pipe", "pipe"],
+        })
+      ).toThrow();
+
+      expect(() =>
+        execFileSync("bash", ["-c", composeScript()], {
+          cwd: repository,
+          env: {
+            ...process.env,
+            BASE_SHA: baseSha,
+            CANDIDATE_SHAS: JSON.stringify([stagingParentSha, candidateSha]),
+            RELEASE_BRANCH: releaseBranch,
+            RELEASE_BUS_GIT_EMAIL: "release-bus-test@example.com",
+            RELEASE_BUS_GIT_NAME: "Release Bus Test",
             RELEASE_PARENT_SHA: baseSha,
             RUNNER_TEMP: runnerTemp,
             TRAIN_ID: "wrong-parent",
@@ -201,6 +229,35 @@ describe("Release Bus v2 frontend composition workflow", () => {
       expect(
         git(repository, "show", "-s", "--format=%B", emptyReleaseSha)
       ).toContain(`Release-Parent-SHA: ${stagingParentSha}`);
+
+      git(repository, "switch", "--detach", baseSha);
+      execFileSync("bash", ["-c", composeScript()], {
+        cwd: repository,
+        env: {
+          ...process.env,
+          BASE_SHA: baseSha,
+          CANDIDATE_SHAS: JSON.stringify([baseSha]),
+          RELEASE_BRANCH: "release-bus-v2/rollback-train-cumulative-frontend",
+          RELEASE_BUS_GIT_EMAIL: "release-bus-test@example.com",
+          RELEASE_BUS_GIT_NAME: "Release Bus Test",
+          RELEASE_PARENT_SHA: releaseSha,
+          RUNNER_TEMP: runnerTemp,
+          TRAIN_ID: "rollback-cumulative",
+        },
+        stdio: ["ignore", "pipe", "pipe"],
+      });
+      const rollbackSha = git(repository, "rev-parse", "HEAD");
+      expect(
+        git(repository, "rev-list", "--parents", "-n", "1", rollbackSha).split(
+          " "
+        )
+      ).toEqual([rollbackSha, releaseSha, baseSha]);
+      expect(git(repository, "rev-parse", `${rollbackSha}^{tree}`)).toBe(
+        git(repository, "rev-parse", `${baseSha}^{tree}`)
+      );
+      expect(() =>
+        git(repository, "show", `${rollbackSha}:candidate-b.txt`)
+      ).toThrow();
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

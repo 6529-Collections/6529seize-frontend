@@ -57,7 +57,9 @@ register backend first and declare it as the frontend prerequisite.
    every admitted candidate; only rollback deliberately binds a last-validated
    replacement tree.
 4. Preparation may finish while another train owns staging.
-5. The train acquires the staging lock and repeats the idle/ref snapshot.
+5. The train acquires the staging lock and repeats the idle/ref snapshot. A
+   carry-forward-only repository must already have `composed_sha` equal to its
+   exact `1a-staging` ref or the train fails before any ref advance or deploy.
 6. Before deployment, every affected `1a-staging` ref advances to the immutable
    release commit through a non-force compare-and-swap from its recorded base.
    Unaffected repositories do not move. A stale or moved ref starts no train
