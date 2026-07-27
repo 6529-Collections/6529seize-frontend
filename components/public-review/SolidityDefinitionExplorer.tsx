@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { compareLocalized, formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -104,6 +104,8 @@ export function SolidityDefinitionExplorer({
   const [kind, setKind] = useState("");
   const [scope, setScope] = useState("");
   const [resultLimit, setResultLimit] = useState(INITIAL_RESULT_LIMIT);
+  const focusResultsAfterExpansion = useRef(false);
+  const resultsStatusRef = useRef<HTMLParagraphElement>(null);
   const filterOptions = useMemo(
     () => ({
       classifications: getDistinctValues(items, "classification"),
@@ -120,6 +122,22 @@ export function SolidityDefinitionExplorer({
     [classification, items, kind, query, scope]
   );
   const visibleItems = filteredItems.slice(0, resultLimit);
+
+  useEffect(() => {
+    if (!focusResultsAfterExpansion.current) {
+      return;
+    }
+    focusResultsAfterExpansion.current = false;
+    resultsStatusRef.current?.focus();
+  }, [resultLimit]);
+
+  const showMoreDefinitions = (): void => {
+    setResultLimit((current) => {
+      const next = current + INITIAL_RESULT_LIMIT;
+      focusResultsAfterExpansion.current = next >= filteredItems.length;
+      return next;
+    });
+  };
 
   return (
     <section aria-labelledby="solidity-definition-inventory">
@@ -168,7 +186,12 @@ export function SolidityDefinitionExplorer({
         />
       </div>
 
-      <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-text-iron-400" role="status">
+      <p
+        className="tw-mb-0 tw-mt-4 tw-text-sm tw-text-iron-400"
+        ref={resultsStatusRef}
+        role="status"
+        tabIndex={-1}
+      >
         {t(DEFAULT_LOCALE, "publicReview.reference.resultsCount", {
           visible: formatInteger(DEFAULT_LOCALE, visibleItems.length),
           total: formatInteger(DEFAULT_LOCALE, items.length),
@@ -269,9 +292,7 @@ export function SolidityDefinitionExplorer({
       {visibleItems.length < filteredItems.length ? (
         <button
           className="tw-mt-5 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-4 tw-py-2 tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
-          onClick={() =>
-            setResultLimit((current) => current + INITIAL_RESULT_LIMIT)
-          }
+          onClick={showMoreDefinitions}
           type="button"
         >
           {t(DEFAULT_LOCALE, "publicReview.reference.showMoreDefinitions")}

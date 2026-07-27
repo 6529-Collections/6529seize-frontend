@@ -96,6 +96,7 @@ function createMarkdownComponents(): Components {
       <pre
         aria-label={t(DEFAULT_LOCALE, "publicReview.markdown.codeRegion")}
         className="tw-my-6 tw-overflow-x-auto tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-black tw-p-4 tw-text-sm tw-leading-6 tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+        role="region"
         tabIndex={0}
       >
         {children}

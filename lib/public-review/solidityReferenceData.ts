@@ -160,26 +160,32 @@ type SourceBufferLoader = (
 function createSourceBufferLoader(publicRoot: string): SourceBufferLoader {
   const cache = new Map<string, Promise<Buffer>>();
   return (file) => {
-    let pending = cache.get(file.publicPath);
+    const cacheKey = file.publicPath;
+    let pending = cache.get(cacheKey);
     if (!pending) {
       pending = (async () => {
-        const filePath = resolveContainedPublicPath(
-          publicRoot,
-          file.publicPath,
-          ".sol"
-        );
-        // The manifest allowlists the path and containment is checked above.
-        // eslint-disable-next-line security/detect-non-literal-fs-filename
-        const source = await readFile(filePath);
-        if (
-          toSha256Urn(source) !== file.sha256 ||
-          source.byteLength !== file.byteLength
-        ) {
-          throw new Error("Solidity source file checksum drift.");
+        try {
+          const filePath = resolveContainedPublicPath(
+            publicRoot,
+            file.publicPath,
+            ".sol"
+          );
+          // The manifest allowlists the path and containment is checked above.
+          // eslint-disable-next-line security/detect-non-literal-fs-filename
+          const source = await readFile(filePath);
+          if (
+            toSha256Urn(source) !== file.sha256 ||
+            source.byteLength !== file.byteLength
+          ) {
+            throw new Error("Solidity source file checksum drift.");
+          }
+          return source;
+        } catch (error) {
+          cache.delete(cacheKey);
+          throw error;
         }
-        return source;
       })();
-      cache.set(file.publicPath, pending);
+      cache.set(cacheKey, pending);
     }
     return pending;
   };
@@ -195,12 +201,17 @@ function createIndexLoader({
   let indexPromise: Promise<SolidityReferenceIndex> | undefined;
   return () => {
     indexPromise ??= (async () => {
-      const value = await readChecksummedJson(
-        publicRoot,
-        `${REVIEW_DATA_ROOT}/${identity.reviewId}/index.json`
-      );
-      assertSolidityReferenceIndex(value, identity);
-      return value;
+      try {
+        const value = await readChecksummedJson(
+          publicRoot,
+          `${REVIEW_DATA_ROOT}/${identity.reviewId}/index.json`
+        );
+        assertSolidityReferenceIndex(value, identity);
+        return value;
+      } catch (error) {
+        indexPromise = undefined;
+        throw error;
+      }
     })();
     return indexPromise;
   };
@@ -223,32 +234,37 @@ function createManifestLoader({
       return cached;
     }
     const pending = (async () => {
-      if (!identity.availableVersions.includes(version)) {
-        throw new SolidityReferenceNotFoundError(
-          `Unknown Solidity reference version: ${version}`
+      try {
+        if (!identity.availableVersions.includes(version)) {
+          throw new SolidityReferenceNotFoundError(
+            `Unknown Solidity reference version: ${version}`
+          );
+        }
+        const index = await loadIndex();
+        const versionEntry = index.versions.find(
+          (candidate) => candidate.version === version
         );
-      }
-      const index = await loadIndex();
-      const versionEntry = index.versions.find(
-        (candidate) => candidate.version === version
-      );
-      if (!versionEntry) {
-        throw new SolidityReferenceNotFoundError(
-          `Missing Solidity reference version: ${version}`
+        if (!versionEntry) {
+          throw new SolidityReferenceNotFoundError(
+            `Missing Solidity reference version: ${version}`
+          );
+        }
+        const value = await readChecksummedJson(
+          publicRoot,
+          versionEntry.bundlePath,
+          versionEntry.bundleSha256,
+          "manifest-output"
         );
+        assertSolidityReferenceManifest(value, {
+          identity,
+          version,
+          versionEntry,
+        });
+        return { index, manifest: value, versionEntry };
+      } catch (error) {
+        cache.delete(version);
+        throw error;
       }
-      const value = await readChecksummedJson(
-        publicRoot,
-        versionEntry.bundlePath,
-        versionEntry.bundleSha256,
-        "manifest-output"
-      );
-      assertSolidityReferenceManifest(value, {
-        identity,
-        version,
-        versionEntry,
-      });
-      return { index, manifest: value, versionEntry };
     })();
     cache.set(version, pending);
     return pending;
@@ -278,25 +294,30 @@ function createDefinitionLoader({
     let shardPromise = cache.get(cacheKey);
     if (!shardPromise) {
       shardPromise = (async () => {
-        const value = await readChecksummedJson(
-          publicRoot,
-          indexEntry.shardPath,
-          indexEntry.shardSha256
-        );
-        assertSolidityDefinitionShard(value, { indexEntry, manifest });
-        const file = getIndexedSourceByPath(
-          manifest.files,
-          indexEntry.sourcePath
-        );
-        if (!file) {
-          throw new Error("Solidity definition source file is missing.");
+        try {
+          const value = await readChecksummedJson(
+            publicRoot,
+            indexEntry.shardPath,
+            indexEntry.shardSha256
+          );
+          assertSolidityDefinitionShard(value, { indexEntry, manifest });
+          const file = getIndexedSourceByPath(
+            manifest.files,
+            indexEntry.sourcePath
+          );
+          if (!file) {
+            throw new Error("Solidity definition source file is missing.");
+          }
+          assertSolidityDefinitionSourceIntegrity({
+            file,
+            shard: value,
+            source: await loadSourceBuffer(file),
+          });
+          return value;
+        } catch (error) {
+          cache.delete(cacheKey);
+          throw error;
         }
-        assertSolidityDefinitionSourceIntegrity({
-          file,
-          shard: value,
-          source: await loadSourceBuffer(file),
-        });
-        return value;
       })();
       cache.set(cacheKey, shardPromise);
     }

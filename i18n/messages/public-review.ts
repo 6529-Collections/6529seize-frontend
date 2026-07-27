@@ -541,6 +541,8 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.ledger.exportMarkdown": "Export loaded feedback as Markdown",
   "publicReview.ledger.exportEmpty":
     "Load feedback before creating an auditor export.",
+  "publicReview.ledger.exportRequiresCompleteLedger":
+    "Load all remaining feedback before creating an auditor export.",
   "publicReview.ledger.pageTitle": "6529 Stream public feedback",
   "publicReview.ledger.pageIntro":
     "A filterable record of structured community and auditor feedback for this exact contract review version.",

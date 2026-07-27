@@ -170,6 +170,15 @@ export function SolidityReadinessExplorer({
                         target="_blank"
                       >
                         {artifact.path}
+                        <span className="tw-sr-only">
+                          {" "}
+                          (
+                          {t(
+                            DEFAULT_LOCALE,
+                            "publicReview.markdown.externalLink"
+                          )}
+                          )
+                        </span>
                       </a>
                     </li>
                   ))}

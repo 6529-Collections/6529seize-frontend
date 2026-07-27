@@ -9,7 +9,10 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { loadStreamEditorialContent } from "@/lib/public-review/editorialContent";
+import {
+  loadStreamEditorialContent,
+  PublicReviewEditorialContentError,
+} from "@/lib/public-review/editorialContent";
 import { extractPublicReviewSections } from "@/lib/public-review/editorialSections";
 import {
   createStreamEditorialFeedbackPageContext,
@@ -63,10 +66,18 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
   if (!reviewVersion) {
     throw new Error("The resolved Stream review version is unavailable.");
   }
-  const editorialMarkdown = await loadStreamEditorialContent(
-    route.page,
-    contentVersion
-  );
+  let editorialMarkdown: string;
+  try {
+    editorialMarkdown = await loadStreamEditorialContent(
+      route.page,
+      contentVersion
+    );
+  } catch (error) {
+    if (error instanceof PublicReviewEditorialContentError) {
+      notFound();
+    }
+    throw error;
+  }
   const sections = extractPublicReviewSections(editorialMarkdown);
   const { manifest } =
     await getStreamSolidityReferenceReader().loadManifest(contentVersion);

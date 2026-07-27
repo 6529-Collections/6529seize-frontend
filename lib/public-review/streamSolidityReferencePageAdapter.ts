@@ -46,9 +46,9 @@ export function resolveStreamReferenceRouteOrNotFound({
   };
 }
 
-export async function renderStreamReferenceOrNotFound(
-  render: () => Promise<React.ReactNode>
-): Promise<React.ReactNode> {
+export async function renderStreamReferenceOrNotFound<Result>(
+  render: () => Promise<Result>
+): Promise<Result> {
   try {
     return await render();
   } catch (error) {

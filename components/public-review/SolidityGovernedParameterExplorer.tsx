@@ -134,6 +134,10 @@ export function SolidityGovernedParameterExplorer({
         target="_blank"
       >
         {t(DEFAULT_LOCALE, "publicReview.reference.candidateBindingIssue")}
+        <span className="tw-sr-only">
+          {" "}
+          ({t(DEFAULT_LOCALE, "publicReview.markdown.externalLink")})
+        </span>
       </a>
       <div className="tw-mt-5 tw-grid tw-gap-4 tw-rounded-xl tw-bg-iron-900/70 tw-p-4 md:tw-grid-cols-[minmax(0,2fr)_minmax(12rem,1fr)]">
         <label className="tw-block tw-text-sm tw-font-medium tw-text-iron-200">
@@ -221,6 +225,15 @@ export function SolidityGovernedParameterExplorer({
                     >
                       {item.normative_source.path}#
                       {item.normative_source.anchor}
+                      <span className="tw-sr-only">
+                        {" "}
+                        (
+                        {t(
+                          DEFAULT_LOCALE,
+                          "publicReview.markdown.externalLink"
+                        )}
+                        )
+                      </span>
                     </a>
                   </dd>
                 </div>

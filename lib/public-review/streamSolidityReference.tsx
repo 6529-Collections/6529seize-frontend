@@ -246,11 +246,13 @@ function getReferenceMetadata({
 export function getStreamSolidityReferenceMetadata({
   baseEndpoint,
   canonicalPath,
+  description,
   params,
   pageTitle,
 }: {
   readonly baseEndpoint: string;
   readonly canonicalPath?: string | undefined;
+  readonly description?: string | undefined;
   readonly params: StreamSolidityReferenceRouteParams;
   readonly pageTitle?: string | undefined;
 }): Metadata | undefined {
@@ -268,10 +270,9 @@ export function getStreamSolidityReferenceMetadata({
     canonicalPath:
       canonicalPath ??
       getSolidityReferenceRootHref(getHrefContext(params.version)),
-    description: t(
-      DEFAULT_LOCALE,
-      "publicReview.reference.overviewDescription"
-    ),
+    description:
+      description ??
+      t(DEFAULT_LOCALE, "publicReview.reference.overviewDescription"),
     title,
   });
 }
