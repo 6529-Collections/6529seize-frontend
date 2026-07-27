@@ -9,6 +9,9 @@ import {
   type ReactNode,
   useContext,
   useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
   useSyncExternalStore,
 } from "react";
 
@@ -95,6 +98,29 @@ export function PublicReviewReadingLayout({
     getPanelPreferenceSnapshot,
     () => false
   );
+  const [focusRequest, setFocusRequest] = useState(0);
+  const handledFocusRequestRef = useRef(0);
+
+  useLayoutEffect(() => {
+    if (
+      !feedbackAvailable ||
+      !isPanelOpen ||
+      focusRequest === handledFocusRequestRef.current
+    ) {
+      return;
+    }
+
+    const panelElement = document.getElementById(COMMENT_PANEL_ID);
+    if (!panelElement) {
+      return;
+    }
+    handledFocusRequestRef.current = focusRequest;
+    panelElement.focus({ preventScroll: true });
+    panelElement.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, [feedbackAvailable, focusRequest, isPanelOpen]);
 
   useEffect(() => {
     if (!feedbackAvailable) {
@@ -105,15 +131,8 @@ export function PublicReviewReadingLayout({
       if (window.location.hash !== `#${COMMENT_PANEL_ID}`) {
         return;
       }
+      setFocusRequest((request) => request + 1);
       updatePanelPreference(true);
-      window.setTimeout(() => {
-        const panelElement = document.getElementById(COMMENT_PANEL_ID);
-        panelElement?.focus({ preventScroll: true });
-        panelElement?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }, 0);
     };
 
     const revealTimer = window.setTimeout(revealHashTarget, 0);

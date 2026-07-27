@@ -1,6 +1,7 @@
 import {
   decodePublicReviewFeedbackMetadata,
   encodePublicReviewFeedback,
+  getPublicReviewFeedbackPrimaryComment,
   hasPublicReviewMetadata,
   PUBLIC_REVIEW_METADATA_KEYS,
   PublicReviewFeedbackValidationError,
@@ -197,6 +198,17 @@ describe("public review feedback codec", () => {
     expect(payload.parts[0]!.content).toContain(
       `/blob/${COMMIT}/src/Stream.sol#L42-L45`
     );
+  });
+
+  it("extracts the primary comment without exposing review metadata", () => {
+    const payload = encode();
+
+    expect(
+      getPublicReviewFeedbackPrimaryComment(payload.parts[0]!.content)
+    ).toBe(draft.comment);
+    expect(
+      getPublicReviewFeedbackPrimaryComment("  Plain Wave comment  ")
+    ).toBe("Plain Wave comment");
   });
 
   it.each(["0", "01", "-1", "1.5", " 1"])(

@@ -19,22 +19,12 @@ import {
   PUBLIC_REVIEW_LEDGER_PAGE_SIZE,
   type PublicReviewLedgerApi,
 } from "@/services/api/public-review/ledger";
+import { getPublicReviewFeedbackPrimaryComment } from "@/services/api/public-review/feedback-codec";
 import type {
   PublicReviewDiscussionDestination,
   PublicReviewFeedbackConfig,
   PublicReviewPageContext,
 } from "@/services/api/public-review/types";
-
-function getPrimaryComment(body: string): string {
-  const reviewMetadataStart = body.indexOf("\n\n**Review:**");
-  const visibleBody =
-    reviewMetadataStart >= 0 ? body.slice(0, reviewMetadataStart) : body;
-  const headingEnd = visibleBody.indexOf("\n\n");
-  if (visibleBody.startsWith("## ") && headingEnd >= 0) {
-    return visibleBody.slice(headingEnd + 2).trim();
-  }
-  return visibleBody.trim();
-}
 
 export function PublicReviewPageComments({
   api,
@@ -163,7 +153,9 @@ export function PublicReviewPageComments({
               config.severityOptions.find(
                 (severity) => severity.value === record.severity
               )?.label ?? record.severity;
-            const primaryComment = getPrimaryComment(record.body);
+            const primaryComment = getPublicReviewFeedbackPrimaryComment(
+              record.body
+            );
 
             return (
               <li key={record.dropId}>

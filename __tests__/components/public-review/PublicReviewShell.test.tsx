@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 
 import { PublicReviewShell } from "@/components/public-review/PublicReviewShell";
 import {
@@ -63,9 +63,16 @@ describe("PublicReviewShell", () => {
     expect(
       screen.getAllByRole("link", { name: /Community Review/ })
     ).not.toHaveLength(0);
-    expect(
-      screen.getByRole("button", { name: "Show comments" })
-    ).toHaveAttribute("aria-controls", "public-review-feedback");
+    const commentsToggle = screen.getByRole("button", {
+      name: "Show comments",
+    });
+    expect(commentsToggle).toHaveAttribute(
+      "aria-controls",
+      "public-review-feedback"
+    );
+    expect(document.getElementById("public-review-feedback")).toHaveClass(
+      "tw-hidden"
+    );
     expect(
       screen.getAllByRole("link", { name: "The short answer" })
     ).toHaveLength(2);
@@ -79,6 +86,36 @@ describe("PublicReviewShell", () => {
     expect(
       screen.queryByRole("heading", { name: "Review status" })
     ).not.toBeInTheDocument();
+  });
+
+  it("focuses the comment panel only after a feedback hash reveals it", async () => {
+    const overview = ACTIVE_REVIEW_VERSION.pages[0];
+    if (!overview) {
+      throw new Error("Stream review overview is missing");
+    }
+    window.localStorage.setItem("public-review-comment-panel-open", "false");
+    window.history.replaceState(null, "", "#public-review-feedback");
+
+    render(
+      <PublicReviewShell
+        editorialMarkdown="# Editorial title"
+        page={overview}
+        review={STREAM_REVIEW_DEFINITION}
+        reviewVersion={ACTIVE_REVIEW_VERSION}
+        sections={[]}
+        displayedVersion={STREAM_REVIEW_DEFINITION.activeVersion}
+        feedbackSlot={<div>Feedback form</div>}
+        source={ACTIVE_REVIEW_VERSION.source}
+      />
+    );
+
+    const commentsPanel = document.getElementById("public-review-feedback");
+    expect(commentsPanel).toBeInTheDocument();
+    await waitFor(() => expect(commentsPanel).not.toHaveClass("tw-hidden"));
+    await waitFor(() => expect(commentsPanel).toHaveFocus());
+
+    window.localStorage.setItem("public-review-comment-panel-open", "false");
+    window.history.replaceState(null, "", window.location.pathname);
   });
 
   it("uses the exact resolved source identity instead of the active default", () => {
