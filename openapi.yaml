@@ -7999,29 +7999,6 @@ paths:
               schema:
                 type: object
                 additionalProperties: true
-  /deploy/release-bus-v2/maintenance/recover-stalled-qualifications:
-    post:
-      tags:
-        - Release Bus v2
-      summary: >-
-        Safely yield unsatisfiable production qualifications while production
-        automation is disabled
-      operationId: recoverStalledReleaseBusV2ProductionQualifications
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: >-
-            Unsatisfiable parent and qualification trains were terminalized
-            transactionally and their explicit candidates retained for replan.
-            Recovery commits at most one yield per request; has_more means the
-            caller must invoke the endpoint again, and only a response with no
-            recovered item and has_more=false proves the drain pass is complete
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: true
   /subscriptions/consolidation/coverage/{consolidation_key}:
     get:
       tags:
