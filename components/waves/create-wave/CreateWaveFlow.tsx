@@ -16,11 +16,18 @@ export default function CreateWaveFlow({
   children,
   isActive = true,
   nativeBoundedStyle,
+  scrollResetKey,
 }: {
   readonly title: string;
   readonly onBack: () => void;
   readonly children: ReactNode;
   readonly isActive?: boolean | undefined;
+  // Bumped when the flow should snap back to the top of ITS OWN scrollport
+  // (e.g. a step change). We reset THIS region's scrollTop rather than
+  // scrollIntoView-ing the container: the container's nearest scrollable
+  // ancestor is the app-shell scroller, so scrolling that would ride the app
+  // header (its back arrow) up under the status bar and leave a black gap.
+  readonly scrollResetKey?: string | number | undefined;
   // Native app shell only. The web modal bounds this region's height itself, so
   // its internal `overflow-y-auto` is already a real scrollport and the sticky
   // footer pins to it. The native /waves/create route has no such bounding
@@ -78,6 +85,20 @@ export default function CreateWaveFlow({
       browserWindow.removeEventListener("keydown", handleKeyDown);
     };
   }, [handleBack, isActive]);
+
+  // Snap the inner scrollport back to the top on step change, after the new
+  // step's content has laid out. Never touches the app-shell scroller, so the
+  // header stays put.
+  useEffect(() => {
+    const region = scrollRegionRef.current;
+    if (!region) {
+      return;
+    }
+    const frame = requestAnimationFrame(() => {
+      region.scrollTop = 0;
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [scrollResetKey]);
 
   return (
     <div

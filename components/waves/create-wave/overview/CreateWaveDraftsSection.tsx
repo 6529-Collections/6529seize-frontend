@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import DateAccordion from "@/components/common/DateAccordion";
+import CollapsibleCard from "@/components/common/CollapsibleCard";
 import { getTimeAgo } from "@/helpers/Helpers";
 import type { CreateWaveDraft } from "@/helpers/waves/create-wave-draft.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -30,7 +30,7 @@ export default function CreateWaveDraftsSection({
     t(locale, "wave.create.drafts.untitled");
 
   return (
-    <DateAccordion
+    <CollapsibleCard
       title={t(locale, "wave.create.drafts.heading")}
       titleActions={
         <span
@@ -60,7 +60,12 @@ export default function CreateWaveDraftsSection({
             >
               <button
                 type="button"
-                onClick={() => onLoad(draft)}
+                onClick={() => {
+                  onLoad(draft);
+                  // Loading immediately applies the draft, so fold the list
+                  // away to reveal the now-populated form below.
+                  setIsExpanded(false);
+                }}
                 className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-items-start tw-gap-y-0.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
               >
                 <span className="tw-w-full tw-truncate tw-text-sm tw-font-medium tw-text-white">
@@ -100,6 +105,6 @@ export default function CreateWaveDraftsSection({
           ))}
         </ul>
       </div>
-    </DateAccordion>
+    </CollapsibleCard>
   );
 }
