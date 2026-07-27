@@ -76,6 +76,10 @@ describe("MentionNode", () => {
     expect(json.type).toBe("mention");
 
     const { element } = node.exportDOM();
+    expect(element).toBeInstanceOf(HTMLElement);
+    if (!(element instanceof HTMLElement)) {
+      throw new Error("Expected MentionNode to export an HTML element");
+    }
     expect(element.getAttribute("data-lexical-mention")).toBe("true");
     expect(element.getAttribute("data-mentioned-profile-id")).toBe(
       "profile-bob"
@@ -87,7 +91,12 @@ describe("MentionNode", () => {
     span.setAttribute("data-lexical-mention", "true");
     span.textContent = "@alice";
     const conv = mapping["span"]!(span)!;
-    const newNode = conv.conversion(span).node;
+    const convertedNode = conv.conversion(span)?.node;
+    const newNode = Array.isArray(convertedNode) ? null : convertedNode;
+    expect($isMentionNode(newNode)).toBe(true);
+    if (!$isMentionNode(newNode)) {
+      throw new Error("Expected mention DOM conversion to create a MentionNode");
+    }
     expect(newNode.__mention).toBe("@alice");
     expect(conv.priority).toBe(1);
     expect(MentionNode.clone(node)).toBeInstanceOf(MentionNode);

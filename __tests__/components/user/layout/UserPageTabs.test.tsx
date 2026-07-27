@@ -1,6 +1,7 @@
 import UserPageTabs from "@/components/user/layout/UserPageTabs";
 import { getUserProfileTabsMessage } from "@/components/user/layout/user-tabs.messages";
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { render, screen, waitFor } from "@testing-library/react";
 import {
   useParams,
@@ -60,6 +61,10 @@ const getActiveTabIds = () =>
     .filter((tab) => tab.getAttribute("data-active") === "true")
     .map((tab) => tab.textContent);
 
+const initialProfile = Object.assign(new ApiIdentity(), {
+  profile_wave_id: null,
+});
+
 const renderTabs = ({
   showWaves,
   isIos,
@@ -114,7 +119,7 @@ const renderTabs = ({
   });
   return {
     router,
-    ...render(<UserPageTabs />),
+    ...render(<UserPageTabs initialProfile={initialProfile} />),
   };
 };
 
@@ -172,7 +177,7 @@ describe("UserPageTabs", () => {
       fetchingProfile: false,
       activeProfileProxy: { id: "proxy-1" },
     });
-    rerender(<UserPageTabs />);
+    rerender(<UserPageTabs initialProfile={initialProfile} />);
 
     expect(getTabIds()).not.toContain(USER_PAGE_TAB_IDS["MENTION-SHORTCUTS"]);
   });
@@ -249,11 +254,11 @@ describe("UserPageTabs", () => {
     expect(getActiveTabIds()).toEqual([USER_PAGE_TAB_IDS["MENTION-SHORTCUTS"]]);
 
     (usePathname as jest.Mock).mockReturnValue("/testuser/brain");
-    rerender(<UserPageTabs />);
+    rerender(<UserPageTabs initialProfile={initialProfile} />);
     expect(getActiveTabIds()).toEqual([USER_PAGE_TAB_IDS.BRAIN]);
 
     (usePathname as jest.Mock).mockReturnValue("/testuser/mention-shortcuts");
-    rerender(<UserPageTabs />);
+    rerender(<UserPageTabs initialProfile={initialProfile} />);
 
     expect(getActiveTabIds()).toEqual([USER_PAGE_TAB_IDS["MENTION-SHORTCUTS"]]);
     expect(router.replace).not.toHaveBeenCalled();
@@ -326,7 +331,7 @@ describe("UserPageTabs", () => {
       connectionState: "connected",
     });
 
-    rerender(<UserPageTabs />);
+    rerender(<UserPageTabs initialProfile={initialProfile} />);
 
     await waitFor(() => {
       expect(getTabIds()).not.toContain(USER_PAGE_TAB_IDS.BRAIN);
@@ -358,7 +363,7 @@ describe("UserPageTabs", () => {
       connectionState: "connected",
     });
 
-    rerender(<UserPageTabs />);
+    rerender(<UserPageTabs initialProfile={initialProfile} />);
 
     await waitFor(() => {
       const tabs = getTabIds();
@@ -386,7 +391,7 @@ describe("UserPageTabs", () => {
       fetchingProfile: false,
     });
 
-    rerender(<UserPageTabs />);
+    rerender(<UserPageTabs initialProfile={initialProfile} />);
 
     await waitFor(() => {
       expect(router.replace).toHaveBeenCalledWith("/testuser");
@@ -411,7 +416,7 @@ describe("UserPageTabs", () => {
       activeProfileProxy: null,
     });
 
-    rerender(<UserPageTabs />);
+    rerender(<UserPageTabs initialProfile={initialProfile} />);
 
     await waitFor(() => {
       expect(router.replace).toHaveBeenCalledWith("/testuser");
