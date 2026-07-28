@@ -605,6 +605,36 @@ describe("Release Bus artifact rollout compatibility", () => {
             artifact_bytes_reused: false,
           },
         });
+
+        expect(
+          runShell(report.run!, {
+            env: {
+              ...reportEnv,
+              ARTIFACT_CONTRACT: "",
+              ARTIFACT_DIGEST: "",
+              ARTIFACT_OUTCOME: "skipped",
+              JOB_STATUS: "failure",
+              PACKAGE_DIGEST: "",
+              SCHEMA_VERSION: "",
+              SOURCE_FAILURE_KIND: "rollback-not-reachable",
+              SOURCE_OUTCOME: "failure",
+            },
+          }).status
+        ).toBe(0);
+        expect(JSON.parse(fs.readFileSync(curlPayload, "utf8"))).toMatchObject({
+          status: "FAILED",
+          failure_class: "INTERACTION",
+          failure_phase: "rollback_source_not_reachable",
+          retryable: false,
+          summary: {
+            artifact_digest: null,
+            package_digest: null,
+            consumed_preflight_artifact: false,
+            rebuilt: false,
+            source_evidence_reused: true,
+            artifact_bytes_reused: false,
+          },
+        });
       } finally {
         fs.rmSync(root, { recursive: true, force: true });
       }
