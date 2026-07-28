@@ -316,6 +316,23 @@ describe("release bus contributor notifications", () => {
           CI_RELEASE_CONTRIBUTORS: "${{ inputs.release_contributors }}",
         });
       }
+      expect(failure.env).not.toHaveProperty("CI_RELEASE_NOTES_PROMPT_PATH");
+      if (_environment === "production") {
+        expect(success.env).toMatchObject({
+          CI_PIPELINES_TARGET_ENV: "prod",
+          CI_PIPELINES_STATUS: "success",
+          CI_PIPELINES_SERVICE: "web",
+          CI_RELEASE_NOTES_PROMPT_PATH:
+            "ops/release-notes/release-notes.prompt.md",
+        });
+        expect(
+          fs.existsSync(
+            path.join(process.cwd(), success.env.CI_RELEASE_NOTES_PROMPT_PATH)
+          )
+        ).toBe(true);
+      } else {
+        expect(success.env).not.toHaveProperty("CI_RELEASE_NOTES_PROMPT_PATH");
+      }
     }
   );
 
