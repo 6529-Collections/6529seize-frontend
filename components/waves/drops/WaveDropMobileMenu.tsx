@@ -8,6 +8,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useCanShowDropCurationsAction } from "@/hooks/drops/useCanShowDropCurationsAction";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+import useCapacitor from "@/hooks/useCapacitor";
 import type { FC, PointerEvent } from "react";
 import {
   useCallback,
@@ -286,6 +287,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   showVoting = true,
 }) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { isCapacitor } = useCapacitor();
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const { canDelete, canSetPinnedDrop } = useDropInteractionRules(drop);
   const { mobileMenuZIndexClassName, mobileDialogZIndexClassName } =
@@ -350,7 +352,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
         <CommonDropdownItemsMobileWrapper
           isOpen={isOpen}
           setOpen={setOpen}
-          hideOnDesktopHover={false}
+          hideOnDesktopHover={!isCapacitor}
           zIndexClassName={mobileMenuZIndexClassName}
         >
           <div

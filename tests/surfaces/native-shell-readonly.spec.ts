@@ -350,8 +350,11 @@ test.describe("Native iPad drop actions @surface @medium @readonly", () => {
   test("keeps the touch action button usable when the WebView reports desktop input", async ({
     page,
   }, testInfo) => {
-    test.skip(
-      testInfo.project.name !== "capacitor-ios-sim",
+    const runsOnIosCapacitor =
+      isCapacitorSimulationProject(testInfo.project.name) &&
+      expectedCapacitorPlatform(testInfo.project.name) === "ios";
+    test.skip( // NOSONAR -- This shared cross-project spec runs the iPad regression only in its iOS simulation.
+      !runsOnIosCapacitor,
       "Native iPad drop actions are covered on the iOS Capacitor simulation"
     );
 

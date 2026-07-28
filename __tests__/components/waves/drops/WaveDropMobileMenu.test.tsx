@@ -4,6 +4,7 @@ import { WaveDropLayerProvider } from "@/components/waves/drops/WaveDropLayerCon
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+import useCapacitor from "@/hooks/useCapacitor";
 import { render, screen } from "@testing-library/react";
 import type { ComponentProps } from "react";
 import userEvent from "@testing-library/user-event";
@@ -28,6 +29,7 @@ const mobileWrapperMock = jest.fn((props: any) =>
 jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
   useDropInteractionRules: jest.fn(),
 }));
+jest.mock("@/hooks/useCapacitor");
 jest.mock("@/hooks/drops/useCanShowDropCurationsAction", () => ({
   useCanShowDropCurationsAction: jest.fn(() => false),
 }));
@@ -93,6 +95,7 @@ beforeAll(() => {
 });
 
 const mockedUseDropInteractionRules = jest.mocked(useDropInteractionRules);
+const mockedUseCapacitor = jest.mocked(useCapacitor);
 type AuthProviderValue = ComponentProps<typeof AuthContext.Provider>["value"];
 
 beforeEach(() => {
@@ -101,6 +104,9 @@ beforeEach(() => {
   mobileWrapperMock.mockClear();
   mockIsMemesWave.mockReturnValue(false);
   mockIsQuorumWave.mockReturnValue(false);
+  mockedUseCapacitor.mockReturnValue({ isCapacitor: false } as ReturnType<
+    typeof useCapacitor
+  >);
   mockedUseDropInteractionRules.mockReturnValue({
     canShowVote: true,
     canVote: true,
@@ -376,7 +382,11 @@ test("shows full menu when a profile handle is present", () => {
   expect(screen.getByTestId("delete")).toBeInTheDocument();
 });
 
-test("does not hide the drop action sheet when desktop hover CSS is active", () => {
+test("does not hide the native drop action sheet when desktop hover CSS is active", () => {
+  mockedUseCapacitor.mockReturnValue({ isCapacitor: true } as ReturnType<
+    typeof useCapacitor
+  >);
+
   const drop = {
     id: "1",
     serial_no: 1,
@@ -408,6 +418,41 @@ test("does not hide the drop action sheet when desktop hover CSS is active", () 
 
   expect(mobileWrapperMock.mock.calls.at(-1)?.[0]).toEqual(
     expect.objectContaining({ hideOnDesktopHover: false })
+  );
+});
+
+test("preserves desktop-hover hiding outside the native app", () => {
+  const drop = {
+    id: "1",
+    serial_no: 1,
+    wave: { id: "w" },
+    drop_type: ApiDropType.Chat,
+    author: { handle: "alice" },
+  } as any;
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: null,
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveDropMobileMenu
+        drop={drop}
+        isOpen
+        showReplyAndQuote
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={jest.fn()}
+        onAddReaction={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(mobileWrapperMock.mock.calls.at(-1)?.[0]).toEqual(
+    expect.objectContaining({ hideOnDesktopHover: true })
   );
 });
 
