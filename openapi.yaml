@@ -7986,7 +7986,7 @@ paths:
     get:
       tags:
         - Release Bus v2
-      summary: Read runtime mode, pause controls, and environment locks
+      summary: Read effective automation lanes and environment state
       operationId: getReleaseBusV2Controls
       security: []
       responses:
@@ -8000,7 +8000,7 @@ paths:
     post:
       tags:
         - Release Bus v2
-      summary: Pause a Release Bus v2 control scope
+      summary: Turn off a Release Bus automation lane
       operationId: pauseReleaseBusV2
       security:
         - bearerAuth: []
@@ -8021,7 +8021,7 @@ paths:
     post:
       tags:
         - Release Bus v2
-      summary: Resume a Release Bus v2 control scope
+      summary: Turn on a Release Bus automation lane
       operationId: resumeReleaseBusV2
       security:
         - bearerAuth: []
@@ -24490,6 +24490,7 @@ components:
       type: object
       required:
         - controls
+        - lanes
         - locks
         - mode
         - staging_state
@@ -24498,6 +24499,12 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ReleaseBusV2Control"
+        lanes:
+          type: array
+          minItems: 2
+          maxItems: 2
+          items:
+            $ref: "#/components/schemas/ReleaseBusV2LaneState"
         locks:
           type: array
           items:
@@ -24510,12 +24517,19 @@ components:
       type: object
       required:
         - controls
+        - lanes
         - mode
       properties:
         controls:
           type: array
           items:
             $ref: "#/components/schemas/ReleaseBusV2Control"
+        lanes:
+          type: array
+          minItems: 2
+          maxItems: 2
+          items:
+            $ref: "#/components/schemas/ReleaseBusV2LaneState"
         mode:
           $ref: "#/components/schemas/ReleaseBusV2Mode"
     ReleaseBusV2Dependency:
@@ -24592,6 +24606,29 @@ components:
     ReleaseBusV2Event:
       type: object
       additionalProperties: true
+    ReleaseBusV2LaneState:
+      type: object
+      required:
+        - lane
+        - status
+        - changeable
+        - reason
+      properties:
+        lane:
+          type: string
+          enum:
+            - STAGING
+            - PRODUCTION
+        status:
+          type: string
+          enum:
+            - "ON"
+            - "OFF"
+        changeable:
+          type: boolean
+        reason:
+          type: string
+          nullable: true
     ReleaseBusV2Lock:
       type: object
       additionalProperties: true
@@ -24773,6 +24810,8 @@ components:
         - id
         - status
         - clean_main
+        - last_validated_frontend_sha
+        - last_validated_backend_sha
         - updated_at
         - row_version
       properties:
@@ -24800,6 +24839,14 @@ components:
           pattern: ^[a-f0-9]{40}$
           nullable: true
         backend_sha:
+          type: string
+          pattern: ^[a-f0-9]{40}$
+          nullable: true
+        last_validated_frontend_sha:
+          type: string
+          pattern: ^[a-f0-9]{40}$
+          nullable: true
+        last_validated_backend_sha:
           type: string
           pattern: ^[a-f0-9]{40}$
           nullable: true

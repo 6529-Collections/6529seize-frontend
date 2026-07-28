@@ -1,8 +1,9 @@
 import { AuthContext } from "@/components/auth/Auth";
 import UserPageMentionShortcuts from "@/components/user/mention-shortcuts/UserPageMentionShortcuts";
 import { useMentionAliases } from "@/hooks/useMentionAliases";
+import { updateMentionAlias } from "@/services/api/mention-aliases-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 jest.mock("@/hooks/useMentionAliases", () => ({
   useMentionAliases: jest.fn(),
@@ -16,6 +17,8 @@ jest.mock("@/services/api/mention-aliases-api", () => ({
 const mockedUseMentionAliases = useMentionAliases as jest.MockedFunction<
   typeof useMentionAliases
 >;
+const mockedUpdateMentionAlias =
+  updateMentionAlias as jest.MockedFunction<typeof updateMentionAlias>;
 
 const profile = {
   id: "profile-1",
@@ -101,6 +104,47 @@ describe("UserPageMentionShortcuts", () => {
     expect(
       screen.getByRole("button", { name: "Remove @bob" })
     ).toBeInTheDocument();
+  });
+
+  it("deduplicates pre-populated profile ids when saving", async () => {
+    mockedUseMentionAliases.mockReturnValue({
+      aliases: [
+        {
+          id: "tag-1",
+          alias: "frens",
+          members: [
+            {
+              profile_id: "profile-2",
+              handle: "bob",
+              pfp: null,
+            },
+            {
+              profile_id: "profile-2",
+              handle: "bob",
+              pfp: null,
+            },
+          ],
+        },
+      ],
+      isPending: false,
+      isError: false,
+    } as ReturnType<typeof useMentionAliases>);
+    mockedUpdateMentionAlias.mockResolvedValue({
+      id: "tag-1",
+      alias: "frens",
+      members: [],
+    });
+    renderQuickTags();
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(mockedUpdateMentionAlias).toHaveBeenCalledWith("tag-1", {
+        alias: "frens",
+        member_profile_ids: ["profile-2"],
+      })
+    );
   });
 
   it("does not render on another profile or while acting as a proxy", () => {

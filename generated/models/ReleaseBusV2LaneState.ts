@@ -11,14 +11,13 @@
  * Do not edit the class manually.
  */
 
-import { ReleaseBusV2LaneState } from '../models/ReleaseBusV2LaneState';
-import { ReleaseBusV2Mode } from '../models/ReleaseBusV2Mode';
 import { HttpFile } from '../http/http';
 
-export class ReleaseBusV2ControlUpdateResponse {
-    'controls': Array<{ [key: string]: any; }>;
-    'lanes': Array<ReleaseBusV2LaneState>;
-    'mode': ReleaseBusV2Mode;
+export class ReleaseBusV2LaneState {
+    'lane': ReleaseBusV2LaneStateLaneEnum;
+    'status': ReleaseBusV2LaneStateStatusEnum;
+    'changeable': boolean;
+    'reason': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,30 +25,44 @@ export class ReleaseBusV2ControlUpdateResponse {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "controls",
-            "baseName": "controls",
-            "type": "Array<{ [key: string]: any; }>",
+            "name": "lane",
+            "baseName": "lane",
+            "type": "ReleaseBusV2LaneStateLaneEnum",
             "format": ""
         },
         {
-            "name": "lanes",
-            "baseName": "lanes",
-            "type": "Array<ReleaseBusV2LaneState>",
+            "name": "status",
+            "baseName": "status",
+            "type": "ReleaseBusV2LaneStateStatusEnum",
             "format": ""
         },
         {
-            "name": "mode",
-            "baseName": "mode",
-            "type": "ReleaseBusV2Mode",
+            "name": "changeable",
+            "baseName": "changeable",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "reason",
+            "baseName": "reason",
+            "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ReleaseBusV2ControlUpdateResponse.attributeTypeMap;
+        return ReleaseBusV2LaneState.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
 
+export enum ReleaseBusV2LaneStateLaneEnum {
+    Staging = 'STAGING',
+    Production = 'PRODUCTION'
+}
+export enum ReleaseBusV2LaneStateStatusEnum {
+    On = 'ON',
+    Off = 'OFF'
+}
 

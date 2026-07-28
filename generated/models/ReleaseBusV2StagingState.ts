@@ -20,6 +20,8 @@ export class ReleaseBusV2StagingState {
     'last_validated_manifest_id'?: string | null;
     'frontend_sha'?: string | null;
     'backend_sha'?: string | null;
+    'last_validated_frontend_sha': string | null;
+    'last_validated_backend_sha': string | null;
     'frontend_staging_ref_sha'?: string | null;
     'backend_staging_ref_sha'?: string | null;
     'clean_main': boolean;
@@ -65,6 +67,18 @@ export class ReleaseBusV2StagingState {
         {
             "name": "backend_sha",
             "baseName": "backend_sha",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "last_validated_frontend_sha",
+            "baseName": "last_validated_frontend_sha",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "last_validated_backend_sha",
+            "baseName": "last_validated_backend_sha",
             "type": "string",
             "format": ""
         },

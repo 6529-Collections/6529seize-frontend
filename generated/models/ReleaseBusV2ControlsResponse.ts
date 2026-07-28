@@ -11,12 +11,14 @@
  * Do not edit the class manually.
  */
 
+import { ReleaseBusV2LaneState } from '../models/ReleaseBusV2LaneState';
 import { ReleaseBusV2Mode } from '../models/ReleaseBusV2Mode';
 import { ReleaseBusV2StagingState } from '../models/ReleaseBusV2StagingState';
 import { HttpFile } from '../http/http';
 
 export class ReleaseBusV2ControlsResponse {
     'controls': Array<{ [key: string]: any; }>;
+    'lanes': Array<ReleaseBusV2LaneState>;
     'locks': Array<{ [key: string]: any; }>;
     'mode': ReleaseBusV2Mode;
     'staging_state': ReleaseBusV2StagingState;
@@ -30,6 +32,12 @@ export class ReleaseBusV2ControlsResponse {
             "name": "controls",
             "baseName": "controls",
             "type": "Array<{ [key: string]: any; }>",
+            "format": ""
+        },
+        {
+            "name": "lanes",
+            "baseName": "lanes",
+            "type": "Array<ReleaseBusV2LaneState>",
             "format": ""
         },
         {

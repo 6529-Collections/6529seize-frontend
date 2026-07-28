@@ -202,7 +202,9 @@ function AliasEditor({
     if (!canSave || mutation.isPending) return;
     mutation.mutate({
       alias: normalizedAlias,
-      member_profile_ids: members.map((member) => member.profile_id),
+      member_profile_ids: [
+        ...new Set(members.map((member) => member.profile_id)),
+      ],
     });
   };
 

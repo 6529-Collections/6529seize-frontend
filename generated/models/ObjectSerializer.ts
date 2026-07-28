@@ -565,6 +565,7 @@ export * from '../models/ReleaseBusV2ControlsResponse';
 export * from '../models/ReleaseBusV2Dependency';
 export * from '../models/ReleaseBusV2DependencyRequest';
 export * from '../models/ReleaseBusV2DeployPlan';
+export * from '../models/ReleaseBusV2LaneState';
 export * from '../models/ReleaseBusV2Manifest';
 export * from '../models/ReleaseBusV2ManifestListResponse';
 export * from '../models/ReleaseBusV2Mode';
@@ -1160,11 +1161,12 @@ import { ReleaseBusV2CandidateListResponse   } from '../models/ReleaseBusV2Candi
 import { ReleaseBusV2CandidateResponse   } from '../models/ReleaseBusV2CandidateResponse';
 import { ReleaseBusV2CandidateStatus } from '../models/ReleaseBusV2CandidateStatus';
 import { ReleaseBusV2ControlRequest, ReleaseBusV2ControlRequestScopeEnum    } from '../models/ReleaseBusV2ControlRequest';
-import { ReleaseBusV2ControlUpdateResponse   } from '../models/ReleaseBusV2ControlUpdateResponse';
-import { ReleaseBusV2ControlsResponse     } from '../models/ReleaseBusV2ControlsResponse';
+import { ReleaseBusV2ControlUpdateResponse    } from '../models/ReleaseBusV2ControlUpdateResponse';
+import { ReleaseBusV2ControlsResponse      } from '../models/ReleaseBusV2ControlsResponse';
 import { ReleaseBusV2Dependency   , ReleaseBusV2DependencyEnvironmentEnum    } from '../models/ReleaseBusV2Dependency';
 import { ReleaseBusV2DependencyRequest , ReleaseBusV2DependencyRequestEnvironmentEnum   } from '../models/ReleaseBusV2DependencyRequest';
 import { ReleaseBusV2DeployPlan } from '../models/ReleaseBusV2DeployPlan';
+import { ReleaseBusV2LaneState, ReleaseBusV2LaneStateLaneEnum  , ReleaseBusV2LaneStateStatusEnum     } from '../models/ReleaseBusV2LaneState';
 import { ReleaseBusV2Manifest  , ReleaseBusV2ManifestLaneEnum   , ReleaseBusV2ManifestStatusEnum             } from '../models/ReleaseBusV2Manifest';
 import { ReleaseBusV2ManifestListResponse } from '../models/ReleaseBusV2ManifestListResponse';
 import { ReleaseBusV2Mode } from '../models/ReleaseBusV2Mode';
@@ -1172,7 +1174,7 @@ import { ReleaseBusV2ProductionSelectionItem } from '../models/ReleaseBusV2Produ
 import { ReleaseBusV2ProductionSelectionRequest } from '../models/ReleaseBusV2ProductionSelectionRequest';
 import { ReleaseBusV2ProductionSelectionResponse , ReleaseBusV2ProductionSelectionResponseQualificationPolicyEnum     } from '../models/ReleaseBusV2ProductionSelectionResponse';
 import { ReleaseBusV2RegisterRequest , ReleaseBusV2RegisterRequestRepositoryEnum        } from '../models/ReleaseBusV2RegisterRequest';
-import { ReleaseBusV2StagingState, ReleaseBusV2StagingStateIdEnum  , ReleaseBusV2StagingStateStatusEnum             } from '../models/ReleaseBusV2StagingState';
+import { ReleaseBusV2StagingState, ReleaseBusV2StagingStateIdEnum  , ReleaseBusV2StagingStateStatusEnum               } from '../models/ReleaseBusV2StagingState';
 import { ReleaseBusV2StagingTransitionRequest  , ReleaseBusV2StagingTransitionRequestTransitionEnum    } from '../models/ReleaseBusV2StagingTransitionRequest';
 import { ReleaseBusV2Train , ReleaseBusV2TrainLaneEnum  , ReleaseBusV2TrainStatusEnum          , ReleaseBusV2TrainStagingPolicyEnum    , ReleaseBusV2TrainQualificationPolicyEnum             } from '../models/ReleaseBusV2Train';
 import { ReleaseBusV2TrainDetailResponse } from '../models/ReleaseBusV2TrainDetailResponse';
@@ -1340,6 +1342,8 @@ let enumsMap: Set<string> = new Set<string>([
     "ReleaseBusV2ControlRequestScopeEnum",
     "ReleaseBusV2DependencyEnvironmentEnum",
     "ReleaseBusV2DependencyRequestEnvironmentEnum",
+    "ReleaseBusV2LaneStateLaneEnum",
+    "ReleaseBusV2LaneStateStatusEnum",
     "ReleaseBusV2ManifestLaneEnum",
     "ReleaseBusV2ManifestStatusEnum",
     "ReleaseBusV2Mode",
@@ -1856,6 +1860,7 @@ let typeMap: {[index: string]: any} = {
     "ReleaseBusV2Dependency": ReleaseBusV2Dependency,
     "ReleaseBusV2DependencyRequest": ReleaseBusV2DependencyRequest,
     "ReleaseBusV2DeployPlan": ReleaseBusV2DeployPlan,
+    "ReleaseBusV2LaneState": ReleaseBusV2LaneState,
     "ReleaseBusV2Manifest": ReleaseBusV2Manifest,
     "ReleaseBusV2ManifestListResponse": ReleaseBusV2ManifestListResponse,
     "ReleaseBusV2ProductionSelectionItem": ReleaseBusV2ProductionSelectionItem,
