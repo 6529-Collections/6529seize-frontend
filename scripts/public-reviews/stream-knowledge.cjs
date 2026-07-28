@@ -21,12 +21,15 @@ const KNOWLEDGE_INDEX_SCHEMA = "public-review.knowledge-index.v1";
 const KNOWLEDGE_SHARD_SCHEMA = "public-review.knowledge-shard.v1";
 const GENERATOR_NAME = "6529-public-review-stream-knowledge";
 const GENERATOR_VERSION = "1";
+const LEGACY_RECORDS_PER_SHARD = 120;
 const RECORDS_PER_SHARD = 160;
+const RECORD_SHARD_LAYOUT_VERSION = "2026-07-27.1";
 const MAX_PROTOCOL_SOURCE_EXCERPT_CHARACTERS = 1_200;
 const MAX_SCRIPT_SOURCE_EXCERPT_CHARACTERS = 700;
 const MAX_SEARCH_TEXT_CHARACTERS = 1_600;
 const SAFE_REVIEW_ID = /^[a-z0-9][a-z0-9-]*$/;
 const SAFE_VERSION = /^[0-9]{4}-[0-9]{2}-[0-9]{2}\.[0-9]+$/;
+const SENSITIVE_SIGNING_KEY_NAME = /(?:private.*key|signer.*key)/i;
 const MARKDOWN_DECORATION = new Set(["`", "*", "_", "~"]);
 const LETTER_OR_NUMBER = /[\p{Letter}\p{Number}]/u;
 const STOP_WORDS = new Set([
@@ -45,6 +48,8 @@ const STOP_WORDS = new Set([
   "this",
   "with",
 ]);
+
+class KnowledgePackDriftError extends Error {}
 
 function readJson(filePath, label) {
   let parsed;
@@ -150,6 +155,12 @@ function knowledgeSourceRoot(repoRoot, reviewId, reviewVersion) {
     reviewVersion,
     "knowledge"
   );
+}
+
+function recordsPerShard(reviewVersion) {
+  return compareReviewVersions(reviewVersion, RECORD_SHARD_LAYOUT_VERSION) < 0
+    ? LEGACY_RECORDS_PER_SHARD
+    : RECORDS_PER_SHARD;
 }
 
 function removeOrderedPrefix(value) {
@@ -596,7 +607,29 @@ function localDeclarationSemanticId(definition, group, declaration) {
   return `${definition.id}#${group}:${signature}`;
 }
 
-function selectedDeclarationDetails(declaration) {
+function isSensitiveSigningKeyDeclaration(declaration, scope) {
+  return (
+    (scope === "test" || scope === "script") &&
+    SENSITIVE_SIGNING_KEY_NAME.test(declaration.name ?? "")
+  );
+}
+
+function declarationKnowledgeNatspec(declaration, definition) {
+  if (
+    definition?.id ===
+      "smart-contracts/StreamSplitWallet.sol:StreamSplitWallet" &&
+    declaration.name === "syncAsset"
+  ) {
+    return (
+      "@notice Emits the current cumulative receipt observation for the " +
+      "supported asset: address(0) is native currency and a nonzero address " +
+      "is the corresponding ERC-20."
+    );
+  }
+  return declaration.natspec;
+}
+
+function selectedDeclarationDetails(declaration, definition, scope) {
   const fields = [
     "anonymous",
     "canonicalSignature",
@@ -619,20 +652,38 @@ function selectedDeclarationDetails(declaration) {
     "type",
     "typeString",
     "underlyingType",
-    "valueSource",
     "virtual",
     "visibility",
   ];
-  return Object.fromEntries(
+  const details = Object.fromEntries(
     fields
       .filter((field) => declaration[field] !== undefined)
       .map((field) => [field, declaration[field]])
   );
+  details.natspec = declarationKnowledgeNatspec(declaration, definition);
+  if (
+    declaration.valueSource !== undefined &&
+    !isSensitiveSigningKeyDeclaration(declaration, scope)
+  ) {
+    details.valueSource = declaration.valueSource;
+  }
+  return details;
 }
 
 function declarationSummary(declaration, kind, definition) {
-  if (declaration.natspec?.trim()) {
-    return declaration.natspec.trim();
+  const natspec = declarationKnowledgeNatspec(declaration, definition);
+  if (natspec?.trim()) {
+    return natspec.trim();
+  }
+  if (
+    definition.id ===
+      "smart-contracts/StreamSplitWallet.sol:StreamSplitWallet" &&
+    declaration.name === "_currentBalance"
+  ) {
+    return (
+      "Returns the current balance of a supported asset: address(0) reads " +
+      "native currency and a nonzero address reads the corresponding ERC-20."
+    );
   }
   const signature =
     declaration.displaySignature ??
@@ -814,10 +865,15 @@ function createTechnicalRecords({
           `${definition.name}.${signature}`,
           kind.replaceAll("_", " "),
         ]);
-        const excerpt = sourceExcerpt(sourceText, declaration.range, {
-          scope: definition.scope,
-          kind,
-        });
+        const excerpt = isSensitiveSigningKeyDeclaration(
+          declaration,
+          definition.scope
+        )
+          ? undefined
+          : sourceExcerpt(sourceText, declaration.range, {
+              scope: definition.scope,
+              kind,
+            });
         const summary = declarationSummary(declaration, kind, definition);
         records.push({
           id: recordId,
@@ -874,7 +930,11 @@ function createTechnicalRecords({
             definitionKey: definition.key,
             definitionKind: definition.kind,
             definitionInheritance: definition.inheritance,
-            declaration: selectedDeclarationDetails(declaration),
+            declaration: selectedDeclarationDetails(
+              declaration,
+              definition,
+              definition.scope
+            ),
           },
           relationships: {
             relatedDefinitionId: definitionId,
@@ -894,7 +954,15 @@ function createTechnicalRecords({
         localIds.push(recordId);
       }
     }
-    declarationIdsByDefinition.set(definitionId, localIds.sort(compareStrings));
+    const abiSurfaceIds = ["functions", "events", "errors"].flatMap((group) =>
+      (definition.abiSurface?.[group] ?? []).map(
+        (entry) => `declaration:${entry.declarationId}`
+      )
+    );
+    declarationIdsByDefinition.set(
+      definitionId,
+      uniqueStrings([...localIds, ...abiSurfaceIds]).sort(compareStrings)
+    );
   }
 
   for (const file of reference.files) {
@@ -907,10 +975,12 @@ function createTechnicalRecords({
         declaration.kind,
         file.path,
       ]);
-      const excerpt = sourceExcerpt(sourceText, declaration.range, {
-        scope: file.scope,
-        kind: `top_level_${declaration.kind}`,
-      });
+      const excerpt = isSensitiveSigningKeyDeclaration(declaration, file.scope)
+        ? undefined
+        : sourceExcerpt(sourceText, declaration.range, {
+            scope: file.scope,
+            kind: `top_level_${declaration.kind}`,
+          });
       records.push({
         id: recordId,
         technicalId: declaration.id,
@@ -948,7 +1018,11 @@ function createTechnicalRecords({
           range: declaration.range,
         },
         technical: {
-          declaration: selectedDeclarationDetails(declaration),
+          declaration: selectedDeclarationDetails(
+            declaration,
+            undefined,
+            file.scope
+          ),
         },
         relationships: {
           relatedEditorialIds: [],
@@ -1348,12 +1422,13 @@ function buildKnowledgePack({
   const files = new Map();
   const recordShards = [];
   const shardPathByRecordId = new Map();
-  for (let offset = 0; offset < records.length; offset += RECORDS_PER_SHARD) {
-    const shardNumber = Math.floor(offset / RECORDS_PER_SHARD);
+  const shardSize = recordsPerShard(reviewVersion);
+  for (let offset = 0; offset < records.length; offset += shardSize) {
+    const shardNumber = Math.floor(offset / shardSize);
     const fileName = `${String(shardNumber).padStart(3, "0")}.json`;
     const relativePath = `records/${fileName}`;
     const publicPath = `${basePublicPath}/${relativePath}`;
-    const shardRecords = records.slice(offset, offset + RECORDS_PER_SHARD);
+    const shardRecords = records.slice(offset, offset + shardSize);
     for (const record of shardRecords) {
       shardPathByRecordId.set(record.id, publicPath);
     }
@@ -1475,17 +1550,17 @@ function expectedFileMap(pack, knowledgeRoot) {
 function assertFileMapEquals(expected, knowledgeRoot, label) {
   const actualPaths = listFiles(knowledgeRoot);
   const expectedPaths = [...expected.keys()].sort(compareStrings);
-  invariant(
-    stableJson(actualPaths) === stableJson(expectedPaths),
-    `${label} file set drifted.`
-  );
+  if (stableJson(actualPaths) !== stableJson(expectedPaths)) {
+    throw new KnowledgePackDriftError(`${label} file set drifted.`);
+  }
   for (const [filePath, buffer] of expected) {
-    invariant(
-      fs.readFileSync(filePath).equals(buffer),
-      `${label} file drifted: ${normalizeRelativePath(
-        path.relative(knowledgeRoot, filePath)
-      )}`
-    );
+    if (!fs.readFileSync(filePath).equals(buffer)) {
+      throw new KnowledgePackDriftError(
+        `${label} file drifted: ${normalizeRelativePath(
+          path.relative(knowledgeRoot, filePath)
+        )}`
+      );
+    }
   }
 }
 
@@ -1642,6 +1717,10 @@ function validateKnowledgePack({
     `${reviewId}@${reviewVersion} knowledge identity drifted.`
   );
   invariant(
+    Array.isArray(manifest.recordShards),
+    `${reviewId}@${reviewVersion} knowledge manifest record shards are invalid.`
+  );
+  invariant(
     manifest.knowledgeSha256 === knowledgeSemanticIdentity(manifest),
     `${reviewId}@${reviewVersion} knowledge semantic checksum drifted.`
   );
@@ -1682,6 +1761,12 @@ function validateKnowledgePack({
   const expectedPaths = new Set(["manifest.json", searchRelative]);
   const shardRecords = [];
   for (const [index, shardEntry] of manifest.recordShards.entries()) {
+    invariant(
+      shardEntry !== null &&
+        typeof shardEntry === "object" &&
+        !Array.isArray(shardEntry),
+      `${reviewId}@${reviewVersion} knowledge shard ${index} manifest entry is invalid.`
+    );
     const relativePath = publicPathToRelative(
       shardEntry.path,
       publicPrefix,
@@ -1759,6 +1844,7 @@ function generateKnowledgePacks({
   repoRoot = REPOSITORY_ROOT,
   reviewId = DEFAULT_REVIEW_ID,
   checkOnly = false,
+  refreshRetained = false,
   writeOutput = process.stdout.write.bind(process.stdout),
 } = {}) {
   const context = knowledgeContext(
@@ -1813,7 +1899,7 @@ function generateKnowledgePacks({
         referenceIndexEntry: entry,
       });
       writePackAtomically(pack, knowledgeRoot);
-    } else if (active && !checkOnly) {
+    } else if ((active || refreshRetained) && !checkOnly) {
       const pack = buildKnowledgePack({
         repoRoot,
         reviewId,
@@ -1827,7 +1913,10 @@ function generateKnowledgePacks({
           knowledgeRoot,
           `${reviewId}@${entry.version} knowledge pack`
         );
-      } catch {
+      } catch (error) {
+        if (!(error instanceof KnowledgePackDriftError)) {
+          throw error;
+        }
         writePackAtomically(pack, knowledgeRoot, { replace: true });
       }
     }
@@ -1862,10 +1951,13 @@ function generateKnowledgePacks({
 function main(argv = process.argv.slice(2)) {
   try {
     let checkOnly = false;
+    let refreshRetained = false;
     let reviewId = DEFAULT_REVIEW_ID;
     for (let index = 0; index < argv.length; index += 1) {
       if (argv[index] === "--check") {
         checkOnly = true;
+      } else if (argv[index] === "--refresh-retained") {
+        refreshRetained = true;
       } else if (argv[index] === "--review-id") {
         reviewId = argv[index + 1];
         index += 1;
@@ -1873,7 +1965,11 @@ function main(argv = process.argv.slice(2)) {
         throw new Error(`Unknown argument: ${argv[index]}`);
       }
     }
-    generateKnowledgePacks({ reviewId, checkOnly });
+    generateKnowledgePacks({
+      reviewId,
+      checkOnly,
+      refreshRetained,
+    });
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;

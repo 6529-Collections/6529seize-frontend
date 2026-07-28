@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 
 const {
@@ -49,6 +50,7 @@ type SearchRecord = {
 };
 
 type EvidenceRecord = SearchRecord & {
+  summary?: string;
   canonicalPath: string;
   sourceLink?: string;
   bodyExcerpt?: string;
@@ -65,7 +67,15 @@ type EvidenceRecord = SearchRecord & {
       stateMutability?: string;
       selector?: string;
       topic0?: string;
+      natspec?: string;
+      valueSource?: string;
     };
+    abiSurfaceCounts?: {
+      errors?: number;
+    };
+  };
+  relationships?: {
+    relatedDeclarationIds?: string[];
   };
   structured?: {
     lifecycleState?: string;
@@ -95,32 +105,35 @@ type KnowledgeManifest = {
   }>;
 };
 
+type ValidatedKnowledgePack = {
+  manifest: KnowledgeManifest;
+  searchIndex: { schemaVersion: string; records: SearchRecord[] };
+  records: EvidenceRecord[];
+};
+
 describe("Stream knowledge pack", () => {
-  const active = validateKnowledgePack({
-    repoRoot: REPO_ROOT,
-    reviewId: REVIEW_ID,
-    reviewVersion: ACTIVE_VERSION,
-    requireCurrentGenerator: true,
-  }) as {
-    manifest: KnowledgeManifest;
-    searchIndex: { schemaVersion: string; records: SearchRecord[] };
-    records: EvidenceRecord[];
-  };
-  const historical = validateKnowledgePack({
-    repoRoot: REPO_ROOT,
-    reviewId: REVIEW_ID,
-    reviewVersion: HISTORICAL_VERSION,
-  }) as {
-    manifest: KnowledgeManifest;
-    searchIndex: { schemaVersion: string; records: SearchRecord[] };
-    records: EvidenceRecord[];
-  };
-  const searchById = new Map(
-    active.searchIndex.records.map((record) => [record.id, record])
-  );
-  const evidenceById = new Map(
-    active.records.map((record) => [record.id, record])
-  );
+  let active: ValidatedKnowledgePack;
+  let historical: ValidatedKnowledgePack;
+  let searchById: Map<string, SearchRecord>;
+  let evidenceById: Map<string, EvidenceRecord>;
+
+  beforeAll(() => {
+    active = validateKnowledgePack({
+      repoRoot: REPO_ROOT,
+      reviewId: REVIEW_ID,
+      reviewVersion: ACTIVE_VERSION,
+      requireCurrentGenerator: true,
+    }) as ValidatedKnowledgePack;
+    historical = validateKnowledgePack({
+      repoRoot: REPO_ROOT,
+      reviewId: REVIEW_ID,
+      reviewVersion: HISTORICAL_VERSION,
+    }) as ValidatedKnowledgePack;
+    searchById = new Map(
+      active.searchIndex.records.map((record) => [record.id, record])
+    );
+    evidenceById = new Map(active.records.map((record) => [record.id, record]));
+  });
 
   it("carries versioned identity, integrity, counts, and deterministic paths", () => {
     expect(active.manifest).toMatchObject({
@@ -244,6 +257,58 @@ describe("Stream knowledge pack", () => {
     );
   });
 
+  it("describes StreamSplitWallet observations for native and ERC-20 assets", () => {
+    const syncAsset = evidenceById.get(
+      "declaration:smart-contracts/StreamSplitWallet.sol:StreamSplitWallet#function:0x833a782a"
+    );
+    const currentBalance = evidenceById.get(
+      "declaration:smart-contracts/StreamSplitWallet.sol:StreamSplitWallet#function:_currentBalance(address)"
+    );
+
+    expect(syncAsset?.summary).toContain("supported asset");
+    expect(syncAsset?.summary).toContain("nonzero address");
+    expect(syncAsset?.technical?.declaration?.natspec).toBe(syncAsset?.summary);
+    expect(currentBalance?.summary).toContain("address(0)");
+    expect(currentBalance?.summary).toContain("ERC-20");
+  });
+
+  it("redacts test signing-key values while preserving declaration metadata", () => {
+    for (const pack of [active, historical]) {
+      const signingKeys = pack.records.filter((record) =>
+        /(?:private.*key|signer.*key)/i.test(record.name ?? "")
+      );
+      expect(signingKeys.length).toBeGreaterThan(0);
+      for (const record of signingKeys) {
+        expect(record.technical?.declaration?.valueSource).toBeUndefined();
+        expect(record.name).toBeTruthy();
+        expect(record.sourceLink).toBeTruthy();
+      }
+    }
+  });
+
+  it("links inherited ABI errors from their containing definitions", () => {
+    const definitionId =
+      "definition:test/StreamGovernanceBootstrap.t.sol:StreamGovernanceSSTORE2ReadHarness";
+    const errorId =
+      "declaration:smart-contracts/SSTORE2.sol:SSTORE2#error:0xd8415944";
+
+    for (const pack of [active, historical]) {
+      const harness = pack.records.find((record) => record.id === definitionId);
+      expect(harness?.technical?.abiSurfaceCounts?.errors).toBe(1);
+      expect(harness?.relationships?.relatedDeclarationIds).toContain(errorId);
+      expect(pack.records.some((record) => record.id === errorId)).toBe(true);
+    }
+  });
+
+  it("preserves compound editorial terms without Markdown wrap spaces", () => {
+    const testEvidence = evidenceById.get(
+      "editorial:security-testing-and-known-limitations:test-evidence"
+    );
+
+    expect(testEvidence?.text).toContain("signed-Drop-to-MintManager");
+    expect(testEvidence?.text).not.toContain("signed-Drop-to- MintManager");
+  });
+
   it("indexes functions, events, errors, topics, selectors, and source classifications", () => {
     const bidderEvent = active.searchIndex.records.find(
       (record) =>
@@ -358,5 +423,42 @@ describe("Stream knowledge pack", () => {
       expect(parsed.schemaVersion).toBe(KNOWLEDGE_SHARD_SCHEMA);
       expect(parsed.reviewVersion).toBe(ACTIVE_VERSION);
     }
+  });
+
+  it("fails with an actionable error for malformed shard manifests", () => {
+    const temporaryRoot = fs.mkdtempSync(
+      path.join(os.tmpdir(), "stream-knowledge-manifest-")
+    );
+    try {
+      const manifest = JSON.parse(
+        fs.readFileSync(path.join(KNOWLEDGE_ROOT, "manifest.json"), "utf8")
+      ) as Record<string, unknown>;
+      manifest["recordShards"] = null;
+      fs.writeFileSync(
+        path.join(temporaryRoot, "manifest.json"),
+        `${JSON.stringify(manifest, null, 2)}\n`
+      );
+
+      expect(() =>
+        validateKnowledgePack({
+          repoRoot: REPO_ROOT,
+          reviewId: REVIEW_ID,
+          reviewVersion: ACTIVE_VERSION,
+          knowledgeRootOverride: temporaryRoot,
+        })
+      ).toThrow("knowledge manifest record shards are invalid");
+    } finally {
+      fs.rmSync(temporaryRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("routes standalone knowledge generation through the artifact lock", () => {
+    const packageJson = JSON.parse(
+      fs.readFileSync(path.join(REPO_ROOT, "package.json"), "utf8")
+    ) as { scripts: Record<string, string> };
+
+    expect(packageJson.scripts["public-review:knowledge"]).toContain(
+      "stream-review-artifacts.cjs --knowledge-only"
+    );
   });
 });

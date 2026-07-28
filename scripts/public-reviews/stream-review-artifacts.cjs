@@ -45,17 +45,33 @@ function runNode(script, args) {
 
 function main(argv = process.argv.slice(2)) {
   const checkOnly = argv.includes("--check");
+  const knowledgeOnly = argv.includes("--knowledge-only");
+  const refreshRetained = argv.includes("--refresh-retained");
   invariant(
-    argv.every((argument) => argument === "--check"),
-    `Unknown argument: ${argv.find((argument) => argument !== "--check")}`
+    argv.every((argument) =>
+      ["--check", "--knowledge-only", "--refresh-retained"].includes(argument)
+    ),
+    `Unknown argument: ${argv.find(
+      (argument) =>
+        !["--check", "--knowledge-only", "--refresh-retained"].includes(
+          argument
+        )
+    )}`
+  );
+  invariant(
+    !(checkOnly && refreshRetained),
+    "--check cannot be combined with --refresh-retained."
   );
   const releaseLock = acquireLock();
   try {
-    runNode(path.join(__dirname, "solidity-reference.cjs"), [
-      ...(checkOnly ? ["--check"] : []),
-    ]);
+    if (!knowledgeOnly) {
+      runNode(path.join(__dirname, "solidity-reference.cjs"), [
+        ...(checkOnly ? ["--check"] : []),
+      ]);
+    }
     runNode(path.join(__dirname, "stream-knowledge.cjs"), [
       ...(checkOnly ? ["--check"] : []),
+      ...(refreshRetained ? ["--refresh-retained"] : []),
     ]);
   } finally {
     releaseLock();
