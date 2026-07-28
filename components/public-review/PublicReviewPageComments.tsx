@@ -8,6 +8,7 @@ import { useMemo } from "react";
 import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
+import { PublicReviewLedgerWarnings } from "@/components/public-review/PublicReviewLedgerWarnings";
 import { usePublicReviewCommentPanelOpen } from "@/components/public-review/PublicReviewReadingLayout";
 import { formatDate, formatInteger, formatTime } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -17,6 +18,7 @@ import {
   dedupePublicReviewLedgerRecords,
   fetchPublicReviewLedgerPage,
   getPublicReviewLedgerQueryKey,
+  isPublicReviewRecordForPage,
   PUBLIC_REVIEW_LEDGER_PAGE_SIZE,
   type PublicReviewLedgerApi,
 } from "@/services/api/public-review/ledger";
@@ -25,6 +27,7 @@ import type {
   PublicReviewDiscussionDestination,
   PublicReviewFeedbackConfig,
   PublicReviewPageContext,
+  PublicReviewReferenceSelection,
 } from "@/services/api/public-review/types";
 
 export function PublicReviewPageComments({
@@ -34,6 +37,7 @@ export function PublicReviewPageComments({
   locale,
   page,
   pageSize = PUBLIC_REVIEW_LEDGER_PAGE_SIZE,
+  referenceSelection,
   sections,
 }: {
   readonly api?: PublicReviewLedgerApi | undefined;
@@ -42,6 +46,7 @@ export function PublicReviewPageComments({
   readonly locale: SupportedLocale;
   readonly page: PublicReviewPageContext;
   readonly pageSize?: number | undefined;
+  readonly referenceSelection?: PublicReviewReferenceSelection | undefined;
   readonly sections: readonly PublicReviewSectionDefinition[];
 }) {
   const isPanelOpen = usePublicReviewCommentPanelOpen();
@@ -69,8 +74,10 @@ export function PublicReviewPageComments({
       dedupePublicReviewLedgerRecords(
         ledgerQuery.data?.pages.flatMap((ledgerPage) => ledgerPage.records) ??
           []
-      ).filter((record) => record.pageId === page.pageId),
-    [ledgerQuery.data, page.pageId]
+      ).filter((record) =>
+        isPublicReviewRecordForPage({ page, record, referenceSelection })
+      ),
+    [ledgerQuery.data, page, referenceSelection]
   );
   const warnings = useMemo(
     () =>
@@ -89,13 +96,11 @@ export function PublicReviewPageComments({
             })}
       </output>
 
-      {warnings.length > 0 ? (
-        <p className="tw-mb-0 tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-amber-500/30 tw-bg-amber-950/20 tw-p-3 tw-text-xs tw-leading-5 tw-text-amber-100">
-          {t(locale, "publicReview.ledger.warning", {
-            count: formatInteger(locale, warnings.length),
-          })}
-        </p>
-      ) : null}
+      <PublicReviewLedgerWarnings
+        className="tw-mt-3"
+        locale={locale}
+        warnings={warnings}
+      />
 
       {ledgerQuery.isLoading ? (
         <div aria-hidden="true" className="tw-mt-4 tw-space-y-2 tw-py-3">

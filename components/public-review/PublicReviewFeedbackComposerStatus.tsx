@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { RefObject } from "react";
 
+import DropPartMarkdown from "@/components/drops/view/part/DropPartMarkdown";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
@@ -114,20 +115,24 @@ export function FeedbackPreview({
   formId,
   locale,
   preview,
+  previewRef,
 }: {
   readonly formId: string;
   readonly locale: SupportedLocale;
   readonly preview: string | null;
+  readonly previewRef: RefObject<HTMLElement | null>;
 }) {
   if (preview === null) {
     return null;
   }
   return (
     <section
+      ref={previewRef}
       aria-labelledby={`${formId}-preview`}
       aria-atomic="true"
       aria-live="polite"
       role="status"
+      tabIndex={-1}
       className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-p-4"
     >
       <h3
@@ -136,8 +141,16 @@ export function FeedbackPreview({
       >
         {t(locale, "publicReview.feedback.previewHeading")}
       </h3>
-      <div className="tw-mb-0 tw-mt-3 tw-whitespace-pre-wrap tw-break-words tw-font-sans tw-text-sm tw-leading-6 tw-text-iron-300">
-        {preview}
+      <div className="tw-mt-3 tw-min-w-0 tw-text-sm tw-leading-6 tw-text-iron-300">
+        <DropPartMarkdown
+          hideLinkPreviews
+          mentionedUsers={[]}
+          mentionedWaves={[]}
+          onQuoteClick={() => undefined}
+          partContent={preview}
+          referencedNfts={[]}
+          textSize="sm"
+        />
       </div>
     </section>
   );

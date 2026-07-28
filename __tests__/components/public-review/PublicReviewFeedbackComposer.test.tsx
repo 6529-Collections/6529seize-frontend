@@ -30,6 +30,13 @@ jest.mock("next/link", () => ({
   ),
 }));
 
+jest.mock("@/components/drops/view/part/DropPartMarkdown", () => ({
+  __esModule: true,
+  default: ({ partContent }: { readonly partContent: string }) => (
+    <div>{partContent}</div>
+  ),
+}));
+
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
 }));

@@ -427,6 +427,7 @@ export default function PublicReviewFeedbackComposer({
 }: PublicReviewFeedbackComposerProps) {
   const formId = useId();
   const commentRef = useRef<HTMLTextAreaElement>(null);
+  const previewRef = useRef<HTMLElement>(null);
   const successRef = useRef<HTMLOutputElement>(null);
   const referenceStatusId = `${formId}-reference-status`;
   const {
@@ -464,7 +465,20 @@ export default function PublicReviewFeedbackComposer({
     }
   };
   const previewAndFocusError = (): void => {
-    if (!handlePreview() && !draft.comment.trim()) {
+    if (handlePreview()) {
+      window.setTimeout(() => {
+        previewRef.current?.focus({ preventScroll: true });
+        const reducedMotionQuery =
+          typeof window.matchMedia === "function"
+            ? window.matchMedia("(prefers-reduced-motion: reduce)")
+            : null;
+        const prefersReducedMotion = reducedMotionQuery?.matches === true;
+        previewRef.current?.scrollIntoView({
+          behavior: prefersReducedMotion ? "auto" : "smooth",
+          block: "nearest",
+        });
+      }, 0);
+    } else if (!draft.comment.trim()) {
       window.setTimeout(() => commentRef.current?.focus(), 0);
     }
   };
@@ -645,23 +659,26 @@ export default function PublicReviewFeedbackComposer({
                   />
                 </label>
               ))}
-
-              <button
-                type="button"
-                disabled={busy || !referenceReady}
-                onClick={previewAndFocusError}
-                className="tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-200 hover:tw-bg-white/[0.025] hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 disabled:tw-opacity-60"
-              >
-                {t(locale, "publicReview.feedback.preview")}
-              </button>
-
-              <FeedbackPreview
-                formId={formId}
-                locale={locale}
-                preview={preview}
-              />
             </div>
           </details>
+
+          <div className="tw-space-y-3">
+            <button
+              type="button"
+              disabled={busy || !referenceReady}
+              onClick={previewAndFocusError}
+              className="tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-200 hover:tw-bg-white/[0.025] hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 disabled:tw-opacity-60"
+            >
+              {t(locale, "publicReview.feedback.preview")}
+            </button>
+
+            <FeedbackPreview
+              formId={formId}
+              locale={locale}
+              preview={preview}
+              previewRef={previewRef}
+            />
+          </div>
 
           <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-[#050506] tw-pb-3 tw-pt-3">
             <button

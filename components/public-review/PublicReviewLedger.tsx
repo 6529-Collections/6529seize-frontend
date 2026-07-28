@@ -4,6 +4,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useId, useMemo, useState } from "react";
 
+import { PublicReviewLedgerWarnings } from "@/components/public-review/PublicReviewLedgerWarnings";
 import type { SupportedLocale } from "@/i18n/locales";
 import {
   compareLocalized,
@@ -317,13 +318,7 @@ export default function PublicReviewLedger({
           : ""}
       </output>
 
-      {warnings.length > 0 ? (
-        <p className="tw-mb-0 tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-amber-500/40 tw-bg-amber-950/20 tw-p-3 tw-text-sm tw-text-amber-100">
-          {t(locale, "publicReview.ledger.warning", {
-            count: formatInteger(locale, warnings.length),
-          })}
-        </p>
-      ) : null}
+      <PublicReviewLedgerWarnings locale={locale} warnings={warnings} />
 
       {ledgerQuery.isPending ? (
         <p className="tw-mb-0 tw-mt-6 tw-text-iron-300">

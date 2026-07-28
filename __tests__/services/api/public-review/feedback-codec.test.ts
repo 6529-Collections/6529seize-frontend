@@ -198,6 +198,9 @@ describe("public review feedback codec", () => {
     expect(payload.parts[0]!.content).toContain(
       `/blob/${COMMIT}/src/Stream.sol#L42-L45`
     );
+    expect(payload.parts[0]!.content).toContain(
+      "**Page:** [Architecture](https://staging.6529.io/stream/review/architecture)"
+    );
   });
 
   it("extracts the primary comment without exposing review metadata", () => {
@@ -207,9 +210,9 @@ describe("public review feedback codec", () => {
       throw new Error("Expected encoded feedback to contain a text part.");
     }
 
-    expect(
-      getPublicReviewFeedbackPrimaryComment(primaryContent)
-    ).toBe(draft.comment);
+    expect(getPublicReviewFeedbackPrimaryComment(primaryContent)).toBe(
+      draft.comment
+    );
     expect(
       getPublicReviewFeedbackPrimaryComment("  Plain Wave comment  ")
     ).toBe("Plain Wave comment");
@@ -490,7 +493,7 @@ describe("public review feedback codec", () => {
     ).toThrow("checksum URN");
   });
 
-  it("round-trips canonical metadata and rejects reordered fields", () => {
+  it("round-trips metadata independently of API row order", () => {
     const payload = encode();
     const decoded = decodePublicReviewFeedbackMetadata({
       config,
@@ -514,7 +517,7 @@ describe("public review feedback codec", () => {
         severity: "critical",
       },
     });
-    expect(reordered.ok).toBe(false);
+    expect(reordered).toEqual(decoded);
   });
 
   it("rejects non-canonical context JSON even when its values match", () => {

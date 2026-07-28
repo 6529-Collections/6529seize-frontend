@@ -5,7 +5,9 @@ import type { ReactNode } from "react";
 
 import { PublicReviewCodeFeedback } from "@/components/public-review/PublicReviewCodeFeedback";
 import PublicReviewFeedbackComposer from "@/components/public-review/PublicReviewFeedbackComposer";
+import { PublicReviewHashScrollRestorer } from "@/components/public-review/PublicReviewHashScrollRestorer";
 import { PublicReviewReferenceShell } from "@/components/public-review/PublicReviewReferenceShell";
+import { PublicReviewTechnicalFeedback } from "@/components/public-review/PublicReviewTechnicalFeedback";
 import {
   SolidityDeclarationView,
   SolidityInterfaceView,
@@ -214,6 +216,54 @@ function getDefinitionSelection(
   };
 }
 
+function getDeclarationSelection({
+  contract,
+  declaration,
+  sourcePath,
+}: {
+  readonly contract?: string | undefined;
+  readonly declaration: {
+    readonly canonicalSignature: string | null;
+    readonly displaySignature: string;
+    readonly range: {
+      readonly lineEnd: number;
+      readonly lineStart: number;
+      readonly snippetSha256: string;
+      readonly sourceSha256: string;
+    };
+  };
+  readonly sourcePath: string;
+}): PublicReviewCodeSelection {
+  return {
+    kind: "code",
+    path: sourcePath,
+    sourceSha256: declaration.range.sourceSha256,
+    lineStart: declaration.range.lineStart,
+    lineEnd: declaration.range.lineEnd,
+    ...(contract ? { contract } : {}),
+    declaration: declaration.canonicalSignature ?? declaration.displaySignature,
+    snippetSha256: declaration.range.snippetSha256,
+  };
+}
+
+function getSourceSelection({
+  lineCount,
+  path,
+  sourceSha256,
+}: {
+  readonly lineCount: number;
+  readonly path: string;
+  readonly sourceSha256: string;
+}): PublicReviewCodeSelection {
+  return {
+    kind: "code",
+    path,
+    sourceSha256,
+    lineStart: 1,
+    lineEnd: lineCount,
+  };
+}
+
 function getEditorialHref(routeVersion: string | undefined): string {
   return routeVersion
     ? `/reviews/${STREAM_REVIEW_SLUG}/versions/${routeVersion}`
@@ -309,6 +359,7 @@ function ReferenceShell({
       }}
       title={title}
     >
+      <PublicReviewHashScrollRestorer />
       {children}
       {feedbackSlot !== undefined && feedbackSlot !== null ? (
         <div
@@ -351,12 +402,18 @@ export async function renderStreamSolidityReferenceOverview({
       routeVersion={routeVersion}
       manifest={manifest}
       feedbackSlot={
-        <PublicReviewFeedbackComposer
-          locale={DEFAULT_LOCALE}
+        <PublicReviewTechnicalFeedback
           config={feedback.config}
           destination={feedback.destination}
           page={feedback.page}
-        />
+        >
+          <PublicReviewFeedbackComposer
+            locale={DEFAULT_LOCALE}
+            config={feedback.config}
+            destination={feedback.destination}
+            page={feedback.page}
+          />
+        </PublicReviewTechnicalFeedback>
       }
       title={pageTitle}
       version={version}
@@ -402,6 +459,7 @@ export async function renderStreamSolidityDefinition({
     pageTitle,
     sourcePaths: [indexEntry.sourcePath],
   });
+  const referenceSelection = getDefinitionSelection(indexEntry);
   return (
     <ReferenceShell
       description={t(
@@ -411,13 +469,20 @@ export async function renderStreamSolidityDefinition({
       routeVersion={routeVersion}
       manifest={manifest}
       feedbackSlot={
-        <PublicReviewFeedbackComposer
-          locale={DEFAULT_LOCALE}
+        <PublicReviewTechnicalFeedback
           config={feedback.config}
           destination={feedback.destination}
           page={feedback.page}
-          referenceSelection={getDefinitionSelection(indexEntry)}
-        />
+          referenceSelection={referenceSelection}
+        >
+          <PublicReviewFeedbackComposer
+            locale={DEFAULT_LOCALE}
+            config={feedback.config}
+            destination={feedback.destination}
+            page={feedback.page}
+            referenceSelection={referenceSelection}
+          />
+        </PublicReviewTechnicalFeedback>
       }
       title={pageTitle}
       version={version}
@@ -479,6 +544,11 @@ export async function renderStreamSolidityDeclaration({
     pageTitle,
     sourcePaths: [indexEntry.sourcePath],
   });
+  const pageReferenceSelection = getDeclarationSelection({
+    contract: indexEntry.name,
+    declaration,
+    sourcePath: indexEntry.sourcePath,
+  });
   return (
     <ReferenceShell
       description={t(
@@ -500,6 +570,7 @@ export async function renderStreamSolidityDeclaration({
               config={feedback.config}
               destination={feedback.destination}
               page={feedback.page}
+              pageReferenceSelection={pageReferenceSelection}
             />
           )
         }
@@ -553,6 +624,10 @@ export async function renderStreamSolidityTopLevelDeclaration({
     pageTitle,
     sourcePaths: [indexEntry.sourcePath],
   });
+  const pageReferenceSelection = getDeclarationSelection({
+    declaration,
+    sourcePath: indexEntry.sourcePath,
+  });
   return (
     <ReferenceShell
       description={t(
@@ -573,6 +648,7 @@ export async function renderStreamSolidityTopLevelDeclaration({
               config={feedback.config}
               destination={feedback.destination}
               page={feedback.page}
+              pageReferenceSelection={pageReferenceSelection}
             />
           )
         }
@@ -615,6 +691,7 @@ export async function renderStreamSolidityInterface({
     pageTitle,
     sourcePaths: [indexEntry.sourcePath],
   });
+  const referenceSelection = getDefinitionSelection(indexEntry);
   return (
     <ReferenceShell
       description={t(
@@ -624,13 +701,20 @@ export async function renderStreamSolidityInterface({
       routeVersion={routeVersion}
       manifest={manifest}
       feedbackSlot={
-        <PublicReviewFeedbackComposer
-          locale={DEFAULT_LOCALE}
+        <PublicReviewTechnicalFeedback
           config={feedback.config}
           destination={feedback.destination}
           page={feedback.page}
-          referenceSelection={getDefinitionSelection(indexEntry)}
-        />
+          referenceSelection={referenceSelection}
+        >
+          <PublicReviewFeedbackComposer
+            locale={DEFAULT_LOCALE}
+            config={feedback.config}
+            destination={feedback.destination}
+            page={feedback.page}
+            referenceSelection={referenceSelection}
+          />
+        </PublicReviewTechnicalFeedback>
       }
       title={pageTitle}
       version={version}
@@ -672,6 +756,11 @@ export async function renderStreamSoliditySource({
     pageTitle,
     sourcePaths: [result.document.file.path],
   });
+  const pageReferenceSelection = getSourceSelection({
+    lineCount: result.document.file.lineCount,
+    path: result.document.file.path,
+    sourceSha256: result.document.file.sha256,
+  });
   return (
     <ReferenceShell
       description={t(
@@ -692,6 +781,7 @@ export async function renderStreamSoliditySource({
               config={feedback.config}
               destination={feedback.destination}
               page={feedback.page}
+              pageReferenceSelection={pageReferenceSelection}
             />
           )
         }
