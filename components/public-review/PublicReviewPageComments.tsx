@@ -113,7 +113,7 @@ export function PublicReviewPageComments({
           className="tw-mt-3 tw-rounded-lg tw-bg-primary-400/[0.025] tw-px-3 tw-py-2.5"
           role="alert"
         >
-          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-300">
             {t(locale, "publicReview.comments.loadError")}
           </p>
           <button
@@ -183,7 +183,7 @@ export function PublicReviewPageComments({
                       fallbackContent={
                         <span
                           aria-hidden="true"
-                          className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400"
+                          className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-300"
                         >
                           {author.slice(0, 1)}
                         </span>
@@ -191,7 +191,7 @@ export function PublicReviewPageComments({
                     />
                     <div className="tw-min-w-0 tw-flex-1">
                       <div className="tw-flex tw-items-center tw-gap-1.5">
-                        <p className="tw-m-0 tw-min-w-0 tw-text-[0.68rem] tw-leading-4 tw-text-iron-500">
+                        <p className="tw-m-0 tw-min-w-0 tw-text-[0.68rem] tw-leading-4 tw-text-iron-400">
                           {t(locale, "publicReview.comments.byline", {
                             author,
                             date: formatDate(locale, record.createdAt),
@@ -200,7 +200,7 @@ export function PublicReviewPageComments({
                         </p>
                       </div>
                       {sectionLabel ? (
-                        <p className="tw-mb-0 tw-mt-2 tw-text-[0.68rem] tw-font-medium tw-leading-4 tw-text-iron-400">
+                        <p className="tw-mb-0 tw-mt-2 tw-text-[0.68rem] tw-font-medium tw-leading-4 tw-text-iron-300">
                           {t(locale, "publicReview.feedback.sectionContext", {
                             section: sectionLabel,
                           })}
@@ -214,7 +214,7 @@ export function PublicReviewPageComments({
                         <span aria-hidden="true" className="tw-text-iron-700">
                           ·
                         </span>
-                        <span className="tw-text-iron-500">
+                        <span className="tw-text-iron-400">
                           {severityLabel}
                         </span>
                       </div>

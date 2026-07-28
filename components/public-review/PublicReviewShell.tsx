@@ -63,7 +63,7 @@ function PublicReviewPageStepper({
             aria-hidden="true"
           />
           <span>
-            <span className="tw-block tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
+            <span className="tw-block tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-400">
               {t(DEFAULT_LOCALE, "publicReview.navigation.previous")}
             </span>
             <span className="tw-mt-1 tw-block tw-text-[0.95rem] tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-200 tw-ease-out group-hover:tw-text-primary-300">
@@ -80,7 +80,7 @@ function PublicReviewPageStepper({
           className="tw-group tw-inline-flex tw-min-h-11 tw-items-center tw-justify-end tw-gap-3 tw-justify-self-end tw-text-right tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-white"
         >
           <span>
-            <span className="tw-block tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
+            <span className="tw-block tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-400">
               {t(DEFAULT_LOCALE, "publicReview.navigation.next")}
             </span>
             <span className="tw-mt-1 tw-block tw-text-[0.95rem] tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-200 tw-ease-out group-hover:tw-text-primary-300">
@@ -140,7 +140,10 @@ export function PublicReviewShell({
             feedbackAvailable={review.feedbackAvailable}
             panel={feedbackSlot}
             toolbar={
-              <p className="tw-m-0 tw-font-mono tw-text-[0.68rem] tw-font-medium tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
+              <p
+                key="review-page-position"
+                className="tw-m-0 tw-font-mono tw-text-[0.68rem] tw-font-medium tw-uppercase tw-tracking-[0.12em] tw-text-iron-400"
+              >
                 {t(DEFAULT_LOCALE, "publicReview.navigation.pagePosition", {
                   current: formatInteger(DEFAULT_LOCALE, currentPageNumber),
                   total: formatInteger(
@@ -151,7 +154,10 @@ export function PublicReviewShell({
               </p>
             }
             content={
-              <div className="tw-mx-auto tw-w-full tw-max-w-[68rem] tw-px-4 tw-pb-20 sm:tw-px-7 lg:tw-px-10">
+              <div
+                key="review-reading-content"
+                className="tw-mx-auto tw-w-full tw-max-w-[68rem] tw-px-4 tw-pb-20 sm:tw-px-7 lg:tw-px-10"
+              >
                 <div className="tw-pt-6 sm:tw-pt-8">
                   <PublicReviewStatusBanner
                     review={review}
@@ -169,7 +175,7 @@ export function PublicReviewShell({
                   <h1 className="tw-mb-0 tw-mt-4 tw-max-w-3xl tw-text-4xl tw-font-semibold tw-leading-[1.05] tw-tracking-[-0.03em] tw-text-white sm:tw-text-5xl">
                     {t(DEFAULT_LOCALE, page.titleKey)}
                   </h1>
-                  <p className="tw-mb-0 tw-mt-5 tw-max-w-3xl tw-text-lg tw-font-light tw-leading-8 tw-text-iron-400">
+                  <p className="tw-mb-0 tw-mt-5 tw-max-w-3xl tw-text-lg tw-font-normal tw-leading-8 tw-text-iron-300">
                     {t(DEFAULT_LOCALE, page.summaryKey)}
                   </p>
                   <div className="tw-mt-8 tw-flex tw-flex-wrap tw-items-center tw-gap-x-7 tw-gap-y-1 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08]">
