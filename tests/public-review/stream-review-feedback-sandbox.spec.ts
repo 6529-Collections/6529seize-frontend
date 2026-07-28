@@ -71,6 +71,15 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
       feedbackPanel.getByText("No comments yet for this page.")
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
 
+    const composerToggle = feedbackPanel.getByText("Send feedback", {
+      exact: true,
+    });
+    await expect(composerToggle).toBeVisible();
+    await expect(
+      feedbackPanel.locator("textarea[data-public-review-feedback-primary]")
+    ).toBeHidden();
+    await composerToggle.click();
+
     const comment = feedbackPanel.locator(
       "textarea[data-public-review-feedback-primary]"
     );

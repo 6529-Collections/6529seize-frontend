@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 import { PublicReviewEditorialFeedback } from "@/components/public-review/PublicReviewEditorialFeedback";
 import type {
@@ -45,7 +45,7 @@ const page: PublicReviewPageContext = {
 };
 
 describe("PublicReviewEditorialFeedback", () => {
-  it("fills the feedback rail at the same breakpoint that makes it sticky", () => {
+  it("fills the feedback rail and reveals the composer on demand", () => {
     render(
       <PublicReviewEditorialFeedback
         config={config}
@@ -58,6 +58,14 @@ describe("PublicReviewEditorialFeedback", () => {
     expect(
       screen.getByTestId("comments").parentElement?.parentElement
     ).toHaveClass("@[760px]:tw-h-full");
+    const disclosure = screen
+      .getByText("Send feedback", { exact: true })
+      .closest("details");
+    expect(disclosure).not.toHaveAttribute("open");
+
+    fireEvent.click(screen.getByText("Send feedback", { exact: true }));
+
+    expect(disclosure).toHaveAttribute("open");
     expect(screen.getByRole("combobox")).toHaveClass("tw-ring-iron-600");
     expect(screen.getByTestId("composer")).toBeInTheDocument();
   });
