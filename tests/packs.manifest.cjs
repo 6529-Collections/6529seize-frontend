@@ -59,9 +59,6 @@ const PUBLIC_REVIEW_SANDBOX_ENV = {
 const READONLY_SPECS = {
   social: ["tests/social/waves-profile-readonly.spec.ts"],
   inputDetection: ["tests/input/win8-touch-latch-readonly.spec.ts"],
-  nativeDropActions: [
-    "tests/surfaces/native-ipad-drop-actions-readonly.spec.ts",
-  ],
   media: ["tests/media/media-mint-detail-readonly.spec.ts"],
   delegation: ["tests/delegation/delegation-readonly.spec.ts"],
   networkOpenData: [
@@ -141,8 +138,7 @@ function productionPack(
   description,
   specs,
   triggers = ["cron", "manual"],
-  timeoutMinutes = 15,
-  tweaks = {}
+  timeoutMinutes = 15
 ) {
   return {
     scriptKey: `test:e2e:production:${suffix}`,
@@ -153,10 +149,9 @@ function productionPack(
     triggers,
     env: PRODUCTION_READONLY_ENV,
     specs,
-    ...tweaks,
-    projects: tweaks.projects ?? [DESKTOP],
+    projects: [DESKTOP],
     workers: 1,
-    timeoutMinutes: tweaks.timeoutMinutes ?? timeoutMinutes,
+    timeoutMinutes,
   };
 }
 
@@ -359,13 +354,6 @@ const PACKS = [
     ["tests/surfaces/native-shell-readonly.spec.ts"],
     { projects: SIMULATION_PROJECTS }
   ),
-  sandboxPack(
-    "test:e2e:native-drop-actions-sandbox",
-    "Wide native iPad drop-action availability with desktop input signals.",
-    READONLY_SPECS.nativeDropActions,
-    COMPOSER_SANDBOX_ENV,
-    ["capacitor-ios-sim"]
-  ),
   localPack(
     "test:e2e:wcag-i18n",
     "WCAG and i18n public-route evidence pack.",
@@ -401,13 +389,6 @@ const PACKS = [
     "Staging Windows touch-input detection contract.",
     READONLY_SPECS.inputDetection,
     { projects: [DESKTOP] }
-  ),
-  stagingPack(
-    "native-drop-actions-readonly",
-    "native-drop-actions-readonly",
-    "Staging wide native iPad drop-action availability.",
-    READONLY_SPECS.nativeDropActions,
-    { projects: ["capacitor-ios-sim"] }
   ),
   stagingPack(
     "public-groups-tools-readonly",
@@ -468,14 +449,6 @@ const PACKS = [
     "social-readonly",
     "Production waves and profile read-only canary.",
     READONLY_SPECS.social
-  ),
-  productionPack(
-    "native-drop-actions-readonly",
-    "Production wide native iPad drop-action canary.",
-    READONLY_SPECS.nativeDropActions,
-    ["post-deploy", "manual"],
-    15,
-    { projects: ["capacitor-ios-sim"] }
   ),
   productionPack(
     "media-readonly",
