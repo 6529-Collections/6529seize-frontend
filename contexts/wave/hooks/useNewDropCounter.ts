@@ -137,13 +137,13 @@ const reconcileNewDropsCounts = ({
 
   waves.forEach((wave) => {
     const localCount = newDropsCounts[wave.id];
-    const serverLatestDropTimestamp = wave.latestDropTimestamp;
+    const serverLatestReadTimestamp = wave.latestReadTimestamp;
     if (
       !localCount ||
       localCount.count <= 0 ||
       localCount.latestDropTimestamp === null ||
-      typeof serverLatestDropTimestamp !== "number" ||
-      serverLatestDropTimestamp < localCount.latestDropTimestamp
+      typeof serverLatestReadTimestamp !== "number" ||
+      serverLatestReadTimestamp < localCount.latestDropTimestamp
     ) {
       return;
     }
@@ -153,7 +153,10 @@ const reconcileNewDropsCounts = ({
     }
     next[wave.id] = {
       count: 0,
-      latestDropTimestamp: serverLatestDropTimestamp,
+      latestDropTimestamp: getNewestTimestamp(
+        localCount.latestDropTimestamp,
+        wave.latestDropTimestamp ?? null
+      ),
       firstUnreadSerialNo: null,
     };
   });
@@ -359,10 +362,10 @@ function useNewDropCounter(
 
         const waveId = message.wave.id;
         const wave = waves.find((w) => w.id === waveId);
-        const serverSnapshotTimestamp = wave?.latestDropTimestamp;
+        const serverLatestReadTimestamp = wave?.latestReadTimestamp;
         if (
-          typeof serverSnapshotTimestamp === "number" &&
-          message.created_at <= serverSnapshotTimestamp
+          typeof serverLatestReadTimestamp === "number" &&
+          message.created_at <= serverLatestReadTimestamp
         ) {
           updateNewDropsCountsForMessage(
             waveId,

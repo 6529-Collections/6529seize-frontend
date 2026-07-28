@@ -87,16 +87,17 @@ describe("useNewDropCounter", () => {
     expect(result.current.newDropsCounts["wave2"]?.count).toBe(0);
   });
 
-  it("reconciles websocket counts when the server snapshot covers the drop", () => {
+  it("keeps websocket unread state until the server read watermark covers it", () => {
     const refetch = jest.fn();
     const { result, rerender } = renderHook(
-      ({ latestDropTimestamp, unreadDropsCount }) =>
+      ({ latestDropTimestamp, latestReadTimestamp, unreadDropsCount }) =>
         useNewDropCounter(
           null,
           [
             {
               id: "wave2",
               latestDropTimestamp,
+              latestReadTimestamp,
               unreadDropsCount,
             },
           ] as any,
@@ -106,6 +107,7 @@ describe("useNewDropCounter", () => {
         wrapper,
         initialProps: {
           latestDropTimestamp: 20,
+          latestReadTimestamp: 20,
           unreadDropsCount: 0,
         },
       }
@@ -120,6 +122,19 @@ describe("useNewDropCounter", () => {
 
     rerender({
       latestDropTimestamp: 31,
+      latestReadTimestamp: 20,
+      unreadDropsCount: 0,
+    });
+
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 1,
+      latestDropTimestamp: 30,
+      firstUnreadSerialNo: 5,
+    });
+
+    rerender({
+      latestDropTimestamp: 31,
+      latestReadTimestamp: 31,
       unreadDropsCount: 0,
     });
 

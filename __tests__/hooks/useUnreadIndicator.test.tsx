@@ -39,7 +39,7 @@ describe("useUnreadIndicator", () => {
     const { result } = renderHook(() =>
       useUnreadIndicator({ type: "notifications", handle: null })
     );
-    expect(result.current.hasUnread).toBe(false);
+    expect(result.current).toEqual({ hasUnread: false, unreadCount: 0 });
   });
 
   it("handles notifications type", () => {
@@ -49,7 +49,7 @@ describe("useUnreadIndicator", () => {
     const { result } = renderHook(() =>
       useUnreadIndicator({ type: "notifications", handle: "me" })
     );
-    expect(result.current.hasUnread).toBe(true);
+    expect(result.current).toEqual({ hasUnread: true, unreadCount: 1 });
     expect(mockUseMyStream).not.toHaveBeenCalled();
   });
 
@@ -65,7 +65,7 @@ describe("useUnreadIndicator", () => {
     const { result } = renderHook(() =>
       useUnreadIndicator({ type: "messages", handle: "me" })
     );
-    expect(result.current.hasUnread).toBe(true);
+    expect(result.current).toEqual({ hasUnread: true, unreadCount: 2 });
     expect(mockUseMyStream).not.toHaveBeenCalled();
   });
 
@@ -87,7 +87,37 @@ describe("useUnreadIndicator", () => {
       })
     );
 
-    expect(result.current.hasUnread).toBe(true);
+    expect(result.current).toEqual({ hasUnread: true, unreadCount: 1 });
     expect(mockUseMyStream).not.toHaveBeenCalled();
+  });
+
+  it("uses the larger local websocket-backed count while the summary catches up", () => {
+    mockUseUnreadDmDrops.mockReturnValue({
+      haveUnreadDmDrops: true,
+      unreadDmDrops: { count: 2 },
+      unreadDmDropsCount: 2,
+    });
+    mockUseUnreadNotifications.mockReturnValue({
+      haveUnreadNotifications: false,
+    });
+
+    const { result } = renderHook(() =>
+      useUnreadIndicator({
+        type: "messages",
+        handle: "me",
+        localDirectMessages: [
+          {
+            unreadDropsCount: 2,
+            newDropsCount: { count: 3 },
+          },
+          {
+            unreadDropsCount: 1,
+            newDropsCount: { count: 0 },
+          },
+        ],
+      })
+    );
+
+    expect(result.current).toEqual({ hasUnread: true, unreadCount: 4 });
   });
 });
