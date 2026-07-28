@@ -36,7 +36,7 @@ jobs:
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
           [[ "$OPERATION_KEY" =~ ^rb2:[A-Za-z0-9:._-]+:a[1-9][0-9]*$ ]]
           [[ "$RELEASE_BRANCH" =~ ^release-bus-v2/(staging|production|qualification)-train-[A-Za-z0-9._-]+$ ]]
-          jq -e 'type == "array" and length > 0 and all(.[]; test("^[a-f0-9]{40}$"))' <<< "$CANDIDATE_SHAS"
+          jq -e 'type == "array" and all(.[]; test("^[a-f0-9]{40}$"))' <<< "$CANDIDATE_SHAS"
       - name: Authorize exact v2 operation
         env:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
@@ -88,7 +88,12 @@ jobs:
           excluded='[]'
           while IFS= read -r sha; do
             git fetch --no-tags origin "$sha"
+            if git merge-base --is-ancestor "$sha" HEAD; then
+              echo "Candidate $sha is already included in the composition."
+              continue
+            fi
             if git merge --no-ff --no-commit "$sha"; then
+              git rev-parse --verify --quiet MERGE_HEAD >/dev/null
               git -c core.hooksPath=/dev/null commit -s \
                 -m "Release Bus v2 train $TRAIN_ID: merge frontend candidate" \
                 -m "Candidate-SHA: $sha" \
