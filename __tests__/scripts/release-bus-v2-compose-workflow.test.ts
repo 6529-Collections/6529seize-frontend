@@ -71,7 +71,14 @@ function composeScript(): string {
   ) {
     throw new Error("Compose workflow script anchors were not preserved");
   }
-  return script;
+  return `
+# The Windows jq binary writes CRLF even inside Git Bash. Normalize its output
+# so local fixtures exercise the workflow's Ubuntu line semantics.
+jq_executable="$(command -v jq)"
+jq() {
+  "$jq_executable" "$@" | tr -d '\\r'
+}
+${script}`;
 }
 
 describe("Release Bus v2 frontend composition workflow", () => {
