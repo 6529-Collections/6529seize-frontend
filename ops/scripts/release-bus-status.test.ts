@@ -175,7 +175,7 @@ function laneStates(
       mode === "PRODUCTION" || (mode === "STAGING" && lane === "STAGING");
     const globalPaused = Boolean(byScope["ALL"]?.paused);
     const lanePaused = Boolean(byScope[lane]?.paused);
-    let reason = byScope[lane]?.reason;
+    let reason: string | null = byScope[lane]?.reason ?? null;
     if (!allowed) {
       reason = HARD_STOP_REASON;
     } else if (globalPaused) {
