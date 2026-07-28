@@ -131,7 +131,7 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
         >
           {m(locale, "about.subscriptions.overview.title")}
         </h2>
-        <p className="tw-mb-0 tw-mt-2 tw-text-base tw-font-light tw-leading-7 tw-text-iron-400">
+        <p className="tw-mb-0 tw-mt-2 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-400">
           {m(locale, "about.subscriptions.overview.intro")}
         </p>
       </div>

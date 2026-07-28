@@ -68,7 +68,7 @@ function AllowlistBackground({ locale }: { readonly locale: SupportedLocale }) {
         >
           {m(locale, "about.minting.background.title")}
         </h2>
-        <p className="tw-mb-0 tw-mt-2 tw-text-base tw-font-light tw-leading-7 tw-text-iron-400">
+        <p className="tw-mb-0 tw-mt-2 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-400">
           It might be useful to understand how we imagine the allowlist process.
           The analogy below is imperfect, but still helpful.
         </p>
@@ -199,7 +199,7 @@ function AllowlistCurrentPractices({
         >
           {m(locale, "about.minting.current.title")}
         </h2>
-        <p className="tw-mb-0 tw-mt-2 tw-text-base tw-font-light tw-leading-7 tw-text-iron-400">
+        <p className="tw-mb-0 tw-mt-2 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-400">
           This is the current process for allowlists at The Memes as of February
           2023. It is certain that the process will change in the future, as it
           has in the past, in response to new challenges.
