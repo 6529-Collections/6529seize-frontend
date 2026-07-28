@@ -6,6 +6,7 @@ import path from "node:path";
 type Pack = {
   scriptKey: string;
   alias?: string;
+  safety: string;
   environments: string[];
   triggers: string[];
   timeoutMinutes: number;
@@ -21,6 +22,7 @@ type SpawnResult = {
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const runner = require("../../scripts/e2e-packs.cjs") as {
+  assertParallelSafe: (packs: Pack[], parallel: number) => void;
   buildSpawnOptions: (pack: Pack) => {
     killSignal: string;
     maxBuffer: number;
@@ -36,6 +38,7 @@ const runner = require("../../scripts/e2e-packs.cjs") as {
     trigger: string | null;
     pack: string | null;
     artifactRoot: string | null;
+    parallel: number;
     list: boolean;
     forward: string[];
   };
@@ -44,17 +47,47 @@ const runner = require("../../scripts/e2e-packs.cjs") as {
     packs: Pack[],
     filters: { env: string | null; trigger: string | null; pack: string | null }
   ) => Pack[];
+  outputPathsForPack: (pack: Pack) => {
+    root: string;
+    testResults: string;
+    report: string;
+  };
   runPacks: (
     packs: Pack[],
     options: {
-      artifactRoot: string;
+      artifactRoot: string | null;
+      environment?: string;
+      trigger?: string;
+      parallel?: number;
       forward: string[];
-      spawn: (pack: Pack, forward: string[]) => SpawnResult;
-      cleanup: () => void;
+      spawn: (
+        pack: Pack,
+        forward: string[],
+        outputPaths: { root: string; testResults: string; report: string }
+      ) => SpawnResult | Promise<SpawnResult>;
+      cleanup: (pack: Pack) => void;
       preserve: (artifactRoot: string, pack: Pack, output: string) => string;
       prepare: (artifactRoot: string) => void;
     }
-  ) => { failedCount: number; infrastructureFailureCount: number };
+  ) => Promise<{
+    failedCount: number;
+    infrastructureFailureCount: number;
+    evidence: {
+      parallelism_requested: number;
+      worker_count: number;
+      results: Array<{ script_key: string; failure_class: string | null }>;
+    };
+  }>;
+  runProcessGroup: (
+    command: string,
+    args: string[],
+    options: {
+      cwd: string;
+      env: NodeJS.ProcessEnv;
+      maxBuffer: number;
+      timeout: number;
+    }
+  ) => Promise<SpawnResult>;
 };
 
 const ROOT = process.cwd();
@@ -64,6 +97,7 @@ const samplePacks: Pack[] = [
   {
     scriptKey: "test:e2e:staging:smoke",
     alias: "smoke",
+    safety: "readonly",
     environments: ["staging"],
     triggers: ["post-deploy", "manual"],
     timeoutMinutes: 10,
@@ -71,6 +105,7 @@ const samplePacks: Pack[] = [
   {
     scriptKey: "test:e2e:production:social-readonly",
     alias: "social-readonly",
+    safety: "readonly",
     environments: ["production"],
     triggers: ["cron", "manual"],
     timeoutMinutes: 15,
@@ -90,6 +125,8 @@ describe("manifest-driven E2E runner", () => {
         "smoke",
         "--artifact-root",
         "artifacts/e2e",
+        "--parallel",
+        "3",
         "--shard",
         "1/2",
         "--list",
@@ -99,6 +136,7 @@ describe("manifest-driven E2E runner", () => {
       trigger: "post-deploy",
       pack: "smoke",
       artifactRoot: "artifacts/e2e",
+      parallel: 3,
       list: true,
       forward: ["--shard=1/2"],
     });
@@ -110,6 +148,9 @@ describe("manifest-driven E2E runner", () => {
     );
     expect(() => runner.parseArgs(["--unknown"])).toThrow(
       'unknown argument "--unknown"'
+    );
+    expect(() => runner.parseArgs(["--parallel", "5"])).toThrow(
+      "--parallel must be between 1 and 4"
     );
   });
 
@@ -202,7 +243,7 @@ describe("manifest-driven E2E runner", () => {
     });
   });
 
-  it("continues after failures and records preserved artifacts", () => {
+  it("continues after failures and records preserved artifacts", async () => {
     const summaryDir = fs.mkdtempSync(path.join(os.tmpdir(), "e2e-packs-"));
     const summaryPath = path.join(summaryDir, "summary.md");
     const previousSummary = process.env["GITHUB_STEP_SUMMARY"];
@@ -213,8 +254,11 @@ describe("manifest-driven E2E runner", () => {
     let call = 0;
 
     try {
-      const result = runner.runPacks(samplePacks, {
+      const result = await runner.runPacks(samplePacks, {
         artifactRoot: path.join(summaryDir, "artifacts"),
+        environment: "staging",
+        trigger: "post-deploy",
+        parallel: 2,
         forward: ["--shard=1/2"],
         spawn: (_pack, forward) => {
           expect(forward).toEqual(["--shard=1/2"]);
@@ -236,12 +280,27 @@ describe("manifest-driven E2E runner", () => {
         },
         cleanup: () => undefined,
         preserve: (_artifactRoot, pack) => `artifacts/${pack.alias}`,
-        prepare: () => undefined,
+        prepare: (artifactRoot) =>
+          fs.mkdirSync(artifactRoot, { recursive: true }),
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         failedCount: 2,
         infrastructureFailureCount: 1,
+        evidence: {
+          parallelism_requested: 2,
+          worker_count: 2,
+          results: [
+            {
+              script_key: "test:e2e:staging:smoke",
+              failure_class: "infrastructure",
+            },
+            {
+              script_key: "test:e2e:production:social-readonly",
+              failure_class: "e2e",
+            },
+          ],
+        },
       });
       expect(call).toBe(2);
       expect(fs.readFileSync(summaryPath, "utf8")).toContain(
@@ -257,7 +316,7 @@ describe("manifest-driven E2E runner", () => {
     }
   });
 
-  it("keeps running when the optional GitHub summary cannot be written", () => {
+  it("keeps running when the optional GitHub summary cannot be written", async () => {
     const summaryDir = fs.mkdtempSync(path.join(os.tmpdir(), "e2e-summary-"));
     const previousSummary = process.env["GITHUB_STEP_SUMMARY"];
     process.env["GITHUB_STEP_SUMMARY"] = summaryDir;
@@ -265,7 +324,7 @@ describe("manifest-driven E2E runner", () => {
     let call = 0;
 
     try {
-      const result = runner.runPacks([samplePacks[0]!], {
+      const result = await runner.runPacks([samplePacks[0]!], {
         artifactRoot: path.join(summaryDir, "staging-e2e-artifacts"),
         forward: [],
         spawn: () => {
@@ -279,10 +338,11 @@ describe("manifest-driven E2E runner", () => {
         },
         cleanup: () => undefined,
         preserve: () => "staging-e2e-artifacts/smoke",
-        prepare: () => undefined,
+        prepare: (artifactRoot) =>
+          fs.mkdirSync(artifactRoot, { recursive: true }),
       });
 
-      expect(result).toEqual({
+      expect(result).toMatchObject({
         failedCount: 0,
         infrastructureFailureCount: 0,
       });
@@ -299,6 +359,129 @@ describe("manifest-driven E2E runner", () => {
       }
       fs.rmSync(summaryDir, { recursive: true, force: true });
     }
+  });
+
+  it("bounds parallelism to readonly packs and assigns unique output paths", async () => {
+    const unsafe = { ...samplePacks[0]!, safety: "sandbox" };
+    expect(() => runner.assertParallelSafe([unsafe], 2)).toThrow(
+      "manifest-declared readonly packs"
+    );
+
+    let active = 0;
+    let peak = 0;
+    const seenRoots = new Set<string>();
+    const result = await runner.runPacks(
+      [
+        samplePacks[0]!,
+        {
+          ...samplePacks[0]!,
+          scriptKey: "test:e2e:staging:second-readonly",
+        },
+        {
+          ...samplePacks[0]!,
+          scriptKey: "test:e2e:staging:third-readonly",
+        },
+      ],
+      {
+        artifactRoot: null,
+        parallel: 2,
+        forward: [],
+        spawn: async (_pack, _forward, outputPaths) => {
+          seenRoots.add(outputPaths.root);
+          active += 1;
+          peak = Math.max(peak, active);
+          await new Promise((resolve) => setTimeout(resolve, 10));
+          active -= 1;
+          return {
+            status: 0,
+            signal: null,
+            stdout: "",
+            stderr: "",
+          };
+        },
+        cleanup: () => undefined,
+        preserve: () => "",
+        prepare: () => undefined,
+      }
+    );
+
+    expect(peak).toBe(2);
+    expect(seenRoots.size).toBe(3);
+    expect(result.evidence.parallelism_requested).toBe(2);
+    expect(result.evidence.worker_count).toBe(2);
+  });
+
+  it.each(["launch", "cleanup", "preservation"] as const)(
+    "classifies %s failures as infrastructure without false-green evidence",
+    async (failurePoint) => {
+      const result = await runner.runPacks([samplePacks[0]!], {
+        artifactRoot: null,
+        parallel: 1,
+        forward: [],
+        spawn: () => {
+          if (failurePoint === "launch") {
+            throw new Error("launch failed");
+          }
+          return {
+            status: 0,
+            signal: null,
+            stdout: "",
+            stderr: "",
+          };
+        },
+        cleanup: () => {
+          if (failurePoint === "cleanup") {
+            throw new Error("cleanup failed");
+          }
+        },
+        preserve: () => {
+          if (failurePoint === "preservation") {
+            throw new Error("preservation failed");
+          }
+          return "";
+        },
+        prepare: () => undefined,
+      });
+
+      expect(result).toMatchObject({
+        failedCount: 1,
+        infrastructureFailureCount: 1,
+        evidence: {
+          failed_count: 1,
+          infrastructure_failure_count: 1,
+          results: [{ failure_class: "infrastructure" }],
+        },
+      });
+    }
+  );
+
+  it("times out and terminates the complete POSIX process group", async () => {
+    const startedAt = Date.now();
+    const result = await runner.runProcessGroup(
+      process.execPath,
+      [
+        "-e",
+        [
+          'const {spawn}=require("node:child_process");',
+          'const child=spawn(process.execPath,["-e","process.on(\\"SIGTERM\\",()=>{});setInterval(()=>{},1000)"],{stdio:"ignore"});',
+          "console.log(child.pid);",
+          "setInterval(()=>{},1000);",
+        ].join(""),
+      ],
+      {
+        cwd: ROOT,
+        env: process.env,
+        maxBuffer: 1024 * 1024,
+        timeout: 100,
+      }
+    );
+
+    expect(result.error?.code).toBe("ETIMEDOUT");
+    expect(Date.now() - startedAt).toBeGreaterThanOrEqual(900);
+    const grandchildPid = Number(result.stdout.trim());
+    expect(grandchildPid).toBeGreaterThan(0);
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(() => process.kill(grandchildPid, 0)).toThrow();
   });
 });
 

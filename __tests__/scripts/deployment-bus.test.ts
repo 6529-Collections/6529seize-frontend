@@ -47,7 +47,7 @@ describe("release bus staging artifact transfer", () => {
     )
   );
 
-  it("selects staging from one immutable dual-profile artifact without rebuilding", () => {
+  it("selects an exact environment-bound artifact with an explicit legacy bridge and never rebuilds", () => {
     const inputs = deployWorkflow.on.workflow_dispatch.inputs;
     const downloadStep = deployWorkflow.jobs.deploy.steps.find(
       (step: { name?: string }) =>
@@ -64,10 +64,23 @@ describe("release bus staging artifact transfer", () => {
       options: ["staging", "production"],
     });
     expect(inputs.artifact_digest).toMatchObject({ required: true });
+    expect(inputs.artifact_contract_version).toMatchObject({
+      required: false,
+      default: "legacy-v2",
+      options: ["legacy-v2", "environment-bound-v3"],
+    });
     expect(downloadStep.with.name).toBe(
       "release-bus-frontend-${{ inputs.artifact_train_id || inputs.release_train_id }}-r${{ inputs.release_train_revision }}"
     );
+    expect(verifyStep.run).toContain(
+      '.artifact_contract == "environment-bound-v1"'
+    );
+    expect(verifyStep.run).toContain('.environment == "staging"');
+    expect(verifyStep.run).toContain(
+      '[ "$ARTIFACT_CONTRACT_VERSION" = legacy-v2 ]'
+    );
     expect(verifyStep.run).toContain('.environment == "dual"');
+    expect(verifyStep.run).toContain("target/package.zip");
     expect(verifyStep.run).toContain("profiles/staging/target/package.zip");
     expect(verifyStep.run).toContain(
       'test "$artifact_digest" = "$EXPECTED_ARTIFACT_DIGEST"'
@@ -593,23 +606,22 @@ describe("release bus v2 combined preflight", () => {
     )
   );
 
-  it("binds reusable PR artifacts to the immutable checked-out run SHA", () => {
+  it("publishes small exact merge-tree CI evidence instead of deploy bytes", () => {
     expect(appPrCi).not.toContain("github.event.pull_request.merge_commit_sha");
-    expect(
-      appPrCi.match(/EXPECTED_MERGE_SHA: \$\{\{ github\.sha \}\}/g)
-    ).toHaveLength(2);
+    expect(appPrCi).toContain("EXPECTED_MERGE_SHA: ${{ github.sha }}");
     expect(appPrCi).toContain("name: release-bus-v2-pr-${{ github.sha }}");
-    expect(appPrCi).toContain(
-      "unset ANNOUNCED_VERSION_ENDPOINT\n          rm -rf .next"
+    expect(appPrCi).toContain("exact-merge-tree-pr-ci-v1");
+    expect(appPrCi).toContain('workflow:".github/workflows/app-pr-ci.yml"');
+    expect(appPrCi).not.toContain("release-bus-v2-pr-artifact/profiles");
+    expect(appPrCi).not.toContain(
+      "Build staging profile for exact artifact reuse"
     );
   });
 
   it("keeps candidate execution jobs secretless and read-only", () => {
-    for (const jobName of ["quality", "build"]) {
-      const job = workflow.jobs[jobName];
-      expect(job.permissions).toEqual({ contents: "read" });
-      expect(JSON.stringify(job.env ?? {})).not.toContain("secrets.");
-    }
+    const job = workflow.jobs.build;
+    expect(job.permissions).toEqual({ contents: "read" });
+    expect(JSON.stringify(job.env ?? {})).not.toContain("secrets.");
     const source = fs.readFileSync(
       path.join(
         process.cwd(),
@@ -622,56 +634,82 @@ describe("release bus v2 combined preflight", () => {
     ).toHaveLength(2);
   });
 
-  it("omits the production-only announcement URL from staging builds", () => {
+  it("builds only the requested profile for v3 and keeps bounded legacy compatibility", () => {
     const build = workflow.jobs.build;
     const buildStep = build.steps.find(
       (step: { name?: string }) =>
-        step.name === "Build exact environment profile once"
+        step.name ===
+        "Build and package only the authorized environment contract"
     );
-    expect(build.env.BUILD_ENVIRONMENT).toBe("${{ matrix.environment }}");
-    expect(buildStep.run).toContain('if [ "$BUILD_ENVIRONMENT" = staging ]');
+    expect(buildStep.run).toContain(
+      '[ "$ARTIFACT_CONTRACT_VERSION" = environment-bound-v3 ]'
+    );
+    expect(buildStep.run).toContain(
+      'build_profile "$ARTIFACT_ENVIRONMENT" release-bus-artifact'
+    );
+    expect(buildStep.run).toContain(
+      "build_profile staging release-bus-artifact/profiles/staging"
+    );
+    expect(buildStep.run).toContain(
+      "build_profile production release-bus-artifact/profiles/production"
+    );
     expect(buildStep.run).toContain("unset ANNOUNCED_VERSION_ENDPOINT");
+    expect(
+      workflow.on.workflow_dispatch.inputs.artifact_contract_version
+    ).toMatchObject({
+      default: "legacy-v2",
+      options: ["legacy-v2", "environment-bound-v3"],
+    });
   });
 
-  it("shards Jest and proves exact inventory before artifact publication", () => {
-    expect(workflow.jobs.quality.strategy.matrix.shard).toEqual([
-      "lint",
-      "typecheck",
-      "inventory",
-      "tests-1",
-      "tests-2",
-      "tests-3",
-      "tests-4",
+  it("removes repository-wide quality matrices from the train critical path", () => {
+    expect(Object.keys(workflow.jobs)).toEqual([
+      "authorize",
+      "build",
+      "finalize",
     ]);
-    const verify = workflow.jobs.aggregate.steps.find(
-      (step: { name?: string }) =>
-        step.name === "Prove sharded Jest inventory is exact"
+    expect(workflow.jobs).not.toHaveProperty("quality");
+    expect(workflow.jobs.build).not.toHaveProperty("strategy");
+    const source = fs.readFileSync(
+      path.join(
+        process.cwd(),
+        ".github/workflows/release-bus-v2-preflight.yml"
+      ),
+      "utf8"
     );
-    const upload = workflow.jobs.aggregate.steps.find(
-      (step: { name?: string }) =>
-        step.name === "Upload one exact frontend artifact"
-    );
-    expect(verify.run).toContain("uniq -d shards.sorted");
-    expect(verify.run).toContain("diff -u complete.sorted shards.sorted");
-    expect(upload.if).toContain("steps.inventory_verify.outcome == 'success'");
+    expect(source).not.toContain("test:no-coverage");
+    expect(source).not.toContain("lint:quiet");
+    expect(source).not.toContain("typecheck:ci");
+    expect(source).not.toContain("Jest inventory");
+    expect(source.match(/\.\/bin\/6529 install:frozen/g)).toHaveLength(1);
   });
 
-  it("prepares generated runtime config and forwards Jest shard flags", () => {
-    for (const jobName of ["quality", "build"]) {
-      const generate = workflow.jobs[jobName].steps.find(
-        (step: { name?: string }) =>
-          step.name === "Generate runtime environment schema"
-      );
-      expect(generate.run).toBe("./bin/6529 run build:env-schema");
-    }
+  it("binds schema v3 to exact environment/SHA and fails closed on v3 schema2", () => {
+    const buildStep = workflow.jobs.build.steps.find(
+      (step: { name?: string }) =>
+        step.name ===
+        "Build and package only the authorized environment contract"
+    );
+    const verify = workflow.jobs.finalize.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Verify structured artifact result"
+    );
+    expect(buildStep.run).toContain("schema_version:3");
+    expect(buildStep.run).toContain('artifact_contract:"environment-bound-v1"');
+    expect(verify.run).toContain(".source_sha == $source_sha");
+    expect(verify.run).toContain(".environment == $environment");
+    expect(verify.run.indexOf("environment-bound-v3")).toBeLessThan(
+      verify.run.indexOf("schema_version == 2")
+    );
+    expect(verify.run).not.toContain("environment-bound-v3 ] ||");
+  });
 
-    const quality = workflow.jobs.quality.steps.find(
-      (step: { name?: string }) => step.name === "Run independent quality shard"
+  it("accepts rollback revisions without weakening ordinary revision validation", () => {
+    const validation = workflow.jobs.authorize.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Validate exact inputs and CI evidence"
     );
-    expect(quality.run).toContain(
-      './bin/6529 run test:no-coverage --runInBand --shard="$shard_index/4"'
-    );
-    expect(quality.run).not.toContain("test:no-coverage -- --runInBand");
+    expect(validation.run).toContain("rollback-[1-9][0-9]{0,8}");
   });
 });
 
