@@ -462,7 +462,8 @@ test "$(git rev-parse HEAD)" = "$base_sha"
       "git rev-parse --verify --quiet MERGE_HEAD >/dev/null"
     );
     const commit = composeScript.indexOf(
-      "git -c core.hooksPath=/dev/null commit -s"
+      "git -c core.hooksPath=/dev/null commit -s",
+      mergeHead
     );
 
     expect(merge).toBeGreaterThan(-1);
