@@ -51,11 +51,12 @@ register backend first and declare it as the frontend prerequisite.
    each application runs one combined sharded preflight and one immutable build.
    Frontend staging/production profiles build concurrently into one checksummed
    dual-profile artifact. For an affected repository, the staging release
-   commit has the recorded current `1a-staging` SHA as its first parent and the
-   dependency-closed composition as its second parent. Normal staging
-   composition starts from that recorded parent and merges current `main` plus
-   every admitted candidate; only rollback deliberately binds a last-validated
-   replacement tree.
+   commit has the recorded current `1a-staging` SHA as its first parent. When
+   the dependency-closed composition adds commits beyond that parent, it is the
+   second parent; a fully current empty-cumulative composition intentionally
+   produces a single-parent commit. Normal staging composition starts from that
+   recorded parent and merges current `main` plus every admitted candidate; only
+   rollback deliberately binds a last-validated replacement tree.
 4. Preparation may finish while another train owns staging.
 5. The train acquires the staging lock and repeats the idle/ref snapshot. A
    carry-forward-only repository must already have `composed_sha` equal to its

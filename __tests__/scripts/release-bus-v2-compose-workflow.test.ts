@@ -29,6 +29,23 @@ function commandFailureStderr(run: () => void): string {
   throw new Error("Expected compose workflow command to fail");
 }
 
+function validateInputsScript(): string {
+  const workflow = readFileSync(
+    path.join(process.cwd(), ".github/workflows/release-bus-v2-compose.yml"),
+    "utf8"
+  );
+  const match = workflow.match(
+    /\n {6}- name: Validate immutable inputs\n[\s\S]*?\n {8}run: \|\n([\s\S]*?)(?=\n {6}- )/
+  );
+  if (!match) {
+    throw new Error("Validate immutable inputs workflow script was not found");
+  }
+  return match[1]!
+    .split("\n")
+    .map((line) => line.replace(/^ {10}/, ""))
+    .join("\n");
+}
+
 function composeScript(): string {
   const workflow = readFileSync(
     path.join(process.cwd(), ".github/workflows/release-bus-v2-compose.yml"),
@@ -66,6 +83,26 @@ describe("Release Bus v2 frontend composition workflow", () => {
     expect(workflow).toContain(
       "(staging|production|qualification|rollback)-train-"
     );
+  });
+
+  it("rejects rollback branches without a recorded release parent", () => {
+    expect(
+      commandFailureStderr(() =>
+        execFileSync("bash", ["-c", validateInputsScript()], {
+          env: {
+            ...process.env,
+            BASE_SHA: "a".repeat(40),
+            CANDIDATE_SHAS: JSON.stringify(["a".repeat(40)]),
+            EXPECTED_SHA: "a".repeat(40),
+            OPERATION_KEY: "rb2:rollback:test:a1",
+            RELEASE_BRANCH: "release-bus-v2/rollback-train-missing-parent",
+            RELEASE_PARENT_SHA: "",
+            TRAIN_ID: "rollback-missing-parent",
+          },
+          stdio: ["ignore", "pipe", "pipe"],
+        })
+      )
+    ).toContain("Rollback release branches require release_parent_sha");
   });
 
   it("creates a cumulative release whose first parent is exact staging", () => {
@@ -225,6 +262,45 @@ describe("Release Bus v2 frontend composition workflow", () => {
       ).toContain(
         "Existing release branch does not have the recorded staging ref as its first parent"
       );
+
+      git(repository, "switch", "main");
+      execFileSync("bash", ["-c", composeScript()], {
+        cwd: repository,
+        env: {
+          ...process.env,
+          BASE_SHA: baseSha,
+          CANDIDATE_SHAS: JSON.stringify([stagingParentSha, candidateSha]),
+          RELEASE_BRANCH:
+            "release-bus-v2/staging-train-legacy-cumulative-frontend",
+          RELEASE_BUS_GIT_EMAIL: "release-bus-test@example.com",
+          RELEASE_BUS_GIT_NAME: "Release Bus Test",
+          RUNNER_TEMP: runnerTemp,
+          TRAIN_ID: "legacy-cumulative",
+        },
+        stdio: ["ignore", "pipe", "pipe"],
+      });
+      const legacyReleaseSha = git(repository, "rev-parse", "HEAD");
+      expect(git(repository, "show", `${legacyReleaseSha}:main.txt`)).toBe(
+        "main after common"
+      );
+      expect(
+        git(repository, "show", `${legacyReleaseSha}:candidate-a.txt`)
+      ).toBe("candidate a");
+      expect(
+        git(repository, "show", `${legacyReleaseSha}:candidate-b.txt`)
+      ).toBe("candidate b");
+      expect(
+        git(repository, "show", "-s", "--format=%B", legacyReleaseSha)
+      ).not.toContain("Release-Parent-SHA:");
+      expect(
+        JSON.parse(
+          readFileSync(path.join(runnerTemp, "composition.json"), "utf8")
+        )
+      ).toEqual({
+        composed_sha: legacyReleaseSha,
+        excluded_shas: [],
+        reused: false,
+      });
 
       git(repository, "switch", "--detach", stagingParentSha);
       execFileSync("bash", ["-c", composeScript()], {

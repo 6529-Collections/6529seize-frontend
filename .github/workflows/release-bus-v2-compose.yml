@@ -39,6 +39,10 @@ jobs:
           [[ "$OPERATION_KEY" =~ ^rb2:[A-Za-z0-9:._-]+:a[1-9][0-9]*$ ]]
           [[ "$RELEASE_BRANCH" =~ ^release-bus-v2/(staging|production|qualification|rollback)-train-[A-Za-z0-9._-]+$ ]]
           test -z "$RELEASE_PARENT_SHA" || [[ "$RELEASE_PARENT_SHA" =~ ^[a-f0-9]{40}$ ]]
+          if [[ "$RELEASE_BRANCH" == release-bus-v2/rollback-train-* ]] && [ -z "$RELEASE_PARENT_SHA" ]; then
+            echo "Rollback release branches require release_parent_sha" >&2
+            exit 1
+          fi
           jq -e 'type == "array" and length > 0 and all(.[]; test("^[a-f0-9]{40}$"))' <<< "$CANDIDATE_SHAS"
       - name: Authorize exact v2 operation
         env:
