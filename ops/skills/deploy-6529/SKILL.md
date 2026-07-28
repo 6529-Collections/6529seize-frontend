@@ -16,12 +16,12 @@ description: Route and execute 6529 frontend, backend, or coupled staging and pr
    hidden controls, or old output.
 3. Route the target environment by the fresh lane result:
 
-| Target lane       | Route                                                                                                                           |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `STAGING: ON`     | Register the exact candidate with Release Bus                                                                                   |
-| `STAGING: OFF`    | Serialized manual staging after the staging drain gate                                                                          |
-| `PRODUCTION: ON`  | Explicitly mark an exact `STAGING_VALIDATED` candidate ready for Release Bus production                                         |
-| `PRODUCTION: OFF` | Serialized manual production after the production drain gate and explicit owner authorization; staging evidence is not required |
+| Target lane       | Route                                                                                                                                                  |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `STAGING: ON`     | Register the exact candidate with Release Bus                                                                                                          |
+| `STAGING: OFF`    | If `changeable: true`, serialized manual staging after the staging drain gate                                                                          |
+| `PRODUCTION: ON`  | Explicitly mark an exact `STAGING_VALIDATED` candidate ready for Release Bus production                                                                |
+| `PRODUCTION: OFF` | If `changeable: true`, serialized manual production after the production drain gate and explicit owner authorization; staging evidence is not required |
 
 Raw mode and `ALL` are internal emergency fences. They are verified by the
 helper but are not normal routing or UI controls. Do not bypass an internal
@@ -33,8 +33,10 @@ lane is `ON`, every deployment for that environment—including API,
 authenticated Release Bus operation. Do not manually dispatch a target
 environment workflow while its lane is `ON`. Manual fallback exists only when
 the helper authoritatively reports the affected lane `OFF` and its drain gate
-passes. If Release Bus cannot safely self-deploy while `ON`, stop for explicit
-owner direction; never infer an exception from the component or GitHub actor.
+passes. The helper must also report `changeable: true` and verify that no hidden
+emergency fence blocks fallback. If Release Bus cannot safely self-deploy while
+`ON`, stop for explicit owner direction; never infer an exception from the
+component or GitHub actor.
 
 ## V2 readiness
 
@@ -70,11 +72,13 @@ profiles concurrently into one checksummed artifact. It owns shared staging
 only for deploy plus E2E, reuses the exact qualified artifact for production,
 and never publishes release notes.
 
-## Manual fallback while the target lane is OFF
+## Manual fallback while the target lane is OFF and changeable
 
-1. Prove the target environment lock is free, no target mutation/E2E workflow
-   is active, and every already-dispatched exact operation is terminal. Fetch
-   the exact remote target head. Wait; never cancel another actor.
+1. Require the helper to report the target lane `OFF` with `changeable: true`
+   and no hidden emergency fence blocking fallback. Then prove the target
+   environment lock is free, no target mutation/E2E workflow is active, and
+   every already-dispatched exact operation is terminal. Fetch the exact remote
+   target head. Wait; never cancel another actor.
 2. Re-fetch immediately before pushing. If a shared ref moved, recompute from
    the new head. Never force-push.
 3. Deploy required backend units in DAG order before merging/deploying dependent

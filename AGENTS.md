@@ -16,9 +16,10 @@
   `releaseBus`, cleaner/reconciler, and other control-plane changes—must go
   through Release Bus with a valid operation identity. A manual workflow is
   fallback only after the helper authoritatively reports the affected lane
-  `OFF` and its drain gate passes. If Release Bus cannot safely self-deploy
-  while `ON`, stop for explicit owner direction; never infer an exception from
-  the component or GitHub actor.
+  `OFF` with `changeable: true`, the helper has verified that no hidden
+  emergency fence blocks fallback, and its drain gate passes. If Release Bus
+  cannot safely self-deploy while `ON`, stop for explicit owner direction;
+  never infer an exception from the component or GitHub actor.
 - Staging `ON` accepts exact candidates. Production `ON` requires a separate
   exact-SHA production action after `STAGING_VALIDATED`.
 - Raw mode and `ALL` are internal emergency fences, not normal routing or UI

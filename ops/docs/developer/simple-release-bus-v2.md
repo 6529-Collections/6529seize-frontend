@@ -16,10 +16,10 @@ fences, and fails closed when the authenticated status request is unavailable,
 malformed, or internally inconsistent. Its operator-facing result contains
 only:
 
-| Effective lane | `ON`                                                                                | `OFF`                                                                                                                                 |
-| -------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Staging        | Register exact candidates with Release Bus                                          | Serialized manual staging after the staging drain gate                                                                                |
-| Production     | Separately select an exact `STAGING_VALIDATED` candidate for Release Bus production | Serialized manual production after the production drain gate and explicit owner authorization; prior staging evidence is not required |
+| Effective lane | `ON`                                                                                | `OFF`                                                                                                                                                        |
+| -------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Staging        | Register exact candidates with Release Bus                                          | If `changeable: true`, serialized manual staging after the staging drain gate                                                                                |
+| Production     | Separately select an exact `STAGING_VALIDATED` candidate for Release Bus production | If `changeable: true`, serialized manual production after the production drain gate and explicit owner authorization; prior staging evidence is not required |
 
 The drain gate requires the target environment lock to be free, no target
 mutation/E2E workflow to be active, and every already-dispatched exact
@@ -32,8 +32,10 @@ lane is `ON`, every deploy for that environment—including API, `releaseBus`,
 cleaner/reconciler, and other control-plane changes—must be an authenticated
 Release Bus operation. Manual workflow dispatch is fallback only after the
 helper authoritatively reports the affected lane `OFF` and the drain gate
-passes. If Release Bus cannot safely self-deploy while `ON`, stop for explicit
-owner direction; never infer an exception from the component or GitHub actor.
+passes. The helper must also report `changeable: true` and verify that no hidden
+emergency fence blocks fallback. If Release Bus cannot safely self-deploy while
+`ON`, stop for explicit owner direction; never infer an exception from the
+component or GitHub actor.
 
 ## Dashboard read model
 
@@ -220,7 +222,8 @@ Do not manually dispatch API or `releaseBus` merely because the bus is
 upgrading itself. Manual fallback is available only after the helper
 authoritatively reports the affected lane `OFF` and its drain gate passes. If a
 safe self-deploy path cannot be proven while `ON`, stop for explicit owner
-direction.
+direction. An `OFF` lane with `changeable: false` remains fail-closed; do not
+use manual fallback through a hidden emergency fence.
 
 Run the old status helper before any compatible migration/API mutation; after
 the API is live, use the new helper, which requires both effective lane states
