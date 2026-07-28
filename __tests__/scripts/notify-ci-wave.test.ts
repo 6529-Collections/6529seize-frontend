@@ -114,10 +114,10 @@ describe("notify-ci-wave Release Train metadata", () => {
         release_group_services: ["web"],
       },
     });
-    expect(result.payload?.deployed_at).toEqual(expect.any(String));
-    expect(Number.isNaN(Date.parse(String(result.payload?.deployed_at)))).toBe(
-      false
-    );
+    expect(result.payload?.["deployed_at"]).toEqual(expect.any(String));
+    expect(
+      Number.isNaN(Date.parse(String(result.payload?.["deployed_at"])))
+    ).toBe(false);
   });
 
   it("rejects contributors without a train id", async () => {
