@@ -26,15 +26,19 @@ interface StreamReviewVersionPublication {
 function isStreamReviewDeploymentStatus(
   value: unknown
 ): value is StreamReviewDeploymentStatus {
-  return STREAM_REVIEW_DEPLOYMENT_STATUSES.some(
-    (candidate) => candidate === value
+  return (
+    typeof value === "string" &&
+    (STREAM_REVIEW_DEPLOYMENT_STATUSES as readonly string[]).includes(value)
   );
 }
 
 function isStreamReviewAuditStatus(
   value: unknown
 ): value is StreamReviewAuditStatus {
-  return STREAM_REVIEW_AUDIT_STATUSES.some((candidate) => candidate === value);
+  return (
+    typeof value === "string" &&
+    (STREAM_REVIEW_AUDIT_STATUSES as readonly string[]).includes(value)
+  );
 }
 
 if (
