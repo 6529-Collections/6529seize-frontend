@@ -269,10 +269,12 @@ function addHistoricalVersion({
   fixture,
   activeLifecycleState,
   historicalLifecycleState,
+  topLevelLifecycleState = activeLifecycleState,
 }: {
   readonly fixture: ReturnType<typeof createFixture>;
   readonly activeLifecycleState: string;
   readonly historicalLifecycleState: string;
+  readonly topLevelLifecycleState?: string;
 }): {
   readonly historicalBundleFile: string;
   readonly historicalEditorialManifest: string;
@@ -294,7 +296,7 @@ function addHistoricalVersion({
     {
       schemaVersion: "public-review.publication.v2",
       reviewId: REVIEW_ID,
-      lifecycleState: activeLifecycleState,
+      lifecycleState: topLevelLifecycleState,
       versions: [
         {
           version: HISTORICAL_VERSION,
@@ -809,6 +811,70 @@ describe("profile-aware public-review artifact packaging", () => {
     expect(
       packagedIndex.versions.map(({ version }: { version: string }) => version)
     ).toEqual([HISTORICAL_VERSION]);
+  });
+
+  it("keeps the prior public version active while preloading a new draft", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    addHistoricalVersion({
+      fixture,
+      activeLifecycleState: "DRAFT",
+      historicalLifecycleState: "PUBLIC_REVIEW",
+      topLevelLifecycleState: "PUBLIC_REVIEW",
+    });
+
+    expect(getPublishedReviewIds(fixture.repoRoot)).toEqual(
+      new Set([REVIEW_ID])
+    );
+    expect(
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "staging",
+      })
+    ).toEqual([
+      expect.objectContaining({
+        reviewId: REVIEW_ID,
+        reviewVersion: HISTORICAL_VERSION,
+        sourceCommit: HISTORICAL_COMMIT,
+      }),
+    ]);
+    const packagedIndex = JSON.parse(
+      fs.readFileSync(
+        path.join(
+          fixture.bundleRoot,
+          `public/review-data/${REVIEW_ID}/index.json`
+        ),
+        "utf8"
+      )
+    );
+    expect(packagedIndex.activeVersion).toBe(HISTORICAL_VERSION);
+    expect(
+      packagedIndex.versions.map(({ version }: { version: string }) => version)
+    ).toEqual([HISTORICAL_VERSION]);
+    expect(
+      fs.existsSync(
+        path.join(
+          fixture.bundleRoot,
+          `public/review-data/${REVIEW_ID}/versions/${REVIEW_VERSION}`
+        )
+      )
+    ).toBe(false);
+  });
+
+  it("rejects a preloaded draft when the public fallback lifecycle drifts", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    addHistoricalVersion({
+      fixture,
+      activeLifecycleState: "DRAFT",
+      historicalLifecycleState: "REVIEW_CLOSED",
+      topLevelLifecycleState: "PUBLIC_REVIEW",
+    });
+
+    expect(() => getPublishedReviewIds(fixture.repoRoot)).toThrow(
+      "fallback publication lifecycle drifted"
+    );
   });
 
   it("omits a retained draft while packaging the public active version", () => {
