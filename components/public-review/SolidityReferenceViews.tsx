@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
 
 import {
   SolidityDeclarationExplorer,
@@ -13,6 +12,11 @@ import {
 import { SolidityGlobalDeclarationExplorer } from "@/components/public-review/SolidityGlobalDeclarationExplorer";
 import { SolidityInheritance } from "@/components/public-review/SolidityInheritance";
 import { SolidityOtherDeclarationGroup } from "@/components/public-review/SolidityOtherDeclarationGroup";
+import {
+  SolidityReferenceHumanizedValue,
+  SolidityReferenceKeyValue,
+  SolidityReferenceSummaryCard,
+} from "@/components/public-review/SolidityReferencePresentation";
 import { SolidityReferenceSectionNavigation } from "@/components/public-review/SolidityReferenceSectionNavigation";
 import { SoliditySemanticIdentity } from "@/components/public-review/SoliditySemanticIdentity";
 import { SolidityWarnings } from "@/components/public-review/SolidityWarnings";
@@ -36,53 +40,10 @@ import type {
 
 const CARD_CLASSES =
   "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-py-8";
-const SUMMARY_CLASSES = "tw-min-w-0 tw-p-3";
 const DATA_SURFACE_CLASSES =
   "tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03]";
 const ROW_GROUP_CLASSES =
   "tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03]";
-
-function HumanizedValue({ value }: { readonly value: string }) {
-  return <>{value.replaceAll("_", " ")}</>;
-}
-
-function SummaryCard({
-  label,
-  value,
-}: {
-  readonly label: string;
-  readonly value: number;
-}) {
-  return (
-    <div className={SUMMARY_CLASSES}>
-      <dt className="tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-500">
-        {label}
-      </dt>
-      <dd className="tw-m-0 tw-mt-2 tw-font-mono tw-text-2xl tw-font-semibold tw-text-white">
-        {formatInteger(DEFAULT_LOCALE, value)}
-      </dd>
-    </div>
-  );
-}
-
-function KeyValue({
-  children,
-  label,
-}: {
-  readonly children: ReactNode;
-  readonly label: string;
-}) {
-  return (
-    <div className="tw-min-w-0">
-      <dt className="tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-400">
-        {label}
-      </dt>
-      <dd className="tw-m-0 tw-mt-1.5 tw-break-all tw-text-sm tw-leading-6 tw-text-iron-300">
-        {children}
-      </dd>
-    </div>
-  );
-}
 
 function ReleaseEvidence({
   definition,
@@ -104,60 +65,60 @@ function ReleaseEvidence({
       <dl
         className={`${DATA_SURFACE_CLASSES} tw-mb-0 tw-mt-5 tw-grid tw-gap-5 sm:tw-grid-cols-2`}
       >
-        <KeyValue
+        <SolidityReferenceKeyValue
           label={t(DEFAULT_LOCALE, "publicReview.reference.releaseCatalog")}
         >
           {definition.membership.releaseCatalog ?? "—"}
-        </KeyValue>
-        <KeyValue
+        </SolidityReferenceKeyValue>
+        <SolidityReferenceKeyValue
           label={t(DEFAULT_LOCALE, "publicReview.reference.genesisTarget")}
         >
           {definition.membership.genesisTarget
             ? t(DEFAULT_LOCALE, "publicReview.reference.yes")
             : t(DEFAULT_LOCALE, "publicReview.reference.no")}
-        </KeyValue>
-        <KeyValue
+        </SolidityReferenceKeyValue>
+        <SolidityReferenceKeyValue
           label={t(DEFAULT_LOCALE, "publicReview.reference.deploymentStatus")}
         >
           {definition.membership.deployment.status}
-        </KeyValue>
+        </SolidityReferenceKeyValue>
         {release.summary ? (
           <>
-            <KeyValue
+            <SolidityReferenceKeyValue
               label={t(DEFAULT_LOCALE, "publicReview.reference.functions")}
             >
               {formatInteger(DEFAULT_LOCALE, release.summary.function_count)}
-            </KeyValue>
-            <KeyValue
+            </SolidityReferenceKeyValue>
+            <SolidityReferenceKeyValue
               label={t(DEFAULT_LOCALE, "publicReview.reference.events")}
             >
               {formatInteger(DEFAULT_LOCALE, release.summary.event_count)}
-            </KeyValue>
-            <KeyValue
+            </SolidityReferenceKeyValue>
+            <SolidityReferenceKeyValue
               label={t(DEFAULT_LOCALE, "publicReview.reference.errors")}
             >
               {formatInteger(
                 DEFAULT_LOCALE,
                 release.summary.custom_error_count
               )}
-            </KeyValue>
-            <KeyValue
+            </SolidityReferenceKeyValue>
+            <SolidityReferenceKeyValue
               label={t(DEFAULT_LOCALE, "publicReview.reference.readFunctions")}
             >
               {formatInteger(
                 DEFAULT_LOCALE,
                 release.summary.read_function_count
               )}
-            </KeyValue>
-            <KeyValue
+            </SolidityReferenceKeyValue>
+            <SolidityReferenceKeyValue
               label={t(DEFAULT_LOCALE, "publicReview.reference.writeFunctions")}
             >
               {formatInteger(
                 DEFAULT_LOCALE,
                 release.summary.write_function_count
               )}
-            </KeyValue>
-            <KeyValue
+            </SolidityReferenceKeyValue>
+            <SolidityReferenceKeyValue
               label={t(
                 DEFAULT_LOCALE,
                 "publicReview.reference.payableFunctions"
@@ -167,11 +128,11 @@ function ReleaseEvidence({
                 DEFAULT_LOCALE,
                 release.summary.payable_function_count
               )}
-            </KeyValue>
+            </SolidityReferenceKeyValue>
           </>
         ) : null}
         {release.deployedBytecodeSizeBytes !== undefined ? (
-          <KeyValue
+          <SolidityReferenceKeyValue
             label={t(DEFAULT_LOCALE, "publicReview.reference.bytecodeSize")}
           >
             {t(DEFAULT_LOCALE, "publicReview.reference.bytes", {
@@ -180,31 +141,31 @@ function ReleaseEvidence({
                 release.deployedBytecodeSizeBytes
               ),
             })}
-          </KeyValue>
+          </SolidityReferenceKeyValue>
         ) : null}
         {release.abiSha256 ? (
-          <KeyValue
+          <SolidityReferenceKeyValue
             label={t(DEFAULT_LOCALE, "publicReview.reference.abiChecksum")}
           >
             <code>{release.abiSha256}</code>
-          </KeyValue>
+          </SolidityReferenceKeyValue>
         ) : null}
         {release.bytecodeSha256 ? (
-          <KeyValue
+          <SolidityReferenceKeyValue
             label={t(DEFAULT_LOCALE, "publicReview.reference.bytecodeChecksum")}
           >
             <code>{release.bytecodeSha256}</code>
-          </KeyValue>
+          </SolidityReferenceKeyValue>
         ) : null}
         {release.deployedBytecodeSha256 ? (
-          <KeyValue
+          <SolidityReferenceKeyValue
             label={t(
               DEFAULT_LOCALE,
               "publicReview.reference.deployedBytecodeChecksum"
             )}
           >
             <code>{release.deployedBytecodeSha256}</code>
-          </KeyValue>
+          </SolidityReferenceKeyValue>
         ) : null}
       </dl>
     </section>
@@ -249,27 +210,27 @@ export function SolidityReferenceOverview({
   return (
     <div className="tw-space-y-10">
       <dl className="tw-m-0 tw-grid tw-grid-cols-2 tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] xl:tw-grid-cols-6">
-        <SummaryCard
+        <SolidityReferenceSummaryCard
           label={t(DEFAULT_LOCALE, "publicReview.reference.definitions")}
           value={manifest.summary.definitionCount}
         />
-        <SummaryCard
+        <SolidityReferenceSummaryCard
           label={t(DEFAULT_LOCALE, "publicReview.reference.contracts")}
           value={manifest.summary.contractCount}
         />
-        <SummaryCard
+        <SolidityReferenceSummaryCard
           label={t(DEFAULT_LOCALE, "publicReview.reference.interfaces")}
           value={manifest.summary.interfaceCount}
         />
-        <SummaryCard
+        <SolidityReferenceSummaryCard
           label={t(DEFAULT_LOCALE, "publicReview.reference.libraries")}
           value={manifest.summary.libraryCount}
         />
-        <SummaryCard
+        <SolidityReferenceSummaryCard
           label={t(DEFAULT_LOCALE, "publicReview.reference.sourceFiles")}
           value={manifest.summary.fileCount}
         />
-        <SummaryCard
+        <SolidityReferenceSummaryCard
           label={t(DEFAULT_LOCALE, "publicReview.reference.warnings")}
           value={manifest.summary.warningCount}
         />
@@ -292,36 +253,36 @@ export function SolidityReferenceOverview({
                 <dl
                   className={`${DATA_SURFACE_CLASSES} tw-mb-0 tw-mt-5 tw-grid tw-gap-5 md:tw-grid-cols-2`}
                 >
-                  <KeyValue
+                  <SolidityReferenceKeyValue
                     label={t(
                       DEFAULT_LOCALE,
                       "publicReview.reference.sourceCommit"
                     )}
                   >
                     <code>{manifest.source.commit}</code>
-                  </KeyValue>
-                  <KeyValue
+                  </SolidityReferenceKeyValue>
+                  <SolidityReferenceKeyValue
                     label={t(
                       DEFAULT_LOCALE,
                       "publicReview.reference.sourceTree"
                     )}
                   >
                     <code>{manifest.source.tree}</code>
-                  </KeyValue>
-                  <KeyValue
+                  </SolidityReferenceKeyValue>
+                  <SolidityReferenceKeyValue
                     label={t(DEFAULT_LOCALE, "publicReview.reference.compiler")}
                   >
                     <code>{manifest.source.compiler.version}</code>
-                  </KeyValue>
-                  <KeyValue
+                  </SolidityReferenceKeyValue>
+                  <SolidityReferenceKeyValue
                     label={t(
                       DEFAULT_LOCALE,
                       "publicReview.reference.evmVersion"
                     )}
                   >
                     <code>{manifest.source.compiler.evmVersion}</code>
-                  </KeyValue>
-                  <KeyValue
+                  </SolidityReferenceKeyValue>
+                  <SolidityReferenceKeyValue
                     label={t(
                       DEFAULT_LOCALE,
                       "publicReview.reference.optimizer"
@@ -342,15 +303,15 @@ export function SolidityReferenceOverview({
                           DEFAULT_LOCALE,
                           "publicReview.reference.optimizerDisabled"
                         )}
-                  </KeyValue>
-                  <KeyValue
+                  </SolidityReferenceKeyValue>
+                  <SolidityReferenceKeyValue
                     label={t(DEFAULT_LOCALE, "publicReview.reference.viaIr")}
                   >
                     {manifest.source.compiler.viaIR
                       ? t(DEFAULT_LOCALE, "publicReview.reference.yes")
                       : t(DEFAULT_LOCALE, "publicReview.reference.no")}
-                  </KeyValue>
-                  <KeyValue
+                  </SolidityReferenceKeyValue>
+                  <SolidityReferenceKeyValue
                     label={t(
                       DEFAULT_LOCALE,
                       "publicReview.reference.commitTimestamp"
@@ -375,8 +336,8 @@ export function SolidityReferenceOverview({
                         }
                       )}
                     </time>
-                  </KeyValue>
-                  <KeyValue
+                  </SolidityReferenceKeyValue>
+                  <SolidityReferenceKeyValue
                     label={t(
                       DEFAULT_LOCALE,
                       "publicReview.reference.generator"
@@ -385,15 +346,15 @@ export function SolidityReferenceOverview({
                     <code>
                       {manifest.generator.name} {manifest.generator.version}
                     </code>
-                  </KeyValue>
-                  <KeyValue
+                  </SolidityReferenceKeyValue>
+                  <SolidityReferenceKeyValue
                     label={t(
                       DEFAULT_LOCALE,
                       "publicReview.reference.outputChecksum"
                     )}
                   >
                     <code>{manifest.generator.outputSha256}</code>
-                  </KeyValue>
+                  </SolidityReferenceKeyValue>
                 </dl>
               </section>
 
@@ -415,7 +376,9 @@ export function SolidityReferenceOverview({
                         className="tw-bg-iron-950 tw-p-3"
                       >
                         <dt className="tw-text-sm tw-text-iron-400">
-                          <HumanizedValue value={classification} />
+                          <SolidityReferenceHumanizedValue
+                            value={classification}
+                          />
                         </dt>
                         <dd className="tw-m-0 tw-mt-1 tw-font-mono tw-text-white">
                           {formatInteger(DEFAULT_LOCALE, count)}
@@ -686,41 +649,45 @@ export function SolidityDefinitionView({
         <dl
           className={`${DATA_SURFACE_CLASSES} tw-mb-0 tw-mt-5 tw-grid tw-gap-5 md:tw-grid-cols-2`}
         >
-          <KeyValue
+          <SolidityReferenceKeyValue
             label={t(DEFAULT_LOCALE, "publicReview.reference.definitionKind")}
           >
             {indexEntry.kind}
             {indexEntry.abstract
               ? ` (${t(DEFAULT_LOCALE, "publicReview.reference.abstract")})`
               : ""}
-          </KeyValue>
-          <KeyValue
+          </SolidityReferenceKeyValue>
+          <SolidityReferenceKeyValue
             label={t(DEFAULT_LOCALE, "publicReview.reference.sourceScope")}
           >
             {indexEntry.scope}
-          </KeyValue>
-          <KeyValue
+          </SolidityReferenceKeyValue>
+          <SolidityReferenceKeyValue
             label={t(DEFAULT_LOCALE, "publicReview.reference.classification")}
           >
-            <HumanizedValue value={indexEntry.classification} />
-          </KeyValue>
-          <KeyValue
+            <SolidityReferenceHumanizedValue
+              value={indexEntry.classification}
+            />
+          </SolidityReferenceKeyValue>
+          <SolidityReferenceKeyValue
             label={t(
               DEFAULT_LOCALE,
               "publicReview.reference.classificationReason"
             )}
           >
             {indexEntry.classificationReason}
-          </KeyValue>
-          <KeyValue label={t(DEFAULT_LOCALE, "publicReview.reference.source")}>
+          </SolidityReferenceKeyValue>
+          <SolidityReferenceKeyValue
+            label={t(DEFAULT_LOCALE, "publicReview.reference.source")}
+          >
             <Link
               className="tw-text-sky-300 tw-no-underline hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
               href={sourceHref}
             >
               {indexEntry.sourcePath}
             </Link>
-          </KeyValue>
-          <KeyValue
+          </SolidityReferenceKeyValue>
+          <SolidityReferenceKeyValue
             label={t(DEFAULT_LOCALE, "publicReview.reference.lines", {
               start: indexEntry.range.lineStart,
               end: indexEntry.range.lineEnd,
@@ -734,18 +701,18 @@ export function SolidityDefinitionView({
             >
               {t(DEFAULT_LOCALE, "publicReview.reference.openPinnedSource")}
             </a>
-          </KeyValue>
-          <KeyValue
+          </SolidityReferenceKeyValue>
+          <SolidityReferenceKeyValue
             label={t(DEFAULT_LOCALE, "publicReview.reference.sourceChecksum")}
           >
             <code>{indexEntry.range.sourceSha256}</code>
-          </KeyValue>
-          <KeyValue
+          </SolidityReferenceKeyValue>
+          <SolidityReferenceKeyValue
             label={t(DEFAULT_LOCALE, "publicReview.reference.snippetChecksum")}
           >
             <code>{indexEntry.range.snippetSha256}</code>
-          </KeyValue>
-          <KeyValue
+          </SolidityReferenceKeyValue>
+          <SolidityReferenceKeyValue
             label={t(DEFAULT_LOCALE, "publicReview.reference.byteRange")}
           >
             {t(DEFAULT_LOCALE, "publicReview.reference.byteRangeValue", {
@@ -755,11 +722,13 @@ export function SolidityDefinitionView({
               ),
               start: formatInteger(DEFAULT_LOCALE, indexEntry.range.byteStart),
             })}
-          </KeyValue>
-          <KeyValue label={t(DEFAULT_LOCALE, "publicReview.reference.natspec")}>
+          </SolidityReferenceKeyValue>
+          <SolidityReferenceKeyValue
+            label={t(DEFAULT_LOCALE, "publicReview.reference.natspec")}
+          >
             {shard.definition.natspec ||
               t(DEFAULT_LOCALE, "publicReview.reference.noNatspec")}
-          </KeyValue>
+          </SolidityReferenceKeyValue>
         </dl>
         <SoliditySemanticIdentity
           routeKey={indexEntry.key}

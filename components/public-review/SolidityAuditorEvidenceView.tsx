@@ -190,7 +190,7 @@ function getGovernedParameterItems(
   );
 }
 
-export type SolidityAuditorEvidenceSection =
+type SolidityAuditorEvidenceSection =
   | "overview"
   | "readiness"
   | "risks"

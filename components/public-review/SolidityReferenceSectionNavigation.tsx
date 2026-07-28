@@ -46,10 +46,9 @@ const REFERENCE_SECTIONS = [
   },
 ] as const;
 
-export type SolidityReferenceSectionId =
-  (typeof REFERENCE_SECTIONS)[number]["id"];
+type SolidityReferenceSectionId = (typeof REFERENCE_SECTIONS)[number]["id"];
 
-export type SolidityReferencePanels = Readonly<
+type SolidityReferencePanels = Readonly<
   Record<SolidityReferenceSectionId, ReactNode>
 >;
 
