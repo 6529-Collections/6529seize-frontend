@@ -83,17 +83,40 @@ from any emergency-surplus withdrawal.
 
 ## Minimum next bid
 
-The minimum increment rule must be deterministic at every value, including
-rounding boundaries. The UI can show a suggested next bid, but the Solidity
-calculation is authoritative.
+### IMPLEMENTED
 
-Reviewers should test:
+The first bid must meet the auction's reserve price. After that, the contract
+requires at least the current highest bid plus a percentage of that bid. The
+percentage starts at 5%. Solidity integer division rounds the percentage
+component down, so the exact default formula is:
+
+`current highest bid + floor(current highest bid * 5 / 100)`
+
+For example, after a highest bid of 1 ETH, the next bid must be at least 1.05
+ETH. For very small values, rounding can produce no increase at all. The
+contract exposes the authoritative result through
+[`minimumNextBid`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/AuctionContract.sol#L251-L265),
+and enforces the same calculation in
+[`participateToAuction`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/AuctionContract.sol#L279-L312).
+
+This percentage is not fixed per auction. A function-scoped or global admin can
+change the one global `incPercent` value at any time, including while auctions
+are active. The current code has no bound, delay, change event, or per-auction
+snapshot. The next bid on every active auction uses whatever value is current
+then. See
+[`updatePercentAndExtensionTime`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/AuctionContract.sol#L549-L558).
+
+The UI can show a suggested next bid, but the Solidity calculation is
+authoritative. Reviewers should decide whether active auctions need immutable
+terms, and should test:
 
 - the first bid;
 - exact minimum bids;
 - one wei below the minimum;
 - large values and multiplication bounds;
 - rounding direction;
+- a zero or extreme admin-set percentage;
+- a percentage change during an active auction;
 - bidder replacement;
 - bids near the end time.
 
@@ -101,25 +124,37 @@ Reviewers should test:
 
 ### IMPLEMENTED
 
-Late bids can extend the auction under configured rules. Extension is intended
-to reduce simple last-block sniping.
+The extension time starts at 300 seconds, or five minutes. When a valid bid
+arrives with five minutes or less remaining, the contract adds another full
+five minutes to the recorded end time. The addition is to the old end time, not
+to the current block time. Every qualifying late bid can extend again; the
+current code sets no maximum number of extensions or maximum total duration.
+Each extension emits `AuctionExtended` with the old and new end times. See
+[`participateToAuction`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/AuctionContract.sol#L279-L312).
 
-The contract should make clear:
+The status calculation treats the auction as ended only when the block
+timestamp is greater than the recorded end time. A bid included at exactly the
+end timestamp can therefore still qualify and extend the auction if every
+other check passes.
 
-- the extension window;
-- extension duration;
-- whether extensions can repeat;
-- any maximum total extension;
-- the event emitted;
-- how clients calculate the current end time.
+Like the bid percentage, `extensionTime` is a mutable global value rather than
+an auction snapshot. A function-scoped or global admin can change it at any
+time, including during active auctions. There is no bound, delay, or change
+event, and any `_opt` value other than `1` in
+[`updatePercentAndExtensionTime`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/AuctionContract.sol#L549-L558)
+changes the extension time. Later bids use the latest value.
 
 Network congestion can still prevent a transaction from landing. An extension
 rule is not a guarantee that every intended bid will be included.
 
 ## Settlement with a winner
 
-After the auction ends, a permissionless caller may be able to settle because
-the sensitive outcome is already fixed in state.
+After the block timestamp moves past the recorded end time, any address may
+call
+[`claimAuction`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/AuctionContract.sol#L371-L388).
+There is no caller-role check. The caller cannot choose the winner, price, or
+proceeds: the contract uses the recorded highest bid and bidder. Settlement
+reverts while the auction-settlement pause is active.
 
 Settlement must:
 
@@ -145,31 +180,46 @@ wallets. The exact credit path is
 
 ### IMPLEMENTED
 
-The reviewed auction design includes no-bid handling and a contract-poster
-pending claim path. This case needs plain language because there is no winning
-bid to fund a normal settlement.
+The token is already minted and held by the Auction contract when the auction
+is registered. Registration confirms that custody before marking the auction
+active. A no-bid result therefore does not undo the mint or restore collection
+supply; it decides where the already-minted token goes.
 
-Reviewers should establish:
+After the auction ends with no bid, anyone may call `claimAuction`. If the
+poster is an ordinary wallet address, settlement transfers the token directly
+back to that poster and marks the auction `SettledNoBid`.
 
-- who receives or can claim the unsold token;
-- whether a token is minted at registration or settlement;
-- whether the collection supply changed;
-- which party may cancel;
-- how the auction becomes terminal.
+If the poster is itself a contract, the Auction contract does not attempt that
+immediate safe transfer. It records the poster contract as the pending claimant
+and emits `NoBidSettlementPending`. Only that exact contract may then call
+[`claimNoBidAuctionToken`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/AuctionContract.sol#L390-L407),
+but it may direct the token to any nonzero recipient. That second call clears
+the pending claimant, transfers the token, and makes the auction terminal. See
+the two branches in
+[`_settleNoBidAuction`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/AuctionContract.sol#L438-L454).
 
 ## Cancellation
 
-Cancellation should be possible only in states that do not violate bidder
-rights. The exact rules matter more than the existence of an admin function.
+### IMPLEMENTED
+
+The poster or an admin authorized for `cancelAuction` may cancel only while the
+auction is still active and its highest bid is zero. Once any valid bid exists,
+or once the auction has ended, this cancellation path is unavailable.
+Cancellation marks the auction terminal and transfers the token from auction
+custody back to the poster. The function does not check the bidding or
+settlement pause. See
+[`cancelAuction`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/AuctionContract.sol#L409-L426).
 
 ### REVIEW QUESTIONS
 
-- Can an auction be cancelled after a valid bid?
-- Can a signer cancellation invalidate a registered auction?
-- What happens if the protocol is paused?
-- Can a guardian cancel, or only stop settlement?
+- Should the bid increment and extension time be bounded, evented, delayed, and
+  fixed when each auction starts?
+- Should a contract poster's pending claim be able to name any recipient?
+- Should cancellation have its own pause rule?
+- Should a signer cancellation affect an auction that is already registered?
 - Are all refunds immediately withdrawable?
-- Does cancellation consume the original signed authorization?
+- Is returning the already-minted token the correct no-bid outcome for supply
+  and collector expectations?
 
 ## Emergency withdrawal
 
@@ -218,6 +268,7 @@ should not absorb speculative sale mechanisms.
 - a replay registers or settles twice;
 - a refund becomes unbacked;
 - an extension calculation is inconsistent across clients;
+- a global admin change silently alters the terms of an active auction;
 - settlement mints incorrectly after funds are committed;
 - cancellation violates a bidder's expectation;
 - emergency withdrawal treats liabilities as surplus;

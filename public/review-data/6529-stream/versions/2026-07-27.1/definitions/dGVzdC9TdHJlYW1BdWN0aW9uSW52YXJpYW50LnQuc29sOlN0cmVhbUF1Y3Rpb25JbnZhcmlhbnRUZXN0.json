@@ -1,0 +1,267 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamAuctionInvariant.t.sol:StreamAuctionInvariantTest#function:0x0a9254e4",
+          "declaringDefinitionId": "test/StreamAuctionInvariant.t.sol:StreamAuctionInvariantTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "setUp",
+          "outputs": [],
+          "selector": "0x0a9254e4",
+          "signature": "setUp()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAuctionInvariant.t.sol:StreamAuctionInvariantTest#function:0x90275308",
+          "declaringDefinitionId": "test/StreamAuctionInvariant.t.sol:StreamAuctionInvariantTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256[24]",
+              "name": "actionSeeds",
+              "type": "uint256[24]"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256[24]",
+              "name": "firstArgs",
+              "type": "uint256[24]"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256[24]",
+              "name": "secondArgs",
+              "type": "uint256[24]"
+            }
+          ],
+          "name": "testAuctionConsistencyInvariantsHoldAcrossBoundedSequences",
+          "outputs": [],
+          "selector": "0x90275308",
+          "signature": "testAuctionConsistencyInvariantsHoldAcrossBoundedSequences(uint256[24],uint256[24],uint256[24])",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "setUp()",
+          "displaySignature": "setUp()",
+          "functionKind": "function",
+          "id": "test/StreamAuctionInvariant.t.sol:StreamAuctionInvariantTest#function:0x0a9254e4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uSW52YXJpYW50LnQuc29sOlN0cmVhbUF1Y3Rpb25JbnZhcmlhbnRUZXN0I2Z1bmN0aW9uOjB4MGE5MjU0ZTQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setUp",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 106,
+            "byteStart": 442,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionInvariant.t.sol#L15-L17",
+            "lineEnd": 17,
+            "lineStart": 15,
+            "snippetSha256": "sha256:daa361e5be9f206adde572c77ce3cbd7e226ac5eb6dd1ff651d2f62904783b98",
+            "sourceSha256": "sha256:a14ee6b19bdd3c7833d38991c9b6771b51a8a87de380df426528b4618c4918e1"
+          },
+          "selector": "0x0a9254e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAuctionConsistencyInvariantsHoldAcrossBoundedSequences(uint256[24],uint256[24],uint256[24])",
+          "displaySignature": "testAuctionConsistencyInvariantsHoldAcrossBoundedSequences(uint256[SEQUENCE_LENGTH],uint256[SEQUENCE_LENGTH],uint256[SEQUENCE_LENGTH])",
+          "functionKind": "function",
+          "id": "test/StreamAuctionInvariant.t.sol:StreamAuctionInvariantTest#function:0x90275308",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "actionSeeds",
+              "storageLocation": "memory",
+              "type": "uint256[SEQUENCE_LENGTH]"
+            },
+            {
+              "index": 1,
+              "name": "firstArgs",
+              "storageLocation": "memory",
+              "type": "uint256[SEQUENCE_LENGTH]"
+            },
+            {
+              "index": 2,
+              "name": "secondArgs",
+              "storageLocation": "memory",
+              "type": "uint256[SEQUENCE_LENGTH]"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uSW52YXJpYW50LnQuc29sOlN0cmVhbUF1Y3Rpb25JbnZhcmlhbnRUZXN0I2Z1bmN0aW9uOjB4OTAyNzUzMDg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAuctionConsistencyInvariantsHoldAcrossBoundedSequences",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 637,
+            "byteStart": 554,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionInvariant.t.sol#L19-L34",
+            "lineEnd": 34,
+            "lineStart": 19,
+            "snippetSha256": "sha256:5a76adfbf89b0469bdc14a5928d28c45088a4f3b4990cdeadc181080e63d6f11",
+            "sourceSha256": "sha256:a14ee6b19bdd3c7833d38991c9b6771b51a8a87de380df426528b4618c4918e1"
+          },
+          "selector": "0x90275308",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SEQUENCE_LENGTH",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 333,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionInvariant.t.sol#L11",
+            "lineEnd": 11,
+            "lineStart": 11,
+            "snippetSha256": "sha256:2e0ccb1ffca871f55f5c9c748f01b7c34e3623771ea1eae7e30c7025b3f0acbc",
+            "sourceSha256": "sha256:a14ee6b19bdd3c7833d38991c9b6771b51a8a87de380df426528b4618c4918e1"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 2,
+            "byteStart": 376,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionInvariant.t.sol#L11",
+            "lineEnd": 11,
+            "lineStart": 11,
+            "snippetSha256": "sha256:c2356069e9d1e79ca924378153cfbbfb4d4416b1f99d41a2940bfdb66c5319db",
+            "sourceSha256": "sha256:a14ee6b19bdd3c7833d38991c9b6771b51a8a87de380df426528b4618c4918e1"
+          },
+          "valueSource": "24",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "handler",
+          "natspec": "",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 385,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionInvariant.t.sol#L13",
+            "lineEnd": 13,
+            "lineStart": 13,
+            "snippetSha256": "sha256:70c76fd716954abf4b2136749406658c091ff6cb2efd4b37781006278b0f26c4",
+            "sourceSha256": "sha256:a14ee6b19bdd3c7833d38991c9b6771b51a8a87de380df426528b4618c4918e1"
+          },
+          "selector": null,
+          "type": "AuctionConsistencyInvariantHandler",
+          "typeString": "contract AuctionConsistencyInvariantHandler",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamAuctionInvariant.t.sol:StreamAuctionInvariantTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+        "name": "DropAuthTestHelper"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1BdWN0aW9uSW52YXJpYW50LnQuc29sOlN0cmVhbUF1Y3Rpb25JbnZhcmlhbnRUZXN0",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamAuctionInvariant.t.sol:StreamAuctionInvariantTest",
+      "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamAuctionInvariantTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 924,
+      "byteStart": 269,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionInvariant.t.sol#L10-L35",
+      "lineEnd": 35,
+      "lineStart": 10,
+      "snippetSha256": "sha256:91dae7d16dc961e4b4f4ed6247a6d3fb0dbd67f67098d7668aa29cfc483e4a50",
+      "sourceSha256": "sha256:a14ee6b19bdd3c7833d38991c9b6771b51a8a87de380df426528b4618c4918e1"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamAuctionInvariant.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 3
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 2
+    },
+    "totalCount": 3
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamAuctionInvariant.t.sol:StreamAuctionInvariantTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionInvariant.t.sol:StreamAuctionInvariantTest#function:0x0a9254e4",
+      "definitionId": "test/StreamAuctionInvariant.t.sol:StreamAuctionInvariantTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionInvariant.t.sol:StreamAuctionInvariantTest#function:0x90275308",
+      "definitionId": "test/StreamAuctionInvariant.t.sol:StreamAuctionInvariantTest",
+      "severity": "advisory"
+    }
+  ]
+}

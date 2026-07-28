@@ -3,6 +3,7 @@ import "next/dist/compiled/server-only";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { PublicReviewEditorialFeedback } from "@/components/public-review/PublicReviewEditorialFeedback";
 import { PublicReviewShell } from "@/components/public-review/PublicReviewShell";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
@@ -14,11 +15,20 @@ import {
 } from "@/lib/public-review/editorialContent";
 import { extractPublicReviewSections } from "@/lib/public-review/editorialSections";
 import {
+  createStreamEditorialFeedbackPageContext,
+  createStreamReviewFeedbackConfig,
+  resolveStreamReviewFeedbackDestination,
+} from "@/lib/public-review/streamReviewFeedback.server";
+import {
   resolveStreamReviewRoute,
   type StreamReviewRouteModel,
   type StreamReviewRouteParams,
 } from "@/lib/public-review/streamReviewRoutes";
-import { STREAM_REVIEW_DEFINITION } from "@/lib/public-review/streamReviewDefinition";
+import {
+  getStreamReviewVersion,
+  STREAM_REVIEW_DEFINITION,
+} from "@/lib/public-review/streamReviewDefinition";
+import { getStreamSolidityReferenceReader } from "@/lib/public-review/streamSolidityReference";
 
 function getStreamReviewMetadata({
   baseEndpoint,
@@ -52,39 +62,65 @@ function getStreamReviewMetadata({
 async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
   const contentVersion =
     route.version ?? STREAM_REVIEW_DEFINITION.activeVersion;
-  let editorialMarkdown: string | undefined;
+  const reviewVersion = getStreamReviewVersion(contentVersion);
+  if (!reviewVersion) {
+    throw new Error("The resolved Stream review version is unavailable.");
+  }
+  let editorialMarkdown: string;
   try {
     editorialMarkdown = await loadStreamEditorialContent(
       route.page,
       contentVersion
     );
   } catch (error) {
-    if (!(error instanceof PublicReviewEditorialContentError)) {
-      throw error;
+    if (error instanceof PublicReviewEditorialContentError) {
+      notFound();
     }
-  }
-  if (editorialMarkdown === undefined) {
-    notFound();
+    throw error;
   }
   const sections = extractPublicReviewSections(editorialMarkdown);
+  const { manifest } =
+    await getStreamSolidityReferenceReader().loadManifest(contentVersion);
+  const feedbackConfig = await createStreamReviewFeedbackConfig({ manifest });
+  const feedbackDestination = await resolveStreamReviewFeedbackDestination(
+    route.baseEndpoint
+  );
 
   return (
     <PublicReviewShell
       editorialMarkdown={editorialMarkdown}
       page={route.page}
-      reviewVersion={route.reviewVersion}
+      review={STREAM_REVIEW_DEFINITION}
+      reviewVersion={reviewVersion}
       sections={sections}
       routeVersion={route.version}
       displayedVersion={contentVersion}
+      source={{
+        repository: manifest.source.repository,
+        commit: manifest.source.commit,
+      }}
+      feedbackSlot={
+        <PublicReviewEditorialFeedback
+          config={feedbackConfig}
+          destination={feedbackDestination}
+          page={createStreamEditorialFeedbackPageContext({
+            page: route.page,
+            version: contentVersion,
+          })}
+          sections={sections}
+        />
+      }
     />
   );
 }
 
+type StreamReviewRoutePageProps = {
+  readonly params: Promise<StreamReviewRouteParams>;
+};
+
 export async function generateStreamReviewRouteMetadata({
   params,
-}: {
-  readonly params: Promise<StreamReviewRouteParams>;
-}): Promise<Metadata> {
+}: StreamReviewRoutePageProps): Promise<Metadata> {
   const metadata = getStreamReviewMetadata({
     baseEndpoint: publicEnv.BASE_ENDPOINT,
     params: await params,
@@ -97,9 +133,7 @@ export async function generateStreamReviewRouteMetadata({
 
 export async function renderStreamReviewRoutePage({
   params,
-}: {
-  readonly params: Promise<StreamReviewRouteParams>;
-}) {
+}: StreamReviewRoutePageProps) {
   const route = resolveStreamReviewRoute({
     baseEndpoint: publicEnv.BASE_ENDPOINT,
     params: await params,

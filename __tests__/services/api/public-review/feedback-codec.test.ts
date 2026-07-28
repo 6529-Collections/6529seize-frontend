@@ -1,6 +1,7 @@
 import {
   decodePublicReviewFeedbackMetadata,
   encodePublicReviewFeedback,
+  getPublicReviewFeedbackPrimaryComment,
   hasPublicReviewMetadata,
   PUBLIC_REVIEW_METADATA_KEYS,
   PublicReviewFeedbackValidationError,
@@ -33,6 +34,7 @@ const config: PublicReviewFeedbackConfig = {
   reviewTitle: "Stream Contract",
   feedbackSchemaVersion: PUBLIC_REVIEW_FEEDBACK_SCHEMA_VERSION,
   submissionsOpen: true,
+  acceptsPublicExploitReports: true,
   categories: [
     { value: "security", label: "Security" },
     {
@@ -132,6 +134,19 @@ describe("public review feedback codec", () => {
     ).not.toThrow();
   });
 
+  it("does not require the public exploit category outside public review", () => {
+    expect(() =>
+      validatePublicReviewFeedbackConfig({
+        ...config,
+        submissionsOpen: false,
+        acceptsPublicExploitReports: false,
+        categories: config.categories.filter(
+          (option) => option.value !== PUBLIC_REVIEW_EXPLOITABLE_SECURITY_TYPE
+        ),
+      })
+    ).not.toThrow();
+  });
+
   it("recognizes only canonical public-review metadata keys", () => {
     expect(
       hasPublicReviewMetadata([{ data_key: PUBLIC_REVIEW_METADATA_KEYS[2] }])
@@ -182,6 +197,24 @@ describe("public review feedback codec", () => {
     });
     expect(payload.parts[0]!.content).toContain(
       `/blob/${COMMIT}/src/Stream.sol#L42-L45`
+    );
+  });
+
+  it("extracts the primary comment without exposing review metadata", () => {
+    const payload = encode();
+    const primaryContent = payload.parts[0]?.content;
+    if (typeof primaryContent !== "string") {
+      throw new Error("Expected encoded feedback to contain a text part.");
+    }
+
+    expect(
+      getPublicReviewFeedbackPrimaryComment(primaryContent)
+    ).toBe(draft.comment);
+    expect(
+      getPublicReviewFeedbackPrimaryComment("  Plain Wave comment  ")
+    ).toBe("Plain Wave comment");
+    expect(getPublicReviewFeedbackPrimaryComment("## Summary\n\nDetails")).toBe(
+      "## Summary\n\nDetails"
     );
   });
 
@@ -243,6 +276,84 @@ describe("public review feedback codec", () => {
     expect(payload.reply_to).toBeUndefined();
   });
 
+  it("rejects public exploit submissions outside the lifecycle capability", () => {
+    expect(() =>
+      encodePublicReviewFeedback({
+        config: {
+          ...config,
+          acceptsPublicExploitReports: false,
+        },
+        destination,
+        draft: {
+          ...draft,
+          category: PUBLIC_REVIEW_EXPLOITABLE_SECURITY_TYPE,
+        },
+        page: {
+          pageId: "architecture",
+          pageTitle: "Architecture",
+          canonicalPath: "/stream/review/architecture",
+        },
+        signer: { address: SIGNER_ADDRESS, isSafeWallet: false },
+        submissionId: SUBMISSION_ID,
+      })
+    ).toThrow("configured disclosure policy");
+  });
+
+  it("rejects all new payloads when lifecycle capabilities close submissions", () => {
+    expect(() =>
+      encodePublicReviewFeedback({
+        config: {
+          ...config,
+          submissionsOpen: false,
+          acceptsPublicExploitReports: false,
+        },
+        destination,
+        draft,
+        page: {
+          pageId: "architecture",
+          pageTitle: "Architecture",
+          canonicalPath: "/stream/review/architecture",
+        },
+        signer: { address: SIGNER_ADDRESS, isSafeWallet: false },
+        submissionId: SUBMISSION_ID,
+      })
+    ).toThrow("not accepting new feedback");
+  });
+
+  it("keeps closed-review exploit records readable in the public ledger", () => {
+    const payload = encodePublicReviewFeedback({
+      config,
+      destination,
+      draft: {
+        ...draft,
+        category: PUBLIC_REVIEW_EXPLOITABLE_SECURITY_TYPE,
+      },
+      page: {
+        pageId: "architecture",
+        pageTitle: "Architecture",
+        canonicalPath: "/stream/review/architecture",
+      },
+      signer: { address: SIGNER_ADDRESS, isSafeWallet: false },
+      submissionId: SUBMISSION_ID,
+    });
+
+    expect(
+      decodePublicReviewFeedbackMetadata({
+        config: {
+          ...config,
+          submissionsOpen: false,
+          acceptsPublicExploitReports: false,
+        },
+        metadata: payload.metadata,
+      })
+    ).toMatchObject({
+      ok: true,
+      value: {
+        category: PUBLIC_REVIEW_EXPLOITABLE_SECURITY_TYPE,
+      },
+    });
+  });
+
   it("rejects a stale source checksum", () => {
     expect(() =>
       encodePublicReviewFeedback({
@@ -265,6 +376,27 @@ describe("public review feedback codec", () => {
         submissionId: SUBMISSION_ID,
       })
     ).toThrow("checksum does not match");
+  });
+
+  it("rejects a section when the configured page has no section allowlist", () => {
+    expect(() =>
+      encodePublicReviewFeedback({
+        config: {
+          ...config,
+          pages: [{ value: "architecture", label: "Architecture" }],
+        },
+        destination,
+        draft,
+        page: {
+          pageId: "architecture",
+          pageTitle: "Architecture",
+          canonicalPath: "/stream/review/architecture",
+          sectionId: "forged-section",
+        },
+        signer: { address: SIGNER_ADDRESS, isSafeWallet: false },
+        submissionId: SUBMISSION_ID,
+      })
+    ).toThrow("section is not part");
   });
 
   it("preserves Safe signer context while keeping the Chat signature null", () => {
