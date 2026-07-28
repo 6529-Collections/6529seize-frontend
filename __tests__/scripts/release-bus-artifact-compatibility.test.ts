@@ -248,6 +248,14 @@ while [ "$#" -gt 0 ]; do
       test "$(jq -r '.aggregate_candidate_evidence_digest' <<< "$payload")" = \
         "$MOCK_AUTH_EXPECTED_AGGREGATE_DIGEST"
     fi
+    if [ -n "\${MOCK_AUTH_EXPECTED_REUSE_RUN_ID:-}" ]; then
+      test "$(jq -r '.reuse_artifact_run_id' <<< "$payload")" = \
+        "$MOCK_AUTH_EXPECTED_REUSE_RUN_ID"
+      test "$(jq -r '.reuse_artifact_name' <<< "$payload")" = \
+        "$MOCK_AUTH_EXPECTED_REUSE_NAME"
+      test "$(jq -r '.reuse_artifact_digest' <<< "$payload")" = \
+        "$MOCK_AUTH_EXPECTED_REUSE_DIGEST"
+    fi
     exit 0
   fi
   shift
@@ -788,6 +796,30 @@ describe("Release Bus artifact rollout compatibility", () => {
         runShell(authorize.run!, {
           env: {
             ...baseEnv,
+            EXPECTED_SHA: EXPECTED_SHA,
+            GITHUB_RUN_ID: "9876",
+            MOCK_AUTH_EXPECTED_REUSE_DIGEST: artifactDigest,
+            MOCK_AUTH_EXPECTED_REUSE_NAME: artifactName,
+            MOCK_AUTH_EXPECTED_REUSE_RUN_ID: "1234",
+            RELEASE_BUS_API_URL: "https://release-bus.invalid",
+            RELEASE_BUS_WORKFLOW_AUTH_TOKEN: "test-token",
+          },
+        }).status
+      ).toBe(0);
+      expect(JSON.parse(fs.readFileSync(curlPayload, "utf8"))).toMatchObject({
+        train_id: TRAIN_ID,
+        expected_sha: EXPECTED_SHA,
+        source_ref: "release-bus-v2/compatibility",
+        candidate_evidence_mode: "strict-single",
+        aggregate_candidate_evidence_digest: null,
+        reuse_artifact_run_id: "1234",
+        reuse_artifact_name: artifactName,
+        reuse_artifact_digest: artifactDigest,
+      });
+      expect(
+        runShell(authorize.run!, {
+          env: {
+            ...baseEnv,
             AGGREGATE_CANDIDATE_EVIDENCE_DIGEST: "f".repeat(64),
             CANDIDATE_EVIDENCE_MODE: "strict-aggregate",
             EXPECTED_SHA: EXPECTED_SHA,
@@ -868,6 +900,9 @@ describe("Release Bus artifact rollout compatibility", () => {
         "aggregate_candidate_evidence_digest"
       );
       expect(legacyAuthorization).not.toHaveProperty("source_ref");
+      expect(legacyAuthorization).not.toHaveProperty("reuse_artifact_run_id");
+      expect(legacyAuthorization).not.toHaveProperty("reuse_artifact_name");
+      expect(legacyAuthorization).not.toHaveProperty("reuse_artifact_digest");
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }

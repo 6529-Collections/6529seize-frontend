@@ -168,6 +168,9 @@ jobs:
           OPERATION_KEY: ${{ inputs.operation_key }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          REUSE_ARTIFACT_DIGEST: ${{ inputs.reuse_artifact_digest }}
+          REUSE_ARTIFACT_NAME: ${{ inputs.reuse_artifact_name }}
+          REUSE_ARTIFACT_RUN_ID: ${{ inputs.reuse_artifact_run_id }}
           SOURCE_REF: ${{ inputs.source_ref }}
           TRAIN_ID: ${{ inputs.release_train_id }}
         run: |
@@ -175,6 +178,9 @@ jobs:
           payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg expected_sha "$EXPECTED_SHA" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"orchestration",service:null,expected_sha:$expected_sha,artifact_digest:null}')"
           if [ "$CANDIDATE_EVIDENCE_MODE" != legacy-whole-train ]; then
             payload="$(jq -n --argjson payload "$payload" --arg source_ref "$SOURCE_REF" --arg candidate_evidence_mode "$CANDIDATE_EVIDENCE_MODE" --arg aggregate_candidate_evidence_digest "$AGGREGATE_CANDIDATE_EVIDENCE_DIGEST" '$payload + {source_ref:$source_ref,candidate_evidence_mode:$candidate_evidence_mode,aggregate_candidate_evidence_digest:(if $aggregate_candidate_evidence_digest == "" then null else $aggregate_candidate_evidence_digest end)}')"
+          fi
+          if [ "$CANDIDATE_EVIDENCE_MODE" = strict-single ]; then
+            payload="$(jq -n --argjson payload "$payload" --arg reuse_artifact_run_id "$REUSE_ARTIFACT_RUN_ID" --arg reuse_artifact_name "$REUSE_ARTIFACT_NAME" --arg reuse_artifact_digest "$REUSE_ARTIFACT_DIGEST" '$payload + {reuse_artifact_run_id:$reuse_artifact_run_id,reuse_artifact_name:$reuse_artifact_name,reuse_artifact_digest:$reuse_artifact_digest}')"
           fi
           curl --fail-with-body --silent --show-error \
             -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
