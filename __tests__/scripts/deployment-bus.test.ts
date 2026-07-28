@@ -670,6 +670,7 @@ describe("release bus v2 combined preflight", () => {
   it("removes repository-wide quality matrices from the train critical path", () => {
     expect(Object.keys(workflow.jobs)).toEqual([
       "authorize",
+      "evidence",
       "build",
       "finalize",
     ]);

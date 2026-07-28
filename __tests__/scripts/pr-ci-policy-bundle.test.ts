@@ -202,6 +202,24 @@ describe("pr-ci-policy-bundle-v1", () => {
       expect(() =>
         fixtureBundle(root, { filePaths: [workflowPath] })
       ).not.toThrow();
+
+      fs.writeFileSync(
+        path.join(root, workflowPath),
+        "jobs:\n  check:\n    steps:\n      - { uses: actions/checkout@v4 }\n"
+      );
+      expect(() => fixtureBundle(root, { filePaths: [workflowPath] })).toThrow(
+        "external action is not pinned to a 40-hex SHA"
+      );
+
+      fs.writeFileSync(
+        path.join(root, workflowPath),
+        `jobs:\n  check:\n    steps:\n      - { uses: actions/checkout@${"b".repeat(
+          40
+        )} }\n`
+      );
+      expect(() =>
+        fixtureBundle(root, { filePaths: [workflowPath] })
+      ).not.toThrow();
     });
   });
 
