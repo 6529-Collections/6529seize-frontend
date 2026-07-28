@@ -1,0 +1,494 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController#function:0x51234902",
+          "declaringDefinitionId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController",
+          "inherited": false,
+          "inputs": [],
+          "name": "lastNumberOfNumbers",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x51234902",
+          "signature": "lastNumberOfNumbers()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController#function:0x21c43217",
+          "declaringDefinitionId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController",
+          "inherited": false,
+          "inputs": [],
+          "name": "lastRefundAddress",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x21c43217",
+          "signature": "lastRefundAddress()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController#function:0x43183834",
+          "declaringDefinitionId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController",
+          "inherited": false,
+          "inputs": [],
+          "name": "lastValue",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x43183834",
+          "signature": "lastValue()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController#function:0x6a84a985",
+          "declaringDefinitionId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController",
+          "inherited": false,
+          "inputs": [],
+          "name": "nextRequestId",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x6a84a985",
+          "signature": "nextRequestId()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController#function:0xd4e0f337",
+          "declaringDefinitionId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "numberOfNumbers",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "refundAddress",
+              "type": "address"
+            }
+          ],
+          "name": "requestRandomWords",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xd4e0f337",
+          "signature": "requestRandomWords(uint256,address)",
+          "stateMutability": "payable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "nextRequestId()",
+          "displaySignature": "nextRequestId()",
+          "functionKind": "getter",
+          "id": "test/StreamEmergencyWithdraw.t.sol:MockArrngController#function:0x6a84a985",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1FbWVyZ2VuY3lXaXRoZHJhdy50LnNvbDpNb2NrQXJybmdDb250cm9sbGVyI2Z1bmN0aW9uOjB4NmE4NGE5ODU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "nextRequestId",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 32,
+            "byteStart": 9880,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L215",
+            "lineEnd": 215,
+            "lineStart": 215,
+            "snippetSha256": "sha256:c7015688cea9d50a6e063a7567b715d0c68802cb091f77014a5213efc709c785",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": "0x6a84a985",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "lastValue()",
+          "displaySignature": "lastValue()",
+          "functionKind": "getter",
+          "id": "test/StreamEmergencyWithdraw.t.sol:MockArrngController#function:0x43183834",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1FbWVyZ2VuY3lXaXRoZHJhdy50LnNvbDpNb2NrQXJybmdDb250cm9sbGVyI2Z1bmN0aW9uOjB4NDMxODM4MzQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "lastValue",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 24,
+            "byteStart": 9918,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L216",
+            "lineEnd": 216,
+            "lineStart": 216,
+            "snippetSha256": "sha256:79979f53bb61fc52a79dd55b4383bc9015aeb6dd14c128d18a47722dacfff37e",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": "0x43183834",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "lastNumberOfNumbers()",
+          "displaySignature": "lastNumberOfNumbers()",
+          "functionKind": "getter",
+          "id": "test/StreamEmergencyWithdraw.t.sol:MockArrngController#function:0x51234902",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1FbWVyZ2VuY3lXaXRoZHJhdy50LnNvbDpNb2NrQXJybmdDb250cm9sbGVyI2Z1bmN0aW9uOjB4NTEyMzQ5MDI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "lastNumberOfNumbers",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 34,
+            "byteStart": 9948,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L217",
+            "lineEnd": 217,
+            "lineStart": 217,
+            "snippetSha256": "sha256:2bdb1698f6c463e0967d29c94e236808114dbb9643b1e43e668f60f957dd59b0",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": "0x51234902",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "lastRefundAddress()",
+          "displaySignature": "lastRefundAddress()",
+          "functionKind": "getter",
+          "id": "test/StreamEmergencyWithdraw.t.sol:MockArrngController#function:0x21c43217",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1FbWVyZ2VuY3lXaXRoZHJhdy50LnNvbDpNb2NrQXJybmdDb250cm9sbGVyI2Z1bmN0aW9uOjB4MjFjNDMyMTc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "lastRefundAddress",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 32,
+            "byteStart": 9988,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L218",
+            "lineEnd": 218,
+            "lineStart": 218,
+            "snippetSha256": "sha256:36b9dd68192ac2dd80fe32abd8795b00578fcab3736d6fc076ce7b06ce59d4bb",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": "0x21c43217",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "requestRandomWords(uint256,address)",
+          "displaySignature": "requestRandomWords(uint256,address)",
+          "functionKind": "function",
+          "id": "test/StreamEmergencyWithdraw.t.sol:MockArrngController#function:0xd4e0f337",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "numberOfNumbers",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "refundAddress",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1FbWVyZ2VuY3lXaXRoZHJhdy50LnNvbDpNb2NrQXJybmdDb250cm9sbGVyI2Z1bmN0aW9uOjB4ZDRlMGYzMzc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestRandomWords",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 337,
+            "byteStart": 10027,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L220-L230",
+            "lineEnd": 230,
+            "lineStart": 220,
+            "snippetSha256": "sha256:1ff2ab49fa1216f9e130301dca5125c4db976575ae1651de062f6ef88ef881d2",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": "0xd4e0f337",
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController#function:0x6a84a985",
+          "immutable": false,
+          "name": "nextRequestId",
+          "natspec": "",
+          "range": {
+            "byteLength": 32,
+            "byteStart": 9880,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L215",
+            "lineEnd": 215,
+            "lineStart": 215,
+            "snippetSha256": "sha256:c7015688cea9d50a6e063a7567b715d0c68802cb091f77014a5213efc709c785",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": "0x6a84a985",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 9911,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L215",
+            "lineEnd": 215,
+            "lineStart": 215,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "valueSource": "1",
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController#function:0x43183834",
+          "immutable": false,
+          "name": "lastValue",
+          "natspec": "",
+          "range": {
+            "byteLength": 24,
+            "byteStart": 9918,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L216",
+            "lineEnd": 216,
+            "lineStart": 216,
+            "snippetSha256": "sha256:79979f53bb61fc52a79dd55b4383bc9015aeb6dd14c128d18a47722dacfff37e",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": "0x43183834",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController#function:0x51234902",
+          "immutable": false,
+          "name": "lastNumberOfNumbers",
+          "natspec": "",
+          "range": {
+            "byteLength": 34,
+            "byteStart": 9948,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L217",
+            "lineEnd": 217,
+            "lineStart": 217,
+            "snippetSha256": "sha256:2bdb1698f6c463e0967d29c94e236808114dbb9643b1e43e668f60f957dd59b0",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": "0x51234902",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController#function:0x21c43217",
+          "immutable": false,
+          "name": "lastRefundAddress",
+          "natspec": "",
+          "range": {
+            "byteLength": 32,
+            "byteStart": 9988,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L218",
+            "lineEnd": 218,
+            "lineStart": 218,
+            "snippetSha256": "sha256:36b9dd68192ac2dd80fe32abd8795b00578fcab3736d6fc076ce7b06ce59d4bb",
+            "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          },
+          "selector": "0x21c43217",
+          "type": "address",
+          "typeString": "address",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamEmergencyWithdraw.t.sol:MockArrngController",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1FbWVyZ2VuY3lXaXRoZHJhdy50LnNvbDpNb2NrQXJybmdDb250cm9sbGVy",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamEmergencyWithdraw.t.sol:MockArrngController"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "MockArrngController",
+    "natspec": "",
+    "range": {
+      "byteLength": 521,
+      "byteStart": 9845,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamEmergencyWithdraw.t.sol#L214-L231",
+      "lineEnd": 231,
+      "lineStart": 214,
+      "snippetSha256": "sha256:e33189b8df30aedc802d18788e057250b2d4cf77e759e83fa7ed02dba5c15b90",
+      "sourceSha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamEmergencyWithdraw.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 6
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 5
+    },
+    "totalCount": 6
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController#function:0x21c43217",
+      "definitionId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController#function:0x43183834",
+      "definitionId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController#function:0x51234902",
+      "definitionId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController#function:0x6a84a985",
+      "definitionId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController#function:0xd4e0f337",
+      "definitionId": "test/StreamEmergencyWithdraw.t.sol:MockArrngController",
+      "severity": "advisory"
+    }
+  ]
+}

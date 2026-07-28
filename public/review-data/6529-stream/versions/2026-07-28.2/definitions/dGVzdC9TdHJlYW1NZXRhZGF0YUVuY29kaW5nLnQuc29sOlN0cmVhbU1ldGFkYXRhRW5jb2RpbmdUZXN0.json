@@ -1,0 +1,230 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamMetadataEncoding.t.sol:StreamMetadataEncodingTest#function:0x01f3a04b",
+          "declaringDefinitionId": "test/StreamMetadataEncoding.t.sol:StreamMetadataEncodingTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testDependencyChunkHashIncludesIndexAndLength",
+          "outputs": [],
+          "selector": "0x01f3a04b",
+          "signature": "testDependencyChunkHashIncludesIndexAndLength()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataEncoding.t.sol:StreamMetadataEncodingTest#function:0xdbb89336",
+          "declaringDefinitionId": "test/StreamMetadataEncoding.t.sol:StreamMetadataEncodingTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testDependencyScriptHashSeparatesAmbiguousChunkBoundaries",
+          "outputs": [],
+          "selector": "0xdbb89336",
+          "signature": "testDependencyScriptHashSeparatesAmbiguousChunkBoundaries()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataEncoding.t.sol:StreamMetadataEncodingTest#function:0x8112c6b4",
+          "declaringDefinitionId": "test/StreamMetadataEncoding.t.sol:StreamMetadataEncodingTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testEmptyDependencyContentHashIsDeterministic",
+          "outputs": [],
+          "selector": "0x8112c6b4",
+          "signature": "testEmptyDependencyContentHashIsDeterministic()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "testDependencyScriptHashSeparatesAmbiguousChunkBoundaries()",
+          "displaySignature": "testDependencyScriptHashSeparatesAmbiguousChunkBoundaries()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataEncoding.t.sol:StreamMetadataEncodingTest#function:0xdbb89336",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUVuY29kaW5nLnQuc29sOlN0cmVhbU1ldGFkYXRhRW5jb2RpbmdUZXN0I2Z1bmN0aW9uOjB4ZGJiODkzMzY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testDependencyScriptHashSeparatesAmbiguousChunkBoundaries",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2171,
+            "byteStart": 424,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEncoding.t.sol#L14-L56",
+            "lineEnd": 56,
+            "lineStart": 14,
+            "snippetSha256": "sha256:b50a8d3cd9e0fc643d3f2c92635c5ee0ac4346978f1f7d2fc6b2b754a9de48fd",
+            "sourceSha256": "sha256:10b756fbaa135a01b6e7bd97ca7f5b5c47b370daf79c8aa8374c3c091c4635ad"
+          },
+          "selector": "0xdbb89336",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testDependencyChunkHashIncludesIndexAndLength()",
+          "displaySignature": "testDependencyChunkHashIncludesIndexAndLength()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataEncoding.t.sol:StreamMetadataEncodingTest#function:0x01f3a04b",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUVuY29kaW5nLnQuc29sOlN0cmVhbU1ldGFkYXRhRW5jb2RpbmdUZXN0I2Z1bmN0aW9uOjB4MDFmM2EwNGI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testDependencyChunkHashIncludesIndexAndLength",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 893,
+            "byteStart": 2601,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEncoding.t.sol#L58-L74",
+            "lineEnd": 74,
+            "lineStart": 58,
+            "snippetSha256": "sha256:35e31aa0285274af9837d3159b34cef2be1d24ed872838b3404d35609499b13b",
+            "sourceSha256": "sha256:10b756fbaa135a01b6e7bd97ca7f5b5c47b370daf79c8aa8374c3c091c4635ad"
+          },
+          "selector": "0x01f3a04b",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testEmptyDependencyContentHashIsDeterministic()",
+          "displaySignature": "testEmptyDependencyContentHashIsDeterministic()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataEncoding.t.sol:StreamMetadataEncodingTest#function:0x8112c6b4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUVuY29kaW5nLnQuc29sOlN0cmVhbU1ldGFkYXRhRW5jb2RpbmdUZXN0I2Z1bmN0aW9uOjB4ODExMmM2YjQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testEmptyDependencyContentHashIsDeterministic",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 523,
+            "byteStart": 3500,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEncoding.t.sol#L76-L85",
+            "lineEnd": 85,
+            "lineStart": 76,
+            "snippetSha256": "sha256:9a51234fe5940f2ea5d7eb6752e4f87993e1bd064b280e158c5b36fd243f14a5",
+            "sourceSha256": "sha256:10b756fbaa135a01b6e7bd97ca7f5b5c47b370daf79c8aa8374c3c091c4635ad"
+          },
+          "selector": "0x8112c6b4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamMetadataEncoding.t.sol:StreamMetadataEncodingTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      },
+      {
+        "definitionId": "test/helpers/TestHashingUtils.sol:TestHashingUtils",
+        "name": "TestHashingUtils"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUVuY29kaW5nLnQuc29sOlN0cmVhbU1ldGFkYXRhRW5jb2RpbmdUZXN0",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamMetadataEncoding.t.sol:StreamMetadataEncodingTest",
+      "test/helpers/TestHashingUtils.sol:TestHashingUtils",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamMetadataEncodingTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 3803,
+      "byteStart": 222,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataEncoding.t.sol#L9-L86",
+      "lineEnd": 86,
+      "lineStart": 9,
+      "snippetSha256": "sha256:65abba96cd8f2638bfd4ff5300a75f0c17a45c84019ecc2c1b0604b38c2c3f15",
+      "sourceSha256": "sha256:10b756fbaa135a01b6e7bd97ca7f5b5c47b370daf79c8aa8374c3c091c4635ad"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamMetadataEncoding.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamMetadataEncoding.t.sol:StreamMetadataEncodingTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataEncoding.t.sol:StreamMetadataEncodingTest#function:0x01f3a04b",
+      "definitionId": "test/StreamMetadataEncoding.t.sol:StreamMetadataEncodingTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataEncoding.t.sol:StreamMetadataEncodingTest#function:0x8112c6b4",
+      "definitionId": "test/StreamMetadataEncoding.t.sol:StreamMetadataEncodingTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataEncoding.t.sol:StreamMetadataEncodingTest#function:0xdbb89336",
+      "definitionId": "test/StreamMetadataEncoding.t.sol:StreamMetadataEncodingTest",
+      "severity": "advisory"
+    }
+  ]
+}
