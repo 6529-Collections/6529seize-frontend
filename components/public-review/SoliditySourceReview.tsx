@@ -193,7 +193,7 @@ function SourceSelectionControls({
           <input
             aria-describedby={rangeStatusId}
             aria-invalid={!selectionValid}
-            className="tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-white tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40"
+            className="tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-white tw-outline-none hover:tw-border-white/[0.16] focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40"
             max={maximumLine}
             min={minimumLine}
             type="number"
@@ -213,7 +213,7 @@ function SourceSelectionControls({
           <input
             aria-describedby={rangeStatusId}
             aria-invalid={!selectionValid}
-            className="tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-white tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40"
+            className="tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-white tw-outline-none hover:tw-border-white/[0.16] focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40"
             max={maximumLine}
             min={minimumLine}
             type="number"

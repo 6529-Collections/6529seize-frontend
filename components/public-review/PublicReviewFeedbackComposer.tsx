@@ -122,7 +122,7 @@ function getFeedbackContextFingerprint({
 }
 
 const INPUT_CLASSES =
-  "tw-min-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-50 tw-outline-none tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition focus:tw-bg-black focus:tw-ring-1 focus:tw-ring-primary-400 focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400";
+  "tw-min-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-50 tw-outline-none tw-ring-1 tw-ring-inset tw-ring-white/[0.08] tw-transition hover:tw-ring-white/[0.14] focus:tw-bg-black focus:tw-ring-1 focus:tw-ring-primary-400 focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400";
 
 function getFeedbackGate({
   authenticated,
@@ -573,7 +573,7 @@ export default function PublicReviewFeedbackComposer({
                     </select>
                     <ChevronDownIcon
                       aria-hidden="true"
-                      className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 tw-size-4 tw--translate-y-1/2 tw-text-iron-500"
+                      className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 tw-size-4 -tw-translate-y-1/2 tw-text-iron-500"
                     />
                   </span>
                 </label>
@@ -601,7 +601,7 @@ export default function PublicReviewFeedbackComposer({
                     </select>
                     <ChevronDownIcon
                       aria-hidden="true"
-                      className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 tw-size-4 tw--translate-y-1/2 tw-text-iron-500"
+                      className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 tw-size-4 -tw-translate-y-1/2 tw-text-iron-500"
                     />
                   </span>
                 </label>
