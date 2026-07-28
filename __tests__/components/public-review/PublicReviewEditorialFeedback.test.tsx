@@ -28,7 +28,7 @@ const destination: PublicReviewDiscussionDestination = {
 
 const config: PublicReviewFeedbackConfig = {
   reviewId: "6529-stream",
-  reviewVersion: "2026-07-27.1",
+  reviewVersion: "2026-07-28.1",
   reviewTitle: "6529 Stream",
   feedbackSchemaVersion: "1",
   submissionsOpen: true,
@@ -41,7 +41,7 @@ const config: PublicReviewFeedbackConfig = {
 const page: PublicReviewPageContext = {
   pageId: "overview",
   pageTitle: "Overview",
-  canonicalPath: "/reviews/6529-stream/versions/2026-07-27.1",
+  canonicalPath: "/reviews/6529-stream/versions/2026-07-28.1",
 };
 
 describe("PublicReviewEditorialFeedback", () => {
