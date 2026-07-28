@@ -8,7 +8,6 @@ import { useMemo } from "react";
 import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
-import { PublicReviewLedgerWarnings } from "@/components/public-review/PublicReviewLedgerWarnings";
 import { usePublicReviewCommentPanelOpen } from "@/components/public-review/PublicReviewReadingLayout";
 import { formatDate, formatInteger, formatTime } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -79,13 +78,6 @@ export function PublicReviewPageComments({
       ),
     [ledgerQuery.data, page, referenceSelection]
   );
-  const warnings = useMemo(
-    () =>
-      ledgerQuery.data?.pages.flatMap((ledgerPage) => ledgerPage.warnings) ??
-      [],
-    [ledgerQuery.data]
-  );
-
   return (
     <section aria-label={t(locale, "publicReview.comments.title")}>
       <output className="tw-sr-only" aria-live="polite" aria-atomic="true">
@@ -95,12 +87,6 @@ export function PublicReviewPageComments({
               count: formatInteger(locale, records.length),
             })}
       </output>
-
-      <PublicReviewLedgerWarnings
-        className="tw-mt-3"
-        locale={locale}
-        warnings={warnings}
-      />
 
       {ledgerQuery.isLoading ? (
         <div aria-hidden="true" className="tw-mt-4 tw-space-y-2 tw-py-3">

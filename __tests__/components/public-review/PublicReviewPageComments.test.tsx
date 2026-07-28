@@ -77,7 +77,13 @@ describe("PublicReviewPageComments", () => {
           {
             destination,
             records: [record],
-            warnings: [],
+            warnings: [
+              {
+                code: "INVALID_REVIEW_METADATA",
+                dropId: "drop-from-another-page",
+                reason: "Feedback metadata is not canonical.",
+              },
+            ],
             nextCursor: null,
             rawDropCount: 1,
           },
@@ -113,6 +119,9 @@ describe("PublicReviewPageComments", () => {
     expect(
       screen.getByText("How does the permanent Core constrain successors?")
     ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/Wave messages could not be included/)
+    ).not.toBeInTheDocument();
   });
 
   it("shows only feedback matching the exact technical page reference", () => {
