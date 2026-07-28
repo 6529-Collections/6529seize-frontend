@@ -9,6 +9,7 @@ type Pack = {
   safety: string;
   environments: string[];
   triggers: string[];
+  specs?: string[];
   timeoutMinutes: number;
 };
 
@@ -92,6 +93,10 @@ const runner = require("../../scripts/e2e-packs.cjs") as {
 
 const ROOT = process.cwd();
 const SCRIPT_PATH = path.join(ROOT, "scripts", "e2e-packs.cjs");
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { PACKS } = require("../../tests/packs.manifest.cjs") as {
+  PACKS: Pack[];
+};
 
 const samplePacks: Pack[] = [
   {
@@ -499,9 +504,9 @@ describe("E2E runner CLI resolution", () => {
   });
 
   it.each([
-    ["staging", "post-deploy", 13],
+    ["staging", "post-deploy", 12],
     ["production", "cron", 10],
-    ["production", "post-deploy", 1],
+    ["production", "post-deploy", 11],
   ])(
     "lists %s/%s as a non-empty deterministic pack set",
     (env, trigger, count) => {
@@ -510,4 +515,34 @@ describe("E2E runner CLI resolution", () => {
       expect(result.stdout).toContain(`resolved ${count} pack(s)`);
     }
   );
+
+  it.each(["staging", "production"])(
+    "uses disjoint readonly %s post-deploy packs",
+    (environment) => {
+      const packs = PACKS.filter(
+        (pack) =>
+          pack.environments.includes(environment) &&
+          pack.triggers.includes("post-deploy")
+      );
+      expect(packs.length).toBeGreaterThan(1);
+      expect(packs.every((pack) => pack.safety === "readonly")).toBe(true);
+      const specs = packs.flatMap((pack) => pack.specs ?? []);
+      expect(new Set(specs).size).toBe(specs.length);
+    }
+  );
+
+  it("preserves the complete production aggregate inventory in disjoint packs", () => {
+    const aggregate = PACKS.find(
+      (pack) => pack.scriptKey === "test:e2e:production:readonly"
+    );
+    expect(aggregate?.triggers).toEqual(["manual"]);
+    const postDeploySpecs = PACKS.filter(
+      (pack) =>
+        pack.environments.includes("production") &&
+        pack.triggers.includes("post-deploy")
+    ).flatMap((pack) => pack.specs ?? []);
+    expect([...postDeploySpecs].sort()).toEqual(
+      [...(aggregate?.specs ?? [])].sort()
+    );
+  });
 });

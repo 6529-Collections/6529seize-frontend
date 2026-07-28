@@ -618,10 +618,15 @@ describe("release bus v2 combined preflight", () => {
     );
   });
 
-  it("keeps candidate execution jobs secretless and read-only", () => {
+  it("authorizes before the only secretless candidate checkout", () => {
     const job = workflow.jobs.build;
     expect(job.permissions).toEqual({ contents: "read" });
     expect(JSON.stringify(job.env ?? {})).not.toContain("secrets.");
+    expect(
+      workflow.jobs.authorize.steps.some((step: { uses?: string }) =>
+        step.uses?.startsWith("actions/checkout@")
+      )
+    ).toBe(false);
     const source = fs.readFileSync(
       path.join(
         process.cwd(),
@@ -631,7 +636,7 @@ describe("release bus v2 combined preflight", () => {
     );
     expect(
       source.match(/codeql\[actions\/untrusted-checkout\/medium\]/g)
-    ).toHaveLength(2);
+    ).toHaveLength(1);
   });
 
   it("builds only the requested profile for v3 and keeps bounded legacy compatibility", () => {

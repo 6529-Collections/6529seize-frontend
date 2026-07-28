@@ -37,10 +37,22 @@
       "jest --listTests"
     ]
   },
+  "normal_v3_deploy": {
+    "dependency_installs": 0,
+    "candidate_checkouts": 0,
+    "rebuilds": 0,
+    "source_verification": "github-ref-api",
+    "consumes_preflight_artifact": true
+  },
   "e2e": {
     "staging_parallelism": 3,
     "production_parallelism": 3,
     "parallel_safety": "readonly",
+    "post_deploy_packs": {
+      "staging": 12,
+      "production": 11,
+      "duplicate_spec_entries": 0
+    },
     "staging_concurrency_group": "staging-e2e",
     "production_concurrency_group": "production-e2e",
     "cancel_in_progress": false

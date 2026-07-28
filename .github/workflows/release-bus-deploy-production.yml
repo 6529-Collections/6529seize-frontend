@@ -105,20 +105,26 @@ jobs:
             -H 'Content-Type: application/json' \
             --data "$payload" \
             "$RELEASE_BUS_API_URL/deploy/release-bus-v2/authorize"
-      - name: Check out exact merged train SHA
+      - name: Confirm immutable production ref without checkout
         id: source
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-        with:
-          ref: ${{ inputs.expected_sha }}
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Confirm immutable source is current main
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
-          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
-          git fetch --no-tags origin main
-          test "$(git rev-parse origin/main)" = "$EXPECTED_SHA"
+          if ! ref_json="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main")"; then
+            echo "failure_kind=api" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          observed_type="$(jq -r '.object.type' <<< "$ref_json")"
+          observed_sha="$(jq -r '.object.sha' <<< "$ref_json")"
+          if [ "$observed_type" != commit ] || [ "$observed_sha" != "$EXPECTED_SHA" ]; then
+            echo "failure_kind=ref-moved" >> "$GITHUB_OUTPUT"
+            echo "observed_sha=$observed_sha" >> "$GITHUB_OUTPUT"
+            echo "main moved from expected $EXPECTED_SHA to $observed_sha." >&2
+            exit 1
+          fi
+          echo "failure_kind=" >> "$GITHUB_OUTPUT"
       - name: Download immutable preflight artifact
         id: artifact-download
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
@@ -150,9 +156,12 @@ jobs:
                 .train_id == $train_id and
                 .source_sha == $source_sha and
                 .environment == "production" and
+                .source_evidence_reused == true and
+                .artifact_bytes_reused == false and
                 (.package_sha256 | test("^[a-f0-9]{64}$"))
               ' manifest.json >/dev/null
             package_root=target
+            artifact_contract=environment-bound-v1
             package_digest="$(sha256sum "$package_root/package.zip" | cut -d' ' -f1)"
             test "$package_digest" = "$(jq -r '.package_sha256' manifest.json)"
           elif [ "$ARTIFACT_CONTRACT_VERSION" = legacy-v2 ] && [ "$schema_version" = 2 ]; then
@@ -166,6 +175,7 @@ jobs:
                 (.profiles.production.package_sha256 | test("^[a-f0-9]{64}$"))
               ' manifest.json >/dev/null
             package_root=profiles/production/target
+            artifact_contract=''
             package_digest="$(sha256sum "$package_root/package.zip" | cut -d' ' -f1)"
             test "$package_digest" = "$(jq -r '.profiles.production.package_sha256' manifest.json)"
           else
@@ -173,8 +183,10 @@ jobs:
             exit 1
           fi
           echo "artifact_digest=$artifact_digest" >> "$GITHUB_OUTPUT"
+          echo "artifact_contract=$artifact_contract" >> "$GITHUB_OUTPUT"
           echo "package_digest=$package_digest" >> "$GITHUB_OUTPUT"
           echo "package_root=$package_root" >> "$GITHUB_OUTPUT"
+          echo "schema_version=$schema_version" >> "$GITHUB_OUTPUT"
       - name: Configure AWS credentials
         id: aws-credentials
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
@@ -295,10 +307,20 @@ jobs:
       - name: Report structured Release Bus deployment result
         if: always()
         env:
+          ARTIFACT_CONTRACT: ${{ steps.artifact.outputs.artifact_contract }}
+          ARTIFACT_CONTRACT_VERSION: ${{ inputs.artifact_contract_version }}
+          ARTIFACT_DIGEST: ${{ steps.artifact.outputs.artifact_digest }}
+          ARTIFACT_ENVIRONMENT: ${{ inputs.artifact_environment }}
+          ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
+          ARTIFACT_TRAIN_ID: ${{ inputs.artifact_train_id || inputs.release_train_id }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          PACKAGE_DIGEST: ${{ steps.artifact.outputs.package_digest }}
+          SCHEMA_VERSION: ${{ steps.artifact.outputs.schema_version }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
           JOB_STATUS: ${{ job.status }}
           SOURCE_OUTCOME: ${{ steps.source.outcome }}
+          SOURCE_FAILURE_KIND: ${{ steps.source.outputs.failure_kind }}
           DOWNLOAD_OUTCOME: ${{ steps.artifact-download.outcome }}
           ARTIFACT_OUTCOME: ${{ steps.artifact.outcome }}
           AWS_OUTCOME: ${{ steps.aws-credentials.outcome }}
@@ -323,7 +345,37 @@ jobs:
               failure_phase=deployment_identity_or_credentials
             fi
           fi
-          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg status "$status" --arg failure_class "$failure_class" --arg failure_phase "$failure_phase" --argjson retryable "$retryable" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"complete",status:$status,failure_class:(if $failure_class == "null" then null else $failure_class end),failure_phase:(if $failure_phase == "null" then null else $failure_phase end),retryable:$retryable,summary:null,stages:[],jest:null,backend_evidence:null}')"
+          if [ "$SOURCE_OUTCOME" = failure ] && [ "$SOURCE_FAILURE_KIND" = ref-moved ]; then
+            failure_class=INTERACTION
+            failure_phase=source_ref_moved
+            retryable=false
+          fi
+          consumed_preflight_artifact=false
+          if [ "$ARTIFACT_OUTCOME" = success ]; then
+            consumed_preflight_artifact=true
+          fi
+          payload="$(jq -n \
+            --arg train_id "$TRAIN_ID" \
+            --arg operation_key "$OPERATION_KEY" \
+            --arg workflow_run_id "$GITHUB_RUN_ID" \
+            --arg status "$status" \
+            --arg failure_class "$failure_class" \
+            --arg failure_phase "$failure_phase" \
+            --argjson retryable "$retryable" \
+            --argjson consumed_preflight_artifact "$consumed_preflight_artifact" \
+            --arg schema_version "$SCHEMA_VERSION" \
+            --arg artifact_contract "$ARTIFACT_CONTRACT" \
+            --arg artifact_contract_version "$ARTIFACT_CONTRACT_VERSION" \
+            --arg repository frontend \
+            --arg source_sha "$EXPECTED_SHA" \
+            --arg environment "$ARTIFACT_ENVIRONMENT" \
+            --arg artifact_run_id "$ARTIFACT_RUN_ID" \
+            --arg artifact_train_id "$ARTIFACT_TRAIN_ID" \
+            --arg artifact_digest "$ARTIFACT_DIGEST" \
+            --arg package_digest "$PACKAGE_DIGEST" \
+            --argjson source_evidence_reused "$([ "$ARTIFACT_CONTRACT_VERSION" = environment-bound-v3 ] && printf true || printf false)" \
+            --argjson artifact_bytes_reused false \
+            '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"complete",status:$status,failure_class:(if $failure_class == "null" then null else $failure_class end),failure_phase:(if $failure_phase == "null" then null else $failure_phase end),retryable:$retryable,summary:{schema_version:(if $schema_version == "" then null else ($schema_version | tonumber) end),artifact_contract:(if $artifact_contract == "" then null else $artifact_contract end),artifact_contract_version:$artifact_contract_version,repository:$repository,source_sha:$source_sha,environment:$environment,service:null,artifact_run_id:$artifact_run_id,artifact_train_id:$artifact_train_id,artifact_digest:(if $artifact_digest == "" then null else $artifact_digest end),package_digest:(if $package_digest == "" then null else $package_digest end),consumed_preflight_artifact:$consumed_preflight_artifact,rebuilt:false,source_evidence_reused:$source_evidence_reused,artifact_bytes_reused:$artifact_bytes_reused},stages:[],jest:null,backend_evidence:null}')"
           curl --fail-with-body --silent --show-error \
             -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
             -H 'Content-Type: application/json' \
