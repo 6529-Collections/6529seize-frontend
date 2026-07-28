@@ -45,6 +45,7 @@ function withFixture(run: (root: string) => void) {
         packageManager: "pnpm@1.2.3",
         scripts: { build: "node build.cjs" },
         dependencies: { unrelated: "1.0.0" },
+        devDependencies: { yaml: "2.9.0" },
       })
     );
     fs.writeFileSync(path.join(root, "a.cjs"), "module.exports = 1;\n");
@@ -167,15 +168,29 @@ describe("pr-ci-policy-bundle-v1", () => {
   it("allows unrelated dependency drift but binds protected script semantics", () => {
     withFixture((root) => {
       const before = fixtureBundle(root).digest;
+      const parserBefore = fixtureBundle(root, {
+        packageFieldKeys: ["devDependencies.yaml"],
+      }).digest;
       const packagePath = path.join(root, "package.json");
       const packageJson = JSON.parse(fs.readFileSync(packagePath, "utf8"));
       packageJson.dependencies.unrelated = "2.0.0";
       fs.writeFileSync(packagePath, JSON.stringify(packageJson));
       expect(fixtureBundle(root).digest).toBe(before);
+      expect(
+        fixtureBundle(root, {
+          packageFieldKeys: ["devDependencies.yaml"],
+        }).digest
+      ).toBe(parserBefore);
 
+      packageJson.devDependencies.yaml = "2.8.0";
       packageJson.scripts.build = "node weakened-build.cjs";
       fs.writeFileSync(packagePath, JSON.stringify(packageJson));
       expect(fixtureBundle(root).digest).not.toBe(before);
+      expect(
+        fixtureBundle(root, {
+          packageFieldKeys: ["devDependencies.yaml"],
+        }).digest
+      ).not.toBe(parserBefore);
     });
   });
 
@@ -282,6 +297,7 @@ describe("pr-ci-policy-bundle-v1", () => {
         "devDependencies.jest",
         "devDependencies.@playwright/test",
         "devDependencies.typescript",
+        "devDependencies.yaml",
       ])
     );
     expect(RUNTIME_PINS).toEqual({ node: "22.17.1" });
