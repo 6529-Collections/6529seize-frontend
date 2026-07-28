@@ -242,9 +242,10 @@ jobs:
           ./bin/6529 run test:no-coverage --runInBand --runTestsByPath \
             __tests__/scripts/pr-ci-policy-bundle.test.ts \
             __tests__/scripts/deployment-bus.test.ts \
-            __tests__/scripts/e2e-packs.test.ts \
-            __tests__/scripts/package-public-review-artifacts.test.ts \
-            __tests__/scripts/release-bus-artifact-compatibility.test.ts \
+                __tests__/scripts/e2e-packs.test.ts \
+                __tests__/scripts/package-public-review-artifacts.test.ts \
+                __tests__/scripts/public-review-artifact-workflows.test.ts \
+                __tests__/scripts/release-bus-artifact-compatibility.test.ts \
             __tests__/scripts/release-bus-performance-contract.test.ts \
             __tests__/scripts/release-bus-v2-compose-workflow.test.ts \
             __tests__/scripts/sync-e2e-manifest.test.ts \

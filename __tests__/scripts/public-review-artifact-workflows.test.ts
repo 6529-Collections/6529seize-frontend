@@ -16,44 +16,33 @@ const sourceCleanGuard =
   "git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews";
 
 describe("public-review artifact workflow contract", () => {
-  it("uses one profile-aware helper for both exact PR artifact profiles", () => {
-    expect(appPrCi.match(new RegExp(`${helper} prepare`, "g"))).toHaveLength(2);
-    expect(appPrCi.match(new RegExp(`${helper} assert-zip`, "g"))).toHaveLength(
-      2
-    );
-    expect(
-      appPrCi.match(new RegExp(`${helper} assert-listing`, "g"))
-    ).toHaveLength(2);
-    expect(appPrCi.match(/--profile production/g)).toHaveLength(3);
-    expect(appPrCi.match(/--profile staging/g)).toHaveLength(3);
-    expect(appPrCi.match(/unzip -Z1/g)).toHaveLength(2);
-    expect(appPrCi.match(/unzip -q/g)).toHaveLength(2);
-    expect(appPrCi.match(/--extracted-root "\$zip_extract"/g)).toHaveLength(2);
-    expect(
-      appPrCi.match(
-        /test -z "\$\(find "\$profile\/target\/_next" -type l -print -quit\)"/g
-      )
-    ).toHaveLength(2);
-    expect(appPrCi.match(new RegExp(sourceCleanGuard, "g"))).toHaveLength(2);
-    expect(appPrCi).not.toMatch(/\bcp -r public\b/);
+  it("keeps exact PR CI source-evidence-only instead of building deploy profiles", () => {
+    expect(appPrCi).toContain("Create exact PR merge-tree CI evidence");
+    expect(appPrCi).toContain("release-bus-v2-pr-evidence/manifest.json");
+    expect(appPrCi).not.toContain(`${helper} prepare`);
+    expect(appPrCi).not.toContain("release-bus-profile/target/package.zip");
+    expect(appPrCi).not.toContain("--profile staging");
   });
 
-  it("binds release-bus matrix artifacts to their explicit environment", () => {
+  it("binds one selected release-bus artifact to its explicit environment", () => {
     expect(releaseBusPreflight).toContain(
-      `${helper} prepare \\\n            --profile "$BUILD_ENVIRONMENT"`
+      `${helper} prepare \\\n              --profile "$profile"`
     );
     expect(releaseBusPreflight).toContain(
-      `${helper} assert-zip \\\n            --profile "$BUILD_ENVIRONMENT"`
+      `${helper} assert-zip \\\n              --profile "$profile"`
     );
     expect(releaseBusPreflight).toContain(
-      `${helper} assert-listing \\\n            --profile "$BUILD_ENVIRONMENT"`
+      `${helper} assert-listing \\\n              --profile "$profile"`
     );
     expect(releaseBusPreflight).toContain(
-      "unzip -Z1 release-bus-profile/target/package.zip"
+      'unzip -Z1 "$destination/target/package.zip"'
+    );
+    expect(releaseBusPreflight).toContain(
+      'build_profile "$ARTIFACT_ENVIRONMENT" release-bus-artifact'
     );
     expect(releaseBusPreflight).toContain(sourceCleanGuard);
     expect(releaseBusPreflight).toContain(
-      'test -z "$(find release-bus-profile/target/_next -type l -print -quit)"'
+      'test -z "$(find "$destination/target/_next" -type l -print -quit)"'
     );
     expect(releaseBusPreflight).toContain('--extracted-root "$zip_extract"');
     expect(releaseBusPreflight).not.toMatch(/\bcp -r public\b/);
@@ -88,7 +77,7 @@ describe("public-review artifact workflow contract", () => {
     expect(legacyProduction).toContain(
       "GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY || secrets.GIPHY_API_KEY }}"
     );
-    expect(appPrCi).toContain("./bin/6529 run help-index:sync");
-    expect(appPrCi).toContain("./bin/6529 run agent-files:sync");
+    expect(releaseBusPreflight).toContain("./bin/6529 run help-index:sync");
+    expect(releaseBusPreflight).toContain("./bin/6529 run agent-files:sync");
   });
 });
