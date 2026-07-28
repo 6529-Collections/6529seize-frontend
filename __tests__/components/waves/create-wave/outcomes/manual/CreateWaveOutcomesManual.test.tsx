@@ -256,6 +256,52 @@ describe("CreateWaveOutcomesManual", () => {
     expect(mockOnOutcome).not.toHaveBeenCalled();
   });
 
+  it("rejects an oversized single position instead of crashing on allocation", async () => {
+    const mockOnOutcome = jest.fn();
+    render(
+      <CreateWaveOutcomesManual
+        {...defaultProps}
+        waveType={ApiWaveType.Rank}
+        onOutcome={mockOnOutcome}
+      />
+    );
+
+    const actionInput = screen.getByLabelText("Manual action");
+    await userEvent.type(actionInput, "Rank action");
+
+    const positionsInput = screen.getByLabelText(/Winning Positions/i);
+    // Without the cap, submitting this would do `new Array(5_000_000_000)` and
+    // throw "RangeError: Invalid array length".
+    await userEvent.type(positionsInput, "5000000000");
+
+    await userEvent.click(screen.getByTestId("primary-button"));
+
+    expect(screen.getByText("Invalid position format")).toBeInTheDocument();
+    expect(mockOnOutcome).not.toHaveBeenCalled();
+  });
+
+  it("rejects an oversized position range", async () => {
+    const mockOnOutcome = jest.fn();
+    render(
+      <CreateWaveOutcomesManual
+        {...defaultProps}
+        waveType={ApiWaveType.Rank}
+        onOutcome={mockOnOutcome}
+      />
+    );
+
+    const actionInput = screen.getByLabelText("Manual action");
+    await userEvent.type(actionInput, "Rank action");
+
+    const positionsInput = screen.getByLabelText(/Winning Positions/i);
+    await userEvent.type(positionsInput, "1-5000000000");
+
+    await userEvent.click(screen.getByTestId("primary-button"));
+
+    expect(screen.getByText("Invalid position format")).toBeInTheDocument();
+    expect(mockOnOutcome).not.toHaveBeenCalled();
+  });
+
   it("filters invalid characters in positions input", async () => {
     render(
       <CreateWaveOutcomesManual {...defaultProps} waveType={ApiWaveType.Rank} />

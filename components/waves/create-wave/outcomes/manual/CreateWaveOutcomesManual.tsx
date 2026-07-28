@@ -9,6 +9,12 @@ import {
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 
+// Winning positions drive a `new Array(maxPosition)` allocation at submit, so an
+// out-of-range value (e.g. a 10-digit rank, or a very wide range) would throw
+// "RangeError: Invalid array length" and crash the form. Cap positions to a sane
+// maximum and reject anything larger as invalid input.
+const MAX_WINNING_POSITION = 10_000;
+
 export default function CreateWaveOutcomesManual({
   waveType,
   onOutcome,
@@ -43,7 +49,8 @@ export default function CreateWaveOutcomesManual({
         Number.isNaN(start) ||
         Number.isNaN(end) ||
         start < 1 ||
-        end < start
+        end < start ||
+        end > MAX_WINNING_POSITION
       ) {
         return null;
       }
@@ -51,7 +58,9 @@ export default function CreateWaveOutcomesManual({
     }
 
     const num = parseInt(range);
-    return Number.isNaN(num) || num < 1 ? null : [num];
+    return Number.isNaN(num) || num < 1 || num > MAX_WINNING_POSITION
+      ? null
+      : [num];
   };
 
   const parsePositions = (input: string): number[] | null => {
