@@ -57,9 +57,11 @@ describe("Release Bus frontend performance contract", () => {
     for (const command of contract.normal_v3_preflight.forbidden_commands) {
       expect(preflightSource).not.toContain(command);
     }
-    expect(preflightSource.match(/\.\/bin\/6529 install:frozen/g)).toHaveLength(
-      contract.normal_v3_preflight.dependency_installs
-    );
+    expect(
+      preflightSource.match(
+        /node scripts\/release-bus-install-dependencies\.cjs/g
+      )
+    ).toHaveLength(contract.normal_v3_preflight.dependency_installs);
     expect(
       preflightSource.match(/package_profile "\$profile" "\$destination"/g)
     ).toHaveLength(1);
@@ -150,12 +152,27 @@ describe("Release Bus frontend performance contract", () => {
       )
     ).toBe(false);
     const buildSteps = preflight.jobs.build.steps;
+    const localValidationIndex = preflight.jobs.authorize.steps.findIndex(
+      (step: { name?: string }) => step.name === "Validate exact local inputs"
+    );
+    const authorizationIndex = preflight.jobs.authorize.steps.findIndex(
+      (step: { name?: string }) => step.name === "Authorize exact v2 operation"
+    );
+    const evidenceValidationIndex = preflight.jobs.authorize.steps.findIndex(
+      (step: { name?: string }) =>
+        step.name === "Validate exact authorized CI evidence"
+    );
+    expect(localValidationIndex).toBeLessThan(authorizationIndex);
+    expect(authorizationIndex).toBeLessThan(evidenceValidationIndex);
+    expect(
+      preflight.jobs.authorize.steps[localValidationIndex].run
+    ).not.toMatch(/\bgh (?:api|run download)\b/);
     const exactShaVerificationIndex = buildSteps.findIndex(
       (step: { name?: string }) => step.name === "Verify exact composed SHA"
     );
     const dependencyInstallIndex = buildSteps.findIndex(
       (step: { name?: string }) =>
-        step.name === "Install frozen dependencies once"
+        step.name === "Install and verify frozen dependencies once"
     );
     expect(exactShaVerificationIndex).toBeGreaterThan(-1);
     expect(exactShaVerificationIndex).toBeLessThan(dependencyInstallIndex);
@@ -182,6 +199,12 @@ describe("Release Bus frontend performance contract", () => {
     );
     expect(report.run).toContain("artifact_run_id:.run_id");
     expect(report.run).toContain("ci_evidence:$ci_evidence");
+    expect(report.run).toContain(
+      'failure_class="${BUILD_FAILURE_CLASS:-INFRASTRUCTURE}"'
+    );
+    expect(report.run).toContain(
+      'failure_phase="${BUILD_FAILURE_PHASE:-frontend_preflight_runner}"'
+    );
     for (const literal of [
       "schema_version:",
       "artifact_contract:",

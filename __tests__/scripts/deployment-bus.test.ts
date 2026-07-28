@@ -686,7 +686,9 @@ describe("release bus v2 combined preflight", () => {
     expect(source).not.toContain("lint:quiet");
     expect(source).not.toContain("typecheck:ci");
     expect(source).not.toContain("Jest inventory");
-    expect(source.match(/\.\/bin\/6529 install:frozen/g)).toHaveLength(1);
+    expect(
+      source.match(/node scripts\/release-bus-install-dependencies\.cjs/g)
+    ).toHaveLength(1);
   });
 
   it("binds schema v3 to exact environment/SHA and fails closed on v3 schema2", () => {
@@ -711,8 +713,7 @@ describe("release bus v2 combined preflight", () => {
 
   it("accepts rollback revisions without weakening ordinary revision validation", () => {
     const validation = workflow.jobs.authorize.steps.find(
-      (step: { name?: string }) =>
-        step.name === "Validate exact inputs and CI evidence"
+      (step: { name?: string }) => step.name === "Validate exact local inputs"
     );
     expect(validation.run).toContain("rollback-[1-9][0-9]{0,8}");
   });
