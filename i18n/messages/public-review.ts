@@ -544,7 +544,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.ledger.loadingMore": "Loading more feedback…",
   "publicReview.ledger.status": "{count} matching feedback items loaded.",
   "publicReview.ledger.warning":
-    "{count} Wave messages could not be included because their full review metadata was unavailable or invalid.",
+    "Wave feedback excluded: {count}. Full review metadata was unavailable or invalid.",
   "publicReview.ledger.reactions": "{count} reactions",
   "publicReview.ledger.openDiscussion": "Open discussion in the Wave",
   "publicReview.ledger.sourceReference": "Open pinned source reference",

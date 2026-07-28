@@ -476,6 +476,23 @@ describe("frontend i18n helpers", () => {
     ).toBe("(1 notification) Waves | Brain");
   });
 
+  it("renders the public-review exclusion warning for one or many Wave messages", () => {
+    expect(
+      t("en-US", "publicReview.ledger.warning", {
+        count: formatInteger("en-US", 1),
+      })
+    ).toBe(
+      "Wave feedback excluded: 1. Full review metadata was unavailable or invalid."
+    );
+    expect(
+      t("en-US", "publicReview.ledger.warning", {
+        count: formatInteger("en-US", 2),
+      })
+    ).toBe(
+      "Wave feedback excluded: 2. Full review metadata was unavailable or invalid."
+    );
+  });
+
   it("translates the wave drop copy action messages", () => {
     expect(t("en-US", "waves.drop.actions.copyFailed")).toBe("Copy failed");
     expect(t("en-GB", "waves.drop.actions.copyFailed")).toBe("Copy failed");
