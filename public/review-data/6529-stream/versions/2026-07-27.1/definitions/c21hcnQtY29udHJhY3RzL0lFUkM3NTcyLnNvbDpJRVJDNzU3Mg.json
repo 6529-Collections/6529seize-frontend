@@ -1,0 +1,175 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IERC7572.sol:IERC7572#event:ContractURIUpdated()",
+          "declaringDefinitionId": "smart-contracts/IERC7572.sol:IERC7572",
+          "inherited": false,
+          "inputs": [],
+          "name": "ContractURIUpdated",
+          "signature": "ContractURIUpdated()",
+          "topic0": "0xa5d4097edda6d87cb9329af83fb3712ef77eeb13738ffe43cc35a4ce305ad962"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IERC7572.sol:IERC7572#function:0xe8a3d485",
+          "declaringDefinitionId": "smart-contracts/IERC7572.sol:IERC7572",
+          "inherited": false,
+          "inputs": [],
+          "name": "contractURI",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0xe8a3d485",
+          "signature": "contractURI()",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "published_interface",
+    "classificationReason": "Listed in release-artifacts/contracts.json interfaces.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 10203,
+          "canonicalSignature": "ContractURIUpdated()",
+          "displaySignature": "ContractURIUpdated()",
+          "id": "smart-contracts/IERC7572.sol:IERC7572#event:ContractURIUpdated()",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lFUkM3NTcyLnNvbDpJRVJDNzU3MiNldmVudDpDb250cmFjdFVSSVVwZGF0ZWQoKQ",
+          "kind": "event",
+          "name": "ContractURIUpdated",
+          "natspec": "",
+          "range": {
+            "byteLength": 27,
+            "byteStart": 84,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC7572.sol#L6",
+            "lineEnd": 6,
+            "lineStart": 6,
+            "snippetSha256": "sha256:9f2fda3e3e3c530da7edfaeec7461d5d5d302f484f7c9810c3a4991f25e1599a",
+            "sourceSha256": "sha256:4be74b9fb6610491453a0f79bb191d67a7936f87ff1b1b7383dd6b199cd44928"
+          },
+          "topic0": "0xa5d4097edda6d87cb9329af83fb3712ef77eeb13738ffe43cc35a4ce305ad962"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "contractURI()",
+          "displaySignature": "contractURI()",
+          "functionKind": "function",
+          "id": "smart-contracts/IERC7572.sol:IERC7572#function:0xe8a3d485",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lFUkM3NTcyLnNvbDpJRVJDNzU3MiNmdW5jdGlvbjoweGU4YTNkNDg1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "contractURI",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 61,
+            "byteStart": 117,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC7572.sol#L8",
+            "lineEnd": 8,
+            "lineStart": 8,
+            "snippetSha256": "sha256:0d489993461365826aea7f13d2980e20e3e018f9a49eea05a758766426dbd014",
+            "sourceSha256": "sha256:4be74b9fb6610491453a0f79bb191d67a7936f87ff1b1b7383dd6b199cd44928"
+          },
+          "selector": "0xe8a3d485",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IERC7572.sol:IERC7572",
+    "inheritance": [],
+    "interface": {
+      "abiSha256": "sha256:fdc27ee0b903d51effbc5868dfe10f7cf9bf0233900772ced428ce4ac5d27ab6",
+      "interfaceId": "0xe8a3d485",
+      "interfaceIdSource": "selector_xor",
+      "published": true
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lFUkM3NTcyLnNvbDpJRVJDNzU3Mg",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IERC7572.sol:IERC7572"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "published_interface"
+    },
+    "name": "IERC7572",
+    "natspec": "",
+    "range": {
+      "byteLength": 121,
+      "byteStart": 59,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC7572.sol#L5-L9",
+      "lineEnd": 9,
+      "lineStart": 5,
+      "snippetSha256": "sha256:310a11618ec989681f87bafadc99cc61949b63346b46982063e99b2e8c9e840f",
+      "sourceSha256": "sha256:4be74b9fb6610491453a0f79bb191d67a7936f87ff1b1b7383dd6b199cd44928"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IERC7572.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/IERC7572.sol:IERC7572",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IERC7572.sol:IERC7572#function:0xe8a3d485",
+      "definitionId": "smart-contracts/IERC7572.sol:IERC7572",
+      "severity": "advisory"
+    }
+  ]
+}

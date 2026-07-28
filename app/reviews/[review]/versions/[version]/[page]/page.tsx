@@ -5,6 +5,7 @@ import {
   renderStreamReviewRoutePage,
 } from "@/lib/public-review/streamReviewPage";
 import {
+  isStreamReviewVersionPubliclyAvailable,
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_SLUG,
 } from "@/lib/public-review/streamReviewDefinition";
@@ -18,12 +19,14 @@ export function generateStaticParams() {
   }
 
   return STREAM_REVIEW_DEFINITION.versions.flatMap((reviewVersion) =>
-    reviewVersion.pages
-      .filter((page) => page.id !== "overview")
-      .map((page) => ({
-        review: STREAM_REVIEW_SLUG,
-        version: reviewVersion.version,
-        page: page.slug,
-      }))
+    isStreamReviewVersionPubliclyAvailable(reviewVersion.version)
+      ? reviewVersion.pages
+          .filter((page) => page.id !== "overview")
+          .map((page) => ({
+            review: STREAM_REVIEW_SLUG,
+            version: reviewVersion.version,
+            page: page.slug,
+          }))
+      : []
   );
 }

@@ -1,5 +1,9 @@
 # Curation and TDH authorization
 
+**TDH means Total Days Held.** It is 6529's time-weighted measure of how long
+eligible assets have been held, not a token or value stored by Stream. The
+[TDH guide](/network/tdh) explains the current calculation and categories.
+
 The decisive boundary on this page is simple:
 
 **TDH and curation are calculated outside Solidity. Stream verifies a signed

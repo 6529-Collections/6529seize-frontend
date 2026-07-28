@@ -1,0 +1,287 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "production_support_library",
+    "classificationReason": "First-party protocol library outside the production contract catalog.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "DROP_EXECUTION",
+          "natspec": "",
+          "range": {
+            "byteLength": 86,
+            "byteStart": 92,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPauseDomains.sol#L6",
+            "lineEnd": 6,
+            "lineStart": 6,
+            "snippetSha256": "sha256:ad41b25d94c156310aab01c11c1693ef53b28dee9143e0781066c8cbae0775f4",
+            "sourceSha256": "sha256:d0dac2fe0fb8772a1761bff71f7ee6d49bf5800e06a002bbb59801ba767b467f"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 43,
+            "byteStart": 135,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPauseDomains.sol#L6",
+            "lineEnd": 6,
+            "lineStart": 6,
+            "snippetSha256": "sha256:08bb19e0938318e36e194c1e83eab601991160a85b31480bf161654a231c78f2",
+            "sourceSha256": "sha256:d0dac2fe0fb8772a1761bff71f7ee6d49bf5800e06a002bbb59801ba767b467f"
+          },
+          "valueSource": "keccak256(\"6529stream.pause.DropExecution\")",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "MINT",
+          "natspec": "",
+          "range": {
+            "byteLength": 67,
+            "byteStart": 184,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPauseDomains.sol#L7",
+            "lineEnd": 7,
+            "lineStart": 7,
+            "snippetSha256": "sha256:49f1aa3fb20991d39ce5ecf7d494304cd6a71b29f34a0a730840b036dc93505b",
+            "sourceSha256": "sha256:d0dac2fe0fb8772a1761bff71f7ee6d49bf5800e06a002bbb59801ba767b467f"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 34,
+            "byteStart": 217,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPauseDomains.sol#L7",
+            "lineEnd": 7,
+            "lineStart": 7,
+            "snippetSha256": "sha256:0809e93fcaafd0bfd19643386a369b80a3be1a2948cf7a8167e6f8eadf03d3e1",
+            "sourceSha256": "sha256:d0dac2fe0fb8772a1761bff71f7ee6d49bf5800e06a002bbb59801ba767b467f"
+          },
+          "valueSource": "keccak256(\"6529stream.pause.Mint\")",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "AUCTION_BID",
+          "natspec": "",
+          "range": {
+            "byteLength": 80,
+            "byteStart": 257,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPauseDomains.sol#L8",
+            "lineEnd": 8,
+            "lineStart": 8,
+            "snippetSha256": "sha256:6ad581257fb7c221f1eabe1e518f930ed90ed5056aa31cab580d5f458a33a20e",
+            "sourceSha256": "sha256:d0dac2fe0fb8772a1761bff71f7ee6d49bf5800e06a002bbb59801ba767b467f"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 40,
+            "byteStart": 297,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPauseDomains.sol#L8",
+            "lineEnd": 8,
+            "lineStart": 8,
+            "snippetSha256": "sha256:72b1db86e77a71fdf24c217b38e4c2018800e82d2001a450f2af0ccefc8d205b",
+            "sourceSha256": "sha256:d0dac2fe0fb8772a1761bff71f7ee6d49bf5800e06a002bbb59801ba767b467f"
+          },
+          "valueSource": "keccak256(\"6529stream.pause.AuctionBid\")",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "AUCTION_SETTLEMENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 94,
+            "byteStart": 343,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPauseDomains.sol#L9",
+            "lineEnd": 9,
+            "lineStart": 9,
+            "snippetSha256": "sha256:112da20a3e2c411a9d11344535fabce035d9b2896415f5feea3b49804b8ed922",
+            "sourceSha256": "sha256:d0dac2fe0fb8772a1761bff71f7ee6d49bf5800e06a002bbb59801ba767b467f"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 47,
+            "byteStart": 390,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPauseDomains.sol#L9",
+            "lineEnd": 9,
+            "lineStart": 9,
+            "snippetSha256": "sha256:a964aa4e4fa764dbea43e72cb3046a4b60d51e7cd7c5f93688354bbe2a354899",
+            "sourceSha256": "sha256:d0dac2fe0fb8772a1761bff71f7ee6d49bf5800e06a002bbb59801ba767b467f"
+          },
+          "valueSource": "keccak256(\"6529stream.pause.AuctionSettlement\")",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "METADATA_MUTATION",
+          "natspec": "",
+          "range": {
+            "byteLength": 92,
+            "byteStart": 443,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPauseDomains.sol#L10",
+            "lineEnd": 10,
+            "lineStart": 10,
+            "snippetSha256": "sha256:927059d4b2417d08a11702e2cfde792cce39827a54c22d609b72e9578b18b03f",
+            "sourceSha256": "sha256:d0dac2fe0fb8772a1761bff71f7ee6d49bf5800e06a002bbb59801ba767b467f"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 46,
+            "byteStart": 489,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPauseDomains.sol#L10",
+            "lineEnd": 10,
+            "lineStart": 10,
+            "snippetSha256": "sha256:721a15aceaff3029a6e85586139da4273496363a04e1bcdb5a5e6185e8b58d26",
+            "sourceSha256": "sha256:d0dac2fe0fb8772a1761bff71f7ee6d49bf5800e06a002bbb59801ba767b467f"
+          },
+          "valueSource": "keccak256(\"6529stream.pause.MetadataMutation\")",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RANDOMNESS_REQUEST",
+          "natspec": "",
+          "range": {
+            "byteLength": 94,
+            "byteStart": 541,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPauseDomains.sol#L11",
+            "lineEnd": 11,
+            "lineStart": 11,
+            "snippetSha256": "sha256:bb304006c9ab2aeaeee4d68127aee050ad9f0d004772555d17a8325f0c19f30b",
+            "sourceSha256": "sha256:d0dac2fe0fb8772a1761bff71f7ee6d49bf5800e06a002bbb59801ba767b467f"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 47,
+            "byteStart": 588,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPauseDomains.sol#L11",
+            "lineEnd": 11,
+            "lineStart": 11,
+            "snippetSha256": "sha256:6714cc843e584c3a6464ccf7b54b1c0a8055beeb10c550e94d48bd05180be190",
+            "sourceSha256": "sha256:d0dac2fe0fb8772a1761bff71f7ee6d49bf5800e06a002bbb59801ba767b467f"
+          },
+          "valueSource": "keccak256(\"6529stream.pause.RandomnessRequest\")",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "EMERGENCY",
+          "natspec": "",
+          "range": {
+            "byteLength": 71,
+            "byteStart": 641,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPauseDomains.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:673e3f072570b768131aff8578801a1322012876322ce2044ddb6451632cc86b",
+            "sourceSha256": "sha256:d0dac2fe0fb8772a1761bff71f7ee6d49bf5800e06a002bbb59801ba767b467f"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 33,
+            "byteStart": 679,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPauseDomains.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:d7b1426f0a1b46294d1a64a0184296e71f85fa57e5e0d8afb971bc49a0bc8835",
+            "sourceSha256": "sha256:d0dac2fe0fb8772a1761bff71f7ee6d49bf5800e06a002bbb59801ba767b467f"
+          },
+          "valueSource": "keccak256(\"6529stream.emergency\")",
+          "visibility": "internal"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/StreamPauseDomains.sol:StreamPauseDomains",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVBhdXNlRG9tYWlucy5zb2w6U3RyZWFtUGF1c2VEb21haW5z",
+    "kind": "library",
+    "linearizedDefinitionIds": [
+      "smart-contracts/StreamPauseDomains.sol:StreamPauseDomains"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamPauseDomains",
+    "natspec": "",
+    "range": {
+      "byteLength": 656,
+      "byteStart": 59,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamPauseDomains.sol#L5-L13",
+      "lineEnd": 13,
+      "lineStart": 5,
+      "snippetSha256": "sha256:b9ead04ad5052300277d1dccae2c6315bbc62aac48f3169c50fdcb433f801a8e",
+      "sourceSha256": "sha256:d0dac2fe0fb8772a1761bff71f7ee6d49bf5800e06a002bbb59801ba767b467f"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/StreamPauseDomains.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 1
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1
+    },
+    "totalCount": 1
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/StreamPauseDomains.sol:StreamPauseDomains",
+      "severity": "advisory"
+    }
+  ]
+}

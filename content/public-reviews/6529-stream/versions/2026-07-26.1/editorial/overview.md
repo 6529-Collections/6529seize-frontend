@@ -10,7 +10,9 @@ The source under review is
 Its exact Git tree is
 `b50ec53109f5f8d6b4f4b07f4cb6fd3c1d0e3100`. Every code link in this review
 points to that commit. When the reviewed commit changes, the old review will
-remain available and a new version will show the diff.
+remain available and the new candidate will receive its own review version.
+Automated diffs are not part of this first release, so reviewers must compare
+the two pinned versions directly.
 
 ## The short answer
 

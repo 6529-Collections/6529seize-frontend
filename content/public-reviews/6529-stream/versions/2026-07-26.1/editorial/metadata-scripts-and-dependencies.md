@@ -116,22 +116,27 @@ description.
 
 The source now provides an exact family-to-writer matrix:
 
-| Record family      | Allowed source classes                                  |
-| ------------------ | ------------------------------------------------------- |
-| Artist             | Artist signer only                                      |
-| Owner              | Owner signer only                                       |
-| Independent        | Independent attestor only                               |
-| Curator            | Curator signer or global admin                          |
-| Institution        | Institution signer only                                 |
-| Rights             | Metadata admin or global admin                          |
-| Archive            | Preservation admin or global admin                      |
-| Fixity             | Institution signer, preservation admin, or global admin |
-| C2PA               | Institution signer, preservation admin, or global admin |
-| IIIF               | Preservation admin, metadata admin, or global admin     |
-| Media relationship | Preservation admin or metadata admin                    |
-| Identity display   | Metadata admin or global admin                          |
-| Snapshot           | Metadata admin or global admin                          |
-| Agent              | Metadata admin or global admin                          |
+| Record family | Plain-language purpose | Allowed source classes | Why an artist or collector should care |
+| --- | --- | --- | --- |
+| Artist | A statement attributed to the recognized artist, such as intent or work context | Artist signer only | Separates the artist's own statement from platform or third-party commentary |
+| Owner | A statement attributed to the recognized current owner | Owner signer only | Shows that the claim came from an owner, not that the artist endorsed it |
+| Independent | A self-attributed third-party observation or analysis | Independent attestor only | Anyone may write one; it is evidence of authorship, not protocol approval |
+| Curator | Curatorial selection, interpretation, or exhibition context | Curator signer or global admin | Identifies who supplied curatorial framing and which admin can also write it |
+| Institution | A museum, archive, university, or other recognized institution's attestation | Institution signer only | Lets readers distinguish institutional evidence from artist or owner claims |
+| Rights | Copyright, license, usage, or permissions information | Metadata admin or global admin | Affects how the work may be displayed or reused; the record is not legal advice |
+| Archive | Where preservation materials or manifests are held | Preservation admin or global admin | A location record does not guarantee the bytes will remain available |
+| Fixity | Checksums, sizes, or other evidence used to test whether bytes changed | Institution signer, preservation admin, or global admin | Helps detect alteration when the referenced bytes can still be retrieved |
+| C2PA | Content-provenance credentials using the Coalition for Content Provenance and Authenticity format | Institution signer, preservation admin, or global admin | Can carry signed creation/edit history; Stream does not make the credential true merely by recording it |
+| IIIF | An International Image Interoperability Framework manifest or presentation endpoint | Preservation admin, metadata admin, or global admin | Helps compatible viewers retrieve and present high-resolution cultural-heritage media |
+| Media relationship | How files relate, for example master, derivative, thumbnail, audio track, or alternate rendering | Preservation admin or metadata admin | Prevents a preview or derivative from being mistaken for the canonical artwork |
+| Identity display | Preferred human-readable names, credits, and attribution display | Metadata admin or global admin | Affects presentation, but does not replace the underlying wallet/provider authority |
+| Snapshot | An immutable commitment to a selected set of metadata records at one point in time | Metadata admin or global admin | Lets later readers compare a known bundle with newer records |
+| Agent | A record about an automated agent, service, or machine-produced action | Metadata admin or global admin | Makes automation visible; it does not independently prove the agent was safe or authorized |
+
+These names are authorization families, not semantic validators. The registry
+decides who may write an admitted record type; it does not verify the truth of a
+rights claim, preservation location, C2PA credential, IIIF response, or agent
+statement. Exact record schemas and consumer behavior still need review.
 
 Artist, owner, independent, and institution families reject admin grants. An
 independent-attestor write is permissionless and self-attributed; it is not a

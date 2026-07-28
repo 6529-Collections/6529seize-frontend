@@ -145,15 +145,19 @@ This ERC-20 function is not a conforming genesis sale path. It currently acts as
 both official revenue recorder and the contract that calls `transferFrom` on
 the payer. The target architecture assigns those powers to two contracts:
 
-1. contract 20 verifies a payer-bound `PaymentIntent` and is the only protocol
-   allowance-pull initiator;
-2. contract 9 resolves revenue, consumes the settlement key, routes value, and
-   records official settlement without pulling the payer.
+1. the proposed ERC-20 primary-sale adapter (architecture component 20) verifies
+   a payer-bound `PaymentIntent` and is the only protocol contract allowed to
+   pull the payer's token allowance;
+2. `StreamPrimarySaleSettlement` (component 9) resolves revenue, consumes the
+   settlement key, routes value, and records official settlement without
+   pulling the payer.
 
-No contract 20 implementation exists. The foundation also lacks PaymentIntent
-signature verification, signer-scoped replay, revocation, revenue-escrow
-fallback, and top-level sale-adapter orchestration. This is a proposed design,
-not a supported token-denominated sale. See
+A `PaymentIntent` would be a payer-signed instruction authorizing one exact
+token payment and binding it to the intended settlement. Its final fields and
+verification contract do not exist in this candidate. The foundation also
+lacks signer-scoped replay protection, revocation, revenue-escrow fallback, and
+top-level sale-adapter orchestration. This is a proposed design, not a supported
+token-denominated sale. See
 [`ADR 0019`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/docs/adr/0019-payment-intent-orchestration.md#L3-L82).
 
 ## Rounding and dust

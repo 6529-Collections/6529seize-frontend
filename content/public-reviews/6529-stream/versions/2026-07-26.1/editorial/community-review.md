@@ -9,22 +9,6 @@ The review version is `2026-07-26.1`. Check both values before commenting. A
 comment about another commit may still be useful, but it must say which code it
 examined.
 
-## Staging integration gate
-
-### KNOWN LIMITATION
-
-This review shell intentionally keeps feedback submission disabled. The
-feedback composer, structured code-reference submission, community-review
-views, and audience-path UI are supplied by the separate reference
-implementation branch; they are not implemented by this shell patch.
-
-Before staging can be shown as an interactive community review, that reference
-branch must be integrated and its destination configuration, public
-vulnerability type, structured fields, code-reference behavior, and end-to-end
-tests must pass against this exact review version. Until then, the descriptions
-below specify the required review experience but the current shell does not
-submit a Wave comment.
-
 ## Who should comment
 
 This review is for:
@@ -45,9 +29,8 @@ workflow, missing recovery case, or authority you would not accept.
 
 ## Comment from the page you are reading
 
-After the reference-branch integration gate is complete, each review page has a
-feedback box. Submitting there records the page, review version, and relevant
-context so other reviewers can find the discussion.
+Each review page has a feedback box. Submitting there records the page, review
+version, and relevant context so other reviewers can find the discussion.
 
 When the page points to generated code, you can attach a specific definition,
 function, event, error, or source range. Technical links use stable semantic
@@ -145,7 +128,8 @@ inside one function.
 ### IMPLEMENTED FOR THE REVIEW PLATFORM
 
 The public record starts in a deterministic `NEW` state. The site can project
-the original report and official replies into a review ledger.
+the original structured, top-level report into a review ledger. Replies remain
+in the linked Wave discussion and are not projected into the ledger.
 
 `NEW` means the report exists. It does not mean accepted, rejected, confirmed,
 or fixed.
@@ -153,12 +137,12 @@ or fixed.
 ### IMPORTANT LIMIT
 
 The initial ledger does not invent authoritative dispositions from free-form
-conversation. Until a disposition workflow is explicitly defined, only
-deterministic state and linked official replies are shown. A model may help
-search or summarize discussion, but it cannot silently decide whether a
-vulnerability is valid.
+conversation. It shows deterministic `NEW` records and links each one to its
+Wave discussion; it does not interpret replies or claim that an issue is
+accepted, rejected, confirmed, or fixed. A model may help search or summarize
+discussion, but it cannot silently decide whether a vulnerability is valid.
 
-When the team records a resolution, it should include:
+When a future disposition workflow records a resolution, it should include:
 
 - the disposition;
 - who made it and under which authority;
@@ -170,18 +154,20 @@ When the team records a resolution, it should include:
 ## Change handling
 
 The contract will change during review. The active review points at one exact
-commit. When a new commit becomes the candidate:
+commit. For each new candidate, the release process must:
 
 1. the generator compiles and inventories the new exact Git tree;
 2. it validates every declaration against the compiler output;
 3. it produces a new immutable review-data bundle;
-4. the site shows a structural diff;
-5. old code links continue to resolve under the historical review version;
-6. feedback remains attached to the version it examined;
-7. unresolved reports are explicitly carried forward or closed with evidence.
+4. the site retains version-specific routes and source links;
+5. new feedback remains attached to the version it examined.
 
 No generated bundle should be overwritten in place. A current page can move to
 the newest candidate; history must remain reproducible.
+
+Automated structural diffs and explicit carry-forward dispositions are not part
+of this first review release. Until those workflows exist, compare pinned
+versions directly and record any carry-forward decision in the Wave.
 
 ## The generator is a truth layer, not an audit
 
@@ -197,7 +183,7 @@ bad behavior.
 
 ## Review categories
 
-The Wave can be filtered around practical areas:
+The review pages organize feedback around practical areas:
 
 - artist experience and approvals;
 - curation and TDH authorization;
@@ -211,8 +197,8 @@ The Wave can be filtered around practical areas:
 - security, testing, and release evidence;
 - documentation, product, accessibility, and localization.
 
-If a comment spans categories, pick the primary one and link the other relevant
-pages.
+If a comment spans areas, submit it from the primary page and link the other
+relevant pages. The ledger can filter by feedback type and source page.
 
 ### Authoritative feedback schema for this review version
 

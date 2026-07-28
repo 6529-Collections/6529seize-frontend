@@ -20,6 +20,7 @@ import type {
 } from "./types";
 
 export const PUBLIC_REVIEW_LEDGER_PAGE_SIZE = 50;
+const PUBLIC_REVIEW_METADATA_CONCURRENCY = 8;
 
 export interface PublicReviewLedgerApi {
   readonly fetchFeed: (input: {
@@ -62,19 +63,22 @@ const DEFAULT_LEDGER_API: PublicReviewLedgerApi = {
 export function getPublicReviewLedgerQueryKey({
   config,
   destination,
+  pageSize,
 }: {
   readonly config: PublicReviewFeedbackConfig;
   readonly destination: PublicReviewDiscussionDestination;
+  readonly pageSize?: number | undefined;
 }) {
-  return [
-    QueryKey.PUBLIC_REVIEW_LEDGER,
-    {
-      environment: destination.environment,
-      waveId: destination.waveId,
-      reviewId: config.reviewId,
-      reviewVersion: config.reviewVersion,
-    },
-  ] as const;
+  const identity = {
+    environment: destination.environment,
+    waveId: destination.waveId,
+    reviewId: config.reviewId,
+    reviewVersion: config.reviewVersion,
+  };
+  const baseKey = [QueryKey.PUBLIC_REVIEW_LEDGER, identity] as const;
+  return pageSize === undefined
+    ? baseKey
+    : ([...baseKey, { pageSize }] as const);
 }
 
 function getNextRawCursor(
@@ -201,6 +205,46 @@ async function hydrateLedgerDrop({
   }
 }
 
+async function hydrateLedgerDrops({
+  api,
+  config,
+  destination,
+  drops,
+  signal,
+}: {
+  readonly api: PublicReviewLedgerApi;
+  readonly config: PublicReviewFeedbackConfig;
+  readonly destination: PublicReviewDiscussionDestination;
+  readonly drops: readonly ApiDropV2[];
+  readonly signal?: AbortSignal | undefined;
+}) {
+  const hydrated: Awaited<ReturnType<typeof hydrateLedgerDrop>>[] = [];
+  for (
+    let offset = 0;
+    offset < drops.length;
+    offset += PUBLIC_REVIEW_METADATA_CONCURRENCY
+  ) {
+    const batch = drops.slice(
+      offset,
+      offset + PUBLIC_REVIEW_METADATA_CONCURRENCY
+    );
+    hydrated.push(
+      ...(await Promise.all(
+        batch.map((drop) =>
+          hydrateLedgerDrop({
+            api,
+            config,
+            destination,
+            drop,
+            signal,
+          })
+        )
+      ))
+    );
+  }
+  return hydrated;
+}
+
 export async function fetchPublicReviewLedgerPage({
   api = DEFAULT_LEDGER_API,
   config,
@@ -238,20 +282,15 @@ export async function fetchPublicReviewLedgerPage({
   }
 
   const candidateDrops = feed.drops.filter(
-    (drop) =>
-      drop.drop_type === ApiDropMainType.Chat && isTopLevelDrop(drop)
+    (drop) => drop.drop_type === ApiDropMainType.Chat && isTopLevelDrop(drop)
   );
-  const hydrated = await Promise.all(
-    candidateDrops.map((drop) =>
-      hydrateLedgerDrop({
-        api,
-        config,
-        destination,
-        drop,
-        signal,
-      })
-    )
-  );
+  const hydrated = await hydrateLedgerDrops({
+    api,
+    config,
+    destination,
+    drops: candidateDrops,
+    signal,
+  });
   const records: PublicReviewFeedbackRecord[] = [];
   const warnings: PublicReviewLedgerWarning[] = [];
 
@@ -335,10 +374,10 @@ export function dedupePublicReviewLedgerRecords(
 ): PublicReviewFeedbackRecord[] {
   const seen = new Set<string>();
   return records.filter((record) => {
-    if (seen.has(record.feedbackId)) {
+    if (seen.has(record.dropId)) {
       return false;
     }
-    seen.add(record.feedbackId);
+    seen.add(record.dropId);
     return true;
   });
 }

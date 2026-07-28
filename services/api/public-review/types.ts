@@ -42,6 +42,7 @@ export interface PublicReviewFeedbackConfig {
   readonly reviewTitle: string;
   readonly feedbackSchemaVersion: string;
   readonly submissionsOpen: boolean;
+  readonly acceptsPublicExploitReports: boolean;
   readonly categories: readonly PublicReviewOption[];
   readonly severityOptions: readonly PublicReviewOption[];
   readonly pages: readonly PublicReviewPageOption[];

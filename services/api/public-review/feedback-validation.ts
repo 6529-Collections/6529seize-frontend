@@ -94,13 +94,17 @@ export function validatePublicReviewFeedbackConfig(
     ...validateOptionList("Feedback categories", config.categories),
     ...validateOptionList("Severity options", config.severityOptions),
   ];
-  if (
-    !config.categories.some(
-      (option) => option.value === PUBLIC_REVIEW_EXPLOITABLE_SECURITY_TYPE
-    )
-  ) {
+  const hasExploitCategory = config.categories.some(
+    (option) => option.value === PUBLIC_REVIEW_EXPLOITABLE_SECURITY_TYPE
+  );
+  if (config.acceptsPublicExploitReports && !hasExploitCategory) {
     issues.push(
-      `Feedback categories must include ${PUBLIC_REVIEW_EXPLOITABLE_SECURITY_TYPE}.`
+      `Feedback categories must include ${PUBLIC_REVIEW_EXPLOITABLE_SECURITY_TYPE} while public exploit reports are accepted.`
+    );
+  }
+  if (config.acceptsPublicExploitReports && !config.submissionsOpen) {
+    issues.push(
+      "Public exploit reports cannot be accepted while feedback submissions are closed."
     );
   }
   if (!config.reviewId.trim()) {
