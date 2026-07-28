@@ -332,4 +332,5 @@ jobs:
           CI_PIPELINES_SHA: ${{ inputs.expected_sha }}
           CI_RELEASE_TRAIN_ID: ${{ inputs.release_train_id }}
           CI_RELEASE_CONTRIBUTORS: ${{ inputs.release_contributors }}
+          CI_RELEASE_NOTES_PROMPT_PATH: ops/release-notes/release-notes.prompt.md
         run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs
