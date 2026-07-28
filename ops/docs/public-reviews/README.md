@@ -114,10 +114,13 @@ visible in future language controls.
 
 Each retained Stream version also owns a generated Help Bot knowledge pack
 under
-`public/review-data/6529-stream/versions/{version}/knowledge/`. The pack is
-derived offline from that version's editorial manifest, generated Solidity
-reference, readiness evidence, risk register, and pinned source commit. It
-contains:
+`ops/public-review-knowledge/6529-stream/versions/{version}/knowledge/`. The
+pack is derived offline from that version's editorial manifest, generated
+Solidity reference, readiness evidence, risk register, and pinned source
+commit. Staging packaging projects only published versions into
+`/review-data/6529-stream/versions/{version}/knowledge/`; this keeps the
+generated source corpus outside the protected reference-snapshot tree while
+preserving the existing review-data runtime namespace. It contains:
 
 - a checksummed manifest binding the review version, commit, reference bundle,
   editorial corpus, publication status, record inventory, and shard paths

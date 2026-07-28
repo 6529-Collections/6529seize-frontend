@@ -13,6 +13,7 @@ const {
   generatorSourceSha256,
 } = require("./public-reviews/solidity-reference.cjs");
 const {
+  KNOWLEDGE_SOURCE_DIRECTORY,
   validateKnowledgePack,
 } = require("./public-reviews/stream-knowledge.cjs");
 
@@ -153,6 +154,7 @@ function captureSourceIdentity(repoRoot) {
     "public",
     PUBLIC_REVIEW_EDITORIAL_DIRECTORY,
     PUBLIC_REVIEW_CONFIG_DIRECTORY,
+    KNOWLEDGE_SOURCE_DIRECTORY,
   ];
   return roots.map((relativePath) => {
     const absolutePath = path.join(repoRoot, relativePath);
@@ -225,6 +227,16 @@ function replaceDirectory(source, destination, options = {}) {
 function isReviewDataPath(relativePath) {
   return (
     relativePath === "review-data" || relativePath.startsWith("review-data/")
+  );
+}
+
+function isKnowledgeProjectionPath(relativePath) {
+  const segments = normalizeRelativePath(relativePath).split("/");
+  return (
+    segments[0] === "review-data" &&
+    segments[2] === "versions" &&
+    segments.length >= 5 &&
+    segments[4] === "knowledge"
   );
 }
 
@@ -727,6 +739,7 @@ function assertDefinitionShards(bundle, versionRoot) {
 }
 
 function assertCanonicalReviewEvidence({
+  repoRoot,
   bundlePublicRoot,
   configPath,
   publicationPlan,
@@ -851,6 +864,15 @@ function assertCanonicalReviewEvidence({
 
       assertSourceFiles(bundle, versionRoot);
       assertDefinitionShards(bundle, versionRoot);
+      const sourceKnowledgeRoot = path.join(
+        repoRoot,
+        KNOWLEDGE_SOURCE_DIRECTORY,
+        config.reviewId,
+        "versions",
+        entry.version,
+        "knowledge"
+      );
+      const bundleKnowledgeRoot = path.join(versionRoot, "knowledge");
       validateKnowledgePack({
         repoRoot: path.dirname(bundlePublicRoot),
         reviewId: config.reviewId,
@@ -860,7 +882,13 @@ function assertCanonicalReviewEvidence({
           (version) => version.version === entry.version
         ),
         referenceIndexEntryOverride: entry,
+        knowledgeRootOverride: bundleKnowledgeRoot,
       });
+      invariant(
+        directoryIdentity(sourceKnowledgeRoot) ===
+          directoryIdentity(bundleKnowledgeRoot),
+        `${config.reviewId}@${entry.version} packaged knowledge does not exactly match the canonical source pack.`
+      );
 
       return {
         reviewId: config.reviewId,
@@ -966,13 +994,19 @@ function assertStagingEvidence(
         const publicRelativePath = `review-data/${relativePath}`;
         return (
           isReviewIndexPath(publicRelativePath, publicationPlans) ||
-          isUnpublishedReviewDataPath(publicRelativePath, publicationPlans)
+          isUnpublishedReviewDataPath(publicRelativePath, publicationPlans) ||
+          isKnowledgeProjectionPath(publicRelativePath)
         );
       },
     }) ===
       directoryIdentity(bundlePublicReviewRoot, {
-        ignore: (relativePath) =>
-          isReviewIndexPath(`review-data/${relativePath}`, publicationPlans),
+        ignore: (relativePath) => {
+          const publicRelativePath = `review-data/${relativePath}`;
+          return (
+            isReviewIndexPath(publicRelativePath, publicationPlans) ||
+            isKnowledgeProjectionPath(publicRelativePath)
+          );
+        },
       }),
     "Staging public-review data does not exactly match the trusted source tree."
   );
@@ -997,6 +1031,7 @@ function assertStagingEvidence(
   const reviews = [...publicationPlans.values()].flatMap((plan) =>
     plan.publishedVersions.size > 0
       ? assertCanonicalReviewEvidence({
+          repoRoot,
           bundlePublicRoot: path.join(bundleRoot, "public"),
           configPath: plan.configPath,
           publicationPlan: plan,
@@ -1043,11 +1078,16 @@ function assertPublicCopyIdentity(
   const sourcePublic = path.join(repoRoot, "public");
   const bundlePublic = path.join(bundleRoot, "public");
   const options = {
-    ignore: (relativePath) =>
-      profile === "production"
-        ? isReviewDataPath(relativePath)
-        : isReviewIndexPath(relativePath, publicationPlans) ||
-          isUnpublishedReviewDataPath(relativePath, publicationPlans),
+    ignore: (relativePath) => {
+      if (profile === "production") {
+        return isReviewDataPath(relativePath);
+      }
+      return (
+        isReviewIndexPath(relativePath, publicationPlans) ||
+        isUnpublishedReviewDataPath(relativePath, publicationPlans) ||
+        isKnowledgeProjectionPath(relativePath)
+      );
+    },
   };
   invariant(
     directoryIdentity(sourcePublic, options) ===
@@ -1119,6 +1159,30 @@ function removeDirectoryIfPresent(directory) {
   fs.rmSync(directory, { recursive: true });
 }
 
+function copyPublishedKnowledgePacks(repoRoot, bundleRoot, publicationPlans) {
+  for (const [reviewId, plan] of publicationPlans) {
+    for (const reviewVersion of plan.publishedVersions) {
+      const source = path.join(
+        repoRoot,
+        KNOWLEDGE_SOURCE_DIRECTORY,
+        reviewId,
+        "versions",
+        reviewVersion,
+        "knowledge"
+      );
+      const destination = path.join(
+        bundleRoot,
+        PUBLIC_REVIEW_DATA_DIRECTORY,
+        reviewId,
+        "versions",
+        reviewVersion,
+        "knowledge"
+      );
+      copyDirectory(source, destination);
+    }
+  }
+}
+
 function prepareProfileBundle({ repoRoot, bundleRoot, profile }) {
   invariant(PROFILES.has(profile), `Unsupported artifact profile: ${profile}`);
   const sourceIdentity = captureSourceIdentity(repoRoot);
@@ -1133,6 +1197,7 @@ function prepareProfileBundle({ repoRoot, bundleRoot, profile }) {
   });
   if (profile === "staging") {
     writePublishedReviewIndexes(bundleRoot, publicationPlans);
+    copyPublishedKnowledgePacks(repoRoot, bundleRoot, publicationPlans);
   }
 
   if (profile === "staging") {

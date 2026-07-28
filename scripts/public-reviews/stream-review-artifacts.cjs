@@ -13,33 +13,12 @@ const REVIEW_ROOT = path.join(
   "review-data",
   REVIEW_ID
 );
-const VERSIONS_ROOT = path.join(REVIEW_ROOT, "versions");
 const LOCK_PATH = path.join(REVIEW_ROOT, ".stream-artifacts.lock");
 
 function invariant(condition, message) {
   if (!condition) {
     throw new Error(message);
   }
-}
-
-function readVersions() {
-  const index = JSON.parse(
-    fs.readFileSync(path.join(REVIEW_ROOT, "index.json"), "utf8")
-  );
-  invariant(
-    index.reviewId === REVIEW_ID &&
-      Array.isArray(index.versions) &&
-      index.versions.length > 0,
-    "Stream reference index is invalid."
-  );
-  return index.versions.map((entry) => {
-    invariant(
-      typeof entry.version === "string" &&
-        /^[0-9]{4}-[0-9]{2}-[0-9]{2}\.[0-9]+$/.test(entry.version),
-      "Stream reference index contains an invalid version."
-    );
-    return entry.version;
-  });
 }
 
 function acquireLock() {
@@ -54,44 +33,6 @@ function acquireLock() {
     fs.closeSync(handle);
     fs.unlinkSync(LOCK_PATH);
   };
-}
-
-function hideKnowledgePacks(versions) {
-  const hiddenRoot = fs.mkdtempSync(
-    path.join(REVIEW_ROOT, `.knowledge-hidden-${process.pid}-`)
-  );
-  const hidden = [];
-  try {
-    for (const version of versions) {
-      const knowledgeRoot = path.join(VERSIONS_ROOT, version, "knowledge");
-      if (!fs.existsSync(knowledgeRoot)) {
-        continue;
-      }
-      const hiddenPath = path.join(hiddenRoot, version);
-      fs.renameSync(knowledgeRoot, hiddenPath);
-      hidden.push({ knowledgeRoot, hiddenPath });
-    }
-    return { hiddenRoot, hidden };
-  } catch (error) {
-    for (const entry of hidden.reverse()) {
-      if (fs.existsSync(entry.hiddenPath)) {
-        fs.renameSync(entry.hiddenPath, entry.knowledgeRoot);
-      }
-    }
-    fs.rmSync(hiddenRoot, { recursive: true, force: true });
-    throw error;
-  }
-}
-
-function restoreKnowledgePacks({ hiddenRoot, hidden }) {
-  for (const entry of hidden) {
-    invariant(
-      !fs.existsSync(entry.knowledgeRoot),
-      `Knowledge destination appeared while hidden: ${entry.knowledgeRoot}`
-    );
-    fs.renameSync(entry.hiddenPath, entry.knowledgeRoot);
-  }
-  fs.rmSync(hiddenRoot, { recursive: true, force: true });
 }
 
 function runNode(script, args) {
@@ -110,14 +51,9 @@ function main(argv = process.argv.slice(2)) {
   );
   const releaseLock = acquireLock();
   try {
-    const hidden = hideKnowledgePacks(readVersions());
-    try {
-      runNode(path.join(__dirname, "solidity-reference.cjs"), [
-        ...(checkOnly ? ["--check"] : []),
-      ]);
-    } finally {
-      restoreKnowledgePacks(hidden);
-    }
+    runNode(path.join(__dirname, "solidity-reference.cjs"), [
+      ...(checkOnly ? ["--check"] : []),
+    ]);
     runNode(path.join(__dirname, "stream-knowledge.cjs"), [
       ...(checkOnly ? ["--check"] : []),
     ]);
@@ -132,8 +68,3 @@ try {
   console.error(error instanceof Error ? error.message : String(error));
   process.exitCode = 1;
 }
-
-module.exports = {
-  hideKnowledgePacks,
-  restoreKnowledgePacks,
-};

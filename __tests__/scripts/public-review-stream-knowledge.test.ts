@@ -15,6 +15,23 @@ const REVIEW_ID = "6529-stream";
 const ACTIVE_VERSION = "2026-07-27.1";
 const HISTORICAL_VERSION = "2026-07-26.1";
 const PINNED_COMMIT = "513bd7e079eafe109df6ae1ae21bfbca6fec6786";
+const KNOWLEDGE_ROOT = path.join(
+  REPO_ROOT,
+  "ops",
+  "public-review-knowledge",
+  REVIEW_ID,
+  "versions",
+  ACTIVE_VERSION,
+  "knowledge"
+);
+
+function knowledgeArtifactPath(publicPath: string): string {
+  const relativePath = publicPath.split("/knowledge/")[1];
+  if (!relativePath) {
+    throw new Error(`Invalid knowledge artifact path: ${publicPath}`);
+  }
+  return path.join(KNOWLEDGE_ROOT, ...relativePath.split("/"));
+}
 
 type SearchRecord = {
   id: string;
@@ -50,6 +67,32 @@ type EvidenceRecord = SearchRecord & {
       topic0?: string;
     };
   };
+  structured?: {
+    lifecycleState?: string;
+    deploymentStatus?: string;
+    auditStatus?: string;
+  };
+};
+
+type KnowledgeManifest = {
+  knowledgeSha256: string;
+  reviewVersion: string;
+  reference: {
+    bundleSha256: string;
+  };
+  editorial: {
+    corpusSha256: string;
+    pageCount: number;
+    sectionCount: number;
+  };
+  counts: {
+    total: number;
+    byKind: Record<string, number>;
+  };
+  recordShards: Array<{
+    path: string;
+    sha256: string;
+  }>;
 };
 
 describe("Stream knowledge pack", () => {
@@ -59,7 +102,7 @@ describe("Stream knowledge pack", () => {
     reviewVersion: ACTIVE_VERSION,
     requireCurrentGenerator: true,
   }) as {
-    manifest: Record<string, any>;
+    manifest: KnowledgeManifest;
     searchIndex: { schemaVersion: string; records: SearchRecord[] };
     records: EvidenceRecord[];
   };
@@ -68,7 +111,7 @@ describe("Stream knowledge pack", () => {
     reviewId: REVIEW_ID,
     reviewVersion: HISTORICAL_VERSION,
   }) as {
-    manifest: Record<string, any>;
+    manifest: KnowledgeManifest;
     searchIndex: { schemaVersion: string; records: SearchRecord[] };
     records: EvidenceRecord[];
   };
@@ -109,7 +152,7 @@ describe("Stream knowledge pack", () => {
       active.searchIndex.records.length
     );
     expect(active.manifest.recordShards).toHaveLength(
-      Math.ceil(active.manifest.counts.total / 120)
+      Math.ceil(active.manifest.counts.total / 160)
     );
     expect(
       active.manifest.recordShards.every(
@@ -278,28 +321,12 @@ describe("Stream knowledge pack", () => {
   });
 
   it("keeps the complete catalog within the backend discovery budget", () => {
-    const searchIndexPath = path.join(
-      REPO_ROOT,
-      "public",
-      "review-data",
-      REVIEW_ID,
-      "versions",
-      ACTIVE_VERSION,
-      "knowledge",
-      "search-index.json"
-    );
+    const searchIndexPath = path.join(KNOWLEDGE_ROOT, "search-index.json");
     expect(fs.statSync(searchIndexPath).size).toBeLessThanOrEqual(8_000_000);
     expect(
       active.manifest.recordShards.every(
         (shard: { path: string }) =>
-          fs.statSync(
-            path.join(
-              REPO_ROOT,
-              "public",
-              "review-data",
-              ...shard.path.slice("/review-data/".length).split("/")
-            )
-          ).size <= 1_000_000
+          fs.statSync(knowledgeArtifactPath(shard.path)).size <= 1_000_000
       )
     ).toBe(true);
   });
@@ -313,8 +340,8 @@ describe("Stream knowledge pack", () => {
     });
     const reviewState = evidenceById.get(
       `status:${ACTIVE_VERSION}:review-state`
-    ) as Record<string, any>;
-    expect(reviewState.structured).toMatchObject({
+    );
+    expect(reviewState?.structured).toMatchObject({
       lifecycleState: "PUBLIC_REVIEW",
       deploymentStatus: "NOT_DEPLOYED",
       auditStatus: "PRE_AUDIT",
@@ -326,15 +353,7 @@ describe("Stream knowledge pack", () => {
       path: string;
     }>) {
       const parsed = JSON.parse(
-        fs.readFileSync(
-          path.join(
-            REPO_ROOT,
-            "public",
-            "review-data",
-            ...shard.path.slice("/review-data/".length).split("/")
-          ),
-          "utf8"
-        )
+        fs.readFileSync(knowledgeArtifactPath(shard.path), "utf8")
       );
       expect(parsed.schemaVersion).toBe(KNOWLEDGE_SHARD_SCHEMA);
       expect(parsed.reviewVersion).toBe(ACTIVE_VERSION);

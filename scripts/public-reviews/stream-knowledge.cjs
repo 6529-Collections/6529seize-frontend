@@ -15,12 +15,13 @@ const {
 
 const REPOSITORY_ROOT = path.resolve(__dirname, "..", "..");
 const DEFAULT_REVIEW_ID = "6529-stream";
+const KNOWLEDGE_SOURCE_DIRECTORY = "ops/public-review-knowledge";
 const KNOWLEDGE_MANIFEST_SCHEMA = "public-review.knowledge-manifest.v1";
 const KNOWLEDGE_INDEX_SCHEMA = "public-review.knowledge-index.v1";
 const KNOWLEDGE_SHARD_SCHEMA = "public-review.knowledge-shard.v1";
 const GENERATOR_NAME = "6529-public-review-stream-knowledge";
 const GENERATOR_VERSION = "1";
-const RECORDS_PER_SHARD = 120;
+const RECORDS_PER_SHARD = 160;
 const MAX_PROTOCOL_SOURCE_EXCERPT_CHARACTERS = 1_200;
 const MAX_SCRIPT_SOURCE_EXCERPT_CHARACTERS = 700;
 const MAX_SEARCH_TEXT_CHARACTERS = 1_600;
@@ -140,6 +141,17 @@ function publicPathToRelative(publicPath, prefix, label) {
 
 function generatorSourceSha256() {
   return fileSha256(__filename);
+}
+
+function knowledgeSourceRoot(repoRoot, reviewId, reviewVersion) {
+  return path.join(
+    repoRoot,
+    KNOWLEDGE_SOURCE_DIRECTORY,
+    reviewId,
+    "versions",
+    reviewVersion,
+    "knowledge"
+  );
 }
 
 function removeOrderedPrefix(value) {
@@ -1485,6 +1497,7 @@ function writePackAtomically(pack, knowledgeRoot, { replace = false } = {}) {
     "Knowledge destination already exists."
   );
   const versionRoot = path.dirname(knowledgeRoot);
+  fs.mkdirSync(versionRoot, { recursive: true });
   const stageRoot = fs.mkdtempSync(
     path.join(versionRoot, `.knowledge-stage-${process.pid}-`)
   );
@@ -1573,6 +1586,7 @@ function validateKnowledgePack({
   requireCurrentGenerator = false,
   publicationOverride,
   referenceIndexEntryOverride,
+  knowledgeRootOverride,
 }) {
   const context =
     publicationOverride && referenceIndexEntryOverride
@@ -1589,7 +1603,9 @@ function validateKnowledgePack({
     "versions",
     reviewVersion
   );
-  const knowledgeRoot = path.join(versionRoot, "knowledge");
+  const knowledgeRoot =
+    knowledgeRootOverride ??
+    knowledgeSourceRoot(repoRoot, reviewId, reviewVersion);
   const manifestPath = path.join(knowledgeRoot, "manifest.json");
   const manifest = readJson(
     manifestPath,
@@ -1780,14 +1796,10 @@ function generateKnowledgePacks({
       publication,
       `${reviewId}@${entry.version} publication is missing.`
     );
-    const knowledgeRoot = path.join(
+    const knowledgeRoot = knowledgeSourceRoot(
       repoRoot,
-      "public",
-      "review-data",
       reviewId,
-      "versions",
-      entry.version,
-      "knowledge"
+      entry.version
     );
     const active = entry.version === context.referenceIndex.activeVersion;
     if (!fs.existsSync(knowledgeRoot)) {
@@ -1880,10 +1892,12 @@ module.exports = {
   KNOWLEDGE_INDEX_SCHEMA,
   KNOWLEDGE_MANIFEST_SCHEMA,
   KNOWLEDGE_SHARD_SCHEMA,
+  KNOWLEDGE_SOURCE_DIRECTORY,
   buildKnowledgePack,
   generateKnowledgePacks,
   generatorSourceSha256,
   headingId,
+  knowledgeSourceRoot,
   splitEditorialPage,
   validateKnowledgePack,
 };

@@ -454,7 +454,7 @@ function addHistoricalVersion({
   fs.rmSync(
     path.join(
       fixture.repoRoot,
-      `public/review-data/${REVIEW_ID}/versions/${REVIEW_VERSION}/knowledge`
+      `ops/public-review-knowledge/${REVIEW_ID}/versions/${REVIEW_VERSION}/knowledge`
     ),
     { recursive: true, force: true }
   );
@@ -1122,10 +1122,10 @@ describe("profile-aware public-review artifact packaging", () => {
       profile: "staging",
     });
     const searchIndex = path.join(
-      fixture.repoRoot,
+      fixture.bundleRoot,
       `public/review-data/${REVIEW_ID}/versions/${REVIEW_VERSION}/knowledge/search-index.json`
     );
-    mirrorTamper(searchIndex, fixture.repoRoot, '{"records":[]}\n');
+    fs.writeFileSync(searchIndex, '{"records":[]}\n');
 
     expect(() =>
       assertProfileBundle({
@@ -1145,16 +1145,12 @@ describe("profile-aware public-review artifact packaging", () => {
       profile: "staging",
     });
     const manifestPath = path.join(
-      fixture.repoRoot,
+      fixture.bundleRoot,
       `public/review-data/${REVIEW_ID}/versions/${REVIEW_VERSION}/knowledge/manifest.json`
     );
     const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
     manifest.source.commit = "0".repeat(40);
-    mirrorTamper(
-      manifestPath,
-      fixture.repoRoot,
-      `${JSON.stringify(manifest, null, 2)}\n`
-    );
+    fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
     expect(() =>
       assertProfileBundle({
