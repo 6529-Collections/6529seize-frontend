@@ -1,0 +1,495 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IStreamDrops.sol:IStreamDrops#function:0xd891b7d2",
+          "declaringDefinitionId": "smart-contracts/IStreamDrops.sol:IStreamDrops",
+          "inherited": false,
+          "inputs": [],
+          "name": "isStreamDropsContract",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xd891b7d2",
+          "signature": "isStreamDropsContract()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamDrops.sol:IStreamDrops#function:0x73a9542c",
+          "declaringDefinitionId": "smart-contracts/IStreamDrops.sol:IStreamDrops",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "_tokenid",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveAuctionPoster",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x73a9542c",
+          "signature": "retrieveAuctionPoster(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamDrops.sol:IStreamDrops#function:0xd63f7c10",
+          "declaringDefinitionId": "smart-contracts/IStreamDrops.sol:IStreamDrops",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "_tokenid",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveAuctionPrice",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xd63f7c10",
+          "signature": "retrieveAuctionPrice(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamDrops.sol:IStreamDrops#function:0x7ca98332",
+          "declaringDefinitionId": "smart-contracts/IStreamDrops.sol:IStreamDrops",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "_tokenid",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveDropID",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x7ca98332",
+          "signature": "retrieveDropID(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamDrops.sol:IStreamDrops#function:0x96f448ce",
+          "declaringDefinitionId": "smart-contracts/IStreamDrops.sol:IStreamDrops",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "_tokenid",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveExecutionAddress",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x96f448ce",
+          "signature": "retrieveExecutionAddress(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamDrops.sol:IStreamDrops#function:0x4098fff1",
+          "declaringDefinitionId": "smart-contracts/IStreamDrops.sol:IStreamDrops",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "_dropID",
+              "type": "bytes32"
+            }
+          ],
+          "name": "retrieveTokenID",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x4098fff1",
+          "signature": "retrieveTokenID(bytes32)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "published_interface",
+    "classificationReason": "Listed in release-artifacts/contracts.json interfaces.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "isStreamDropsContract()",
+          "displaySignature": "isStreamDropsContract()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamDrops.sol:IStreamDrops#function:0xd891b7d2",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Ecm9wcy5zb2w6SVN0cmVhbURyb3BzI2Z1bmN0aW9uOjB4ZDg5MWI3ZDI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isStreamDropsContract",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 62,
+            "byteStart": 88,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamDrops.sol#L6",
+            "lineEnd": 6,
+            "lineStart": 6,
+            "snippetSha256": "sha256:9838cb5f8bee2eb95da1f3249293cf3056441e9a88fa015ecc21264e94e515cc",
+            "sourceSha256": "sha256:df6479173e9f2c568be97d63c202af893d62c3d1aa99a070374c256ec11a4ed2"
+          },
+          "selector": "0xd891b7d2",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "retrieveAuctionPoster(uint256)",
+          "displaySignature": "retrieveAuctionPoster(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamDrops.sol:IStreamDrops#function:0x73a9542c",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_tokenid",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Ecm9wcy5zb2w6SVN0cmVhbURyb3BzI2Z1bmN0aW9uOjB4NzNhOTU0MmM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveAuctionPoster",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 81,
+            "byteStart": 156,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamDrops.sol#L8",
+            "lineEnd": 8,
+            "lineStart": 8,
+            "snippetSha256": "sha256:ab6148a31de9a936836e578e1ea4c4a4882dc4b57af3e2fe175242bb0c172c82",
+            "sourceSha256": "sha256:df6479173e9f2c568be97d63c202af893d62c3d1aa99a070374c256ec11a4ed2"
+          },
+          "selector": "0x73a9542c",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "retrieveAuctionPrice(uint256)",
+          "displaySignature": "retrieveAuctionPrice(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamDrops.sol:IStreamDrops#function:0xd63f7c10",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_tokenid",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Ecm9wcy5zb2w6SVN0cmVhbURyb3BzI2Z1bmN0aW9uOjB4ZDYzZjdjMTA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveAuctionPrice",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 80,
+            "byteStart": 243,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamDrops.sol#L10",
+            "lineEnd": 10,
+            "lineStart": 10,
+            "snippetSha256": "sha256:1d683e588be6c0d0010104cd0b984a91d0eee732d08684f9d1d3af2660cc3dfc",
+            "sourceSha256": "sha256:df6479173e9f2c568be97d63c202af893d62c3d1aa99a070374c256ec11a4ed2"
+          },
+          "selector": "0xd63f7c10",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "retrieveTokenID(bytes32)",
+          "displaySignature": "retrieveTokenID(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamDrops.sol:IStreamDrops#function:0x4098fff1",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_dropID",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Ecm9wcy5zb2w6SVN0cmVhbURyb3BzI2Z1bmN0aW9uOjB4NDA5OGZmZjE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveTokenID",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 74,
+            "byteStart": 329,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamDrops.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:f8fbfed9e3cf49f63ff7843eee1eadf0672ff2039de582cc5f29a8bd31ca3f23",
+            "sourceSha256": "sha256:df6479173e9f2c568be97d63c202af893d62c3d1aa99a070374c256ec11a4ed2"
+          },
+          "selector": "0x4098fff1",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "retrieveDropID(uint256)",
+          "displaySignature": "retrieveDropID(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamDrops.sol:IStreamDrops#function:0x7ca98332",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_tokenid",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Ecm9wcy5zb2w6SVN0cmVhbURyb3BzI2Z1bmN0aW9uOjB4N2NhOTgzMzI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveDropID",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 74,
+            "byteStart": 409,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamDrops.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:02b6c758952c56c230714538f7d609ebf9d2baf66bb24e4d0d75a88a74b60862",
+            "sourceSha256": "sha256:df6479173e9f2c568be97d63c202af893d62c3d1aa99a070374c256ec11a4ed2"
+          },
+          "selector": "0x7ca98332",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "retrieveExecutionAddress(uint256)",
+          "displaySignature": "retrieveExecutionAddress(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamDrops.sol:IStreamDrops#function:0x96f448ce",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_tokenid",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Ecm9wcy5zb2w6SVN0cmVhbURyb3BzI2Z1bmN0aW9uOjB4OTZmNDQ4Y2U",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveExecutionAddress",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 84,
+            "byteStart": 489,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamDrops.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:773b4b73b19f0ad9c37fbb3c0fabf7794254b76fbede0b1b6aa0fa5472e516db",
+            "sourceSha256": "sha256:df6479173e9f2c568be97d63c202af893d62c3d1aa99a070374c256ec11a4ed2"
+          },
+          "selector": "0x96f448ce",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IStreamDrops.sol:IStreamDrops",
+    "inheritance": [],
+    "interface": {
+      "abiSha256": "sha256:481ef1bd67f9a47da7c6e71f095991dd74a3b09664bca7dc6e52df5ba988400e",
+      "interfaceId": "0xd7c2abe3",
+      "interfaceIdSource": "selector_xor",
+      "published": true
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1Ecm9wcy5zb2w6SVN0cmVhbURyb3Bz",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IStreamDrops.sol:IStreamDrops"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "published_interface"
+    },
+    "name": "IStreamDrops",
+    "natspec": "",
+    "range": {
+      "byteLength": 516,
+      "byteStart": 59,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamDrops.sol#L5-L17",
+      "lineEnd": 17,
+      "lineStart": 5,
+      "snippetSha256": "sha256:29d720b1dbe6cb2518c4d6ae320550837375911675db363febb743249cbdad5d",
+      "sourceSha256": "sha256:df6479173e9f2c568be97d63c202af893d62c3d1aa99a070374c256ec11a4ed2"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IStreamDrops.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 7
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 6
+    },
+    "totalCount": 7
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/IStreamDrops.sol:IStreamDrops",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamDrops.sol:IStreamDrops#function:0x4098fff1",
+      "definitionId": "smart-contracts/IStreamDrops.sol:IStreamDrops",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamDrops.sol:IStreamDrops#function:0x73a9542c",
+      "definitionId": "smart-contracts/IStreamDrops.sol:IStreamDrops",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamDrops.sol:IStreamDrops#function:0x7ca98332",
+      "definitionId": "smart-contracts/IStreamDrops.sol:IStreamDrops",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamDrops.sol:IStreamDrops#function:0x96f448ce",
+      "definitionId": "smart-contracts/IStreamDrops.sol:IStreamDrops",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamDrops.sol:IStreamDrops#function:0xd63f7c10",
+      "definitionId": "smart-contracts/IStreamDrops.sol:IStreamDrops",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamDrops.sol:IStreamDrops#function:0xd891b7d2",
+      "definitionId": "smart-contracts/IStreamDrops.sol:IStreamDrops",
+      "severity": "advisory"
+    }
+  ]
+}
