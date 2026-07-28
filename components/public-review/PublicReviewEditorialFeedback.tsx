@@ -106,7 +106,7 @@ export function PublicReviewEditorialFeedback({
                     id="public-review-feedback-section"
                     value={sectionId}
                     onChange={(event) => setSectionId(event.target.value)}
-                    className="tw-min-h-11 tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-3 tw-py-2 tw-pr-9 tw-text-sm tw-text-iron-50 tw-outline-none tw-ring-1 tw-ring-inset tw-ring-iron-600 tw-transition focus:tw-bg-black focus:tw-ring-1 focus:tw-ring-primary-400 focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
+                    className="tw-min-h-11 tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-3 tw-py-2 tw-pr-9 tw-text-sm tw-text-iron-50 tw-outline-none tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition focus:tw-bg-black focus:tw-ring-1 focus:tw-ring-primary-400 focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
                   >
                     <option value="">
                       {t(DEFAULT_LOCALE, "publicReview.feedback.wholePage")}

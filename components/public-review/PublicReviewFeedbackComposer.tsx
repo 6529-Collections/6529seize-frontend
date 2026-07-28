@@ -122,7 +122,7 @@ function getFeedbackContextFingerprint({
 }
 
 const INPUT_CLASSES =
-  "tw-min-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-50 tw-outline-none tw-ring-1 tw-ring-inset tw-ring-iron-600 tw-transition focus:tw-bg-black focus:tw-ring-1 focus:tw-ring-primary-400 focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400";
+  "tw-min-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-50 tw-outline-none tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition focus:tw-bg-black focus:tw-ring-1 focus:tw-ring-primary-400 focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400";
 
 function getFeedbackGate({
   authenticated,
@@ -536,8 +536,8 @@ export default function PublicReviewFeedbackComposer({
             ) : null}
           </div>
 
-          <details className="tw-group tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#0a0a0c] tw-transition-colors open:tw-border-white/[0.11]">
-            <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-3 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-200 hover:tw-bg-white/[0.018] hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
+          <details className="tw-group tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.025] tw-transition-colors open:tw-border-white/[0.11]">
+            <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-3 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-200 hover:tw-bg-white/[0.025] hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
               {t(locale, "publicReview.feedback.advanced")}
               <ChevronDownIcon
                 className="tw-size-3.5 tw-flex-none tw-text-iron-500 tw-transition-transform tw-duration-200 group-open:tw-rotate-180 motion-reduce:tw-transition-none"
