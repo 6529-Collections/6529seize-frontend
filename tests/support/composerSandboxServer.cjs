@@ -1179,6 +1179,8 @@ function isExpectedPublicReviewDropBody(body) {
 }
 
 function hasAcceptedDropSubmit() {
+  // Every sandbox reset grants one shared /api/drops mutation budget, regardless
+  // of which exact allowlisted drop shape consumes it.
   return requests.some(
     (request) =>
       request.method === "POST" &&

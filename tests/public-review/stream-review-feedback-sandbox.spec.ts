@@ -11,6 +11,7 @@ import {
   expectNoUnsafeSandboxMutations,
   fetchSandboxRequests,
   LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+  type SandboxRequest,
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
 
@@ -125,13 +126,16 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
     await expect(comment).toHaveValue("");
 
+    let dropRequests: SandboxRequest[] = [];
     await expect
       .poll(
-        async () =>
-          (await fetchSandboxRequests(baseURL)).filter(
+        async () => {
+          dropRequests = (await fetchSandboxRequests(baseURL)).filter(
             (request) =>
               request.method === "POST" && request.path === "/api/drops"
-          ),
+          );
+          return dropRequests;
+        },
         {
           timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
           message:
@@ -140,9 +144,7 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
       )
       .toHaveLength(1);
 
-    const dropRequest = (await fetchSandboxRequests(baseURL)).find(
-      (request) => request.method === "POST" && request.path === "/api/drops"
-    );
+    const [dropRequest] = dropRequests;
     expect(dropRequest).toMatchObject({
       kind: "allowed-sandbox-mutation",
       body: expect.objectContaining({
