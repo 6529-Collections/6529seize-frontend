@@ -61,6 +61,19 @@ describe("Release Bus frontend performance contract", () => {
     expect(appPrCi).toContain("tests/packs.manifest.cjs");
   });
 
+  it("pins the build and E2E runtime to an exact Node patch", () => {
+    for (const workflowPath of [
+      ".github/workflows/app-pr-ci.yml",
+      ".github/workflows/release-bus-v2-preflight.yml",
+      ".github/workflows/staging-e2e.yml",
+      ".github/workflows/production-e2e.yml",
+    ]) {
+      const source = read(workflowPath);
+      expect(source).toContain('node-version: "22.17.1"');
+      expect(source).not.toMatch(/node-version:\s*["']22["']/);
+    }
+  });
+
   it("binds v3 to one environment and keeps legacy dual bytes same-train only", () => {
     const inputs = preflight.on.workflow_dispatch.inputs;
     expect(inputs.artifact_contract_version).toMatchObject({
