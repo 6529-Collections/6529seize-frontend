@@ -53,7 +53,22 @@ type SanitizedStatus = {
       readonly reason: string | null;
     }
   >;
-  readonly staging: typeof VALID_STAGING_STATE;
+  readonly staging: {
+    readonly status:
+      | "UNINITIALIZED"
+      | "LIVE"
+      | "CLEAN_MAIN"
+      | "ROLLBACK_FAILED";
+    readonly current_manifest_id: string | null;
+    readonly last_validated_manifest_id: string | null;
+    readonly frontend_sha: string | null;
+    readonly backend_sha: string | null;
+    readonly frontend_staging_ref_sha: string | null;
+    readonly backend_staging_ref_sha: string | null;
+    readonly clean_main: boolean;
+    readonly last_transition_train_id: string | null;
+    readonly row_version: number;
+  };
 };
 
 let tempRoot: string;
@@ -233,6 +248,39 @@ describe("release-bus-status helper", () => {
       });
     }
   );
+
+  it("preserves valid nullable staging identity fields", async () => {
+    const result = await runWithResponse({
+      mode: "PRODUCTION",
+      controls: VALID_CONTROLS,
+      lanes: laneStates("PRODUCTION"),
+      staging_state: {
+        ...VALID_STAGING_STATE,
+        status: "UNINITIALIZED",
+        current_manifest_id: null,
+        last_validated_manifest_id: null,
+        frontend_sha: null,
+        backend_sha: null,
+        frontend_staging_ref_sha: null,
+        backend_staging_ref_sha: null,
+        last_transition_train_id: null,
+      },
+    });
+
+    expect(result.code).toBe(0);
+    expect(parseSanitizedStatus(result.stdout).staging).toEqual({
+      status: "UNINITIALIZED",
+      current_manifest_id: null,
+      last_validated_manifest_id: null,
+      frontend_sha: null,
+      backend_sha: null,
+      frontend_staging_ref_sha: null,
+      backend_staging_ref_sha: null,
+      clean_main: false,
+      last_transition_train_id: null,
+      row_version: 7,
+    });
+  });
 
   test.each([
     ["ALL", "OFF", "OFF"],
