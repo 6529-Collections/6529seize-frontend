@@ -18,6 +18,8 @@ const {
 } = require("./solidity-reference-lib.cjs");
 
 const CONFIG_PATH = "config/public-reviews/6529-stream.reference.json";
+const PUBLICATION_CONFIG_PATH =
+  "config/public-reviews/6529-stream.publication.json";
 const REVIEW_ROOT = "public/review-data/6529-stream";
 const FRONTEND_REMOTE =
   "https://github.com/6529-Collections/6529seize-frontend.git";
@@ -259,17 +261,29 @@ function snapshotChangePolicy(entries) {
     invariant(
       entry.paths.every(
         (candidatePath) =>
-          candidatePath === CONFIG_PATH || isReviewDataPath(candidatePath)
+          candidatePath === CONFIG_PATH ||
+          candidatePath === PUBLICATION_CONFIG_PATH ||
+          isReviewDataPath(candidatePath)
       ),
-      "Snapshot PRs may change only the fixed config and review-data tree."
+      "Snapshot PRs may change only the fixed reference config, publication config, and review-data tree."
     );
     if (entry.paths[0] === CONFIG_PATH) {
       invariant(
         ["A", "M"].includes(entry.status),
-        "Snapshot config must be added or modified, never deleted."
+        "Snapshot reference config must be added or modified, never deleted."
       );
     }
   }
+  const publicationChanges = entries.filter((entry) =>
+    entry.paths.includes(PUBLICATION_CONFIG_PATH)
+  );
+  invariant(
+    flattenedPaths.includes(CONFIG_PATH) &&
+      publicationChanges.length === 1 &&
+      publicationChanges[0].status === "M" &&
+      publicationChanges[0].paths.length === 1,
+    "Snapshot PRs must update the fixed reference config and modify exactly one fixed publication config."
+  );
   return { touchesSnapshot: true };
 }
 
@@ -305,6 +319,23 @@ function exactCandidateBlobMaps(repositoryRoot, headSha, run = defaultRun) {
     configBuffer.length <= MAX_CONFIG_BYTES,
     "Candidate snapshot config exceeds the trusted size limit."
   );
+  const publicationEntries = readTreeAtPaths(
+    repositoryRoot,
+    headSha,
+    [PUBLICATION_CONFIG_PATH],
+    run
+  );
+  invariant(
+    publicationEntries.size === 1 &&
+      publicationEntries.has(PUBLICATION_CONFIG_PATH),
+    "Candidate snapshot must contain exactly one fixed publication config blob."
+  );
+  const publicationEntry = publicationEntries.get(PUBLICATION_CONFIG_PATH);
+  const publicationBuffer = readGitBlob(repositoryRoot, publicationEntry, run);
+  invariant(
+    publicationBuffer.length <= MAX_CONFIG_BYTES,
+    "Candidate publication config exceeds the trusted size limit."
+  );
   const reviewEntries = readTreeAtPaths(
     repositoryRoot,
     headSha,
@@ -334,7 +365,13 @@ function exactCandidateBlobMaps(repositoryRoot, headSha, run = defaultRun) {
       buffer,
     });
   }
-  return { configBuffer, configEntry, reviewBlobs };
+  return {
+    configBuffer,
+    configEntry,
+    publicationBuffer,
+    publicationEntry,
+    reviewBlobs,
+  };
 }
 
 function fetchAndBindCandidate(context, dependencies = {}) {
@@ -538,6 +575,49 @@ function validateTrustedConfigPolicy(baseConfig, candidateConfig, versions) {
     stableJson(candidateConfig.output.retainedVersions) ===
       stableJson([...versions, candidateConfig.reviewVersion]),
     "Candidate retainedVersions must append to exact base history."
+  );
+}
+
+function validateTrustedPublicationPolicy(
+  basePublication,
+  candidatePublication,
+  candidateConfig,
+  baseVersions
+) {
+  invariant(
+    baseVersions !== null &&
+      basePublication !== null &&
+      typeof basePublication === "object" &&
+      !Array.isArray(basePublication) &&
+      Array.isArray(basePublication.versions),
+    "Trusted base publication requires an existing review history."
+  );
+  invariant(
+    candidatePublication !== null &&
+      typeof candidatePublication === "object" &&
+      !Array.isArray(candidatePublication) &&
+      Array.isArray(candidatePublication.versions),
+    "Candidate publication config is invalid."
+  );
+  invariant(
+    stableJson(basePublication.versions.map((entry) => entry.version)) ===
+      stableJson(baseVersions),
+    "Trusted base publication versions drifted from trusted review history."
+  );
+  const candidateVersions = candidateConfig.output.retainedVersions;
+  invariant(
+    stableJson(candidatePublication.versions.map((entry) => entry.version)) ===
+      stableJson(candidateVersions),
+    "Candidate publication versions must match retained review history."
+  );
+  const expectedPublication = JSON.parse(JSON.stringify(basePublication));
+  expectedPublication.versions.push({
+    version: candidateConfig.reviewVersion,
+    lifecycleState: "DRAFT",
+  });
+  invariant(
+    stableJson(candidatePublication) === stableJson(expectedPublication),
+    "Candidate publication must preserve trusted state and append exactly one DRAFT version."
   );
 }
 
@@ -920,11 +1000,8 @@ async function verifySnapshotPr(context, dependencies = {}) {
     }
 
     if (binding.touchesSnapshot) {
-      const { configBuffer, reviewBlobs } = exactCandidateBlobMaps(
-        context.repositoryRoot,
-        context.headSha,
-        run
-      );
+      const { configBuffer, publicationBuffer, reviewBlobs } =
+        exactCandidateBlobMaps(context.repositoryRoot, context.headSha, run);
       const baseConfigPath = path.join(
         context.repositoryRoot,
         ...CONFIG_PATH.split("/")
@@ -936,6 +1013,24 @@ async function verifySnapshotPr(context, dependencies = {}) {
       const candidateConfig = parseJson(configBuffer, "candidate config");
       const versions = baseIndexVersions(context.repositoryRoot);
       validateTrustedConfigPolicy(baseConfig, candidateConfig, versions);
+      const basePublicationPath = path.join(
+        context.repositoryRoot,
+        ...PUBLICATION_CONFIG_PATH.split("/")
+      );
+      const basePublication = parseJson(
+        fs.readFileSync(basePublicationPath),
+        "trusted base publication config"
+      );
+      const candidatePublication = parseJson(
+        publicationBuffer,
+        "candidate publication config"
+      );
+      validateTrustedPublicationPolicy(
+        basePublication,
+        candidatePublication,
+        candidateConfig,
+        versions
+      );
 
       tempRoot = fs.mkdtempSync(
         path.join(os.tmpdir(), `public-review-trust-${context.prNumber}-`)
@@ -1068,6 +1163,7 @@ module.exports = {
   CONFIG_PATH,
   FRONTEND_REMOTE,
   GIT_REGULAR_MODE,
+  PUBLICATION_CONFIG_PATH,
   PROTECTED_TRUST_ROOT_PATHS,
   REVIEW_ROOT,
   SOLC_LONG_VERSION,
@@ -1093,6 +1189,7 @@ module.exports = {
   validateIdentifiers,
   validateSolcDigest,
   validateTrustedConfigPolicy,
+  validateTrustedPublicationPolicy,
   verifyOfficialStreamInputs,
   verifySnapshotPr,
 };
