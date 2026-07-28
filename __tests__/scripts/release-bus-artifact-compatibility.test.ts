@@ -15,6 +15,27 @@ type WorkflowStep = {
   uses?: string;
 };
 
+const LEGACY_PREFLIGHT_INPUT_CONTRACT_V0 = Object.freeze({
+  release_train_id: { type: "string", required: true },
+  release_train_revision: { type: "string", required: true },
+  operation_key: { type: "string", required: true },
+  source_ref: { type: "string", required: true },
+  expected_sha: { type: "string", required: true },
+  deploy_units: { type: "string", required: true },
+  artifact_environment: {
+    type: "choice",
+    required: true,
+    options: ["staging", "production"],
+  },
+  reuse_artifact_run_id: {
+    type: "string",
+    required: false,
+    default: "",
+  },
+  reuse_artifact_name: { type: "string", required: false, default: "" },
+  reuse_artifact_digest: { type: "string", required: false, default: "" },
+});
+
 function readWorkflow(name: string) {
   return YAML.parse(
     fs.readFileSync(path.join(ROOT, ".github", "workflows", name), "utf8")
@@ -327,13 +348,13 @@ printf '%s\\n' "$@" > "$MOCK_6529_ARGS"
 
 describe("Release Bus artifact rollout compatibility", () => {
   it("fails new-producer to old-workflow dispatch before jobs and maps old omissions only to legacy defaults", () => {
-    const oldWorkflow = YAML.parse(
-      execFileSync(
-        "git",
-        ["show", "origin/main:.github/workflows/release-bus-v2-preflight.yml"],
-        { cwd: ROOT, encoding: "utf8" }
-      )
-    );
+    const oldWorkflow = {
+      on: {
+        workflow_dispatch: {
+          inputs: LEGACY_PREFLIGHT_INPUT_CONTRACT_V0,
+        },
+      },
+    };
     const newWorkflow = readWorkflow("release-bus-v2-preflight.yml");
     const oldProducerInputs = {
       release_train_id: TRAIN_ID,
