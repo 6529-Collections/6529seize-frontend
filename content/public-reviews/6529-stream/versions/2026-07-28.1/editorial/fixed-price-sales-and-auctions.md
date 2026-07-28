@@ -63,14 +63,15 @@ binds the chain and verifying contract. Its payload binds:
 
 - authorization identity and replay inputs;
 - poster;
-- token recipient;
-- payer;
+- token recipient for fixed price, which must be zero for auction;
+- payer for paid fixed price, which must be zero for free fixed price and
+  auction;
 - collection;
 - fixed-price or auction mode;
 - token-data hash;
-- fixed price;
+- fixed price, which must be zero for auction;
 - quantity;
-- auction reserve and end time;
+- auction reserve and end time, which must be zero for fixed price;
 - deadline;
 - signer epoch.
 
@@ -79,13 +80,16 @@ contract does not reproduce Total Days Held (TDH), 6529's time-weighted holding
 measure, or the curation process; it verifies that the signed result cannot
 quietly become a different sale.
 
-Without the domain binding, the signature could be replayed elsewhere. Without
-separate payer and recipient fields, a copied transaction could redirect the
-work or charge the wrong account. Without the mode, amount, token-data hash,
-deadline, signer epoch, and one-use identity, one valid signature could
-authorize more than its signer intended.
+Without the domain binding, the signature could be replayed elsewhere. On a
+paid fixed-price mint, separate payer and recipient fields stop a copied
+transaction from redirecting the work or charging the wrong account. A free
+fixed-price mint requires the payer to be zero. An auction requires both payer
+and recipient to be zero because bidders later fund the auction contract and
+the winner receives the token only at settlement. Without the mode, amount,
+token-data hash, deadline, signer epoch, and one-use identity, one valid
+signature could authorize more than its signer intended.
 
-Signature validity is only the first gate. Supply, mint policy, pause state,
+Signature validity is only the first gate. Supply, collection-time, pause state,
 payment, freeze, and sale-specific checks still apply.
 
 The current authorization has no currency or token-address field. These Drop
@@ -124,11 +128,12 @@ not a batch mint.
 
 ## Payer and recipient are intentionally different
 
-The account funding a mint and the account receiving the token can differ. That
-supports gifts and sponsored actions without leaving the beneficiary
-ambiguous.
+For a paid fixed-price mint, the account funding the mint and the account
+receiving the token can differ. That supports gifts and sponsored actions
+without leaving the beneficiary ambiguous. A free mint still names its
+recipient but requires its payer to be zero.
 
-Both addresses are signed. Someone may copy a public transaction, but the copy
+Both fields are signed. Someone may copy a public transaction, but the copy
 cannot change the recipient or charge another payer. This does not promise
 private order flow or first inclusion; it limits what a copied payload can do.
 
@@ -148,18 +153,20 @@ Core-entry behavior as one composition.
 
 An auction authorization opens a longer state machine:
 
-1. The authorization registers the approved collection, token, poster, reserve,
-   and end time with
-   [`AuctionContract.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/AuctionContract.sol).
-2. Registration mints the token into auction custody and confirms that custody
-   before bidding becomes active.
-3. A valid first bid meets the reserve. Each later valid bid meets the current
+1. The authorization approves the collection and token-data inputs, poster,
+   reserve, and end time. It does not name an existing token ID.
+2. The legacy minter allocates the Core's next token ID and mints that new token
+   into auction custody.
+3. `StreamDrops` registers the newly allocated token and approved terms with
+   [`AuctionContract.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/AuctionContract.sol),
+   which confirms custody before bidding becomes active.
+4. A valid first bid meets the reserve. Each later valid bid meets the current
    minimum and becomes the new leader.
-4. The displaced bidder receives a withdrawable credit; the new bid is not
+5. The displaced bidder receives a withdrawable credit; the new bid is not
    allowed to depend on an immediate refund succeeding.
-5. A qualifying late bid extends the end time.
-6. After the end, any address may trigger the already-determined settlement.
-7. If no one bid, the contract returns or makes the token claimable by the
+6. A qualifying late bid extends the end time.
+7. After the end, any address may trigger the already-determined settlement.
+8. If no one bid, the contract returns or makes the token claimable by the
    poster. A cancellation is possible only before any bid and before the
    auction has ended.
 

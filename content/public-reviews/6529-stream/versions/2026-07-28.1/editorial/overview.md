@@ -22,15 +22,19 @@ Imagine an artist publishing one generative artwork.
    supply delay. It is not a reusable “I approve Stream” message.
 4. **A community decision becomes an exact sale.** Curation and Total Days Held
    (TDH), 6529's time-weighted holding measure, remain offchain, but the
-   resulting signed authorization fixes the collection, payer, recipient,
-   price, quantity, timing, sale mode, signer era, and a one-use identifier that
-   prevents the authorization from being executed twice.
+   resulting signed authorization fixes the collection, token data, quantity,
+   timing, sale mode, signer era, and a one-use identifier. For fixed price it
+   also binds the recipient, payer, and price: a paid mint names the payer and
+   exact price, while a free mint sets its payer and price to zero. For auction,
+   payer, recipient, and fixed price must be zero; later bids determine the
+   bidder and winner.
 5. **The token is minted and sold.** A fixed-price mint or English auction
    applies the authorized terms, updates supply, and records the resulting
    payment obligations.
 6. **Randomness follows a visible lifecycle.** The request identifies its
-   provider and era. Fulfillment stores evidence, and a failed Core write retries
-   the same accepted seed rather than drawing again.
+   provider and era. Fulfillment stores evidence, and a failed Core write can
+   retry the same accepted seed while that provider and era remain current,
+   rather than drawing again.
 7. **The artwork can be reconstructed.** Metadata can combine onchain state,
    token data, scripts, images, attributes, randomness, and named dependency
    versions.
@@ -82,7 +86,7 @@ that responsibility would go if the component were removed.
 | Make artist consent specific | Typed state approval with ordinary-account and contract-wallet signature support | Consent becomes a vague message, operator assertion, or private workflow |
 | Connect community curation to exact execution | A signed authorization binds the chain, contract, signer era, collection, participants, economics, timing, and sale mode | The offchain decision and onchain action can drift apart |
 | Support different distribution policies safely | Mint phases, executors, gates, policy hashes, and durable counters live outside the permanent token layer | Every new distribution rule either bloats the Core or depends on a private eligibility database |
-| Handle generative randomness without reroll ambiguity | Requests bind provider and era; fulfillment stores evidence; failed Core writes retry the same derived seed | Provider delay, callback failure, retries, and migration become informal operator decisions |
+| Handle generative randomness without reroll ambiguity | Requests bind provider and era; fulfillment stores evidence; failed Core writes can retry the same derived seed while that provider and era remain current | Provider delay, callback failure, retries, and migration become informal operator decisions |
 | Preserve executable artwork, not only a token URI | Scripts, token data, dependencies, content commitments, manifests, and preservation records describe what the work needs | Critical materials and runtime assumptions remain scattered across mutable services |
 | Say exactly what “final” means | Supply finalization, Core freeze, preservation evidence, and terminal artwork finality are separate states | One “immutable” badge conceals remaining mutation paths, dependencies, and operational duties |
 | Represent real artistic economics | Sale accounting, split profiles, curator allocations, refunds, asset policy, and royalty information are distinct concerns | Collaborator payments, curator rewards, refunds, rounding, and royalty policy move into private accounting |
@@ -153,12 +157,17 @@ power, and irreversible actions before the artist signs.
 Stream does not calculate TDH or choose artists inside Solidity. Community
 curation remains a human and operational process.
 
-Once that process reaches a result, the signed Drop authorization binds values
-including the chain, verifying contract, signer epoch, collection, payer,
-recipient, quantity, price, deadline, sale mode, token-data hash, and replay
-identifier—a one-use value that prevents the authorization from being executed
-twice. The contract can then verify that the submitted transaction matches the
-authorized action.
+Once that process reaches a result, the signed Drop authorization binds shared
+values including the chain, verifying contract, signer epoch, collection,
+quantity, deadline, sale mode, token-data hash, and replay identifier—a one-use
+value that prevents the authorization from being executed twice. A fixed-price
+authorization also binds its recipient, payer, and price. A paid mint names its
+payer and exact price; a free mint sets payer and price to zero. An auction
+authorization instead requires payer, recipient, and fixed price to be zero and
+binds its reserve and end time. Those zero addresses are not the later bidder
+and winner, which the auction determines through bids and settlement. The
+contract can then verify that the submitted transaction matches the authorized
+action.
 
 This protects the result from quietly changing between community approval and
 execution. It cannot prove that the offchain curation rule was fair, the TDH

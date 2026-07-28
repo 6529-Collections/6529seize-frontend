@@ -313,7 +313,9 @@ The release needs a generated, machine-readable manifest containing:
 - chain, addresses, creation transactions, and runtime code hashes;
 - constructor and initializer arguments;
 - Core pointers and the complete module graph;
-- role holders, scopes, signer addresses, and signer epochs;
+- role holders and scopes;
+- signer addresses, signer types, signer epochs, rotation authority,
+  emergency-revocation process, and exact typed-data software;
 - record-family admissions, authority providers, and grants;
 - governed parameters and action classes;
 - pause, unpause, and guardian configuration;
@@ -322,6 +324,11 @@ The release needs a generated, machine-readable manifest containing:
 - ownership transfers, renunciations, and one-way bootstrap sealing;
 - explorer verification;
 - independent readback of every critical invariant.
+
+The signer fields above are the public operational record required by [Roles
+and Trust](./roles-and-trust#signed-authorization). Independent readback must
+cover those fields as well as the onchain address and epoch; the manifest must
+never contain signing secrets.
 
 A local deployment script does not prove a live deployment is correct. Someone
 other than the deployer must be able to reconstruct and verify the ceremony

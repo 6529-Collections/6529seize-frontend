@@ -19,6 +19,14 @@ type Config = {
   [key: string]: unknown;
 };
 
+type Publication = {
+  schemaVersion: string;
+  reviewId: string;
+  lifecycleState: string;
+  versions: Array<{ version: string; lifecycleState: string }>;
+  [key: string]: unknown;
+};
+
 type GitEntry = {
   mode: string;
   type: string;
@@ -38,6 +46,7 @@ type Run = (
 const {
   CONFIG_PATH,
   GIT_REGULAR_MODE,
+  PUBLICATION_CONFIG_PATH,
   REVIEW_ROOT,
   SOLC_SHA256,
   compareCandidateToRegeneration,
@@ -54,11 +63,13 @@ const {
   validateIdentifiers,
   validateSolcDigest,
   validateTrustedConfigPolicy,
+  validateTrustedPublicationPolicy,
   verifyOfficialStreamInputs,
   verifySnapshotPr,
 } = require("../../scripts/public-reviews/verify-snapshot-pr.cjs") as {
   CONFIG_PATH: string;
   GIT_REGULAR_MODE: string;
+  PUBLICATION_CONFIG_PATH: string;
   REVIEW_ROOT: string;
   SOLC_SHA256: string;
   compareCandidateToRegeneration: (
@@ -93,11 +104,7 @@ const {
   parseNameStatus: (
     buffer: Buffer
   ) => Array<{ status: string; paths: string[] }>;
-  readGitBlob: (
-    repositoryRoot: string,
-    entry: GitEntry,
-    run?: Run
-  ) => Buffer;
+  readGitBlob: (repositoryRoot: string, entry: GitEntry, run?: Run) => Buffer;
   sha256: (buffer: Buffer) => string;
   snapshotChangePolicy: (
     entries: Array<{ status: string; paths: string[] }>
@@ -111,6 +118,12 @@ const {
   validateTrustedConfigPolicy: (
     base: Config,
     candidate: Config,
+    versions: string[] | null
+  ) => void;
+  validateTrustedPublicationPolicy: (
+    base: Publication,
+    candidate: Publication,
+    candidateConfig: Config,
     versions: string[] | null
   ) => void;
   verifyOfficialStreamInputs: (
@@ -152,6 +165,7 @@ const {
 const shaA = "a".repeat(40);
 const shaB = "b".repeat(40);
 const shaC = "c".repeat(40);
+const SYNTHETIC_FUTURE_VERSION = "2099-12-31.1";
 
 function loadConfig(): Config {
   return JSON.parse(
@@ -169,6 +183,12 @@ function cloneConfig(config: Config): Config {
   return JSON.parse(JSON.stringify(config)) as Config;
 }
 
+function loadPublication(): Publication {
+  return JSON.parse(
+    fs.readFileSync(path.join(process.cwd(), PUBLICATION_CONFIG_PATH), "utf8")
+  ) as Publication;
+}
+
 function treeRecord(
   candidatePath: string,
   mode = GIT_REGULAR_MODE,
@@ -181,28 +201,14 @@ function treeRecord(
 describe("public-review snapshot trust argument and Git parsing", () => {
   it("accepts each required identifier exactly once", () => {
     expect(
-      parseArgs([
-        "--head-sha",
-        shaA,
-        "--pr-number",
-        "3467",
-        "--base-sha",
-        shaB,
-      ])
+      parseArgs(["--head-sha", shaA, "--pr-number", "3467", "--base-sha", shaB])
     ).toEqual({
       prNumber: "3467",
       headSha: shaA,
       baseSha: shaB,
     });
     expect(() =>
-      parseArgs([
-        "--head-sha",
-        shaA,
-        "--head-sha",
-        shaB,
-        "--base-sha",
-        shaC,
-      ])
+      parseArgs(["--head-sha", shaA, "--head-sha", shaB, "--base-sha", shaC])
     ).toThrow("Duplicate verifier argument");
   });
 
@@ -251,24 +257,21 @@ describe("public-review snapshot trust argument and Git parsing", () => {
       { status: "A", paths: [`${REVIEW_ROOT}/index.json`] },
       {
         status: "R100",
-        paths: [
-          `${REVIEW_ROOT}/old.json`,
-          `${REVIEW_ROOT}/new.json`,
-        ],
+        paths: [`${REVIEW_ROOT}/old.json`, `${REVIEW_ROOT}/new.json`],
       },
     ]);
-    expect(() =>
-      parseNameStatus(Buffer.from(`A\0../escape.json\0`))
-    ).toThrow("Unsafe candidate path");
+    expect(() => parseNameStatus(Buffer.from(`A\0../escape.json\0`))).toThrow(
+      "Unsafe candidate path"
+    );
     expect(() => parseNameStatus(Buffer.from(`A10\0${CONFIG_PATH}\0`))).toThrow(
       "Invalid Git status"
     );
-    expect(() =>
-      parseNameStatus(Buffer.from(`A\0${CONFIG_PATH}`))
-    ).toThrow("not NUL-terminated");
-    expect(() =>
-      parseNameStatus(Buffer.from(`A\0${CONFIG_PATH}\0\0`))
-    ).toThrow("empty record");
+    expect(() => parseNameStatus(Buffer.from(`A\0${CONFIG_PATH}`))).toThrow(
+      "not NUL-terminated"
+    );
+    expect(() => parseNameStatus(Buffer.from(`A\0${CONFIG_PATH}\0\0`))).toThrow(
+      "empty record"
+    );
     expect(() =>
       parseNameStatus(Buffer.from(`A\0${REVIEW_ROOT}/bad\tname.json\0`))
     ).toThrow("Unsafe candidate path");
@@ -325,10 +328,8 @@ describe("public-review snapshot trust argument and Git parsing", () => {
       readGitBlob("", { ...regular, mode: "120000" }, () => Buffer.from("x"))
     ).toThrow("non-executable regular Git blob");
     expect(() =>
-      readGitBlob(
-        "",
-        { ...regular, mode: "160000", type: "commit" },
-        () => Buffer.from("x")
+      readGitBlob("", { ...regular, mode: "160000", type: "commit" }, () =>
+        Buffer.from("x")
       )
     ).toThrow("non-executable regular Git blob");
     expect(() =>
@@ -352,10 +353,11 @@ describe("public-review snapshot trust change policy", () => {
     ).toEqual({ touchesSnapshot: false });
   });
 
-  it("allows only config and review data, with no rename or config delete", () => {
+  it("allows only both configs and review data, with no rename or config delete", () => {
     expect(
       snapshotChangePolicy([
         { status: "M", paths: [CONFIG_PATH] },
+        { status: "M", paths: [PUBLICATION_CONFIG_PATH] },
         { status: "A", paths: [`${REVIEW_ROOT}/index.json`] },
       ])
     ).toEqual({ touchesSnapshot: true });
@@ -369,16 +371,26 @@ describe("public-review snapshot trust change policy", () => {
       snapshotChangePolicy([
         {
           status: "R100",
-          paths: [
-            `${REVIEW_ROOT}/old.json`,
-            `${REVIEW_ROOT}/new.json`,
-          ],
+          paths: [`${REVIEW_ROOT}/old.json`, `${REVIEW_ROOT}/new.json`],
         },
       ])
     ).toThrow("renamed or copied");
     expect(() =>
       snapshotChangePolicy([{ status: "D", paths: [CONFIG_PATH] }])
     ).toThrow("never deleted");
+    expect(() =>
+      snapshotChangePolicy([
+        { status: "M", paths: [CONFIG_PATH] },
+        { status: "D", paths: [PUBLICATION_CONFIG_PATH] },
+        { status: "A", paths: [`${REVIEW_ROOT}/index.json`] },
+      ])
+    ).toThrow("modify exactly one");
+    expect(() =>
+      snapshotChangePolicy([
+        { status: "M", paths: [CONFIG_PATH] },
+        { status: "A", paths: [`${REVIEW_ROOT}/index.json`] },
+      ])
+    ).toThrow("modify exactly one");
   });
 
   it.each([
@@ -410,7 +422,9 @@ describe("public-review snapshot trust change policy", () => {
       [`merge-base ${shaB} ${shaA}`, Buffer.from(shaB)],
       [
         `diff --name-status -z --find-renames ${shaB} ${shaA}`,
-        Buffer.from(`M\0${CONFIG_PATH}\0A\0${REVIEW_ROOT}/index.json\0`),
+        Buffer.from(
+          `M\0${CONFIG_PATH}\0M\0${PUBLICATION_CONFIG_PATH}\0A\0${REVIEW_ROOT}/index.json\0`
+        ),
       ],
     ]);
     const run: Run = (_command, args) => {
@@ -481,7 +495,9 @@ describe("public-review snapshot trust change policy", () => {
         return Buffer.from(shaC);
       }
       if (operation === "diff") {
-        return Buffer.from(`M\0${CONFIG_PATH}\0`);
+        return Buffer.from(
+          `M\0${CONFIG_PATH}\0M\0${PUBLICATION_CONFIG_PATH}\0`
+        );
       }
       throw new Error(`Unexpected Git call: ${args.join(" ")}`);
     };
@@ -521,49 +537,164 @@ describe("public-review snapshot trust immutable history", () => {
 
   it("requires a future version to append exact immutable history", () => {
     const base = loadConfig();
+    const trustedVersions = [...base.output.retainedVersions];
     const candidate = cloneConfig(base);
-    candidate.reviewVersion = "2026-07-28.2";
+    candidate.reviewVersion = SYNTHETIC_FUTURE_VERSION;
     candidate.source.commit = shaA;
     candidate.source.tree = shaB;
-    candidate.output.directory =
-      "public/review-data/6529-stream/versions/2026-07-28.2";
+    candidate.output.directory = `public/review-data/6529-stream/versions/${SYNTHETIC_FUTURE_VERSION}`;
     candidate.output.retainedVersions = [
-      "2026-07-26.1",
-      "2026-07-27.1",
-      "2026-07-28.1",
-      "2026-07-28.2",
+      ...trustedVersions,
+      SYNTHETIC_FUTURE_VERSION,
     ];
 
     expect(() =>
-      validateTrustedConfigPolicy(base, candidate, [
-        "2026-07-26.1",
-        "2026-07-27.1",
-        "2026-07-28.1",
-      ])
+      validateTrustedConfigPolicy(base, candidate, trustedVersions)
     ).not.toThrow();
-    candidate.output.retainedVersions = ["2026-07-28.2"];
+    candidate.output.retainedVersions = [SYNTHETIC_FUTURE_VERSION];
     expect(() =>
-      validateTrustedConfigPolicy(base, candidate, [
-        "2026-07-26.1",
-        "2026-07-27.1",
-        "2026-07-28.1",
-      ])
+      validateTrustedConfigPolicy(base, candidate, trustedVersions)
     ).toThrow("append to exact base history");
-    candidate.reviewVersion = "2026-07-28.1";
-    candidate.output.directory =
-      "public/review-data/6529-stream/versions/2026-07-28.1";
-    candidate.output.retainedVersions = [
-      "2026-07-26.1",
-      "2026-07-27.1",
-      "2026-07-28.1",
-    ];
+    candidate.reviewVersion = base.reviewVersion;
+    candidate.output.directory = `public/review-data/6529-stream/versions/${base.reviewVersion}`;
+    candidate.output.retainedVersions = [...trustedVersions];
     expect(() =>
-      validateTrustedConfigPolicy(base, candidate, [
-        "2026-07-26.1",
-        "2026-07-27.1",
-        "2026-07-28.1",
-      ])
+      validateTrustedConfigPolicy(base, candidate, trustedVersions)
     ).toThrow("strictly greater");
+  });
+});
+
+describe("public-review snapshot trust publication preload", () => {
+  function futureConfig(): Config {
+    const candidate = cloneConfig(loadConfig());
+    candidate.reviewVersion = SYNTHETIC_FUTURE_VERSION;
+    candidate.source.commit = shaA;
+    candidate.source.tree = shaB;
+    candidate.output.directory = `public/review-data/6529-stream/versions/${SYNTHETIC_FUTURE_VERSION}`;
+    candidate.output.retainedVersions = [
+      ...candidate.output.retainedVersions,
+      SYNTHETIC_FUTURE_VERSION,
+    ];
+    return candidate;
+  }
+
+  function draftPublication(): Publication {
+    const candidate = JSON.parse(
+      JSON.stringify(loadPublication())
+    ) as Publication;
+    candidate.versions.push({
+      version: SYNTHETIC_FUTURE_VERSION,
+      lifecycleState: "DRAFT",
+    });
+    return candidate;
+  }
+
+  it("allows exactly one new DRAFT entry while preserving published state", () => {
+    expect(() =>
+      validateTrustedPublicationPolicy(
+        loadPublication(),
+        draftPublication(),
+        futureConfig(),
+        loadConfig().output.retainedVersions
+      )
+    ).not.toThrow();
+  });
+
+  it.each([
+    {
+      label: "a non-draft preload",
+      mutate: (candidate: Publication) => {
+        candidate.versions.at(-1)!.lifecycleState = "PUBLIC_REVIEW";
+      },
+      message: "append exactly one DRAFT version",
+    },
+    {
+      label: "a published lifecycle change",
+      mutate: (candidate: Publication) => {
+        candidate.lifecycleState = "REVIEW_CLOSED";
+      },
+      message: "append exactly one DRAFT version",
+    },
+    {
+      label: "a historical lifecycle change",
+      mutate: (candidate: Publication) => {
+        candidate.versions[0]!.lifecycleState = "ARCHIVED";
+      },
+      message: "append exactly one DRAFT version",
+    },
+    {
+      label: "an extra top-level key",
+      mutate: (candidate: Publication) => {
+        candidate["untrusted"] = true;
+      },
+      message: "append exactly one DRAFT version",
+    },
+    {
+      label: "an extra version key",
+      mutate: (candidate: Publication) => {
+        (
+          candidate.versions.at(-1)! as {
+            version: string;
+            lifecycleState: string;
+            untrusted?: boolean;
+          }
+        ).untrusted = true;
+      },
+      message: "append exactly one DRAFT version",
+    },
+    {
+      label: "a changed review identity",
+      mutate: (candidate: Publication) => {
+        candidate.reviewId = "other-review";
+      },
+      message: "append exactly one DRAFT version",
+    },
+  ])("rejects $label", ({ mutate, message }) => {
+    const candidate = draftPublication();
+    mutate(candidate);
+    expect(() =>
+      validateTrustedPublicationPolicy(
+        loadPublication(),
+        candidate,
+        futureConfig(),
+        loadConfig().output.retainedVersions
+      )
+    ).toThrow(message);
+  });
+
+  it("rejects publication history that does not match either trusted index", () => {
+    const base = loadPublication();
+    const trustedVersions = loadConfig().output.retainedVersions;
+    expect(() =>
+      validateTrustedPublicationPolicy(
+        base,
+        draftPublication(),
+        futureConfig(),
+        trustedVersions.slice(0, -1)
+      )
+    ).toThrow("Trusted base publication versions drifted");
+
+    const candidate = draftPublication();
+    candidate.versions.at(-1)!.version = "2099-12-31.2";
+    expect(() =>
+      validateTrustedPublicationPolicy(
+        base,
+        candidate,
+        futureConfig(),
+        trustedVersions
+      )
+    ).toThrow("must match retained review history");
+  });
+
+  it("rejects a candidate publication without a versions array", () => {
+    expect(() =>
+      validateTrustedPublicationPolicy(
+        loadPublication(),
+        null as unknown as Publication,
+        futureConfig(),
+        loadConfig().output.retainedVersions
+      )
+    ).toThrow("Candidate publication config is invalid");
   });
 });
 
@@ -574,9 +705,7 @@ describe("public-review snapshot trust independent inputs and output", () => {
         ...config.source.roots.map((root) =>
           treeRecord(`${root.path}/Fixture.sol`)
         ),
-        ...config.releaseArtifacts.map((artifact) =>
-          treeRecord(artifact.path)
-        ),
+        ...config.releaseArtifacts.map((artifact) => treeRecord(artifact.path)),
         extra,
       ].join("")
     );
@@ -712,10 +841,7 @@ describe("public-review snapshot trust independent inputs and output", () => {
       path.join(os.tmpdir(), "snapshot-trust-files-")
     );
     try {
-      const reviewRoot = path.join(
-        repositoryRoot,
-        ...REVIEW_ROOT.split("/")
-      );
+      const reviewRoot = path.join(repositoryRoot, ...REVIEW_ROOT.split("/"));
       fs.mkdirSync(reviewRoot, { recursive: true });
       fs.writeFileSync(
         path.join(reviewRoot, "index.json"),
@@ -723,10 +849,7 @@ describe("public-review snapshot trust independent inputs and output", () => {
       );
       expect(filesystemBlobMap(repositoryRoot, REVIEW_ROOT)).toEqual(
         new Map([
-          [
-            `${REVIEW_ROOT}/index.json`,
-            Buffer.from('{"trusted":true}\n'),
-          ],
+          [`${REVIEW_ROOT}/index.json`, Buffer.from('{"trusted":true}\n')],
         ])
       );
 
@@ -735,9 +858,9 @@ describe("public-review snapshot trust independent inputs and output", () => {
         path.join(reviewRoot, "linked.json"),
         "file"
       );
-      expect(() =>
-        filesystemBlobMap(repositoryRoot, REVIEW_ROOT)
-      ).toThrow("must not be a regenerated symlink");
+      expect(() => filesystemBlobMap(repositoryRoot, REVIEW_ROOT)).toThrow(
+        "must not be a regenerated symlink"
+      );
     } finally {
       fs.rmSync(repositoryRoot, { recursive: true, force: true });
     }
@@ -768,13 +891,58 @@ describe("public-review snapshot trust orchestration", () => {
     const repositoryRoot = fs.mkdtempSync(
       path.join(os.tmpdir(), "snapshot-trust-orchestration-")
     );
-    const baseConfig = loadInitialConfig();
+    const baseConfig = loadConfig();
     const configPath = path.join(repositoryRoot, ...CONFIG_PATH.split("/"));
     fs.mkdirSync(path.dirname(configPath), { recursive: true });
     fs.writeFileSync(configPath, `${JSON.stringify(baseConfig, null, 2)}\n`);
 
+    const basePublication = loadPublication();
+    const publicationPath = path.join(
+      repositoryRoot,
+      ...PUBLICATION_CONFIG_PATH.split("/")
+    );
+    fs.writeFileSync(
+      publicationPath,
+      `${JSON.stringify(basePublication, null, 2)}\n`
+    );
+    const baseIndexPath = path.join(
+      repositoryRoot,
+      ...`${REVIEW_ROOT}/index.json`.split("/")
+    );
+    fs.mkdirSync(path.dirname(baseIndexPath), { recursive: true });
+    fs.writeFileSync(
+      baseIndexPath,
+      `${JSON.stringify(
+        {
+          reviewId: "6529-stream",
+          versions: baseConfig.output.retainedVersions.map((version) => ({
+            version,
+          })),
+        },
+        null,
+        2
+      )}\n`
+    );
+
+    const futureConfig = cloneConfig(baseConfig);
+    futureConfig.reviewVersion = SYNTHETIC_FUTURE_VERSION;
+    futureConfig.output.directory = `public/review-data/6529-stream/versions/${SYNTHETIC_FUTURE_VERSION}`;
+    futureConfig.output.retainedVersions = [
+      ...baseConfig.output.retainedVersions,
+      futureConfig.reviewVersion,
+    ];
     const candidateConfig = Buffer.from(
-      `${JSON.stringify(baseConfig, null, 2)}\n`
+      `${JSON.stringify(futureConfig, null, 2)}\n`
+    );
+    const candidatePublicationObject = JSON.parse(
+      JSON.stringify(basePublication)
+    ) as Publication;
+    candidatePublicationObject.versions.push({
+      version: futureConfig.reviewVersion,
+      lifecycleState: "DRAFT",
+    });
+    const candidatePublication = Buffer.from(
+      `${JSON.stringify(candidatePublicationObject, null, 2)}\n`
     );
     const candidateBytes =
       options.candidateBytes ?? Buffer.from('{"trusted":true}\n');
@@ -783,6 +951,7 @@ describe("public-review snapshot trust orchestration", () => {
     const configOid = "1".repeat(40);
     const reviewOid = "2".repeat(40);
     const streamOid = "3".repeat(40);
+    const publicationOid = "4".repeat(40);
     const reviewPath = `${REVIEW_ROOT}/index.json`;
     const cleanupOperations: string[] = [];
     let fetchCount = 0;
@@ -843,14 +1012,21 @@ describe("public-review snapshot trust orchestration", () => {
       if (operation === "diff") {
         return options.unrelated
           ? Buffer.from("M\0components/Card.tsx\0")
-          : Buffer.from(`M\0${CONFIG_PATH}\0A\0${reviewPath}\0`);
+          : Buffer.from(
+              `M\0${CONFIG_PATH}\0M\0${PUBLICATION_CONFIG_PATH}\0A\0${reviewPath}\0`
+            );
       }
       if (operation === "ls-tree") {
         if (repository === "/stream.git") {
           return Buffer.from(
             [
               ...baseConfig.source.roots.map((root) =>
-                treeRecord(`${root.path}/Fixture.sol`, GIT_REGULAR_MODE, "blob", streamOid)
+                treeRecord(
+                  `${root.path}/Fixture.sol`,
+                  GIT_REGULAR_MODE,
+                  "blob",
+                  streamOid
+                )
               ),
               ...baseConfig.releaseArtifacts.map((artifact) =>
                 treeRecord(artifact.path, GIT_REGULAR_MODE, "blob", streamOid)
@@ -862,6 +1038,16 @@ describe("public-review snapshot trust orchestration", () => {
         if (requestedPath === CONFIG_PATH) {
           return Buffer.from(
             treeRecord(CONFIG_PATH, GIT_REGULAR_MODE, "blob", configOid)
+          );
+        }
+        if (requestedPath === PUBLICATION_CONFIG_PATH) {
+          return Buffer.from(
+            treeRecord(
+              PUBLICATION_CONFIG_PATH,
+              GIT_REGULAR_MODE,
+              "blob",
+              publicationOid
+            )
           );
         }
         if (requestedPath === REVIEW_ROOT) {
@@ -877,6 +1063,9 @@ describe("public-review snapshot trust orchestration", () => {
         }
         if (oid === reviewOid) {
           return candidateBytes;
+        }
+        if (oid === publicationOid) {
+          return candidatePublication;
         }
         if (oid === streamOid) {
           return Buffer.from("trusted Stream input\n");
@@ -901,10 +1090,7 @@ describe("public-review snapshot trust orchestration", () => {
     const status = (_command: string, args: string[]) => {
       const operation = args.slice(2, 4).join(" ");
       cleanupOperations.push(operation);
-      if (
-        options.cleanupFailure &&
-        operation === "worktree remove"
-      ) {
+      if (options.cleanupFailure && operation === "worktree remove") {
         return { status: 1, stderr: "cleanup failed" };
       }
       return { status: 0, stderr: "" };
@@ -956,7 +1142,11 @@ describe("public-review snapshot trust orchestration", () => {
       baseSha: shaB,
     });
     expect(harness.cleanupOperations).toEqual(
-      expect.arrayContaining(["worktree remove", "worktree prune", "update-ref -d"])
+      expect.arrayContaining([
+        "worktree remove",
+        "worktree prune",
+        "update-ref -d",
+      ])
     );
     expect(
       harness.cleanupOperations.filter(
