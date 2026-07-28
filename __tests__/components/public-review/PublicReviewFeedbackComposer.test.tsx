@@ -165,7 +165,7 @@ describe("PublicReviewFeedbackComposer", () => {
       selector: "textarea",
     });
     expect(comment).toHaveClass("placeholder:tw-text-iron-400");
-    expect(comment).toHaveClass("tw-ring-iron-600");
+    expect(comment).toHaveClass("tw-ring-iron-700");
     expect(
       screen.getByRole("button", { name: "Post to review Wave" })
     ).toHaveClass("tw-bg-primary-600", "hover:tw-ring-primary-300/60");

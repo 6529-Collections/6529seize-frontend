@@ -45,7 +45,7 @@ const EVIDENCE_PRESENTATION: Record<
     labelKey: "publicReview.evidence.labels.deferred",
     descriptionKey: "publicReview.evidence.deferred",
     dotClassName: "tw-bg-iron-500",
-    textClassName: "tw-text-iron-400",
+    textClassName: "tw-text-iron-300",
   },
   KNOWN_LIMITATION: {
     labelKey: "publicReview.evidence.labels.knownLimitation",
@@ -80,7 +80,7 @@ export function PublicReviewEvidenceLegend() {
       <summary className="tw-min-h-11 tw-cursor-pointer tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-200 marker:tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
         {t(DEFAULT_LOCALE, "publicReview.evidence.summary")}
       </summary>
-      <h2 className="tw-mb-0 tw-mt-4 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
+      <h2 className="tw-mb-0 tw-mt-4 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-400">
         {t(DEFAULT_LOCALE, "publicReview.evidence.heading")}
       </h2>
       <dl className="tw-mb-0 tw-mt-5 tw-grid tw-gap-x-8 tw-gap-y-5 sm:tw-grid-cols-2">
