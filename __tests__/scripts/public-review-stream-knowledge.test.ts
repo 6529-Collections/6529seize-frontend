@@ -258,16 +258,25 @@ describe("Stream knowledge pack", () => {
   });
 
   it("describes StreamSplitWallet observations for native and ERC-20 assets", () => {
-    const syncAsset = evidenceById.get(
-      "declaration:smart-contracts/StreamSplitWallet.sol:StreamSplitWallet#function:0x833a782a"
-    );
+    const assetAwareFunctionIds = [
+      "declaration:smart-contracts/StreamSplitWallet.sol:StreamSplitWallet#function:0x15dc07d7",
+      "declaration:smart-contracts/StreamSplitWallet.sol:StreamSplitWallet#function:0x1c8db92d",
+      "declaration:smart-contracts/StreamSplitWallet.sol:StreamSplitWallet#function:0x833a782a",
+      "declaration:smart-contracts/StreamSplitWallet.sol:StreamSplitWallet#function:0xc45ac050",
+      "declaration:smart-contracts/StreamSplitWallet.sol:StreamSplitWallet#function:0xee11f328",
+    ];
+
+    for (const id of assetAwareFunctionIds) {
+      const record = evidenceById.get(id);
+      expect(record?.summary).toContain("supported asset");
+      expect(record?.summary).toContain("address(0)");
+      expect(record?.summary).toContain("ERC-20");
+      expect(record?.technical?.declaration?.natspec).toBe(record?.summary);
+    }
+
     const currentBalance = evidenceById.get(
       "declaration:smart-contracts/StreamSplitWallet.sol:StreamSplitWallet#function:_currentBalance(address)"
     );
-
-    expect(syncAsset?.summary).toContain("supported asset");
-    expect(syncAsset?.summary).toContain("nonzero address");
-    expect(syncAsset?.technical?.declaration?.natspec).toBe(syncAsset?.summary);
     expect(currentBalance?.summary).toContain("address(0)");
     expect(currentBalance?.summary).toContain("ERC-20");
   });

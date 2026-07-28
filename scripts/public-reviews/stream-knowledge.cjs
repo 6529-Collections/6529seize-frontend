@@ -30,6 +30,40 @@ const MAX_SEARCH_TEXT_CHARACTERS = 1_600;
 const SAFE_REVIEW_ID = /^[a-z0-9][a-z0-9-]*$/;
 const SAFE_VERSION = /^[0-9]{4}-[0-9]{2}-[0-9]{2}\.[0-9]+$/;
 const SENSITIVE_SIGNING_KEY_NAME = /(?:private.*key|signer.*key)/i;
+const STREAM_SPLIT_WALLET_DEFINITION_ID =
+  "smart-contracts/StreamSplitWallet.sol:StreamSplitWallet";
+const STREAM_SPLIT_WALLET_ASSET_NATSPEC = new Map([
+  [
+    "observedReceived",
+    "@notice Returns cumulative receipts for a supported asset as current " +
+      "balance plus released funds: address(0) is native currency and a " +
+      "nonzero address is the corresponding ERC-20.",
+  ],
+  [
+    "releasable",
+    "@notice Returns the currently releasable amount of a supported asset for " +
+      "an account: address(0) is native currency and a nonzero address is the " +
+      "corresponding ERC-20.",
+  ],
+  [
+    "roundingDust",
+    "@notice Returns unreleasable dust for a supported asset caused by integer " +
+      "division rounding: address(0) is native currency and a nonzero address " +
+      "is the corresponding ERC-20.",
+  ],
+  [
+    "syncAsset",
+    "@notice Emits the current cumulative receipt observation for the " +
+      "supported asset: address(0) is native currency and a nonzero address " +
+      "is the corresponding ERC-20.",
+  ],
+  [
+    "release",
+    "@notice Pulls releasable funds for a supported asset to an account or its " +
+      "chosen recipient: address(0) is native currency and a nonzero address " +
+      "is the corresponding ERC-20.",
+  ],
+]);
 const MARKDOWN_DECORATION = new Set(["`", "*", "_", "~"]);
 const LETTER_OR_NUMBER = /[\p{Letter}\p{Number}]/u;
 const STOP_WORDS = new Set([
@@ -615,16 +649,13 @@ function isSensitiveSigningKeyDeclaration(declaration, scope) {
 }
 
 function declarationKnowledgeNatspec(declaration, definition) {
-  if (
-    definition?.id ===
-      "smart-contracts/StreamSplitWallet.sol:StreamSplitWallet" &&
-    declaration.name === "syncAsset"
-  ) {
-    return (
-      "@notice Emits the current cumulative receipt observation for the " +
-      "supported asset: address(0) is native currency and a nonzero address " +
-      "is the corresponding ERC-20."
+  if (definition?.id === STREAM_SPLIT_WALLET_DEFINITION_ID) {
+    const assetAwareNatspec = STREAM_SPLIT_WALLET_ASSET_NATSPEC.get(
+      declaration.name
     );
+    if (assetAwareNatspec) {
+      return assetAwareNatspec;
+    }
   }
   return declaration.natspec;
 }
@@ -676,8 +707,7 @@ function declarationSummary(declaration, kind, definition) {
     return natspec.trim();
   }
   if (
-    definition.id ===
-      "smart-contracts/StreamSplitWallet.sol:StreamSplitWallet" &&
+    definition.id === STREAM_SPLIT_WALLET_DEFINITION_ID &&
     declaration.name === "_currentBalance"
   ) {
     return (
