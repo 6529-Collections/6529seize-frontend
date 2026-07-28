@@ -82,7 +82,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
         <div className="tw-mb-5">
           <h2
             id="manage-by-collection"
-            className="tw-mb-2 tw-text-xl tw-font-semibold tw-text-white"
+            className="tw-mb-2 tw-text-xl tw-font-semibold tw-text-iron-100"
           >
             Manage by Collection
           </h2>
@@ -96,7 +96,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
             <button
               key={c.contract}
               type="button"
-              className="tw-group tw-grid tw-min-h-20 tw-w-full tw-grid-cols-[56px_minmax(0,1fr)_56px] tw-items-center tw-gap-4 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-5 tw-py-3 tw-text-white tw-shadow-sm tw-transition-colors hover:tw-border-white/20 hover:tw-bg-iron-800 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+              className="tw-group tw-grid tw-min-h-20 tw-w-full tw-grid-cols-[56px_minmax(0,1fr)_56px] tw-items-center tw-gap-4 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/55 tw-px-5 tw-py-3 tw-text-iron-100 tw-shadow-sm tw-transition-colors hover:tw-border-iron-700/60 hover:tw-bg-iron-900/75 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
               onClick={() => {
                 const newSection = getCollectionSection(c.contract);
                 if (newSection !== undefined) {
@@ -167,7 +167,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
   return (
     <div className="tw-w-full">
       <header className="tw-mb-6">
-        <h1 className="tw-mb-2 tw-text-3xl tw-font-bold tw-text-white">
+        <h1 className="tw-mb-2 tw-text-3xl tw-font-bold tw-text-iron-50">
           Delegation Center
         </h1>
         <p className="tw-mb-0 tw-max-w-4xl tw-text-base tw-leading-6 tw-text-iron-300">
@@ -180,11 +180,11 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
         {actionCards.map((card) => (
           <section
             key={card.title}
-            className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5 sm:tw-p-6"
+            className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/55 tw-p-5 sm:tw-p-6"
           >
             <div className="tw-flex tw-flex-col tw-gap-5 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between">
               <div className="tw-min-w-0 tw-flex-1">
-                <h2 className="tw-mb-8 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
+                <h2 className="tw-mb-8 tw-mt-0 tw-text-xl tw-font-semibold tw-text-iron-100">
                   {card.title}
                 </h2>
                 <div className="tw-flex tw-items-center tw-gap-4">
@@ -199,7 +199,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                     height={56}
                     className="tw-h-14 tw-w-14 tw-shrink-0 tw-object-contain"
                   />
-                  <ul className="tw-my-0 tw-min-w-0 tw-pl-5 tw-text-base tw-leading-6 tw-text-iron-100">
+                  <ul className="tw-my-0 tw-min-w-0 tw-pl-5 tw-text-base tw-leading-6 tw-text-iron-300">
                     {card.details.map((detail) => (
                       <li key={detail}>{detail}</li>
                     ))}
