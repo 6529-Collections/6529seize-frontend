@@ -70,7 +70,7 @@ describe("PublicReviewEditorialFeedback", () => {
     fireEvent.click(screen.getByText("Send feedback", { exact: true }));
 
     expect(disclosure).toHaveAttribute("open");
-    expect(screen.getByRole("combobox")).toHaveClass("tw-ring-iron-700");
+    expect(screen.getByRole("combobox")).toHaveClass("tw-ring-white/[0.08]");
     expect(screen.getByTestId("composer")).toBeInTheDocument();
   });
 
