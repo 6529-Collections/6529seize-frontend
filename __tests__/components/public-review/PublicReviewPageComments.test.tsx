@@ -68,10 +68,10 @@ const record: PublicReviewFeedbackRecord = {
 describe("PublicReviewPageComments", () => {
   it("shows the section targeted by structured page feedback", () => {
     const queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false } },
+      defaultOptions: { queries: { retry: false, staleTime: Infinity } },
     });
     queryClient.setQueryData(
-      getPublicReviewLedgerQueryKey({ config, destination }),
+      getPublicReviewLedgerQueryKey({ config, destination, pageSize: 50 }),
       {
         pages: [
           {

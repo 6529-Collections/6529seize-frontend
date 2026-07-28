@@ -46,7 +46,11 @@ export function PublicReviewPageComments({
 }) {
   const isPanelOpen = usePublicReviewCommentPanelOpen();
   const ledgerQuery = useInfiniteQuery({
-    queryKey: getPublicReviewLedgerQueryKey({ config, destination }),
+    queryKey: getPublicReviewLedgerQueryKey({
+      config,
+      destination,
+      pageSize,
+    }),
     queryFn: ({ pageParam, signal }) =>
       fetchPublicReviewLedgerPage({
         api,
@@ -78,7 +82,7 @@ export function PublicReviewPageComments({
   return (
     <section aria-label={t(locale, "publicReview.comments.title")}>
       <output className="tw-sr-only" aria-live="polite" aria-atomic="true">
-        {ledgerQuery.isPending
+        {ledgerQuery.isLoading
           ? t(locale, "publicReview.comments.loading")
           : t(locale, "publicReview.comments.status", {
               count: formatInteger(locale, records.length),
@@ -93,7 +97,7 @@ export function PublicReviewPageComments({
         </p>
       ) : null}
 
-      {ledgerQuery.isPending ? (
+      {ledgerQuery.isLoading ? (
         <div aria-hidden="true" className="tw-mt-4 tw-space-y-2 tw-py-3">
           <div className="tw-h-3 tw-w-2/3 tw-animate-pulse tw-rounded tw-bg-iron-800 motion-reduce:tw-animate-none" />
           <div className="tw-h-3 tw-w-full tw-animate-pulse tw-rounded tw-bg-iron-800 motion-reduce:tw-animate-none" />
@@ -126,7 +130,7 @@ export function PublicReviewPageComments({
         </div>
       ) : null}
 
-      {!ledgerQuery.isPending &&
+      {!ledgerQuery.isLoading &&
       !ledgerQuery.isError &&
       records.length === 0 ? (
         <p className="tw-mb-0 tw-mt-4 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08] tw-py-5 tw-text-sm tw-leading-6 tw-text-iron-400">

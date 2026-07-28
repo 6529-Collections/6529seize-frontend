@@ -199,7 +199,7 @@ export function PublicReviewReadingLayout({
         <aside
           id={COMMENT_PANEL_ID}
           aria-label={t(DEFAULT_LOCALE, "publicReview.comments.title")}
-          className={`tw-order-1 tw-scroll-mt-20 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-bg-[#0D0D0F] tw-outline-none @[760px]:tw-sticky @[760px]:tw-top-16 @[760px]:tw-order-2 @[760px]:tw-h-[calc(100dvh-4rem)] @[760px]:tw-overflow-hidden @[760px]:tw-border-b-0 @[760px]:tw-border-l ${
+          className={`tw-order-1 tw-scroll-mt-20 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-bg-[#0D0D0F] focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400 @[760px]:tw-sticky @[760px]:tw-top-16 @[760px]:tw-order-2 @[760px]:tw-h-[calc(100dvh-4rem)] @[760px]:tw-overflow-hidden @[760px]:tw-border-b-0 @[760px]:tw-border-l ${
             isPanelOpen ? "tw-block" : "tw-hidden"
           }`}
           tabIndex={-1}

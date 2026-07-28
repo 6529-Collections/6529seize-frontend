@@ -1,4 +1,4 @@
-import { render, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 
 import { PublicReviewReadingLayout } from "@/components/public-review/PublicReviewReadingLayout";
 
@@ -55,6 +55,13 @@ describe("PublicReviewReadingLayout", () => {
         behavior: "auto",
         block: "start",
       })
+    );
+    expect(
+      screen.getByRole("complementary", { name: "Page comments" })
+    ).toHaveClass(
+      "focus:tw-ring-2",
+      "focus:tw-ring-inset",
+      "focus:tw-ring-primary-400"
     );
   });
 });

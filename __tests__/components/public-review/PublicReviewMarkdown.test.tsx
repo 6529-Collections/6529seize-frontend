@@ -124,4 +124,13 @@ describe("PublicReviewMarkdown", () => {
       "/reviews/6529-stream/versions/2026-07-27.1/security-testing-and-known-limitations#known-limitations"
     );
   });
+
+  it("does not classify an internal path beginning with http as external", () => {
+    render(<PublicReviewMarkdown markdown="[Notes](http-notes)" />);
+
+    const link = screen.getByRole("link", { name: "Notes" });
+    expect(link).toHaveAttribute("href", "http-notes");
+    expect(link).not.toHaveAttribute("target");
+    expect(link).not.toHaveTextContent("opens in a new tab");
+  });
 });

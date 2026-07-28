@@ -451,7 +451,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.feedback.reproduction": "Reproduction or proof of concept",
   "publicReview.feedback.preview": "Preview Wave message",
   "publicReview.feedback.previewHeading": "Wave message preview",
-  "publicReview.feedback.submit": "Post feedback",
+  "publicReview.feedback.submit": "Post to review Wave",
   "publicReview.feedback.submitting": "Posting feedback…",
   "publicReview.feedback.connect": "Connect wallet to comment",
   "publicReview.feedback.reconnect": "Re-authenticate wallet",

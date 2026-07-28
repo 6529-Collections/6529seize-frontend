@@ -286,6 +286,21 @@ describe("public review ledger projection", () => {
     expect(JSON.stringify(stagingKey)).toContain("2026-07-26.1");
   });
 
+  it("partitions query keys by raw Wave page size", () => {
+    const compactKey = getPublicReviewLedgerQueryKey({
+      config,
+      destination,
+      pageSize: 25,
+    });
+    const fullKey = getPublicReviewLedgerQueryKey({
+      config,
+      destination,
+      pageSize: 50,
+    });
+
+    expect(compactKey).not.toEqual(fullKey);
+  });
+
   it("filters loaded records and deduplicates immutable drop IDs", () => {
     const record = {
       feedbackId: "feedback-1",

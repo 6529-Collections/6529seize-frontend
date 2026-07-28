@@ -63,19 +63,22 @@ const DEFAULT_LEDGER_API: PublicReviewLedgerApi = {
 export function getPublicReviewLedgerQueryKey({
   config,
   destination,
+  pageSize,
 }: {
   readonly config: PublicReviewFeedbackConfig;
   readonly destination: PublicReviewDiscussionDestination;
+  readonly pageSize?: number | undefined;
 }) {
-  return [
-    QueryKey.PUBLIC_REVIEW_LEDGER,
-    {
-      environment: destination.environment,
-      waveId: destination.waveId,
-      reviewId: config.reviewId,
-      reviewVersion: config.reviewVersion,
-    },
-  ] as const;
+  const identity = {
+    environment: destination.environment,
+    waveId: destination.waveId,
+    reviewId: config.reviewId,
+    reviewVersion: config.reviewVersion,
+  };
+  const baseKey = [QueryKey.PUBLIC_REVIEW_LEDGER, identity] as const;
+  return pageSize === undefined
+    ? baseKey
+    : ([...baseKey, { pageSize }] as const);
 }
 
 function getNextRawCursor(

@@ -111,6 +111,7 @@ describe("PublicReviewLedger auditor exports", () => {
       getPublicReviewLedgerQueryKey({
         config,
         destination: record.destination,
+        pageSize: 50,
       }),
       {
         pages: [

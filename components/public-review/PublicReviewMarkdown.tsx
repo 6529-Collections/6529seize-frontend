@@ -121,7 +121,7 @@ function createMarkdownComponents(
         href,
         internalLinkBasePath
       );
-      const isExternal = resolvedHref?.startsWith("http") ?? false;
+      const isExternal = /^https?:\/\//i.test(resolvedHref ?? "");
       return (
         <a
           href={resolvedHref}

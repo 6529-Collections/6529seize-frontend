@@ -166,10 +166,9 @@ describe("PublicReviewFeedbackComposer", () => {
     });
     expect(comment).toHaveClass("placeholder:tw-text-iron-400");
     expect(comment).toHaveClass("tw-ring-iron-600");
-    expect(screen.getByRole("button", { name: "Post feedback" })).toHaveClass(
-      "tw-bg-primary-600",
-      "hover:tw-ring-primary-300/60"
-    );
+    expect(
+      screen.getByRole("button", { name: "Post to review Wave" })
+    ).toHaveClass("tw-bg-primary-600", "hover:tw-ring-primary-300/60");
   });
 
   it("keeps the wallet connection action on AA-contrast tokens", () => {
@@ -198,7 +197,9 @@ describe("PublicReviewFeedbackComposer", () => {
       selector: "textarea",
     });
     await user.type(comment, "Do not lose this exploit report.");
-    await user.click(screen.getByRole("button", { name: "Post feedback" }));
+    await user.click(
+      screen.getByRole("button", { name: "Post to review Wave" })
+    );
 
     await waitFor(() => expect(submitter).toHaveBeenCalledTimes(1));
     expect(comment).toHaveValue("Do not lose this exploit report.");
@@ -224,7 +225,7 @@ describe("PublicReviewFeedbackComposer", () => {
     });
     await user.type(comment, "Keep this until the API confirms.");
     const submitButton = screen.getByRole("button", {
-      name: "Post feedback",
+      name: "Post to review Wave",
     });
     await user.click(submitButton);
 
@@ -290,7 +291,9 @@ describe("PublicReviewFeedbackComposer", () => {
       selector: "textarea",
     });
     await user.type(comment, "First submitted draft.");
-    await user.click(screen.getByRole("button", { name: "Post feedback" }));
+    await user.click(
+      screen.getByRole("button", { name: "Post to review Wave" })
+    );
     rerenderSelection({
       ...sourceSelection,
       lineStart: 20,
@@ -317,10 +320,12 @@ describe("PublicReviewFeedbackComposer", () => {
     );
     await waitFor(() =>
       expect(
-        screen.getByRole("button", { name: "Post feedback" })
+        screen.getByRole("button", { name: "Post to review Wave" })
       ).toBeEnabled()
     );
-    await user.click(screen.getByRole("button", { name: "Post feedback" }));
+    await user.click(
+      screen.getByRole("button", { name: "Post to review Wave" })
+    );
     await waitFor(() => expect(submitterMock).toHaveBeenCalledTimes(2));
 
     const firstPayload = JSON.parse(
@@ -355,7 +360,7 @@ describe("PublicReviewFeedbackComposer", () => {
       screen.getByRole("button", { name: "Re-authenticate wallet" })
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Post feedback" })
+      screen.queryByRole("button", { name: "Post to review Wave" })
     ).not.toBeInTheDocument();
     expect(fetchWaveByIdMock).not.toHaveBeenCalled();
   });
@@ -426,7 +431,7 @@ describe("PublicReviewFeedbackComposer", () => {
       screen.getByRole("button", { name: "Preview Wave message" })
     ).toBeDisabled();
     expect(
-      screen.getByRole("button", { name: "Post feedback" })
+      screen.getByRole("button", { name: "Post to review Wave" })
     ).toBeDisabled();
     expect(
       screen.getByText("Calculating exact source checksum.")
@@ -455,7 +460,7 @@ describe("PublicReviewFeedbackComposer", () => {
       selector: "textarea",
     });
     const submit = screen.getByRole("button", {
-      name: "Post feedback",
+      name: "Post to review Wave",
     });
     expect(comment).toBeRequired();
     expect(document.querySelector(`label[for="${comment.id}"]`)).toHaveClass(

@@ -126,7 +126,11 @@ export default function PublicReviewLedger({
   }, [searchInput]);
 
   const ledgerQuery = useInfiniteQuery({
-    queryKey: getPublicReviewLedgerQueryKey({ config, destination }),
+    queryKey: getPublicReviewLedgerQueryKey({
+      config,
+      destination,
+      pageSize,
+    }),
     queryFn: ({ pageParam, signal }) =>
       fetchPublicReviewLedgerPage({
         api,
