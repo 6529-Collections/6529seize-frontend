@@ -178,9 +178,7 @@ jest.mock("@/services/auth/immediate-validation.utils", () => ({
 
 jest.mock("@/services/analytics/productImpactTelemetry", () => ({
   resetAuthSessionRefreshProductImpactDedupe: (
-    ...args: Parameters<
-      typeof mockResetAuthSessionRefreshProductImpactDedupe
-    >
+    ...args: Parameters<typeof mockResetAuthSessionRefreshProductImpactDedupe>
   ) => mockResetAuthSessionRefreshProductImpactDedupe(...args),
   trackAuthSessionRefreshProductImpact: (
     ...args: Parameters<typeof mockTrackAuthSessionRefreshProductImpact>
@@ -2067,8 +2065,7 @@ describe("Auth component", () => {
         );
       });
       const firstTerminalScope =
-        mockTrackAuthSessionRefreshProductImpact.mock.calls[0]?.[0]
-          .dedupeScope;
+        mockTrackAuthSessionRefreshProductImpact.mock.calls[0]?.[0].dedupeScope;
       expect(firstTerminalScope).toEqual(expect.any(String));
 
       currentJwt = "session-b-jwt";
