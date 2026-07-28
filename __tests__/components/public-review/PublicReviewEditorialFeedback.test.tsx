@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import { PublicReviewEditorialFeedback } from "@/components/public-review/PublicReviewEditorialFeedback";
 import type {
@@ -45,6 +45,10 @@ const page: PublicReviewPageContext = {
 };
 
 describe("PublicReviewEditorialFeedback", () => {
+  afterEach(() => {
+    window.history.replaceState({}, "", window.location.pathname);
+  });
+
   it("fills the feedback rail and reveals the composer on demand", () => {
     render(
       <PublicReviewEditorialFeedback
@@ -68,5 +72,23 @@ describe("PublicReviewEditorialFeedback", () => {
     expect(disclosure).toHaveAttribute("open");
     expect(screen.getByRole("combobox")).toHaveClass("tw-ring-iron-600");
     expect(screen.getByTestId("composer")).toBeInTheDocument();
+  });
+
+  it("reveals the composer for the feedback hash target", async () => {
+    window.history.replaceState({}, "", "#public-review-feedback");
+
+    render(
+      <PublicReviewEditorialFeedback
+        config={config}
+        destination={destination}
+        page={page}
+        sections={[]}
+      />
+    );
+
+    const disclosure = screen
+      .getByText("Send feedback", { exact: true })
+      .closest("details");
+    await waitFor(() => expect(disclosure).toHaveAttribute("open"));
   });
 });

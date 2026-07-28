@@ -78,7 +78,14 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
     await expect(
       feedbackPanel.locator("textarea[data-public-review-feedback-primary]")
     ).toBeHidden();
-    await composerToggle.click();
+
+    if (isDesktop) {
+      await page.evaluate(() => {
+        globalThis.location.hash = "public-review-feedback";
+      });
+    } else {
+      await composerToggle.click();
+    }
 
     const comment = feedbackPanel.locator(
       "textarea[data-public-review-feedback-primary]"

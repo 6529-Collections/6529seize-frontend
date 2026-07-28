@@ -5,7 +5,7 @@ import {
   PlusIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import PublicReviewFeedbackComposer from "@/components/public-review/PublicReviewFeedbackComposer";
 import { PublicReviewPageComments } from "@/components/public-review/PublicReviewPageComments";
@@ -30,6 +30,7 @@ export function PublicReviewEditorialFeedback({
   readonly sections: readonly PublicReviewSectionDefinition[];
 }) {
   const [sectionId, setSectionId] = useState("");
+  const composerDisclosureRef = useRef<HTMLDetailsElement>(null);
   const selectedSection = sections.find((section) => section.id === sectionId);
   const pageContext = useMemo<PublicReviewPageContext>(
     () => ({
@@ -44,6 +45,21 @@ export function PublicReviewEditorialFeedback({
     [page, selectedSection]
   );
 
+  useEffect(() => {
+    const revealComposerForFeedbackHash = (): void => {
+      if (window.location.hash === "#public-review-feedback") {
+        composerDisclosureRef.current?.setAttribute("open", "");
+      }
+    };
+
+    const revealTimer = window.setTimeout(revealComposerForFeedbackHash, 0);
+    window.addEventListener("hashchange", revealComposerForFeedbackHash);
+    return () => {
+      window.clearTimeout(revealTimer);
+      window.removeEventListener("hashchange", revealComposerForFeedbackHash);
+    };
+  }, []);
+
   return (
     <div className="tw-flex tw-min-h-0 tw-flex-col @[760px]:tw-h-full">
       <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-px-5 tw-py-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
@@ -55,8 +71,11 @@ export function PublicReviewEditorialFeedback({
           sections={sections}
         />
       </div>
-      <details className="tw-group tw-flex-none tw-overflow-y-auto tw-overscroll-contain tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-transparent tw-bg-transparent tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 open:tw-max-h-[70vh] open:tw-border-white/[0.08] open:tw-bg-[#0D0D0F] desktop-hover:hover:tw-scrollbar-thumb-iron-500">
-        <summary className="tw-mx-auto tw-mb-5 tw-mt-3 tw-flex tw-min-h-11 tw-w-fit tw-cursor-pointer tw-list-none tw-items-center tw-justify-center tw-gap-3 tw-rounded-full tw-border-0 tw-bg-primary-600 tw-px-5 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-shadow-[0_12px_28px_rgba(0,0,0,0.42)] tw-transition hover:tw-bg-primary-500 hover:tw-ring-2 hover:tw-ring-inset hover:tw-ring-primary-300/60 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-300 group-open:tw-mx-5 group-open:tw-mb-3 group-open:tw-w-auto group-open:tw-justify-between group-open:tw-rounded-lg group-open:tw-border group-open:tw-border-solid group-open:tw-border-white/[0.08] group-open:tw-bg-white/[0.02] group-open:tw-px-3 group-open:tw-text-iron-200 group-open:tw-shadow-none group-open:hover:tw-bg-white/[0.04] [&::-webkit-details-marker]:tw-hidden">
+      <details
+        ref={composerDisclosureRef}
+        className="tw-group tw-flex-none tw-overflow-y-auto tw-overscroll-contain tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-transparent tw-bg-transparent tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 open:tw-max-h-[70vh] open:tw-border-white/[0.08] open:tw-bg-[#0D0D0F] desktop-hover:hover:tw-scrollbar-thumb-iron-500"
+      >
+        <summary className="tw-mx-auto tw-mb-5 tw-mt-3 tw-flex tw-min-h-11 tw-w-fit tw-cursor-pointer tw-list-none tw-items-center tw-justify-center tw-gap-3 tw-rounded-full tw-border-0 tw-bg-primary-600 tw-px-5 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-shadow-[0_12px_28px_rgba(0,0,0,0.42)] tw-transition-[transform,background-color,box-shadow,color] tw-duration-200 tw-ease-out desktop-hover:hover:-tw-translate-y-0.5 desktop-hover:hover:tw-bg-primary-500 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.5)] active:tw-translate-y-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-300 group-open:tw-mx-5 group-open:tw-mb-3 group-open:tw-mt-4 group-open:tw-w-auto group-open:tw-translate-y-0 group-open:tw-justify-between group-open:tw-rounded-none group-open:tw-bg-transparent group-open:tw-px-0 group-open:tw-py-0 group-open:tw-text-sm group-open:tw-text-iron-100 group-open:tw-shadow-none desktop-hover:group-open:hover:tw-translate-y-0 desktop-hover:group-open:hover:tw-bg-transparent desktop-hover:group-open:hover:tw-shadow-none motion-reduce:tw-transform-none motion-reduce:tw-transition-none [&::-webkit-details-marker]:tw-hidden">
           <span className="tw-flex tw-items-center tw-gap-2">
             <PlusIcon
               className="tw-size-3.5 tw-flex-none group-open:tw-hidden"

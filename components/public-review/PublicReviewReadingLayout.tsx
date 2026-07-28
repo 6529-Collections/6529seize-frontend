@@ -167,22 +167,27 @@ export function PublicReviewReadingLayout({
             aria-controls={COMMENT_PANEL_ID}
             aria-expanded={isPanelOpen}
             onClick={() => updatePanelPreference(!isPanelOpen)}
-            className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-flex-none tw-items-center tw-gap-2 tw-border-0 tw-bg-transparent tw-px-0 tw-text-xs tw-font-semibold tw-text-iron-300 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-white"
+            className="tw-group/feedback-toggle tw-inline-flex tw-min-h-11 tw-flex-none tw-items-center tw-gap-2 tw-border-0 tw-bg-transparent tw-px-0 tw-text-xs tw-font-semibold tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-white"
           >
             {isPanelOpen ? (
-              <XMarkIcon className="tw-size-4" aria-hidden="true" />
+              <XMarkIcon
+                className="tw-size-4 tw-transition-colors desktop-hover:group-hover/feedback-toggle:tw-text-primary-200"
+                aria-hidden="true"
+              />
             ) : (
               <ChatBubbleLeftRightIcon
-                className="tw-size-4"
+                className="tw-size-4 tw-transition-colors desktop-hover:group-hover/feedback-toggle:tw-text-primary-200"
                 aria-hidden="true"
               />
             )}
-            {t(
-              DEFAULT_LOCALE,
-              isPanelOpen
-                ? "publicReview.comments.hide"
-                : "publicReview.comments.show"
-            )}
+            <span className="tw-transition-colors desktop-hover:group-hover/feedback-toggle:tw-text-primary-200">
+              {t(
+                DEFAULT_LOCALE,
+                isPanelOpen
+                  ? "publicReview.comments.hide"
+                  : "publicReview.comments.show"
+              )}
+            </span>
           </button>
         </div>
       </div>
