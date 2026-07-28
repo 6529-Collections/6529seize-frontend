@@ -119,7 +119,7 @@ export function PublicReviewStatusBanner({
               AUDIT_LABELS[displayedReviewVersion.auditStatus]
             )}
           </span>
-          <span className={`${STATUS_ITEM} tw-text-iron-500`}>
+          <span className={`${STATUS_ITEM} tw-text-iron-400`}>
             {t(DEFAULT_LOCALE, "publicReview.status.version", {
               version: displayedVersion,
             })}
@@ -144,13 +144,13 @@ export function PublicReviewStatusBanner({
                 contract: review.contractName,
               }
             )}
-            className={`${STATUS_ITEM} tw-group tw-gap-1.5 tw-text-iron-400 tw-no-underline hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white`}
+            className={`${STATUS_ITEM} tw-group tw-gap-1.5 tw-text-iron-300 tw-no-underline hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white`}
           >
             {t(DEFAULT_LOCALE, "publicReview.status.source", {
               commit: shortCommit,
             })}
             <ArrowTopRightOnSquareIcon
-              className="tw-size-3 tw-flex-none tw-text-iron-600 tw-transition-colors group-hover:tw-text-iron-300"
+              className="tw-size-3 tw-flex-none tw-text-iron-500 tw-transition-colors group-hover:tw-text-iron-300"
               aria-hidden="true"
             />
           </a>
