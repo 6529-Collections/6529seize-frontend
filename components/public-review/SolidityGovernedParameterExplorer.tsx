@@ -2,6 +2,10 @@
 
 import { useMemo, useState } from "react";
 
+import {
+  PUBLIC_REVIEW_INPUT_CLASSES,
+  PublicReviewSelect,
+} from "@/components/public-review/PublicReviewFormControls";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -20,9 +24,6 @@ export interface SolidityGovernedParameterListItem extends Omit<
 }
 
 type GovernedInventory = SolidityAuditorEvidence["governedParameterInventory"];
-
-const INPUT_CLASSES =
-  "tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-iron-50 tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40";
 
 function matchesQuery(
   item: SolidityGovernedParameterListItem,
@@ -66,7 +67,7 @@ export function SolidityGovernedParameterExplorer({
   return (
     <section
       aria-labelledby="solidity-governed-parameters"
-      className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5"
+      className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-py-8"
     >
       <h2
         id="solidity-governed-parameters"
@@ -74,13 +75,13 @@ export function SolidityGovernedParameterExplorer({
       >
         {t(DEFAULT_LOCALE, "publicReview.reference.governedParameters")}
       </h2>
-      <p className="tw-mb-0 tw-mt-2 tw-max-w-4xl tw-text-sm tw-leading-6 tw-text-iron-300">
+      <p className="tw-mb-0 tw-mt-2 tw-max-w-4xl tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-300">
         {t(
           DEFAULT_LOCALE,
           "publicReview.reference.governedParametersDescription"
         )}
       </p>
-      <dl className="tw-mb-0 tw-mt-5 tw-grid tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
+      <dl className="tw-mb-0 tw-mt-5 tw-grid tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] sm:tw-grid-cols-2 xl:tw-grid-cols-4">
         {[
           [
             t(DEFAULT_LOCALE, "publicReview.reference.candidateBinding"),
@@ -110,11 +111,8 @@ export function SolidityGovernedParameterExplorer({
             )}`,
           ],
         ].map(([label, value]) => (
-          <div
-            className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/60 tw-p-3"
-            key={label}
-          >
-            <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+          <div className="tw-min-w-0 tw-p-3" key={label}>
+            <dt className="tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-500">
               {label}
             </dt>
             <dd className="tw-m-0 tw-mt-1 tw-break-words tw-font-mono tw-text-sm tw-text-white">
@@ -128,7 +126,7 @@ export function SolidityGovernedParameterExplorer({
         {policy.forbidden_surfaces.join(", ")}
       </p>
       <a
-        className="tw-mt-2 tw-inline-flex tw-text-sm tw-text-sky-300 tw-no-underline hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+        className="tw-mt-2 tw-inline-flex tw-text-sm tw-text-sky-300 tw-no-underline hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
         href={candidateBinding.blocked_by_issue}
         rel="noreferrer"
         target="_blank"
@@ -139,13 +137,13 @@ export function SolidityGovernedParameterExplorer({
           ({t(DEFAULT_LOCALE, "publicReview.markdown.externalLink")})
         </span>
       </a>
-      <div className="tw-mt-5 tw-grid tw-gap-4 tw-rounded-xl tw-bg-iron-900/70 tw-p-4 md:tw-grid-cols-[minmax(0,2fr)_minmax(12rem,1fr)]">
+      <div className="tw-mt-5 tw-grid tw-grid-cols-1 tw-gap-4 tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] md:tw-grid-cols-[minmax(0,2fr)_minmax(12rem,1fr)]">
         <label className="tw-block tw-text-sm tw-font-medium tw-text-iron-200">
           <span className="tw-mb-1.5 tw-block">
             {t(DEFAULT_LOCALE, "publicReview.reference.searchParameters")}
           </span>
           <input
-            className={INPUT_CLASSES}
+            className={PUBLIC_REVIEW_INPUT_CLASSES}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={t(
               DEFAULT_LOCALE,
@@ -159,8 +157,7 @@ export function SolidityGovernedParameterExplorer({
           <span className="tw-mb-1.5 tw-block">
             {t(DEFAULT_LOCALE, "publicReview.reference.parameterFamily")}
           </span>
-          <select
-            className={INPUT_CLASSES}
+          <PublicReviewSelect
             onChange={(event) => setFamily(event.target.value)}
             value={family}
           >
@@ -169,7 +166,7 @@ export function SolidityGovernedParameterExplorer({
             </option>
             <option value="GGP">GGP</option>
             <option value="GTP">GTP</option>
-          </select>
+          </PublicReviewSelect>
         </label>
       </div>
       <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-text-iron-400" role="status">
@@ -177,11 +174,11 @@ export function SolidityGovernedParameterExplorer({
           total: formatInteger(DEFAULT_LOCALE, filteredItems.length),
         })}
       </p>
-      <ul className="tw-mb-0 tw-mt-5 tw-list-none tw-space-y-3 tw-p-0">
+      <ul className="tw-mb-0 tw-mt-5 tw-list-none tw-divide-y tw-divide-white/[0.05] tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03]">
         {filteredItems.map((item) => (
           <li key={item.parameter_id}>
-            <details className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/60 tw-p-4">
-              <summary className="tw-cursor-pointer tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
+            <details className="tw-group tw-rounded-lg tw-px-4 tw-py-3.5 tw-transition-colors open:tw-bg-iron-900/40 desktop-hover:hover:tw-bg-iron-900/40">
+              <summary className="tw-relative tw-cursor-pointer tw-list-none tw-pl-7 tw-text-white before:tw-absolute before:tw-left-1 before:tw-top-0 before:tw-text-lg before:tw-leading-6 before:tw-text-iron-500 before:tw-transition-transform before:tw-content-['›'] group-open:before:tw-rotate-90 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
                 <span className="tw-rounded-full tw-bg-sky-400/10 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-text-sky-200">
                   {item.family}
                 </span>
@@ -189,9 +186,9 @@ export function SolidityGovernedParameterExplorer({
                   {item.name}
                 </code>
               </summary>
-              <dl className="tw-mb-0 tw-mt-5 tw-grid tw-gap-4">
+              <dl className="tw-mb-0 tw-mt-5 tw-grid tw-grid-cols-1 tw-gap-4">
                 <div>
-                  <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+                  <dt className="tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-400">
                     {t(DEFAULT_LOCALE, "publicReview.reference.parameterId")}
                   </dt>
                   <dd className="tw-m-0 tw-mt-1 tw-break-all tw-font-mono tw-text-xs tw-text-sky-300">
@@ -199,18 +196,18 @@ export function SolidityGovernedParameterExplorer({
                   </dd>
                 </div>
                 <div>
-                  <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+                  <dt className="tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-400">
                     {t(
                       DEFAULT_LOCALE,
                       "publicReview.reference.parameterPreimage"
                     )}
                   </dt>
-                  <dd className="tw-m-0 tw-mt-1 tw-break-all tw-font-mono tw-text-xs tw-text-iron-200">
+                  <dd className="tw-m-0 tw-mt-1 tw-break-all tw-font-mono tw-text-xs tw-text-iron-300">
                     {item.preimage}
                   </dd>
                 </div>
                 <div>
-                  <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+                  <dt className="tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-400">
                     {t(
                       DEFAULT_LOCALE,
                       "publicReview.reference.normativeSource"
@@ -218,7 +215,7 @@ export function SolidityGovernedParameterExplorer({
                   </dt>
                   <dd className="tw-m-0 tw-mt-1">
                     <a
-                      className="tw-break-all tw-text-sm tw-text-sky-300 tw-no-underline hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+                      className="tw-break-all tw-text-sm tw-text-sky-300 tw-no-underline hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                       href={item.normative_source.href}
                       rel="noreferrer"
                       target="_blank"
@@ -237,30 +234,30 @@ export function SolidityGovernedParameterExplorer({
                     </a>
                   </dd>
                 </div>
-                <div className="tw-grid tw-gap-4 sm:tw-grid-cols-2">
+                <div className="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
                   <div>
-                    <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+                    <dt className="tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-400">
                       {t(
                         DEFAULT_LOCALE,
                         "publicReview.reference.expectedHosts"
                       )}
                     </dt>
-                    <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-200">
+                    <dd className="tw-m-0 tw-mt-1 tw-break-words tw-text-sm tw-text-iron-300">
                       {formatInteger(DEFAULT_LOCALE, item.expected_hosts.count)}{" "}
                       ({item.expected_hosts.status})
                     </dd>
                   </div>
                   <div>
-                    <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+                    <dt className="tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-400">
                       {t(DEFAULT_LOCALE, "publicReview.reference.consumers")}
                     </dt>
-                    <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-200">
+                    <dd className="tw-m-0 tw-mt-1 tw-break-words tw-text-sm tw-text-iron-300">
                       {item.guarded_consumers.consumers.join(", ") ||
                         t(DEFAULT_LOCALE, "publicReview.reference.none")}
                     </dd>
                   </div>
                 </div>
-                <div className="tw-grid tw-gap-4 sm:tw-grid-cols-3">
+                <div className="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-3">
                   {item.gas ? (
                     <>
                       <EvidenceValue
@@ -318,7 +315,7 @@ export function SolidityGovernedParameterExplorer({
                     </>
                   ) : null}
                 </div>
-                <div className="tw-grid tw-gap-4 sm:tw-grid-cols-2">
+                <div className="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
                   <EvidenceValue
                     label={t(
                       DEFAULT_LOCALE,
@@ -364,11 +361,11 @@ function EvidenceValue({
   }
   return (
     <div>
-      <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+      <dt className="tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-400">
         {label}
       </dt>
-      <dd className="tw-m-0 tw-mt-1 tw-break-words tw-text-sm tw-text-iron-200">
-        {displayedValue} <span className="tw-text-iron-500">({status})</span>
+      <dd className="tw-m-0 tw-mt-1 tw-break-words tw-text-sm tw-text-iron-300">
+        {displayedValue} <span className="tw-text-iron-400">({status})</span>
       </dd>
     </div>
   );

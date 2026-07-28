@@ -35,7 +35,12 @@ import type {
 } from "@/lib/public-review/solidityReferenceTypes";
 
 const CARD_CLASSES =
-  "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5";
+  "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-py-8";
+const SUMMARY_CLASSES = "tw-min-w-0 tw-p-3";
+const DATA_SURFACE_CLASSES =
+  "tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03]";
+const ROW_GROUP_CLASSES =
+  "tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03]";
 
 function HumanizedValue({ value }: { readonly value: string }) {
   return <>{value.replaceAll("_", " ")}</>;
@@ -49,8 +54,8 @@ function SummaryCard({
   readonly value: number;
 }) {
   return (
-    <div className={CARD_CLASSES}>
-      <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.08em] tw-text-iron-500">
+    <div className={SUMMARY_CLASSES}>
+      <dt className="tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-500">
         {label}
       </dt>
       <dd className="tw-m-0 tw-mt-2 tw-font-mono tw-text-2xl tw-font-semibold tw-text-white">
@@ -69,10 +74,10 @@ function KeyValue({
 }) {
   return (
     <div className="tw-min-w-0">
-      <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.08em] tw-text-iron-500">
+      <dt className="tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-400">
         {label}
       </dt>
-      <dd className="tw-m-0 tw-mt-1.5 tw-break-all tw-text-sm tw-leading-6 tw-text-iron-200">
+      <dd className="tw-m-0 tw-mt-1.5 tw-break-all tw-text-sm tw-leading-6 tw-text-iron-300">
         {children}
       </dd>
     </div>
@@ -96,7 +101,9 @@ function ReleaseEvidence({
       >
         {t(DEFAULT_LOCALE, "publicReview.reference.releaseEvidence")}
       </h2>
-      <dl className="tw-mb-0 tw-mt-5 tw-grid tw-gap-5 sm:tw-grid-cols-2">
+      <dl
+        className={`${DATA_SURFACE_CLASSES} tw-mb-0 tw-mt-5 tw-grid tw-gap-5 sm:tw-grid-cols-2`}
+      >
         <KeyValue
           label={t(DEFAULT_LOCALE, "publicReview.reference.releaseCatalog")}
         >
@@ -240,8 +247,8 @@ export function SolidityReferenceOverview({
   ).sort((left, right) => compareLocalized(DEFAULT_LOCALE, left, right));
 
   return (
-    <div className="tw-space-y-8">
-      <dl className="tw-m-0 tw-grid tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-6">
+    <div className="tw-space-y-10">
+      <dl className="tw-m-0 tw-grid tw-grid-cols-2 tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] xl:tw-grid-cols-6">
         <SummaryCard
           label={t(DEFAULT_LOCALE, "publicReview.reference.definitions")}
           value={manifest.summary.definitionCount}
@@ -268,168 +275,247 @@ export function SolidityReferenceOverview({
         />
       </dl>
 
-      <SolidityReferenceSectionNavigation />
+      <SolidityReferenceSectionNavigation
+        panels={{
+          "solidity-generation-provenance": (
+            <div>
+              <section
+                aria-labelledby="solidity-generation-provenance"
+                className={CARD_CLASSES}
+              >
+                <h2
+                  id="solidity-generation-provenance"
+                  className="tw-m-0 tw-scroll-mt-28 tw-text-xl tw-font-semibold tw-text-white"
+                >
+                  {t(DEFAULT_LOCALE, "publicReview.reference.generatedLabel")}
+                </h2>
+                <dl
+                  className={`${DATA_SURFACE_CLASSES} tw-mb-0 tw-mt-5 tw-grid tw-gap-5 md:tw-grid-cols-2`}
+                >
+                  <KeyValue
+                    label={t(
+                      DEFAULT_LOCALE,
+                      "publicReview.reference.sourceCommit"
+                    )}
+                  >
+                    <code>{manifest.source.commit}</code>
+                  </KeyValue>
+                  <KeyValue
+                    label={t(
+                      DEFAULT_LOCALE,
+                      "publicReview.reference.sourceTree"
+                    )}
+                  >
+                    <code>{manifest.source.tree}</code>
+                  </KeyValue>
+                  <KeyValue
+                    label={t(DEFAULT_LOCALE, "publicReview.reference.compiler")}
+                  >
+                    <code>{manifest.source.compiler.version}</code>
+                  </KeyValue>
+                  <KeyValue
+                    label={t(
+                      DEFAULT_LOCALE,
+                      "publicReview.reference.evmVersion"
+                    )}
+                  >
+                    <code>{manifest.source.compiler.evmVersion}</code>
+                  </KeyValue>
+                  <KeyValue
+                    label={t(
+                      DEFAULT_LOCALE,
+                      "publicReview.reference.optimizer"
+                    )}
+                  >
+                    {manifest.source.compiler.optimizer.enabled
+                      ? t(
+                          DEFAULT_LOCALE,
+                          "publicReview.reference.optimizerEnabled",
+                          {
+                            runs: formatInteger(
+                              DEFAULT_LOCALE,
+                              manifest.source.compiler.optimizer.runs
+                            ),
+                          }
+                        )
+                      : t(
+                          DEFAULT_LOCALE,
+                          "publicReview.reference.optimizerDisabled"
+                        )}
+                  </KeyValue>
+                  <KeyValue
+                    label={t(DEFAULT_LOCALE, "publicReview.reference.viaIr")}
+                  >
+                    {manifest.source.compiler.viaIR
+                      ? t(DEFAULT_LOCALE, "publicReview.reference.yes")
+                      : t(DEFAULT_LOCALE, "publicReview.reference.no")}
+                  </KeyValue>
+                  <KeyValue
+                    label={t(
+                      DEFAULT_LOCALE,
+                      "publicReview.reference.commitTimestamp"
+                    )}
+                  >
+                    <time
+                      dateTime={manifest.source.commitTimestamp}
+                      title={manifest.source.commitTimestamp}
+                    >
+                      {formatDate(
+                        DEFAULT_LOCALE,
+                        manifest.source.commitTimestamp,
+                        {
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          month: "short",
+                          second: "2-digit",
+                          timeZone: "UTC",
+                          timeZoneName: "short",
+                          year: "numeric",
+                        }
+                      )}
+                    </time>
+                  </KeyValue>
+                  <KeyValue
+                    label={t(
+                      DEFAULT_LOCALE,
+                      "publicReview.reference.generator"
+                    )}
+                  >
+                    <code>
+                      {manifest.generator.name} {manifest.generator.version}
+                    </code>
+                  </KeyValue>
+                  <KeyValue
+                    label={t(
+                      DEFAULT_LOCALE,
+                      "publicReview.reference.outputChecksum"
+                    )}
+                  >
+                    <code>{manifest.generator.outputSha256}</code>
+                  </KeyValue>
+                </dl>
+              </section>
 
-      <section
-        aria-labelledby="solidity-generation-provenance"
-        className={CARD_CLASSES}
-      >
-        <h2
-          id="solidity-generation-provenance"
-          className="tw-m-0 tw-scroll-mt-28 tw-text-xl tw-font-semibold tw-text-white"
-        >
-          {t(DEFAULT_LOCALE, "publicReview.reference.generatedLabel")}
-        </h2>
-        <dl className="tw-mb-0 tw-mt-5 tw-grid tw-gap-5 md:tw-grid-cols-2">
-          <KeyValue
-            label={t(DEFAULT_LOCALE, "publicReview.reference.sourceCommit")}
-          >
-            <code>{manifest.source.commit}</code>
-          </KeyValue>
-          <KeyValue
-            label={t(DEFAULT_LOCALE, "publicReview.reference.sourceTree")}
-          >
-            <code>{manifest.source.tree}</code>
-          </KeyValue>
-          <KeyValue
-            label={t(DEFAULT_LOCALE, "publicReview.reference.compiler")}
-          >
-            <code>{manifest.source.compiler.version}</code>
-          </KeyValue>
-          <KeyValue
-            label={t(DEFAULT_LOCALE, "publicReview.reference.evmVersion")}
-          >
-            <code>{manifest.source.compiler.evmVersion}</code>
-          </KeyValue>
-          <KeyValue
-            label={t(DEFAULT_LOCALE, "publicReview.reference.optimizer")}
-          >
-            {manifest.source.compiler.optimizer.enabled
-              ? t(DEFAULT_LOCALE, "publicReview.reference.optimizerEnabled", {
-                  runs: formatInteger(
+              <section
+                aria-labelledby="solidity-classifications"
+                className={CARD_CLASSES}
+              >
+                <h2
+                  id="solidity-classifications"
+                  className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white"
+                >
+                  {t(DEFAULT_LOCALE, "publicReview.reference.classifications")}
+                </h2>
+                <dl className="tw-mb-0 tw-mt-5 tw-grid tw-gap-px tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] sm:tw-grid-cols-2 lg:tw-grid-cols-3">
+                  {Object.entries(manifest.summary.classifications).map(
+                    ([classification, count]) => (
+                      <div
+                        key={classification}
+                        className="tw-bg-iron-950 tw-p-3"
+                      >
+                        <dt className="tw-text-sm tw-text-iron-400">
+                          <HumanizedValue value={classification} />
+                        </dt>
+                        <dd className="tw-m-0 tw-mt-1 tw-font-mono tw-text-white">
+                          {formatInteger(DEFAULT_LOCALE, count)}
+                        </dd>
+                      </div>
+                    )
+                  )}
+                </dl>
+              </section>
+
+              <section
+                aria-labelledby="solidity-retained-artifacts"
+                className={CARD_CLASSES}
+              >
+                <h2
+                  id="solidity-retained-artifacts"
+                  className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white"
+                >
+                  {t(
                     DEFAULT_LOCALE,
-                    manifest.source.compiler.optimizer.runs
-                  ),
-                })
-              : t(DEFAULT_LOCALE, "publicReview.reference.optimizerDisabled")}
-          </KeyValue>
-          <KeyValue label={t(DEFAULT_LOCALE, "publicReview.reference.viaIr")}>
-            {manifest.source.compiler.viaIR
-              ? t(DEFAULT_LOCALE, "publicReview.reference.yes")
-              : t(DEFAULT_LOCALE, "publicReview.reference.no")}
-          </KeyValue>
-          <KeyValue
-            label={t(DEFAULT_LOCALE, "publicReview.reference.commitTimestamp")}
-          >
-            <time
-              dateTime={manifest.source.commitTimestamp}
-              title={manifest.source.commitTimestamp}
-            >
-              {formatDate(DEFAULT_LOCALE, manifest.source.commitTimestamp, {
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                month: "short",
-                second: "2-digit",
-                timeZone: "UTC",
-                timeZoneName: "short",
-                year: "numeric",
-              })}
-            </time>
-          </KeyValue>
-          <KeyValue
-            label={t(DEFAULT_LOCALE, "publicReview.reference.generator")}
-          >
-            <code>
-              {manifest.generator.name} {manifest.generator.version}
-            </code>
-          </KeyValue>
-          <KeyValue
-            label={t(DEFAULT_LOCALE, "publicReview.reference.outputChecksum")}
-          >
-            <code>{manifest.generator.outputSha256}</code>
-          </KeyValue>
-        </dl>
-      </section>
-
-      <section
-        aria-labelledby="solidity-classifications"
-        className={CARD_CLASSES}
-      >
-        <h2
-          id="solidity-classifications"
-          className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white"
-        >
-          {t(DEFAULT_LOCALE, "publicReview.reference.classifications")}
-        </h2>
-        <dl className="tw-mb-0 tw-mt-5 tw-grid tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
-          {Object.entries(manifest.summary.classifications).map(
-            ([classification, count]) => (
-              <div
-                key={classification}
-                className="tw-rounded-lg tw-bg-iron-900 tw-p-3"
-              >
-                <dt className="tw-text-sm tw-text-iron-300">
-                  <HumanizedValue value={classification} />
-                </dt>
-                <dd className="tw-m-0 tw-mt-1 tw-font-mono tw-text-white">
-                  {formatInteger(DEFAULT_LOCALE, count)}
-                </dd>
-              </div>
-            )
-          )}
-        </dl>
-      </section>
-
-      <section
-        aria-labelledby="solidity-retained-artifacts"
-        className={CARD_CLASSES}
-      >
-        <h2
-          id="solidity-retained-artifacts"
-          className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white"
-        >
-          {t(DEFAULT_LOCALE, "publicReview.reference.artifactChecksums")}
-        </h2>
-        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
-          {t(
-            DEFAULT_LOCALE,
-            "publicReview.reference.releaseEvidenceDescription"
-          )}
-        </p>
-        <dl className="tw-mb-0 tw-mt-5 tw-space-y-3">
-          {Object.entries(manifest.source.artifactChecksums).map(
-            ([artifact, checksum]) => (
-              <div
-                key={artifact}
-                className="tw-grid tw-gap-1 tw-rounded-lg tw-bg-iron-900 tw-p-3 lg:tw-grid-cols-[minmax(16rem,1fr)_minmax(0,2fr)]"
-              >
-                <dt className="tw-break-all tw-font-mono tw-text-xs tw-text-iron-300">
-                  {artifact}
-                </dt>
-                <dd className="tw-m-0 tw-break-all tw-font-mono tw-text-xs tw-text-sky-200">
-                  {checksum}
-                </dd>
-              </div>
-            )
-          )}
-        </dl>
-      </section>
-
-      <SolidityAuditorEvidenceView
-        hrefContext={hrefContext}
-        manifest={manifest}
+                    "publicReview.reference.artifactChecksums"
+                  )}
+                </h2>
+                <p className="tw-mb-0 tw-mt-2 tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-300">
+                  {t(
+                    DEFAULT_LOCALE,
+                    "publicReview.reference.releaseEvidenceDescription"
+                  )}
+                </p>
+                <dl className={`${ROW_GROUP_CLASSES} tw-mb-0 tw-mt-5`}>
+                  {Object.entries(manifest.source.artifactChecksums).map(
+                    ([artifact, checksum]) => (
+                      <div
+                        key={artifact}
+                        className="tw-grid tw-gap-1 tw-rounded-lg tw-px-4 tw-py-3 tw-transition-colors desktop-hover:hover:tw-bg-iron-900/40 lg:tw-grid-cols-[minmax(16rem,1fr)_minmax(0,2fr)]"
+                      >
+                        <dt className="tw-break-all tw-font-mono tw-text-xs tw-text-iron-400">
+                          {artifact}
+                        </dt>
+                        <dd className="tw-m-0 tw-break-all tw-font-mono tw-text-xs tw-text-sky-200">
+                          {checksum}
+                        </dd>
+                      </div>
+                    )
+                  )}
+                </dl>
+              </section>
+            </div>
+          ),
+          "solidity-auditor-evidence": (
+            <SolidityAuditorEvidenceView
+              hrefContext={hrefContext}
+              manifest={manifest}
+              section="overview"
+            />
+          ),
+          "solidity-release-readiness": (
+            <SolidityAuditorEvidenceView
+              hrefContext={hrefContext}
+              manifest={manifest}
+              section="readiness"
+            />
+          ),
+          "solidity-risk-register": (
+            <SolidityAuditorEvidenceView
+              hrefContext={hrefContext}
+              manifest={manifest}
+              section="risks"
+            />
+          ),
+          "solidity-governed-parameters": (
+            <SolidityAuditorEvidenceView
+              hrefContext={hrefContext}
+              manifest={manifest}
+              section="parameters"
+            />
+          ),
+          "solidity-natspec-gaps": (
+            <SolidityAuditorEvidenceView
+              hrefContext={hrefContext}
+              manifest={manifest}
+              section="documentation"
+            />
+          ),
+          "solidity-global-declarations": (
+            <SolidityGlobalDeclarationExplorer
+              linkMode={hrefContext.version ? "versioned" : "active"}
+              reviewId={manifest.reviewId}
+              scopes={declarationScopes}
+              sourceCommit={manifest.source.commit}
+              version={manifest.reviewVersion}
+            />
+          ),
+          "solidity-definition-inventory": (
+            <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-py-8">
+              <SolidityDefinitionExplorer items={listItems} />
+            </div>
+          ),
+        }}
       />
-
-      <SolidityGlobalDeclarationExplorer
-        linkMode={hrefContext.version ? "versioned" : "active"}
-        reviewId={manifest.reviewId}
-        scopes={declarationScopes}
-        sourceCommit={manifest.source.commit}
-        version={manifest.reviewVersion}
-      />
-
-      <SolidityDefinitionExplorer items={listItems} />
     </div>
   );
 }
@@ -517,14 +603,14 @@ function AbiSurface({
 
   return (
     <details className={CARD_CLASSES}>
-      <summary className="tw-cursor-pointer tw-text-xl tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
+      <summary className="tw-cursor-pointer tw-text-xl tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400">
         {t(DEFAULT_LOCALE, "publicReview.reference.abiSurface")} (
         {formatInteger(DEFAULT_LOCALE, entries.length)})
       </summary>
       <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
         {t(DEFAULT_LOCALE, "publicReview.reference.abiSurfaceDescription")}
       </p>
-      <ul className="tw-mb-0 tw-mt-5 tw-list-none tw-space-y-2 tw-p-0">
+      <ul className={`${ROW_GROUP_CLASSES} tw-mb-0 tw-mt-5 tw-list-none`}>
         {entries.map(({ entry, kind }) => {
           const declaringDefinition = manifest.definitionIndex.find(
             (definition) => definition.id === entry.declaringDefinitionId
@@ -543,16 +629,16 @@ function AbiSurface({
           return (
             <li
               key={`${kind}:${entry.declarationId}`}
-              className="tw-grid tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-p-3 lg:tw-grid-cols-[7rem_minmax(0,1fr)_minmax(8rem,auto)] lg:tw-items-center"
+              className="tw-grid tw-gap-2 tw-rounded-lg tw-px-3 tw-py-3 tw-transition-colors desktop-hover:hover:tw-bg-iron-900/40 lg:tw-grid-cols-[7rem_minmax(0,1fr)_minmax(8rem,auto)] lg:tw-items-center"
             >
-              <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+              <span className="tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-500">
                 {entry.inherited
                   ? t(DEFAULT_LOCALE, "publicReview.reference.inherited")
                   : t(DEFAULT_LOCALE, "publicReview.reference.local")}
               </span>
               {declarationHref ? (
                 <Link
-                  className="tw-break-all tw-font-mono tw-text-sm tw-text-white tw-no-underline hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+                  className="tw-break-all tw-font-mono tw-text-sm tw-text-white tw-no-underline hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                   href={declarationHref}
                 >
                   {entry.signature}
@@ -597,7 +683,9 @@ export function SolidityDefinitionView({
         >
           {indexEntry.name}
         </h2>
-        <dl className="tw-mb-0 tw-mt-5 tw-grid tw-gap-5 md:tw-grid-cols-2">
+        <dl
+          className={`${DATA_SURFACE_CLASSES} tw-mb-0 tw-mt-5 tw-grid tw-gap-5 md:tw-grid-cols-2`}
+        >
           <KeyValue
             label={t(DEFAULT_LOCALE, "publicReview.reference.definitionKind")}
           >
@@ -626,7 +714,7 @@ export function SolidityDefinitionView({
           </KeyValue>
           <KeyValue label={t(DEFAULT_LOCALE, "publicReview.reference.source")}>
             <Link
-              className="tw-text-sky-300 tw-no-underline hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+              className="tw-text-sky-300 tw-no-underline hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
               href={sourceHref}
             >
               {indexEntry.sourcePath}
@@ -639,7 +727,7 @@ export function SolidityDefinitionView({
             })}
           >
             <a
-              className="tw-text-sky-300 tw-no-underline hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+              className="tw-text-sky-300 tw-no-underline hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
               href={indexEntry.range.githubUrl}
               rel="noreferrer"
               target="_blank"

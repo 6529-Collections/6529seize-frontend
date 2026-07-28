@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import {
+  PUBLIC_REVIEW_INPUT_CLASSES,
+  PublicReviewSelect,
+} from "@/components/public-review/PublicReviewFormControls";
 import { compareLocalized, formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -22,8 +26,6 @@ export interface SolidityDefinitionListItem {
   readonly warningCount: number;
 }
 
-const INPUT_CLASSES =
-  "tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-iron-50 tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40";
 const INITIAL_RESULT_LIMIT = 50;
 
 function getDistinctValues(
@@ -76,8 +78,7 @@ function FilterSelect({
   return (
     <label className="tw-block tw-text-sm tw-font-medium tw-text-iron-200">
       <span className="tw-mb-1.5 tw-block">{label}</span>
-      <select
-        className={INPUT_CLASSES}
+      <PublicReviewSelect
         value={value}
         onChange={(event) => onChange(event.target.value)}
       >
@@ -89,7 +90,7 @@ function FilterSelect({
             {option.replaceAll("_", " ")}
           </option>
         ))}
-      </select>
+      </PublicReviewSelect>
     </label>
   );
 }
@@ -146,13 +147,13 @@ export function SolidityDefinitionExplorer({
       >
         {t(DEFAULT_LOCALE, "publicReview.reference.definitions")}
       </h2>
-      <div className="tw-mt-5 tw-grid tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/70 tw-p-4 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
+      <div className="tw-mt-5 tw-grid tw-gap-4 tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] sm:tw-grid-cols-2 xl:tw-grid-cols-4">
         <label className="tw-block tw-text-sm tw-font-medium tw-text-iron-200 sm:tw-col-span-2 xl:tw-col-span-1">
           <span className="tw-mb-1.5 tw-block">
             {t(DEFAULT_LOCALE, "publicReview.reference.searchDefinitions")}
           </span>
           <input
-            className={INPUT_CLASSES}
+            className={PUBLIC_REVIEW_INPUT_CLASSES}
             type="search"
             value={query}
             placeholder={t(
@@ -198,13 +199,13 @@ export function SolidityDefinitionExplorer({
       </p>
 
       {filteredItems.length === 0 ? (
-        <p className="tw-mb-0 tw-mt-5 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-5 tw-text-iron-300">
+        <p className="tw-mb-0 tw-mt-5 tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-iron-300 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03]">
           {t(DEFAULT_LOCALE, "publicReview.reference.noDefinitions")}
         </p>
       ) : (
-        <ul className="tw-mb-0 tw-mt-5 tw-grid tw-list-none tw-gap-3 tw-p-0 lg:tw-grid-cols-2">
+        <ul className="tw-mb-0 tw-mt-5 tw-grid tw-list-none tw-grid-cols-1 tw-gap-3 tw-p-0 lg:tw-grid-cols-2">
           {visibleItems.map((item) => (
-            <li key={item.key}>
+            <li className="tw-min-w-0" key={item.key}>
               <Link
                 href={item.href}
                 aria-label={t(
@@ -212,14 +213,14 @@ export function SolidityDefinitionExplorer({
                   "publicReview.reference.openDefinition",
                   { name: item.name }
                 )}
-                className="tw-block tw-h-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4 tw-no-underline hover:tw-border-iron-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+                className="tw-group tw-flex tw-h-full tw-min-w-0 tw-cursor-pointer tw-flex-col tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-no-underline tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] tw-transition-colors hover:tw-bg-iron-900/70 hover:tw-ring-primary-400/30 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
               >
                 <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-3">
                   <div className="tw-min-w-0">
-                    <h3 className="tw-m-0 tw-break-words tw-font-mono tw-text-base tw-font-semibold tw-text-white">
+                    <h3 className="tw-m-0 tw-break-words tw-font-mono tw-text-base tw-font-semibold tw-text-white tw-transition-colors group-hover:tw-text-primary-300">
                       {item.name}
                     </h3>
-                    <p className="tw-mb-0 tw-mt-1 tw-break-all tw-font-mono tw-text-xs tw-text-iron-500">
+                    <p className="tw-mb-0 tw-mt-1 tw-break-all tw-font-mono tw-text-xs tw-text-iron-400">
                       {item.sourcePath}
                     </p>
                   </div>
@@ -251,7 +252,7 @@ export function SolidityDefinitionExplorer({
                     )}
                   </span>
                 </div>
-                <dl className="tw-mb-0 tw-mt-4 tw-grid tw-grid-cols-4 tw-gap-2 tw-text-xs">
+                <dl className="tw-mb-0 tw-mt-auto tw-grid tw-grid-cols-4 tw-gap-2 tw-pt-4 tw-text-xs">
                   {[
                     [
                       t(DEFAULT_LOCALE, "publicReview.reference.functions"),
@@ -272,7 +273,7 @@ export function SolidityDefinitionExplorer({
                   ].map(([label, count]) => (
                     <div
                       key={String(label)}
-                      className="tw-rounded-lg tw-bg-iron-900 tw-p-2 tw-text-center"
+                      className="tw-rounded-lg tw-bg-black/20 tw-p-2 tw-text-center"
                     >
                       <dt className="tw-break-words tw-text-[0.65rem] tw-font-semibold tw-leading-4 tw-text-iron-500">
                         {label}
@@ -290,7 +291,7 @@ export function SolidityDefinitionExplorer({
       )}
       {visibleItems.length < filteredItems.length ? (
         <button
-          className="tw-mt-5 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-4 tw-py-2 tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+          className="tw-mt-5 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-4 tw-py-2 tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
           onClick={showMoreDefinitions}
           type="button"
         >
