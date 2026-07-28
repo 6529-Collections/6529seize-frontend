@@ -212,6 +212,50 @@ describe("CreateWaveOutcomesManual", () => {
     );
   });
 
+  it("rejects a reversed range where the end precedes the start", async () => {
+    const mockOnOutcome = jest.fn();
+    render(
+      <CreateWaveOutcomesManual
+        {...defaultProps}
+        waveType={ApiWaveType.Rank}
+        onOutcome={mockOnOutcome}
+      />
+    );
+
+    const actionInput = screen.getByLabelText("Manual action");
+    await userEvent.type(actionInput, "Rank action");
+
+    const positionsInput = screen.getByLabelText(/Winning Positions/i);
+    await userEvent.type(positionsInput, "3-1");
+
+    await userEvent.click(screen.getByTestId("primary-button"));
+
+    expect(screen.getByText("Invalid position format")).toBeInTheDocument();
+    expect(mockOnOutcome).not.toHaveBeenCalled();
+  });
+
+  it("rejects a range whose start is below the first position", async () => {
+    const mockOnOutcome = jest.fn();
+    render(
+      <CreateWaveOutcomesManual
+        {...defaultProps}
+        waveType={ApiWaveType.Rank}
+        onOutcome={mockOnOutcome}
+      />
+    );
+
+    const actionInput = screen.getByLabelText("Manual action");
+    await userEvent.type(actionInput, "Rank action");
+
+    const positionsInput = screen.getByLabelText(/Winning Positions/i);
+    await userEvent.type(positionsInput, "0-2");
+
+    await userEvent.click(screen.getByTestId("primary-button"));
+
+    expect(screen.getByText("Invalid position format")).toBeInTheDocument();
+    expect(mockOnOutcome).not.toHaveBeenCalled();
+  });
+
   it("filters invalid characters in positions input", async () => {
     render(
       <CreateWaveOutcomesManual {...defaultProps} waveType={ApiWaveType.Rank} />

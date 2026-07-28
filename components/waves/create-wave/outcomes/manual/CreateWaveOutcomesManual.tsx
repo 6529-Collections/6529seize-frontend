@@ -37,14 +37,21 @@ export default function CreateWaveOutcomesManual({
   const parseRange = (range: string): number[] | null => {
     if (range.includes("-")) {
       const [start, end] = range.split("-").map((num) => parseInt(num));
-      if (isNaN(start!) || isNaN(end!) || start! < 1 || end! < start!) {
+      if (
+        start === undefined ||
+        end === undefined ||
+        Number.isNaN(start) ||
+        Number.isNaN(end) ||
+        start < 1 ||
+        end < start
+      ) {
         return null;
       }
-      return Array.from({ length: end! - start! + 1 }, (_, i) => start! + i);
+      return Array.from({ length: end - start + 1 }, (_, i) => start + i);
     }
 
     const num = parseInt(range);
-    return isNaN(num) || num < 1 ? null : [num];
+    return Number.isNaN(num) || num < 1 ? null : [num];
   };
 
   const parsePositions = (input: string): number[] | null => {
