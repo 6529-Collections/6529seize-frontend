@@ -113,7 +113,7 @@ function MintingHeader() {
           >
             {m("about.minting.summary.label")}
           </h2>
-          <div className="tw-mt-2 tw-space-y-2 tw-text-base tw-font-light tw-leading-7 tw-text-iron-400">
+          <div className="tw-mt-2 tw-space-y-2 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-400">
             <p className="tw-m-0">
               Meme Cards are minted (primary sale) when the art for the next
               Meme Card is ready.
@@ -249,7 +249,7 @@ function MintingOverview() {
         ))}
       </ul>
 
-      <p className="tw-mb-0 tw-mt-6 tw-max-w-4xl tw-text-base tw-font-light tw-leading-7 tw-text-iron-400">
+      <p className="tw-mb-0 tw-mt-6 tw-max-w-4xl tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300">
         The Memes generally mint using an allowlist model. The purpose of the
         allowlist is to avoid gas wars / bot wars and to give as broad a range
         of people as possible a chance to mint.
@@ -295,7 +295,7 @@ function MintingOverview() {
         </aside>
       </div>
 
-      <p className="tw-mb-0 tw-mt-5 tw-text-sm tw-font-light tw-italic tw-leading-6 tw-text-iron-500">
+      <p className="tw-mb-0 tw-mt-5 tw-text-sm tw-font-normal tw-italic tw-leading-6 tw-text-iron-400">
         There is quite a bit of thought that goes into the allowlist process.
         Read below to learn more.
       </p>
@@ -381,7 +381,7 @@ function MintingPhilosophy() {
         >
           {m("about.minting.philosophy.title")}
         </h2>
-        <p className="tw-mb-0 tw-mt-2 tw-text-base tw-font-light tw-leading-7 tw-text-iron-400">
+        <p className="tw-mb-0 tw-mt-2 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-400">
           Mints for well-known collections where demand may exceed supply are
           very difficult to manage effectively. The main approaches and our
           views on them are highlighted below.
