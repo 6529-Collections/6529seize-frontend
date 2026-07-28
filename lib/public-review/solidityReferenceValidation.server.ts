@@ -428,20 +428,24 @@ export function assertSolidityReferenceIndex(
       (entry, index) =>
         isRecord(entry) && entry["version"] === availableVersions[index]
     );
+  const publishedVersionSet = new Set(identity.availableVersions);
+  const publishedProjectionVersions = sourceIndexAvailableVersions.filter(
+    (version) => publishedVersionSet.has(version)
+  );
   const isFullSourceIndex = hasExactIdentityShape(
     sourceIndexActiveVersion,
     sourceIndexAvailableVersions
   );
   const isPublishedProjection = hasExactIdentityShape(
     identity.activeVersion,
-    identity.availableVersions
+    publishedProjectionVersions
   );
   if (!isFullSourceIndex && !isPublishedProjection) {
     throw new Error("Invalid Solidity reference index identity.");
   }
   const expectedVersions = isFullSourceIndex
     ? sourceIndexAvailableVersions
-    : identity.availableVersions;
+    : publishedProjectionVersions;
   const seenVersions = new Set<string>();
   let activeVersionCommit: string | undefined;
   let sourceIndexActiveVersionCommit: string | undefined;

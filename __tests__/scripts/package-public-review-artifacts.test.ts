@@ -68,10 +68,13 @@ interface ReviewEvidence {
 const REVIEW_ID = "6529-stream";
 const REVIEW_VERSION = "2026-07-26.1";
 const HISTORICAL_VERSION = "2026-07-25.1";
+const OLDER_HISTORICAL_VERSION = "2026-07-24.1";
 const SOURCE_COMMIT = "b1598aff93693c6fb8610f7a7a8d2fc3e4df8c1c";
 const SOURCE_TREE = "c7075288c27601727f4ab7ef3be6c52e887ca663";
 const HISTORICAL_COMMIT = "816d85ca277b77cf306e6f919fbc6fbe89f0f43a";
 const HISTORICAL_TREE = "a4de94d6df63539e6737c17a4de41f17cc76052f";
+const OLDER_HISTORICAL_COMMIT = "7bc4ba1176a85bd8227c77f04cb329bc88f27b92";
+const OLDER_HISTORICAL_TREE = "3587b159de93c7ac586e99844104d35da32f3c66";
 const SOURCE_REPOSITORY = "6529-Collections/6529Stream";
 const SOURCE_PATH = "smart-contracts/StreamCore.sol";
 const DEFINITION_ID = `${SOURCE_PATH}:StreamCore`;
@@ -418,6 +421,137 @@ function addHistoricalVersion({
     historicalEditorialManifest,
     historicalSourceFile,
   };
+}
+
+function addOlderPublicVersion(
+  fixture: ReturnType<typeof createFixture>
+): void {
+  const configPath = path.join(
+    fixture.repoRoot,
+    `config/public-reviews/${REVIEW_ID}.reference.json`
+  );
+  const config = JSON.parse(fs.readFileSync(configPath, "utf8")) as {
+    output: { retainedVersions: string[] };
+  };
+  config.output.retainedVersions = [
+    OLDER_HISTORICAL_VERSION,
+    HISTORICAL_VERSION,
+    REVIEW_VERSION,
+  ];
+  const configText = `${JSON.stringify(config, null, 2)}\n`;
+  fs.writeFileSync(configPath, configText);
+
+  const publicationPath = path.join(
+    fixture.repoRoot,
+    `config/public-reviews/${REVIEW_ID}.publication.json`
+  );
+  const publication = JSON.parse(fs.readFileSync(publicationPath, "utf8")) as {
+    versions: { version: string; lifecycleState: string }[];
+  };
+  publication.versions.unshift({
+    version: OLDER_HISTORICAL_VERSION,
+    lifecycleState: "REVIEW_CLOSED",
+  });
+  fs.writeFileSync(
+    publicationPath,
+    `${JSON.stringify(publication, null, 2)}\n`
+  );
+
+  const activeBundle = JSON.parse(fs.readFileSync(fixture.bundleFile, "utf8"));
+  activeBundle.generator.configSha256 = sha256Urn(normalizeLf(configText));
+  activeBundle.generator.outputSha256 = null;
+  activeBundle.generator.outputSha256 = bundleOutputSha256(activeBundle);
+  fs.writeFileSync(
+    fixture.bundleFile,
+    `${JSON.stringify(activeBundle, null, 2)}\n`
+  );
+
+  const historicalVersionRoot = path.join(
+    fixture.repoRoot,
+    `public/review-data/${REVIEW_ID}/versions/${HISTORICAL_VERSION}`
+  );
+  const olderVersionRoot = path.join(
+    fixture.repoRoot,
+    `public/review-data/${REVIEW_ID}/versions/${OLDER_HISTORICAL_VERSION}`
+  );
+  fs.cpSync(historicalVersionRoot, olderVersionRoot, { recursive: true });
+  const olderBundlePath = path.join(
+    olderVersionRoot,
+    "reference-manifest.json"
+  );
+  const olderBundle = JSON.parse(fs.readFileSync(olderBundlePath, "utf8"));
+  olderBundle.reviewVersion = OLDER_HISTORICAL_VERSION;
+  olderBundle.source.commit = OLDER_HISTORICAL_COMMIT;
+  olderBundle.source.tree = OLDER_HISTORICAL_TREE;
+  olderBundle.generator.configSha256 = sha256Urn("older historical config");
+  olderBundle.generator.sourceSha256 = sha256Urn("older historical generator");
+  olderBundle.generator.outputSha256 = null;
+  olderBundle.files[0].publicPath =
+    `/review-data/${REVIEW_ID}/versions/${OLDER_HISTORICAL_VERSION}` +
+    `/sources/${SOURCE_PATH}`;
+  olderBundle.definitionIndex[0].shardPath =
+    `/review-data/${REVIEW_ID}/versions/${OLDER_HISTORICAL_VERSION}` +
+    `/definitions/${DEFINITION_KEY}.json`;
+  olderBundle.generator.outputSha256 = bundleOutputSha256(olderBundle);
+  fs.writeFileSync(
+    olderBundlePath,
+    `${JSON.stringify(olderBundle, null, 2)}\n`
+  );
+
+  const historicalEditorialRoot = path.join(
+    fixture.repoRoot,
+    `content/public-reviews/${REVIEW_ID}/versions/${HISTORICAL_VERSION}`
+  );
+  const olderEditorialRoot = path.join(
+    fixture.repoRoot,
+    `content/public-reviews/${REVIEW_ID}/versions/${OLDER_HISTORICAL_VERSION}`
+  );
+  fs.cpSync(historicalEditorialRoot, olderEditorialRoot, { recursive: true });
+  const olderEditorialManifestPath = path.join(
+    olderEditorialRoot,
+    "editorial",
+    "manifest.json"
+  );
+  const olderEditorialManifest = JSON.parse(
+    fs.readFileSync(olderEditorialManifestPath, "utf8")
+  );
+  olderEditorialManifest.review_version = OLDER_HISTORICAL_VERSION;
+  olderEditorialManifest.source_commit = OLDER_HISTORICAL_COMMIT;
+  fs.writeFileSync(
+    olderEditorialManifestPath,
+    `${JSON.stringify(olderEditorialManifest, null, 2)}\n`
+  );
+
+  const indexPath = path.join(
+    fixture.repoRoot,
+    `public/review-data/${REVIEW_ID}/index.json`
+  );
+  const index = JSON.parse(fs.readFileSync(indexPath, "utf8")) as {
+    versions: {
+      version: string;
+      commit: string;
+      tree: string;
+      bundlePath: string;
+      bundleSha256: string;
+    }[];
+  };
+  const activeEntry = index.versions.find(
+    ({ version }) => version === REVIEW_VERSION
+  );
+  if (!activeEntry) {
+    throw new Error("Fixture active review index entry is missing.");
+  }
+  activeEntry.bundleSha256 = activeBundle.generator.outputSha256;
+  index.versions.unshift({
+    version: OLDER_HISTORICAL_VERSION,
+    commit: OLDER_HISTORICAL_COMMIT,
+    tree: OLDER_HISTORICAL_TREE,
+    bundlePath:
+      `/review-data/${REVIEW_ID}/versions/${OLDER_HISTORICAL_VERSION}` +
+      "/reference-manifest.json",
+    bundleSha256: olderBundle.generator.outputSha256,
+  });
+  fs.writeFileSync(indexPath, `${JSON.stringify(index, null, 2)}\n`);
 }
 
 function mirrorTamper(sourcePath: string, repoRoot: string, value: string) {
@@ -827,6 +961,7 @@ describe("profile-aware public-review artifact packaging", () => {
       historicalLifecycleState: "PUBLIC_REVIEW",
       topLevelLifecycleState: "PUBLIC_REVIEW",
     });
+    addOlderPublicVersion(fixture);
 
     expect(getPublishedReviewIds(fixture.repoRoot)).toEqual(
       new Set([REVIEW_ID])
@@ -838,6 +973,11 @@ describe("profile-aware public-review artifact packaging", () => {
         profile: "staging",
       })
     ).toEqual([
+      expect.objectContaining({
+        reviewId: REVIEW_ID,
+        reviewVersion: OLDER_HISTORICAL_VERSION,
+        sourceCommit: OLDER_HISTORICAL_COMMIT,
+      }),
       expect.objectContaining({
         reviewId: REVIEW_ID,
         reviewVersion: HISTORICAL_VERSION,
@@ -856,18 +996,23 @@ describe("profile-aware public-review artifact packaging", () => {
     expect(packagedIndex.activeVersion).toBe(HISTORICAL_VERSION);
     expect(
       packagedIndex.versions.map(({ version }: { version: string }) => version)
-    ).toEqual([HISTORICAL_VERSION]);
+    ).toEqual([OLDER_HISTORICAL_VERSION, HISTORICAL_VERSION]);
     const referenceIdentity: SolidityReferenceReviewIdentity = {
       activeSourceCommit: HISTORICAL_COMMIT,
       activeVersion: HISTORICAL_VERSION,
-      availableVersions: [HISTORICAL_VERSION],
+      availableVersions: [HISTORICAL_VERSION, OLDER_HISTORICAL_VERSION],
       reviewId: REVIEW_ID,
       sourceCommits: {
+        [OLDER_HISTORICAL_VERSION]: OLDER_HISTORICAL_COMMIT,
         [HISTORICAL_VERSION]: HISTORICAL_COMMIT,
         [REVIEW_VERSION]: SOURCE_COMMIT,
       },
       sourceIndexActiveVersion: REVIEW_VERSION,
-      sourceIndexAvailableVersions: [HISTORICAL_VERSION, REVIEW_VERSION],
+      sourceIndexAvailableVersions: [
+        OLDER_HISTORICAL_VERSION,
+        HISTORICAL_VERSION,
+        REVIEW_VERSION,
+      ],
       sourceRepository: SOURCE_REPOSITORY,
     };
     expect(() =>
