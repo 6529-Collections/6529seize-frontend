@@ -377,6 +377,10 @@ describe("Release Bus frontend performance contract", () => {
       expect(deploySource).toContain(
         "^([1-9][0-9]{0,8}|rollback-[1-9][0-9]{0,8})$"
       );
+      const e2eSource = read(`.github/workflows/${environment}-e2e.yml`);
+      expect(e2eSource).toContain(
+        "^([1-9][0-9]{0,8}|rollback-[1-9][0-9]{0,8})$"
+      );
     }
   });
 
