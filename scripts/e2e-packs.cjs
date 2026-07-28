@@ -21,6 +21,15 @@ const SUMMARY_TAIL_LINES = 25;
 const MAX_BUFFER_BYTES = 64 * 1024 * 1024;
 const MAX_PARALLEL_PACKS = 4;
 const TRANSIENT_ROOT = ".release-bus-e2e-output";
+const RUNNER_CAPABILITIES = Object.freeze({
+  contract: "release-bus-e2e-runner-capabilities.v1",
+  features: Object.freeze({
+    readonly_pack_parallelism: Object.freeze({
+      version: 1,
+      max_parallel: MAX_PARALLEL_PACKS,
+    }),
+  }),
+});
 
 function parseArgs(argv) {
   const options = {
@@ -29,6 +38,7 @@ function parseArgs(argv) {
     pack: null,
     artifactRoot: null,
     parallel: 1,
+    capabilities: false,
     list: false,
     forward: [],
   };
@@ -63,6 +73,10 @@ function parseArgs(argv) {
     }
     if (arg === "--list") {
       options.list = true;
+      continue;
+    }
+    if (arg === "--capabilities") {
+      options.capabilities = true;
       continue;
     }
     if (arg === "--shard") {
@@ -624,7 +638,8 @@ function printUsage() {
     "usage: e2e:packs -- --env <local|staging|production> " +
       "[--trigger <manual|pr-ci|post-deploy|cron>] " +
       "[--pack <scriptKey|alias|all>] [--artifact-root <path>] " +
-      `[--parallel <1-${MAX_PARALLEL_PACKS}>] [--shard i/N] [--list]`
+      `[--parallel <1-${MAX_PARALLEL_PACKS}>] [--shard i/N] [--list] ` +
+      "[--capabilities]"
   );
 }
 
@@ -638,6 +653,10 @@ async function main() {
     );
     printUsage();
     process.exitCode = 2;
+    return;
+  }
+  if (options.capabilities) {
+    console.log(JSON.stringify(RUNNER_CAPABILITIES));
     return;
   }
   if (!options.env) {
@@ -715,6 +734,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  RUNNER_CAPABILITIES,
   assertParallelSafe,
   buildSpawnOptions,
   classifyResult,

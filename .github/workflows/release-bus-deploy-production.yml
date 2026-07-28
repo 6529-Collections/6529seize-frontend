@@ -112,17 +112,49 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          if ! commit_json="$(gh api "repos/$GITHUB_REPOSITORY/git/commits/$EXPECTED_SHA")"; then
+            echo "failure_kind=api" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          commit_sha="$(jq -r '.sha' <<< "$commit_json")"
+          if [ "$commit_sha" != "$EXPECTED_SHA" ]; then
+            echo "failure_kind=api" >> "$GITHUB_OUTPUT"
+            echo "GitHub did not resolve the authorized production commit exactly." >&2
+            exit 1
+          fi
           if ! ref_json="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main")"; then
             echo "failure_kind=api" >> "$GITHUB_OUTPUT"
             exit 1
           fi
           observed_type="$(jq -r '.object.type' <<< "$ref_json")"
           observed_sha="$(jq -r '.object.sha' <<< "$ref_json")"
-          if [ "$observed_type" != commit ] || [ "$observed_sha" != "$EXPECTED_SHA" ]; then
+          if [ "$observed_type" != commit ] || ! [[ "$observed_sha" =~ ^[a-f0-9]{40}$ ]]; then
+            echo "failure_kind=api" >> "$GITHUB_OUTPUT"
+            echo "GitHub returned an invalid main ref." >&2
+            exit 1
+          fi
+          if [[ "$TRAIN_REVISION" != rollback-* ]] && [ "$observed_sha" != "$EXPECTED_SHA" ]; then
             echo "failure_kind=ref-moved" >> "$GITHUB_OUTPUT"
             echo "observed_sha=$observed_sha" >> "$GITHUB_OUTPUT"
             echo "main moved from expected $EXPECTED_SHA to $observed_sha." >&2
             exit 1
+          fi
+          if [[ "$TRAIN_REVISION" == rollback-* ]] && [ "$observed_sha" != "$EXPECTED_SHA" ]; then
+            if ! compare_json="$(gh api "repos/$GITHUB_REPOSITORY/compare/$EXPECTED_SHA...$observed_sha")"; then
+              echo "failure_kind=api" >> "$GITHUB_OUTPUT"
+              exit 1
+            fi
+            compare_status="$(jq -r '.status' <<< "$compare_json")"
+            compare_base_sha="$(jq -r '.base_commit.sha' <<< "$compare_json")"
+            merge_base_sha="$(jq -r '.merge_base_commit.sha' <<< "$compare_json")"
+            if [ "$compare_base_sha" != "$EXPECTED_SHA" ] ||
+              [ "$merge_base_sha" != "$EXPECTED_SHA" ] ||
+              [[ ! "$compare_status" =~ ^(ahead|identical)$ ]]; then
+              echo "failure_kind=rollback-not-reachable" >> "$GITHUB_OUTPUT"
+              echo "observed_sha=$observed_sha" >> "$GITHUB_OUTPUT"
+              echo "Authorized production rollback $EXPECTED_SHA is not reachable from current main $observed_sha." >&2
+              exit 1
+            fi
           fi
           echo "failure_kind=" >> "$GITHUB_OUTPUT"
       - name: Download immutable preflight artifact
@@ -348,6 +380,10 @@ jobs:
           if [ "$SOURCE_OUTCOME" = failure ] && [ "$SOURCE_FAILURE_KIND" = ref-moved ]; then
             failure_class=INTERACTION
             failure_phase=source_ref_moved
+            retryable=false
+          elif [ "$SOURCE_OUTCOME" = failure ] && [ "$SOURCE_FAILURE_KIND" = rollback-not-reachable ]; then
+            failure_class=INTERACTION
+            failure_phase=rollback_source_not_reachable
             retryable=false
           fi
           consumed_preflight_artifact=false

@@ -210,7 +210,15 @@ jobs:
             --trigger post-deploy
             --artifact-root staging-e2e-artifacts
           )
-          if grep -q '"--parallel"' scripts/e2e-packs.cjs; then
+          if runner_capabilities="$(./bin/6529 exec node scripts/e2e-packs.cjs --capabilities 2>/dev/null)" &&
+            jq -e '
+              .contract == "release-bus-e2e-runner-capabilities.v1" and
+              .features.readonly_pack_parallelism == {
+                version: 1,
+                max_parallel: 4
+              }
+            ' <<< "$runner_capabilities" >/dev/null
+          then
             args+=(--parallel 3)
           fi
           if [ "${SELECTED_PACK:-all}" != all ]; then
