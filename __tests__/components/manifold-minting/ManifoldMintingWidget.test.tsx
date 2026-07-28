@@ -253,6 +253,47 @@ describe("ManifoldMintingWidget", () => {
     );
   });
 
+  it("aborts a delayed mint when its transaction details change", async () => {
+    const user = userEvent.setup();
+    let connectionState = createConnectionState({
+      canSignActiveWallet: false,
+    });
+    useSeizeConnectContextMock.mockImplementation(() => connectionState);
+    const changedProps = {
+      ...baseProps,
+      claim: {
+        ...baseProps.claim,
+        costWei: 2n,
+      },
+    };
+    const { rerender } = render(<ManifoldMintingWidget {...baseProps} />);
+
+    await user.click(screen.getByTestId("connect"));
+    await user.click(screen.getByRole("button", { name: /SEIZE x1/i }));
+    rerender(<ManifoldMintingWidget {...changedProps} />);
+    connectionState = {
+      ...connectionState,
+      seizeConnectOpen: true,
+    };
+    rerender(<ManifoldMintingWidget {...changedProps} />);
+    connectionState = {
+      ...connectionState,
+      canSignActiveWallet: true,
+      seizeConnectOpen: false,
+    };
+    rerender(<ManifoldMintingWidget {...changedProps} />);
+
+    await waitFor(() => {
+      expect(writeContract).not.toHaveBeenCalled();
+      expect(
+        screen.getByText(
+          "Mint details changed while connecting. Review and try again."
+        )
+      ).toBeInTheDocument();
+    });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
   it("shows a submitted transaction in the onchain modal", async () => {
     const user = userEvent.setup();
     const transactionHash: `0x${string}` = `0x${"a".repeat(64)}`;

@@ -28,10 +28,10 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getMemesMintingProofsByAddress } from "@/services/api/memes-minting-claims-api";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import { useConnectedAction } from "../auth/useConnectedAction";
 import DotLoader from "../dotLoader/DotLoader";
 import ManifoldMintingConnect from "./ManifoldMintingConnect";
 import { getTransactionModalTitle } from "./ManifoldMintingWidget.utils";
+import { useManifoldMintConnectedAction } from "./useManifoldMintConnectedAction";
 import {
   isAddress,
   type Abi,
@@ -175,7 +175,6 @@ export default function ManifoldMintingWidget(
   }>
 ) {
   const connectedAddress = useSeizeConnectContext();
-  const runConnectedAction = useConnectedAction();
   const locale = useBrowserLocale();
   const searchParams = useSearchParams();
   const [mintForAddress, setMintForAddress] = useState<string | null>(null);
@@ -339,6 +338,18 @@ export default function ManifoldMintingWidget(
   }, [readContracts.data]);
 
   const safeMintCount = normalizeMintCount(mintCount);
+  const runConnectedAction = useManifoldMintConnectedAction({
+    contract: props.contract,
+    chainId: props.chain.id,
+    claim: props.claim,
+    connectedAddress: connectedAddress.address,
+    mintForAddress,
+    mintCount: safeMintCount,
+    feeWei,
+    merkleProofs,
+    merkleProofsMints,
+    setMintError,
+  });
 
   const getSelectedMerkleProofs = () => {
     const selectedMerkleProofs: MintingClaimsProofItem[] = [];

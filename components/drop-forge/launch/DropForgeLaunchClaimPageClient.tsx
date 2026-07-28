@@ -7,7 +7,10 @@ import {
   useWriteContract,
 } from "wagmi";
 import { useAuth } from "@/components/auth/Auth";
-import { useConnectedAction } from "@/components/auth/useConnectedAction";
+import {
+  getConnectedActionFingerprint,
+  useConnectedAction,
+} from "@/components/auth/useConnectedAction";
 import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
 import ClaimTransactionModal from "@/components/drop-forge/launch/ClaimTransactionModal";
 import {
@@ -26,12 +29,14 @@ interface DropForgeLaunchClaimPageClientProps {
   claimId: number;
 }
 
+const TRANSACTION_DETAILS_CHANGED_MESSAGE =
+  "Transaction details changed while connecting. Review and try again.";
+
 export default function DropForgeLaunchClaimPageClient({
   claimId,
 }: Readonly<DropForgeLaunchClaimPageClientProps>) {
   const pageTitle = `Launch Claim #${claimId}`;
   const { requestAuth, setToast } = useAuth();
-  const runConnectedAction = useConnectedAction();
   const { contract: forgeMintingContract, chain: forgeMintingChain } =
     useDropForgeMintingConfig();
   const { hasWallet, permissionsLoading, canAccessLaunchPage, isClaimsAdmin } =
@@ -148,6 +153,46 @@ export default function DropForgeLaunchClaimPageClient({
     waitClaimWrite,
     payArtistWrite,
     waitPayArtistWrite,
+  });
+  const connectedActionContextFingerprint = getConnectedActionFingerprint([
+    claimId,
+    forgeMintingChain.id,
+    forgeMintingContract,
+    isInitialized,
+    claim?.edition_size,
+    claim?.metadata_location,
+    manifoldClaim?.totalMax,
+    manifoldClaim?.walletMax,
+    manifoldClaim?.startDate,
+    manifoldClaim?.endDate,
+    manifoldClaim?.storageProtocol,
+    manifoldClaim?.merkleRoot,
+    manifoldClaim?.costWei,
+    manifoldClaim?.paymentReceiver,
+    manifoldClaim?.erc20,
+    manifoldClaim?.signingAddress,
+    phaseData.map((phase) => [phase.key, phase.root?.merkle_root ?? null]),
+    launchClaimState.phaseAllowlistWindows,
+    launchClaimState.phasePricesEth,
+    selectedPhase,
+    artistAirdrops,
+    teamAirdrops,
+    launchClaimState.subscriptionAirdropsByPhase,
+    researchAirdropCount,
+    payArtistAmountEth,
+    payArtistAmountWei,
+    payArtistAddressLoading,
+    launchClaimState.payArtistAddressHasEnsError,
+    payArtistResolvedAddressTrimmed,
+    payArtistAddressValid,
+  ]);
+  const runConnectedAction = useConnectedAction({
+    contextFingerprint: connectedActionContextFingerprint,
+    onContextChanged: () =>
+      setToast({
+        message: TRANSACTION_DETAILS_CHANGED_MESSAGE,
+        type: "error",
+      }),
   });
 
   const {

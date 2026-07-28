@@ -104,6 +104,9 @@
   opens wallet connection and continues the intended mint after connection.
   Closing the connection dialog cancels the pending mint without showing a
   transaction error.
+- If transaction-relevant mint details change while wallet connection is open,
+  the pending mint is cancelled so the user can review the updated details and
+  retry instead of submitting stale inputs.
 - On iOS:
   - Country `US`: shows `Mint on 6529.io` handoff button.
   - Non-`US` or unknown country: mint controls are hidden.

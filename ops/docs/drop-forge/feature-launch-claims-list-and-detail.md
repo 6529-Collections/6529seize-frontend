@@ -122,6 +122,8 @@ The launch surface combines:
   - If the authorized wallet is not currently connected, selecting an on-chain
     action opens wallet connection and continues that action after connection.
     Closing the connection dialog cancels the pending action.
+  - If transaction details change while wallet connection is open, the pending
+    action is cancelled so the updated values can be reviewed before retrying.
   - Wallet confirmation, submitted, success, and error states appear in a
     transaction dialog using the active action name.
   - Submitted and terminal states can include a `View Tx` explorer link.

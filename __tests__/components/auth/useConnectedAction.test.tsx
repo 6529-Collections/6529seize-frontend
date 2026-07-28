@@ -26,6 +26,10 @@ describe("useConnectedAction", () => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it("runs the action immediately when the active wallet can sign", () => {
     useSeizeConnectContextMock.mockReturnValue(
       createConnectionState({
@@ -71,6 +75,39 @@ describe("useConnectedAction", () => {
   });
 
   it("discards the pending action when connect closes without connecting", () => {
+    jest.useFakeTimers();
+    let connectionState = createConnectionState({
+      canSignActiveWallet: false,
+    });
+    useSeizeConnectContextMock.mockImplementation(() => connectionState);
+    const action = jest.fn();
+    const { result, rerender } = renderHook(() => useConnectedAction());
+
+    act(() => result.current(action));
+    connectionState = {
+      ...connectionState,
+      seizeConnectOpen: true,
+    };
+    rerender();
+    connectionState = {
+      ...connectionState,
+      seizeConnectOpen: false,
+    };
+    rerender();
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+    connectionState = {
+      ...connectionState,
+      canSignActiveWallet: true,
+    };
+    rerender();
+
+    expect(action).not.toHaveBeenCalled();
+  });
+
+  it("runs the pending action when signer readiness follows modal close", () => {
+    jest.useFakeTimers();
     let connectionState = createConnectionState({
       canSignActiveWallet: false,
     });
@@ -94,8 +131,45 @@ describe("useConnectedAction", () => {
       canSignActiveWallet: true,
     };
     rerender();
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    expect(action).toHaveBeenCalledTimes(1);
+  });
+
+  it("aborts the pending action when its context changes", () => {
+    let connectionState = createConnectionState({
+      canSignActiveWallet: false,
+    });
+    let contextFingerprint = "before";
+    useSeizeConnectContextMock.mockImplementation(() => connectionState);
+    const action = jest.fn();
+    const onContextChanged = jest.fn();
+    const { result, rerender } = renderHook(() =>
+      useConnectedAction({
+        contextFingerprint,
+        onContextChanged,
+      })
+    );
+
+    act(() => result.current(action));
+    connectionState = {
+      ...connectionState,
+      seizeConnectOpen: true,
+    };
+    rerender();
+    contextFingerprint = "after";
+    rerender();
+    connectionState = {
+      ...connectionState,
+      canSignActiveWallet: true,
+      seizeConnectOpen: false,
+    };
+    rerender();
 
     expect(action).not.toHaveBeenCalled();
+    expect(onContextChanged).toHaveBeenCalledTimes(1);
   });
 
   it("does not run when signing becomes available before connect opens", () => {
