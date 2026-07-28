@@ -7,6 +7,7 @@ import type {
   PublicReviewDiscussionDestination,
   PublicReviewFeedbackConfig,
   PublicReviewPageContext,
+  PublicReviewReferenceSelection,
 } from "@/services/api/public-review/types";
 
 jest.mock("@/components/public-review/SoliditySourceReview", () => ({
@@ -16,9 +17,18 @@ jest.mock("@/components/public-review/SoliditySourceReview", () => ({
 jest.mock("@/components/public-review/PublicReviewTechnicalFeedback", () => ({
   PublicReviewTechnicalFeedback: ({
     children,
+    referenceSelection,
   }: {
     readonly children: ReactNode;
-  }) => <>{children}</>,
+    readonly referenceSelection?: PublicReviewReferenceSelection | undefined;
+  }) => (
+    <>
+      <output data-testid="page-reference-selection">
+        {JSON.stringify(referenceSelection)}
+      </output>
+      {children}
+    </>
+  ),
 }));
 
 jest.mock("@/components/public-review/PublicReviewFeedbackComposer", () => {
@@ -80,6 +90,9 @@ describe("PublicReviewCodeFeedback", () => {
     fireEvent.change(draft, { target: { value: "Preserve this draft." } });
     expect(screen.getByTestId("reference-integrity")).toHaveTextContent(
       "pending"
+    );
+    expect(screen.getByTestId("page-reference-selection")).toHaveTextContent(
+      JSON.stringify(pageReferenceSelection)
     );
 
     useCodeSelectionMock.mockReturnValue({
