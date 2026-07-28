@@ -41,7 +41,7 @@ function ReviewPageLinks({
               <span
                 aria-hidden="true"
                 className={`tw-w-6 tw-flex-none tw-font-mono tw-text-[0.65rem] ${
-                  isCurrent ? "tw-text-primary-300" : "tw-text-iron-600"
+                  isCurrent ? "tw-text-primary-300" : "tw-text-iron-500"
                 }`}
               >
                 {String(index + 1).padStart(2, "0")}
