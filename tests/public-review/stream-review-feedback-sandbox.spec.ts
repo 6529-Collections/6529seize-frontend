@@ -105,7 +105,7 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
       .click();
     await feedbackPanel
       .getByLabel("Comment on")
-      .selectOption("a-concrete-1-1-journey");
+      .selectOption("two-objectives");
     await feedbackPanel
       .getByLabel("Feedback type")
       .selectOption("product-or-ux");
@@ -175,7 +175,7 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
           reviewId: "6529-stream",
           reviewVersion: "2026-07-28.2",
           pageId: "overview",
-          sectionId: "a-concrete-1-1-journey",
+          sectionId: "two-objectives",
         }),
         signature: null,
         is_safe_signature: false,
