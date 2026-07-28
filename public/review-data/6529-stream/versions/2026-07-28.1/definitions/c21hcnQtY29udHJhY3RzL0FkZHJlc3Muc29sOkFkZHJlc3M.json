@@ -1,0 +1,694 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "vendored_dependency",
+    "classificationReason": "Source path is explicitly classified as vendored in the input manifest.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "isContract(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/Address.sol:Address#function:isContract(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0FkZHJlc3Muc29sOkFkZHJlc3MjZnVuY3Rpb246aXNDb250cmFjdChhZGRyZXNzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isContract",
+          "natspec": "@dev Returns true if `account` is a contract.\n [IMPORTANT]\n ====\n It is unsafe to assume that an address for which this function returns\n false is an externally-owned account (EOA) and not a contract.\n Among others, `isContract` will return false for the following\n types of addresses:\n  - an externally-owned account\n  - a contract in construction\n  - an address where a contract will be created\n  - an address where a contract lived, but was destroyed\n Furthermore, `isContract` will also return true if the target contract within\n the same transaction is already scheduled for destruction by `SELFDESTRUCT`,\n which only has an effect at the end of a transaction.\n ====\n [IMPORTANT]\n ====\n You shouldn't rely on `isContract` to protect against flash loan attacks!\n Preventing calls from contracts is highly discouraged. It breaks composability, breaks support for smart wallets\n like Gnosis Safe, and does not provide security since it can be circumvented by calling from a contract\n constructor.\n ====",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 320,
+            "byteStart": 1412,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Address.sol#L40-L46",
+            "lineEnd": 46,
+            "lineStart": 40,
+            "snippetSha256": "sha256:290a91bd2ef77fd0a995b0c0585aad39c97724b9c17b76d17531383a4f773c9e",
+            "sourceSha256": "sha256:73d0ad7fabd436626fa9705075daf04ca4fe4c78f87ed6643c3f9fea553b05f8"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "sendValue(address payable,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/Address.sol:Address#function:sendValue(address payable,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "recipient",
+              "type": "address payable"
+            },
+            {
+              "index": 1,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0FkZHJlc3Muc29sOkFkZHJlc3MjZnVuY3Rpb246c2VuZFZhbHVlKGFkZHJlc3MgcGF5YWJsZSx1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "sendValue",
+          "natspec": "@dev Replacement for Solidity's `transfer`: sends `amount` wei to\n `recipient`, forwarding all available gas and reverting on errors.\n https://eips.ethereum.org/EIPS/eip-1884[EIP1884] increases the gas cost\n of certain opcodes, possibly making contracts go over the 2300 gas limit\n imposed by `transfer`, making them unable to receive funds via\n `transfer`. {sendValue} removes this limitation.\n https://consensys.net/diligence/blog/2019/09/stop-using-soliditys-transfer-now/[Learn more].\n IMPORTANT: because control is transferred to `recipient`, care must be\n taken to not create reentrancy vulnerabilities. Consider using\n {ReentrancyGuard} or the\n https://solidity.readthedocs.io/en/v0.8.0/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].",
+          "outputs": [],
+          "range": {
+            "byteLength": 312,
+            "byteStart": 2647,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Address.sol#L64-L69",
+            "lineEnd": 69,
+            "lineStart": 64,
+            "snippetSha256": "sha256:f66e549cf0a5551925e0b9f9b3a6261505f67a51d8db192e9d2c56897dcbbbd1",
+            "sourceSha256": "sha256:73d0ad7fabd436626fa9705075daf04ca4fe4c78f87ed6643c3f9fea553b05f8"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "functionCall(address,bytes)",
+          "functionKind": "function",
+          "id": "smart-contracts/Address.sol:Address#function:functionCall(address,bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0FkZHJlc3Muc29sOkFkZHJlc3MjZnVuY3Rpb246ZnVuY3Rpb25DYWxsKGFkZHJlc3MsYnl0ZXMp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "functionCall",
+          "natspec": "@dev Performs a Solidity function call using a low level `call`. A\n plain `call` is an unsafe replacement for a function call: use this\n function instead.\n If `target` reverts with a revert reason, it is bubbled up by this\n function (like regular Solidity function calls).\n Returns the raw returned data. To convert to the expected return value,\n use https://solidity.readthedocs.io/en/latest/units-and-global-variables.html?highlight=abi.decode#abi-encoding-and-decoding-functions[`abi.decode`].\n Requirements:\n - `target` must be a contract.\n - calling `target` with `data` must not revert.\n _Available since v3.1._",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 185,
+            "byteStart": 3701,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Address.sol#L89-L91",
+            "lineEnd": 91,
+            "lineStart": 89,
+            "snippetSha256": "sha256:4b3831e81ebfe30b7aa91f955b5f1a21e57f86591b77c69ab50817094307e736",
+            "sourceSha256": "sha256:73d0ad7fabd436626fa9705075daf04ca4fe4c78f87ed6643c3f9fea553b05f8"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "functionCall(address,bytes,string)",
+          "functionKind": "function",
+          "id": "smart-contracts/Address.sol:Address#function:functionCall(address,bytes,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "errorMessage",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0FkZHJlc3Muc29sOkFkZHJlc3MjZnVuY3Rpb246ZnVuY3Rpb25DYWxsKGFkZHJlc3MsYnl0ZXMsc3RyaW5nKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "functionCall",
+          "natspec": "@dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`], but with\n `errorMessage` as a fallback revert reason when `target` reverts.\n _Available since v3.1._",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 223,
+            "byteStart": 4108,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Address.sol#L99-L105",
+            "lineEnd": 105,
+            "lineStart": 99,
+            "snippetSha256": "sha256:9e0187a5784942e413608ee369abccb8abe67bc9083096708b26d26de605ee96",
+            "sourceSha256": "sha256:73d0ad7fabd436626fa9705075daf04ca4fe4c78f87ed6643c3f9fea553b05f8"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "functionCallWithValue(address,bytes,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/Address.sol:Address#function:functionCallWithValue(address,bytes,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0FkZHJlc3Muc29sOkFkZHJlc3MjZnVuY3Rpb246ZnVuY3Rpb25DYWxsV2l0aFZhbHVlKGFkZHJlc3MsYnl0ZXMsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "functionCallWithValue",
+          "natspec": "@dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\n but also transferring `value` wei to `target`.\n Requirements:\n - the calling contract must have an ETH balance of at least `value`.\n - the called Solidity function must be `payable`.\n _Available since v3.1._",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 224,
+            "byteStart": 4693,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Address.sol#L118-L120",
+            "lineEnd": 120,
+            "lineStart": 118,
+            "snippetSha256": "sha256:274faa851a8241addd5ef88767943ade650dca26eb1fede52b73f3783ccb5d6d",
+            "sourceSha256": "sha256:73d0ad7fabd436626fa9705075daf04ca4fe4c78f87ed6643c3f9fea553b05f8"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "functionCallWithValue(address,bytes,uint256,string)",
+          "functionKind": "function",
+          "id": "smart-contracts/Address.sol:Address#function:functionCallWithValue(address,bytes,uint256,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "errorMessage",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0FkZHJlc3Muc29sOkFkZHJlc3MjZnVuY3Rpb246ZnVuY3Rpb25DYWxsV2l0aFZhbHVlKGFkZHJlc3MsYnl0ZXMsdWludDI1NixzdHJpbmcp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "functionCallWithValue",
+          "natspec": "@dev Same as {xref-Address-functionCallWithValue-address-bytes-uint256-}[`functionCallWithValue`], but\n with `errorMessage` as a fallback revert reason when `target` reverts.\n _Available since v3.1._",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 446,
+            "byteStart": 5165,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Address.sol#L128-L137",
+            "lineEnd": 137,
+            "lineStart": 128,
+            "snippetSha256": "sha256:72a94b97d8970170bcfcf91807aecfff642e555fa5c04e9403b224c7b39e636b",
+            "sourceSha256": "sha256:73d0ad7fabd436626fa9705075daf04ca4fe4c78f87ed6643c3f9fea553b05f8"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "functionStaticCall(address,bytes)",
+          "functionKind": "function",
+          "id": "smart-contracts/Address.sol:Address#function:functionStaticCall(address,bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0FkZHJlc3Muc29sOkFkZHJlc3MjZnVuY3Rpb246ZnVuY3Rpb25TdGF0aWNDYWxsKGFkZHJlc3MsYnl0ZXMp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "functionStaticCall",
+          "natspec": "@dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\n but performing a static call.\n _Available since v3.3._",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 197,
+            "byteStart": 5788,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Address.sol#L145-L147",
+            "lineEnd": 147,
+            "lineStart": 145,
+            "snippetSha256": "sha256:d0bf7774f2c4a4e2e6bb02369cee7342c2fb7e34ae1949f2075dd0efb3f5f2fa",
+            "sourceSha256": "sha256:73d0ad7fabd436626fa9705075daf04ca4fe4c78f87ed6643c3f9fea553b05f8"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "functionStaticCall(address,bytes,string)",
+          "functionKind": "function",
+          "id": "smart-contracts/Address.sol:Address#function:functionStaticCall(address,bytes,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "errorMessage",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0FkZHJlc3Muc29sOkFkZHJlc3MjZnVuY3Rpb246ZnVuY3Rpb25TdGF0aWNDYWxsKGFkZHJlc3MsYnl0ZXMsc3RyaW5nKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "functionStaticCall",
+          "natspec": "@dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],\n but performing a static call.\n _Available since v3.3._",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 326,
+            "byteStart": 6169,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Address.sol#L155-L162",
+            "lineEnd": 162,
+            "lineStart": 155,
+            "snippetSha256": "sha256:8a1b5e28f4d068e0d466e94f55cddda438ecb5f407c2748277a05f4440de4edd",
+            "sourceSha256": "sha256:73d0ad7fabd436626fa9705075daf04ca4fe4c78f87ed6643c3f9fea553b05f8"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "functionDelegateCall(address,bytes)",
+          "functionKind": "function",
+          "id": "smart-contracts/Address.sol:Address#function:functionDelegateCall(address,bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0FkZHJlc3Muc29sOkFkZHJlc3MjZnVuY3Rpb246ZnVuY3Rpb25EZWxlZ2F0ZUNhbGwoYWRkcmVzcyxieXRlcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "functionDelegateCall",
+          "natspec": "@dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],\n but performing a delegate call.\n _Available since v3.4._",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 198,
+            "byteStart": 6674,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Address.sol#L170-L172",
+            "lineEnd": 172,
+            "lineStart": 170,
+            "snippetSha256": "sha256:0a065538b95298e8b38ccc24a1d57d987d104bf4cf33cfe9389876cd062f0e5e",
+            "sourceSha256": "sha256:73d0ad7fabd436626fa9705075daf04ca4fe4c78f87ed6643c3f9fea553b05f8"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "functionDelegateCall(address,bytes,string)",
+          "functionKind": "function",
+          "id": "smart-contracts/Address.sol:Address#function:functionDelegateCall(address,bytes,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "errorMessage",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0FkZHJlc3Muc29sOkFkZHJlc3MjZnVuY3Rpb246ZnVuY3Rpb25EZWxlZ2F0ZUNhbGwoYWRkcmVzcyxieXRlcyxzdHJpbmcp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "functionDelegateCall",
+          "natspec": "@dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],\n but performing a delegate call.\n _Available since v3.4._",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 325,
+            "byteStart": 7058,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Address.sol#L180-L187",
+            "lineEnd": 187,
+            "lineStart": 180,
+            "snippetSha256": "sha256:98110e523769d1e0573aa0a638bec9f8cc65e489300f9cd535cfbdd01b2de046",
+            "sourceSha256": "sha256:73d0ad7fabd436626fa9705075daf04ca4fe4c78f87ed6643c3f9fea553b05f8"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "verifyCallResultFromTarget(address,bool,bytes,string)",
+          "functionKind": "function",
+          "id": "smart-contracts/Address.sol:Address#function:verifyCallResultFromTarget(address,bool,bytes,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "success",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "returndata",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 3,
+              "name": "errorMessage",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0FkZHJlc3Muc29sOkFkZHJlc3MjZnVuY3Rpb246dmVyaWZ5Q2FsbFJlc3VsdEZyb21UYXJnZXQoYWRkcmVzcyxib29sLGJ5dGVzLHN0cmluZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "verifyCallResultFromTarget",
+          "natspec": "@dev Tool to verify that a low level call to smart-contract was successful, and revert (either by bubbling\n the revert reason or using the provided one) in case of unsuccessful call or if target was not a contract.\n _Available since v4.8._",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 628,
+            "byteStart": 7671,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Address.sol#L195-L211",
+            "lineEnd": 211,
+            "lineStart": 195,
+            "snippetSha256": "sha256:55a58bf8d1122f2b52cd30a92eee422f677c2b919396ab01da0c7132f44f5632",
+            "sourceSha256": "sha256:73d0ad7fabd436626fa9705075daf04ca4fe4c78f87ed6643c3f9fea553b05f8"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "verifyCallResult(bool,bytes,string)",
+          "functionKind": "function",
+          "id": "smart-contracts/Address.sol:Address#function:verifyCallResult(bool,bytes,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "success",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "returndata",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "errorMessage",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0FkZHJlc3Muc29sOkFkZHJlc3MjZnVuY3Rpb246dmVyaWZ5Q2FsbFJlc3VsdChib29sLGJ5dGVzLHN0cmluZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "verifyCallResult",
+          "natspec": "@dev Tool to verify that a low level call was successful, and revert if it wasn't, either by bubbling the\n revert reason or using the provided one.\n _Available since v4.3._",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 295,
+            "byteStart": 8520,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Address.sol#L219-L229",
+            "lineEnd": 229,
+            "lineStart": 219,
+            "snippetSha256": "sha256:8961088884f20f88f3a2c3f6e15f9c82f8bb2bf36f85cd4569b1976a0674052b",
+            "sourceSha256": "sha256:73d0ad7fabd436626fa9705075daf04ca4fe4c78f87ed6643c3f9fea553b05f8"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_revert(bytes,string)",
+          "functionKind": "function",
+          "id": "smart-contracts/Address.sol:Address#function:_revert(bytes,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "returndata",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 1,
+              "name": "errorMessage",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0FkZHJlc3Muc29sOkFkZHJlc3MjZnVuY3Rpb246X3JldmVydChieXRlcyxzdHJpbmcp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_revert",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 540,
+            "byteStart": 8821,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Address.sol#L231-L243",
+            "lineEnd": 243,
+            "lineStart": 231,
+            "snippetSha256": "sha256:4bdf1e424f2ff0fad101ba7c540180742761c540ab79eb3a5224b75b66127c8a",
+            "sourceSha256": "sha256:73d0ad7fabd436626fa9705075daf04ca4fe4c78f87ed6643c3f9fea553b05f8"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/Address.sol:Address",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0FkZHJlc3Muc29sOkFkZHJlc3M",
+    "kind": "library",
+    "linearizedDefinitionIds": [
+      "smart-contracts/Address.sol:Address"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "Address",
+    "natspec": "@dev Collection of functions related to the address type",
+    "range": {
+      "byteLength": 9169,
+      "byteStart": 194,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Address.sol#L9-L244",
+      "lineEnd": 244,
+      "lineStart": 9,
+      "snippetSha256": "sha256:0d6715927318c38e864910e3150b851eecf202d499088972f8a327bff48ae7ee",
+      "sourceSha256": "sha256:73d0ad7fabd436626fa9705075daf04ca4fe4c78f87ed6643c3f9fea553b05f8"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/Address.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

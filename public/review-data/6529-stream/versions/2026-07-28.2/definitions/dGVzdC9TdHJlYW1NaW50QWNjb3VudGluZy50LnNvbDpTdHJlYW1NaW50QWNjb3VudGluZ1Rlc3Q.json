@@ -1,0 +1,522 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest#function:0x865d6204",
+          "declaringDefinitionId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFinalSupplyUsesMintedEverNotLiveSupplyAfterBurn",
+          "outputs": [],
+          "selector": "0x865d6204",
+          "signature": "testFinalSupplyUsesMintedEverNotLiveSupplyAfterBurn()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest#function:0x6f225e1b",
+          "declaringDefinitionId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMintUsesRandomizerRotatedDuringSafeMintCallback",
+          "outputs": [],
+          "selector": "0x6f225e1b",
+          "signature": "testMintUsesRandomizerRotatedDuringSafeMintCallback()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest#function:0xad009f52",
+          "declaringDefinitionId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRepeatedFinalSupplyDoesNotDriftUncheckedBounds",
+          "outputs": [],
+          "selector": "0xad009f52",
+          "signature": "testRepeatedFinalSupplyDoesNotDriftUncheckedBounds()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest#function:0x1f13030d",
+          "declaringDefinitionId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRetainedAirdropMintCounterStartsAtZeroAndIncrements",
+          "outputs": [],
+          "selector": "0x1f13030d",
+          "signature": "testRetainedAirdropMintCounterStartsAtZeroAndIncrements()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest#function:0x3d8dab8c",
+          "declaringDefinitionId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSupplyExhaustedMintAfterBurnDoesNotAdvanceUncheckedCounters",
+          "outputs": [],
+          "selector": "0x3d8dab8c",
+          "signature": "testSupplyExhaustedMintAfterBurnDoesNotAdvanceUncheckedCounters()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest#function:0xfc2abb51",
+          "declaringDefinitionId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testUnauthorizedMintDoesNotIncrementRetainedAirdropCounter",
+          "outputs": [],
+          "selector": "0xfc2abb51",
+          "signature": "testUnauthorizedMintDoesNotIncrementRetainedAirdropCounter()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "testRetainedAirdropMintCounterStartsAtZeroAndIncrements()",
+          "displaySignature": "testRetainedAirdropMintCounterStartsAtZeroAndIncrements()",
+          "functionKind": "function",
+          "id": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest#function:0x1f13030d",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50QWNjb3VudGluZy50LnNvbDpTdHJlYW1NaW50QWNjb3VudGluZ1Rlc3QjZnVuY3Rpb246MHgxZjEzMDMwZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRetainedAirdropMintCounterStartsAtZeroAndIncrements",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 843,
+            "byteStart": 2478,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L81-L98",
+            "lineEnd": 98,
+            "lineStart": 81,
+            "snippetSha256": "sha256:811acfde72421bb9f40719eff64948684ce530c1363e06afb24493e190795963",
+            "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+          },
+          "selector": "0x1f13030d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testUnauthorizedMintDoesNotIncrementRetainedAirdropCounter()",
+          "displaySignature": "testUnauthorizedMintDoesNotIncrementRetainedAirdropCounter()",
+          "functionKind": "function",
+          "id": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest#function:0xfc2abb51",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50QWNjb3VudGluZy50LnNvbDpTdHJlYW1NaW50QWNjb3VudGluZ1Rlc3QjZnVuY3Rpb246MHhmYzJhYmI1MQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testUnauthorizedMintDoesNotIncrementRetainedAirdropCounter",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 656,
+            "byteStart": 3327,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L100-L114",
+            "lineEnd": 114,
+            "lineStart": 100,
+            "snippetSha256": "sha256:9e8737db66b5ab198b65720f642a9f6c5e12136fe70222fc054daff3cdcb71f0",
+            "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+          },
+          "selector": "0xfc2abb51",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSupplyExhaustedMintAfterBurnDoesNotAdvanceUncheckedCounters()",
+          "displaySignature": "testSupplyExhaustedMintAfterBurnDoesNotAdvanceUncheckedCounters()",
+          "functionKind": "function",
+          "id": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest#function:0x3d8dab8c",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50QWNjb3VudGluZy50LnNvbDpTdHJlYW1NaW50QWNjb3VudGluZ1Rlc3QjZnVuY3Rpb246MHgzZDhkYWI4Yw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSupplyExhaustedMintAfterBurnDoesNotAdvanceUncheckedCounters",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 953,
+            "byteStart": 3989,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L116-L134",
+            "lineEnd": 134,
+            "lineStart": 116,
+            "snippetSha256": "sha256:578130f81d367fdfc6cd764e8db823de7f2f852274ae19ea73e1f82e39402679",
+            "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+          },
+          "selector": "0x3d8dab8c",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testFinalSupplyUsesMintedEverNotLiveSupplyAfterBurn()",
+          "displaySignature": "testFinalSupplyUsesMintedEverNotLiveSupplyAfterBurn()",
+          "functionKind": "function",
+          "id": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest#function:0x865d6204",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50QWNjb3VudGluZy50LnNvbDpTdHJlYW1NaW50QWNjb3VudGluZ1Rlc3QjZnVuY3Rpb246MHg4NjVkNjIwNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFinalSupplyUsesMintedEverNotLiveSupplyAfterBurn",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 993,
+            "byteStart": 4948,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L136-L155",
+            "lineEnd": 155,
+            "lineStart": 136,
+            "snippetSha256": "sha256:9f47a572705c0173ebc2aa8e69cefd736b4c2e98cc419e58bc21938461df720e",
+            "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+          },
+          "selector": "0x865d6204",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRepeatedFinalSupplyDoesNotDriftUncheckedBounds()",
+          "displaySignature": "testRepeatedFinalSupplyDoesNotDriftUncheckedBounds()",
+          "functionKind": "function",
+          "id": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest#function:0xad009f52",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50QWNjb3VudGluZy50LnNvbDpTdHJlYW1NaW50QWNjb3VudGluZ1Rlc3QjZnVuY3Rpb246MHhhZDAwOWY1Mg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRepeatedFinalSupplyDoesNotDriftUncheckedBounds",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1022,
+            "byteStart": 5947,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L157-L176",
+            "lineEnd": 176,
+            "lineStart": 157,
+            "snippetSha256": "sha256:44a000b5d3da33b609c7f6d223c6bd4f81dece82be53ac231e191fd9e4564fa0",
+            "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+          },
+          "selector": "0xad009f52",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMintUsesRandomizerRotatedDuringSafeMintCallback()",
+          "displaySignature": "testMintUsesRandomizerRotatedDuringSafeMintCallback()",
+          "functionKind": "function",
+          "id": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest#function:0x6f225e1b",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50QWNjb3VudGluZy50LnNvbDpTdHJlYW1NaW50QWNjb3VudGluZ1Rlc3QjZnVuY3Rpb246MHg2ZjIyNWUxYg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMintUsesRandomizerRotatedDuringSafeMintCallback",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1915,
+            "byteStart": 6975,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L178-L213",
+            "lineEnd": 213,
+            "lineStart": 178,
+            "snippetSha256": "sha256:48c92a65b4905e20065a7a26b3e475cb1f9c72249103d393c72bb04b7a872369",
+            "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+          },
+          "selector": "0x6f225e1b",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_mintToken(DeployedStream,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest#function:_mintToken(DeployedStream,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "DeployedStream"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "salt",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50QWNjb3VudGluZy50LnNvbDpTdHJlYW1NaW50QWNjb3VudGluZ1Rlc3QjZnVuY3Rpb246X21pbnRUb2tlbihEZXBsb3llZFN0cmVhbSx1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_mintToken",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 220,
+            "byteStart": 8896,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L215-L218",
+            "lineEnd": 218,
+            "lineStart": 215,
+            "snippetSha256": "sha256:56171b2d321c889c49a122ef2f47a2a6e38c57761b1b7f8c0d4863ea6da0f513",
+            "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_warpPastFinalSupplyWindow()",
+          "functionKind": "function",
+          "id": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest#function:_warpPastFinalSupplyWindow()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50QWNjb3VudGluZy50LnNvbDpTdHJlYW1NaW50QWNjb3VudGluZ1Rlc3QjZnVuY3Rpb246X3dhcnBQYXN0RmluYWxTdXBwbHlXaW5kb3coKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_warpPastFinalSupplyWindow",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 101,
+            "byteStart": 9122,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L220-L222",
+            "lineEnd": 222,
+            "lineStart": 220,
+            "snippetSha256": "sha256:82a6688bff813f04a0b4678165717eac2ee27e3657eac19a004bc225f1440737",
+            "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COLLECTION_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 2327,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L77",
+            "lineEnd": 77,
+            "lineStart": 77,
+            "snippetSha256": "sha256:cba8ff5a3b4148cc54bed7e4899604a5bc39c7815d1a23162a647a4813b0e087",
+            "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 2368,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L77",
+            "lineEnd": 77,
+            "lineStart": 77,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TOKEN_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 2375,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L78",
+            "lineEnd": 78,
+            "lineStart": 78,
+            "snippetSha256": "sha256:c73d15ab01ba31af3abe0a3398754b34011adc910a4aba23a00a8a747263c4fa",
+            "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 2411,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L78",
+            "lineEnd": 78,
+            "lineStart": 78,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 53,
+            "byteStart": 2418,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L79",
+            "lineEnd": 79,
+            "lineStart": 79,
+            "snippetSha256": "sha256:9ad3cd03bccb87616377ded5a696e0eb9dcbd4debf5aabca58a379ad81e19501",
+            "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 16,
+            "byteStart": 2455,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L79",
+            "lineEnd": 79,
+            "lineStart": 79,
+            "snippetSha256": "sha256:ff90295fee849d58a9a67d401763bcdf9a2e87e84bdeb02ce3ca102c5621224f",
+            "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+          },
+          "valueSource": "address(0xA11CE)",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1NaW50QWNjb3VudGluZy50LnNvbDpTdHJlYW1NaW50QWNjb3VudGluZ1Rlc3Q",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamMintAccounting.t.sol:StreamMintAccountingTest",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamMintAccountingTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 7115,
+      "byteStart": 2110,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L71-L223",
+      "lineEnd": 223,
+      "lineStart": 71,
+      "snippetSha256": "sha256:be762ab92e75c748b9a1811c7903cb32027fd06fc93bb0d93f3e9fca08964347",
+      "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamMintAccounting.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 7
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 6
+    },
+    "totalCount": 7
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest#function:0x1f13030d",
+      "definitionId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest#function:0x3d8dab8c",
+      "definitionId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest#function:0x6f225e1b",
+      "definitionId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest#function:0x865d6204",
+      "definitionId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest#function:0xad009f52",
+      "definitionId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest#function:0xfc2abb51",
+      "definitionId": "test/StreamMintAccounting.t.sol:StreamMintAccountingTest",
+      "severity": "advisory"
+    }
+  ]
+}

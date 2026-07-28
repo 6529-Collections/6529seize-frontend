@@ -1,0 +1,223 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/mocks/MockRandomizer.sol:NoopRandomizer#function:0xbf1b89d3",
+          "declaringDefinitionId": "test/mocks/MockRandomizer.sol:NoopRandomizer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "calculateTokenHash",
+          "outputs": [],
+          "selector": "0xbf1b89d3",
+          "signature": "calculateTokenHash(uint256,uint256,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/mocks/MockRandomizer.sol:NoopRandomizer#function:0x4cf0c697",
+          "declaringDefinitionId": "test/mocks/MockRandomizer.sol:NoopRandomizer",
+          "inherited": false,
+          "inputs": [],
+          "name": "isRandomizerContract",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x4cf0c697",
+          "signature": "isRandomizerContract()",
+          "stateMutability": "pure"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "calculateTokenHash(uint256,uint256,uint256)",
+          "displaySignature": "calculateTokenHash(uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/mocks/MockRandomizer.sol:NoopRandomizer#function:0xbf1b89d3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrUmFuZG9taXplci5zb2w6Tm9vcFJhbmRvbWl6ZXIjZnVuY3Rpb246MHhiZjFiODlkMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "calculateTokenHash",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 67,
+            "byteStart": 729,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizer.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:c4a052a1a75dabdc2080725fc3fb3d558bfa1f40c187fd58e9034b112f385414",
+            "sourceSha256": "sha256:1e6dc49d7f8a13d072dab4452150fd1a2fe91fa763114eddb5677ce96f5e625f"
+          },
+          "selector": "0xbf1b89d3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isRandomizerContract()",
+          "displaySignature": "isRandomizerContract()",
+          "functionKind": "function",
+          "id": "test/mocks/MockRandomizer.sol:NoopRandomizer#function:0x4cf0c697",
+          "inputs": [],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrUmFuZG9taXplci5zb2w6Tm9vcFJhbmRvbWl6ZXIjZnVuY3Rpb246MHg0Y2YwYzY5Nw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isRandomizerContract",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 89,
+            "byteStart": 802,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizer.sol#L29-L31",
+            "lineEnd": 31,
+            "lineStart": 29,
+            "snippetSha256": "sha256:daac779faad038f7e020f880d90a485c144831fcda6e8d6215dd3aa976335c75",
+            "sourceSha256": "sha256:1e6dc49d7f8a13d072dab4452150fd1a2fe91fa763114eddb5677ce96f5e625f"
+          },
+          "selector": "0x4cf0c697",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/mocks/MockRandomizer.sol:NoopRandomizer",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/IRandomizer.sol:IRandomizer",
+        "name": "IRandomizer"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9tb2Nrcy9Nb2NrUmFuZG9taXplci5zb2w6Tm9vcFJhbmRvbWl6ZXI",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/mocks/MockRandomizer.sol:NoopRandomizer",
+      "smart-contracts/IRandomizer.sol:IRandomizer"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "NoopRandomizer",
+    "natspec": "",
+    "range": {
+      "byteLength": 209,
+      "byteStart": 684,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizer.sol#L26-L32",
+      "lineEnd": 32,
+      "lineStart": 26,
+      "snippetSha256": "sha256:8875968dd986a5c03ec4ebd69d61407a2ccbed94ae97e75a9260d6b6fcb762a0",
+      "sourceSha256": "sha256:1e6dc49d7f8a13d072dab4452150fd1a2fe91fa763114eddb5677ce96f5e625f"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/mocks/MockRandomizer.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 3
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 2
+    },
+    "totalCount": 3
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/mocks/MockRandomizer.sol:NoopRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockRandomizer.sol:NoopRandomizer#function:0x4cf0c697",
+      "definitionId": "test/mocks/MockRandomizer.sol:NoopRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockRandomizer.sol:NoopRandomizer#function:0xbf1b89d3",
+      "definitionId": "test/mocks/MockRandomizer.sol:NoopRandomizer",
+      "severity": "advisory"
+    }
+  ]
+}
