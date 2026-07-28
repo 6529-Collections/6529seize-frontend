@@ -82,6 +82,7 @@ describe("notify-ci-wave Release Train metadata", () => {
         body = {
           id: 123,
           name: "Web Deploy - PROD",
+          path: ".github/workflows/build-upload-deploy-prod.yml@refs/heads/main",
           head_sha: "a".repeat(40),
           head_branch: "main",
           status: "completed",
@@ -98,6 +99,7 @@ describe("notify-ci-wave Release Train metadata", () => {
             {
               id: 122,
               name: "Web Deploy - PROD",
+              path: ".github/workflows/build-upload-deploy-prod.yml@refs/heads/main",
               head_sha: "b".repeat(40),
               head_branch: "main",
               status: "completed",

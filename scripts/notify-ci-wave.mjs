@@ -164,11 +164,17 @@ async function listPreviousWorkflowRuns({
       `/actions/workflows/${encodeURIComponent(workflowFile)}/runs?status=success&branch=${encodeURIComponent(branch)}&per_page=100&page=${page}`
     );
     const pageRuns = payload.workflow_runs ?? [];
+    if (!Array.isArray(pageRuns)) {
+      throw new Error(
+        `Production history for ${workflowName} is malformed`
+      );
+    }
     for (const run of pageRuns) {
       if (
         String(run.id) === String(currentRun.id) ||
         run.head_sha === currentSha ||
         run.name !== workflowName ||
+        run.path?.split("@")[0].split("/").at(-1) !== workflowFile ||
         run.status !== "completed" ||
         run.conclusion !== "success" ||
         run.head_branch !== branch ||
@@ -201,6 +207,7 @@ async function deriveManualRangeContributors({
   if (
     String(currentRun.id) !== runId ||
     currentRun.name !== workflow ||
+    currentRun.path?.split("@")[0].split("/").at(-1) !== workflowFile ||
     currentRun.head_sha !== deployedSha ||
     currentRun.head_branch !== branch ||
     currentRun.status !== "completed" ||
@@ -228,10 +235,11 @@ async function deriveManualRangeContributors({
     )
   )
     .flat()
-    .sort(
-      (left, right) =>
-        Date.parse(right.created_at) - Date.parse(left.created_at)
-    );
+    .sort((left, right) => {
+      const chronology =
+        Date.parse(right.created_at) - Date.parse(left.created_at);
+      return chronology || Number(right.id) - Number(left.id);
+    });
   const baseline = baselineRuns[0];
   if (!baseline) {
     throw new Error("No prior approved successful deployment baseline exists");
@@ -246,6 +254,9 @@ async function deriveManualRangeContributors({
       throw new Error("Deployment comparison is not a forward range");
     }
     const pageCommits = comparison.commits ?? [];
+    if (!Array.isArray(pageCommits)) {
+      throw new Error("Deployment comparison commit evidence is malformed");
+    }
     commits.push(...pageCommits);
     if (pageCommits.length < 100) break;
     if (page === 3) {
@@ -260,6 +271,11 @@ async function deriveManualRangeContributors({
       repository,
       `/commits/${encodeURIComponent(commit.sha)}/pulls`
     );
+    if (!Array.isArray(associated)) {
+      throw new Error(
+        `Pull-request evidence for commit ${commit.sha} is malformed`
+      );
+    }
     for (const pull of associated) {
       if (pull.merged_at) {
         pullRequests.set(pull.number, pull);
@@ -273,6 +289,9 @@ async function deriveManualRangeContributors({
         repository,
         `/pulls/${pull.number}/commits?per_page=100&page=${page}`
       );
+      if (!Array.isArray(pullCommits)) {
+        throw new Error(`PR #${pull.number} commit evidence is malformed`);
+      }
       for (const commit of pullCommits) {
         users.push(commit.author, commit.committer);
       }
