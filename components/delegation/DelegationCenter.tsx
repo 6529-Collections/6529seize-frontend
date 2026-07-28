@@ -79,24 +79,24 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
   function printCollectionSelection() {
     return (
       <section className="tw-w-full" aria-labelledby="manage-by-collection">
-        <div className="tw-mb-5">
+        <div className="tw-mb-[21px]">
           <h2
             id="manage-by-collection"
-            className="tw-mb-2 tw-text-xl tw-font-semibold tw-text-iron-100"
+            className="tw-mb-[8px] tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl"
           >
             Manage by Collection
           </h2>
-          <p className="tw-mb-0 tw-text-base tw-leading-6 tw-text-iron-300">
+          <p className="tw-mb-0 tw-text-base tw-font-light tw-leading-7 tw-text-iron-400">
             Manage existing records by collection scope, including locks that
             block incoming delegations.
           </p>
         </div>
-        <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
+        <div className="tw-grid tw-grid-cols-1 tw-gap-[13px] sm:tw-grid-cols-2 xl:tw-grid-cols-4">
           {Object.values(SUPPORTED_COLLECTIONS).map((c) => (
             <button
               key={c.contract}
               type="button"
-              className="tw-group tw-grid tw-min-h-20 tw-w-full tw-grid-cols-[56px_minmax(0,1fr)_56px] tw-items-center tw-gap-4 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/55 tw-px-5 tw-py-3 tw-text-iron-100 tw-shadow-sm tw-transition-colors hover:tw-border-iron-700/60 hover:tw-bg-iron-900/75 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+              className="tw-group tw-flex tw-min-h-[81px] tw-w-full tw-items-center tw-gap-[13px] tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-950 tw-p-[13px] tw-text-left tw-text-iron-100 tw-shadow-[0_16px_40px_-32px_rgba(0,0,0,0.95)] tw-transition-[transform,background-color,border-color,box-shadow] tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:-tw-translate-y-0.5 desktop-hover:hover:tw-border-white/[0.08] desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-shadow-[0_20px_44px_-30px_rgba(0,0,0,1)] motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
               onClick={() => {
                 const newSection = getCollectionSection(c.contract);
                 if (newSection !== undefined) {
@@ -104,7 +104,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                 }
               }}
             >
-              <span className="tw-relative tw-h-14 tw-w-14 tw-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800">
+              <span className="tw-relative tw-size-[55px] tw-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800">
                 <Image
                   unoptimized
                   className="tw-object-cover"
@@ -117,10 +117,9 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                   aria-hidden="true"
                 />
               </span>
-              <span className="tw-whitespace-nowrap tw-text-center tw-text-base tw-font-semibold">
+              <span className="tw-min-w-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100 group-hover:tw-text-iron-50">
                 {c.title}
               </span>
-              <span aria-hidden="true" />
             </button>
           ))}
         </div>
@@ -166,53 +165,58 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
 
   return (
     <div className="tw-w-full">
-      <header className="tw-mb-6">
-        <h1 className="tw-mb-2 tw-text-3xl tw-font-bold tw-text-iron-50">
+      <header className="tw-mb-[34px]">
+        <h1 className="tw-mb-[13px] tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
           Delegation Center
         </h1>
-        <p className="tw-mb-0 tw-max-w-4xl tw-text-base tw-leading-6 tw-text-iron-300">
+        <p className="tw-mb-0 tw-max-w-4xl tw-text-base tw-font-light tw-leading-7 tw-text-iron-400">
           Register wallet relationships for NFT utility and 6529 collection
           metrics. These actions do not transfer NFTs.
         </p>
       </header>
 
-      <div className="tw-space-y-3">
+      <div className="tw-space-y-[13px]">
         {actionCards.map((card) => (
           <section
             key={card.title}
-            className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/55 tw-p-5 sm:tw-p-6"
+            className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-950 tw-p-[21px] tw-shadow-[0_20px_60px_-38px_rgba(0,0,0,0.95)] before:tw-pointer-events-none before:tw-absolute before:tw-inset-x-[34px] before:tw-top-0 before:tw-h-px before:tw-bg-gradient-to-r before:tw-from-transparent before:tw-via-white/[0.08] before:tw-to-transparent sm:tw-p-[34px]"
           >
-            <div className="tw-flex tw-flex-col tw-gap-5 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between">
-              <div className="tw-min-w-0 tw-flex-1">
-                <h2 className="tw-mb-8 tw-mt-0 tw-text-xl tw-font-semibold tw-text-iron-100">
-                  {card.title}
-                </h2>
-                <div className="tw-flex tw-items-center tw-gap-4">
-                  <Image
-                    unoptimized
-                    loading="eager"
-                    priority
-                    src={card.icon}
-                    alt={card.iconAlt}
-                    aria-hidden="true"
-                    width={56}
-                    height={56}
-                    className="tw-h-14 tw-w-14 tw-shrink-0 tw-object-contain"
-                  />
-                  <ul className="tw-my-0 tw-min-w-0 tw-pl-5 tw-text-base tw-leading-6 tw-text-iron-300">
+            <div className="tw-flex tw-flex-col tw-gap-[21px] sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+              <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-start tw-gap-[21px]">
+                <Image
+                  unoptimized
+                  loading="eager"
+                  priority
+                  src={card.icon}
+                  alt={card.iconAlt}
+                  aria-hidden="true"
+                  width={34}
+                  height={34}
+                  className="tw-mt-[5px] tw-size-[34px] tw-shrink-0 tw-object-contain tw-opacity-80"
+                />
+                <div className="tw-min-w-0">
+                  <h2 className="tw-mb-[8px] tw-mt-0 tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl">
+                    {card.title}
+                  </h2>
+                  <ul className="tw-my-0 tw-min-w-0 tw-list-none tw-pl-0 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300">
                     {card.details.map((detail) => (
-                      <li key={detail}>{detail}</li>
+                      <li
+                        key={detail}
+                        className="tw-relative tw-mb-[5px] tw-pl-[13px] before:tw-absolute before:tw-left-0 before:tw-text-iron-500 before:tw-content-['•'] last:tw-mb-0"
+                      >
+                        {detail}
+                      </li>
                     ))}
                   </ul>
                 </div>
               </div>
-              <div className="tw-w-full tw-shrink-0 lg:tw-w-72">
+              <div className="tw-w-full tw-shrink-0 sm:tw-w-auto">
                 <PrimaryButton
                   loading={false}
                   disabled={false}
                   onClicked={() => setRedirect(card.section)}
                   size="lg"
-                  className="tw-min-h-12 tw-w-full"
+                  className="tw-min-h-11 tw-w-full sm:tw-min-w-48"
                 >
                   <FontAwesomeIcon
                     icon={faPlus}
@@ -226,7 +230,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
         ))}
       </div>
 
-      <div className="tw-mt-10">{printCollectionSelection()}</div>
+      <div className="tw-mt-[55px]">{printCollectionSelection()}</div>
     </div>
   );
 }
