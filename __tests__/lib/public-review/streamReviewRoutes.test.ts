@@ -4,6 +4,8 @@ import {
 } from "@/lib/public-review/streamReviewRoutes";
 import {
   STREAM_REVIEW_DEFINITION,
+  STREAM_REVIEW_INITIAL_VERSION,
+  STREAM_REVIEW_PREVIOUS_VERSION,
   STREAM_REVIEW_SOURCE_COMMIT,
   STREAM_REVIEW_VERSION,
 } from "@/lib/public-review/streamReviewDefinition";
@@ -32,6 +34,19 @@ describe("6529 Stream public review routes", () => {
       })?.canonicalPath
     ).toBe(
       `/reviews/6529-stream/versions/${STREAM_REVIEW_VERSION}/for-artists`
+    );
+
+    expect(
+      resolveStreamReviewRoute({
+        baseEndpoint: "https://staging.6529.io",
+        params: {
+          ...ACTIVE_REVIEW,
+          version: STREAM_REVIEW_PREVIOUS_VERSION,
+          page: "for-artists",
+        },
+      })?.canonicalPath
+    ).toBe(
+      `/reviews/6529-stream/versions/${STREAM_REVIEW_PREVIOUS_VERSION}/for-artists`
     );
   });
 
@@ -82,15 +97,21 @@ describe("6529 Stream public review routes", () => {
           params: ACTIVE_REVIEW,
         })
       ).toBeUndefined();
-      expect(
-        resolveStreamReviewRoute({
-          baseEndpoint: "https://staging.6529.io",
-          params: {
-            ...ACTIVE_REVIEW,
-            version: STREAM_REVIEW_VERSION,
-          },
-        })?.canonicalPath
-      ).toBe(`/reviews/6529-stream/versions/${STREAM_REVIEW_VERSION}`);
+      for (const version of [
+        STREAM_REVIEW_VERSION,
+        STREAM_REVIEW_PREVIOUS_VERSION,
+        STREAM_REVIEW_INITIAL_VERSION,
+      ]) {
+        expect(
+          resolveStreamReviewRoute({
+            baseEndpoint: "https://staging.6529.io",
+            params: {
+              ...ACTIVE_REVIEW,
+              version,
+            },
+          })?.canonicalPath
+        ).toBe(`/reviews/6529-stream/versions/${version}`);
+      }
     } finally {
       replacement.restore();
     }

@@ -1,13 +1,16 @@
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { extractPublicReviewEvidenceStates } from "@/lib/public-review/editorialSections";
+import { getPublicReviewLifecycleCapabilities } from "@/lib/public-review/publicReviewLifecycle";
 import { PUBLIC_REVIEW_EVIDENCE_STATES } from "@/lib/public-review/publicReviewTypes";
 import {
   getStreamReviewFeedbackHref,
   STREAM_REVIEW_DEFINITION,
+  STREAM_REVIEW_INITIAL_VERSION,
   STREAM_REVIEW_PAGES,
   STREAM_REVIEW_PREVIOUS_VERSION,
   STREAM_REVIEW_SOURCE_COMMIT,
@@ -33,8 +36,9 @@ const EXPECTED_PAGE_TITLES = [
 
 describe("6529 Stream public review definition", () => {
   it("pins the active review version and exact source commit", () => {
-    expect(STREAM_REVIEW_VERSION).toBe("2026-07-27.1");
-    expect(STREAM_REVIEW_PREVIOUS_VERSION).toBe("2026-07-26.1");
+    expect(STREAM_REVIEW_VERSION).toBe("2026-07-28.1");
+    expect(STREAM_REVIEW_PREVIOUS_VERSION).toBe("2026-07-27.1");
+    expect(STREAM_REVIEW_INITIAL_VERSION).toBe("2026-07-26.1");
     expect(STREAM_REVIEW_SOURCE_COMMIT).toBe(
       "513bd7e079eafe109df6ae1ae21bfbca6fec6786"
     );
@@ -58,13 +62,16 @@ describe("6529 Stream public review definition", () => {
     );
   });
 
-  it("retains the superseded editorial snapshot with feedback closed", () => {
+  it("retains both superseded editorial snapshots with feedback closed", () => {
     const previous = STREAM_REVIEW_DEFINITION.versions.find(
       (version) => version.version === STREAM_REVIEW_PREVIOUS_VERSION
     );
+    const initial = STREAM_REVIEW_DEFINITION.versions.find(
+      (version) => version.version === STREAM_REVIEW_INITIAL_VERSION
+    );
 
     expect(previous).toMatchObject({
-      version: "2026-07-26.1",
+      version: "2026-07-27.1",
       status: "REVIEW_CLOSED",
       deploymentStatus: "NOT_DEPLOYED",
       auditStatus: "PRE_AUDIT",
@@ -73,9 +80,68 @@ describe("6529 Stream public review definition", () => {
       },
     });
     expect(previous?.pages).toHaveLength(14);
+    expect(initial).toMatchObject({
+      version: "2026-07-26.1",
+      status: "REVIEW_CLOSED",
+      deploymentStatus: "NOT_DEPLOYED",
+      auditStatus: "PRE_AUDIT",
+      source: {
+        commit: STREAM_REVIEW_SOURCE_COMMIT,
+      },
+    });
+    expect(initial?.pages).toHaveLength(14);
     expect(
-      previous?.pages.map((page) => t(DEFAULT_LOCALE, page.titleKey))
+      initial?.pages.map((page) => t(DEFAULT_LOCALE, page.titleKey))
     ).toContain("Security, Testing, and Known Limitations");
+  });
+
+  it("keeps the previous editorial snapshot byte-for-byte immutable", () => {
+    const editorialRoot = path.join(
+      process.cwd(),
+      "content",
+      "public-reviews",
+      "6529-stream",
+      "versions",
+      STREAM_REVIEW_PREVIOUS_VERSION,
+      "editorial"
+    );
+    const fileIdentities = fs
+      .readdirSync(editorialRoot)
+      .sort()
+      .map((name) => ({
+        name,
+        sha256: createHash("sha256")
+          .update(fs.readFileSync(path.join(editorialRoot, name)))
+          .digest("hex"),
+      }));
+    const directoryIdentity = createHash("sha256")
+      .update(JSON.stringify(fileIdentities))
+      .digest("hex");
+
+    expect(fileIdentities).toHaveLength(15);
+    expect(directoryIdentity).toBe(
+      "4720cd5a980ba33b890c055a864c521165f3ab91864f6cffe003cb4cd30bb0be"
+    );
+  });
+
+  it("opens feedback only on the new active writing revision", () => {
+    const active = STREAM_REVIEW_DEFINITION.versions.find(
+      (version) => version.version === STREAM_REVIEW_VERSION
+    );
+    const previous = STREAM_REVIEW_DEFINITION.versions.find(
+      (version) => version.version === STREAM_REVIEW_PREVIOUS_VERSION
+    );
+
+    expect(active?.status).toBe("PUBLIC_REVIEW");
+    expect(previous?.status).toBe("REVIEW_CLOSED");
+    expect(
+      getPublicReviewLifecycleCapabilities(active!.status)
+        .feedbackSubmissionsOpen
+    ).toBe(true);
+    expect(
+      getPublicReviewLifecycleCapabilities(previous!.status)
+        .feedbackSubmissionsOpen
+    ).toBe(false);
   });
 
   it("keeps active and immutable feedback ledgers version-addressable", () => {

@@ -522,38 +522,46 @@ describe("public-review snapshot trust immutable history", () => {
   it("requires a future version to append exact immutable history", () => {
     const base = loadConfig();
     const candidate = cloneConfig(base);
-    candidate.reviewVersion = "2026-07-27.2";
+    candidate.reviewVersion = "2026-07-28.2";
     candidate.source.commit = shaA;
     candidate.source.tree = shaB;
     candidate.output.directory =
-      "public/review-data/6529-stream/versions/2026-07-27.2";
+      "public/review-data/6529-stream/versions/2026-07-28.2";
     candidate.output.retainedVersions = [
       "2026-07-26.1",
       "2026-07-27.1",
-      "2026-07-27.2",
+      "2026-07-28.1",
+      "2026-07-28.2",
     ];
 
     expect(() =>
       validateTrustedConfigPolicy(base, candidate, [
         "2026-07-26.1",
         "2026-07-27.1",
+        "2026-07-28.1",
       ])
     ).not.toThrow();
-    candidate.output.retainedVersions = ["2026-07-27.2"];
+    candidate.output.retainedVersions = ["2026-07-28.2"];
     expect(() =>
       validateTrustedConfigPolicy(base, candidate, [
         "2026-07-26.1",
         "2026-07-27.1",
+        "2026-07-28.1",
       ])
     ).toThrow("append to exact base history");
-    candidate.reviewVersion = "2026-07-27.1";
+    candidate.reviewVersion = "2026-07-28.1";
     candidate.output.directory =
-      "public/review-data/6529-stream/versions/2026-07-27.1";
-    candidate.output.retainedVersions = ["2026-07-26.1", "2026-07-27.1"];
+      "public/review-data/6529-stream/versions/2026-07-28.1";
+    candidate.output.retainedVersions = [
+      "2026-07-26.1",
+      "2026-07-27.1",
+      "2026-07-28.1",
+    ];
     expect(() =>
       validateTrustedConfigPolicy(base, candidate, [
         "2026-07-26.1",
         "2026-07-27.1",
+        "2026-07-28.1",
       ])
     ).toThrow("strictly greater");
   });

@@ -1,0 +1,737 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost#error:0x866ed79e",
+          "declaringDefinitionId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "GasParameterActionAlreadyApplied",
+          "selector": "0x866ed79e",
+          "signature": "GasParameterActionAlreadyApplied(bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost#error:0xfb223d18",
+          "declaringDefinitionId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "expectedClass",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "actualClass",
+              "type": "uint8"
+            }
+          ],
+          "name": "GasParameterActionClassMismatch",
+          "selector": "0xfb223d18",
+          "signature": "GasParameterActionClassMismatch(uint8,uint8)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost#error:0xd35612f5",
+          "declaringDefinitionId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost",
+          "inherited": true,
+          "inputs": [],
+          "name": "GasParameterActionContextInvalid",
+          "selector": "0xd35612f5",
+          "signature": "GasParameterActionContextInvalid()"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost#error:0xa87b4fde",
+          "declaringDefinitionId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost",
+          "inherited": true,
+          "inputs": [],
+          "name": "GasParameterActionIdZero",
+          "selector": "0xa87b4fde",
+          "signature": "GasParameterActionIdZero()"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost#error:0x51e700c5",
+          "declaringDefinitionId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost",
+          "inherited": true,
+          "inputs": [],
+          "name": "GasParameterActionNotExecuting",
+          "selector": "0x51e700c5",
+          "signature": "GasParameterActionNotExecuting()"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost#error:0x5624caca",
+          "declaringDefinitionId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "GasParameterAlreadyRegistered",
+          "selector": "0x5624caca",
+          "signature": "GasParameterAlreadyRegistered(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost#error:0x8f531261",
+          "declaringDefinitionId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "authority",
+              "type": "address"
+            }
+          ],
+          "name": "GasParameterInvalidAuthority",
+          "selector": "0x8f531261",
+          "signature": "GasParameterInvalidAuthority(address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost#error:0x7013651c",
+          "declaringDefinitionId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "GasParameterInvalidConfig",
+          "selector": "0x7013651c",
+          "signature": "GasParameterInvalidConfig(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost#error:0x673e2889",
+          "declaringDefinitionId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "expectedHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "actualHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "GasParameterNewStateHashMismatch",
+          "selector": "0x673e2889",
+          "signature": "GasParameterNewStateHashMismatch(bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost#error:0xc687635e",
+          "declaringDefinitionId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "currentValue",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "newValue",
+              "type": "uint256"
+            }
+          ],
+          "name": "GasParameterNotARaise",
+          "selector": "0xc687635e",
+          "signature": "GasParameterNotARaise(bytes32,uint256,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost#error:0xd3bb2fce",
+          "declaringDefinitionId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "caller",
+              "type": "address"
+            }
+          ],
+          "name": "GasParameterNotAuthority",
+          "selector": "0xd3bb2fce",
+          "signature": "GasParameterNotAuthority(address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost#error:0x57fc0b1c",
+          "declaringDefinitionId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "expectedHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "actualHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "GasParameterOldStateHashMismatch",
+          "selector": "0x57fc0b1c",
+          "signature": "GasParameterOldStateHashMismatch(bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost#error:0x5147c037",
+          "declaringDefinitionId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "currentValue",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "newValue",
+              "type": "uint256"
+            }
+          ],
+          "name": "GasParameterRaiseBoundExceeded",
+          "selector": "0x5147c037",
+          "signature": "GasParameterRaiseBoundExceeded(bytes32,uint256,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost#error:0x0ee3a92f",
+          "declaringDefinitionId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "GasParameterRevisionOverflow",
+          "selector": "0x0ee3a92f",
+          "signature": "GasParameterRevisionOverflow(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost#error:0x9c87b2a7",
+          "declaringDefinitionId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "expectedHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "actualHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "GasParameterScopeHashMismatch",
+          "selector": "0x9c87b2a7",
+          "signature": "GasParameterScopeHashMismatch(bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost#error:0xe01a85d2",
+          "declaringDefinitionId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "GasParameterUnknown",
+          "selector": "0xe01a85d2",
+          "signature": "GasParameterUnknown(bytes32)"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost#event:GasParameterRegistered(uint16,bytes32,string,uint256,uint256,uint8)",
+          "declaringDefinitionId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "genesisValue",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "floor",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint8",
+              "name": "failureClass",
+              "type": "uint8"
+            }
+          ],
+          "name": "GasParameterRegistered",
+          "signature": "GasParameterRegistered(uint16,bytes32,string,uint256,uint256,uint8)",
+          "topic0": "0xfdd41cabb6d4b167ea1a6ab7738a933e6f7e4223f1d0051261b08f4558959e58"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost#event:GasParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)",
+          "declaringDefinitionId": "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "host",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "oldValue",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "newValue",
+              "type": "uint256"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "floor",
+              "type": "uint256"
+            }
+          ],
+          "name": "GasParameterUpdated",
+          "signature": "GasParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)",
+          "topic0": "0x587835584450495af0ebae742cc2f7c3927ade7498ab91baaebb9525d68e14dc"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/StreamGasParameterHost.sol:StreamGasParameterHost#function:0xf6d8576e",
+          "declaringDefinitionId": "smart-contracts/StreamGasParameterHost.sol:StreamGasParameterHost",
+          "inherited": true,
+          "inputs": [],
+          "name": "FAILURE_CLASS_FAIL_CLOSED_PRECHECK",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0xf6d8576e",
+          "signature": "FAILURE_CLASS_FAIL_CLOSED_PRECHECK()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamGasParameterHost.sol:StreamGasParameterHost#function:0xb3a8ac2c",
+          "declaringDefinitionId": "smart-contracts/StreamGasParameterHost.sol:StreamGasParameterHost",
+          "inherited": true,
+          "inputs": [],
+          "name": "FAILURE_CLASS_FORWARDING_CAP",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0xb3a8ac2c",
+          "signature": "FAILURE_CLASS_FORWARDING_CAP()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamGasParameterHost.sol:StreamGasParameterHost#function:0x191b4fef",
+          "declaringDefinitionId": "smart-contracts/StreamGasParameterHost.sol:StreamGasParameterHost",
+          "inherited": true,
+          "inputs": [],
+          "name": "FAILURE_CLASS_MIN_GAS_GATE",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x191b4fef",
+          "signature": "FAILURE_CLASS_MIN_GAS_GATE()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamGasParameterHost.sol:StreamGasParameterHost#function:0x506e7497",
+          "declaringDefinitionId": "smart-contracts/StreamGasParameterHost.sol:StreamGasParameterHost",
+          "inherited": true,
+          "inputs": [],
+          "name": "FAILURE_CLASS_NONE",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x506e7497",
+          "signature": "FAILURE_CLASS_NONE()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamGasParameterHost.sol:StreamGasParameterHost#function:0xee7f8416",
+          "declaringDefinitionId": "smart-contracts/StreamGasParameterHost.sol:StreamGasParameterHost",
+          "inherited": true,
+          "inputs": [],
+          "name": "GAS_PARAMETER_SCHEMA_VERSION",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "selector": "0xee7f8416",
+          "signature": "GAS_PARAMETER_SCHEMA_VERSION()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamGasParameterHost.sol:StreamGasParameterHost#function:0xbf8c2502",
+          "declaringDefinitionId": "smart-contracts/StreamGasParameterHost.sol:StreamGasParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "gasParameter",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xbf8c2502",
+          "signature": "gasParameter(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamGasParameterHost.sol:StreamGasParameterHost#function:0x025c6291",
+          "declaringDefinitionId": "smart-contracts/StreamGasParameterHost.sol:StreamGasParameterHost",
+          "inherited": true,
+          "inputs": [],
+          "name": "gasParameterIds",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32[]",
+              "name": "",
+              "type": "bytes32[]"
+            }
+          ],
+          "selector": "0x025c6291",
+          "signature": "gasParameterIds()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamGasParameterHost.sol:StreamGasParameterHost#function:0xec2ef90a",
+          "declaringDefinitionId": "smart-contracts/StreamGasParameterHost.sol:StreamGasParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "gasParameterInfo",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "floor",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint8",
+              "name": "failureClass",
+              "type": "uint8"
+            },
+            {
+              "index": 3,
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0xec2ef90a",
+          "signature": "gasParameterInfo(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamGasParameterHost.sol:StreamGasParameterHost#function:0xc81dbbe8",
+          "declaringDefinitionId": "smart-contracts/StreamGasParameterHost.sol:StreamGasParameterHost",
+          "inherited": true,
+          "inputs": [],
+          "name": "governanceAuthority",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0xc81dbbe8",
+          "signature": "governanceAuthority()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamGasParameterHost.sol:StreamGasParameterHost#function:0x5c0df7da",
+          "declaringDefinitionId": "smart-contracts/StreamGasParameterHost.sol:StreamGasParameterHost",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "newValue",
+              "type": "uint256"
+            }
+          ],
+          "name": "raiseGasParameter",
+          "outputs": [],
+          "selector": "0x5c0df7da",
+          "signature": "raiseGasParameter(bytes32,uint256)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(address,GasParameterConfig[])",
+          "functionKind": "constructor",
+          "id": "smart-contracts/StreamGasParameterStore.sol:StreamGasParameterStore#function:constructor(address,GasParameterConfig[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authority",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "configs",
+              "storageLocation": "memory",
+              "type": "GasParameterConfig[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUdhc1BhcmFtZXRlclN0b3JlLnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZSNmdW5jdGlvbjpjb25zdHJ1Y3RvcihhZGRyZXNzLEdhc1BhcmFtZXRlckNvbmZpZ1tdKQ",
+          "kind": "function",
+          "modifiers": [
+            "StreamGasParameterHost"
+          ],
+          "name": "constructor",
+          "natspec": "@param authority Canonical Governance-V2 executor, or zero for an\n        immutable-after-deployment store.\n @param configs The full parameter inventory hosted by this store.",
+          "outputs": [],
+          "range": {
+            "byteLength": 319,
+            "byteStart": 595,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamGasParameterStore.sol#L13-L23",
+            "lineEnd": 23,
+            "lineStart": 13,
+            "snippetSha256": "sha256:30dc7fea6191c7308d545c5b8f55e4adc4cc3f96fe71a93500f6ad39bfe14b9e",
+            "sourceSha256": "sha256:0abeb30427f45c954d6f409cd4ef84d2cd4cb3697d117f03ba0b8c2a7fe362b1"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/StreamGasParameterStore.sol:StreamGasParameterStore",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/StreamGasParameterHost.sol:StreamGasParameterHost",
+        "name": "StreamGasParameterHost"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUdhc1BhcmFtZXRlclN0b3JlLnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZQ",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "smart-contracts/StreamGasParameterStore.sol:StreamGasParameterStore",
+      "smart-contracts/StreamGasParameterHost.sol:StreamGasParameterHost",
+      "smart-contracts/IStreamGasParameterHost.sol:IStreamGasParameterHost"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamGasParameterStore",
+    "natspec": "@notice Standalone deployable launch-v1 Governed Gas Parameter store.\n @dev The parameter set is fixed in the constructor. Values are storage-backed\n      and may only increase through delayed, bounded Governance-V2 actions.",
+    "range": {
+      "byteLength": 583,
+      "byteStart": 333,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamGasParameterStore.sol#L9-L24",
+      "lineEnd": 24,
+      "lineStart": 9,
+      "snippetSha256": "sha256:80e5956790eaa40e94b1c8e640236a956f9d9121531566715a26d55672eb913f",
+      "sourceSha256": "sha256:0abeb30427f45c954d6f409cd4ef84d2cd4cb3697d117f03ba0b8c2a7fe362b1"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/StreamGasParameterStore.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

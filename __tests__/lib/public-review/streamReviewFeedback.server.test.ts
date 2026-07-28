@@ -13,6 +13,7 @@ import {
 import type { SolidityReferenceManifest } from "@/lib/public-review/solidityReferenceTypes";
 import {
   STREAM_REVIEW_PAGES,
+  STREAM_REVIEW_PREVIOUS_VERSION,
   STREAM_REVIEW_SLUG,
   STREAM_REVIEW_VERSION,
 } from "@/lib/public-review/streamReviewDefinition";
@@ -30,10 +31,12 @@ const SOURCE_SHA256 = "a".repeat(64);
 const DESTINATIONS_ENV = "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS";
 const STAGING_WAVE_ID = "22222222-2222-4222-8222-222222222222";
 
-function makeManifest(): SolidityReferenceManifest {
+function makeManifest(
+  reviewVersion = STREAM_REVIEW_VERSION
+): SolidityReferenceManifest {
   return {
     reviewId: STREAM_REVIEW_SLUG,
-    reviewVersion: STREAM_REVIEW_VERSION,
+    reviewVersion,
     source: {
       repository: "https://github.com/6529-Collections/6529Stream",
       commit: SOURCE_COMMIT,
@@ -130,6 +133,22 @@ describe("Stream review feedback manifest binding", () => {
         version: "not-a-retained-version",
       })
     ).toThrow("Feedback page does not belong to this review version.");
+  });
+
+  it("keeps the previous version readable while closing its feedback policy", async () => {
+    const config = await createStreamReviewFeedbackConfig({
+      manifest: makeManifest(STREAM_REVIEW_PREVIOUS_VERSION),
+    });
+
+    expect(config.reviewVersion).toBe(STREAM_REVIEW_PREVIOUS_VERSION);
+    expect(config.submissionsOpen).toBe(false);
+    expect(config.acceptsPublicExploitReports).toBe(false);
+    expect(config.pages).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ value: "overview" }),
+        expect.objectContaining({ value: "reference-function" }),
+      ])
+    );
   });
 
   it("rejects a file that is absent from the exact manifest", async () => {
