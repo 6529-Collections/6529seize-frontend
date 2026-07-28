@@ -27,6 +27,14 @@ operation to be terminal. Both lanes `OFF` means full manual fallback after both
 drain gates. Raw `RELEASE_BUS_V2_MODE` and `ALL` remain internal emergency
 fences; they are not normal routing or UI controls and must never be bypassed.
 
+There is no inferred control-plane or self-upgrade exception. While a target
+lane is `ON`, every deploy for that environment—including API, `releaseBus`,
+cleaner/reconciler, and other control-plane changes—must be an authenticated
+Release Bus operation. Manual workflow dispatch is fallback only after the
+helper authoritatively reports the affected lane `OFF` and the drain gate
+passes. If Release Bus cannot safely self-deploy while `ON`, stop for explicit
+owner direction; never infer an exception from the component or GitHub actor.
+
 ## Dashboard read model
 
 `/deploy/ui/bus` presents Staging and Production as the two developer-facing
@@ -203,10 +211,20 @@ operation identities and never repeat completed mutations.
 
 ## Operator rollout and rollback
 
-Deploy additive changes in this order: database migrations, API/UI, then the v2
-reconciler. Run the old status helper before migration/API mutation; after the
-API is live, use the new helper, which requires both effective lane states and
-the authoritative `staging_state`. Do not deploy the cumulative reconciler
+Deploy additive changes in this compatibility order: database migrations,
+API/UI, then the v2 reconciler. The effective lane still decides how every step
+is dispatched. While the target lane is `ON`, register the exact rollout
+candidate and express API-before-reconciler ordering in its Release Bus deploy
+plan; the bus must dispatch each workflow with its valid operation identity.
+Do not manually dispatch API or `releaseBus` merely because the bus is
+upgrading itself. Manual fallback is available only after the helper
+authoritatively reports the affected lane `OFF` and its drain gate passes. If a
+safe self-deploy path cannot be proven while `ON`, stop for explicit owner
+direction.
+
+Run the old status helper before any compatible migration/API mutation; after
+the API is live, use the new helper, which requires both effective lane states
+and the authoritative `staging_state`. Do not deploy the cumulative reconciler
 before both migration and API are live. During offline and synthetic
 validation, keep both effective lanes `OFF` with the internal hard stop. For
 staging beta, expose only staging as `ON`; keep production `OFF`. Turn

@@ -11,6 +11,14 @@
   the target environment lock is free, no mutation/E2E workflow is active, and
   every already-dispatched exact operation is terminal. Both lanes `OFF` means
   full manual fallback.
+- There is no inferred control-plane or self-upgrade exception. While a target
+  lane is `ON`, every deploy for that environment—including API,
+  `releaseBus`, cleaner/reconciler, and other control-plane changes—must go
+  through Release Bus with a valid operation identity. A manual workflow is
+  fallback only after the helper authoritatively reports the affected lane
+  `OFF` and its drain gate passes. If Release Bus cannot safely self-deploy
+  while `ON`, stop for explicit owner direction; never infer an exception from
+  the component or GitHub actor.
 - Staging `ON` accepts exact candidates. Production `ON` requires a separate
   exact-SHA production action after `STAGING_VALIDATED`.
 - Raw mode and `ALL` are internal emergency fences, not normal routing or UI

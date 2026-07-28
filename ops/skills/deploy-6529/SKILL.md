@@ -27,6 +27,15 @@ Raw mode and `ALL` are internal emergency fences. They are verified by the
 helper but are not normal routing or UI controls. Do not bypass an internal
 fence. Both lanes `OFF` means full manual fallback after both drain gates.
 
+There is no inferred control-plane or self-upgrade exception. When a target
+lane is `ON`, every deployment for that environment—including API,
+`releaseBus`, cleaner/reconciler, and other control-plane changes—must be an
+authenticated Release Bus operation. Do not manually dispatch a target
+environment workflow while its lane is `ON`. Manual fallback exists only when
+the helper authoritatively reports the affected lane `OFF` and its drain gate
+passes. If Release Bus cannot safely self-deploy while `ON`, stop for explicit
+owner direction; never infer an exception from the component or GitHub actor.
+
 ## V2 readiness
 
 1. Require an open PR whose exact head and green merge-tree checks are current.
@@ -91,9 +100,11 @@ and never publishes release notes.
   idempotent operation. They do not isolate candidates.
 - A merge conflict marks only the direct candidate `NEEDS_REBASE` and holds
   transitive dependants. Fix the branch and register its new SHA.
-- A control-plane defect turns the affected automation lane off and leaves
-  candidates unblamed. Keep exact state, wait for its drain gate, use manual
-  fallback for that environment, and turn the lane on explicitly after repair.
+- A control-plane defect leaves candidates unblamed. If the supported,
+  authorized recovery procedure turns the affected automation lane off, keep
+  exact state and wait for its drain gate before using manual fallback; turn
+  the lane on explicitly after repair. If the lane remains `ON`, do not infer a
+  self-upgrade exception—stop for explicit owner direction.
 - Use the backend fast-off helper only for an emergency hard stop of both
   lanes. Its raw mode and `ALL` changes are intentionally absent from normal UI
   and routing.

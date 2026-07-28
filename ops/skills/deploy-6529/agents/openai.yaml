@@ -1,4 +1,4 @@
 interface:
   display_name: "Deploy 6529"
   short_description: "Route exact releases by effective lane state."
-  default_prompt: "Use $deploy-6529 to route, deploy, validate, and recover an exact 6529 frontend, backend, or coupled release."
+  default_prompt: "Use $deploy-6529 to route, deploy, validate, and recover an exact 6529 frontend, backend, or coupled release; while a lane is ON, route every deploy through Release Bus with no self-upgrade exception."
