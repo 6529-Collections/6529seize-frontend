@@ -144,13 +144,22 @@ describe("pr-ci-policy-bundle-v1", () => {
   it("fails closed on missing paths, duplicate paths, and oversized bundles", () => {
     withFixture((root) => {
       expect(() => fixtureBundle(root, { filePaths: ["missing.cjs"] })).toThrow(
-        "protected path is missing: missing.cjs"
+        "protected path missing.cjs is missing"
       );
       expect(() =>
         fixtureBundle(root, { filePaths: ["a.cjs", "a.cjs"] })
       ).toThrow("duplicate file path: a.cjs");
       expect(() => fixtureBundle(root, { maxCanonicalBytes: 1 })).toThrow(
         "canonical bytes"
+      );
+    });
+  });
+
+  it("rejects a protected path that is replaced by a symbolic link", () => {
+    withFixture((root) => {
+      fs.symlinkSync(path.join(root, "z.mjs"), path.join(root, "linked.cjs"));
+      expect(() => fixtureBundle(root, { filePaths: ["linked.cjs"] })).toThrow(
+        "protected path linked.cjs is not a regular file"
       );
     });
   });
