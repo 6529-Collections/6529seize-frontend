@@ -1,0 +1,654 @@
+import crypto from "node:crypto";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { execFileSync, spawnSync } from "node:child_process";
+import YAML from "yaml";
+
+const ROOT = process.cwd();
+const EXPECTED_SHA = "a".repeat(40);
+const TRAIN_ID = "compatibility-train";
+
+type WorkflowStep = {
+  name?: string;
+  run?: string;
+  uses?: string;
+};
+
+function readWorkflow(name: string) {
+  return YAML.parse(
+    fs.readFileSync(path.join(ROOT, ".github", "workflows", name), "utf8")
+  );
+}
+
+function modelWorkflowDispatch(
+  workflow: any,
+  supplied: Record<string, string>
+) {
+  const inputs = workflow.on.workflow_dispatch.inputs as Record<
+    string,
+    { required?: boolean; default?: string; options?: string[] }
+  >;
+  const unsupported = Object.keys(supplied)
+    .filter((key) => !Object.prototype.hasOwnProperty.call(inputs, key))
+    .sort();
+  if (unsupported.length > 0) {
+    return { accepted: false, unsupported, resolved: {} };
+  }
+  const resolved: Record<string, string> = {};
+  for (const [key, contract] of Object.entries(inputs)) {
+    const value = supplied[key] ?? contract.default;
+    if (contract.required && (value === undefined || value === "")) {
+      return { accepted: false, unsupported: [], resolved: {} };
+    }
+    if (
+      value !== undefined &&
+      contract.options &&
+      !contract.options.includes(value)
+    ) {
+      return { accepted: false, unsupported: [], resolved: {} };
+    }
+    resolved[key] = value ?? "";
+  }
+  return { accepted: true, unsupported: [], resolved };
+}
+
+function findStep(workflow: any, job: string, name: string): WorkflowStep {
+  const step = workflow.jobs[job].steps.find(
+    (candidate: WorkflowStep) => candidate.name === name
+  );
+  if (!step?.run) {
+    throw new Error(`Missing executable workflow step: ${job}/${name}`);
+  }
+  return step;
+}
+
+function runShell(
+  source: string,
+  {
+    cwd = ROOT,
+    env = {},
+  }: { cwd?: string; env?: Record<string, string | undefined> } = {}
+) {
+  return spawnSync("bash", ["-c", source], {
+    cwd,
+    encoding: "utf8",
+    env: { ...process.env, ...env } as NodeJS.ProcessEnv,
+    timeout: 20_000,
+  });
+}
+
+function sha256(value: string | Buffer) {
+  return crypto.createHash("sha256").update(value).digest("hex");
+}
+
+function writeArtifact(
+  root: string,
+  environment: "staging" | "production",
+  schema: 2 | 3,
+  overrides: Record<string, unknown> = {}
+) {
+  const artifactRoot = path.join(root, "release-bus-artifact");
+  fs.mkdirSync(artifactRoot, { recursive: true });
+  const files = new Map<string, Buffer>();
+  let manifest: Record<string, unknown>;
+  if (schema === 2) {
+    const staging = Buffer.from("staging-package");
+    const production = Buffer.from("production-package");
+    files.set("profiles/staging/target/package.zip", staging);
+    files.set("profiles/production/target/package.zip", production);
+    manifest = {
+      schema_version: 2,
+      repository: "frontend",
+      train_id: TRAIN_ID,
+      source_sha: EXPECTED_SHA,
+      environment: "dual",
+      profiles: {
+        staging: { package_sha256: sha256(staging) },
+        production: { package_sha256: sha256(production) },
+      },
+      ...overrides,
+    };
+  } else {
+    const packageBytes = Buffer.from(`${environment}-v3-package`);
+    files.set("target/package.zip", packageBytes);
+    manifest = {
+      schema_version: 3,
+      artifact_contract: "environment-bound-v1",
+      artifact_contract_version: "environment-bound-v3",
+      repository: "frontend",
+      train_id: TRAIN_ID,
+      source_sha: EXPECTED_SHA,
+      environment,
+      source_evidence_reused: true,
+      artifact_bytes_reused: false,
+      package_sha256: sha256(packageBytes),
+      ...overrides,
+    };
+  }
+  files.set("manifest.json", Buffer.from(JSON.stringify(manifest)));
+  for (const [relativePath, bytes] of files) {
+    const destination = path.join(artifactRoot, relativePath);
+    fs.mkdirSync(path.dirname(destination), { recursive: true });
+    fs.writeFileSync(destination, bytes);
+  }
+  const checksumLines = [...files.entries()]
+    .sort(([left], [right]) =>
+      Buffer.compare(Buffer.from(left, "utf8"), Buffer.from(right, "utf8"))
+    )
+    .map(([relativePath, bytes]) => `${sha256(bytes)}  ./${relativePath}\n`)
+    .join("");
+  fs.writeFileSync(path.join(artifactRoot, "SHA256SUMS"), checksumLines);
+  return sha256(checksumLines);
+}
+
+function deployEnv(
+  environment: "staging" | "production",
+  artifactDigest: string,
+  contract: "legacy-v2" | "environment-bound-v3"
+) {
+  return {
+    ARTIFACT_CONTRACT_VERSION: contract,
+    ARTIFACT_ENVIRONMENT: environment,
+    ARTIFACT_RUN_ID: "1234",
+    ARTIFACT_TRAIN_ID: TRAIN_ID,
+    EXPECTED_ARTIFACT_DIGEST: artifactDigest,
+    EXPECTED_SHA,
+    GITHUB_OUTPUT: path.join(os.tmpdir(), `compat-output-${process.pid}`),
+    OPERATION_KEY: "rb2:compatibility:a1",
+    RELEASE_CONTRIBUTORS: "[]",
+    SOURCE_REF: "release-bus-v2/compatibility",
+    TRAIN_ID,
+    TRAIN_REVISION: "1",
+  };
+}
+
+function createStrictEvidence(root: string, mergeSha: string) {
+  const evidenceRoot = path.join(root, "evidence-source");
+  fs.mkdirSync(evidenceRoot);
+  const policyBundle = `file\ta.cjs\t${"c".repeat(40)}\n`;
+  const manifest = JSON.stringify({
+    schema_version: 1,
+    evidence_contract: "exact-merge-tree-pr-ci-v1",
+    repository: "frontend",
+    event: "pull_request",
+    workflow: ".github/workflows/app-pr-ci.yml",
+    merge_sha: mergeSha,
+    head_sha: "e".repeat(40),
+    production_build_required: true,
+    policy_bundle_contract: "pr-ci-policy-bundle-v1",
+    policy_bundle_digest: sha256(policyBundle),
+    policy_bundle_line_count: 1,
+    required_gates: [
+      "package-manager-discipline",
+      "dependency-analysis",
+      "reviewbot-contract",
+      "generated-agent-files",
+      "release-bus-workflow-contract",
+      "changed-lint",
+      "changed-typecheck",
+      "test-typecheck",
+      "related-jest-selection",
+      "production-build-or-plan-not-required",
+      "pr-ci-policy-bundle",
+    ],
+  });
+  fs.writeFileSync(path.join(evidenceRoot, "manifest.json"), manifest);
+  fs.writeFileSync(path.join(evidenceRoot, "policy-bundle.txt"), policyBundle);
+  fs.writeFileSync(
+    path.join(evidenceRoot, "SHA256SUMS"),
+    `${sha256(manifest)}  ./manifest.json\n${sha256(
+      policyBundle
+    )}  ./policy-bundle.txt\n`
+  );
+  return evidenceRoot;
+}
+
+function createMockGh(root: string) {
+  const bin = path.join(root, "bin");
+  fs.mkdirSync(bin);
+  const executable = path.join(bin, "gh");
+  fs.writeFileSync(
+    executable,
+    `#!/usr/bin/env bash
+set -euo pipefail
+if [ "$1" = api ] && [[ "$2" == *"/artifacts?name="* ]]; then
+  printf '{"artifacts":[{"expired":false,"name":"%s","digest":"sha256:%s"}]}\n' "$MOCK_ARTIFACT_NAME" "$MOCK_ARTIFACT_DIGEST"
+elif [ "$1" = api ]; then
+  printf '{"event":"pull_request","conclusion":"success","head_sha":"%s","path":".github/workflows/app-pr-ci.yml"}\n' "$MOCK_MERGE_SHA"
+elif [ "$1" = run ] && [ "$2" = download ]; then
+  destination=""
+  while [ "$#" -gt 0 ]; do
+    if [ "$1" = --dir ]; then destination="$2"; break; fi
+    shift
+  done
+  test -n "$destination"
+  mkdir -p "$destination"
+  cp "$MOCK_EVIDENCE_SOURCE"/* "$destination/"
+else
+  exit 64
+fi
+`
+  );
+  fs.chmodSync(executable, 0o755);
+  return bin;
+}
+
+function createMockCurl(bin: string) {
+  const executable = path.join(bin, "curl");
+  fs.writeFileSync(
+    executable,
+    `#!/usr/bin/env bash
+set -euo pipefail
+while [ "$#" -gt 0 ]; do
+  if [ "$1" = --data ]; then
+    printf '%s' "$2" > "$MOCK_CURL_PAYLOAD"
+    exit 0
+  fi
+  shift
+done
+exit 64
+`
+  );
+  fs.chmodSync(executable, 0o755);
+}
+
+function createMockRefGh(root: string) {
+  const bin = path.join(root, "bin");
+  fs.mkdirSync(bin);
+  const executable = path.join(bin, "gh");
+  fs.writeFileSync(
+    executable,
+    `#!/usr/bin/env bash
+set -euo pipefail
+if [ "\${MOCK_GH_FAIL:-0}" = 1 ]; then
+  exit 1
+fi
+printf '{"object":{"type":"commit","sha":"%s"}}\n' "$MOCK_REF_SHA"
+`
+  );
+  fs.chmodSync(executable, 0o755);
+  return bin;
+}
+
+describe("Release Bus artifact rollout compatibility", () => {
+  it("fails new-producer to old-workflow dispatch before jobs and maps old omissions only to legacy defaults", () => {
+    const oldWorkflow = YAML.parse(
+      execFileSync(
+        "git",
+        ["show", "origin/main:.github/workflows/release-bus-v2-preflight.yml"],
+        { cwd: ROOT, encoding: "utf8" }
+      )
+    );
+    const newWorkflow = readWorkflow("release-bus-v2-preflight.yml");
+    const oldProducerInputs = {
+      release_train_id: TRAIN_ID,
+      release_train_revision: "1",
+      operation_key: "rb2:compatibility:a1",
+      source_ref: "release-bus-v2/compatibility",
+      expected_sha: EXPECTED_SHA,
+      deploy_units: "[]",
+      artifact_environment: "staging",
+      reuse_artifact_run_id: "",
+      reuse_artifact_name: "",
+      reuse_artifact_digest: "",
+    };
+    const newProducerToOld = modelWorkflowDispatch(oldWorkflow, {
+      ...oldProducerInputs,
+      artifact_contract_version: "environment-bound-v3",
+      candidate_evidence_mode: "strict-aggregate",
+      aggregate_candidate_evidence_digest: "f".repeat(64),
+    });
+    expect(newProducerToOld).toEqual({
+      accepted: false,
+      unsupported: [
+        "aggregate_candidate_evidence_digest",
+        "artifact_contract_version",
+        "candidate_evidence_mode",
+      ],
+      resolved: {},
+    });
+
+    const oldProducerToNew = modelWorkflowDispatch(
+      newWorkflow,
+      oldProducerInputs
+    );
+    expect(oldProducerToNew.accepted).toBe(true);
+    expect(oldProducerToNew.resolved).toMatchObject({
+      artifact_contract_version: "legacy-v2",
+      candidate_evidence_mode: "legacy-whole-train",
+      aggregate_candidate_evidence_digest: "",
+    });
+  });
+
+  for (const environment of ["staging", "production"] as const) {
+    const workflowName = `release-bus-deploy-${environment}.yml`;
+
+    it(`${environment} executably accepts schema2 only for the same train before credentials`, () => {
+      const workflow = readWorkflow(workflowName);
+      const validate = findStep(
+        workflow,
+        "deploy",
+        "Validate dispatch inputs before using credentials"
+      );
+      const verify = findStep(
+        workflow,
+        "deploy",
+        "Verify and bind immutable artifact"
+      );
+      const steps: WorkflowStep[] = workflow.jobs.deploy.steps;
+      const validateIndex = steps.indexOf(validate);
+      const credentialIndex = steps.findIndex(
+        (step) => step.name === "Configure AWS credentials"
+      );
+      expect(validateIndex).toBeLessThan(credentialIndex);
+
+      const root = fs.mkdtempSync(
+        path.join(os.tmpdir(), `release-bus-${environment}-schema2-`)
+      );
+      try {
+        const digest = writeArtifact(root, environment, 2);
+        const env = deployEnv(environment, digest, "legacy-v2");
+        expect(runShell(validate.run!, { env }).status).toBe(0);
+        expect(runShell(verify.run!, { cwd: root, env }).status).toBe(0);
+
+        const crossTrain = runShell(validate.run!, {
+          env: { ...env, ARTIFACT_TRAIN_ID: "different-train" },
+        });
+        expect(crossTrain.status).not.toBe(0);
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
+    });
+
+    it(`${environment} executably accepts exact v3 and rejects the wrong environment`, () => {
+      const workflow = readWorkflow(workflowName);
+      const verify = findStep(
+        workflow,
+        "deploy",
+        "Verify and bind immutable artifact"
+      );
+      const root = fs.mkdtempSync(
+        path.join(os.tmpdir(), `release-bus-${environment}-schema3-`)
+      );
+      try {
+        const digest = writeArtifact(root, environment, 3);
+        const env = deployEnv(environment, digest, "environment-bound-v3");
+        expect(runShell(verify.run!, { cwd: root, env }).status).toBe(0);
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
+
+      const mismatchRoot = fs.mkdtempSync(
+        path.join(os.tmpdir(), `release-bus-${environment}-mismatch-`)
+      );
+      try {
+        const wrongEnvironment =
+          environment === "staging" ? "production" : "staging";
+        const digest = writeArtifact(mismatchRoot, environment, 3, {
+          environment: wrongEnvironment,
+        });
+        const env = deployEnv(environment, digest, "environment-bound-v3");
+        expect(
+          runShell(verify.run!, { cwd: mismatchRoot, env }).status
+        ).not.toBe(0);
+      } finally {
+        fs.rmSync(mismatchRoot, { recursive: true, force: true });
+      }
+    });
+
+    it(`${environment} distinguishes ref movement and reports exact artifact consumption`, () => {
+      const workflow = readWorkflow(`release-bus-deploy-${environment}.yml`);
+      const source = findStep(
+        workflow,
+        "deploy",
+        environment === "staging"
+          ? "Verify immutable staging ref without checkout"
+          : "Confirm immutable production ref without checkout"
+      );
+      const report = findStep(
+        workflow,
+        "deploy",
+        "Report structured Release Bus deployment result"
+      );
+      const root = fs.mkdtempSync(
+        path.join(os.tmpdir(), `release-bus-${environment}-source-`)
+      );
+      try {
+        const mockBin = createMockRefGh(root);
+        createMockCurl(mockBin);
+        const sourceOutput = path.join(root, "source-output");
+        const curlPayload = path.join(root, "report-payload.json");
+        const sourceEnv = {
+          EXPECTED_SHA,
+          GITHUB_OUTPUT: sourceOutput,
+          GITHUB_REPOSITORY: "6529-Collections/6529seize-frontend",
+          MOCK_REF_SHA: EXPECTED_SHA,
+          PATH: `${mockBin}:${process.env["PATH"]}`,
+        };
+        expect(runShell(source.run!, { env: sourceEnv }).status).toBe(0);
+        expect(fs.readFileSync(sourceOutput, "utf8")).toContain(
+          "failure_kind="
+        );
+
+        fs.writeFileSync(sourceOutput, "");
+        expect(
+          runShell(source.run!, {
+            env: { ...sourceEnv, MOCK_REF_SHA: "b".repeat(40) },
+          }).status
+        ).not.toBe(0);
+        expect(fs.readFileSync(sourceOutput, "utf8")).toContain(
+          "failure_kind=ref-moved"
+        );
+        fs.writeFileSync(sourceOutput, "");
+        expect(
+          runShell(source.run!, {
+            env: { ...sourceEnv, MOCK_GH_FAIL: "1" },
+          }).status
+        ).not.toBe(0);
+        expect(fs.readFileSync(sourceOutput, "utf8")).toContain(
+          "failure_kind=api"
+        );
+
+        const reportEnv = {
+          ARTIFACT_CONTRACT: "environment-bound-v1",
+          ARTIFACT_CONTRACT_VERSION: "environment-bound-v3",
+          ARTIFACT_DIGEST: "c".repeat(64),
+          ARTIFACT_ENVIRONMENT: environment,
+          ARTIFACT_OUTCOME: "success",
+          ARTIFACT_RUN_ID: "1234",
+          ARTIFACT_TRAIN_ID: TRAIN_ID,
+          AWS_OUTCOME: "success",
+          DOWNLOAD_OUTCOME: "success",
+          EVIDENCE_OUTCOME: "success",
+          EXPECTED_SHA,
+          GITHUB_RUN_ID: "9876",
+          JOB_STATUS: "success",
+          MOCK_CURL_PAYLOAD: curlPayload,
+          OPERATION_KEY: "rb2:compatibility:a1",
+          PACKAGE_DIGEST: "d".repeat(64),
+          PATH: `${mockBin}:${process.env["PATH"]}`,
+          RELEASE_BUS_API_URL: "https://release-bus.invalid",
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: "test-token",
+          SCHEMA_VERSION: "3",
+          SOURCE_FAILURE_KIND: "",
+          SOURCE_OUTCOME: "success",
+          TRAIN_ID,
+        };
+        expect(runShell(report.run!, { env: reportEnv }).status).toBe(0);
+        expect(JSON.parse(fs.readFileSync(curlPayload, "utf8"))).toMatchObject({
+          status: "SUCCEEDED",
+          summary: {
+            schema_version: 3,
+            artifact_contract: "environment-bound-v1",
+            artifact_contract_version: "environment-bound-v3",
+            repository: "frontend",
+            source_sha: EXPECTED_SHA,
+            environment,
+            service: null,
+            artifact_run_id: "1234",
+            artifact_train_id: TRAIN_ID,
+            artifact_digest: "c".repeat(64),
+            package_digest: "d".repeat(64),
+            consumed_preflight_artifact: true,
+            rebuilt: false,
+            source_evidence_reused: true,
+            artifact_bytes_reused: false,
+          },
+        });
+
+        expect(
+          runShell(report.run!, {
+            env: {
+              ...reportEnv,
+              ARTIFACT_CONTRACT: "",
+              ARTIFACT_DIGEST: "",
+              ARTIFACT_OUTCOME: "skipped",
+              JOB_STATUS: "failure",
+              PACKAGE_DIGEST: "",
+              SCHEMA_VERSION: "",
+              SOURCE_FAILURE_KIND: "ref-moved",
+              SOURCE_OUTCOME: "failure",
+            },
+          }).status
+        ).toBe(0);
+        expect(JSON.parse(fs.readFileSync(curlPayload, "utf8"))).toMatchObject({
+          status: "FAILED",
+          failure_class: "INTERACTION",
+          failure_phase: "source_ref_moved",
+          retryable: false,
+          summary: {
+            artifact_digest: null,
+            package_digest: null,
+            consumed_preflight_artifact: false,
+            rebuilt: false,
+            source_evidence_reused: true,
+            artifact_bytes_reused: false,
+          },
+        });
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
+    });
+  }
+
+  it("executably enforces explicit single, aggregate, and legacy evidence modes", () => {
+    const workflow = readWorkflow("release-bus-v2-preflight.yml");
+    const validate = findStep(
+      workflow,
+      "authorize",
+      "Validate exact inputs and CI evidence"
+    );
+    const authorize = findStep(
+      workflow,
+      "authorize",
+      "Authorize exact v2 operation"
+    );
+    const root = fs.mkdtempSync(
+      path.join(os.tmpdir(), "release-bus-evidence-mode-")
+    );
+    try {
+      const mergeSha = "b".repeat(40);
+      const artifactDigest = "d".repeat(64);
+      const artifactName = `release-bus-v2-pr-${mergeSha}`;
+      const evidenceSource = createStrictEvidence(root, mergeSha);
+      const mockBin = createMockGh(root);
+      createMockCurl(mockBin);
+      const curlPayload = path.join(root, "authorize-payload.json");
+      const baseEnv = {
+        AGGREGATE_CANDIDATE_EVIDENCE_DIGEST: "",
+        ARTIFACT_CONTRACT_VERSION: "environment-bound-v3",
+        ARTIFACT_ENVIRONMENT: "staging",
+        CANDIDATE_EVIDENCE_MODE: "strict-single",
+        DEPLOY_UNITS: "[]",
+        EXPECTED_SHA: execFileSync("git", ["rev-parse", "HEAD"], {
+          cwd: ROOT,
+          encoding: "utf8",
+        }).trim(),
+        GITHUB_REPOSITORY: "6529-Collections/6529seize-frontend",
+        MOCK_ARTIFACT_DIGEST: artifactDigest,
+        MOCK_ARTIFACT_NAME: artifactName,
+        MOCK_CURL_PAYLOAD: curlPayload,
+        MOCK_EVIDENCE_SOURCE: evidenceSource,
+        MOCK_MERGE_SHA: mergeSha,
+        OPERATION_KEY: "rb2:compatibility:a1",
+        PATH: `${mockBin}:${process.env["PATH"]}`,
+        REUSE_ARTIFACT_DIGEST: artifactDigest,
+        REUSE_ARTIFACT_NAME: artifactName,
+        REUSE_ARTIFACT_RUN_ID: "1234",
+        RUNNER_TEMP: path.join(root, "runner"),
+        SOURCE_REF: "release-bus-v2/compatibility",
+        TRAIN_ID,
+        TRAIN_REVISION: "1",
+      };
+
+      expect(runShell(validate.run!, { env: baseEnv }).status).toBe(0);
+      expect(
+        runShell(validate.run!, {
+          env: {
+            ...baseEnv,
+            REUSE_ARTIFACT_DIGEST: "",
+            REUSE_ARTIFACT_NAME: "",
+            REUSE_ARTIFACT_RUN_ID: "",
+          },
+        }).status
+      ).not.toBe(0);
+      expect(
+        runShell(validate.run!, {
+          env: {
+            ...baseEnv,
+            AGGREGATE_CANDIDATE_EVIDENCE_DIGEST: "f".repeat(64),
+            CANDIDATE_EVIDENCE_MODE: "strict-aggregate",
+            REUSE_ARTIFACT_DIGEST: "",
+            REUSE_ARTIFACT_NAME: "",
+            REUSE_ARTIFACT_RUN_ID: "",
+          },
+        }).status
+      ).toBe(0);
+      expect(
+        runShell(authorize.run!, {
+          env: {
+            ...baseEnv,
+            AGGREGATE_CANDIDATE_EVIDENCE_DIGEST: "f".repeat(64),
+            CANDIDATE_EVIDENCE_MODE: "strict-aggregate",
+            EXPECTED_SHA: EXPECTED_SHA,
+            GITHUB_RUN_ID: "9876",
+            RELEASE_BUS_API_URL: "https://release-bus.invalid",
+            RELEASE_BUS_WORKFLOW_AUTH_TOKEN: "test-token",
+          },
+        }).status
+      ).toBe(0);
+      expect(JSON.parse(fs.readFileSync(curlPayload, "utf8"))).toMatchObject({
+        train_id: TRAIN_ID,
+        expected_sha: EXPECTED_SHA,
+        candidate_evidence_mode: "strict-aggregate",
+        aggregate_candidate_evidence_digest: "f".repeat(64),
+      });
+      expect(
+        runShell(validate.run!, {
+          env: {
+            ...baseEnv,
+            CANDIDATE_EVIDENCE_MODE: "",
+            REUSE_ARTIFACT_DIGEST: "",
+            REUSE_ARTIFACT_NAME: "",
+            REUSE_ARTIFACT_RUN_ID: "",
+          },
+        }).status
+      ).not.toBe(0);
+      expect(
+        runShell(validate.run!, {
+          env: {
+            ...baseEnv,
+            ARTIFACT_CONTRACT_VERSION: "legacy-v2",
+            CANDIDATE_EVIDENCE_MODE: "legacy-whole-train",
+            REUSE_ARTIFACT_DIGEST: "",
+            REUSE_ARTIFACT_NAME: "",
+            REUSE_ARTIFACT_RUN_ID: "",
+          },
+        }).status
+      ).toBe(0);
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+});

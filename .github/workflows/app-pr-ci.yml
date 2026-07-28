@@ -237,35 +237,19 @@ jobs:
         run: ./bin/6529 run test:no-coverage -- __tests__/scripts/sync-agent-files.test.ts
 
       - name: Verify Release Bus v2 workflow contract
-        env:
-          BASE_REF: ${{ github.base_ref }}
         run: |
           set -euo pipefail
-          if git diff --quiet "origin/${BASE_REF}...HEAD" -- \
-            .github/workflows/app-pr-ci.yml \
-            .github/workflows/release-bus-*.yml \
-            .github/workflows/staging-e2e.yml \
-            .github/workflows/production-e2e.yml \
-            playwright.config.ts \
-            scripts/e2e-packs.cjs \
-            scripts/release-bus-install-dependencies.cjs \
-            scripts/sync-e2e-manifest.cjs \
-            tests/packs.manifest.cjs \
-            ops/deployment-bus/release-bus-performance-contract.v1.json \
-            __tests__/scripts/e2e-packs.test.ts \
-            __tests__/scripts/release-bus-install-dependencies.test.ts \
-            __tests__/scripts/deployment-bus.test.ts \
-            __tests__/scripts/release-bus-performance-contract.test.ts \
-            __tests__/scripts/sync-e2e-manifest.test.ts; then
-            echo "Release Bus v2 workflow files are unchanged."
-            exit 0
-          fi
           ./bin/6529 run test:no-coverage --runInBand --runTestsByPath \
+            __tests__/scripts/pr-ci-policy-bundle.test.ts \
             __tests__/scripts/deployment-bus.test.ts \
             __tests__/scripts/e2e-packs.test.ts \
+            __tests__/scripts/package-public-review-artifacts.test.ts \
+            __tests__/scripts/release-bus-artifact-compatibility.test.ts \
             __tests__/scripts/release-bus-performance-contract.test.ts \
+            __tests__/scripts/release-bus-v2-compose-workflow.test.ts \
             __tests__/scripts/sync-e2e-manifest.test.ts \
-            __tests__/scripts/release-bus-install-dependencies.test.ts
+            __tests__/scripts/release-bus-install-dependencies.test.ts \
+            ops/scripts/release-bus-status.test.ts
 
       - name: Lint changed source
         if: needs.plan.outputs.lint_changed_required == 'true'
@@ -430,9 +414,21 @@ jobs:
           test "$(git rev-parse HEAD)" = "$EXPECTED_MERGE_SHA"
           rm -rf release-bus-v2-pr-evidence
           mkdir -p release-bus-v2-pr-evidence
+          policy_bundle="$(node scripts/pr-ci-policy-bundle.cjs \
+            --expected-git-ref "$EXPECTED_MERGE_SHA" \
+            --output release-bus-v2-pr-evidence/policy-bundle.txt)"
+          policy_bundle_contract="$(jq -er .contract <<< "$policy_bundle")"
+          policy_bundle_digest="$(jq -er .digest <<< "$policy_bundle")"
+          policy_bundle_line_count="$(jq -er .line_count <<< "$policy_bundle")"
+          test "$policy_bundle_contract" = pr-ci-policy-bundle-v1
+          [[ "$policy_bundle_digest" =~ ^[a-f0-9]{64}$ ]]
+          [[ "$policy_bundle_line_count" =~ ^[1-9][0-9]{0,3}$ ]]
           jq -n \
             --arg merge_sha "$EXPECTED_MERGE_SHA" \
             --arg head_sha "$EXPECTED_HEAD_SHA" \
+            --arg policy_bundle_contract "$policy_bundle_contract" \
+            --arg policy_bundle_digest "$policy_bundle_digest" \
+            --argjson policy_bundle_line_count "$policy_bundle_line_count" \
             --argjson build_required "$BUILD_REQUIRED" \
             '{
               schema_version:1,
@@ -443,6 +439,9 @@ jobs:
               merge_sha:$merge_sha,
               head_sha:$head_sha,
               production_build_required:$build_required,
+              policy_bundle_contract:$policy_bundle_contract,
+              policy_bundle_digest:$policy_bundle_digest,
+              policy_bundle_line_count:$policy_bundle_line_count,
               required_gates:[
                 "package-manager-discipline",
                 "dependency-analysis",
@@ -453,10 +452,12 @@ jobs:
                 "changed-typecheck",
                 "test-typecheck",
                 "related-jest-selection",
-                "production-build-or-plan-not-required"
+                "production-build-or-plan-not-required",
+                "pr-ci-policy-bundle"
               ]
             }' > release-bus-v2-pr-evidence/manifest.json
-          (cd release-bus-v2-pr-evidence && sha256sum ./manifest.json > SHA256SUMS)
+          (cd release-bus-v2-pr-evidence && \
+            sha256sum ./manifest.json ./policy-bundle.txt > SHA256SUMS)
 
       - name: Upload exact PR merge-tree CI evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
