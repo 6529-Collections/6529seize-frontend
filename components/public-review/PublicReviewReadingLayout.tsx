@@ -171,16 +171,16 @@ export function PublicReviewReadingLayout({
           >
             {isPanelOpen ? (
               <XMarkIcon
-                className="tw-size-4 tw-transition-colors desktop-hover:group-hover/feedback-toggle:tw-text-primary-200"
+                className="tw-size-4 tw-transition-colors group-hover/feedback-toggle:tw-text-primary-300"
                 aria-hidden="true"
               />
             ) : (
               <ChatBubbleLeftRightIcon
-                className="tw-size-4 tw-transition-colors desktop-hover:group-hover/feedback-toggle:tw-text-primary-200"
+                className="tw-size-4 tw-transition-colors group-hover/feedback-toggle:tw-text-primary-300"
                 aria-hidden="true"
               />
             )}
-            <span className="tw-transition-colors desktop-hover:group-hover/feedback-toggle:tw-text-primary-200">
+            <span className="tw-transition-colors group-hover/feedback-toggle:tw-text-primary-300">
               {t(
                 DEFAULT_LOCALE,
                 isPanelOpen
