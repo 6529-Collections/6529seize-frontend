@@ -33,6 +33,8 @@ export function useManifoldMintConnectedAction({
   merkleProofsMints: readonly boolean[];
   setMintError: (message: string) => void;
 }>) {
+  // Keep these fields aligned with the validation and write arguments in
+  // ManifoldMintingWidget so a changed input cancels the pending mint.
   const contextFingerprint = getConnectedActionFingerprint([
     contract,
     chainId,

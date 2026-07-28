@@ -154,6 +154,8 @@ export default function DropForgeLaunchClaimPageClient({
     payArtistWrite,
     waitPayArtistWrite,
   });
+  // Keep this superset aligned with every value used to build a connected
+  // Drop Forge write so a changed input cancels rather than resumes the action.
   const connectedActionContextFingerprint = getConnectedActionFingerprint([
     claimId,
     forgeMintingChain.id,
