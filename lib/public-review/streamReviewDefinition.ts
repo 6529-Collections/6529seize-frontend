@@ -13,7 +13,7 @@ import {
   STREAM_REVIEW_LIFECYCLE_STATE,
 } from "@/lib/public-review/streamReviewPublication";
 
-export const STREAM_REVIEW_VERSION = "2026-07-28.1";
+export const STREAM_REVIEW_VERSION = "2026-07-28.2";
 export const STREAM_REVIEW_PREVIOUS_VERSION = "2026-07-27.1";
 export const STREAM_REVIEW_INITIAL_VERSION = "2026-07-26.1";
 export const STREAM_REVIEW_SLUG = "6529-stream";

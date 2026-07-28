@@ -32,7 +32,7 @@ const destination: PublicReviewDiscussionDestination = {
 
 const config: PublicReviewFeedbackConfig = {
   reviewId: "6529-stream",
-  reviewVersion: "2026-07-28.1",
+  reviewVersion: "2026-07-28.2",
   reviewTitle: "6529 Stream",
   feedbackSchemaVersion: "1",
   submissionsOpen: true,

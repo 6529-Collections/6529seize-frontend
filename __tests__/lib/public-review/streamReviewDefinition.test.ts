@@ -36,7 +36,7 @@ const EXPECTED_PAGE_TITLES = [
 
 describe("6529 Stream public review definition", () => {
   it("pins the active review version and exact source commit", () => {
-    expect(STREAM_REVIEW_VERSION).toBe("2026-07-28.1");
+    expect(STREAM_REVIEW_VERSION).toBe("2026-07-28.2");
     expect(STREAM_REVIEW_PREVIOUS_VERSION).toBe("2026-07-27.1");
     expect(STREAM_REVIEW_INITIAL_VERSION).toBe("2026-07-26.1");
     expect(STREAM_REVIEW_SOURCE_COMMIT).toBe(

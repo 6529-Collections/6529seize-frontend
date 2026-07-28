@@ -1116,7 +1116,7 @@ function isExpectedPublicReviewMetadata(metadata) {
     typeof context.submissionId === "string" &&
     PUBLIC_REVIEW_CONTEXT_PATTERN.test(context.submissionId) &&
     context.reviewId === "6529-stream" &&
-    context.reviewVersion === "2026-07-28.1" &&
+    context.reviewVersion === "2026-07-28.2" &&
     context.pageId === "overview" &&
     context.sectionId === "a-concrete-1-1-journey"
   );
@@ -1147,8 +1147,8 @@ function isExpectedPublicReviewDropBody(body) {
   const expectedContent = [
     "## Product or UX",
     PUBLIC_REVIEW_COMMENT,
-    "**Review:** 6529 Stream Contract Review (2026-07-28.1)",
-    "**Page:** [Overview](/reviews/6529-stream/versions/2026-07-28.1)",
+    "**Review:** 6529 Stream Contract Review (2026-07-28.2)",
+    "**Page:** [Overview](/reviews/6529-stream/versions/2026-07-28.2)",
     "**Suspected severity:** Medium",
     "**Section:** A concrete 1/1 journey",
     `### Why this matters\n\n${PUBLIC_REVIEW_WHY_IT_MATTERS}`,

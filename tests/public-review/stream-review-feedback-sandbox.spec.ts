@@ -173,7 +173,7 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
         review_severity: "medium",
         review_context: expect.objectContaining({
           reviewId: "6529-stream",
-          reviewVersion: "2026-07-28.1",
+          reviewVersion: "2026-07-28.2",
           pageId: "overview",
           sectionId: "a-concrete-1-1-journey",
         }),
