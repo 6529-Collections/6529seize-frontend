@@ -19,6 +19,13 @@ on:
           default: production,
           options: [staging, production],
         }
+      artifact_contract_version:
+        {
+          type: choice,
+          required: false,
+          default: legacy-v2,
+          options: [legacy-v2, environment-bound-v3],
+        }
 
 permissions:
   actions: read
@@ -46,6 +53,7 @@ jobs:
     env:
       ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
       ARTIFACT_TRAIN_ID: ${{ inputs.artifact_train_id || inputs.release_train_id }}
+      ARTIFACT_CONTRACT_VERSION: ${{ inputs.artifact_contract_version }}
       ARTIFACT_ENVIRONMENT: ${{ inputs.artifact_environment }}
       EXPECTED_ARTIFACT_DIGEST: ${{ inputs.artifact_digest }}
       EXPECTED_SHA: ${{ inputs.expected_sha }}
@@ -59,6 +67,7 @@ jobs:
         env:
           ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
           ARTIFACT_TRAIN_ID: ${{ inputs.artifact_train_id || inputs.release_train_id }}
+          ARTIFACT_CONTRACT_VERSION: ${{ inputs.artifact_contract_version }}
           ARTIFACT_ENVIRONMENT: ${{ inputs.artifact_environment }}
           EXPECTED_ARTIFACT_DIGEST: ${{ inputs.artifact_digest }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
@@ -73,9 +82,13 @@ jobs:
           [[ "$ARTIFACT_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
           [[ "$ARTIFACT_TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
           [[ "$EXPECTED_ARTIFACT_DIGEST" =~ ^[a-f0-9]{64}$ ]]
+          [[ "$ARTIFACT_CONTRACT_VERSION" =~ ^(legacy-v2|environment-bound-v3)$ ]]
           test "$ARTIFACT_ENVIRONMENT" = production
+          if [ "$ARTIFACT_CONTRACT_VERSION" = legacy-v2 ]; then
+            test "$ARTIFACT_TRAIN_ID" = "$TRAIN_ID"
+          fi
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
-          [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
+          [[ "$TRAIN_REVISION" =~ ^([1-9][0-9]{0,8}|rollback-[1-9][0-9]{0,8})$ ]]
           [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
           # Semantic GitHub-login validation is centralized in notify-ci-wave.mjs.
           jq -e 'type == "array" and length <= 100 and all(.[]; type == "string" and length >= 1 and length <= 39)' <<< "$RELEASE_CONTRIBUTORS" > /dev/null
@@ -123,18 +136,45 @@ jobs:
           [[ "$ARTIFACT_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
           [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
-          jq -e \
-            --arg train_id "$ARTIFACT_TRAIN_ID" \
-            --arg source_sha "$EXPECTED_SHA" \
-            '.train_id == $train_id and .source_sha == $source_sha and .environment == "dual" and (.profiles.production.package_sha256 | test("^[a-f0-9]{64}$"))' \
-            manifest.json >/dev/null
           sha256sum -c SHA256SUMS
           artifact_digest="$(sha256sum SHA256SUMS | cut -d' ' -f1)"
           test "$artifact_digest" = "$EXPECTED_ARTIFACT_DIGEST"
-          package_digest="$(sha256sum profiles/production/target/package.zip | cut -d' ' -f1)"
-          test "$package_digest" = "$(jq -r '.profiles.production.package_sha256' manifest.json)"
+          schema_version="$(jq -r '.schema_version' manifest.json)"
+          if [ "$ARTIFACT_CONTRACT_VERSION" = environment-bound-v3 ] && [ "$schema_version" = 3 ]; then
+            jq -e \
+              --arg train_id "$ARTIFACT_TRAIN_ID" \
+              --arg source_sha "$EXPECTED_SHA" '
+                .artifact_contract == "environment-bound-v1" and
+                .artifact_contract_version == "environment-bound-v3" and
+                .repository == "frontend" and
+                .train_id == $train_id and
+                .source_sha == $source_sha and
+                .environment == "production" and
+                (.package_sha256 | test("^[a-f0-9]{64}$"))
+              ' manifest.json >/dev/null
+            package_root=target
+            package_digest="$(sha256sum "$package_root/package.zip" | cut -d' ' -f1)"
+            test "$package_digest" = "$(jq -r '.package_sha256' manifest.json)"
+          elif [ "$ARTIFACT_CONTRACT_VERSION" = legacy-v2 ] && [ "$schema_version" = 2 ]; then
+            jq -e \
+              --arg train_id "$ARTIFACT_TRAIN_ID" \
+              --arg source_sha "$EXPECTED_SHA" '
+                .repository == "frontend" and
+                .train_id == $train_id and
+                .source_sha == $source_sha and
+                .environment == "dual" and
+                (.profiles.production.package_sha256 | test("^[a-f0-9]{64}$"))
+              ' manifest.json >/dev/null
+            package_root=profiles/production/target
+            package_digest="$(sha256sum "$package_root/package.zip" | cut -d' ' -f1)"
+            test "$package_digest" = "$(jq -r '.profiles.production.package_sha256' manifest.json)"
+          else
+            echo "Artifact schema is incompatible with $ARTIFACT_CONTRACT_VERSION." >&2
+            exit 1
+          fi
           echo "artifact_digest=$artifact_digest" >> "$GITHUB_OUTPUT"
           echo "package_digest=$package_digest" >> "$GITHUB_OUTPUT"
+          echo "package_root=$package_root" >> "$GITHUB_OUTPUT"
       - name: Configure AWS credentials
         id: aws-credentials
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
@@ -143,13 +183,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
       - name: Upload immutable application assets
-        run: aws s3 sync release-bus-artifact/profiles/production/target "s3://${AWS_BUCKET}/web_build/${EXPECTED_SHA}/"
+        env:
+          PACKAGE_ROOT: ${{ steps.artifact.outputs.package_root }}
+        run: aws s3 sync "release-bus-artifact/${PACKAGE_ROOT}" "s3://${AWS_BUCKET}/web_build/${EXPECTED_SHA}/"
       - name: Ensure Elastic Beanstalk application version
         run: |
           set -euo pipefail
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
-          [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
+          [[ "$TRAIN_REVISION" =~ ^([1-9][0-9]{0,8}|rollback-[1-9][0-9]{0,8})$ ]]
           source_key="web_build/${EXPECTED_SHA}/package.zip"
           version_json="$(aws elasticbeanstalk describe-application-versions \
             --application-name "$BEANSTALK_APP_NAME" \

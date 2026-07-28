@@ -2,18 +2,15 @@
 "use strict";
 
 /**
- * Manifest-driven Playwright pack resolver and sequential runner.
+ * Manifest-driven Playwright pack resolver and bounded parallel runner.
  *
- * Examples:
- *   seize run e2e:packs -- --env staging --trigger post-deploy
- *   seize run e2e:packs -- --env staging --pack smoke
- *   seize run e2e:packs -- --env production --trigger cron --list
- *
- * An empty resolution, invalid manifest, timed-out pack, launch failure, test
- * failure, cleanup failure, or artifact-preservation failure is always red.
+ * Deployed-environment parallelism is allowed only for packs whose manifest
+ * safety is `readonly`. Each child receives unique Playwright output/report
+ * paths, its own timeout, deterministic failure attribution, and one
+ * manifest-bound structured evidence record.
  */
 
-const { spawnSync } = require("node:child_process");
+const { spawn } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
 
@@ -22,7 +19,8 @@ const ROOT = process.env["E2E_MANIFEST_ROOT"]
   : path.resolve(__dirname, "..");
 const SUMMARY_TAIL_LINES = 25;
 const MAX_BUFFER_BYTES = 64 * 1024 * 1024;
-const PLAYWRIGHT_OUTPUTS = ["test-results", "playwright-report"];
+const MAX_PARALLEL_PACKS = 4;
+const TRANSIENT_ROOT = ".release-bus-e2e-output";
 
 function parseArgs(argv) {
   const options = {
@@ -30,6 +28,7 @@ function parseArgs(argv) {
     trigger: null,
     pack: null,
     artifactRoot: null,
+    parallel: 1,
     list: false,
     forward: [],
   };
@@ -40,15 +39,25 @@ function parseArgs(argv) {
       arg === "--env" ||
       arg === "--trigger" ||
       arg === "--pack" ||
-      arg === "--artifact-root"
+      arg === "--artifact-root" ||
+      arg === "--parallel"
     ) {
       const value = argv[index + 1];
       if (!value || value.startsWith("--")) {
         throw new Error(`${arg} requires a value.`);
       }
-      const key =
-        arg === "--artifact-root" ? "artifactRoot" : arg.replace(/^--/, "");
-      options[key] = value;
+      if (arg === "--parallel") {
+        if (!/^[1-4]$/.test(value)) {
+          throw new Error(
+            `--parallel must be between 1 and ${MAX_PARALLEL_PACKS}.`
+          );
+        }
+        options.parallel = Number(value);
+      } else {
+        const key =
+          arg === "--artifact-root" ? "artifactRoot" : arg.replace(/^--/, "");
+        options[key] = value;
+      }
       index += 1;
       continue;
     }
@@ -107,6 +116,19 @@ function resolvePacks(packs, { env, trigger, pack }) {
   });
 }
 
+function assertParallelSafe(packs, parallel) {
+  if (parallel <= 1) {
+    return;
+  }
+  const unsafe = packs.filter((pack) => pack.safety !== "readonly");
+  if (unsafe.length > 0) {
+    throw new Error(
+      "parallel execution is restricted to manifest-declared readonly packs: " +
+        unsafe.map((pack) => pack.scriptKey).join(", ")
+    );
+  }
+}
+
 function appendSummary(lines) {
   const summaryPath = process.env["GITHUB_STEP_SUMMARY"];
   if (!summaryPath) {
@@ -123,40 +145,8 @@ function appendSummary(lines) {
   }
 }
 
-function buildSpawnOptions(pack) {
-  return {
-    cwd: ROOT,
-    encoding: "utf8",
-    env: process.env,
-    killSignal: "SIGTERM",
-    maxBuffer: MAX_BUFFER_BYTES,
-    timeout: pack.timeoutMinutes * 60 * 1000,
-  };
-}
-
-function defaultSpawn(pack, forwardArgs) {
-  const npmExecPath = process.env["npm_execpath"];
-  if (!npmExecPath) {
-    return {
-      status: null,
-      signal: null,
-      stdout: "",
-      stderr: "",
-      error: new Error(
-        "npm_execpath is unavailable; run the pack runner through " +
-          "`seize run e2e:packs` or `./bin/6529 run e2e:packs`."
-      ),
-    };
-  }
-  const runArgs =
-    forwardArgs.length > 0
-      ? ["run", pack.scriptKey, "--", ...forwardArgs]
-      : ["run", pack.scriptKey];
-  return spawnSync(
-    process.execPath,
-    [npmExecPath, ...runArgs],
-    buildSpawnOptions(pack)
-  );
+function packSlug(scriptKey) {
+  return scriptKey.replaceAll(/[^a-zA-Z0-9]+/g, "-").replaceAll(/(^-|-$)/g, "");
 }
 
 function resolveInsideRoot(relativePath, label) {
@@ -203,41 +193,195 @@ function resolveArtifactRoot(relativePath) {
   return resolveInsideRoot(relativePath, "--artifact-root");
 }
 
-function removeTransientOutputs() {
-  for (const relativePath of PLAYWRIGHT_OUTPUTS) {
-    const outputPath = resolveInsideRoot(relativePath, "Playwright output");
-    fs.rmSync(outputPath, { force: true, recursive: true });
-  }
+function outputPathsForPack(pack) {
+  const root = resolveInsideRoot(
+    `${TRANSIENT_ROOT}/${packSlug(pack.scriptKey)}`,
+    "pack output root"
+  );
+  return {
+    root,
+    testResults: path.join(root, "test-results", "playwright"),
+    report: path.join(root, "playwright-report"),
+  };
 }
 
 function prepareArtifactRoot(artifactRoot) {
-  if (!artifactRoot) {
-    return;
+  if (artifactRoot) {
+    fs.rmSync(artifactRoot, { force: true, recursive: true });
+    fs.mkdirSync(artifactRoot, { recursive: true });
   }
-  fs.rmSync(artifactRoot, { force: true, recursive: true });
-  fs.mkdirSync(artifactRoot, { recursive: true });
+  const transientRoot = resolveInsideRoot(TRANSIENT_ROOT, "transient root");
+  fs.rmSync(transientRoot, { force: true, recursive: true });
+  fs.mkdirSync(transientRoot, { recursive: true });
 }
 
-function packSlug(scriptKey) {
-  return scriptKey.replaceAll(/[^a-zA-Z0-9]+/g, "-").replaceAll(/(^-|-$)/g, "");
+function cleanupPackOutputs(pack, outputPaths = outputPathsForPack(pack)) {
+  fs.rmSync(outputPaths.root, { force: true, recursive: true });
+  fs.mkdirSync(outputPaths.root, { recursive: true });
 }
 
-function preserveArtifacts(artifactRoot, pack, output) {
+function preserveArtifacts(artifactRoot, pack, output, outputPaths) {
   if (!artifactRoot) {
     return null;
   }
   const packRoot = path.join(artifactRoot, packSlug(pack.scriptKey));
   fs.mkdirSync(packRoot, { recursive: true });
   fs.writeFileSync(path.join(packRoot, "output.log"), output);
-  for (const relativePath of PLAYWRIGHT_OUTPUTS) {
-    const source = resolveInsideRoot(relativePath, "Playwright output");
-    if (fs.existsSync(source)) {
-      fs.cpSync(source, path.join(packRoot, relativePath), {
-        recursive: true,
-      });
-    }
+  if (fs.existsSync(outputPaths.testResults)) {
+    fs.cpSync(
+      outputPaths.testResults,
+      path.join(packRoot, "test-results", "playwright"),
+      { recursive: true }
+    );
+  }
+  if (fs.existsSync(outputPaths.report)) {
+    fs.cpSync(outputPaths.report, path.join(packRoot, "playwright-report"), {
+      recursive: true,
+    });
   }
   return path.relative(ROOT, packRoot).replaceAll("\\", "/");
+}
+
+function buildSpawnOptions(pack, outputPaths = outputPathsForPack(pack)) {
+  return {
+    cwd: ROOT,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      PLAYWRIGHT_OUTPUT_DIR: outputPaths.testResults,
+      PLAYWRIGHT_HTML_REPORT_DIR: outputPaths.report,
+    },
+    killSignal: "SIGTERM",
+    maxBuffer: MAX_BUFFER_BYTES,
+    timeout: pack.timeoutMinutes * 60 * 1000,
+  };
+}
+
+function runProcessGroup(command, args, options) {
+  return new Promise((resolve) => {
+    const child = spawn(command, args, {
+      cwd: options.cwd,
+      detached: true,
+      env: options.env,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    let infrastructureError = null;
+    let completed = false;
+    let killTimer = null;
+    let escalationComplete = false;
+    let closeResult = null;
+
+    const finish = () => {
+      if (completed || !closeResult) {
+        return;
+      }
+      completed = true;
+      resolve(closeResult);
+    };
+
+    const killGroup = (signal) => {
+      if (!child.pid) {
+        return;
+      }
+      try {
+        process.kill(-child.pid, signal);
+      } catch {
+        child.kill(signal);
+      }
+    };
+    const terminate = (error) => {
+      if (infrastructureError) {
+        return;
+      }
+      infrastructureError = error;
+      killGroup("SIGTERM");
+      killTimer = setTimeout(() => {
+        killGroup("SIGKILL");
+        escalationComplete = true;
+        finish();
+      }, 1000);
+      // Keep the grace timer referenced. A child can close its stdio and exit
+      // while a detached Playwright grandchild ignores SIGTERM; Node must stay
+      // alive long enough to deliver the bounded group-wide SIGKILL.
+    };
+    const append = (target, chunk) => {
+      const next = target + chunk.toString("utf8");
+      if (Buffer.byteLength(next) > options.maxBuffer) {
+        terminate(
+          Object.assign(new Error("pack output exceeded the bounded buffer"), {
+            code: "ENOBUFS",
+          })
+        );
+      }
+      return next;
+    };
+
+    child.stdout.on("data", (chunk) => {
+      stdout = append(stdout, chunk);
+    });
+    child.stderr.on("data", (chunk) => {
+      stderr = append(stderr, chunk);
+    });
+    child.on("error", (error) => {
+      infrastructureError = error;
+    });
+
+    const timeout = setTimeout(() => {
+      terminate(
+        Object.assign(
+          new Error(`pack exceeded its ${options.timeout} ms timeout`),
+          { code: "ETIMEDOUT" }
+        )
+      );
+    }, options.timeout);
+    timeout.unref?.();
+
+    child.on("close", (status, signal) => {
+      clearTimeout(timeout);
+      closeResult = {
+        status,
+        signal,
+        stdout,
+        stderr,
+        ...(infrastructureError ? { error: infrastructureError } : {}),
+      };
+      if (!infrastructureError) {
+        if (killTimer) {
+          clearTimeout(killTimer);
+        }
+        finish();
+      } else if (!killTimer || escalationComplete) {
+        finish();
+      }
+    });
+  });
+}
+
+function defaultSpawn(pack, forwardArgs, outputPaths) {
+  const npmExecPath = process.env["npm_execpath"];
+  if (!npmExecPath) {
+    return Promise.resolve({
+      status: null,
+      signal: null,
+      stdout: "",
+      stderr: "",
+      error: new Error(
+        "npm_execpath is unavailable; run the pack runner through " +
+          "`seize run e2e:packs` or `./bin/6529 run e2e:packs`."
+      ),
+    });
+  }
+  const runArgs =
+    forwardArgs.length > 0
+      ? ["run", pack.scriptKey, "--", ...forwardArgs]
+      : ["run", pack.scriptKey];
+  return runProcessGroup(
+    process.execPath,
+    [npmExecPath, ...runArgs],
+    buildSpawnOptions(pack, outputPaths)
+  );
 }
 
 function classifyResult(result) {
@@ -280,85 +424,149 @@ function outputTail(output) {
     .join("\n");
 }
 
-function runPacks(
+function releaseBindingFromEnvironment() {
+  const binding = {
+    manifest_id: process.env["RELEASE_BUS_E2E_MANIFEST_ID"] || null,
+    manifest_identity_sha256:
+      process.env["RELEASE_BUS_E2E_MANIFEST_IDENTITY_SHA256"] || null,
+    source_sha: process.env["RELEASE_BUS_E2E_SOURCE_SHA"] || null,
+  };
+  if (
+    binding.manifest_id === null &&
+    binding.manifest_identity_sha256 === null &&
+    binding.source_sha === null
+  ) {
+    return null;
+  }
+  if (
+    !/^[a-f0-9-]{36}$/.test(binding.manifest_id ?? "") ||
+    !/^[a-f0-9]{64}$/.test(binding.manifest_identity_sha256 ?? "") ||
+    !/^[a-f0-9]{40}$/.test(binding.source_sha ?? "")
+  ) {
+    throw new Error("Release Bus E2E binding is incomplete or malformed.");
+  }
+  return binding;
+}
+
+async function runOnePack(
+  pack,
+  { artifactRoot, forward, spawn, cleanup, preserve }
+) {
+  const startedAt = new Date();
+  const outputPaths = outputPathsForPack(pack);
+  let cleanupError = null;
+  try {
+    await cleanup(pack, outputPaths);
+  } catch (error) {
+    cleanupError = error instanceof Error ? error : new Error(String(error));
+  }
+
+  let result;
+  try {
+    result = await spawn(pack, forward, outputPaths);
+  } catch (error) {
+    result = {
+      status: null,
+      signal: null,
+      stdout: "",
+      stderr: "",
+      error: error instanceof Error ? error : new Error(String(error)),
+    };
+  }
+
+  const output = `${result.stdout ?? ""}${result.stderr ?? ""}`;
+  let classification = classifyResult(result);
+  if (cleanupError) {
+    classification = {
+      failed: true,
+      infrastructure: true,
+      label: `cleanup failed: ${cleanupError.message}`,
+    };
+  }
+
+  let artifactPath = null;
+  try {
+    artifactPath = await preserve(artifactRoot, pack, output, outputPaths);
+  } catch (error) {
+    const artifactError =
+      error instanceof Error ? error : new Error(String(error));
+    classification = {
+      failed: true,
+      infrastructure: true,
+      label: `artifact preservation failed: ${artifactError.message}`,
+    };
+  }
+
+  return {
+    pack,
+    output,
+    artifactPath,
+    classification,
+    startedAt: startedAt.toISOString(),
+    durationMs: Date.now() - startedAt.getTime(),
+  };
+}
+
+async function runPacks(
   resolved,
   {
     artifactRoot = null,
+    environment = null,
+    trigger = null,
+    parallel = 1,
     forward = [],
     spawn = defaultSpawn,
-    cleanup = removeTransientOutputs,
+    cleanup = cleanupPackOutputs,
     preserve = preserveArtifacts,
     prepare = prepareArtifactRoot,
   } = {}
 ) {
+  assertParallelSafe(resolved, parallel);
   prepare(artifactRoot);
+  const startedAt = new Date();
+  const records = new Array(resolved.length);
+  let nextIndex = 0;
+
+  async function worker() {
+    while (nextIndex < resolved.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      records[index] = await runOnePack(resolved[index], {
+        artifactRoot,
+        forward,
+        spawn,
+        cleanup,
+        preserve,
+      });
+    }
+  }
+
+  const workerCount = Math.min(parallel, resolved.length);
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
+
   appendSummary(["## E2E packs", ""]);
   let failedCount = 0;
   let infrastructureFailureCount = 0;
-
-  for (const pack of resolved) {
+  for (const record of records) {
+    const { pack, output, artifactPath, classification } = record;
     console.log(`\n=== ${pack.scriptKey} ===`);
-    let cleanupError = null;
-    try {
-      cleanup();
-    } catch (error) {
-      cleanupError = error instanceof Error ? error : new Error(String(error));
-    }
-
-    let result;
-    try {
-      result = spawn(pack, forward);
-    } catch (error) {
-      result = {
-        status: null,
-        signal: null,
-        stdout: "",
-        stderr: "",
-        error: error instanceof Error ? error : new Error(String(error)),
-      };
-    }
-
-    const output = `${result.stdout ?? ""}${result.stderr ?? ""}`;
     if (output) {
       process.stdout.write(output.endsWith("\n") ? output : `${output}\n`);
     }
-    let classification = classifyResult(result);
-    if (cleanupError) {
-      classification = {
-        failed: true,
-        infrastructure: true,
-        label: `cleanup failed: ${cleanupError.message}`,
-      };
-    }
-
-    let artifactPath = null;
-    try {
-      artifactPath = preserve(artifactRoot, pack, output);
-    } catch (error) {
-      const artifactError =
-        error instanceof Error ? error : new Error(String(error));
-      classification = {
-        failed: true,
-        infrastructure: true,
-        label: `artifact preservation failed: ${artifactError.message}`,
-      };
-    }
-
     if (!classification.failed) {
       appendSummary([
-        `- :white_check_mark: \`${pack.scriptKey}\``,
+        `- :white_check_mark: \`${pack.scriptKey}\` (${record.durationMs} ms)`,
         ...(artifactPath ? [`  - Artifacts: \`${artifactPath}/\``] : []),
       ]);
       continue;
     }
-
     failedCount += 1;
     if (classification.infrastructure) {
       infrastructureFailureCount += 1;
     }
     const tail = outputTail(output);
     appendSummary([
-      `- :x: \`${pack.scriptKey}\` (${classification.label})`,
+      `- :x: \`${pack.scriptKey}\` (${classification.label}; ${record.durationMs} ms)`,
       ...(artifactPath ? [`  - Artifacts: \`${artifactPath}/\``] : []),
       ...(tail
         ? [
@@ -376,7 +584,39 @@ function runPacks(
     console.error(`e2e-packs: ${pack.scriptKey} ${classification.label}.`);
   }
 
-  return { failedCount, infrastructureFailureCount };
+  const evidence = {
+    schema_version: "release-bus-e2e-packs.v1",
+    environment,
+    trigger,
+    parallelism_requested: parallel,
+    worker_count: workerCount,
+    started_at: startedAt.toISOString(),
+    completed_at: new Date().toISOString(),
+    release_binding: releaseBindingFromEnvironment(),
+    pack_count: records.length,
+    failed_count: failedCount,
+    infrastructure_failure_count: infrastructureFailureCount,
+    results: records.map((record) => ({
+      script_key: record.pack.scriptKey,
+      safety: record.pack.safety,
+      status: record.classification.failed ? "failed" : "passed",
+      failure_class: record.classification.failed
+        ? record.classification.infrastructure
+          ? "infrastructure"
+          : "e2e"
+        : null,
+      detail: record.classification.label,
+      duration_ms: record.durationMs,
+      artifact_path: record.artifactPath,
+    })),
+  };
+  if (artifactRoot) {
+    fs.writeFileSync(
+      path.join(artifactRoot, "evidence.json"),
+      `${JSON.stringify(evidence, null, 2)}\n`
+    );
+  }
+  return { failedCount, infrastructureFailureCount, evidence };
 }
 
 function printUsage() {
@@ -384,11 +624,11 @@ function printUsage() {
     "usage: e2e:packs -- --env <local|staging|production> " +
       "[--trigger <manual|pr-ci|post-deploy|cron>] " +
       "[--pack <scriptKey|alias|all>] [--artifact-root <path>] " +
-      "[--shard i/N] [--list]"
+      `[--parallel <1-${MAX_PARALLEL_PACKS}>] [--shard i/N] [--list]`
   );
 }
 
-function main() {
+async function main() {
   let options;
   try {
     options = parseArgs(process.argv.slice(2));
@@ -397,12 +637,14 @@ function main() {
       `e2e-packs: ${error instanceof Error ? error.message : String(error)}`
     );
     printUsage();
-    process.exit(2);
+    process.exitCode = 2;
+    return;
   }
   if (!options.env) {
     console.error("e2e-packs: --env is required.");
     printUsage();
-    process.exit(2);
+    process.exitCode = 2;
+    return;
   }
 
   try {
@@ -426,10 +668,12 @@ function main() {
           "is a hard failure."
       );
     }
+    assertParallelSafe(resolved, options.parallel);
 
     console.log(
       `e2e-packs: resolved ${resolved.length} pack(s) for env=${options.env}` +
-        `${options.trigger ? ` trigger=${options.trigger}` : ""}:`
+        `${options.trigger ? ` trigger=${options.trigger}` : ""}; ` +
+        `parallelism=${options.parallel}:`
     );
     for (const pack of resolved) {
       console.log(
@@ -441,8 +685,11 @@ function main() {
     }
 
     const artifactRoot = resolveArtifactRoot(options.artifactRoot);
-    const result = runPacks(resolved, {
+    const result = await runPacks(resolved, {
       artifactRoot,
+      environment: options.env,
+      trigger: options.trigger,
+      parallel: options.parallel,
       forward: options.forward,
     });
     if (result.failedCount > 0) {
@@ -450,7 +697,8 @@ function main() {
         `e2e-packs: ${result.failedCount} pack(s) failed ` +
           `(${result.infrastructureFailureCount} infrastructure failure(s)).`
       );
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
     console.log(`e2e-packs: all ${resolved.length} pack(s) passed.`);
   } catch (error) {
@@ -458,20 +706,23 @@ function main() {
     for (const line of message.split("\n")) {
       console.error(`e2e-packs: ${line}`);
     }
-    process.exit(1);
+    process.exitCode = 1;
   }
 }
 
 if (require.main === module) {
-  main();
+  void main();
 }
 
 module.exports = {
+  assertParallelSafe,
   buildSpawnOptions,
   classifyResult,
   isValidShard,
+  outputPathsForPack,
   parseArgs,
   resolveArtifactRoot,
   resolvePacks,
   runPacks,
+  runProcessGroup,
 };
