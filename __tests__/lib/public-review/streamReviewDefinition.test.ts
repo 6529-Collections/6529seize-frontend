@@ -10,6 +10,7 @@ import { PUBLIC_REVIEW_EVIDENCE_STATES } from "@/lib/public-review/publicReviewT
 import {
   getStreamReviewFeedbackHref,
   STREAM_REVIEW_DEFINITION,
+  STREAM_REVIEW_HIDDEN_DRAFT_VERSION,
   STREAM_REVIEW_INITIAL_VERSION,
   STREAM_REVIEW_PAGES,
   STREAM_REVIEW_PREVIOUS_VERSION,
@@ -37,6 +38,7 @@ const EXPECTED_PAGE_TITLES = [
 describe("6529 Stream public review definition", () => {
   it("pins the active review version and exact source commit", () => {
     expect(STREAM_REVIEW_VERSION).toBe("2026-07-28.2");
+    expect(STREAM_REVIEW_HIDDEN_DRAFT_VERSION).toBe("2026-07-28.1");
     expect(STREAM_REVIEW_PREVIOUS_VERSION).toBe("2026-07-27.1");
     expect(STREAM_REVIEW_INITIAL_VERSION).toBe("2026-07-26.1");
     expect(STREAM_REVIEW_SOURCE_COMMIT).toBe(
@@ -62,7 +64,10 @@ describe("6529 Stream public review definition", () => {
     );
   });
 
-  it("retains both superseded editorial snapshots with feedback closed", () => {
+  it("retains the hidden draft and both superseded public snapshots", () => {
+    const hiddenDraft = STREAM_REVIEW_DEFINITION.versions.find(
+      (version) => version.version === STREAM_REVIEW_HIDDEN_DRAFT_VERSION
+    );
     const previous = STREAM_REVIEW_DEFINITION.versions.find(
       (version) => version.version === STREAM_REVIEW_PREVIOUS_VERSION
     );
@@ -70,6 +75,19 @@ describe("6529 Stream public review definition", () => {
       (version) => version.version === STREAM_REVIEW_INITIAL_VERSION
     );
 
+    expect(hiddenDraft).toMatchObject({
+      version: "2026-07-28.1",
+      status: "DRAFT",
+      deploymentStatus: "NOT_DEPLOYED",
+      auditStatus: "PRE_AUDIT",
+      source: {
+        commit: STREAM_REVIEW_SOURCE_COMMIT,
+      },
+    });
+    expect(
+      getPublicReviewLifecycleCapabilities(hiddenDraft!.status)
+        .publicRoutesAvailable
+    ).toBe(false);
     expect(previous).toMatchObject({
       version: "2026-07-27.1",
       status: "REVIEW_CLOSED",

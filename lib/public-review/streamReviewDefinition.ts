@@ -14,6 +14,7 @@ import {
 } from "@/lib/public-review/streamReviewPublication";
 
 export const STREAM_REVIEW_VERSION = "2026-07-28.2";
+export const STREAM_REVIEW_HIDDEN_DRAFT_VERSION = "2026-07-28.1";
 export const STREAM_REVIEW_PREVIOUS_VERSION = "2026-07-27.1";
 export const STREAM_REVIEW_INITIAL_VERSION = "2026-07-26.1";
 export const STREAM_REVIEW_SLUG = "6529-stream";
@@ -321,6 +322,20 @@ export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
     {
       version: STREAM_REVIEW_VERSION,
       status: STREAM_REVIEW_VERSION_LIFECYCLE_STATE,
+      deploymentStatus: "NOT_DEPLOYED",
+      auditStatus: "PRE_AUDIT",
+      source: {
+        repository: "6529-Collections/6529Stream",
+        commit: STREAM_REVIEW_SOURCE_COMMIT,
+      },
+      pages: STREAM_REVIEW_PAGES,
+      audienceEntryPageIds: STREAM_REVIEW_AUDIENCE_ENTRY_PAGE_IDS,
+    },
+    {
+      version: STREAM_REVIEW_HIDDEN_DRAFT_VERSION,
+      status: getStreamReviewVersionLifecycleState(
+        STREAM_REVIEW_HIDDEN_DRAFT_VERSION
+      ),
       deploymentStatus: "NOT_DEPLOYED",
       auditStatus: "PRE_AUDIT",
       source: {
