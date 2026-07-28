@@ -17,10 +17,7 @@ import {
 import OnchainTransactionModal, {
   type OnchainTransactionModalStatus,
 } from "@/components/common/OnchainTransactionModal";
-import {
-  MANIFOLD_LAZY_CLAIM_CONTRACT,
-  MEMES_CONTRACT,
-} from "@/constants/constants";
+import { MANIFOLD_LAZY_CLAIM_CONTRACT } from "@/constants/constants";
 import type { MintingClaimsProofItem } from "@/generated/models/MintingClaimsProofItem";
 import { areEqualAddresses, fromGWEI } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
@@ -34,6 +31,7 @@ import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { useConnectedAction } from "../auth/useConnectedAction";
 import DotLoader from "../dotLoader/DotLoader";
 import ManifoldMintingConnect from "./ManifoldMintingConnect";
+import { getTransactionModalTitle } from "./ManifoldMintingWidget.utils";
 import {
   isAddress,
   type Abi,
@@ -88,22 +86,6 @@ function getTransactionModalMessage(
           })
         : t(locale, "theMemes.mint.transaction.error");
   }
-}
-
-function getTransactionModalTitle(
-  locale: SupportedLocale,
-  contract: string,
-  tokenId: number | undefined
-): string {
-  const hasMemeTokenId =
-    areEqualAddresses(contract, MEMES_CONTRACT) &&
-    typeof tokenId === "number" &&
-    Number.isSafeInteger(tokenId) &&
-    tokenId > 0;
-
-  return hasMemeTokenId
-    ? t(locale, "theMemes.mint.transaction.titleWithTokenId", { tokenId })
-    : t(locale, "theMemes.mint.transaction.title");
 }
 
 function resolveTransactionModalStatus({
