@@ -242,7 +242,12 @@ function createMockCurl(bin: string) {
 set -euo pipefail
 while [ "$#" -gt 0 ]; do
   if [ "$1" = --data ]; then
-    printf '%s' "$2" > "$MOCK_CURL_PAYLOAD"
+    payload="$2"
+    printf '%s' "$payload" > "$MOCK_CURL_PAYLOAD"
+    if [ -n "\${MOCK_AUTH_EXPECTED_AGGREGATE_DIGEST:-}" ]; then
+      test "$(jq -r '.aggregate_candidate_evidence_digest' <<< "$payload")" = \
+        "$MOCK_AUTH_EXPECTED_AGGREGATE_DIGEST"
+    fi
     exit 0
   fi
   shift
@@ -264,11 +269,52 @@ set -euo pipefail
 if [ "\${MOCK_GH_FAIL:-0}" = 1 ]; then
   exit 1
 fi
-printf '{"object":{"type":"commit","sha":"%s"}}\n' "$MOCK_REF_SHA"
+endpoint="$2"
+if [[ "$endpoint" == *"/git/commits/"* ]]; then
+  printf '{"sha":"%s"}\n' "\${MOCK_COMMIT_SHA:-$EXPECTED_SHA}"
+elif [[ "$endpoint" == *"/git/ref/heads/"* ]]; then
+  printf '{"object":{"type":"commit","sha":"%s"}}\n' "$MOCK_REF_SHA"
+elif [[ "$endpoint" == *"/compare/"* ]]; then
+  printf '{"status":"%s","base_commit":{"sha":"%s"},"merge_base_commit":{"sha":"%s"}}\n' \
+    "\${MOCK_COMPARE_STATUS:-ahead}" \
+    "\${MOCK_COMPARE_BASE_SHA:-$EXPECTED_SHA}" \
+    "\${MOCK_MERGE_BASE_SHA:-$EXPECTED_SHA}"
+else
+  exit 64
+fi
 `
   );
   fs.chmodSync(executable, 0o755);
   return bin;
+}
+
+function createMock6529(root: string) {
+  const bin = path.join(root, "bin");
+  fs.mkdirSync(bin);
+  const executable = path.join(bin, "6529");
+  fs.writeFileSync(
+    executable,
+    `#!/usr/bin/env bash
+set -euo pipefail
+if [ "$*" = "exec node scripts/e2e-packs.cjs --capabilities" ]; then
+  case "\${MOCK_RUNNER_CAPABILITY:-old}" in
+    current)
+      printf '%s\\n' '{"contract":"release-bus-e2e-runner-capabilities.v1","features":{"readonly_pack_parallelism":{"version":1,"max_parallel":4}}}'
+      exit 0
+      ;;
+    incompatible)
+      printf '%s\\n' '{"contract":"release-bus-e2e-runner-capabilities.v2","features":{"readonly_pack_parallelism":{"version":2,"max_parallel":8}}}'
+      exit 0
+      ;;
+    old)
+      exit 2
+      ;;
+  esac
+fi
+printf '%s\\n' "$@" > "$MOCK_6529_ARGS"
+`
+  );
+  fs.chmodSync(executable, 0o755);
 }
 
 describe("Release Bus artifact rollout compatibility", () => {
@@ -397,7 +443,7 @@ describe("Release Bus artifact rollout compatibility", () => {
       }
     });
 
-    it(`${environment} distinguishes ref movement and reports exact artifact consumption`, () => {
+    it(`${environment} preserves ordinary CAS and proves rollback reachability without checkout`, () => {
       const workflow = readWorkflow(`release-bus-deploy-${environment}.yml`);
       const source = findStep(
         workflow,
@@ -425,6 +471,7 @@ describe("Release Bus artifact rollout compatibility", () => {
           GITHUB_REPOSITORY: "6529-Collections/6529seize-frontend",
           MOCK_REF_SHA: EXPECTED_SHA,
           PATH: `${mockBin}:${process.env["PATH"]}`,
+          TRAIN_REVISION: "1",
         };
         expect(runShell(source.run!, { env: sourceEnv }).status).toBe(0);
         expect(fs.readFileSync(sourceOutput, "utf8")).toContain(
@@ -440,6 +487,38 @@ describe("Release Bus artifact rollout compatibility", () => {
         expect(fs.readFileSync(sourceOutput, "utf8")).toContain(
           "failure_kind=ref-moved"
         );
+
+        fs.writeFileSync(sourceOutput, "");
+        expect(
+          runShell(source.run!, {
+            env: {
+              ...sourceEnv,
+              MOCK_REF_SHA: "b".repeat(40),
+              TRAIN_REVISION: "rollback-2",
+            },
+          }).status
+        ).toBe(0);
+        expect(fs.readFileSync(sourceOutput, "utf8")).toContain(
+          "failure_kind="
+        );
+
+        fs.writeFileSync(sourceOutput, "");
+        expect(
+          runShell(source.run!, {
+            env: {
+              ...sourceEnv,
+              MOCK_COMPARE_BASE_SHA: EXPECTED_SHA,
+              MOCK_COMPARE_STATUS: "diverged",
+              MOCK_MERGE_BASE_SHA: "c".repeat(40),
+              MOCK_REF_SHA: "b".repeat(40),
+              TRAIN_REVISION: "rollback-2",
+            },
+          }).status
+        ).not.toBe(0);
+        expect(fs.readFileSync(sourceOutput, "utf8")).toContain(
+          "failure_kind=rollback-not-reachable"
+        );
+
         fs.writeFileSync(sourceOutput, "");
         expect(
           runShell(source.run!, {
@@ -526,6 +605,76 @@ describe("Release Bus artifact rollout compatibility", () => {
             artifact_bytes_reused: false,
           },
         });
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
+    });
+  }
+
+  for (const environment of ["staging", "production"] as const) {
+    it(`${environment} uses explicit runner capabilities and safely runs old candidates serially`, () => {
+      const workflow = readWorkflow(
+        environment === "staging" ? "staging-e2e.yml" : "production-e2e.yml"
+      );
+      const step = findStep(
+        workflow,
+        environment === "staging" ? "staging-packs" : "readonly",
+        environment === "staging"
+          ? "Run staging packs against staging.6529.io"
+          : "Run production-safe read-only packs"
+      );
+      const root = fs.mkdtempSync(
+        path.join(os.tmpdir(), `release-bus-${environment}-runner-`)
+      );
+      try {
+        createMock6529(root);
+        const invocation = path.join(root, "runner-args");
+        const baseEnv = {
+          MOCK_6529_ARGS: invocation,
+          SELECTED_PACK: "all",
+        };
+
+        expect(
+          runShell(step.run!, {
+            cwd: root,
+            env: { ...baseEnv, MOCK_RUNNER_CAPABILITY: "current" },
+          }).status
+        ).toBe(0);
+        const currentArgs = fs.readFileSync(invocation, "utf8").split("\n");
+        expect(currentArgs).toEqual(
+          expect.arrayContaining(["--parallel", "3"])
+        );
+        expect(currentArgs).toEqual(
+          expect.arrayContaining(["--trigger", "post-deploy"])
+        );
+
+        expect(
+          runShell(step.run!, {
+            cwd: root,
+            env: { ...baseEnv, MOCK_RUNNER_CAPABILITY: "old" },
+          }).status
+        ).toBe(0);
+        const oldArgs = fs.readFileSync(invocation, "utf8").split("\n");
+        expect(oldArgs).not.toContain("--parallel");
+        expect(oldArgs).not.toContain("--pack");
+        expect(oldArgs).toEqual(
+          expect.arrayContaining(["--trigger", "post-deploy"])
+        );
+
+        expect(
+          runShell(step.run!, {
+            cwd: root,
+            env: { ...baseEnv, MOCK_RUNNER_CAPABILITY: "incompatible" },
+          }).status
+        ).toBe(0);
+        const incompatibleArgs = fs
+          .readFileSync(invocation, "utf8")
+          .split("\n");
+        expect(incompatibleArgs).not.toContain("--parallel");
+        expect(incompatibleArgs).not.toContain("--pack");
+        expect(incompatibleArgs).toEqual(
+          expect.arrayContaining(["--trigger", "post-deploy"])
+        );
       } finally {
         fs.rmSync(root, { recursive: true, force: true });
       }
@@ -624,6 +773,20 @@ describe("Release Bus artifact rollout compatibility", () => {
         candidate_evidence_mode: "strict-aggregate",
         aggregate_candidate_evidence_digest: "f".repeat(64),
       });
+      expect(
+        runShell(authorize.run!, {
+          env: {
+            ...baseEnv,
+            AGGREGATE_CANDIDATE_EVIDENCE_DIGEST: "f".repeat(64),
+            CANDIDATE_EVIDENCE_MODE: "strict-aggregate",
+            EXPECTED_SHA: EXPECTED_SHA,
+            GITHUB_RUN_ID: "9876",
+            MOCK_AUTH_EXPECTED_AGGREGATE_DIGEST: "0".repeat(64),
+            RELEASE_BUS_API_URL: "https://release-bus.invalid",
+            RELEASE_BUS_WORKFLOW_AUTH_TOKEN: "test-token",
+          },
+        }).status
+      ).not.toBe(0);
       expect(
         runShell(validate.run!, {
           env: {

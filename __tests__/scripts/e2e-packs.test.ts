@@ -23,6 +23,15 @@ type SpawnResult = {
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const runner = require("../../scripts/e2e-packs.cjs") as {
+  RUNNER_CAPABILITIES: {
+    contract: string;
+    features: {
+      readonly_pack_parallelism: {
+        version: number;
+        max_parallel: number;
+      };
+    };
+  };
   assertParallelSafe: (packs: Pack[], parallel: number) => void;
   buildSpawnOptions: (pack: Pack) => {
     killSignal: string;
@@ -40,6 +49,7 @@ const runner = require("../../scripts/e2e-packs.cjs") as {
     pack: string | null;
     artifactRoot: string | null;
     parallel: number;
+    capabilities: boolean;
     list: boolean;
     forward: string[];
   };
@@ -142,6 +152,7 @@ describe("manifest-driven E2E runner", () => {
       pack: "smoke",
       artifactRoot: "artifacts/e2e",
       parallel: 3,
+      capabilities: false,
       list: true,
       forward: ["--shard=1/2"],
     });
@@ -157,6 +168,33 @@ describe("manifest-driven E2E runner", () => {
     expect(() => runner.parseArgs(["--parallel", "5"])).toThrow(
       "--parallel must be between 1 and 4"
     );
+  });
+
+  it("reports an explicit versioned parallel-runner capability without requiring an environment", () => {
+    expect(runner.RUNNER_CAPABILITIES).toEqual({
+      contract: "release-bus-e2e-runner-capabilities.v1",
+      features: {
+        readonly_pack_parallelism: {
+          version: 1,
+          max_parallel: 4,
+        },
+      },
+    });
+    expect(runner.parseArgs(["--capabilities"])).toMatchObject({
+      env: null,
+      parallel: 1,
+      capabilities: true,
+    });
+    const result = spawnSync(
+      process.execPath,
+      [SCRIPT_PATH, "--capabilities"],
+      {
+        cwd: ROOT,
+        encoding: "utf8",
+      }
+    );
+    expect(result.status).toBe(0);
+    expect(JSON.parse(result.stdout)).toEqual(runner.RUNNER_CAPABILITIES);
   });
 
   it("limits destructive artifact cleanup to dedicated top-level directories", () => {

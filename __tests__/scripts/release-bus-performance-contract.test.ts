@@ -266,11 +266,24 @@ describe("Release Bus frontend performance contract", () => {
           ? "git/ref/heads/1a-staging"
           : "git/ref/heads/main"
       );
+      expect(sourceVerification.run).toContain("git/commits/$EXPECTED_SHA");
       expect(sourceVerification.run).toContain(
-        '[ "$observed_sha" != "$EXPECTED_SHA" ]'
+        '[[ "$TRAIN_REVISION" != rollback-* ]] && [ "$observed_sha" != "$EXPECTED_SHA" ]'
+      );
+      expect(sourceVerification.run).toContain(
+        "compare/$EXPECTED_SHA...$observed_sha"
+      );
+      expect(sourceVerification.run).toContain(
+        '[[ "$TRAIN_REVISION" == rollback-* ]]'
+      );
+      expect(sourceVerification.run).toContain(
+        '[ "$merge_base_sha" != "$EXPECTED_SHA" ]'
       );
       expect(sourceVerification.run).toContain(
         'echo "failure_kind=ref-moved" >> "$GITHUB_OUTPUT"'
+      );
+      expect(sourceVerification.run).toContain(
+        'echo "failure_kind=rollback-not-reachable" >> "$GITHUB_OUTPUT"'
       );
       expect(
         deploy.jobs.deploy.steps.filter(
@@ -321,6 +334,20 @@ describe("Release Bus frontend performance contract", () => {
     const productionSource = read(".github/workflows/production-e2e.yml");
     expect(stagingSource).toContain("args+=(--parallel 3)");
     expect(productionSource).toContain("args+=(--parallel 3)");
+    expect(stagingSource).toContain(
+      "exec node scripts/e2e-packs.cjs --capabilities"
+    );
+    expect(productionSource).toContain(
+      "exec node scripts/e2e-packs.cjs --capabilities"
+    );
+    expect(stagingSource).toContain(
+      '.contract == "release-bus-e2e-runner-capabilities.v1"'
+    );
+    expect(productionSource).toContain(
+      '.contract == "release-bus-e2e-runner-capabilities.v1"'
+    );
+    expect(stagingSource).not.toContain("grep -q");
+    expect(productionSource).not.toContain("grep -q");
     expect(stagingSource).toContain("RELEASE_BUS_E2E_MANIFEST_IDENTITY_SHA256");
     expect(productionSource).toContain(
       "RELEASE_BUS_E2E_MANIFEST_IDENTITY_SHA256"
