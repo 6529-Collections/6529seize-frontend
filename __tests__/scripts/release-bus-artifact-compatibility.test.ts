@@ -840,6 +840,32 @@ describe("Release Bus artifact rollout compatibility", () => {
           },
         }).status
       ).toBe(0);
+      expect(
+        runShell(authorize.run!, {
+          env: {
+            ...baseEnv,
+            ARTIFACT_CONTRACT_VERSION: "legacy-v2",
+            CANDIDATE_EVIDENCE_MODE: "legacy-whole-train",
+            EXPECTED_SHA: EXPECTED_SHA,
+            GITHUB_RUN_ID: "9876",
+            RELEASE_BUS_API_URL: "https://release-bus.invalid",
+            RELEASE_BUS_WORKFLOW_AUTH_TOKEN: "test-token",
+          },
+        }).status
+      ).toBe(0);
+      const legacyAuthorization = JSON.parse(
+        fs.readFileSync(curlPayload, "utf8")
+      );
+      expect(legacyAuthorization).toMatchObject({
+        train_id: TRAIN_ID,
+        expected_sha: EXPECTED_SHA,
+        repository: "frontend",
+        environment: "orchestration",
+      });
+      expect(legacyAuthorization).not.toHaveProperty("candidate_evidence_mode");
+      expect(legacyAuthorization).not.toHaveProperty(
+        "aggregate_candidate_evidence_digest"
+      );
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }
