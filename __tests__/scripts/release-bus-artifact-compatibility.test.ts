@@ -800,6 +800,7 @@ describe("Release Bus artifact rollout compatibility", () => {
       expect(JSON.parse(fs.readFileSync(curlPayload, "utf8"))).toMatchObject({
         train_id: TRAIN_ID,
         expected_sha: EXPECTED_SHA,
+        source_ref: "release-bus-v2/compatibility",
         candidate_evidence_mode: "strict-aggregate",
         aggregate_candidate_evidence_digest: "f".repeat(64),
       });
@@ -866,6 +867,7 @@ describe("Release Bus artifact rollout compatibility", () => {
       expect(legacyAuthorization).not.toHaveProperty(
         "aggregate_candidate_evidence_digest"
       );
+      expect(legacyAuthorization).not.toHaveProperty("source_ref");
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }

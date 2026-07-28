@@ -170,6 +170,7 @@ describe("Release Bus frontend performance contract", () => {
     expect(authorize.run).toContain(
       'if [ "$CANDIDATE_EVIDENCE_MODE" != legacy-whole-train ]'
     );
+    expect(authorize.run).toContain("source_ref:$source_ref");
     for (const literal of [
       "schema_version:",
       "artifact_contract:",
