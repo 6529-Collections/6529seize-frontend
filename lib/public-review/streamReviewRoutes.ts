@@ -1,12 +1,11 @@
 import { isPublicReviewEnabled } from "@/config/publicReviews";
-import type {
-  PublicReviewPageDefinition,
-  PublicReviewVersionDefinition,
-} from "@/lib/public-review/publicReviewTypes";
+import { getPublicReviewLifecycleCapabilities } from "@/lib/public-review/publicReviewLifecycle";
+import type { PublicReviewPageDefinition } from "@/lib/public-review/publicReviewTypes";
 import {
   getStreamReviewPage,
   getStreamReviewPageHref,
   getStreamReviewVersion,
+  isStreamReviewVersionPubliclyAvailable,
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_SLUG,
 } from "@/lib/public-review/streamReviewDefinition";
@@ -18,10 +17,21 @@ export interface StreamReviewRouteParams {
 }
 
 export interface StreamReviewRouteModel {
+  readonly baseEndpoint: string;
   readonly page: PublicReviewPageDefinition;
-  readonly reviewVersion: PublicReviewVersionDefinition;
   readonly version?: string | undefined;
   readonly canonicalPath: string;
+}
+
+export function isStreamReviewPubliclyAvailable(baseEndpoint: string): boolean {
+  return (
+    isPublicReviewEnabled(baseEndpoint) &&
+    getPublicReviewLifecycleCapabilities(STREAM_REVIEW_DEFINITION.status)
+      .publicRoutesAvailable &&
+    isStreamReviewVersionPubliclyAvailable(
+      STREAM_REVIEW_DEFINITION.activeVersion
+    )
+  );
 }
 
 export function resolveStreamReviewRoute({
@@ -33,26 +43,32 @@ export function resolveStreamReviewRoute({
 }): StreamReviewRouteModel | undefined {
   if (
     !isPublicReviewEnabled(baseEndpoint) ||
-    params.review !== STREAM_REVIEW_SLUG
+    params.review !== STREAM_REVIEW_SLUG ||
+    (params.version === undefined &&
+      !isStreamReviewPubliclyAvailable(baseEndpoint))
   ) {
     return undefined;
   }
 
-  const selectedVersion =
+  const displayedVersion =
     params.version ?? STREAM_REVIEW_DEFINITION.activeVersion;
-  const reviewVersion = getStreamReviewVersion(selectedVersion);
-  if (!reviewVersion) {
+  const reviewVersion = getStreamReviewVersion(displayedVersion);
+  if (
+    !reviewVersion ||
+    !getPublicReviewLifecycleCapabilities(reviewVersion.status)
+      .publicRoutesAvailable
+  ) {
     return undefined;
   }
 
-  const page = getStreamReviewPage(params.page ?? "overview", selectedVersion);
+  const page = getStreamReviewPage(params.page ?? "overview", displayedVersion);
   if (!page) {
     return undefined;
   }
 
   return {
+    baseEndpoint,
     page,
-    reviewVersion,
     version: params.version,
     canonicalPath: getStreamReviewPageHref({
       page,

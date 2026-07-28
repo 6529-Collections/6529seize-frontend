@@ -7817,6 +7817,39 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ReleaseBusV2CandidateResponse"
+  /deploy/release-bus-v2/production-selections:
+    post:
+      tags:
+        - Release Bus v2
+      summary: Explicitly select a dependency-closed candidate-evidence production set
+      operationId: markReleaseBusV2ProductionSelectionReady
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReleaseBusV2ProductionSelectionRequest"
+      responses:
+        "200":
+          description: Atomic candidate-evidence production selection recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReleaseBusV2ProductionSelectionResponse"
+        "401":
+          description: GitHub authentication is required
+        "403":
+          description: >-
+            Production readiness is disabled or the actor cannot authorize the
+            full selection
+        "404":
+          description: A selected candidate does not exist
+        "409":
+          description: >-
+            Candidate state, evidence, dependency closure, controls, or exact
+            head identity changed
   /deploy/release-bus-v2/candidates/{id}/revoke-production-readiness:
     post:
       tags:
@@ -24172,6 +24205,10 @@ components:
         production_requested_by:
           type: string
           nullable: true
+        production_selection_id:
+          type: string
+          format: uuid
+          nullable: true
         hold_reason:
           type: string
           nullable: true
@@ -24236,6 +24273,7 @@ components:
         - STAGING_VALIDATING
         - STAGING_VALIDATED
         - READY_FOR_PRODUCTION
+        - READY_FOR_CANDIDATE_EVIDENCE_PRODUCTION
         - WAITING_FOR_PRODUCTION_REPLAN
         - PRODUCTION_IN_TRAIN
         - PRODUCTION_BUILDING_OR_QUALIFYING
@@ -24406,6 +24444,7 @@ components:
           enum:
             - STAGING_DEPLOYED
             - STAGING_VALIDATED
+            - PRODUCTION_CANDIDATE_EVIDENCE_QUALIFIED
             - PRODUCTION_DEPLOYED
             - FAILED
         frontend_sha:
@@ -24458,6 +24497,55 @@ components:
     ReleaseBusV2Operation:
       type: object
       additionalProperties: true
+    ReleaseBusV2ProductionSelectionItem:
+      type: object
+      required:
+        - candidate_id
+        - expected_head_sha
+        - expected_row_version
+      properties:
+        candidate_id:
+          type: string
+          format: uuid
+        expected_head_sha:
+          type: string
+          pattern: ^[a-f0-9]{40}$
+        expected_row_version:
+          type: integer
+          minimum: 1
+    ReleaseBusV2ProductionSelectionRequest:
+      type: object
+      required:
+        - candidates
+      properties:
+        candidates:
+          type: array
+          minItems: 1
+          maxItems: 100
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/ReleaseBusV2ProductionSelectionItem"
+    ReleaseBusV2ProductionSelectionResponse:
+      type: object
+      required:
+        - production_selection_id
+        - qualification_policy
+        - candidates
+        - mode
+      properties:
+        production_selection_id:
+          type: string
+          format: uuid
+        qualification_policy:
+          type: string
+          enum:
+            - CANDIDATE_STAGING_EVIDENCE_V1
+        candidates:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReleaseBusV2Candidate"
+        mode:
+          $ref: "#/components/schemas/ReleaseBusV2Mode"
     ReleaseBusV2RegisterRequest:
       type: object
       required:
@@ -24654,6 +24742,18 @@ components:
           type: object
           nullable: true
           additionalProperties: true
+        qualification_policy:
+          type: string
+          enum:
+            - CANDIDATE_STAGING_EVIDENCE_V1
+            - LEGACY_EXACT_MANIFEST_V1
+          nullable: true
+        qualification_evidence_json:
+          type: array
+          nullable: true
+          items:
+            type: object
+            additionalProperties: true
         manifest_id:
           type: string
           format: uuid

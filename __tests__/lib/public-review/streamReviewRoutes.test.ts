@@ -3,6 +3,7 @@ import {
   type StreamReviewRouteParams,
 } from "@/lib/public-review/streamReviewRoutes";
 import {
+  STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_SOURCE_COMMIT,
   STREAM_REVIEW_VERSION,
 } from "@/lib/public-review/streamReviewDefinition";
@@ -66,5 +67,32 @@ describe("6529 Stream public review routes", () => {
     const serialized = JSON.stringify(model) ?? "";
     expect(serialized).not.toContain(STREAM_REVIEW_SOURCE_COMMIT);
     expect(serialized).not.toMatch(/wave|subwave|discussion/i);
+  });
+
+  it("keeps a public immutable version available when the active review closes globally", () => {
+    const mutableReview = STREAM_REVIEW_DEFINITION as unknown as {
+      status: (typeof STREAM_REVIEW_DEFINITION)["status"];
+    };
+    const replacement = jest.replaceProperty(mutableReview, "status", "DRAFT");
+
+    try {
+      expect(
+        resolveStreamReviewRoute({
+          baseEndpoint: "https://staging.6529.io",
+          params: ACTIVE_REVIEW,
+        })
+      ).toBeUndefined();
+      expect(
+        resolveStreamReviewRoute({
+          baseEndpoint: "https://staging.6529.io",
+          params: {
+            ...ACTIVE_REVIEW,
+            version: STREAM_REVIEW_VERSION,
+          },
+        })?.canonicalPath
+      ).toBe(`/reviews/6529-stream/versions/${STREAM_REVIEW_VERSION}`);
+    } finally {
+      replacement.restore();
+    }
   });
 });

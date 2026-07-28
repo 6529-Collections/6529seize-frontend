@@ -28,6 +28,8 @@ export class ReleaseBusV2Train {
     'staging_policy'?: ReleaseBusV2TrainStagingPolicyEnum | null;
     'staging_baseline_manifest_id'?: string | null;
     'staging_transition_json'?: { [key: string]: any; } | null;
+    'qualification_policy'?: ReleaseBusV2TrainQualificationPolicyEnum | null;
+    'qualification_evidence_json'?: Array<{ [key: string]: any; }> | null;
     'manifest_id'?: string | null;
     'failure_class'?: string | null;
     'failure_message'?: string | null;
@@ -128,6 +130,18 @@ export class ReleaseBusV2Train {
             "format": ""
         },
         {
+            "name": "qualification_policy",
+            "baseName": "qualification_policy",
+            "type": "ReleaseBusV2TrainQualificationPolicyEnum",
+            "format": ""
+        },
+        {
+            "name": "qualification_evidence_json",
+            "baseName": "qualification_evidence_json",
+            "type": "Array<{ [key: string]: any; }>",
+            "format": ""
+        },
+        {
             "name": "manifest_id",
             "baseName": "manifest_id",
             "type": "string",
@@ -217,5 +231,9 @@ export enum ReleaseBusV2TrainStatusEnum {
 export enum ReleaseBusV2TrainStagingPolicyEnum {
     CumulativeAdmittedSetV1 = 'CUMULATIVE_ADMITTED_SET_V1',
     RestoreValidatedStagingV1 = 'RESTORE_VALIDATED_STAGING_V1'
+}
+export enum ReleaseBusV2TrainQualificationPolicyEnum {
+    CandidateStagingEvidenceV1 = 'CANDIDATE_STAGING_EVIDENCE_V1',
+    LegacyExactManifestV1 = 'LEGACY_EXACT_MANIFEST_V1'
 }
 

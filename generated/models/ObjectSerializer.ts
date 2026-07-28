@@ -568,6 +568,9 @@ export * from '../models/ReleaseBusV2DeployPlan';
 export * from '../models/ReleaseBusV2Manifest';
 export * from '../models/ReleaseBusV2ManifestListResponse';
 export * from '../models/ReleaseBusV2Mode';
+export * from '../models/ReleaseBusV2ProductionSelectionItem';
+export * from '../models/ReleaseBusV2ProductionSelectionRequest';
+export * from '../models/ReleaseBusV2ProductionSelectionResponse';
 export * from '../models/ReleaseBusV2RegisterRequest';
 export * from '../models/ReleaseBusV2StagingState';
 export * from '../models/ReleaseBusV2StagingTransitionRequest';
@@ -1145,7 +1148,7 @@ import { RedeemedSubscriptionCounts } from '../models/RedeemedSubscriptionCounts
 import { RedeemedSubscriptionCountsPage } from '../models/RedeemedSubscriptionCountsPage';
 import { RedeemedSubscriptionPage } from '../models/RedeemedSubscriptionPage';
 import { RefreshWalletAuthSessionRequestClass } from '../models/RefreshWalletAuthSessionRequest';
-import { ReleaseBusV2Candidate , ReleaseBusV2CandidateRepositoryEnum            , ReleaseBusV2CandidateStagingLiveStateEnum     , ReleaseBusV2CandidateStagingTransitionRequestEnum              } from '../models/ReleaseBusV2Candidate';
+import { ReleaseBusV2Candidate , ReleaseBusV2CandidateRepositoryEnum            , ReleaseBusV2CandidateStagingLiveStateEnum     , ReleaseBusV2CandidateStagingTransitionRequestEnum               } from '../models/ReleaseBusV2Candidate';
 import { ReleaseBusV2CandidateActionRequest } from '../models/ReleaseBusV2CandidateActionRequest';
 import { ReleaseBusV2CandidateListResponse   } from '../models/ReleaseBusV2CandidateListResponse';
 import { ReleaseBusV2CandidateResponse   } from '../models/ReleaseBusV2CandidateResponse';
@@ -1159,10 +1162,13 @@ import { ReleaseBusV2DeployPlan } from '../models/ReleaseBusV2DeployPlan';
 import { ReleaseBusV2Manifest  , ReleaseBusV2ManifestLaneEnum   , ReleaseBusV2ManifestStatusEnum             } from '../models/ReleaseBusV2Manifest';
 import { ReleaseBusV2ManifestListResponse } from '../models/ReleaseBusV2ManifestListResponse';
 import { ReleaseBusV2Mode } from '../models/ReleaseBusV2Mode';
+import { ReleaseBusV2ProductionSelectionItem } from '../models/ReleaseBusV2ProductionSelectionItem';
+import { ReleaseBusV2ProductionSelectionRequest } from '../models/ReleaseBusV2ProductionSelectionRequest';
+import { ReleaseBusV2ProductionSelectionResponse , ReleaseBusV2ProductionSelectionResponseQualificationPolicyEnum     } from '../models/ReleaseBusV2ProductionSelectionResponse';
 import { ReleaseBusV2RegisterRequest , ReleaseBusV2RegisterRequestRepositoryEnum        } from '../models/ReleaseBusV2RegisterRequest';
 import { ReleaseBusV2StagingState, ReleaseBusV2StagingStateIdEnum  , ReleaseBusV2StagingStateStatusEnum             } from '../models/ReleaseBusV2StagingState';
 import { ReleaseBusV2StagingTransitionRequest  , ReleaseBusV2StagingTransitionRequestTransitionEnum    } from '../models/ReleaseBusV2StagingTransitionRequest';
-import { ReleaseBusV2Train , ReleaseBusV2TrainLaneEnum  , ReleaseBusV2TrainStatusEnum          , ReleaseBusV2TrainStagingPolicyEnum              } from '../models/ReleaseBusV2Train';
+import { ReleaseBusV2Train , ReleaseBusV2TrainLaneEnum  , ReleaseBusV2TrainStatusEnum          , ReleaseBusV2TrainStagingPolicyEnum    , ReleaseBusV2TrainQualificationPolicyEnum             } from '../models/ReleaseBusV2Train';
 import { ReleaseBusV2TrainDetailResponse } from '../models/ReleaseBusV2TrainDetailResponse';
 import { ReleaseBusV2TrainListResponse   } from '../models/ReleaseBusV2TrainListResponse';
 import { ReleaseBusV2VersionedActionRequest } from '../models/ReleaseBusV2VersionedActionRequest';
@@ -1325,6 +1331,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ReleaseBusV2ManifestLaneEnum",
     "ReleaseBusV2ManifestStatusEnum",
     "ReleaseBusV2Mode",
+    "ReleaseBusV2ProductionSelectionResponseQualificationPolicyEnum",
     "ReleaseBusV2RegisterRequestRepositoryEnum",
     "ReleaseBusV2StagingStateIdEnum",
     "ReleaseBusV2StagingStateStatusEnum",
@@ -1332,6 +1339,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ReleaseBusV2TrainLaneEnum",
     "ReleaseBusV2TrainStatusEnum",
     "ReleaseBusV2TrainStagingPolicyEnum",
+    "ReleaseBusV2TrainQualificationPolicyEnum",
 ]);
 
 let typeMap: {[index: string]: any} = {
@@ -1832,6 +1840,9 @@ let typeMap: {[index: string]: any} = {
     "ReleaseBusV2DeployPlan": ReleaseBusV2DeployPlan,
     "ReleaseBusV2Manifest": ReleaseBusV2Manifest,
     "ReleaseBusV2ManifestListResponse": ReleaseBusV2ManifestListResponse,
+    "ReleaseBusV2ProductionSelectionItem": ReleaseBusV2ProductionSelectionItem,
+    "ReleaseBusV2ProductionSelectionRequest": ReleaseBusV2ProductionSelectionRequest,
+    "ReleaseBusV2ProductionSelectionResponse": ReleaseBusV2ProductionSelectionResponse,
     "ReleaseBusV2RegisterRequest": ReleaseBusV2RegisterRequest,
     "ReleaseBusV2StagingState": ReleaseBusV2StagingState,
     "ReleaseBusV2StagingTransitionRequest": ReleaseBusV2StagingTransitionRequest,

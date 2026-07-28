@@ -1,10 +1,10 @@
+jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
+
 import { publicEnvSchema } from "@/config/env.schema";
 import {
   PUBLIC_REVIEW_DESTINATIONS_ENV,
   resolvePublicReviewDiscussionDestination,
 } from "@/services/api/public-review/destination.server";
-
-jest.mock("next/dist/compiled/server-only", () => ({}));
 
 const LOCAL_WAVE_ID = "11111111-1111-4111-8111-111111111111";
 const STAGING_WAVE_ID = "22222222-2222-4222-8222-222222222222";

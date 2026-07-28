@@ -2,18 +2,19 @@ import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropReque
 import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { getAddress, isAddress } from "viem";
-import type {
-  PublicReviewCodeReference,
-  PublicReviewCodeSelection,
-  PublicReviewDiscussionDestination,
-  PublicReviewFeedbackConfig,
-  PublicReviewFeedbackContext,
-  PublicReviewFeedbackDraft,
-  PublicReviewFeedbackSigner,
-  PublicReviewPageContext,
-  PublicReviewReference,
-  PublicReviewReferenceSelection,
-  PublicReviewSourceConfig,
+import {
+  PUBLIC_REVIEW_EXPLOITABLE_SECURITY_TYPE,
+  type PublicReviewCodeReference,
+  type PublicReviewCodeSelection,
+  type PublicReviewDiscussionDestination,
+  type PublicReviewFeedbackConfig,
+  type PublicReviewFeedbackContext,
+  type PublicReviewFeedbackDraft,
+  type PublicReviewFeedbackSigner,
+  type PublicReviewPageContext,
+  type PublicReviewReference,
+  type PublicReviewReferenceSelection,
+  type PublicReviewSourceConfig,
 } from "./types";
 import {
   isPublicReviewSha256Urn,
@@ -35,6 +36,7 @@ export const PUBLIC_REVIEW_METADATA_KEYS = [
 
 export const PUBLIC_REVIEW_DROP_CONTENT_LIMIT = 25_000;
 export const PUBLIC_REVIEW_METADATA_VALUE_LIMIT = 5_000;
+export const PUBLIC_REVIEW_FEEDBACK_REVIEW_MARKER = "**Review:**";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -217,8 +219,7 @@ function buildFeedbackContext({
   }
   if (
     page.sectionId !== undefined &&
-    configuredPage.sectionValues !== undefined &&
-    !configuredPage.sectionValues.includes(page.sectionId)
+    !configuredPage.sectionValues?.includes(page.sectionId)
   ) {
     throw new PublicReviewFeedbackValidationError([
       "The selected section is not part of this review page.",
@@ -264,6 +265,23 @@ function appendOptionalSection(
   }
 }
 
+export function getPublicReviewFeedbackPrimaryComment(body: string): string {
+  const reviewMetadataStart = body.indexOf(
+    `\n\n${PUBLIC_REVIEW_FEEDBACK_REVIEW_MARKER}`
+  );
+  const visibleBody =
+    reviewMetadataStart >= 0 ? body.slice(0, reviewMetadataStart) : body;
+  const headingEnd = visibleBody.indexOf("\n\n");
+  if (
+    reviewMetadataStart >= 0 &&
+    visibleBody.startsWith("## ") &&
+    headingEnd >= 0
+  ) {
+    return visibleBody.slice(headingEnd + 2).trim();
+  }
+  return visibleBody.trim();
+}
+
 function buildFeedbackBody({
   categoryLabel,
   draft,
@@ -284,7 +302,7 @@ function buildFeedbackBody({
   const sections = [
     `## ${categoryLabel}`,
     draft.comment.trim(),
-    `**Review:** ${reviewTitle} (${reviewVersion})`,
+    `${PUBLIC_REVIEW_FEEDBACK_REVIEW_MARKER} ${reviewTitle} (${reviewVersion})`,
     `**Page:** [${page.pageTitle}](${page.canonicalPath})`,
     `**Suspected severity:** ${severityLabel}`,
   ];
@@ -371,8 +389,19 @@ export function encodePublicReviewFeedback({
   const issues: string[] = [];
   const category = getAllowedOption(config.categories, draft.category);
   const severity = getAllowedOption(config.severityOptions, draft.severity);
+  if (!config.submissionsOpen) {
+    issues.push("This public review is not accepting new feedback.");
+  }
   if (!category) {
     issues.push("Select a feedback category from this review.");
+  }
+  if (
+    draft.category === PUBLIC_REVIEW_EXPLOITABLE_SECURITY_TYPE &&
+    !config.acceptsPublicExploitReports
+  ) {
+    issues.push(
+      "Possible exploitable security vulnerabilities must use the configured disclosure policy for this review state."
+    );
   }
   if (!severity) {
     issues.push("Select a severity from this review.");
@@ -414,7 +443,7 @@ export function encodePublicReviewFeedback({
   });
   if (body.length > PUBLIC_REVIEW_DROP_CONTENT_LIMIT) {
     throw new PublicReviewFeedbackValidationError([
-      "The rendered feedback exceeds the drop content limit.",
+      "The rendered feedback exceeds the 25,000-character Wave limit. Shorten the comment or technical-detail fields and try again.",
     ]);
   }
 
@@ -613,8 +642,7 @@ function decodeContext({
   }
   if (
     typeof value["sectionId"] === "string" &&
-    configuredPage.sectionValues !== undefined &&
-    !configuredPage.sectionValues.includes(value["sectionId"])
+    !configuredPage.sectionValues?.includes(value["sectionId"])
   ) {
     throw new Error("Feedback references an unknown review section.");
   }

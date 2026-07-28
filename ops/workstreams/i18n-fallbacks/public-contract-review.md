@@ -4,10 +4,12 @@ Status verified against current source on 2026-07-26.
 
 ## Current fallback
 
-The reusable review shell, feedback composer, and feedback ledger route
-interface copy through `publicReview.*` message keys. The current route resolves
-those messages with `DEFAULT_LOCALE`; supported `en-GB`, `fr-FR`, `es-ES`, and
-`de-DE` locales fall back to `en-US`.
+The reusable review shell, feedback composer, feedback ledger, lifecycle
+statuses, validation and connection states, source-range controls, integrity
+announcements, accessible names, and keyboard skip actions route interface copy
+through `publicReview.*` message keys. The current route resolves those messages
+with `DEFAULT_LOCALE`; supported `en-GB`, `fr-FR`, `es-ES`, and `de-DE` locales
+fall back to `en-US`.
 
 The immutable Stream editorial Markdown is also maintained as source-locale
 English and does not yet have translated content snapshots.

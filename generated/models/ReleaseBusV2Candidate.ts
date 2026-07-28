@@ -39,6 +39,7 @@ export class ReleaseBusV2Candidate {
     'staging_transition_reason'?: string | null;
     'production_requested_at'?: number | null;
     'production_requested_by'?: string | null;
+    'production_selection_id'?: string | null;
     'hold_reason'?: string | null;
     'superseded_at'?: number | null;
     'created_at': number;
@@ -182,6 +183,12 @@ export class ReleaseBusV2Candidate {
             "baseName": "production_requested_by",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "production_selection_id",
+            "baseName": "production_selection_id",
+            "type": "string",
+            "format": "uuid"
         },
         {
             "name": "hold_reason",

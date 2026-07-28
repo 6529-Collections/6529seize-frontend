@@ -167,8 +167,9 @@ The Stream instance contains fourteen editorial pages:
     manifests, archival evidence, reconstruction, and terminal actions
 12. **Governance, Pausing, and Successors** - roles, schedules, action classes,
     emergency controls, replacement, and succession
-13. **Security, Testing, and Known Limitations** - invariants, tests, analysis,
-    blockers, bytecode limits, audits, and explicit non-guarantees
+13. **Current Implementation and Readiness** - current wiring, source-only
+    foundations, accepted targets, proposals, evidence, tests, blockers,
+    bytecode limits, and audits
 14. **Community Review** - open questions, all feedback, dispositions, changes,
     exports, and review closeout
 
@@ -307,6 +308,9 @@ Supported states:
 The current state controls:
 
 - status banner and explanatory copy
+- whether public editorial, technical-reference, and feedback-ledger routes are
+  available
+- whether review navigation and packaged public evidence are available
 - whether new feedback may be submitted
 - the source revision shown
 - whether security findings are public or use the configured post-deployment
@@ -340,6 +344,26 @@ routes for every state except `DRAFT`, permits new public feedback only in
 `PUBLIC_REVIEW`. A future review may opt into additional pre-deployment feedback
 states only by changing the validated capability map and its tests.
 
+`DRAFT` is a publication boundary, not only a feedback state. In that state,
+the overview, editorial, technical-reference, source, declaration-search, and
+feedback-ledger route families all return the standard not-found behavior.
+Navigation omits the review, and staging packages omit both the generated raw
+evidence under `public/review-data` and the corresponding editorial corpus.
+Help records carry a review identifier and are filtered through the same
+publication configuration before the Help Bot and agent artifacts are
+generated, so `DRAFT` cannot be advertised through machine-readable discovery.
+Changing a review from `DRAFT` to a public lifecycle state therefore requires
+one explicit, validated publication-state change.
+
+Each immutable review version also carries its own lifecycle, deployment
+status, and audit status. Rendering, technical-reference route generation,
+status copy, exploit-report policy, and ordinary feedback submission are
+derived from the displayed version rather than the review's active version.
+When a new version becomes active, the superseded version can remain public as
+`REVIEW_CLOSED`; it is marked historical, links to the current review, cannot
+silently keep accepting feedback, and cannot inherit newer deployment or audit
+claims.
+
 ## Environment Activation
 
 Merging the implementation does not authorize production exposure. Each review
@@ -350,8 +374,11 @@ only.
 In a disabled environment:
 
 - Stream is absent from navigation and search surfaces
-- review routes return the repository-standard not-found behavior
+- all editorial, technical-reference, source, declaration-search, and
+  feedback-ledger routes return the repository-standard not-found behavior
 - feedback submission cannot be invoked
+- generated raw review evidence and editorial content are omitted from the
+  environment's packaged artifact
 - staging Wave identifiers are never rendered into production HTML
 
 Production activation is a later explicit configuration change with its own
@@ -509,6 +536,13 @@ The bundle also includes a complete top-level-definition index. Release-facing
 pages may default to production contracts and published interfaces, but the
 technical reference exposes the excluded and support classifications so
 reviewers can inspect the full source boundary.
+
+The all-declarations explorer does not serialize the complete declaration
+inventory into the browser page. It sends bounded search, kind, scope, and
+location filters to a server-only query boundary and receives at most 100
+records per page. The page shows the total match count, preserves the active
+filters while loading later pages, and provides distinct loading, empty,
+failure, retry, and end-of-results states.
 
 Record identifiers are semantic and stable: source path, declaring definition,
 declaration kind, and canonical signature. They never use transient compiler AST
@@ -682,6 +716,11 @@ selected value is absent from the active definition or when the serialized
 payload exceeds an API limit. Payload-shape tests use the checked-in Wave API
 contract so ordinary builds stay offline.
 
+A section ID is accepted only when the configured page explicitly allow-lists
+that exact section. Supplying a section for a page with no section allow-list is
+invalid on both submission and ledger decoding; it is never treated as an
+unrestricted page.
+
 The drop body remains understandable without metadata rendering. It includes
 the feedback type, comment, optional reasoning/change, and links back to the
 exact review and source.
@@ -722,7 +761,7 @@ staging and production fixtures.
 
 The Community Review page reads structured review drops and provides:
 
-- stable feedback identifier
+- immutable Wave drop identifier
 - category
 - page/module
 - source reference
@@ -743,6 +782,12 @@ additional pages. Text search is debounced, loading and empty results are
 distinct states, and result-count/status changes are announced through an
 accessible live region. Large result sets do not require all hydrated drops to
 be mounted at once.
+
+Ledger identity and duplicate suppression use the immutable Wave drop ID, not
+the client-supplied submission UUID carried in feedback metadata. A copied or
+repeated submission UUID therefore cannot hide a different Wave drop. Metadata
+hydration is performed in batches of at most eight concurrent requests, so one
+50-drop page cannot open 50 simultaneous metadata requests.
 
 For the staging release, this ledger is explicitly a frontend projection over
 paginated Wave Chat drops and hydrated metadata. The current API cannot
@@ -983,7 +1028,8 @@ This PR is merged before implementation PRs.
 ### PR 5: Stream Editorial Corpus
 
 - fourteen complete editorial pages
-- diagrams, examples, open questions, limitations, and evidence labels
+- diagrams, examples, open questions, and one centralized implementation and
+  evidence ledger
 - links to generated truth
 
 ### PR 6: Integration, Documentation, and Staging Evidence
