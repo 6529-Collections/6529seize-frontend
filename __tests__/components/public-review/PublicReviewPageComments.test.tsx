@@ -122,7 +122,13 @@ describe("PublicReviewPageComments", () => {
     const sourceSha256 = `sha256:${"a".repeat(64)}`;
     const makeTechnicalRecord = (
       dropId: string,
-      declaration: string
+      declaration: string,
+      referenceOverrides: Partial<
+        Extract<
+          PublicReviewFeedbackRecord["reference"],
+          { readonly kind: "code" }
+        >
+      > = {}
     ): PublicReviewFeedbackRecord => ({
       ...record,
       feedbackId: `feedback-${dropId}`,
@@ -140,8 +146,17 @@ describe("PublicReviewPageComments", () => {
         lineEnd: 12,
         contract: "Stream",
         declaration,
+        ...referenceOverrides,
       },
     });
+    const recordWithoutReference: PublicReviewFeedbackRecord = {
+      ...record,
+      feedbackId: "feedback-drop-no-reference",
+      dropId: "drop-no-reference",
+      body: "Comment without a code reference",
+      pageId: "reference-function",
+      sectionId: undefined,
+    };
     queryClient.setQueryData(
       getPublicReviewLedgerQueryKey({ config, destination, pageSize: 50 }),
       {
@@ -151,6 +166,13 @@ describe("PublicReviewPageComments", () => {
             records: [
               makeTechnicalRecord("drop-a", "mint()"),
               makeTechnicalRecord("drop-b", "withdraw()"),
+              makeTechnicalRecord("drop-c", "mint()", {
+                sourceSha256: `sha256:${"b".repeat(64)}`,
+              }),
+              makeTechnicalRecord("drop-d", "mint()", {
+                contract: "OtherContract",
+              }),
+              recordWithoutReference,
             ],
             warnings: [],
             nextCursor: null,
@@ -190,5 +212,9 @@ describe("PublicReviewPageComments", () => {
     expect(
       screen.queryByText("Comment for withdraw()")
     ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Comment without a code reference")
+    ).not.toBeInTheDocument();
+    expect(screen.getAllByText("Comment for mint()")).toHaveLength(1);
   });
 });

@@ -427,7 +427,7 @@ export default function PublicReviewFeedbackComposer({
 }: PublicReviewFeedbackComposerProps) {
   const formId = useId();
   const commentRef = useRef<HTMLTextAreaElement>(null);
-  const previewRef = useRef<HTMLElement>(null);
+  const previewRef = useRef<HTMLHeadingElement>(null);
   const successRef = useRef<HTMLOutputElement>(null);
   const referenceStatusId = `${formId}-reference-status`;
   const {

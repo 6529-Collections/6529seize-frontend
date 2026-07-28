@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 function getHashTarget(): HTMLElement | null {
   const encodedId = window.location.hash.slice(1);
@@ -15,6 +15,8 @@ function getHashTarget(): HTMLElement | null {
 }
 
 export function PublicReviewHashScrollRestorer() {
+  const markerRef = useRef<HTMLSpanElement>(null);
+
   useEffect(() => {
     let observer: MutationObserver | null = null;
     let observerTimeout: number | null = null;
@@ -52,7 +54,10 @@ export function PublicReviewHashScrollRestorer() {
           stopObserving();
         }
       });
-      observer.observe(document.body, { childList: true, subtree: true });
+      observer.observe(markerRef.current?.parentElement ?? document.body, {
+        childList: true,
+        subtree: true,
+      });
       observerTimeout = window.setTimeout(stopObserving, 10_000);
     };
 
@@ -65,5 +70,5 @@ export function PublicReviewHashScrollRestorer() {
     };
   }, []);
 
-  return null;
+  return <span ref={markerRef} aria-hidden="true" className="tw-hidden" />;
 }

@@ -120,23 +120,20 @@ export function FeedbackPreview({
   readonly formId: string;
   readonly locale: SupportedLocale;
   readonly preview: string | null;
-  readonly previewRef: RefObject<HTMLElement | null>;
+  readonly previewRef: RefObject<HTMLHeadingElement | null>;
 }) {
   if (preview === null) {
     return null;
   }
   return (
     <section
-      ref={previewRef}
       aria-labelledby={`${formId}-preview`}
-      aria-atomic="true"
-      aria-live="polite"
-      role="status"
-      tabIndex={-1}
       className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-p-4"
     >
       <h3
+        ref={previewRef}
         id={`${formId}-preview`}
+        tabIndex={-1}
         className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100"
       >
         {t(locale, "publicReview.feedback.previewHeading")}

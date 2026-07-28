@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 
+import PublicReviewFeedbackComposer from "@/components/public-review/PublicReviewFeedbackComposer";
 import { PublicReviewPageComments } from "@/components/public-review/PublicReviewPageComments";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -50,5 +51,34 @@ export function PublicReviewTechnicalFeedback({
       </section>
       {children}
     </div>
+  );
+}
+
+export function PublicReviewTechnicalFeedbackComposer({
+  config,
+  destination,
+  page,
+  referenceSelection,
+}: {
+  readonly config: PublicReviewFeedbackConfig;
+  readonly destination: PublicReviewDiscussionDestination;
+  readonly page: PublicReviewPageContext;
+  readonly referenceSelection?: PublicReviewReferenceSelection | undefined;
+}) {
+  return (
+    <PublicReviewTechnicalFeedback
+      config={config}
+      destination={destination}
+      page={page}
+      referenceSelection={referenceSelection}
+    >
+      <PublicReviewFeedbackComposer
+        locale={DEFAULT_LOCALE}
+        config={config}
+        destination={destination}
+        page={page}
+        referenceSelection={referenceSelection}
+      />
+    </PublicReviewTechnicalFeedback>
   );
 }

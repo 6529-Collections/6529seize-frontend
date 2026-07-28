@@ -60,10 +60,10 @@ describe("PublicReviewHashScrollRestorer", () => {
   });
 
   it("waits for a streamed hash target to enter the document", async () => {
-    render(<PublicReviewHashScrollRestorer />);
+    const { container } = render(<PublicReviewHashScrollRestorer />);
     const target = document.createElement("h2");
     target.id = "solidity-global-declarations";
-    document.body.append(target);
+    container.append(target);
 
     await waitFor(() =>
       expect(target.scrollIntoView).toHaveBeenCalledWith({

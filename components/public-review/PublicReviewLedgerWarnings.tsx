@@ -17,8 +17,7 @@ export function PublicReviewLedgerWarnings({
   }
 
   return (
-    <aside
-      aria-label={t(locale, "publicReview.ledger.warningDiagnostics")}
+    <div
       className={`${className} tw-rounded-lg tw-border tw-border-solid tw-border-amber-500/40 tw-bg-amber-950/20 tw-p-3 tw-text-amber-100`}
     >
       <p className="tw-m-0 tw-text-sm">
@@ -41,6 +40,6 @@ export function PublicReviewLedgerWarnings({
           ))}
         </ul>
       </details>
-    </aside>
+    </div>
   );
 }
