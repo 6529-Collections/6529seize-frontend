@@ -176,7 +176,7 @@ New production trains use `CANDIDATE_STAGING_EVIDENCE_V1`:
   closure, composition/check/build/artifact failures, or either stale base;
 - persist `PRODUCTION_CANDIDATE_EVIDENCE_QUALIFIED` as an auditable production
   manifest without mutating shared staging;
-- never create `PRODUCTION_QUALIFICATION` merely because the selected set
+- never create `PRODUCTION_CANDIDATE_EVIDENCE_QUALIFIED` merely because the selected set
   differs from a validated staging manifest;
 - compare-and-swap only the exact tested commits, deploy immutable artifacts in
   dependency order, verify exact versions, run production-safe read-only E2E,
