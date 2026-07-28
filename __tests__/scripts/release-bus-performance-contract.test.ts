@@ -167,6 +167,9 @@ describe("Release Bus frontend performance contract", () => {
         step.name === "Report structured terminal result"
     );
     expect(authorize.run).toContain('environment:"orchestration"');
+    expect(authorize.run).toContain(
+      'if [ "$CANDIDATE_EVIDENCE_MODE" != legacy-whole-train ]'
+    );
     for (const literal of [
       "schema_version:",
       "artifact_contract:",
