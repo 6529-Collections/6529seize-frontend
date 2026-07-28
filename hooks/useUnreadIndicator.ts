@@ -61,7 +61,7 @@ export function useUnreadIndicator({
     0
   );
   const unreadMessagesCount = Math.max(
-    unreadDmDropsCount ?? 0,
+    unreadDmDropsCount,
     localUnreadMessagesCount
   );
 

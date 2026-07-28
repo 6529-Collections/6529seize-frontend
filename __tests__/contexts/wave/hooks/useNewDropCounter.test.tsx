@@ -257,6 +257,28 @@ describe("useNewDropCounter", () => {
     expect(refetch).not.toHaveBeenCalled();
   });
 
+  it("clears stored counts when re-enabled", () => {
+    const { result, rerender } = renderHook(
+      ({ enabled }) =>
+        useNewDropCounter(null, waves, jest.fn(), {
+          enabled,
+        }),
+      {
+        wrapper,
+        initialProps: { enabled: true },
+      }
+    );
+
+    emitDropUpdate();
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(1);
+
+    rerender({ enabled: false });
+    expect(result.current.newDropsCounts).toEqual({});
+
+    rerender({ enabled: true });
+    expect(result.current.newDropsCounts).toEqual({});
+  });
+
   it("updates muted wave timestamps without unread counts", () => {
     const refetch = jest.fn();
     const { result, rerender } = renderHook(

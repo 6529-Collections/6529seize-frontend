@@ -189,9 +189,17 @@ function useNewDropCounter(
   const [rawNewDropsCounts, setRawNewDropsCounts] = useState<
     Record<string, MinimalWaveNewDropsCount>
   >({});
+  const [previousEnabled, setPreviousEnabled] = useState(enabled);
   const wavesRef = useRef(waves);
   const lastUnknownWaveRefetchAtRef = useRef<number | null>(null);
   const wasEnabledRef = useRef(enabled);
+
+  if (previousEnabled !== enabled) {
+    setPreviousEnabled(enabled);
+    if (enabled) {
+      setRawNewDropsCounts({});
+    }
+  }
 
   useEffect(() => {
     if (!enabled) {
@@ -205,7 +213,6 @@ function useNewDropCounter(
   useEffect(() => {
     if (enabled && !wasEnabledRef.current) {
       lastUnknownWaveRefetchAtRef.current = null;
-      setRawNewDropsCounts({});
     }
 
     wasEnabledRef.current = enabled;
