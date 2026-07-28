@@ -325,6 +325,11 @@ describe("release bus contributor notifications", () => {
           CI_RELEASE_NOTES_PROMPT_PATH:
             "ops/release-notes/release-notes.prompt.md",
         });
+        expect(
+          fs.existsSync(
+            path.join(process.cwd(), success.env.CI_RELEASE_NOTES_PROMPT_PATH)
+          )
+        ).toBe(true);
       } else {
         expect(success.env).not.toHaveProperty("CI_RELEASE_NOTES_PROMPT_PATH");
       }

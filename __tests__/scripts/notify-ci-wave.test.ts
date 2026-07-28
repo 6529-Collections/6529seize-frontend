@@ -95,6 +95,9 @@ describe("notify-ci-wave Release Train metadata", () => {
         sha: expectedSha,
       },
     });
+    expect(result.payload).not.toHaveProperty("release_notes_prompt_path");
+    expect(result.payload).not.toHaveProperty("release_group_id");
+    expect(result.payload).not.toHaveProperty("deployed_at");
   });
 
   it("adds the autonomous release-note contract for frontend production", async () => {
