@@ -1,0 +1,87 @@
+jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
+
+import { assertSolidityReferenceIndex } from "@/lib/public-review/solidityReferenceValidation.server";
+import type { SolidityReferenceReviewIdentity } from "@/lib/public-review/solidityReferenceTypes";
+
+const PUBLIC_VERSION = "2026-07-27.1";
+const DRAFT_VERSION = "2026-07-28.1";
+const PUBLIC_COMMIT = "a".repeat(40);
+const DRAFT_COMMIT = "b".repeat(40);
+const BUNDLE_SHA256 = `sha256:${"c".repeat(64)}`;
+
+const IDENTITY: SolidityReferenceReviewIdentity = {
+  activeSourceCommit: PUBLIC_COMMIT,
+  activeVersion: PUBLIC_VERSION,
+  availableVersions: [PUBLIC_VERSION],
+  reviewId: "6529-stream",
+  sourceCommits: {
+    [PUBLIC_VERSION]: PUBLIC_COMMIT,
+    [DRAFT_VERSION]: DRAFT_COMMIT,
+  },
+  sourceIndexActiveVersion: DRAFT_VERSION,
+  sourceIndexAvailableVersions: [PUBLIC_VERSION, DRAFT_VERSION],
+  sourceRepository: "6529-Collections/6529Stream",
+};
+
+function versionEntry(version: string, commit: string) {
+  return {
+    version,
+    commit,
+    tree: "d".repeat(40),
+    bundlePath: `/review-data/6529-stream/versions/${version}/reference-manifest.json`,
+    bundleSha256: BUNDLE_SHA256,
+  };
+}
+
+function sourceIndex() {
+  return {
+    schemaVersion: "public-review.solidity-reference-index.v1",
+    reviewId: "6529-stream",
+    activeVersion: DRAFT_VERSION,
+    versions: [
+      versionEntry(PUBLIC_VERSION, PUBLIC_COMMIT),
+      versionEntry(DRAFT_VERSION, DRAFT_COMMIT),
+    ],
+  };
+}
+
+describe("Solidity reference source-index validation", () => {
+  it("accepts a trusted source-active draft while keeping the public identity pinned", () => {
+    expect(() =>
+      assertSolidityReferenceIndex(sourceIndex(), IDENTITY)
+    ).not.toThrow();
+  });
+
+  it("rejects a source index that activates the wrong version", () => {
+    const index = sourceIndex();
+    index.activeVersion = PUBLIC_VERSION;
+
+    expect(() => assertSolidityReferenceIndex(index, IDENTITY)).toThrow(
+      "Invalid Solidity reference index identity"
+    );
+  });
+
+  it("rejects commit drift in the hidden source version", () => {
+    const index = sourceIndex();
+    index.versions[1]!.commit = "e".repeat(40);
+
+    expect(() => assertSolidityReferenceIndex(index, IDENTITY)).toThrow(
+      "Invalid Solidity reference version entry"
+    );
+  });
+
+  it("rejects a source identity that omits a required public version", () => {
+    const identity = {
+      ...IDENTITY,
+      availableVersions: ["2026-07-26.1"],
+      sourceCommits: {
+        ...IDENTITY.sourceCommits,
+        "2026-07-26.1": "f".repeat(40),
+      },
+    };
+
+    expect(() => assertSolidityReferenceIndex(sourceIndex(), identity)).toThrow(
+      "Missing public Solidity reference version"
+    );
+  });
+});
