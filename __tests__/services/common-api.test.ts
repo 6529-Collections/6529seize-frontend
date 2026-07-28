@@ -1,5 +1,6 @@
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
+import { publicEnv } from "@/config/env";
 
 jest.mock("@/services/auth/auth.utils", () => ({
   getStagingAuth: jest.fn(),
@@ -59,6 +60,29 @@ describe("commonApiFetch", () => {
       "https://api.test.6529.io/api/bad",
       expect.objectContaining({
         headers: {},
+      })
+    );
+  });
+
+  it("can target a same-origin Next route without changing default callers", async () => {
+    (getStagingAuth as jest.Mock).mockReturnValue("s");
+    (getAuthJwt as jest.Mock).mockReturnValue(null);
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({ result: 1 }),
+    });
+
+    await commonApiFetch({
+      endpoint: "public-reviews/6529-stream/declarations",
+      includeWalletAuth: false,
+      params: { version: "2026-07-26.1" },
+      requestOrigin: "app",
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${publicEnv.BASE_ENDPOINT}/api/public-reviews/6529-stream/declarations?version=2026-07-26.1`,
+      expect.objectContaining({
+        headers: { "x-6529-auth": "s" },
       })
     );
   });

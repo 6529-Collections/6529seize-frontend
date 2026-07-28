@@ -54,19 +54,83 @@ describe("PublicReviewMarkdown", () => {
     );
   });
 
-  it("gives repeated headings unique IDs and names scrollable tables", () => {
-    const { container } = render(
+  it("labels wide tables as independently focusable scroll regions", () => {
+    render(
       <PublicReviewMarkdown
-        markdown={
-          "## Repeated\n\n## Repeated\n\n| Name | Value |\n| --- | --- |\n| A | B |"
-        }
+        markdown={`
+## Comparison
+
+| Module | Status |
+| --- | --- |
+| StreamCore | Implemented |
+`}
       />
     );
 
-    expect(container.querySelectorAll("#repeated")).toHaveLength(1);
-    expect(container.querySelectorAll("#repeated-2")).toHaveLength(1);
-    expect(
-      screen.getByRole("region", { name: "Scrollable review data table" })
-    ).toHaveAttribute("tabindex", "0");
+    const tableRegion = screen.getByRole("region", {
+      name: "Scrollable table in the contract review",
+    });
+    expect(tableRegion).toHaveAttribute("tabindex", "0");
+    expect(tableRegion.querySelector("table")).toBeInTheDocument();
+  });
+
+  it("uses a semantic region for independently scrollable code", () => {
+    render(
+      <PublicReviewMarkdown
+        markdown={"## Example\n\n```solidity\nfunction mint() external {}\n```"}
+      />
+    );
+
+    const codeRegion = screen.getByRole("region", {
+      name: "Scrollable code example",
+    });
+    expect(codeRegion).toHaveAttribute("tabindex", "0");
+    expect(codeRegion.querySelector("pre")).toBeInTheDocument();
+  });
+
+  it("allows long inline source identities to wrap on narrow screens", () => {
+    const sourceCommit = "513bd7e079eafe109df6ae1ae21bfbca6fec6786";
+    render(
+      <PublicReviewMarkdown markdown={`## Source\n\n\`${sourceCommit}\``} />
+    );
+
+    expect(screen.getByText(sourceCommit)).toHaveClass("tw-break-all");
+  });
+
+  it("resolves review-relative links from active and immutable review roots", () => {
+    const markdown =
+      "[Readiness](./security-testing-and-known-limitations#known-limitations)";
+    const { rerender } = render(
+      <PublicReviewMarkdown
+        internalLinkBasePath="/reviews/6529-stream"
+        markdown={markdown}
+      />
+    );
+
+    expect(screen.getByRole("link", { name: "Readiness" })).toHaveAttribute(
+      "href",
+      "/reviews/6529-stream/security-testing-and-known-limitations#known-limitations"
+    );
+
+    rerender(
+      <PublicReviewMarkdown
+        internalLinkBasePath="/reviews/6529-stream/versions/2026-07-27.1"
+        markdown={markdown}
+      />
+    );
+
+    expect(screen.getByRole("link", { name: "Readiness" })).toHaveAttribute(
+      "href",
+      "/reviews/6529-stream/versions/2026-07-27.1/security-testing-and-known-limitations#known-limitations"
+    );
+  });
+
+  it("does not classify an internal path beginning with http as external", () => {
+    render(<PublicReviewMarkdown markdown="[Notes](http-notes)" />);
+
+    const link = screen.getByRole("link", { name: "Notes" });
+    expect(link).toHaveAttribute("href", "http-notes");
+    expect(link).not.toHaveAttribute("target");
+    expect(link).not.toHaveTextContent("opens in a new tab");
   });
 });

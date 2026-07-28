@@ -1,4 +1,5 @@
 import type { MessageKey } from "@/i18n/messages";
+import type { PublicReviewLifecycleState } from "./publicReviewLifecycle";
 
 export const PUBLIC_REVIEW_EVIDENCE_STATES = [
   "IMPLEMENTED",
@@ -46,17 +47,22 @@ export interface PublicReviewVersionDefinition {
   readonly version: string;
   readonly source: PublicReviewSource;
   readonly pages: readonly PublicReviewPageDefinition[];
+  readonly audienceEntryPageIds: Readonly<Record<PublicReviewAudience, string>>;
+  readonly status: PublicReviewLifecycleState;
+  readonly deploymentStatus: "NOT_DEPLOYED" | "DEPLOYED";
+  readonly auditStatus: "PRE_AUDIT" | "AUDIT_IN_PROGRESS" | "AUDIT_COMPLETE";
 }
 
 export interface PublicReviewDefinition {
   readonly id: string;
   readonly slug: string;
+  readonly contractName: string;
   readonly title: string;
   readonly description: string;
   readonly activeVersion: string;
   readonly versions: readonly PublicReviewVersionDefinition[];
-  readonly status: "PUBLIC_REVIEW";
-  readonly deploymentStatus: "NOT_DEPLOYED";
-  readonly auditStatus: "PRE_AUDIT";
+  readonly status: PublicReviewLifecycleState;
+  readonly deploymentStatus: "NOT_DEPLOYED" | "DEPLOYED";
+  readonly auditStatus: "PRE_AUDIT" | "AUDIT_IN_PROGRESS" | "AUDIT_COMPLETE";
   readonly feedbackAvailable: boolean;
 }

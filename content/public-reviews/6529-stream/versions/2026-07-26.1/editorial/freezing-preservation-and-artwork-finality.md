@@ -3,7 +3,8 @@
 Stream has several ways to say that something is complete. They are not
 interchangeable.
 
-- **Final supply** means no more tokens may be minted for a collection.
+- **Final supply** is intended to mean that no more tokens may be minted for a
+  collection. The reviewed candidate has a zero-mint exception described below.
 - **Core freeze** fixes selected collection configuration in the permanent
   token contract.
 - **Preservation records** commit evidence about artwork materials.
@@ -22,19 +23,35 @@ rehearsal's deployed contract set. Its source is not candidate wiring evidence.
 
 ## Final supply
 
-### IMPLEMENTED
+### KNOWN LIMITATION
 
-Finalizing supply closes future minting for the collection. It is about token
-count, not about artwork bytes.
+For a collection that has minted at least one token, `setFinalSupply` lowers the
+configured cap to the number minted so far. Future minting then fails at that
+cap. It is about token count, not about artwork bytes.
+
+The zero-mint case is different. The current implementation writes `0` as the
+final supply when no token has ever been minted
+([`setFinalSupply`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L888-L907),
+[`_finalizeCollectionSupply`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L1497-L1501)).
+The same `0` value is also used by `setCollectionData` to mean that supply has
+not been initialized. While the collection remains unfrozen, a function admin
+can therefore set a new nonzero cap and reopen minting
+([`setCollectionData`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L377-L408)).
+
+There is no separate final-supply flag or final-supply event in the pinned
+candidate. Final supply is therefore not irreversible for a zero-minted,
+unfrozen collection. Core freeze does set a separate freeze flag and closes
+this route, but calling `setFinalSupply` alone does not.
 
 A collection can have final supply while its metadata or scripts remain
 editable. Conversely, an artwork could be considered complete before every
 authorized token has been minted. The UI needs to show those states separately.
 
-Supply finalization should be irreversible and should compose with pending
-signed mints, auctions, reservations, and burns. Reviewers should establish
-what happens to an authorization created before final supply but submitted
-after it.
+Before finalization can be treated as a permanent promise, the contract needs a
+monotonic finalization record or an equivalent guard, an event that records the
+final value, and regression tests for zero-minted collections. Reviewers should
+also establish what happens to a signed mint, auction, or reservation created
+before final supply but submitted after it.
 
 ## Core freeze
 

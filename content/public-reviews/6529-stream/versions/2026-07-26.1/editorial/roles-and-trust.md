@@ -155,6 +155,11 @@ display, snapshot, and agent. Artist, owner, independent, and institution
 families reject admin grants. An exact record type is admitted once and cannot
 be remapped.
 
+The names alone do not explain what a record asserts or whether it is true.
+[Metadata, Scripts, and Dependencies](./metadata-scripts-and-dependencies#source-implemented---candidate-unbound)
+defines each family in ordinary language and explains the consequence for
+artists and collectors.
+
 The implementation is in
 [`StreamRecordFamilyRegistry`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRecordFamilyRegistry.sol#L17-L285).
 Live providers are code-hash pinned and fail closed on a failed call, malformed
