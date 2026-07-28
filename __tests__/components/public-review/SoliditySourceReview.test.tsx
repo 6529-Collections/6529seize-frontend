@@ -93,7 +93,7 @@ describe("SoliditySourceReview", () => {
       screen.getByRole("button", { name: "Comment on selected lines" })
     ).toHaveClass("tw-bg-primary-600", "hover:tw-ring-primary-300/60");
     expect(screen.getByLabelText("Start line")).toHaveClass(
-      "tw-border-iron-600"
+      "tw-border-white/10"
     );
   });
 
