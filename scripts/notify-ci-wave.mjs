@@ -17,6 +17,7 @@ const {
   CI_RELEASE_GROUP_SERVICES,
   CI_RELEASE_TRAIN_ID,
   CI_RELEASE_CONTRIBUTORS,
+  CI_RELEASE_OPERATION_KEY,
   CI_PIPELINES_SHA,
   GITHUB_REPOSITORY,
   GITHUB_WORKFLOW,
@@ -27,6 +28,8 @@ const {
   GITHUB_REF_NAME,
   GITHUB_TRIGGERING_ACTOR,
   GITHUB_ACTOR,
+  GITHUB_TOKEN,
+  GITHUB_API_URL = "https://api.github.com",
 } = process.env;
 
 function requireValue(name, value) {
@@ -67,6 +70,25 @@ function isContributorGithubLogin(value) {
   );
 }
 
+const NON_HUMAN_GITHUB_LOGINS = new Set([
+  "dependabot",
+  "github-actions",
+  "renovate",
+  "web-flow",
+]);
+
+function isHumanGithubUser(user) {
+  const login = user?.login?.trim();
+  const type = user?.type?.trim().toLowerCase();
+  return Boolean(
+    login &&
+    type !== "bot" &&
+    type !== "app" &&
+    !login.toLowerCase().endsWith("[bot]") &&
+    !NON_HUMAN_GITHUB_LOGINS.has(login.toLowerCase())
+  );
+}
+
 function parseReleaseContributors(value) {
   if (!value) return [];
   const parsed = JSON.parse(value);
@@ -85,11 +107,186 @@ function parseReleaseContributors(value) {
     }
     const login = entry.trim();
     const key = login.toLowerCase();
-    if (seen.has(key)) continue;
+    if (
+      seen.has(key) ||
+      key.endsWith("[bot]") ||
+      NON_HUMAN_GITHUB_LOGINS.has(key)
+    )
+      continue;
     seen.add(key);
     contributors.push(login);
   }
   return contributors;
+}
+
+async function githubApi(repository, path) {
+  const response = await fetch(
+    `${GITHUB_API_URL.replace(/\/$/, "")}/repos/${repository}${path}`,
+    {
+      headers: {
+        Accept: "application/vnd.github+json",
+        ...(GITHUB_TOKEN ? { Authorization: `Bearer ${GITHUB_TOKEN}` } : {}),
+        "User-Agent": "6529-ci-contributor-attribution",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    }
+  );
+  if (!response.ok) {
+    throw new Error(
+      `GitHub contributor evidence request failed: ${response.status} ${response.statusText}`
+    );
+  }
+  return response.json();
+}
+
+const MANUAL_FRONTEND_WORKFLOWS = Object.freeze({
+  "Web Deploy - STAGING": "deploy-staging.yml",
+  "Web Deploy - PROD": "build-upload-deploy-prod.yml",
+});
+const APPROVED_FRONTEND_PRODUCTION_WORKFLOWS = Object.freeze({
+  "Web Deploy - PROD": "build-upload-deploy-prod.yml",
+  "Release Bus - Deploy Frontend Production":
+    "release-bus-deploy-production.yml",
+});
+
+async function listPreviousWorkflowRuns({
+  repository,
+  workflowName,
+  workflowFile,
+  currentRun,
+  currentSha,
+  branch,
+}) {
+  const runs = [];
+  for (let page = 1; page <= 10; page += 1) {
+    const payload = await githubApi(
+      repository,
+      `/actions/workflows/${encodeURIComponent(workflowFile)}/runs?status=success&branch=${encodeURIComponent(branch)}&per_page=100&page=${page}`
+    );
+    const pageRuns = payload.workflow_runs ?? [];
+    for (const run of pageRuns) {
+      if (
+        String(run.id) === String(currentRun.id) ||
+        run.head_sha === currentSha ||
+        run.name !== workflowName ||
+        run.status !== "completed" ||
+        run.conclusion !== "success" ||
+        run.head_branch !== branch ||
+        !run.created_at ||
+        Date.parse(run.created_at) >= Date.parse(currentRun.created_at)
+      )
+        continue;
+      runs.push(run);
+    }
+    if (pageRuns.length < 100) break;
+    if (page === 10) {
+      throw new Error(`Production history for ${workflowName} is too large`);
+    }
+  }
+  return runs;
+}
+
+async function deriveManualRangeContributors({
+  repository,
+  runId,
+  workflow,
+  deployedSha,
+  branch,
+}) {
+  const workflowFile = MANUAL_FRONTEND_WORKFLOWS[workflow];
+  if (!workflowFile) {
+    throw new Error(`Workflow ${workflow} is not an approved manual path`);
+  }
+  const currentRun = await githubApi(repository, `/actions/runs/${runId}`);
+  if (
+    String(currentRun.id) !== runId ||
+    currentRun.name !== workflow ||
+    currentRun.head_sha !== deployedSha ||
+    currentRun.head_branch !== branch ||
+    currentRun.status !== "completed" ||
+    currentRun.conclusion !== "success" ||
+    !currentRun.created_at
+  ) {
+    throw new Error("Current workflow run does not match deployed metadata");
+  }
+  const baselineWorkflows =
+    workflow === "Web Deploy - PROD"
+      ? APPROVED_FRONTEND_PRODUCTION_WORKFLOWS
+      : { [workflow]: workflowFile };
+  const baselineRuns = (
+    await Promise.all(
+      Object.entries(baselineWorkflows).map(([name, file]) =>
+        listPreviousWorkflowRuns({
+          repository,
+          workflowName: name,
+          workflowFile: file,
+          currentRun,
+          currentSha: deployedSha,
+          branch,
+        })
+      )
+    )
+  )
+    .flat()
+    .sort(
+      (left, right) =>
+        Date.parse(right.created_at) - Date.parse(left.created_at)
+    );
+  const baseline = baselineRuns[0];
+  if (!baseline) {
+    throw new Error("No prior approved successful deployment baseline exists");
+  }
+  const commits = [];
+  for (let page = 1; page <= 3; page += 1) {
+    const comparison = await githubApi(
+      repository,
+      `/compare/${encodeURIComponent(baseline.head_sha)}...${encodeURIComponent(deployedSha)}?per_page=100&page=${page}`
+    );
+    if (comparison.status !== "ahead" && comparison.status !== "identical") {
+      throw new Error("Deployment comparison is not a forward range");
+    }
+    const pageCommits = comparison.commits ?? [];
+    commits.push(...pageCommits);
+    if (pageCommits.length < 100) break;
+    if (page === 3) {
+      throw new Error("Deployment comparison exceeds the evidence bound");
+    }
+  }
+  const users = [];
+  const pullRequests = new Map();
+  for (const commit of commits) {
+    users.push(commit.author, commit.committer);
+    const associated = await githubApi(
+      repository,
+      `/commits/${encodeURIComponent(commit.sha)}/pulls`
+    );
+    for (const pull of associated) {
+      if (pull.merged_at) {
+        pullRequests.set(pull.number, pull);
+      }
+    }
+  }
+  for (const pull of pullRequests.values()) {
+    users.push(pull.user);
+    for (let page = 1; page <= 3; page += 1) {
+      const pullCommits = await githubApi(
+        repository,
+        `/pulls/${pull.number}/commits?per_page=100&page=${page}`
+      );
+      for (const commit of pullCommits) {
+        users.push(commit.author, commit.committer);
+      }
+      if (pullCommits.length < 100) break;
+      if (page === 3) {
+        throw new Error(
+          `PR #${pull.number} contributor evidence is incomplete`
+        );
+      }
+    }
+  }
+  return parseReleaseContributors(
+    JSON.stringify(users.filter(isHumanGithubUser).map((user) => user.login))
+  );
 }
 
 function releaseContributorMetadataErrorMessage(error) {
@@ -130,13 +327,30 @@ try {
 }
 if (
   CI_RELEASE_TRAIN_ID &&
-  !/^[A-Za-z0-9._-]{1,100}$/.test(CI_RELEASE_TRAIN_ID)
+  !/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(
+    CI_RELEASE_TRAIN_ID
+  )
 ) {
   console.error("CI_RELEASE_TRAIN_ID is invalid");
   process.exit(1);
 }
-if (releaseContributors.length > 0 && !CI_RELEASE_TRAIN_ID) {
-  console.error("CI_RELEASE_TRAIN_ID is required with CI_RELEASE_CONTRIBUTORS");
+if (
+  (CI_RELEASE_TRAIN_ID && !CI_RELEASE_OPERATION_KEY) ||
+  (!CI_RELEASE_TRAIN_ID && CI_RELEASE_OPERATION_KEY)
+) {
+  console.error(
+    "CI_RELEASE_TRAIN_ID and CI_RELEASE_OPERATION_KEY must be supplied together"
+  );
+  process.exit(1);
+}
+if (
+  CI_RELEASE_OPERATION_KEY &&
+  (!/^rb2:[A-Za-z0-9:._-]{1,220}:a[1-9]\d{0,8}$/.test(
+    CI_RELEASE_OPERATION_KEY
+  ) ||
+    !CI_RELEASE_OPERATION_KEY.startsWith(`rb2:${CI_RELEASE_TRAIN_ID}:`))
+) {
+  console.error("CI_RELEASE_OPERATION_KEY is invalid for CI_RELEASE_TRAIN_ID");
   process.exit(1);
 }
 if (CI_PIPELINES_SHA && !/^[a-f0-9]{40}$/.test(CI_PIPELINES_SHA)) {
@@ -163,14 +377,50 @@ const releaseNotesFields = isReleaseNotesEligible
       deployed_at: new Date().toISOString(),
     }
   : {};
-// Keep the two new fields atomic. During the ordered rollout, the old
-// dispatcher supplies an empty array and the old receiver rejects unknown
-// fields; the train id has no downstream use unless contributor credits exist.
-const releaseTrainFields =
-  CI_RELEASE_TRAIN_ID && releaseContributors.length > 0
+let contributorEvidence = null;
+if (CI_RELEASE_TRAIN_ID && CI_RELEASE_OPERATION_KEY) {
+  contributorEvidence = "release-bus-operation";
+} else if (releaseContributors.length > 0) {
+  console.warn(
+    "Ignoring user-supplied contributors on a manual deployment; immutable GitHub evidence is required."
+  );
+  releaseContributors = [];
+}
+const deployedSha = CI_PIPELINES_SHA || GITHUB_SHA || null;
+if (
+  status === "success" &&
+  !CI_RELEASE_TRAIN_ID &&
+  GITHUB_TOKEN &&
+  deployedSha &&
+  GITHUB_REF_NAME
+) {
+  try {
+    releaseContributors = await deriveManualRangeContributors({
+      repository,
+      runId,
+      workflow: CI_PIPELINES_WORKFLOW || GITHUB_WORKFLOW,
+      deployedSha,
+      branch: GITHUB_REF_NAME,
+    });
+    contributorEvidence = releaseContributors.length ? "manual-range" : null;
+  } catch (error) {
+    console.warn(
+      `Contributors row omitted because exact manual deployment scope could not be established: ${getFetchFailureMessage(error)}`
+    );
+  }
+}
+const releaseIdentityFields =
+  CI_RELEASE_TRAIN_ID && CI_RELEASE_OPERATION_KEY
     ? {
         release_train_id: CI_RELEASE_TRAIN_ID,
+        release_operation_key: CI_RELEASE_OPERATION_KEY,
+      }
+    : {};
+const contributorFields =
+  contributorEvidence && releaseContributors.length
+    ? {
         contributor_github_logins: releaseContributors,
+        contributor_evidence: contributorEvidence,
       }
     : {};
 
@@ -184,11 +434,12 @@ const payload = {
   run_id: runId,
   run_number: GITHUB_RUN_NUMBER || null,
   run_url: `${GITHUB_SERVER_URL}/${repository}/actions/runs/${runId}`,
-  sha: CI_PIPELINES_SHA || GITHUB_SHA || null,
+  sha: deployedSha,
   branch: GITHUB_REF_NAME || null,
   environment: targetEnvironment || null,
   service: CI_PIPELINES_SERVICE || null,
-  ...releaseTrainFields,
+  ...releaseIdentityFields,
+  ...contributorFields,
   ...releaseNotesFields,
 };
 
@@ -237,4 +488,32 @@ if (!response.ok) {
   process.exit(1);
 }
 
-console.log("CI pipeline wave notification sent.");
+let outcome = null;
+try {
+  outcome = await response.json();
+} catch {
+  // Older receivers returned an empty response. Preserve rollout compatibility.
+}
+if (outcome?.ci_drop === "accepted") {
+  console.log("CI drop accepted.");
+} else if (outcome?.ci_drop === "duplicate") {
+  console.log("CI drop already accepted; duplicate notification skipped.");
+} else if (outcome?.ci_drop === "failed") {
+  console.error("CI drop processing failed after receiver acceptance.");
+} else {
+  console.log("CI pipeline wave notification accepted by receiver.");
+}
+if (outcome?.release_note === "enqueued") {
+  console.log("Release-note request eligible and enqueued.");
+} else if (outcome?.release_note === "queue-failed") {
+  console.error(
+    `Release-note queue failure: ${outcome.release_note_reason || "unknown"}`
+  );
+} else if (
+  outcome?.release_note === "skipped" ||
+  outcome?.release_note === "ineligible"
+) {
+  console.log(
+    `Release-note request ${outcome.release_note}: ${outcome.release_note_reason || "unspecified"}`
+  );
+}

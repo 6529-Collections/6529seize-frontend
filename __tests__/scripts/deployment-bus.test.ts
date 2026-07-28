@@ -313,6 +313,7 @@ describe("release bus contributor notifications", () => {
         expect(notifyStep.env).toMatchObject({
           CI_PIPELINES_SHA: "${{ inputs.expected_sha }}",
           CI_RELEASE_TRAIN_ID: "${{ inputs.release_train_id }}",
+          CI_RELEASE_OPERATION_KEY: "${{ inputs.operation_key }}",
           CI_RELEASE_CONTRIBUTORS: "${{ inputs.release_contributors }}",
         });
       }
@@ -340,8 +341,49 @@ describe("release bus contributor notifications", () => {
     expect(notifier).toContain(
       "contributor_github_logins: releaseContributors"
     );
-    expect(notifier).toContain("sha: CI_PIPELINES_SHA || GITHUB_SHA || null");
+    expect(notifier).toContain(
+      "const deployedSha = CI_PIPELINES_SHA || GITHUB_SHA || null"
+    );
+    expect(notifier).toContain("sha: deployedSha");
   });
+});
+
+describe("manual frontend contributor notification contracts", () => {
+  const manualWorkflows = [
+    ["staging", ".github/workflows/deploy-staging.yml"],
+    ["production", ".github/workflows/build-upload-deploy-prod.yml"],
+  ] as const;
+
+  it.each(manualWorkflows)(
+    "gives the %s notifier immutable GitHub evidence access",
+    (_environment, workflowPath) => {
+      const workflow = YAML.parse(
+        fs.readFileSync(path.join(process.cwd(), workflowPath), "utf8")
+      );
+      const job = Object.values(workflow.jobs).find((candidate: any) =>
+        candidate.steps?.some(
+          (step: any) => step.name === "Notify CI wave about success"
+        )
+      ) as any;
+      const notifyStep = job.steps.find(
+        (step: any) => step.name === "Notify CI wave about success"
+      );
+
+      expect(job.permissions).toMatchObject({
+        actions: "read",
+        contents: "read",
+        "pull-requests": "read",
+      });
+      expect(notifyStep.env).toMatchObject({
+        GITHUB_TOKEN: "${{ github.token }}",
+      });
+      if (_environment === "staging") {
+        expect(notifyStep.env.CI_PIPELINES_SHA).toBe(
+          "${{ steps.expected-commit.outputs.sha }}"
+        );
+      }
+    }
+  );
 });
 
 describe("release bus v2 E2E callbacks", () => {

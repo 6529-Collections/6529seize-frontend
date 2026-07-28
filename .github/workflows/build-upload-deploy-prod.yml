@@ -4,7 +4,9 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: read
   contents: read
+  pull-requests: read
 
 concurrency:
   group: web-deploy-prod
@@ -47,8 +49,10 @@ jobs:
     needs: assert-main-ref
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: read
       deployments: write
+      pull-requests: read
     environment: production
 
     steps:
@@ -573,6 +577,7 @@ jobs:
           CI_PIPELINES_TITLE: "Seize PROD WEB DEPLOY: CI pipeline is broken!!!"
           CI_PIPELINES_ENVIRONMENT: production
           CI_PIPELINES_SERVICE: web
+          GITHUB_TOKEN: ${{ github.token }}
         run: node scripts/notify-ci-wave.mjs
 
       - name: Notify about success
@@ -598,4 +603,5 @@ jobs:
           CI_PIPELINES_ENVIRONMENT: production
           CI_PIPELINES_SERVICE: web
           CI_RELEASE_NOTES_PROMPT_PATH: ops/release-notes/release-notes.prompt.md
+          GITHUB_TOKEN: ${{ github.token }}
         run: node scripts/notify-ci-wave.mjs

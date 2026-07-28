@@ -7,7 +7,9 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: read
   contents: read
+  pull-requests: read
 
 concurrency:
   group: staging-deploy
@@ -24,8 +26,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 75
     permissions:
+      actions: read
       contents: read
       deployments: write
+      pull-requests: read
 
     steps:
       - name: Checkout staging branch
@@ -566,6 +570,7 @@ jobs:
           CI_PIPELINES_TITLE: "Seize STAGING WEB DEPLOY: CI pipeline is broken!!!"
           CI_PIPELINES_ENVIRONMENT: staging
           CI_PIPELINES_SERVICE: web
+          GITHUB_TOKEN: ${{ github.token }}
         run: node scripts/notify-ci-wave.mjs
 
       - name: Notify CI wave about success
@@ -580,4 +585,6 @@ jobs:
           CI_PIPELINES_TITLE: "Seize STAGING WEB DEPLOY: CI pipeline complete"
           CI_PIPELINES_ENVIRONMENT: staging
           CI_PIPELINES_SERVICE: web
+          CI_PIPELINES_SHA: ${{ steps.expected-commit.outputs.sha }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: node scripts/notify-ci-wave.mjs
