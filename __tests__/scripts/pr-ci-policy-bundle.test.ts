@@ -220,6 +220,14 @@ describe("pr-ci-policy-bundle-v1", () => {
       expect(() =>
         fixtureBundle(root, { filePaths: [workflowPath] })
       ).not.toThrow();
+
+      fs.writeFileSync(
+        path.join(root, workflowPath),
+        `- { uses: actions/checkout@${"c".repeat(40)} }\n`
+      );
+      expect(() => fixtureBundle(root, { filePaths: [workflowPath] })).toThrow(
+        "expected an object"
+      );
     });
   });
 

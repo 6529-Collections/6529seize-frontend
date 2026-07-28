@@ -309,6 +309,11 @@ function assertPinnedWorkflowActions(root, workflows) {
         }`
       );
     }
+    if (!workflow || typeof workflow !== "object" || Array.isArray(workflow)) {
+      throw new Error(
+        `pr-ci-policy-bundle: malformed workflow YAML at ${relativePath}: expected an object`
+      );
+    }
 
     const visit = (value) => {
       if (Array.isArray(value)) {
