@@ -175,7 +175,7 @@ export function PublicReviewShell({
                   <h1 className="tw-mb-0 tw-mt-4 tw-max-w-3xl tw-text-4xl tw-font-semibold tw-leading-[1.05] tw-tracking-[-0.03em] tw-text-white sm:tw-text-5xl">
                     {t(DEFAULT_LOCALE, page.titleKey)}
                   </h1>
-                  <p className="tw-mb-0 tw-mt-5 tw-max-w-3xl tw-text-lg tw-font-normal tw-leading-8 tw-text-iron-300">
+                  <p className="tw-mb-0 tw-mt-5 tw-max-w-3xl tw-text-pretty tw-text-lg tw-font-normal tw-leading-8 tw-text-iron-300">
                     {t(DEFAULT_LOCALE, page.summaryKey)}
                   </p>
                   <div className="tw-mt-8 tw-flex tw-flex-wrap tw-items-center tw-gap-x-7 tw-gap-y-1 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08]">
