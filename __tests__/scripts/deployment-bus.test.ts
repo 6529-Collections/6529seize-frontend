@@ -120,9 +120,7 @@ describe("release bus staging artifact transfer", () => {
     expect(deployStep.run).toContain(
       "public-review-discussion-destinations.json"
     );
-    expect(deployStep.run).toContain(
-      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS:"
-    );
+    expect(deployStep.run).toContain("PUBLIC_REVIEW_DISCUSSION_DESTINATIONS:");
     expect(deployStep.run).toContain(
       '> "$release_dir/public-review-discussion-destinations.json"'
     );
@@ -318,6 +316,23 @@ describe("release bus contributor notifications", () => {
           CI_RELEASE_CONTRIBUTORS: "${{ inputs.release_contributors }}",
         });
       }
+      expect(failure.env).not.toHaveProperty("CI_RELEASE_NOTES_PROMPT_PATH");
+      if (_environment === "production") {
+        expect(success.env).toMatchObject({
+          CI_PIPELINES_TARGET_ENV: "prod",
+          CI_PIPELINES_STATUS: "success",
+          CI_PIPELINES_SERVICE: "web",
+          CI_RELEASE_NOTES_PROMPT_PATH:
+            "ops/release-notes/release-notes.prompt.md",
+        });
+        expect(
+          fs.existsSync(
+            path.join(process.cwd(), success.env.CI_RELEASE_NOTES_PROMPT_PATH)
+          )
+        ).toBe(true);
+      } else {
+        expect(success.env).not.toHaveProperty("CI_RELEASE_NOTES_PROMPT_PATH");
+      }
     }
   );
 
@@ -360,6 +375,206 @@ describe("release bus v2 E2E callbacks", () => {
     expect(stagingE2E).toContain("failure_phase=staging_e2e_setup");
     expect(stagingE2E).toContain("failure_class=E2E");
     expect(stagingE2E).toContain("failure_phase=staging_e2e");
+  });
+});
+
+describe("release bus v2 frontend composition", () => {
+  const workflow = YAML.parse(
+    fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/release-bus-v2-compose.yml"),
+      "utf8"
+    )
+  );
+  const composeScript = workflow.jobs.compose.steps.find(
+    (step: { name?: string }) =>
+      step.name === "Compose deterministic candidate set"
+  ).run;
+  const validateScript = workflow.jobs.compose.steps.find(
+    (step: { name?: string }) => step.name === "Validate immutable inputs"
+  ).run;
+
+  function runCompositionScenario(
+    setup: string,
+    candidates: string,
+    assertions: string
+  ) {
+    const tempDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "release-bus-v2-compose-")
+    );
+    try {
+      childProcess.execFileSync("bash", ["-s"], {
+        cwd: tempDir,
+        env: {
+          ...process.env,
+          GIT_CONFIG_NOSYSTEM: "1",
+        },
+        input: `
+set -euo pipefail
+# The Windows jq binary writes CRLF even inside Git Bash. Normalize its output
+# so this fixture exercises the workflow's Ubuntu line semantics locally too.
+jq_executable="$(command -v jq)"
+jq() {
+  "$jq_executable" "$@" | tr -d '\\r'
+}
+git init --bare origin.git >/dev/null
+git init seed >/dev/null
+cd seed
+git config user.name "Fixture Author"
+git config user.email "fixture@example.com"
+printf 'base\\n' > shared.txt
+git add shared.txt
+git commit -m base >/dev/null
+base_sha="$(git rev-parse HEAD)"
+git branch -M main
+git remote add origin "$OLDPWD/origin.git"
+git push origin main >/dev/null
+${setup}
+cd ..
+git clone --no-checkout origin.git work >/dev/null
+cd work
+git checkout --detach "$base_sha" >/dev/null
+mkdir -p runner-temp
+export BASE_SHA="$base_sha"
+export CANDIDATE_SHAS="$(jq -nc ${candidates})"
+export RELEASE_BRANCH="release-bus-v2/staging-train-fixture"
+export RELEASE_BUS_GIT_EMAIL="release-bus@example.com"
+export RELEASE_BUS_GIT_NAME="Release Bus Fixture"
+export RUNNER_TEMP="$PWD/runner-temp"
+export TRAIN_ID="fixture"
+(
+${composeScript}
+)
+${assertions}
+`,
+        stdio: "pipe",
+      });
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  }
+
+  it("accepts a base-only composition with an empty candidate set", () => {
+    expect(validateScript).toContain(
+      'type == "array" and all(.[]; test("^[a-f0-9]{40}$"))'
+    );
+    expect(validateScript).not.toContain("length > 0");
+
+    runCompositionScenario(
+      "",
+      "'[]'",
+      `
+test "$(jq -r '.reused' "$RUNNER_TEMP/composition.json")" = false
+test "$(jq -c '.excluded_shas' "$RUNNER_TEMP/composition.json")" = '[]'
+test "$(jq -r '.composed_sha' "$RUNNER_TEMP/composition.json")" = "$base_sha"
+test "$(git rev-parse HEAD)" = "$base_sha"
+`
+    );
+  });
+
+  it("commits candidates only from an active merge state", () => {
+    const merge = composeScript.indexOf(
+      'if git merge --no-ff --no-commit "$sha"; then'
+    );
+    const mergeHead = composeScript.indexOf(
+      "git rev-parse --verify --quiet MERGE_HEAD >/dev/null"
+    );
+    const commit = composeScript.indexOf(
+      "git -c core.hooksPath=/dev/null commit -s",
+      mergeHead
+    );
+
+    expect(merge).toBeGreaterThan(-1);
+    expect(mergeHead).toBeGreaterThan(merge);
+    expect(commit).toBeGreaterThan(mergeHead);
+    expect(composeScript).not.toContain("--allow-empty");
+  });
+
+  it("accepts ancestor and repeated candidate SHAs without empty commits", () => {
+    runCompositionScenario(
+      `
+printf 'candidate\\n' > candidate.txt
+git add candidate.txt
+git commit -m candidate >/dev/null
+candidate_sha="$(git rev-parse HEAD)"
+git push origin HEAD:refs/heads/candidate >/dev/null
+`,
+      '--arg base "$base_sha" --arg candidate "$candidate_sha" \'[$base, $candidate, $candidate]\'',
+      `
+test "$(jq -r '.reused' "$RUNNER_TEMP/composition.json")" = false
+test "$(jq -c '.excluded_shas' "$RUNNER_TEMP/composition.json")" = '[]'
+composed_sha="$(jq -r '.composed_sha' "$RUNNER_TEMP/composition.json")"
+test "$composed_sha" = "$(git rev-parse HEAD)"
+git merge-base --is-ancestor "$base_sha" "$composed_sha"
+git merge-base --is-ancestor "$candidate_sha" "$composed_sha"
+test "$(git rev-list --merges --count "$base_sha..$composed_sha")" = 1
+test "$(git log --format=%B "$base_sha..$composed_sha" | grep -c "Candidate-SHA: $candidate_sha")" = 1
+`
+    );
+  });
+
+  it("reuses an existing immutable branch and reports candidates outside it", () => {
+    runCompositionScenario(
+      `
+git switch -c existing "$base_sha" >/dev/null
+printf 'existing\\n' > existing.txt
+git add existing.txt
+git commit -m existing >/dev/null
+existing_sha="$(git rev-parse HEAD)"
+git push origin HEAD:refs/heads/release-bus-v2/staging-train-fixture >/dev/null
+git switch -c outside "$base_sha" >/dev/null
+printf 'outside\\n' > outside.txt
+git add outside.txt
+git commit -m outside >/dev/null
+outside_sha="$(git rev-parse HEAD)"
+git push origin HEAD:refs/heads/outside >/dev/null
+`,
+      '--arg existing "$existing_sha" --arg outside "$outside_sha" \'[$existing, $outside]\'',
+      `
+test "$(jq -r '.reused' "$RUNNER_TEMP/composition.json")" = true
+test "$(jq -r '.composed_sha' "$RUNNER_TEMP/composition.json")" = "$existing_sha"
+test "$(jq -r '.excluded_shas | length' "$RUNNER_TEMP/composition.json")" = 1
+test "$(jq -r '.excluded_shas[0]' "$RUNNER_TEMP/composition.json")" = "$outside_sha"
+`
+    );
+  });
+
+  it("continues with a compatible candidate after excluding a conflict", () => {
+    runCompositionScenario(
+      `
+git switch -c first "$base_sha" >/dev/null
+printf 'first\\n' > shared.txt
+git commit -am first >/dev/null
+first_sha="$(git rev-parse HEAD)"
+git push origin HEAD:refs/heads/first >/dev/null
+git switch -c conflicting "$base_sha" >/dev/null
+printf 'conflicting\\n' > shared.txt
+git commit -am conflicting >/dev/null
+conflicting_sha="$(git rev-parse HEAD)"
+git push origin HEAD:refs/heads/conflicting >/dev/null
+git switch -c following "$first_sha" >/dev/null
+printf 'following\\n' > following.txt
+git add following.txt
+git commit -m following >/dev/null
+following_sha="$(git rev-parse HEAD)"
+git push origin HEAD:refs/heads/following >/dev/null
+`,
+      '--arg first "$first_sha" --arg conflicting "$conflicting_sha" --arg following "$following_sha" \'[$first, $conflicting, $following]\'',
+      `
+test "$(jq -r '.reused' "$RUNNER_TEMP/composition.json")" = false
+test "$(jq -r '.excluded_shas | length' "$RUNNER_TEMP/composition.json")" = 1
+test "$(jq -r '.excluded_shas[0]' "$RUNNER_TEMP/composition.json")" = "$conflicting_sha"
+composed_sha="$(jq -r '.composed_sha' "$RUNNER_TEMP/composition.json")"
+git merge-base --is-ancestor "$first_sha" "$composed_sha"
+git merge-base --is-ancestor "$following_sha" "$composed_sha"
+if git merge-base --is-ancestor "$conflicting_sha" "$composed_sha"; then
+  exit 1
+fi
+test -z "$(git ls-files --unmerged)"
+test "$(cat shared.txt)" = first
+test "$(cat following.txt)" = following
+test "$(git rev-list --merges --count "$base_sha..$composed_sha")" = 2
+`
+    );
   });
 });
 

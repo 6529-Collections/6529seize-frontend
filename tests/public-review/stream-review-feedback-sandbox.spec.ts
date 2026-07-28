@@ -1,0 +1,202 @@
+import type { Page } from "@playwright/test";
+
+import {
+  expect,
+  expectNoHorizontalOverflow,
+  test,
+  waitForRouteReady,
+} from "../testHelpers";
+import {
+  dismissNextDevTools,
+  expectNoUnsafeSandboxMutations,
+  fetchSandboxRequests,
+  LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+  type SandboxRequest,
+  useLocalSandboxMutationGuard,
+} from "../support/localSandbox";
+
+const PUBLIC_REVIEW_COMMENT =
+  "The recovery trigger needs clearer reviewer guidance.";
+const PUBLIC_REVIEW_WHY_IT_MATTERS = "Readers need to understand who can act.";
+const PUBLIC_REVIEW_SUGGESTED_CHANGE = "Clarify the trigger and eligible role.";
+const PUBLIC_REVIEW_METADATA_KEYS = [
+  "review_schema",
+  "type",
+  "severity",
+  "context",
+] as const;
+
+test.describe.configure({ mode: "serial" });
+
+test.describe("Stream review feedback local sandbox @auth @medium @local-only", () => {
+  test.skip(
+    process.env["PLAYWRIGHT_PUBLIC_REVIEW_SANDBOX"] !== "1",
+    "Stream review feedback sandbox requires the local mock API runner."
+  );
+  useLocalSandboxMutationGuard(
+    test,
+    "PLAYWRIGHT_COMPOSER_SANDBOX",
+    "Stream review feedback sandbox requires the local mock API runner."
+  );
+
+  test("opens the feedback panel and submits structured feedback safely", async ({
+    baseURL,
+    page,
+  }, testInfo) => {
+    await page.addInitScript(() => {
+      globalThis.localStorage.removeItem("public-review-comment-panel-open");
+    });
+    await gotoStreamReview(page);
+
+    const feedbackPanel = page.locator("#public-review-feedback");
+    const isDesktop = testInfo.project.name === "web-desktop-chromium";
+    const feedbackToggle = page.getByRole("button", {
+      name: isDesktop ? "Hide feedback" : "Show feedback",
+    });
+    await expect(feedbackToggle).toBeVisible();
+    await expect(feedbackToggle).toHaveAttribute(
+      "aria-expanded",
+      isDesktop ? "true" : "false"
+    );
+
+    if (!isDesktop) {
+      await feedbackToggle.click();
+      await expect(
+        page.getByRole("button", { name: "Hide feedback" })
+      ).toHaveAttribute("aria-expanded", "true");
+    }
+
+    await expect(feedbackPanel).toBeVisible();
+    await expect(
+      feedbackPanel.getByText("No comments yet for this page.")
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+
+    const composerToggle = feedbackPanel.getByText("Send feedback", {
+      exact: true,
+    });
+    await expect(composerToggle).toBeVisible();
+    await expect(
+      feedbackPanel.locator("textarea[data-public-review-feedback-primary]")
+    ).toBeHidden();
+
+    if (isDesktop) {
+      await page.evaluate(() => {
+        globalThis.location.hash = "public-review-feedback";
+      });
+    } else {
+      await composerToggle.click();
+    }
+
+    const comment = feedbackPanel.locator(
+      "textarea[data-public-review-feedback-primary]"
+    );
+    await expect(comment).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(
+      feedbackPanel.getByRole("button", {
+        name: "Connect wallet to comment",
+      })
+    ).toBeHidden();
+    await comment.fill(PUBLIC_REVIEW_COMMENT);
+
+    await feedbackPanel
+      .getByText("Add technical detail", { exact: true })
+      .click();
+    await feedbackPanel
+      .getByLabel("Comment on")
+      .selectOption("a-concrete-1-1-journey");
+    await feedbackPanel
+      .getByLabel("Feedback type")
+      .selectOption("product-or-ux");
+    await feedbackPanel.getByLabel("Suspected severity").selectOption("medium");
+    await feedbackPanel
+      .getByLabel("Why this matters")
+      .fill(PUBLIC_REVIEW_WHY_IT_MATTERS);
+    await feedbackPanel
+      .getByLabel("Suggested change")
+      .fill(PUBLIC_REVIEW_SUGGESTED_CHANGE);
+
+    const previewButton = feedbackPanel.getByRole("button", {
+      name: "Preview Wave message",
+    });
+    await previewButton.click();
+    await expect(
+      feedbackPanel.getByRole("heading", { name: "Wave message preview" })
+    ).toBeVisible();
+    await expect(feedbackPanel).toContainText(PUBLIC_REVIEW_COMMENT);
+    await expect(feedbackPanel).toContainText("Product or UX");
+    await expect(feedbackPanel).toContainText("Medium");
+
+    const submitButton = feedbackPanel.getByRole("button", {
+      name: "Post to review Wave",
+    });
+    await expect(submitButton).toBeVisible();
+    await expect(submitButton).toBeEnabled({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await submitButton.click();
+
+    await expect(
+      feedbackPanel.getByText("Feedback posted successfully.")
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await expect(comment).toHaveValue("");
+
+    let dropRequests: SandboxRequest[] = [];
+    await expect
+      .poll(
+        async () => {
+          dropRequests = (await fetchSandboxRequests(baseURL)).filter(
+            (request) =>
+              request.method === "POST" && request.path === "/api/drops"
+          );
+          return dropRequests;
+        },
+        {
+          timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+          message:
+            "Expected exactly one canonical public-review drop submission.",
+        }
+      )
+      .toHaveLength(1);
+
+    const [dropRequest] = dropRequests;
+    expect(dropRequest).toMatchObject({
+      kind: "allowed-sandbox-mutation",
+      body: expect.objectContaining({
+        wave_id: "00000000-0000-4000-8000-000000000529",
+        drop_type: "CHAT",
+        content: expect.stringContaining(PUBLIC_REVIEW_COMMENT),
+        metadata_count: 4,
+        metadata_keys: PUBLIC_REVIEW_METADATA_KEYS,
+        review_type: "product-or-ux",
+        review_severity: "medium",
+        review_context: expect.objectContaining({
+          reviewId: "6529-stream",
+          reviewVersion: "2026-07-28.1",
+          pageId: "overview",
+          sectionId: "a-concrete-1-1-journey",
+        }),
+        signature: null,
+        is_safe_signature: false,
+        hide_link_preview: false,
+      }),
+    });
+
+    await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+});
+
+async function gotoStreamReview(page: Page) {
+  await page.goto("/reviews/6529-stream", {
+    waitUntil: "domcontentloaded",
+  });
+  await waitForRouteReady(page);
+  await expect(page).toHaveURL(/\/reviews\/6529-stream$/);
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Overview" })
+  ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+  await dismissNextDevTools(page);
+  await expectNoHorizontalOverflow(page);
+}

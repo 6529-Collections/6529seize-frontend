@@ -20,8 +20,8 @@ export default function NowMintingSection({
           Latest Drop
         </span>
 
-        <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950">
-          <div className="tw-grid tw-grid-cols-1 tw-gap-y-6 lg:tw-grid-cols-12 xl:tw-grid-cols-9">
+        <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-shadow-[0_24px_60px_rgba(0,0,0,0.2)]">
+          <div className="tw-grid tw-grid-cols-1 tw-items-stretch lg:tw-grid-cols-12 xl:tw-grid-cols-9">
             <div className="tw-p-0 lg:tw-col-span-6 xl:tw-col-span-5">
               <div className="tw-relative tw-h-[clamp(360px,65vw,640px)] tw-w-full tw-animate-pulse tw-rounded-none tw-bg-iron-800/50" />
             </div>
@@ -33,7 +33,7 @@ export default function NowMintingSection({
                   <div className="tw-h-7 tw-w-3/4 tw-animate-pulse tw-rounded tw-bg-iron-800/50" />
                   <div className="tw-h-4 tw-w-32 tw-animate-pulse tw-rounded tw-bg-iron-800/50" />
                 </div>
-                <div className="tw-grid tw-grid-cols-2 tw-gap-3">
+                <div className="tw-grid tw-grid-cols-2 tw-gap-x-8 tw-gap-y-5">
                   {...new Array(4).map((_, i) => (
                     <div key={i} className="tw-space-y-2">
                       <div className="tw-h-4 tw-w-16 tw-animate-pulse tw-rounded tw-bg-iron-800/50" />
@@ -41,7 +41,7 @@ export default function NowMintingSection({
                     </div>
                   ))}
                 </div>
-                <div className="tw-h-12 tw-w-full tw-animate-pulse tw-rounded-lg tw-bg-iron-800/50" />
+                <div className="tw-h-24 tw-w-full tw-animate-pulse tw-rounded-xl tw-bg-primary-500/[0.06]" />
                 <div className="tw-h-32 tw-w-full tw-animate-pulse tw-rounded-lg tw-bg-iron-800/50" />
               </div>
             </div>
@@ -61,7 +61,7 @@ export default function NowMintingSection({
         Latest Drop
       </span>
 
-      <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-iron-950">
+      <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-iron-950 tw-shadow-[0_24px_60px_rgba(0,0,0,0.2)]">
         <div className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-x-6 tw-gap-y-6 lg:tw-grid-cols-12 xl:tw-grid-cols-9">
           <div className="tw-p-0 lg:tw-col-span-6 xl:tw-col-span-5">
             <NowMintingArtwork nft={nft} />

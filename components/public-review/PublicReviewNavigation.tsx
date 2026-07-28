@@ -74,7 +74,7 @@ function ReviewSectionLinks({
         <li key={section.id}>
           <a
             href={`#${section.id}`}
-            className="tw--ml-2 tw-block tw-px-2 tw-py-1.5 tw-text-xs tw-leading-5 tw-text-iron-500 tw-no-underline tw-transition-colors tw-duration-150 hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+            className="tw--ml-2 tw-block tw-px-2 tw-py-1.5 tw-text-xs tw-leading-5 tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-150 hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
           >
             {section.title}
           </a>
@@ -133,7 +133,7 @@ export function PublicReviewNavigation({
               "publicReview.navigation.contentsLabel"
             )}
           >
-            <p className="tw-mb-4 tw-mt-0 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-500">
+            <p className="tw-mb-4 tw-mt-0 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-400">
               {t(DEFAULT_LOCALE, "publicReview.navigation.contents")}
             </p>
             <ReviewPageLinks
