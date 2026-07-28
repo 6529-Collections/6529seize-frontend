@@ -50,6 +50,7 @@ jest.mock("@/hooks/useDropForgePermissions", () => ({
 
 const mockUseUnreadIndicator = jest.fn((_props: unknown) => ({
   hasUnread: false,
+  unreadCount: 0,
 }));
 jest.mock("@/hooks/useUnreadIndicator", () => ({
   useUnreadIndicator: (props: unknown) => mockUseUnreadIndicator(props),

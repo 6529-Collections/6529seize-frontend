@@ -126,6 +126,25 @@ const addUnreadDropCount = ({
   };
 };
 
+const getServerSnapshotCoverageTimestamp = (
+  wave: SidebarWave
+): number | null => {
+  const snapshotLatestDropTimestamp =
+    wave.serverSnapshotLatestDropTimestamp ?? null;
+  const latestReadTimestamp =
+    typeof wave.latestReadTimestamp === "number"
+      ? wave.latestReadTimestamp
+      : null;
+
+  if (snapshotLatestDropTimestamp === null) {
+    return latestReadTimestamp;
+  }
+
+  return latestReadTimestamp === null
+    ? snapshotLatestDropTimestamp
+    : Math.max(snapshotLatestDropTimestamp, latestReadTimestamp);
+};
+
 const reconcileNewDropsCounts = ({
   newDropsCounts,
   waves,
@@ -137,13 +156,13 @@ const reconcileNewDropsCounts = ({
 
   waves.forEach((wave) => {
     const localCount = newDropsCounts[wave.id];
-    const serverLatestReadTimestamp = wave.latestReadTimestamp;
+    const serverCoverageTimestamp = getServerSnapshotCoverageTimestamp(wave);
     if (
       !localCount ||
       localCount.count <= 0 ||
       localCount.latestDropTimestamp === null ||
-      typeof serverLatestReadTimestamp !== "number" ||
-      serverLatestReadTimestamp < localCount.latestDropTimestamp
+      serverCoverageTimestamp === null ||
+      serverCoverageTimestamp < localCount.latestDropTimestamp
     ) {
       return;
     }
@@ -192,7 +211,6 @@ function useNewDropCounter(
   const [previousEnabled, setPreviousEnabled] = useState(enabled);
   const wavesRef = useRef(waves);
   const lastUnknownWaveRefetchAtRef = useRef<number | null>(null);
-  const wasEnabledRef = useRef(enabled);
 
   if (previousEnabled !== enabled) {
     setPreviousEnabled(enabled);
@@ -204,19 +222,12 @@ function useNewDropCounter(
   useEffect(() => {
     if (!enabled) {
       wavesRef.current = [];
+      lastUnknownWaveRefetchAtRef.current = null;
       return;
     }
 
     wavesRef.current = waves;
   }, [enabled, waves]);
-
-  useEffect(() => {
-    if (enabled && !wasEnabledRef.current) {
-      lastUnknownWaveRefetchAtRef.current = null;
-    }
-
-    wasEnabledRef.current = enabled;
-  }, [enabled]);
 
   const reconciledNewDropsCounts = useMemo(
     () =>
@@ -377,10 +388,12 @@ function useNewDropCounter(
 
         const waveId = message.wave.id;
         const wave = waves.find((w) => w.id === waveId);
-        const serverLatestReadTimestamp = wave?.latestReadTimestamp;
+        const serverCoverageTimestamp = wave
+          ? getServerSnapshotCoverageTimestamp(wave)
+          : null;
         if (
-          typeof serverLatestReadTimestamp === "number" &&
-          message.created_at <= serverLatestReadTimestamp
+          serverCoverageTimestamp !== null &&
+          message.created_at <= serverCoverageTimestamp
         ) {
           updateNewDropsCountsForMessage(
             waveId,
