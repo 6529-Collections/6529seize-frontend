@@ -6,7 +6,15 @@ const DEFAULT_API_URL = "https://api.6529.io";
 const DEFAULT_TIMEOUT_MS = 10_000;
 const MAX_TIMEOUT_MS = 60_000;
 const REQUIRED_SCOPES = ["ALL", "STAGING", "PRODUCTION"];
-const VALID_MODES = new Set(["OFF", "SHADOW", "STAGING", "PRODUCTION"]);
+const REQUIRED_LANES = ["STAGING", "PRODUCTION"];
+const VALID_MODES = new Set(["OFF", "STAGING", "PRODUCTION"]);
+const VALID_LANE_STATUSES = new Set(["ON", "OFF"]);
+const VALID_STAGING_STATES = new Set([
+  "UNINITIALIZED",
+  "LIVE",
+  "CLEAN_MAIN",
+  "ROLLBACK_FAILED",
+]);
 const LOOPBACK_HOSTS = new Set(["127.0.0.1", "[::1]", "localhost"]);
 
 class SafeStatusError extends Error {}
@@ -93,13 +101,26 @@ function normalizePaused(value) {
   );
 }
 
+function normalizeReason(value) {
+  if (value === null || value === undefined) return null;
+  if (typeof value === "string") return value;
+  throw new SafeStatusError(
+    "Release Bus status API returned invalid status data."
+  );
+}
+
+function modeAllowsLane(mode, lane) {
+  return mode === "PRODUCTION" || (mode === "STAGING" && lane === "STAGING");
+}
+
 function sanitizeStatus(payload) {
   if (
     payload === null ||
     typeof payload !== "object" ||
     Array.isArray(payload) ||
     !VALID_MODES.has(payload.mode) ||
-    !Array.isArray(payload.controls)
+    !Array.isArray(payload.controls) ||
+    !Array.isArray(payload.lanes)
   ) {
     throw new SafeStatusError(
       "Release Bus status API returned invalid status data."
@@ -120,10 +141,104 @@ function sanitizeStatus(payload) {
         "Release Bus status API returned incomplete control information."
       );
     }
-    controls[scope] = normalizePaused(matches[0].paused) ? "PAUSED" : "RUNNING";
+    controls[scope] = {
+      paused: normalizePaused(matches[0].paused),
+      reason: normalizeReason(matches[0].reason),
+    };
   }
 
-  return { mode: payload.mode, controls };
+  const lanes = {};
+  for (const lane of REQUIRED_LANES) {
+    const matches = payload.lanes.filter(
+      (item) =>
+        item !== null &&
+        typeof item === "object" &&
+        !Array.isArray(item) &&
+        item.lane === lane
+    );
+    if (matches.length !== 1) {
+      throw new SafeStatusError(
+        "Release Bus status API returned incomplete lane information."
+      );
+    }
+    const item = matches[0];
+    if (
+      !VALID_LANE_STATUSES.has(item.status) ||
+      typeof item.changeable !== "boolean"
+    ) {
+      throw new SafeStatusError(
+        "Release Bus status API returned invalid lane information."
+      );
+    }
+    const globalPaused = controls.ALL.paused;
+    const lanePaused = controls[lane].paused;
+    const allowed = modeAllowsLane(payload.mode, lane);
+    const expected = {
+      status: allowed && !globalPaused && !lanePaused ? "ON" : "OFF",
+      changeable: allowed && !globalPaused,
+      reason: !allowed
+        ? "Internal Release Bus hard stop is active"
+        : globalPaused
+          ? (controls.ALL.reason ?? "Internal Release Bus hard stop is active")
+          : controls[lane].reason,
+    };
+    const actual = {
+      status: item.status,
+      changeable: item.changeable,
+      reason: normalizeReason(item.reason),
+    };
+    if (
+      actual.status !== expected.status ||
+      actual.changeable !== expected.changeable ||
+      actual.reason !== expected.reason
+    ) {
+      throw new SafeStatusError(
+        "Release Bus status API returned inconsistent lane information."
+      );
+    }
+    lanes[lane] = actual;
+  }
+
+  const staging = payload.staging_state;
+  if (
+    !staging ||
+    typeof staging !== "object" ||
+    !VALID_STAGING_STATES.has(staging.status) ||
+    !Number.isInteger(Number(staging.row_version)) ||
+    Number(staging.row_version) < 1
+  ) {
+    throw new SafeStatusError(
+      "Release Bus status API returned invalid staging state."
+    );
+  }
+  const optionalSha = (value) =>
+    value === null || /^[a-f0-9]{40}$/.test(String(value));
+  if (
+    !optionalSha(staging.frontend_sha) ||
+    !optionalSha(staging.backend_sha) ||
+    !optionalSha(staging.frontend_staging_ref_sha) ||
+    !optionalSha(staging.backend_staging_ref_sha)
+  ) {
+    throw new SafeStatusError(
+      "Release Bus status API returned invalid staging identity."
+    );
+  }
+
+  return {
+    lanes,
+    staging: {
+      status: staging.status,
+      current_manifest_id: staging.current_manifest_id ?? null,
+      last_validated_manifest_id: staging.last_validated_manifest_id ?? null,
+      frontend_sha: staging.frontend_sha,
+      backend_sha: staging.backend_sha,
+      frontend_staging_ref_sha: staging.frontend_staging_ref_sha,
+      backend_staging_ref_sha: staging.backend_staging_ref_sha,
+      clean_main: normalizePaused(staging.clean_main),
+      last_transition_train_id: staging.last_transition_train_id ?? null,
+      row_version: Number(staging.row_version),
+    },
+  };
 }
 
 async function requestStatus(token, statusUrl, timeoutMs) {

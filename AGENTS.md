@@ -6,17 +6,19 @@
 - Before staging, production, promotion, or release mutation, run
   `./bin/6529 exec node ops/scripts/release-bus-status.mjs` and follow
   `deploy-6529`.
-- `OFF` uses the serialized manual fallback and requires enforcement absent or
-  `false`. `STAGING` routes staging readiness through v2. `PRODUCTION` routes
-  staging through v2 and requires a separate explicit exact-SHA production
-  action after `STAGING_VALIDATED`.
-- While `OFF`, dispatch backend `Deploy a service` workflows one at a time and
-  wait for exact success before starting the next. Its shared concurrency can
-  cancel sibling service runs, including independent DAG-frontier units.
-- Stop an active v2 lane when `ALL` or that lane is paused. In `OFF`, v2
-  controls are non-authoritative and do not block manual staging or production.
-  Explicit owner production authorization is sufficient; prior staging
-  deployment or validation is not required.
+- Route only from the helper's two effective lane states. When the target lane
+  is `ON`, use v2. When it is `OFF`, use serialized manual fallback only after
+  the target environment lock is free, no mutation/E2E workflow is active, and
+  every already-dispatched exact operation is terminal. Both lanes `OFF` means
+  full manual fallback.
+- Staging `ON` accepts exact candidates. Production `ON` requires a separate
+  exact-SHA production action after `STAGING_VALIDATED`.
+- Raw mode and `ALL` are internal emergency fences, not normal routing or UI
+  controls. Never bypass them. Use the backend fast-off helper only for an
+  emergency hard stop.
+- In manual fallback, dispatch backend `Deploy a service` workflows one at a
+  time and wait for exact success before starting the next. Shared concurrency
+  can cancel sibling service runs, including independent DAG-frontier units.
 - For coupled work, declare backend dependencies and preserve backend-before-
   frontend ordering. Within v2, only independent backend DAG frontier units run
   together.

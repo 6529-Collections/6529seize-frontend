@@ -1,7 +1,7 @@
 # Simple Release Bus v2
 
 Simple Release Bus v2 is the deployment authority for exact frontend/backend
-candidate SHAs when its live mode enables a lane.
+candidate SHAs when the target environment's effective lane is `ON`.
 
 ## Route every request from live state
 
@@ -11,17 +11,45 @@ Run:
 ./bin/6529 exec node ops/scripts/release-bus-status.mjs
 ```
 
-The helper reads `/deploy/release-bus-v2/controls` and fails closed when the
-authenticated status request is unavailable or malformed.
+The helper reads `/deploy/release-bus-v2/controls`, verifies the hidden safety
+fences, and fails closed when the authenticated status request is unavailable,
+malformed, or internally inconsistent. Its operator-facing result contains
+only:
 
-| Mode         | Staging                 | Production                                                                                    |
-| ------------ | ----------------------- | --------------------------------------------------------------------------------------------- |
-| `OFF`        | Serialized manual route | Serialized manual route with explicit owner authority; prior staging evidence is not required |
-| `STAGING`    | V2 readiness            | Production remains manual/disabled                                                            |
-| `PRODUCTION` | V2 readiness            | Separate explicit v2 action for an exact `STAGING_VALIDATED` candidate                        |
+| Effective lane | `ON`                                                                                | `OFF`                                                                                                                                 |
+| -------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Staging        | Register exact candidates with Release Bus                                          | Serialized manual staging after the staging drain gate                                                                                |
+| Production     | Separately select an exact `STAGING_VALIDATED` candidate for Release Bus production | Serialized manual production after the production drain gate and explicit owner authorization; prior staging evidence is not required |
 
-For an active mode, `ALL` and the target lane must be running. In `OFF`, paused
-v2 controls are expected and the serialized manual fallback remains available.
+The drain gate requires the target environment lock to be free, no target
+mutation/E2E workflow to be active, and every already-dispatched exact
+operation to be terminal. Both lanes `OFF` means full manual fallback after both
+drain gates. Raw `RELEASE_BUS_V2_MODE` and `ALL` remain internal emergency
+fences; they are not normal routing or UI controls and must never be bypassed.
+
+## Dashboard read model
+
+`/deploy/ui/bus` presents Staging and Production as the two developer-facing
+lanes. Each lane shows its effective `ON`/`OFF` state, the exact frontend and
+backend SHAs currently deployed, the last successfully validated exact SHAs,
+and three train views:
+
+- the currently active train, if one has been claimed;
+- the projected next train if the queue does not change; and
+- terminal train history, loaded incrementally.
+
+The projected train is read-only planning output. It is never claim evidence and
+may change until the reconciler persists a train. Train cards split backend and
+frontend candidates and retain exact PR, SHA, status, membership, dependency,
+and backend deployment-DAG data. Locks, manifests, workflow runs, operations,
+errors, and durable events remain available inside the train's expandable
+diagnostics rather than as separate top-level dashboards.
+
+The shared Pull requests view lists every registered exact candidate and can be
+filtered by PR number or status. Public users can inspect this state without a
+GitHub token. Authentication reveals only the lane and candidate actions that
+can mutate state. The UI is a human read model; agents and scripts must continue
+to route and validate mutations from the versioned helper and API response.
 
 ## Candidate contract
 
@@ -106,30 +134,68 @@ Staging validation never creates production readiness. A developer explicitly
 marks the unchanged exact candidate SHA ready through the Deploy UI or the
 versioned mark-ready endpoint.
 
-Production selects only explicit candidates. It composes the proposed subset
-from current `main`:
+Production selects only explicit candidates. An authenticated selection is
+atomic: all selected candidates share one `production_selection_id`, every
+candidate must still be `STAGING_VALIDATED` at the submitted exact head, and
+the set must be transitively dependency-closed. A production prerequisite must
+be selected in the same action or already be terminal `PRODUCTION_DEPLOYED`
+with exact manifest and successful production E2E evidence. Omitted unrelated
+candidates retain their staging evidence and any separate production intent.
 
-- if both exact composed tree SHAs match a validated manifest, reuse its
-  validation and immutable dual-profile/backend artifacts;
-- otherwise enqueue an exact `PRODUCTION_QUALIFICATION` staging train, run
-  manifest-bound E2E, then continue automatically;
-- immediately before mutation, require every `main` ref to equal its recorded
-  base. A moved ref cancels and requeues the set for fresh qualification;
-- advance exact tested commits, deploy the same artifacts in dependency order,
-  verify exact versions, run production-safe read-only E2E, and mark
-  `PRODUCTION_DEPLOYED`.
+If either production base moves before irreversible production mutation, the
+old train is cancelled without changing its immutable membership and its exact
+explicit intents move to `WAITING_FOR_PRODUCTION_REPLAN`. The next scheduler
+transaction creates an audited replacement selection and train from every
+currently eligible explicit production intent, including compatible
+selections recorded after the old train was claimed. Exact heads, historical
+staging train/manifest/E2E evidence, dependencies, ownership, and both current
+production bases are rechecked. Audit events map every included source
+selection/train to the replacement and retain every omission reason. The
+replacement never infers candidates from staging.
+
+If `PRODUCTION_REPLAN_INTENT_SCAN_FAILED_CLOSED` reaches its bounded 500-row
+scan cap, no replacement may claim. Wait for production ownership to drain and
+use authenticated revoke/cancel actions only for owner-authorized stale
+intents, or deploy a separately reviewed cap/pagination change. Never edit the
+ledger, discard intent, or split a dependency set merely to unblock the queue.
+
+The replacement boundary closes as soon as either `main` advance succeeds, a
+production deploy is dispatched, or production E2E exists. After that boundary
+the original exact set remains frozen and only that train may resume or
+recover; it is never broadened in place. A nonterminal dispatched operation
+retains the production lease while it drains. After terminal drain, the
+frozen/paused train releases the lease while the active train and paused
+production lane still block every new claim until exact recovery.
+
+New production trains use `CANDIDATE_STAGING_EVIDENCE_V1`:
+
+- persist each selected candidate's exact identity plus its staging train,
+  validated manifest, and successful manifest-bound E2E operation/run;
+- freshly compose both repositories against the current trusted `main` bases;
+- fail closed on moved heads, ambiguous or stale evidence, invalid dependency
+  closure, composition/check/build/artifact failures, or either stale base;
+- persist `PRODUCTION_CANDIDATE_EVIDENCE_QUALIFIED` as an auditable production
+  manifest without mutating shared staging;
+- never create `PRODUCTION_QUALIFICATION` merely because the selected set
+  differs from a validated staging manifest;
+- compare-and-swap only the exact tested commits, deploy immutable artifacts in
+  dependency order, verify exact versions, run production-safe read-only E2E,
+  and create `PRODUCTION_DEPLOYED` only after terminal success.
 
 V2 does not publish release notes.
 
 ## Failure behavior
 
-| Class                | Behavior                                                                                                                                                                                                 |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Candidate merge/test | Before shared mutation, fail closed and leave the last validated admitted manifest live; mark only the new direct candidate `NEEDS_REBASE` as applicable                                                 |
-| Infrastructure       | Bounded idempotent retry; no candidate isolation                                                                                                                                                         |
-| Retryable deployment | Retry only the failed operation at the same release SHA and idempotency key; preserve successful sibling evidence                                                                                        |
-| Control plane        | Fail the train, requeue candidates, pause automated claiming, retain manual fallback                                                                                                                     |
-| E2E                  | Keep the failed manifest unvalidated and forward-CAS, deploy, and E2E an immutable restore commit with the exact last validated tree under the same staging lock before committing any membership change |
+| Class                         | Behavior                                                                                                                                                                                                 |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Candidate merge/test          | Before shared mutation, fail closed and leave the last validated admitted manifest live; mark only the new direct candidate `NEEDS_REBASE` as applicable                                                 |
+| Infrastructure                | Bounded idempotent retry; no candidate isolation                                                                                                                                                         |
+| Retryable deployment          | Retry only the failed operation at the same release SHA and idempotency key; preserve successful sibling evidence                                                                                        |
+| Control plane                 | Fail the train, preserve or requeue exact candidates, turn the affected lane off where safe, and permit manual fallback only after its operations are terminal and its drain gate passes                 |
+| E2E                           | Keep the failed manifest unvalidated and forward-CAS, deploy, and E2E an immutable restore commit with the exact last validated tree under the same staging lock before committing any membership change |
+| Production preflight          | Fail before shared mutation; retry only through a new explicit exact-SHA selection after unchanged staging evidence and terminal compose/preflight operations are revalidated                            |
+| Production base moved         | Before irreversible mutation, preserve explicit intent and form an audited replacement from all currently eligible dependency-closed selections; after mutation, freeze the original exact set           |
+| Production after main advance | Fail selected candidates closed, turn production off, block later claims, and require exact recorded `main`/runtime parity or an explicit rollback before resuming                                       |
 
 Every pending GitHub status must map to a visible candidate/train/operation state
 and recovery message. Duplicate callbacks and worker invocations reuse immutable
@@ -139,12 +205,13 @@ operation identities and never repeat completed mutations.
 
 Deploy additive changes in this order: database migrations, API/UI, then the v2
 reconciler. Run the old status helper before migration/API mutation; after the
-API is live, use the new helper, which requires and displays authoritative
-`staging_state`. Do not deploy the cumulative reconciler before both migration
-and API are live. Keep `RELEASE_BUS_V2_MODE=OFF` and controls paused during
-offline and synthetic validation. For staging beta, set mode `STAGING`, resume
-`STAGING` and `ALL`, and keep `PRODUCTION` paused. Enable `PRODUCTION` only after
-staging acceptance passes; production remains explicit.
+API is live, use the new helper, which requires both effective lane states and
+the authoritative `staging_state`. Do not deploy the cumulative reconciler
+before both migration and API are live. During offline and synthetic
+validation, keep both effective lanes `OFF` with the internal hard stop. For
+staging beta, expose only staging as `ON`; keep production `OFF`. Turn
+production `ON` only after staging acceptance passes; production selection
+remains explicit.
 
 The cumulative-staging migration has an intentionally non-destructive `down`.
 Migration rollback leaves the additive table and columns in place so an older
@@ -154,10 +221,10 @@ confirmed `OFF`.
 
 Rollback:
 
-1. pause v2 `ALL` and set mode `OFF`;
+1. use the internal hard stop and verify both effective lanes report `OFF`;
 2. allow any already-dispatched exact operation to reach a safe terminal state;
 3. verify no v2 train owns staging or production;
-4. use the serialized manual fallback;
+4. use the serialized manual fallback only after each target drain gate;
 5. preserve v2 rows for diagnosis—do not destructively delete them.
 
 Never cancel another actor's shared workflow or force-push a shared ref.
