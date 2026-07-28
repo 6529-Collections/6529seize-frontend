@@ -171,6 +171,12 @@ describe("Release Bus frontend performance contract", () => {
       'if [ "$CANDIDATE_EVIDENCE_MODE" != legacy-whole-train ]'
     );
     expect(authorize.run).toContain("source_ref:$source_ref");
+    expect(authorize.run).toContain(
+      'if [ "$CANDIDATE_EVIDENCE_MODE" = strict-single ]'
+    );
+    expect(authorize.run).toContain(
+      "reuse_artifact_run_id:$reuse_artifact_run_id"
+    );
     for (const literal of [
       "schema_version:",
       "artifact_contract:",
