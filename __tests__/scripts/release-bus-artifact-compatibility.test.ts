@@ -583,6 +583,37 @@ describe("Release Bus artifact rollout compatibility", () => {
             artifact_bytes_reused: false,
           },
         });
+        expect(
+          runShell(report.run!, {
+            env: {
+              ...reportEnv,
+              ARTIFACT_CONTRACT: "legacy-v2",
+              ARTIFACT_CONTRACT_VERSION: "legacy-v2",
+              SCHEMA_VERSION: "2",
+            },
+          }).status
+        ).toBe(0);
+        expect(JSON.parse(fs.readFileSync(curlPayload, "utf8"))).toMatchObject({
+          status: "SUCCEEDED",
+          summary: {
+            schema_version: 2,
+            artifact_contract: "legacy-v2",
+            artifact_contract_version: "legacy-v2",
+            repository: "frontend",
+            source_sha: EXPECTED_SHA,
+            environment: "portable",
+            deployment_environment: environment,
+            service: null,
+            artifact_run_id: "1234",
+            artifact_train_id: TRAIN_ID,
+            artifact_digest: "c".repeat(64),
+            package_digest: "d".repeat(64),
+            consumed_preflight_artifact: true,
+            rebuilt: false,
+            source_evidence_reused: false,
+            artifact_bytes_reused: false,
+          },
+        });
 
         expect(
           runShell(report.run!, {
@@ -731,6 +762,11 @@ describe("Release Bus artifact rollout compatibility", () => {
       "authorize",
       "Authorize exact v2 operation"
     );
+    const report = findStep(
+      workflow,
+      "finalize",
+      "Report structured terminal result"
+    );
     const root = fs.mkdtempSync(
       path.join(os.tmpdir(), "release-bus-evidence-mode-")
     );
@@ -815,6 +851,73 @@ describe("Release Bus artifact rollout compatibility", () => {
         reuse_artifact_run_id: "1234",
         reuse_artifact_name: artifactName,
         reuse_artifact_digest: artifactDigest,
+      });
+      const artifactRoot = path.join(root, "release-bus-artifact");
+      fs.mkdirSync(artifactRoot);
+      const packageDigest = "e".repeat(64);
+      const writeManifest = (ciEvidence: Record<string, string | null>) => {
+        fs.writeFileSync(
+          path.join(artifactRoot, "manifest.json"),
+          JSON.stringify({
+            schema_version: 3,
+            artifact_contract: "environment-bound-v1",
+            artifact_contract_version: "environment-bound-v3",
+            repository: "frontend",
+            source_sha: EXPECTED_SHA,
+            environment: "staging",
+            package_sha256: packageDigest,
+            ci_evidence: ciEvidence,
+          })
+        );
+      };
+      fs.writeFileSync(path.join(artifactRoot, "SHA256SUMS"), "fixture\n");
+      const reportEnv = {
+        ...baseEnv,
+        BUILD_RESULT: "success",
+        DOWNLOAD_OUTCOME: "success",
+        EXPECTED_SHA: EXPECTED_SHA,
+        GITHUB_RUN_ID: "9876",
+        RELEASE_BUS_API_URL: "https://release-bus.invalid",
+        RELEASE_BUS_WORKFLOW_AUTH_TOKEN: "test-token",
+        VERIFY_OUTCOME: "success",
+      };
+      writeManifest({
+        mode: "strict-single",
+        aggregate_digest: null,
+        run_id: "1234",
+        name: artifactName,
+        digest: artifactDigest,
+      });
+      expect(runShell(report.run!, { cwd: root, env: reportEnv }).status).toBe(
+        0
+      );
+      expect(
+        JSON.parse(fs.readFileSync(curlPayload, "utf8")).summary.ci_evidence
+      ).toEqual({
+        mode: "strict-single",
+        aggregate_candidate_evidence_digest: null,
+        artifact_run_id: "1234",
+        artifact_name: artifactName,
+        artifact_digest: artifactDigest,
+      });
+      writeManifest({
+        mode: "strict-aggregate",
+        aggregate_digest: "f".repeat(64),
+        run_id: null,
+        name: null,
+        digest: null,
+      });
+      expect(runShell(report.run!, { cwd: root, env: reportEnv }).status).toBe(
+        0
+      );
+      expect(
+        JSON.parse(fs.readFileSync(curlPayload, "utf8")).summary.ci_evidence
+      ).toEqual({
+        mode: "strict-aggregate",
+        aggregate_candidate_evidence_digest: "f".repeat(64),
+        artifact_run_id: null,
+        artifact_name: null,
+        artifact_digest: null,
       });
       expect(
         runShell(authorize.run!, {
