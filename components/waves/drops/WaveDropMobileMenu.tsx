@@ -350,6 +350,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
         <CommonDropdownItemsMobileWrapper
           isOpen={isOpen}
           setOpen={setOpen}
+          hideOnDesktopHover={false}
           zIndexClassName={mobileMenuZIndexClassName}
         >
           <div

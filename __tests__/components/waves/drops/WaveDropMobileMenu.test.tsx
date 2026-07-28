@@ -376,6 +376,41 @@ test("shows full menu when a profile handle is present", () => {
   expect(screen.getByTestId("delete")).toBeInTheDocument();
 });
 
+test("does not hide the drop action sheet when desktop hover CSS is active", () => {
+  const drop = {
+    id: "1",
+    serial_no: 1,
+    wave: { id: "w" },
+    drop_type: ApiDropType.Chat,
+    author: { handle: "alice" },
+  } as any;
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: null,
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveDropMobileMenu
+        drop={drop}
+        isOpen
+        showReplyAndQuote
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={jest.fn()}
+        onAddReaction={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(mobileWrapperMock.mock.calls.at(-1)?.[0]).toEqual(
+    expect.objectContaining({ hideOnDesktopHover: false })
+  );
+});
+
 test("does not show mobile download actions for media", () => {
   const drop = {
     id: "1",
