@@ -91,6 +91,27 @@ describe("useUnreadIndicator", () => {
     expect(mockUseMyStream).not.toHaveBeenCalled();
   });
 
+  it("treats a missing summary count as zero", () => {
+    mockUseUnreadDmDrops.mockReturnValue({
+      haveUnreadDmDrops: false,
+      unreadDmDrops: undefined,
+      unreadDmDropsCount: undefined,
+    });
+    mockUseUnreadNotifications.mockReturnValue({
+      haveUnreadNotifications: false,
+    });
+
+    const { result } = renderHook(() =>
+      useUnreadIndicator({
+        type: "messages",
+        handle: "me",
+        localDirectMessages: [{ newDropsCount: { count: 1 } }],
+      })
+    );
+
+    expect(result.current).toEqual({ hasUnread: true, unreadCount: 1 });
+  });
+
   it("uses the larger local websocket-backed count while the summary catches up", () => {
     mockUseUnreadDmDrops.mockReturnValue({
       haveUnreadDmDrops: true,

@@ -186,7 +186,7 @@ function useNewDropCounter(
   } = options;
 
   // Keep track of new drop counts
-  const [newDropsCounts, setNewDropsCounts] = useState<
+  const [rawNewDropsCounts, setRawNewDropsCounts] = useState<
     Record<string, MinimalWaveNewDropsCount>
   >({});
   const wavesRef = useRef(waves);
@@ -205,7 +205,7 @@ function useNewDropCounter(
   useEffect(() => {
     if (enabled && !wasEnabledRef.current) {
       lastUnknownWaveRefetchAtRef.current = null;
-      setNewDropsCounts({});
+      setRawNewDropsCounts({});
     }
 
     wasEnabledRef.current = enabled;
@@ -214,10 +214,10 @@ function useNewDropCounter(
   const reconciledNewDropsCounts = useMemo(
     () =>
       reconcileNewDropsCounts({
-        newDropsCounts,
+        newDropsCounts: rawNewDropsCounts,
         waves,
       }),
-    [newDropsCounts, waves]
+    [rawNewDropsCounts, waves]
   );
 
   const updateNewDropsCountsForMessage = useCallback(
@@ -226,7 +226,7 @@ function useNewDropCounter(
       createdAt: number,
       update: (current: NewDropsCounts) => NewDropsCounts
     ) => {
-      setNewDropsCounts((previous) => {
+      setRawNewDropsCounts((previous) => {
         const current = reconcileNewDropsCounts({
           newDropsCounts: previous,
           waves,
@@ -253,8 +253,12 @@ function useNewDropCounter(
         return;
       }
 
-      setNewDropsCounts((prev) => {
-        const previous = prev[waveId];
+      setRawNewDropsCounts((prev) => {
+        const current = reconcileNewDropsCounts({
+          newDropsCounts: prev,
+          waves: wavesRef.current,
+        });
+        const previous = current[waveId];
         const next: MinimalWaveNewDropsCount = {
           count: 0,
           latestDropTimestamp: getNewestTimestamp(
@@ -270,11 +274,11 @@ function useNewDropCounter(
           previous.latestDropTimestamp === next.latestDropTimestamp &&
           previous.firstUnreadSerialNo === next.firstUnreadSerialNo
         ) {
-          return prev;
+          return current;
         }
 
         return {
-          ...prev,
+          ...current,
           [waveId]: next,
         };
       });
@@ -288,14 +292,18 @@ function useNewDropCounter(
       return;
     }
 
-    setNewDropsCounts((prev) => {
+    setRawNewDropsCounts((prev) => {
+      const current = reconcileNewDropsCounts({
+        newDropsCounts: prev,
+        waves: wavesRef.current,
+      });
       const newCounts: Record<string, MinimalWaveNewDropsCount> = {};
       const nextWaveIds = new Set<string>();
       let changed = false;
 
       wavesRef.current.forEach((wave) => {
         nextWaveIds.add(wave.id);
-        const previous = prev[wave.id];
+        const previous = current[wave.id];
         const next: MinimalWaveNewDropsCount = {
           count: 0,
           latestDropTimestamp: getNewestTimestamp(
@@ -316,11 +324,11 @@ function useNewDropCounter(
         newCounts[wave.id] = next;
       });
 
-      if (Object.keys(prev).some((waveId) => !nextWaveIds.has(waveId))) {
+      if (Object.keys(current).some((waveId) => !nextWaveIds.has(waveId))) {
         changed = true;
       }
 
-      return changed ? newCounts : prev;
+      return changed ? newCounts : current;
     });
   }, [enabled]);
 

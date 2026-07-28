@@ -155,6 +155,78 @@ describe("useNewDropCounter", () => {
     });
   });
 
+  it("commits reconciled state when resetting one wave", () => {
+    const { result, rerender } = renderHook(
+      ({ latestReadTimestamp }) =>
+        useNewDropCounter(
+          null,
+          [
+            {
+              id: "wave2",
+              latestDropTimestamp: 31,
+              latestReadTimestamp,
+            },
+          ] as any,
+          jest.fn()
+        ),
+      {
+        wrapper,
+        initialProps: { latestReadTimestamp: 20 },
+      }
+    );
+
+    emitDropUpdate({ createdAt: 30, serialNo: 5 });
+    rerender({ latestReadTimestamp: 31 });
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(0);
+
+    act(() => {
+      result.current.resetWaveNewDropsCount("wave2");
+    });
+    rerender({ latestReadTimestamp: 20 });
+
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 0,
+      latestDropTimestamp: 31,
+      firstUnreadSerialNo: null,
+    });
+  });
+
+  it("commits reconciled state when resetting all waves", () => {
+    const { result, rerender } = renderHook(
+      ({ latestReadTimestamp }) =>
+        useNewDropCounter(
+          null,
+          [
+            {
+              id: "wave2",
+              latestDropTimestamp: 31,
+              latestReadTimestamp,
+            },
+          ] as any,
+          jest.fn()
+        ),
+      {
+        wrapper,
+        initialProps: { latestReadTimestamp: 20 },
+      }
+    );
+
+    emitDropUpdate({ createdAt: 30, serialNo: 5 });
+    rerender({ latestReadTimestamp: 31 });
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(0);
+
+    act(() => {
+      result.current.resetAllWavesNewDropsCount();
+    });
+    rerender({ latestReadTimestamp: 20 });
+
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 0,
+      latestDropTimestamp: 31,
+      firstUnreadSerialNo: null,
+    });
+  });
+
   it("does not increment counts for poll response updates", () => {
     const refetch = jest.fn();
     const { result } = renderHook(
