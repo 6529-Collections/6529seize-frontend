@@ -18,7 +18,7 @@ authenticated status request is unavailable or malformed.
 | ------------ | ----------------------- | --------------------------------------------------------------------------------------------- |
 | `OFF`        | Serialized manual route | Serialized manual route with explicit owner authority; prior staging evidence is not required |
 | `STAGING`    | V2 readiness            | Production remains manual/disabled                                                            |
-| `PRODUCTION` | V2 readiness            | Separate explicit v2 action for an exact `STAGING_VALIDATED` candidate                        |
+| `PRODUCTION` | V2 readiness            | Explicit dependency-closed selection of unchanged exact `STAGING_VALIDATED` candidates         |
 
 For an active mode, `ALL` and the target lane must be running. In `OFF`, paused
 v2 controls are expected and the serialized manual fallback remains available.
@@ -102,22 +102,44 @@ selection never changes shared staging membership.
 
 ## Production lifecycle
 
-Staging validation never creates production readiness. A developer explicitly
-marks the unchanged exact candidate SHA ready through the Deploy UI or the
-versioned mark-ready endpoint.
+Staging validation never creates production intent. A developer explicitly
+selects unchanged exact candidates through the Deploy UI or the versioned
+production-selection endpoint. The selection must include every transitive
+dependency that is not already terminally `PRODUCTION_DEPLOYED` at the required
+exact identity.
 
-Production selects only explicit candidates. It composes the proposed subset
-from current `main`:
+Each selected candidate must map to durable successful staging evidence: its
+candidate ID and unchanged head SHA, staging train, immutable manifest, and
+successful manifest-bound E2E operation and workflow run. Evidence may come
+from different staging trains. An exact combined staging manifest for the
+chosen production subset is not required.
 
-- if both exact composed tree SHAs match a validated manifest, reuse its
-  validation and immutable dual-profile/backend artifacts;
-- otherwise enqueue an exact `PRODUCTION_QUALIFICATION` staging train, run
-  manifest-bound E2E, then continue automatically;
-- immediately before mutation, require every `main` ref to equal its recorded
-  base. A moved ref cancels and requeues the set for fresh qualification;
-- advance exact tested commits, deploy the same artifacts in dependency order,
-  verify exact versions, run production-safe read-only E2E, and mark
-  `PRODUCTION_DEPLOYED`.
+Production composes only the explicitly selected dependency-closed set from
+fresh fenced `main`. For example, if shared staging contains A+B+C, selecting
+A+C keeps B out of production and leaves B's staging evidence, live membership,
+and production intent unchanged for a later train.
+
+Before any production mutation, V2:
+
+1. rechecks every selected PR head, non-superseded candidate, dependency, and
+   staging evidence record;
+2. freshly composes frontend and backend release refs from the recorded
+   `main` bases and prepares both repositories concurrently where safe;
+3. runs the required checks and builds for that exact production composition;
+4. requires every current `main` ref to equal its fenced base, then advances
+   each affected `main` by non-force compare-and-swap to the exact composed
+   commit;
+5. deploys only the immutable artifacts bound to those exact resulting `main`
+   SHAs in backend DAG and cross-repository dependency order;
+6. runs mandatory production-safe read-only E2E and marks
+   `PRODUCTION_DEPLOYED` only after terminal success.
+
+Moved heads or bases, ambiguous or superseded evidence, invalid dependencies,
+merge conflicts, failed checks or builds, artifact mismatches, and failed
+production E2E all fail closed. The production train durably records its
+candidate-evidence policy and exact per-candidate evidence mapping. A later
+train starts from the advanced `main`, so it cannot silently drop code released
+by an earlier train.
 
 V2 does not publish release notes.
 

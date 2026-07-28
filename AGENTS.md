@@ -8,8 +8,9 @@
   `deploy-6529`.
 - `OFF` uses the serialized manual fallback and requires enforcement absent or
   `false`. `STAGING` routes staging readiness through v2. `PRODUCTION` routes
-  staging through v2 and requires a separate explicit exact-SHA production
-  action after `STAGING_VALIDATED`.
+  staging through v2 and requires a separate explicit, dependency-closed
+  production selection of unchanged exact-SHA candidates after
+  `STAGING_VALIDATED`.
 - While `OFF`, dispatch backend `Deploy a service` workflows one at a time and
   wait for exact success before starting the next. Its shared concurrency can
   cancel sibling service runs, including independent DAG-frontier units.
@@ -21,7 +22,10 @@
   frontend ordering. Within v2, only independent backend DAG frontier units run
   together.
 - `STAGING_DEPLOYED` is not validation. Do not mutate staging during manifest-
-  bound E2E, and never infer production readiness from staging validation.
+  bound E2E, and never infer production intent from staging validation.
+  Candidate-level staging evidence qualifies an unchanged exact SHA for an
+  explicit production selection; the selected production combination does not
+  need a matching combined staging manifest.
 - Never cancel another actor's workflow, force-push a shared ref, or bypass exact
   SHA/artifact checks. Never author or post release notes manually; preserve the
   autonomous bot's complete grouping metadata and finalize signal.
