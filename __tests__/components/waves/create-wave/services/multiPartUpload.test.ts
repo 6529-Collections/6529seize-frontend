@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type AxiosProgressEvent, type AxiosResponse } from "axios";
 import pLimit from "p-limit";
 import pRetry from "p-retry";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
@@ -42,7 +42,9 @@ describe("multiPartUpload", () => {
     jest.clearAllMocks();
 
     // Mock pLimit to return a function that just executes the task
-    mockPLimit.mockReturnValue((fn: any) => fn());
+    mockPLimit.mockReturnValue(
+      ((fn: () => unknown) => fn()) as unknown as ReturnType<typeof pLimit>
+    );
 
     // Mock pRetry to just execute the function
     mockPRetry.mockImplementation((fn: any) => fn());
@@ -214,16 +216,20 @@ describe("multiPartUpload", () => {
       const progressSpy = jest.fn();
 
       // Mock axios.put to simulate progress
-      mockAxios.put.mockImplementation((url, data, config: any) => {
-        // Simulate progress callback
-        if (config.onUploadProgress) {
-          config.onUploadProgress({ loaded: 50, total: 100 });
-          config.onUploadProgress({ loaded: 100, total: 100 });
-        }
+      mockAxios.put.mockImplementation((_url, _data, config) => {
+        // Simulate progress callbacks
+        config?.onUploadProgress?.({
+          loaded: 50,
+          total: 100,
+        } as AxiosProgressEvent);
+        config?.onUploadProgress?.({
+          loaded: 100,
+          total: 100,
+        } as AxiosProgressEvent);
         return Promise.resolve({
           headers: { etag: '"test-etag"' },
           status: 200,
-        });
+        } as unknown as AxiosResponse);
       });
 
       await multiPartUpload({

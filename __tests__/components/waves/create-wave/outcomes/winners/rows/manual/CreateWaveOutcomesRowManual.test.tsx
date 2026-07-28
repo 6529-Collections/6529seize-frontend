@@ -39,7 +39,7 @@ describe('CreateWaveOutcomesRowManual', () => {
   const mockOutcome: CreateWaveOutcomeConfig = {
     id: 'outcome-1',
     type: 'manual',
-  } as CreateWaveOutcomeConfig;
+  } as unknown as CreateWaveOutcomeConfig;
 
   const mockRemoveOutcome = jest.fn();
 
@@ -150,7 +150,7 @@ describe('CreateWaveOutcomesRowManual', () => {
       id: 'custom-outcome',
       type: 'custom',
       description: 'Custom outcome',
-    } as CreateWaveOutcomeConfig;
+    } as unknown as CreateWaveOutcomeConfig;
 
     render(
       <CreateWaveOutcomesRowManual

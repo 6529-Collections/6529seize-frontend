@@ -5,12 +5,11 @@ import { CREATE_WAVE_VALIDATION_ERROR } from '@/helpers/waves/create-wave.valida
 
 beforeAll(() => {
   // Mock ResizeObserver used in CommonAnimationHeight
-  // @ts-ignore
   global.ResizeObserver = class {
     observe() {}
     unobserve() {}
     disconnect() {}
-  };
+  } as unknown as typeof ResizeObserver;
 });
 
 describe('CreateWaveNameInput', () => {

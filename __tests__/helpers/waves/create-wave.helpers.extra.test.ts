@@ -105,8 +105,8 @@ describe("create-wave.helpers extra", () => {
       metadata: [],
     };
     const body = getCreateNewWaveBody({ drop, picture: null, config });
-    expect(body.participation.period.max).toBeNull();
-    expect(body.voting.period.max).toBeNull();
+    expect(body.participation.period?.max).toBeNull();
+    expect(body.voting.period?.max).toBeNull();
   });
 
   it("uses the last fixed rank decision as the period max", () => {
@@ -159,8 +159,8 @@ describe("create-wave.helpers extra", () => {
 
     const body = getCreateNewWaveBody({ drop, picture: null, config });
 
-    expect(body.participation.period.max).toBe(22);
-    expect(body.voting.period.max).toBe(22);
+    expect(body.participation.period?.max).toBe(22);
+    expect(body.voting.period?.max).toBe(22);
   });
 });
 it("calculates rolling end date correctly", () => {
@@ -211,8 +211,8 @@ it("calculates rolling end date correctly", () => {
     metadata: [],
   };
   const body = getCreateNewWaveBody({ drop, picture: null, config });
-  expect(body.participation.period.max).toBe(60);
-  expect(body.voting.period.max).toBe(60); // last decision before 65
+  expect(body.participation.period?.max).toBe(60);
+  expect(body.voting.period?.max).toBe(60); // last decision before 65
 });
 
 it("sets max votes per identity per drop", () => {
