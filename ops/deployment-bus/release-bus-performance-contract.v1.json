@@ -26,7 +26,7 @@
     }
   },
   "normal_v3_preflight": {
-    "critical_path_jobs": ["authorize", "build", "finalize"],
+    "critical_path_jobs": ["authorize", "evidence", "build", "finalize"],
     "dependency_installs": 1,
     "profiles_built": 1,
     "artifact_contract": "environment-bound-v3",

@@ -808,18 +808,13 @@ describe("Release Bus artifact rollout compatibility", () => {
     );
     const validateEvidence = findStep(
       workflow,
-      "authorize",
+      "evidence",
       "Validate exact authorized CI evidence"
     );
     const authorize = findStep(
       workflow,
       "authorize",
       "Authorize exact v2 operation"
-    );
-    const evidenceFailureReport = findStep(
-      workflow,
-      "authorize",
-      "Report authorized CI evidence failure"
     );
     const report = findStep(
       workflow,
@@ -873,9 +868,8 @@ describe("Release Bus artifact rollout compatibility", () => {
       expect(authorizeSteps.indexOf(validateLocal)).toBeLessThan(
         authorizeSteps.indexOf(authorize)
       );
-      expect(authorizeSteps.indexOf(authorize)).toBeLessThan(
-        authorizeSteps.indexOf(validateEvidence)
-      );
+      expect(workflow.jobs.evidence.needs).toBe("authorize");
+      expect(workflow.jobs.build.needs).toBe("evidence");
       expect(runShell(validateLocal.run!, { env: baseEnv }).status).toBe(0);
       expect(fs.existsSync(ghInvocations)).toBe(false);
       expect(
@@ -967,21 +961,29 @@ describe("Release Bus artifact rollout compatibility", () => {
         "retryable=true"
       );
       expect(
-        runShell(evidenceFailureReport.run!, {
+        runShell(report.run!, {
           env: {
             ARTIFACT_CONTRACT_VERSION: "environment-bound-v3",
             ARTIFACT_ENVIRONMENT: "staging",
+            AUTHORIZATION_RESULT: "success",
+            BUILD_FAILURE_CLASS: "",
+            BUILD_FAILURE_PHASE: "",
+            BUILD_RETRYABLE: "",
+            BUILD_RESULT: "skipped",
+            DOWNLOAD_OUTCOME: "skipped",
+            EVIDENCE_FAILURE_CLASS: "INFRASTRUCTURE",
+            EVIDENCE_FAILURE_PHASE: "candidate_evidence_transport",
+            EVIDENCE_RESULT: "failure",
+            EVIDENCE_RETRYABLE: "true",
             EXPECTED_SHA,
-            FAILURE_CLASS: "INFRASTRUCTURE",
-            FAILURE_PHASE: "candidate_evidence_transport",
             GITHUB_RUN_ID: "9876",
             MOCK_CURL_PAYLOAD: curlPayload,
             OPERATION_KEY: "rb2:compatibility:a1",
             PATH: `${mockBin}:${process.env["PATH"]}`,
             RELEASE_BUS_API_URL: "https://release-bus.invalid",
             RELEASE_BUS_WORKFLOW_AUTH_TOKEN: "test-token",
-            RETRYABLE: "true",
             TRAIN_ID,
+            VERIFY_OUTCOME: "skipped",
           },
         }).status
       ).toBe(0);
@@ -989,6 +991,34 @@ describe("Release Bus artifact rollout compatibility", () => {
         status: "FAILED",
         failure_class: "INFRASTRUCTURE",
         failure_phase: "candidate_evidence_transport",
+        retryable: true,
+      });
+      expect(
+        runShell(report.run!, {
+          env: {
+            ...baseEnv,
+            AUTHORIZATION_RESULT: "success",
+            BUILD_FAILURE_CLASS: "",
+            BUILD_FAILURE_PHASE: "",
+            BUILD_RETRYABLE: "",
+            BUILD_RESULT: "skipped",
+            DOWNLOAD_OUTCOME: "skipped",
+            EVIDENCE_FAILURE_CLASS: "",
+            EVIDENCE_FAILURE_PHASE: "",
+            EVIDENCE_RESULT: "cancelled",
+            EVIDENCE_RETRYABLE: "",
+            EXPECTED_SHA,
+            GITHUB_RUN_ID: "9876",
+            RELEASE_BUS_API_URL: "https://release-bus.invalid",
+            RELEASE_BUS_WORKFLOW_AUTH_TOKEN: "test-token",
+            VERIFY_OUTCOME: "skipped",
+          },
+        }).status
+      ).toBe(0);
+      expect(JSON.parse(fs.readFileSync(curlPayload, "utf8"))).toMatchObject({
+        status: "FAILED",
+        failure_class: "INFRASTRUCTURE",
+        failure_phase: "candidate_evidence_runner",
         retryable: true,
       });
       expect(
@@ -1036,8 +1066,10 @@ describe("Release Bus artifact rollout compatibility", () => {
       fs.writeFileSync(path.join(artifactRoot, "SHA256SUMS"), "fixture\n");
       const reportEnv = {
         ...baseEnv,
+        AUTHORIZATION_RESULT: "success",
         BUILD_RESULT: "success",
         DOWNLOAD_OUTCOME: "success",
+        EVIDENCE_RESULT: "success",
         EXPECTED_SHA: EXPECTED_SHA,
         GITHUB_RUN_ID: "9876",
         RELEASE_BUS_API_URL: "https://release-bus.invalid",

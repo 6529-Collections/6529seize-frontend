@@ -123,6 +123,20 @@ jobs:
             -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
             -H 'Content-Type: application/json' --data "$payload" \
             "$RELEASE_BUS_API_URL/deploy/release-bus-v2/authorize"
+
+  evidence:
+    needs: authorize
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      actions: read
+    outputs:
+      failure_class: ${{ steps.evidence.outputs.failure_class }}
+      failure_phase: ${{ steps.evidence.outputs.failure_phase }}
+      retryable: ${{ steps.evidence.outputs.retryable }}
+    steps:
+      # This job has GitHub's read-only token but no Release Bus secret.
+      # Runner loss or cancellation is classified by the trusted finalizer.
       - name: Validate exact authorized CI evidence
         id: evidence
         continue-on-error: true
@@ -249,36 +263,6 @@ jobs:
           test "$(wc -c < "$evidence_root/policy-bundle.txt")" -le 65536
           test "$(tail -c 1 "$evidence_root/policy-bundle.txt" | od -An -tuC | tr -d '[:space:]')" = 10
           LC_ALL=C sort -c "$evidence_root/policy-bundle.txt"
-      - name: Report authorized CI evidence failure
-        if: steps.evidence.outcome == 'failure'
-        env:
-          ARTIFACT_CONTRACT_VERSION: ${{ inputs.artifact_contract_version }}
-          ARTIFACT_ENVIRONMENT: ${{ inputs.artifact_environment }}
-          EXPECTED_SHA: ${{ inputs.expected_sha }}
-          FAILURE_CLASS: ${{ steps.evidence.outputs.failure_class }}
-          FAILURE_PHASE: ${{ steps.evidence.outputs.failure_phase }}
-          OPERATION_KEY: ${{ inputs.operation_key }}
-          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
-          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
-          RETRYABLE: ${{ steps.evidence.outputs.retryable }}
-          TRAIN_ID: ${{ inputs.release_train_id }}
-        run: |
-          set -euo pipefail
-          payload="$(jq -n \
-            --arg train_id "$TRAIN_ID" \
-            --arg operation_key "$OPERATION_KEY" \
-            --arg workflow_run_id "$GITHUB_RUN_ID" \
-            --arg failure_class "$FAILURE_CLASS" \
-            --arg failure_phase "$FAILURE_PHASE" \
-            --argjson retryable "$RETRYABLE" \
-            --arg contract "$ARTIFACT_CONTRACT_VERSION" \
-            --arg environment "$ARTIFACT_ENVIRONMENT" \
-            --arg source_sha "$EXPECTED_SHA" \
-            '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"complete",status:"FAILED",failure_class:$failure_class,failure_phase:$failure_phase,retryable:$retryable,summary:{artifact_digest:null,package_digest:null,schema_version:null,artifact_contract:null,artifact_contract_version:$contract,repository:"frontend",source_sha:$source_sha,environment:$environment,fresh_or_reused:"failed",source_evidence_reused:false,artifact_bytes_reused:false,ci_evidence:null},stages:[],jest:null,backend_evidence:null}')"
-          curl --fail-with-body --silent --show-error \
-            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
-            -H 'Content-Type: application/json' --data "$payload" \
-            "$RELEASE_BUS_API_URL/deploy/release-bus-v2/report-progress"
       - name: Return authoritative CI evidence result
         if: always()
         env:
@@ -286,7 +270,7 @@ jobs:
         run: test "$EVIDENCE_OUTCOME" = success
 
   build:
-    needs: authorize
+    needs: evidence
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
@@ -581,16 +565,48 @@ jobs:
         run: test "$FAILURE_CLASS" = null
 
   finalize:
-    if: always() && needs.authorize.result == 'success'
-    needs: [authorize, build]
+    if: always()
+    needs: [authorize, evidence, build]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       actions: read
     steps:
+      # Re-authorizing the same immutable operation makes terminal reporting
+      # independent of an authorize/evidence/build runner disappearing after
+      # the API accepted the dispatch. Invalid or unauthorized dispatches still
+      # fail closed and cannot report or access candidate artifacts.
+      - name: Re-authorize exact operation for terminal reporting
+        id: report-authorization
+        continue-on-error: true
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          AGGREGATE_CANDIDATE_EVIDENCE_DIGEST: ${{ inputs.aggregate_candidate_evidence_digest }}
+          CANDIDATE_EVIDENCE_MODE: ${{ inputs.candidate_evidence_mode }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          REUSE_ARTIFACT_DIGEST: ${{ inputs.reuse_artifact_digest }}
+          REUSE_ARTIFACT_NAME: ${{ inputs.reuse_artifact_name }}
+          REUSE_ARTIFACT_RUN_ID: ${{ inputs.reuse_artifact_run_id }}
+          SOURCE_REF: ${{ inputs.source_ref }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+        run: |
+          set -euo pipefail
+          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg expected_sha "$EXPECTED_SHA" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"orchestration",service:null,expected_sha:$expected_sha,artifact_digest:null}')"
+          if [ "$CANDIDATE_EVIDENCE_MODE" != legacy-whole-train ]; then
+            payload="$(jq -n --argjson payload "$payload" --arg source_ref "$SOURCE_REF" --arg candidate_evidence_mode "$CANDIDATE_EVIDENCE_MODE" --arg aggregate_candidate_evidence_digest "$AGGREGATE_CANDIDATE_EVIDENCE_DIGEST" '$payload + {source_ref:$source_ref,candidate_evidence_mode:$candidate_evidence_mode,aggregate_candidate_evidence_digest:(if $aggregate_candidate_evidence_digest == "" then null else $aggregate_candidate_evidence_digest end)}')"
+          fi
+          if [ "$CANDIDATE_EVIDENCE_MODE" = strict-single ]; then
+            payload="$(jq -n --argjson payload "$payload" --arg reuse_artifact_run_id "$REUSE_ARTIFACT_RUN_ID" --arg reuse_artifact_name "$REUSE_ARTIFACT_NAME" --arg reuse_artifact_digest "$REUSE_ARTIFACT_DIGEST" '$payload + {reuse_artifact_run_id:$reuse_artifact_run_id,reuse_artifact_name:$reuse_artifact_name,reuse_artifact_digest:$reuse_artifact_digest}')"
+          fi
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+            -H 'Content-Type: application/json' --data "$payload" \
+            "$RELEASE_BUS_API_URL/deploy/release-bus-v2/authorize"
       - name: Download exact immutable frontend artifact
         id: download
-        if: needs.build.result == 'success'
+        if: steps.report-authorization.outcome == 'success' && needs.evidence.result == 'success' && needs.build.result == 'success'
         continue-on-error: true
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
@@ -653,15 +669,20 @@ jobs:
             ' manifest.json >/dev/null
           fi
       - name: Report structured terminal result
-        if: always()
+        if: always() && steps.report-authorization.outcome == 'success'
         env:
           ARTIFACT_CONTRACT_VERSION: ${{ inputs.artifact_contract_version }}
           ARTIFACT_ENVIRONMENT: ${{ inputs.artifact_environment }}
+          AUTHORIZATION_RESULT: ${{ needs.authorize.result }}
           BUILD_FAILURE_CLASS: ${{ needs.build.outputs.failure_class }}
           BUILD_FAILURE_PHASE: ${{ needs.build.outputs.failure_phase }}
           BUILD_RETRYABLE: ${{ needs.build.outputs.retryable }}
           BUILD_RESULT: ${{ needs.build.result }}
           DOWNLOAD_OUTCOME: ${{ steps.download.outcome }}
+          EVIDENCE_FAILURE_CLASS: ${{ needs.evidence.outputs.failure_class }}
+          EVIDENCE_FAILURE_PHASE: ${{ needs.evidence.outputs.failure_phase }}
+          EVIDENCE_RESULT: ${{ needs.evidence.result }}
+          EVIDENCE_RETRYABLE: ${{ needs.evidence.outputs.retryable }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
           OPERATION_KEY: ${{ inputs.operation_key }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
@@ -672,10 +693,28 @@ jobs:
           set -euo pipefail
           source_evidence_reused=false
           artifact_bytes_reused=false
-          if [ "$ARTIFACT_CONTRACT_VERSION" = environment-bound-v3 ]; then
+          if [ "$ARTIFACT_CONTRACT_VERSION" = environment-bound-v3 ] && [ "$EVIDENCE_RESULT" = success ]; then
             source_evidence_reused=true
           fi
-          if [ "$BUILD_RESULT" = success ] && [ "$DOWNLOAD_OUTCOME" = success ] && [ "$VERIFY_OUTCOME" = success ]; then
+          if [ "$AUTHORIZATION_RESULT" != success ]; then
+            status=FAILED; failure_class=INFRASTRUCTURE; retryable=true
+            failure_phase=frontend_preflight_authorization_runner
+            digest=''; package_digest=''; schema_version=null
+            artifact_contract=''; repository=frontend
+            source_sha="$EXPECTED_SHA"; environment="$ARTIFACT_ENVIRONMENT"
+            ci_evidence=null
+            fresh_or_reused=failed
+          elif [ "$EVIDENCE_RESULT" != success ]; then
+            status=FAILED
+            failure_class="${EVIDENCE_FAILURE_CLASS:-INFRASTRUCTURE}"
+            failure_phase="${EVIDENCE_FAILURE_PHASE:-candidate_evidence_runner}"
+            retryable="${EVIDENCE_RETRYABLE:-true}"
+            digest=''; package_digest=''; schema_version=null
+            artifact_contract=''; repository=frontend
+            source_sha="$EXPECTED_SHA"; environment="$ARTIFACT_ENVIRONMENT"
+            ci_evidence=null
+            fresh_or_reused=failed
+          elif [ "$BUILD_RESULT" = success ] && [ "$DOWNLOAD_OUTCOME" = success ] && [ "$VERIFY_OUTCOME" = success ]; then
             status=SUCCEEDED; failure_class=null; retryable=false
             digest="$(sha256sum release-bus-artifact/SHA256SUMS | cut -d' ' -f1)"
             schema_version="$(jq -r .schema_version release-bus-artifact/manifest.json)"
@@ -694,7 +733,7 @@ jobs:
               ci_evidence=null
               fresh_or_reused=fresh-legacy-dual-profile
             fi
-          elif [ "$BUILD_RESULT" = failure ]; then
+          elif [ "$BUILD_RESULT" != success ]; then
             status=FAILED
             failure_class="${BUILD_FAILURE_CLASS:-INFRASTRUCTURE}"
             failure_phase="${BUILD_FAILURE_PHASE:-frontend_preflight_runner}"
@@ -741,7 +780,10 @@ jobs:
       - name: Return authoritative preflight result
         if: always()
         env:
+          AUTHORIZATION_RESULT: ${{ needs.authorize.result }}
           BUILD_RESULT: ${{ needs.build.result }}
           DOWNLOAD_OUTCOME: ${{ steps.download.outcome }}
+          EVIDENCE_RESULT: ${{ needs.evidence.result }}
+          REPORT_AUTHORIZATION_OUTCOME: ${{ steps.report-authorization.outcome }}
           VERIFY_OUTCOME: ${{ steps.verify.outcome }}
-        run: test "$BUILD_RESULT" = success -a "$DOWNLOAD_OUTCOME" = success -a "$VERIFY_OUTCOME" = success
+        run: test "$REPORT_AUTHORIZATION_OUTCOME" = success -a "$AUTHORIZATION_RESULT" = success -a "$EVIDENCE_RESULT" = success -a "$BUILD_RESULT" = success -a "$DOWNLOAD_OUTCOME" = success -a "$VERIFY_OUTCOME" = success

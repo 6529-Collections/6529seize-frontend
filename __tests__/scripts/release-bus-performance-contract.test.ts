@@ -158,12 +158,20 @@ describe("Release Bus frontend performance contract", () => {
     const authorizationIndex = preflight.jobs.authorize.steps.findIndex(
       (step: { name?: string }) => step.name === "Authorize exact v2 operation"
     );
-    const evidenceValidationIndex = preflight.jobs.authorize.steps.findIndex(
-      (step: { name?: string }) =>
-        step.name === "Validate exact authorized CI evidence"
-    );
     expect(localValidationIndex).toBeLessThan(authorizationIndex);
-    expect(authorizationIndex).toBeLessThan(evidenceValidationIndex);
+    expect(preflight.jobs.evidence.needs).toBe("authorize");
+    expect(preflight.jobs.build.needs).toBe("evidence");
+    expect(preflight.jobs.finalize).toMatchObject({
+      if: "always()",
+      needs: ["authorize", "evidence", "build"],
+    });
+    expect(
+      preflight.jobs.evidence.steps.some(
+        (step: { name?: string }) =>
+          step.name === "Validate exact authorized CI evidence"
+      )
+    ).toBe(true);
+    expect(JSON.stringify(preflight.jobs.evidence)).not.toContain("secrets.");
     expect(
       preflight.jobs.authorize.steps[localValidationIndex].run
     ).not.toMatch(/\bgh (?:api|run download)\b/);
@@ -183,6 +191,10 @@ describe("Release Bus frontend performance contract", () => {
       (step: { name?: string }) =>
         step.name === "Report structured terminal result"
     );
+    const reportAuthorization = preflight.jobs.finalize.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Re-authorize exact operation for terminal reporting"
+    );
     expect(authorize.run).toContain('environment:"orchestration"');
     expect(authorize.run).toContain(
       'if [ "$CANDIDATE_EVIDENCE_MODE" != legacy-whole-train ]'
@@ -194,6 +206,10 @@ describe("Release Bus frontend performance contract", () => {
     expect(authorize.run).toContain(
       "reuse_artifact_run_id:$reuse_artifact_run_id"
     );
+    expect(reportAuthorization.run).toBe(authorize.run);
+    expect(report.if).toBe(
+      "always() && steps.report-authorization.outcome == 'success'"
+    );
     expect(report.run).toContain(
       "aggregate_candidate_evidence_digest:.aggregate_digest"
     );
@@ -204,6 +220,12 @@ describe("Release Bus frontend performance contract", () => {
     );
     expect(report.run).toContain(
       'failure_phase="${BUILD_FAILURE_PHASE:-frontend_preflight_runner}"'
+    );
+    expect(report.run).toContain(
+      'failure_phase="${EVIDENCE_FAILURE_PHASE:-candidate_evidence_runner}"'
+    );
+    expect(report.run).toContain(
+      "failure_phase=frontend_preflight_authorization_runner"
     );
     for (const literal of [
       "schema_version:",
