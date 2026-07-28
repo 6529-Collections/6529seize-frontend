@@ -1835,6 +1835,7 @@ export const EN_US_MESSAGES = {
   "theMemes.empty.title": "No memes found",
   "theMemes.empty.description": "Try a different season or sort option.",
   "theMemes.mint.transaction.title": "Mint The Memes",
+  "theMemes.mint.transaction.titleWithTokenId": "Mint: The Memes #{tokenId}",
   "theMemes.mint.transaction.confirmWallet": "Confirm in your wallet",
   "theMemes.mint.transaction.submitted": "Transaction Submitted - SEIZING",
   "theMemes.mint.transaction.success": "SEIZED!",

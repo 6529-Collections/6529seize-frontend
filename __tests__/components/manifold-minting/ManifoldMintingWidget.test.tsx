@@ -1,5 +1,6 @@
 import ManifoldMintingWidget from "@/components/manifold-minting/ManifoldMintingWidget";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import { ManifoldClaimStatus, ManifoldPhase } from "@/hooks/useManifoldClaim";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -125,6 +126,61 @@ describe("ManifoldMintingWidget", () => {
     await user.click(screen.getByTestId("connect"));
     expect(
       screen.getByRole("button", { name: /SEIZE x1/i })
+    ).toBeInTheDocument();
+  });
+
+  it("includes the current Meme token ID in the transaction modal title", async () => {
+    const user = userEvent.setup();
+    render(
+      <ManifoldMintingWidget
+        {...baseProps}
+        contract={MEMES_CONTRACT}
+        claim={{ ...baseProps.claim, tokenId: 156 }}
+      />
+    );
+
+    await user.click(screen.getByTestId("connect"));
+    await user.click(screen.getByRole("button", { name: /SEIZE x1/i }));
+
+    expect(
+      await screen.findByRole("dialog", {
+        name: "Mint: The Memes #156",
+      })
+    ).toBeInTheDocument();
+  });
+
+  it("uses the existing title when the Meme token ID is unavailable", async () => {
+    const user = userEvent.setup();
+    render(
+      <ManifoldMintingWidget
+        {...baseProps}
+        contract={MEMES_CONTRACT}
+        claim={{ ...baseProps.claim, tokenId: undefined }}
+      />
+    );
+
+    await user.click(screen.getByTestId("connect"));
+    await user.click(screen.getByRole("button", { name: /SEIZE x1/i }));
+
+    expect(
+      await screen.findByRole("dialog", { name: "Mint The Memes" })
+    ).toBeInTheDocument();
+  });
+
+  it("preserves the existing title for other mint collections", async () => {
+    const user = userEvent.setup();
+    render(
+      <ManifoldMintingWidget
+        {...baseProps}
+        claim={{ ...baseProps.claim, tokenId: 156 }}
+      />
+    );
+
+    await user.click(screen.getByTestId("connect"));
+    await user.click(screen.getByRole("button", { name: /SEIZE x1/i }));
+
+    expect(
+      await screen.findByRole("dialog", { name: "Mint The Memes" })
     ).toBeInTheDocument();
   });
 

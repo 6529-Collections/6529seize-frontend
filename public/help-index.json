@@ -5373,6 +5373,7 @@
         "Mint flow docs explain entry points, common scenarios, and recovery.",
         "If the authorized wallet is disconnected, selecting SEIZE opens wallet connection and continues the mint after connection succeeds.",
         "Wallet confirmation, submitted, successful, and on-chain error states appear in the shared transaction modal; local recipient and mint-count validation stays inline.",
+        "The shared transaction modal identifies the current card as Mint: The Memes #{id} when a valid token ID is available, and otherwise keeps the generic Mint The Memes title.",
         "Mint eligibility is separate from subscription mode and allowlist rules."
       ],
       "canonical_path": "/the-memes/mint",

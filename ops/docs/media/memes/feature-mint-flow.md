@@ -156,6 +156,9 @@
   wall-clock windows remain fixed.
 - Transaction success is shown after receipt confirmation, not immediately after
   wallet submission.
+- The transaction modal identifies the current card as
+  `Mint: The Memes #{id}` when the on-chain claim provides a valid token ID;
+  otherwise it keeps the generic `Mint The Memes` title.
 - Debug diagnostics are only exposed when the `mintdebug=1` query parameter is
   set, and are intended for debugging support.
 

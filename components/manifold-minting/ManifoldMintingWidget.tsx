@@ -17,7 +17,10 @@ import {
 import OnchainTransactionModal, {
   type OnchainTransactionModalStatus,
 } from "@/components/common/OnchainTransactionModal";
-import { MANIFOLD_LAZY_CLAIM_CONTRACT } from "@/constants/constants";
+import {
+  MANIFOLD_LAZY_CLAIM_CONTRACT,
+  MEMES_CONTRACT,
+} from "@/constants/constants";
 import type { MintingClaimsProofItem } from "@/generated/models/MintingClaimsProofItem";
 import { areEqualAddresses, fromGWEI } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
@@ -85,6 +88,22 @@ function getTransactionModalMessage(
           })
         : t(locale, "theMemes.mint.transaction.error");
   }
+}
+
+function getTransactionModalTitle(
+  locale: SupportedLocale,
+  contract: string,
+  tokenId: number | undefined
+): string {
+  const hasMemeTokenId =
+    areEqualAddresses(contract, MEMES_CONTRACT) &&
+    typeof tokenId === "number" &&
+    Number.isSafeInteger(tokenId) &&
+    tokenId > 0;
+
+  return hasMemeTokenId
+    ? t(locale, "theMemes.mint.transaction.titleWithTokenId", { tokenId })
+    : t(locale, "theMemes.mint.transaction.title");
 }
 
 function resolveTransactionModalStatus({
@@ -768,7 +787,11 @@ export default function ManifoldMintingWidget(
       {transactionModalStatus ? (
         <OnchainTransactionModal
           status={transactionModalStatus}
-          title={t(locale, "theMemes.mint.transaction.title")}
+          title={getTransactionModalTitle(
+            locale,
+            props.contract,
+            props.claim.tokenId
+          )}
           message={transactionModalMessage}
           transactionHash={
             hasCurrentTransactionHash ? mintWrite.data : undefined
