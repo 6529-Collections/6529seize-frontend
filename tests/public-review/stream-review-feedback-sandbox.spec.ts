@@ -105,7 +105,7 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
       .click();
     await feedbackPanel
       .getByLabel("Comment on")
-      .selectOption("what-stream-is-designed-to-hold-together");
+      .selectOption("two-objectives");
     await feedbackPanel
       .getByLabel("Feedback type")
       .selectOption("product-or-ux");
@@ -173,9 +173,9 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
         review_severity: "medium",
         review_context: expect.objectContaining({
           reviewId: "6529-stream",
-          reviewVersion: "2026-07-27.1",
+          reviewVersion: "2026-07-28.2",
           pageId: "overview",
-          sectionId: "what-stream-is-designed-to-hold-together",
+          sectionId: "two-objectives",
         }),
         signature: null,
         is_safe_signature: false,

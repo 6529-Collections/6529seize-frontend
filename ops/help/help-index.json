@@ -188,7 +188,7 @@
         "Ledger entries are identified and deduplicated by immutable Wave drop ID rather than the client-supplied submission UUID.",
         "Ledger metadata for a 50-drop page is hydrated in batches of no more than eight concurrent requests.",
         "A feedback section is accepted only when that exact section is explicitly allowed for the selected page; pages without a section allow-list accept no section IDs.",
-        "Immutable review-version routes have their own version-filtered feedback ledger and exact source-commit banner; review version 2026-07-26.1 is retained with feedback closed while 2026-07-27.1 is the active writing revision.",
+        "Immutable review-version routes have their own version-filtered feedback ledger and exact source-commit banner; review versions 2026-07-26.1 and 2026-07-27.1 are retained with feedback closed, 2026-07-28.1 remains a hidden draft, and 2026-07-28.2 is the active plain-language writing revision.",
         "Ledger code links open the immutable in-site versioned source and also provide the pinned GitHub source."
       ],
       "canonical_path": "/reviews/6529-stream/feedback",
@@ -197,6 +197,7 @@
         "/reviews/6529-stream/community-review",
         "/reviews/6529-stream/security-testing-and-known-limitations",
         "/reviews/6529-stream/reference",
+        "/reviews/6529-stream/versions/2026-07-28.2/feedback",
         "/reviews/6529-stream/versions/2026-07-27.1/feedback",
         "/reviews/6529-stream/versions/2026-07-26.1/feedback"
       ],

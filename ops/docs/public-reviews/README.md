@@ -92,6 +92,13 @@ precise verbs next to each claim and link to the canonical ledger rather than
 repeating wiring matrices, release blockers, and badge taxonomies throughout
 the reading experience.
 
+Each topical page begins with the subsystem's practical job and a concrete
+artwork, user, sale, or incident flow. It then explains why the machinery
+exists, what it protects, and what remains external or imperfect before moving
+into exact contract mechanics and reviewer questions. The shared status banner
+and this one readiness page carry candidate-wide status; topical pages do not
+repeat a page-level readiness disclaimer.
+
 ## Editorial Content
 
 Editorial source lives under
