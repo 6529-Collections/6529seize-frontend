@@ -486,11 +486,13 @@ jobs:
               package_digest="$(jq -r .package_sha256 release-bus-artifact/manifest.json)"
               artifact_contract="$(jq -r .artifact_contract release-bus-artifact/manifest.json)"
               environment="$(jq -r .environment release-bus-artifact/manifest.json)"
+              ci_evidence="$(jq -c '.ci_evidence | {mode,aggregate_candidate_evidence_digest:.aggregate_digest,artifact_run_id:.run_id,artifact_name:.name,artifact_digest:.digest}' release-bus-artifact/manifest.json)"
               fresh_or_reused=fresh-environment-bound
             else
               package_digest="$(jq -r --arg environment "$ARTIFACT_ENVIRONMENT" '.profiles[$environment].package_sha256' release-bus-artifact/manifest.json)"
               artifact_contract=''
               environment=dual
+              ci_evidence=null
               fresh_or_reused=fresh-legacy-dual-profile
             fi
           elif [ "$BUILD_RESULT" = failure ]; then
@@ -498,12 +500,14 @@ jobs:
             digest=''; package_digest=''; schema_version=null
             artifact_contract=''; repository=frontend
             source_sha="$EXPECTED_SHA"; environment="$ARTIFACT_ENVIRONMENT"
+            ci_evidence=null
             fresh_or_reused=failed
           else
             status=FAILED; failure_class=INFRASTRUCTURE; retryable=true
             digest=''; package_digest=''; schema_version=null
             artifact_contract=''; repository=frontend
             source_sha="$EXPECTED_SHA"; environment="$ARTIFACT_ENVIRONMENT"
+            ci_evidence=null
             fresh_or_reused=failed
           fi
           payload="$(jq -n \
@@ -524,7 +528,8 @@ jobs:
             --arg fresh_or_reused "$fresh_or_reused" \
             --argjson source_evidence_reused "$source_evidence_reused" \
             --argjson artifact_bytes_reused "$artifact_bytes_reused" \
-            '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"complete",status:$status,failure_class:(if $failure_class == "null" then null else $failure_class end),failure_phase:(if $status == "FAILED" then "frontend_preflight" else null end),retryable:$retryable,summary:{artifact_digest:(if $digest == "" then null else $digest end),package_digest:(if $package_digest == "" then null else $package_digest end),schema_version:(if $schema_version == "null" then null else ($schema_version | tonumber) end),artifact_contract:(if $artifact_contract == "" then null else $artifact_contract end),artifact_contract_version:$contract,repository:$repository,source_sha:$source_sha,environment:$environment,fresh_or_reused:$fresh_or_reused,source_evidence_reused:$source_evidence_reused,artifact_bytes_reused:$artifact_bytes_reused},stages:[],jest:null,backend_evidence:null}')"
+            --argjson ci_evidence "$ci_evidence" \
+            '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"complete",status:$status,failure_class:(if $failure_class == "null" then null else $failure_class end),failure_phase:(if $status == "FAILED" then "frontend_preflight" else null end),retryable:$retryable,summary:{artifact_digest:(if $digest == "" then null else $digest end),package_digest:(if $package_digest == "" then null else $package_digest end),schema_version:(if $schema_version == "null" then null else ($schema_version | tonumber) end),artifact_contract:(if $artifact_contract == "" then null else $artifact_contract end),artifact_contract_version:$contract,repository:$repository,source_sha:$source_sha,environment:$environment,fresh_or_reused:$fresh_or_reused,source_evidence_reused:$source_evidence_reused,artifact_bytes_reused:$artifact_bytes_reused,ci_evidence:$ci_evidence},stages:[],jest:null,backend_evidence:null}')"
           curl --fail-with-body --silent --show-error \
             -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
             -H 'Content-Type: application/json' --data "$payload" \

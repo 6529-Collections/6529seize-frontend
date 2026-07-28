@@ -177,6 +177,11 @@ describe("Release Bus frontend performance contract", () => {
     expect(authorize.run).toContain(
       "reuse_artifact_run_id:$reuse_artifact_run_id"
     );
+    expect(report.run).toContain(
+      "aggregate_candidate_evidence_digest:.aggregate_digest"
+    );
+    expect(report.run).toContain("artifact_run_id:.run_id");
+    expect(report.run).toContain("ci_evidence:$ci_evidence");
     for (const literal of [
       "schema_version:",
       "artifact_contract:",
@@ -239,6 +244,11 @@ describe("Release Bus frontend performance contract", () => {
       expect(verification.run).toContain(".artifact_bytes_reused == false");
       expect(verification.run).toContain(
         '[ "$ARTIFACT_CONTRACT_VERSION" = legacy-v2 ]'
+      );
+      expect(verification.run).toContain("artifact_contract=legacy-v2");
+      expect(deployReport.run).toContain("summary_environment=portable");
+      expect(deployReport.run).toContain(
+        "deployment_environment:$deployment_environment"
       );
       expect(verification.run).toContain(
         "Artifact schema is incompatible with $ARTIFACT_CONTRACT_VERSION."
