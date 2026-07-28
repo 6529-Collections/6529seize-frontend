@@ -59,7 +59,7 @@ export function PublicReviewEditorialFeedback({
             <label
               id="public-review-editorial-feedback-context"
               htmlFor="public-review-feedback-section"
-              className="tw-block tw-text-[11px] tw-font-medium tw-text-iron-400"
+              className="tw-block tw-text-[11px] tw-font-medium tw-text-iron-300"
             >
               <span className="tw-mb-1.5 tw-block">
                 {t(DEFAULT_LOCALE, "publicReview.feedback.sectionSelector")}

@@ -74,7 +74,7 @@ export function PublicReviewAudiencePaths({
       >
         {t(DEFAULT_LOCALE, "publicReview.audiences.heading")}
       </h2>
-      <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-font-light tw-leading-6 tw-text-iron-400">
+      <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-300">
         {t(DEFAULT_LOCALE, "publicReview.audiences.description")}
       </p>
       <div className="tw-mt-7 tw-divide-y tw-divide-white/[0.08] tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08]">
@@ -98,7 +98,7 @@ export function PublicReviewAudiencePaths({
                 />
                 {t(DEFAULT_LOCALE, copy.title)}
               </h3>
-              <p className="tw-m-0 tw-text-[0.8125rem] tw-font-light tw-leading-5 tw-text-iron-400">
+              <p className="tw-m-0 tw-text-[0.8125rem] tw-font-normal tw-leading-5 tw-text-iron-300">
                 {t(DEFAULT_LOCALE, copy.description)}
               </p>
               {firstPage ? (

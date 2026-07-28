@@ -169,7 +169,7 @@ function ReviewFeedbackContext({
 }) {
   return (
     <div
-      className={`${className} tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-white/[0.018] tw-p-3 tw-text-xs tw-leading-5 tw-text-iron-400`}
+      className={`${className} tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-white/[0.018] tw-p-3 tw-text-xs tw-leading-5 tw-text-iron-300`}
     >
       <p className="tw-m-0">
         {t(locale, "publicReview.feedback.pageContext", {
@@ -537,7 +537,7 @@ export default function PublicReviewFeedbackComposer({
           </div>
 
           <details className="tw-group tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#0a0a0c] tw-transition-colors open:tw-border-white/[0.11]">
-            <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-3 tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors tw-duration-200 hover:tw-bg-white/[0.018] hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
+            <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-3 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-200 hover:tw-bg-white/[0.018] hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
               {t(locale, "publicReview.feedback.advanced")}
               <ChevronDownIcon
                 className="tw-size-3.5 tw-flex-none tw-text-iron-500 tw-transition-transform tw-duration-200 group-open:tw-rotate-180 motion-reduce:tw-transition-none"
@@ -551,7 +551,7 @@ export default function PublicReviewFeedbackComposer({
               <div className="tw-grid tw-gap-3 @[340px]:tw-grid-cols-2">
                 <label
                   htmlFor={`${formId}-category`}
-                  className="tw-block tw-min-w-0 tw-text-[11px] tw-font-medium tw-text-iron-400"
+                  className="tw-block tw-min-w-0 tw-text-[11px] tw-font-medium tw-text-iron-300"
                 >
                   <span className="tw-mb-1.5 tw-block">
                     {t(locale, "publicReview.feedback.category")}
@@ -579,7 +579,7 @@ export default function PublicReviewFeedbackComposer({
                 </label>
                 <label
                   htmlFor={`${formId}-severity`}
-                  className="tw-block tw-min-w-0 tw-text-[11px] tw-font-medium tw-text-iron-400"
+                  className="tw-block tw-min-w-0 tw-text-[11px] tw-font-medium tw-text-iron-300"
                 >
                   <span className="tw-mb-1.5 tw-block">
                     {t(locale, "publicReview.feedback.severity")}
@@ -632,7 +632,7 @@ export default function PublicReviewFeedbackComposer({
                 <label
                   key={field}
                   htmlFor={`${formId}-${field}`}
-                  className="tw-block tw-text-[11px] tw-font-medium tw-text-iron-400"
+                  className="tw-block tw-text-[11px] tw-font-medium tw-text-iron-300"
                 >
                   <span className="tw-mb-1.5 tw-block">
                     {t(locale, messageKey)}
