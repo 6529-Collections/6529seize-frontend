@@ -4,6 +4,10 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+import {
+  PUBLIC_REVIEW_INPUT_CLASSES,
+  PublicReviewSelect,
+} from "@/components/public-review/PublicReviewFormControls";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -18,9 +22,6 @@ import {
   fetchSolidityDeclarations,
   getSolidityDeclarationsQueryKey,
 } from "@/services/api/public-review/declarations";
-
-const INPUT_CLASSES =
-  "tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-iron-50 tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40";
 
 interface SolidityGlobalDeclarationExplorerProps {
   readonly linkMode: "active" | "versioned";
@@ -91,26 +92,29 @@ export function SolidityGlobalDeclarationExplorer({
   const total = declarationsQuery.data?.pages[0]?.total ?? 0;
 
   return (
-    <section aria-labelledby="solidity-global-declarations">
+    <section
+      aria-labelledby="solidity-global-declarations"
+      className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-py-8"
+    >
       <h2
         id="solidity-global-declarations"
         className="tw-m-0 tw-scroll-mt-28 tw-text-2xl tw-font-semibold tw-text-white"
       >
         {t(DEFAULT_LOCALE, "publicReview.reference.globalDeclarations")}
       </h2>
-      <p className="tw-mb-0 tw-mt-2 tw-max-w-4xl tw-text-sm tw-leading-6 tw-text-iron-300">
+      <p className="tw-mb-0 tw-mt-2 tw-max-w-4xl tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-300">
         {t(
           DEFAULT_LOCALE,
           "publicReview.reference.globalDeclarationsDescription"
         )}
       </p>
-      <div className="tw-mt-5 tw-grid tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/70 tw-p-4 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
+      <div className="tw-mt-5 tw-grid tw-gap-4 tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] sm:tw-grid-cols-2 xl:tw-grid-cols-4">
         <label className="tw-block tw-text-sm tw-font-medium tw-text-iron-200 sm:tw-col-span-2 xl:tw-col-span-1">
           <span className="tw-mb-1.5 tw-block">
             {t(DEFAULT_LOCALE, "publicReview.reference.searchAllDeclarations")}
           </span>
           <input
-            className={INPUT_CLASSES}
+            className={PUBLIC_REVIEW_INPUT_CLASSES}
             maxLength={SOLIDITY_DECLARATION_MAX_QUERY_LENGTH}
             onChange={(event) => setSearchInput(event.target.value)}
             placeholder={t(
@@ -125,8 +129,7 @@ export function SolidityGlobalDeclarationExplorer({
           <span className="tw-mb-1.5 tw-block">
             {t(DEFAULT_LOCALE, "publicReview.reference.filterDeclarationKind")}
           </span>
-          <select
-            className={INPUT_CLASSES}
+          <PublicReviewSelect
             onChange={(event) =>
               setFilters((current) => ({
                 ...current,
@@ -147,14 +150,13 @@ export function SolidityGlobalDeclarationExplorer({
             <option value="error">
               {t(DEFAULT_LOCALE, "publicReview.reference.errors")}
             </option>
-          </select>
+          </PublicReviewSelect>
         </label>
         <label className="tw-block tw-text-sm tw-font-medium tw-text-iron-200">
           <span className="tw-mb-1.5 tw-block">
             {t(DEFAULT_LOCALE, "publicReview.reference.filterScope")}
           </span>
-          <select
-            className={INPUT_CLASSES}
+          <PublicReviewSelect
             onChange={(event) =>
               setFilters((current) => ({
                 ...current,
@@ -171,14 +173,13 @@ export function SolidityGlobalDeclarationExplorer({
                 {option}
               </option>
             ))}
-          </select>
+          </PublicReviewSelect>
         </label>
         <label className="tw-block tw-text-sm tw-font-medium tw-text-iron-200">
           <span className="tw-mb-1.5 tw-block">
             {t(DEFAULT_LOCALE, "publicReview.reference.declarationLocation")}
           </span>
-          <select
-            className={INPUT_CLASSES}
+          <PublicReviewSelect
             onChange={(event) =>
               setFilters((current) => ({
                 ...current,
@@ -197,7 +198,7 @@ export function SolidityGlobalDeclarationExplorer({
             <option value="file-scope">
               {t(DEFAULT_LOCALE, "publicReview.reference.fileScope")}
             </option>
-          </select>
+          </PublicReviewSelect>
         </label>
       </div>
 
@@ -218,7 +219,7 @@ export function SolidityGlobalDeclarationExplorer({
             {t(DEFAULT_LOCALE, "publicReview.reference.declarationsLoadError")}
           </p>
           <button
-            className="tw-mt-3 tw-min-h-11 tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-4 tw-py-2 tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+            className="tw-mt-3 tw-min-h-11 tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-4 tw-py-2 tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
             onClick={() => void declarationsQuery.refetch()}
             type="button"
           >
@@ -248,7 +249,7 @@ export function SolidityGlobalDeclarationExplorer({
       ) : null}
       {declarationsQuery.hasNextPage ? (
         <button
-          className="tw-mt-5 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-4 tw-py-2 tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white disabled:tw-cursor-wait disabled:tw-opacity-60"
+          className="tw-mt-5 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-4 tw-py-2 tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60"
           disabled={declarationsQuery.isFetchingNextPage}
           onClick={() => void declarationsQuery.fetchNextPage()}
           type="button"
@@ -271,11 +272,11 @@ function DeclarationResults({
   readonly items: readonly SolidityGlobalDeclarationListItem[];
 }) {
   return (
-    <ul className="tw-mb-0 tw-mt-5 tw-list-none tw-space-y-2 tw-p-0">
+    <ul className="tw-mb-0 tw-mt-5 tw-list-none tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03]">
       {items.map((item) => (
         <li key={item.key}>
           <Link
-            className="tw-grid tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4 tw-no-underline hover:tw-border-iron-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white lg:tw-grid-cols-[7rem_minmax(0,1fr)_minmax(13rem,auto)] lg:tw-items-center"
+            className="tw-group tw-grid tw-cursor-pointer tw-gap-3 tw-rounded-lg tw-px-4 tw-py-3.5 tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-900/40 lg:tw-grid-cols-[7rem_minmax(0,1fr)_minmax(13rem,auto)] lg:tw-items-center"
             href={item.href}
           >
             <span className="tw-flex tw-flex-wrap tw-gap-2">
@@ -289,10 +290,10 @@ function DeclarationResults({
               ) : null}
             </span>
             <span className="tw-min-w-0">
-              <code className="tw-block tw-break-all tw-text-sm tw-text-white">
+              <code className="tw-block tw-break-all tw-text-sm tw-text-white tw-transition-colors group-hover:tw-text-primary-300">
                 {item.signature}
               </code>
-              <span className="tw-mt-1 tw-block tw-break-all tw-font-mono tw-text-xs tw-text-iron-500">
+              <span className="tw-mt-1 tw-block tw-break-all tw-font-mono tw-text-xs tw-text-iron-400">
                 {item.definitionName
                   ? `${item.definitionName} · ${item.sourcePath}`
                   : item.sourcePath}

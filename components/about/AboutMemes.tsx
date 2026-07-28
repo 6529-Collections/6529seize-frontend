@@ -130,7 +130,7 @@ export default function AboutMemes() {
             </h2>
           </header>
           <div className="tw-max-w-3xl">
-            <p className="tw-m-0 tw-text-pretty tw-text-lg tw-font-light tw-leading-7 tw-text-iron-100 sm:tw-text-xl sm:tw-leading-8">
+            <p className="tw-m-0 tw-text-pretty tw-text-lg tw-font-normal tw-leading-7 tw-text-iron-100 sm:tw-text-xl sm:tw-leading-8">
               {t(DEFAULT_LOCALE, "about.memes.intro")}
             </p>
             <p className="tw-m-0 tw-mt-5 tw-text-pretty tw-text-base tw-leading-6 tw-text-iron-300 sm:tw-mt-6 sm:tw-text-lg sm:tw-leading-7">

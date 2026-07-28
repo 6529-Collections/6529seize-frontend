@@ -1,0 +1,472 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamDropsERC1271.t.sol:MockERC1271Signer#function:0x7490b5a2",
+          "declaringDefinitionId": "test/StreamDropsERC1271.t.sol:MockERC1271Signer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "enum MockERC1271Signer.Mode",
+              "name": "_mode",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "_expectedHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes",
+              "name": "_expectedSignature",
+              "type": "bytes"
+            }
+          ],
+          "name": "configure",
+          "outputs": [],
+          "selector": "0x7490b5a2",
+          "signature": "configure(uint8,bytes32,bytes)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamDropsERC1271.t.sol:MockERC1271Signer#function:0x1626ba7e",
+          "declaringDefinitionId": "test/StreamDropsERC1271.t.sol:MockERC1271Signer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "_hash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes",
+              "name": "_signature",
+              "type": "bytes"
+            }
+          ],
+          "name": "isValidSignature",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "selector": "0x1626ba7e",
+          "signature": "isValidSignature(bytes32,bytes)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [
+        {
+          "memberDetails": [
+            {
+              "index": 0,
+              "name": "Valid",
+              "range": {
+                "byteLength": 5,
+                "byteStart": 15482,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsERC1271.t.sol#L372",
+                "lineEnd": 372,
+                "lineStart": 372,
+                "snippetSha256": "sha256:f5162206318ee96491108354ae7361db244d6a013aa32185216b5f15ac544f4c",
+                "sourceSha256": "sha256:578cbea446e9804d4ea37ec2349c9a3822e0071780b21746f50b065d12402fc8"
+              }
+            },
+            {
+              "index": 1,
+              "name": "InvalidMagic",
+              "range": {
+                "byteLength": 12,
+                "byteStart": 15497,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsERC1271.t.sol#L373",
+                "lineEnd": 373,
+                "lineStart": 373,
+                "snippetSha256": "sha256:28e1535efc0ff8462a611aaf715b21249ba03ba6b578fcfff758a6e5bbc133e4",
+                "sourceSha256": "sha256:578cbea446e9804d4ea37ec2349c9a3822e0071780b21746f50b065d12402fc8"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Revert",
+              "range": {
+                "byteLength": 6,
+                "byteStart": 15519,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsERC1271.t.sol#L374",
+                "lineEnd": 374,
+                "lineStart": 374,
+                "snippetSha256": "sha256:0026c505347863ae188a99df6946e16ac83262585044660440699346d24784e7",
+                "sourceSha256": "sha256:578cbea446e9804d4ea37ec2349c9a3822e0071780b21746f50b065d12402fc8"
+              }
+            },
+            {
+              "index": 3,
+              "name": "EmptyReturn",
+              "range": {
+                "byteLength": 11,
+                "byteStart": 15535,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsERC1271.t.sol#L375",
+                "lineEnd": 375,
+                "lineStart": 375,
+                "snippetSha256": "sha256:9103b18c025b4dd7c2a66044127007486fbda0954a859d1767a5f9825396413e",
+                "sourceSha256": "sha256:578cbea446e9804d4ea37ec2349c9a3822e0071780b21746f50b065d12402fc8"
+              }
+            },
+            {
+              "index": 4,
+              "name": "ShortReturn",
+              "range": {
+                "byteLength": 11,
+                "byteStart": 15556,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsERC1271.t.sol#L376",
+                "lineEnd": 376,
+                "lineStart": 376,
+                "snippetSha256": "sha256:0035e32f1f41753aca235d8c70027052ce55f9e3df6be911d1fbd5927320d19f",
+                "sourceSha256": "sha256:578cbea446e9804d4ea37ec2349c9a3822e0071780b21746f50b065d12402fc8"
+              }
+            },
+            {
+              "index": 5,
+              "name": "ExtraReturn",
+              "range": {
+                "byteLength": 11,
+                "byteStart": 15577,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsERC1271.t.sol#L377",
+                "lineEnd": 377,
+                "lineStart": 377,
+                "snippetSha256": "sha256:d491c39b6126b8038481c72a3640ed1a1e443fcb3e67379bc6d90f5d6bd4b34b",
+                "sourceSha256": "sha256:578cbea446e9804d4ea37ec2349c9a3822e0071780b21746f50b065d12402fc8"
+              }
+            }
+          ],
+          "members": [
+            "Valid",
+            "InvalidMagic",
+            "Revert",
+            "EmptyReturn",
+            "ShortReturn",
+            "ExtraReturn"
+          ],
+          "name": "Mode",
+          "natspec": "",
+          "range": {
+            "byteLength": 132,
+            "byteStart": 15462,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsERC1271.t.sol#L371-L378",
+            "lineEnd": 378,
+            "lineStart": 371,
+            "snippetSha256": "sha256:ad24eef027ba2431acc0c0c085d3fc4d64762c1cac4efb3e3c522af82ff0eff1",
+            "sourceSha256": "sha256:578cbea446e9804d4ea37ec2349c9a3822e0071780b21746f50b065d12402fc8"
+          }
+        }
+      ],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "configure(uint8,bytes32,bytes)",
+          "displaySignature": "configure(Mode,bytes32,bytes)",
+          "functionKind": "function",
+          "id": "test/StreamDropsERC1271.t.sol:MockERC1271Signer#function:0x7490b5a2",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_mode",
+              "type": "Mode"
+            },
+            {
+              "index": 1,
+              "name": "_expectedHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "_expectedSignature",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Ecm9wc0VSQzEyNzEudC5zb2w6TW9ja0VSQzEyNzFTaWduZXIjZnVuY3Rpb246MHg3NDkwYjVhMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "configure",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 225,
+            "byteStart": 15695,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsERC1271.t.sol#L384-L390",
+            "lineEnd": 390,
+            "lineStart": 384,
+            "snippetSha256": "sha256:6aefac3f5c504a1428263d7227de525b64ff7bc00d469253d24b9d0c7a286f25",
+            "sourceSha256": "sha256:578cbea446e9804d4ea37ec2349c9a3822e0071780b21746f50b065d12402fc8"
+          },
+          "selector": "0x7490b5a2",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isValidSignature(bytes32,bytes)",
+          "displaySignature": "isValidSignature(bytes32,bytes)",
+          "functionKind": "function",
+          "id": "test/StreamDropsERC1271.t.sol:MockERC1271Signer#function:0x1626ba7e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_hash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "_signature",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Ecm9wc0VSQzEyNzEudC5zb2w6TW9ja0VSQzEyNzFTaWduZXIjZnVuY3Rpb246MHgxNjI2YmE3ZQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isValidSignature",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "range": {
+            "byteLength": 940,
+            "byteStart": 15926,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsERC1271.t.sol#L392-L425",
+            "lineEnd": 425,
+            "lineStart": 392,
+            "snippetSha256": "sha256:0f9aace52f458bcca6d0eda22111d5b3f419c0a7c5b1f2928ebea64d5a4c4fd9",
+            "sourceSha256": "sha256:578cbea446e9804d4ea37ec2349c9a3822e0071780b21746f50b065d12402fc8"
+          },
+          "selector": "0x1626ba7e",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "MAGIC_VALUE",
+          "natspec": "",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 15351,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsERC1271.t.sol#L368",
+            "lineEnd": 368,
+            "lineStart": 368,
+            "snippetSha256": "sha256:a0d05acc74e0bf1c539e7dc0466e5715b207a4e7e042679137d34c03533ef0d7",
+            "sourceSha256": "sha256:578cbea446e9804d4ea37ec2349c9a3822e0071780b21746f50b065d12402fc8"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "typeString": "bytes4",
+          "valueRange": {
+            "byteLength": 10,
+            "byteStart": 15389,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsERC1271.t.sol#L368",
+            "lineEnd": 368,
+            "lineStart": 368,
+            "snippetSha256": "sha256:fb6e13219ed30abf119c1841ffe1905c566a0ef304a840cf5607d48f1c44df97",
+            "sourceSha256": "sha256:578cbea446e9804d4ea37ec2349c9a3822e0071780b21746f50b065d12402fc8"
+          },
+          "valueSource": "0x1626ba7e",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "INVALID_VALUE",
+          "natspec": "",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 15405,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsERC1271.t.sol#L369",
+            "lineEnd": 369,
+            "lineStart": 369,
+            "snippetSha256": "sha256:73b263fa82a578bf21c1a365c99a80b73682f1a643a44c81771ff282f93ef374",
+            "sourceSha256": "sha256:578cbea446e9804d4ea37ec2349c9a3822e0071780b21746f50b065d12402fc8"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "typeString": "bytes4",
+          "valueRange": {
+            "byteLength": 10,
+            "byteStart": 15445,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsERC1271.t.sol#L369",
+            "lineEnd": 369,
+            "lineStart": 369,
+            "snippetSha256": "sha256:8755cf766a3d431df2cd81685dbc6ad36f546b29c7c0cda14377cdf5083d5546",
+            "sourceSha256": "sha256:578cbea446e9804d4ea37ec2349c9a3822e0071780b21746f50b065d12402fc8"
+          },
+          "valueSource": "0xffffffff",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "expectedHash",
+          "natspec": "",
+          "range": {
+            "byteLength": 28,
+            "byteStart": 15600,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsERC1271.t.sol#L380",
+            "lineEnd": 380,
+            "lineStart": 380,
+            "snippetSha256": "sha256:06fb01b1f5607e822d5217e90d9afd0229e8f203620289b4f8e37d5defa70b60",
+            "sourceSha256": "sha256:578cbea446e9804d4ea37ec2349c9a3822e0071780b21746f50b065d12402fc8"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "expectedSignature",
+          "natspec": "",
+          "range": {
+            "byteLength": 31,
+            "byteStart": 15634,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsERC1271.t.sol#L381",
+            "lineEnd": 381,
+            "lineStart": 381,
+            "snippetSha256": "sha256:75ebbd650b6224241e2aead5797bfa6768d810f3298f1eba54fde920d0aeca28",
+            "sourceSha256": "sha256:578cbea446e9804d4ea37ec2349c9a3822e0071780b21746f50b065d12402fc8"
+          },
+          "selector": null,
+          "type": "bytes",
+          "typeString": "bytes",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "mode",
+          "natspec": "",
+          "range": {
+            "byteLength": 17,
+            "byteStart": 15671,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsERC1271.t.sol#L382",
+            "lineEnd": 382,
+            "lineStart": 382,
+            "snippetSha256": "sha256:e7ebd9865ee5d667514b259f64c61e9155369a55fa08841d8d6101e12bf3c651",
+            "sourceSha256": "sha256:578cbea446e9804d4ea37ec2349c9a3822e0071780b21746f50b065d12402fc8"
+          },
+          "selector": null,
+          "type": "Mode",
+          "typeString": "enum MockERC1271Signer.Mode",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamDropsERC1271.t.sol:MockERC1271Signer",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Ecm9wc0VSQzEyNzEudC5zb2w6TW9ja0VSQzEyNzFTaWduZXI",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamDropsERC1271.t.sol:MockERC1271Signer"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "MockERC1271Signer",
+    "natspec": "",
+    "range": {
+      "byteLength": 1550,
+      "byteStart": 15318,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamDropsERC1271.t.sol#L367-L426",
+      "lineEnd": 426,
+      "lineStart": 367,
+      "snippetSha256": "sha256:13efee95c9b3e7dc1ac1f8733ceba8da731bf10a18395568d580eeb89fb9d3c6",
+      "sourceSha256": "sha256:578cbea446e9804d4ea37ec2349c9a3822e0071780b21746f50b065d12402fc8"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamDropsERC1271.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 3
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 2
+    },
+    "totalCount": 3
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamDropsERC1271.t.sol:MockERC1271Signer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamDropsERC1271.t.sol:MockERC1271Signer#function:0x1626ba7e",
+      "definitionId": "test/StreamDropsERC1271.t.sol:MockERC1271Signer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamDropsERC1271.t.sol:MockERC1271Signer#function:0x7490b5a2",
+      "definitionId": "test/StreamDropsERC1271.t.sol:MockERC1271Signer",
+      "severity": "advisory"
+    }
+  ]
+}
