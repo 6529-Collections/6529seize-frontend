@@ -97,7 +97,8 @@ jobs:
               run="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$REUSE_ARTIFACT_RUN_ID")"
               test "$(jq -r .event <<< "$run")" = pull_request
               test "$(jq -r .conclusion <<< "$run")" = success
-              test "$(jq -r .head_sha <<< "$run")" = "$merge_sha"
+              run_head_sha="$(jq -r .head_sha <<< "$run")"
+              [[ "$run_head_sha" =~ ^[a-f0-9]{40}$ ]]
               test "$(jq -r .path <<< "$run")" = .github/workflows/app-pr-ci.yml
               evidence_root="$RUNNER_TEMP/release-bus-pr-ci-evidence"
               rm -rf "$evidence_root"
@@ -144,6 +145,7 @@ jobs:
                   "pr-ci-policy-bundle"
                 ]
               ' "$evidence_root/manifest.json" >/dev/null
+              test "$(jq -r .head_sha "$evidence_root/manifest.json")" = "$run_head_sha"
               policy_bundle_digest="$(sha256sum "$evidence_root/policy-bundle.txt" | cut -d' ' -f1)"
               test "$policy_bundle_digest" = "$(jq -r .policy_bundle_digest "$evidence_root/manifest.json")"
               policy_bundle_line_count="$(wc -l < "$evidence_root/policy-bundle.txt" | tr -d '[:space:]')"

@@ -236,7 +236,7 @@ set -euo pipefail
 if [ "$1" = api ] && [[ "$2" == *"/artifacts?name="* ]]; then
   printf '{"artifacts":[{"expired":false,"name":"%s","digest":"sha256:%s"}]}\n' "$MOCK_ARTIFACT_NAME" "$MOCK_ARTIFACT_DIGEST"
 elif [ "$1" = api ]; then
-  printf '{"event":"pull_request","conclusion":"success","head_sha":"%s","path":".github/workflows/app-pr-ci.yml"}\n' "$MOCK_MERGE_SHA"
+  printf '{"event":"pull_request","conclusion":"success","head_sha":"%s","path":".github/workflows/app-pr-ci.yml"}\n' "$MOCK_HEAD_SHA"
 elif [ "$1" = run ] && [ "$2" = download ]; then
   destination=""
   while [ "$#" -gt 0 ]; do
@@ -702,7 +702,7 @@ describe("Release Bus artifact rollout compatibility", () => {
   }
 
   for (const environment of ["staging", "production"] as const) {
-    it(`${environment} uses explicit runner capabilities and safely runs old candidates serially`, () => {
+    it(`${environment} falls back old runners to serial and fails closed without manifest evidence`, () => {
       const workflow = readWorkflow(
         environment === "staging" ? "staging-e2e.yml" : "production-e2e.yml"
       );
@@ -712,6 +712,11 @@ describe("Release Bus artifact rollout compatibility", () => {
         environment === "staging"
           ? "Run staging packs against staging.6529.io"
           : "Run production-safe read-only packs"
+      );
+      const evidence = findStep(
+        workflow,
+        environment === "staging" ? "staging-packs" : "readonly",
+        "Validate exact manifest-bound E2E evidence"
       );
       const root = fs.mkdtempSync(
         path.join(os.tmpdir(), `release-bus-${environment}-runner-`)
@@ -765,6 +770,18 @@ describe("Release Bus artifact rollout compatibility", () => {
         expect(incompatibleArgs).toEqual(
           expect.arrayContaining(["--trigger", "post-deploy"])
         );
+        expect(
+          runShell(evidence.run!, {
+            cwd: root,
+            env: {
+              E2E_OUTCOME: "success",
+              EXPECTED_SHA,
+              MANIFEST_ID: "manifest",
+              MANIFEST_IDENTITY: "f".repeat(64),
+              OPERATION_KEY: "rb2:compatibility:a1",
+            },
+          }).status
+        ).not.toBe(0);
       } finally {
         fs.rmSync(root, { recursive: true, force: true });
       }
@@ -814,6 +831,7 @@ describe("Release Bus artifact rollout compatibility", () => {
         MOCK_ARTIFACT_NAME: artifactName,
         MOCK_CURL_PAYLOAD: curlPayload,
         MOCK_EVIDENCE_SOURCE: evidenceSource,
+        MOCK_HEAD_SHA: "e".repeat(40),
         MOCK_MERGE_SHA: mergeSha,
         OPERATION_KEY: "rb2:compatibility:a1",
         PATH: `${mockBin}:${process.env["PATH"]}`,
@@ -827,6 +845,11 @@ describe("Release Bus artifact rollout compatibility", () => {
       };
 
       expect(runShell(validate.run!, { env: baseEnv }).status).toBe(0);
+      expect(
+        runShell(validate.run!, {
+          env: { ...baseEnv, MOCK_HEAD_SHA: "a".repeat(40) },
+        }).status
+      ).not.toBe(0);
       expect(
         runShell(validate.run!, {
           env: {
