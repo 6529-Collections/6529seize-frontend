@@ -140,7 +140,10 @@ export function PublicReviewShell({
             feedbackAvailable={review.feedbackAvailable}
             panel={feedbackSlot}
             toolbar={
-              <p className="tw-m-0 tw-font-mono tw-text-[0.68rem] tw-font-medium tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
+              <p
+                key="review-page-position"
+                className="tw-m-0 tw-font-mono tw-text-[0.68rem] tw-font-medium tw-uppercase tw-tracking-[0.12em] tw-text-iron-500"
+              >
                 {t(DEFAULT_LOCALE, "publicReview.navigation.pagePosition", {
                   current: formatInteger(DEFAULT_LOCALE, currentPageNumber),
                   total: formatInteger(
@@ -151,7 +154,10 @@ export function PublicReviewShell({
               </p>
             }
             content={
-              <div className="tw-mx-auto tw-w-full tw-max-w-[68rem] tw-px-4 tw-pb-20 sm:tw-px-7 lg:tw-px-10">
+              <div
+                key="review-reading-content"
+                className="tw-mx-auto tw-w-full tw-max-w-[68rem] tw-px-4 tw-pb-20 sm:tw-px-7 lg:tw-px-10"
+              >
                 <div className="tw-pt-6 sm:tw-pt-8">
                   <PublicReviewStatusBanner
                     review={review}
