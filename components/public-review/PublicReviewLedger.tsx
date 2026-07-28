@@ -5,6 +5,10 @@ import Link from "next/link";
 import { useEffect, useId, useMemo, useState } from "react";
 
 import { PublicReviewLedgerWarnings } from "@/components/public-review/PublicReviewLedgerWarnings";
+import {
+  PUBLIC_REVIEW_INPUT_CLASSES,
+  PublicReviewSelect,
+} from "@/components/public-review/PublicReviewFormControls";
 import type { SupportedLocale } from "@/i18n/locales";
 import {
   compareLocalized,
@@ -51,8 +55,6 @@ const EMPTY_FILTERS: PublicReviewLedgerFilters = {
   search: "",
 };
 
-const SELECT_CLASSES =
-  "tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-iron-50 tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40";
 const LEDGER_ALL_MESSAGE = "publicReview.ledger.all" as const;
 
 function getInternalSourceLink({
@@ -186,18 +188,18 @@ export default function PublicReviewLedger({
   return (
     <section
       aria-labelledby={`${ledgerId}-title`}
-      className="tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.09] tw-py-6"
+      className="tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08] tw-py-8"
     >
       <h2
         id={`${ledgerId}-title`}
-        className="tw-m-0 tw-text-xl tw-font-semibold tw-text-iron-50"
+        className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
       >
         {t(locale, "publicReview.ledger.title")}
       </h2>
-      <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+      <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-pretty tw-text-sm tw-font-light tw-leading-6 tw-text-iron-300">
         {t(locale, "publicReview.ledger.intro")}
       </p>
-      <div className="tw-mt-4 tw-flex tw-flex-wrap tw-gap-3">
+      <div className="tw-mt-5 tw-flex tw-flex-wrap tw-gap-3">
         <button
           type="button"
           aria-describedby={
@@ -211,7 +213,7 @@ export default function PublicReviewLedger({
               type: "text/csv;charset=utf-8",
             })
           }
-          className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-transparent tw-px-4 tw-py-2 tw-font-semibold tw-text-iron-100 focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+          className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-shadow-sm tw-transition-colors hover:tw-border-white/[0.18] hover:tw-bg-white/[0.025] hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 disabled:hover:tw-border-white/10 disabled:hover:tw-bg-transparent disabled:hover:tw-text-iron-200"
         >
           {t(locale, "publicReview.ledger.exportCsv")}
         </button>
@@ -231,7 +233,7 @@ export default function PublicReviewLedger({
               type: "text/markdown;charset=utf-8",
             })
           }
-          className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-transparent tw-px-4 tw-py-2 tw-font-semibold tw-text-iron-100 focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+          className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-shadow-sm tw-transition-colors hover:tw-border-white/[0.18] hover:tw-bg-white/[0.025] hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 disabled:hover:tw-border-white/10 disabled:hover:tw-bg-transparent disabled:hover:tw-text-iron-200"
         >
           {t(locale, "publicReview.ledger.exportMarkdown")}
         </button>
@@ -245,7 +247,7 @@ export default function PublicReviewLedger({
         </p>
       ) : null}
 
-      <fieldset className="tw-mt-5 tw-grid tw-gap-4 tw-border-0 tw-p-0 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
+      <fieldset className="tw-mt-6 tw-grid tw-gap-x-4 tw-gap-y-5 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] sm:tw-grid-cols-2 lg:tw-grid-cols-3">
         <legend className="tw-sr-only">
           {t(locale, "publicReview.ledger.filters")}
         </legend>
@@ -255,7 +257,7 @@ export default function PublicReviewLedger({
           </span>
           <input
             type="search"
-            className={SELECT_CLASSES}
+            className={PUBLIC_REVIEW_INPUT_CLASSES}
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
           />
@@ -352,7 +354,7 @@ export default function PublicReviewLedger({
       ) : null}
 
       {visibleRecords.length > 0 ? (
-        <ol className="tw-mb-0 tw-mt-6 tw-list-none tw-divide-y tw-divide-white/[0.09] tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.09] tw-p-0">
+        <ol className="tw-mb-0 tw-mt-8 tw-list-none tw-divide-y tw-divide-white/[0.05] tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03]">
           {visibleRecords.map((record) => {
             const author =
               record.author.handle ??
@@ -376,27 +378,30 @@ export default function PublicReviewLedger({
               : undefined;
 
             return (
-              <li key={record.dropId}>
+              <li
+                key={record.dropId}
+                className="tw-py-8 first:tw-pt-0 last:tw-pb-0"
+              >
                 <article
                   aria-label={t(locale, "publicReview.ledger.itemLabel", {
                     author,
                   })}
-                  className="tw-py-5"
+                  className="tw-min-w-0"
                 >
-                  <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.1em]">
+                  <div className="tw-mb-1 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-[0.1em]">
                     <span className="tw-text-sky-300">{categoryLabel}</span>
-                    <span aria-hidden="true" className="tw-text-iron-700">
+                    <span aria-hidden="true" className="tw-text-iron-800">
                       ·
                     </span>
-                    <span className="tw-text-iron-400">{severityLabel}</span>
-                    <span aria-hidden="true" className="tw-text-iron-700">
+                    <span className="tw-text-iron-500">{severityLabel}</span>
+                    <span aria-hidden="true" className="tw-text-iron-800">
                       ·
                     </span>
                     <span className="tw-text-iron-500">
                       {t(locale, "publicReview.ledger.new")}
                     </span>
                   </div>
-                  <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-400">
+                  <p className="tw-mb-0 tw-mt-2 tw-text-pretty tw-text-xs tw-font-light tw-leading-5 tw-text-iron-500">
                     {t(locale, "publicReview.ledger.byline", {
                       author,
                       page: pageLabel,
@@ -404,11 +409,11 @@ export default function PublicReviewLedger({
                       time: formatTime(locale, record.createdAt),
                     })}
                   </p>
-                  <div className="tw-mb-0 tw-mt-4 tw-whitespace-pre-wrap tw-break-words tw-font-sans tw-text-sm tw-leading-6 tw-text-iron-200">
+                  <div className="tw-mb-0 tw-mt-4 tw-whitespace-pre-wrap tw-break-words tw-font-sans tw-text-sm tw-font-normal tw-leading-[1.8] tw-text-iron-300">
                     {record.body}
                   </div>
-                  <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-text-sm">
-                    <span className="tw-text-iron-400">
+                  <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 tw-text-[13px]">
+                    <span className="tw-text-iron-500">
                       {t(locale, "publicReview.ledger.reactions", {
                         count: formatInteger(locale, record.reactionsCount),
                       })}
@@ -418,7 +423,7 @@ export default function PublicReviewLedger({
                         {internalSourceLink ? (
                           <Link
                             href={internalSourceLink}
-                            className="tw-font-semibold tw-text-primary-300 tw-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300"
+                            className="tw-font-normal tw-text-primary-300 tw-no-underline hover:tw-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
                           >
                             {t(
                               locale,
@@ -430,7 +435,7 @@ export default function PublicReviewLedger({
                           href={getPublicReviewSourceLink(record.reference)}
                           target="_blank"
                           rel="noreferrer"
-                          className="tw-font-semibold tw-text-primary-300 tw-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300"
+                          className="tw-font-normal tw-text-primary-300 tw-no-underline hover:tw-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
                         >
                           {t(
                             locale,
@@ -441,7 +446,7 @@ export default function PublicReviewLedger({
                     ) : null}
                     <Link
                       href={record.discussionPath}
-                      className="tw-font-semibold tw-text-primary-300 tw-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300"
+                      className="tw-font-normal tw-text-primary-300 tw-no-underline hover:tw-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
                     >
                       {t(locale, "publicReview.ledger.openDiscussion")}
                     </Link>
@@ -459,7 +464,7 @@ export default function PublicReviewLedger({
           aria-busy={ledgerQuery.isFetchingNextPage}
           disabled={ledgerQuery.isFetchingNextPage}
           onClick={() => void ledgerQuery.fetchNextPage()}
-          className="tw-mt-6 tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-transparent tw-px-4 tw-py-2 tw-font-semibold tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 disabled:tw-cursor-wait disabled:tw-opacity-60"
+          className="tw-mt-6 tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-transparent tw-px-4 tw-py-2 tw-font-semibold tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 disabled:tw-cursor-wait disabled:tw-opacity-60"
         >
           {ledgerQuery.isFetchingNextPage
             ? t(locale, "publicReview.ledger.loadingMore")
@@ -489,8 +494,7 @@ function LedgerSelect({
   return (
     <label className="tw-block tw-text-sm tw-font-medium tw-text-iron-200">
       <span className="tw-mb-1.5 tw-block">{label}</span>
-      <select
-        className={SELECT_CLASSES}
+      <PublicReviewSelect
         value={value}
         onChange={(event) => onChange(event.target.value)}
       >
@@ -500,7 +504,7 @@ function LedgerSelect({
             {option.label}
           </option>
         ))}
-      </select>
+      </PublicReviewSelect>
     </label>
   );
 }

@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
+import {
+  PUBLIC_REVIEW_INPUT_CLASSES,
+  PublicReviewSelect,
+} from "@/components/public-review/PublicReviewFormControls";
 import { compareLocalized, formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -14,8 +18,6 @@ export interface SolidityNatSpecGapListItem extends SolidityNatSpecGap {
 }
 
 const INITIAL_RESULT_LIMIT = 50;
-const INPUT_CLASSES =
-  "tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-base tw-text-iron-50 tw-outline-none focus:tw-border-primary-400 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/40";
 
 function humanize(value: string): string {
   return value.replaceAll("_", " ");
@@ -76,7 +78,7 @@ export function SolidityNatSpecGapExplorer({
   return (
     <section
       aria-labelledby="solidity-natspec-gaps"
-      className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5"
+      className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-py-8"
     >
       <h2
         id="solidity-natspec-gaps"
@@ -84,10 +86,10 @@ export function SolidityNatSpecGapExplorer({
       >
         {t(DEFAULT_LOCALE, "publicReview.reference.natSpecGaps")}
       </h2>
-      <p className="tw-mb-0 tw-mt-2 tw-max-w-4xl tw-text-sm tw-leading-6 tw-text-iron-300">
+      <p className="tw-mb-0 tw-mt-2 tw-max-w-4xl tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-300">
         {t(DEFAULT_LOCALE, "publicReview.reference.natSpecGapsDescription")}
       </p>
-      <div className="tw-mt-5 tw-grid tw-gap-4 tw-rounded-xl tw-bg-iron-900/70 tw-p-4 md:tw-grid-cols-3">
+      <div className="tw-mt-5 tw-grid tw-gap-4 tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] md:tw-grid-cols-3">
         <label className="tw-block tw-text-sm tw-font-medium tw-text-iron-200">
           <span className="tw-mb-1.5 tw-block">
             {t(
@@ -96,7 +98,7 @@ export function SolidityNatSpecGapExplorer({
             )}
           </span>
           <input
-            className={INPUT_CLASSES}
+            className={PUBLIC_REVIEW_INPUT_CLASSES}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={t(
               DEFAULT_LOCALE,
@@ -110,8 +112,7 @@ export function SolidityNatSpecGapExplorer({
           <span className="tw-mb-1.5 tw-block">
             {t(DEFAULT_LOCALE, "publicReview.reference.documentationGapType")}
           </span>
-          <select
-            className={INPUT_CLASSES}
+          <PublicReviewSelect
             onChange={(event) => setGapType(event.target.value)}
             value={gapType}
           >
@@ -123,14 +124,13 @@ export function SolidityNatSpecGapExplorer({
                 {humanize(option)}
               </option>
             ))}
-          </select>
+          </PublicReviewSelect>
         </label>
         <label className="tw-block tw-text-sm tw-font-medium tw-text-iron-200">
           <span className="tw-mb-1.5 tw-block">
             {t(DEFAULT_LOCALE, "publicReview.reference.documentationGapStatus")}
           </span>
-          <select
-            className={INPUT_CLASSES}
+          <PublicReviewSelect
             onChange={(event) => setStatus(event.target.value)}
             value={status}
           >
@@ -142,7 +142,7 @@ export function SolidityNatSpecGapExplorer({
                 {humanize(option)}
               </option>
             ))}
-          </select>
+          </PublicReviewSelect>
         </label>
       </div>
       <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-text-iron-400" role="status">
@@ -152,10 +152,10 @@ export function SolidityNatSpecGapExplorer({
         })}
       </p>
       {visibleItems.length ? (
-        <ul className="tw-mb-0 tw-mt-5 tw-list-none tw-space-y-3 tw-p-0">
+        <ul className="tw-mb-0 tw-mt-5 tw-list-none tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03]">
           {visibleItems.map((item) => (
             <li
-              className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/60 tw-p-4"
+              className="tw-rounded-lg tw-px-4 tw-py-3.5 tw-transition-colors desktop-hover:hover:tw-bg-iron-900/40"
               key={item.id}
             >
               <div className="tw-flex tw-flex-wrap tw-gap-2">
@@ -169,7 +169,7 @@ export function SolidityNatSpecGapExplorer({
               <h3 className="tw-mb-0 tw-mt-3 tw-break-all tw-font-mono tw-text-base tw-font-semibold tw-text-white">
                 {item.declarationHref ? (
                   <Link
-                    className="tw-text-white tw-no-underline hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+                    className="tw-text-white tw-no-underline hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                     href={item.declarationHref}
                   >
                     {item.contract}.{item.signature}
@@ -178,7 +178,7 @@ export function SolidityNatSpecGapExplorer({
                   `${item.contract}.${item.signature}`
                 )}
               </h3>
-              <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-200">
+              <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
                 {item.reason}
               </p>
               <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
@@ -188,7 +188,7 @@ export function SolidityNatSpecGapExplorer({
                 {item.follow_up}
               </p>
               <Link
-                className="tw-mt-3 tw-inline-flex tw-break-all tw-font-mono tw-text-xs tw-text-sky-300 tw-no-underline hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+                className="tw-mt-3 tw-inline-flex tw-break-all tw-font-mono tw-text-xs tw-text-sky-300 tw-no-underline hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                 href={item.sourceHref}
               >
                 {item.source}
@@ -204,7 +204,7 @@ export function SolidityNatSpecGapExplorer({
       )}
       {visibleItems.length < filteredItems.length ? (
         <button
-          className="tw-mt-5 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-4 tw-py-2 tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+          className="tw-mt-5 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-4 tw-py-2 tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
           onClick={() =>
             setResultLimit((current) => current + INITIAL_RESULT_LIMIT)
           }

@@ -14,6 +14,7 @@ import {
   SolidityRiskExplorer,
   type SolidityRiskListItem,
 } from "@/components/public-review/SolidityRiskExplorer";
+import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -28,8 +29,7 @@ import type {
   SolidityReferenceManifest,
 } from "@/lib/public-review/solidityReferenceTypes";
 
-const SUMMARY_CARD_CLASSES =
-  "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4";
+const SUMMARY_CARD_CLASSES = "tw-min-w-0 tw-p-3";
 
 function EvidenceSummaryCard({
   label,
@@ -40,7 +40,7 @@ function EvidenceSummaryCard({
 }) {
   return (
     <div className={SUMMARY_CARD_CLASSES}>
-      <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.08em] tw-text-iron-500">
+      <dt className="tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-500">
         {label}
       </dt>
       <dd className="tw-m-0 tw-mt-2 tw-break-words tw-font-mono tw-text-lg tw-font-semibold tw-text-white">
@@ -190,11 +190,16 @@ function getGovernedParameterItems(
   );
 }
 
-export function SolidityAuditorEvidenceView({
-  hrefContext,
+type SolidityAuditorEvidenceSection =
+  | "overview"
+  | "readiness"
+  | "risks"
+  | "parameters"
+  | "documentation";
+
+function AuditorEvidenceOverview({
   manifest,
 }: {
-  readonly hrefContext: SolidityReferenceHrefContext;
   readonly manifest: SolidityReferenceManifest;
 }) {
   const evidence = manifest.auditorEvidence;
@@ -206,84 +211,101 @@ export function SolidityAuditorEvidenceView({
   ).length;
 
   return (
-    <div className="tw-space-y-8">
-      <section aria-labelledby="solidity-auditor-evidence">
-        <h2
-          id="solidity-auditor-evidence"
-          className="tw-m-0 tw-scroll-mt-28 tw-text-2xl tw-font-semibold tw-text-white"
-        >
-          {t(DEFAULT_LOCALE, "publicReview.reference.auditorEvidence")}
-        </h2>
-        <p className="tw-mb-0 tw-mt-2 tw-max-w-4xl tw-text-sm tw-leading-6 tw-text-iron-300">
-          {t(
+    <section
+      aria-labelledby="solidity-auditor-evidence"
+      className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-py-8"
+    >
+      <h2
+        id="solidity-auditor-evidence"
+        className="tw-m-0 tw-scroll-mt-28 tw-text-2xl tw-font-semibold tw-text-white"
+      >
+        {t(DEFAULT_LOCALE, "publicReview.reference.auditorEvidence")}
+      </h2>
+      <p className="tw-mb-0 tw-mt-2 tw-max-w-4xl tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-300">
+        {t(DEFAULT_LOCALE, "publicReview.reference.auditorEvidenceDescription")}
+      </p>
+      <dl className="tw-mb-0 tw-mt-5 tw-grid tw-grid-cols-2 tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] xl:tw-grid-cols-4">
+        <EvidenceSummaryCard
+          label={t(DEFAULT_LOCALE, "publicReview.reference.releaseStatus")}
+          value={evidence.release.status}
+        />
+        <EvidenceSummaryCard
+          label={t(DEFAULT_LOCALE, "publicReview.reference.publicBeta")}
+          value={evidence.readiness.status.public_beta}
+        />
+        <EvidenceSummaryCard
+          label={t(DEFAULT_LOCALE, "publicReview.reference.productionRelease")}
+          value={evidence.readiness.status.production_release}
+        />
+        <EvidenceSummaryCard
+          label={t(
             DEFAULT_LOCALE,
-            "publicReview.reference.auditorEvidenceDescription"
+            "publicReview.reference.unfinishedRequirements"
           )}
-        </p>
-        <dl className="tw-mb-0 tw-mt-5 tw-grid tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
-          <EvidenceSummaryCard
-            label={t(DEFAULT_LOCALE, "publicReview.reference.releaseStatus")}
-            value={evidence.release.status}
-          />
-          <EvidenceSummaryCard
-            label={t(DEFAULT_LOCALE, "publicReview.reference.publicBeta")}
-            value={evidence.readiness.status.public_beta}
-          />
-          <EvidenceSummaryCard
-            label={t(
-              DEFAULT_LOCALE,
-              "publicReview.reference.productionRelease"
-            )}
-            value={evidence.readiness.status.production_release}
-          />
-          <EvidenceSummaryCard
-            label={t(
-              DEFAULT_LOCALE,
-              "publicReview.reference.unfinishedRequirements"
-            )}
-            value={unfinishedRequirements}
-          />
-          <EvidenceSummaryCard
-            label={t(DEFAULT_LOCALE, "publicReview.reference.openRiskBlockers")}
-            value={openRiskBlockers}
-          />
-          <EvidenceSummaryCard
-            label={t(DEFAULT_LOCALE, "publicReview.reference.natSpecGaps")}
-            value={evidence.natSpecGaps.gapCount}
-          />
-          <EvidenceSummaryCard
-            label={t(
-              DEFAULT_LOCALE,
-              "publicReview.reference.governedParameters"
-            )}
-            value={
-              evidence.governedParameterInventory.inventory_summary
-                .logical_parameter_count
-            }
-          />
-          <EvidenceSummaryCard
-            label={t(
-              DEFAULT_LOCALE,
-              "publicReview.reference.retainedArtifacts"
-            )}
-            value={Object.keys(evidence.boundArtifactDigests).length}
-          />
-        </dl>
-        <p className="tw-mb-0 tw-mt-4 tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/30 tw-bg-amber-400/5 tw-p-4 tw-text-sm tw-leading-6 tw-text-amber-100">
-          {evidence.riskRegister.readiness_boundary}
-        </p>
-      </section>
-
-      <SolidityReadinessExplorer items={getReadinessItems(manifest)} />
-      <SolidityRiskExplorer items={getRiskItems(manifest)} />
-      <SolidityGovernedParameterExplorer
-        candidateBinding={evidence.governedParameterInventory.candidate_binding}
-        items={getGovernedParameterItems(manifest)}
-        policy={evidence.governedParameterInventory.governance_policy}
-      />
-      <SolidityNatSpecGapExplorer
-        items={getNatSpecItems({ hrefContext, manifest })}
-      />
-    </div>
+          value={unfinishedRequirements}
+        />
+        <EvidenceSummaryCard
+          label={t(DEFAULT_LOCALE, "publicReview.reference.openRiskBlockers")}
+          value={openRiskBlockers}
+        />
+        <EvidenceSummaryCard
+          label={t(DEFAULT_LOCALE, "publicReview.reference.natSpecGaps")}
+          value={evidence.natSpecGaps.gapCount}
+        />
+        <EvidenceSummaryCard
+          label={t(DEFAULT_LOCALE, "publicReview.reference.governedParameters")}
+          value={
+            evidence.governedParameterInventory.inventory_summary
+              .logical_parameter_count
+          }
+        />
+        <EvidenceSummaryCard
+          label={t(DEFAULT_LOCALE, "publicReview.reference.retainedArtifacts")}
+          value={Object.keys(evidence.boundArtifactDigests).length}
+        />
+      </dl>
+      <p className="tw-mb-0 tw-mt-4 tw-rounded-md tw-border tw-border-solid tw-border-[#5c4d3c] tw-bg-[#b48232]/[0.015] tw-p-4 tw-text-[13.5px] tw-font-light tw-leading-relaxed tw-text-[#c2b29e]">
+        {evidence.riskRegister.readiness_boundary}
+      </p>
+    </section>
   );
+}
+
+export function SolidityAuditorEvidenceView({
+  hrefContext,
+  manifest,
+  section,
+}: {
+  readonly hrefContext: SolidityReferenceHrefContext;
+  readonly manifest: SolidityReferenceManifest;
+  readonly section: SolidityAuditorEvidenceSection;
+}) {
+  const evidence = manifest.auditorEvidence;
+
+  switch (section) {
+    case "overview":
+      return <AuditorEvidenceOverview manifest={manifest} />;
+    case "readiness":
+      return <SolidityReadinessExplorer items={getReadinessItems(manifest)} />;
+    case "risks":
+      return <SolidityRiskExplorer items={getRiskItems(manifest)} />;
+    case "parameters":
+      return (
+        <SolidityGovernedParameterExplorer
+          candidateBinding={
+            evidence.governedParameterInventory.candidate_binding
+          }
+          items={getGovernedParameterItems(manifest)}
+          policy={evidence.governedParameterInventory.governance_policy}
+        />
+      );
+    case "documentation":
+      return (
+        <SolidityNatSpecGapExplorer
+          items={getNatSpecItems({ hrefContext, manifest })}
+        />
+      );
+    default:
+      return assertUnreachable(section);
+  }
 }
