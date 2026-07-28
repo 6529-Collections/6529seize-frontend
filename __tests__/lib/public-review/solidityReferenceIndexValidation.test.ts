@@ -45,6 +45,14 @@ function sourceIndex() {
   };
 }
 
+function publishedIndex() {
+  return {
+    ...sourceIndex(),
+    activeVersion: PUBLIC_VERSION,
+    versions: [versionEntry(PUBLIC_VERSION, PUBLIC_COMMIT)],
+  };
+}
+
 describe("Solidity reference source-index validation", () => {
   it("accepts a trusted source-active draft while keeping the public identity pinned", () => {
     expect(() =>
@@ -52,9 +60,42 @@ describe("Solidity reference source-index validation", () => {
     ).not.toThrow();
   });
 
-  it("rejects a source index that activates the wrong version", () => {
+  it("accepts the exact published projection without exposing the hidden draft", () => {
+    expect(() =>
+      assertSolidityReferenceIndex(publishedIndex(), IDENTITY)
+    ).not.toThrow();
+  });
+
+  it("rejects a public-active index with the full source version list", () => {
     const index = sourceIndex();
     index.activeVersion = PUBLIC_VERSION;
+
+    expect(() => assertSolidityReferenceIndex(index, IDENTITY)).toThrow(
+      "Invalid Solidity reference index identity"
+    );
+  });
+
+  it("rejects a source-active index with only the published version list", () => {
+    const index = publishedIndex();
+    index.activeVersion = DRAFT_VERSION;
+
+    expect(() => assertSolidityReferenceIndex(index, IDENTITY)).toThrow(
+      "Invalid Solidity reference index identity"
+    );
+  });
+
+  it("rejects a partial full-source version list", () => {
+    const index = sourceIndex();
+    index.versions = [versionEntry(DRAFT_VERSION, DRAFT_COMMIT)];
+
+    expect(() => assertSolidityReferenceIndex(index, IDENTITY)).toThrow(
+      "Invalid Solidity reference index identity"
+    );
+  });
+
+  it("rejects an extra version in the published projection", () => {
+    const index = publishedIndex();
+    index.versions.push(versionEntry("2026-07-29.1", "e".repeat(40)));
 
     expect(() => assertSolidityReferenceIndex(index, IDENTITY)).toThrow(
       "Invalid Solidity reference index identity"
@@ -64,6 +105,15 @@ describe("Solidity reference source-index validation", () => {
   it("rejects commit drift in the hidden source version", () => {
     const index = sourceIndex();
     index.versions[1]!.commit = "e".repeat(40);
+
+    expect(() => assertSolidityReferenceIndex(index, IDENTITY)).toThrow(
+      "Invalid Solidity reference version entry"
+    );
+  });
+
+  it("rejects commit drift in the published projection", () => {
+    const index = publishedIndex();
+    index.versions[0]!.commit = "e".repeat(40);
 
     expect(() => assertSolidityReferenceIndex(index, IDENTITY)).toThrow(
       "Invalid Solidity reference version entry"

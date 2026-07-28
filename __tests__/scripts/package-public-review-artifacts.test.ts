@@ -1,8 +1,13 @@
+jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
+
 import { spawnSync } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+
+import { assertSolidityReferenceIndex } from "@/lib/public-review/solidityReferenceValidation.server";
+import type { SolidityReferenceReviewIdentity } from "@/lib/public-review/solidityReferenceTypes";
 
 const {
   assertProfileBundle,
@@ -852,6 +857,22 @@ describe("profile-aware public-review artifact packaging", () => {
     expect(
       packagedIndex.versions.map(({ version }: { version: string }) => version)
     ).toEqual([HISTORICAL_VERSION]);
+    const referenceIdentity: SolidityReferenceReviewIdentity = {
+      activeSourceCommit: HISTORICAL_COMMIT,
+      activeVersion: HISTORICAL_VERSION,
+      availableVersions: [HISTORICAL_VERSION],
+      reviewId: REVIEW_ID,
+      sourceCommits: {
+        [HISTORICAL_VERSION]: HISTORICAL_COMMIT,
+        [REVIEW_VERSION]: SOURCE_COMMIT,
+      },
+      sourceIndexActiveVersion: REVIEW_VERSION,
+      sourceIndexAvailableVersions: [HISTORICAL_VERSION, REVIEW_VERSION],
+      sourceRepository: SOURCE_REPOSITORY,
+    };
+    expect(() =>
+      assertSolidityReferenceIndex(packagedIndex, referenceIdentity)
+    ).not.toThrow();
     expect(
       fs.existsSync(
         path.join(
