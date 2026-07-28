@@ -323,13 +323,6 @@ function getPublicReviewPublicationPlans(repoRoot) {
         `${publication.reviewId} source review index drifted from publication config.`
       );
 
-      const activePublication = publication.versions.find(
-        (version) => version.version === reference.config.reviewVersion
-      );
-      invariant(
-        activePublication?.lifecycleState === publication.lifecycleState,
-        `${publication.reviewId} active publication lifecycle drifted.`
-      );
       const publishedVersions = new Set(
         publication.versions
           .filter((version) =>
@@ -344,6 +337,27 @@ function getPublicReviewPublicationPlans(repoRoot) {
         : [...retainedVersions]
             .reverse()
             .find((version) => publishedVersions.has(version));
+      const sourceActivePublication = publication.versions.find(
+        (version) => version.version === reference.config.reviewVersion
+      );
+      invariant(
+        sourceActivePublication,
+        `${publication.reviewId} has no publication entry for its source-active version.`
+      );
+      if (sourceActivePublication.lifecycleState !== "DRAFT") {
+        invariant(
+          sourceActivePublication.lifecycleState === publication.lifecycleState,
+          `${publication.reviewId} active publication lifecycle drifted.`
+        );
+      } else if (publication.lifecycleState !== "DRAFT") {
+        const fallbackPublication = publication.versions.find(
+          (version) => version.version === indexActiveVersion
+        );
+        invariant(
+          fallbackPublication?.lifecycleState === publication.lifecycleState,
+          `${publication.reviewId} fallback publication lifecycle drifted.`
+        );
+      }
 
       return [
         publication.reviewId,
@@ -363,9 +377,7 @@ function getPublishedReviewIds(repoRoot) {
   return new Set(
     [...getPublicReviewPublicationPlans(repoRoot).entries()]
       .filter(([, plan]) =>
-        PUBLIC_REVIEW_PUBLIC_ROUTE_STATES.has(
-          plan.publication.lifecycleState
-        )
+        PUBLIC_REVIEW_PUBLIC_ROUTE_STATES.has(plan.publication.lifecycleState)
       )
       .map(([reviewId]) => reviewId)
   );
@@ -790,9 +802,7 @@ function assertCanonicalReviewEvidence({
     config.reviewId
   );
   return index.versions
-    .filter((entry) =>
-      publicationPlan.publishedVersions.has(entry.version)
-    )
+    .filter((entry) => publicationPlan.publishedVersions.has(entry.version))
     .map((entry) => {
       invariant(
         SAFE_VERSION_PATTERN.test(entry.version) &&
@@ -801,11 +811,7 @@ function assertCanonicalReviewEvidence({
           SHA256_URN_PATTERN.test(entry.bundleSha256),
         `${config.reviewId}@${entry.version} review index entry is invalid.`
       );
-      const versionRoot = path.join(
-        reviewRoot,
-        "versions",
-        entry.version
-      );
+      const versionRoot = path.join(reviewRoot, "versions", entry.version);
       const bundlePath = path.join(versionRoot, config.output.bundleFile);
       const expectedBundlePath = `/review-data/${config.reviewId}/versions/${entry.version}/${config.output.bundleFile}`;
       invariant(
@@ -959,10 +965,7 @@ function assertStagingEvidence(
     }) ===
       directoryIdentity(bundlePublicReviewRoot, {
         ignore: (relativePath) =>
-          isReviewIndexPath(
-            `review-data/${relativePath}`,
-            publicationPlans
-          ),
+          isReviewIndexPath(`review-data/${relativePath}`, publicationPlans),
       }),
     "Staging public-review data does not exactly match the trusted source tree."
   );
@@ -1087,12 +1090,7 @@ function assertProfileBundle({
 }) {
   invariant(PROFILES.has(profile), `Unsupported artifact profile: ${profile}`);
   invariant(fs.statSync(bundleRoot).isDirectory(), "Bundle root is missing.");
-  assertPublicCopyIdentity(
-    repoRoot,
-    bundleRoot,
-    profile,
-    publicationPlans
-  );
+  assertPublicCopyIdentity(repoRoot, bundleRoot, profile, publicationPlans);
 
   if (profile === "production") {
     assertProductionAbsence(bundleRoot);
