@@ -4,12 +4,15 @@ import CreateWaveNameInput from '@/components/waves/create-wave/overview/CreateW
 import { CREATE_WAVE_VALIDATION_ERROR } from '@/helpers/waves/create-wave.validation';
 
 beforeAll(() => {
-  // Mock ResizeObserver used in CommonAnimationHeight
-  global.ResizeObserver = class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  } as unknown as typeof ResizeObserver;
+  // Mock ResizeObserver used in CommonAnimationHeight. Implementing the real
+  // constructor + method signatures makes it a structurally valid
+  // `typeof ResizeObserver`, so no cast is needed.
+  global.ResizeObserver = class ResizeObserverMock {
+    constructor(_callback: ResizeObserverCallback) {}
+    observe(_target: Element, _options?: ResizeObserverOptions): void {}
+    unobserve(_target: Element): void {}
+    disconnect(): void {}
+  };
 });
 
 describe('CreateWaveNameInput', () => {

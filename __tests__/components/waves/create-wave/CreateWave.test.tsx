@@ -179,7 +179,7 @@ describe("CreateWave", () => {
     level: 5,
     classification: ApiProfileClassification.Pseudonym,
     sub_classification: null,
-  } as unknown as ApiIdentity;
+  } as ApiIdentity;
 
   const mockAuthContext = {
     requestAuth: jest.fn(),
