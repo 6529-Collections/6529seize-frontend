@@ -661,5 +661,7 @@ export interface SolidityReferenceReviewIdentity {
   readonly availableVersions: readonly string[];
   readonly reviewId: string;
   readonly sourceCommits: Readonly<Record<string, string>>;
+  readonly sourceIndexActiveVersion?: string | undefined;
+  readonly sourceIndexAvailableVersions?: readonly string[] | undefined;
   readonly sourceRepository: string;
 }
