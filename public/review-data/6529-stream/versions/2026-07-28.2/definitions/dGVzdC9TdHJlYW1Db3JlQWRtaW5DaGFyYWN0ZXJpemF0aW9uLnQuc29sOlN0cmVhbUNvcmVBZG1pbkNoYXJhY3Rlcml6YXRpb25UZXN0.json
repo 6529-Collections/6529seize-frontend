@@ -1,0 +1,130 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamCoreAdminCharacterization.t.sol:StreamCoreAdminCharacterizationTest#function:0x01bac758",
+          "declaringDefinitionId": "test/StreamCoreAdminCharacterization.t.sol:StreamCoreAdminCharacterizationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSetCollectionDataUsesOwnSelector",
+          "outputs": [],
+          "selector": "0x01bac758",
+          "signature": "testSetCollectionDataUsesOwnSelector()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "testSetCollectionDataUsesOwnSelector()",
+          "displaySignature": "testSetCollectionDataUsesOwnSelector()",
+          "functionKind": "function",
+          "id": "test/StreamCoreAdminCharacterization.t.sol:StreamCoreAdminCharacterizationTest#function:0x01bac758",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlQWRtaW5DaGFyYWN0ZXJpemF0aW9uLnQuc29sOlN0cmVhbUNvcmVBZG1pbkNoYXJhY3Rlcml6YXRpb25UZXN0I2Z1bmN0aW9uOjB4MDFiYWM3NTg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSetCollectionDataUsesOwnSelector",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2191,
+            "byteStart": 396,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreAdminCharacterization.t.sol#L13-L73",
+            "lineEnd": 73,
+            "lineStart": 13,
+            "snippetSha256": "sha256:bddf461bb00d891ed8747374ba704c303c548c9dda1c0f3fa5937ef4da45f9d8",
+            "sourceSha256": "sha256:e720acf488f0db359584cd8360e2bf437bbc0535da4133c1df7292e55c585397"
+          },
+          "selector": "0x01bac758",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamCoreAdminCharacterization.t.sol:StreamCoreAdminCharacterizationTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Db3JlQWRtaW5DaGFyYWN0ZXJpemF0aW9uLnQuc29sOlN0cmVhbUNvcmVBZG1pbkNoYXJhY3Rlcml6YXRpb25UZXN0",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamCoreAdminCharacterization.t.sol:StreamCoreAdminCharacterizationTest",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamCoreAdminCharacterizationTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 2304,
+      "byteStart": 285,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreAdminCharacterization.t.sol#L10-L74",
+      "lineEnd": 74,
+      "lineStart": 10,
+      "snippetSha256": "sha256:89c0f87a66264aecc3569156dea1f0fb9c779c9e915e55ac6a3da5eac0b0c2c5",
+      "sourceSha256": "sha256:e720acf488f0db359584cd8360e2bf437bbc0535da4133c1df7292e55c585397"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamCoreAdminCharacterization.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamCoreAdminCharacterization.t.sol:StreamCoreAdminCharacterizationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCoreAdminCharacterization.t.sol:StreamCoreAdminCharacterizationTest#function:0x01bac758",
+      "definitionId": "test/StreamCoreAdminCharacterization.t.sol:StreamCoreAdminCharacterizationTest",
+      "severity": "advisory"
+    }
+  ]
+}
