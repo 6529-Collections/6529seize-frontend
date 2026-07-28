@@ -158,13 +158,13 @@ function laneStates(
   return ["STAGING", "PRODUCTION"].map((lane) => {
     const allowed =
       mode === "PRODUCTION" || (mode === "STAGING" && lane === "STAGING");
-    const globalPaused = Boolean(byScope.ALL?.paused);
+    const globalPaused = Boolean(byScope["ALL"]?.paused);
     const lanePaused = Boolean(byScope[lane]?.paused);
     let reason = byScope[lane]?.reason;
     if (!allowed) {
       reason = HARD_STOP_REASON;
     } else if (globalPaused) {
-      reason = byScope.ALL?.reason ?? HARD_STOP_REASON;
+      reason = byScope["ALL"]?.reason ?? HARD_STOP_REASON;
     }
     return {
       lane,
