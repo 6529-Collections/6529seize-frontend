@@ -217,6 +217,37 @@ function assertUnique(values, label) {
   }
 }
 
+function readRegularFileNoFollow(absolutePath, label) {
+  const noFollow = fs.constants.O_NOFOLLOW;
+  if (!Number.isInteger(noFollow)) {
+    throw new Error(
+      "pr-ci-policy-bundle: this platform cannot reject symbolic-link inputs"
+    );
+  }
+
+  let descriptor;
+  try {
+    descriptor = fs.openSync(absolutePath, fs.constants.O_RDONLY | noFollow);
+  } catch (error) {
+    if (error && error.code === "ENOENT") {
+      throw new Error(`pr-ci-policy-bundle: ${label} is missing`);
+    }
+    if (error && error.code === "ELOOP") {
+      throw new Error(`pr-ci-policy-bundle: ${label} is not a regular file`);
+    }
+    throw error;
+  }
+
+  try {
+    if (!fs.fstatSync(descriptor).isFile()) {
+      throw new Error(`pr-ci-policy-bundle: ${label} is not a regular file`);
+    }
+    return fs.readFileSync(descriptor);
+  } finally {
+    fs.closeSync(descriptor);
+  }
+}
+
 function readPackageField(packageJson, dottedKey) {
   let value = packageJson;
   for (const segment of dottedKey.split(".")) {
@@ -241,7 +272,10 @@ function readPackageField(packageJson, dottedKey) {
 
 function assertNodeRuntimePins(root, workflows, expectedNodeVersion) {
   for (const relativePath of workflows) {
-    const source = fs.readFileSync(path.join(root, relativePath), "utf8");
+    const source = readRegularFileNoFollow(
+      path.join(root, relativePath),
+      `protected path ${relativePath}`
+    ).toString("utf8");
     const versions = Array.from(
       source.matchAll(/node-version:\s*["']?([^"'#\s]+)["']?/gu),
       (match) => match[1]
@@ -259,7 +293,10 @@ function assertNodeRuntimePins(root, workflows, expectedNodeVersion) {
 
 function assertPinnedWorkflowActions(root, workflows) {
   for (const relativePath of workflows) {
-    const source = fs.readFileSync(path.join(root, relativePath), "utf8");
+    const source = readRegularFileNoFollow(
+      path.join(root, relativePath),
+      `protected path ${relativePath}`
+    ).toString("utf8");
     for (const [index, line] of source.split(/\r?\n/u).entries()) {
       if (!/^\s*(?:-\s*)?uses:/u.test(line)) {
         continue;
@@ -342,23 +379,10 @@ function buildPolicyBundle({
       );
     }
     const absolutePath = path.join(root, relativePath);
-    let stat;
-    try {
-      stat = fs.lstatSync(absolutePath);
-    } catch (error) {
-      if (error && error.code === "ENOENT") {
-        throw new Error(
-          `pr-ci-policy-bundle: protected path is missing: ${relativePath}`
-        );
-      }
-      throw error;
-    }
-    if (!stat.isFile() || stat.isSymbolicLink()) {
-      throw new Error(
-        `pr-ci-policy-bundle: protected path is not a regular file: ${relativePath}`
-      );
-    }
-    const bytes = fs.readFileSync(absolutePath);
+    const bytes = readRegularFileNoFollow(
+      absolutePath,
+      `protected path ${relativePath}`
+    );
     const blobSha = gitBlobSha(bytes);
     if (
       expectedGitRef &&
@@ -377,7 +401,10 @@ function buildPolicyBundle({
     lines.push(`file\t${relativePath}\t${blobSha}\n`);
   }
 
-  const packageJsonBytes = fs.readFileSync(path.join(root, "package.json"));
+  const packageJsonBytes = readRegularFileNoFollow(
+    path.join(root, "package.json"),
+    "package.json"
+  );
   if (
     expectedGitRef &&
     gitBlobAtRef(root, expectedGitRef, "package.json") !==
