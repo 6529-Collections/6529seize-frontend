@@ -11,7 +11,14 @@ profile applied, recording each entitlement once, keeping every credit backed,
 and describing royalties without promising enforcement that ERC-2981, the
 marketplace royalty-reporting standard, does not provide.
 
-## The money flow at a glance
+## Two source-described money paths, and which one is wired
+
+These are alternative paths in the pinned source, not one reconciled accounting
+system. In the present rehearsal, signed Drops and Auctions use their own
+native-ETH credit accounting. The rehearsal also deploys the separate resolver,
+split-wallet, asset-policy, and settlement foundation, but those sale paths do
+not call it and no settlement caller is configured. [Current Implementation and
+Readiness](./security-testing-and-known-limitations) records that exact wiring.
 
 For the native-ETH Drop and Auction paths described in this review, value moves
 in this order:
@@ -25,12 +32,10 @@ in this order:
 5. Emergency recovery may reach only balance that is not owed to anyone.
 6. Public reads and events should let another person reconstruct the full path.
 
-Stream also defines a separate accounting foundation for choosing an approved
-asset and economic profile, ensuring one sale is settled once, routing its
-value to a split wallet with a predictable address, and letting recipients
-withdraw. [Current Implementation and
-Readiness](./security-testing-and-known-limitations) records which revenue path
-the present rehearsal actually uses.
+The separate foundation is designed to choose an approved asset and economic
+profile, ensure one sale is settled once, route its value to a split wallet with
+a predictable address, and let recipients withdraw. It is implemented in source,
+but it is not the accounting path used by the rehearsed Drop and Auction flow.
 
 ## Why the machinery exists
 

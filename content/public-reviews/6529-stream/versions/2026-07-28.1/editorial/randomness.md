@@ -23,8 +23,10 @@ One request moves through these steps:
 4. Stream verifies the request context, hashes the raw words, and derives one
    seed bound to that provider, request, collection, token, and epoch.
 5. It tries to write the seed to Core exactly once.
-6. If that Core write fails, an authorized retry reuses the same accepted seed;
-   it never asks for fresh randomness.
+6. If that Core write fails, an authorized retry may reuse the same accepted
+   seed while the original provider and provider epoch remain current; it never
+   asks for fresh randomness. Replacing the provider or changing the epoch can
+   strand this retry path.
 7. The request record remains as provenance even if the token is later burned.
 
 ## Why the lifecycle exists

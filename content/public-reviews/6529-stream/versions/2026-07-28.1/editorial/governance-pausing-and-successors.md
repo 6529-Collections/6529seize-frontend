@@ -140,6 +140,18 @@ It publishes the calldata preimage onchain. Authorized actors schedule or
 cancel; execution is permissionless inside the committed window. See the
 [`scheduled-call binding`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamGovernanceExecutor.sol#L305-L403).
 
+The schedule path takes the executor's current nonce, includes it in the action
+ID, and then increments it. The action ID also binds the chain, executor
+address, and action class. See
+[`nonce consumption`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamGovernanceExecutor.sol#L938-L977)
+and
+[`action-identity hashing`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamGovernanceBootstrap.sol#L73-L108).
+The current generic record has no separate predecessor field or governing
+configuration epoch. Any ordering or configuration dependency must therefore
+be encoded in the call, scope, old-state, new-state, or manifest commitments for
+that selector. Complete selector-by-selector evidence for those dependencies
+remains a release requirement.
+
 Without complete binding for every governed selector, the reviewed action can
 differ from the executed one.
 

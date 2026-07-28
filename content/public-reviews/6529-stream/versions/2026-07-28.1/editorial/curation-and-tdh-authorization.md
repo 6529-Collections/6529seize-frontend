@@ -92,8 +92,8 @@ The signed `DropAuthorization` contains:
 | --------------------- | ---------------------------------------------------------------- |
 | `dropId`              | The authorization identity consumed or cancelled by the contract |
 | `poster`              | The sale poster and current native-sale proceeds recipient       |
-| `recipient`           | The account that receives the token                              |
-| `payer`               | The account allowed to fund the execution                        |
+| `recipient`           | Fixed price: the token recipient. Auction: must be zero           |
+| `payer`               | Paid fixed price: the caller funding the mint. Free or auction: must be zero |
 | `collectionId`        | The collection that may be minted or auctioned                   |
 | `saleMode`            | Fixed price or auction                                           |
 | `tokenDataHash`       | The hash of the token data supplied at execution                 |
@@ -105,6 +105,12 @@ The signed `DropAuthorization` contains:
 | `nonce`               | Signer-scoped sequence input used to derive the drop identity    |
 | `deadline`            | The last valid execution time                                    |
 | `signerEpoch`         | The signing-key era that must still be current                   |
+
+For an auction, the eventual bidder and winner are not known when this payload
+is signed. Bidders later fund the separate auction contract, and settlement
+sends the token to the winner. The signed auction's `payer` and `recipient`
+fields are therefore both zero; they do not stand for that later bidder or
+winner.
 
 Reviewers should compare the typed-data definition, Solidity encoding, offchain
 construction code, wallet display, and emitted events byte for byte. A field
@@ -130,9 +136,12 @@ grace period, or remain valid only after another explicit action.
 
 ### Payer and recipient
 
-The account providing funds and the account receiving the token may differ.
-Binding both supports sponsored or delegated purchases without letting a copied
-transaction redirect the artwork or charge an unintended payer.
+For a paid fixed-price mint, the signed payer must submit the transaction, while
+the separately signed recipient receives the token. This supports sponsored or
+delegated purchases without letting a copied transaction redirect the artwork
+or charge an unintended payer. A free fixed-price mint keeps the recipient but
+requires the payer to be zero. An auction requires both fields to be zero
+because its later bidder and winner come from the auction state.
 
 ### Collection and token data
 
@@ -199,8 +208,9 @@ Signature validity does not override those checks. If execution fails, the
 transaction reverts rather than leaving a partly consumed authorization and a
 partly minted token.
 
-A free authorization still needs identity, recipient, replay, deadline, phase,
-and supply protection. Removing payment does not remove policy.
+A free fixed-price authorization requires the payer to be zero, but it still
+needs identity, recipient, replay, deadline, collection-time, mint-pause,
+supply, and Core-freeze protection. Removing payment does not remove policy.
 
 ## Auction registration
 
@@ -283,7 +293,9 @@ Every authorized Drop should have a public, human-readable receipt containing:
 - signer address and epoch;
 - chain and verifying contract;
 - payer and recipient rules;
-- price, asset, quantity, deadline, and sale mode;
+- price, quantity, deadline, and sale mode from the typed payload;
+- native ETH as the current execution route's currency, clearly distinguished
+  from the signed fields because the payload has no currency or token address;
 - token-data hash and authorization identity;
 - transaction and emitted events after execution;
 - cancellation, expiry, or exception record where applicable.
