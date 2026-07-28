@@ -172,6 +172,7 @@ const PACKAGE_FIELD_KEYS = Object.freeze([
   "devDependencies.ts-jest",
   "devDependencies.typescript",
   "devDependencies.typescript-eslint",
+  "devDependencies.yaml",
 ]);
 
 const RUNTIME_PINS = Object.freeze({ node: "22.17.1" });
