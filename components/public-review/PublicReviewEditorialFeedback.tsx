@@ -75,7 +75,7 @@ export function PublicReviewEditorialFeedback({
         ref={composerDisclosureRef}
         className="tw-group tw-flex-none tw-overflow-y-auto tw-overscroll-contain tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-transparent tw-bg-transparent tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 open:tw-max-h-[70vh] open:tw-border-white/[0.08] open:tw-bg-[#121216] desktop-hover:hover:tw-scrollbar-thumb-iron-500"
       >
-        <summary className="tw-mx-auto tw-mb-5 tw-mt-3 tw-flex tw-min-h-11 tw-w-fit tw-cursor-pointer tw-list-none tw-items-center tw-justify-center tw-gap-3 tw-rounded-full tw-border-0 tw-bg-primary-600 tw-px-5 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-shadow-[0_12px_28px_rgba(0,0,0,0.42)] tw-transition-[transform,box-shadow] tw-duration-200 tw-ease-out desktop-hover:hover:-tw-translate-y-0.5 desktop-hover:hover:tw-bg-primary-500 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.5)] active:tw-translate-y-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-300 group-open:tw-mx-5 group-open:tw-mb-3 group-open:tw-mt-4 group-open:tw-w-auto group-open:tw-translate-y-0 group-open:tw-justify-between group-open:tw-rounded-none group-open:tw-bg-transparent group-open:tw-px-0 group-open:tw-py-0 group-open:tw-text-sm group-open:tw-text-iron-100 group-open:tw-shadow-none group-open:tw-transition-none desktop-hover:group-open:hover:tw-translate-y-0 desktop-hover:group-open:hover:tw-bg-transparent desktop-hover:group-open:hover:tw-shadow-none motion-reduce:tw-transform-none motion-reduce:tw-transition-none [&::-webkit-details-marker]:tw-hidden">
+        <summary className="tw-mx-auto tw-mb-5 tw-mt-3 tw-flex tw-min-h-11 tw-w-fit tw-cursor-pointer tw-list-none tw-items-center tw-justify-center tw-gap-3 tw-rounded-full tw-border-0 tw-bg-primary-600 tw-px-5 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-shadow-[0_12px_28px_rgba(0,0,0,0.42)] tw-transition-[transform,box-shadow] tw-duration-200 tw-ease-out group-open:tw-mx-5 group-open:tw-mb-3 group-open:tw-mt-4 group-open:tw-w-auto group-open:tw-translate-y-0 group-open:tw-justify-between group-open:tw-rounded-none group-open:tw-bg-transparent group-open:tw-px-0 group-open:tw-py-0 group-open:tw-text-sm group-open:tw-text-iron-100 group-open:tw-shadow-none group-open:tw-transition-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-300 active:tw-translate-y-0 desktop-hover:hover:-tw-translate-y-0.5 desktop-hover:hover:tw-bg-primary-500 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.5)] desktop-hover:group-open:hover:tw-translate-y-0 desktop-hover:group-open:hover:tw-bg-transparent desktop-hover:group-open:hover:tw-shadow-none motion-reduce:tw-transform-none motion-reduce:tw-transition-none [&::-webkit-details-marker]:tw-hidden">
           <span className="tw-flex tw-items-center tw-gap-2">
             <PlusIcon
               className="tw-size-3.5 tw-flex-none group-open:tw-hidden"
@@ -106,7 +106,7 @@ export function PublicReviewEditorialFeedback({
                     id="public-review-feedback-section"
                     value={sectionId}
                     onChange={(event) => setSectionId(event.target.value)}
-                    className="tw-min-h-11 tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-3 tw-py-2 tw-pr-9 tw-text-sm tw-text-iron-50 tw-outline-none tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition focus:tw-bg-black focus:tw-ring-1 focus:tw-ring-primary-400 focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
+                    className="tw-min-h-11 tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-3 tw-py-2 tw-pr-9 tw-text-sm tw-text-iron-50 tw-outline-none tw-ring-1 tw-ring-inset tw-ring-white/[0.08] tw-transition hover:tw-ring-white/[0.14] focus:tw-bg-black focus:tw-ring-1 focus:tw-ring-primary-400 focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
                   >
                     <option value="">
                       {t(DEFAULT_LOCALE, "publicReview.feedback.wholePage")}
@@ -119,7 +119,7 @@ export function PublicReviewEditorialFeedback({
                   </select>
                   <ChevronDownIcon
                     aria-hidden="true"
-                    className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 tw-size-4 tw--translate-y-1/2 tw-text-iron-500"
+                    className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 tw-size-4 -tw-translate-y-1/2 tw-text-iron-500"
                   />
                 </span>
               </label>
