@@ -233,6 +233,17 @@ function createMockGh(root: string) {
     executable,
     `#!/usr/bin/env bash
 set -euo pipefail
+if [ -n "\${MOCK_GH_INVOCATIONS:-}" ]; then
+  printf '%s\\n' "$*" >> "$MOCK_GH_INVOCATIONS"
+fi
+if [ "\${MOCK_GH_FAILURE:-}" = transport ]; then
+  echo 'HTTP 503 Service Unavailable' >&2
+  exit 1
+fi
+if [ "\${MOCK_GH_FAILURE:-}" = missing ]; then
+  echo 'HTTP 404 Not Found' >&2
+  exit 1
+fi
 if [ "$1" = api ] && [[ "$2" == *"/artifacts?name="* ]]; then
   printf '{"artifacts":[{"expired":false,"name":"%s","digest":"sha256:%s"}]}\n' "$MOCK_ARTIFACT_NAME" "$MOCK_ARTIFACT_DIGEST"
 elif [ "$1" = api ]; then
@@ -790,15 +801,25 @@ describe("Release Bus artifact rollout compatibility", () => {
 
   it("executably enforces explicit single, aggregate, and legacy evidence modes", () => {
     const workflow = readWorkflow("release-bus-v2-preflight.yml");
-    const validate = findStep(
+    const validateLocal = findStep(
       workflow,
       "authorize",
-      "Validate exact inputs and CI evidence"
+      "Validate exact local inputs"
+    );
+    const validateEvidence = findStep(
+      workflow,
+      "authorize",
+      "Validate exact authorized CI evidence"
     );
     const authorize = findStep(
       workflow,
       "authorize",
       "Authorize exact v2 operation"
+    );
+    const evidenceFailureReport = findStep(
+      workflow,
+      "authorize",
+      "Report authorized CI evidence failure"
     );
     const report = findStep(
       workflow,
@@ -816,6 +837,8 @@ describe("Release Bus artifact rollout compatibility", () => {
       const mockBin = createMockGh(root);
       createMockCurl(mockBin);
       const curlPayload = path.join(root, "authorize-payload.json");
+      const evidenceOutput = path.join(root, "evidence-output");
+      const ghInvocations = path.join(root, "gh-invocations");
       const baseEnv = {
         AGGREGATE_CANDIDATE_EVIDENCE_DIGEST: "",
         ARTIFACT_CONTRACT_VERSION: "environment-bound-v3",
@@ -827,11 +850,13 @@ describe("Release Bus artifact rollout compatibility", () => {
           encoding: "utf8",
         }).trim(),
         GITHUB_REPOSITORY: "6529-Collections/6529seize-frontend",
+        GITHUB_OUTPUT: evidenceOutput,
         MOCK_ARTIFACT_DIGEST: artifactDigest,
         MOCK_ARTIFACT_NAME: artifactName,
         MOCK_CURL_PAYLOAD: curlPayload,
         MOCK_EVIDENCE_SOURCE: evidenceSource,
         MOCK_HEAD_SHA: "e".repeat(40),
+        MOCK_GH_INVOCATIONS: ghInvocations,
         MOCK_MERGE_SHA: mergeSha,
         OPERATION_KEY: "rb2:compatibility:a1",
         PATH: `${mockBin}:${process.env["PATH"]}`,
@@ -844,14 +869,41 @@ describe("Release Bus artifact rollout compatibility", () => {
         TRAIN_REVISION: "1",
       };
 
-      expect(runShell(validate.run!, { env: baseEnv }).status).toBe(0);
+      const authorizeSteps = workflow.jobs.authorize.steps as WorkflowStep[];
+      expect(authorizeSteps.indexOf(validateLocal)).toBeLessThan(
+        authorizeSteps.indexOf(authorize)
+      );
+      expect(authorizeSteps.indexOf(authorize)).toBeLessThan(
+        authorizeSteps.indexOf(validateEvidence)
+      );
+      expect(runShell(validateLocal.run!, { env: baseEnv }).status).toBe(0);
+      expect(fs.existsSync(ghInvocations)).toBe(false);
       expect(
-        runShell(validate.run!, {
+        runShell(authorize.run!, {
+          env: {
+            ...baseEnv,
+            EXPECTED_SHA: EXPECTED_SHA,
+            GITHUB_RUN_ID: "9876",
+            MOCK_AUTH_EXPECTED_REUSE_DIGEST: artifactDigest,
+            MOCK_AUTH_EXPECTED_REUSE_NAME: artifactName,
+            MOCK_AUTH_EXPECTED_REUSE_RUN_ID: "1234",
+            RELEASE_BUS_API_URL: "https://release-bus.invalid",
+            RELEASE_BUS_WORKFLOW_AUTH_TOKEN: "test-token",
+          },
+        }).status
+      ).toBe(0);
+      expect(fs.existsSync(curlPayload)).toBe(true);
+      expect(runShell(validateEvidence.run!, { env: baseEnv }).status).toBe(0);
+      expect(fs.readFileSync(ghInvocations, "utf8")).toContain(
+        "actions/runs/1234/artifacts"
+      );
+      expect(
+        runShell(validateEvidence.run!, {
           env: { ...baseEnv, MOCK_HEAD_SHA: "a".repeat(40) },
         }).status
       ).not.toBe(0);
       expect(
-        runShell(validate.run!, {
+        runShell(validateLocal.run!, {
           env: {
             ...baseEnv,
             REUSE_ARTIFACT_DIGEST: "",
@@ -861,7 +913,7 @@ describe("Release Bus artifact rollout compatibility", () => {
         }).status
       ).not.toBe(0);
       expect(
-        runShell(validate.run!, {
+        runShell(validateLocal.run!, {
           env: {
             ...baseEnv,
             AGGREGATE_CANDIDATE_EVIDENCE_DIGEST: "f".repeat(64),
@@ -872,6 +924,73 @@ describe("Release Bus artifact rollout compatibility", () => {
           },
         }).status
       ).toBe(0);
+      expect(
+        runShell(validateEvidence.run!, {
+          env: {
+            ...baseEnv,
+            AGGREGATE_CANDIDATE_EVIDENCE_DIGEST: "f".repeat(64),
+            CANDIDATE_EVIDENCE_MODE: "strict-aggregate",
+            REUSE_ARTIFACT_DIGEST: "",
+            REUSE_ARTIFACT_NAME: "",
+            REUSE_ARTIFACT_RUN_ID: "",
+          },
+        }).status
+      ).toBe(0);
+      fs.writeFileSync(evidenceOutput, "");
+      expect(
+        runShell(validateEvidence.run!, {
+          env: { ...baseEnv, MOCK_GH_FAILURE: "missing" },
+        }).status
+      ).not.toBe(0);
+      expect(fs.readFileSync(evidenceOutput, "utf8")).toContain(
+        "failure_class=CANDIDATE"
+      );
+      expect(fs.readFileSync(evidenceOutput, "utf8")).toContain(
+        "failure_phase=candidate_evidence_validation"
+      );
+      expect(fs.readFileSync(evidenceOutput, "utf8")).toContain(
+        "retryable=false"
+      );
+      fs.writeFileSync(evidenceOutput, "");
+      expect(
+        runShell(validateEvidence.run!, {
+          env: { ...baseEnv, MOCK_GH_FAILURE: "transport" },
+        }).status
+      ).not.toBe(0);
+      expect(fs.readFileSync(evidenceOutput, "utf8")).toContain(
+        "failure_class=INFRASTRUCTURE"
+      );
+      expect(fs.readFileSync(evidenceOutput, "utf8")).toContain(
+        "failure_phase=candidate_evidence_transport"
+      );
+      expect(fs.readFileSync(evidenceOutput, "utf8")).toContain(
+        "retryable=true"
+      );
+      expect(
+        runShell(evidenceFailureReport.run!, {
+          env: {
+            ARTIFACT_CONTRACT_VERSION: "environment-bound-v3",
+            ARTIFACT_ENVIRONMENT: "staging",
+            EXPECTED_SHA,
+            FAILURE_CLASS: "INFRASTRUCTURE",
+            FAILURE_PHASE: "candidate_evidence_transport",
+            GITHUB_RUN_ID: "9876",
+            MOCK_CURL_PAYLOAD: curlPayload,
+            OPERATION_KEY: "rb2:compatibility:a1",
+            PATH: `${mockBin}:${process.env["PATH"]}`,
+            RELEASE_BUS_API_URL: "https://release-bus.invalid",
+            RELEASE_BUS_WORKFLOW_AUTH_TOKEN: "test-token",
+            RETRYABLE: "true",
+            TRAIN_ID,
+          },
+        }).status
+      ).toBe(0);
+      expect(JSON.parse(fs.readFileSync(curlPayload, "utf8"))).toMatchObject({
+        status: "FAILED",
+        failure_class: "INFRASTRUCTURE",
+        failure_phase: "candidate_evidence_transport",
+        retryable: true,
+      });
       expect(
         runShell(authorize.run!, {
           env: {
@@ -998,7 +1117,7 @@ describe("Release Bus artifact rollout compatibility", () => {
         }).status
       ).not.toBe(0);
       expect(
-        runShell(validate.run!, {
+        runShell(validateLocal.run!, {
           env: {
             ...baseEnv,
             CANDIDATE_EVIDENCE_MODE: "",
@@ -1009,7 +1128,7 @@ describe("Release Bus artifact rollout compatibility", () => {
         }).status
       ).not.toBe(0);
       expect(
-        runShell(validate.run!, {
+        runShell(validateLocal.run!, {
           env: {
             ...baseEnv,
             ARTIFACT_CONTRACT_VERSION: "legacy-v2",
@@ -1050,6 +1169,94 @@ describe("Release Bus artifact rollout compatibility", () => {
       expect(legacyAuthorization).not.toHaveProperty("reuse_artifact_run_id");
       expect(legacyAuthorization).not.toHaveProperty("reuse_artifact_name");
       expect(legacyAuthorization).not.toHaveProperty("reuse_artifact_digest");
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("executably attributes frontend preflight setup, install, build, and upload failures", () => {
+    const workflow = readWorkflow("release-bus-v2-preflight.yml");
+    const classify = findStep(
+      workflow,
+      "build",
+      "Classify exact frontend preflight result"
+    );
+    const root = fs.mkdtempSync(
+      path.join(os.tmpdir(), "release-bus-preflight-classification-")
+    );
+    const output = path.join(root, "github-output");
+    const evidenceRoot = path.join(root, "release-bus-evidence");
+    fs.mkdirSync(evidenceRoot);
+    const baseEnv = {
+      CHECKOUT_OUTCOME: "success",
+      DEPENDENCIES_OUTCOME: "success",
+      GENERATE_OUTCOME: "success",
+      GITHUB_OUTPUT: output,
+      NODE_OUTCOME: "success",
+      PACKAGE_MANAGER_OUTCOME: "success",
+      PACKAGE_OUTCOME: "success",
+      RUNNER_TEMP: root,
+      SOCKET_OUTCOME: "success",
+      SOURCE_OUTCOME: "success",
+      UPLOAD_OUTCOME: "success",
+    };
+    const runClassification = (overrides: Record<string, string>) => {
+      fs.writeFileSync(output, "");
+      expect(
+        runShell(classify.run!, { env: { ...baseEnv, ...overrides } }).status
+      ).toBe(0);
+      return Object.fromEntries(
+        fs
+          .readFileSync(output, "utf8")
+          .trim()
+          .split("\n")
+          .map((line) => {
+            const separator = line.indexOf("=");
+            return [line.slice(0, separator), line.slice(separator + 1)];
+          })
+      );
+    };
+    try {
+      expect(runClassification({ NODE_OUTCOME: "failure" })).toMatchObject({
+        failure_class: "INFRASTRUCTURE",
+        failure_phase: "build_setup",
+        retryable: "true",
+      });
+
+      fs.writeFileSync(
+        path.join(evidenceRoot, "dependency-install.json"),
+        JSON.stringify({ failure_class: "INFRASTRUCTURE_TRANSIENT" })
+      );
+      expect(
+        runClassification({ DEPENDENCIES_OUTCOME: "failure" })
+      ).toMatchObject({
+        failure_class: "INFRASTRUCTURE",
+        failure_phase: "dependency_install",
+        retryable: "true",
+      });
+
+      fs.writeFileSync(
+        path.join(evidenceRoot, "dependency-install.json"),
+        JSON.stringify({ failure_class: "SOURCE" })
+      );
+      expect(
+        runClassification({ DEPENDENCIES_OUTCOME: "failure" })
+      ).toMatchObject({
+        failure_class: "CANDIDATE",
+        failure_phase: "dependency_contract",
+        retryable: "false",
+      });
+
+      expect(runClassification({ PACKAGE_OUTCOME: "failure" })).toMatchObject({
+        failure_class: "CANDIDATE",
+        failure_phase: "environment_build",
+        retryable: "false",
+      });
+      expect(runClassification({ UPLOAD_OUTCOME: "failure" })).toMatchObject({
+        failure_class: "INFRASTRUCTURE",
+        failure_phase: "artifact_upload",
+        retryable: "true",
+      });
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }

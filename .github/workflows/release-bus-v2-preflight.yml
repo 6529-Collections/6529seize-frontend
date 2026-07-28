@@ -40,10 +40,10 @@ jobs:
     permissions:
       actions: read
     steps:
-      # Authorize and bind exact CI evidence before fetching or executing any
-      # candidate repository bytes. The build job performs the one exact
-      # composed-SHA checkout after this gate succeeds.
-      - name: Validate exact inputs and CI evidence
+      # Validate only dispatch syntax before authorization. Candidate artifact
+      # metadata and bytes are not accessed until the immutable operation is
+      # authorized by the Release Bus API.
+      - name: Validate exact local inputs
         env:
           AGGREGATE_CANDIDATE_EVIDENCE_DIGEST: ${{ inputs.aggregate_candidate_evidence_digest }}
           ARTIFACT_CONTRACT_VERSION: ${{ inputs.artifact_contract_version }}
@@ -51,7 +51,6 @@ jobs:
           CANDIDATE_EVIDENCE_MODE: ${{ inputs.candidate_evidence_mode }}
           DEPLOY_UNITS: ${{ inputs.deploy_units }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
-          GH_TOKEN: ${{ github.token }}
           OPERATION_KEY: ${{ inputs.operation_key }}
           REUSE_ARTIFACT_DIGEST: ${{ inputs.reuse_artifact_digest }}
           REUSE_ARTIFACT_NAME: ${{ inputs.reuse_artifact_name }}
@@ -71,14 +70,10 @@ jobs:
           [[ "$CANDIDATE_EVIDENCE_MODE" =~ ^(legacy-whole-train|strict-single|strict-aggregate)$ ]]
           jq -e 'type == "array" and length == 0' <<< "$DEPLOY_UNITS"
 
-          validate_reuse_artifact_identity() {
+          validate_reuse_artifact_syntax() {
             [[ "$REUSE_ARTIFACT_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
             [[ "$REUSE_ARTIFACT_NAME" =~ ^release-bus-v2-pr-[a-f0-9]{40}$ ]]
             [[ "$REUSE_ARTIFACT_DIGEST" =~ ^[a-f0-9]{64}$ ]]
-            response="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$REUSE_ARTIFACT_RUN_ID/artifacts?name=$REUSE_ARTIFACT_NAME")"
-            artifact="$(jq -c --arg name "$REUSE_ARTIFACT_NAME" '.artifacts | map(select(.expired == false and .name == $name))' <<< "$response")"
-            test "$(jq 'length' <<< "$artifact")" -eq 1
-            test "$(jq -r '.[0].digest | sub("^sha256:"; "")' <<< "$artifact")" = "$REUSE_ARTIFACT_DIGEST"
           }
 
           case "$CANDIDATE_EVIDENCE_MODE" in
@@ -86,73 +81,13 @@ jobs:
               test "$ARTIFACT_CONTRACT_VERSION" = legacy-v2
               test -z "$AGGREGATE_CANDIDATE_EVIDENCE_DIGEST"
               if [ -n "$REUSE_ARTIFACT_RUN_ID$REUSE_ARTIFACT_NAME$REUSE_ARTIFACT_DIGEST" ]; then
-                validate_reuse_artifact_identity
+                validate_reuse_artifact_syntax
               fi
               ;;
             strict-single)
               test "$ARTIFACT_CONTRACT_VERSION" = environment-bound-v3
               test -z "$AGGREGATE_CANDIDATE_EVIDENCE_DIGEST"
-              validate_reuse_artifact_identity
-              merge_sha="${REUSE_ARTIFACT_NAME#release-bus-v2-pr-}"
-              run="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$REUSE_ARTIFACT_RUN_ID")"
-              test "$(jq -r .event <<< "$run")" = pull_request
-              test "$(jq -r .conclusion <<< "$run")" = success
-              run_head_sha="$(jq -r .head_sha <<< "$run")"
-              [[ "$run_head_sha" =~ ^[a-f0-9]{40}$ ]]
-              test "$(jq -r .path <<< "$run")" = .github/workflows/app-pr-ci.yml
-              evidence_root="$RUNNER_TEMP/release-bus-pr-ci-evidence"
-              rm -rf "$evidence_root"
-              gh run download "$REUSE_ARTIFACT_RUN_ID" \
-                --repo "$GITHUB_REPOSITORY" \
-                --name "$REUSE_ARTIFACT_NAME" \
-                --dir "$evidence_root"
-              mapfile -t evidence_files < <(
-                find "$evidence_root" -maxdepth 1 -type f -exec basename {} \; |
-                  LC_ALL=C sort
-              )
-              test "${evidence_files[*]}" = "SHA256SUMS manifest.json policy-bundle.txt"
-              test -z "$(find "$evidence_root" -mindepth 1 -maxdepth 1 -type d -print -quit)"
-              mapfile -t checksum_lines < "$evidence_root/SHA256SUMS"
-              test "${#checksum_lines[@]}" -eq 2
-              expected_checksums="$(
-                cd "$evidence_root"
-                sha256sum ./manifest.json ./policy-bundle.txt
-              )"
-              test "$(cat "$evidence_root/SHA256SUMS")" = "$expected_checksums"
-              (cd "$evidence_root" && sha256sum -c SHA256SUMS)
-              jq -e --arg merge_sha "$merge_sha" '
-                .schema_version == 1 and
-                .evidence_contract == "exact-merge-tree-pr-ci-v1" and
-                .repository == "frontend" and
-                .event == "pull_request" and
-                .workflow == ".github/workflows/app-pr-ci.yml" and
-                .merge_sha == $merge_sha and
-                (.head_sha | test("^[a-f0-9]{40}$")) and
-                .policy_bundle_contract == "pr-ci-policy-bundle-v1" and
-                (.policy_bundle_digest | test("^[a-f0-9]{64}$")) and
-                (.policy_bundle_line_count | type == "number" and . >= 1 and . <= 1000 and floor == .) and
-                .required_gates == [
-                  "package-manager-discipline",
-                  "dependency-analysis",
-                  "reviewbot-contract",
-                  "generated-agent-files",
-                  "release-bus-workflow-contract",
-                  "changed-lint",
-                  "changed-typecheck",
-                  "test-typecheck",
-                  "related-jest-selection",
-                  "production-build-or-plan-not-required",
-                  "pr-ci-policy-bundle"
-                ]
-              ' "$evidence_root/manifest.json" >/dev/null
-              test "$(jq -r .head_sha "$evidence_root/manifest.json")" = "$run_head_sha"
-              policy_bundle_digest="$(sha256sum "$evidence_root/policy-bundle.txt" | cut -d' ' -f1)"
-              test "$policy_bundle_digest" = "$(jq -r .policy_bundle_digest "$evidence_root/manifest.json")"
-              policy_bundle_line_count="$(wc -l < "$evidence_root/policy-bundle.txt" | tr -d '[:space:]')"
-              test "$policy_bundle_line_count" = "$(jq -r .policy_bundle_line_count "$evidence_root/manifest.json")"
-              test "$(wc -c < "$evidence_root/policy-bundle.txt")" -le 65536
-              test "$(tail -c 1 "$evidence_root/policy-bundle.txt" | od -An -tuC | tr -d '[:space:]')" = 10
-              LC_ALL=C sort -c "$evidence_root/policy-bundle.txt"
+              validate_reuse_artifact_syntax
               ;;
             strict-aggregate)
               test "$ARTIFACT_CONTRACT_VERSION" = environment-bound-v3
@@ -188,6 +123,167 @@ jobs:
             -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
             -H 'Content-Type: application/json' --data "$payload" \
             "$RELEASE_BUS_API_URL/deploy/release-bus-v2/authorize"
+      - name: Validate exact authorized CI evidence
+        id: evidence
+        continue-on-error: true
+        env:
+          CANDIDATE_EVIDENCE_MODE: ${{ inputs.candidate_evidence_mode }}
+          GH_TOKEN: ${{ github.token }}
+          REUSE_ARTIFACT_DIGEST: ${{ inputs.reuse_artifact_digest }}
+          REUSE_ARTIFACT_NAME: ${{ inputs.reuse_artifact_name }}
+          REUSE_ARTIFACT_RUN_ID: ${{ inputs.reuse_artifact_run_id }}
+        run: |
+          set -euo pipefail
+          echo "failure_class=CANDIDATE" >> "$GITHUB_OUTPUT"
+          echo "failure_phase=candidate_evidence_validation" >> "$GITHUB_OUTPUT"
+          echo "retryable=false" >> "$GITHUB_OUTPUT"
+
+          classify_gh_failure() {
+            local output="$1"
+            if grep -Eqi 'HTTP (408|429|5[0-9][0-9])|status(code)? (408|429|5[0-9][0-9])|EAI_AGAIN|ECONN(REFUSED|RESET|ABORTED)?|ENET(UNREACH|DOWN)|ENOTFOUND|ETIMEDOUT' <<< "$output"; then
+              echo "failure_class=INFRASTRUCTURE" >> "$GITHUB_OUTPUT"
+              echo "failure_phase=candidate_evidence_transport" >> "$GITHUB_OUTPUT"
+              echo "retryable=true" >> "$GITHUB_OUTPUT"
+            fi
+          }
+
+          validate_reuse_artifact_identity() {
+            local response status
+            set +e
+            response="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$REUSE_ARTIFACT_RUN_ID/artifacts?name=$REUSE_ARTIFACT_NAME" 2>&1)"
+            status=$?
+            set -e
+            if [ "$status" -ne 0 ]; then
+              classify_gh_failure "$response"
+              return 1
+            fi
+            artifact="$(jq -c --arg name "$REUSE_ARTIFACT_NAME" '.artifacts | map(select(.expired == false and .name == $name))' <<< "$response")"
+            test "$(jq 'length' <<< "$artifact")" -eq 1
+            test "$(jq -r '.[0].digest | sub("^sha256:"; "")' <<< "$artifact")" = "$REUSE_ARTIFACT_DIGEST"
+          }
+
+          if [ "$CANDIDATE_EVIDENCE_MODE" = legacy-whole-train ]; then
+            if [ -n "$REUSE_ARTIFACT_RUN_ID" ]; then
+              validate_reuse_artifact_identity
+            fi
+            exit 0
+          fi
+          if [ "$CANDIDATE_EVIDENCE_MODE" = strict-aggregate ]; then
+            exit 0
+          fi
+
+          validate_reuse_artifact_identity
+          merge_sha="${REUSE_ARTIFACT_NAME#release-bus-v2-pr-}"
+          set +e
+          run="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$REUSE_ARTIFACT_RUN_ID" 2>&1)"
+          run_status=$?
+          set -e
+          if [ "$run_status" -ne 0 ]; then
+            classify_gh_failure "$run"
+            exit 1
+          fi
+          test "$(jq -r .event <<< "$run")" = pull_request
+          test "$(jq -r .conclusion <<< "$run")" = success
+          run_head_sha="$(jq -r .head_sha <<< "$run")"
+          [[ "$run_head_sha" =~ ^[a-f0-9]{40}$ ]]
+          test "$(jq -r .path <<< "$run")" = .github/workflows/app-pr-ci.yml
+          evidence_root="$RUNNER_TEMP/release-bus-pr-ci-evidence"
+          rm -rf "$evidence_root"
+          set +e
+          download_output="$(
+            gh run download "$REUSE_ARTIFACT_RUN_ID" \
+              --repo "$GITHUB_REPOSITORY" \
+              --name "$REUSE_ARTIFACT_NAME" \
+              --dir "$evidence_root" 2>&1
+          )"
+          download_status=$?
+          set -e
+          if [ "$download_status" -ne 0 ]; then
+            classify_gh_failure "$download_output"
+            exit 1
+          fi
+          mapfile -t evidence_files < <(
+            find "$evidence_root" -maxdepth 1 -type f -exec basename {} \; |
+              LC_ALL=C sort
+          )
+          test "${evidence_files[*]}" = "SHA256SUMS manifest.json policy-bundle.txt"
+          test -z "$(find "$evidence_root" -mindepth 1 -maxdepth 1 -type d -print -quit)"
+          mapfile -t checksum_lines < "$evidence_root/SHA256SUMS"
+          test "${#checksum_lines[@]}" -eq 2
+          expected_checksums="$(
+            cd "$evidence_root"
+            sha256sum ./manifest.json ./policy-bundle.txt
+          )"
+          test "$(cat "$evidence_root/SHA256SUMS")" = "$expected_checksums"
+          (cd "$evidence_root" && sha256sum -c SHA256SUMS)
+          jq -e --arg merge_sha "$merge_sha" '
+            .schema_version == 1 and
+            .evidence_contract == "exact-merge-tree-pr-ci-v1" and
+            .repository == "frontend" and
+            .event == "pull_request" and
+            .workflow == ".github/workflows/app-pr-ci.yml" and
+            .merge_sha == $merge_sha and
+            (.head_sha | test("^[a-f0-9]{40}$")) and
+            .policy_bundle_contract == "pr-ci-policy-bundle-v1" and
+            (.policy_bundle_digest | test("^[a-f0-9]{64}$")) and
+            (.policy_bundle_line_count | type == "number" and . >= 1 and . <= 1000 and floor == .) and
+            .required_gates == [
+              "package-manager-discipline",
+              "dependency-analysis",
+              "reviewbot-contract",
+              "generated-agent-files",
+              "release-bus-workflow-contract",
+              "changed-lint",
+              "changed-typecheck",
+              "test-typecheck",
+              "related-jest-selection",
+              "production-build-or-plan-not-required",
+              "pr-ci-policy-bundle"
+            ]
+          ' "$evidence_root/manifest.json" >/dev/null
+          test "$(jq -r .head_sha "$evidence_root/manifest.json")" = "$run_head_sha"
+          policy_bundle_digest="$(sha256sum "$evidence_root/policy-bundle.txt" | cut -d' ' -f1)"
+          test "$policy_bundle_digest" = "$(jq -r .policy_bundle_digest "$evidence_root/manifest.json")"
+          policy_bundle_line_count="$(wc -l < "$evidence_root/policy-bundle.txt" | tr -d '[:space:]')"
+          test "$policy_bundle_line_count" = "$(jq -r .policy_bundle_line_count "$evidence_root/manifest.json")"
+          test "$(wc -c < "$evidence_root/policy-bundle.txt")" -le 65536
+          test "$(tail -c 1 "$evidence_root/policy-bundle.txt" | od -An -tuC | tr -d '[:space:]')" = 10
+          LC_ALL=C sort -c "$evidence_root/policy-bundle.txt"
+      - name: Report authorized CI evidence failure
+        if: steps.evidence.outcome == 'failure'
+        env:
+          ARTIFACT_CONTRACT_VERSION: ${{ inputs.artifact_contract_version }}
+          ARTIFACT_ENVIRONMENT: ${{ inputs.artifact_environment }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          FAILURE_CLASS: ${{ steps.evidence.outputs.failure_class }}
+          FAILURE_PHASE: ${{ steps.evidence.outputs.failure_phase }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          RETRYABLE: ${{ steps.evidence.outputs.retryable }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+        run: |
+          set -euo pipefail
+          payload="$(jq -n \
+            --arg train_id "$TRAIN_ID" \
+            --arg operation_key "$OPERATION_KEY" \
+            --arg workflow_run_id "$GITHUB_RUN_ID" \
+            --arg failure_class "$FAILURE_CLASS" \
+            --arg failure_phase "$FAILURE_PHASE" \
+            --argjson retryable "$RETRYABLE" \
+            --arg contract "$ARTIFACT_CONTRACT_VERSION" \
+            --arg environment "$ARTIFACT_ENVIRONMENT" \
+            --arg source_sha "$EXPECTED_SHA" \
+            '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"complete",status:"FAILED",failure_class:$failure_class,failure_phase:$failure_phase,retryable:$retryable,summary:{artifact_digest:null,package_digest:null,schema_version:null,artifact_contract:null,artifact_contract_version:$contract,repository:"frontend",source_sha:$source_sha,environment:$environment,fresh_or_reused:"failed",source_evidence_reused:false,artifact_bytes_reused:false,ci_evidence:null},stages:[],jest:null,backend_evidence:null}')"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+            -H 'Content-Type: application/json' --data "$payload" \
+            "$RELEASE_BUS_API_URL/deploy/release-bus-v2/report-progress"
+      - name: Return authoritative CI evidence result
+        if: always()
+        env:
+          EVIDENCE_OUTCOME: ${{ steps.evidence.outcome }}
+        run: test "$EVIDENCE_OUTCOME" = success
 
   build:
     needs: authorize
@@ -195,6 +291,10 @@ jobs:
     timeout-minutes: 60
     permissions:
       contents: read
+    outputs:
+      failure_class: ${{ steps.classify.outputs.failure_class }}
+      failure_phase: ${{ steps.classify.outputs.failure_phase }}
+      retryable: ${{ steps.classify.outputs.retryable }}
     env:
       NODE_ENV: production
       VERSION: ${{ inputs.expected_sha }}
@@ -208,11 +308,16 @@ jobs:
       # secrets. Exact-head quality gates already ran in merge-tree PR CI.
       # codeql[actions/untrusted-checkout/medium]
       - name: Check out exact composed SHA
+        id: checkout
+        continue-on-error: true
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: ${{ inputs.expected_sha }}
           persist-credentials: false
       - name: Verify exact composed SHA
+        id: source
+        if: steps.checkout.outcome == 'success'
+        continue-on-error: true
         env:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
         run: |
@@ -220,27 +325,46 @@ jobs:
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
           test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - name: Install Node.js
+        id: node
+        if: steps.source.outcome == 'success'
+        continue-on-error: true
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with: { node-version: "22.17.1" }
       - name: Activate pinned pnpm
+        id: package-manager
+        if: steps.node.outcome == 'success'
+        continue-on-error: true
         run: |
           corepack enable pnpm
           corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
       - name: Install Socket Firewall
         id: socket-firewall
+        if: steps.package-manager.outcome == 'success'
+        continue-on-error: true
         uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
         with: { mode: firewall }
-      - name: Install frozen dependencies once
+      - name: Install and verify frozen dependencies once
+        id: dependencies
+        if: always() && steps.package-manager.outcome == 'success'
+        continue-on-error: true
         env:
+          RELEASE_BUS_INSTALL_EVIDENCE: ${{ runner.temp }}/release-bus-evidence/dependency-install.json
+          RELEASE_BUS_SOCKET_FIREWALL_OUTCOME: ${{ steps.socket-firewall.outcome }}
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
-        run: ./bin/6529 install:frozen
+        run: node scripts/release-bus-install-dependencies.cjs
       - name: Generate source-stable build inputs once
+        id: generate
+        if: steps.dependencies.outcome == 'success'
+        continue-on-error: true
         run: |
           set -euo pipefail
           ./bin/6529 run build:env-schema
           ./bin/6529 run help-index:sync
           ./bin/6529 run agent-files:sync
       - name: Build and package only the authorized environment contract
+        id: package
+        if: steps.generate.outcome == 'success'
+        continue-on-error: true
         env:
           AGGREGATE_CANDIDATE_EVIDENCE_DIGEST: ${{ inputs.aggregate_candidate_evidence_digest }}
           ARTIFACT_CONTRACT_VERSION: ${{ inputs.artifact_contract_version }}
@@ -378,6 +502,9 @@ jobs:
           (cd release-bus-artifact && find . -type f ! -path ./SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)
           test -z "$(git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews)"
       - name: Upload exact immutable frontend artifact
+        id: upload
+        if: steps.package.outcome == 'success'
+        continue-on-error: true
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: release-bus-frontend-${{ inputs.release_train_id }}-r${{ inputs.release_train_revision }}
@@ -385,6 +512,73 @@ jobs:
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 30
+      - name: Classify exact frontend preflight result
+        id: classify
+        if: always()
+        env:
+          CHECKOUT_OUTCOME: ${{ steps.checkout.outcome }}
+          DEPENDENCIES_OUTCOME: ${{ steps.dependencies.outcome }}
+          GENERATE_OUTCOME: ${{ steps.generate.outcome }}
+          NODE_OUTCOME: ${{ steps.node.outcome }}
+          PACKAGE_MANAGER_OUTCOME: ${{ steps.package-manager.outcome }}
+          PACKAGE_OUTCOME: ${{ steps.package.outcome }}
+          SOURCE_OUTCOME: ${{ steps.source.outcome }}
+          SOCKET_OUTCOME: ${{ steps.socket-firewall.outcome }}
+          UPLOAD_OUTCOME: ${{ steps.upload.outcome }}
+        run: |
+          set -euo pipefail
+          failure_class=null
+          failure_phase=null
+          retryable=false
+
+          if [ "$CHECKOUT_OUTCOME" != success ]; then
+            failure_class=INFRASTRUCTURE
+            failure_phase=source_checkout
+            retryable=true
+          elif [ "$SOURCE_OUTCOME" != success ]; then
+            failure_class=INFRASTRUCTURE
+            failure_phase=source_identity
+            retryable=true
+          elif [ "$NODE_OUTCOME" != success ] || [ "$PACKAGE_MANAGER_OUTCOME" != success ] || [ "$SOCKET_OUTCOME" != success ]; then
+            failure_class=INFRASTRUCTURE
+            failure_phase=build_setup
+            retryable=true
+          elif [ "$DEPENDENCIES_OUTCOME" != success ]; then
+            dependency_evidence="$RUNNER_TEMP/release-bus-evidence/dependency-install.json"
+            if [ -f "$dependency_evidence" ] &&
+               [ "$(jq -r '.failure_class // ""' "$dependency_evidence")" = SOURCE ]; then
+              failure_class=CANDIDATE
+              failure_phase=dependency_contract
+              retryable=false
+            else
+              failure_class=INFRASTRUCTURE
+              failure_phase=dependency_install
+              retryable=true
+            fi
+          elif [ "$GENERATE_OUTCOME" != success ]; then
+            failure_class=CANDIDATE
+            failure_phase=generated_inputs
+            retryable=false
+          elif [ "$PACKAGE_OUTCOME" != success ]; then
+            failure_class=CANDIDATE
+            failure_phase=environment_build
+            retryable=false
+          elif [ "$UPLOAD_OUTCOME" != success ]; then
+            failure_class=INFRASTRUCTURE
+            failure_phase=artifact_upload
+            retryable=true
+          fi
+
+          {
+            echo "failure_class=$failure_class"
+            echo "failure_phase=$failure_phase"
+            echo "retryable=$retryable"
+          } >> "$GITHUB_OUTPUT"
+      - name: Return authoritative frontend build result
+        if: always()
+        env:
+          FAILURE_CLASS: ${{ steps.classify.outputs.failure_class }}
+        run: test "$FAILURE_CLASS" = null
 
   finalize:
     if: always() && needs.authorize.result == 'success'
@@ -463,6 +657,9 @@ jobs:
         env:
           ARTIFACT_CONTRACT_VERSION: ${{ inputs.artifact_contract_version }}
           ARTIFACT_ENVIRONMENT: ${{ inputs.artifact_environment }}
+          BUILD_FAILURE_CLASS: ${{ needs.build.outputs.failure_class }}
+          BUILD_FAILURE_PHASE: ${{ needs.build.outputs.failure_phase }}
+          BUILD_RETRYABLE: ${{ needs.build.outputs.retryable }}
           BUILD_RESULT: ${{ needs.build.result }}
           DOWNLOAD_OUTCOME: ${{ steps.download.outcome }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
@@ -498,7 +695,10 @@ jobs:
               fresh_or_reused=fresh-legacy-dual-profile
             fi
           elif [ "$BUILD_RESULT" = failure ]; then
-            status=FAILED; failure_class=CANDIDATE; retryable=false
+            status=FAILED
+            failure_class="${BUILD_FAILURE_CLASS:-INFRASTRUCTURE}"
+            failure_phase="${BUILD_FAILURE_PHASE:-frontend_preflight_runner}"
+            retryable="${BUILD_RETRYABLE:-true}"
             digest=''; package_digest=''; schema_version=null
             artifact_contract=''; repository=frontend
             source_sha="$EXPECTED_SHA"; environment="$ARTIFACT_ENVIRONMENT"
@@ -506,6 +706,7 @@ jobs:
             fresh_or_reused=failed
           else
             status=FAILED; failure_class=INFRASTRUCTURE; retryable=true
+            failure_phase=frontend_preflight_artifact_verification
             digest=''; package_digest=''; schema_version=null
             artifact_contract=''; repository=frontend
             source_sha="$EXPECTED_SHA"; environment="$ARTIFACT_ENVIRONMENT"
@@ -518,6 +719,7 @@ jobs:
             --arg workflow_run_id "$GITHUB_RUN_ID" \
             --arg status "$status" \
             --arg failure_class "$failure_class" \
+            --arg failure_phase "${failure_phase:-null}" \
             --argjson retryable "$retryable" \
             --arg digest "$digest" \
             --arg package_digest "$package_digest" \
@@ -531,7 +733,7 @@ jobs:
             --argjson source_evidence_reused "$source_evidence_reused" \
             --argjson artifact_bytes_reused "$artifact_bytes_reused" \
             --argjson ci_evidence "$ci_evidence" \
-            '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"complete",status:$status,failure_class:(if $failure_class == "null" then null else $failure_class end),failure_phase:(if $status == "FAILED" then "frontend_preflight" else null end),retryable:$retryable,summary:{artifact_digest:(if $digest == "" then null else $digest end),package_digest:(if $package_digest == "" then null else $package_digest end),schema_version:(if $schema_version == "null" then null else ($schema_version | tonumber) end),artifact_contract:(if $artifact_contract == "" then null else $artifact_contract end),artifact_contract_version:$contract,repository:$repository,source_sha:$source_sha,environment:$environment,fresh_or_reused:$fresh_or_reused,source_evidence_reused:$source_evidence_reused,artifact_bytes_reused:$artifact_bytes_reused,ci_evidence:$ci_evidence},stages:[],jest:null,backend_evidence:null}')"
+            '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"complete",status:$status,failure_class:(if $failure_class == "null" then null else $failure_class end),failure_phase:(if $failure_phase == "null" then null else $failure_phase end),retryable:$retryable,summary:{artifact_digest:(if $digest == "" then null else $digest end),package_digest:(if $package_digest == "" then null else $package_digest end),schema_version:(if $schema_version == "null" then null else ($schema_version | tonumber) end),artifact_contract:(if $artifact_contract == "" then null else $artifact_contract end),artifact_contract_version:$contract,repository:$repository,source_sha:$source_sha,environment:$environment,fresh_or_reused:$fresh_or_reused,source_evidence_reused:$source_evidence_reused,artifact_bytes_reused:$artifact_bytes_reused,ci_evidence:$ci_evidence},stages:[],jest:null,backend_evidence:null}')"
           curl --fail-with-body --silent --show-error \
             -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
             -H 'Content-Type: application/json' --data "$payload" \
