@@ -12,6 +12,9 @@ const {
   configSha256,
   generatorSourceSha256,
 } = require("./public-reviews/solidity-reference.cjs");
+const {
+  validateKnowledgePack,
+} = require("./public-reviews/stream-knowledge.cjs");
 
 const PROFILES = new Set(["production", "staging"]);
 const PUBLIC_REVIEW_CONFIG_DIRECTORY = "config/public-reviews";
@@ -32,6 +35,12 @@ const PUBLIC_REVIEW_LIFECYCLE_STATES = new Set([
 const PUBLIC_REVIEW_PUBLIC_ROUTE_STATES = new Set(
   [...PUBLIC_REVIEW_LIFECYCLE_STATES].filter((state) => state !== "DRAFT")
 );
+const PUBLIC_REVIEW_DEPLOYMENT_STATUSES = new Set(["NOT_DEPLOYED", "DEPLOYED"]);
+const PUBLIC_REVIEW_AUDIT_STATUSES = new Set([
+  "PRE_AUDIT",
+  "AUDIT_IN_PROGRESS",
+  "AUDIT_COMPLETE",
+]);
 const PRODUCTION_BASE_ENDPOINT = "https://6529.io";
 const RUNTIME_CONFIG_PATH = ".next/PUBLIC_RUNTIME.json";
 const SHA256_URN_PATTERN = /^sha256:[0-9a-f]{64}$/;
@@ -241,7 +250,9 @@ function getPublicReviewPublicationConfigs(repoRoot) {
               version !== null &&
               typeof version === "object" &&
               SAFE_VERSION_PATTERN.test(version.version) &&
-              PUBLIC_REVIEW_LIFECYCLE_STATES.has(version.lifecycleState)
+              PUBLIC_REVIEW_LIFECYCLE_STATES.has(version.lifecycleState) &&
+              PUBLIC_REVIEW_DEPLOYMENT_STATUSES.has(version.deploymentStatus) &&
+              PUBLIC_REVIEW_AUDIT_STATUSES.has(version.auditStatus)
           ) &&
           new Set(config.versions.map((version) => version.version)).size ===
             config.versions.length,
@@ -363,9 +374,7 @@ function getPublishedReviewIds(repoRoot) {
   return new Set(
     [...getPublicReviewPublicationPlans(repoRoot).entries()]
       .filter(([, plan]) =>
-        PUBLIC_REVIEW_PUBLIC_ROUTE_STATES.has(
-          plan.publication.lifecycleState
-        )
+        PUBLIC_REVIEW_PUBLIC_ROUTE_STATES.has(plan.publication.lifecycleState)
       )
       .map(([reviewId]) => reviewId)
   );
@@ -790,9 +799,7 @@ function assertCanonicalReviewEvidence({
     config.reviewId
   );
   return index.versions
-    .filter((entry) =>
-      publicationPlan.publishedVersions.has(entry.version)
-    )
+    .filter((entry) => publicationPlan.publishedVersions.has(entry.version))
     .map((entry) => {
       invariant(
         SAFE_VERSION_PATTERN.test(entry.version) &&
@@ -801,11 +808,7 @@ function assertCanonicalReviewEvidence({
           SHA256_URN_PATTERN.test(entry.bundleSha256),
         `${config.reviewId}@${entry.version} review index entry is invalid.`
       );
-      const versionRoot = path.join(
-        reviewRoot,
-        "versions",
-        entry.version
-      );
+      const versionRoot = path.join(reviewRoot, "versions", entry.version);
       const bundlePath = path.join(versionRoot, config.output.bundleFile);
       const expectedBundlePath = `/review-data/${config.reviewId}/versions/${entry.version}/${config.output.bundleFile}`;
       invariant(
@@ -848,6 +851,16 @@ function assertCanonicalReviewEvidence({
 
       assertSourceFiles(bundle, versionRoot);
       assertDefinitionShards(bundle, versionRoot);
+      validateKnowledgePack({
+        repoRoot: path.dirname(bundlePublicRoot),
+        reviewId: config.reviewId,
+        reviewVersion: entry.version,
+        requireCurrentGenerator: entry.version === config.reviewVersion,
+        publicationOverride: publicationPlan.publication.versions.find(
+          (version) => version.version === entry.version
+        ),
+        referenceIndexEntryOverride: entry,
+      });
 
       return {
         reviewId: config.reviewId,
@@ -959,10 +972,7 @@ function assertStagingEvidence(
     }) ===
       directoryIdentity(bundlePublicReviewRoot, {
         ignore: (relativePath) =>
-          isReviewIndexPath(
-            `review-data/${relativePath}`,
-            publicationPlans
-          ),
+          isReviewIndexPath(`review-data/${relativePath}`, publicationPlans),
       }),
     "Staging public-review data does not exactly match the trusted source tree."
   );
@@ -1087,12 +1097,7 @@ function assertProfileBundle({
 }) {
   invariant(PROFILES.has(profile), `Unsupported artifact profile: ${profile}`);
   invariant(fs.statSync(bundleRoot).isDirectory(), "Bundle root is missing.");
-  assertPublicCopyIdentity(
-    repoRoot,
-    bundleRoot,
-    profile,
-    publicationPlans
-  );
+  assertPublicCopyIdentity(repoRoot, bundleRoot, profile, publicationPlans);
 
   if (profile === "production") {
     assertProductionAbsence(bundleRoot);

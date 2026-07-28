@@ -5,11 +5,15 @@
   "versions": [
     {
       "version": "2026-07-26.1",
-      "lifecycleState": "REVIEW_CLOSED"
+      "lifecycleState": "REVIEW_CLOSED",
+      "deploymentStatus": "NOT_DEPLOYED",
+      "auditStatus": "PRE_AUDIT"
     },
     {
       "version": "2026-07-27.1",
-      "lifecycleState": "PUBLIC_REVIEW"
+      "lifecycleState": "PUBLIC_REVIEW",
+      "deploymentStatus": "NOT_DEPLOYED",
+      "auditStatus": "PRE_AUDIT"
     }
   ]
 }
