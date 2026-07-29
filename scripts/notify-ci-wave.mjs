@@ -106,8 +106,7 @@ function isHumanGithubUser(user) {
   const type = user?.type?.trim().toLowerCase();
   return Boolean(
     login &&
-    type !== "bot" &&
-    type !== "app" &&
+    type === "user" &&
     !login.toLowerCase().endsWith("[bot]") &&
     !NON_HUMAN_GITHUB_LOGINS.has(login.toLowerCase())
   );
@@ -425,7 +424,7 @@ async function deriveManualRangeContributors({
       );
     }
     for (const pull of associated) {
-      if (pull.merged_at) {
+      if (pull.merged_at && pull.base?.ref === branch) {
         pullRequests.set(pull.number, pull);
       }
     }

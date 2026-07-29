@@ -113,6 +113,7 @@ async function runManualNotifier({
       number: 3498,
       merged_at: "2026-07-23T10:00:00Z",
       user: { login: "PR-Author", type: "User" },
+      base: { ref: fixture.branch },
     },
   ],
   pullCommits = [
@@ -433,6 +434,17 @@ describe("notify-ci-wave Release Train metadata", () => {
       ],
       [],
     ],
+    [
+      "non-user account",
+      [
+        {
+          sha: "c".repeat(40),
+          author: { login: "release-organization", type: "Organization" },
+          committer: { login: "release-app", type: "App" },
+        },
+      ],
+      [],
+    ],
   ])(
     "omits manual contributors for a %s deployment range",
     async (_name, commits, pullRequests) => {
@@ -447,6 +459,36 @@ describe("notify-ci-wave Release Train metadata", () => {
       expect(result.payload).not.toHaveProperty("contributor_github_logins");
     }
   );
+
+  it("excludes an associated PR that targets a different branch", async () => {
+    const result = await runManualNotifier({
+      commits: [
+        {
+          sha: "c".repeat(40),
+          author: null,
+          committer: null,
+        },
+      ],
+      pullRequests: [
+        {
+          number: 3498,
+          merged_at: "2026-07-23T10:00:00Z",
+          user: { login: "Unrelated-PR-Author", type: "User" },
+          base: { ref: "unrelated-branch" },
+        },
+      ],
+      pullCommits: [
+        {
+          author: { login: "Unrelated-Commit-Author", type: "User" },
+          committer: { login: "Unrelated-Committer", type: "User" },
+        },
+      ],
+    });
+
+    expect(result.code).toBe(0);
+    expect(result.payload).not.toHaveProperty("contributor_evidence");
+    expect(result.payload).not.toHaveProperty("contributor_github_logins");
+  });
 
   it.each([
     ["staging", "Release Bus - Deploy Frontend Staging", "staging"],
