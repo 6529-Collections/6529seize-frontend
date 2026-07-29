@@ -84,6 +84,7 @@ describe("Release Bus frontend performance contract", () => {
       expect(appPrCi).toContain(
         "policy_bundle_line_count:$policy_bundle_line_count"
       );
+      expect(appPrCi).toContain('[[ "$BUILD_REQUIRED" =~ ^(true|false)$ ]]');
       expect(appPrCi).not.toContain(
         "Build staging profile for exact artifact reuse"
       );
