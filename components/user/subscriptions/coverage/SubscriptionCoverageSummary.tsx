@@ -261,7 +261,7 @@ export default function SubscriptionCoverageSummary({
             </span>
             <span
               className={clsx(
-                "tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-semibold tw-ring-1 tw-ring-inset",
+                "tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-medium tw-ring-1 tw-ring-inset",
                 tone.pill
               )}
             >
