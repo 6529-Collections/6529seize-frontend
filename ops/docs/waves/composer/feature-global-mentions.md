@@ -41,6 +41,8 @@ Wave creators and admins can also use `@all`.
 - Typing a complete token directly has the same effect as choosing it from the
   suggestion menu; Chat access is the invocation requirement for
   `@contributors`, `@admins`, and `@devs6529`.
+- Global mention text inside links or inline/fenced code remains literal and
+  does not notify a Wave audience.
 - A profile included by more than one mention is notified only once.
 - The message author is not notified by their own global mention.
 - Muted profiles and profiles that cannot view the Wave are excluded.

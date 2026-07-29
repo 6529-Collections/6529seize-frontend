@@ -13,7 +13,6 @@ import {
   $isTextNode,
   type LexicalEditor,
   type EditorState,
-  type LexicalNode,
   type TextNode,
 } from "lexical";
 import {
@@ -47,10 +46,9 @@ import type {
   MentionAlias,
   MentionAliasMember,
 } from "@/entities/IMentionAlias";
-import { $isCodeNode } from "@lexical/code";
-import { $isLinkNode } from "@lexical/link";
 import { AuthContext } from "@/components/auth/Auth";
 import { GROUP_MENTION_TEXT } from "@/helpers/waves/drop-group-mentions";
+import { isInsideCodeOrLink } from "@/components/drops/create/lexical/utils/mentionContext";
 import { useDraftMentionSearchScope } from "./MentionSearchScopeContext";
 
 const AtSignMentionsRegex =
@@ -140,17 +138,6 @@ export interface MentionAliasExpansionResult {
 
 const ALIAS_TOKEN_PATTERN =
   /(^|[^\p{L}\p{N}_@])@(\w{3,15})(?=$|[^\p{L}\p{N}_@])/gu;
-
-const isInsideCodeOrLink = (node: LexicalNode): boolean => {
-  let parent = node.getParent();
-  while (parent) {
-    if ($isCodeNode(parent) || $isLinkNode(parent)) {
-      return true;
-    }
-    parent = parent.getParent();
-  }
-  return false;
-};
 
 const toMentionedUser = (member: MentionAliasMember) => ({
   mentioned_profile_id: member.profile_id,

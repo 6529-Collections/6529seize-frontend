@@ -151,6 +151,30 @@ describe("expandPlainAliasTokens", () => {
     expect(onSelect).not.toHaveBeenCalled();
   });
 
+  it("preserves unknown aliases and trailing text around a known alias", async () => {
+    const editor = createTestEditor();
+    editor.update(
+      () => {
+        $getRoot().append(
+          $createParagraphNode().append(
+            $createTextNode("@unknown then @frens trailing")
+          )
+        );
+      },
+      { discrete: true }
+    );
+    const onSelect = jest.fn();
+
+    await expandPlainAliasTokens({ editor, aliases: [alias], onSelect });
+
+    editor.getEditorState().read(() => {
+      expect($getRoot().getTextContent()).toBe(
+        "@unknown then @alice @bob trailing"
+      );
+    });
+    expect(onSelect).toHaveBeenCalledTimes(2);
+  });
+
   it("replaces a selected alias with plain text when every member already exists", () => {
     const editor = createTestEditor();
     const onSelect = jest.fn();
