@@ -40,7 +40,7 @@ export default function DefinitionsClient() {
   const locale = useBrowserLocale();
   const sections = getGlossarySections(locale);
 
-  useSetTitle("Definitions | Network");
+  useSetTitle(m(locale, "network.definitions.metadata.title"));
 
   return (
     <main
@@ -50,6 +50,7 @@ export default function DefinitionsClient() {
         <AboutContentsDropdown
           className={NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES}
           currentHref="/network/definitions"
+          locale={locale}
           withDivider
         />
 
