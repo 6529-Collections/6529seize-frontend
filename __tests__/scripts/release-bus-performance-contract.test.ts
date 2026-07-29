@@ -11,6 +11,7 @@ const workflow = (name: string) =>
 const { PACKS: E2E_PACKS } = require("../../tests/packs.manifest.cjs") as {
   PACKS: Array<{
     scriptKey: string;
+    alias?: string;
     safety: string;
     environments: string[];
     triggers: string[];
@@ -406,6 +407,24 @@ describe("Release Bus frontend performance contract", () => {
   it("keeps E2E lane ownership independent and parallelizes readonly packs only", () => {
     const staging = workflow("staging-e2e.yml");
     const production = workflow("production-e2e.yml");
+    const stagingPackInput = staging.on.workflow_dispatch.inputs.pack;
+    const stagingPostDeployAliases = E2E_PACKS.filter(
+      (pack) =>
+        pack.environments.includes("staging") &&
+        pack.triggers.includes("post-deploy")
+    ).map((pack) => pack.alias);
+
+    expect(stagingPostDeployAliases).not.toContain(undefined);
+    expect(stagingPackInput).toMatchObject({
+      type: "choice",
+      required: true,
+      default: "all",
+    });
+    expect(stagingPackInput.options).toEqual([
+      "all",
+      ...stagingPostDeployAliases,
+    ]);
+    expect(stagingPackInput.options).not.toContain("smoke");
     expect(staging.concurrency).toEqual({
       group: contract.e2e.staging_concurrency_group,
       "cancel-in-progress": false,

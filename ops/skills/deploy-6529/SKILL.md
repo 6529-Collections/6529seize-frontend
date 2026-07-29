@@ -82,7 +82,7 @@ manifest-bound E2E. V2 never publishes release notes.
    and no hidden emergency fence blocking fallback. The legacy frontend
    staging and production workflows independently call the authenticated
    readiness gate as their first job and reject before checkout, build, ref,
-   credential, or deployment mutation unless the same exact run and drain state
+   credential, or deployment mutation unless the exact run and drain state
    are authorized. Then prove the target environment lock is free, no target
    mutation/E2E workflow is active, and every already-dispatched exact operation
    is terminal. Fetch the exact remote target head. Wait; never cancel another

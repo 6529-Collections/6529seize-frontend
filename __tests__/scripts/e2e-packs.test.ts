@@ -579,6 +579,11 @@ describe("manifest-driven E2E runner", () => {
       stderr: new PassThrough(),
       stdout: new PassThrough(),
     }) as unknown as ChildProcess;
+    const processKill = jest.spyOn(process, "kill").mockImplementation(() => {
+      throw Object.assign(new Error("No such process group"), {
+        code: "ESRCH",
+      });
+    });
 
     try {
       const resultPromise = runner.runProcessGroup("never-closes", [], {
@@ -596,6 +601,7 @@ describe("manifest-driven E2E runner", () => {
       });
       expect(fakeChild.kill).toHaveBeenCalledTimes(2);
     } finally {
+      processKill.mockRestore();
       jest.useRealTimers();
     }
   });
