@@ -96,7 +96,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
             <button
               key={c.contract}
               type="button"
-              className="tw-group tw-grid tw-min-h-20 tw-w-full tw-grid-cols-[56px_minmax(0,1fr)_56px] tw-items-center tw-gap-4 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-5 tw-py-3 tw-text-white tw-shadow-sm tw-transition-colors hover:tw-border-white/20 hover:tw-bg-iron-800 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+              className="tw-group tw-grid tw-min-h-20 tw-w-full tw-grid-cols-1 tw-items-center tw-justify-items-start tw-gap-3 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-px-4 tw-py-3 tw-text-iron-100 tw-transition-colors hover:tw-border-white/20 hover:tw-bg-iron-950 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
               onClick={() => {
                 const newSection = getCollectionSection(c.contract);
                 if (newSection !== undefined) {
@@ -104,7 +104,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                 }
               }}
             >
-              <span className="tw-relative tw-h-14 tw-w-14 tw-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800">
+              <span className="tw-relative tw-h-12 tw-w-12 tw-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800">
                 <Image
                   unoptimized
                   className="tw-object-cover"
@@ -117,10 +117,9 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                   aria-hidden="true"
                 />
               </span>
-              <span className="tw-whitespace-nowrap tw-text-center tw-text-base tw-font-semibold">
+              <span className="tw-min-w-0 tw-text-left tw-text-base tw-font-semibold tw-leading-5">
                 {c.title}
               </span>
-              <span aria-hidden="true" />
             </button>
           ))}
         </div>
@@ -167,10 +166,10 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
   return (
     <div className="tw-w-full">
       <header className="tw-mb-6">
-        <h1 className="tw-mb-2 tw-text-3xl tw-font-bold tw-text-white">
+        <h1 className="tw-mb-2 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl">
           Delegation Center
         </h1>
-        <p className="tw-mb-0 tw-max-w-4xl tw-text-base tw-leading-6 tw-text-iron-300">
+        <p className="tw-mb-0 tw-max-w-4xl tw-text-base tw-font-normal tw-leading-6 tw-text-iron-300">
           Register wallet relationships for NFT utility and 6529 collection
           metrics. These actions do not transfer NFTs.
         </p>
@@ -180,14 +179,14 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
         {actionCards.map((card) => (
           <section
             key={card.title}
-            className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5 sm:tw-p-6"
+            className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-p-4 sm:tw-p-6"
           >
             <div className="tw-flex tw-flex-col tw-gap-5 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between">
               <div className="tw-min-w-0 tw-flex-1">
-                <h2 className="tw-mb-8 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
+                <h2 className="tw-mb-5 tw-mt-0 tw-text-xl tw-font-semibold tw-text-iron-50">
                   {card.title}
                 </h2>
-                <div className="tw-flex tw-items-center tw-gap-4">
+                <div className="tw-flex tw-flex-col tw-items-start tw-gap-4 sm:tw-flex-row sm:tw-items-center">
                   <Image
                     unoptimized
                     loading="eager"
@@ -197,9 +196,9 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                     aria-hidden="true"
                     width={56}
                     height={56}
-                    className="tw-h-14 tw-w-14 tw-shrink-0 tw-object-contain"
+                    className="tw-h-12 tw-w-12 tw-shrink-0 tw-object-contain sm:tw-h-14 sm:tw-w-14"
                   />
-                  <ul className="tw-my-0 tw-min-w-0 tw-pl-5 tw-text-base tw-leading-6 tw-text-iron-100">
+                  <ul className="tw-my-0 tw-min-w-0 tw-pl-5 tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-300 sm:tw-text-base">
                     {card.details.map((detail) => (
                       <li key={detail}>{detail}</li>
                     ))}
@@ -226,7 +225,9 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
         ))}
       </div>
 
-      <div className="tw-mt-10">{printCollectionSelection()}</div>
+      <div className="tw-mt-10 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-pt-8">
+        {printCollectionSelection()}
+      </div>
     </div>
   );
 }
