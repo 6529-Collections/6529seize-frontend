@@ -801,7 +801,8 @@ describe("Release Bus artifact rollout compatibility", () => {
 
   it("rejects partial staging E2E operation identity before checkout", () => {
     const workflow = readWorkflow("staging-e2e.yml");
-    const steps = workflow.jobs["staging-packs"]?.steps ?? [];
+    const steps = (workflow.jobs["staging-packs"]?.steps ??
+      []) as WorkflowStep[];
     const guard = findStep(
       workflow,
       "staging-packs",
