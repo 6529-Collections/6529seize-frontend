@@ -103,6 +103,12 @@ const NotificationsFollowAllBtn: FC<NotificationsFollowAllBtnProps> = ({
         hideChildrenWhenLoading
         variant={allFollowed ? "secondary" : "primary"}
         size={FOLLOW_BUTTON_SIZES[size]}
+        aria-label={label}
+        className={
+          allFollowed
+            ? "disabled:!tw-cursor-default disabled:!tw-opacity-100"
+            : undefined
+        }
       >
         {allFollowed ? <FollowBtnCheckIcon /> : <FollowBtnPlusIcon size={size} />}
         <span>{label}</span>

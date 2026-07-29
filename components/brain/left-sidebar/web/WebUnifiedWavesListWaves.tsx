@@ -165,8 +165,8 @@ function CreateWaveButton({ onClick }: { readonly onClick: () => void }) {
         onClick={onClick}
         aria-label="Create wave"
         variant="primary"
-        size="sm"
-        className="tw-w-9 tw-px-0"
+        size={null}
+        className="tw-size-9 tw-p-0"
       >
         <FontAwesomeIcon icon={faPlus} className="tw-size-4 tw-flex-shrink-0" />
       </Button>

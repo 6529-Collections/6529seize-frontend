@@ -309,7 +309,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
     <Button
       onClick={handleMemesSubmit}
       variant="primary"
-      size="xs"
+      size={null}
       title={tooltipText}
       className={`${HEADER_ACTION_BUTTON_CLASS} tw-px-0 sm:tw-px-2.5`}
     >

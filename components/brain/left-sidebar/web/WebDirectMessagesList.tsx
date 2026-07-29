@@ -163,8 +163,8 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
                   onClick={openDirectMessage}
                   aria-label="New direct message"
                   variant="primary"
-                  size="sm"
-                  className="tw-w-9 tw-px-0"
+                  size={null}
+                  className="tw-size-9 tw-p-0"
                 >
                   <FontAwesomeIcon
                     icon={faPaperPlane}

@@ -140,6 +140,7 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
         hideChildrenWhenLoading
         variant={following ? "secondary" : "primary"}
         size={FOLLOW_BUTTON_SIZES[size]}
+        aria-label={label}
       >
         {following ? <FollowBtnCheckIcon /> : <FollowBtnPlusIcon size={size} />}
         <span>{label}</span>

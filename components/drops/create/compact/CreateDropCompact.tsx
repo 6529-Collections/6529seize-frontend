@@ -15,7 +15,6 @@ import { forwardRef, useImperativeHandle, useRef } from "react";
 import { CreateDropType, CreateDropViewType } from "../types";
 import type { CreateDropContentHandles } from "../utils/CreateDropContent";
 import CreateDropContent from "../utils/CreateDropContent";
-import type { CreateDropScreenType } from "../utils/CreateDropWrapper";
 import CreateDropSelectedFileIcon from "../utils/file/CreateDropSelectedFileIcon";
 import CreateDropSelectedFilePreview from "../utils/file/CreateDropSelectedFilePreview";
 
@@ -24,7 +23,6 @@ export interface CreateDropCompactHandles {
 }
 interface CreateDropCompactProps {
   readonly waveId: string | null;
-  readonly screenType: CreateDropScreenType;
   readonly editorState: EditorState | null;
   readonly files: File[];
   readonly canSubmit: boolean;
