@@ -11,14 +11,16 @@ import { createPublicReviewRouteBuilder } from "@/lib/public-review/publicReview
 import {
   getStreamReviewVersionLifecycleState,
   getStreamReviewVersionPublication,
+  getStreamReviewVersionSourceCommit,
   STREAM_REVIEW_LIFECYCLE_STATE,
 } from "@/lib/public-review/streamReviewPublication";
 
 export const STREAM_REVIEW_VERSION = "2026-07-27.1";
 export const STREAM_REVIEW_PREVIOUS_VERSION = "2026-07-26.1";
 export const STREAM_REVIEW_SLUG = "6529-stream";
-export const STREAM_REVIEW_SOURCE_COMMIT =
-  "513bd7e079eafe109df6ae1ae21bfbca6fec6786";
+export const STREAM_REVIEW_SOURCE_COMMIT = getStreamReviewVersionSourceCommit(
+  STREAM_REVIEW_VERSION
+);
 const STREAM_REVIEW_VERSION_LIFECYCLE_STATE =
   getStreamReviewVersionLifecycleState(STREAM_REVIEW_VERSION);
 const STREAM_REVIEW_VERSION_PUBLICATION = getStreamReviewVersionPublication(
@@ -345,7 +347,9 @@ export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
       auditStatus: STREAM_REVIEW_PREVIOUS_VERSION_PUBLICATION.auditStatus,
       source: {
         repository: "6529-Collections/6529Stream",
-        commit: STREAM_REVIEW_SOURCE_COMMIT,
+        commit: getStreamReviewVersionSourceCommit(
+          STREAM_REVIEW_PREVIOUS_VERSION
+        ),
       },
       pages: STREAM_REVIEW_2026_07_26_PAGES,
       audienceEntryPageIds: STREAM_REVIEW_AUDIENCE_ENTRY_PAGE_IDS,

@@ -5,7 +5,7 @@ import {
 } from "@/lib/public-review/publicReviewLifecycle";
 
 const STREAM_REVIEW_PUBLICATION_SCHEMA =
-  "public-review.publication.v2" as const;
+  "public-review.publication.v3" as const;
 const STREAM_REVIEW_PUBLICATION_ID = "6529-stream" as const;
 const STREAM_REVIEW_DEPLOYMENT_STATUSES = ["NOT_DEPLOYED", "DEPLOYED"] as const;
 const STREAM_REVIEW_AUDIT_STATUSES = [
@@ -13,12 +13,20 @@ const STREAM_REVIEW_AUDIT_STATUSES = [
   "AUDIT_IN_PROGRESS",
   "AUDIT_COMPLETE",
 ] as const;
+const STREAM_REVIEW_SOURCE_COMMIT_PATTERN = /^[0-9a-f]{40}$/;
+const STREAM_REVIEW_VERSION_PATTERN = /^\d{4}-\d{2}-\d{2}\.\d+$/;
 
 type StreamReviewDeploymentStatus =
   (typeof STREAM_REVIEW_DEPLOYMENT_STATUSES)[number];
 type StreamReviewAuditStatus = (typeof STREAM_REVIEW_AUDIT_STATUSES)[number];
-interface StreamReviewVersionPublication {
+export interface StreamReviewVersionIdentity {
   readonly lifecycleState: PublicReviewLifecycleState;
+  readonly sourceCommit: string;
+  readonly version: string;
+}
+
+interface StreamReviewVersionPublication
+  extends StreamReviewVersionIdentity {
   readonly deploymentStatus: StreamReviewDeploymentStatus;
   readonly auditStatus: StreamReviewAuditStatus;
 }
@@ -41,12 +49,45 @@ function isStreamReviewAuditStatus(
   );
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+export function parseStreamReviewVersionIdentities(
+  value: unknown
+): readonly StreamReviewVersionIdentity[] {
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new Error("The Stream public-review version config is invalid.");
+  }
+
+  const seenVersions = new Set<string>();
+  const identities = value.map((candidate) => {
+    if (
+      !isRecord(candidate) ||
+      typeof candidate["version"] !== "string" ||
+      !STREAM_REVIEW_VERSION_PATTERN.test(candidate["version"]) ||
+      !isPublicReviewLifecycleState(candidate["lifecycleState"]) ||
+      typeof candidate["sourceCommit"] !== "string" ||
+      !STREAM_REVIEW_SOURCE_COMMIT_PATTERN.test(candidate["sourceCommit"]) ||
+      seenVersions.has(candidate["version"])
+    ) {
+      throw new Error("The Stream public-review version config is invalid.");
+    }
+    seenVersions.add(candidate["version"]);
+    return Object.freeze({
+      lifecycleState: candidate["lifecycleState"],
+      sourceCommit: candidate["sourceCommit"],
+      version: candidate["version"],
+    });
+  });
+
+  return Object.freeze(identities);
+}
+
 if (
   publication.schemaVersion !== STREAM_REVIEW_PUBLICATION_SCHEMA ||
   publication.reviewId !== STREAM_REVIEW_PUBLICATION_ID ||
-  !isPublicReviewLifecycleState(publication.lifecycleState) ||
-  !Array.isArray(publication.versions) ||
-  publication.versions.length === 0
+  !isPublicReviewLifecycleState(publication.lifecycleState)
 ) {
   throw new Error("The Stream public-review publication config is invalid.");
 }
@@ -54,26 +95,39 @@ if (
 export const STREAM_REVIEW_LIFECYCLE_STATE: PublicReviewLifecycleState =
   publication.lifecycleState;
 
+export const STREAM_REVIEW_VERSION_IDENTITIES =
+  parseStreamReviewVersionIdentities(publication.versions);
+
 const STREAM_REVIEW_VERSION_PUBLICATIONS = new Map<
   string,
   StreamReviewVersionPublication
 >();
-for (const version of publication.versions) {
+const STREAM_REVIEW_VERSION_LIFECYCLE_STATES = new Map<
+  string,
+  PublicReviewLifecycleState
+>();
+const STREAM_REVIEW_VERSION_SOURCE_COMMITS = new Map<string, string>();
+for (const [index, identity] of STREAM_REVIEW_VERSION_IDENTITIES.entries()) {
+  const version = publication.versions[index];
   if (
-    typeof version.version !== "string" ||
-    version.version.length === 0 ||
-    !isPublicReviewLifecycleState(version.lifecycleState) ||
     !isStreamReviewDeploymentStatus(version.deploymentStatus) ||
-    !isStreamReviewAuditStatus(version.auditStatus) ||
-    STREAM_REVIEW_VERSION_PUBLICATIONS.has(version.version)
+    !isStreamReviewAuditStatus(version.auditStatus)
   ) {
     throw new Error("The Stream public-review version config is invalid.");
   }
-  STREAM_REVIEW_VERSION_PUBLICATIONS.set(version.version, {
-    lifecycleState: version.lifecycleState,
+  STREAM_REVIEW_VERSION_PUBLICATIONS.set(identity.version, {
+    ...identity,
     deploymentStatus: version.deploymentStatus,
     auditStatus: version.auditStatus,
   });
+  STREAM_REVIEW_VERSION_LIFECYCLE_STATES.set(
+    identity.version,
+    identity.lifecycleState
+  );
+  STREAM_REVIEW_VERSION_SOURCE_COMMITS.set(
+    identity.version,
+    identity.sourceCommit
+  );
 }
 
 export function getStreamReviewVersionPublication(
@@ -91,5 +145,21 @@ export function getStreamReviewVersionPublication(
 export function getStreamReviewVersionLifecycleState(
   version: string
 ): PublicReviewLifecycleState {
-  return getStreamReviewVersionPublication(version).lifecycleState;
+  const lifecycleState = STREAM_REVIEW_VERSION_LIFECYCLE_STATES.get(version);
+  if (!lifecycleState) {
+    throw new Error(
+      `The Stream public-review publication config is missing ${version}.`
+    );
+  }
+  return lifecycleState;
+}
+
+export function getStreamReviewVersionSourceCommit(version: string): string {
+  const sourceCommit = STREAM_REVIEW_VERSION_SOURCE_COMMITS.get(version);
+  if (!sourceCommit) {
+    throw new Error(
+      `The Stream public-review publication config is missing the source commit for ${version}.`
+    );
+  }
+  return sourceCommit;
 }
