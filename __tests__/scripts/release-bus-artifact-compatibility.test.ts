@@ -799,6 +799,53 @@ describe("Release Bus artifact rollout compatibility", () => {
     });
   }
 
+  it("rejects partial staging E2E operation identity before checkout", () => {
+    const workflow = readWorkflow("staging-e2e.yml");
+    const steps = workflow.jobs["staging-packs"]?.steps ?? [];
+    const guard = findStep(
+      workflow,
+      "staging-packs",
+      "Reject partial Release Bus identity"
+    );
+    const guardIndex = steps.indexOf(guard);
+    const checkoutIndex = steps.findIndex(
+      ({ name }) => name === "Check out the deployed ref"
+    );
+    const emptyIdentity = {
+      BACKEND_ARTIFACT_DIGEST: "",
+      BACKEND_SHA: "",
+      EXPECTED_SHA: "",
+      FRONTEND_ARTIFACT_DIGEST: "",
+      FRONTEND_SHA: "",
+      MANIFEST_ID: "",
+      MANIFEST_IDENTITY: "",
+      OPERATION_KEY: "",
+      SOURCE_REF: "",
+      TRAIN_ID: "",
+      TRAIN_REVISION: "",
+    };
+
+    expect(guardIndex).toBeGreaterThanOrEqual(0);
+    expect(guardIndex).toBeLessThan(checkoutIndex);
+    expect(runShell(guard.run!, { env: emptyIdentity }).status).toBe(0);
+    expect(
+      runShell(guard.run!, {
+        env: {
+          ...emptyIdentity,
+          OPERATION_KEY: "rb2:staging:e2e:a1",
+        },
+      }).status
+    ).not.toBe(0);
+    expect(
+      runShell(guard.run!, {
+        env: {
+          ...emptyIdentity,
+          TRAIN_ID: "train-without-operation",
+        },
+      }).status
+    ).not.toBe(0);
+  });
+
   it("executably enforces explicit single, aggregate, and legacy evidence modes", () => {
     const workflow = readWorkflow("release-bus-v2-preflight.yml");
     const validateLocal = findStep(

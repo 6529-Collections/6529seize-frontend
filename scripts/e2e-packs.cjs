@@ -273,7 +273,7 @@ function buildSpawnOptions(pack, outputPaths = outputPathsForPack(pack)) {
 
 function runProcessGroup(command, args, options) {
   return new Promise((resolve) => {
-    const child = spawn(command, args, {
+    const child = (options.spawnProcess ?? spawn)(command, args, {
       cwd: options.cwd,
       detached: true,
       env: options.env,
@@ -284,7 +284,6 @@ function runProcessGroup(command, args, options) {
     let infrastructureError = null;
     let completed = false;
     let killTimer = null;
-    let escalationComplete = false;
     let closeResult = null;
 
     const finish = () => {
@@ -313,7 +312,13 @@ function runProcessGroup(command, args, options) {
       killGroup("SIGTERM");
       killTimer = setTimeout(() => {
         killGroup("SIGKILL");
-        escalationComplete = true;
+        closeResult ??= {
+          status: null,
+          signal: "SIGKILL",
+          stdout,
+          stderr,
+          error: infrastructureError,
+        };
         finish();
       }, 1000);
       // Keep the grace timer referenced. A child can close its stdio and exit
@@ -366,7 +371,7 @@ function runProcessGroup(command, args, options) {
           clearTimeout(killTimer);
         }
         finish();
-      } else if (!killTimer || escalationComplete) {
+      } else if (!killTimer) {
         finish();
       }
     });
@@ -536,6 +541,7 @@ async function runPacks(
   } = {}
 ) {
   assertParallelSafe(resolved, parallel);
+  const releaseBinding = releaseBindingFromEnvironment();
   prepare(artifactRoot);
   const startedAt = new Date();
   const records = new Array(resolved.length);
@@ -606,7 +612,7 @@ async function runPacks(
     worker_count: workerCount,
     started_at: startedAt.toISOString(),
     completed_at: new Date().toISOString(),
-    release_binding: releaseBindingFromEnvironment(),
+    release_binding: releaseBinding,
     pack_count: records.length,
     failed_count: failedCount,
     infrastructure_failure_count: infrastructureFailureCount,
