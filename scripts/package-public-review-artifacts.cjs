@@ -17,7 +17,7 @@ const PROFILES = new Set(["production", "staging"]);
 const PUBLIC_REVIEW_CONFIG_DIRECTORY = "config/public-reviews";
 const PUBLIC_REVIEW_DATA_DIRECTORY = "public/review-data";
 const PUBLIC_REVIEW_EDITORIAL_DIRECTORY = "content/public-reviews";
-const PUBLIC_REVIEW_PUBLICATION_SCHEMA = "public-review.publication.v2";
+const PUBLIC_REVIEW_PUBLICATION_SCHEMA = "public-review.publication.v3";
 const PUBLIC_REVIEW_LIFECYCLE_STATES = new Set([
   "DRAFT",
   "SCHEDULED",
@@ -241,7 +241,8 @@ function getPublicReviewPublicationConfigs(repoRoot) {
               version !== null &&
               typeof version === "object" &&
               SAFE_VERSION_PATTERN.test(version.version) &&
-              PUBLIC_REVIEW_LIFECYCLE_STATES.has(version.lifecycleState)
+              PUBLIC_REVIEW_LIFECYCLE_STATES.has(version.lifecycleState) &&
+              SOURCE_PIN_PATTERN.test(version.sourceCommit)
           ) &&
           new Set(config.versions.map((version) => version.version)).size ===
             config.versions.length,
@@ -322,6 +323,13 @@ function getPublicReviewPublicationPlans(repoRoot) {
           ) === JSON.stringify(retainedVersions),
         `${publication.reviewId} source review index drifted from publication config.`
       );
+      invariant(
+        sourceIndex.versions.every(
+          (entry, index) =>
+            entry.commit === publication.versions[index].sourceCommit
+        ),
+        `${publication.reviewId} source review index commits drifted from trusted publication identities.`
+      );
 
       const publishedVersions = new Set(
         publication.versions
@@ -341,8 +349,10 @@ function getPublicReviewPublicationPlans(repoRoot) {
         (version) => version.version === reference.config.reviewVersion
       );
       invariant(
-        sourceActivePublication,
-        `${publication.reviewId} has no publication entry for its source-active version.`
+        sourceActivePublication &&
+          sourceActivePublication.sourceCommit ===
+            reference.config.source.commit,
+        `${publication.reviewId} source-active publication identity drifted from source config.`
       );
       if (sourceActivePublication.lifecycleState !== "DRAFT") {
         invariant(
