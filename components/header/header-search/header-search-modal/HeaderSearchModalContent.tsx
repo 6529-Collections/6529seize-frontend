@@ -7,6 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import { FocusTrap } from "focus-trap-react";
+import { usePathname } from "next/navigation";
 import {
   useCallback,
   useEffect,
@@ -37,6 +38,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import useBodyScrollLock from "@/hooks/useBodyScrollLock";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import useLocalPreference from "@/hooks/useLocalPreference";
 import {
@@ -228,6 +230,9 @@ function ScopedHeaderSearchModal({
   storageScope,
 }: ScopedHeaderSearchModalProps) {
   useLayoutViewportLock(true);
+  useBodyScrollLock({ reserveScrollbarGap: true });
+  const pathname = usePathname();
+  const initialPathnameRef = useRef(pathname);
   const sessionQueryStorageKey = getScopedStorageKey(
     HEADER_SEARCH_SESSION_QUERY_KEY,
     storageScope
@@ -244,6 +249,10 @@ function ScopedHeaderSearchModal({
   >(null);
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
+
+  useEffect(() => {
+    if (pathname !== initialPathnameRef.current) onClose();
+  }, [onClose, pathname]);
 
   const [searchValue, setSearchValue] = useState(() =>
     readSessionQuery(sessionQueryStorageKey)
@@ -367,20 +376,6 @@ function ScopedHeaderSearchModal({
       // Search remains fully functional without session storage.
     }
   }, [searchValue, sessionQueryStorageKey]);
-
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    const previousPaddingRight = document.body.style.paddingRight;
-    const scrollbarGap =
-      window.innerWidth - document.documentElement.clientWidth;
-    document.body.style.overflow = "hidden";
-    if (scrollbarGap > 0)
-      document.body.style.paddingRight = `${scrollbarGap}px`;
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.body.style.paddingRight = previousPaddingRight;
-    };
-  }, []);
 
   const rememberSearch = useCallback(
     (query: string) => {

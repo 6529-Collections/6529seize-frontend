@@ -66,6 +66,12 @@
   * {
     -webkit-tap-highlight-color: transparent;
   }
+  body[data-seize-body-scroll-locked="true"] {
+    overflow: hidden !important;
+  }
+  body[data-seize-body-scrollbar-gap="true"] {
+    padding-right: var(--seize-body-scrollbar-gap) !important;
+  }
   /* Android keyboard height adjustments */
   :root {
     --android-keyboard-height: 0px;
