@@ -62,6 +62,9 @@ const SOURCE_COMMITS = Object.fromEntries(
 );
 SOURCE_COMMITS[streamReferenceConfig.reviewVersion] =
   streamReferenceConfig.source.commit;
+for (const retainedVersion of streamReferenceConfig.output.retainedVersions) {
+  SOURCE_COMMITS[retainedVersion] ??= streamReferenceConfig.source.commit;
+}
 
 const IDENTITY: SolidityReferenceReviewIdentity = {
   activeSourceCommit: REFERENCE_ACTIVE_REVIEW_VERSION.source.commit,

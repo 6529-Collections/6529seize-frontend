@@ -92,6 +92,10 @@ const streamReferenceSourceCommits = Object.fromEntries(
 );
 streamReferenceSourceCommits[streamReferenceConfig.reviewVersion] =
   streamReferenceConfig.source.commit;
+for (const retainedVersion of streamReferenceConfig.output.retainedVersions) {
+  streamReferenceSourceCommits[retainedVersion] ??=
+    streamReferenceConfig.source.commit;
+}
 
 if (
   streamReferenceConfig.reviewId !== STREAM_REVIEW_SLUG ||
