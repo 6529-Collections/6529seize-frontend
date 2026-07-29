@@ -14,6 +14,7 @@ import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { getAuthJwt, isAuthJwtUsable } from "@/services/auth/auth.utils";
 
 const noopWaveAction = () => {};
+const MAX_RECONCILIATION_ATTEMPTS_PER_VIEWER = 2;
 
 interface UseDmWavesListOptions {
   readonly enabled?: boolean | undefined;
@@ -75,6 +76,7 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
     status,
     refetch,
     queryKey: dmWavesQueryKey,
+    dataUpdatedAt: dmWavesDataUpdatedAt,
   } = useWavesV2({
     overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
     pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
@@ -88,7 +90,11 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
     connectedProfile?.handle ?? null,
     { enabled: shouldFetchDmWaves }
   );
-  const reconciliationAttemptIdentityRef = useRef<string | null>(null);
+  const reconciliationStateRef = useRef<{
+    readonly viewerIdentityKey: string;
+    readonly attempts: number;
+    readonly lastDataUpdatedAt: number;
+  } | null>(null);
   const listedUnreadDropsCount = useMemo(
     () =>
       mainWaves.reduce(
@@ -99,21 +105,43 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
   );
 
   useEffect(() => {
-    if (!shouldFetchDmWaves || unreadDmDropsCount <= listedUnreadDropsCount) {
-      reconciliationAttemptIdentityRef.current = null;
+    if (
+      !shouldFetchDmWaves ||
+      !viewerIdentityKey ||
+      unreadDmDropsCount <= listedUnreadDropsCount
+    ) {
+      reconciliationStateRef.current = null;
       return;
     }
 
+    if (isFetching) {
+      return;
+    }
+
+    const previousState =
+      reconciliationStateRef.current?.viewerIdentityKey === viewerIdentityKey
+        ? reconciliationStateRef.current
+        : {
+            viewerIdentityKey,
+            attempts: 0,
+            lastDataUpdatedAt: -1,
+          };
+    const hasNewDmSnapshot =
+      previousState.lastDataUpdatedAt !== dmWavesDataUpdatedAt;
     if (
-      isFetching ||
-      reconciliationAttemptIdentityRef.current === viewerIdentityKey
+      previousState.attempts >= MAX_RECONCILIATION_ATTEMPTS_PER_VIEWER ||
+      (previousState.attempts > 0 && !hasNewDmSnapshot)
     ) {
       return;
     }
 
-    reconciliationAttemptIdentityRef.current = viewerIdentityKey;
-    // Reconcile once per viewer when the aggregate summary advances first.
-    // Regular DM polling remains the fallback until both snapshots converge.
+    reconciliationStateRef.current = {
+      viewerIdentityKey,
+      attempts: previousState.attempts + 1,
+      lastDataUpdatedAt: dmWavesDataUpdatedAt,
+    };
+    // Retry only when a fresh DM snapshot is still behind, then let regular
+    // polling continue without creating an unbounded reconciliation loop.
     void queryClient.refetchQueries({
       queryKey: dmWavesQueryKey,
       exact: true,
@@ -121,6 +149,7 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
     });
   }, [
     dmWavesQueryKey,
+    dmWavesDataUpdatedAt,
     isFetching,
     listedUnreadDropsCount,
     queryClient,

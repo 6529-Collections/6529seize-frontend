@@ -76,6 +76,7 @@ describe("useDmWavesList", () => {
       status: "success",
       refetch: jest.fn(),
       queryKey: dmWavesQueryKey,
+      dataUpdatedAt: 100,
     });
   });
 
@@ -99,9 +100,10 @@ describe("useDmWavesList", () => {
     );
   });
 
-  it("reconciles only once per viewer until the DM rows catch up", () => {
+  it("bounds retries to fresh DM snapshots until the rows catch up", () => {
     let isFetching = false;
     let unreadDmDropsCount = 1;
+    let dataUpdatedAt = 100;
     useUnreadDmDropsMock.mockReturnValue({
       get unreadDmDropsCount() {
         return unreadDmDropsCount;
@@ -122,6 +124,9 @@ describe("useDmWavesList", () => {
       status: "success",
       refetch: jest.fn(),
       queryKey: dmWavesQueryKey,
+      get dataUpdatedAt() {
+        return dataUpdatedAt;
+      },
     }));
 
     const { rerender } = renderHook(() => useDmWavesList());
@@ -141,12 +146,20 @@ describe("useDmWavesList", () => {
 
     expect(refetchQueries).toHaveBeenCalledTimes(1);
 
+    dataUpdatedAt = 200;
+    rerender();
+    expect(refetchQueries).toHaveBeenCalledTimes(2);
+
+    dataUpdatedAt = 300;
+    rerender();
+    expect(refetchQueries).toHaveBeenCalledTimes(2);
+
     unreadDmDropsCount = 0;
     rerender();
     unreadDmDropsCount = 1;
     rerender();
 
-    expect(refetchQueries).toHaveBeenCalledTimes(2);
+    expect(refetchQueries).toHaveBeenCalledTimes(3);
   });
 
   it("does not refetch when the DM rows account for the unread summary", () => {
@@ -169,6 +182,7 @@ describe("useDmWavesList", () => {
       status: "success",
       refetch,
       queryKey: dmWavesQueryKey,
+      dataUpdatedAt: 100,
     });
 
     renderHook(() => useDmWavesList());
@@ -210,6 +224,7 @@ describe("useDmWavesList", () => {
       status: "success",
       refetch,
       queryKey: dmWavesQueryKey,
+      dataUpdatedAt: 100,
     });
 
     const { result } = renderHook(() => useDmWavesList());
@@ -250,6 +265,7 @@ describe("useDmWavesList", () => {
       status: "success",
       refetch,
       queryKey: dmWavesQueryKey,
+      dataUpdatedAt: 100,
     });
 
     const { result } = renderHook(() => useDmWavesList({ enabled: false }));

@@ -283,7 +283,7 @@ function useNewDropCounter(
       setRawNewDropsCounts((previous) => {
         const current = reconcileNewDropsCounts({
           newDropsCounts: previous,
-          waves,
+          waves: wavesRef.current,
         });
         const currentWave = current[waveId];
         if (
@@ -297,7 +297,7 @@ function useNewDropCounter(
         return update(current);
       });
     },
-    [setRawNewDropsCounts, waves]
+    [setRawNewDropsCounts]
   );
 
   // Reset counts for a specific wave

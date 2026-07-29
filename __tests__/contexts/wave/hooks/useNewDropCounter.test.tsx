@@ -236,6 +236,43 @@ describe("useNewDropCounter", () => {
     });
   });
 
+  it("uses the current wave snapshot for resets and websocket updates", () => {
+    const { result, rerender } = renderHook(
+      ({ serverSnapshotLatestDropTimestamp }) =>
+        useNewDropCounter(
+          null,
+          [
+            {
+              id: "wave2",
+              latestDropTimestamp: serverSnapshotLatestDropTimestamp,
+              latestReadTimestamp: 20,
+              serverSnapshotLatestDropTimestamp,
+            },
+          ] as any,
+          jest.fn()
+        ),
+      {
+        wrapper,
+        initialProps: { serverSnapshotLatestDropTimestamp: 20 },
+      }
+    );
+
+    emitDropUpdate({ createdAt: 30, serialNo: 5 });
+    rerender({ serverSnapshotLatestDropTimestamp: 31 });
+
+    act(() => {
+      result.current.resetWaveNewDropsCount("wave2");
+    });
+    emitDropUpdate({ createdAt: 30, serialNo: 5 });
+    rerender({ serverSnapshotLatestDropTimestamp: 20 });
+
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 0,
+      latestDropTimestamp: 31,
+      firstUnreadSerialNo: null,
+    });
+  });
+
   it("does not increment counts for poll response updates", () => {
     const refetch = jest.fn();
     const { result } = renderHook(

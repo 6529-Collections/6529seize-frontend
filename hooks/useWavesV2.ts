@@ -185,6 +185,7 @@ export const useWavesV2 = ({
       status: query.status,
       refetch,
       queryKey,
+      dataUpdatedAt: query.dataUpdatedAt,
     }),
     [waves, query, fetchNextPage, refetch, queryKey]
   );
