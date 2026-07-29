@@ -1,8 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import type { RefObject } from "react";
-
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
@@ -146,15 +143,9 @@ export function FeedbackPreview({
 export function FeedbackResultMessages({
   feedbackGate,
   formError,
-  locale,
-  successPath,
-  successRef,
 }: {
   readonly feedbackGate: string | null;
   readonly formError: string | null;
-  readonly locale: SupportedLocale;
-  readonly successPath: string | null;
-  readonly successRef: RefObject<HTMLOutputElement | null>;
 }) {
   return (
     <>
@@ -174,23 +165,6 @@ export function FeedbackResultMessages({
         >
           {formError}
         </p>
-      ) : null}
-      {successPath ? (
-        <output
-          ref={successRef}
-          tabIndex={-1}
-          aria-live="polite"
-          aria-atomic="true"
-          className="tw-border-green-500/40 tw-bg-green-950/30 tw-text-green-100 focus-visible:tw-ring-green-300 tw-mb-0 tw-mt-4 tw-block tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-text-sm focus:tw-outline-none focus-visible:tw-ring-2"
-        >
-          {t(locale, "publicReview.feedback.success")}{" "}
-          <Link
-            className="tw-text-green-100 focus-visible:tw-ring-green-300 tw-font-semibold tw-underline focus:tw-outline-none focus-visible:tw-ring-2"
-            href={successPath}
-          >
-            {t(locale, "publicReview.feedback.viewWave")}
-          </Link>
-        </output>
       ) : null}
     </>
   );

@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import { PublicReviewReadingLayout } from "@/components/public-review/PublicReviewReadingLayout";
 
@@ -7,6 +8,7 @@ describe("PublicReviewReadingLayout", () => {
   const originalScrollIntoView = HTMLElement.prototype.scrollIntoView;
 
   afterEach(() => {
+    jest.restoreAllMocks();
     window.localStorage.clear();
     window.history.replaceState({}, "", window.location.pathname);
     Object.defineProperty(window, "matchMedia", {
@@ -20,6 +22,19 @@ describe("PublicReviewReadingLayout", () => {
   });
 
   it("reveals the feedback hash target without smooth motion when requested", async () => {
+    jest
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockReturnValue({
+        bottom: 800,
+        height: 800,
+        left: 0,
+        right: 760,
+        top: 0,
+        width: 760,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      });
     const scrollIntoView = jest.fn();
     Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
       configurable: true,
@@ -63,5 +78,104 @@ describe("PublicReviewReadingLayout", () => {
       "focus:tw-ring-inset",
       "focus:tw-ring-primary-400"
     );
+  });
+
+  it("reveals the feedback hash target as an overlay on narrow layouts", async () => {
+    window.localStorage.setItem("public-review-comment-panel-open", "false");
+    window.history.replaceState({}, "", "#public-review-feedback");
+
+    render(
+      <PublicReviewReadingLayout
+        content={<div>Review content</div>}
+        feedbackAvailable
+        panel={<div>Feedback panel</div>}
+        toolbar={<div>Page 1</div>}
+      />
+    );
+
+    const dialog = await screen.findByRole("dialog", {
+      name: "Page comments",
+    });
+    expect(dialog).toBeInTheDocument();
+    await waitFor(() =>
+      expect(document.getElementById("public-review-feedback")).toHaveFocus()
+    );
+  });
+
+  it("keeps the controlled panel mounted and restores focus after Escape", async () => {
+    const user = userEvent.setup();
+    window.localStorage.setItem("public-review-comment-panel-open", "false");
+
+    render(
+      <PublicReviewReadingLayout
+        content={<div>Review content</div>}
+        feedbackAvailable
+        panel={<div>Feedback panel</div>}
+        toolbar={<div>Page 1</div>}
+      />
+    );
+
+    const toggle = screen.getByRole("button", { name: "Show feedback" });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(document.getElementById("public-review-feedback")).toHaveAttribute(
+      "hidden"
+    );
+
+    await user.click(toggle);
+    await screen.findByRole("dialog", { name: "Page comments" });
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+
+    await user.keyboard("{Escape}");
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("dialog", { name: "Page comments" })
+      ).not.toBeInTheDocument()
+    );
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(toggle).toHaveFocus();
+    expect(document.getElementById("public-review-feedback")).toHaveAttribute(
+      "hidden"
+    );
+  });
+
+  it("starts observing the layout when feedback becomes available", async () => {
+    const user = userEvent.setup();
+    window.localStorage.setItem("public-review-comment-panel-open", "false");
+    jest
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockReturnValue({
+        bottom: 800,
+        height: 800,
+        left: 0,
+        right: 760,
+        top: 0,
+        width: 760,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      });
+    const layout = (feedbackAvailable: boolean) => (
+      <PublicReviewReadingLayout
+        content={<div>Review content</div>}
+        feedbackAvailable={feedbackAvailable}
+        panel={<div>Feedback panel</div>}
+        toolbar={<div>Page 1</div>}
+      />
+    );
+    const { rerender } = render(layout(false));
+    expect(
+      screen.queryByRole("button", { name: "Show feedback" })
+    ).not.toBeInTheDocument();
+
+    rerender(layout(true));
+    const toggle = screen.getByRole("button", { name: "Show feedback" });
+    await user.click(toggle);
+
+    expect(
+      screen.getByRole("complementary", { name: "Page comments" })
+    ).not.toHaveAttribute("hidden");
+    expect(
+      screen.queryByRole("dialog", { name: "Page comments" })
+    ).not.toBeInTheDocument();
   });
 });

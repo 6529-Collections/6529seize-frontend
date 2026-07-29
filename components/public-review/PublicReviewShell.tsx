@@ -1,8 +1,6 @@
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
-  ChatBubbleLeftRightIcon,
-  CodeBracketIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -13,6 +11,7 @@ import { PublicReviewMarkdown } from "@/components/public-review/PublicReviewMar
 import { PublicReviewNavigation } from "@/components/public-review/PublicReviewNavigation";
 import { PublicReviewReadingLayout } from "@/components/public-review/PublicReviewReadingLayout";
 import { PublicReviewStatusBanner } from "@/components/public-review/PublicReviewStatusBanner";
+import { PublicReviewSurfaceNavigation } from "@/components/public-review/PublicReviewSurfaceNavigation";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -28,9 +27,6 @@ import {
   type PublicReviewRouteBuilder,
 } from "@/lib/public-review/publicReviewRoutes";
 import { getSolidityReferenceRootHref } from "@/lib/public-review/solidityReferenceRoutes";
-
-const REVIEW_ACTION_LINK =
-  "tw-group tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 
 function PublicReviewPageStepper({
   currentPage,
@@ -164,6 +160,15 @@ export function PublicReviewShell({
                     displayedVersion={displayedVersion}
                     source={source}
                   />
+                  <PublicReviewSurfaceNavigation
+                    activeSurface="review"
+                    feedbackHref={routes.getFeedbackHref(routeVersion)}
+                    referenceHref={getSolidityReferenceRootHref({
+                      reviewSlug: review.slug,
+                      version: routeVersion,
+                    })}
+                    reviewHref={routes.getRootHref(routeVersion)}
+                  />
                 </div>
 
                 <header className="tw-mt-12 tw-w-full tw-max-w-[52rem] sm:tw-mt-16">
@@ -178,36 +183,6 @@ export function PublicReviewShell({
                   <p className="tw-mb-0 tw-mt-5 tw-max-w-3xl tw-text-pretty tw-text-lg tw-font-normal tw-leading-8 tw-text-iron-300">
                     {t(DEFAULT_LOCALE, page.summaryKey)}
                   </p>
-                  <div className="tw-mt-8 tw-flex tw-flex-wrap tw-items-center tw-gap-x-7 tw-gap-y-1 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08]">
-                    <Link
-                      href={getSolidityReferenceRootHref({
-                        reviewSlug: review.slug,
-                        version: routeVersion,
-                      })}
-                      className={`${REVIEW_ACTION_LINK} hover:tw-text-iron-100`}
-                    >
-                      <CodeBracketIcon
-                        className="tw-size-3.5 tw-flex-none tw-text-iron-500 tw-transition-colors tw-duration-200 tw-ease-out group-hover:tw-text-iron-300"
-                        aria-hidden="true"
-                      />
-                      {t(
-                        DEFAULT_LOCALE,
-                        "publicReview.reference.openReference"
-                      )}
-                    </Link>
-                    {review.feedbackAvailable ? (
-                      <Link
-                        href={routes.getFeedbackHref(routeVersion)}
-                        className={`${REVIEW_ACTION_LINK} hover:tw-text-iron-100`}
-                      >
-                        <ChatBubbleLeftRightIcon
-                          className="tw-size-3.5 tw-flex-none tw-text-iron-500 tw-transition-colors tw-duration-200 tw-ease-out group-hover:tw-text-iron-300"
-                          aria-hidden="true"
-                        />
-                        {t(DEFAULT_LOCALE, "publicReview.comments.viewLedger")}
-                      </Link>
-                    ) : null}
-                  </div>
                 </header>
 
                 {page.id === "overview" && (
