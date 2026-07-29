@@ -520,7 +520,10 @@ describe("manifest-driven E2E runner", () => {
     try {
       await expect(
         runner.runPacks([samplePacks[0]!], {
+          artifactRoot: null,
           forward: [],
+          cleanup: () => undefined,
+          preserve: () => "",
           prepare,
           spawn,
         })
