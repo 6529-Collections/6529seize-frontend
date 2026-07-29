@@ -28,6 +28,7 @@ const FILE_PATHS = Object.freeze([
   "__tests__/scripts/deployment-bus.test.ts",
   "__tests__/scripts/e2e-packs.test.ts",
   "__tests__/scripts/lint-package-json.test.ts",
+  "__tests__/scripts/manual-deploy-routing-guard.test.ts",
   "__tests__/scripts/package-public-review-artifacts.test.ts",
   "__tests__/scripts/pr-ci-policy-bundle.test.ts",
   "__tests__/scripts/public-review-artifact-workflows.test.ts",

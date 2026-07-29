@@ -261,6 +261,7 @@ describe("pr-ci-policy-bundle-v1", () => {
         ".github/workflows/release-bus-deploy-production.yml",
         ".github/workflows/staging-e2e.yml",
         ".github/workflows/production-e2e.yml",
+        "__tests__/scripts/manual-deploy-routing-guard.test.ts",
         "bin/6529",
         "eslint.config.diff.mjs",
         "eslint.config.mjs",
