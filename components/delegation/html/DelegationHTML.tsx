@@ -380,7 +380,7 @@ export default function DelegationHTML(props: Readonly<Props>) {
     if (!currentContainer) {
       return;
     }
-    const container: HTMLDivElement = currentContainer;
+    const container = currentContainer;
 
     function prefetchHref(href: string) {
       if (prefetchedRoutesRef.current.has(href)) {
