@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 
 const BODY_SCROLL_LOCKED_DATASET_KEY = "seizeBodyScrollLocked";
 const BODY_SCROLLBAR_GAP_DATASET_KEY = "seizeBodyScrollbarGap";
@@ -56,7 +56,7 @@ const acquireBodyScrollLock = ({
 export default function useBodyScrollLock(options: BodyScrollLockOptions = {}) {
   const { reserveScrollbarGap = false } = options;
 
-  useEffect(
+  useLayoutEffect(
     () => acquireBodyScrollLock({ reserveScrollbarGap }),
     [reserveScrollbarGap]
   );
