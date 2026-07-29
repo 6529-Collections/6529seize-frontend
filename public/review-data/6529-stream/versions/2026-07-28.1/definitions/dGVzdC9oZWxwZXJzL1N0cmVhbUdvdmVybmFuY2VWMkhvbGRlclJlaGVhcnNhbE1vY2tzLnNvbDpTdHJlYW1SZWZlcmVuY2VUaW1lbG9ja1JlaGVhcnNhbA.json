@@ -1,0 +1,1620 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#error:0x60b86bef",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+          "inherited": false,
+          "inputs": [],
+          "name": "RehearsalTimelockAlreadyBound",
+          "selector": "0x60b86bef",
+          "signature": "RehearsalTimelockAlreadyBound()"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#error:0xe05e0117",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+          "inherited": false,
+          "inputs": [],
+          "name": "RehearsalTimelockCallFailed",
+          "selector": "0xe05e0117",
+          "signature": "RehearsalTimelockCallFailed()"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#error:0x9e3b1f7c",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "operationId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RehearsalTimelockOperationExecutedAlready",
+          "selector": "0x9e3b1f7c",
+          "signature": "RehearsalTimelockOperationExecutedAlready(bytes32)"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#error:0x02bb5f29",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "operationId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RehearsalTimelockOperationExists",
+          "selector": "0x02bb5f29",
+          "signature": "RehearsalTimelockOperationExists(bytes32)"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#error:0xaf130b5f",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "operationId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "readyAt",
+              "type": "uint64"
+            }
+          ],
+          "name": "RehearsalTimelockOperationNotReady",
+          "selector": "0xaf130b5f",
+          "signature": "RehearsalTimelockOperationNotReady(bytes32,uint64)"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#error:0x991cc9b6",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "actor",
+              "type": "address"
+            }
+          ],
+          "name": "RehearsalTimelockUnauthorized",
+          "selector": "0x991cc9b6",
+          "signature": "RehearsalTimelockUnauthorized(address)"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#event:RehearsalTimelockGovernorBound(address)",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "governor",
+              "type": "address"
+            }
+          ],
+          "name": "RehearsalTimelockGovernorBound",
+          "signature": "RehearsalTimelockGovernorBound(address)",
+          "topic0": "0xb58a5e34d3e3d5b2427bfe498dff45a646736ea37aa871bcaa411d44022d9b9e"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#event:RehearsalTimelockOperationExecuted(bytes32,bytes)",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "operationId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "internalType": "bytes",
+              "name": "returnData",
+              "type": "bytes"
+            }
+          ],
+          "name": "RehearsalTimelockOperationExecuted",
+          "signature": "RehearsalTimelockOperationExecuted(bytes32,bytes)",
+          "topic0": "0xfc30acd19d75712c8c5b7546e0fe2e427efe52e26b2b34d532a7fc7116ef1a66"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#event:RehearsalTimelockOperationScheduled(bytes32,uint64)",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "operationId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "readyAt",
+              "type": "uint64"
+            }
+          ],
+          "name": "RehearsalTimelockOperationScheduled",
+          "signature": "RehearsalTimelockOperationScheduled(bytes32,uint64)",
+          "topic0": "0x7e39aaa924a21e6142411e7dddfd527e0b56e11673d3de1db66b9fba99e64397"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xf8ded6be",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "governor_",
+              "type": "address"
+            }
+          ],
+          "name": "bindGovernor",
+          "outputs": [],
+          "selector": "0xf8ded6be",
+          "signature": "bindGovernor(address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xf5778b03",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+          "inherited": false,
+          "inputs": [],
+          "name": "bootstrapAdmin",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0xf5778b03",
+          "signature": "bootstrapAdmin()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0x88aa4c12",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "salt",
+              "type": "bytes32"
+            }
+          ],
+          "name": "execute",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes",
+              "name": "returnData",
+              "type": "bytes"
+            }
+          ],
+          "selector": "0x88aa4c12",
+          "signature": "execute(address,uint256,bytes,bytes32)",
+          "stateMutability": "payable"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0x0c340a24",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+          "inherited": false,
+          "inputs": [],
+          "name": "governor",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x0c340a24",
+          "signature": "governor()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0x600869e3",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+          "inherited": false,
+          "inputs": [],
+          "name": "implementationName",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "selector": "0x600869e3",
+          "signature": "implementationName()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0x52a2e17e",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+          "inherited": false,
+          "inputs": [],
+          "name": "lastNativeSender",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x52a2e17e",
+          "signature": "lastNativeSender()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xe4a6700d",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+          "inherited": false,
+          "inputs": [],
+          "name": "minimumDelaySeconds",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0xe4a6700d",
+          "signature": "minimumDelaySeconds()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xda30972a",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "salt",
+              "type": "bytes32"
+            }
+          ],
+          "name": "operationId",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xda30972a",
+          "signature": "operationId(address,uint256,bytes,bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xc74f349b",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "name": "operations",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint64",
+              "name": "readyAt",
+              "type": "uint64"
+            },
+            {
+              "index": 1,
+              "internalType": "bool",
+              "name": "executed",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xc74f349b",
+          "signature": "operations(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xd1c6ef92",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+          "inherited": false,
+          "inputs": [],
+          "name": "receivedNative",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xd1c6ef92",
+          "signature": "receivedNative()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xb0e58bc9",
+          "declaringDefinitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "salt",
+              "type": "bytes32"
+            }
+          ],
+          "name": "schedule",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "id",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "readyAt",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0xb0e58bc9",
+          "signature": "schedule(address,uint256,bytes,bytes32)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [
+        {
+          "astId": 314578,
+          "canonicalSignature": "RehearsalTimelockUnauthorized(address)",
+          "displaySignature": "RehearsalTimelockUnauthorized(address)",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#error:0x991cc9b6",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "actor",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNlcnJvcjoweDk5MWNjOWI2",
+          "kind": "error",
+          "name": "RehearsalTimelockUnauthorized",
+          "natspec": "",
+          "range": {
+            "byteLength": 51,
+            "byteStart": 8070,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L212",
+            "lineEnd": 212,
+            "lineStart": 212,
+            "snippetSha256": "sha256:3710a261fa2aadd316320071ee9aac0bf05b9a46a5e389862a97947531439ada",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0x991cc9b6"
+        },
+        {
+          "astId": 314580,
+          "canonicalSignature": "RehearsalTimelockAlreadyBound()",
+          "displaySignature": "RehearsalTimelockAlreadyBound()",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#error:0x60b86bef",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNlcnJvcjoweDYwYjg2YmVm",
+          "kind": "error",
+          "name": "RehearsalTimelockAlreadyBound",
+          "natspec": "",
+          "range": {
+            "byteLength": 38,
+            "byteStart": 8126,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L213",
+            "lineEnd": 213,
+            "lineStart": 213,
+            "snippetSha256": "sha256:fe768b1d641a8d6e547c70ad6dc7ae721bf0e488f2fafe1ed59087efb7c7fd4b",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0x60b86bef"
+        },
+        {
+          "astId": 314584,
+          "canonicalSignature": "RehearsalTimelockOperationExists(bytes32)",
+          "displaySignature": "RehearsalTimelockOperationExists(bytes32)",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#error:0x02bb5f29",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "operationId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNlcnJvcjoweDAyYmI1ZjI5",
+          "kind": "error",
+          "name": "RehearsalTimelockOperationExists",
+          "natspec": "",
+          "range": {
+            "byteLength": 60,
+            "byteStart": 8169,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L214",
+            "lineEnd": 214,
+            "lineStart": 214,
+            "snippetSha256": "sha256:31001f1057b177508d064509d165a9c8881e52a953dd30d7b27a2540595a188b",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0x02bb5f29"
+        },
+        {
+          "astId": 314590,
+          "canonicalSignature": "RehearsalTimelockOperationNotReady(bytes32,uint64)",
+          "displaySignature": "RehearsalTimelockOperationNotReady(bytes32,uint64)",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#error:0xaf130b5f",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "operationId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "readyAt",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNlcnJvcjoweGFmMTMwYjVm",
+          "kind": "error",
+          "name": "RehearsalTimelockOperationNotReady",
+          "natspec": "",
+          "range": {
+            "byteLength": 78,
+            "byteStart": 8234,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L215",
+            "lineEnd": 215,
+            "lineStart": 215,
+            "snippetSha256": "sha256:cc0580b9f25979c873cd0133e568c46992c931a8e6f7aef0038e62547f61a3c9",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0xaf130b5f"
+        },
+        {
+          "astId": 314594,
+          "canonicalSignature": "RehearsalTimelockOperationExecutedAlready(bytes32)",
+          "displaySignature": "RehearsalTimelockOperationExecutedAlready(bytes32)",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#error:0x9e3b1f7c",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "operationId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNlcnJvcjoweDllM2IxZjdj",
+          "kind": "error",
+          "name": "RehearsalTimelockOperationExecutedAlready",
+          "natspec": "",
+          "range": {
+            "byteLength": 69,
+            "byteStart": 8317,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L216",
+            "lineEnd": 216,
+            "lineStart": 216,
+            "snippetSha256": "sha256:e5ecffca86829ba8218faa5f33c977c17898bd5c30bef71fd7f3d282de5806c4",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0x9e3b1f7c"
+        },
+        {
+          "astId": 314596,
+          "canonicalSignature": "RehearsalTimelockCallFailed()",
+          "displaySignature": "RehearsalTimelockCallFailed()",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#error:0xe05e0117",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNlcnJvcjoweGUwNWUwMTE3",
+          "kind": "error",
+          "name": "RehearsalTimelockCallFailed",
+          "natspec": "",
+          "range": {
+            "byteLength": 36,
+            "byteStart": 8391,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L217",
+            "lineEnd": 217,
+            "lineStart": 217,
+            "snippetSha256": "sha256:f7509de0b32df61880c373436f0f62a1b1f501671037d7d1f7709fc9ef7a27ee",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0xe05e0117"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 314562,
+          "canonicalSignature": "RehearsalTimelockGovernorBound(address)",
+          "displaySignature": "RehearsalTimelockGovernorBound(address)",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#event:RehearsalTimelockGovernorBound(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "governor",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNldmVudDpSZWhlYXJzYWxUaW1lbG9ja0dvdmVybm9yQm91bmQoYWRkcmVzcyk",
+          "kind": "event",
+          "name": "RehearsalTimelockGovernorBound",
+          "natspec": "",
+          "range": {
+            "byteLength": 63,
+            "byteStart": 7816,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L208",
+            "lineEnd": 208,
+            "lineStart": 208,
+            "snippetSha256": "sha256:0e0ed67c63cfb7d18de1d5d077734d87e6a4beb8cdd40a81c372a8e9d6b8f9f6",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "topic0": "0xb58a5e34d3e3d5b2427bfe498dff45a646736ea37aa871bcaa411d44022d9b9e"
+        },
+        {
+          "anonymous": false,
+          "astId": 314568,
+          "canonicalSignature": "RehearsalTimelockOperationScheduled(bytes32,uint64)",
+          "displaySignature": "RehearsalTimelockOperationScheduled(bytes32,uint64)",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#event:RehearsalTimelockOperationScheduled(bytes32,uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "operationId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "name": "readyAt",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNldmVudDpSZWhlYXJzYWxUaW1lbG9ja09wZXJhdGlvblNjaGVkdWxlZChieXRlczMyLHVpbnQ2NCk",
+          "kind": "event",
+          "name": "RehearsalTimelockOperationScheduled",
+          "natspec": "",
+          "range": {
+            "byteLength": 87,
+            "byteStart": 7884,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L209",
+            "lineEnd": 209,
+            "lineStart": 209,
+            "snippetSha256": "sha256:7799b67f3a0923a9d8f17ce0b8aeb3f32872c39d6f319b355da7ed23e2f5a8c8",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "topic0": "0x7e39aaa924a21e6142411e7dddfd527e0b56e11673d3de1db66b9fba99e64397"
+        },
+        {
+          "anonymous": false,
+          "astId": 314574,
+          "canonicalSignature": "RehearsalTimelockOperationExecuted(bytes32,bytes)",
+          "displaySignature": "RehearsalTimelockOperationExecuted(bytes32,bytes)",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#event:RehearsalTimelockOperationExecuted(bytes32,bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "operationId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "name": "returnData",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNldmVudDpSZWhlYXJzYWxUaW1lbG9ja09wZXJhdGlvbkV4ZWN1dGVkKGJ5dGVzMzIsYnl0ZXMp",
+          "kind": "event",
+          "name": "RehearsalTimelockOperationExecuted",
+          "natspec": "",
+          "range": {
+            "byteLength": 88,
+            "byteStart": 7976,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L210",
+            "lineEnd": 210,
+            "lineStart": 210,
+            "snippetSha256": "sha256:6f2f4d80c98733772cd43ec306fffe1d7c6ca43f819935cf3e1253be98bd4290",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "topic0": "0xfc30acd19d75712c8c5b7546e0fe2e427efe52e26b2b34d532a7fc7116ef1a66"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "bootstrapAdmin()",
+          "displaySignature": "bootstrapAdmin()",
+          "functionKind": "getter",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xf5778b03",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNmdW5jdGlvbjoweGY1Nzc4YjAz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "bootstrapAdmin",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 29,
+            "byteStart": 7587,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L201",
+            "lineEnd": 201,
+            "lineStart": 201,
+            "snippetSha256": "sha256:12fd345f024e7fc8ffa1e90b35efe6707883244508547c493b0f5c6b245b8ba8",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0xf5778b03",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "governor()",
+          "displaySignature": "governor()",
+          "functionKind": "getter",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0x0c340a24",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNmdW5jdGlvbjoweDBjMzQwYTI0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "governor",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 23,
+            "byteStart": 7622,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L202",
+            "lineEnd": 202,
+            "lineStart": 202,
+            "snippetSha256": "sha256:a829ec86844c88af4075c3145bedc08aaacbe5e19600d8374b38c761c5b2aa1e",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0x0c340a24",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "minimumDelaySeconds()",
+          "displaySignature": "minimumDelaySeconds()",
+          "functionKind": "getter",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xe4a6700d",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNmdW5jdGlvbjoweGU0YTY3MDBk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "minimumDelaySeconds",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 33,
+            "byteStart": 7651,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L203",
+            "lineEnd": 203,
+            "lineStart": 203,
+            "snippetSha256": "sha256:644cd829deaac8abbdf8cdab1f796a15f0707ad9797166505be3461a74a8de82",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0xe4a6700d",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "operations(bytes32)",
+          "displaySignature": "operations(bytes32)",
+          "functionKind": "getter",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xc74f349b",
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNmdW5jdGlvbjoweGM3NGYzNDli",
+          "kind": "function",
+          "modifiers": [],
+          "name": "operations",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint64",
+              "name": "readyAt",
+              "type": "uint64"
+            },
+            {
+              "index": 1,
+              "internalType": "bool",
+              "name": "executed",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 47,
+            "byteStart": 7690,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L204",
+            "lineEnd": 204,
+            "lineStart": 204,
+            "snippetSha256": "sha256:ff7b8bce28b7279d42f1085cb5419048e8e5011af253332b6327f749d6b20687",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0xc74f349b",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "receivedNative()",
+          "displaySignature": "receivedNative()",
+          "functionKind": "getter",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xd1c6ef92",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNmdW5jdGlvbjoweGQxYzZlZjky",
+          "kind": "function",
+          "modifiers": [],
+          "name": "receivedNative",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 29,
+            "byteStart": 7743,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L205",
+            "lineEnd": 205,
+            "lineStart": 205,
+            "snippetSha256": "sha256:6498577d98324dbf0949b107a160d98f92d59903b61dc205cd1a952b13f72083",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0xd1c6ef92",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "lastNativeSender()",
+          "displaySignature": "lastNativeSender()",
+          "functionKind": "getter",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0x52a2e17e",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNmdW5jdGlvbjoweDUyYTJlMTdl",
+          "kind": "function",
+          "modifiers": [],
+          "name": "lastNativeSender",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 31,
+            "byteStart": 7778,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L206",
+            "lineEnd": 206,
+            "lineStart": 206,
+            "snippetSha256": "sha256:d40b3f9b1d58c1ca8e5888da1965d249f4ce35f1233be1cc98d38208a4bf438e",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0x52a2e17e",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(uint64)",
+          "functionKind": "constructor",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:constructor(uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "minimumDelaySeconds_",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNmdW5jdGlvbjpjb25zdHJ1Y3Rvcih1aW50NjQp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 216,
+            "byteStart": 8433,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L219-L223",
+            "lineEnd": 223,
+            "lineStart": 219,
+            "snippetSha256": "sha256:f1a8afe5b218dc872a7f9955d10b0a3dd414bdd1425ec53d70b9c81a07628543",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "implementationName()",
+          "displaySignature": "implementationName()",
+          "functionKind": "function",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0x600869e3",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNmdW5jdGlvbjoweDYwMDg2OWUz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "implementationName",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 126,
+            "byteStart": 8789,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L230-L232",
+            "lineEnd": 232,
+            "lineStart": 230,
+            "snippetSha256": "sha256:48aac1fe1e505673dbe3a56fb0e1311659ed88f5743a9d28bdc400cbb205e5da",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0x600869e3",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "bindGovernor(address)",
+          "displaySignature": "bindGovernor(address)",
+          "functionKind": "function",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xf8ded6be",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "governor_",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNmdW5jdGlvbjoweGY4ZGVkNmJl",
+          "kind": "function",
+          "modifiers": [],
+          "name": "bindGovernor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 399,
+            "byteStart": 8921,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L234-L242",
+            "lineEnd": 242,
+            "lineStart": 234,
+            "snippetSha256": "sha256:2685d0877e6e64955f8e091159d511128eb43a6e0a4563f07d46792235bd85d2",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0xf8ded6be",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "operationId(address,uint256,bytes,bytes32)",
+          "displaySignature": "operationId(address,uint256,bytes,bytes32)",
+          "functionKind": "function",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xda30972a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "data",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            },
+            {
+              "index": 3,
+              "name": "salt",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNmdW5jdGlvbjoweGRhMzA5NzJh",
+          "kind": "function",
+          "modifiers": [],
+          "name": "operationId",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 247,
+            "byteStart": 9326,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L244-L250",
+            "lineEnd": 250,
+            "lineStart": 244,
+            "snippetSha256": "sha256:a606dd8c7e83340498cb6052bb7d06d51bb9cf3a8a131fbc0637c20da563d207",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0xda30972a",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "schedule(address,uint256,bytes,bytes32)",
+          "displaySignature": "schedule(address,uint256,bytes,bytes32)",
+          "functionKind": "function",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xb0e58bc9",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "data",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            },
+            {
+              "index": 3,
+              "name": "salt",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNmdW5jdGlvbjoweGIwZTU4YmM5",
+          "kind": "function",
+          "modifiers": [
+            "onlyGovernor"
+          ],
+          "name": "schedule",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "id",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "readyAt",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 520,
+            "byteStart": 9579,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L252-L262",
+            "lineEnd": 262,
+            "lineStart": 252,
+            "snippetSha256": "sha256:7990926d57fddf506315f785b8fa25466a7030233ba344080a0e3ec42f9f89e7",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0xb0e58bc9",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "execute(address,uint256,bytes,bytes32)",
+          "displaySignature": "execute(address,uint256,bytes,bytes32)",
+          "functionKind": "function",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0x88aa4c12",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "data",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            },
+            {
+              "index": 3,
+              "name": "salt",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNmdW5jdGlvbjoweDg4YWE0YzEy",
+          "kind": "function",
+          "modifiers": [
+            "onlyGovernor"
+          ],
+          "name": "execute",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 855,
+            "byteStart": 10105,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L264-L282",
+            "lineEnd": 282,
+            "lineStart": 264,
+            "snippetSha256": "sha256:356185fba39285450a7f6649cb3b027629142bf82c0a94a695ce6927f43f98be",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0x88aa4c12",
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_bubble(bytes)",
+          "functionKind": "function",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:_bubble(bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNmdW5jdGlvbjpfYnViYmxlKGJ5dGVzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_bubble",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 242,
+            "byteStart": 10966,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L284-L289",
+            "lineEnd": 289,
+            "lineStart": 284,
+            "snippetSha256": "sha256:c7421e228dbe721423ead2d69becf0a8a65547a07bc427a1dd42004a4eb38c58",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "receive()",
+          "functionKind": "receive",
+          "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:receive()",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbCNmdW5jdGlvbjpyZWNlaXZlKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "receive",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 110,
+            "byteStart": 11214,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L291-L294",
+            "lineEnd": 294,
+            "lineStart": 291,
+            "snippetSha256": "sha256:243a34fcf9a06e77cdf82dfa554e6992437cbf4c2267e2f299b9ae626b8f26c4",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": null,
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [
+        {
+          "inputs": [],
+          "name": "onlyGovernor",
+          "natspec": "",
+          "overrides": [],
+          "range": {
+            "byteLength": 128,
+            "byteStart": 8655,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L225-L228",
+            "lineEnd": 228,
+            "lineStart": 225,
+            "snippetSha256": "sha256:69eae28e1ac0d84b089cbd90bd88b66d6966d30a4d1a3c9f073f9d8f337845a1",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "virtual": false
+        }
+      ],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xf5778b03",
+          "immutable": false,
+          "name": "bootstrapAdmin",
+          "natspec": "",
+          "range": {
+            "byteLength": 29,
+            "byteStart": 7587,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L201",
+            "lineEnd": 201,
+            "lineStart": 201,
+            "snippetSha256": "sha256:12fd345f024e7fc8ffa1e90b35efe6707883244508547c493b0f5c6b245b8ba8",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0xf5778b03",
+          "type": "address",
+          "typeString": "address",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0x0c340a24",
+          "immutable": false,
+          "name": "governor",
+          "natspec": "",
+          "range": {
+            "byteLength": 23,
+            "byteStart": 7622,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L202",
+            "lineEnd": 202,
+            "lineStart": 202,
+            "snippetSha256": "sha256:a829ec86844c88af4075c3145bedc08aaacbe5e19600d8374b38c761c5b2aa1e",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0x0c340a24",
+          "type": "address",
+          "typeString": "address",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xe4a6700d",
+          "immutable": false,
+          "name": "minimumDelaySeconds",
+          "natspec": "",
+          "range": {
+            "byteLength": 33,
+            "byteStart": 7651,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L203",
+            "lineEnd": 203,
+            "lineStart": 203,
+            "snippetSha256": "sha256:644cd829deaac8abbdf8cdab1f796a15f0707ad9797166505be3461a74a8de82",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0xe4a6700d",
+          "type": "uint64",
+          "typeString": "uint64",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xc74f349b",
+          "immutable": false,
+          "name": "operations",
+          "natspec": "",
+          "range": {
+            "byteLength": 47,
+            "byteStart": 7690,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L204",
+            "lineEnd": 204,
+            "lineStart": 204,
+            "snippetSha256": "sha256:ff7b8bce28b7279d42f1085cb5419048e8e5011af253332b6327f749d6b20687",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0xc74f349b",
+          "type": "mapping(bytes32 => Operation)",
+          "typeString": "mapping(bytes32 => struct StreamReferenceTimelockRehearsal.Operation)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xd1c6ef92",
+          "immutable": false,
+          "name": "receivedNative",
+          "natspec": "",
+          "range": {
+            "byteLength": 29,
+            "byteStart": 7743,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L205",
+            "lineEnd": 205,
+            "lineStart": 205,
+            "snippetSha256": "sha256:6498577d98324dbf0949b107a160d98f92d59903b61dc205cd1a952b13f72083",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0xd1c6ef92",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0x52a2e17e",
+          "immutable": false,
+          "name": "lastNativeSender",
+          "natspec": "",
+          "range": {
+            "byteLength": 31,
+            "byteStart": 7778,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L206",
+            "lineEnd": 206,
+            "lineStart": 206,
+            "snippetSha256": "sha256:d40b3f9b1d58c1ca8e5888da1965d249f4ce35f1233be1cc98d38208a4bf438e",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          },
+          "selector": "0x52a2e17e",
+          "type": "address",
+          "typeString": "address",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "readyAt",
+              "natspec": "",
+              "range": {
+                "byteLength": 14,
+                "byteStart": 7537,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L197",
+                "lineEnd": 197,
+                "lineStart": 197,
+                "snippetSha256": "sha256:99451c68a0377bf84e1997cbf47c049cc9615ae06045918f63d5f3134908410e",
+                "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+              },
+              "type": "uint64",
+              "typeString": "uint64"
+            },
+            {
+              "index": 1,
+              "name": "executed",
+              "natspec": "",
+              "range": {
+                "byteLength": 13,
+                "byteStart": 7561,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L198",
+                "lineEnd": 198,
+                "lineStart": 198,
+                "snippetSha256": "sha256:c0a7fe5c1947fa096538a49b958dccdbc8a1843c7bbe1045a7157f534fcf8f65",
+                "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+              },
+              "type": "bool",
+              "typeString": "bool"
+            }
+          ],
+          "name": "Operation",
+          "natspec": "",
+          "range": {
+            "byteLength": 71,
+            "byteStart": 7510,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L196-L199",
+            "lineEnd": 199,
+            "lineStart": 196,
+            "snippetSha256": "sha256:8c503906b09b62a61dedef9b23495dd885491b7aa21b9249a6c8aa03b72ac04c",
+            "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUdvdmVybmFuY2VWMkhvbGRlclJlaGVhcnNhbE1vY2tzLnNvbDpTdHJlYW1SZWZlcmVuY2VUaW1lbG9ja1JlaGVhcnNhbA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamReferenceTimelockRehearsal",
+    "natspec": "@notice Separate local-only timelock executor for the pinned reference\n         governor rehearsal. The governor binding is one-way and scheduling\n         never executes an operation in the same transaction.",
+    "range": {
+      "byteLength": 3864,
+      "byteStart": 7462,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol#L195-L295",
+      "lineEnd": 295,
+      "lineStart": 195,
+      "snippetSha256": "sha256:1a416482bca619eab16b70f800852a423c892be6b3dc31fd6aed3c5c9a432a9a",
+      "sourceSha256": "sha256:354bec3b99312eb240bc643693584ebcfeb7c3e567d10e8291bae82334c30594"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 13
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 13
+    },
+    "totalCount": 13
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0x0c340a24",
+      "definitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0x52a2e17e",
+      "definitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0x600869e3",
+      "definitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0x88aa4c12",
+      "definitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xb0e58bc9",
+      "definitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xc74f349b",
+      "definitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xd1c6ef92",
+      "definitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xda30972a",
+      "definitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xe4a6700d",
+      "definitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xf5778b03",
+      "definitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:0xf8ded6be",
+      "definitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:constructor(uint64)",
+      "definitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal#function:receive()",
+      "definitionId": "test/helpers/StreamGovernanceV2HolderRehearsalMocks.sol:StreamReferenceTimelockRehearsal",
+      "severity": "advisory"
+    }
+  ]
+}
