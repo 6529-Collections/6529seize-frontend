@@ -8,6 +8,7 @@ import {
   createSolidityReferenceReader,
   SolidityReferenceNotFoundError,
 } from "@/lib/public-review/solidityReferenceData";
+import { buildStreamReferenceSourceCommits } from "@/lib/public-review/streamSolidityReferenceIdentity";
 import {
   encodeSoliditySemanticId,
   getSolidityDeclarationHref,
@@ -54,14 +55,14 @@ const REFERENCE_ACTIVE_REVIEW_VERSION =
   ) ??
   PUBLICLY_AVAILABLE_REVIEW_VERSIONS.at(-1) ??
   ACTIVE_REVIEW_VERSION;
-const SOURCE_COMMITS = Object.fromEntries(
-  STREAM_REVIEW_DEFINITION.versions.map(({ source, version }) => [
-    version,
-    source.commit,
-  ])
-);
-SOURCE_COMMITS[streamReferenceConfig.reviewVersion] =
-  streamReferenceConfig.source.commit;
+const SOURCE_COMMITS = buildStreamReferenceSourceCommits({
+  declaredVersions: STREAM_REVIEW_DEFINITION.versions,
+  retainedVersions: streamReferenceConfig.output.retainedVersions,
+  snapshot: {
+    commit: streamReferenceConfig.source.commit,
+    version: streamReferenceConfig.reviewVersion,
+  },
+});
 
 const IDENTITY: SolidityReferenceReviewIdentity = {
   activeSourceCommit: REFERENCE_ACTIVE_REVIEW_VERSION.source.commit,
