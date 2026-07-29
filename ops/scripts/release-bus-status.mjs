@@ -14,6 +14,7 @@ const VALID_STAGING_STATES = new Set([
   "LIVE",
   "CLEAN_MAIN",
   "ROLLBACK_FAILED",
+  "DETACHED_MANUAL_OWNERSHIP",
 ]);
 const LOOPBACK_HOSTS = new Set(["127.0.0.1", "[::1]", "localhost"]);
 

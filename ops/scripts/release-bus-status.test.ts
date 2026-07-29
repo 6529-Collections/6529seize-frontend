@@ -58,7 +58,8 @@ type SanitizedStatus = {
       | "UNINITIALIZED"
       | "LIVE"
       | "CLEAN_MAIN"
-      | "ROLLBACK_FAILED";
+      | "ROLLBACK_FAILED"
+      | "DETACHED_MANUAL_OWNERSHIP";
     readonly current_manifest_id: string | null;
     readonly last_validated_manifest_id: string | null;
     readonly frontend_sha: string | null;
@@ -214,7 +215,6 @@ async function runWithResponse(
   }
 }
 
-// eslint-disable-next-line max-lines-per-function -- This integration-style suite shares one isolated helper/server fixture.
 describe("release-bus-status helper", () => {
   test.each(["OFF", "STAGING", "PRODUCTION"] as const)(
     "prints sanitized status for %s mode",
@@ -279,6 +279,60 @@ describe("release-bus-status helper", () => {
       clean_main: false,
       last_transition_train_id: null,
       row_version: 7,
+    });
+  });
+
+  it("reports detached manual ownership without claiming physical staging absence", async () => {
+    const pausedLaneControls = VALID_CONTROLS.map((control) => ({
+      ...control,
+      paused: control.scope !== "ALL",
+    }));
+    const result = await runWithResponse({
+      mode: "PRODUCTION",
+      controls: pausedLaneControls,
+      lanes: laneStates("PRODUCTION", pausedLaneControls),
+      staging_state: {
+        status: "DETACHED_MANUAL_OWNERSHIP",
+        current_manifest_id: null,
+        last_validated_manifest_id: "historical-manifest",
+        frontend_sha: null,
+        backend_sha: null,
+        frontend_staging_ref_sha: null,
+        backend_staging_ref_sha: null,
+        clean_main: false,
+        last_transition_train_id: null,
+        row_version: 8,
+      },
+    });
+
+    expect(result.code).toBe(0);
+    expect(result.stderr).toBe("");
+    expect(result.authorization).toBe(`Bearer ${TOKEN}`);
+    expect(parseSanitizedStatus(result.stdout)).toEqual({
+      lanes: {
+        STAGING: {
+          status: "OFF",
+          changeable: true,
+          reason: "Staging enabled",
+        },
+        PRODUCTION: {
+          status: "OFF",
+          changeable: true,
+          reason: "Production enabled",
+        },
+      },
+      staging: {
+        status: "DETACHED_MANUAL_OWNERSHIP",
+        current_manifest_id: null,
+        last_validated_manifest_id: "historical-manifest",
+        frontend_sha: null,
+        backend_sha: null,
+        frontend_staging_ref_sha: null,
+        backend_staging_ref_sha: null,
+        clean_main: false,
+        last_transition_train_id: null,
+        row_version: 8,
+      },
     });
   });
 
@@ -589,6 +643,7 @@ describe("release-bus-status helper", () => {
   });
 
   test.each([
+    ["status", "DETACHED", INVALID_STAGING_STATE],
     ["row_version", true, INVALID_STAGING_STATE],
     ["row_version", "7", INVALID_STAGING_STATE],
     ["clean_main", null, INVALID_STAGING_STATE],
