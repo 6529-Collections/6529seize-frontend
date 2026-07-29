@@ -113,7 +113,7 @@ function MintingHeader() {
           >
             {m("about.minting.summary.label")}
           </h2>
-          <div className="tw-mt-2 tw-space-y-2 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-400">
+          <div className="tw-mt-2 tw-space-y-2 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300">
             <p className="tw-m-0">
               Meme Cards are minted (primary sale) when the art for the next
               Meme Card is ready.
@@ -381,7 +381,7 @@ function MintingPhilosophy() {
         >
           {m("about.minting.philosophy.title")}
         </h2>
-        <p className="tw-mb-0 tw-mt-2 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-400">
+        <p className="tw-mb-0 tw-mt-2 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300">
           Mints for well-known collections where demand may exceed supply are
           very difficult to manage effectively. The main approaches and our
           views on them are highlighted below.
