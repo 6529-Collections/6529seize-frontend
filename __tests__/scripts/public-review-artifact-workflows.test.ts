@@ -10,7 +10,16 @@ function workflow(name: string): string {
 
 const appPrCi = workflow("app-pr-ci.yml");
 const releaseBusPreflight = workflow("release-bus-v2-preflight.yml");
+const legacyStaging = workflow("deploy-staging.yml");
 const legacyProduction = workflow("build-upload-deploy-prod.yml");
+const stagingScript = fs.readFileSync(
+  path.join(process.cwd(), "scripts", "staging.sh"),
+  "utf8"
+);
+const standaloneStart = fs.readFileSync(
+  path.join(process.cwd(), "scripts", "start-standalone.cjs"),
+  "utf8"
+);
 const helper = "node scripts/package-public-review-artifacts.cjs";
 const sourceCleanGuard =
   "git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews";
@@ -76,6 +85,33 @@ describe("public-review artifact workflow contract", () => {
     );
     expect(legacyProduction).toContain('--extracted-root "$zip_extract"');
     expect(legacyProduction).not.toMatch(/\bcp -r public\b/);
+  });
+
+  it("keeps legacy staging aligned with the public-review bundle contract", () => {
+    expect(legacyStaging).toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS }}"
+    );
+    expect(legacyStaging).toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64"
+    );
+    expect(legacyStaging).toContain('(has("production") | not)');
+    expect(stagingScript).toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64"
+    );
+    expect(stagingScript).toContain("STANDALONE_ARTIFACT_PROFILE=staging");
+    expect(stagingScript).toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE="
+    );
+    expect(standaloneStart).toContain(
+      '"package-public-review-artifacts.cjs"'
+    );
+    expect(standaloneStart).toContain('"prepare"');
+    expect(standaloneStart).toContain(
+      'process.env["STANDALONE_ARTIFACT_PROFILE"]'
+    );
+    expect(standaloneStart).toContain(
+      'process.env["PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE"]'
+    );
   });
 
   it("preserves production identity and staging help and agent regeneration", () => {
