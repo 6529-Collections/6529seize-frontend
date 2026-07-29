@@ -1,0 +1,1704 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#event:PauseUpdated(bytes32,bool,address,bytes32)",
+          "declaringDefinitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "domain",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "internalType": "bool",
+              "name": "paused",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "reason",
+              "type": "bytes32"
+            }
+          ],
+          "name": "PauseUpdated",
+          "signature": "PauseUpdated(bytes32,bool,address,bytes32)",
+          "topic0": "0x77c6d21474f6f6813fde8949bd7651f09078a0dd6c1e886847baae6f5c97d717"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0xef04b735",
+          "declaringDefinitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAuctionBidPauseBlocksOnlyNewBids",
+          "outputs": [],
+          "selector": "0xef04b735",
+          "signature": "testAuctionBidPauseBlocksOnlyNewBids()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0x257d4025",
+          "declaringDefinitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAuctionBidPauseMatrixPreservesCreditsEscrowAndWithdrawals",
+          "outputs": [],
+          "selector": "0x257d4025",
+          "signature": "testAuctionBidPauseMatrixPreservesCreditsEscrowAndWithdrawals()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0xc546d0fe",
+          "declaringDefinitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAuctionSettlementPauseBlocksEndedAuctionSettlementUntilUnpaused",
+          "outputs": [],
+          "selector": "0xc546d0fe",
+          "signature": "testAuctionSettlementPauseBlocksEndedAuctionSettlementUntilUnpaused()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0xb169cd76",
+          "declaringDefinitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAuctionSettlementPauseMatrixPreservesCustodyAndProceeds",
+          "outputs": [],
+          "selector": "0xb169cd76",
+          "signature": "testAuctionSettlementPauseMatrixPreservesCustodyAndProceeds()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0x5150bfaa",
+          "declaringDefinitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testDropExecutionPauseBlocksSignedDropsUntilUnpaused",
+          "outputs": [],
+          "selector": "0x5150bfaa",
+          "signature": "testDropExecutionPauseBlocksSignedDropsUntilUnpaused()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0xfbf747c5",
+          "declaringDefinitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testDropExecutionPauseSupportsSignerCompromiseResponse",
+          "outputs": [],
+          "selector": "0xfbf747c5",
+          "signature": "testDropExecutionPauseSupportsSignerCompromiseResponse()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0x74e0d53b",
+          "declaringDefinitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMetadataMutationPauseBlocksMutableMetadataOnly",
+          "outputs": [],
+          "selector": "0x74e0d53b",
+          "signature": "testMetadataMutationPauseBlocksMutableMetadataOnly()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0x4668a58c",
+          "declaringDefinitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMintPauseBlocksMinterPathWithoutConsumingDrop",
+          "outputs": [],
+          "selector": "0x4668a58c",
+          "signature": "testMintPauseBlocksMinterPathWithoutConsumingDrop()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0x194a2eb3",
+          "declaringDefinitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testNoBidSettlementPauseMatrixPreservesContractPosterCustody",
+          "outputs": [],
+          "selector": "0x194a2eb3",
+          "signature": "testNoBidSettlementPauseMatrixPreservesContractPosterCustody()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0x0eeb7cf9",
+          "declaringDefinitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPauseGuardianCanPauseButCannotUnpause",
+          "outputs": [],
+          "selector": "0x0eeb7cf9",
+          "signature": "testPauseGuardianCanPauseButCannotUnpause()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0x12f1d7fb",
+          "declaringDefinitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRandomnessRequestPauseBlocksNewRequestsUntilUnpaused",
+          "outputs": [],
+          "selector": "0x12f1d7fb",
+          "signature": "testRandomnessRequestPauseBlocksNewRequestsUntilUnpaused()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0xedf1e2a1",
+          "declaringDefinitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testUserWithdrawalsRemainAvailableDuringOperationalPauses",
+          "outputs": [],
+          "selector": "0xedf1e2a1",
+          "signature": "testUserWithdrawalsRemainAvailableDuringOperationalPauses()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 249454,
+          "canonicalSignature": "PauseUpdated(bytes32,bool,address,bytes32)",
+          "displaySignature": "PauseUpdated(bytes32,bool,address,bytes32)",
+          "id": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#event:PauseUpdated(bytes32,bool,address,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "domain",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "name": "paused",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "admin",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "name": "reason",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlN0cmVhbVBhdXNlQ29udHJvbHNUZXN0I2V2ZW50OlBhdXNlVXBkYXRlZChieXRlczMyLGJvb2wsYWRkcmVzcyxieXRlczMyKQ",
+          "kind": "event",
+          "name": "PauseUpdated",
+          "natspec": "",
+          "range": {
+            "byteLength": 117,
+            "byteStart": 579,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L18-L20",
+            "lineEnd": 20,
+            "lineStart": 18,
+            "snippetSha256": "sha256:37195974166c4a197cd956dafa2607b160591f3e5286df57b94f315bfcd9b8ab",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "topic0": "0x77c6d21474f6f6813fde8949bd7651f09078a0dd6c1e886847baae6f5c97d717"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "testPauseGuardianCanPauseButCannotUnpause()",
+          "displaySignature": "testPauseGuardianCanPauseButCannotUnpause()",
+          "functionKind": "function",
+          "id": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0x0eeb7cf9",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlN0cmVhbVBhdXNlQ29udHJvbHNUZXN0I2Z1bmN0aW9uOjB4MGVlYjdjZjk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPauseGuardianCanPauseButCannotUnpause",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1286,
+            "byteStart": 2118,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L57-L86",
+            "lineEnd": 86,
+            "lineStart": 57,
+            "snippetSha256": "sha256:0835daba605508c5acdaa9f845929d4dabbf277344a07ad515b72e8a86ee2a55",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": "0x0eeb7cf9",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testDropExecutionPauseBlocksSignedDropsUntilUnpaused()",
+          "displaySignature": "testDropExecutionPauseBlocksSignedDropsUntilUnpaused()",
+          "functionKind": "function",
+          "id": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0x5150bfaa",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlN0cmVhbVBhdXNlQ29udHJvbHNUZXN0I2Z1bmN0aW9uOjB4NTE1MGJmYWE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testDropExecutionPauseBlocksSignedDropsUntilUnpaused",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1493,
+            "byteStart": 3410,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L88-L123",
+            "lineEnd": 123,
+            "lineStart": 88,
+            "snippetSha256": "sha256:a74c4d95cca33bcd8520111aa3334afb917f0094104239137bc8d85c0e0a2b7c",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": "0x5150bfaa",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testDropExecutionPauseSupportsSignerCompromiseResponse()",
+          "displaySignature": "testDropExecutionPauseSupportsSignerCompromiseResponse()",
+          "functionKind": "function",
+          "id": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0xfbf747c5",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlN0cmVhbVBhdXNlQ29udHJvbHNUZXN0I2Z1bmN0aW9uOjB4ZmJmNzQ3YzU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testDropExecutionPauseSupportsSignerCompromiseResponse",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1461,
+            "byteStart": 4909,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L125-L158",
+            "lineEnd": 158,
+            "lineStart": 125,
+            "snippetSha256": "sha256:dc453e31cab2c8eb9f1a8acd9fb1b159f9e1eac3be42b527d78b5821a9d9e068",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": "0xfbf747c5",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMintPauseBlocksMinterPathWithoutConsumingDrop()",
+          "displaySignature": "testMintPauseBlocksMinterPathWithoutConsumingDrop()",
+          "functionKind": "function",
+          "id": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0x4668a58c",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlN0cmVhbVBhdXNlQ29udHJvbHNUZXN0I2Z1bmN0aW9uOjB4NDY2OGE1OGM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMintPauseBlocksMinterPathWithoutConsumingDrop",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1380,
+            "byteStart": 6376,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L160-L194",
+            "lineEnd": 194,
+            "lineStart": 160,
+            "snippetSha256": "sha256:9c4924157588f2ebfc18600d7ca57ff7f2abdbfa2f0ce8452ad23afec3ad2845",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": "0x4668a58c",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAuctionBidPauseBlocksOnlyNewBids()",
+          "displaySignature": "testAuctionBidPauseBlocksOnlyNewBids()",
+          "functionKind": "function",
+          "id": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0xef04b735",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlN0cmVhbVBhdXNlQ29udHJvbHNUZXN0I2Z1bmN0aW9uOjB4ZWYwNGI3MzU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAuctionBidPauseBlocksOnlyNewBids",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 720,
+            "byteStart": 7762,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L196-L209",
+            "lineEnd": 209,
+            "lineStart": 196,
+            "snippetSha256": "sha256:058dc26cfc4de0689ff52c1a7a3e1e0421cf86b6d465d858d5b1e94591aa9191",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": "0xef04b735",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAuctionSettlementPauseBlocksEndedAuctionSettlementUntilUnpaused()",
+          "displaySignature": "testAuctionSettlementPauseBlocksEndedAuctionSettlementUntilUnpaused()",
+          "functionKind": "function",
+          "id": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0xc546d0fe",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlN0cmVhbVBhdXNlQ29udHJvbHNUZXN0I2Z1bmN0aW9uOjB4YzU0NmQwZmU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAuctionSettlementPauseBlocksEndedAuctionSettlementUntilUnpaused",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1070,
+            "byteStart": 8488,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L211-L234",
+            "lineEnd": 234,
+            "lineStart": 211,
+            "snippetSha256": "sha256:3b0365fb1ea95fa26bbfc6ad7da4556c245988659aee76bb7f7df8a39ebb96a6",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": "0xc546d0fe",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMetadataMutationPauseBlocksMutableMetadataOnly()",
+          "displaySignature": "testMetadataMutationPauseBlocksMutableMetadataOnly()",
+          "functionKind": "function",
+          "id": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0x74e0d53b",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlN0cmVhbVBhdXNlQ29udHJvbHNUZXN0I2Z1bmN0aW9uOjB4NzRlMGQ1M2I",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMetadataMutationPauseBlocksMutableMetadataOnly",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 778,
+            "byteStart": 9564,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L236-L251",
+            "lineEnd": 251,
+            "lineStart": 236,
+            "snippetSha256": "sha256:b4a8ec7b6170f9ab601b1bdb4b7ebe7bd4208bce44b9598a75d689877d79f531",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": "0x74e0d53b",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRandomnessRequestPauseBlocksNewRequestsUntilUnpaused()",
+          "displaySignature": "testRandomnessRequestPauseBlocksNewRequestsUntilUnpaused()",
+          "functionKind": "function",
+          "id": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0x12f1d7fb",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlN0cmVhbVBhdXNlQ29udHJvbHNUZXN0I2Z1bmN0aW9uOjB4MTJmMWQ3ZmI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRandomnessRequestPauseBlocksNewRequestsUntilUnpaused",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1246,
+            "byteStart": 10348,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L253-L276",
+            "lineEnd": 276,
+            "lineStart": 253,
+            "snippetSha256": "sha256:f211520b14a9a49627c96b730f72a19c5b4ad51aecad7e5afb17ba6e6607eaa7",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": "0x12f1d7fb",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testUserWithdrawalsRemainAvailableDuringOperationalPauses()",
+          "displaySignature": "testUserWithdrawalsRemainAvailableDuringOperationalPauses()",
+          "functionKind": "function",
+          "id": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0xedf1e2a1",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlN0cmVhbVBhdXNlQ29udHJvbHNUZXN0I2Z1bmN0aW9uOjB4ZWRmMWUyYTE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testUserWithdrawalsRemainAvailableDuringOperationalPauses",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1862,
+            "byteStart": 11600,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L278-L316",
+            "lineEnd": 316,
+            "lineStart": 278,
+            "snippetSha256": "sha256:49394305757f87443a921e03a8b4007d6d730917c356b4a83013ccf97a1fc4c9",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": "0xedf1e2a1",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAuctionBidPauseMatrixPreservesCreditsEscrowAndWithdrawals()",
+          "displaySignature": "testAuctionBidPauseMatrixPreservesCreditsEscrowAndWithdrawals()",
+          "functionKind": "function",
+          "id": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0x257d4025",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlN0cmVhbVBhdXNlQ29udHJvbHNUZXN0I2Z1bmN0aW9uOjB4MjU3ZDQwMjU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAuctionBidPauseMatrixPreservesCreditsEscrowAndWithdrawals",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2533,
+            "byteStart": 13468,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L318-L364",
+            "lineEnd": 364,
+            "lineStart": 318,
+            "snippetSha256": "sha256:79f2340ef6a02303a25eabf68bfb22645309193b42e30e79929746e90ce6ee4a",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": "0x257d4025",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAuctionSettlementPauseMatrixPreservesCustodyAndProceeds()",
+          "displaySignature": "testAuctionSettlementPauseMatrixPreservesCustodyAndProceeds()",
+          "functionKind": "function",
+          "id": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0xb169cd76",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlN0cmVhbVBhdXNlQ29udHJvbHNUZXN0I2Z1bmN0aW9uOjB4YjE2OWNkNzY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAuctionSettlementPauseMatrixPreservesCustodyAndProceeds",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3774,
+            "byteStart": 16007,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L366-L435",
+            "lineEnd": 435,
+            "lineStart": 366,
+            "snippetSha256": "sha256:c75e68b0131a6bf7937f94c464883865d7060ce93bc5b079a3c115c097c75cd8",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": "0xb169cd76",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testNoBidSettlementPauseMatrixPreservesContractPosterCustody()",
+          "displaySignature": "testNoBidSettlementPauseMatrixPreservesContractPosterCustody()",
+          "functionKind": "function",
+          "id": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0x194a2eb3",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlN0cmVhbVBhdXNlQ29udHJvbHNUZXN0I2Z1bmN0aW9uOjB4MTk0YTJlYjM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testNoBidSettlementPauseMatrixPreservesContractPosterCustody",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3079,
+            "byteStart": 19787,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L437-L492",
+            "lineEnd": 492,
+            "lineStart": 437,
+            "snippetSha256": "sha256:ae7b4769c484a615376d534abe0c288036f4f4210637e7261b57ed4bf5a2aab2",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": "0x194a2eb3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_createAuctionDrop(uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:_createAuctionDrop(uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "duration",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "reservePrice",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlN0cmVhbVBhdXNlQ29udHJvbHNUZXN0I2Z1bmN0aW9uOl9jcmVhdGVBdWN0aW9uRHJvcCh1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_createAuctionDrop",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "AuctionSetup"
+            }
+          ],
+          "range": {
+            "byteLength": 215,
+            "byteStart": 22872,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L494-L499",
+            "lineEnd": 499,
+            "lineStart": 494,
+            "snippetSha256": "sha256:53e7be5e69981c7e691d1f915a8a2848631a3380359bf00847c536a7cf280b2c",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_createAuctionDropForPoster(address,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:_createAuctionDropForPoster(address,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "poster",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "duration",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "reservePrice",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlN0cmVhbVBhdXNlQ29udHJvbHNUZXN0I2Z1bmN0aW9uOl9jcmVhdGVBdWN0aW9uRHJvcEZvclBvc3RlcihhZGRyZXNzLHVpbnQyNTYsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_createAuctionDropForPoster",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "AuctionSetup"
+            }
+          ],
+          "range": {
+            "byteLength": 1247,
+            "byteStart": 23093,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L501-L536",
+            "lineEnd": 536,
+            "lineStart": 501,
+            "snippetSha256": "sha256:6953395e055931138a97cfa279bbca47ae8fcdca856b5ebddb8344b06d893838",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_snapshotAuctionPauseState(AuctionSetup,address)",
+          "functionKind": "function",
+          "id": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:_snapshotAuctionPauseState(AuctionSetup,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "AuctionSetup"
+            },
+            {
+              "index": 1,
+              "name": "watchedBidder",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlN0cmVhbVBhdXNlQ29udHJvbHNUZXN0I2Z1bmN0aW9uOl9zbmFwc2hvdEF1Y3Rpb25QYXVzZVN0YXRlKEF1Y3Rpb25TZXR1cCxhZGRyZXNzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_snapshotAuctionPauseState",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "snapshot",
+              "storageLocation": "memory",
+              "type": "AuctionPauseSnapshot"
+            }
+          ],
+          "range": {
+            "byteLength": 1355,
+            "byteStart": 24346,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L538-L561",
+            "lineEnd": 561,
+            "lineStart": 538,
+            "snippetSha256": "sha256:f8d46aa44547430d281967ecdf9f72fa2427aa1145b35bb0aecb9d5408e8f82b",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertAuctionPauseState(AuctionSetup,address,AuctionPauseSnapshot)",
+          "functionKind": "function",
+          "id": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:_assertAuctionPauseState(AuctionSetup,address,AuctionPauseSnapshot)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "AuctionSetup"
+            },
+            {
+              "index": 1,
+              "name": "watchedBidder",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "expected",
+              "storageLocation": "memory",
+              "type": "AuctionPauseSnapshot"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlN0cmVhbVBhdXNlQ29udHJvbHNUZXN0I2Z1bmN0aW9uOl9hc3NlcnRBdWN0aW9uUGF1c2VTdGF0ZShBdWN0aW9uU2V0dXAsYWRkcmVzcyxBdWN0aW9uUGF1c2VTbmFwc2hvdCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertAuctionPauseState",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1758,
+            "byteStart": 25707,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L563-L588",
+            "lineEnd": 588,
+            "lineStart": 563,
+            "snippetSha256": "sha256:1e03ed7e11e7477cea7a46b55cc16e5bf295ac62efc8e9c41ce185f5ad1cf9b9",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_pauseAllOperationalDomains(StreamAdmins)",
+          "functionKind": "function",
+          "id": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:_pauseAllOperationalDomains(StreamAdmins)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "admins",
+              "type": "StreamAdmins"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlN0cmVhbVBhdXNlQ29udHJvbHNUZXN0I2Z1bmN0aW9uOl9wYXVzZUFsbE9wZXJhdGlvbmFsRG9tYWlucyhTdHJlYW1BZG1pbnMp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_pauseAllOperationalDomains",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 503,
+            "byteStart": 27471,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L590-L597",
+            "lineEnd": 597,
+            "lineStart": 590,
+            "snippetSha256": "sha256:fdb5e164950860e59b84d0466fa8ee2a850907f5cfdf9b07d04681fe302be00d",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_setPaused(StreamAdmins,bytes32,bool)",
+          "functionKind": "function",
+          "id": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:_setPaused(StreamAdmins,bytes32,bool)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "admins",
+              "type": "StreamAdmins"
+            },
+            {
+              "index": 1,
+              "name": "domain",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "paused",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlN0cmVhbVBhdXNlQ29udHJvbHNUZXN0I2Z1bmN0aW9uOl9zZXRQYXVzZWQoU3RyZWFtQWRtaW5zLGJ5dGVzMzIsYm9vbCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_setPaused",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 135,
+            "byteStart": 27980,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L599-L601",
+            "lineEnd": 601,
+            "lineStart": 599,
+            "snippetSha256": "sha256:cf0fb78235244c0f35aba97269bf3dcef059f0789cc79c07ada6b8d6f698aab0",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "POSTER",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 702,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:695a59e12d896c6e13bf8a41a7b87f2dbedaa0e769d3f48d88cfb58046e19145",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 736,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:0ab9e750f7c6ea7ca35cb67c84e1deac4cd43cc2a6a45b284817308c28bdf2a2",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "valueSource": "address(0x1001)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 52,
+            "byteStart": 757,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:3e651fdfebdcfe0dd0fdc57a7c7e95dcc88555bb618ed67eaaae88bb2f03bb11",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 794,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:1e80055498f115d09b966c83a4320475410b3488cc2e25d7bd51229b835b3e62",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "valueSource": "address(0x5005)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PAYOUT",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 815,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:6de2ca19a7b0e6342b9c731f9156dbb66238022542868c0f1d32ade32ca072b7",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 849,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:f459905761015e37605475907d05df689f55b238aec15260d4f0510e5e363c1f",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "valueSource": "address(0x2002)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "CURATORS_POOL",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 870,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:c7bb6fdd9819faf3c363c0c7247b0cfebcb63e2077a5c446bc0035b0e17c4018",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 911,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:59382625991cd4bee04dd9942857caa65309d0e0d4b1f91c186b3b9845797e29",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "valueSource": "address(0x3003)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "WITHDRAW_RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 61,
+            "byteStart": 932,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:5d4aba953ea476feaac5b09486784ce897bf9789d08c6087d3cab8a2851b8fe2",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 978,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:1f4fd140ad2c560f9c39ca5e51b0dd8d00bd16cb2bb0afd99e8b005b7136d9d7",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "valueSource": "address(0x4004)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PAUSE_GUARDIAN",
+          "natspec": "",
+          "range": {
+            "byteLength": 57,
+            "byteStart": 999,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:4224c1dd9191fe77d3a801d6a5982e951c10ca38bbc9b879ed45fe76de918cf3",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1041,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:2b313e967de5483796211fbd6b58e26c0e1d5832d8be24b0b4b1d2ad4809a902",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "valueSource": "address(0x6006)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "UNPAUSE_ADMIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 1062,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:ad87224f03d22bf57a00add26948b4628696c7a18acb248246e74ddbb57aec93",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1103,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:ac2733152df2595a308f253c6d663e57effbc243730ee25817f4fc7ed2c5c6b8",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "valueSource": "address(0x7007)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "FIRST_BIDDER",
+          "natspec": "",
+          "range": {
+            "byteLength": 55,
+            "byteStart": 1124,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:6f608a2b0b686068842bf49e4fcd2fedb6f0a9bd06c0146c1a85ffbbe7c3bbd0",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1164,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:c59018fa9925c027b90f40869f2cf2d45a9085ebd0d4ccf608b74606ef40cc7a",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "valueSource": "address(0x8008)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SECOND_BIDDER",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 1185,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:38c883ffaf23775a57daac9fc77e4c53d759e463f0e79cbfba2410148b6c49bc",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1226,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:10d11374d807282badd831bbfc6691cb61a5aba0957cac25fd5595fc40990c14",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "valueSource": "address(0x9009)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "THIRD_BIDDER",
+          "natspec": "",
+          "range": {
+            "byteLength": 55,
+            "byteStart": 1247,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:b4eb0a7c7ab83e46afd3da509b1fe61024262e79521d58f87dbaa734f1f2deee",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1287,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:3e6c36bb77589f7e20736129782805fb949639bfd671907f006911c545067f6c",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "valueSource": "address(0xA00A)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TOKEN_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 1308,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L32",
+            "lineEnd": 32,
+            "lineStart": 32,
+            "snippetSha256": "sha256:c73d15ab01ba31af3abe0a3398754b34011adc910a4aba23a00a8a747263c4fa",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 1344,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L32",
+            "lineEnd": 32,
+            "lineStart": 32,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RESERVE_PRICE",
+          "natspec": "",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 1351,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L33",
+            "lineEnd": 33,
+            "lineStart": 33,
+            "snippetSha256": "sha256:5d220cdbd734b87afbb29e781ce1a0927c3f4a7259c1d16b10ddb926f6ededa1",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 7,
+            "byteStart": 1392,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L33",
+            "lineEnd": 33,
+            "lineStart": 33,
+            "snippetSha256": "sha256:89d2e8f6fbb5823cc4c82092cd5b652e6504bca12f3a7e4bf6dd158f7e1bd67a",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "valueSource": "5 ether",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SECOND_BID",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 1405,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:d6e7e28579e1cfed0eb06d7e93683d0533231202e1e1dc27df10fc976d030145",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 7,
+            "byteStart": 1443,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:a073dd9f791dbcff86197a52bb8aac26d3cc467e5138fdf43027e9abf73fe25e",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "valueSource": "6 ether",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "THIRD_BID",
+          "natspec": "",
+          "range": {
+            "byteLength": 44,
+            "byteStart": 1456,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L35",
+            "lineEnd": 35,
+            "lineStart": 35,
+            "snippetSha256": "sha256:e0f0d398a3a6151fe81d97d975f672772929af5deec977a65c8872531c19e2b8",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 7,
+            "byteStart": 1493,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L35",
+            "lineEnd": 35,
+            "lineStart": 35,
+            "snippetSha256": "sha256:eb32cf96bfe300e04805f4f18718dcbdaad343e2e5c0fef42e4a1c4fbfe76ac8",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "valueSource": "7 ether",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "REASON",
+          "natspec": "",
+          "range": {
+            "byteLength": 63,
+            "byteStart": 1506,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L36",
+            "lineEnd": 36,
+            "lineStart": 36,
+            "snippetSha256": "sha256:8108f9ddfb3380c206a07b5e5a39d375ce6138fdaeb7e8fd5bff3077073a61a7",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 29,
+            "byteStart": 1540,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L36",
+            "lineEnd": 36,
+            "lineStart": 36,
+            "snippetSha256": "sha256:fcf6e7029f9782cbbda6f5aa1c1482839004592b034b0a948d1f15fb6eb332ae",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          },
+          "valueSource": "keccak256(\"pause-regression\")",
+          "visibility": "private"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "highestBid",
+              "natspec": "",
+              "range": {
+                "byteLength": 18,
+                "byteStart": 1614,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L39",
+                "lineEnd": 39,
+                "lineStart": 39,
+                "snippetSha256": "sha256:28f94f17d7394823aaa3c88d6521cbf7f5906d34e7c53a468d6791f9fdce4f01",
+                "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "highestBidder",
+              "natspec": "",
+              "range": {
+                "byteLength": 21,
+                "byteStart": 1642,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L40",
+                "lineEnd": 40,
+                "lineStart": 40,
+                "snippetSha256": "sha256:7385afc9e9e25b4df8561f57dbaa7cb0a0bdd16d1094004d053054c0e1deb634",
+                "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 2,
+              "name": "watchedBidderCredit",
+              "natspec": "",
+              "range": {
+                "byteLength": 27,
+                "byteStart": 1673,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L41",
+                "lineEnd": 41,
+                "lineStart": 41,
+                "snippetSha256": "sha256:5eb81fb7772090a1ad48edb7c1def422b9db0dbd2d46e76b9de706a85b1f23a2",
+                "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "posterCredit",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 1710,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L42",
+                "lineEnd": 42,
+                "lineStart": 42,
+                "snippetSha256": "sha256:a20fd9584ef3d84f52012798896bb4f1d8d595fb573d96c061ff363337dc77f0",
+                "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "protocolCredit",
+              "natspec": "",
+              "range": {
+                "byteLength": 22,
+                "byteStart": 1740,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L43",
+                "lineEnd": 43,
+                "lineStart": 43,
+                "snippetSha256": "sha256:f3b49d5f863cf06dfec0e7e19359ef907605b2bb803de12ec125493d972e0cdb",
+                "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "curatorCredit",
+              "natspec": "",
+              "range": {
+                "byteLength": 21,
+                "byteStart": 1772,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L44",
+                "lineEnd": 44,
+                "lineStart": 44,
+                "snippetSha256": "sha256:a37f159cc50e2a2c0ced0d45ba31a7b1e43851c6862a9fc7e409dea50911d8a8",
+                "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 6,
+              "name": "totalBidderOwed",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 1803,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L45",
+                "lineEnd": 45,
+                "lineStart": 45,
+                "snippetSha256": "sha256:d3807b5bff5317323cea4afd2f4729626ac531d82d1646eba74706c1be65c16f",
+                "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 7,
+              "name": "totalAuctionBidEscrow",
+              "natspec": "",
+              "range": {
+                "byteLength": 29,
+                "byteStart": 1836,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L46",
+                "lineEnd": 46,
+                "lineStart": 46,
+                "snippetSha256": "sha256:9830dc992e0eec54836b8250b5479836e459514ed95ff50109d026f4bed01653",
+                "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 8,
+              "name": "totalPosterOwed",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 1875,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L47",
+                "lineEnd": 47,
+                "lineStart": 47,
+                "snippetSha256": "sha256:6bfca5af65b185c13d377a73cf5cc86436352982e78c3284bd581ad1eb05313f",
+                "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 9,
+              "name": "totalProtocolOwed",
+              "natspec": "",
+              "range": {
+                "byteLength": 25,
+                "byteStart": 1908,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L48",
+                "lineEnd": 48,
+                "lineStart": 48,
+                "snippetSha256": "sha256:ad0613dcbb7138904de9453a8fea0beac2d653f2449930cd8719de642bfef548",
+                "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 10,
+              "name": "totalCuratorOwed",
+              "natspec": "",
+              "range": {
+                "byteLength": 24,
+                "byteStart": 1943,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L49",
+                "lineEnd": 49,
+                "lineStart": 49,
+                "snippetSha256": "sha256:3f99909d0b93a047daf77033492143bbf054570ffc944c8ea513319dd3ce7b3b",
+                "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 11,
+              "name": "totalOwed",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 1977,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L50",
+                "lineEnd": 50,
+                "lineStart": 50,
+                "snippetSha256": "sha256:555146ae7deba284debcb5a2582367764509b11a57d1dba32541ae89740a1760",
+                "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 12,
+              "name": "balance",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 2004,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L51",
+                "lineEnd": 51,
+                "lineStart": 51,
+                "snippetSha256": "sha256:05b79612708198460920e1a79099cff33f47d24fd37cdcf16c6f11270f48c64f",
+                "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 13,
+              "name": "emergencyWithdrawable",
+              "natspec": "",
+              "range": {
+                "byteLength": 29,
+                "byteStart": 2029,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L52",
+                "lineEnd": 52,
+                "lineStart": 52,
+                "snippetSha256": "sha256:91b16066f6b573c6c77d2fc9b9d5e13970d8570a318c3f5969516de31caa0237",
+                "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 14,
+              "name": "status",
+              "natspec": "",
+              "range": {
+                "byteLength": 14,
+                "byteStart": 2068,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L53",
+                "lineEnd": 53,
+                "lineStart": 53,
+                "snippetSha256": "sha256:a5d887ba4c4d1f394d607b25fd25599966129dce3cddec9a5173a92224698cb3",
+                "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 15,
+              "name": "owner",
+              "natspec": "",
+              "range": {
+                "byteLength": 13,
+                "byteStart": 2092,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L54",
+                "lineEnd": 54,
+                "lineStart": 54,
+                "snippetSha256": "sha256:8a244f16ba6f8d35d410e961effc10adbeb921976956c62be3d0e0b1efde76bb",
+                "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+              },
+              "type": "address",
+              "typeString": "address"
+            }
+          ],
+          "name": "AuctionPauseSnapshot",
+          "natspec": "",
+          "range": {
+            "byteLength": 536,
+            "byteStart": 1576,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L38-L55",
+            "lineEnd": 55,
+            "lineStart": 38,
+            "snippetSha256": "sha256:8bd3874579af6d65ba9cca7575646b8eb95d8ddc926212fb8c7339783bab36c3",
+            "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+        "name": "DropAuthTestHelper"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1QYXVzZUNvbnRyb2xzLnQuc29sOlN0cmVhbVBhdXNlQ29udHJvbHNUZXN0",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamPauseControlsTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 27714,
+      "byteStart": 403,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPauseControls.t.sol#L13-L602",
+      "lineEnd": 602,
+      "lineStart": 13,
+      "snippetSha256": "sha256:94aaf25e050bca368c1378acea0165a4136bc0bfb4287639f0200e3f6a0ac053",
+      "sourceSha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamPauseControls.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 13
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 12
+    },
+    "totalCount": 13
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0x0eeb7cf9",
+      "definitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0x12f1d7fb",
+      "definitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0x194a2eb3",
+      "definitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0x257d4025",
+      "definitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0x4668a58c",
+      "definitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0x5150bfaa",
+      "definitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0x74e0d53b",
+      "definitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0xb169cd76",
+      "definitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0xc546d0fe",
+      "definitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0xedf1e2a1",
+      "definitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0xef04b735",
+      "definitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest#function:0xfbf747c5",
+      "definitionId": "test/StreamPauseControls.t.sol:StreamPauseControlsTest",
+      "severity": "advisory"
+    }
+  ]
+}

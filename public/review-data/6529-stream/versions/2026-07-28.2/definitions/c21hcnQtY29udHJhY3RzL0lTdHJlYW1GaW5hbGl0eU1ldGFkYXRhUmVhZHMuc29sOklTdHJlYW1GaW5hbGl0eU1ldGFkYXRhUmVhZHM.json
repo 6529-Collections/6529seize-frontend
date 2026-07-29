@@ -1,0 +1,453 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IStreamFinalityMetadataReads.sol:IStreamFinalityMetadataReads#function:0x7f606947",
+          "declaringDefinitionId": "smart-contracts/IStreamFinalityMetadataReads.sol:IStreamFinalityMetadataReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionMetadataMode",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "mode",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x7f606947",
+          "signature": "collectionMetadataMode(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamFinalityMetadataReads.sol:IStreamFinalityMetadataReads#function:0xf92570e5",
+          "declaringDefinitionId": "smart-contracts/IStreamFinalityMetadataReads.sol:IStreamFinalityMetadataReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "recordType",
+              "type": "bytes32"
+            }
+          ],
+          "name": "collectionRecordTypeLocked",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xf92570e5",
+          "signature": "collectionRecordTypeLocked(uint256,bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamFinalityMetadataReads.sol:IStreamFinalityMetadataReads#function:0x5895bdd8",
+          "declaringDefinitionId": "smart-contracts/IStreamFinalityMetadataReads.sol:IStreamFinalityMetadataReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "latestCollectionSnapshotHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x5895bdd8",
+          "signature": "latestCollectionSnapshotHash(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamFinalityMetadataReads.sol:IStreamFinalityMetadataReads#function:0x862fdecd",
+          "declaringDefinitionId": "smart-contracts/IStreamFinalityMetadataReads.sol:IStreamFinalityMetadataReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "scopeId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "scopeManifest",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "published",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x862fdecd",
+          "signature": "scopeManifest(uint256,bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamFinalityMetadataReads.sol:IStreamFinalityMetadataReads#function:0xe62db288",
+          "declaringDefinitionId": "smart-contracts/IStreamFinalityMetadataReads.sol:IStreamFinalityMetadataReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "scopeSubject",
+              "type": "bytes32"
+            }
+          ],
+          "name": "tokenContentRoot",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "contentRoot",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "leafCount",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "schemaId",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xe62db288",
+          "signature": "tokenContentRoot(uint256,bytes32)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "collectionMetadataMode(uint256)",
+          "displaySignature": "collectionMetadataMode(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamFinalityMetadataReads.sol:IStreamFinalityMetadataReads#function:0x7f606947",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1GaW5hbGl0eU1ldGFkYXRhUmVhZHMuc29sOklTdHJlYW1GaW5hbGl0eU1ldGFkYXRhUmVhZHMjZnVuY3Rpb246MHg3ZjYwNjk0Nw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionMetadataMode",
+          "natspec": "@notice Collection metadata mode, pinned numeric IDs `OFFCHAIN = 0`, `ONCHAIN = 1`,\n         `HYBRID = 2` (the `MetadataMode` enum owned by the metadata router,\n         docs/metadata-router-and-renderer.md; Numeric ID Catalog). The finality registry\n         consumes it to pick the mandatory component floor per [LTA-FINALITY] req 1/6 and\n         to apply the [CMC-FINALITY-INPUTS] rule 3 onchain/hybrid snapshot-manifest gate.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "mode",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 89,
+            "byteStart": 1238,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamFinalityMetadataReads.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:67e1e73f7f8ed52166f667167caef1e9a342691bc31c4b401426bb3530320fe7",
+            "sourceSha256": "sha256:51219eabd2fcac11d004f047132e9bf4bc65c4384d3f59fce58370f473cf5706"
+          },
+          "selector": "0x7f606947",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "tokenContentRoot(uint256,bytes32)",
+          "displaySignature": "tokenContentRoot(uint256,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamFinalityMetadataReads.sol:IStreamFinalityMetadataReads#function:0xe62db288",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "scopeSubject",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1GaW5hbGl0eU1ldGFkYXRhUmVhZHMuc29sOklTdHJlYW1GaW5hbGl0eU1ldGFkYXRhUmVhZHMjZnVuY3Rpb246MHhlNjJkYjI4OA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "tokenContentRoot",
+          "natspec": "@notice Recorded token content root for a [CMC-SUBJECT-ID] scope subject.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "contentRoot",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "leafCount",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "name": "schemaId",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 174,
+            "byteStart": 1415,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamFinalityMetadataReads.sol#L22-L25",
+            "lineEnd": 25,
+            "lineStart": 22,
+            "snippetSha256": "sha256:fffa74f016d2c9573c3a2c1df1e552813d973280e30e1e0c58b46cac8bdc6982",
+            "sourceSha256": "sha256:51219eabd2fcac11d004f047132e9bf4bc65c4384d3f59fce58370f473cf5706"
+          },
+          "selector": "0xe62db288",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "latestCollectionSnapshotHash(uint256)",
+          "displaySignature": "latestCollectionSnapshotHash(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamFinalityMetadataReads.sol:IStreamFinalityMetadataReads#function:0x5895bdd8",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1GaW5hbGl0eU1ldGFkYXRhUmVhZHMuc29sOklTdHJlYW1GaW5hbGl0eU1ldGFkYXRhUmVhZHMjZnVuY3Rpb246MHg1ODk1YmRkOA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "latestCollectionSnapshotHash",
+          "natspec": "@notice Latest assembled snapshot manifest hash ([CMC-FINALITY-INPUTS] rule 3 input).",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 92,
+            "byteStart": 1689,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamFinalityMetadataReads.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:76db2c3892e2a76900a849c823b22c4fab387e7d6350ac2bc774aa4aada92e8b",
+            "sourceSha256": "sha256:51219eabd2fcac11d004f047132e9bf4bc65c4384d3f59fce58370f473cf5706"
+          },
+          "selector": "0x5895bdd8",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "collectionRecordTypeLocked(uint256,bytes32)",
+          "displaySignature": "collectionRecordTypeLocked(uint256,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamFinalityMetadataReads.sol:IStreamFinalityMetadataReads#function:0xf92570e5",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "recordType",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1GaW5hbGl0eU1ldGFkYXRhUmVhZHMuc29sOklTdHJlYW1GaW5hbGl0eU1ldGFkYXRhUmVhZHMjZnVuY3Rpb246MHhmOTI1NzBlNQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionRecordTypeLocked",
+          "natspec": "@notice Explicit lock state for one record-type key ([CMC-LOCKS]).",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 131,
+            "byteStart": 1862,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamFinalityMetadataReads.sol#L31-L34",
+            "lineEnd": 34,
+            "lineStart": 31,
+            "snippetSha256": "sha256:b81c5e32e986b02177e59cba18b6932e8a48c9e5c081414e2b8864913d499708",
+            "sourceSha256": "sha256:51219eabd2fcac11d004f047132e9bf4bc65c4384d3f59fce58370f473cf5706"
+          },
+          "selector": "0xf92570e5",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "scopeManifest(uint256,bytes32)",
+          "displaySignature": "scopeManifest(uint256,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamFinalityMetadataReads.sol:IStreamFinalityMetadataReads#function:0x862fdecd",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "scopeId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1GaW5hbGl0eU1ldGFkYXRhUmVhZHMuc29sOklTdHJlYW1GaW5hbGl0eU1ldGFkYXRhUmVhZHMjZnVuY3Rpb246MHg4NjJmZGVjZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "scopeManifest",
+          "natspec": "@notice Published scope manifest for RELEASE/SEASON/VIEW scope IDs\n         (Scoped Finality For Open Series, scope rule 3).",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "published",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "manifestHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 147,
+            "byteStart": 2139,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamFinalityMetadataReads.sol#L38-L41",
+            "lineEnd": 41,
+            "lineStart": 38,
+            "snippetSha256": "sha256:de18e2a664fbea5faecdce5c6092fde0553fa99ee08f447e04bd1d81f85d6afd",
+            "sourceSha256": "sha256:51219eabd2fcac11d004f047132e9bf4bc65c4384d3f59fce58370f473cf5706"
+          },
+          "selector": "0x862fdecd",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IStreamFinalityMetadataReads.sol:IStreamFinalityMetadataReads",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1GaW5hbGl0eU1ldGFkYXRhUmVhZHMuc29sOklTdHJlYW1GaW5hbGl0eU1ldGFkYXRhUmVhZHM",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IStreamFinalityMetadataReads.sol:IStreamFinalityMetadataReads"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "IStreamFinalityMetadataReads",
+    "natspec": "@notice Narrow consumer seam over the collection-metadata satellite surfaces the finality\n         registry (and its preview tooling) reads.\n @dev Shapes follow docs/collection-metadata-contract.md: [CMC-CONTENT-ROOT] rule 4 for the\n      content-root read, [CMC-LOCKS] for lock state, snapshot publication for the assembled\n      snapshot hash, and the scoped finality model for scope manifest publication. The\n      satellite additionally serves the\n      generic component read (`finalityState`/`finalityStateForScope`) as one of the\n      submitted finality components; that surface lives in\n      IStreamArtworkFinalityComponents.sol.",
+    "range": {
+      "byteLength": 1562,
+      "byteStart": 726,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamFinalityMetadataReads.sol#L13-L42",
+      "lineEnd": 42,
+      "lineStart": 13,
+      "snippetSha256": "sha256:945150f9e0bcfe5e821f234fd2029786102b5def4bd5b92c709396c1da2ab418",
+      "sourceSha256": "sha256:51219eabd2fcac11d004f047132e9bf4bc65c4384d3f59fce58370f473cf5706"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IStreamFinalityMetadataReads.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

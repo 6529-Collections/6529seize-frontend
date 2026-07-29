@@ -1,0 +1,227 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol:IStreamRecordFamilyAuthorityProvider#function:0xd0cab440",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol:IStreamRecordFamilyAuthorityProvider",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "subjectId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "internalType": "address",
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "internalType": "bytes",
+              "name": "authorizationData",
+              "type": "bytes"
+            }
+          ],
+          "name": "isAuthorizedRecordWriter",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xd0cab440",
+          "signature": "isAuthorizedRecordWriter(uint256,bytes32,bytes32,address,bytes)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol:IStreamRecordFamilyAuthorityProvider#function:0x651f7d26",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol:IStreamRecordFamilyAuthorityProvider",
+          "inherited": false,
+          "inputs": [],
+          "name": "isStreamRecordFamilyAuthorityProvider",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x651f7d26",
+          "signature": "isStreamRecordFamilyAuthorityProvider()",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "isStreamRecordFamilyAuthorityProvider()",
+          "displaySignature": "isStreamRecordFamilyAuthorityProvider()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol:IStreamRecordFamilyAuthorityProvider#function:0x651f7d26",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlBdXRob3JpdHlQcm92aWRlci5zb2w6SVN0cmVhbVJlY29yZEZhbWlseUF1dGhvcml0eVByb3ZpZGVyI2Z1bmN0aW9uOjB4NjUxZjdkMjY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isStreamRecordFamilyAuthorityProvider",
+          "natspec": "@notice Returns true for deployment and configuration validation.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 78,
+            "byteStart": 451,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyAuthorityProvider.sol#L9",
+            "lineEnd": 9,
+            "lineStart": 9,
+            "snippetSha256": "sha256:1cf914b1d55dd347cde58394e1c24675c9a2cf2d366043ce51f6964eb1b4e6ea",
+            "sourceSha256": "sha256:eb381ae81e56bfa27495c5c20de82843a642995b50d5c07de102e4e20399cb2f"
+          },
+          "selector": "0x651f7d26",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isAuthorizedRecordWriter(uint256,bytes32,bytes32,address,bytes)",
+          "displaySignature": "isAuthorizedRecordWriter(uint256,bytes32,bytes32,address,bytes)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol:IStreamRecordFamilyAuthorityProvider#function:0xd0cab440",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "subjectId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "name": "authorizationData",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlBdXRob3JpdHlQcm92aWRlci5zb2w6SVN0cmVhbVJlY29yZEZhbWlseUF1dGhvcml0eVByb3ZpZGVyI2Z1bmN0aW9uOjB4ZDBjYWI0NDA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isAuthorizedRecordWriter",
+          "natspec": "@notice Returns whether `actor` currently controls the named record write.\n @dev Direct calls need no detached signature: `actor == msg.sender` at the host.\n      Relayed typed-write surfaces can pass a nonempty `authorizationData` payload.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 219,
+            "byteStart": 798,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyAuthorityProvider.sol#L14-L20",
+            "lineEnd": 20,
+            "lineStart": 14,
+            "snippetSha256": "sha256:2da07dd5eaa76df5c47fa5ea0d0e15060eeea86e0c27daa29821f491419cf0cb",
+            "sourceSha256": "sha256:eb381ae81e56bfa27495c5c20de82843a642995b50d5c07de102e4e20399cb2f"
+          },
+          "selector": "0xd0cab440",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol:IStreamRecordFamilyAuthorityProvider",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlBdXRob3JpdHlQcm92aWRlci5zb2w6SVN0cmVhbVJlY29yZEZhbWlseUF1dGhvcml0eVByb3ZpZGVy",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol:IStreamRecordFamilyAuthorityProvider"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "IStreamRecordFamilyAuthorityProvider",
+    "natspec": "@notice Live authority seam used by the record-family registry for signer-owned lanes.\n @dev Providers are class-specific and candidate-bound. They must derive authority from\n      live protocol state; a provider return is never cached by a metadata host.",
+    "range": {
+      "byteLength": 695,
+      "byteStart": 324,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyAuthorityProvider.sol#L7-L21",
+      "lineEnd": 21,
+      "lineStart": 7,
+      "snippetSha256": "sha256:17fce3967a249d58172cc4f92b34970c9cc2dffe3ee1303a08a594108bd6f8dd",
+      "sourceSha256": "sha256:eb381ae81e56bfa27495c5c20de82843a642995b50d5c07de102e4e20399cb2f"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

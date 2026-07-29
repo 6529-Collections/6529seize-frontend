@@ -1,0 +1,377 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "assertTrue(bool,string)",
+          "functionKind": "function",
+          "id": "test/helpers/Assertions.sol:Assertions#function:assertTrue(bool,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "condition",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "message",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0Fzc2VydGlvbnMuc29sOkFzc2VydGlvbnMjZnVuY3Rpb246YXNzZXJ0VHJ1ZShib29sLHN0cmluZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "assertTrue",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 117,
+            "byteStart": 83,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/Assertions.sol#L5-L7",
+            "lineEnd": 7,
+            "lineStart": 5,
+            "snippetSha256": "sha256:bc234ccdb213cc8da2e6c750d302ac8e30c0c71474cb8535181b90ead8a6b096",
+            "sourceSha256": "sha256:13ea508b7feaa6156f30bd70e0d407d784c7ebd8288278abe199139d2b397f25"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "assertFalse(bool,string)",
+          "functionKind": "function",
+          "id": "test/helpers/Assertions.sol:Assertions#function:assertFalse(bool,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "condition",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "message",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0Fzc2VydGlvbnMuc29sOkFzc2VydGlvbnMjZnVuY3Rpb246YXNzZXJ0RmFsc2UoYm9vbCxzdHJpbmcp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "assertFalse",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 119,
+            "byteStart": 206,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/Assertions.sol#L9-L11",
+            "lineEnd": 11,
+            "lineStart": 9,
+            "snippetSha256": "sha256:ecc2dd650ddb302b4381dc8d050d608bf2d0299093fa86340eeefd31aad9c21d",
+            "sourceSha256": "sha256:13ea508b7feaa6156f30bd70e0d407d784c7ebd8288278abe199139d2b397f25"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "assertEq(address,address,string)",
+          "functionKind": "function",
+          "id": "test/helpers/Assertions.sol:Assertions#function:assertEq(address,address,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "actual",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "expected",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "message",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0Fzc2VydGlvbnMuc29sOkFzc2VydGlvbnMjZnVuY3Rpb246YXNzZXJ0RXEoYWRkcmVzcyxhZGRyZXNzLHN0cmluZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "assertEq",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 142,
+            "byteStart": 331,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/Assertions.sol#L13-L15",
+            "lineEnd": 15,
+            "lineStart": 13,
+            "snippetSha256": "sha256:f51676bd735684b0e3d2838012ca0c92b7c9a89b56ca88547d75dc820e2275df",
+            "sourceSha256": "sha256:13ea508b7feaa6156f30bd70e0d407d784c7ebd8288278abe199139d2b397f25"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "assertEq(uint256,uint256,string)",
+          "functionKind": "function",
+          "id": "test/helpers/Assertions.sol:Assertions#function:assertEq(uint256,uint256,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "actual",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "expected",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "message",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0Fzc2VydGlvbnMuc29sOkFzc2VydGlvbnMjZnVuY3Rpb246YXNzZXJ0RXEodWludDI1Nix1aW50MjU2LHN0cmluZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "assertEq",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 142,
+            "byteStart": 479,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/Assertions.sol#L17-L19",
+            "lineEnd": 19,
+            "lineStart": 17,
+            "snippetSha256": "sha256:414645c018617284fb5b19e8e691c0d5776623d7b017a250945d57caa2299a0e",
+            "sourceSha256": "sha256:13ea508b7feaa6156f30bd70e0d407d784c7ebd8288278abe199139d2b397f25"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "assertGte(uint256,uint256,string)",
+          "functionKind": "function",
+          "id": "test/helpers/Assertions.sol:Assertions#function:assertGte(uint256,uint256,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "actual",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "expected",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "message",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0Fzc2VydGlvbnMuc29sOkFzc2VydGlvbnMjZnVuY3Rpb246YXNzZXJ0R3RlKHVpbnQyNTYsdWludDI1NixzdHJpbmcp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "assertGte",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 143,
+            "byteStart": 627,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/Assertions.sol#L21-L23",
+            "lineEnd": 23,
+            "lineStart": 21,
+            "snippetSha256": "sha256:07cdfe755423ee03b32ee332ef6e3ea8775f18c6129ba0c937bc78e166375d6e",
+            "sourceSha256": "sha256:13ea508b7feaa6156f30bd70e0d407d784c7ebd8288278abe199139d2b397f25"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "assertEq(bytes32,bytes32,string)",
+          "functionKind": "function",
+          "id": "test/helpers/Assertions.sol:Assertions#function:assertEq(bytes32,bytes32,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "actual",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "expected",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "message",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0Fzc2VydGlvbnMuc29sOkFzc2VydGlvbnMjZnVuY3Rpb246YXNzZXJ0RXEoYnl0ZXMzMixieXRlczMyLHN0cmluZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "assertEq",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 142,
+            "byteStart": 776,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/Assertions.sol#L25-L27",
+            "lineEnd": 27,
+            "lineStart": 25,
+            "snippetSha256": "sha256:b3c3b5347c2e41c485d83306690fa3661f9882721040210204c4038b2988e6ad",
+            "sourceSha256": "sha256:13ea508b7feaa6156f30bd70e0d407d784c7ebd8288278abe199139d2b397f25"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "assertEq(string,string,string)",
+          "functionKind": "function",
+          "id": "test/helpers/Assertions.sol:Assertions#function:assertEq(string,string,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "actual",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 1,
+              "name": "expected",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "name": "message",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0Fzc2VydGlvbnMuc29sOkFzc2VydGlvbnMjZnVuY3Rpb246YXNzZXJ0RXEoc3RyaW5nLHN0cmluZyxzdHJpbmcp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "assertEq",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 210,
+            "byteStart": 924,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/Assertions.sol#L29-L34",
+            "lineEnd": 34,
+            "lineStart": 29,
+            "snippetSha256": "sha256:343bfb0876fd224f486757d93debdb4dc105c342d0439acef0c024c59796e2df",
+            "sourceSha256": "sha256:13ea508b7feaa6156f30bd70e0d407d784c7ebd8288278abe199139d2b397f25"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/helpers/Assertions.sol:Assertions",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9oZWxwZXJzL0Fzc2VydGlvbnMuc29sOkFzc2VydGlvbnM",
+    "kind": "library",
+    "linearizedDefinitionIds": [
+      "test/helpers/Assertions.sol:Assertions"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "Assertions",
+    "natspec": "",
+    "range": {
+      "byteLength": 1078,
+      "byteStart": 58,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/Assertions.sol#L4-L35",
+      "lineEnd": 35,
+      "lineStart": 4,
+      "snippetSha256": "sha256:3dee1834e69d92e8f2a6cdd25dff89247a5183b6251a84f3bc0a51d3b132ddc4",
+      "sourceSha256": "sha256:13ea508b7feaa6156f30bd70e0d407d784c7ebd8288278abe199139d2b397f25"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/helpers/Assertions.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 1
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1
+    },
+    "totalCount": 1
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/helpers/Assertions.sol:Assertions",
+      "severity": "advisory"
+    }
+  ]
+}
