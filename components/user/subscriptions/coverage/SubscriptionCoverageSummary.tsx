@@ -407,10 +407,10 @@ export default function SubscriptionCoverageSummary({
           ) : null}
           <div className="tw-grid tw-grid-cols-2 tw-gap-4 lg:tw-grid-cols-1 lg:tw-gap-7">
             <div className="tw-grid tw-min-w-0 tw-grid-cols-[auto_1fr] tw-items-baseline tw-gap-x-1.5">
-              <div className="tw-col-span-2 tw-mb-1 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
+              <div className="tw-col-span-2 tw-mb-2 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
                 {t(locale, "subscriptions.coverage.capacity")}
               </div>
-              <div className="tw-break-words tw-text-3xl tw-font-medium tw-leading-none tw-tracking-tight tw-text-iron-100">
+              <div className="tw-break-words tw-text-2xl tw-font-medium tw-leading-none tw-tracking-tight tw-text-iron-100 sm:tw-text-3xl">
                 {coverage.mint_capacity === null
                   ? "—"
                   : formatInteger(locale, coverage.mint_capacity)}
@@ -420,10 +420,10 @@ export default function SubscriptionCoverageSummary({
               </div>
             </div>
             <div className="tw-grid tw-min-w-0 tw-grid-cols-[auto_1fr] tw-items-baseline tw-gap-x-1.5">
-              <div className="tw-col-span-2 tw-mb-1 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
+              <div className="tw-col-span-2 tw-mb-2 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
                 {t(locale, "subscriptions.coverage.allocated")}
               </div>
-              <div className="tw-break-words tw-text-3xl tw-font-medium tw-leading-none tw-tracking-tight tw-text-iron-100">
+              <div className="tw-break-words tw-text-2xl tw-font-medium tw-leading-none tw-tracking-tight tw-text-iron-100 sm:tw-text-3xl">
                 {formatInteger(locale, coverage.allocated_mints)}
               </div>
               <div className="tw-self-baseline tw-text-xs tw-leading-none tw-text-iron-500 sm:tw-text-sm">
