@@ -412,6 +412,7 @@ jobs:
           set -euo pipefail
           [[ "$EXPECTED_MERGE_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$EXPECTED_HEAD_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$BUILD_REQUIRED" =~ ^(true|false)$ ]]
           test "$(git rev-parse HEAD)" = "$EXPECTED_MERGE_SHA"
           rm -rf release-bus-v2-pr-evidence
           mkdir -p release-bus-v2-pr-evidence
