@@ -23,7 +23,11 @@ type Publication = {
   schemaVersion: string;
   reviewId: string;
   lifecycleState: string;
-  versions: Array<{ version: string; lifecycleState: string }>;
+  versions: Array<{
+    version: string;
+    lifecycleState: string;
+    sourceCommit: string;
+  }>;
   [key: string]: unknown;
 };
 
@@ -585,6 +589,7 @@ describe("public-review snapshot trust publication preload", () => {
     candidate.versions.push({
       version: SYNTHETIC_FUTURE_VERSION,
       lifecycleState: "DRAFT",
+      sourceCommit: shaA,
     });
     return candidate;
   }
@@ -646,6 +651,13 @@ describe("public-review snapshot trust publication preload", () => {
       label: "a changed review identity",
       mutate: (candidate: Publication) => {
         candidate.reviewId = "other-review";
+      },
+      message: "append exactly one DRAFT version",
+    },
+    {
+      label: "a mismatched source identity",
+      mutate: (candidate: Publication) => {
+        candidate.versions.at(-1)!.sourceCommit = shaB;
       },
       message: "append exactly one DRAFT version",
     },
@@ -940,6 +952,7 @@ describe("public-review snapshot trust orchestration", () => {
     candidatePublicationObject.versions.push({
       version: futureConfig.reviewVersion,
       lifecycleState: "DRAFT",
+      sourceCommit: futureConfig.source.commit,
     });
     const candidatePublication = Buffer.from(
       `${JSON.stringify(candidatePublicationObject, null, 2)}\n`
