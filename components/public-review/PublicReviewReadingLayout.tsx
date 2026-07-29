@@ -1,6 +1,11 @@
 "use client";
 
-import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react";
+import {
+  Dialog,
+  DialogBackdrop,
+  DialogPanel,
+  DialogTitle,
+} from "@headlessui/react";
 import {
   ChatBubbleLeftRightIcon,
   XMarkIcon,
@@ -125,7 +130,7 @@ export function PublicReviewReadingLayout({
       resizeObserver?.disconnect();
       globalThis.removeEventListener("resize", updateLayout);
     };
-  }, []);
+  }, [feedbackAvailable]);
 
   useLayoutEffect(() => {
     if (
@@ -195,12 +200,22 @@ export function PublicReviewReadingLayout({
               className="tw-size-4 tw-flex-none tw-text-iron-400"
               aria-hidden="true"
             />
-            <h2
-              id={COMMENT_PANEL_HEADING_ID}
-              className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-200"
-            >
-              {t(DEFAULT_LOCALE, "publicReview.comments.title")}
-            </h2>
+            {showCloseButton ? (
+              <DialogTitle
+                as="h2"
+                id={COMMENT_PANEL_HEADING_ID}
+                className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-200"
+              >
+                {t(DEFAULT_LOCALE, "publicReview.comments.title")}
+              </DialogTitle>
+            ) : (
+              <h2
+                id={COMMENT_PANEL_HEADING_ID}
+                className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-200"
+              >
+                {t(DEFAULT_LOCALE, "publicReview.comments.title")}
+              </h2>
+            )}
           </div>
           {showCloseButton ? (
             <button
@@ -226,7 +241,6 @@ export function PublicReviewReadingLayout({
     overlayIsOpen && typeof document !== "undefined"
       ? createPortal(
           <Dialog
-            aria-label={t(DEFAULT_LOCALE, "publicReview.comments.title")}
             className="tailwind-scope tw-relative tw-z-[1000]"
             onClose={closePanel}
             open
@@ -295,7 +309,7 @@ export function PublicReviewReadingLayout({
         {overlayIsOpen ? null : (
           <aside
             id={COMMENT_PANEL_ID}
-            aria-label={t(DEFAULT_LOCALE, "publicReview.comments.title")}
+            aria-labelledby={COMMENT_PANEL_HEADING_ID}
             className={`tw-order-1 tw-scroll-mt-20 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400 @[760px]:tw-sticky @[760px]:tw-top-16 @[760px]:tw-order-2 @[760px]:tw-h-[calc(100dvh-4rem)] @[760px]:tw-overflow-hidden @[760px]:tw-border-b-0 @[760px]:tw-border-l ${
               inlinePanelIsVisible ? "tw-block" : "tw-hidden"
             }`}

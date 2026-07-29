@@ -137,4 +137,45 @@ describe("PublicReviewReadingLayout", () => {
       "hidden"
     );
   });
+
+  it("starts observing the layout when feedback becomes available", async () => {
+    const user = userEvent.setup();
+    window.localStorage.setItem("public-review-comment-panel-open", "false");
+    jest
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockReturnValue({
+        bottom: 800,
+        height: 800,
+        left: 0,
+        right: 760,
+        top: 0,
+        width: 760,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      });
+    const layout = (feedbackAvailable: boolean) => (
+      <PublicReviewReadingLayout
+        content={<div>Review content</div>}
+        feedbackAvailable={feedbackAvailable}
+        panel={<div>Feedback panel</div>}
+        toolbar={<div>Page 1</div>}
+      />
+    );
+    const { rerender } = render(layout(false));
+    expect(
+      screen.queryByRole("button", { name: "Show feedback" })
+    ).not.toBeInTheDocument();
+
+    rerender(layout(true));
+    const toggle = screen.getByRole("button", { name: "Show feedback" });
+    await user.click(toggle);
+
+    expect(
+      screen.getByRole("complementary", { name: "Page comments" })
+    ).not.toHaveAttribute("hidden");
+    expect(
+      screen.queryByRole("dialog", { name: "Page comments" })
+    ).not.toBeInTheDocument();
+  });
 });
