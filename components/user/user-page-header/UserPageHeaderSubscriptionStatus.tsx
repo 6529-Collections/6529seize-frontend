@@ -2,6 +2,7 @@
 
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
+import EthereumIcon from "@/components/user/utils/icons/EthereumIcon";
 import { getProfileSubscriptionsHref } from "@/components/user/subscriptions/subscriptionNavigation";
 import {
   formatSubscriptionCoverageDate,
@@ -22,7 +23,6 @@ import {
   ArrowRightIcon,
   CheckCircleIcon,
   ClockIcon,
-  InformationCircleIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
@@ -31,11 +31,21 @@ import type { ComponentType, SVGProps } from "react";
 
 type StatusIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
+function SubscriptionEthIcon({
+  className,
+}: Readonly<SVGProps<SVGSVGElement>>) {
+  return (
+    <span className={clsx("tw-inline-flex tw-flex-none", className)}>
+      <EthereumIcon />
+    </span>
+  );
+}
+
 const STATUS_ICONS: Record<SubscriptionCoverageTone, StatusIcon> = {
   positive: CheckCircleIcon,
   caution: ClockIcon,
   danger: XCircleIcon,
-  neutral: InformationCircleIcon,
+  neutral: SubscriptionEthIcon,
 };
 
 const STATUS_CONTAINER_RING_CLASSES: Record<SubscriptionCoverageTone, string> = {
@@ -80,10 +90,10 @@ export default function UserPageHeaderSubscriptionStatus({
     return (
       <div
         aria-label={t(locale, "subscriptions.coverage.loading")}
-        className="tw-min-h-[68px] tw-w-full tw-animate-pulse tw-rounded-xl tw-bg-black/45 tw-p-3 tw-ring-1 tw-ring-white/10 sm:tw-w-80"
+        className="tw-min-h-14 tw-w-full tw-animate-pulse tw-rounded-xl tw-bg-white/[0.035] tw-p-2.5 tw-shadow-sm tw-shadow-black/20 tw-ring-1 tw-ring-white/10 tw-backdrop-blur-sm sm:tw-w-72"
       >
-        <div className="tw-h-4 tw-w-44 tw-rounded tw-bg-iron-700/80" />
-        <div className="tw-mt-2 tw-h-3 tw-w-56 tw-rounded tw-bg-iron-800/90" />
+        <div className="tw-h-3.5 tw-w-40 tw-rounded tw-bg-iron-700/80" />
+        <div className="tw-mt-1.5 tw-h-3 tw-w-48 tw-rounded tw-bg-iron-800/90" />
       </div>
     );
   }
@@ -93,13 +103,13 @@ export default function UserPageHeaderSubscriptionStatus({
     return (
       <Link
         href={profileHref}
-        className="tw-flex tw-min-h-[68px] tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-xl tw-bg-black/60 tw-p-3 tw-text-left tw-no-underline tw-ring-1 tw-ring-white/10 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 sm:tw-w-80"
+        className="tw-flex tw-min-h-14 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-xl tw-bg-white/[0.035] tw-p-2.5 tw-text-left tw-no-underline tw-shadow-sm tw-shadow-black/20 tw-ring-1 tw-ring-white/10 tw-backdrop-blur-sm tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 desktop-hover:hover:tw-bg-white/[0.06] sm:tw-w-72"
       >
         <span className="tw-min-w-0">
-          <span className="tw-block tw-text-sm tw-font-semibold tw-text-iron-100">
+          <span className="tw-block tw-text-[13px] tw-font-medium tw-text-iron-100">
             {t(locale, "subscriptions.coverage.status.unknown")}
           </span>
-          <span className="tw-mt-1 tw-block tw-text-xs tw-text-iron-400">
+          <span className="tw-mt-0.5 tw-block tw-text-[11px] tw-text-iron-400">
             {t(locale, "subscriptions.coverage.action.reviewSettings")}
           </span>
         </span>
@@ -143,34 +153,34 @@ export default function UserPageHeaderSubscriptionStatus({
   return (
     <div
       className={clsx(
-        "tw-flex tw-min-h-[68px] tw-w-full tw-items-center tw-gap-3 tw-rounded-xl tw-bg-black/65 tw-p-3 tw-shadow-lg tw-ring-1 tw-backdrop-blur-sm focus-within:tw-ring-2 focus-within:tw-ring-primary-300 sm:tw-w-auto sm:tw-min-w-80",
+        "tw-flex tw-min-h-14 tw-w-full tw-items-center tw-gap-2 tw-rounded-xl tw-bg-white/[0.035] tw-p-2.5 tw-shadow-sm tw-shadow-black/20 tw-ring-1 tw-backdrop-blur-sm focus-within:tw-ring-2 focus-within:tw-ring-primary-300 sm:tw-w-auto sm:tw-min-w-72",
         STATUS_CONTAINER_RING_CLASSES[presentation.tone]
       )}
     >
       <span
         aria-hidden="true"
         className={clsx(
-          "tw-inline-flex tw-size-7 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-ring-1",
+          "tw-inline-flex tw-size-6 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-ring-1",
           STATUS_ICON_CLASSES[presentation.tone]
         )}
       >
-        <StatusIcon className="tw-size-4" />
+        <StatusIcon className="tw-size-3.5" />
       </span>
       <span className="tw-min-w-0 tw-flex-1">
-        <span className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
+        <span className="tw-block tw-truncate tw-text-[13px] tw-font-medium tw-text-iron-100">
           {getSubscriptionCoverageCompactLine(locale, coverage)}
         </span>
-        <span className="tw-mt-1 tw-block tw-truncate tw-text-xs tw-text-iron-400">
+        <span className="tw-mt-0.5 tw-block tw-truncate tw-text-[11px] tw-text-iron-400">
           {secondaryLine}
         </span>
       </span>
       <Link
         href={href}
         className={clsx(
-          "tw-inline-flex tw-min-h-9 tw-flex-none tw-items-center tw-gap-1.5 tw-rounded-lg tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-no-underline tw-transition focus-visible:tw-outline-none",
+          "tw-inline-flex tw-min-h-10 tw-flex-none tw-items-center tw-gap-1.5 tw-rounded-lg tw-px-2.5 tw-py-2 tw-text-xs tw-font-semibold tw-no-underline tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300",
           isUrgentTopUp
             ? "tw-bg-primary-500 tw-text-white desktop-hover:hover:tw-bg-primary-400"
-            : "tw-bg-white/10 tw-text-iron-100 desktop-hover:hover:tw-bg-white/15"
+            : "tw-text-iron-400 desktop-hover:hover:tw-bg-white/[0.05] desktop-hover:hover:tw-text-iron-100"
         )}
       >
         {actionLabel}
