@@ -431,6 +431,7 @@ function useNewDropCounter(
           serverCoverageTimestamp !== null &&
           message.created_at <= serverCoverageTimestamp
         ) {
+          // Reconcile retained websocket state without adding this covered drop.
           updateNewDropsCountsForMessage(
             waveId,
             message.created_at,

@@ -3,6 +3,10 @@ import useDmWavesList from "@/hooks/useDmWavesList";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS } from "@/components/react-query-wrapper/utils/query-utils";
 
+jest.mock("@tanstack/react-query", () => ({
+  useQueryClient: jest.fn(),
+}));
+
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
 }));
@@ -31,14 +35,20 @@ const useSeizeConnectContextMock =
 const useWavesV2Mock = require("@/hooks/useWavesV2").useWavesV2 as jest.Mock;
 const useUnreadDmDropsMock = require("@/hooks/useUnreadDmDrops")
   .useUnreadDmDrops as jest.Mock;
+const useQueryClientMock = require("@tanstack/react-query")
+  .useQueryClient as jest.Mock;
 const getAuthJwtMock = require("@/services/auth/auth.utils")
   .getAuthJwt as jest.Mock;
 const isAuthJwtUsableMock = require("@/services/auth/auth.utils")
   .isAuthJwtUsable as jest.Mock;
 
 describe("useDmWavesList", () => {
+  const dmWavesQueryKey = ["waves-v2", { direct_message: true }] as const;
+  const refetchQueries = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
+    useQueryClientMock.mockReturnValue({ refetchQueries });
     getAuthJwtMock.mockReturnValue("valid-jwt");
     isAuthJwtUsableMock.mockReturnValue(true);
     useAuthMock.mockReturnValue({
@@ -65,6 +75,7 @@ describe("useDmWavesList", () => {
       fetchNextPage: jest.fn(),
       status: "success",
       refetch: jest.fn(),
+      queryKey: dmWavesQueryKey,
     });
   });
 
@@ -88,11 +99,13 @@ describe("useDmWavesList", () => {
     );
   });
 
-  it("refetches once when the unread summary is ahead of the DM rows", () => {
-    const refetch = jest.fn();
+  it("reconciles only once per viewer until the DM rows catch up", () => {
     let isFetching = false;
+    let unreadDmDropsCount = 1;
     useUnreadDmDropsMock.mockReturnValue({
-      unreadDmDropsCount: 1,
+      get unreadDmDropsCount() {
+        return unreadDmDropsCount;
+      },
     });
     useWavesV2Mock.mockImplementation(() => ({
       waves: [
@@ -107,19 +120,33 @@ describe("useDmWavesList", () => {
       hasNextPage: false,
       fetchNextPage: jest.fn(),
       status: "success",
-      refetch,
+      refetch: jest.fn(),
+      queryKey: dmWavesQueryKey,
     }));
 
     const { rerender } = renderHook(() => useDmWavesList());
 
-    expect(refetch).toHaveBeenCalledTimes(1);
+    expect(refetchQueries).toHaveBeenCalledTimes(1);
+    expect(refetchQueries).toHaveBeenCalledWith({
+      queryKey: dmWavesQueryKey,
+      exact: true,
+      type: "active",
+    });
 
     isFetching = true;
     rerender();
+    unreadDmDropsCount = 2;
     isFetching = false;
     rerender();
 
-    expect(refetch).toHaveBeenCalledTimes(1);
+    expect(refetchQueries).toHaveBeenCalledTimes(1);
+
+    unreadDmDropsCount = 0;
+    rerender();
+    unreadDmDropsCount = 1;
+    rerender();
+
+    expect(refetchQueries).toHaveBeenCalledTimes(2);
   });
 
   it("does not refetch when the DM rows account for the unread summary", () => {
@@ -141,11 +168,12 @@ describe("useDmWavesList", () => {
       fetchNextPage: jest.fn(),
       status: "success",
       refetch,
+      queryKey: dmWavesQueryKey,
     });
 
     renderHook(() => useDmWavesList());
 
-    expect(refetch).not.toHaveBeenCalled();
+    expect(refetchQueries).not.toHaveBeenCalled();
   });
 
   it("disables the DM query while the auth JWT is unusable", () => {
@@ -181,6 +209,7 @@ describe("useDmWavesList", () => {
       fetchNextPage,
       status: "success",
       refetch,
+      queryKey: dmWavesQueryKey,
     });
 
     const { result } = renderHook(() => useDmWavesList());
@@ -220,6 +249,7 @@ describe("useDmWavesList", () => {
       fetchNextPage,
       status: "success",
       refetch,
+      queryKey: dmWavesQueryKey,
     });
 
     const { result } = renderHook(() => useDmWavesList({ enabled: false }));

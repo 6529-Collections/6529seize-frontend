@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useWavesV2 } from "./useWavesV2";
@@ -19,6 +20,7 @@ interface UseDmWavesListOptions {
 }
 
 const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
+  const queryClient = useQueryClient();
   const { address, hasValidWalletAuth } = useSeizeConnectContext();
   const {
     activeProfileProxy,
@@ -72,6 +74,7 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
     fetchNextPage,
     status,
     refetch,
+    queryKey: dmWavesQueryKey,
   } = useWavesV2({
     overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
     pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
@@ -85,7 +88,7 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
     connectedProfile?.handle ?? null,
     { enabled: shouldFetchDmWaves }
   );
-  const lastReconciledMismatchRef = useRef<string | null>(null);
+  const reconciliationAttemptIdentityRef = useRef<string | null>(null);
   const listedUnreadDropsCount = useMemo(
     () =>
       mainWaves.reduce(
@@ -97,27 +100,30 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
 
   useEffect(() => {
     if (!shouldFetchDmWaves || unreadDmDropsCount <= listedUnreadDropsCount) {
-      lastReconciledMismatchRef.current = null;
+      reconciliationAttemptIdentityRef.current = null;
       return;
     }
 
-    if (isFetching) {
+    if (
+      isFetching ||
+      reconciliationAttemptIdentityRef.current === viewerIdentityKey
+    ) {
       return;
     }
 
-    const mismatchKey = `${String(viewerIdentityKey)}:${unreadDmDropsCount}:${listedUnreadDropsCount}`;
-    if (lastReconciledMismatchRef.current === mismatchKey) {
-      return;
-    }
-
-    lastReconciledMismatchRef.current = mismatchKey;
-    // Reconcile two independent REST snapshots when the summary advances first.
-    // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-data-to-parent
-    refetch();
+    reconciliationAttemptIdentityRef.current = viewerIdentityKey;
+    // Reconcile once per viewer when the aggregate summary advances first.
+    // Regular DM polling remains the fallback until both snapshots converge.
+    void queryClient.refetchQueries({
+      queryKey: dmWavesQueryKey,
+      exact: true,
+      type: "active",
+    });
   }, [
+    dmWavesQueryKey,
     isFetching,
     listedUnreadDropsCount,
-    refetch,
+    queryClient,
     shouldFetchDmWaves,
     unreadDmDropsCount,
     viewerIdentityKey,

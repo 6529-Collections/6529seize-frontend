@@ -330,4 +330,28 @@ describe("useEnhancedWavesListCore", () => {
 
     expect(result.current.waves[0]?.unreadDropsCount).toBe(1);
   });
+
+  it("suppresses a forced unread count while its wave is active", () => {
+    const wavesData = createWavesData({
+      mainWavesRefetch: jest.fn(),
+      refetchAllWaves: jest.fn(),
+      waves: [createSidebarWave()],
+    });
+    const { result, rerender } = renderHook(
+      ({ activeWaveId }) =>
+        useEnhancedWavesListCore(activeWaveId, wavesData, {
+          supportsPinning: false,
+        }),
+      { initialProps: { activeWaveId: null as string | null } }
+    );
+
+    act(() => {
+      result.current.restoreWaveUnreadCount("wave-1", 2);
+    });
+    expect(result.current.waves[0]?.unreadDropsCount).toBe(2);
+
+    rerender({ activeWaveId: "wave-1" });
+
+    expect(result.current.waves[0]?.unreadDropsCount).toBe(0);
+  });
 });
