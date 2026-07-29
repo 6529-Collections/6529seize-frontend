@@ -79,6 +79,7 @@
       "scripts/public-reviews/solidity-reference.cjs": ["exports"],
       "scripts/public-reviews/solidity-reference-lib.cjs": ["exports"],
       "scripts/public-reviews/stream-knowledge.cjs": ["exports"],
+      "scripts/public-reviews/stream-knowledge-packs.cjs": ["exports"],
       "services/api/public-review/feedback-codec.ts": ["exports", "types"],
       "services/api/public-review/ledger.ts": ["exports"],
       "services/**": ["files"],
