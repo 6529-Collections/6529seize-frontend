@@ -8,18 +8,16 @@ import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/React
 let capturedActionProps: any;
 let capturedClassificationProps: any;
 
-jest.mock("@/components/utils/button/ActionButton", () => (props: any) => {
-  capturedActionProps = props;
+jest.mock("@/components/utils/button/Button", () => (props: any) => {
+  if (props.variant === "action") {
+    capturedActionProps = props;
+  }
   return (
     <button type={props.type} disabled={props.disabled}>
-      save
+      {props.children}
     </button>
   );
 });
-
-jest.mock("@/components/utils/button/SecondaryButton", () => () => (
-  <button type="button">cancel</button>
-));
 
 jest.mock(
   "@/components/user/settings/UserSettingsClassification",
