@@ -311,8 +311,8 @@ describe("frontend manual deployment routing guards", () => {
       ({ name }) => name === "Checkout staging branch"
     );
 
-    expect(checkout?.with?.ref).toBe("${{ github.sha }}");
-    expect(checkout?.with?.ref).not.toBe("${{ env.STAGING_BRANCH }}");
+    expect(checkout?.with?.["ref"]).toBe("${{ github.sha }}");
+    expect(checkout?.with?.["ref"]).not.toBe("${{ env.STAGING_BRANCH }}");
   });
 
   it.each([
