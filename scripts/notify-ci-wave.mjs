@@ -149,6 +149,50 @@ const APPROVED_FRONTEND_PRODUCTION_WORKFLOWS = Object.freeze({
     "release-bus-deploy-production.yml",
 });
 
+function validateCurrentManualWorkflowRun({
+  currentRun,
+  runId,
+  workflow,
+  workflowFile,
+  deployedSha,
+  branch,
+}) {
+  if (String(currentRun.id) !== runId) {
+    throw new Error("Current workflow run ID does not match GITHUB_RUN_ID");
+  }
+  if (currentRun.name !== workflow) {
+    throw new Error("Current workflow run name is not the approved workflow");
+  }
+  const currentWorkflowPath = currentRun.path?.split("@")[0];
+  const approvedWorkflowPath = `.github/workflows/${workflowFile}`;
+  if (currentWorkflowPath !== approvedWorkflowPath) {
+    throw new Error("Current workflow run path is not the approved workflow");
+  }
+  if (currentRun.head_sha !== deployedSha) {
+    throw new Error("Current workflow run SHA does not match the deployed SHA");
+  }
+  if (currentRun.head_branch !== branch) {
+    throw new Error(
+      "Current workflow run branch does not match the deployed branch"
+    );
+  }
+  const isLiveSuccessNotification =
+    currentRun.status === "in_progress" && currentRun.conclusion === null;
+  const isSuccessfulReplay =
+    currentRun.status === "completed" && currentRun.conclusion === "success";
+  if (!isLiveSuccessNotification && !isSuccessfulReplay) {
+    throw new Error(
+      `Current workflow run state ${currentRun.status ?? "unknown"}/${currentRun.conclusion ?? "null"} is not valid for a success notification`
+    );
+  }
+  if (
+    !currentRun.created_at ||
+    Number.isNaN(Date.parse(currentRun.created_at))
+  ) {
+    throw new Error("Current workflow run creation time is invalid");
+  }
+}
+
 async function listPreviousWorkflowRuns({
   repository,
   workflowName,
@@ -165,16 +209,14 @@ async function listPreviousWorkflowRuns({
     );
     const pageRuns = payload.workflow_runs ?? [];
     if (!Array.isArray(pageRuns)) {
-      throw new Error(
-        `Production history for ${workflowName} is malformed`
-      );
+      throw new Error(`Production history for ${workflowName} is malformed`);
     }
     for (const run of pageRuns) {
       if (
         String(run.id) === String(currentRun.id) ||
         run.head_sha === currentSha ||
         run.name !== workflowName ||
-        run.path?.split("@")[0].split("/").at(-1) !== workflowFile ||
+        run.path?.split("@")[0] !== `.github/workflows/${workflowFile}` ||
         run.status !== "completed" ||
         run.conclusion !== "success" ||
         run.head_branch !== branch ||
@@ -204,18 +246,14 @@ async function deriveManualRangeContributors({
     throw new Error(`Workflow ${workflow} is not an approved manual path`);
   }
   const currentRun = await githubApi(repository, `/actions/runs/${runId}`);
-  if (
-    String(currentRun.id) !== runId ||
-    currentRun.name !== workflow ||
-    currentRun.path?.split("@")[0].split("/").at(-1) !== workflowFile ||
-    currentRun.head_sha !== deployedSha ||
-    currentRun.head_branch !== branch ||
-    currentRun.status !== "completed" ||
-    currentRun.conclusion !== "success" ||
-    !currentRun.created_at
-  ) {
-    throw new Error("Current workflow run does not match deployed metadata");
-  }
+  validateCurrentManualWorkflowRun({
+    currentRun,
+    runId,
+    workflow,
+    workflowFile,
+    deployedSha,
+    branch,
+  });
   const baselineWorkflows =
     workflow === "Web Deploy - PROD"
       ? APPROVED_FRONTEND_PRODUCTION_WORKFLOWS
