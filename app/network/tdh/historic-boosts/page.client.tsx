@@ -374,7 +374,7 @@ function MobileSummaryMetric({
 }) {
   return (
     <div className="tw-min-w-0">
-      <dt className="tw-text-[10px] tw-font-medium tw-uppercase tw-leading-4 tw-tracking-wide tw-text-iron-600">
+      <dt className="tw-text-[10px] tw-font-medium tw-uppercase tw-leading-4 tw-tracking-wide tw-text-iron-400">
         {label}
       </dt>
       <dd
