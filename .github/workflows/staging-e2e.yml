@@ -7,10 +7,24 @@ on:
   workflow_dispatch:
     inputs:
       pack:
-        description: Post-deploy manifest alias or script key; use all for the full set
-        type: string
+        description: Post-deploy manifest alias; use all for the full set
+        type: choice
         required: true
         default: all
+        options:
+          - all
+          - core
+          - social-readonly
+          - input-detection-readonly
+          - public-groups-tools-readonly
+          - delegation-readonly
+          - collections-readonly
+          - admin-guards-readonly
+          - public-content-readonly
+          - profile-deep-links-readonly
+          - search-waves-readonly
+          - media-readonly
+          - network-open-data-readonly
       release_train_id:
         description: Release Bus train id
         type: string

@@ -9,6 +9,7 @@ type WorkflowStep = {
   readonly uses?: string;
   readonly run?: string;
   readonly env?: Readonly<Record<string, string>>;
+  readonly with?: Readonly<Record<string, unknown>>;
 };
 
 type WorkflowJob = {
@@ -299,6 +300,19 @@ describe("frontend manual deployment routing guards", () => {
     expect(workflowJob(staging, "deploy-staging").needs).toBe(
       "manual-deployment-guard"
     );
+  });
+
+  it("pins manual staging deployment to the SHA authorized by its guard", () => {
+    const stagingDeploy = workflowJob(
+      workflow("deploy-staging.yml"),
+      "deploy-staging"
+    );
+    const checkout = stagingDeploy.steps.find(
+      ({ name }) => name === "Checkout staging branch"
+    );
+
+    expect(checkout?.with?.["ref"]).toBe("${{ github.sha }}");
+    expect(checkout?.with?.["ref"]).not.toBe("${{ env.STAGING_BRANCH }}");
   });
 
   it.each([
