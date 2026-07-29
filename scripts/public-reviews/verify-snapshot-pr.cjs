@@ -614,7 +614,6 @@ function validateTrustedPublicationPolicy(
   expectedPublication.versions.push({
     version: candidateConfig.reviewVersion,
     lifecycleState: "DRAFT",
-    sourceCommit: candidateConfig.source.commit,
   });
   invariant(
     stableJson(candidatePublication) === stableJson(expectedPublication),
