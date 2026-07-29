@@ -19,11 +19,11 @@ export function SolidityReferenceSummaryCard({
   readonly value: number;
 }) {
   return (
-    <div className="tw-min-w-0 tw-p-3">
+    <div className="tw-min-w-0 tw-px-2 tw-py-3 sm:tw-p-3">
       <dt className="tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-500">
         {label}
       </dt>
-      <dd className="tw-m-0 tw-mt-2 tw-font-mono tw-text-2xl tw-font-semibold tw-text-white">
+      <dd className="tw-m-0 tw-mt-1.5 tw-font-mono tw-text-lg tw-font-semibold tw-text-white sm:tw-text-xl lg:tw-text-2xl">
         {formatInteger(DEFAULT_LOCALE, value)}
       </dd>
     </div>
