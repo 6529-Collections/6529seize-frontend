@@ -27,10 +27,11 @@ const m = (
 ) => t(locale, key, params);
 
 const LIST_CLASS =
-  "tw-m-0 tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-iron-600 sm:tw-space-y-3";
+  "tw-m-0 tw-space-y-2 tw-pl-5 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300 marker:tw-text-iron-600 sm:tw-space-y-3";
 const NESTED_LIST_CLASS =
-  "tw-mt-2 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-iron-600 sm:tw-mt-3 sm:tw-space-y-3";
-const BODY_CLASS = "tw-space-y-4 tw-text-base tw-leading-7 tw-text-iron-300";
+  "tw-mt-2 tw-space-y-2 tw-pl-5 tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-400 marker:tw-text-iron-600 sm:tw-mt-3 sm:tw-space-y-3";
+const BODY_CLASS =
+  "tw-space-y-4 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300";
 const TIMELINE_ITEM_CLASS =
   "tw-relative tw-grid tw-grid-cols-[2rem_minmax(0,1fr)] tw-gap-3 sm:tw-grid-cols-[2.5rem_minmax(0,1fr)] sm:tw-gap-5";
 const TIMELINE_MARKER_CLASS =
@@ -356,7 +357,7 @@ function AllowlistCurrentPractices({
       </ol>
 
       <aside className="tw-mt-8 tw-max-w-5xl tw-rounded-xl tw-border tw-border-solid tw-border-[#00f0ff]/20 tw-bg-[#00f0ff]/[0.06] tw-p-4 sm:tw-mt-10 sm:tw-p-6">
-        <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-300">
+        <p className="tw-m-0 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300">
           It is important to emphasize that you see the allowlist in the same
           light in which we see it, namely, that it is something like a guest
           list for a gallery.
@@ -534,7 +535,7 @@ function TechnicalIssues({ locale }: { readonly locale: SupportedLocale }) {
       id="minting-technical-issues"
       title={m(locale, "about.minting.technicalIssues.title")}
     >
-      <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-orange-400 sm:tw-space-y-3">
+      <ul className="tw-m-0 tw-space-y-2 tw-pl-5 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300 marker:tw-text-orange-400 sm:tw-space-y-3">
         <li>
           Sometimes under heavy load the minting page will fail to load or fail
           to load a transaction. You may have to refresh multiple times to be

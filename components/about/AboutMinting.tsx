@@ -134,7 +134,7 @@ function MintingHeader() {
           {TOC_ITEMS.map((item) => (
             <li key={item.href}>
               <a
-                className="tw-flex tw-min-h-10 tw-items-center tw-whitespace-nowrap tw-rounded-lg tw-px-2 tw-py-2 tw-text-sm tw-leading-5 tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-bg-white/[0.05] hover:tw-text-iron-50 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-[#00f0ff]/60"
+                className="tw-flex tw-min-h-10 tw-items-center tw-whitespace-nowrap tw-rounded-lg tw-px-2 tw-py-2 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-bg-white/[0.05] hover:tw-text-iron-50 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-[#00f0ff]/60"
                 href={item.href}
               >
                 {m(item.labelKey)}
@@ -242,7 +242,7 @@ function MintingOverview() {
               className={`tw-shrink-0 tw-text-sm ${card.iconClassName}`}
               icon={card.icon}
             />
-            <div className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+            <div className="tw-mt-3 tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-400">
               {card.content}
             </div>
           </li>
@@ -267,7 +267,7 @@ function MintingOverview() {
               A collector of one or more The Memes NFT should not assume they
               receive an allowlist spot for multiple reasons:
             </h3>
-            <ul className="tw-m-0 tw-mt-3 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-[#00f0ff]/60 sm:tw-space-y-3">
+            <ul className="tw-m-0 tw-mt-3 tw-space-y-2 tw-pl-5 tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-400 marker:tw-text-[#00f0ff]/60 sm:tw-space-y-3">
               <li>
                 There are many more collectors of The Memes NFTs than there are
                 allowlist spots.
@@ -408,7 +408,7 @@ function MintingPhilosophy() {
                 {card.title}
               </h3>
             </div>
-            <div className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+            <div className="tw-mt-3 tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-400">
               {card.content}
             </div>
           </li>
