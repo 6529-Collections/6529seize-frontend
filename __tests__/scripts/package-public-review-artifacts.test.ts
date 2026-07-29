@@ -159,10 +159,16 @@ function createFixture(lifecycleState = "PUBLIC_REVIEW"): {
     configText
   );
   writeJson(repoRoot, `config/public-reviews/${REVIEW_ID}.publication.json`, {
-    schemaVersion: "public-review.publication.v2",
+    schemaVersion: "public-review.publication.v3",
     reviewId: REVIEW_ID,
     lifecycleState,
-    versions: [{ version: REVIEW_VERSION, lifecycleState }],
+    versions: [
+      {
+        version: REVIEW_VERSION,
+        lifecycleState,
+        sourceCommit: SOURCE_COMMIT,
+      },
+    ],
   });
 
   const sourceText = "contract StreamCore {}\n";
@@ -302,15 +308,20 @@ function addHistoricalVersion({
     fixture.repoRoot,
     `config/public-reviews/${REVIEW_ID}.publication.json`,
     {
-      schemaVersion: "public-review.publication.v2",
+      schemaVersion: "public-review.publication.v3",
       reviewId: REVIEW_ID,
       lifecycleState: topLevelLifecycleState,
       versions: [
         {
           version: HISTORICAL_VERSION,
           lifecycleState: historicalLifecycleState,
+          sourceCommit: HISTORICAL_COMMIT,
         },
-        { version: REVIEW_VERSION, lifecycleState: activeLifecycleState },
+        {
+          version: REVIEW_VERSION,
+          lifecycleState: activeLifecycleState,
+          sourceCommit: SOURCE_COMMIT,
+        },
       ],
     }
   );
@@ -446,11 +457,16 @@ function addOlderPublicVersion(
     `config/public-reviews/${REVIEW_ID}.publication.json`
   );
   const publication = JSON.parse(fs.readFileSync(publicationPath, "utf8")) as {
-    versions: { version: string; lifecycleState: string }[];
+    versions: {
+      version: string;
+      lifecycleState: string;
+      sourceCommit: string;
+    }[];
   };
   publication.versions.unshift({
     version: OLDER_HISTORICAL_VERSION,
     lifecycleState: "REVIEW_CLOSED",
+    sourceCommit: OLDER_HISTORICAL_COMMIT,
   });
   fs.writeFileSync(
     publicationPath,
@@ -869,6 +885,60 @@ describe("profile-aware public-review artifact packaging", () => {
         "utf8"
       )
     ).toContain("Fixture editorial content");
+  });
+
+  it.each([
+    {
+      label: "missing",
+      sourceCommit: undefined,
+    },
+    {
+      label: "malformed",
+      sourceCommit: "not-a-commit",
+    },
+  ])(
+    "rejects a $label trusted publication source commit",
+    ({ sourceCommit }) => {
+      const fixture = createFixture();
+      fixtureRoots.push(fixture.repoRoot);
+      const publicationPath = path.join(
+        fixture.repoRoot,
+        `config/public-reviews/${REVIEW_ID}.publication.json`
+      );
+      const publication = JSON.parse(fs.readFileSync(publicationPath, "utf8"));
+      if (sourceCommit === undefined) {
+        delete publication.versions[0].sourceCommit;
+      } else {
+        publication.versions[0].sourceCommit = sourceCommit;
+      }
+      fs.writeFileSync(
+        publicationPath,
+        `${JSON.stringify(publication, null, 2)}\n`
+      );
+
+      expect(() => getPublishedReviewIds(fixture.repoRoot)).toThrow(
+        "is not a valid public-review publication config"
+      );
+    }
+  );
+
+  it("rejects a trusted publication commit that disagrees with the retained index", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    const publicationPath = path.join(
+      fixture.repoRoot,
+      `config/public-reviews/${REVIEW_ID}.publication.json`
+    );
+    const publication = JSON.parse(fs.readFileSync(publicationPath, "utf8"));
+    publication.versions[0].sourceCommit = HISTORICAL_COMMIT;
+    fs.writeFileSync(
+      publicationPath,
+      `${JSON.stringify(publication, null, 2)}\n`
+    );
+
+    expect(() => getPublishedReviewIds(fixture.repoRoot)).toThrow(
+      "source review index commits drifted from trusted publication identities"
+    );
   });
 
   it("omits draft routes' raw evidence from staging artifacts", () => {
