@@ -9,24 +9,25 @@ export const GROUP_MENTION_TEXT: Readonly<Record<ApiDropGroupMention, string>> =
   };
 
 const GROUP_MENTION_PATTERNS: Readonly<Record<ApiDropGroupMention, RegExp>> = {
-  [ApiDropGroupMention.All]: /(^|[^\p{L}\p{N}_@])(@all)(?![\p{L}\p{N}_@])/iu,
+  [ApiDropGroupMention.All]: /(?<![\p{L}\p{N}_@])(@all)(?![\p{L}\p{N}_@])/iu,
   [ApiDropGroupMention.Contributors]:
-    /(^|[^\p{L}\p{N}_@])(@contributors)(?![\p{L}\p{N}_@])/iu,
+    /(?<![\p{L}\p{N}_@])(@contributors)(?![\p{L}\p{N}_@])/iu,
   [ApiDropGroupMention.Admins]:
-    /(^|[^\p{L}\p{N}_@])(@admins)(?![\p{L}\p{N}_@])/iu,
+    /(?<![\p{L}\p{N}_@])(@admins)(?![\p{L}\p{N}_@])/iu,
   [ApiDropGroupMention.Devs6529]:
-    /(^|[^\p{L}\p{N}_@])(@devs6529)(?![\p{L}\p{N}_@])/iu,
+    /(?<![\p{L}\p{N}_@])(@devs6529)(?![\p{L}\p{N}_@])/iu,
 };
 
-const GROUP_MENTION_MARK_PATTERNS: Readonly<
-  Record<ApiDropGroupMention, RegExp>
+const GROUP_MENTION_MARK_PATTERN_FACTORIES: Readonly<
+  Record<ApiDropGroupMention, () => RegExp>
 > = {
-  [ApiDropGroupMention.All]: /(?<![\p{L}\p{N}_@])(@all)(?![\p{L}\p{N}_@])/giu,
-  [ApiDropGroupMention.Contributors]:
+  [ApiDropGroupMention.All]: () =>
+    /(?<![\p{L}\p{N}_@])(@all)(?![\p{L}\p{N}_@])/giu,
+  [ApiDropGroupMention.Contributors]: () =>
     /(?<![\p{L}\p{N}_@])(@contributors)(?![\p{L}\p{N}_@])/giu,
-  [ApiDropGroupMention.Admins]:
+  [ApiDropGroupMention.Admins]: () =>
     /(?<![\p{L}\p{N}_@])(@admins)(?![\p{L}\p{N}_@])/giu,
-  [ApiDropGroupMention.Devs6529]:
+  [ApiDropGroupMention.Devs6529]: () =>
     /(?<![\p{L}\p{N}_@])(@devs6529)(?![\p{L}\p{N}_@])/giu,
 };
 
@@ -77,6 +78,6 @@ export const markGroupMentionTokens = ({
   readonly marker: string;
 }) =>
   content.replace(
-    GROUP_MENTION_MARK_PATTERNS[group],
+    GROUP_MENTION_MARK_PATTERN_FACTORIES[group](),
     (_match, token: string) => `${marker}${token}${marker}`
   );

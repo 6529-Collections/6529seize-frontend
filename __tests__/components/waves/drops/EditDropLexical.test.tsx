@@ -614,6 +614,38 @@ describe("EditDropLexical", () => {
     expect(onCancel).not.toHaveBeenCalled();
   });
 
+  it("backfills permission-group metadata on an otherwise unchanged edit", async () => {
+    const user = userEvent.setup();
+    const onSave = jest.fn();
+    const onCancel = jest.fn();
+    exportDropMarkdownMock.mockReturnValue("@admins");
+    getMentionedGroupsFromEditorStateMock.mockReturnValue([
+      ApiDropGroupMention.Admins,
+    ]);
+
+    render(
+      <EditDropLexical
+        {...defaultProps}
+        initialContent="@admins"
+        initialGroupMentions={[]}
+        canMentionAll={false}
+        onSave={onSave}
+        onCancel={onCancel}
+      />
+    );
+
+    const saveButton = screen.getByRole("button", { name: /save/i });
+    await user.click(saveButton);
+
+    expect(onSave).toHaveBeenCalledWith(
+      "@admins",
+      [],
+      [ApiDropGroupMention.Admins],
+      []
+    );
+    expect(onCancel).not.toHaveBeenCalled();
+  });
+
   it("does not strip existing ALL group metadata for non-admin unchanged content", async () => {
     const user = userEvent.setup();
     const onSave = jest.fn();

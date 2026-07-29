@@ -150,6 +150,17 @@ describe("UserPageMentionShortcuts", () => {
       screen.getByRole("button", { name: "New Quick Tag" })
     ).toBeInTheDocument();
     expect(screen.getByText("@writers")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "New Quick Tag" }));
+
+    expect(
+      screen.getByRole("heading", { name: "Create Quick Tag" })
+    ).toBeInTheDocument();
+    expect(screen.queryByText("@writers")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Save Quick Tag" })
+    ).toBeInTheDocument();
   });
 
   it("uses the shared selected-profile chips in the editor", () => {

@@ -40,6 +40,21 @@ describe("drop group mentions", () => {
     ]);
   });
 
+  it("keeps detection stable across repeated multi-paragraph scans", () => {
+    const content = [
+      "First paragraph for the team.",
+      "Second paragraph: @ADMINS can review this.",
+      "Third paragraph: @contributors can reply.",
+    ].join("\n");
+    const expected = [
+      ApiDropGroupMention.Contributors,
+      ApiDropGroupMention.Admins,
+    ];
+
+    expect(getMentionedGroupsFromText(content, false)).toEqual(expected);
+    expect(getMentionedGroupsFromText(content, false)).toEqual(expected);
+  });
+
   it("does not match embedded global mention names", () => {
     expect(
       getMentionedGroupsFromText(
@@ -58,6 +73,17 @@ describe("drop group mentions", () => {
         marker: "**",
       })
     ).toBe("**@admins** **@admins**");
+  });
+
+  it("keeps marking stable across repeated calls", () => {
+    const params = {
+      content: "@admins and @ADMINS",
+      group: ApiDropGroupMention.Admins,
+      marker: "**",
+    };
+
+    expect(markGroupMentionTokens(params)).toBe("**@admins** and **@ADMINS**");
+    expect(markGroupMentionTokens(params)).toBe("**@admins** and **@ADMINS**");
   });
 
   it("keeps @all restricted while returning other metadata", () => {

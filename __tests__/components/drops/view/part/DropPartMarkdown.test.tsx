@@ -797,6 +797,23 @@ describe("DropPartMarkdown", () => {
     }
   });
 
+  it("keeps unrecorded case-insensitive group text plain", () => {
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedGroups={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={"hello @ADMINS"}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("hello @ADMINS")).not.toHaveClass(
+      "tw-text-primary-400"
+    );
+  });
+
   it("renders bold markdown on the browser baseline without aligning plain text spans", () => {
     const { container } = render(
       <DropPartMarkdown
