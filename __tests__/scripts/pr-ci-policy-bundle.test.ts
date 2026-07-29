@@ -291,6 +291,7 @@ describe("pr-ci-policy-bundle-v1", () => {
         "typecheck:changed",
         "typecheck:tests",
         "e2e:packs",
+        "test:e2e:production:home-readonly",
       ])
     );
     expect(PACKAGE_FIELD_KEYS).toEqual(

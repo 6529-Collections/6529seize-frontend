@@ -333,6 +333,13 @@ function runProcessGroup(command, args, options) {
             code: "ENOBUFS",
           })
         );
+        let bounded = Buffer.from(next, "utf8")
+          .subarray(0, options.maxBuffer)
+          .toString("utf8");
+        while (Buffer.byteLength(bounded) > options.maxBuffer) {
+          bounded = bounded.slice(0, -1);
+        }
+        return bounded;
       }
       return next;
     };

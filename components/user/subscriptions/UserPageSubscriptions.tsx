@@ -288,7 +288,7 @@ export default function UserPageSubscriptions(
           id="profile-subscriptions-settings"
           className="tw-mt-6 tw-scroll-mt-24"
         >
-          <h3 className="tw-mb-3 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-400">
+          <h3 className="tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
             {t(locale, "subscriptions.page.settingsTitle")}
           </h3>
           <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2">
