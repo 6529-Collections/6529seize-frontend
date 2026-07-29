@@ -1887,7 +1887,7 @@ function generateKnowledgePacks({
   );
   invariant(
     context.publicationConfig.schemaVersion ===
-      "public-review.publication.v3" &&
+      "public-review.publication.v2" &&
       context.publicationConfig.reviewId === reviewId &&
       context.publicationConfig.versions.length ===
         context.referenceIndex.versions.length,

@@ -69,7 +69,7 @@ function main(argv = process.argv.slice(2)) {
         ...(checkOnly ? ["--check"] : []),
       ]);
     }
-    runNode(path.join(__dirname, "stream-knowledge.cjs"), [
+    runNode(path.join(__dirname, "stream-knowledge-packs.cjs"), [
       ...(checkOnly ? ["--check"] : []),
       ...(refreshRetained ? ["--refresh-retained"] : []),
     ]);

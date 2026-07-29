@@ -48,7 +48,7 @@ const { bundleOutputSha256 } =
     bundleOutputSha256(bundle: Record<string, unknown>): string;
   };
 const { generateKnowledgePacks } =
-  require("../../scripts/public-reviews/stream-knowledge.cjs") as {
+  require("../../scripts/public-reviews/stream-knowledge-packs.cjs") as {
     generateKnowledgePacks(input: {
       readonly repoRoot: string;
       readonly checkOnly?: boolean;
