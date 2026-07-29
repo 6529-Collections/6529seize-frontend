@@ -11,13 +11,19 @@ jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
     children,
     isOpen,
     title,
+    titleActions,
+    headerActions,
   }: {
     children: React.ReactNode;
     isOpen: boolean;
     title: string;
+    titleActions?: React.ReactNode;
+    headerActions?: React.ReactNode;
   }) =>
     isOpen ? (
       <div role="dialog" aria-label={title}>
+        {titleActions}
+        {headerActions}
         {children}
       </div>
     ) : null,
@@ -149,6 +155,9 @@ describe("UserPageMentionShortcuts", () => {
     expect(
       screen.getByRole("button", { name: "New Quick Tag" })
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "New Quick Tag" })
+    ).toHaveTextContent("+ New");
     expect(screen.getByText("@writers")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "New Quick Tag" }));
@@ -156,6 +165,9 @@ describe("UserPageMentionShortcuts", () => {
     expect(
       screen.getByRole("heading", { name: "Create Quick Tag" })
     ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "New Quick Tag" })
+    ).not.toBeInTheDocument();
     expect(screen.queryByText("@writers")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
     expect(

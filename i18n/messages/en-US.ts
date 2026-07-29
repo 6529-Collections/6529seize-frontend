@@ -691,6 +691,7 @@ const MENTION_SHORTCUT_SETTINGS_MESSAGES = objectMessages(
     profileCount: "{count} profile",
     profileCountMany: "{count} profiles",
     new: "New Quick Tag",
+    newShort: "+ New",
     create: "Create Quick Tag",
     edit: "Edit Quick Tag",
     editorDescription:
