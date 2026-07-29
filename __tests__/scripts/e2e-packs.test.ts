@@ -1,5 +1,7 @@
-import { spawnSync } from "node:child_process";
+import { spawnSync, type ChildProcess } from "node:child_process";
+import { EventEmitter } from "node:events";
 import fs from "node:fs";
+import { PassThrough } from "node:stream";
 import os from "node:os";
 import path from "node:path";
 
@@ -96,6 +98,7 @@ const runner = require("../../scripts/e2e-packs.cjs") as {
       cwd: string;
       env: NodeJS.ProcessEnv;
       maxBuffer: number;
+      spawnProcess?: () => ChildProcess;
       timeout: number;
     }
   ) => Promise<SpawnResult>;
@@ -498,6 +501,44 @@ describe("manifest-driven E2E runner", () => {
     }
   );
 
+  it("rejects an incomplete release binding before preparing or running packs", async () => {
+    const bindingVariables = [
+      "RELEASE_BUS_E2E_MANIFEST_ID",
+      "RELEASE_BUS_E2E_MANIFEST_IDENTITY_SHA256",
+      "RELEASE_BUS_E2E_SOURCE_SHA",
+    ] as const;
+    const previous = Object.fromEntries(
+      bindingVariables.map((name) => [name, process.env[name]])
+    );
+    process.env["RELEASE_BUS_E2E_MANIFEST_ID"] =
+      "11111111-1111-1111-1111-111111111111";
+    delete process.env["RELEASE_BUS_E2E_MANIFEST_IDENTITY_SHA256"];
+    delete process.env["RELEASE_BUS_E2E_SOURCE_SHA"];
+    const prepare = jest.fn();
+    const spawn = jest.fn();
+
+    try {
+      await expect(
+        runner.runPacks([samplePacks[0]!], {
+          forward: [],
+          prepare,
+          spawn,
+        })
+      ).rejects.toThrow("binding is incomplete or malformed");
+      expect(prepare).not.toHaveBeenCalled();
+      expect(spawn).not.toHaveBeenCalled();
+    } finally {
+      for (const name of bindingVariables) {
+        const value = previous[name];
+        if (value === undefined) {
+          delete process.env[name];
+        } else {
+          process.env[name] = value;
+        }
+      }
+    }
+  });
+
   it("times out and terminates the complete POSIX process group", async () => {
     const startedAt = Date.now();
     const result = await runner.runProcessGroup(
@@ -525,6 +566,35 @@ describe("manifest-driven E2E runner", () => {
     expect(grandchildPid).toBeGreaterThan(0);
     await new Promise((resolve) => setTimeout(resolve, 100));
     expect(() => process.kill(grandchildPid, 0)).toThrow();
+  });
+
+  it("returns a bounded infrastructure result if close never follows escalation", async () => {
+    jest.useFakeTimers();
+    const fakeChild = Object.assign(new EventEmitter(), {
+      kill: jest.fn().mockReturnValue(true),
+      pid: 987654,
+      stderr: new PassThrough(),
+      stdout: new PassThrough(),
+    }) as unknown as ChildProcess;
+
+    try {
+      const resultPromise = runner.runProcessGroup("never-closes", [], {
+        cwd: ROOT,
+        env: process.env,
+        maxBuffer: 1024,
+        spawnProcess: () => fakeChild,
+        timeout: 100,
+      });
+      await jest.advanceTimersByTimeAsync(1100);
+      await expect(resultPromise).resolves.toMatchObject({
+        status: null,
+        signal: "SIGKILL",
+        error: { code: "ETIMEDOUT" },
+      });
+      expect(fakeChild.kill).toHaveBeenCalledTimes(2);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });
 
