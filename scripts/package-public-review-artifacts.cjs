@@ -346,13 +346,6 @@ function getPublicReviewPublicationPlans(repoRoot) {
         `${publication.reviewId} source review index drifted from publication config.`
       );
 
-      const activePublication = publication.versions.find(
-        (version) => version.version === reference.config.reviewVersion
-      );
-      invariant(
-        activePublication?.lifecycleState === publication.lifecycleState,
-        `${publication.reviewId} active publication lifecycle drifted.`
-      );
       const publishedVersions = new Set(
         publication.versions
           .filter((version) =>
@@ -367,6 +360,27 @@ function getPublicReviewPublicationPlans(repoRoot) {
         : [...retainedVersions]
             .reverse()
             .find((version) => publishedVersions.has(version));
+      const sourceActivePublication = publication.versions.find(
+        (version) => version.version === reference.config.reviewVersion
+      );
+      invariant(
+        sourceActivePublication,
+        `${publication.reviewId} has no publication entry for its source-active version.`
+      );
+      if (sourceActivePublication.lifecycleState !== "DRAFT") {
+        invariant(
+          sourceActivePublication.lifecycleState === publication.lifecycleState,
+          `${publication.reviewId} active publication lifecycle drifted.`
+        );
+      } else if (publication.lifecycleState !== "DRAFT") {
+        const fallbackPublication = publication.versions.find(
+          (version) => version.version === indexActiveVersion
+        );
+        invariant(
+          fallbackPublication?.lifecycleState === publication.lifecycleState,
+          `${publication.reviewId} fallback publication lifecycle drifted.`
+        );
+      }
 
       return [
         publication.reviewId,

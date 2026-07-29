@@ -1,0 +1,1420 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": true,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_deployProtocolStateMachine()",
+          "functionKind": "function",
+          "id": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine#function:_deployProtocolStateMachine()",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL1Byb3RvY29sU3RhdGVNYWNoaW5lLnNvbDpQcm90b2NvbFN0YXRlTWFjaGluZSNmdW5jdGlvbjpfZGVwbG95UHJvdG9jb2xTdGF0ZU1hY2hpbmUoKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_deployProtocolStateMachine",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 888,
+            "byteStart": 1867,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L55-L76",
+            "lineEnd": 76,
+            "lineStart": 55,
+            "snippetSha256": "sha256:087da1c9d99e4d8bac6ba6b81b5102202e6ad57a8a67a8cfb78edc9609ffa3f3",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_mintProtocolFixedPriceDrop(uint256,string)",
+          "functionKind": "function",
+          "id": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine#function:_mintProtocolFixedPriceDrop(uint256,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "price",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1Byb3RvY29sU3RhdGVNYWNoaW5lLnNvbDpQcm90b2NvbFN0YXRlTWFjaGluZSNmdW5jdGlvbjpfbWludFByb3RvY29sRml4ZWRQcmljZURyb3AodWludDI1NixzdHJpbmcp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_mintProtocolFixedPriceDrop",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "result",
+              "storageLocation": "memory",
+              "type": "FixedPriceMintResult"
+            }
+          ],
+          "range": {
+            "byteLength": 1582,
+            "byteStart": 2761,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L78-L112",
+            "lineEnd": 112,
+            "lineStart": 78,
+            "snippetSha256": "sha256:9269d9d43e744ecbe690d7fa927a0b71961c5f98c73088b51bb1424355592842",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_mintProtocolAuctionDrop(uint256,string)",
+          "functionKind": "function",
+          "id": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine#function:_mintProtocolAuctionDrop(uint256,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "reservePrice",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1Byb3RvY29sU3RhdGVNYWNoaW5lLnNvbDpQcm90b2NvbFN0YXRlTWFjaGluZSNmdW5jdGlvbjpfbWludFByb3RvY29sQXVjdGlvbkRyb3AodWludDI1NixzdHJpbmcp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_mintProtocolAuctionDrop",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "result",
+              "storageLocation": "memory",
+              "type": "AuctionMintResult"
+            }
+          ],
+          "range": {
+            "byteLength": 1626,
+            "byteStart": 4349,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L114-L152",
+            "lineEnd": 152,
+            "lineStart": 114,
+            "snippetSha256": "sha256:c2dacd2baada09fe91f50e5ba1ee20a3510f164e0a46b331e20b21241a5664c1",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_bidProtocolAuction(uint256,address,uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine#function:_bidProtocolAuction(uint256,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "bidder",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "bid",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1Byb3RvY29sU3RhdGVNYWNoaW5lLnNvbDpQcm90b2NvbFN0YXRlTWFjaGluZSNmdW5jdGlvbjpfYmlkUHJvdG9jb2xBdWN0aW9uKHVpbnQyNTYsYWRkcmVzcyx1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_bidProtocolAuction",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 735,
+            "byteStart": 5981,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L154-L166",
+            "lineEnd": 166,
+            "lineStart": 154,
+            "snippetSha256": "sha256:8f132d60ecab94a66b503cc2f4708dfa6c8ab1486ab89b5a7938930e8df10d85",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_settleProtocolAuctionWithBid(uint256,address)",
+          "functionKind": "function",
+          "id": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine#function:_settleProtocolAuctionWithBid(uint256,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "expectedWinner",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1Byb3RvY29sU3RhdGVNYWNoaW5lLnNvbDpQcm90b2NvbFN0YXRlTWFjaGluZSNmdW5jdGlvbjpfc2V0dGxlUHJvdG9jb2xBdWN0aW9uV2l0aEJpZCh1aW50MjU2LGFkZHJlc3Mp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_settleProtocolAuctionWithBid",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 685,
+            "byteStart": 6722,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L168-L180",
+            "lineEnd": 180,
+            "lineStart": 168,
+            "snippetSha256": "sha256:d2e988f0dde8107c9627e14ffdb919fe479322b0ec627763dec9836bc525316d",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_finalizeProtocolTokenMetadata(uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine#function:_finalizeProtocolTokenMetadata(uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "salt",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1Byb3RvY29sU3RhdGVNYWNoaW5lLnNvbDpQcm90b2NvbFN0YXRlTWFjaGluZSNmdW5jdGlvbjpfZmluYWxpemVQcm90b2NvbFRva2VuTWV0YWRhdGEodWludDI1Nix1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_finalizeProtocolTokenMetadata",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 512,
+            "byteStart": 7413,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L182-L189",
+            "lineEnd": 189,
+            "lineStart": 182,
+            "snippetSha256": "sha256:223ab851148e7d03077bfd889d1c868b0445d5c6fb8234dc10558c360f83e0fb",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_mutateProtocolTokenMetadata(uint256,string)",
+          "functionKind": "function",
+          "id": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine#function:_mutateProtocolTokenMetadata(uint256,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1Byb3RvY29sU3RhdGVNYWNoaW5lLnNvbDpQcm90b2NvbFN0YXRlTWFjaGluZSNmdW5jdGlvbjpfbXV0YXRlUHJvdG9jb2xUb2tlbk1ldGFkYXRhKHVpbnQyNTYsc3RyaW5nKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_mutateProtocolTokenMetadata",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 911,
+            "byteStart": 7931,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L191-L207",
+            "lineEnd": 207,
+            "lineStart": 191,
+            "snippetSha256": "sha256:15867997e120d311648277bcc739fa9db7b2fff18c033a7ec94ee886b94425eb",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_exerciseProtocolPauseSignerAndCancellation()",
+          "functionKind": "function",
+          "id": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine#function:_exerciseProtocolPauseSignerAndCancellation()",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL1Byb3RvY29sU3RhdGVNYWNoaW5lLnNvbDpQcm90b2NvbFN0YXRlTWFjaGluZSNmdW5jdGlvbjpfZXhlcmNpc2VQcm90b2NvbFBhdXNlU2lnbmVyQW5kQ2FuY2VsbGF0aW9uKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_exerciseProtocolPauseSignerAndCancellation",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "cancelledDropId",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 3216,
+            "byteStart": 8848,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L209-L287",
+            "lineEnd": 287,
+            "lineStart": 209,
+            "snippetSha256": "sha256:f95e25c3fcb03108fea9478a9be1ee90d9d3d99fe7ce11a2543e9ca08d2000db",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertProtocolMetadataPauseBlocksMutation(uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine#function:_assertProtocolMetadataPauseBlocksMutation(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1Byb3RvY29sU3RhdGVNYWNoaW5lLnNvbDpQcm90b2NvbFN0YXRlTWFjaGluZSNmdW5jdGlvbjpfYXNzZXJ0UHJvdG9jb2xNZXRhZGF0YVBhdXNlQmxvY2tzTXV0YXRpb24odWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertProtocolMetadataPauseBlocksMutation",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 521,
+            "byteStart": 12070,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L289-L299",
+            "lineEnd": 299,
+            "lineStart": 289,
+            "snippetSha256": "sha256:3d8e464169cd9286ff5fe8393f5d49bcea122db4414f5cee615f227b319383e7",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_withdrawProtocolFixedPriceCredit(address)",
+          "functionKind": "function",
+          "id": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine#function:_withdrawProtocolFixedPriceCredit(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1Byb3RvY29sU3RhdGVNYWNoaW5lLnNvbDpQcm90b2NvbFN0YXRlTWFjaGluZSNmdW5jdGlvbjpfd2l0aGRyYXdQcm90b2NvbEZpeGVkUHJpY2VDcmVkaXQoYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_withdrawProtocolFixedPriceCredit",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 605,
+            "byteStart": 12597,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L301-L312",
+            "lineEnd": 312,
+            "lineStart": 301,
+            "snippetSha256": "sha256:55443369b113e84f43155ab8c66feb028ce761a4869597cc40f56336085fa885",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_withdrawProtocolBidderCredit(address)",
+          "functionKind": "function",
+          "id": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine#function:_withdrawProtocolBidderCredit(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1Byb3RvY29sU3RhdGVNYWNoaW5lLnNvbDpQcm90b2NvbFN0YXRlTWFjaGluZSNmdW5jdGlvbjpfd2l0aGRyYXdQcm90b2NvbEJpZGRlckNyZWRpdChhZGRyZXNzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_withdrawProtocolBidderCredit",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 368,
+            "byteStart": 13208,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L314-L321",
+            "lineEnd": 321,
+            "lineStart": 314,
+            "snippetSha256": "sha256:2407c37010f99552cb4be489af6a79ee92a8e52850771c5211164699390079d5",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_withdrawProtocolAuctionProceedsCredit(address)",
+          "functionKind": "function",
+          "id": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine#function:_withdrawProtocolAuctionProceedsCredit(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1Byb3RvY29sU3RhdGVNYWNoaW5lLnNvbDpQcm90b2NvbFN0YXRlTWFjaGluZSNmdW5jdGlvbjpfd2l0aGRyYXdQcm90b2NvbEF1Y3Rpb25Qcm9jZWVkc0NyZWRpdChhZGRyZXNzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_withdrawProtocolAuctionProceedsCredit",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 698,
+            "byteStart": 13582,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L323-L336",
+            "lineEnd": 336,
+            "lineStart": 323,
+            "snippetSha256": "sha256:fd28af04a8fd44356d975195abec7a817f521beb84ee739cdc5114b54b32c4b9",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_freezeProtocolCollection()",
+          "functionKind": "function",
+          "id": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine#function:_freezeProtocolCollection()",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL1Byb3RvY29sU3RhdGVNYWNoaW5lLnNvbDpQcm90b2NvbFN0YXRlTWFjaGluZSNmdW5jdGlvbjpfZnJlZXplUHJvdG9jb2xDb2xsZWN0aW9uKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_freezeProtocolCollection",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "manifestHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 847,
+            "byteStart": 14286,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L338-L353",
+            "lineEnd": 353,
+            "lineStart": 338,
+            "snippetSha256": "sha256:7b63044b291287768fa797cb120da2818f83d62b85022670a05a0d194c24c2e6",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertProtocolFixedPriceCredits(uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine#function:_assertProtocolFixedPriceCredits(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "price",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1Byb3RvY29sU3RhdGVNYWNoaW5lLnNvbDpQcm90b2NvbFN0YXRlTWFjaGluZSNmdW5jdGlvbjpfYXNzZXJ0UHJvdG9jb2xGaXhlZFByaWNlQ3JlZGl0cyh1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertProtocolFixedPriceCredits",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 824,
+            "byteStart": 15139,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L355-L368",
+            "lineEnd": 368,
+            "lineStart": 355,
+            "snippetSha256": "sha256:319d607a399379aadce8f85038c523624da1ffa3b99ae9651979e686ca4c141f",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertProtocolAuctionCredits(uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine#function:_assertProtocolAuctionCredits(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "highestBid",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1Byb3RvY29sU3RhdGVNYWNoaW5lLnNvbDpQcm90b2NvbFN0YXRlTWFjaGluZSNmdW5jdGlvbjpfYXNzZXJ0UHJvdG9jb2xBdWN0aW9uQ3JlZGl0cyh1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertProtocolAuctionCredits",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 793,
+            "byteStart": 15969,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L370-L383",
+            "lineEnd": 383,
+            "lineStart": 370,
+            "snippetSha256": "sha256:a152c4fca6b9b8d541e792495f9f54faea5554161857b7fe565a952c2e1b1f02",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertProtocolAccountingCoversOwed()",
+          "functionKind": "function",
+          "id": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine#function:_assertProtocolAccountingCoversOwed()",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL1Byb3RvY29sU3RhdGVNYWNoaW5lLnNvbDpQcm90b2NvbFN0YXRlTWFjaGluZSNmdW5jdGlvbjpfYXNzZXJ0UHJvdG9jb2xBY2NvdW50aW5nQ292ZXJzT3dlZCgp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertProtocolAccountingCoversOwed",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 745,
+            "byteStart": 16768,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L385-L401",
+            "lineEnd": 401,
+            "lineStart": 385,
+            "snippetSha256": "sha256:8466659bf22c83a5c11667f6d63c2cbf6deba6017fc42611db748f9361c7df70",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_setProtocolPaused(bytes32,bool)",
+          "functionKind": "function",
+          "id": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine#function:_setProtocolPaused(bytes32,bool)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "domain",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "paused",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1Byb3RvY29sU3RhdGVNYWNoaW5lLnNvbDpQcm90b2NvbFN0YXRlTWFjaGluZSNmdW5jdGlvbjpfc2V0UHJvdG9jb2xQYXVzZWQoYnl0ZXMzMixib29sKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_setProtocolPaused",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 365,
+            "byteStart": 17519,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L403-L410",
+            "lineEnd": 410,
+            "lineStart": 403,
+            "snippetSha256": "sha256:b9ae91690528459afea4af97d275a9626721bc3653d2d63410e8ab36a3bcbf9a",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_warpPastProtocolFinalSupplyWindow()",
+          "functionKind": "function",
+          "id": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine#function:_warpPastProtocolFinalSupplyWindow()",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL1Byb3RvY29sU3RhdGVNYWNoaW5lLnNvbDpQcm90b2NvbFN0YXRlTWFjaGluZSNmdW5jdGlvbjpfd2FycFBhc3RQcm90b2NvbEZpbmFsU3VwcGx5V2luZG93KCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_warpPastProtocolFinalSupplyWindow",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 315,
+            "byteStart": 17890,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L412-L419",
+            "lineEnd": 419,
+            "lineStart": 412,
+            "snippetSha256": "sha256:c944b98bb07d08a20029b15b4965535ea555f961a04e77fc16ef80c6b34c388c",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_consumeProtocolNonce()",
+          "functionKind": "function",
+          "id": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine#function:_consumeProtocolNonce()",
+          "inputs": [],
+          "key": "dGVzdC9oZWxwZXJzL1Byb3RvY29sU3RhdGVNYWNoaW5lLnNvbDpQcm90b2NvbFN0YXRlTWFjaGluZSNmdW5jdGlvbjpfY29uc3VtZVByb3RvY29sTm9uY2UoKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_consumeProtocolNonce",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "nonce",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 148,
+            "byteStart": 18211,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L421-L424",
+            "lineEnd": 424,
+            "lineStart": 421,
+            "snippetSha256": "sha256:3cede71ae800ad4f37e7c280cf127b5e27b333cdaacf8c50747eb83688661699",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_protocolSurplus(address,uint256)",
+          "functionKind": "function",
+          "id": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine#function:_protocolSurplus(address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "owed",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1Byb3RvY29sU3RhdGVNYWNoaW5lLnNvbDpQcm90b2NvbFN0YXRlTWFjaGluZSNmdW5jdGlvbjpfcHJvdG9jb2xTdXJwbHVzKGFkZHJlc3MsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_protocolSurplus",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 202,
+            "byteStart": 18365,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L426-L431",
+            "lineEnd": 431,
+            "lineStart": 426,
+            "snippetSha256": "sha256:9f32512ee2547d0383fad7afbae9bdd0a3548fe0c733251622fd2e787e1fb8e3",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PROTOCOL_COLLECTION_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 52,
+            "byteStart": 555,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:eef57193463615c24af346fee23ac1c80b582af72abad373cd6362dac5c7f417",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 606,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "valueSource": "1",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PROTOCOL_AUCTION_DURATION",
+          "natspec": "",
+          "range": {
+            "byteLength": 60,
+            "byteStart": 613,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:a02c1914e264044b07cf15aa04b7c88c5d0f3cfa53f0e493c766dec9040a25aa",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 6,
+            "byteStart": 667,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:3805e58181b01ac7e3bcd1fb3404f3d2ed685660f24bf2ce3361e6d6663c29bf",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "valueSource": "1 days",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PROTOCOL_POSTER",
+          "natspec": "",
+          "range": {
+            "byteLength": 59,
+            "byteStart": 679,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:6cd5f23388fb4ee01aed37cc2e9796720455c90543364b69022c0ba40e58fba6",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 723,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:0ab9e750f7c6ea7ca35cb67c84e1deac4cd43cc2a6a45b284817308c28bdf2a2",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "valueSource": "address(0x1001)",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PROTOCOL_RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 62,
+            "byteStart": 744,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:44f3af8736a3564ed5f850491d6de60a9f2d955f249df88c95ac49a4383a2c82",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 791,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:8c262acd027cd04362ad0bf925e100df0730a67a3bc00162d96b74c991167c42",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "valueSource": "address(0x2001)",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PROTOCOL_PAYOUT",
+          "natspec": "",
+          "range": {
+            "byteLength": 59,
+            "byteStart": 812,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:6d970d9e53a25a0e53b64efdcda655d21cf9184162bbfd6c9d843284804e94b8",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 856,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:a41fc240d38b7cdcdce6a559175b4b6958a7128a899e99f41eca3bed02bf0f77",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "valueSource": "address(0x3001)",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PROTOCOL_CURATORS_POOL",
+          "natspec": "",
+          "range": {
+            "byteLength": 66,
+            "byteStart": 877,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:bc5b7f852903d6843bfb7a7685520a399569f1e7485fbb71e1856532e179656d",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 928,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:a9dac33b00de468df5e9b3ff103d11732592c79ac7f237c6e12b8bbd34148312",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "valueSource": "address(0x4001)",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PROTOCOL_FIRST_BIDDER",
+          "natspec": "",
+          "range": {
+            "byteLength": 65,
+            "byteStart": 949,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:c088bc29aca861b6da61fc64286128881cc23fac4f367a1bf2ba6713597b14bd",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 999,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:07d94250e37a5d2ba7ad11906ccb75be32b87f6edb26a22bbe16e75ea92d1426",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "valueSource": "address(0x5001)",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PROTOCOL_SECOND_BIDDER",
+          "natspec": "",
+          "range": {
+            "byteLength": 66,
+            "byteStart": 1020,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:444f44b4ab0f29250047bb11dacaf8558e72646f1e181efc152b23b497f6998a",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1071,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:f6839ebb30e69c7ef583dd8662a60330885ec1f0d7fc8998e9988512504338d5",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "valueSource": "address(0x5002)",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PROTOCOL_WITHDRAW_RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 71,
+            "byteStart": 1092,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:bafcb122216d38f6daaa8b3e91348121e1c73d864e254adc7ecd7c6baf56ba40",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1148,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:410a0ba944aa1eb7e5fd3043721656e53b589d86c442604655354ee5daad37f7",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "valueSource": "address(0x6001)",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PROTOCOL_PAUSE_REASON",
+          "natspec": "",
+          "range": {
+            "byteLength": 85,
+            "byteStart": 1169,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:6e323470dae12ecd8437c06445e2c3122b069eb6c8730da0792fdb1372ce947a",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 35,
+            "byteStart": 1219,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:3866848a59dcfc1fa2fc780f1b74ef5ce6f6fd876c89b9b0ea2dc1df03644701",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "valueSource": "keccak256(\"protocol-state-machine\")",
+          "visibility": "internal"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "protocolDeployed",
+          "natspec": "",
+          "range": {
+            "byteLength": 40,
+            "byteStart": 1732,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L51",
+            "lineEnd": 51,
+            "lineStart": 51,
+            "snippetSha256": "sha256:8e26c364ba14d40e32dec9d6744e0f84c213518678729833393578974488ba6d",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "type": "DeployedStream",
+          "typeString": "struct StreamFixture.DeployedStream",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "internal"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "protocolAuctions",
+          "natspec": "",
+          "range": {
+            "byteLength": 40,
+            "byteStart": 1778,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L52",
+            "lineEnd": 52,
+            "lineStart": 52,
+            "snippetSha256": "sha256:43a49b42fb4b0adaf0bdc50f6bdab10e034c03a20b929dd809aab65e2b9a0f0b",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "type": "StreamAuctions",
+          "typeString": "contract StreamAuctions",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "internal"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "protocolModel",
+          "natspec": "",
+          "range": {
+            "byteLength": 36,
+            "byteStart": 1824,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L53",
+            "lineEnd": 53,
+            "lineStart": 53,
+            "snippetSha256": "sha256:f67d66b654fb43ffcf7b7cbf022c76330c8300b1e013c9316b1b6fe280cd97d5",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          },
+          "selector": null,
+          "type": "ProtocolModel",
+          "typeString": "struct ProtocolStateMachine.ProtocolModel",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "internal"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "dropId",
+              "natspec": "",
+              "range": {
+                "byteLength": 14,
+                "byteStart": 1299,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L30",
+                "lineEnd": 30,
+                "lineStart": 30,
+                "snippetSha256": "sha256:b2ab11adaf1723425d1759f7ffda3faa78c5b7d67f66a9d2c80bad47b92df93c",
+                "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 1323,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L31",
+                "lineEnd": 31,
+                "lineStart": 31,
+                "snippetSha256": "sha256:66875c39eec6445ab2b3787f7fe7517ed1914f5ebb02d7f9ee07cc370b8b605f",
+                "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "price",
+              "natspec": "",
+              "range": {
+                "byteLength": 13,
+                "byteStart": 1348,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L32",
+                "lineEnd": 32,
+                "lineStart": 32,
+                "snippetSha256": "sha256:1282132554b2c82ff0c609cd2397b193b432baa4852bdffa6c21468e70a86e10",
+                "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            }
+          ],
+          "name": "FixedPriceMintResult",
+          "natspec": "",
+          "range": {
+            "byteLength": 107,
+            "byteStart": 1261,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L29-L33",
+            "lineEnd": 33,
+            "lineStart": 29,
+            "snippetSha256": "sha256:fa0dd503e215b7e4687422ae2e9f21e2b39c54cf495cf3f140592a4ea800b9cc",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          }
+        },
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "dropId",
+              "natspec": "",
+              "range": {
+                "byteLength": 14,
+                "byteStart": 1409,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L36",
+                "lineEnd": 36,
+                "lineStart": 36,
+                "snippetSha256": "sha256:b2ab11adaf1723425d1759f7ffda3faa78c5b7d67f66a9d2c80bad47b92df93c",
+                "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 1433,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L37",
+                "lineEnd": 37,
+                "lineStart": 37,
+                "snippetSha256": "sha256:66875c39eec6445ab2b3787f7fe7517ed1914f5ebb02d7f9ee07cc370b8b605f",
+                "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "reservePrice",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 1458,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L38",
+                "lineEnd": 38,
+                "lineStart": 38,
+                "snippetSha256": "sha256:d5af136a3ca4b4ff8b2045fd6ef8367eeed38c19ec50fe53b261263721b72db7",
+                "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "endTime",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 1488,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L39",
+                "lineEnd": 39,
+                "lineStart": 39,
+                "snippetSha256": "sha256:a9db8ef05fb39f34612c1fb27aa0749eac85205ab0d0372ff30fee492aac4abc",
+                "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            }
+          ],
+          "name": "AuctionMintResult",
+          "natspec": "",
+          "range": {
+            "byteLength": 136,
+            "byteStart": 1374,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L35-L40",
+            "lineEnd": 40,
+            "lineStart": 35,
+            "snippetSha256": "sha256:45e5e20ba36500f7baeaca9678551eeda8bc4841949deb7d09519b7d1e89cdfc",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          }
+        },
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "nextNonce",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 1547,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L43",
+                "lineEnd": 43,
+                "lineStart": 43,
+                "snippetSha256": "sha256:8557e32bd14929b0aabb4252d057c9964b62c2e5da456ff8542dcf7fc1272dae",
+                "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "fixedPriceMints",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 1574,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L44",
+                "lineEnd": 44,
+                "lineStart": 44,
+                "snippetSha256": "sha256:4969355c67f17e2783715aac35941f7525b3da08216a84a755b6b0910a173960",
+                "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "auctionMints",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 1607,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L45",
+                "lineEnd": 45,
+                "lineStart": 45,
+                "snippetSha256": "sha256:8b64c486de0ba920eca625486dfe676bc44de52458ae3c7e4abc22ab44f104e2",
+                "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "finalizedTokens",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 1637,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L46",
+                "lineEnd": 46,
+                "lineStart": 46,
+                "snippetSha256": "sha256:9393c02981ac18d0598c2d6d22c9f92f53a644ee85b14738f9daa8d9610aa8ed",
+                "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "signerRotated",
+              "natspec": "",
+              "range": {
+                "byteLength": 18,
+                "byteStart": 1670,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L47",
+                "lineEnd": 47,
+                "lineStart": 47,
+                "snippetSha256": "sha256:6aa86a218d482285bc599afc085ca0995317f0053031ade7b01078c89a9a03c1",
+                "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+              },
+              "type": "bool",
+              "typeString": "bool"
+            },
+            {
+              "index": 5,
+              "name": "collectionFrozen",
+              "natspec": "",
+              "range": {
+                "byteLength": 21,
+                "byteStart": 1698,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L48",
+                "lineEnd": 48,
+                "lineStart": 48,
+                "snippetSha256": "sha256:51eb5b9871dbca562b4540c549657b026261906c75405e1ad68e676308cbf6da",
+                "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+              },
+              "type": "bool",
+              "typeString": "bool"
+            }
+          ],
+          "name": "ProtocolModel",
+          "natspec": "",
+          "range": {
+            "byteLength": 210,
+            "byteStart": 1516,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L42-L49",
+            "lineEnd": 49,
+            "lineStart": 42,
+            "snippetSha256": "sha256:2fc582f5d0137f20f3f172b6be1bb672547c9dee71af6e413bae4b569ff41864",
+            "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+        "name": "DropAuthTestHelper"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9oZWxwZXJzL1Byb3RvY29sU3RhdGVNYWNoaW5lLnNvbDpQcm90b2NvbFN0YXRlTWFjaGluZQ",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "ProtocolStateMachine",
+    "natspec": "",
+    "range": {
+      "byteLength": 18263,
+      "byteStart": 306,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/ProtocolStateMachine.sol#L11-L432",
+      "lineEnd": 432,
+      "lineStart": 11,
+      "snippetSha256": "sha256:6324dc3aacc35912e1edc564db5cfb219400d2518dfe552cd1e474307b0d18c3",
+      "sourceSha256": "sha256:51b8c9e806b185d716bfd548275aca14ba7f95fe9e0e74cff7429276e32d246a"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/helpers/ProtocolStateMachine.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 1
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1
+    },
+    "totalCount": 1
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine",
+      "severity": "advisory"
+    }
+  ]
+}

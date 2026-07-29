@@ -1,0 +1,2260 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0x41ffda09",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "authorizationClass",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            }
+          ],
+          "name": "AuthorityProviderCallFailed",
+          "selector": "0x41ffda09",
+          "signature": "AuthorityProviderCallFailed(uint8,address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0x1155bc73",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "authorizationClass",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            }
+          ],
+          "name": "AuthorityProviderNoOp",
+          "selector": "0x1155bc73",
+          "signature": "AuthorityProviderNoOp(uint8,address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0x60ad02aa",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "authorizationClass",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            }
+          ],
+          "name": "InvalidAuthorityProvider",
+          "selector": "0x60ad02aa",
+          "signature": "InvalidAuthorityProvider(uint8,address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0x4a3549de",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "familyId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint16",
+              "name": "supplied",
+              "type": "uint16"
+            },
+            {
+              "index": 2,
+              "internalType": "uint16",
+              "name": "allowed",
+              "type": "uint16"
+            }
+          ],
+          "name": "InvalidAuthorizationClassMask",
+          "selector": "0x4a3549de",
+          "signature": "InvalidAuthorizationClassMask(bytes32,uint16,uint16)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0x51909c48",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "recordType",
+              "type": "bytes32"
+            }
+          ],
+          "name": "InvalidRecordType",
+          "selector": "0x51909c48",
+          "signature": "InvalidRecordType(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0x291112fa",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "familyId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "authorizationClass",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            }
+          ],
+          "name": "RecordFamilyGrantNoOp",
+          "selector": "0x291112fa",
+          "signature": "RecordFamilyGrantNoOp(bytes32,uint8,address,bool)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0xa5701b56",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "familyId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "authorizationClass",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "RecordFamilyGrantNotAllowed",
+          "selector": "0xa5701b56",
+          "signature": "RecordFamilyGrantNotAllowed(bytes32,uint8,address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0x144bf3a1",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "caller",
+              "type": "address"
+            }
+          ],
+          "name": "RecordFamilyRegistryOwnerRequired",
+          "selector": "0x144bf3a1",
+          "signature": "RecordFamilyRegistryOwnerRequired(address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0x5862473e",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "familyId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "internalType": "uint16",
+              "name": "authorizationClassMask",
+              "type": "uint16"
+            }
+          ],
+          "name": "RecordFamilyUnauthorized",
+          "selector": "0x5862473e",
+          "signature": "RecordFamilyUnauthorized(address,bytes32,bytes32,uint16)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0x7de24345",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "recordType",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RecordTypeAlreadyAdmitted",
+          "selector": "0x7de24345",
+          "signature": "RecordTypeAlreadyAdmitted(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0x6742729e",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "recordType",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RecordTypeNotAdmitted",
+          "selector": "0x6742729e",
+          "signature": "RecordTypeNotAdmitted(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0xa2e6f7cd",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "authorizationClass",
+              "type": "uint8"
+            }
+          ],
+          "name": "UnknownAuthorizationClass",
+          "selector": "0xa2e6f7cd",
+          "signature": "UnknownAuthorizationClass(uint8)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0x84dbb611",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "familyId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "UnknownRecordFamily",
+          "selector": "0x84dbb611",
+          "signature": "UnknownRecordFamily(bytes32)"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#event:RecordFamilyAuthorityProviderUpdated(uint16,uint8,address,address,bytes32,uint64,address)",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint8",
+              "name": "authorizationClass",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "oldProvider",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "internalType": "address",
+              "name": "newProvider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "newProviderCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "address",
+              "name": "authority",
+              "type": "address"
+            }
+          ],
+          "name": "RecordFamilyAuthorityProviderUpdated",
+          "signature": "RecordFamilyAuthorityProviderUpdated(uint16,uint8,address,address,bytes32,uint64,address)",
+          "topic0": "0x1cfcee8993237bddc4a24328ce8d74d01ec1c1cb8bfbf6154892cf36decd74b3"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#event:RecordFamilyGrantUpdated(uint16,bytes32,uint8,address,bool,uint64,address)",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "familyId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint8",
+              "name": "authorizationClass",
+              "type": "uint8"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "address",
+              "name": "authority",
+              "type": "address"
+            }
+          ],
+          "name": "RecordFamilyGrantUpdated",
+          "signature": "RecordFamilyGrantUpdated(uint16,bytes32,uint8,address,bool,uint64,address)",
+          "topic0": "0xc65761ebcb4f79b29e338643f2a6d4f91e7c6088e98dd6bb4f8bd822738f8379"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#event:RecordTypeAdmitted(uint16,bytes32,bytes32,uint16,uint64,address)",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "familyId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "authorizationClassMask",
+              "type": "uint16"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            },
+            {
+              "index": 5,
+              "indexed": true,
+              "internalType": "address",
+              "name": "authority",
+              "type": "address"
+            }
+          ],
+          "name": "RecordTypeAdmitted",
+          "signature": "RecordTypeAdmitted(uint16,bytes32,bytes32,uint16,uint64,address)",
+          "topic0": "0xa0b0a2b25e3580f59ce88b32cc5c210edaf14deb244714413f8f9355ed532639"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x7e3c9be7",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [],
+          "name": "adminsContract",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x7e3c9be7",
+          "signature": "adminsContract()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0xe96cc920",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "familyId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "uint16",
+              "name": "authorizationClassMask",
+              "type": "uint16"
+            }
+          ],
+          "name": "admitRecordType",
+          "outputs": [],
+          "selector": "0xe96cc920",
+          "signature": "admitRecordType(bytes32,bytes32,uint16)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x95b71c66",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "authorizationClass",
+              "type": "uint8"
+            }
+          ],
+          "name": "authorityProvider",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "providerCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0x95b71c66",
+          "signature": "authorityProvider(uint8)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x54b63fc2",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "familyId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "familyAllowedAuthorizationClassMask",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "selector": "0x54b63fc2",
+          "signature": "familyAllowedAuthorizationClassMask(bytes32)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0xe69e4156",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "familyId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "familyRejectsAdminAuthority",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xe69e4156",
+          "signature": "familyRejectsAdminAuthority(bytes32)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x20e9f458",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [],
+          "name": "isStreamRecordFamilyRegistry",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x20e9f458",
+          "signature": "isStreamRecordFamilyRegistry()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x1118ed2f",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "familyId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "authorizationClass",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "recordFamilyGrant",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0x1118ed2f",
+          "signature": "recordFamilyGrant(bytes32,uint8,address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0xcd2369a6",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "recordType",
+              "type": "bytes32"
+            }
+          ],
+          "name": "recordTypePolicy",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamRecordFamilyRegistry.RecordTypePolicy",
+              "name": "",
+              "type": "(bytes32,uint16,bool)"
+            }
+          ],
+          "selector": "0xcd2369a6",
+          "signature": "recordTypePolicy(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x9ecd97c6",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "recordType",
+              "type": "bytes32"
+            }
+          ],
+          "name": "recordTypeRejectsAdminAuthority",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x9ecd97c6",
+          "signature": "recordTypeRejectsAdminAuthority(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x9f175161",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "recordType",
+              "type": "bytes32"
+            }
+          ],
+          "name": "recordTypeRevision",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0x9f175161",
+          "signature": "recordTypeRevision(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0xb3fcab16",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "subjectId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "internalType": "address",
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "internalType": "bytes",
+              "name": "authorizationData",
+              "type": "bytes"
+            }
+          ],
+          "name": "requireRecordWriter",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "authorizationClass",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0xb3fcab16",
+          "signature": "requireRecordWriter(uint256,bytes32,bytes32,address,bytes)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x0f4f2a68",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "authorizationClass",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            }
+          ],
+          "name": "setAuthorityProvider",
+          "outputs": [],
+          "selector": "0x0f4f2a68",
+          "signature": "setAuthorityProvider(uint8,address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x40ee7ee3",
+          "declaringDefinitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "familyId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "authorizationClass",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            }
+          ],
+          "name": "setRecordFamilyGrant",
+          "outputs": [],
+          "selector": "0x40ee7ee3",
+          "signature": "setRecordFamilyGrant(bytes32,uint8,address,bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IERC165.sol:IERC165#function:0x01ffc9a7",
+          "declaringDefinitionId": "smart-contracts/IERC165.sol:IERC165",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [
+        {
+          "astId": 16190,
+          "canonicalSignature": "RecordFamilyRegistryOwnerRequired(address)",
+          "displaySignature": "RecordFamilyRegistryOwnerRequired(address)",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0x144bf3a1",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "caller",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Vycm9yOjB4MTQ0YmYzYTE",
+          "kind": "error",
+          "name": "RecordFamilyRegistryOwnerRequired",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 347,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:d922a6615a5019782e202ded80df9f048133430d41419d7f87ca94370c1f1dee",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0x144bf3a1"
+        },
+        {
+          "astId": 16194,
+          "canonicalSignature": "UnknownRecordFamily(bytes32)",
+          "displaySignature": "UnknownRecordFamily(bytes32)",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0x84dbb611",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "familyId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Vycm9yOjB4ODRkYmI2MTE",
+          "kind": "error",
+          "name": "UnknownRecordFamily",
+          "natspec": "",
+          "range": {
+            "byteLength": 44,
+            "byteStart": 408,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:cc52500fd8701068457e1424c376ba08d9fe1d70e1610cbb073f95ddebfc4c30",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0x84dbb611"
+        },
+        {
+          "astId": 16198,
+          "canonicalSignature": "UnknownAuthorizationClass(uint8)",
+          "displaySignature": "UnknownAuthorizationClass(uint8)",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0xa2e6f7cd",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authorizationClass",
+              "type": "uint8"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Vycm9yOjB4YTJlNmY3Y2Q",
+          "kind": "error",
+          "name": "UnknownAuthorizationClass",
+          "natspec": "",
+          "range": {
+            "byteLength": 58,
+            "byteStart": 457,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:421bac156a45233d4f5cde08fb2a7745a70d29ea4647e7a63d222f6e53e2261b",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0xa2e6f7cd"
+        },
+        {
+          "astId": 16206,
+          "canonicalSignature": "InvalidAuthorizationClassMask(bytes32,uint16,uint16)",
+          "displaySignature": "InvalidAuthorizationClassMask(bytes32,uint16,uint16)",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0x4a3549de",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "familyId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "supplied",
+              "type": "uint16"
+            },
+            {
+              "index": 2,
+              "name": "allowed",
+              "type": "uint16"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Vycm9yOjB4NGEzNTQ5ZGU",
+          "kind": "error",
+          "name": "InvalidAuthorizationClassMask",
+          "natspec": "",
+          "range": {
+            "byteLength": 87,
+            "byteStart": 520,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:a9973c2130a9e85c3fbe03df4942cf53ebd1ba34dff49f8ceec49c9c3cc69966",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0x4a3549de"
+        },
+        {
+          "astId": 16210,
+          "canonicalSignature": "InvalidRecordType(bytes32)",
+          "displaySignature": "InvalidRecordType(bytes32)",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0x51909c48",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "recordType",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Vycm9yOjB4NTE5MDljNDg",
+          "kind": "error",
+          "name": "InvalidRecordType",
+          "natspec": "",
+          "range": {
+            "byteLength": 44,
+            "byteStart": 612,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:1edf37c3a58f60d1fb2519331603fb66f729fd4a871ec7886370c18b1679d61c",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0x51909c48"
+        },
+        {
+          "astId": 16214,
+          "canonicalSignature": "RecordTypeAlreadyAdmitted(bytes32)",
+          "displaySignature": "RecordTypeAlreadyAdmitted(bytes32)",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0x7de24345",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "recordType",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Vycm9yOjB4N2RlMjQzNDU",
+          "kind": "error",
+          "name": "RecordTypeAlreadyAdmitted",
+          "natspec": "",
+          "range": {
+            "byteLength": 52,
+            "byteStart": 661,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:9c62ec701d3e78352fa875d7e817413f6239c52d3652acf719ee76e15275febe",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0x7de24345"
+        },
+        {
+          "astId": 16218,
+          "canonicalSignature": "RecordTypeNotAdmitted(bytes32)",
+          "displaySignature": "RecordTypeNotAdmitted(bytes32)",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0x6742729e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "recordType",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Vycm9yOjB4Njc0MjcyOWU",
+          "kind": "error",
+          "name": "RecordTypeNotAdmitted",
+          "natspec": "",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 718,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:b8361a94ea87dbaaac961e5ab2d6ff75c236f750e5bb8e510f562e1f051bba79",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0x6742729e"
+        },
+        {
+          "astId": 16226,
+          "canonicalSignature": "RecordFamilyGrantNotAllowed(bytes32,uint8,address)",
+          "displaySignature": "RecordFamilyGrantNotAllowed(bytes32,uint8,address)",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0xa5701b56",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "familyId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "authorizationClass",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Vycm9yOjB4YTU3MDFiNTY",
+          "kind": "error",
+          "name": "RecordFamilyGrantNotAllowed",
+          "natspec": "",
+          "range": {
+            "byteLength": 95,
+            "byteStart": 771,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:ab232400de5dad422dd1579058cd383542d9d5eeb46c2f173d28aad36b234bf4",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0xa5701b56"
+        },
+        {
+          "astId": 16236,
+          "canonicalSignature": "RecordFamilyGrantNoOp(bytes32,uint8,address,bool)",
+          "displaySignature": "RecordFamilyGrantNoOp(bytes32,uint8,address,bool)",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0x291112fa",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "familyId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "authorizationClass",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "enabled",
+              "type": "bool"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Vycm9yOjB4MjkxMTEyZmE",
+          "kind": "error",
+          "name": "RecordFamilyGrantNoOp",
+          "natspec": "",
+          "range": {
+            "byteLength": 117,
+            "byteStart": 871,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L22-L24",
+            "lineEnd": 24,
+            "lineStart": 22,
+            "snippetSha256": "sha256:4ec85ec6e436c7526ef2089d4951c1d3ff194b91a29a65a39b39a3d657b7abb9",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0x291112fa"
+        },
+        {
+          "astId": 16242,
+          "canonicalSignature": "InvalidAuthorityProvider(uint8,address)",
+          "displaySignature": "InvalidAuthorityProvider(uint8,address)",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0x60ad02aa",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authorizationClass",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "provider",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Vycm9yOjB4NjBhZDAyYWE",
+          "kind": "error",
+          "name": "InvalidAuthorityProvider",
+          "natspec": "",
+          "range": {
+            "byteLength": 75,
+            "byteStart": 993,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:7fd59b58b61181e179b18e6605ebd0fe3762d57bad75b9ddd90c26fdb59ac5cb",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0x60ad02aa"
+        },
+        {
+          "astId": 16248,
+          "canonicalSignature": "AuthorityProviderNoOp(uint8,address)",
+          "displaySignature": "AuthorityProviderNoOp(uint8,address)",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0x1155bc73",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authorizationClass",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "provider",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Vycm9yOjB4MTE1NWJjNzM",
+          "kind": "error",
+          "name": "AuthorityProviderNoOp",
+          "natspec": "",
+          "range": {
+            "byteLength": 72,
+            "byteStart": 1073,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:00330fa553856dd4da6a43a41745895026eca22b3a4c90492cfabc0bf490e0fa",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0x1155bc73"
+        },
+        {
+          "astId": 16258,
+          "canonicalSignature": "RecordFamilyUnauthorized(address,bytes32,bytes32,uint16)",
+          "displaySignature": "RecordFamilyUnauthorized(address,bytes32,bytes32,uint16)",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0x5862473e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "familyId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "authorizationClassMask",
+              "type": "uint16"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Vycm9yOjB4NTg2MjQ3M2U",
+          "kind": "error",
+          "name": "RecordFamilyUnauthorized",
+          "natspec": "",
+          "range": {
+            "byteLength": 129,
+            "byteStart": 1150,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L27-L29",
+            "lineEnd": 29,
+            "lineStart": 27,
+            "snippetSha256": "sha256:80872d6a0fec603a21f22ef50810279ef90f0e3337e046a252b5c5851abc3d6c",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0x5862473e"
+        },
+        {
+          "astId": 16264,
+          "canonicalSignature": "AuthorityProviderCallFailed(uint8,address)",
+          "displaySignature": "AuthorityProviderCallFailed(uint8,address)",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#error:0x41ffda09",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authorizationClass",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "provider",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Vycm9yOjB4NDFmZmRhMDk",
+          "kind": "error",
+          "name": "AuthorityProviderCallFailed",
+          "natspec": "",
+          "range": {
+            "byteLength": 78,
+            "byteStart": 1284,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:17073939aa21623f987909c614b86900b5529f1b2d92cd3b3b1cc8525dee0ccf",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0x41ffda09"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 16278,
+          "canonicalSignature": "RecordTypeAdmitted(uint16,bytes32,bytes32,uint16,uint64,address)",
+          "displaySignature": "RecordTypeAdmitted(uint16,bytes32,bytes32,uint16,uint64,address)",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#event:RecordTypeAdmitted(uint16,bytes32,bytes32,uint16,uint64,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "familyId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "authorizationClassMask",
+              "type": "uint16"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "revision",
+              "type": "uint64"
+            },
+            {
+              "index": 5,
+              "indexed": true,
+              "name": "authority",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2V2ZW50OlJlY29yZFR5cGVBZG1pdHRlZCh1aW50MTYsYnl0ZXMzMixieXRlczMyLHVpbnQxNix1aW50NjQsYWRkcmVzcyk",
+          "kind": "event",
+          "name": "RecordTypeAdmitted",
+          "natspec": "",
+          "range": {
+            "byteLength": 230,
+            "byteStart": 1368,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L32-L39",
+            "lineEnd": 39,
+            "lineStart": 32,
+            "snippetSha256": "sha256:55e965fc31213019ce63b870ef177ad6064c604a660243797346995d41f23634",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "topic0": "0xa0b0a2b25e3580f59ce88b32cc5c210edaf14deb244714413f8f9355ed532639"
+        },
+        {
+          "anonymous": false,
+          "astId": 16294,
+          "canonicalSignature": "RecordFamilyGrantUpdated(uint16,bytes32,uint8,address,bool,uint64,address)",
+          "displaySignature": "RecordFamilyGrantUpdated(uint16,bytes32,uint8,address,bool,uint64,address)",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#event:RecordFamilyGrantUpdated(uint16,bytes32,uint8,address,bool,uint64,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "familyId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "authorizationClass",
+              "type": "uint8"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "revision",
+              "type": "uint64"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "name": "authority",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2V2ZW50OlJlY29yZEZhbWlseUdyYW50VXBkYXRlZCh1aW50MTYsYnl0ZXMzMix1aW50OCxhZGRyZXNzLGJvb2wsdWludDY0LGFkZHJlc3Mp",
+          "kind": "event",
+          "name": "RecordFamilyGrantUpdated",
+          "natspec": "",
+          "range": {
+            "byteLength": 250,
+            "byteStart": 1603,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L40-L48",
+            "lineEnd": 48,
+            "lineStart": 40,
+            "snippetSha256": "sha256:03fad607cc4e4aeb18e45d7149cca8b89b3f1105b781f477e33b4fe2115ff7b2",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "topic0": "0xc65761ebcb4f79b29e338643f2a6d4f91e7c6088e98dd6bb4f8bd822738f8379"
+        },
+        {
+          "anonymous": false,
+          "astId": 16310,
+          "canonicalSignature": "RecordFamilyAuthorityProviderUpdated(uint16,uint8,address,address,bytes32,uint64,address)",
+          "displaySignature": "RecordFamilyAuthorityProviderUpdated(uint16,uint8,address,address,bytes32,uint64,address)",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#event:RecordFamilyAuthorityProviderUpdated(uint16,uint8,address,address,bytes32,uint64,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "authorizationClass",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "oldProvider",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "name": "newProvider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "newProviderCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "revision",
+              "type": "uint64"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "name": "authority",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2V2ZW50OlJlY29yZEZhbWlseUF1dGhvcml0eVByb3ZpZGVyVXBkYXRlZCh1aW50MTYsdWludDgsYWRkcmVzcyxhZGRyZXNzLGJ5dGVzMzIsdWludDY0LGFkZHJlc3Mp",
+          "kind": "event",
+          "name": "RecordFamilyAuthorityProviderUpdated",
+          "natspec": "",
+          "range": {
+            "byteLength": 284,
+            "byteStart": 1858,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L49-L57",
+            "lineEnd": 57,
+            "lineStart": 49,
+            "snippetSha256": "sha256:d7d9412c356dc99be1b9005122cf71b51c9cc5b0585690c5b8777f578f6b1db4",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "topic0": "0x1cfcee8993237bddc4a24328ce8d74d01ec1c1cb8bfbf6154892cf36decd74b3"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "isStreamRecordFamilyRegistry()",
+          "displaySignature": "isStreamRecordFamilyRegistry()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x20e9f458",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4MjBlOWY0NTg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isStreamRecordFamilyRegistry",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 69,
+            "byteStart": 2148,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L59",
+            "lineEnd": 59,
+            "lineStart": 59,
+            "snippetSha256": "sha256:b887288a404917dbbb893b4eea762236a16b69909622d5a890b3e85cd2c4ee56",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0x20e9f458",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "adminsContract()",
+          "displaySignature": "adminsContract()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x7e3c9be7",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4N2UzYzliZTc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "adminsContract",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 58,
+            "byteStart": 2222,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L60",
+            "lineEnd": 60,
+            "lineStart": 60,
+            "snippetSha256": "sha256:9bf6e74d594fc93809b3900ac85db4f0ebc745a7f8272097b75a8c1c39c6cfca",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0x7e3c9be7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "recordTypePolicy(bytes32)",
+          "displaySignature": "recordTypePolicy(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0xcd2369a6",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "recordType",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4Y2QyMzY5YTY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "recordTypePolicy",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "RecordTypePolicy"
+            }
+          ],
+          "range": {
+            "byteLength": 94,
+            "byteStart": 2285,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L61",
+            "lineEnd": 61,
+            "lineStart": 61,
+            "snippetSha256": "sha256:75a1529049cbfee7d7d6eddb2732205c5e3b0f84bd8f6a3a70444bb420c3051a",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0xcd2369a6",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "recordTypeRevision(bytes32)",
+          "displaySignature": "recordTypeRevision(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x9f175161",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "recordType",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4OWYxNzUxNjE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "recordTypeRevision",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 79,
+            "byteStart": 2384,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L62",
+            "lineEnd": 62,
+            "lineStart": 62,
+            "snippetSha256": "sha256:c59e22f700b82bd2e6d5eb73fbbf6dfb42c7b7727b20ad2b260a182b08e3c818",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0x9f175161",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "familyAllowedAuthorizationClassMask(bytes32)",
+          "displaySignature": "familyAllowedAuthorizationClassMask(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x54b63fc2",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "familyId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4NTRiNjNmYzI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "familyAllowedAuthorizationClassMask",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "range": {
+            "byteLength": 94,
+            "byteStart": 2468,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L63",
+            "lineEnd": 63,
+            "lineStart": 63,
+            "snippetSha256": "sha256:55cd528189239cd2c930937b12ff6dd14188b0efe0cd682ca27c43a8e3a09d02",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0x54b63fc2",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "familyRejectsAdminAuthority(bytes32)",
+          "displaySignature": "familyRejectsAdminAuthority(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0xe69e4156",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "familyId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4ZTY5ZTQxNTY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "familyRejectsAdminAuthority",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 84,
+            "byteStart": 2567,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L64",
+            "lineEnd": 64,
+            "lineStart": 64,
+            "snippetSha256": "sha256:137004b89420e63fe088fc3c81c2b20520300b640e967fbc39a5a6382124b322",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0xe69e4156",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "recordTypeRejectsAdminAuthority(bytes32)",
+          "displaySignature": "recordTypeRejectsAdminAuthority(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x9ecd97c6",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "recordType",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4OWVjZDk3YzY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "recordTypeRejectsAdminAuthority",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 90,
+            "byteStart": 2656,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L65",
+            "lineEnd": 65,
+            "lineStart": 65,
+            "snippetSha256": "sha256:d2e89dbaac501a8db9eeb6f6d122396e1d3e73ecd655a3bb05af237ffdebf92d",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0x9ecd97c6",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "recordFamilyGrant(bytes32,uint8,address)",
+          "displaySignature": "recordFamilyGrant(bytes32,uint8,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x1118ed2f",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "familyId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "authorizationClass",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4MTExOGVkMmY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "recordFamilyGrant",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 166,
+            "byteStart": 2751,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L66-L69",
+            "lineEnd": 69,
+            "lineStart": 66,
+            "snippetSha256": "sha256:0ed343ffe667939acc66f7a47d0cab52f805c14f4a1cd8f4164feb51c088e9fc",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0x1118ed2f",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "authorityProvider(uint8)",
+          "displaySignature": "authorityProvider(uint8)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x95b71c66",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authorizationClass",
+              "type": "uint8"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4OTViNzFjNjY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "authorityProvider",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "providerCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 161,
+            "byteStart": 2922,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L70-L73",
+            "lineEnd": 73,
+            "lineStart": 70,
+            "snippetSha256": "sha256:ded161251f060ecb54b2a8f6943d0aff804b861d4a9e28a33eabad018b2a8a0f",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0x95b71c66",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "admitRecordType(bytes32,bytes32,uint16)",
+          "displaySignature": "admitRecordType(bytes32,bytes32,uint16)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0xe96cc920",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "familyId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "authorizationClassMask",
+              "type": "uint16"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4ZTk2Y2M5MjA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "admitRecordType",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 111,
+            "byteStart": 3088,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L74-L75",
+            "lineEnd": 75,
+            "lineStart": 74,
+            "snippetSha256": "sha256:efaf8b94a02baed7f04fe7e7b2d19e2e1c97fa8b988deeea2adbc5287d4729b0",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0xe96cc920",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setRecordFamilyGrant(bytes32,uint8,address,bool)",
+          "displaySignature": "setRecordFamilyGrant(bytes32,uint8,address,bool)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x40ee7ee3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "familyId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "authorizationClass",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "enabled",
+              "type": "bool"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4NDBlZTdlZTM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setRecordFamilyGrant",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 152,
+            "byteStart": 3204,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L76-L81",
+            "lineEnd": 81,
+            "lineStart": 76,
+            "snippetSha256": "sha256:84c1b7dad9fef20fc9ac84e2dad98e75cdf0f643d8928b1fe00deaffee41f11f",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0x40ee7ee3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setAuthorityProvider(uint8,address)",
+          "displaySignature": "setAuthorityProvider(uint8,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x0f4f2a68",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authorizationClass",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "provider",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4MGY0ZjJhNjg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setAuthorityProvider",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 83,
+            "byteStart": 3361,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L82",
+            "lineEnd": 82,
+            "lineStart": 82,
+            "snippetSha256": "sha256:a6bbbfa9eccb01e750188b59bdab99dcbf7d89990b63fe7a1557c076f478804d",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0x0f4f2a68",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "requireRecordWriter(uint256,bytes32,bytes32,address,bytes)",
+          "displaySignature": "requireRecordWriter(uint256,bytes32,bytes32,address,bytes)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0xb3fcab16",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "subjectId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "recordType",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "name": "authorizationData",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4YjNmY2FiMTY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requireRecordWriter",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "authorizationClass",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 234,
+            "byteStart": 3449,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L83-L89",
+            "lineEnd": 89,
+            "lineStart": 83,
+            "snippetSha256": "sha256:e99dfbd50e37999907f0a5809b55f0da52391977411f0d843d89b1a426202bcf",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          },
+          "selector": "0xb3fcab16",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "familyId",
+              "natspec": "",
+              "range": {
+                "byteLength": 16,
+                "byteStart": 256,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L9",
+                "lineEnd": 9,
+                "lineStart": 9,
+                "snippetSha256": "sha256:00c6610b2f2282b9ed3665ac667dbe61bf512c1aa689c092c9bf1836b87669da",
+                "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "authorizationClassMask",
+              "natspec": "",
+              "range": {
+                "byteLength": 29,
+                "byteStart": 282,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L10",
+                "lineEnd": 10,
+                "lineStart": 10,
+                "snippetSha256": "sha256:ef1f6576357cbd2d9bd69050d3b7bb5ead0d71c63809a02b92af2a0a38ea9d98",
+                "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+              },
+              "type": "uint16",
+              "typeString": "uint16"
+            },
+            {
+              "index": 2,
+              "name": "admitted",
+              "natspec": "",
+              "range": {
+                "byteLength": 13,
+                "byteStart": 321,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L11",
+                "lineEnd": 11,
+                "lineStart": 11,
+                "snippetSha256": "sha256:fdbf1ff994b59e199f99ab55ab6294116330501c2d2972bc02389448ede96248",
+                "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+              },
+              "type": "bool",
+              "typeString": "bool"
+            }
+          ],
+          "name": "RecordTypePolicy",
+          "natspec": "",
+          "range": {
+            "byteLength": 119,
+            "byteStart": 222,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L8-L12",
+            "lineEnd": 12,
+            "lineStart": 8,
+            "snippetSha256": "sha256:dcb43255e624fed434dcf9074042731186e69b0787f2e19a512a6e91553dcdbc",
+            "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/IERC165.sol:IERC165",
+        "name": "IERC165"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZWNvcmRGYW1pbHlSZWdpc3RyeS5zb2w6SVN0cmVhbVJlY29yZEZhbWlseVJlZ2lzdHJ5",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+      "smart-contracts/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "IStreamRecordFamilyRegistry",
+    "natspec": "@notice Closed-world record-type classifier and family-scoped writer authority.",
+    "range": {
+      "byteLength": 3518,
+      "byteStart": 167,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRecordFamilyRegistry.sol#L7-L90",
+      "lineEnd": 90,
+      "lineStart": 7,
+      "snippetSha256": "sha256:da594080b362598d94eb8fbd4a81c2d66c5014d33da9cd8439738b69572710a7",
+      "sourceSha256": "sha256:82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IStreamRecordFamilyRegistry.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 13
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 13
+    },
+    "totalCount": 13
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x0f4f2a68",
+      "definitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x1118ed2f",
+      "definitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x20e9f458",
+      "definitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x40ee7ee3",
+      "definitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x54b63fc2",
+      "definitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x7e3c9be7",
+      "definitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x95b71c66",
+      "definitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x9ecd97c6",
+      "definitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0x9f175161",
+      "definitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0xb3fcab16",
+      "definitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0xcd2369a6",
+      "definitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0xe69e4156",
+      "definitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry#function:0xe96cc920",
+      "definitionId": "smart-contracts/IStreamRecordFamilyRegistry.sol:IStreamRecordFamilyRegistry",
+      "severity": "advisory"
+    }
+  ]
+}

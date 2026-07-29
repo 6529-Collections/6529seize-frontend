@@ -3,6 +3,7 @@ jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
 import { existsSync } from "node:fs";
 import path from "node:path";
 
+import streamReferenceConfig from "@/config/public-reviews/6529-stream.reference.json";
 import {
   createSolidityReferenceReader,
   SolidityReferenceNotFoundError,
@@ -17,6 +18,7 @@ import {
 } from "@/lib/public-review/solidityReferenceRoutes";
 import type { SolidityReferenceReviewIdentity } from "@/lib/public-review/solidityReferenceTypes";
 import {
+  isStreamReviewVersionPubliclyAvailable,
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_SLUG,
   STREAM_REVIEW_VERSION,
@@ -36,25 +38,42 @@ if (!hasFixture && process.env["CI"]) {
   throw new Error(`Missing Solidity reference fixture: ${FIXTURE_INDEX}`);
 }
 const describeFixture = hasFixture ? describe : describe.skip;
-const REVIEW_VERSION = STREAM_REVIEW_DEFINITION.versions[0];
-if (!REVIEW_VERSION) {
+const ACTIVE_REVIEW_VERSION = STREAM_REVIEW_DEFINITION.versions.find(
+  ({ version }) => version === STREAM_REVIEW_VERSION
+);
+if (!ACTIVE_REVIEW_VERSION) {
   throw new Error("The Stream review fixture version is missing.");
 }
+const PUBLICLY_AVAILABLE_REVIEW_VERSIONS =
+  STREAM_REVIEW_DEFINITION.versions.filter(({ version }) =>
+    isStreamReviewVersionPubliclyAvailable(version)
+  );
+const REFERENCE_ACTIVE_REVIEW_VERSION =
+  PUBLICLY_AVAILABLE_REVIEW_VERSIONS.find(
+    ({ version }) => version === STREAM_REVIEW_VERSION
+  ) ??
+  PUBLICLY_AVAILABLE_REVIEW_VERSIONS.at(-1) ??
+  ACTIVE_REVIEW_VERSION;
+const SOURCE_COMMITS = Object.fromEntries(
+  STREAM_REVIEW_DEFINITION.versions.map(({ source, version }) => [
+    version,
+    source.commit,
+  ])
+);
+SOURCE_COMMITS[streamReferenceConfig.reviewVersion] =
+  streamReferenceConfig.source.commit;
 
 const IDENTITY: SolidityReferenceReviewIdentity = {
-  activeSourceCommit: REVIEW_VERSION.source.commit,
-  activeVersion: STREAM_REVIEW_VERSION,
-  availableVersions: STREAM_REVIEW_DEFINITION.versions.map(
-    (candidate) => candidate.version
+  activeSourceCommit: REFERENCE_ACTIVE_REVIEW_VERSION.source.commit,
+  activeVersion: REFERENCE_ACTIVE_REVIEW_VERSION.version,
+  availableVersions: PUBLICLY_AVAILABLE_REVIEW_VERSIONS.map(
+    ({ version }) => version
   ),
   reviewId: STREAM_REVIEW_SLUG,
-  sourceCommits: Object.fromEntries(
-    STREAM_REVIEW_DEFINITION.versions.map((candidate) => [
-      candidate.version,
-      candidate.source.commit,
-    ])
-  ),
-  sourceRepository: REVIEW_VERSION.source.repository,
+  sourceCommits: SOURCE_COMMITS,
+  sourceIndexActiveVersion: streamReferenceConfig.reviewVersion,
+  sourceIndexAvailableVersions: streamReferenceConfig.output.retainedVersions,
+  sourceRepository: ACTIVE_REVIEW_VERSION.source.repository,
 };
 
 describe("Solidity reference route identities", () => {
@@ -135,11 +154,15 @@ describeFixture("generated Stream Solidity reference fixture", () => {
       STREAM_REVIEW_VERSION
     );
 
-    expect(index.activeVersion).toBe(STREAM_REVIEW_VERSION);
-    expect(versionEntry.commit).toBe(REVIEW_VERSION.source.commit);
+    expect(index.activeVersion).toBe(streamReferenceConfig.reviewVersion);
+    expect(versionEntry.commit).toBe(
+      REFERENCE_ACTIVE_REVIEW_VERSION.source.commit
+    );
     expect(manifest.reviewId).toBe(STREAM_REVIEW_SLUG);
     expect(manifest.reviewVersion).toBe(STREAM_REVIEW_VERSION);
-    expect(manifest.source.repository).toBe(REVIEW_VERSION.source.repository);
+    expect(manifest.source.repository).toBe(
+      ACTIVE_REVIEW_VERSION.source.repository
+    );
     expect(manifest.summary.definitionCount).toBe(
       manifest.definitionIndex.length
     );
