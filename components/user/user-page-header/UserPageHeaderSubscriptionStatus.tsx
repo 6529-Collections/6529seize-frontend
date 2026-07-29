@@ -35,7 +35,7 @@ function SubscriptionEthIcon({
   className,
 }: Readonly<SVGProps<SVGSVGElement>>) {
   return (
-    <span className={className}>
+    <span className={clsx("tw-inline-flex tw-flex-none", className)}>
       <EthereumIcon />
     </span>
   );
