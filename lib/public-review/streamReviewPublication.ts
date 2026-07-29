@@ -25,8 +25,7 @@ export interface StreamReviewVersionIdentity {
   readonly version: string;
 }
 
-interface StreamReviewVersionPublication
-  extends StreamReviewVersionIdentity {
+interface StreamReviewVersionPublication extends StreamReviewVersionIdentity {
   readonly deploymentStatus: StreamReviewDeploymentStatus;
   readonly auditStatus: StreamReviewAuditStatus;
 }
@@ -116,11 +115,14 @@ for (const [index, identity] of STREAM_REVIEW_VERSION_IDENTITIES.entries()) {
   ) {
     throw new Error("The Stream public-review version config is invalid.");
   }
-  STREAM_REVIEW_VERSION_PUBLICATIONS.set(identity.version, {
-    ...identity,
-    deploymentStatus: version.deploymentStatus,
-    auditStatus: version.auditStatus,
-  });
+  STREAM_REVIEW_VERSION_PUBLICATIONS.set(
+    identity.version,
+    Object.freeze({
+      ...identity,
+      deploymentStatus: version.deploymentStatus,
+      auditStatus: version.auditStatus,
+    })
+  );
   STREAM_REVIEW_VERSION_LIFECYCLE_STATES.set(
     identity.version,
     identity.lifecycleState

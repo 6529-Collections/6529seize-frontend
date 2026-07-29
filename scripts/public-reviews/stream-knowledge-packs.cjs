@@ -22,6 +22,7 @@ const REPOSITORY_ROOT = path.resolve(__dirname, "..", "..");
 const DEFAULT_REVIEW_ID = "6529-stream";
 const PUBLICATION_SCHEMA = "public-review.publication.v3";
 const UNPUBLISHED_LIFECYCLE_STATE = "DRAFT";
+const SAFE_REVIEW_ID = /^[a-z0-9][a-z0-9-]*$/;
 
 class KnowledgePackDriftError extends Error {}
 
@@ -188,12 +189,22 @@ function generateKnowledgePacks({
   refreshRetained = false,
   writeOutput = process.stdout.write.bind(process.stdout),
 } = {}) {
+  invariant(
+    typeof reviewId === "string" && SAFE_REVIEW_ID.test(reviewId),
+    "--review-id requires a safe review id value."
+  );
+  invariant(
+    !(checkOnly && refreshRetained),
+    "--check cannot be combined with --refresh-retained."
+  );
   const { publicationConfig, referenceIndex } = knowledgeContext(
     repoRoot,
     reviewId
   );
   invariant(
-    publicationConfig.schemaVersion === PUBLICATION_SCHEMA &&
+    Array.isArray(publicationConfig.versions) &&
+      Array.isArray(referenceIndex.versions) &&
+      publicationConfig.schemaVersion === PUBLICATION_SCHEMA &&
       publicationConfig.reviewId === reviewId &&
       publicationConfig.versions.length === referenceIndex.versions.length,
     `${reviewId} publication and reference indexes drifted.`

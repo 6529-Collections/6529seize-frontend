@@ -52,6 +52,8 @@ const { generateKnowledgePacks } =
     generateKnowledgePacks(input: {
       readonly repoRoot: string;
       readonly checkOnly?: boolean;
+      readonly refreshRetained?: boolean;
+      readonly reviewId?: string;
       readonly writeOutput?: (value: string) => void;
     }): void;
   };
@@ -658,6 +660,50 @@ afterEach(() => {
 });
 
 describe("profile-aware public-review artifact packaging", () => {
+  it("rejects incompatible knowledge generation modes", () => {
+    expect(() =>
+      generateKnowledgePacks({
+        repoRoot: process.cwd(),
+        checkOnly: true,
+        refreshRetained: true,
+        writeOutput: () => undefined,
+      })
+    ).toThrow("--check cannot be combined with --refresh-retained.");
+  });
+
+  it("rejects unsafe knowledge review IDs before resolving paths", () => {
+    expect(() =>
+      generateKnowledgePacks({
+        repoRoot: process.cwd(),
+        reviewId: "../unsafe",
+        writeOutput: () => undefined,
+      })
+    ).toThrow("--review-id requires a safe review id value.");
+  });
+
+  it("reports malformed knowledge version inventories as drift", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    const publicationPath = path.join(
+      fixture.repoRoot,
+      `config/public-reviews/${REVIEW_ID}.publication.json`
+    );
+    const publication = JSON.parse(fs.readFileSync(publicationPath, "utf8"));
+    publication.versions = null;
+    fs.writeFileSync(
+      publicationPath,
+      `${JSON.stringify(publication, null, 2)}\n`
+    );
+
+    expect(() =>
+      generateKnowledgePacks({
+        repoRoot: fixture.repoRoot,
+        checkOnly: true,
+        writeOutput: () => undefined,
+      })
+    ).toThrow(`${REVIEW_ID} publication and reference indexes drifted.`);
+  });
+
   it("copies ordinary public assets while omitting every production review input", () => {
     const fixture = createFixture();
     fixtureRoots.push(fixture.repoRoot);
@@ -1031,6 +1077,28 @@ describe("profile-aware public-review artifact packaging", () => {
     expect(
       fs.existsSync(path.join(fixture.bundleRoot, "content/public-reviews"))
     ).toBe(false);
+  });
+
+  it("reports a missing published knowledge pack before copying", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    fs.rmSync(
+      path.join(
+        fixture.repoRoot,
+        `ops/public-review-knowledge/${REVIEW_ID}/versions/${REVIEW_VERSION}/knowledge`
+      ),
+      { recursive: true, force: true }
+    );
+
+    expect(() =>
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "staging",
+      })
+    ).toThrow(
+      `${REVIEW_ID}@${REVIEW_VERSION} knowledge pack is missing; run 6529 run public-review:knowledge.`
+    );
   });
 
   it("keeps public history while omitting an active draft version", () => {

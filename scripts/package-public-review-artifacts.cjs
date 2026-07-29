@@ -897,6 +897,8 @@ function assertCanonicalReviewEvidence({
         "knowledge"
       );
       const bundleKnowledgeRoot = path.join(versionRoot, "knowledge");
+      // Validate bytes from the packaged tree while comparing them with the
+      // canonical source pack rooted in the checkout.
       validateKnowledgePack({
         repoRoot: path.dirname(bundlePublicRoot),
         reviewId: config.reviewId,
@@ -1193,6 +1195,10 @@ function copyPublishedKnowledgePacks(repoRoot, bundleRoot, publicationPlans) {
         "versions",
         reviewVersion,
         "knowledge"
+      );
+      invariant(
+        fs.existsSync(source),
+        `${reviewId}@${reviewVersion} knowledge pack is missing; run 6529 run public-review:knowledge.`
       );
       const destination = path.join(
         bundleRoot,
