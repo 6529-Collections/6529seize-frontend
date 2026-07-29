@@ -137,7 +137,7 @@ describe("UserPageMentionShortcuts", () => {
     renderQuickTags();
 
     fireEvent.click(screen.getByRole("button", { name: "Edit" }));
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save Quick Tag" }));
 
     await waitFor(() =>
       expect(mockedUpdateMentionAlias).toHaveBeenCalledWith("tag-1", {
