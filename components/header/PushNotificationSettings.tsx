@@ -119,14 +119,15 @@ export default function PushNotificationSettings({
     loadSettings();
   }, [isOpen]);
 
-  const hasChanges =
+  const hasChanges = Boolean(
     currentSettings &&
-    originalSettings &&
-    Object.keys(originalSettings).some(
-      (key) =>
-        originalSettings[key as keyof ApiPushNotificationSettings] !==
-        currentSettings[key as keyof ApiPushNotificationSettings]
-    );
+      originalSettings &&
+      Object.keys(originalSettings).some(
+        (key) =>
+          originalSettings[key as keyof ApiPushNotificationSettings] !==
+          currentSettings[key as keyof ApiPushNotificationSettings]
+      )
+  );
 
   const updateSetting = useCallback(
     (key: keyof ApiPushNotificationSettings, value: boolean) => {
@@ -170,6 +171,12 @@ export default function PushNotificationSettings({
   const settingKeys = Object.keys(SETTINGS_LABELS) as Array<
     keyof ApiPushNotificationSettings
   >;
+  let saveButtonLabel = "No Changes";
+  if (isSaving) {
+    saveButtonLabel = "Saving...";
+  } else if (hasChanges) {
+    saveButtonLabel = "Save Changes";
+  }
 
   return (
     <MobileWrapperDialog
@@ -247,11 +254,7 @@ export default function PushNotificationSettings({
                 size="md"
                 fullWidth
               >
-                {isSaving
-                  ? "Saving..."
-                  : hasChanges
-                    ? "Save Changes"
-                    : "No Changes"}
+                {saveButtonLabel}
               </Button>
             </div>
           </>

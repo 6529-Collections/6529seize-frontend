@@ -17,43 +17,47 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   readonly children: ReactNode;
 }
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  {
-    variant = "primary",
-    size = "md",
-    loading = false,
-    disabled = false,
-    fullWidth = false,
-    hideChildrenWhenLoading = false,
-    type = "button",
-    "aria-busy": ariaBusy,
-    className,
-    children,
-    ...buttonProps
-  },
-  ref
-) {
-  const inactive = disabled || loading;
-  const showChildren = !loading || !hideChildrenWhenLoading;
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    {
+      variant = "primary",
+      size = "md",
+      loading = false,
+      disabled = false,
+      fullWidth = false,
+      hideChildrenWhenLoading = false,
+      type = "button",
+      "aria-busy": ariaBusy,
+      className,
+      children,
+      ...buttonProps
+    },
+    ref
+  ) => {
+    const inactive = disabled || loading;
+    const showChildren = !loading || !hideChildrenWhenLoading;
 
-  return (
-    <button
-      {...buttonProps}
-      ref={ref}
-      type={type}
-      disabled={inactive}
-      aria-busy={loading || ariaBusy || undefined}
-      className={getButtonClasses({
-        variant,
-        size,
-        fullWidth,
-        className,
-      })}
-    >
-      {loading && <CircleLoader />}
-      {showChildren && children}
-    </button>
-  );
-});
+    return (
+      <button
+        {...buttonProps}
+        ref={ref}
+        type={type}
+        disabled={inactive}
+        aria-busy={loading ? true : ariaBusy}
+        className={getButtonClasses({
+          variant,
+          size,
+          fullWidth,
+          className,
+        })}
+      >
+        {loading && <CircleLoader />}
+        {showChildren && children}
+      </button>
+    );
+  }
+);
+
+Button.displayName = "Button";
 
 export default Button;

@@ -1,3 +1,5 @@
+import Button from "@/components/utils/button/Button";
+
 interface CollectionLoadMoreProps {
   readonly isVisible: boolean;
   readonly isFetching: boolean;
@@ -26,4 +28,3 @@ export function CollectionLoadMore({
     </div>
   );
 }
-import Button from "@/components/utils/button/Button";

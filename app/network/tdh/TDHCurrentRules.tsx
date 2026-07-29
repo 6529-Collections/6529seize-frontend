@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import { formatInteger, formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";

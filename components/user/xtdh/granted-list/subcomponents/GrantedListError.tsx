@@ -1,3 +1,5 @@
+import Button from "@/components/utils/button/Button";
+
 interface GrantedListErrorProps {
   readonly message?: string | undefined;
   readonly onRetry: () => void;
@@ -25,4 +27,3 @@ export function GrantedListError({
     </div>
   );
 }
-import Button from "@/components/utils/button/Button";

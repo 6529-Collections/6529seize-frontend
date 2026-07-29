@@ -1,3 +1,5 @@
+import Button from "@/components/utils/button/Button";
+
 interface UserPageXtdhStatsHeaderErrorProps {
   readonly message: string;
   readonly onRetry: () => void;
@@ -23,4 +25,3 @@ export function UserPageXtdhStatsHeaderError({
     </section>
   );
 }
-import Button from "@/components/utils/button/Button";
