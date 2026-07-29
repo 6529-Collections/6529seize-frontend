@@ -16,6 +16,13 @@ type ManualWorkflowFixture = {
   readonly targetEnvironment: "staging" | "prod";
 };
 
+const DEFAULT_MANUAL_WORKFLOW_FIXTURE: ManualWorkflowFixture = {
+  workflow: "Web Deploy - PROD",
+  workflowFile: "build-upload-deploy-prod.yml",
+  branch: "main",
+  targetEnvironment: "prod",
+};
+
 const MANUAL_WORKFLOW_FIXTURES: readonly ManualWorkflowFixture[] = [
   {
     workflow: "Web Deploy - STAGING",
@@ -23,12 +30,7 @@ const MANUAL_WORKFLOW_FIXTURES: readonly ManualWorkflowFixture[] = [
     branch: "1a-staging",
     targetEnvironment: "staging",
   },
-  {
-    workflow: "Web Deploy - PROD",
-    workflowFile: "build-upload-deploy-prod.yml",
-    branch: "main",
-    targetEnvironment: "prod",
-  },
+  DEFAULT_MANUAL_WORKFLOW_FIXTURE,
 ];
 
 async function runNotifier(
@@ -97,7 +99,7 @@ async function runNotifier(
 }
 
 async function runManualNotifier({
-  fixture = MANUAL_WORKFLOW_FIXTURES[1],
+  fixture = DEFAULT_MANUAL_WORKFLOW_FIXTURE,
   currentRunOverrides = {},
   commits = [
     {
