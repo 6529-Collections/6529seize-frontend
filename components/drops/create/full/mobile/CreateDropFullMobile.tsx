@@ -274,6 +274,9 @@ const CreateDropFullMobile = forwardRef<
                   disabled={!canSubmit}
                   loading={loading}
                   hideChildrenWhenLoading
+                  aria-label={
+                    loading ? `${getSubmitText()} in progress` : undefined
+                  }
                   onClick={onDrop}
                   variant="action"
                   size="lg"
