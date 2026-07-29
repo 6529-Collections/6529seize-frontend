@@ -275,7 +275,7 @@ export default function SubscriptionCoverageSummary({
 
           <h3
             className={clsx(
-              "tw-mb-0 tw-mt-4 tw-text-xl tw-font-semibold tw-tracking-tight sm:tw-text-2xl",
+              "tw-mb-0 tw-mt-[13px] tw-text-xl tw-font-medium tw-leading-6 tw-tracking-tight",
               showFundedCount ? tone.text : "tw-text-iron-100"
             )}
           >
@@ -302,14 +302,14 @@ export default function SubscriptionCoverageSummary({
             </div>
           ) : null}
 
-          <div className="tw-mt-5 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-sm">
-            <span className="tw-font-semibold tw-text-iron-100">
+          <div className="tw-mt-[21px] tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-[13px]">
+            <span className="tw-font-medium tw-text-iron-100">
               {getSubscriptionModeLabel(locale, coverage.mode)}
             </span>
             <span aria-hidden="true" className="tw-text-iron-700">
               ·
             </span>
-            <span className="tw-font-semibold tw-text-iron-100">
+            <span className="tw-font-medium tw-text-iron-100">
               {formatSubscriptionEth(locale, coverage.balance_eth)} ETH
             </span>
             <span aria-hidden="true" className="tw-text-iron-700">
@@ -373,7 +373,7 @@ export default function SubscriptionCoverageSummary({
           ) : null}
 
           {isOwner ? (
-            <div className="tw-mt-5">
+            <div className="tw-mt-[21px]">
               <Link
                 href={actionHref}
                 className={clsx(
@@ -410,7 +410,7 @@ export default function SubscriptionCoverageSummary({
               <div className="tw-col-span-2 tw-mb-1 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
                 {t(locale, "subscriptions.coverage.capacity")}
               </div>
-              <div className="tw-break-words tw-text-3xl tw-font-light tw-leading-none tw-tracking-tight tw-text-iron-100">
+              <div className="tw-break-words tw-text-3xl tw-font-medium tw-leading-none tw-tracking-tight tw-text-iron-100">
                 {coverage.mint_capacity === null
                   ? "—"
                   : formatInteger(locale, coverage.mint_capacity)}
@@ -423,7 +423,7 @@ export default function SubscriptionCoverageSummary({
               <div className="tw-col-span-2 tw-mb-1 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
                 {t(locale, "subscriptions.coverage.allocated")}
               </div>
-              <div className="tw-break-words tw-text-3xl tw-font-light tw-leading-none tw-tracking-tight tw-text-iron-100">
+              <div className="tw-break-words tw-text-3xl tw-font-medium tw-leading-none tw-tracking-tight tw-text-iron-100">
                 {formatInteger(locale, coverage.allocated_mints)}
               </div>
               <div className="tw-self-baseline tw-text-xs tw-leading-none tw-text-iron-500 sm:tw-text-sm">
