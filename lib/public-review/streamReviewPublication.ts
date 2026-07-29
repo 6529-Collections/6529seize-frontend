@@ -110,6 +110,7 @@ const STREAM_REVIEW_VERSION_SOURCE_COMMITS = new Map<string, string>();
 for (const [index, identity] of STREAM_REVIEW_VERSION_IDENTITIES.entries()) {
   const version = publication.versions[index];
   if (
+    !version ||
     !isStreamReviewDeploymentStatus(version.deploymentStatus) ||
     !isStreamReviewAuditStatus(version.auditStatus)
   ) {
