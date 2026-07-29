@@ -1,0 +1,590 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority#function:0xc17db092",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "roleId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "hasStreamRole",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xc17db092",
+          "signature": "hasStreamRole(bytes32,address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority#function:0x4763dcdd",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "guardian",
+              "type": "address"
+            }
+          ],
+          "name": "setDefaultGuardian",
+          "outputs": [],
+          "selector": "0x4763dcdd",
+          "signature": "setDefaultGuardian(address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority#function:0xd3674b18",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "guardian",
+              "type": "address"
+            }
+          ],
+          "name": "setGuardian",
+          "outputs": [],
+          "selector": "0xd3674b18",
+          "signature": "setGuardian(bytes32,address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority#function:0x6a951316",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "roleId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "bool",
+              "name": "granted",
+              "type": "bool"
+            }
+          ],
+          "name": "setRole",
+          "outputs": [],
+          "selector": "0x6a951316",
+          "signature": "setRole(bytes32,address,bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority#function:0x175a5708",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint64",
+              "name": "deadline",
+              "type": "uint64"
+            }
+          ],
+          "name": "setVetoDeadline",
+          "outputs": [],
+          "selector": "0x175a5708",
+          "signature": "setVetoDeadline(uint64)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority#function:0xe6f22dba",
+          "declaringDefinitionId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "terminalFreezeVetoGuardian",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "guardian",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "vetoDeadline",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0xe6f22dba",
+          "signature": "terminalFreezeVetoGuardian(bytes32)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "setRole(bytes32,address,bool)",
+          "displaySignature": "setRole(bytes32,address,bool)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityAuthority#function:0x6a951316",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "roleId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "granted",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUF1dGhvcml0eSNmdW5jdGlvbjoweDZhOTUxMzE2",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setRole",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 123,
+            "byteStart": 436,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L13-L15",
+            "lineEnd": 15,
+            "lineStart": 13,
+            "snippetSha256": "sha256:805a99cbde25062a9531d6f2dd5d3dd90afcc35301de121031c1a68bcddc819c",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x6a951316",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setDefaultGuardian(address)",
+          "displaySignature": "setDefaultGuardian(address)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityAuthority#function:0x4763dcdd",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "guardian",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUF1dGhvcml0eSNmdW5jdGlvbjoweDQ3NjNkY2Rk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setDefaultGuardian",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 99,
+            "byteStart": 565,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L17-L19",
+            "lineEnd": 19,
+            "lineStart": 17,
+            "snippetSha256": "sha256:4a3dd9d28e62a87c4bf1cb87f0ce7ea3f4ba83fa37d031b672bf94332a07deb1",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x4763dcdd",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setGuardian(bytes32,address)",
+          "displaySignature": "setGuardian(bytes32,address)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityAuthority#function:0xd3674b18",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "guardian",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUF1dGhvcml0eSNmdW5jdGlvbjoweGQzNjc0YjE4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setGuardian",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 116,
+            "byteStart": 670,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L21-L23",
+            "lineEnd": 23,
+            "lineStart": 21,
+            "snippetSha256": "sha256:08012da513b3c788068a6960d26ec845f1c06babc4d20670da701095b0313b13",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0xd3674b18",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setVetoDeadline(uint64)",
+          "displaySignature": "setVetoDeadline(uint64)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityAuthority#function:0x175a5708",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "deadline",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUF1dGhvcml0eSNmdW5jdGlvbjoweDE3NWE1NzA4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setVetoDeadline",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 92,
+            "byteStart": 792,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L25-L27",
+            "lineEnd": 27,
+            "lineStart": 25,
+            "snippetSha256": "sha256:918e2330323ae9f9dc7e435bfed478c815e89691c8e9a2cad30ea2eba82c39c0",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0x175a5708",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "hasStreamRole(bytes32,address)",
+          "displaySignature": "hasStreamRole(bytes32,address)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityAuthority#function:0xc17db092",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "roleId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUF1dGhvcml0eSNmdW5jdGlvbjoweGMxN2RiMDky",
+          "kind": "function",
+          "modifiers": [],
+          "name": "hasStreamRole",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 132,
+            "byteStart": 890,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L29-L31",
+            "lineEnd": 31,
+            "lineStart": 29,
+            "snippetSha256": "sha256:dd6f344bc5cd1e0e69475df3348cb805fb0ed3c263fb4ef844ad356dfeca696a",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0xc17db092",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "terminalFreezeVetoGuardian(bytes32)",
+          "displaySignature": "terminalFreezeVetoGuardian(bytes32)",
+          "functionKind": "function",
+          "id": "test/helpers/FinalityMocks.sol:MockFinalityAuthority#function:0xe6f22dba",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scopeHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUF1dGhvcml0eSNmdW5jdGlvbjoweGU2ZjIyZGJh",
+          "kind": "function",
+          "modifiers": [],
+          "name": "terminalFreezeVetoGuardian",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "guardian",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "vetoDeadline",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 288,
+            "byteStart": 1028,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L33-L40",
+            "lineEnd": 40,
+            "lineStart": 33,
+            "snippetSha256": "sha256:1f016e3151c98d3fdf6a9f1242332388c8018240b5e1c8b8cd27ba15a8746efc",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": "0xe6f22dba",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_roles",
+          "natspec": "",
+          "range": {
+            "byteLength": 59,
+            "byteStart": 246,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L8",
+            "lineEnd": 8,
+            "lineStart": 8,
+            "snippetSha256": "sha256:aa61a98380651392f0bed057d1534b5aeb50e6cd93b82caca33bf91eea61f9e4",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": null,
+          "type": "mapping(bytes32 => mapping(address => bool))",
+          "typeString": "mapping(bytes32 => mapping(address => bool))",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_guardians",
+          "natspec": "",
+          "range": {
+            "byteLength": 46,
+            "byteStart": 311,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L9",
+            "lineEnd": 9,
+            "lineStart": 9,
+            "snippetSha256": "sha256:3bd362b243c5da0acc9117710ba1d5c7d4f722d1a0661d55696652cd6c93bf4f",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": null,
+          "type": "mapping(bytes32 => address)",
+          "typeString": "mapping(bytes32 => address)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_defaultGuardian",
+          "natspec": "",
+          "range": {
+            "byteLength": 32,
+            "byteStart": 363,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L10",
+            "lineEnd": 10,
+            "lineStart": 10,
+            "snippetSha256": "sha256:f132cdc1065667261c700b251c3a05af333c840f5a6639c4d17dfb79da0604a7",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_vetoDeadline",
+          "natspec": "",
+          "range": {
+            "byteLength": 28,
+            "byteStart": 401,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L11",
+            "lineEnd": 11,
+            "lineStart": 11,
+            "snippetSha256": "sha256:5581fa48572060b8d94154c59b3aea213204f486928a2115a45155dab4cccc72",
+            "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+          },
+          "selector": null,
+          "type": "uint64",
+          "typeString": "uint64",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/helpers/FinalityMocks.sol:MockFinalityAuthority",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9oZWxwZXJzL0ZpbmFsaXR5TW9ja3Muc29sOk1vY2tGaW5hbGl0eUF1dGhvcml0eQ",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/helpers/FinalityMocks.sol:MockFinalityAuthority"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "MockFinalityAuthority",
+    "natspec": "@notice Governance-authority mock for the IStreamFinalityGovernanceAuthority seam.",
+    "range": {
+      "byteLength": 1109,
+      "byteStart": 209,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/FinalityMocks.sol#L7-L41",
+      "lineEnd": 41,
+      "lineStart": 7,
+      "snippetSha256": "sha256:cdad079eed1e5ed3d452b8b92d7ce1609e30c0c8692b9a371bdddde12bdfdbc5",
+      "sourceSha256": "sha256:a39fa14f82123a8bf85f1b4e7646f547b324ef4d3bca609084605e436cd79ed6"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/helpers/FinalityMocks.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 6
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 6
+    },
+    "totalCount": 6
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority#function:0x175a5708",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority#function:0x4763dcdd",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority#function:0x6a951316",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority#function:0xc17db092",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority#function:0xd3674b18",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority#function:0xe6f22dba",
+      "definitionId": "test/helpers/FinalityMocks.sol:MockFinalityAuthority",
+      "severity": "advisory"
+    }
+  ]
+}

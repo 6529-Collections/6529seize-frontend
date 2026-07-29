@@ -10,6 +10,14 @@
     {
       "version": "2026-07-27.1",
       "lifecycleState": "PUBLIC_REVIEW"
+    },
+    {
+      "version": "2026-07-28.1",
+      "lifecycleState": "DRAFT"
+    },
+    {
+      "version": "2026-07-28.2",
+      "lifecycleState": "DRAFT"
     }
   ]
 }

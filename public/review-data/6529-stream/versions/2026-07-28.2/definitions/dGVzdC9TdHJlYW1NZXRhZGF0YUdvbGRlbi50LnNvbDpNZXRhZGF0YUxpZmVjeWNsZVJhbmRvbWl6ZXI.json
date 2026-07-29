@@ -1,0 +1,1337 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0xbf1b89d3",
+          "declaringDefinitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "calculateTokenHash",
+          "outputs": [],
+          "selector": "0xbf1b89d3",
+          "signature": "calculateTokenHash(uint256,uint256,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0xd7d06a8d",
+          "declaringDefinitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "contract IStreamCore",
+              "name": "core",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "hash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "finalizeToken",
+          "outputs": [],
+          "selector": "0xd7d06a8d",
+          "signature": "finalizeToken(address,uint256,uint256,bytes32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x4cf0c697",
+          "declaringDefinitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+          "inherited": false,
+          "inputs": [],
+          "name": "isRandomizerContract",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x4cf0c697",
+          "signature": "isRandomizerContract()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0xdd26bdd1",
+          "declaringDefinitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "pendingRandomnessRequests",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xdd26bdd1",
+          "signature": "pendingRandomnessRequests(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0xba73a1d8",
+          "declaringDefinitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "name": "randomnessRequestState",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "enum IRandomizerLifecycle.RandomnessRequestState",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0xba73a1d8",
+          "signature": "randomnessRequestState(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x841940f9",
+          "declaringDefinitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "randomnessRequestStateForToken",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "enum IRandomizerLifecycle.RandomnessRequestState",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x841940f9",
+          "signature": "randomnessRequestStateForToken(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x1370ba38",
+          "declaringDefinitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "name": "requestToToken",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x1370ba38",
+          "signature": "requestToToken(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x677e25c7",
+          "declaringDefinitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveRandomnessRequest",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct IRandomizerLifecycle.RandomnessRequest",
+              "name": "",
+              "type": "(uint256,uint256,address,uint256,uint256,uint8,uint256,uint256,uint256,uint256,bytes32,bytes32,bytes32,uint256)"
+            }
+          ],
+          "selector": "0x677e25c7",
+          "signature": "retrieveRandomnessRequest(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x60e26604",
+          "declaringDefinitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveRandomnessRequestForToken",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct IRandomizerLifecycle.RandomnessRequest",
+              "name": "",
+              "type": "(uint256,uint256,address,uint256,uint256,uint8,uint256,uint256,uint256,uint256,bytes32,bytes32,bytes32,uint256)"
+            }
+          ],
+          "selector": "0x60e26604",
+          "signature": "retrieveRandomnessRequestForToken(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x796ba852",
+          "declaringDefinitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "value",
+              "type": "bool"
+            }
+          ],
+          "name": "setLifecycleSupported",
+          "outputs": [],
+          "selector": "0x796ba852",
+          "signature": "setLifecycleSupported(bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x66f9ff41",
+          "declaringDefinitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "value",
+              "type": "bool"
+            }
+          ],
+          "name": "setStateLookupReverts",
+          "outputs": [],
+          "selector": "0x66f9ff41",
+          "signature": "setStateLookupReverts(bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0xbfd237d1",
+          "declaringDefinitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "enum IRandomizerLifecycle.RandomnessRequestState",
+              "name": "state",
+              "type": "uint8"
+            }
+          ],
+          "name": "setTokenState",
+          "outputs": [],
+          "selector": "0xbfd237d1",
+          "signature": "setTokenState(uint256,uint256,uint8)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x81d673e0",
+          "declaringDefinitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+          "inherited": false,
+          "inputs": [],
+          "name": "supportsRandomizerLifecycle",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x81d673e0",
+          "signature": "supportsRandomizerLifecycle()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x94b8ae9d",
+          "declaringDefinitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenIdToCollection",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x94b8ae9d",
+          "signature": "tokenIdToCollection(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0xaa419ba4",
+          "declaringDefinitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenToRequest",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xaa419ba4",
+          "signature": "tokenToRequest(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0xe231f9df",
+          "declaringDefinitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+          "inherited": false,
+          "inputs": [],
+          "name": "totalPendingRandomnessRequests",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xe231f9df",
+          "signature": "totalPendingRandomnessRequests()",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "calculateTokenHash(uint256,uint256,uint256)",
+          "displaySignature": "calculateTokenHash(uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0xbf1b89d3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUdvbGRlbi50LnNvbDpNZXRhZGF0YUxpZmVjeWNsZVJhbmRvbWl6ZXIjZnVuY3Rpb246MHhiZjFiODlkMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "calculateTokenHash",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 67,
+            "byteStart": 731,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:c4a052a1a75dabdc2080725fc3fb3d558bfa1f40c187fd58e9034b112f385414",
+            "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+          },
+          "selector": "0xbf1b89d3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isRandomizerContract()",
+          "displaySignature": "isRandomizerContract()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x4cf0c697",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUdvbGRlbi50LnNvbDpNZXRhZGF0YUxpZmVjeWNsZVJhbmRvbWl6ZXIjZnVuY3Rpb246MHg0Y2YwYzY5Nw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isRandomizerContract",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 89,
+            "byteStart": 804,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L22-L24",
+            "lineEnd": 24,
+            "lineStart": 22,
+            "snippetSha256": "sha256:daac779faad038f7e020f880d90a485c144831fcda6e8d6215dd3aa976335c75",
+            "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+          },
+          "selector": "0x4cf0c697",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "supportsRandomizerLifecycle()",
+          "displaySignature": "supportsRandomizerLifecycle()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x81d673e0",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUdvbGRlbi50LnNvbDpNZXRhZGF0YUxpZmVjeWNsZVJhbmRvbWl6ZXIjZnVuY3Rpb246MHg4MWQ2NzNlMA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsRandomizerLifecycle",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 110,
+            "byteStart": 899,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L26-L28",
+            "lineEnd": 28,
+            "lineStart": 26,
+            "snippetSha256": "sha256:f18bb0e17cc62dbb568999702067ea8b34805df3fb590b00f70226af7afcc789",
+            "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+          },
+          "selector": "0x81d673e0",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setTokenState(uint256,uint256,uint8)",
+          "displaySignature": "setTokenState(uint256,uint256,RandomnessRequestState)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0xbfd237d1",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "state",
+              "type": "RandomnessRequestState"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUdvbGRlbi50LnNvbDpNZXRhZGF0YUxpZmVjeWNsZVJhbmRvbWl6ZXIjZnVuY3Rpb246MHhiZmQyMzdkMQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setTokenState",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 985,
+            "byteStart": 1015,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L30-L53",
+            "lineEnd": 53,
+            "lineStart": 30,
+            "snippetSha256": "sha256:74d0c3883cbb8277515dc684cccbead7072703058c32c387d17eadf186c86c05",
+            "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+          },
+          "selector": "0xbfd237d1",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setStateLookupReverts(bool)",
+          "displaySignature": "setStateLookupReverts(bool)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x66f9ff41",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUdvbGRlbi50LnNvbDpNZXRhZGF0YUxpZmVjeWNsZVJhbmRvbWl6ZXIjZnVuY3Rpb246MHg2NmY5ZmY0MQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setStateLookupReverts",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 94,
+            "byteStart": 2006,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L55-L57",
+            "lineEnd": 57,
+            "lineStart": 55,
+            "snippetSha256": "sha256:4d08d52ef15754ac99013ddc6e9f19d003a0b3c83f59bb1b297484e48b83f9d4",
+            "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+          },
+          "selector": "0x66f9ff41",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setLifecycleSupported(bool)",
+          "displaySignature": "setLifecycleSupported(bool)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x796ba852",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUdvbGRlbi50LnNvbDpNZXRhZGF0YUxpZmVjeWNsZVJhbmRvbWl6ZXIjZnVuY3Rpb246MHg3OTZiYTg1Mg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setLifecycleSupported",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 95,
+            "byteStart": 2106,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L59-L61",
+            "lineEnd": 61,
+            "lineStart": 59,
+            "snippetSha256": "sha256:1b51d9c47121c3b2d1e8e25636bb416b3e40a4dedd171b487fe9a0d4920fff5e",
+            "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+          },
+          "selector": "0x796ba852",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "finalizeToken(address,uint256,uint256,bytes32)",
+          "displaySignature": "finalizeToken(IStreamCore,uint256,uint256,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0xd7d06a8d",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "core",
+              "type": "IStreamCore"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "hash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUdvbGRlbi50LnNvbDpNZXRhZGF0YUxpZmVjeWNsZVJhbmRvbWl6ZXIjZnVuY3Rpb246MHhkN2QwNmE4ZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "finalizeToken",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 178,
+            "byteStart": 2207,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L63-L67",
+            "lineEnd": 67,
+            "lineStart": 63,
+            "snippetSha256": "sha256:65c61d583c0e01fa822df0487d1bd987e22ae050a8808c8f6358c81bf86b239c",
+            "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+          },
+          "selector": "0xd7d06a8d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "retrieveRandomnessRequest(uint256)",
+          "displaySignature": "retrieveRandomnessRequest(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x677e25c7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUdvbGRlbi50LnNvbDpNZXRhZGF0YUxpZmVjeWNsZVJhbmRvbWl6ZXIjZnVuY3Rpb246MHg2NzdlMjVjNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveRandomnessRequest",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "RandomnessRequest"
+            }
+          ],
+          "range": {
+            "byteLength": 297,
+            "byteStart": 2391,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L69-L79",
+            "lineEnd": 79,
+            "lineStart": 69,
+            "snippetSha256": "sha256:5b317c3db836c697affa90b57ca37bfd3f52fcac1557ea0bacafdf33e75a2615",
+            "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+          },
+          "selector": "0x677e25c7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "retrieveRandomnessRequestForToken(uint256)",
+          "displaySignature": "retrieveRandomnessRequestForToken(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x60e26604",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUdvbGRlbi50LnNvbDpNZXRhZGF0YUxpZmVjeWNsZVJhbmRvbWl6ZXIjZnVuY3Rpb246MHg2MGUyNjYwNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveRandomnessRequestForToken",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "RandomnessRequest"
+            }
+          ],
+          "range": {
+            "byteLength": 291,
+            "byteStart": 2694,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L81-L91",
+            "lineEnd": 91,
+            "lineStart": 81,
+            "snippetSha256": "sha256:01351793ce2745deda34c823dd02cfd0990373deff99b3ca0de13a21299baadb",
+            "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+          },
+          "selector": "0x60e26604",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "randomnessRequestState(uint256)",
+          "displaySignature": "randomnessRequestState(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0xba73a1d8",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUdvbGRlbi50LnNvbDpNZXRhZGF0YUxpZmVjeWNsZVJhbmRvbWl6ZXIjZnVuY3Rpb246MHhiYTczYTFkOA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "randomnessRequestState",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "RandomnessRequestState"
+            }
+          ],
+          "range": {
+            "byteLength": 269,
+            "byteStart": 2991,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L93-L100",
+            "lineEnd": 100,
+            "lineStart": 93,
+            "snippetSha256": "sha256:5d0c85f1ba3f613bfe379c3fe24f8a4fb4654716fb042a6cbfbc463e74e83ce6",
+            "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+          },
+          "selector": "0xba73a1d8",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "randomnessRequestStateForToken(uint256)",
+          "displaySignature": "randomnessRequestStateForToken(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x841940f9",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUdvbGRlbi50LnNvbDpNZXRhZGF0YUxpZmVjeWNsZVJhbmRvbWl6ZXIjZnVuY3Rpb246MHg4NDE5NDBmOQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "randomnessRequestStateForToken",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "RandomnessRequestState"
+            }
+          ],
+          "range": {
+            "byteLength": 263,
+            "byteStart": 3266,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L102-L109",
+            "lineEnd": 109,
+            "lineStart": 102,
+            "snippetSha256": "sha256:052c9f7d8c94b8ef53e0258c931c9ab9f25f3459cf18814d6a39ce79491c7497",
+            "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+          },
+          "selector": "0x841940f9",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "requestToToken(uint256)",
+          "displaySignature": "requestToToken(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x1370ba38",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUdvbGRlbi50LnNvbDpNZXRhZGF0YUxpZmVjeWNsZVJhbmRvbWl6ZXIjZnVuY3Rpb246MHgxMzcwYmEzOA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestToToken",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 159,
+            "byteStart": 3535,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L111-L113",
+            "lineEnd": 113,
+            "lineStart": 111,
+            "snippetSha256": "sha256:f7f34b93b52ed78db69c5089dc6d7a733a8057af14c5a9514d0caf0e16dffd3a",
+            "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+          },
+          "selector": "0x1370ba38",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "tokenToRequest(uint256)",
+          "displaySignature": "tokenToRequest(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0xaa419ba4",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUdvbGRlbi50LnNvbDpNZXRhZGF0YUxpZmVjeWNsZVJhbmRvbWl6ZXIjZnVuY3Rpb246MHhhYTQxOWJhNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "tokenToRequest",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 155,
+            "byteStart": 3700,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L115-L117",
+            "lineEnd": 117,
+            "lineStart": 115,
+            "snippetSha256": "sha256:9881a28a94a07a2a8abdcf2b4b8a06e03e01e9ca59b2921ce95d376f334f7ad9",
+            "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+          },
+          "selector": "0xaa419ba4",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "tokenIdToCollection(uint256)",
+          "displaySignature": "tokenIdToCollection(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x94b8ae9d",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUdvbGRlbi50LnNvbDpNZXRhZGF0YUxpZmVjeWNsZVJhbmRvbWl6ZXIjZnVuY3Rpb246MHg5NGI4YWU5ZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "tokenIdToCollection",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 155,
+            "byteStart": 3861,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L119-L121",
+            "lineEnd": 121,
+            "lineStart": 119,
+            "snippetSha256": "sha256:94b375d2cf3cd68ac4671e8e276f8961513370d953531a78ca1a6fb8b0f16edb",
+            "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+          },
+          "selector": "0x94b8ae9d",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "pendingRandomnessRequests(uint256)",
+          "displaySignature": "pendingRandomnessRequests(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0xdd26bdd1",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUdvbGRlbi50LnNvbDpNZXRhZGF0YUxpZmVjeWNsZVJhbmRvbWl6ZXIjZnVuY3Rpb246MHhkZDI2YmRkMQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "pendingRandomnessRequests",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 244,
+            "byteStart": 4022,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L123-L128",
+            "lineEnd": 128,
+            "lineStart": 123,
+            "snippetSha256": "sha256:16dccb9749006f810a6a4bc784e95bb4d0e6f646c621e10f8a01c3a59b22c30a",
+            "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+          },
+          "selector": "0xdd26bdd1",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "totalPendingRandomnessRequests()",
+          "displaySignature": "totalPendingRandomnessRequests()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0xe231f9df",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUdvbGRlbi50LnNvbDpNZXRhZGF0YUxpZmVjeWNsZVJhbmRvbWl6ZXIjZnVuY3Rpb246MHhlMjMxZjlkZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "totalPendingRandomnessRequests",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 153,
+            "byteStart": 4272,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L130-L132",
+            "lineEnd": 132,
+            "lineStart": 130,
+            "snippetSha256": "sha256:29105b2cf5a0242116c790dfcad12ecd5ea1d2b0ef5513625b8fdf57642330b3",
+            "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+          },
+          "selector": "0xe231f9df",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_maybeRevertStateLookup()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:_maybeRevertStateLookup()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUdvbGRlbi50LnNvbDpNZXRhZGF0YUxpZmVjeWNsZVJhbmRvbWl6ZXIjZnVuY3Rpb246X21heWJlUmV2ZXJ0U3RhdGVMb29rdXAoKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_maybeRevertStateLookup",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 139,
+            "byteStart": 4431,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L134-L138",
+            "lineEnd": 138,
+            "lineStart": 134,
+            "snippetSha256": "sha256:639fa0649203e26404291b7b82235035ff56c6aa3fe0d0f7b6da26280b170ced",
+            "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_emptyRequest()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:_emptyRequest()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUdvbGRlbi50LnNvbDpNZXRhZGF0YUxpZmVjeWNsZVJhbmRvbWl6ZXIjZnVuY3Rpb246X2VtcHR5UmVxdWVzdCgp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_emptyRequest",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "empty",
+              "storageLocation": "memory",
+              "type": "RandomnessRequest"
+            }
+          ],
+          "range": {
+            "byteLength": 82,
+            "byteStart": 4576,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L140",
+            "lineEnd": 140,
+            "lineStart": 140,
+            "snippetSha256": "sha256:24e904e2043e01fe3323fb3dd47a5ae1e1977a284f2f6ebf1a92920b348a2af2",
+            "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "request",
+          "natspec": "",
+          "range": {
+            "byteLength": 33,
+            "byteStart": 611,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:499f481d0517f5f11db2c444ddef0c40d620447975d3f6458c9801ddbc2f40e0",
+            "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+          },
+          "selector": null,
+          "type": "RandomnessRequest",
+          "typeString": "struct IRandomizerLifecycle.RandomnessRequest",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "lifecycleSupported",
+          "natspec": "",
+          "range": {
+            "byteLength": 38,
+            "byteStart": 650,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:4544c5065998febcca2890802d875f6c08662abc22f827d4053226f265dcdcd1",
+            "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+          },
+          "selector": null,
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": {
+            "byteLength": 4,
+            "byteStart": 684,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+            "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+          },
+          "valueSource": "true",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "revertStateLookup",
+          "natspec": "",
+          "range": {
+            "byteLength": 30,
+            "byteStart": 694,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:b8bbd931b711515d1f7ca34332096860bc00dbd3b6c72725dc1be694cc746a2d",
+            "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+          },
+          "selector": null,
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/IRandomizer.sol:IRandomizer",
+        "name": "IRandomizer"
+      },
+      {
+        "definitionId": "smart-contracts/IRandomizerLifecycle.sol:IRandomizerLifecycle",
+        "name": "IRandomizerLifecycle"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1NZXRhZGF0YUdvbGRlbi50LnNvbDpNZXRhZGF0YUxpZmVjeWNsZVJhbmRvbWl6ZXI",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+      "smart-contracts/IRandomizerLifecycle.sol:IRandomizerLifecycle",
+      "smart-contracts/IRandomizer.sol:IRandomizer"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "MetadataLifecycleRandomizer",
+    "natspec": "",
+    "range": {
+      "byteLength": 4129,
+      "byteStart": 531,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataGolden.t.sol#L15-L141",
+      "lineEnd": 141,
+      "lineStart": 15,
+      "snippetSha256": "sha256:8cecf0722e655ec12b1eca01ab00d921733f59629939f5a5412d84d3d4930312",
+      "sourceSha256": "sha256:6bb03958b57ab7ed388f6989f06a24b0690d2b848ad58c21693943b3c44ebad2"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamMetadataGolden.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 17
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 16
+    },
+    "totalCount": 17
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x1370ba38",
+      "definitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x4cf0c697",
+      "definitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x60e26604",
+      "definitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x66f9ff41",
+      "definitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x677e25c7",
+      "definitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x796ba852",
+      "definitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x81d673e0",
+      "definitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x841940f9",
+      "definitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0x94b8ae9d",
+      "definitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0xaa419ba4",
+      "definitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0xba73a1d8",
+      "definitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0xbf1b89d3",
+      "definitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0xbfd237d1",
+      "definitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0xd7d06a8d",
+      "definitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0xdd26bdd1",
+      "definitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer#function:0xe231f9df",
+      "definitionId": "test/StreamMetadataGolden.t.sol:MetadataLifecycleRandomizer",
+      "severity": "advisory"
+    }
+  ]
+}

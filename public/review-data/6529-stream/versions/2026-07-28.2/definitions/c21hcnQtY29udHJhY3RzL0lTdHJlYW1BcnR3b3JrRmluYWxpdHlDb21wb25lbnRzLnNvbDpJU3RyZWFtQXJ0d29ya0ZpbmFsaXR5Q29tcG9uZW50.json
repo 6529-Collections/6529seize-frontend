@@ -1,0 +1,132 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IStreamArtworkFinalityComponents.sol:IStreamArtworkFinalityComponent#function:0x1300f2d7",
+          "declaringDefinitionId": "smart-contracts/IStreamArtworkFinalityComponents.sol:IStreamArtworkFinalityComponent",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "finalityState",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamFinalityComponentState",
+              "name": "",
+              "type": "(bool,bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)"
+            }
+          ],
+          "selector": "0x1300f2d7",
+          "signature": "finalityState(uint256)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "finalityState(uint256)",
+          "displaySignature": "finalityState(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamArtworkFinalityComponents.sol:IStreamArtworkFinalityComponent#function:0x1300f2d7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1BcnR3b3JrRmluYWxpdHlDb21wb25lbnRzLnNvbDpJU3RyZWFtQXJ0d29ya0ZpbmFsaXR5Q29tcG9uZW50I2Z1bmN0aW9uOjB4MTMwMGYyZDc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "finalityState",
+          "natspec": "@notice Reports the component's collection-scope finality state.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "StreamFinalityComponentState"
+            }
+          ],
+          "range": {
+            "byteLength": 129,
+            "byteStart": 481,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamArtworkFinalityComponents.sol#L11-L14",
+            "lineEnd": 14,
+            "lineStart": 11,
+            "snippetSha256": "sha256:223ff2b041278b593365b90bd9cd13620217909935c55b6362a1ee67223970c6",
+            "sourceSha256": "sha256:9b54941cc9ec170631e27ca89df8f0d3db4b40df13409b15504d70405ef08496"
+          },
+          "selector": "0x1300f2d7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IStreamArtworkFinalityComponents.sol:IStreamArtworkFinalityComponent",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1BcnR3b3JrRmluYWxpdHlDb21wb25lbnRzLnNvbDpJU3RyZWFtQXJ0d29ya0ZpbmFsaXR5Q29tcG9uZW50",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IStreamArtworkFinalityComponents.sol:IStreamArtworkFinalityComponent"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "IStreamArtworkFinalityComponent",
+    "natspec": "@notice Finality read surface every participating satellite exposes ([LTA-FINALITY]).\n @dev Interface names carry the `Artwork` infix so this wave never collides with sibling\n      worktrees; function selectors follow the spec code blocks exactly.",
+    "range": {
+      "byteLength": 252,
+      "byteStart": 360,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamArtworkFinalityComponents.sol#L9-L15",
+      "lineEnd": 15,
+      "lineStart": 9,
+      "snippetSha256": "sha256:618b7f58abd6c0d5a11e8098384d0ff62beab278843a34c01e15fc86389e8609",
+      "sourceSha256": "sha256:9b54941cc9ec170631e27ca89df8f0d3db4b40df13409b15504d70405ef08496"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IStreamArtworkFinalityComponents.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

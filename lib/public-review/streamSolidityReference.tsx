@@ -17,6 +17,7 @@ import {
 } from "@/components/public-review/SolidityReferenceViews";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
+import streamReferenceConfig from "@/config/public-reviews/6529-stream.reference.json";
 import { isPublicReviewEnabled } from "@/config/publicReviews";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -83,6 +84,29 @@ const referenceActiveStreamReviewVersion =
   publiclyAvailableStreamReviewVersions.at(-1) ??
   activeStreamReviewVersion;
 
+const streamReferenceSourceCommits = Object.fromEntries(
+  STREAM_REVIEW_DEFINITION.versions.map((candidate) => [
+    candidate.version,
+    candidate.source.commit,
+  ])
+);
+streamReferenceSourceCommits[streamReferenceConfig.reviewVersion] =
+  streamReferenceConfig.source.commit;
+
+if (
+  streamReferenceConfig.reviewId !== STREAM_REVIEW_SLUG ||
+  streamReferenceConfig.source.repository !==
+    activeStreamReviewVersion.source.repository ||
+  !streamReferenceConfig.output.retainedVersions.includes(
+    streamReferenceConfig.reviewVersion
+  ) ||
+  streamReferenceConfig.output.retainedVersions.some(
+    (version) => !streamReferenceSourceCommits[version]
+  )
+) {
+  throw new Error("The Stream Solidity source-index identity is invalid.");
+}
+
 const STREAM_SOLIDITY_REFERENCE_IDENTITY: SolidityReferenceReviewIdentity = {
   activeSourceCommit: referenceActiveStreamReviewVersion.source.commit,
   activeVersion: referenceActiveStreamReviewVersion.version,
@@ -90,12 +114,9 @@ const STREAM_SOLIDITY_REFERENCE_IDENTITY: SolidityReferenceReviewIdentity = {
     (candidate) => candidate.version
   ),
   reviewId: STREAM_REVIEW_SLUG,
-  sourceCommits: Object.fromEntries(
-    STREAM_REVIEW_DEFINITION.versions.map((candidate) => [
-      candidate.version,
-      candidate.source.commit,
-    ])
-  ),
+  sourceCommits: streamReferenceSourceCommits,
+  sourceIndexActiveVersion: streamReferenceConfig.reviewVersion,
+  sourceIndexAvailableVersions: streamReferenceConfig.output.retainedVersions,
   sourceRepository: activeStreamReviewVersion.source.repository,
 };
 
