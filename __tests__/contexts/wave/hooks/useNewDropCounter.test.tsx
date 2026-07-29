@@ -288,6 +288,26 @@ describe("useNewDropCounter", () => {
     expect(result.current.newDropsCounts).toEqual({});
   });
 
+  it("does not carry websocket counts into another viewer identity", () => {
+    const { result, rerender } = renderHook(
+      ({ identityKey }) =>
+        useNewDropCounter(null, waves, jest.fn(), {
+          stateIdentityKey: identityKey,
+        }),
+      {
+        wrapper,
+        initialProps: { identityKey: "profile-1" },
+      }
+    );
+
+    emitDropUpdate();
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(1);
+
+    rerender({ identityKey: "profile-2" });
+
+    expect(result.current.newDropsCounts).toEqual({});
+  });
+
   it("updates muted wave timestamps without unread counts", () => {
     const refetch = jest.fn();
     const { result, rerender } = renderHook(

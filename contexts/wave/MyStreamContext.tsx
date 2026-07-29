@@ -238,6 +238,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const dmWavesHookData = useEnhancedWavesListCore(activeWaveId, dmWavesData, {
     enabled: isDirectMessagesListEnabled,
     supportsPinning: false,
+    stateIdentityKey: dmWavesData.viewerIdentityKey,
     otherListWaveIds: mainWaveIds,
     sortMutedLast: false,
   });

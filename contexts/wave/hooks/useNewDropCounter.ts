@@ -9,7 +9,14 @@ import {
 import { getWebSocketMessageReason } from "@/services/websocket/WebSocketTypes";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import type { SidebarWave } from "@/types/waves.types";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type SetStateAction,
+} from "react";
 
 /**
  * Interface for tracking new drops count for a wave
@@ -24,6 +31,7 @@ type NewDropsCounts = Record<string, MinimalWaveNewDropsCount>;
 
 interface UseNewDropCounterOptions {
   readonly enabled?: boolean | undefined;
+  readonly stateIdentityKey?: string | null | undefined;
   readonly otherListWaveIds?: ReadonlySet<string> | undefined;
   readonly unknownWaveRefetchCooldownMs?: number | undefined;
 }
@@ -200,14 +208,42 @@ function useNewDropCounter(
   const { connectedProfile } = useAuth();
   const {
     enabled = true,
+    stateIdentityKey,
     otherListWaveIds = DEFAULT_OTHER_LIST_WAVE_IDS,
     unknownWaveRefetchCooldownMs = DEFAULT_UNKNOWN_WAVE_REFETCH_COOLDOWN_MS,
   } = options;
 
   // Keep track of new drop counts
-  const [rawNewDropsCounts, setRawNewDropsCounts] = useState<
-    Record<string, MinimalWaveNewDropsCount>
-  >({});
+  const [rawNewDropsState, setRawNewDropsState] = useState<{
+    readonly identityKey: string | null | undefined;
+    readonly counts: Record<string, MinimalWaveNewDropsCount>;
+  }>(() => ({
+    identityKey: stateIdentityKey,
+    counts: {},
+  }));
+  const rawNewDropsCounts = useMemo(
+    () =>
+      rawNewDropsState.identityKey === stateIdentityKey
+        ? rawNewDropsState.counts
+        : {},
+    [rawNewDropsState, stateIdentityKey]
+  );
+  const setRawNewDropsCounts = useCallback(
+    (
+      update: SetStateAction<Record<string, MinimalWaveNewDropsCount>>
+    ): void => {
+      setRawNewDropsState((previous) => {
+        const current =
+          previous.identityKey === stateIdentityKey ? previous.counts : {};
+        const counts = typeof update === "function" ? update(current) : update;
+        return {
+          identityKey: stateIdentityKey,
+          counts,
+        };
+      });
+    },
+    [stateIdentityKey]
+  );
   const [previousEnabled, setPreviousEnabled] = useState(enabled);
   const wavesRef = useRef(waves);
   const lastUnknownWaveRefetchAtRef = useRef<number | null>(null);
@@ -261,7 +297,7 @@ function useNewDropCounter(
         return update(current);
       });
     },
-    [waves]
+    [setRawNewDropsCounts, waves]
   );
 
   // Reset counts for a specific wave
@@ -301,7 +337,7 @@ function useNewDropCounter(
         };
       });
     },
-    [enabled]
+    [enabled, setRawNewDropsCounts]
   );
 
   // Reset counts for all waves
@@ -348,7 +384,7 @@ function useNewDropCounter(
 
       return changed ? newCounts : current;
     });
-  }, [enabled]);
+  }, [enabled, setRawNewDropsCounts]);
 
   // Handle visibility changes for active wave
   useEffect(() => {

@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useWavesV2 } from "./useWavesV2";
+import { useUnreadDmDrops } from "./useUnreadDmDrops";
 import {
   SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
   WAVE_FOLLOWING_WAVES_PARAMS,
@@ -80,6 +81,47 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
     refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
     refetchIntervalInBackground: false,
   });
+  const { unreadDmDropsCount } = useUnreadDmDrops(
+    connectedProfile?.handle ?? null,
+    { enabled: shouldFetchDmWaves }
+  );
+  const lastReconciledMismatchRef = useRef<string | null>(null);
+  const listedUnreadDropsCount = useMemo(
+    () =>
+      mainWaves.reduce(
+        (total, wave) => total + Math.max(wave.unreadDropsCount, 0),
+        0
+      ),
+    [mainWaves]
+  );
+
+  useEffect(() => {
+    if (!shouldFetchDmWaves || unreadDmDropsCount <= listedUnreadDropsCount) {
+      lastReconciledMismatchRef.current = null;
+      return;
+    }
+
+    if (isFetching) {
+      return;
+    }
+
+    const mismatchKey = `${String(viewerIdentityKey)}:${unreadDmDropsCount}:${listedUnreadDropsCount}`;
+    if (lastReconciledMismatchRef.current === mismatchKey) {
+      return;
+    }
+
+    lastReconciledMismatchRef.current = mismatchKey;
+    // Reconcile two independent REST snapshots when the summary advances first.
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-data-to-parent
+    refetch();
+  }, [
+    isFetching,
+    listedUnreadDropsCount,
+    refetch,
+    shouldFetchDmWaves,
+    unreadDmDropsCount,
+    viewerIdentityKey,
+  ]);
 
   // sort by latest drop
   const sorted = useMemo(() => {
@@ -127,6 +169,7 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       missingPinnedIds: [],
       mainWavesRefetch: refetchStable,
       refetchAllWaves: refetchStable,
+      viewerIdentityKey,
     }),
     [
       sorted,
@@ -138,6 +181,7 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       mainWaves,
       refetchStable,
       shouldFetchDmWaves,
+      viewerIdentityKey,
     ]
   );
 };

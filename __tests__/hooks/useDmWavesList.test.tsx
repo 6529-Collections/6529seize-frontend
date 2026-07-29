@@ -15,6 +15,10 @@ jest.mock("@/hooks/useWavesV2", () => ({
   useWavesV2: jest.fn(),
 }));
 
+jest.mock("@/hooks/useUnreadDmDrops", () => ({
+  useUnreadDmDrops: jest.fn(),
+}));
+
 jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: jest.fn(() => "valid-jwt"),
   isAuthJwtUsable: jest.fn(() => true),
@@ -25,6 +29,8 @@ const useSeizeConnectContextMock =
   require("@/components/auth/SeizeConnectContext")
     .useSeizeConnectContext as jest.Mock;
 const useWavesV2Mock = require("@/hooks/useWavesV2").useWavesV2 as jest.Mock;
+const useUnreadDmDropsMock = require("@/hooks/useUnreadDmDrops")
+  .useUnreadDmDrops as jest.Mock;
 const getAuthJwtMock = require("@/services/auth/auth.utils")
   .getAuthJwt as jest.Mock;
 const isAuthJwtUsableMock = require("@/services/auth/auth.utils")
@@ -44,6 +50,9 @@ describe("useDmWavesList", () => {
     useSeizeConnectContextMock.mockReturnValue({
       address: "0xABC",
       hasValidWalletAuth: true,
+    });
+    useUnreadDmDropsMock.mockReturnValue({
+      unreadDmDropsCount: 0,
     });
     useWavesV2Mock.mockReturnValue({
       waves: [
@@ -77,6 +86,66 @@ describe("useDmWavesList", () => {
         refetchIntervalInBackground: false,
       })
     );
+  });
+
+  it("refetches once when the unread summary is ahead of the DM rows", () => {
+    const refetch = jest.fn();
+    let isFetching = false;
+    useUnreadDmDropsMock.mockReturnValue({
+      unreadDmDropsCount: 1,
+    });
+    useWavesV2Mock.mockImplementation(() => ({
+      waves: [
+        {
+          id: "wave-1",
+          latestDropTimestamp: 200,
+          unreadDropsCount: 0,
+        },
+      ],
+      isFetching,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      status: "success",
+      refetch,
+    }));
+
+    const { rerender } = renderHook(() => useDmWavesList());
+
+    expect(refetch).toHaveBeenCalledTimes(1);
+
+    isFetching = true;
+    rerender();
+    isFetching = false;
+    rerender();
+
+    expect(refetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not refetch when the DM rows account for the unread summary", () => {
+    const refetch = jest.fn();
+    useUnreadDmDropsMock.mockReturnValue({
+      unreadDmDropsCount: 1,
+    });
+    useWavesV2Mock.mockReturnValue({
+      waves: [
+        {
+          id: "wave-1",
+          latestDropTimestamp: 200,
+          unreadDropsCount: 1,
+        },
+      ],
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      status: "success",
+      refetch,
+    });
+
+    renderHook(() => useDmWavesList());
+
+    expect(refetch).not.toHaveBeenCalled();
   });
 
   it("disables the DM query while the auth JWT is unusable", () => {
