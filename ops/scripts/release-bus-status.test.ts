@@ -306,10 +306,20 @@ describe("release-bus-status helper", () => {
     });
 
     expect(result.code).toBe(0);
-    expect(parseSanitizedStatus(result.stdout)).toMatchObject({
+    expect(result.stderr).toBe("");
+    expect(result.authorization).toBe(`Bearer ${TOKEN}`);
+    expect(parseSanitizedStatus(result.stdout)).toEqual({
       lanes: {
-        STAGING: { status: "OFF", changeable: true },
-        PRODUCTION: { status: "OFF", changeable: true },
+        STAGING: {
+          status: "OFF",
+          changeable: true,
+          reason: "Staging enabled",
+        },
+        PRODUCTION: {
+          status: "OFF",
+          changeable: true,
+          reason: "Production enabled",
+        },
       },
       staging: {
         status: "DETACHED_MANUAL_OWNERSHIP",
@@ -317,7 +327,10 @@ describe("release-bus-status helper", () => {
         last_validated_manifest_id: "historical-manifest",
         frontend_sha: null,
         backend_sha: null,
+        frontend_staging_ref_sha: null,
+        backend_staging_ref_sha: null,
         clean_main: false,
+        last_transition_train_id: null,
         row_version: 8,
       },
     });
@@ -630,6 +643,7 @@ describe("release-bus-status helper", () => {
   });
 
   test.each([
+    ["status", "DETACHED", INVALID_STAGING_STATE],
     ["row_version", true, INVALID_STAGING_STATE],
     ["row_version", "7", INVALID_STAGING_STATE],
     ["clean_main", null, INVALID_STAGING_STATE],

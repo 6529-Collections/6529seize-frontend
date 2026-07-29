@@ -563,6 +563,11 @@ export const createEslintConfig = ({
     {
       files: ["**/*.{js,cjs,mjs}"],
       extends: [tseslint.configs.disableTypeChecked],
+      rules: {
+        // This rule requests parser services when eslint-config-next owns the
+        // JavaScript parser, so keep it scoped to the typed-file config.
+        "@typescript-eslint/consistent-type-imports": "off",
+      },
     },
 
     // TypeScript-specific rules with type-checking
