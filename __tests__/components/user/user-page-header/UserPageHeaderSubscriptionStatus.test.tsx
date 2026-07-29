@@ -58,6 +58,9 @@ describe("UserPageHeaderSubscriptionStatus", () => {
       "href",
       "/sesamenoodles/subscriptions#profile-subscriptions-top-up"
     );
+    expect(screen.getByRole("link", { name: "Top up" })).toHaveClass(
+      "tw-bg-primary-500"
+    );
   });
 
   it("keeps the early warning top-up action visually secondary", () => {
@@ -84,7 +87,10 @@ describe("UserPageHeaderSubscriptionStatus", () => {
     );
 
     expect(screen.getByRole("link", { name: "Top up" })).toHaveClass(
-      "tw-bg-white/10"
+      "tw-text-iron-400"
+    );
+    expect(screen.getByRole("link", { name: "Top up" })).not.toHaveClass(
+      "tw-bg-primary-500"
     );
   });
 });
