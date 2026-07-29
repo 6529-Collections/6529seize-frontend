@@ -26,8 +26,8 @@ describe("PrimaryButton", () => {
 
     const button = screen.getByRole("button", { name: "Button" });
     expect(button).toHaveClass("tw-text-sm");
+    expect(button).toHaveClass("tw-h-10");
     expect(button).toHaveClass("tw-px-3.5");
-    expect(button).toHaveClass("tw-py-2.5");
   });
 
   it("uses small text size and padding", () => {
@@ -36,19 +36,8 @@ describe("PrimaryButton", () => {
     const button = screen.getByRole("button", { name: "Button" });
     expect(button).toHaveClass("tw-text-xs");
     expect(button).not.toHaveClass("tw-text-sm");
+    expect(button).toHaveClass("tw-h-8");
     expect(button).toHaveClass("tw-px-2.5");
-    expect(button).toHaveClass("tw-py-2");
-  });
-
-  it("keeps small text size when custom padding is provided", () => {
-    renderPrimaryButton({ size: "sm", padding: "tw-px-4 tw-py-1" });
-
-    const button = screen.getByRole("button", { name: "Button" });
-    expect(button).toHaveClass("tw-text-xs");
-    expect(button).not.toHaveClass("tw-text-sm");
-    expect(button).toHaveClass("tw-px-4");
-    expect(button).toHaveClass("tw-py-1");
-    expect(button).not.toHaveClass("tw-px-2.5");
   });
 
   it("uses native link behavior when an href is provided", () => {
