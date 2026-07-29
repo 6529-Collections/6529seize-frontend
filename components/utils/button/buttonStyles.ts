@@ -46,7 +46,10 @@ export function getButtonClasses({
   className,
 }: ButtonStyleOptions = {}): string {
   return clsx(
-    "tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-font-semibold tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-200 tw-ease-out enabled:tw-cursor-pointer focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50",
+    "tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-font-semibold tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-200 tw-ease-out enabled:tw-cursor-pointer focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 disabled:tw-cursor-not-allowed disabled:tw-opacity-50",
+    variant === "destructive"
+      ? "focus-visible:tw-outline-red"
+      : "focus-visible:tw-outline-primary-400",
     VARIANT_CLASSES[variant],
     size && SIZE_CLASSES[size],
     fullWidth && "tw-w-full",

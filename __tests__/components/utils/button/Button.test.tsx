@@ -31,9 +31,9 @@ describe("Button", () => {
       "tw-h-10",
       "tw-rounded-lg",
       "tw-bg-iron-200",
-      "tw-ring-1",
-      "tw-ring-inset"
+      "tw-border-iron-200"
     );
+    expect(button).not.toHaveClass("tw-ring-1", "tw-ring-inset");
 
     await user.click(button);
     expect(onClick).toHaveBeenCalledTimes(1);
@@ -62,6 +62,14 @@ describe("Button", () => {
 
     await user.click(button);
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("uses a matching focus outline for destructive actions", () => {
+    render(<Button variant="destructive">Delete</Button>);
+
+    expect(screen.getByRole("button", { name: "Delete" })).toHaveClass(
+      "focus-visible:tw-outline-red"
+    );
   });
 });
 
