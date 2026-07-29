@@ -71,6 +71,12 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "Previous and next contract review pages",
   "publicReview.navigation.contents": "Review contents",
   "publicReview.navigation.onThisPage": "On this page",
+  "publicReview.surface.navigation": "Contract review areas",
+  "publicReview.surface.review": "Review",
+  "publicReview.surface.reference": "Technical reference",
+  "publicReview.surface.referenceShort": "Reference",
+  "publicReview.surface.feedback": "Public feedback",
+  "publicReview.surface.feedbackShort": "Feedback",
   "publicReview.navigation.previous": "Previous",
   "publicReview.navigation.next": "Next",
   "publicReview.navigation.pagePosition": "Page {current} of {total}",
@@ -165,6 +171,10 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.reference.overviewDescription":
     "A deterministic inventory generated from the exact pinned Solidity source, compiler output, and retained release evidence.",
   "publicReview.reference.generatedLabel": "Generated from source",
+  "publicReview.reference.scrollSectionsLeft":
+    "Scroll reference sections left",
+  "publicReview.reference.scrollSectionsRight":
+    "Scroll reference sections right",
   "publicReview.reference.sourceCommit": "Pinned source commit",
   "publicReview.reference.sourceTree": "Pinned source tree",
   "publicReview.reference.compiler": "Compiler",
@@ -471,7 +481,6 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.feedback.connectError":
     "The wallet connection could not be completed. Please try again.",
   "publicReview.feedback.success": "Feedback posted successfully.",
-  "publicReview.feedback.viewWave": "Open your feedback in the Wave",
   "publicReview.feedback.pageContext": "Page: {page}",
   "publicReview.feedback.sectionContext": "Section: {section}",
   "publicReview.feedback.sourceContext":

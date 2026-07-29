@@ -199,7 +199,7 @@ export default function PublicReviewLedger({
       <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-pretty tw-text-sm tw-font-light tw-leading-6 tw-text-iron-300">
         {t(locale, "publicReview.ledger.intro")}
       </p>
-      <div className="tw-mt-5 tw-flex tw-flex-wrap tw-gap-3">
+      <div className="tw-mt-5 tw-flex tw-flex-wrap tw-gap-2">
         <button
           type="button"
           aria-describedby={
@@ -213,7 +213,7 @@ export default function PublicReviewLedger({
               type: "text/csv;charset=utf-8",
             })
           }
-          className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-shadow-sm tw-transition-colors hover:tw-border-white/[0.18] hover:tw-bg-white/[0.025] hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 disabled:hover:tw-border-white/10 disabled:hover:tw-bg-transparent disabled:hover:tw-text-iron-200"
+          className="tw-inline-flex tw-min-h-9 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-white/[0.08] tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-colors hover:tw-border-white/[0.15] hover:tw-bg-white/[0.02] hover:tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 disabled:hover:tw-border-white/[0.08] disabled:hover:tw-bg-transparent disabled:hover:tw-text-iron-300"
         >
           {t(locale, "publicReview.ledger.exportCsv")}
         </button>
@@ -233,7 +233,7 @@ export default function PublicReviewLedger({
               type: "text/markdown;charset=utf-8",
             })
           }
-          className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-shadow-sm tw-transition-colors hover:tw-border-white/[0.18] hover:tw-bg-white/[0.025] hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 disabled:hover:tw-border-white/10 disabled:hover:tw-bg-transparent disabled:hover:tw-text-iron-200"
+          className="tw-inline-flex tw-min-h-9 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-white/[0.08] tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-colors hover:tw-border-white/[0.15] hover:tw-bg-white/[0.02] hover:tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 disabled:hover:tw-border-white/[0.08] disabled:hover:tw-bg-transparent disabled:hover:tw-text-iron-300"
         >
           {t(locale, "publicReview.ledger.exportMarkdown")}
         </button>

@@ -53,4 +53,44 @@ describe("SolidityReferenceSectionNavigation", () => {
     ).toHaveAttribute("aria-selected", "true");
     expect(screen.getByText("Auditor panel")).toBeInTheDocument();
   });
+
+  it("reveals and operates the horizontal scroll controls", () => {
+    render(<SolidityReferenceSectionNavigation panels={panels} />);
+
+    const scrollContainer = screen.getByRole("tablist").parentElement;
+    if (!scrollContainer) {
+      throw new Error("Reference tab scroll container is missing");
+    }
+    const scrollBy = jest.fn();
+    Object.defineProperties(scrollContainer, {
+      clientWidth: { configurable: true, value: 200 },
+      scrollBy: { configurable: true, value: scrollBy },
+      scrollLeft: { configurable: true, value: 0, writable: true },
+      scrollWidth: { configurable: true, value: 600 },
+    });
+
+    fireEvent.scroll(scrollContainer);
+    const scrollRight = screen.getByRole("button", {
+      name: "Scroll reference sections right",
+    });
+    expect(
+      screen.queryByRole("button", {
+        name: "Scroll reference sections left",
+      })
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(scrollRight);
+    expect(scrollBy).toHaveBeenCalledWith({
+      behavior: "smooth",
+      left: 140,
+    });
+
+    scrollContainer.scrollLeft = 200;
+    fireEvent.scroll(scrollContainer);
+    expect(
+      screen.getByRole("button", {
+        name: "Scroll reference sections left",
+      })
+    ).toBeInTheDocument();
+  });
 });

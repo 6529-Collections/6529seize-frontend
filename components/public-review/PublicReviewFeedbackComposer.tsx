@@ -22,7 +22,6 @@ import {
 } from "@/components/public-review/PublicReviewFeedbackComposerStatus";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { fetchWaveById } from "@/services/api/waves-v2-api";
@@ -209,7 +208,7 @@ function useFeedbackComposerState({
   readonly submitter: PublicReviewFeedbackSubmitter;
 }) {
   const queryClient = useQueryClient();
-  const { connectedProfile, requestAuth } = useAuth();
+  const { connectedProfile, requestAuth, setToast } = useAuth();
   const {
     address,
     hasValidWalletAuth,
@@ -228,8 +227,6 @@ function useFeedbackComposerState({
   const [formError, setFormError] = useState<ContextBoundValue<string> | null>(
     null
   );
-  const [successPath, setSuccessPath] =
-    useState<ContextBoundValue<string> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const draftRevisionRef = useRef(0);
@@ -335,7 +332,6 @@ function useFeedbackComposerState({
       return false;
     }
     setCurrentFormError(null);
-    setSuccessPath(null);
     const submissionContextFingerprint = contextFingerprint;
     const submittedDraftRevision = draftRevisionRef.current;
     let payload;
@@ -348,16 +344,7 @@ function useFeedbackComposerState({
 
     setIsSubmitting(true);
     try {
-      const drop = await submitter({ destination, payload });
-      setSuccessPath({
-        contextFingerprint: submissionContextFingerprint,
-        value: getWaveRoute({
-          waveId: destination.waveId,
-          serialNo: drop.serial_no,
-          isDirectMessage: false,
-          isApp: false,
-        }),
-      });
+      await submitter({ destination, payload });
       const submittedStateIsCurrent =
         latestContextFingerprintRef.current === submissionContextFingerprint &&
         draftRevisionRef.current === submittedDraftRevision;
@@ -370,6 +357,10 @@ function useFeedbackComposerState({
       setSubmissionId(createSubmissionId());
       await queryClient.invalidateQueries({
         queryKey: getPublicReviewLedgerQueryKey({ config, destination }),
+      });
+      setToast({
+        message: t(locale, "publicReview.feedback.success"),
+        type: "success",
       });
       return true;
     } catch {
@@ -406,10 +397,6 @@ function useFeedbackComposerState({
     isSubmitting,
     preview:
       preview?.contextFingerprint === contextFingerprint ? preview.value : null,
-    successPath:
-      successPath?.contextFingerprint === contextFingerprint
-        ? successPath.value
-        : null,
     updateDraft,
   };
 }
@@ -428,7 +415,6 @@ export default function PublicReviewFeedbackComposer({
   const formId = useId();
   const commentRef = useRef<HTMLTextAreaElement>(null);
   const previewRef = useRef<HTMLHeadingElement>(null);
-  const successRef = useRef<HTMLOutputElement>(null);
   const referenceStatusId = `${formId}-reference-status`;
   const {
     authenticated,
@@ -444,7 +430,6 @@ export default function PublicReviewFeedbackComposer({
     handleSubmit,
     isSubmitting,
     preview,
-    successPath,
     updateDraft,
   } = useFeedbackComposerState({
     locale,
@@ -457,10 +442,8 @@ export default function PublicReviewFeedbackComposer({
     submitter,
   });
 
-  const submitAndFocusConfirmation = async () => {
-    if (await handleSubmit()) {
-      window.setTimeout(() => successRef.current?.focus(), 0);
-    } else if (!draft.comment.trim()) {
+  const submitAndFocusError = async () => {
+    if (!(await handleSubmit()) && !draft.comment.trim()) {
       window.setTimeout(() => commentRef.current?.focus(), 0);
     }
   };
@@ -514,7 +497,7 @@ export default function PublicReviewFeedbackComposer({
           noValidate
           onSubmit={(event) => {
             event.preventDefault();
-            void submitAndFocusConfirmation();
+            void submitAndFocusError();
           }}
         >
           <div>
@@ -697,9 +680,6 @@ export default function PublicReviewFeedbackComposer({
       <FeedbackResultMessages
         feedbackGate={feedbackGate}
         formError={formError}
-        locale={locale}
-        successPath={successPath}
-        successRef={successRef}
       />
     </section>
   );
