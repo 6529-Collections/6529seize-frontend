@@ -230,6 +230,7 @@ export default function SubscriptionCoverageSummary({
   const headline = showFundedCount
     ? getFundedDropsLabel(locale, coverage.fully_funded_drops)
     : presentation.label;
+  const showStatusPill = headline !== presentation.label;
   const actionLabel = getSubscriptionCoverageActionLabel(
     locale,
     presentation.action
@@ -255,19 +256,21 @@ export default function SubscriptionCoverageSummary({
       />
       <div className="tw-relative tw-grid tw-gap-4 lg:tw-grid-cols-[minmax(0,1.75fr)_minmax(280px,1fr)] lg:tw-gap-6">
         <div className="tw-min-w-0">
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
             <span className="tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
               {t(locale, "subscriptions.coverage.title")}
             </span>
-            <span
-              className={clsx(
-                "tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-medium tw-ring-1 tw-ring-inset",
-                tone.pill
-              )}
-            >
-              <StatusIcon className="tw-size-3.5" aria-hidden="true" />
-              {presentation.label}
-            </span>
+            {showStatusPill ? (
+              <span
+                className={clsx(
+                  "tw-inline-flex tw-items-center tw-gap-2 tw-rounded-full tw-px-3 tw-py-1 tw-text-[11px] tw-font-medium tw-ring-1 tw-ring-inset",
+                  tone.pill
+                )}
+              >
+                <StatusIcon className="tw-size-3.5" aria-hidden="true" />
+                {presentation.label}
+              </span>
+            ) : null}
           </div>
 
           <h3
