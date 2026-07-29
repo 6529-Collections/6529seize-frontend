@@ -51,6 +51,11 @@ const AUTH_SANDBOX_ENV = {
   ...COMPOSER_SANDBOX_ENV,
 };
 
+const PUBLIC_REVIEW_SANDBOX_ENV = {
+  PLAYWRIGHT_PUBLIC_REVIEW_SANDBOX: "1",
+  ...COMPOSER_SANDBOX_ENV,
+};
+
 const READONLY_SPECS = {
   social: ["tests/social/waves-profile-readonly.spec.ts"],
   inputDetection: ["tests/input/win8-touch-latch-readonly.spec.ts"],
@@ -274,6 +279,13 @@ const PACKS = [
     [DESKTOP, MOBILE]
   ),
   sandboxPack(
+    "test:e2e:public-review-sandbox",
+    "Stream review feedback sandbox against the local mock API.",
+    ["tests/public-review/stream-review-feedback-sandbox.spec.ts"],
+    PUBLIC_REVIEW_SANDBOX_ENV,
+    [DESKTOP, MOBILE]
+  ),
+  sandboxPack(
     "test:e2e:reaction-sandbox",
     "Drop reaction sandbox against the local mock API.",
     ["tests/social/wave-reaction-sandbox.spec.ts"],
@@ -487,6 +499,7 @@ const PACKS = [
     "readonly",
     "Combined production-safe release validation.",
     [
+      "tests/home/home.spec.ts",
       ...READONLY_SPECS.social,
       ...READONLY_SPECS.media,
       ...READONLY_SPECS.delegation,

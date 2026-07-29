@@ -6,16 +6,20 @@ import CircleLoader, {
 import Button from "@/components/utils/button/Button";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
+import { formatInteger } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t as translate } from "@/i18n/messages";
 import {
   faAnglesDown,
   faAnglesUp,
-  faXmarkCircle,
+  faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { PublicClient } from "viem";
 import type { FlowState, TxEntry, TxState } from "./TransferModal.types";
 
 function computeFlowTitle(
+  locale: SupportedLocale,
   total: number,
   successCount: number,
   errorCount: number
@@ -25,30 +29,43 @@ function computeFlowTitle(
 
   if (total === 1 && allSuccess) {
     return {
-      label: "Transfer Successful",
+      label: translate(locale, "transfer.modal.result.singleSuccess"),
       icon: "/emojis/sgt_saluting_face.webp",
     };
   }
   if (total === 1 && allFail) {
-    return { label: "Transfer Failed", icon: "/emojis/sgt_sob.webp" };
+    return {
+      label: translate(locale, "transfer.modal.result.singleFailure"),
+      icon: "/emojis/sgt_sob.webp",
+    };
   }
   if (total === 1) {
-    return { label: "Transfer Complete", icon: "/emojis/sgt_grimacing.webp" };
+    return {
+      label: translate(locale, "transfer.modal.result.singleComplete"),
+      icon: "/emojis/sgt_grimacing.webp",
+    };
   }
   if (allSuccess) {
     return {
-      label: `All ${total} Transactions Successful`,
+      label: translate(locale, "transfer.modal.result.allSuccess", {
+        count: formatInteger(locale, total),
+      }),
       icon: "/emojis/sgt_saluting_face.webp",
     };
   }
   if (allFail) {
     return {
-      label: `All ${total} Transactions Failed`,
+      label: translate(locale, "transfer.modal.result.allFailure", {
+        count: formatInteger(locale, total),
+      }),
       icon: "/emojis/sgt_sob.webp",
     };
   }
   return {
-    label: `Transfer Complete: ${successCount} successful, ${errorCount} failed`,
+    label: translate(locale, "transfer.modal.result.mixed", {
+      successCount: formatInteger(locale, successCount),
+      errorCount: formatInteger(locale, errorCount),
+    }),
     icon: "/emojis/sgt_grimacing.webp",
   };
 }
@@ -56,12 +73,14 @@ function computeFlowTitle(
 export function FlowTitle({
   flow,
   txs,
+  locale,
 }: {
   readonly flow: FlowState;
   readonly txs: TxEntry[];
+  readonly locale: SupportedLocale;
 }) {
   if (flow === "review") {
-    return <span>Review transfer and select recipient</span>;
+    return <span>{translate(locale, "transfer.modal.reviewTitle")}</span>;
   }
 
   const anyPending = anyTxsPending(txs);
@@ -69,7 +88,13 @@ export function FlowTitle({
     return (
       <span className="tw-flex tw-items-center tw-gap-1.5">
         <span>
-          Executing {txs.length} Transaction{txs.length > 1 ? "s" : ""}
+          {translate(
+            locale,
+            txs.length === 1
+              ? "transfer.modal.executing.one"
+              : "transfer.modal.executing.many",
+            { count: formatInteger(locale, txs.length) }
+          )}
         </span>
         <CircleLoader size={CircleLoaderSize.MEDIUM} />
       </span>
@@ -80,14 +105,38 @@ export function FlowTitle({
   const successCount = txs.filter((t) => t.state === "success").length;
   const errorCount = txs.filter((t) => t.state === "error").length;
 
-  const { label, icon } = computeFlowTitle(total, successCount, errorCount);
+  const { label, icon } = computeFlowTitle(
+    locale,
+    total,
+    successCount,
+    errorCount
+  );
 
   return (
     <span className="tw-flex tw-items-center tw-gap-1.5">
       <span>{label}</span>
-      <img src={icon} alt="status" className="tw-h-6 tw-w-6" />
+      <Image
+        src={icon}
+        alt={translate(locale, "transfer.modal.statusIconAlt")}
+        width={24}
+        height={24}
+        className="tw-h-6 tw-w-6"
+      />
     </span>
   );
+}
+
+function getSummaryMessageKey(nftCount: number, itemCount: number) {
+  if (nftCount === 1 && itemCount === 1) {
+    return "transfer.modal.summary.oneNftOneItem";
+  }
+  if (nftCount === 1) {
+    return "transfer.modal.summary.oneNftManyItems";
+  }
+  if (itemCount === 1) {
+    return "transfer.modal.summary.manyNftsOneItem";
+  }
+  return "transfer.modal.summary.manyNftsManyItems";
 }
 
 function SelectedSummaryList({
@@ -95,6 +144,7 @@ function SelectedSummaryList({
   leftListRef,
   leftHasOverflow,
   leftAtEnd,
+  locale,
 }: {
   readonly items: {
     key: string;
@@ -105,18 +155,18 @@ function SelectedSummaryList({
   readonly leftListRef: React.RefObject<HTMLUListElement | null>;
   readonly leftHasOverflow: boolean;
   readonly leftAtEnd: boolean;
+  readonly locale: SupportedLocale;
 }) {
+  const totalUnits = items.reduce((sum, it) => sum + (it.qty || 0), 0);
+  const summaryKey = getSummaryMessageKey(items.length, totalUnits);
+
   return (
-    <div className="tw-flex tw-max-h-full tw-min-h-0 tw-flex-col tw-space-y-2 tw-overflow-hidden">
-      <div className="tw-flex-shrink-0 tw-font-semibold">
-        You're transferring <span className="tw-font-bold">{items.length}</span>{" "}
-        {items.length === 1 ? "NFT" : "NFTs"} ·{" "}
-        <span className="tw-font-bold">
-          {items.reduce((sum, it) => sum + (it.qty || 0), 0)}
-        </span>{" "}
-        {items.reduce((sum, it) => sum + (it.qty || 0), 0) === 1
-          ? "item"
-          : "items"}
+    <div className="tw-flex tw-max-h-full tw-min-h-0 tw-flex-col tw-gap-3 tw-overflow-hidden">
+      <div className="tw-flex-shrink-0 tw-pb-1 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100">
+        {translate(locale, summaryKey, {
+          nftCount: formatInteger(locale, items.length),
+          itemCount: formatInteger(locale, totalUnits),
+        })}
       </div>
       <ul
         ref={leftListRef}
@@ -127,7 +177,7 @@ function SelectedSummaryList({
           return (
             <li
               key={it.key}
-              className="tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-bg-white/10 tw-p-2"
+              className="tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-bg-iron-900 tw-p-2.5 tw-ring-1 tw-ring-inset tw-ring-white/5"
             >
               {it.thumbUrl ? (
                 <div className="tw-relative tw-h-10 tw-w-10 tw-overflow-hidden tw-rounded-md tw-bg-white/10">
@@ -151,7 +201,9 @@ function SelectedSummaryList({
                   {collection} #{tokenId}
                 </div>
               </div>
-              <div className="tw-text-xs tw-font-medium">x{it.qty}</div>
+              <div className="tw-text-xs tw-font-medium">
+                x{formatInteger(locale, it.qty)}
+              </div>
             </li>
           );
         })}
@@ -159,7 +211,7 @@ function SelectedSummaryList({
       {leftHasOverflow && (
         <div className="tw-flex-shrink-0 tw-text-center tw-text-xs tw-opacity-75">
           <FontAwesomeIcon icon={leftAtEnd ? faAnglesUp : faAnglesDown} />{" "}
-          Scroll for more
+          {translate(locale, "transfer.modal.scrollForMore")}
         </div>
       )}
     </div>
@@ -169,29 +221,27 @@ function SelectedSummaryList({
 function TxStatusList({
   txs,
   publicClient,
+  locale,
 }: {
   readonly txs: TxEntry[];
   readonly publicClient: PublicClient | undefined;
+  readonly locale: SupportedLocale;
 }) {
   const explorer = publicClient?.chain?.blockExplorers?.default.url;
 
-  const getBgColor = (state: TxState) => {
+  const getStatusClasses = (state: TxState) => {
     switch (state) {
       case "awaiting_approval":
-        return "#406AFE";
+        return "tw-bg-primary-500 tw-text-white";
       case "submitted":
-        return "#a1e1ff";
+        return "tw-bg-primary-300 tw-text-black";
       case "error":
-        return "#ffcccc";
+        return "tw-bg-error tw-text-black";
       case "success":
-        return "#ccffcc";
+        return "tw-bg-success tw-text-black";
       default:
-        return "rgba(255, 255, 255, 0.9)";
+        return "tw-bg-iron-100 tw-text-black";
     }
-  };
-  const getTextColor = (state: TxState) => {
-    if (state === "awaiting_approval") return "#fff";
-    return "#000";
   };
 
   const txLink = (hash: string) => {
@@ -205,7 +255,7 @@ function TxStatusList({
         size="xs"
         className="tw-ml-2"
       >
-        View Tx
+        {translate(locale, "transfer.modal.viewTransaction")}
       </ButtonLink>
     );
   };
@@ -215,38 +265,51 @@ function TxStatusList({
       {txs.map((t, index) => (
         <div
           key={t.id}
-          className="tw-rounded-lg tw-p-4"
-          style={{
-            backgroundColor: getBgColor(t.state),
-            color: getTextColor(t.state),
-          }}
+          className={`tw-rounded-lg tw-p-4 ${getStatusClasses(t.state)}`}
         >
           <div className="tw-font-medium">
-            {index + 1}/ {t.label}
+            {translate(locale, "transfer.modal.transactionPosition", {
+              position: formatInteger(locale, index + 1),
+              label: t.label,
+            })}
           </div>
           <div className="tw-text-xs tw-opacity-60">
-            Originator: {t.originKey}
+            {translate(locale, "transfer.modal.originator", {
+              originator: t.originKey,
+            })}
           </div>
           <div className="tw-mt-2 tw-text-sm">
-            {t.state === "pending" && <span>Pending</span>}
+            {t.state === "pending" && (
+              <span>{translate(locale, "transfer.modal.status.pending")}</span>
+            )}
             {t.state === "awaiting_approval" && (
-              <span>Approve in your wallet</span>
+              <span>
+                {translate(locale, "transfer.modal.status.awaitingApproval")}
+              </span>
             )}
             {t.state === "error" && (
               <span>
-                Error: {t.error || "Transaction failed"}
+                {translate(locale, "transfer.modal.status.error", {
+                  message:
+                    typeof t.error === "string" && t.error.length > 0
+                      ? t.error
+                      : translate(
+                          locale,
+                          "transfer.modal.status.failedFallback"
+                        ),
+                })}
                 {t.hash && txLink(t.hash)}
               </span>
             )}
             {t.state === "submitted" && (
               <span>
-                Submitted — waiting for confirmation
+                {translate(locale, "transfer.modal.status.submitted")}
                 {t.hash && txLink(t.hash)}
               </span>
             )}
             {t.state === "success" && (
               <span>
-                Successful
+                {translate(locale, "transfer.modal.status.success")}
                 {t.hash && txLink(t.hash)}
               </span>
             )}
@@ -261,10 +324,12 @@ export function HeaderRight({
   flow,
   trxPending,
   onClose,
+  locale,
 }: {
   readonly flow: FlowState;
   readonly trxPending: boolean;
   readonly onClose: () => void;
+  readonly locale: SupportedLocale;
 }) {
   return (
     <div className="tw-flex tw-items-center tw-gap-3">
@@ -272,10 +337,10 @@ export function HeaderRight({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close"
-          className="tw-flex tw-items-center tw-justify-center tw-border-none tw-bg-transparent tw-p-0"
+          aria-label={translate(locale, "transfer.modal.closeAriaLabel")}
+          className="tw-inline-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-p-0 tw-text-iron-300 tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/10 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
         >
-          <FontAwesomeIcon icon={faXmarkCircle} className="tw-size-6" />
+          <FontAwesomeIcon icon={faXmark} className="tw-size-4" />
         </button>
       )}
     </div>
@@ -289,6 +354,7 @@ export function FooterActions({
   onConfirm,
   onClose,
   txs,
+  locale,
 }: {
   readonly flow: FlowState;
   readonly canConfirm: boolean;
@@ -296,6 +362,7 @@ export function FooterActions({
   readonly onConfirm: () => void;
   readonly onClose: () => void;
   readonly txs: TxEntry[];
+  readonly locale: SupportedLocale;
 }) {
   if (flow === "review") {
     return (
@@ -306,7 +373,7 @@ export function FooterActions({
           variant="secondary"
           size="md"
         >
-          Cancel
+          {translate(locale, "transfer.modal.cancel")}
         </Button>
         <Button
           type="button"
@@ -315,7 +382,7 @@ export function FooterActions({
           variant="primary"
           size="md"
         >
-          Transfer
+          {translate(locale, "transfer.modal.transfer")}
         </Button>
       </div>
     );
@@ -330,7 +397,7 @@ export function FooterActions({
         variant="secondary"
         size="md"
       >
-        Processing…
+        {translate(locale, "transfer.modal.processing")}
       </Button>
     );
   }
@@ -342,7 +409,7 @@ export function FooterActions({
       variant="primary"
       size="md"
     >
-      Close
+      {translate(locale, "common.close")}
     </Button>
   );
 }
@@ -360,6 +427,7 @@ export function BodyByFlow({
   selectedWallet,
   publicClient,
   txs,
+  locale,
 }: {
   readonly flow: FlowState;
   readonly open: boolean;
@@ -378,6 +446,7 @@ export function BodyByFlow({
   readonly selectedWallet: string | null;
   readonly publicClient: PublicClient | undefined;
   readonly txs: TxEntry[];
+  readonly locale: SupportedLocale;
 }) {
   if (flow === "submission") {
     const anyPending = anyTxsPending(txs);
@@ -386,25 +455,29 @@ export function BodyByFlow({
       <div className="tw-flex-1 tw-space-y-4 tw-overflow-auto tw-p-4 sm:tw-p-6">
         <div className="tw-flex tw-items-center tw-gap-2 tw-text-xs tw-opacity-80 sm:tw-text-sm">
           <span>
-            {anyPending
-              ? "Follow the prompts in your wallet and keep this tab open."
-              : "All transactions have been completed. You can close this window now."}
+            {translate(
+              locale,
+              anyPending
+                ? "transfer.modal.submission.pending"
+                : "transfer.modal.submission.complete"
+            )}
           </span>
         </div>
 
-        <TxStatusList txs={txs} publicClient={publicClient} />
+        <TxStatusList txs={txs} publicClient={publicClient} locale={locale} />
       </div>
     );
   }
 
   return (
-    <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-6 tw-overflow-hidden tw-px-4 tw-py-2 lg:tw-grid lg:tw-grid-cols-2">
+    <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-6 tw-overflow-hidden tw-p-4 sm:tw-p-6 lg:tw-grid lg:tw-grid-cols-2">
       <div className="tw-max-h-[50%] tw-min-h-0 lg:tw-max-h-none">
         <SelectedSummaryList
           items={items}
           leftListRef={leftListRef}
           leftHasOverflow={leftHasOverflow}
           leftAtEnd={leftAtEnd}
+          locale={locale}
         />
       </div>
       <RecipientSelector
@@ -413,6 +486,7 @@ export function BodyByFlow({
         selectedWallet={selectedWallet}
         onProfileSelect={setSelectedProfile}
         onWalletSelect={setSelectedWallet}
+        locale={locale}
       />
     </div>
   );

@@ -2,9 +2,14 @@ import { EN_GB_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-to
 import { EN_GB_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { EN_GB_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES as EN_GB_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
+import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const EN_GB_MESSAGES = {
+  "linkPreview.twitter.kind.article": "Article",
+  "linkPreview.twitter.kind.post": "Post",
+  "linkPreview.twitter.article.provider": "Article on X",
+  "linkPreview.twitter.article.read": "Read article: {title}",
   "media.video.captions": "Captions",
   "media.video.download": "Download media",
   "media.video.downloading": "Downloading media",
@@ -53,6 +58,36 @@ export const EN_GB_MESSAGES = {
   "linkPreview.github.fact.mime": "MIME",
   "linkPreview.github.fact.type": "Type",
   "linkPreview.github.fileKind": "{kind} file",
+  "linkPreview.etherscan.provider": "Etherscan",
+  "linkPreview.etherscan.previewLabel": "Etherscan {kind} preview on {network}",
+  "linkPreview.etherscan.open": "Open on Etherscan",
+  "linkPreview.etherscan.copy": "Copy {kind}",
+  "linkPreview.etherscan.copied": "{kind} copied",
+  "linkPreview.etherscan.copyFailed": "{kind} could not be copied",
+  "linkPreview.etherscan.retry": "Retry",
+  "linkPreview.etherscan.loading": "Loading Etherscan preview",
+  "linkPreview.etherscan.partial": "Some live details are unavailable",
+  "linkPreview.etherscan.liveUnavailable": "Live data unavailable",
+  "linkPreview.etherscan.legacy":
+    "Legacy network — live data is unavailable for this archived explorer.",
+  "linkPreview.etherscan.status.success": "Successful",
+  "linkPreview.etherscan.status.pending": "Pending",
+  "linkPreview.etherscan.status.reverted": "Reverted",
+  "linkPreview.etherscan.status.finalized": "Finalised",
+  "linkPreview.etherscan.status.proposed": "Proposed",
+  "linkPreview.etherscan.status.future": "Future block",
+  "linkPreview.etherscan.status.unknown": "Status unavailable",
+  "linkPreview.etherscan.action.nativeTransfer": "{value} ETH sent",
+  "linkPreview.etherscan.action.tokenTransfer": "Token transfer",
+  "linkPreview.etherscan.action.contractCreation": "Contract created",
+  "linkPreview.etherscan.action.contractInteraction": "Contract interaction",
+  "linkPreview.etherscan.action.transaction": "Ethereum transaction",
+  "linkPreview.etherscan.action.compound":
+    "Compound {action}: {amount} {token}",
+  "linkPreview.etherscan.description.tool":
+    "A read-only link to an Etherscan tool. 6529 does not submit its form.",
+  "linkPreview.etherscan.description.unknown":
+    "An Etherscan page. Open it to inspect the full route.",
   "profileCms.block.audioUnavailable": "Audio unavailable",
   "profileCms.block.collectionFallback": "Collection",
   "profileCms.block.galleryUnavailable": "Gallery unavailable",
@@ -357,6 +392,7 @@ export const EN_GB_MESSAGES = {
   ...EN_GB_NEW_VERSION_TOAST_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel": "Wave chat file upload area",
   "waves.loadingStatus": "Loading waves",
+  "waves.gifPicker.open": "Add GIF",
   "waves.gifPicker.dialogTitle": "GIF search",
   "waves.gifPicker.searchPlaceholder": "Search GIFs",
   "waves.gifPicker.noResults": "No GIFs found.",
@@ -397,4 +433,5 @@ export const EN_GB_MESSAGES = {
   "theMemes.filters.season.label": "Season",
   "theMemes.filters.season.all": "All Seasons",
   "theMemes.filters.season.allForYear": "All Year {year}",
+  ...TRANSFER_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;

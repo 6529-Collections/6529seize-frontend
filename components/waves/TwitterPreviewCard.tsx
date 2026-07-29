@@ -6,9 +6,12 @@ import { useMemo, useState, type MouseEvent, type ReactNode } from "react";
 import Button from "@/components/utils/button/Button";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import XIcon from "@/components/user/utils/icons/XIcon";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import type { TweetPreview, TweetPreviewMedia } from "@/lib/twitter";
 import { parseTweetUrl } from "@/lib/twitter/url";
 import { useTwitterPreview } from "@/hooks/useTwitterPreview";
+import { TwitterPreviewArticle } from "./twitter-preview/TwitterPreviewArticle";
 import {
   TweetMediaGridVideo,
   TweetVideo,
@@ -361,10 +364,12 @@ function TweetHeader({
 
 function TweetKicker({
   href,
+  kindLabel,
   timestamp,
   xPostPath,
 }: {
   readonly href: string;
+  readonly kindLabel: string;
   readonly timestamp: string | undefined;
   readonly xPostPath: string;
 }) {
@@ -374,7 +379,7 @@ function TweetKicker({
         X
       </span>
       <span className="tw-inline-flex tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-sky-400/30 tw-bg-sky-400/10 tw-px-2 tw-py-1 tw-text-[11px] tw-font-semibold tw-leading-none tw-text-sky-100">
-        Post
+        {kindLabel}
       </span>
       <Link
         href={href}
@@ -391,6 +396,7 @@ function TweetKicker({
 
 function TweetBodyText({
   authorName,
+  hasArticle,
   href,
   replyToHandle,
   text,
@@ -399,6 +405,7 @@ function TweetBodyText({
   readonly href: string;
   readonly replyToHandle: string | undefined;
   readonly text: string | undefined;
+  readonly hasArticle: boolean;
 }) {
   if (text) {
     return (
@@ -413,6 +420,10 @@ function TweetBodyText({
         </p>
       </div>
     );
+  }
+
+  if (hasArticle) {
+    return null;
   }
 
   return (
@@ -639,6 +650,7 @@ export default function TwitterPreviewCard({
   tweetId,
 }: TwitterPreviewCardProps) {
   const [copied, setCopied] = useState(false);
+  const locale = useBrowserLocale();
   const { data: twitterPreview, isLoading } = useTwitterPreview({
     href,
     tweetId,
@@ -703,7 +715,17 @@ export default function TwitterPreviewCard({
         className="tw-absolute tw-inset-0 tw-z-0 tw-rounded-lg"
       />
       <div className="tw-pointer-events-none tw-relative tw-z-10 tw-flex tw-flex-col tw-gap-y-3 tw-p-3 tw-pl-4 sm:tw-p-4 sm:tw-pl-5 [&_a]:tw-pointer-events-auto [&_button]:tw-pointer-events-auto [&_video]:tw-pointer-events-auto">
-        <TweetKicker href={href} timestamp={timestamp} xPostPath={xPostPath} />
+        <TweetKicker
+          href={href}
+          kindLabel={t(
+            locale,
+            preview.article
+              ? "linkPreview.twitter.kind.article"
+              : "linkPreview.twitter.kind.post"
+          )}
+          timestamp={timestamp}
+          xPostPath={xPostPath}
+        />
 
         <TweetHeader
           authorHref={authorHref}
@@ -716,7 +738,18 @@ export default function TwitterPreviewCard({
           href={href}
           replyToHandle={preview.replyToHandle}
           text={preview.text}
+          hasArticle={preview.article !== undefined}
         />
+
+        {preview.article && (
+          <TwitterPreviewArticle
+            article={preview.article}
+            articleOnXLabel={t(locale, "linkPreview.twitter.article.provider")}
+            readArticleLabel={t(locale, "linkPreview.twitter.article.read", {
+              title: preview.article.title,
+            })}
+          />
+        )}
 
         <TweetMedia authorName={authorName} href={href} preview={preview} />
 

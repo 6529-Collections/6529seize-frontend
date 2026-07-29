@@ -3,10 +3,15 @@ import { ES_ES_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-to
 import { ES_ES_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { ES_ES_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import { ES_ES_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
+import { ES_ES_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import stormComposerEsMessages from "@/i18n/messages/stormComposer.es-ES.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const ES_ES_MESSAGES = {
+  "linkPreview.twitter.kind.article": "Artículo",
+  "linkPreview.twitter.kind.post": "Publicación",
+  "linkPreview.twitter.article.provider": "Artículo en X",
+  "linkPreview.twitter.article.read": "Leer artículo: {title}",
   "waves.drop.actions.copyText": "Copiar texto",
   "waves.drop.actions.copyLink": "Copiar enlace",
   "waves.drop.actions.copied": "Copiado!",
@@ -59,6 +64,39 @@ export const ES_ES_MESSAGES = {
   "linkPreview.github.fact.mime": "MIME",
   "linkPreview.github.fact.type": "Tipo",
   "linkPreview.github.fileKind": "Archivo {kind}",
+  "linkPreview.etherscan.provider": "Etherscan",
+  "linkPreview.etherscan.previewLabel":
+    "Vista previa de {kind} de Etherscan en {network}",
+  "linkPreview.etherscan.open": "Abrir en Etherscan",
+  "linkPreview.etherscan.copy": "Copiar {kind}",
+  "linkPreview.etherscan.copied": "{kind} copiado",
+  "linkPreview.etherscan.copyFailed": "No se pudo copiar {kind}",
+  "linkPreview.etherscan.retry": "Reintentar",
+  "linkPreview.etherscan.loading": "Cargando vista previa de Etherscan",
+  "linkPreview.etherscan.partial":
+    "Algunos datos en directo no están disponibles",
+  "linkPreview.etherscan.liveUnavailable": "Datos en directo no disponibles",
+  "linkPreview.etherscan.legacy":
+    "Red histórica: los datos en directo no están disponibles para este explorador archivado.",
+  "linkPreview.etherscan.status.success": "Correcta",
+  "linkPreview.etherscan.status.pending": "Pendiente",
+  "linkPreview.etherscan.status.reverted": "Revertida",
+  "linkPreview.etherscan.status.finalized": "Finalizado",
+  "linkPreview.etherscan.status.proposed": "Propuesto",
+  "linkPreview.etherscan.status.future": "Bloque futuro",
+  "linkPreview.etherscan.status.unknown": "Estado no disponible",
+  "linkPreview.etherscan.action.nativeTransfer": "{value} ETH enviados",
+  "linkPreview.etherscan.action.tokenTransfer": "Transferencia de token",
+  "linkPreview.etherscan.action.contractCreation": "Contrato creado",
+  "linkPreview.etherscan.action.contractInteraction":
+    "Interacción con contrato",
+  "linkPreview.etherscan.action.transaction": "Transacción de Ethereum",
+  "linkPreview.etherscan.action.compound":
+    "Compound {action}: {amount} {token}",
+  "linkPreview.etherscan.description.tool":
+    "Enlace de solo lectura a una herramienta de Etherscan. 6529 no envía su formulario.",
+  "linkPreview.etherscan.description.unknown":
+    "Una página de Etherscan. Ábrela para consultar la ruta completa.",
   "profileCms.block.audioUnavailable": "Audio no disponible",
   "profileCms.block.collectionFallback": "Colección",
   "profileCms.block.galleryUnavailable": "Galería no disponible",
@@ -370,6 +408,7 @@ export const ES_ES_MESSAGES = {
     "Área de carga de archivos del chat de wave",
   ...stormComposerEsMessages,
   "waves.loadingStatus": "Cargando waves",
+  "waves.gifPicker.open": "Añadir GIF",
   "waves.gifPicker.dialogTitle": "Busqueda de GIF",
   "waves.gifPicker.searchPlaceholder": "Buscar GIF",
   "waves.gifPicker.noResults": "No se encontraron GIFs.",
@@ -460,4 +499,5 @@ export const ES_ES_MESSAGES = {
   "theMemes.volume.7Days": "7 días",
   "theMemes.volume.30Days": "30 días",
   "theMemes.volume.allTime": "Todo el tiempo",
+  ...ES_ES_TRANSFER_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;

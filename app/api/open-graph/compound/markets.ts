@@ -4,10 +4,8 @@ import {
   formatUnits,
   getAddress,
   isAddress,
-  isHex,
   zeroAddress,
   type Address,
-  type Hash,
 } from "viem";
 
 import { cTokenAbi, cometAbi, comptrollerAbi, priceOracleAbi } from "./abis";
@@ -44,16 +42,7 @@ export type PreviewPlan = {
 export type CompoundTarget =
   | { kind: "market"; version: "v2"; market: CompoundV2MarketConfig }
   | { kind: "market"; version: "v3"; market: CompoundV3MarketConfig }
-  | { kind: "account"; address: Address }
-  | { kind: "tx"; hash: Hash };
-
-const TX_HASH_LENGTH = 66;
-
-export function isPossibleTxHash(value: string): value is Hash {
-  return (
-    value.startsWith("0x") && value.length === TX_HASH_LENGTH && isHex(value)
-  );
-}
+  | { kind: "account"; address: Address };
 
 export function normalizeAddress(value: string): Address | null {
   if (!isAddress(value)) {

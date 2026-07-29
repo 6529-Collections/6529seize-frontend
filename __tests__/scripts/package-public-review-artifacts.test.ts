@@ -1,14 +1,20 @@
+jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
+
 import { spawnSync } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+import { assertSolidityReferenceIndex } from "@/lib/public-review/solidityReferenceValidation.server";
+import type { SolidityReferenceReviewIdentity } from "@/lib/public-review/solidityReferenceTypes";
+
 const {
   assertProfileBundle,
   assertZipListing,
   assertZipListingSafety,
   expectedBundleEntries,
+  getPublishedReviewIds,
   parseCli,
   parseZipListing,
   prepareProfileBundle,
@@ -24,6 +30,7 @@ const {
     input: ArtifactInput & { readonly listingFile: string }
   ): readonly ReviewEvidence[];
   expectedBundleEntries(bundleRoot: string): readonly string[];
+  getPublishedReviewIds(repoRoot: string): ReadonlySet<string>;
   parseCli(argv: readonly string[]): {
     readonly command: "prepare" | "assert-listing" | "assert-zip";
     readonly profile: ArtifactProfile;
@@ -60,8 +67,14 @@ interface ReviewEvidence {
 
 const REVIEW_ID = "6529-stream";
 const REVIEW_VERSION = "2026-07-26.1";
+const HISTORICAL_VERSION = "2026-07-25.1";
+const OLDER_HISTORICAL_VERSION = "2026-07-24.1";
 const SOURCE_COMMIT = "b1598aff93693c6fb8610f7a7a8d2fc3e4df8c1c";
 const SOURCE_TREE = "c7075288c27601727f4ab7ef3be6c52e887ca663";
+const HISTORICAL_COMMIT = "816d85ca277b77cf306e6f919fbc6fbe89f0f43a";
+const HISTORICAL_TREE = "a4de94d6df63539e6737c17a4de41f17cc76052f";
+const OLDER_HISTORICAL_COMMIT = "7bc4ba1176a85bd8227c77f04cb329bc88f27b92";
+const OLDER_HISTORICAL_TREE = "3587b159de93c7ac586e99844104d35da32f3c66";
 const SOURCE_REPOSITORY = "6529-Collections/6529Stream";
 const SOURCE_PATH = "smart-contracts/StreamCore.sol";
 const DEFINITION_ID = `${SOURCE_PATH}:StreamCore`;
@@ -100,7 +113,7 @@ function writeJson(root: string, relativePath: string, value: unknown): string {
   return writeFile(root, relativePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
-function createFixture(): {
+function createFixture(lifecycleState = "PUBLIC_REVIEW"): {
   readonly repoRoot: string;
   readonly bundleRoot: string;
   readonly sourceFile: string;
@@ -114,6 +127,10 @@ function createFixture(): {
   const bundleRoot = path.join(repoRoot, "artifact", "bundle");
   fs.mkdirSync(bundleRoot, { recursive: true });
   writeFile(bundleRoot, "server.js", "console.log('fixture');\n");
+  writeJson(bundleRoot, ".next/PUBLIC_RUNTIME.json", {
+    BASE_ENDPOINT: "https://6529.io",
+    GIPHY_API_KEY: "test-giphy-client-key",
+  });
   writeFile(repoRoot, "public/favicon.svg", "<svg />\n");
   writeFile(repoRoot, "public/agents.md", "staging agent corpus\n");
 
@@ -141,6 +158,12 @@ function createFixture(): {
     `config/public-reviews/${REVIEW_ID}.reference.json`,
     configText
   );
+  writeJson(repoRoot, `config/public-reviews/${REVIEW_ID}.publication.json`, {
+    schemaVersion: "public-review.publication.v2",
+    reviewId: REVIEW_ID,
+    lifecycleState,
+    versions: [{ version: REVIEW_VERSION, lifecycleState }],
+  });
 
   const sourceText = "contract StreamCore {}\n";
   const sourceFile = writeFile(
@@ -250,6 +273,287 @@ function createFixture(): {
   };
 }
 
+function addHistoricalVersion({
+  fixture,
+  activeLifecycleState,
+  historicalLifecycleState,
+  topLevelLifecycleState = activeLifecycleState,
+}: {
+  readonly fixture: ReturnType<typeof createFixture>;
+  readonly activeLifecycleState: string;
+  readonly historicalLifecycleState: string;
+  readonly topLevelLifecycleState?: string;
+}): {
+  readonly historicalBundleFile: string;
+  readonly historicalEditorialManifest: string;
+  readonly historicalSourceFile: string;
+} {
+  const configPath = path.join(
+    fixture.repoRoot,
+    `config/public-reviews/${REVIEW_ID}.reference.json`
+  );
+  const config = JSON.parse(fs.readFileSync(configPath, "utf8")) as {
+    output: { retainedVersions: string[] };
+  };
+  config.output.retainedVersions = [HISTORICAL_VERSION, REVIEW_VERSION];
+  const configText = `${JSON.stringify(config, null, 2)}\n`;
+  fs.writeFileSync(configPath, configText);
+  writeJson(
+    fixture.repoRoot,
+    `config/public-reviews/${REVIEW_ID}.publication.json`,
+    {
+      schemaVersion: "public-review.publication.v2",
+      reviewId: REVIEW_ID,
+      lifecycleState: topLevelLifecycleState,
+      versions: [
+        {
+          version: HISTORICAL_VERSION,
+          lifecycleState: historicalLifecycleState,
+        },
+        { version: REVIEW_VERSION, lifecycleState: activeLifecycleState },
+      ],
+    }
+  );
+
+  const activeBundle = JSON.parse(fs.readFileSync(fixture.bundleFile, "utf8"));
+  activeBundle.generator.configSha256 = sha256Urn(normalizeLf(configText));
+  activeBundle.generator.outputSha256 = null;
+  activeBundle.generator.outputSha256 = bundleOutputSha256(activeBundle);
+  fs.writeFileSync(
+    fixture.bundleFile,
+    `${JSON.stringify(activeBundle, null, 2)}\n`
+  );
+
+  const historicalSourceText = "contract StreamCore { uint256 legacy; }\n";
+  const historicalSourceFile = writeFile(
+    fixture.repoRoot,
+    `public/review-data/${REVIEW_ID}/versions/${HISTORICAL_VERSION}/sources/${SOURCE_PATH}`,
+    historicalSourceText
+  );
+  const historicalShardFile = path.join(
+    fixture.repoRoot,
+    `public/review-data/${REVIEW_ID}/versions/${HISTORICAL_VERSION}/definitions/${DEFINITION_KEY}.json`
+  );
+  fs.mkdirSync(path.dirname(historicalShardFile), { recursive: true });
+  fs.copyFileSync(fixture.shardFile, historicalShardFile);
+  const historicalShardText = fs.readFileSync(historicalShardFile, "utf8");
+
+  const historicalBundle = {
+    ...activeBundle,
+    reviewVersion: HISTORICAL_VERSION,
+    source: {
+      ...activeBundle.source,
+      commit: HISTORICAL_COMMIT,
+      tree: HISTORICAL_TREE,
+    },
+    generator: {
+      ...activeBundle.generator,
+      configSha256: sha256Urn("historical config"),
+      sourceSha256: sha256Urn("historical generator"),
+      outputSha256: null as string | null,
+    },
+    files: [
+      {
+        ...activeBundle.files[0],
+        publicPath: `/review-data/${REVIEW_ID}/versions/${HISTORICAL_VERSION}/sources/${SOURCE_PATH}`,
+        sha256: sha256Urn(historicalSourceText),
+        byteLength: Buffer.byteLength(historicalSourceText),
+      },
+    ],
+    definitionIndex: [
+      {
+        ...activeBundle.definitionIndex[0],
+        shardPath: `/review-data/${REVIEW_ID}/versions/${HISTORICAL_VERSION}/definitions/${DEFINITION_KEY}.json`,
+        shardSha256: sha256Urn(historicalShardText),
+      },
+    ],
+  };
+  historicalBundle.generator.outputSha256 =
+    bundleOutputSha256(historicalBundle);
+  const historicalBundleFile = writeJson(
+    fixture.repoRoot,
+    `public/review-data/${REVIEW_ID}/versions/${HISTORICAL_VERSION}/reference-manifest.json`,
+    historicalBundle
+  );
+  writeJson(fixture.repoRoot, `public/review-data/${REVIEW_ID}/index.json`, {
+    schemaVersion: "public-review.solidity-reference-index.v1",
+    reviewId: REVIEW_ID,
+    activeVersion: REVIEW_VERSION,
+    versions: [
+      {
+        version: HISTORICAL_VERSION,
+        commit: HISTORICAL_COMMIT,
+        tree: HISTORICAL_TREE,
+        bundlePath: `/review-data/${REVIEW_ID}/versions/${HISTORICAL_VERSION}/reference-manifest.json`,
+        bundleSha256: historicalBundle.generator.outputSha256,
+      },
+      {
+        version: REVIEW_VERSION,
+        commit: SOURCE_COMMIT,
+        tree: SOURCE_TREE,
+        bundlePath: `/review-data/${REVIEW_ID}/versions/${REVIEW_VERSION}/reference-manifest.json`,
+        bundleSha256: activeBundle.generator.outputSha256,
+      },
+    ],
+  });
+
+  writeFile(
+    fixture.repoRoot,
+    `content/public-reviews/${REVIEW_ID}/versions/${HISTORICAL_VERSION}/editorial/overview.md`,
+    "# Overview\n\nHistorical fixture editorial content.\n"
+  );
+  const historicalEditorialManifest = writeJson(
+    fixture.repoRoot,
+    `content/public-reviews/${REVIEW_ID}/versions/${HISTORICAL_VERSION}/editorial/manifest.json`,
+    {
+      schema_version: 1,
+      review_id: REVIEW_ID,
+      review_version: HISTORICAL_VERSION,
+      locale: "en-US",
+      source_repository: `https://github.com/${SOURCE_REPOSITORY}`,
+      source_commit: HISTORICAL_COMMIT,
+      pages: [{ id: "overview", title: "Overview", file: "overview.md" }],
+    }
+  );
+
+  return {
+    historicalBundleFile,
+    historicalEditorialManifest,
+    historicalSourceFile,
+  };
+}
+
+function addOlderPublicVersion(
+  fixture: ReturnType<typeof createFixture>
+): void {
+  const configPath = path.join(
+    fixture.repoRoot,
+    `config/public-reviews/${REVIEW_ID}.reference.json`
+  );
+  const config = JSON.parse(fs.readFileSync(configPath, "utf8")) as {
+    output: { retainedVersions: string[] };
+  };
+  config.output.retainedVersions = [
+    OLDER_HISTORICAL_VERSION,
+    HISTORICAL_VERSION,
+    REVIEW_VERSION,
+  ];
+  const configText = `${JSON.stringify(config, null, 2)}\n`;
+  fs.writeFileSync(configPath, configText);
+
+  const publicationPath = path.join(
+    fixture.repoRoot,
+    `config/public-reviews/${REVIEW_ID}.publication.json`
+  );
+  const publication = JSON.parse(fs.readFileSync(publicationPath, "utf8")) as {
+    versions: { version: string; lifecycleState: string }[];
+  };
+  publication.versions.unshift({
+    version: OLDER_HISTORICAL_VERSION,
+    lifecycleState: "REVIEW_CLOSED",
+  });
+  fs.writeFileSync(
+    publicationPath,
+    `${JSON.stringify(publication, null, 2)}\n`
+  );
+
+  const activeBundle = JSON.parse(fs.readFileSync(fixture.bundleFile, "utf8"));
+  activeBundle.generator.configSha256 = sha256Urn(normalizeLf(configText));
+  activeBundle.generator.outputSha256 = null;
+  activeBundle.generator.outputSha256 = bundleOutputSha256(activeBundle);
+  fs.writeFileSync(
+    fixture.bundleFile,
+    `${JSON.stringify(activeBundle, null, 2)}\n`
+  );
+
+  const historicalVersionRoot = path.join(
+    fixture.repoRoot,
+    `public/review-data/${REVIEW_ID}/versions/${HISTORICAL_VERSION}`
+  );
+  const olderVersionRoot = path.join(
+    fixture.repoRoot,
+    `public/review-data/${REVIEW_ID}/versions/${OLDER_HISTORICAL_VERSION}`
+  );
+  fs.cpSync(historicalVersionRoot, olderVersionRoot, { recursive: true });
+  const olderBundlePath = path.join(
+    olderVersionRoot,
+    "reference-manifest.json"
+  );
+  const olderBundle = JSON.parse(fs.readFileSync(olderBundlePath, "utf8"));
+  olderBundle.reviewVersion = OLDER_HISTORICAL_VERSION;
+  olderBundle.source.commit = OLDER_HISTORICAL_COMMIT;
+  olderBundle.source.tree = OLDER_HISTORICAL_TREE;
+  olderBundle.generator.configSha256 = sha256Urn("older historical config");
+  olderBundle.generator.sourceSha256 = sha256Urn("older historical generator");
+  olderBundle.generator.outputSha256 = null;
+  olderBundle.files[0].publicPath =
+    `/review-data/${REVIEW_ID}/versions/${OLDER_HISTORICAL_VERSION}` +
+    `/sources/${SOURCE_PATH}`;
+  olderBundle.definitionIndex[0].shardPath =
+    `/review-data/${REVIEW_ID}/versions/${OLDER_HISTORICAL_VERSION}` +
+    `/definitions/${DEFINITION_KEY}.json`;
+  olderBundle.generator.outputSha256 = bundleOutputSha256(olderBundle);
+  fs.writeFileSync(
+    olderBundlePath,
+    `${JSON.stringify(olderBundle, null, 2)}\n`
+  );
+
+  const historicalEditorialRoot = path.join(
+    fixture.repoRoot,
+    `content/public-reviews/${REVIEW_ID}/versions/${HISTORICAL_VERSION}`
+  );
+  const olderEditorialRoot = path.join(
+    fixture.repoRoot,
+    `content/public-reviews/${REVIEW_ID}/versions/${OLDER_HISTORICAL_VERSION}`
+  );
+  fs.cpSync(historicalEditorialRoot, olderEditorialRoot, { recursive: true });
+  const olderEditorialManifestPath = path.join(
+    olderEditorialRoot,
+    "editorial",
+    "manifest.json"
+  );
+  const olderEditorialManifest = JSON.parse(
+    fs.readFileSync(olderEditorialManifestPath, "utf8")
+  );
+  olderEditorialManifest.review_version = OLDER_HISTORICAL_VERSION;
+  olderEditorialManifest.source_commit = OLDER_HISTORICAL_COMMIT;
+  fs.writeFileSync(
+    olderEditorialManifestPath,
+    `${JSON.stringify(olderEditorialManifest, null, 2)}\n`
+  );
+
+  const indexPath = path.join(
+    fixture.repoRoot,
+    `public/review-data/${REVIEW_ID}/index.json`
+  );
+  const index = JSON.parse(fs.readFileSync(indexPath, "utf8")) as {
+    versions: {
+      version: string;
+      commit: string;
+      tree: string;
+      bundlePath: string;
+      bundleSha256: string;
+    }[];
+  };
+  const activeEntry = index.versions.find(
+    ({ version }) => version === REVIEW_VERSION
+  );
+  if (!activeEntry) {
+    throw new Error("Fixture active review index entry is missing.");
+  }
+  activeEntry.bundleSha256 = activeBundle.generator.outputSha256;
+  index.versions.unshift({
+    version: OLDER_HISTORICAL_VERSION,
+    commit: OLDER_HISTORICAL_COMMIT,
+    tree: OLDER_HISTORICAL_TREE,
+    bundlePath:
+      `/review-data/${REVIEW_ID}/versions/${OLDER_HISTORICAL_VERSION}` +
+      "/reference-manifest.json",
+    bundleSha256: olderBundle.generator.outputSha256,
+  });
+  fs.writeFileSync(indexPath, `${JSON.stringify(index, null, 2)}\n`);
+}
+
 function mirrorTamper(sourcePath: string, repoRoot: string, value: string) {
   fs.writeFileSync(sourcePath, value);
   const relativePath = path.relative(repoRoot, sourcePath);
@@ -306,6 +610,112 @@ describe("profile-aware public-review artifact packaging", () => {
     );
   });
 
+  it("replaces a traced standalone public tree with the exact production profile", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    writeFile(
+      fixture.bundleRoot,
+      "public/review-data/6529-stream/leaked.json",
+      "{}\n"
+    );
+    writeFile(
+      fixture.bundleRoot,
+      "public/stale-standalone-asset.txt",
+      "stale\n"
+    );
+
+    expect(
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "production",
+      })
+    ).toEqual([]);
+    expect(
+      fs.existsSync(path.join(fixture.bundleRoot, "public/review-data"))
+    ).toBe(false);
+    expect(
+      fs.existsSync(
+        path.join(fixture.bundleRoot, "public/stale-standalone-asset.txt")
+      )
+    ).toBe(false);
+    expect(
+      fs.readFileSync(
+        path.join(fixture.bundleRoot, "public/favicon.svg"),
+        "utf8"
+      )
+    ).toBe("<svg />\n");
+  });
+
+  it("refuses to replace a symbolic-link standalone public destination", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    const externalPublic = path.join(fixture.repoRoot, "external-public");
+    writeFile(fixture.repoRoot, "external-public/keep.txt", "keep\n");
+    fs.symlinkSync(
+      externalPublic,
+      path.join(fixture.bundleRoot, "public"),
+      process.platform === "win32" ? "junction" : "dir"
+    );
+
+    expect(() =>
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "production",
+      })
+    ).toThrow("Refusing to replace symbolic-link destination");
+    expect(fs.readFileSync(path.join(externalPublic, "keep.txt"), "utf8")).toBe(
+      "keep\n"
+    );
+  });
+
+  it("replaces a traced standalone public tree with the exact staging profile", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    writeFile(
+      fixture.bundleRoot,
+      "public/review-data/unpublished-review/leaked.json",
+      "{}\n"
+    );
+    writeFile(
+      fixture.bundleRoot,
+      "public/stale-standalone-asset.txt",
+      "stale\n"
+    );
+
+    expect(
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "staging",
+      })
+    ).toEqual([
+      expect.objectContaining({
+        reviewId: REVIEW_ID,
+        reviewVersion: REVIEW_VERSION,
+      }),
+    ]);
+    expect(
+      fs.existsSync(
+        path.join(
+          fixture.bundleRoot,
+          `public/review-data/${REVIEW_ID}/versions/${REVIEW_VERSION}/reference-manifest.json`
+        )
+      )
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(fixture.bundleRoot, "public/review-data/unpublished-review")
+      )
+    ).toBe(false);
+    expect(
+      fs.existsSync(
+        path.join(fixture.bundleRoot, "public/stale-standalone-asset.txt")
+      )
+    ).toBe(false);
+  });
+
   it("fails closed when Next standalone tracing carries editorial content into production", () => {
     const fixture = createFixture();
     fixtureRoots.push(fixture.repoRoot);
@@ -322,6 +732,54 @@ describe("profile-aware public-review artifact packaging", () => {
         profile: "production",
       })
     ).toThrow("Production bundle contains public-review evidence");
+  });
+
+  it("rejects a production bundle built for a non-production endpoint", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    writeJson(fixture.bundleRoot, ".next/PUBLIC_RUNTIME.json", {
+      BASE_ENDPOINT: "http://localhost:3001",
+      GIPHY_API_KEY: "test-giphy-client-key",
+    });
+
+    expect(() =>
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "production",
+      })
+    ).toThrow("Production bundle BASE_ENDPOINT must equal https://6529.io.");
+  });
+
+  it("rejects a production bundle without GIPHY client configuration", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    writeJson(fixture.bundleRoot, ".next/PUBLIC_RUNTIME.json", {
+      BASE_ENDPOINT: "https://6529.io",
+      GIPHY_API_KEY: " ",
+    });
+
+    expect(() =>
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "production",
+      })
+    ).toThrow("Production bundle GIPHY_API_KEY must be configured.");
+  });
+
+  it("rejects a production bundle with missing runtime configuration", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    fs.rmSync(path.join(fixture.bundleRoot, ".next/PUBLIC_RUNTIME.json"));
+
+    expect(() =>
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "production",
+      })
+    ).toThrow("Production bundle is missing .next/PUBLIC_RUNTIME.json.");
   });
 
   it.each([
@@ -411,6 +869,320 @@ describe("profile-aware public-review artifact packaging", () => {
         "utf8"
       )
     ).toContain("Fixture editorial content");
+  });
+
+  it("omits draft routes' raw evidence from staging artifacts", () => {
+    const fixture = createFixture("DRAFT");
+    fixtureRoots.push(fixture.repoRoot);
+
+    expect(
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "staging",
+      })
+    ).toEqual([]);
+    expect(
+      fs.existsSync(path.join(fixture.bundleRoot, "public/review-data"))
+    ).toBe(false);
+    expect(
+      fs.existsSync(path.join(fixture.bundleRoot, "content/public-reviews"))
+    ).toBe(false);
+  });
+
+  it("keeps public history while omitting an active draft version", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    addHistoricalVersion({
+      fixture,
+      activeLifecycleState: "DRAFT",
+      historicalLifecycleState: "REVIEW_CLOSED",
+    });
+
+    expect(getPublishedReviewIds(fixture.repoRoot)).toEqual(new Set());
+    expect(
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "staging",
+      })
+    ).toEqual([
+      expect.objectContaining({
+        reviewId: REVIEW_ID,
+        reviewVersion: HISTORICAL_VERSION,
+        sourceCommit: HISTORICAL_COMMIT,
+      }),
+    ]);
+    expect(
+      fs.existsSync(
+        path.join(
+          fixture.bundleRoot,
+          `public/review-data/${REVIEW_ID}/versions/${HISTORICAL_VERSION}`
+        )
+      )
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(
+          fixture.bundleRoot,
+          `public/review-data/${REVIEW_ID}/versions/${REVIEW_VERSION}`
+        )
+      )
+    ).toBe(false);
+    expect(
+      fs.existsSync(
+        path.join(
+          fixture.bundleRoot,
+          `content/public-reviews/${REVIEW_ID}/versions/${REVIEW_VERSION}`
+        )
+      )
+    ).toBe(false);
+    const packagedIndex = JSON.parse(
+      fs.readFileSync(
+        path.join(
+          fixture.bundleRoot,
+          `public/review-data/${REVIEW_ID}/index.json`
+        ),
+        "utf8"
+      )
+    );
+    expect(packagedIndex.activeVersion).toBe(HISTORICAL_VERSION);
+    expect(
+      packagedIndex.versions.map(({ version }: { version: string }) => version)
+    ).toEqual([HISTORICAL_VERSION]);
+  });
+
+  it("keeps the prior public version active while preloading a new draft", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    addHistoricalVersion({
+      fixture,
+      activeLifecycleState: "DRAFT",
+      historicalLifecycleState: "PUBLIC_REVIEW",
+      topLevelLifecycleState: "PUBLIC_REVIEW",
+    });
+    addOlderPublicVersion(fixture);
+
+    expect(getPublishedReviewIds(fixture.repoRoot)).toEqual(
+      new Set([REVIEW_ID])
+    );
+    expect(
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "staging",
+      })
+    ).toEqual([
+      expect.objectContaining({
+        reviewId: REVIEW_ID,
+        reviewVersion: OLDER_HISTORICAL_VERSION,
+        sourceCommit: OLDER_HISTORICAL_COMMIT,
+      }),
+      expect.objectContaining({
+        reviewId: REVIEW_ID,
+        reviewVersion: HISTORICAL_VERSION,
+        sourceCommit: HISTORICAL_COMMIT,
+      }),
+    ]);
+    const packagedIndex = JSON.parse(
+      fs.readFileSync(
+        path.join(
+          fixture.bundleRoot,
+          `public/review-data/${REVIEW_ID}/index.json`
+        ),
+        "utf8"
+      )
+    );
+    expect(packagedIndex.activeVersion).toBe(HISTORICAL_VERSION);
+    expect(
+      packagedIndex.versions.map(({ version }: { version: string }) => version)
+    ).toEqual([OLDER_HISTORICAL_VERSION, HISTORICAL_VERSION]);
+    const referenceIdentity: SolidityReferenceReviewIdentity = {
+      activeSourceCommit: HISTORICAL_COMMIT,
+      activeVersion: HISTORICAL_VERSION,
+      availableVersions: [HISTORICAL_VERSION, OLDER_HISTORICAL_VERSION],
+      reviewId: REVIEW_ID,
+      sourceCommits: {
+        [OLDER_HISTORICAL_VERSION]: OLDER_HISTORICAL_COMMIT,
+        [HISTORICAL_VERSION]: HISTORICAL_COMMIT,
+        [REVIEW_VERSION]: SOURCE_COMMIT,
+      },
+      sourceIndexActiveVersion: REVIEW_VERSION,
+      sourceIndexAvailableVersions: [
+        OLDER_HISTORICAL_VERSION,
+        HISTORICAL_VERSION,
+        REVIEW_VERSION,
+      ],
+      sourceRepository: SOURCE_REPOSITORY,
+    };
+    expect(() =>
+      assertSolidityReferenceIndex(packagedIndex, referenceIdentity)
+    ).not.toThrow();
+    expect(
+      fs.existsSync(
+        path.join(
+          fixture.bundleRoot,
+          `public/review-data/${REVIEW_ID}/versions/${REVIEW_VERSION}`
+        )
+      )
+    ).toBe(false);
+  });
+
+  it("rejects a preloaded draft when the public fallback lifecycle drifts", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    addHistoricalVersion({
+      fixture,
+      activeLifecycleState: "DRAFT",
+      historicalLifecycleState: "REVIEW_CLOSED",
+      topLevelLifecycleState: "PUBLIC_REVIEW",
+    });
+
+    expect(() => getPublishedReviewIds(fixture.repoRoot)).toThrow(
+      "fallback publication lifecycle drifted"
+    );
+  });
+
+  it("omits a retained draft while packaging the public active version", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    addHistoricalVersion({
+      fixture,
+      activeLifecycleState: "PUBLIC_REVIEW",
+      historicalLifecycleState: "DRAFT",
+    });
+
+    expect(getPublishedReviewIds(fixture.repoRoot)).toEqual(
+      new Set([REVIEW_ID])
+    );
+    expect(
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "staging",
+      })
+    ).toEqual([
+      expect.objectContaining({
+        reviewVersion: REVIEW_VERSION,
+        sourceCommit: SOURCE_COMMIT,
+      }),
+    ]);
+    expect(
+      fs.existsSync(
+        path.join(
+          fixture.bundleRoot,
+          `public/review-data/${REVIEW_ID}/versions/${HISTORICAL_VERSION}`
+        )
+      )
+    ).toBe(false);
+    const packagedIndex = JSON.parse(
+      fs.readFileSync(
+        path.join(
+          fixture.bundleRoot,
+          `public/review-data/${REVIEW_ID}/index.json`
+        ),
+        "utf8"
+      )
+    );
+    expect(packagedIndex.activeVersion).toBe(REVIEW_VERSION);
+    expect(
+      packagedIndex.versions.map(({ version }: { version: string }) => version)
+    ).toEqual([REVIEW_VERSION]);
+  });
+
+  it("validates and reports every public version with historical provenance", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    addHistoricalVersion({
+      fixture,
+      activeLifecycleState: "PUBLIC_REVIEW",
+      historicalLifecycleState: "REVIEW_CLOSED",
+    });
+
+    expect(
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "staging",
+      })
+    ).toEqual([
+      expect.objectContaining({
+        reviewVersion: HISTORICAL_VERSION,
+        sourceCommit: HISTORICAL_COMMIT,
+        editorialSha256: expect.stringMatching(/^sha256:[0-9a-f]{64}$/),
+      }),
+      expect.objectContaining({
+        reviewVersion: REVIEW_VERSION,
+        sourceCommit: SOURCE_COMMIT,
+        editorialSha256: expect.stringMatching(/^sha256:[0-9a-f]{64}$/),
+      }),
+    ]);
+  });
+
+  it.each([
+    {
+      label: "source bytes",
+      tamper: (
+        _fixture: ReturnType<typeof createFixture>,
+        historical: ReturnType<typeof addHistoricalVersion>
+      ) =>
+        fs.writeFileSync(
+          historical.historicalSourceFile,
+          "contract StreamCore { uint256 tampered; }\n"
+        ),
+      message: "packaged source checksum drifted",
+    },
+    {
+      label: "editorial identity",
+      tamper: (
+        _fixture: ReturnType<typeof createFixture>,
+        historical: ReturnType<typeof addHistoricalVersion>
+      ) => {
+        const manifest = JSON.parse(
+          fs.readFileSync(historical.historicalEditorialManifest, "utf8")
+        );
+        manifest.source_commit = SOURCE_COMMIT;
+        fs.writeFileSync(
+          historical.historicalEditorialManifest,
+          `${JSON.stringify(manifest, null, 2)}\n`
+        );
+      },
+      message: "editorial manifest identity drifted",
+    },
+    {
+      label: "generator provenance",
+      tamper: (
+        _fixture: ReturnType<typeof createFixture>,
+        historical: ReturnType<typeof addHistoricalVersion>
+      ) => {
+        const bundle = JSON.parse(
+          fs.readFileSync(historical.historicalBundleFile, "utf8")
+        );
+        bundle.generator.configSha256 = "invalid";
+        fs.writeFileSync(
+          historical.historicalBundleFile,
+          `${JSON.stringify(bundle, null, 2)}\n`
+        );
+      },
+      message: "historical generator provenance is invalid",
+    },
+  ])("fails closed on historical $label drift", ({ tamper, message }) => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    const historical = addHistoricalVersion({
+      fixture,
+      activeLifecycleState: "PUBLIC_REVIEW",
+      historicalLifecycleState: "REVIEW_CLOSED",
+    });
+    tamper(fixture, historical);
+
+    expect(() =>
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "staging",
+      })
+    ).toThrow(message);
   });
 
   it.each([

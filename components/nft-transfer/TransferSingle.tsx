@@ -27,6 +27,7 @@ interface TransferSingleProps {
   readonly title: string;
   readonly max: number;
   readonly thumbUrl?: string | undefined;
+  readonly presentation?: "panel" | "inline" | undefined;
 }
 
 export default function TransferSingle(props: TransferSingleProps) {
@@ -50,6 +51,10 @@ function TransferSingleImpl(props: TransferSingleProps) {
 
   if (isMobileDevice) {
     return null;
+  }
+
+  if (props.presentation === "inline") {
+    return <TransferSingleActionsImpl {...props} layout="inline" />;
   }
 
   return (
@@ -157,10 +162,10 @@ function TransferSingleActionsImpl(
         onClick={() => decQty(key)}
         disabled={selectedQty <= 1}
         aria-label="Decrease quantity"
-        className={`tw-flex tw-size-[1.875rem] tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-all focus:tw-outline-none ${
+        className={`tw-flex tw-size-[1.875rem] tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
           selectedQty <= 1
             ? "tw-cursor-not-allowed tw-bg-transparent tw-text-iron-600"
-            : "tw-cursor-pointer tw-bg-iron-800 tw-text-iron-100 hover:tw-bg-iron-700 active:tw-scale-95"
+            : "tw-cursor-pointer tw-bg-iron-800 tw-text-iron-100 hover:tw-bg-iron-700"
         }`}
         data-testid="transfer-single-minus"
       >
@@ -174,10 +179,10 @@ function TransferSingleActionsImpl(
         onClick={() => incQty(key)}
         disabled={selectedQty >= max}
         aria-label="Increase quantity"
-        className={`tw-flex tw-size-[1.875rem] tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-all focus:tw-outline-none ${
+        className={`tw-flex tw-size-[1.875rem] tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
           selectedQty >= max
             ? "tw-cursor-not-allowed tw-bg-iron-800/50 tw-text-iron-600"
-            : "tw-cursor-pointer tw-bg-primary-500 tw-text-white hover:tw-bg-primary-400 active:tw-scale-95"
+            : "tw-cursor-pointer tw-bg-primary-500 tw-text-white hover:tw-bg-primary-400"
         }`}
         data-testid="transfer-single-plus"
       >

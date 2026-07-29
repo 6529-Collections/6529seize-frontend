@@ -115,6 +115,36 @@ Every item needs one of:
 The final register should preserve tool version, configuration, raw output,
 normalization rules, source commit, and disposition evidence.
 
+## Zero-mint final-supply reopening
+
+### KNOWN LIMITATION — SOURCE CONFIRMED
+
+The current `StreamCore` does not store a separate final-supply flag.
+`setFinalSupply` writes the collection's minted-ever count into
+`collectionTotalSupply`. If no token has been minted, that value is `0`.
+`setCollectionData` also interprets `0` as an uninitialized supply and permits a
+function admin to replace it with a new nonzero cap while the collection is
+unfrozen. Minting can then resume.
+
+This does not require an unprivileged caller, but it breaks the claimed
+irreversibility of final supply and creates a dangerous mismatch between the
+public promise and the stored state. Core freeze closes the route through a
+separate flag; `setFinalSupply` by itself does not.
+
+The candidate should not pass final review unless either:
+
+- the standalone irreversible-final-supply promise is removed or renamed; or
+- finalization is enforced by a monotonic flag or equivalent state invariant
+  that covers zero, with a final-supply event carrying the collection and final
+  value plus regression tests for zero-minted finalization and pending mint
+  authorizations.
+
+Source:
+[`setCollectionData`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L377-L408),
+[`setFinalSupply`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L888-L907),
+and
+[`_finalizeCollectionSupply`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L1497-L1501).
+
 ## Contract bytecode size
 
 ### KNOWN LIMITATION

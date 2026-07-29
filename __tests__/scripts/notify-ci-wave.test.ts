@@ -95,6 +95,29 @@ describe("notify-ci-wave Release Train metadata", () => {
         sha: expectedSha,
       },
     });
+    expect(result.payload).not.toHaveProperty("release_notes_prompt_path");
+    expect(result.payload).not.toHaveProperty("release_group_id");
+    expect(result.payload).not.toHaveProperty("deployed_at");
+  });
+
+  it("adds the autonomous release-note contract for frontend production", async () => {
+    const result = await runNotifier({
+      CI_RELEASE_NOTES_PROMPT_PATH: "ops/release-notes/release-notes.prompt.md",
+    });
+
+    expect(result).toMatchObject({
+      code: 0,
+      stderr: "",
+      payload: {
+        release_notes_prompt_path: "ops/release-notes/release-notes.prompt.md",
+        release_group_id: "6529-Collections/6529seize-frontend:123",
+        release_group_services: ["web"],
+      },
+    });
+    expect(result.payload?.["deployed_at"]).toEqual(expect.any(String));
+    expect(
+      Number.isNaN(Date.parse(String(result.payload?.["deployed_at"])))
+    ).toBe(false);
   });
 
   it("rejects contributors without a train id", async () => {

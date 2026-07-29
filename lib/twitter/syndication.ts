@@ -1,5 +1,5 @@
-import { matchesDomainOrSubdomain } from "@/lib/url/domains";
-
+import { parseSyndicationArticle } from "./article";
+import { isImageUrl, isTwitterMediaUrl } from "./media-url";
 import type {
   TweetPreview,
   TweetPreviewMedia,
@@ -182,31 +182,6 @@ const excerptTweetText = (text: string | undefined): string | undefined => {
       ? candidate.slice(0, wordBoundaryIndex)
       : candidate;
   return `${trimTrailingPreviewPunctuation(excerpt)}...`;
-};
-
-const isImageUrl = (value: string): boolean => {
-  try {
-    const url = new URL(value);
-    const pathname = url.pathname.toLowerCase();
-    return (
-      matchesDomainOrSubdomain(url.hostname, "twimg.com") ||
-      pathname.endsWith(".jpg") ||
-      pathname.endsWith(".jpeg") ||
-      pathname.endsWith(".png") ||
-      pathname.endsWith(".webp")
-    );
-  } catch {
-    return false;
-  }
-};
-
-const isTwitterMediaUrl = (value: string): boolean => {
-  try {
-    const url = new URL(value);
-    return matchesDomainOrSubdomain(url.hostname, "twimg.com");
-  } catch {
-    return false;
-  }
 };
 
 const findFirstImageInArray = (
@@ -680,14 +655,6 @@ const setPreviewValue = <Key extends keyof TweetPreview>(
   }
 };
 
-export const extractMetaImage = (html: string): string | undefined => {
-  const match =
-    /<meta[^>]+(?:property|name)=["'](?:og:image|twitter:image|twitter:image:src)["'][^>]+content=["']([^"']+)["'][^>]*>/i.exec(
-      html
-    );
-  return match?.[1] && isImageUrl(match[1]) ? match[1] : undefined;
-};
-
 export function parseSyndicationPreview(
   payload: unknown,
   href: string,
@@ -715,6 +682,10 @@ function buildSyndicationPreview(
   const firstMedia = getFirstSyndicationMedia(entities);
   const authorHandle = readString(user["screen_name"]);
   const mediaLink = readString(firstMedia["url"]);
+  const { article, redirectUrl: articleRedirectUrl } = parseSyndicationArticle(
+    record,
+    entities
+  );
   const mediaItems = findMediaItems(record);
   const firstImageMedia = findFirstMedia(mediaItems, "image");
   const firstVideoMedia = findFirstMedia(mediaItems, "video");
@@ -749,7 +720,10 @@ function buildSyndicationPreview(
   setPreviewValue(
     preview,
     "text",
-    removeTrailingMediaUrl(previewText, mediaLink)
+    removeTrailingMediaUrl(
+      removeTrailingMediaUrl(previewText, articleRedirectUrl),
+      mediaLink
+    )
   );
   setPreviewValue(preview, "mediaLink", mediaLink);
   setPreviewValue(
@@ -788,6 +762,7 @@ function buildSyndicationPreview(
     readNumberish(record["bookmark_count"])
   );
   setPreviewValue(preview, "viewCount", readNumberish(record["view_count"]));
+  setPreviewValue(preview, "article", article);
 
   return preview;
 }

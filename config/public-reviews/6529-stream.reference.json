@@ -1,7 +1,7 @@
 {
   "schemaVersion": "public-review.solidity-source.v1",
   "reviewId": "6529-stream",
-  "reviewVersion": "2026-07-26.1",
+  "reviewVersion": "2026-07-28.2",
   "source": {
     "repository": "6529-Collections/6529Stream",
     "commit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786",
@@ -120,8 +120,13 @@
     "excludedDefinitions": []
   },
   "output": {
-    "directory": "public/review-data/6529-stream/versions/2026-07-26.1",
-    "retainedVersions": ["2026-07-26.1"],
+    "directory": "public/review-data/6529-stream/versions/2026-07-28.2",
+    "retainedVersions": [
+      "2026-07-26.1",
+      "2026-07-27.1",
+      "2026-07-28.1",
+      "2026-07-28.2"
+    ],
     "bundleFile": "reference-manifest.json",
     "definitionsDirectory": "definitions",
     "sourcesDirectory": "sources",

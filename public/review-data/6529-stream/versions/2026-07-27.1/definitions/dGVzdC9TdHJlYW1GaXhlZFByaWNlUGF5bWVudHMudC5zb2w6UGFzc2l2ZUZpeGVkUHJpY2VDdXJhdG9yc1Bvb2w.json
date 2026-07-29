@@ -1,0 +1,112 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "receive()",
+          "functionKind": "receive",
+          "id": "test/StreamFixedPricePayments.t.sol:PassiveFixedPriceCuratorsPool#function:receive()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUGF5bWVudHMudC5zb2w6UGFzc2l2ZUZpeGVkUHJpY2VDdXJhdG9yc1Bvb2wjZnVuY3Rpb246cmVjZWl2ZSgp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "receive",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 30,
+            "byteStart": 20796,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPricePayments.t.sol#L420",
+            "lineEnd": 420,
+            "lineStart": 420,
+            "snippetSha256": "sha256:5b6a98427c1f43e7515585164def7acd95a33725cb1caad01f96b99fb5352509",
+            "sourceSha256": "sha256:e4a59529a870ab1717615dc9a6fa2ef7584389eaab1b7fa2640cb2727ad7329a"
+          },
+          "selector": null,
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamFixedPricePayments.t.sol:PassiveFixedPriceCuratorsPool",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUGF5bWVudHMudC5zb2w6UGFzc2l2ZUZpeGVkUHJpY2VDdXJhdG9yc1Bvb2w",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamFixedPricePayments.t.sol:PassiveFixedPriceCuratorsPool"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "PassiveFixedPriceCuratorsPool",
+    "natspec": "",
+    "range": {
+      "byteLength": 77,
+      "byteStart": 20751,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPricePayments.t.sol#L419-L421",
+      "lineEnd": 421,
+      "lineStart": 419,
+      "snippetSha256": "sha256:94949394041f9dae79983bbd00521224bae0c04ca436c6dfd6a6a56faf9af061",
+      "sourceSha256": "sha256:e4a59529a870ab1717615dc9a6fa2ef7584389eaab1b7fa2640cb2727ad7329a"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamFixedPricePayments.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamFixedPricePayments.t.sol:PassiveFixedPriceCuratorsPool",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFixedPricePayments.t.sol:PassiveFixedPriceCuratorsPool#function:receive()",
+      "definitionId": "test/StreamFixedPricePayments.t.sol:PassiveFixedPriceCuratorsPool",
+      "severity": "advisory"
+    }
+  ]
+}

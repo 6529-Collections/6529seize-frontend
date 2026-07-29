@@ -137,6 +137,21 @@ The registry rechecks active status, interface support, and code hash. A gate
 returns an authorization ID, nullifiers, authorizer, maximum quantity, and gate
 hash. Those values are security inputs, not descriptive metadata.
 
+- **Authorization ID:** a one-use identifier. The current ledger scopes it to
+  the calling mint manager and rejects a second consumption by that manager.
+- **Nullifier:** a one-time, domain-separated replay key. It may be derived from
+  public evidence or from privacy-preserving evidence; the `bytes32[]` interface
+  alone does not provide privacy. The current manager and ledger reject every
+  nonempty nullifier array, so this candidate does **not** yet support
+  nullifier-backed gates.
+- **Authorizer:** the identity whose authority or entitlement the gate accepted.
+  If both the request and gate provide one, they must match; the value may also
+  key mint counters.
+- **Maximum quantity:** the most tokens this validation result permits.
+- **Gate hash:** a required nonzero commitment to the gate's validation result
+  and policy context. It is emitted for auditability; a hash alone does not
+  explain or prove that the gate's offchain policy was correct.
+
 See
 [`StreamMintModuleRegistry`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamMintModuleRegistry.sol#L9-L100)
 and
@@ -263,16 +278,29 @@ module can accidentally treat “nonexistent” and “burned” as the same sta
 
 ## Final supply and mint closure
 
-Final supply is a separate recorded state. It should be impossible to declare
-final supply while a legitimate mint path can still create tokens.
+### KNOWN LIMITATION
+
+The pinned candidate does not store final supply as a separate state and does
+not emit a final-supply event. `setFinalSupply` only replaces the configured cap
+with the minted-ever count. When that count is zero, `setCollectionData` can
+later treat the same zero value as uninitialized and let a function admin set a
+new nonzero cap. A zero-minted, unfrozen collection can therefore be reopened
+after `setFinalSupply`.
+
+This is a source-confirmed exception to the intended mint-closure rule. See the
+line-by-line explanation on
+[Freezing, Preservation, and Artwork Finality](./freezing-preservation-and-artwork-finality#final-supply).
 
 Reviewers should verify:
 
+- finalization is stored monotonically even when minted-ever supply is zero;
 - all phases and executors are closed or exhausted;
 - auction and signed-drop paths cannot mint later;
 - no successor module can bypass the final state;
 - the required delay has elapsed;
-- events and manifests record the final value.
+- an event records the final value;
+- tests cover zero-minted finalization and authorizations prepared before
+  finalization.
 
 ## What we think
 
