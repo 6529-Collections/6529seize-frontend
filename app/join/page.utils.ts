@@ -5,7 +5,7 @@ import type { Join6529MessageKey, JoinHref, JoinLinks } from "./page.content";
 type MessageParams = Record<string, string | number>;
 
 export const SECTION_EYEBROW_CLASS =
-  "tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-iron-500";
+  "tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-iron-400";
 
 export const SECTION_HEADING_CLASS =
   "tw-text-[30px] tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[34px]";

@@ -191,7 +191,7 @@ export default function UserPageRepHeader({
               <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10">
                 {canEditRep && repDirection === "received" && (
                   <Button
-                    size="lg"
+                    size="md"
                     onClick={() => setIsGrantRepOpen(true)}
                   >
                     <PlusIcon

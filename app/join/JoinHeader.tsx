@@ -132,7 +132,7 @@ export function JoinHeader({
         className="tw-pointer-events-none tw-absolute tw-inset-x-8 tw-bottom-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-white/10 tw-to-transparent"
       />
       <div className="tw-relative tw-z-10 tw-mx-auto tw-mt-4 tw-flex tw-w-full tw-max-w-5xl tw-flex-col tw-items-center tw-text-center">
-        <div className="tw-mb-6 tw-inline-flex tw-items-center tw-gap-2.5 tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3.5 tw-py-1.5 tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-iron-600 sm:tw-gap-3 sm:tw-px-4">
+        <div className="tw-mb-6 tw-inline-flex tw-items-center tw-gap-2.5 tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3.5 tw-py-1.5 tw-text-[10px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-iron-400 sm:tw-gap-3 sm:tw-px-4">
           <span
             aria-hidden="true"
             className="tw-h-1.5 tw-w-1.5 tw-animate-pulse tw-rounded-full tw-bg-iron-400"
@@ -140,11 +140,11 @@ export function JoinHeader({
           {m(locale, heroContent.eyebrowKey)}
         </div>
         <div className="tw-flex tw-w-full tw-max-w-2xl tw-flex-col tw-items-center">
-          <h1 className="tw-m-0 tw-mb-4 tw-text-[2.25rem] tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] sm:tw-text-[2.5rem]">
+          <h1 className="tw-m-0 tw-mb-4 tw-text-[2.25rem] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-drop-shadow-[0_0_20px_rgba(255,255,255,0.1)] sm:tw-text-[2.5rem]">
             {m(locale, heroContent.titleKey)}
           </h1>
           {subtitleKey !== undefined && (
-            <p className="tw-m-0 tw-text-pretty tw-text-lg tw-font-light tw-leading-7 tw-text-iron-400 lg:tw-text-xl">
+            <p className="tw-m-0 tw-text-pretty tw-text-lg tw-font-normal tw-leading-7 tw-text-iron-300 lg:tw-text-xl">
               {m(locale, subtitleKey)}
             </p>
           )}
@@ -174,7 +174,7 @@ function HeroPoints({ locale }: { readonly locale: SupportedLocale }) {
           <p className="tw-mb-1 tw-text-[15px] tw-font-medium tw-leading-6 tw-text-iron-100">
             {m(locale, point.titleKey)}
           </p>
-          <p className="tw-mb-0 tw-text-[15px] tw-font-light tw-leading-6 tw-text-iron-500">
+          <p className="tw-mb-0 tw-text-[15px] tw-font-normal tw-leading-6 tw-text-iron-400">
             {m(locale, point.bodyKey)}
           </p>
         </div>
