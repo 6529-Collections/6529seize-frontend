@@ -77,6 +77,9 @@
       // The public-review generator exposes pure internals to its focused Jest
       // contract tests; Knip intentionally does not analyze test-only usage.
       "scripts/public-reviews/solidity-reference-lib.cjs": ["exports"],
+      // Exact policy-bundle helpers are a testable CLI API. Knip intentionally
+      // excludes their focused Jest consumers from its usage graph.
+      "scripts/pr-ci-policy-bundle.cjs": ["exports"],
       "services/api/public-review/feedback-codec.ts": ["exports", "types"],
       "services/api/public-review/ledger.ts": ["exports"],
       "services/**": ["files"],
