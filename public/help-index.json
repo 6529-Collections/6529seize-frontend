@@ -487,12 +487,16 @@
         "The Memes minting website is /the-memes/mint; there is no other official minting website for The Memes.",
         "The page says Meme Cards are minted when the art for the next Meme Card is ready, currently about three times per week, though frequency and timing can vary.",
         "The page says The Memes generally use an allowlist model to avoid gas wars and bot wars and to give a broad range of people a chance to mint.",
+        "The page has horizontal section navigation for its summary, minting philosophy, allowlist background and current practices, provability, improvements, tools, and technical issues.",
         "Users should follow @6529collections for current mint dates and times."
       ],
       "canonical_path": "/about/minting",
       "related_paths": ["/the-memes/mint", "/the-memes", "/about/the-memes"],
       "tags": ["about", "memes", "minting"],
-      "source_refs": ["components/about/AboutMinting.tsx"]
+      "source_refs": [
+        "components/about/AboutMinting.tsx",
+        "components/about/AboutMintingReference.tsx"
+      ]
     },
     {
       "id": "about.license",
@@ -868,7 +872,10 @@
         "update airdrop address",
         "update my airdrop address",
         "subscription airdrop address",
-        "change subscription settings"
+        "change subscription settings",
+        "how long is my subscription funded",
+        "when do i need to top up",
+        "subscription running low"
       ],
       "keywords": [
         "profile",
@@ -879,12 +886,17 @@
         "top",
         "up",
         "history",
-        "upcoming"
+        "upcoming",
+        "coverage",
+        "runway",
+        "funded"
       ],
       "facts": [
         "A user's Meme Card subscription controls and history live under /{user}/subscriptions.",
-        "The tab shows balance, airdrop address, manual or automatic mode, edition preference, upcoming drops, and history when subscriptions are available.",
+        "The tab leads with subscription coverage: status, consecutive intended drops funded, funded-through and next-unfunded Meme context, and an authoritative top-up deadline only when one is available.",
+        "The tab also shows exact ETH balance, raw mint capacity, airdrop address, manual or automatic mode, edition preference, upcoming drops, and history when subscriptions are available.",
         "Owners can update settings, including airdrop address and mode, and top up; read-only viewers can inspect visible subscription information.",
+        "The owner profile header and connected Home subscription row show a compact coverage status with a contextual setup, manage, choose-drops, or top-up action.",
         "The tab keeps loading and empty states distinct, and its subscription controls, upcoming rows, and history panels adapt to narrow screens."
       ],
       "canonical_path": "/{user}/subscriptions",
@@ -959,6 +971,9 @@
       "facts": [
         "The Profile Brain tab surfaces Brain-related profile activity and wave context.",
         "Brain views include activity and wave sidebar surfaces where available.",
+        "Created Waves is labeled Wave posts, and each row's Last activity time refers to the newest post by anyone in that wave.",
+        "Most Active In is labeled All time and ranks accessible non-direct-message waves by how many posts the identity has written in them across all time.",
+        "Most Active In shows up to five ranked waves and labels each desktop row Last post with when the viewed identity last posted in that specific wave.",
         "Use /{user}/brain for profile-specific Brain context."
       ],
       "canonical_path": "/{user}/brain",
@@ -966,7 +981,8 @@
       "tags": ["profiles", "brain", "glossary"],
       "source_refs": [
         "ops/docs/profiles/tabs/feature-brain-tab.md",
-        "ops/docs/profiles/tabs/feature-brain-activity-heatmap.md"
+        "ops/docs/profiles/tabs/feature-brain-activity-heatmap.md",
+        "ops/docs/profiles/tabs/feature-brain-wave-sidebar.md"
       ]
     },
     {
@@ -1060,6 +1076,7 @@
       ],
       "facts": [
         "Network definitions explain Cards Collected, Unique Memes, Meme Sets, TDH variants, purchases, sales, transfers, and related Network metrics.",
+        "The glossary groups terms into Collection metrics, Activity metrics, and TDH metrics.",
         "Genesis Sets are complete sets of the first three Meme NFTs.",
         "Use the definitions page when users ask what a Network metric means.",
         "For a single TDH explanation, point users to the TDH page."
@@ -3007,6 +3024,10 @@
         "The /about/subscriptions primary action says Connect to Subscribe when a wallet or profile handoff is needed and Manage when the user can continue to their profile subscription settings.",
         "Users manage their subscription mode, balance, airdrop address, top-ups, upcoming drops, and history under their profile Subscriptions tab.",
         "Automatic mode mints eligible cards until the balance is used unless the user opts out; Manual mode only mints cards the user opts into.",
+        "Automatic mode does not expire when the balance is insufficient; coverage describes what the current balance funds, not an expiration date for the mode.",
+        "Coverage counts consecutive fully funded intended drops from the immediate next intended drop and accounts for mode, eligibility, edition preference, selections, opt-outs, balance, and the published schedule.",
+        "Coverage is green at 7 or more funded drops, gives an early plan-a-top-up warning at 4 to 6, shows running low at 2 to 3, and requires action at 0 to 1.",
+        "When available, Funded through and Next unfunded identify the Meme card and date; Top up by is shown only for an authoritative backend deadline.",
         "If an eligible card is unavailable, no card is airdropped and the unused balance stays available.",
         "The About Subscriptions overview links to the Subscriptions Report for aggregate subscribed and redeemed subscription counts."
       ],
@@ -3106,7 +3127,8 @@
       ],
       "facts": [
         "Subscription top-ups send ETH to the configured subscriptions address on the configured chain.",
-        "The Profile Subscriptions tab shows Current Balance, a refresh balance control, pending or successful top-up transaction links, and Top Up History.",
+        "The Profile Subscriptions tab shows Subscription balance, a refresh balance control, pending or successful top-up transaction links, and Top Up History.",
+        "When coverage supplies them, Recommended restores the healthy funded runway and Minimum for next drop covers the immediate at-risk intended drop using the exact required ETH, including a partial shortfall.",
         "If the wallet transaction is still pending, wait for confirmation; if it is confirmed and the balance or Top Up History still does not update after refreshing, share the transaction hash with the tech team."
       ],
       "canonical_path": "/about/subscriptions",
@@ -3288,12 +3310,16 @@
       "facts": [
         "Meme Lab is a collection area separate from The Memes.",
         "Meme Lab has collection, individual card, and distribution routes.",
+        "The /about/meme-lab overview explains the experimental CC0 artist contract.",
         "Use /meme-lab when users ask where Meme Lab cards live."
       ],
       "canonical_path": "/meme-lab",
-      "related_paths": ["/the-memes"],
+      "related_paths": ["/the-memes", "/about/meme-lab"],
       "tags": ["collections", "meme-lab"],
-      "source_refs": ["ops/docs/media/README.md"]
+      "source_refs": [
+        "components/about/AboutMemeLab.tsx",
+        "ops/docs/media/README.md"
+      ]
     },
     {
       "id": "nextgen.overview",
@@ -3720,7 +3746,9 @@
         "drop reacted notification",
         "drop boosted notification",
         "rep notification",
-        "nic notification"
+        "nic notification",
+        "subscription coverage notification",
+        "subscription running low notification"
       ],
       "keywords": [
         "notifications",
@@ -3733,15 +3761,18 @@
         "replies",
         "identity",
         "reactions",
-        "boosts"
+        "boosts",
+        "subscriptions",
+        "coverage"
       ],
       "facts": [
         "The notifications feed lives at /notifications.",
         "It supports feed filters, row actions, read state, paging, and navigation to related app content.",
-        "Cause filters include Mentions, Replies, Identity, Reactions, and Invites.",
+        "Cause filters include Mentions, Replies, Identity, Reactions, Invites, and Subscriptions.",
         "The Invites filter includes wave-created notifications: standard waves the user can access and direct-message waves started with the user.",
         "Standard wave-created rows can offer Join wave and Follow creator controls; direct-message wave-created rows offer Open DM instead of joining the wave.",
         "The Reactions filter includes voted, reacted, and boosted drop notifications; the Identity filter includes new follows and REP/NIC updates.",
+        "The Subscriptions filter includes transition-based coverage alerts with runway, Meme context, authoritative deadline when available, and exact minimum top-up action.",
         "Notification rows may be missing or stale if loading, permissions, or realtime connectivity are disrupted."
       ],
       "canonical_path": "/notifications",
@@ -3767,7 +3798,9 @@
         "drop reacted push",
         "drop boosted push",
         "identity rep push",
-        "identity nic push"
+        "identity nic push",
+        "subscription coverage push",
+        "subscription balance alert"
       ],
       "keywords": [
         "mobile",
@@ -3780,12 +3813,16 @@
         "react",
         "boost",
         "rep",
-        "nic"
+        "nic",
+        "subscriptions",
+        "coverage"
       ],
       "facts": [
         "Mobile push notifications are documented under the Notifications area.",
         "Push notification behavior depends on mobile app support and notification permissions.",
-        "Push settings include toggles for Identity - REP, Identity - NIC, New Follows, Mentions, Drops - Quoted, Drops - Replied, Drops - Voted, Drops - Reacted, Drops - Boosted, and Wave Invites.",
+        "Push settings include toggles for Identity - REP, Identity - NIC, New Follows, Mentions, Drops - Quoted, Drops - Replied, Drops - Voted, Drops - Reacted, Drops - Boosted, Wave Invites, and Subscription Coverage.",
+        "Running-low and action-required subscription coverage can send mobile push; the earlier plan-a-top-up alert remains in the in-app feed without a push.",
+        "Tapping a subscription coverage push opens the matching profile's Subscriptions tab.",
         "Use the notifications feed when a user wants to inspect in-app notification history."
       ],
       "canonical_path": "/notifications",
@@ -4880,6 +4917,44 @@
       "source_refs": ["ops/docs/waves/drop-actions/feature-quote-link-cards.md"]
     },
     {
+      "id": "waves.link-previews.etherscan",
+      "kind": "ui_affordance",
+      "title": "Etherscan link preview cards",
+      "aliases": [
+        "Etherscan card",
+        "Ethereum explorer preview",
+        "transaction preview",
+        "address preview",
+        "block explorer card"
+      ],
+      "keywords": [
+        "waves",
+        "link",
+        "preview",
+        "etherscan",
+        "ethereum",
+        "transaction",
+        "address",
+        "token",
+        "nft",
+        "block"
+      ],
+      "facts": [
+        "Supported Etherscan links in Waves and DMs render dedicated cards for transactions, addresses, tokens, NFTs, blocks, explorer lists, analytics, and tools.",
+        "Transaction cards can show status, action, participants, fee, block/finality context, and timestamp; recognized Compound events add Compound action context inside the Etherscan card.",
+        "Address, token, NFT, and block cards show bounded on-chain summaries when live RPC data is available.",
+        "Partial data, route-only pages, and retired explorer networks are labeled explicitly; the original canonical Etherscan link remains available.",
+        "Only exact approved HTTPS Etherscan hosts receive structured cards. Unknown subdomains and lookalike domains use the ordinary external-link behavior.",
+        "Bare .eth names and app.ens.domains URLs remain ENS previews rather than Etherscan previews."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves", "/messages"],
+      "tags": ["waves", "links", "etherscan", "ethereum"],
+      "source_refs": [
+        "ops/docs/waves/link-previews/feature-web3-preview-cards.md"
+      ]
+    },
+    {
       "id": "waves.drop.selection-copy",
       "kind": "ui_affordance",
       "title": "Wave drop selection copy",
@@ -5156,7 +5231,8 @@
       "keywords": ["tdh", "historic", "boosts", "rules", "versions"],
       "facts": [
         "Historic TDH boost rules live at /network/tdh/historic-boosts.",
-        "The page documents archived rule models and version differences.",
+        "The page compares archived versions in a table on tablet and desktop and in summary cards on mobile.",
+        "Use the row details control or Show rules button to expand the complete Category A, B, and C rules for a version.",
         "Use the main TDH page for the current TDH explanation."
       ],
       "canonical_path": "/network/tdh/historic-boosts",
@@ -5169,6 +5245,7 @@
       "tags": ["network", "tdh", "historic"],
       "source_refs": [
         "app/network/tdh/historic-boosts/page.tsx",
+        "app/network/tdh/historic-boosts/page.client.tsx",
         "ops/docs/network/feature-tdh-historic-boosts.md"
       ]
     },
@@ -6069,12 +6146,14 @@
       "facts": [
         "The 6529 Gradient collection route lives at /6529-gradient.",
         "Individual Gradient detail routes use /6529-gradient/{id}.",
+        "The /about/6529-gradient overview explains the grayscale design system, animated #50, museum-held pieces, and community purpose.",
         "Use this route when users ask where to view the 6529 Gradient collection."
       ],
       "canonical_path": "/6529-gradient",
-      "related_paths": ["/6529-gradient/{id}"],
+      "related_paths": ["/6529-gradient/{id}", "/about/6529-gradient"],
       "tags": ["gradient", "collection"],
       "source_refs": [
+        "components/about/AboutGradients.tsx",
         "app/6529-gradient/page.tsx",
         "app/6529-gradient/[id]/page.tsx"
       ]

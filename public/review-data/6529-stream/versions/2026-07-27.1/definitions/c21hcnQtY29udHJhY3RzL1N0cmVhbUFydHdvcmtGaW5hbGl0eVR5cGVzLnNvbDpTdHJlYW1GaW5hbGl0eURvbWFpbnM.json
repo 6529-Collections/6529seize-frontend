@@ -1,0 +1,1086 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "production_support_library",
+    "classificationReason": "First-party protocol library outside the production contract catalog.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STREAM_FINALITY_V1",
+          "natspec": "@dev keccak256(\"6529STREAM_FINALITY_V1\")",
+          "range": {
+            "byteLength": 121,
+            "byteStart": 6474,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L193-L194",
+            "lineEnd": 194,
+            "lineStart": 193,
+            "snippetSha256": "sha256:fecec1684b555cad37f0ba7b55da2dbce3e330022ecf92f661d3353d444344c5",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 6529,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L194",
+            "lineEnd": 194,
+            "lineStart": 194,
+            "snippetSha256": "sha256:3af28918b530fb5c6444e8ecd79826b63de2937a22ef6af0668ed64a7590eea7",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0x569714204c899f0d33a0f98879ce85708169a5f1e11f763f2897f64e5d6c8493",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STREAM_FINALITY_COMPONENTS_V1",
+          "natspec": "@dev keccak256(\"6529STREAM_FINALITY_COMPONENTS_V1\")",
+          "range": {
+            "byteLength": 132,
+            "byteStart": 6662,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L197-L198",
+            "lineEnd": 198,
+            "lineStart": 197,
+            "snippetSha256": "sha256:8160dde99e171c6a67a4eb957ab84fc297b61753c974c09bf7e3b38cd7c54be1",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 6728,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L198",
+            "lineEnd": 198,
+            "lineStart": 198,
+            "snippetSha256": "sha256:170d3413d6deaa8c9a8a0aeee8dcbe0b38b76936a38568c5501b5bc236076233",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0xf57efb77611ea13bd3a60968beee86ec330159736aa5d42707a9c0676dbc8898",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STREAM_CORE_COLLECTION_FACTS_V1",
+          "natspec": "@dev keccak256(\"6529STREAM_CORE_COLLECTION_FACTS_V1\")",
+          "range": {
+            "byteLength": 134,
+            "byteStart": 6863,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L201-L202",
+            "lineEnd": 202,
+            "lineStart": 201,
+            "snippetSha256": "sha256:4ae383b716a1b51f5062f233a0c53e069438501cbe49ef42063cfd1db392909e",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 6931,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L202",
+            "lineEnd": 202,
+            "lineStart": 202,
+            "snippetSha256": "sha256:689fca360e547138b6690a9878ca4bf903d326f021eb3c568e4741b1f92221ca",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0x387b66c3b8fdca5febff2a13faa7057fef7f711c4155493c8c8087e48b28c764",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STREAM_CORE_COLLECTION_CONFIG_EMPTY_V1",
+          "natspec": "@dev keccak256(\"6529STREAM_CORE_COLLECTION_CONFIG_EMPTY_V1\"); Core owns the preimage,\n      the registry pins it for golden coverage and integration mocks.",
+          "range": {
+            "byteLength": 141,
+            "byteStart": 7175,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L206-L207",
+            "lineEnd": 207,
+            "lineStart": 206,
+            "snippetSha256": "sha256:11b72fc57d86d0510b89e7c3e6d2d542b9895b86338f512ab992ad4560cd313a",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 7250,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L207",
+            "lineEnd": 207,
+            "lineStart": 207,
+            "snippetSha256": "sha256:5ee3e1c3b510161d5496d57948147791169a80073bd4f3db01acaf980dd1e3da",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0x6adebabfe6f92286e8678fc5f206cacb6b1a3b912afc80b6039e9240567e7f26",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STREAM_FINALITY_RECOVERY_V1",
+          "natspec": "@dev keccak256(\"6529STREAM_FINALITY_RECOVERY_V1\"); recovery machinery ships in a later\n      slice, the domain is pinned now so preimage discipline never drifts.",
+          "range": {
+            "byteLength": 130,
+            "byteStart": 7500,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L211-L212",
+            "lineEnd": 212,
+            "lineStart": 211,
+            "snippetSha256": "sha256:f9032662c643ada83ccca1bf0ca88a7faf34df1e54259b36d4f928ad583365d2",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 7564,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L212",
+            "lineEnd": 212,
+            "lineStart": 212,
+            "snippetSha256": "sha256:9d14e86aef7e6b030385c533a017168d89f39778dd0751aaffb1e9bd9fd63cad",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0x521e8df5a00a793a5b47409e1e7711b4b8857ba9e6c833fe59a48dfa865b19ac",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STREAM_SCOPED_FINALITY_V1",
+          "natspec": "@dev keccak256(\"6529STREAM_SCOPED_FINALITY_V1\")",
+          "range": {
+            "byteLength": 128,
+            "byteStart": 7693,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L215-L216",
+            "lineEnd": 216,
+            "lineStart": 215,
+            "snippetSha256": "sha256:01207d3303dd84312a119fc88d04ea58eef1e34dfb210bb9e9009ae0eed7e683",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 7755,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L216",
+            "lineEnd": 216,
+            "lineStart": 216,
+            "snippetSha256": "sha256:3e419f665fa13042b2788f3c108050761061178e74163c7e6812367d8213ae88",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0x5b56313142e6381659f9d10163ccfa5ea22cb437617c8e69b37c31ecda6f3a50",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STREAM_SCOPED_CORE_FINALITY_FACTS_V1",
+          "natspec": "@dev keccak256(\"6529STREAM_SCOPED_CORE_FINALITY_FACTS_V1\")",
+          "range": {
+            "byteLength": 139,
+            "byteStart": 7895,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L219-L220",
+            "lineEnd": 220,
+            "lineStart": 219,
+            "snippetSha256": "sha256:3dd3d160dd00de45d1f2ab11933210fb52a0afd6de9f7ebe2a85decfc2779974",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 7968,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L220",
+            "lineEnd": 220,
+            "lineStart": 220,
+            "snippetSha256": "sha256:bc81c98384d500b30c33f6a829ec61e9e35ff44f6dd296fb757284017cb39405",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0x5c6390c543248a4d63630061d67c3d2245df223d9ac586deccabf40620b43f6e",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STREAM_SCOPED_FINALITY_RECOVERY_V1",
+          "natspec": "@dev keccak256(\"6529STREAM_SCOPED_FINALITY_RECOVERY_V1\"); pinned ahead of the recovery\n      slice, same as STREAM_FINALITY_RECOVERY_V1.",
+          "range": {
+            "byteLength": 137,
+            "byteStart": 8193,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L224-L225",
+            "lineEnd": 225,
+            "lineStart": 224,
+            "snippetSha256": "sha256:e37af9147a1ccc45f56928ac06b62a02bf82c77b1c2c5576de53f21575aa6133",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 8264,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L225",
+            "lineEnd": 225,
+            "lineStart": 225,
+            "snippetSha256": "sha256:7a3ddd2acd1ee56640d1b44e5a968994716d00e912b9ed54bc1b7d265490bb9e",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0x7111cd2afae740dbddcd349ab0b8b9269b6a81c331cef7ca8d542e87308bc54a",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STREAM_SUBJECT_TOKEN_V1",
+          "natspec": "@dev keccak256(\"6529STREAM_SUBJECT_TOKEN_V1\")",
+          "range": {
+            "byteLength": 126,
+            "byteStart": 8461,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L230-L231",
+            "lineEnd": 231,
+            "lineStart": 230,
+            "snippetSha256": "sha256:37a261619306987cc7a5f299eb30e725377272208ae3b3d3a1bfb5ba817b9309",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 8521,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L231",
+            "lineEnd": 231,
+            "lineStart": 231,
+            "snippetSha256": "sha256:a44ca51e167f5eeec17369bf9c3aceaea09e64cafb14c0082d66bd5017c2be2f",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0x1e576f27850d12bc1ec9255ca277dbecfbc84fb3a9a34c474640dfca89811d7e",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STREAM_SUBJECT_SCOPE_V1",
+          "natspec": "@dev keccak256(\"6529STREAM_SUBJECT_SCOPE_V1\")",
+          "range": {
+            "byteLength": 126,
+            "byteStart": 8648,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L234-L235",
+            "lineEnd": 235,
+            "lineStart": 234,
+            "snippetSha256": "sha256:624ef3d09c78898655b3b9021dad0c27a3d15849f04ec5ff0854ecc4bdb225d8",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 8708,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L235",
+            "lineEnd": 235,
+            "lineStart": 235,
+            "snippetSha256": "sha256:9529ecea4f00506adf7842de3725a05a8c33e5547b008314727a8fea4e9db5a3",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0x748002ff892f4748f1544a8191da460ca6d167aa2e13eeced354e4f66f636394",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STREAM_SUBJECT_COLLECTION_V1",
+          "natspec": "@dev keccak256(\"6529STREAM_SUBJECT_COLLECTION_V1\")",
+          "range": {
+            "byteLength": 131,
+            "byteStart": 8840,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L238-L239",
+            "lineEnd": 239,
+            "lineStart": 238,
+            "snippetSha256": "sha256:6eaa3cc584a2a0c89faa915e227a617c787b0f750f6c1295f54b9ab9a066fd90",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 8905,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L239",
+            "lineEnd": 239,
+            "lineStart": 239,
+            "snippetSha256": "sha256:f684d4a6a2d6b710ac95b0963bf82a2698064421e508ea9a71d0ef8b3dbb6f98",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0x3a882a22dad9915c9193738f63216234155080ed4c4fc9bfae446e90f1df6e16",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SANCTION_SUBJECT_DOMAIN",
+          "natspec": "@dev keccak256(\"6529STREAM_ARTIST_SANCTION_SUBJECT_V1\")",
+          "range": {
+            "byteLength": 126,
+            "byteStart": 9120,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L244-L245",
+            "lineEnd": 245,
+            "lineStart": 244,
+            "snippetSha256": "sha256:401b829b4879f1772ddba111357d1f5fb4e58a458d9b7d58ab70cab93b5754b3",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 9180,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L245",
+            "lineEnd": 245,
+            "lineStart": 245,
+            "snippetSha256": "sha256:1251aee3924196b5eb0e97b6e79ae5f8c8316911d0e8cfa2b8bd037c28205aec",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0x47c9894872096248b3971f1551b555619aea8b63903f526c2da354a7286bb473",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COMPONENT_COLLECTION_METADATA",
+          "natspec": "@dev keccak256(\"COLLECTION_METADATA\")",
+          "range": {
+            "byteLength": 132,
+            "byteStart": 9391,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L250-L251",
+            "lineEnd": 251,
+            "lineStart": 250,
+            "snippetSha256": "sha256:173826587d63f6f1976e3a659775df8621d8801a84f905b5360729528bb4378e",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 9457,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L251",
+            "lineEnd": 251,
+            "lineStart": 251,
+            "snippetSha256": "sha256:99ec03b21f48c00429113ca69489b1b8335424bee151f125ce20bab918738068",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0xd90b9e0160ba8e56a77078d6022d52bf0cd862ba5a5adfb6f792287e31399f90",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COMPONENT_METADATA_ROUTER",
+          "natspec": "@dev keccak256(\"METADATA_ROUTER\")",
+          "range": {
+            "byteLength": 128,
+            "byteStart": 9572,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L254-L255",
+            "lineEnd": 255,
+            "lineStart": 254,
+            "snippetSha256": "sha256:3ff99c553f35e06616ba214500a9bafacdcc06a7b4073daa4781d7eea53bdf53",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 9634,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L255",
+            "lineEnd": 255,
+            "lineStart": 255,
+            "snippetSha256": "sha256:022739529e927299b1394a4d9e1e02361fa484630caf695dd03eca610f6b6344",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0x7024d3e2544fc48a261933c43d901dca0ee3fc26ea2b857748ab0c295a16f20a",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COMPONENT_RENDERER",
+          "natspec": "@dev keccak256(\"RENDERER\")",
+          "range": {
+            "byteLength": 121,
+            "byteStart": 9742,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L258-L259",
+            "lineEnd": 259,
+            "lineStart": 258,
+            "snippetSha256": "sha256:b1c7a3fff353b8cefbd5926eb65328ec2b8a3a1f9bb5f36a50f7edb2ca7afbae",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 9797,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L259",
+            "lineEnd": 259,
+            "lineStart": 259,
+            "snippetSha256": "sha256:4d219f8955d70ebc33aabf46f734b09b5fbc1f99307face074bbd26c92d74aa8",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0x7df206a0c907b7474a3b59ec39322d07f5cc76c424145fa560ae864e2c8334b1",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COMPONENT_RENDER_CONTEXT",
+          "natspec": "@dev keccak256(\"RENDER_CONTEXT\")",
+          "range": {
+            "byteLength": 127,
+            "byteStart": 9911,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L262-L263",
+            "lineEnd": 263,
+            "lineStart": 262,
+            "snippetSha256": "sha256:5900ccaca1d9f32ee7170dae133ad055d8a84716cd3456e6450038592ce27cba",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 9972,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L263",
+            "lineEnd": 263,
+            "lineStart": 263,
+            "snippetSha256": "sha256:2574b99054a5d16e22065d9e9730745a6470e526580289f232569b68311a4611",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0x9ec0296f9ec64a61db0ff3a5efd1294b47d2978c32c1aecb076f216525c6d1c5",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COMPONENT_SCRIPT_SOURCE",
+          "natspec": "@dev keccak256(\"SCRIPT_SOURCE\")",
+          "range": {
+            "byteLength": 126,
+            "byteStart": 10085,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L266-L267",
+            "lineEnd": 267,
+            "lineStart": 266,
+            "snippetSha256": "sha256:14b7b71d0e0cd7c8c2e4e6ee7efc0df7af205e58626f6fed70abf985d4c6161f",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 10145,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L267",
+            "lineEnd": 267,
+            "lineStart": 267,
+            "snippetSha256": "sha256:ab1e33ca2c49ef7385cc074cd424ebf6b5116b8824c453498b3f41677ebac9ee",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0x01bcbf3ae47218f940ddca3bf4e7d92baf29ddecea1c38e63350d55b4aa53d73",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COMPONENT_DEPENDENCY_SOURCE",
+          "natspec": "@dev keccak256(\"DEPENDENCY_SOURCE\")",
+          "range": {
+            "byteLength": 130,
+            "byteStart": 10262,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L270-L271",
+            "lineEnd": 271,
+            "lineStart": 270,
+            "snippetSha256": "sha256:8dc2bb17353e4f123c8f4f3cbc42ce0405798566dad317f9c0fad3c08777d812",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 10326,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L271",
+            "lineEnd": 271,
+            "lineStart": 271,
+            "snippetSha256": "sha256:fc5c01fa28d83e6487a82b6c581c64175efccb0ecf42b723e0892bf61937e716",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0xa1e40ff39c7b676a717e91c20b2ab7b7f502965d6cc6bd8b37d7ce772f8c8586",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COMPONENT_MEDIA_MANIFEST",
+          "natspec": "@dev keccak256(\"MEDIA_MANIFEST\")",
+          "range": {
+            "byteLength": 127,
+            "byteStart": 10440,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L274-L275",
+            "lineEnd": 275,
+            "lineStart": 274,
+            "snippetSha256": "sha256:f4125271d0bc9d387da36713c8690c02a4ce9fa496e14e635a59071424a3ae8e",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 10501,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L275",
+            "lineEnd": 275,
+            "lineStart": 275,
+            "snippetSha256": "sha256:dcf9fdcfe1adb3aadef8e0859e8818fa1eb89a37361d59a2a9d65d9c880d60e2",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0xa094a8a85bb1f5c4c5c7fa7dad9d83cdba21c78ccef9ae708217cd64dbea7c9a",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COMPONENT_ENTROPY_COORDINATOR",
+          "natspec": "@dev keccak256(\"ENTROPY_COORDINATOR\")",
+          "range": {
+            "byteLength": 132,
+            "byteStart": 10620,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L278-L279",
+            "lineEnd": 279,
+            "lineStart": 278,
+            "snippetSha256": "sha256:28d1be61e8a0516c9e508a956c50de91f36eb64bbd8e56a6966a56908ce50e39",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 10686,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L279",
+            "lineEnd": 279,
+            "lineStart": 279,
+            "snippetSha256": "sha256:4dfab833d875e961f50cfade55b416d49ea38fd48b121eef846042ad623d7c04",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0xb3b3ef20764c647bdeda70b21ab009ff2783106d6995be14389ec6f42ea6dfbb",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COMPONENT_ARTIST_SANCTION",
+          "natspec": "@dev keccak256(\"ARTIST_SANCTION\"); pinned in the protocol v1 artist mirror rows.",
+          "range": {
+            "byteLength": 128,
+            "byteStart": 10848,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L282-L283",
+            "lineEnd": 283,
+            "lineStart": 282,
+            "snippetSha256": "sha256:64a2e20ed23ed4225363c828844a04d009eb9305c27ee6f34b8f173f484aa0df",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 10910,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L283",
+            "lineEnd": 283,
+            "lineStart": 283,
+            "snippetSha256": "sha256:4219348b63b9714505a0afc1229de19fcf0d8da21047b37882aa87cd1b90c07f",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0x1e14b418e60392f62e7baf2e6edfcfb6dfeab92fb4428eff216b492ed5cef047",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COMPONENT_PLATFORM_WORKS_DECLARATION",
+          "natspec": "@dev keccak256(\"PLATFORM_WORKS_DECLARATION\"); pinned in the protocol v1 artist mirror rows.",
+          "range": {
+            "byteLength": 139,
+            "byteStart": 11083,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L286-L287",
+            "lineEnd": 287,
+            "lineStart": 286,
+            "snippetSha256": "sha256:437cdaa04dc58a372282a4779015b3e084697143e90d7159200405d3289fa2d5",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 11156,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L287",
+            "lineEnd": 287,
+            "lineStart": 287,
+            "snippetSha256": "sha256:f40073b12c6fe0b040d3b9982b4af1d4ad25b8b24a31d1a0aeb007646fc112d2",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0x9b732a2be945a9747de080e93cd0a83076acad44dca7585847960ffebdb0d29d",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COMPONENT_REFERENCE_RENDER",
+          "natspec": "@dev keccak256(\"REFERENCE_RENDER\")",
+          "range": {
+            "byteLength": 129,
+            "byteStart": 11272,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L290-L291",
+            "lineEnd": 291,
+            "lineStart": 290,
+            "snippetSha256": "sha256:7df3e064fb09d4aa1f98fbd2a3a85b0687f4362b1bcb08e024ca399e3b8ac43c",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 11335,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L291",
+            "lineEnd": 291,
+            "lineStart": 291,
+            "snippetSha256": "sha256:80250e255026bbb915b7877867c75cd6c9ab7605e47b0e8a815a193ee330c35c",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0xa814b1b6f6e0b07c5330893efc29545d7b6c242616f50f8aaf7942305569a8ca",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COMPONENT_OPTIONAL_SNAPSHOT_ROUTE",
+          "natspec": "@dev keccak256(\"OPTIONAL_SNAPSHOT_ROUTE\")",
+          "range": {
+            "byteLength": 136,
+            "byteStart": 11458,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L294-L295",
+            "lineEnd": 295,
+            "lineStart": 294,
+            "snippetSha256": "sha256:e717714316440347381919380dab69c6ec97222a1f56d182a03c263211bb9f44",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 11528,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L295",
+            "lineEnd": 295,
+            "lineStart": 295,
+            "snippetSha256": "sha256:6c81c1727df978d5b73fcc62fcc8474afe0d1f4f41286cfe63bf318cb05ae695",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0x31768727f16bb21bf296353a211441c524fc19d478fe73d886555c8a2150ae40",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ROLE_COLLECTION_FINALITY_ADMIN",
+          "natspec": "@dev keccak256(\"ROLE_COLLECTION_FINALITY_ADMIN\")",
+          "range": {
+            "byteLength": 133,
+            "byteStart": 11732,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L300-L301",
+            "lineEnd": 301,
+            "lineStart": 300,
+            "snippetSha256": "sha256:78b2d63786adfca57f7931bfa5a3b4ee960976d0c6a36b649ce6f9fd4607e5f9",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 11799,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L301",
+            "lineEnd": 301,
+            "lineStart": 301,
+            "snippetSha256": "sha256:e5ab0ff4dff3f2ed429a04522479eec77670833356dfa2a3ab81f6b93e4ca1ab",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0x3ba602f38b556566e93e274f3c25565b5efa75d4084fb99bdf6ddc5adb423226",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ROLE_TERMINAL_FREEZE_VETO",
+          "natspec": "@dev keccak256(\"ROLE_TERMINAL_FREEZE_VETO\")",
+          "range": {
+            "byteLength": 128,
+            "byteStart": 11924,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L304-L305",
+            "lineEnd": 305,
+            "lineStart": 304,
+            "snippetSha256": "sha256:0989ff13399ddbe38f238faff83dcfc9b86dd4275acad54092150017f4ddde5d",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 11986,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L305",
+            "lineEnd": 305,
+            "lineStart": 305,
+            "snippetSha256": "sha256:e656354d5a1f3317a2e2613a7bf2100fbcf7ca5cfa4da57dc86b375e9caa1cbc",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0x7c0cf05bbab982f1ecb8f528f1921326b0f24dfd9baf5beabba3ebbf59a6e61c",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "GGP_FINALITY_COMPONENT_READ_GAS",
+          "natspec": "@dev keccak256(\"6529STREAM_GGP_FINALITY_COMPONENT_READ_GAS\")",
+          "range": {
+            "byteLength": 134,
+            "byteStart": 12203,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L310-L311",
+            "lineEnd": 311,
+            "lineStart": 310,
+            "snippetSha256": "sha256:d5469256e2d1c664e39b9797fca15a72b3c8f5a00365d790e708ad8d62d0d3be",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 12271,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L311",
+            "lineEnd": 311,
+            "lineStart": 311,
+            "snippetSha256": "sha256:fc7fc07108d8382aac42987f290fca57db089c7ef06d30d2e8d348dd1e8c3a55",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0xbf54fb4ba4a0942771e26fe4b1f829f8324f6f98ef66e080fd6885b75bdf3221",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "CORE_COLLECTION_STATUS_CLOSED",
+          "natspec": "@dev CollectionStatus CLOSED per the ACTIVE/PAUSED/CLOSED vocabulary\n      (docs/collection-metadata-contract.md, Open-Ended Collections).",
+          "range": {
+            "byteLength": 57,
+            "byteStart": 12596,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L317",
+            "lineEnd": 317,
+            "lineStart": 317,
+            "snippetSha256": "sha256:1bc13c58beb0e965b8917a2aa04b72ad811d769c4627d5a647307578425421a5",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 12652,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L317",
+            "lineEnd": 317,
+            "lineStart": 317,
+            "snippetSha256": "sha256:d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "2",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "CORE_COLLECTION_SUPPLY_MODE_UNCAPPED_OPEN",
+          "natspec": "@dev CollectionSupplyMode UNCAPPED_OPEN is the highest valid value in the closed\n      FIXED/CAPPED_OPEN/UNCAPPED_OPEN vocabulary.",
+          "range": {
+            "byteLength": 69,
+            "byteStart": 12806,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L321",
+            "lineEnd": 321,
+            "lineStart": 321,
+            "snippetSha256": "sha256:94376a54fd5ebb78161e169664b6b5d3328520411d04df47f70586230079576a",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 12874,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L321",
+            "lineEnd": 321,
+            "lineStart": 321,
+            "snippetSha256": "sha256:d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "2",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TOKEN_LIFECYCLE_MINTED",
+          "natspec": "@dev tokenLifecycle numeric IDs ([LTA-IDENTITY]: UNKNOWN=0, PREPARED_INCOMPLETE=1,\n      MINTED=2, BURNED=3).",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 13007,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L325",
+            "lineEnd": 325,
+            "lineStart": 325,
+            "snippetSha256": "sha256:e6667e400f294d93a18b7f0a76a27b484992bb0dc78f3b53d814eaf53b87d7d0",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 13056,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L325",
+            "lineEnd": 325,
+            "lineStart": 325,
+            "snippetSha256": "sha256:d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "2",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TOKEN_LIFECYCLE_BURNED",
+          "natspec": "",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 13063,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L326",
+            "lineEnd": 326,
+            "lineStart": 326,
+            "snippetSha256": "sha256:a1f95d4d08110121d79b6bb664d48340be0808d100e216208c87d6a9fd01717b",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 13112,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L326",
+            "lineEnd": 326,
+            "lineStart": 326,
+            "snippetSha256": "sha256:4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "3",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "METADATA_MODE_OFFCHAIN",
+          "natspec": "@dev MetadataMode numeric IDs (the `MetadataMode` enum owned by the metadata router,\n      docs/metadata-router-and-renderer.md; Numeric ID Catalog): OFFCHAIN=0, ONCHAIN=1,\n      HYBRID=2. ONCHAIN and HYBRID are the script-work modes that carry the extra\n      SCRIPT_SOURCE/DEPENDENCY_SOURCE/REFERENCE_RENDER floor and the snapshot-manifest gate.",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 13497,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L332",
+            "lineEnd": 332,
+            "lineStart": 332,
+            "snippetSha256": "sha256:080f7a4c6a39ed464e08ad5f464263ae82047e3cd32964bab92a21b9f49bde4b",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 13546,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L332",
+            "lineEnd": 332,
+            "lineStart": 332,
+            "snippetSha256": "sha256:5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "0",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "METADATA_MODE_ONCHAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 13553,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L333",
+            "lineEnd": 333,
+            "lineStart": 333,
+            "snippetSha256": "sha256:bdbbf2241707b8c268f13dc4ab175bfa5f614734ed28cee2f06720f854e70465",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 13601,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L333",
+            "lineEnd": 333,
+            "lineStart": 333,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "1",
+          "visibility": "internal"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "METADATA_MODE_HYBRID",
+          "natspec": "",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 13608,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L334",
+            "lineEnd": 334,
+            "lineStart": 334,
+            "snippetSha256": "sha256:9785c466b823aaaa5bb8faf56c254ba7cb09aa61817073df34ff90db121cf459",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "selector": null,
+          "type": "uint8",
+          "typeString": "uint8",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 13655,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L334",
+            "lineEnd": 334,
+            "lineStart": 334,
+            "snippetSha256": "sha256:d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+          },
+          "valueSource": "2",
+          "visibility": "internal"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityDomains",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbUFydHdvcmtGaW5hbGl0eVR5cGVzLnNvbDpTdHJlYW1GaW5hbGl0eURvbWFpbnM",
+    "kind": "library",
+    "linearizedDefinitionIds": [
+      "smart-contracts/StreamArtworkFinalityTypes.sol:StreamFinalityDomains"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamFinalityDomains",
+    "natspec": "@notice Pinned domain constants for the artwork finality registry.\n @dev Every value is `keccak256` of the string preimage in the trailing comment and is\n      mirrored in docs/launch-v1-target-architecture.md (Umbrella Architecture Mirror Rows,\n      artist rows, subject rows). test/StreamFinalityDomainsGolden.t.sol recomputes each one.",
+    "range": {
+      "byteLength": 7351,
+      "byteStart": 6308,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamArtworkFinalityTypes.sol#L189-L335",
+      "lineEnd": 335,
+      "lineStart": 189,
+      "snippetSha256": "sha256:f4d845069d1460867206c61f3c17fdc1252a903b0734f048f3d6782d9899345b",
+      "sourceSha256": "sha256:cc2fae7eee12b66e163e150162f0f01fe4f1316a350a7b8ac18fc72c5155b142"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/StreamArtworkFinalityTypes.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

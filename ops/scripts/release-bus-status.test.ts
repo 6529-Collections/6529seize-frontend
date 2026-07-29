@@ -10,12 +10,28 @@ import { promisify } from "node:util";
 
 const HELPER_PATH = path.resolve(__dirname, "release-bus-status.mjs");
 const TOKEN = "test-token-that-must-never-be-printed";
+const HARD_STOP_REASON = "Internal Release Bus hard stop is active";
+const INVALID_STAGING_STATE = "invalid staging state";
+const INVALID_STAGING_IDENTITY = "invalid staging identity";
+const CURRENT_MANIFEST_ID = "manifest-current";
 const execFileAsync = promisify(execFile);
 const VALID_CONTROLS = [
-  { scope: "ALL", paused: 0 },
-  { scope: "STAGING", paused: false },
-  { scope: "PRODUCTION", paused: 0 },
+  { scope: "ALL", paused: 0, reason: "Global recovery complete" },
+  { scope: "STAGING", paused: false, reason: "Staging enabled" },
+  { scope: "PRODUCTION", paused: 0, reason: "Production enabled" },
 ];
+const VALID_STAGING_STATE = {
+  status: "LIVE",
+  current_manifest_id: CURRENT_MANIFEST_ID,
+  last_validated_manifest_id: CURRENT_MANIFEST_ID,
+  frontend_sha: "a".repeat(40),
+  backend_sha: "b".repeat(40),
+  frontend_staging_ref_sha: "a".repeat(40),
+  backend_staging_ref_sha: "b".repeat(40),
+  clean_main: false,
+  last_transition_train_id: "train-current",
+  row_version: 7,
+};
 
 type HelperResult = {
   readonly code: number;
@@ -26,6 +42,34 @@ type HelperResult = {
 type TestServer = {
   readonly url: string;
   readonly server: Server;
+};
+
+type SanitizedStatus = {
+  readonly lanes: Record<
+    "STAGING" | "PRODUCTION",
+    {
+      readonly status: "ON" | "OFF";
+      readonly changeable: boolean;
+      readonly reason: string | null;
+    }
+  >;
+  readonly staging: {
+    readonly status:
+      | "UNINITIALIZED"
+      | "LIVE"
+      | "CLEAN_MAIN"
+      | "ROLLBACK_FAILED"
+      | "DETACHED_MANUAL_OWNERSHIP";
+    readonly current_manifest_id: string | null;
+    readonly last_validated_manifest_id: string | null;
+    readonly frontend_sha: string | null;
+    readonly backend_sha: string | null;
+    readonly frontend_staging_ref_sha: string | null;
+    readonly backend_staging_ref_sha: string | null;
+    readonly clean_main: boolean;
+    readonly last_transition_train_id: string | null;
+    readonly row_version: number;
+  };
 };
 
 let tempRoot: string;
@@ -116,14 +160,39 @@ async function stopServer(server: Server): Promise<void> {
   await closed;
 }
 
-function parseStatus(stdout: string): {
-  readonly mode: string;
-  readonly controls: Readonly<Record<string, string>>;
-} {
-  return JSON.parse(stdout) as {
-    readonly mode: string;
-    readonly controls: Readonly<Record<string, string>>;
-  };
+function laneStates(
+  mode: "OFF" | "STAGING" | "PRODUCTION",
+  controls: readonly {
+    readonly scope: string;
+    readonly paused: boolean | number;
+    readonly reason: string | null;
+  }[] = VALID_CONTROLS
+) {
+  const byScope = Object.fromEntries(
+    controls.map((control) => [control.scope, control])
+  );
+  return ["STAGING", "PRODUCTION"].map((lane) => {
+    const allowed =
+      mode === "PRODUCTION" || (mode === "STAGING" && lane === "STAGING");
+    const globalPaused = Boolean(byScope["ALL"]?.paused);
+    const lanePaused = Boolean(byScope[lane]?.paused);
+    let reason: string | null = byScope[lane]?.reason ?? null;
+    if (!allowed) {
+      reason = HARD_STOP_REASON;
+    } else if (globalPaused) {
+      reason = byScope["ALL"]?.reason ?? HARD_STOP_REASON;
+    }
+    return {
+      lane,
+      status: allowed && !globalPaused && !lanePaused ? "ON" : "OFF",
+      changeable: allowed && !globalPaused,
+      reason,
+    };
+  });
+}
+
+function parseSanitizedStatus(stdout: string): SanitizedStatus {
+  return JSON.parse(stdout) as SanitizedStatus;
 }
 
 async function runWithResponse(
@@ -147,63 +216,253 @@ async function runWithResponse(
 }
 
 describe("release-bus-status helper", () => {
-  test.each(["OFF", "SHADOW", "STAGING", "PRODUCTION"])(
+  test.each(["OFF", "STAGING", "PRODUCTION"] as const)(
     "prints sanitized status for %s mode",
     async (mode) => {
       const result = await runWithResponse({
         mode,
         controls: VALID_CONTROLS,
+        lanes: laneStates(mode),
+        staging_state: VALID_STAGING_STATE,
       });
 
       expect(result.code).toBe(0);
       expect(result.stderr).toBe("");
       expect(result.authorization).toBe(`Bearer ${TOKEN}`);
-      expect(parseStatus(result.stdout)).toEqual({
-        mode,
-        controls: {
-          ALL: "RUNNING",
-          STAGING: "RUNNING",
-          PRODUCTION: "RUNNING",
-        },
+      const parsed = parseSanitizedStatus(result.stdout);
+      expect(parsed.lanes.STAGING.status).toBe(mode === "OFF" ? "OFF" : "ON");
+      expect(parsed.lanes.PRODUCTION.status).toBe(
+        mode === "PRODUCTION" ? "ON" : "OFF"
+      );
+      expect(parsed.staging).toEqual({
+        status: "LIVE",
+        current_manifest_id: CURRENT_MANIFEST_ID,
+        last_validated_manifest_id: CURRENT_MANIFEST_ID,
+        frontend_sha: "a".repeat(40),
+        backend_sha: "b".repeat(40),
+        frontend_staging_ref_sha: "a".repeat(40),
+        backend_staging_ref_sha: "b".repeat(40),
+        clean_main: false,
+        last_transition_train_id: "train-current",
+        row_version: 7,
       });
     }
   );
 
-  test.each(["ALL", "STAGING", "PRODUCTION"])(
-    "reports a paused %s control",
-    async (pausedScope) => {
+  it("preserves valid nullable staging identity fields", async () => {
+    const result = await runWithResponse({
+      mode: "PRODUCTION",
+      controls: VALID_CONTROLS,
+      lanes: laneStates("PRODUCTION"),
+      staging_state: {
+        ...VALID_STAGING_STATE,
+        status: "UNINITIALIZED",
+        current_manifest_id: null,
+        last_validated_manifest_id: null,
+        frontend_sha: null,
+        backend_sha: null,
+        frontend_staging_ref_sha: null,
+        backend_staging_ref_sha: null,
+        last_transition_train_id: null,
+      },
+    });
+
+    expect(result.code).toBe(0);
+    expect(parseSanitizedStatus(result.stdout).staging).toEqual({
+      status: "UNINITIALIZED",
+      current_manifest_id: null,
+      last_validated_manifest_id: null,
+      frontend_sha: null,
+      backend_sha: null,
+      frontend_staging_ref_sha: null,
+      backend_staging_ref_sha: null,
+      clean_main: false,
+      last_transition_train_id: null,
+      row_version: 7,
+    });
+  });
+
+  it("reports detached manual ownership without claiming physical staging absence", async () => {
+    const pausedLaneControls = VALID_CONTROLS.map((control) => ({
+      ...control,
+      paused: control.scope !== "ALL",
+    }));
+    const result = await runWithResponse({
+      mode: "PRODUCTION",
+      controls: pausedLaneControls,
+      lanes: laneStates("PRODUCTION", pausedLaneControls),
+      staging_state: {
+        status: "DETACHED_MANUAL_OWNERSHIP",
+        current_manifest_id: null,
+        last_validated_manifest_id: "historical-manifest",
+        frontend_sha: null,
+        backend_sha: null,
+        frontend_staging_ref_sha: null,
+        backend_staging_ref_sha: null,
+        clean_main: false,
+        last_transition_train_id: null,
+        row_version: 8,
+      },
+    });
+
+    expect(result.code).toBe(0);
+    expect(result.stderr).toBe("");
+    expect(result.authorization).toBe(`Bearer ${TOKEN}`);
+    expect(parseSanitizedStatus(result.stdout)).toEqual({
+      lanes: {
+        STAGING: {
+          status: "OFF",
+          changeable: true,
+          reason: "Staging enabled",
+        },
+        PRODUCTION: {
+          status: "OFF",
+          changeable: true,
+          reason: "Production enabled",
+        },
+      },
+      staging: {
+        status: "DETACHED_MANUAL_OWNERSHIP",
+        current_manifest_id: null,
+        last_validated_manifest_id: "historical-manifest",
+        frontend_sha: null,
+        backend_sha: null,
+        frontend_staging_ref_sha: null,
+        backend_staging_ref_sha: null,
+        clean_main: false,
+        last_transition_train_id: null,
+        row_version: 8,
+      },
+    });
+  });
+
+  test.each([
+    ["ALL", "OFF", "OFF"],
+    ["STAGING", "OFF", "ON"],
+    ["PRODUCTION", "ON", "OFF"],
+  ] as const)(
+    "derives the two effective lanes when hidden %s is paused",
+    async (pausedScope, expectedStaging, expectedProduction) => {
+      const controls = VALID_CONTROLS.map((control) => ({
+        ...control,
+        paused: control.scope === pausedScope,
+        reason:
+          pausedScope === "ALL" && control.scope === "ALL"
+            ? null
+            : control.reason,
+      }));
       const result = await runWithResponse({
-        mode: "STAGING",
-        controls: VALID_CONTROLS.map((control) => ({
-          ...control,
-          paused: control.scope === pausedScope,
-        })),
+        mode: "PRODUCTION",
+        controls,
+        lanes: laneStates("PRODUCTION", controls),
+        staging_state: VALID_STAGING_STATE,
       });
 
       expect(result.code).toBe(0);
-      expect(parseStatus(result.stdout).controls[pausedScope]).toBe("PAUSED");
+      expect(parseSanitizedStatus(result.stdout).lanes).toMatchObject({
+        STAGING: { status: expectedStaging },
+        PRODUCTION: { status: expectedProduction },
+      });
+      if (pausedScope === "ALL") {
+        expect(parseSanitizedStatus(result.stdout).lanes).toEqual({
+          STAGING: {
+            status: "OFF",
+            changeable: false,
+            reason: HARD_STOP_REASON,
+          },
+          PRODUCTION: {
+            status: "OFF",
+            changeable: false,
+            reason: HARD_STOP_REASON,
+          },
+        });
+      }
     }
   );
 
-  it("falls back to the disabled legacy endpoint before v2 is deployed", async () => {
+  it("fails when derived lane state disagrees with hidden safety controls", async () => {
+    const result = await runWithResponse({
+      mode: "PRODUCTION",
+      controls: VALID_CONTROLS,
+      lanes: laneStates("OFF"),
+      staging_state: VALID_STAGING_STATE,
+    });
+
+    expect(result.code).not.toBe(0);
+    expect(result.stderr).toContain("inconsistent lane information");
+  });
+
+  it("fails when a required effective lane is missing or duplicated", async () => {
+    const lanes = laneStates("PRODUCTION");
+    for (const invalidLanes of [
+      lanes.filter(({ lane }) => lane !== "PRODUCTION"),
+      [...lanes, lanes[0]],
+    ]) {
+      const result = await runWithResponse({
+        mode: "PRODUCTION",
+        controls: VALID_CONTROLS,
+        lanes: invalidLanes,
+        staging_state: VALID_STAGING_STATE,
+      });
+
+      expect(result.code).not.toBe(0);
+      expect(result.stderr).toContain("incomplete lane information");
+    }
+  });
+
+  it("fails when an unknown third effective lane is present", async () => {
+    const result = await runWithResponse({
+      mode: "PRODUCTION",
+      controls: VALID_CONTROLS,
+      lanes: [
+        ...laneStates("PRODUCTION"),
+        {
+          lane: "ALL",
+          status: "OFF",
+          changeable: false,
+          reason: null,
+        },
+      ],
+      staging_state: VALID_STAGING_STATE,
+    });
+
+    expect(result.code).not.toBe(0);
+    expect(result.stderr).toContain("incomplete lane information");
+  });
+
+  it("fails when an effective lane omits its reason", async () => {
+    const lanes = laneStates("PRODUCTION").map((lane) =>
+      lane.lane === "STAGING"
+        ? {
+            lane: lane.lane,
+            status: lane.status,
+            changeable: lane.changeable,
+          }
+        : lane
+    );
+    const result = await runWithResponse({
+      mode: "PRODUCTION",
+      controls: VALID_CONTROLS,
+      lanes,
+      staging_state: VALID_STAGING_STATE,
+    });
+
+    expect(result.code).not.toBe(0);
+    expect(result.stderr).toContain("invalid lane information");
+  });
+
+  it("fails closed when the v2 controls endpoint is missing", async () => {
     const paths: string[] = [];
     const testServer = await startServer((request, response) => {
       paths.push(request.url ?? "");
-      if (request.url === "/deploy/release-bus-v2/controls") {
-        response.writeHead(404).end();
-        return;
-      }
-      response.writeHead(200, { "Content-Type": "application/json" });
-      response.end(JSON.stringify({ mode: "OFF", controls: VALID_CONTROLS }));
+      response.writeHead(404).end();
     });
     try {
       const result = await runHelper({ RELEASE_BUS_API_URL: testServer.url });
-      expect(result.code).toBe(0);
-      expect(parseStatus(result.stdout).mode).toBe("OFF");
-      expect(paths).toEqual([
-        "/deploy/release-bus-v2/controls",
-        "/deploy/release-bus/controls",
-      ]);
+      expect(result.code).not.toBe(0);
+      expect(result.stdout).toBe("");
+      expect(result.stderr).toContain("status API returned HTTP 404");
+      expect(paths).toEqual(["/deploy/release-bus-v2/controls"]);
     } finally {
       await stopServer(testServer.server);
     }
@@ -317,6 +576,7 @@ describe("release-bus-status helper", () => {
     const result = await runWithResponse({
       mode: TOKEN,
       controls: VALID_CONTROLS,
+      lanes: [],
     });
 
     expect(result.code).not.toBe(0);
@@ -324,7 +584,11 @@ describe("release-bus-status helper", () => {
   });
 
   test.each([null, 1, {}])("fails on non-string mode %j", async (mode) => {
-    const result = await runWithResponse({ mode, controls: VALID_CONTROLS });
+    const result = await runWithResponse({
+      mode,
+      controls: VALID_CONTROLS,
+      lanes: [],
+    });
 
     expect(result.code).not.toBe(0);
     expect(result.stderr).toContain("invalid status data");
@@ -336,6 +600,7 @@ describe("release-bus-status helper", () => {
       controls: VALID_CONTROLS.filter(
         (control) => control.scope !== "PRODUCTION"
       ),
+      lanes: [],
     });
 
     expect(result.code).not.toBe(0);
@@ -346,6 +611,7 @@ describe("release-bus-status helper", () => {
     const result = await runWithResponse({
       mode: "OFF",
       controls: [...VALID_CONTROLS, VALID_CONTROLS[0]],
+      lanes: [],
     });
 
     expect(result.code).not.toBe(0);
@@ -358,9 +624,45 @@ describe("release-bus-status helper", () => {
       controls: VALID_CONTROLS.map((control) =>
         control.scope === "ALL" ? { ...control, paused: "false" } : control
       ),
+      lanes: [],
     });
 
     expect(result.code).not.toBe(0);
     expect(result.stderr).toContain("invalid status data");
   });
+
+  it("fails closed when authoritative staging state is missing", async () => {
+    const result = await runWithResponse({
+      mode: "OFF",
+      controls: VALID_CONTROLS,
+      lanes: laneStates("OFF"),
+    });
+
+    expect(result.code).not.toBe(0);
+    expect(result.stderr).toContain(INVALID_STAGING_STATE);
+  });
+
+  test.each([
+    ["status", "DETACHED", INVALID_STAGING_STATE],
+    ["row_version", true, INVALID_STAGING_STATE],
+    ["row_version", "7", INVALID_STAGING_STATE],
+    ["clean_main", null, INVALID_STAGING_STATE],
+    ["frontend_sha", 123, INVALID_STAGING_IDENTITY],
+    ["current_manifest_id", 123, INVALID_STAGING_IDENTITY],
+    ["last_validated_manifest_id", {}, INVALID_STAGING_IDENTITY],
+    ["last_transition_train_id", false, INVALID_STAGING_IDENTITY],
+  ])(
+    "fails closed when staging %s has malformed value %p",
+    async (field, value, message) => {
+      const result = await runWithResponse({
+        mode: "PRODUCTION",
+        controls: VALID_CONTROLS,
+        lanes: laneStates("PRODUCTION"),
+        staging_state: { ...VALID_STAGING_STATE, [field]: value },
+      });
+
+      expect(result.code).not.toBe(0);
+      expect(result.stderr).toContain(message);
+    }
+  );
 });

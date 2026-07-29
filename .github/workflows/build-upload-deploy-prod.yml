@@ -2,11 +2,6 @@ name: Web Deploy - PROD
 
 on:
   workflow_dispatch:
-    inputs:
-      break_glass_reason:
-        type: string
-        description: Operator-only reason for a manual production deploy after bus enforcement
-        required: false
 
 permissions:
   contents: read
@@ -35,6 +30,103 @@ env:
   ANNOUNCED_VERSION_ENDPOINT: "https://dnclu2fna0b2b.cloudfront.net/web_build/current-production-version.json"
 
 jobs:
+  manual-deployment-guard:
+    name: Authorize manual production fallback
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+
+    steps:
+      - name: Require authoritative production fallback readiness
+        env:
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          TARGET_ENVIRONMENT: prod
+          TARGET_LANE: PRODUCTION
+        run: |
+          set -euo pipefail
+
+          test -n "$RELEASE_BUS_API_URL" || {
+            echo "::error::Release Bus API URL is unavailable; refusing manual production deployment."
+            exit 1
+          }
+          test -n "$RELEASE_BUS_WORKFLOW_AUTH_TOKEN" || {
+            echo "::error::Release Bus workflow credential is unavailable; refusing manual production deployment."
+            exit 1
+          }
+          [[ "$GITHUB_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]] || {
+            echo "::error::GitHub run identity is malformed; refusing manual production deployment."
+            exit 1
+          }
+          [[ "$GITHUB_RUN_ATTEMPT" =~ ^[1-9][0-9]{0,8}$ ]] || {
+            echo "::error::GitHub run attempt is malformed; refusing manual production deployment."
+            exit 1
+          }
+          [[ "$GITHUB_REF_NAME" =~ ^[A-Za-z0-9._/-]{1,255}$ ]] || {
+            echo "::error::GitHub source ref is malformed; refusing manual production deployment."
+            exit 1
+          }
+          [[ "$GITHUB_SHA" =~ ^[a-f0-9]{40}$ ]] || {
+            echo "::error::GitHub source SHA is malformed; refusing manual production deployment."
+            exit 1
+          }
+
+          payload="$(
+            jq -n \
+              --arg repository frontend \
+              --arg environment "$TARGET_ENVIRONMENT" \
+              --arg service frontend \
+              --arg workflow_run_id "$GITHUB_RUN_ID" \
+              --argjson workflow_run_attempt "$GITHUB_RUN_ATTEMPT" \
+              --arg source_ref "$GITHUB_REF_NAME" \
+              --arg source_sha "$GITHUB_SHA" \
+              '{repository:$repository,environment:$environment,service:$service,workflow_run_id:$workflow_run_id,workflow_run_attempt:$workflow_run_attempt,source_ref:$source_ref,source_sha:$source_sha}'
+          )"
+          response_file="$(mktemp)"
+          trap 'rm -f "$response_file"' EXIT
+          if ! http_status="$(
+            curl --silent --show-error \
+              --connect-timeout 10 \
+              --max-time 30 \
+              --output "$response_file" \
+              --write-out '%{http_code}' \
+              -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+              -H 'Content-Type: application/json' \
+              --data "$payload" \
+              "$RELEASE_BUS_API_URL/deploy/release-bus-v2/manual-deployment-readiness"
+          )"; then
+            echo "::error::Release Bus readiness is unavailable; refusing manual production deployment."
+            exit 1
+          fi
+          if [ "$http_status" != 200 ]; then
+            echo "::error::Manual production fallback readiness was rejected with HTTP $http_status."
+            exit 1
+          fi
+          if ! jq -e \
+            --arg repository frontend \
+            --arg environment "$TARGET_ENVIRONMENT" \
+            --arg service frontend \
+            --arg workflow_run_id "$GITHUB_RUN_ID" \
+            --arg workflow_run_attempt "$GITHUB_RUN_ATTEMPT" \
+            --arg source_ref "$GITHUB_REF_NAME" \
+            --arg source_sha "$GITHUB_SHA" \
+            --arg lane "$TARGET_LANE" \
+            'type == "object" and
+             .ready == true and
+             .mode == "manual" and
+             .lane == $lane and
+             .repository == $repository and
+             .environment == $environment and
+             .service == $service and
+             (.workflow_run_id | tostring) == $workflow_run_id and
+             (.workflow_run_attempt | tostring) == $workflow_run_attempt and
+             .source_ref == $source_ref and
+             .source_sha == $source_sha' \
+            "$response_file" >/dev/null; then
+            echo "::error::Release Bus returned malformed or mismatched readiness evidence; refusing manual production deployment."
+            exit 1
+          fi
+
   assert-main-ref:
     name: Assert main ref
     runs-on: ubuntu-latest
@@ -48,35 +140,8 @@ jobs:
             exit 1
           fi
 
-      - name: Authorize operator break glass
-        if: vars.RELEASE_BUS_ENFORCEMENT == 'true'
-        env:
-          BREAK_GLASS_REASON: ${{ inputs.break_glass_reason }}
-          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
-          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
-        run: |
-          set -euo pipefail
-          test -n "$RELEASE_BUS_API_URL"
-          test -n "$RELEASE_BUS_WORKFLOW_AUTH_TOKEN"
-          test -n "$BREAK_GLASS_REASON" || {
-            echo 'A break-glass reason is required while Release Bus enforcement is enabled.' >&2
-            exit 1
-          }
-          payload="$(jq -n \
-            --arg workflow_run_id "$GITHUB_RUN_ID" \
-            --arg repository frontend \
-            --arg environment prod \
-            --arg expected_sha "$GITHUB_SHA" \
-            --arg reason "$BREAK_GLASS_REASON" \
-            '{workflow_run_id:$workflow_run_id,repository:$repository,environment:$environment,service:null,expected_sha:$expected_sha,reason:$reason}')"
-          curl --fail-with-body --silent --show-error \
-            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
-            -H 'Content-Type: application/json' \
-            --data "$payload" \
-            "$RELEASE_BUS_API_URL/deploy/release-bus/authorize-break-glass"
-
   build-upload-deploy:
-    needs: assert-main-ref
+    needs: [assert-main-ref, manual-deployment-guard]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -134,7 +199,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
-          node-version: "22"
+          node-version: "22.17.1"
 
       - name: Activate pinned pnpm
         run: |
@@ -172,7 +237,7 @@ jobs:
           VERSION_BUILD_TIMESTAMP: ${{ env.VERSION_BUILD_TIMESTAMP }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           NEXTGEN_CHAIN_ID: ${{ env.NEXTGEN_CHAIN_ID }}
-          GIPHY_API_KEY: ${{ secrets.GIPHY_API_KEY }}
+          GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY || secrets.GIPHY_API_KEY }}
           AWS_RUM_APP_ID: ${{ secrets.AWS_RUM_APP_ID }}
           AWS_RUM_REGION: ${{ secrets.AWS_RUM_REGION }}
           AWS_RUM_SAMPLE_RATE: ${{ secrets.AWS_RUM_SAMPLE_RATE }}
@@ -192,7 +257,6 @@ jobs:
           cp -r .next/standalone/. .deploy-bundle/
           cp -r .next/static target/_next/
           cp -r .next/static .deploy-bundle/.next/
-          cp -r public .deploy-bundle/
           cp Procfile .deploy-bundle/
           cp -r .ebextensions .deploy-bundle/
           if [ -d .platform ]; then
@@ -209,10 +273,34 @@ jobs:
             fi
           done
 
+          node scripts/package-public-review-artifacts.cjs prepare \
+            --profile production \
+            --bundle-root .deploy-bundle
+          test -z "$(find target/_next -type l -print -quit)"
+
           (
             cd .deploy-bundle
             zip -yr ../target/package.zip .
           )
+
+          zip_listing="$(mktemp)"
+          zip_extract="$(mktemp -d)"
+          trap 'rm -f "$zip_listing"; rm -rf "$zip_extract"' EXIT
+          unzip -Z1 target/package.zip > "$zip_listing"
+          node scripts/package-public-review-artifacts.cjs assert-listing \
+            --profile production \
+            --bundle-root .deploy-bundle \
+            --listing-file "$zip_listing"
+          unzip -q target/package.zip -d "$zip_extract"
+          node scripts/package-public-review-artifacts.cjs assert-zip \
+            --profile production \
+            --bundle-root .deploy-bundle \
+            --listing-file "$zip_listing" \
+            --extracted-root "$zip_extract"
+          rm -f "$zip_listing"
+          rm -rf "$zip_extract"
+          trap - EXIT
+          test -z "$(git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews)"
 
       - name: Verify package bundle size
         run: |
@@ -560,7 +648,7 @@ jobs:
           persist-credentials: false
 
       - name: Notify about failure
-        uses: sarisia/actions-status-discord@v1
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1
         if: failure()
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
@@ -585,7 +673,7 @@ jobs:
         run: node scripts/notify-ci-wave.mjs
 
       - name: Notify about success
-        uses: sarisia/actions-status-discord@v1
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1
         if: success()
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}

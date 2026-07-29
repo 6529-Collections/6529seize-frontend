@@ -15,17 +15,9 @@ const {
   verifyInstall: (repoRoot: string) => Record<string, any>;
 } = require("../../scripts/release-bus-install-dependencies.cjs");
 
-const identityEnvironment = (runnerTemp: string) => ({
+const installerEnvironment = (runnerTemp: string) => ({
   ...process.env,
   GITHUB_JOB: "jest",
-  RELEASE_BUS_BASE_SHA: "a".repeat(40),
-  RELEASE_BUS_EVIDENCE_ENVIRONMENT: "orchestration",
-  RELEASE_BUS_GATE_FINGERPRINT: "b".repeat(64),
-  RELEASE_BUS_WORKFLOW_SHA: "c".repeat(40),
-  RELEASE_BUS_WORKFLOW_DIGEST: "d".repeat(64),
-  RELEASE_BUS_NODE_VERSION: "22",
-  RELEASE_BUS_PACKAGE_MANAGER: "pnpm@10.14.0",
-  RELEASE_BUS_BUILD_PROFILE_DIGEST: "e".repeat(64),
   RUNNER_TEMP: runnerTemp,
 });
 
@@ -65,7 +57,7 @@ describe("Release Bus verified dependency installation", () => {
     let invocation = 0;
     const evidence = await installWithRetries({
       repoRoot,
-      environment: identityEnvironment(repoRoot),
+      environment: installerEnvironment(repoRoot),
       maxAttempts: 2,
       backoffMs: 0,
       runInstall: jest.fn(async () => {
@@ -91,7 +83,7 @@ describe("Release Bus verified dependency installation", () => {
       status: "SUCCEEDED",
       failure_class: null,
       recovered: true,
-      build_profile_digest: "e".repeat(64),
+      source: "staging_e2e",
     });
     expect(evidence.attempts).toHaveLength(2);
     expect(
@@ -120,7 +112,7 @@ describe("Release Bus verified dependency installation", () => {
     await expect(
       installWithRetries({
         repoRoot,
-        environment: identityEnvironment(repoRoot),
+        environment: installerEnvironment(repoRoot),
         maxAttempts: 3,
         backoffMs: 0,
         runInstall,
@@ -151,7 +143,7 @@ describe("Release Bus verified dependency installation", () => {
       installWithRetries({
         repoRoot,
         environment: {
-          ...identityEnvironment(repoRoot),
+          ...installerEnvironment(repoRoot),
           RELEASE_BUS_SOCKET_FIREWALL_OUTCOME: "failure",
         },
         runInstall,

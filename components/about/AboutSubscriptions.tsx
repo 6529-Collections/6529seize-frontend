@@ -20,8 +20,8 @@ import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
 import AboutSubscriptionsProfileButton from "./AboutSubscriptionsProfileButton";
 import AboutSubscriptionsReference from "./AboutSubscriptionsReference";
 import {
-  SUBSCRIPTIONS_PANEL_CLASS,
   SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS,
+  SUBSCRIPTIONS_PANEL_CLASS,
   SUBSCRIPTIONS_SECTION_HEADING_CLASS,
 } from "./aboutSubscriptionsStyles";
 
@@ -131,7 +131,7 @@ function Overview({ locale }: { readonly locale: SupportedLocale }) {
         >
           {m(locale, "about.subscriptions.overview.title")}
         </h2>
-        <p className="tw-mb-0 tw-mt-2 tw-text-base tw-font-light tw-leading-7 tw-text-iron-400">
+        <p className="tw-mb-0 tw-mt-2 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300">
           {m(locale, "about.subscriptions.overview.intro")}
         </p>
       </div>

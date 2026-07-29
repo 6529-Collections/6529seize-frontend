@@ -1,0 +1,222 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "test/StreamMintManager.t.sol:RevertingMintManagerReceiver#error:0xaf82a072",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:RevertingMintManagerReceiver",
+          "inherited": false,
+          "inputs": [],
+          "name": "ReceiverRejected",
+          "selector": "0xaf82a072",
+          "signature": "ReceiverRejected()"
+        }
+      ],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamMintManager.t.sol:RevertingMintManagerReceiver#function:0x150b7a02",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:RevertingMintManagerReceiver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes",
+              "name": "",
+              "type": "bytes"
+            }
+          ],
+          "name": "onERC721Received",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "selector": "0x150b7a02",
+          "signature": "onERC721Received(address,address,uint256,bytes)",
+          "stateMutability": "pure"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [
+        {
+          "astId": 221970,
+          "canonicalSignature": "ReceiverRejected()",
+          "displaySignature": "ReceiverRejected()",
+          "id": "test/StreamMintManager.t.sol:RevertingMintManagerReceiver#error:0xaf82a072",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpSZXZlcnRpbmdNaW50TWFuYWdlclJlY2VpdmVyI2Vycm9yOjB4YWY4MmEwNzI",
+          "kind": "error",
+          "name": "ReceiverRejected",
+          "natspec": "",
+          "range": {
+            "byteLength": 25,
+            "byteStart": 889,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:17b06ee3f15d742134de3a3fe99865713b23610069f4e4af1be57337157436ef",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0xaf82a072"
+        }
+      ],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "onERC721Received(address,address,uint256,bytes)",
+          "displaySignature": "onERC721Received(address,address,uint256,bytes)",
+          "functionKind": "function",
+          "id": "test/StreamMintManager.t.sol:RevertingMintManagerReceiver#function:0x150b7a02",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpSZXZlcnRpbmdNaW50TWFuYWdlclJlY2VpdmVyI2Z1bmN0aW9uOjB4MTUwYjdhMDI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "onERC721Received",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "range": {
+            "byteLength": 170,
+            "byteStart": 920,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L24-L30",
+            "lineEnd": 30,
+            "lineStart": 24,
+            "snippetSha256": "sha256:274ef0fdfb862adaf5a0be1441647a1738b2de11b174252d3ffecd023dddfa49",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x150b7a02",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamMintManager.t.sol:RevertingMintManagerReceiver",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/IERC721Receiver.sol:IERC721Receiver",
+        "name": "IERC721Receiver"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpSZXZlcnRpbmdNaW50TWFuYWdlclJlY2VpdmVy",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamMintManager.t.sol:RevertingMintManagerReceiver",
+      "smart-contracts/IERC721Receiver.sol:IERC721Receiver"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "RevertingMintManagerReceiver",
+    "natspec": "",
+    "range": {
+      "byteLength": 266,
+      "byteStart": 826,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L21-L31",
+      "lineEnd": 31,
+      "lineStart": 21,
+      "snippetSha256": "sha256:fecd3f3bda12d72601e18e10eb5b4dd99fd8b95d7dae8382f772902394340371",
+      "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamMintManager.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamMintManager.t.sol:RevertingMintManagerReceiver",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:RevertingMintManagerReceiver#function:0x150b7a02",
+      "definitionId": "test/StreamMintManager.t.sol:RevertingMintManagerReceiver",
+      "severity": "advisory"
+    }
+  ]
+}

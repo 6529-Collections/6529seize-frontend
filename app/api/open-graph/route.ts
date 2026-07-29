@@ -37,6 +37,7 @@ import { createOpenSeaPlan } from "./opensea/service";
 import { createFirstParty6529Plan } from "./6529/service";
 import { createTransientPlan } from "./transient/service";
 import { createYoutubePlan } from "./youtube/service";
+import { createEtherscanPlan } from "./etherscan/service";
 import { buildFarcasterEmbedResponse } from "./farcaster/service";
 import { detectEnsTarget, fetchEnsPreview, EnsPreviewError } from "./ens";
 import { HTML_FETCH_HEADERS, createFetchConfig } from "./fetchConfig";
@@ -120,71 +121,12 @@ function batchBodyLimitErrorResponse(
   return NextResponse.json({ error: message }, { status: error.statusCode });
 }
 
-type FetchInput = Parameters<typeof fetch>[0];
-
-const isRequestLike = (value: unknown): value is { url: string } => {
-  if (typeof value !== "object" || value === null) {
-    return false;
-  }
-
-  const { url } = value as { url?: unknown | undefined };
-  return typeof url === "string" && url.length > 0;
-};
-
-const stringifiesToUrl = (value: unknown): string | null => {
-  if (
-    typeof value !== "object" ||
-    value === null ||
-    typeof (value as { toString?: unknown | undefined }).toString !== "function"
-  ) {
-    return null;
-  }
-
-  try {
-    const raw = (value as { toString: () => string }).toString();
-    return typeof raw === "string" &&
-      !raw.startsWith("[object ") &&
-      raw.length > 0
-      ? raw
-      : null;
-  } catch {
-    return null;
-  }
-};
-
-const resolveRequestUrl = (input: FetchInput): URL => {
-  if (typeof input === "string") {
-    return new URL(input);
-  }
-
-  if (input instanceof URL) {
-    return input;
-  }
-
-  if (typeof Request !== "undefined" && input instanceof Request) {
-    return new URL(input.url);
-  }
-
-  if (isRequestLike(input)) {
-    return new URL(input.url);
-  }
-
-  const stringified = stringifiesToUrl(input);
-  if (stringified) {
-    return new URL(stringified);
-  }
-
-  throw new UrlGuardError(
-    "Unsupported fetch input provided.",
-    "invalid-url",
-    400
-  );
-};
-
-// Apply host-specific header overrides while letting fetchPublicUrl enforce SSRF guardrails.
-const hostAwareFetch: typeof fetch = async (input, init = {}) => {
-  const targetUrl = resolveRequestUrl(input);
-  const { headers: baseHeaders, userAgent } = createFetchConfig(targetUrl);
+// Apply host-specific headers per hop without opening a second, unpinned fetch.
+const buildHostAwareRequestInit = (
+  url: URL,
+  init: RequestInit
+): RequestInit => {
+  const { headers: baseHeaders, userAgent } = createFetchConfig(url);
 
   const headers = new Headers(init.headers);
   const keysToReset = new Set([
@@ -203,10 +145,10 @@ const hostAwareFetch: typeof fetch = async (input, init = {}) => {
 
   headers.set("user-agent", userAgent);
 
-  return fetch(input, {
+  return {
     ...init,
     headers,
-  });
+  };
 };
 
 function ensureSuccessfulResponse(response: Response): void {
@@ -272,7 +214,7 @@ async function fetchGenericResponse(url: URL): Promise<Response> {
       ...PUBLIC_URL_OPTIONS,
       timeoutMs: FETCH_TIMEOUT_MS,
       maxRedirects: MAX_REDIRECTS,
-      fetchImpl: hostAwareFetch,
+      buildRequestInit: buildHostAwareRequestInit,
     }
   );
 
@@ -546,6 +488,18 @@ async function resolveLinkPreview(
   rawUrl: string | null,
   context?: PreviewContext
 ): Promise<LinkPreviewResponse> {
+  if (rawUrl) {
+    try {
+      const etherscanPlan = createEtherscanPlan(new URL(rawUrl));
+      if (etherscanPlan) {
+        return executePlan(etherscanPlan);
+      }
+    } catch {
+      // Bare ENS names and other non-URL inputs continue through existing
+      // provider detection below.
+    }
+  }
+
   const ensTarget = detectEnsTarget(rawUrl);
   if (ensTarget) {
     return fetchEnsPreview(ensTarget) as Promise<LinkPreviewResponse>;

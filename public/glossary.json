@@ -305,6 +305,7 @@
       ],
       "facts": [
         "Network definitions explain Cards Collected, Unique Memes, Meme Sets, TDH variants, purchases, sales, transfers, and related Network metrics.",
+        "The glossary groups terms into Collection metrics, Activity metrics, and TDH metrics.",
         "Genesis Sets are complete sets of the first three Meme NFTs.",
         "Use the definitions page when users ask what a Network metric means.",
         "For a single TDH explanation, point users to the TDH page."
@@ -389,6 +390,9 @@
       "facts": [
         "The Profile Brain tab surfaces Brain-related profile activity and wave context.",
         "Brain views include activity and wave sidebar surfaces where available.",
+        "Created Waves is labeled Wave posts, and each row's Last activity time refers to the newest post by anyone in that wave.",
+        "Most Active In is labeled All time and ranks accessible non-direct-message waves by how many posts the identity has written in them across all time.",
+        "Most Active In shows up to five ranked waves and labels each desktop row Last post with when the viewed identity last posted in that specific wave.",
         "Use /{user}/brain for profile-specific Brain context."
       ],
       "canonical_path": "/{user}/brain",
@@ -670,6 +674,10 @@
         "The /about/subscriptions primary action says Connect to Subscribe when a wallet or profile handoff is needed and Manage when the user can continue to their profile subscription settings.",
         "Users manage their subscription mode, balance, airdrop address, top-ups, upcoming drops, and history under their profile Subscriptions tab.",
         "Automatic mode mints eligible cards until the balance is used unless the user opts out; Manual mode only mints cards the user opts into.",
+        "Automatic mode does not expire when the balance is insufficient; coverage describes what the current balance funds, not an expiration date for the mode.",
+        "Coverage counts consecutive fully funded intended drops from the immediate next intended drop and accounts for mode, eligibility, edition preference, selections, opt-outs, balance, and the published schedule.",
+        "Coverage is green at 7 or more funded drops, gives an early plan-a-top-up warning at 4 to 6, shows running low at 2 to 3, and requires action at 0 to 1.",
+        "When available, Funded through and Next unfunded identify the Meme card and date; Top up by is shown only for an authoritative backend deadline.",
         "If an eligible card is unavailable, no card is airdropped and the unused balance stays available.",
         "The About Subscriptions overview links to the Subscriptions Report for aggregate subscribed and redeemed subscription counts."
       ],

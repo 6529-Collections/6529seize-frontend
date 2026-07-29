@@ -4,8 +4,8 @@ Parent: [Wave Link Previews Index](README.md)
 
 ## Overview
 
-Wave markdown renders dedicated web3 cards for supported ENS, NFT marketplace,
-Art Blocks, Compound, and `pepe.wtf` links.
+Wave markdown renders dedicated web3 cards for supported Etherscan, ENS, NFT
+marketplace, Art Blocks, Compound, and `pepe.wtf` links.
 
 If a URL does not match a supported rule, rendering falls back to a generic
 external preview or a plain link.
@@ -28,7 +28,32 @@ external preview or a plain link.
 - `https://app.ens.domains/{name}`
 - `https://app.ens.domains/name/{name}`
 - `https://app.ens.domains/address/{name-or-address}`
-- `https://etherscan.io/address/{name-or-address}`
+
+### Etherscan
+
+Only `https://` URLs on the exact supported explorer hosts match. Supported
+current networks are Ethereum (`etherscan.io` and `www.etherscan.io`), Sepolia,
+and Hoodi. Retired Ropsten, Rinkeby, Goerli, Kovan, and Holesky explorer hosts
+render archived-network context without attempting live RPC reads.
+
+Structured entity cards cover:
+
+- Transactions: `/tx/{hash}` and identity-bearing raw transaction, VM trace,
+  input decoder, transaction decoder, and search URLs
+- Addresses and ENS address lookups: `/address/{address-or-name}`,
+  `/address/{address-or-name}/advanced`, token holdings, balance checker, token
+  approval checker, name lookup, and search URLs
+- Tokens: `/token/{contract}`, token checker, and token tracker URLs
+- NFTs: `/nft/{contract}/{tokenId}`
+- Blocks: `/block/{height-or-hash}`, `/block/countdown/{height}`, and search
+  URLs
+- Uncles, blobs, and verified signatures: `/uncle/{hash}`, `/blob/{hash}`, and
+  `/verifySig/{id}`
+
+Etherscan lists, analytics, charts, contract tools, converters, account pages,
+directory pages, policy/about pages, and newly introduced paths on an approved
+host render route-aware cards. Unknown Etherscan subdomains and lookalike
+domains do not receive structured treatment.
 
 ### NFT marketplaces
 
@@ -59,10 +84,6 @@ Only `https://` URLs match. Host must be apex or `www`.
   - `https://app.compound.finance/comet/{market}`
 - App account path with wallet query:
   - `https://app.compound.finance/account?address={wallet}`
-- Etherscan transaction:
-  - `https://etherscan.io/tx/{hash}`
-- Etherscan known Compound market contract:
-  - `https://etherscan.io/address/{contract}`
 
 ### `pepe.wtf`
 
@@ -118,16 +139,31 @@ Only `https://` URLs match. Host must be apex or `www`.
 - OpenSea cards filter blocked OpenGraph-overlay image URLs.
 - Art Blocks cards show project/token context with `View live` and
   `Open on Art Blocks`.
-- Compound links render market, account, or transaction layouts by URL shape.
+- Etherscan transaction cards show status, inferred action, participants,
+  block/finality context, fee, and timestamp when bounded RPC reads succeed.
+- Etherscan address cards distinguish EOAs, contracts, and delegated EOAs and
+  show balance and observed block height when available.
+- Etherscan token and NFT cards show on-chain identity and standard details;
+  block cards distinguish future, proposed, and finalized blocks.
+- Etherscan deep-link tabs and tools remain visible as context chips. Partial
+  data, retired networks, and route-only cards are labeled rather than
+  presented as live data.
+- Recognized Compound protocol events enrich an Etherscan transaction card
+  with the decoded Compound action; Etherscan URLs are not owned by the
+  Compound provider.
+- Compound links render market or account layouts from Compound app URLs.
 - `pepe.wtf` links render asset, collection, artist, or set cards.
 
 ## Edge Cases
 
 - Unsupported host/path shapes do not use web3 cards.
 - Marketplace matching is strict to supported HTTPS host and path rules.
-- Etherscan `/address/{contract}` only shows a Compound card for known Compound
-  market contracts.
+- Etherscan matching uses an exact normalized host registry. A host such as
+  `foo.etherscan.io` falls back to the ordinary external-link path.
 - ENS inputs can normalize case, punycode, and address checksum format.
+- Bare `.eth` names and `app.ens.domains` URLs remain ENS cards; Etherscan
+  address URLs remain Etherscan cards even when their identifier is an ENS
+  name.
 - If previews are hidden on a drop, links stay plain until previews are shown.
 
 ## Failure and Recovery
@@ -140,6 +176,9 @@ Only `https://` URLs match. Host must be apex or `www`.
 - ENS links can fall back to plain links when ENS preview resolution fails.
 - Art Blocks cards can keep rendering with placeholder media when metadata/media
   is missing.
+- Etherscan entity cards degrade to identity-preserving partial cards when RPC
+  reads fail or exceed their budget. Route-only pages never require an upstream
+  request.
 - Compound links can fall back to generic external preview, then plain link.
 - `pepe.wtf` cards fall back to an `Open on pepe.wtf` link card when resolver
   requests fail.
@@ -148,6 +187,11 @@ Only `https://` URLs match. Host must be apex or `www`.
 ## Limitations / Notes
 
 - Dedicated web3 cards activate only for supported URL patterns above.
+- Etherscan live entity data is read from fixed chain RPC clients with bounded
+  timeouts. Cards show a snapshot and link to the canonical explorer page.
+- Uncle, blob, and verified-signature cards currently preserve verified route
+  identity and context but do not claim live structured fields that cannot be
+  obtained through the bounded RPC path.
 - Compound market coverage depends on the supported registry-backed market list.
 - Displayed market/protocol values are snapshots and can drift from live state.
 - Card completeness depends on upstream metadata quality and availability.

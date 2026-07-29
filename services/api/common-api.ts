@@ -3,6 +3,7 @@ import { recordMobileLaunchApiRequest } from "@/utils/monitoring/mobileLaunchTim
 import { getAuthJwt, getStagingAuth } from "../auth/auth.utils";
 
 type ApiErrorMode = "legacy-string" | "structured";
+type ApiRequestOrigin = "api" | "app";
 
 type StructuredApiError = Error & {
   status: number;
@@ -33,10 +34,13 @@ const getHeaders = (
 const buildUrl = (
   endpoint: string,
   params?: Record<string, string>,
-  transformParams?: (params: Record<string, string>) => Record<string, string>
+  transformParams?: (params: Record<string, string>) => Record<string, string>,
+  requestOrigin: ApiRequestOrigin = "api"
 ): string => {
   let path = `/api/${endpoint}`;
-  let url = `${publicEnv.API_ENDPOINT}${path}`;
+  const apiEndpoint =
+    requestOrigin === "app" ? publicEnv.BASE_ENDPOINT : publicEnv.API_ENDPOINT;
+  let url = `${apiEndpoint}${path}`;
 
   if (params) {
     const queryParams = new URLSearchParams();
@@ -350,6 +354,7 @@ function getRequestTimingNow(): number {
 
 export const commonApiFetch = async <T, U = Record<string, string>>(param: {
   endpoint: string;
+  requestOrigin?: ApiRequestOrigin | undefined;
   headers?: Record<string, string> | undefined;
   params?: U | undefined;
   signal?: AbortSignal | undefined;
@@ -366,7 +371,8 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
         transformed[key] = value === "nic" ? "cic" : value;
       });
       return transformed;
-    }
+    },
+    param.requestOrigin
   );
 
   return executeApiRequest<T>({

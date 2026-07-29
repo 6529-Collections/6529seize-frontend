@@ -1,0 +1,699 @@
+import { spawnSync, type ChildProcess } from "node:child_process";
+import { EventEmitter } from "node:events";
+import fs from "node:fs";
+import { PassThrough } from "node:stream";
+import os from "node:os";
+import path from "node:path";
+
+type Pack = {
+  scriptKey: string;
+  alias?: string;
+  safety: string;
+  environments: string[];
+  triggers: string[];
+  specs?: string[];
+  timeoutMinutes: number;
+};
+
+type SpawnResult = {
+  status: number | null;
+  signal: NodeJS.Signals | null;
+  stdout: string;
+  stderr: string;
+  error?: Error & { code?: string };
+};
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const runner = require("../../scripts/e2e-packs.cjs") as {
+  RUNNER_CAPABILITIES: {
+    contract: string;
+    features: {
+      readonly_pack_parallelism: {
+        version: number;
+        max_parallel: number;
+      };
+    };
+  };
+  assertParallelSafe: (packs: Pack[], parallel: number) => void;
+  buildSpawnOptions: (pack: Pack) => {
+    killSignal: string;
+    maxBuffer: number;
+    timeout: number;
+  };
+  classifyResult: (result: SpawnResult) => {
+    failed: boolean;
+    infrastructure: boolean;
+    label: string;
+  };
+  parseArgs: (args: string[]) => {
+    env: string | null;
+    trigger: string | null;
+    pack: string | null;
+    artifactRoot: string | null;
+    parallel: number;
+    capabilities: boolean;
+    list: boolean;
+    forward: string[];
+  };
+  resolveArtifactRoot: (artifactRoot: string | null) => string | null;
+  resolvePacks: (
+    packs: Pack[],
+    filters: { env: string | null; trigger: string | null; pack: string | null }
+  ) => Pack[];
+  outputPathsForPack: (pack: Pack) => {
+    root: string;
+    testResults: string;
+    report: string;
+  };
+  runPacks: (
+    packs: Pack[],
+    options: {
+      artifactRoot: string | null;
+      environment?: string;
+      trigger?: string;
+      parallel?: number;
+      forward: string[];
+      spawn: (
+        pack: Pack,
+        forward: string[],
+        outputPaths: { root: string; testResults: string; report: string }
+      ) => SpawnResult | Promise<SpawnResult>;
+      cleanup: (pack: Pack) => void;
+      preserve: (artifactRoot: string, pack: Pack, output: string) => string;
+      prepare: (artifactRoot: string) => void;
+    }
+  ) => Promise<{
+    failedCount: number;
+    infrastructureFailureCount: number;
+    evidence: {
+      parallelism_requested: number;
+      worker_count: number;
+      results: Array<{ script_key: string; failure_class: string | null }>;
+    };
+  }>;
+  runProcessGroup: (
+    command: string,
+    args: string[],
+    options: {
+      cwd: string;
+      env: NodeJS.ProcessEnv;
+      maxBuffer: number;
+      spawnProcess?: () => ChildProcess;
+      timeout: number;
+    }
+  ) => Promise<SpawnResult>;
+};
+
+const ROOT = process.cwd();
+const SCRIPT_PATH = path.join(ROOT, "scripts", "e2e-packs.cjs");
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { PACKS } = require("../../tests/packs.manifest.cjs") as {
+  PACKS: Pack[];
+};
+
+const samplePacks: Pack[] = [
+  {
+    scriptKey: "test:e2e:staging:smoke",
+    alias: "smoke",
+    safety: "readonly",
+    environments: ["staging"],
+    triggers: ["post-deploy", "manual"],
+    timeoutMinutes: 10,
+  },
+  {
+    scriptKey: "test:e2e:production:social-readonly",
+    alias: "social-readonly",
+    safety: "readonly",
+    environments: ["production"],
+    triggers: ["cron", "manual"],
+    timeoutMinutes: 15,
+  },
+];
+
+describe("manifest-driven E2E runner", () => {
+  it("parses filters, runner options, shard forwarding, and a bare separator", () => {
+    expect(
+      runner.parseArgs([
+        "--",
+        "--env",
+        "staging",
+        "--trigger",
+        "post-deploy",
+        "--pack",
+        "smoke",
+        "--artifact-root",
+        "artifacts/e2e",
+        "--parallel",
+        "3",
+        "--shard",
+        "1/2",
+        "--list",
+      ])
+    ).toEqual({
+      env: "staging",
+      trigger: "post-deploy",
+      pack: "smoke",
+      artifactRoot: "artifacts/e2e",
+      parallel: 3,
+      capabilities: false,
+      list: true,
+      forward: ["--shard=1/2"],
+    });
+    expect(() => runner.parseArgs(["--shard", "0/2"])).toThrow(
+      "--shard requires a value like 1/2"
+    );
+    expect(() => runner.parseArgs(["--shard", "3/2"])).toThrow(
+      "--shard requires a value like 1/2"
+    );
+    expect(() => runner.parseArgs(["--unknown"])).toThrow(
+      'unknown argument "--unknown"'
+    );
+    expect(() => runner.parseArgs(["--parallel", "5"])).toThrow(
+      "--parallel must be between 1 and 4"
+    );
+  });
+
+  it("reports an explicit versioned parallel-runner capability without requiring an environment", () => {
+    expect(runner.RUNNER_CAPABILITIES).toEqual({
+      contract: "release-bus-e2e-runner-capabilities.v1",
+      features: {
+        readonly_pack_parallelism: {
+          version: 1,
+          max_parallel: 4,
+        },
+      },
+    });
+    expect(runner.parseArgs(["--capabilities"])).toMatchObject({
+      env: null,
+      parallel: 1,
+      capabilities: true,
+    });
+    const result = spawnSync(
+      process.execPath,
+      [SCRIPT_PATH, "--capabilities"],
+      {
+        cwd: ROOT,
+        encoding: "utf8",
+      }
+    );
+    expect(result.status).toBe(0);
+    expect(JSON.parse(result.stdout)).toEqual(runner.RUNNER_CAPABILITIES);
+  });
+
+  it("limits destructive artifact cleanup to dedicated top-level directories", () => {
+    expect(runner.resolveArtifactRoot("staging-e2e-artifacts")).toBe(
+      path.join(ROOT, "staging-e2e-artifacts")
+    );
+    expect(runner.resolveArtifactRoot("production-e2e-artifacts/retry-1")).toBe(
+      path.join(ROOT, "production-e2e-artifacts", "retry-1")
+    );
+    expect(() => runner.resolveArtifactRoot("tests/artifacts")).toThrow(
+      "dedicated top-level *-artifacts directory"
+    );
+    expect(() =>
+      runner.resolveArtifactRoot("staging-e2e-artifacts/../tests")
+    ).toThrow("must not contain empty, . or .. segments");
+    expect(() => runner.resolveArtifactRoot("../outside-artifacts")).toThrow();
+    expect(() => runner.resolveArtifactRoot("test-results")).toThrow();
+  });
+
+  it("resolves exact keys and aliases without changing manifest order", () => {
+    expect(
+      runner.resolvePacks(samplePacks, {
+        env: "staging",
+        trigger: "post-deploy",
+        pack: "smoke",
+      })
+    ).toEqual([samplePacks[0]]);
+    expect(
+      runner.resolvePacks(samplePacks, {
+        env: "production",
+        trigger: "cron",
+        pack: "all",
+      })
+    ).toEqual([samplePacks[1]]);
+  });
+
+  it("applies a bounded timeout and distinguishes failure classes", () => {
+    expect(runner.buildSpawnOptions(samplePacks[0]!)).toMatchObject({
+      killSignal: "SIGTERM",
+      maxBuffer: 64 * 1024 * 1024,
+      timeout: 10 * 60 * 1000,
+    });
+
+    const timeoutError = Object.assign(new Error("timed out"), {
+      code: "ETIMEDOUT",
+    });
+    expect(
+      runner.classifyResult({
+        status: null,
+        signal: null,
+        stdout: "",
+        stderr: "",
+        error: timeoutError,
+      })
+    ).toMatchObject({ failed: true, infrastructure: true });
+    expect(
+      runner.classifyResult({
+        status: 1,
+        signal: null,
+        stdout: "",
+        stderr: "",
+      })
+    ).toMatchObject({ failed: true, infrastructure: false });
+    expect(
+      runner.classifyResult({
+        status: null,
+        signal: "SIGTERM",
+        stdout: "",
+        stderr: "",
+      })
+    ).toMatchObject({ failed: true, infrastructure: true });
+
+    const cleanTeardownTimeout = spawnSync(
+      process.execPath,
+      [
+        "-e",
+        'process.on("SIGTERM", () => process.exit(0)); setInterval(() => {}, 1000);',
+      ],
+      {
+        encoding: "utf8",
+        killSignal: "SIGTERM",
+        timeout: 100,
+      }
+    ) as unknown as SpawnResult;
+    expect(cleanTeardownTimeout.error?.code).toBe("ETIMEDOUT");
+    expect(runner.classifyResult(cleanTeardownTimeout)).toMatchObject({
+      failed: true,
+      infrastructure: true,
+    });
+  });
+
+  it("continues after failures and records preserved artifacts", async () => {
+    const summaryDir = fs.mkdtempSync(path.join(os.tmpdir(), "e2e-packs-"));
+    const summaryPath = path.join(summaryDir, "summary.md");
+    const previousSummary = process.env["GITHUB_STEP_SUMMARY"];
+    process.env["GITHUB_STEP_SUMMARY"] = summaryPath;
+    const timeoutError = Object.assign(new Error("timed out"), {
+      code: "ETIMEDOUT",
+    });
+    let call = 0;
+
+    try {
+      const result = await runner.runPacks(samplePacks, {
+        artifactRoot: path.join(summaryDir, "artifacts"),
+        environment: "staging",
+        trigger: "post-deploy",
+        parallel: 2,
+        forward: ["--shard=1/2"],
+        spawn: (_pack, forward) => {
+          expect(forward).toEqual(["--shard=1/2"]);
+          call += 1;
+          return call === 1
+            ? {
+                status: null,
+                signal: null,
+                stdout: "",
+                stderr: "",
+                error: timeoutError,
+              }
+            : {
+                status: 1,
+                signal: null,
+                stdout: "",
+                stderr: "",
+              };
+        },
+        cleanup: () => undefined,
+        preserve: (_artifactRoot, pack) => `artifacts/${pack.alias}`,
+        prepare: (artifactRoot) =>
+          fs.mkdirSync(artifactRoot, { recursive: true }),
+      });
+
+      expect(result).toMatchObject({
+        failedCount: 2,
+        infrastructureFailureCount: 1,
+        evidence: {
+          parallelism_requested: 2,
+          worker_count: 2,
+          results: [
+            {
+              script_key: "test:e2e:staging:smoke",
+              failure_class: "infrastructure",
+            },
+            {
+              script_key: "test:e2e:production:social-readonly",
+              failure_class: "e2e",
+            },
+          ],
+        },
+      });
+      expect(call).toBe(2);
+      expect(fs.readFileSync(summaryPath, "utf8")).toContain(
+        "artifacts/social-readonly"
+      );
+    } finally {
+      if (previousSummary === undefined) {
+        delete process.env["GITHUB_STEP_SUMMARY"];
+      } else {
+        process.env["GITHUB_STEP_SUMMARY"] = previousSummary;
+      }
+      fs.rmSync(summaryDir, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps running when the optional GitHub summary cannot be written", async () => {
+    const summaryDir = fs.mkdtempSync(path.join(os.tmpdir(), "e2e-summary-"));
+    const previousSummary = process.env["GITHUB_STEP_SUMMARY"];
+    process.env["GITHUB_STEP_SUMMARY"] = summaryDir;
+    const warning = jest.spyOn(console, "warn").mockImplementation();
+    let call = 0;
+
+    try {
+      const result = await runner.runPacks([samplePacks[0]!], {
+        artifactRoot: path.join(summaryDir, "staging-e2e-artifacts"),
+        forward: [],
+        spawn: () => {
+          call += 1;
+          return {
+            status: 0,
+            signal: null,
+            stdout: "",
+            stderr: "",
+          };
+        },
+        cleanup: () => undefined,
+        preserve: () => "staging-e2e-artifacts/smoke",
+        prepare: (artifactRoot) =>
+          fs.mkdirSync(artifactRoot, { recursive: true }),
+      });
+
+      expect(result).toMatchObject({
+        failedCount: 0,
+        infrastructureFailureCount: 0,
+      });
+      expect(call).toBe(1);
+      expect(warning).toHaveBeenCalledWith(
+        expect.stringContaining("unable to update GITHUB_STEP_SUMMARY")
+      );
+    } finally {
+      warning.mockRestore();
+      if (previousSummary === undefined) {
+        delete process.env["GITHUB_STEP_SUMMARY"];
+      } else {
+        process.env["GITHUB_STEP_SUMMARY"] = previousSummary;
+      }
+      fs.rmSync(summaryDir, { recursive: true, force: true });
+    }
+  });
+
+  it("bounds parallelism to readonly packs and assigns unique output paths", async () => {
+    const unsafe = { ...samplePacks[0]!, safety: "sandbox" };
+    expect(() => runner.assertParallelSafe([unsafe], 2)).toThrow(
+      "manifest-declared readonly packs"
+    );
+
+    let active = 0;
+    let peak = 0;
+    const seenRoots = new Set<string>();
+    const result = await runner.runPacks(
+      [
+        samplePacks[0]!,
+        {
+          ...samplePacks[0]!,
+          scriptKey: "test:e2e:staging:second-readonly",
+        },
+        {
+          ...samplePacks[0]!,
+          scriptKey: "test:e2e:staging:third-readonly",
+        },
+      ],
+      {
+        artifactRoot: null,
+        parallel: 2,
+        forward: [],
+        spawn: async (_pack, _forward, outputPaths) => {
+          seenRoots.add(outputPaths.root);
+          active += 1;
+          peak = Math.max(peak, active);
+          await new Promise((resolve) => setTimeout(resolve, 10));
+          active -= 1;
+          return {
+            status: 0,
+            signal: null,
+            stdout: "",
+            stderr: "",
+          };
+        },
+        cleanup: () => undefined,
+        preserve: () => "",
+        prepare: () => undefined,
+      }
+    );
+
+    expect(peak).toBe(2);
+    expect(seenRoots.size).toBe(3);
+    expect(result.evidence.parallelism_requested).toBe(2);
+    expect(result.evidence.worker_count).toBe(2);
+  });
+
+  it.each(["launch", "cleanup", "preservation"] as const)(
+    "classifies %s failures as infrastructure without false-green evidence",
+    async (failurePoint) => {
+      const result = await runner.runPacks([samplePacks[0]!], {
+        artifactRoot: null,
+        parallel: 1,
+        forward: [],
+        spawn: () => {
+          if (failurePoint === "launch") {
+            throw new Error("launch failed");
+          }
+          return {
+            status: 0,
+            signal: null,
+            stdout: "",
+            stderr: "",
+          };
+        },
+        cleanup: () => {
+          if (failurePoint === "cleanup") {
+            throw new Error("cleanup failed");
+          }
+        },
+        preserve: () => {
+          if (failurePoint === "preservation") {
+            throw new Error("preservation failed");
+          }
+          return "";
+        },
+        prepare: () => undefined,
+      });
+
+      expect(result).toMatchObject({
+        failedCount: 1,
+        infrastructureFailureCount: 1,
+        evidence: {
+          failed_count: 1,
+          infrastructure_failure_count: 1,
+          results: [{ failure_class: "infrastructure" }],
+        },
+      });
+    }
+  );
+
+  it("rejects an incomplete release binding before preparing or running packs", async () => {
+    const bindingVariables = [
+      "RELEASE_BUS_E2E_MANIFEST_ID",
+      "RELEASE_BUS_E2E_MANIFEST_IDENTITY_SHA256",
+      "RELEASE_BUS_E2E_SOURCE_SHA",
+    ] as const;
+    const previous = Object.fromEntries(
+      bindingVariables.map((name) => [name, process.env[name]])
+    );
+    process.env["RELEASE_BUS_E2E_MANIFEST_ID"] =
+      "11111111-1111-1111-1111-111111111111";
+    delete process.env["RELEASE_BUS_E2E_MANIFEST_IDENTITY_SHA256"];
+    delete process.env["RELEASE_BUS_E2E_SOURCE_SHA"];
+    const prepare = jest.fn();
+    const spawn = jest.fn();
+
+    try {
+      await expect(
+        runner.runPacks([samplePacks[0]!], {
+          artifactRoot: null,
+          forward: [],
+          cleanup: () => undefined,
+          preserve: () => "",
+          prepare,
+          spawn,
+        })
+      ).rejects.toThrow("binding is incomplete or malformed");
+      expect(prepare).not.toHaveBeenCalled();
+      expect(spawn).not.toHaveBeenCalled();
+    } finally {
+      for (const name of bindingVariables) {
+        const value = previous[name];
+        if (value === undefined) {
+          delete process.env[name];
+        } else {
+          process.env[name] = value;
+        }
+      }
+    }
+  });
+
+  it("times out and terminates the complete POSIX process group", async () => {
+    const startedAt = Date.now();
+    const result = await runner.runProcessGroup(
+      process.execPath,
+      [
+        "-e",
+        [
+          'const {spawn}=require("node:child_process");',
+          'const child=spawn(process.execPath,["-e","process.on(\\"SIGTERM\\",()=>{});setInterval(()=>{},1000)"],{stdio:"ignore"});',
+          "console.log(child.pid);",
+          "setInterval(()=>{},1000);",
+        ].join(""),
+      ],
+      {
+        cwd: ROOT,
+        env: process.env,
+        maxBuffer: 1024 * 1024,
+        timeout: 100,
+      }
+    );
+
+    expect(result.error?.code).toBe("ETIMEDOUT");
+    expect(Date.now() - startedAt).toBeGreaterThanOrEqual(900);
+    const grandchildPid = Number(result.stdout.trim());
+    expect(grandchildPid).toBeGreaterThan(0);
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(() => process.kill(grandchildPid, 0)).toThrow();
+  });
+
+  it("returns a bounded infrastructure result if close never follows escalation", async () => {
+    jest.useFakeTimers();
+    const fakeChild = Object.assign(new EventEmitter(), {
+      kill: jest.fn().mockReturnValue(true),
+      pid: 987654,
+      stderr: new PassThrough(),
+      stdout: new PassThrough(),
+    }) as unknown as ChildProcess;
+    const processKill = jest.spyOn(process, "kill").mockImplementation(() => {
+      throw Object.assign(new Error("No such process group"), {
+        code: "ESRCH",
+      });
+    });
+
+    try {
+      const resultPromise = runner.runProcessGroup("never-closes", [], {
+        cwd: ROOT,
+        env: process.env,
+        maxBuffer: 1024,
+        spawnProcess: () => fakeChild,
+        timeout: 100,
+      });
+      await jest.advanceTimersByTimeAsync(1100);
+      await expect(resultPromise).resolves.toMatchObject({
+        status: null,
+        signal: "SIGKILL",
+        error: { code: "ETIMEDOUT" },
+      });
+      expect(fakeChild.kill).toHaveBeenCalledTimes(2);
+    } finally {
+      processKill.mockRestore();
+      jest.useRealTimers();
+    }
+  });
+
+  it("truncates output while a noisy process is being terminated", async () => {
+    jest.useFakeTimers();
+    const fakeChild = Object.assign(new EventEmitter(), {
+      kill: jest.fn().mockReturnValue(true),
+      pid: 987654,
+      stderr: new PassThrough(),
+      stdout: new PassThrough(),
+    }) as unknown as ChildProcess;
+    const processKill = jest.spyOn(process, "kill").mockImplementation(() => {
+      throw Object.assign(new Error("No such process group"), {
+        code: "ESRCH",
+      });
+    });
+
+    try {
+      const resultPromise = runner.runProcessGroup("noisy", [], {
+        cwd: ROOT,
+        env: process.env,
+        maxBuffer: 32,
+        spawnProcess: () => fakeChild,
+        timeout: 10_000,
+      });
+      fakeChild.stdout!.emit("data", Buffer.alloc(4096, "x"));
+      fakeChild.stdout!.emit("data", Buffer.alloc(4096, "y"));
+      await jest.advanceTimersByTimeAsync(1000);
+      const result = await resultPromise;
+      expect(result.error?.code).toBe("ENOBUFS");
+      expect(Buffer.byteLength(result.stdout)).toBeLessThanOrEqual(32);
+    } finally {
+      processKill.mockRestore();
+      jest.useRealTimers();
+    }
+  });
+});
+
+describe("E2E runner CLI resolution", () => {
+  const run = (args: string[]) =>
+    spawnSync(process.execPath, [SCRIPT_PATH, ...args], {
+      cwd: ROOT,
+      encoding: "utf8",
+    });
+
+  it("hard-fails an empty deployed-environment selection", () => {
+    const result = run(["--env", "staging", "--trigger", "cron", "--list"]);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("An empty deployed-environment selection");
+  });
+
+  it.each([
+    ["staging", "post-deploy", 12],
+    ["production", "cron", 10],
+    ["production", "post-deploy", 11],
+  ])(
+    "lists %s/%s as a non-empty deterministic pack set",
+    (env, trigger, count) => {
+      const result = run(["--env", env, "--trigger", trigger, "--list"]);
+      expect(result.status).toBe(0);
+      expect(result.stdout).toContain(`resolved ${count} pack(s)`);
+    }
+  );
+
+  it.each(["staging", "production"])(
+    "uses disjoint readonly %s post-deploy packs",
+    (environment) => {
+      const packs = PACKS.filter(
+        (pack) =>
+          pack.environments.includes(environment) &&
+          pack.triggers.includes("post-deploy")
+      );
+      expect(packs.length).toBeGreaterThan(1);
+      expect(packs.every((pack) => pack.safety === "readonly")).toBe(true);
+      const specs = packs.flatMap((pack) => pack.specs ?? []);
+      expect(new Set(specs).size).toBe(specs.length);
+    }
+  );
+
+  it("preserves the complete production aggregate inventory in disjoint packs", () => {
+    const aggregate = PACKS.find(
+      (pack) => pack.scriptKey === "test:e2e:production:readonly"
+    );
+    expect(aggregate?.triggers).toEqual(["manual"]);
+    const postDeploySpecs = PACKS.filter(
+      (pack) =>
+        pack.environments.includes("production") &&
+        pack.triggers.includes("post-deploy")
+    ).flatMap((pack) => pack.specs ?? []);
+    expect([...postDeploySpecs].sort()).toEqual(
+      [...(aggregate?.specs ?? [])].sort()
+    );
+  });
+});

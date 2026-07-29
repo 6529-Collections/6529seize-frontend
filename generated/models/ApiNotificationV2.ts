@@ -23,7 +23,7 @@ export class ApiNotificationV2 {
     'cause': ApiNotificationCause;
     'created_at': number;
     'read_at': number | null;
-    'related_identity': ApiIdentityOverview;
+    'related_identity': ApiIdentityOverview | null;
     'related_drops': Array<ApiDropV2>;
     'related_wave'?: ApiWaveOverview;
     'additional_context': ApiNotificationAdditionalContextV2;
