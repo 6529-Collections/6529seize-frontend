@@ -132,9 +132,6 @@ export default function TDHHistoricBoostsPage() {
               >
                 {m(locale, "network.tdhHistoric.versions.title")}
               </h2>
-              <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
-                {m(locale, "network.tdhHistoric.versions.intro")}
-              </p>
             </div>
 
             <div className="tw-min-w-0">
@@ -436,7 +433,12 @@ function HistoricRuleDetails({
   return (
     <>
       <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-400">
-        {m(locale, "network.tdhHistoric.details.combination")}
+        {m(
+          locale,
+          rule.version === "1.2"
+            ? "network.tdhHistoric.details.combinationLowercase"
+            : "network.tdhHistoric.details.combination"
+        )}
       </p>
 
       <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4 xl:tw-grid-cols-3">
@@ -454,12 +456,13 @@ function HistoricRuleDetails({
               <Multiplier locale={locale} value={rule.completeSetMultiplier} />
             </li>
             <li>
+              {m(locale, "network.tdhHistoric.details.categoryA.additionalSet")}{" "}
+              <Multiplier locale={locale} value={1.02} />
               {m(
                 locale,
-                "network.tdhHistoric.details.categoryA.additionalSets",
+                "network.tdhHistoric.details.categoryA.additionalSetMaximum",
                 { count: formatInteger(locale, 2) }
-              )}{" "}
-              <Multiplier locale={locale} value={1.02} />
+              )}
             </li>
           </ul>
         </section>
@@ -510,10 +513,17 @@ function HistoricRuleDetails({
               </ul>
             </li>
             <li>
-              {m(locale, "network.tdhHistoric.details.categoryB.laterSeasons", {
-                maxSeason: formatInteger(locale, rule.maxSeason),
-              })}{" "}
-              <Multiplier locale={locale} value={1.05} />
+              {Array.from(
+                { length: rule.maxSeason - 1 },
+                (_, index) => index + 2
+              ).map((season) => (
+                <span className="tw-block" key={season}>
+                  {m(locale, "network.tdhHistoric.details.categoryB.season", {
+                    season: formatInteger(locale, season),
+                  })}{" "}
+                  <Multiplier locale={locale} value={1.05} />
+                </span>
+              ))}
             </li>
           </ul>
         </section>
@@ -590,10 +600,7 @@ function RulePeriod({
       <time dateTime={rule.startDateIso}>
         {formatLongDate(locale, rule.startDate)}
       </time>
-      <span aria-hidden="true"> — </span>
-      <span className="tw-sr-only">
-        {m(locale, "network.tdhHistoric.table.through")}
-      </span>
+      <span> — </span>
       <time dateTime={rule.endDateIso}>
         {formatLongDate(locale, rule.endDate)}
       </time>
@@ -604,7 +611,7 @@ function RulePeriod({
 function formatLongDate(locale: SupportedLocale, date: number): string {
   return formatDate(locale, date, {
     day: "numeric",
-    month: "short",
+    month: "long",
     year: "numeric",
     timeZone: "UTC",
   });

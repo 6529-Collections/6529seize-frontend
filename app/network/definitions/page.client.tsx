@@ -59,9 +59,6 @@ export default function DefinitionsClient() {
             <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
               {m(locale, "network.definitions.hero.title")}
             </h1>
-            <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300">
-              {m(locale, "network.definitions.hero.intro")}
-            </p>
           </header>
 
           {sections.map((section) => (
