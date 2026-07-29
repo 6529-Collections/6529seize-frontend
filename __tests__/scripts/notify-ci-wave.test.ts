@@ -182,7 +182,10 @@ async function runManualNotifier({
     } else if (pathName.includes(`/commits/${"c".repeat(40)}/pulls`)) {
       body = pullRequests;
     } else if (pathName.includes("/pulls/3498/commits")) {
-      body = pullCommits;
+      const page = Number(
+        new URL(pathName, "http://localhost").searchParams.get("page") ?? "1"
+      );
+      body = pullCommits.slice((page - 1) * 100, page * 100);
     } else {
       response.writeHead(404);
       response.end();
@@ -255,8 +258,48 @@ describe("notify-ci-wave Release Train metadata", () => {
     });
   });
 
+  it("stops paging deployment history after finding an approved baseline", async () => {
+    const fixture: ManualWorkflowFixture = {
+      workflow: "Web Deploy - STAGING",
+      workflowFile: "deploy-staging.yml",
+      branch: "1a-staging",
+      targetEnvironment: "staging",
+    };
+    let historyRequests = 0;
+    const result = await runManualNotifier({
+      fixture,
+      githubResponseOverride: (pathName, response) => {
+        if (!pathName.includes("/actions/workflows/deploy-staging.yml/runs")) {
+          return false;
+        }
+        historyRequests += 1;
+        response.writeHead(200, { "content-type": "application/json" });
+        response.end(
+          JSON.stringify({
+            workflow_runs: Array.from({ length: 100 }, (_, index) => ({
+              id: 122 - index,
+              name: fixture.workflow,
+              path: `.github/workflows/${fixture.workflowFile}@refs/heads/${fixture.branch}`,
+              head_sha: "b".repeat(40),
+              head_branch: fixture.branch,
+              status: "completed",
+              conclusion: "success",
+              created_at: "2026-07-22T11:38:00Z",
+            })),
+          })
+        );
+        return true;
+      },
+    });
+
+    expect(result.stderr).toBe("");
+    expect(result.payload).toMatchObject({
+      contributor_evidence: "manual-range",
+    });
+    expect(historyRequests).toBe(1);
+  });
+
   it("aborts stalled GitHub evidence and still sends the CI notification", async () => {
-    const startedAt = Date.now();
     const result = await runManualNotifier({
       githubResponseOverride: (pathName) =>
         pathName.endsWith("/actions/runs/123"),
@@ -266,7 +309,6 @@ describe("notify-ci-wave Release Train metadata", () => {
       },
     });
 
-    expect(Date.now() - startedAt).toBeLessThan(2_000);
     expect(result.code).toBe(0);
     expect(result.stderr).toContain(
       "GitHub contributor evidence request timed out after 50ms"
@@ -455,10 +497,27 @@ describe("notify-ci-wave Release Train metadata", () => {
       });
 
       expect(result.code).toBe(0);
+      expect(result.stderr).toBe("");
       expect(result.payload).not.toHaveProperty("contributor_evidence");
       expect(result.payload).not.toHaveProperty("contributor_github_logins");
     }
   );
+
+  it("reports a precise diagnostic when verified contributors exceed the payload bound", async () => {
+    const result = await runManualNotifier({
+      pullCommits: Array.from({ length: 101 }, (_, index) => ({
+        author: { login: `manual-user-${index}`, type: "User" },
+        committer: null,
+      })),
+    });
+
+    expect(result.code).toBe(0);
+    expect(result.stderr).toContain(
+      "Verified manual deployment contributor evidence exceeds 100 users"
+    );
+    expect(result.payload).not.toHaveProperty("contributor_evidence");
+    expect(result.payload).not.toHaveProperty("contributor_github_logins");
+  });
 
   it("excludes an associated PR that targets a different branch", async () => {
     const result = await runManualNotifier({

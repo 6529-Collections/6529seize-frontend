@@ -112,22 +112,10 @@ function isHumanGithubUser(user) {
   );
 }
 
-function parseReleaseContributors(value) {
-  if (!value) return [];
-  const parsed = JSON.parse(value);
-  if (!Array.isArray(parsed) || parsed.length > 100) {
-    throw new Error(
-      "CI_RELEASE_CONTRIBUTORS must be an array with at most 100 entries"
-    );
-  }
+function normalizeContributorGithubLogins(entries) {
   const contributors = [];
   const seen = new Set();
-  for (const entry of parsed) {
-    if (typeof entry !== "string" || !isContributorGithubLogin(entry.trim())) {
-      throw new Error(
-        "CI_RELEASE_CONTRIBUTORS contains an invalid GitHub login"
-      );
-    }
+  for (const entry of entries) {
     const login = entry.trim();
     const key = login.toLowerCase();
     if (
@@ -140,6 +128,26 @@ function parseReleaseContributors(value) {
     contributors.push(login);
   }
   return contributors;
+}
+
+function parseReleaseContributors(value) {
+  if (!value) return [];
+  const parsed = JSON.parse(value);
+  if (!Array.isArray(parsed) || parsed.length > 100) {
+    throw new Error(
+      "CI_RELEASE_CONTRIBUTORS must be an array with at most 100 entries"
+    );
+  }
+  const contributors = [];
+  for (const entry of parsed) {
+    if (typeof entry !== "string" || !isContributorGithubLogin(entry.trim())) {
+      throw new Error(
+        "CI_RELEASE_CONTRIBUTORS contains an invalid GitHub login"
+      );
+    }
+    contributors.push(entry);
+  }
+  return normalizeContributorGithubLogins(contributors);
 }
 
 function githubRetryDelayMs(response, attempt) {
@@ -325,6 +333,7 @@ async function listPreviousWorkflowRuns({
         continue;
       runs.push(run);
     }
+    if (runs.length > 0) break;
     if (pageRuns.length < 100) break;
     if (page === 10) {
       throw new Error(`Production history for ${workflowName} is too large`);
@@ -451,9 +460,15 @@ async function deriveManualRangeContributors({
       }
     }
   }
-  return parseReleaseContributors(
-    JSON.stringify(users.filter(isHumanGithubUser).map((user) => user.login))
+  const contributors = normalizeContributorGithubLogins(
+    users.filter(isHumanGithubUser).map((user) => user.login)
   );
+  if (contributors.length > 100) {
+    throw new Error(
+      "Verified manual deployment contributor evidence exceeds 100 users"
+    );
+  }
+  return contributors;
 }
 
 function releaseContributorMetadataErrorMessage(error) {
