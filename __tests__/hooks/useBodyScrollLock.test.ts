@@ -22,11 +22,11 @@ describe("useBodyScrollLock", () => {
   it("releases the body lock after its owner unmounts", () => {
     const lock = renderHook(() => useBodyScrollLock());
 
-    expect(document.body.dataset.seizeBodyScrollLocked).toBe("true");
+    expect(document.body.dataset["seizeBodyScrollLocked"]).toBe("true");
 
     lock.unmount();
 
-    expect(document.body.dataset.seizeBodyScrollLocked).toBeUndefined();
+    expect(document.body.dataset["seizeBodyScrollLocked"]).toBeUndefined();
   });
 
   it("keeps a nested scrollbar gap until its last owner unmounts", () => {
@@ -46,16 +46,16 @@ describe("useBodyScrollLock", () => {
 
     firstLock.unmount();
 
-    expect(document.body.dataset.seizeBodyScrollLocked).toBe("true");
-    expect(document.body.dataset.seizeBodyScrollbarGap).toBe("true");
+    expect(document.body.dataset["seizeBodyScrollLocked"]).toBe("true");
+    expect(document.body.dataset["seizeBodyScrollbarGap"]).toBe("true");
     expect(
       document.body.style.getPropertyValue("--seize-body-scrollbar-gap")
     ).toBe("20px");
 
     secondLock.unmount();
 
-    expect(document.body.dataset.seizeBodyScrollLocked).toBeUndefined();
-    expect(document.body.dataset.seizeBodyScrollbarGap).toBeUndefined();
+    expect(document.body.dataset["seizeBodyScrollLocked"]).toBeUndefined();
+    expect(document.body.dataset["seizeBodyScrollbarGap"]).toBeUndefined();
     expect(
       document.body.style.getPropertyValue("--seize-body-scrollbar-gap")
     ).toBe("");
@@ -70,11 +70,11 @@ describe("useBodyScrollLock", () => {
 
     gapLock.unmount();
 
-    expect(document.body.dataset.seizeBodyScrollLocked).toBe("true");
-    expect(document.body.dataset.seizeBodyScrollbarGap).toBeUndefined();
+    expect(document.body.dataset["seizeBodyScrollLocked"]).toBe("true");
+    expect(document.body.dataset["seizeBodyScrollbarGap"]).toBeUndefined();
 
     bodyLock.unmount();
 
-    expect(document.body.dataset.seizeBodyScrollLocked).toBeUndefined();
+    expect(document.body.dataset["seizeBodyScrollLocked"]).toBeUndefined();
   });
 });
