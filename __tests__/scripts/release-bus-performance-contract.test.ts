@@ -84,6 +84,7 @@ describe("Release Bus frontend performance contract", () => {
       expect(appPrCi).toContain(
         "policy_bundle_line_count:$policy_bundle_line_count"
       );
+      expect(appPrCi).toContain('[[ "$BUILD_REQUIRED" =~ ^(true|false)$ ]]');
       expect(appPrCi).not.toContain(
         "Build staging profile for exact artifact reuse"
       );
@@ -345,6 +346,12 @@ describe("Release Bus frontend performance contract", () => {
       expect(deployReport.run).toContain("consumed_preflight_artifact=false");
       expect(deployReport.run).toContain(
         'if [ "$ARTIFACT_OUTCOME" = success ]'
+      );
+      expect(deployReport.run).toContain(
+        '[ "$ARTIFACT_CONTRACT" = environment-bound-v1 ]'
+      );
+      expect(deployReport.run).not.toContain(
+        '[ "$ARTIFACT_CONTRACT_VERSION" = environment-bound-v3 ] && printf true'
       );
       expect(sourceVerification.run).toContain(
         environment === "staging"
