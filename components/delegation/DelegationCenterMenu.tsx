@@ -289,7 +289,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
         className={`tw-h-full tw-min-h-11 tw-w-full tw-whitespace-normal tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-leading-5 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
           active
             ? "tw-border-primary-400 tw-bg-primary-500 tw-text-white"
-            : "tw-border-white/10 tw-bg-iron-900 tw-text-iron-300 hover:tw-border-white/20 hover:tw-bg-iron-800 hover:tw-text-white"
+            : "hover:tw-border-white/12 tw-border-white/[0.06] tw-bg-iron-900 tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-200"
         }`}
         aria-current={active ? "page" : undefined}
       >
@@ -351,13 +351,20 @@ function EtherscanLink() {
       }
       target="_blank"
       rel="noopener noreferrer"
-      className="tw-group tw-inline-flex tw-min-h-10 tw-items-center tw-gap-2 tw-rounded-md tw-px-1 tw-py-1.5 tw-text-sm tw-font-medium tw-text-white tw-no-underline tw-transition-all hover:-tw-translate-y-0.5 hover:tw-text-white hover:tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+      className="tw-group tw-inline-flex tw-min-h-9 tw-items-center tw-gap-1.5 tw-rounded-md tw-px-1 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-iron-100 hover:tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
     >
-      <Image unoptimized src="/etherscan_w.png" alt="" width={24} height={24} />
+      <Image
+        unoptimized
+        src="/etherscan_w.png"
+        alt=""
+        width={20}
+        height={20}
+        className="tw-opacity-60 tw-transition-opacity group-hover:tw-opacity-90"
+      />
       <span>Etherscan</span>
       <FontAwesomeIcon
         icon={faArrowUpRightFromSquare}
-        className="tw-h-3.5 tw-w-3.5 tw-text-white tw-transition-colors group-hover:tw-text-primary-300"
+        className="tw-size-3 tw-text-iron-500 tw-transition-colors group-hover:tw-text-iron-300"
         aria-hidden="true"
       />
     </Link>
@@ -370,13 +377,20 @@ function GithubLink() {
       href={`https://github.com/6529-Collections/nftdelegation`}
       target="_blank"
       rel="noopener noreferrer"
-      className="tw-group tw-inline-flex tw-min-h-10 tw-items-center tw-gap-2 tw-rounded-md tw-px-1 tw-py-1.5 tw-text-sm tw-font-medium tw-text-white tw-no-underline tw-transition-all hover:-tw-translate-y-0.5 hover:tw-text-white hover:tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+      className="tw-group tw-inline-flex tw-min-h-9 tw-items-center tw-gap-1.5 tw-rounded-md tw-px-1 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-iron-100 hover:tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
     >
-      <Image unoptimized src="/github_w.png" alt="" width={24} height={24} />
+      <Image
+        unoptimized
+        src="/github_w.png"
+        alt=""
+        width={20}
+        height={20}
+        className="tw-opacity-60 tw-transition-opacity group-hover:tw-opacity-90"
+      />
       <span>GitHub</span>
       <FontAwesomeIcon
         icon={faArrowUpRightFromSquare}
-        className="tw-h-3.5 tw-w-3.5 tw-text-white tw-transition-colors group-hover:tw-text-primary-300"
+        className="tw-size-3 tw-text-iron-500 tw-transition-colors group-hover:tw-text-iron-300"
         aria-hidden="true"
       />
     </Link>
