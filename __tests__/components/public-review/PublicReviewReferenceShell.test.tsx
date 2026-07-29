@@ -33,11 +33,11 @@ describe("PublicReviewReferenceShell", () => {
     );
 
     expect(
-      screen.getByRole("link", { name: "Jump to send feedback" })
+      screen.getByRole("link", { name: "Send feedback" })
     ).toHaveAttribute("href", "#public-review-feedback");
     expect(
-      screen.getByRole("link", { name: "Open technical reference" })
-    ).not.toHaveAttribute("aria-current");
+      screen.getByRole("link", { name: /Technical reference/ })
+    ).toHaveAttribute("aria-current", "page");
   });
 
   it("keeps the feedback ledger but removes the submit shortcut when closed", () => {
@@ -58,10 +58,10 @@ describe("PublicReviewReferenceShell", () => {
     );
 
     expect(
-      screen.getByRole("link", { name: "View public feedback" })
+      screen.getByRole("link", { name: /Public feedback/ })
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: "Jump to send feedback" })
+      screen.queryByRole("link", { name: "Send feedback" })
     ).not.toBeInTheDocument();
   });
 });
