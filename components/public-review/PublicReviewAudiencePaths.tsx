@@ -66,7 +66,7 @@ export function PublicReviewAudiencePaths({
   return (
     <section
       aria-labelledby="review-audiences-heading"
-      className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-py-10"
+      className="tw-py-10"
     >
       <h2
         id="review-audiences-heading"
