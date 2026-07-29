@@ -54,14 +54,19 @@ const REFERENCE_ACTIVE_REVIEW_VERSION =
   ) ??
   PUBLICLY_AVAILABLE_REVIEW_VERSIONS.at(-1) ??
   ACTIVE_REVIEW_VERSION;
-const SOURCE_COMMITS = Object.fromEntries(
-  STREAM_REVIEW_DEFINITION.versions.map(({ source, version }) => [
+const REVIEW_VERSIONS_BY_VERSION = new Map(
+  STREAM_REVIEW_DEFINITION.versions.map((version) => [
+    version.version,
     version,
-    source.commit,
   ])
 );
-SOURCE_COMMITS[streamReferenceConfig.reviewVersion] =
-  streamReferenceConfig.source.commit;
+const SOURCE_COMMITS = Object.fromEntries(
+  streamReferenceConfig.output.retainedVersions.map((version) => [
+    version,
+    REVIEW_VERSIONS_BY_VERSION.get(version)?.source.commit ??
+      streamReferenceConfig.source.commit,
+  ])
+);
 
 const IDENTITY: SolidityReferenceReviewIdentity = {
   activeSourceCommit: REFERENCE_ACTIVE_REVIEW_VERSION.source.commit,

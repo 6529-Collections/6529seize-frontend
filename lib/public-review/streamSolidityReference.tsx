@@ -88,14 +88,22 @@ const referenceActiveStreamReviewVersion =
   publiclyAvailableStreamReviewVersions.at(-1) ??
   activeStreamReviewVersion;
 
-const streamReferenceSourceCommits = Object.fromEntries(
+const streamReviewVersionsByVersion = new Map(
   STREAM_REVIEW_DEFINITION.versions.map((candidate) => [
     candidate.version,
-    candidate.source.commit,
+    candidate,
   ])
 );
-streamReferenceSourceCommits[streamReferenceConfig.reviewVersion] =
-  streamReferenceConfig.source.commit;
+// Published versions keep their explicit reviewed pins. Retained draft
+// snapshots are generated from the current trusted source config and must
+// therefore resolve to that same source commit.
+const streamReferenceSourceCommits = Object.fromEntries(
+  streamReferenceConfig.output.retainedVersions.map((version) => [
+    version,
+    streamReviewVersionsByVersion.get(version)?.source.commit ??
+      streamReferenceConfig.source.commit,
+  ])
+);
 
 if (
   streamReferenceConfig.reviewId !== STREAM_REVIEW_SLUG ||
@@ -103,6 +111,10 @@ if (
     activeStreamReviewVersion.source.repository ||
   !streamReferenceConfig.output.retainedVersions.includes(
     streamReferenceConfig.reviewVersion
+  ) ||
+  publiclyAvailableStreamReviewVersions.some(
+    (candidate) =>
+      !streamReferenceConfig.output.retainedVersions.includes(candidate.version)
   ) ||
   streamReferenceConfig.output.retainedVersions.some(
     (version) => !streamReferenceSourceCommits[version]
