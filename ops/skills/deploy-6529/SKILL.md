@@ -66,19 +66,27 @@ component or GitHub actor.
    stale intents or deploy a separately reviewed pagination/cap change. Never
    edit the ledger or silently drop intent.
 
-V2 reuses the exact green PR merge-tree dual-profile artifact when eligible;
-otherwise it runs one combined preflight and builds staging and production
-profiles concurrently into one checksummed artifact. It owns shared staging
-only for deploy plus E2E, reuses the exact qualified artifact for production,
-and never publishes release notes.
+V2 reuses exact green PR merge-tree source and test evidence, then freshly
+builds one immutable environment-bound artifact from the train's exact
+composition. Staging builds only the staging profile. Production freshly
+composes the exact dependency-closed selection on current production `main`
+and builds only the production profile; staging artifact bytes are never
+reused for ordinary production. Repository-wide lint, typecheck, test
+inventory, and full Jest matrices stay in exact-head/merge-tree PR CI rather
+than normal train preflight. Shared staging is owned only for deploy plus
+manifest-bound E2E. V2 never publishes release notes.
 
 ## Manual fallback while the target lane is OFF and changeable
 
 1. Require the helper to report the target lane `OFF` with `changeable: true`
-   and no hidden emergency fence blocking fallback. Then prove the target
-   environment lock is free, no target mutation/E2E workflow is active, and
-   every already-dispatched exact operation is terminal. Fetch the exact remote
-   target head. Wait; never cancel another actor.
+   and no hidden emergency fence blocking fallback. The legacy frontend
+   staging and production workflows independently call the authenticated
+   readiness gate as their first job and reject before checkout, build, ref,
+   credential, or deployment mutation unless the exact run and drain state
+   are authorized. Then prove the target environment lock is free, no target
+   mutation/E2E workflow is active, and every already-dispatched exact operation
+   is terminal. Fetch the exact remote target head. Wait; never cancel another
+   actor.
 2. Re-fetch immediately before pushing. If a shared ref moved, recompute from
    the new head. Never force-push.
 3. Deploy required backend units in DAG order before merging/deploying dependent
