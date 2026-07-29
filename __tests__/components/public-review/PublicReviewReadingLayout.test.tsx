@@ -7,6 +7,7 @@ describe("PublicReviewReadingLayout", () => {
   const originalScrollIntoView = HTMLElement.prototype.scrollIntoView;
 
   afterEach(() => {
+    jest.restoreAllMocks();
     window.localStorage.clear();
     window.history.replaceState({}, "", window.location.pathname);
     Object.defineProperty(window, "matchMedia", {
@@ -20,6 +21,19 @@ describe("PublicReviewReadingLayout", () => {
   });
 
   it("reveals the feedback hash target without smooth motion when requested", async () => {
+    jest
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockReturnValue({
+        bottom: 800,
+        height: 800,
+        left: 0,
+        right: 800,
+        top: 0,
+        width: 800,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      });
     const scrollIntoView = jest.fn();
     Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
       configurable: true,
@@ -62,6 +76,28 @@ describe("PublicReviewReadingLayout", () => {
       "focus:tw-ring-2",
       "focus:tw-ring-inset",
       "focus:tw-ring-primary-400"
+    );
+  });
+
+  it("reveals the feedback hash target as an overlay on narrow layouts", async () => {
+    window.localStorage.setItem("public-review-comment-panel-open", "false");
+    window.history.replaceState({}, "", "#public-review-feedback");
+
+    render(
+      <PublicReviewReadingLayout
+        content={<div>Review content</div>}
+        feedbackAvailable
+        panel={<div>Feedback panel</div>}
+        toolbar={<div>Page 1</div>}
+      />
+    );
+
+    const dialog = await screen.findByRole("dialog", {
+      name: "Page comments",
+    });
+    expect(dialog).toBeInTheDocument();
+    await waitFor(() =>
+      expect(document.getElementById("public-review-feedback")).toHaveFocus()
     );
   });
 });
