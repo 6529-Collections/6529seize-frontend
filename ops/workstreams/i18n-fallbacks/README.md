@@ -12,7 +12,7 @@ fallback dictionaries.
 | [About The Memes](about-memes.md)                         | `AboutMemes` still resolves `about.memes.*` through `DEFAULT_LOCALE`                                                          |
 | [About minting](about-minting.md)                         | `AboutMinting` still uses `DEFAULT_LOCALE`, with canonical body copy remaining in source-locale English                       |
 | [Public contract review](public-contract-review.md)       | The shell, feedback composer, ledger, and immutable editorial snapshots currently use the source-locale fallback              |
-| [Network reference pages](network-reference-pages.md)     | xTDH remains English in source; new Definitions and Historic Boosts messages fall back to `en-US` outside the source locale   |
+| [Network reference pages](network-reference-pages.md)     | Prenodes and xTDH remain English in source; Definitions and Historic Boosts messages fall back to `en-US` outside the source  |
 | [Sidebar navigation](sidebar-navigation.md)               | `useSidebarSections` still resolves shared navigation through `DEFAULT_LOCALE` and retains residual hardcoded labels          |
 | [Wave competition badges](wave-competition-badges.md)     | The source locale contains `waves.competitionBadges.*`; supported locale dictionaries still rely on fallback for this surface |
 | [Wave rules](wave-rules.md)                               | Wave rule creation/rendering still includes direct English strings and non-localized formatting                               |
