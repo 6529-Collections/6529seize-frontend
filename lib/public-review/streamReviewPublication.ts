@@ -8,7 +8,7 @@ const STREAM_REVIEW_PUBLICATION_SCHEMA =
   "public-review.publication.v3" as const;
 const STREAM_REVIEW_PUBLICATION_ID = "6529-stream" as const;
 const STREAM_REVIEW_SOURCE_COMMIT_PATTERN = /^[0-9a-f]{40}$/;
-const STREAM_REVIEW_VERSION_PATTERN = /^[0-9]{4}-[0-9]{2}-[0-9]{2}\.[0-9]+$/;
+const STREAM_REVIEW_VERSION_PATTERN = /^\d{4}-\d{2}-\d{2}\.\d+$/;
 
 export interface StreamReviewVersionIdentity {
   readonly lifecycleState: PublicReviewLifecycleState;
