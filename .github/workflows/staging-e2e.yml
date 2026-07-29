@@ -7,10 +7,24 @@ on:
   workflow_dispatch:
     inputs:
       pack:
-        description: Post-deploy manifest alias or script key; use all for the full set
-        type: string
+        description: Post-deploy manifest alias; use all for the full set
+        type: choice
         required: true
         default: all
+        options:
+          - all
+          - core
+          - social-readonly
+          - input-detection-readonly
+          - public-groups-tools-readonly
+          - delegation-readonly
+          - collections-readonly
+          - admin-guards-readonly
+          - public-content-readonly
+          - profile-deep-links-readonly
+          - search-waves-readonly
+          - media-readonly
+          - network-open-data-readonly
       release_train_id:
         description: Release Bus train id
         type: string
@@ -77,6 +91,29 @@ jobs:
       PLAYWRIGHT_STAGING_ACCESS_CODE: ${{ secrets.PLAYWRIGHT_STAGING_ACCESS_CODE }}
       SELECTED_PACK: ${{ github.event.inputs.pack || 'all' }}
     steps:
+      - name: Reject partial Release Bus identity
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          BACKEND_ARTIFACT_DIGEST: ${{ inputs.backend_artifact_digest }}
+          BACKEND_SHA: ${{ inputs.backend_sha }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          FRONTEND_ARTIFACT_DIGEST: ${{ inputs.frontend_artifact_digest }}
+          FRONTEND_SHA: ${{ inputs.frontend_sha }}
+          MANIFEST_ID: ${{ inputs.release_manifest_id }}
+          MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          SOURCE_REF: ${{ inputs.source_ref }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+          TRAIN_REVISION: ${{ inputs.release_train_revision }}
+        run: |
+          set -euo pipefail
+          identity_values="$TRAIN_ID$TRAIN_REVISION$OPERATION_KEY$SOURCE_REF$EXPECTED_SHA$MANIFEST_ID$MANIFEST_IDENTITY$FRONTEND_SHA$BACKEND_SHA$FRONTEND_ARTIFACT_DIGEST$BACKEND_ARTIFACT_DIGEST"
+          if [ -z "$OPERATION_KEY" ]; then
+            test -z "$identity_values"
+          else
+            test -n "$TRAIN_ID"
+          fi
+
       - name: Validate Release Bus inputs
         if: github.event_name == 'workflow_dispatch' && inputs.operation_key != ''
         env:
@@ -95,7 +132,7 @@ jobs:
           set -euo pipefail
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
-          [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
+          [[ "$TRAIN_REVISION" =~ ^([1-9][0-9]{0,8}|rollback-[1-9][0-9]{0,8})$ ]]
           [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
           [[ "$SOURCE_REF" =~ ^[A-Za-z0-9._/-]{1,255}$ ]]
           [[ "$MANIFEST_ID" =~ ^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$ ]]
@@ -163,7 +200,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: "22"
+          node-version: "22.17.1"
 
       - name: Activate pinned pnpm
         run: |
@@ -199,6 +236,10 @@ jobs:
         if: steps.dependencies.outcome == 'success' && steps.playwright.outcome == 'success'
         id: e2e
         continue-on-error: true
+        env:
+          RELEASE_BUS_E2E_MANIFEST_ID: ${{ inputs.release_manifest_id }}
+          RELEASE_BUS_E2E_MANIFEST_IDENTITY_SHA256: ${{ inputs.release_manifest_identity_sha256 }}
+          RELEASE_BUS_E2E_SOURCE_SHA: ${{ inputs.expected_sha }}
         run: |
           set -euo pipefail
           args=(
@@ -206,18 +247,83 @@ jobs:
             --trigger post-deploy
             --artifact-root staging-e2e-artifacts
           )
+          if runner_capabilities="$(./bin/6529 exec node scripts/e2e-packs.cjs --capabilities 2>/dev/null)" &&
+            jq -e '
+              .contract == "release-bus-e2e-runner-capabilities.v1" and
+              .features.readonly_pack_parallelism == {
+                version: 1,
+                max_parallel: 4
+              }
+            ' <<< "$runner_capabilities" >/dev/null
+          then
+            args+=(--parallel 3)
+          fi
           if [ "${SELECTED_PACK:-all}" != all ]; then
             args+=(--pack "$SELECTED_PACK")
           fi
           ./bin/6529 run e2e:packs -- "${args[@]}"
 
-      - name: Upload Playwright artifacts on failure
-        if: always() && steps.e2e.outcome == 'failure'
+      - name: Validate exact manifest-bound E2E evidence
+        id: evidence
+        if: always() && steps.dependencies.outcome == 'success' && steps.playwright.outcome == 'success'
+        env:
+          E2E_OUTCOME: ${{ steps.e2e.outcome }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          MANIFEST_ID: ${{ inputs.release_manifest_id }}
+          MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+        run: |
+          set -euo pipefail
+          test -f staging-e2e-artifacts/evidence.json
+          expected_inventory="$(./bin/6529 exec node - <<'NODE'
+          const { PACKS } = require("./tests/packs.manifest.cjs");
+          const selected = process.env.SELECTED_PACK || "all";
+          const keys = PACKS.filter((pack) =>
+            pack.environments.includes("staging") &&
+            pack.triggers.includes("post-deploy") &&
+            (selected === "all" || pack.scriptKey === selected || pack.alias === selected)
+          ).map((pack) => pack.scriptKey);
+          process.stdout.write(JSON.stringify(keys));
+          NODE
+          )"
+          jq -e --argjson expected "$expected_inventory" '
+            .schema_version == "release-bus-e2e-packs.v1" and
+            .environment == "staging" and
+            .trigger == "post-deploy" and
+            (.worker_count | type == "number" and . >= 1 and . <= 3) and
+            .pack_count == ($expected | length) and
+            (.results | map(.script_key)) == $expected and
+            (.results | map(.script_key) | unique | length) == .pack_count and
+            (.results | all(.safety == "readonly")) and
+            .failed_count == ([.results[] | select(.status == "failed")] | length) and
+            .infrastructure_failure_count == ([.results[] | select(.failure_class == "infrastructure")] | length)
+          ' staging-e2e-artifacts/evidence.json >/dev/null
+          if [ -n "$OPERATION_KEY" ]; then
+            jq -e --arg manifest_id "$MANIFEST_ID" --arg identity "$MANIFEST_IDENTITY" --arg source_sha "$EXPECTED_SHA" '
+              .release_binding == {
+                manifest_id:$manifest_id,
+                manifest_identity_sha256:$identity,
+                source_sha:$source_sha
+              }
+            ' staging-e2e-artifacts/evidence.json >/dev/null
+          else
+            jq -e '.release_binding == null' staging-e2e-artifacts/evidence.json >/dev/null
+          fi
+          if [ "$E2E_OUTCOME" = success ]; then
+            jq -e '
+              .failed_count == 0 and
+              .infrastructure_failure_count == 0 and
+              (.results | all(.status == "passed" and .failure_class == null))
+            ' staging-e2e-artifacts/evidence.json >/dev/null
+          fi
+
+      - name: Upload manifest-bound Playwright evidence
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: staging-e2e-artifacts
+          name: staging-e2e-artifacts-${{ inputs.release_train_id || github.run_id }}
           path: staging-e2e-artifacts/
-          retention-days: 7
+          retention-days: 30
           if-no-files-found: ignore
 
       - name: Report structured Release Bus E2E result
@@ -225,6 +331,7 @@ jobs:
         env:
           DEPENDENCIES_OUTCOME: ${{ steps.dependencies.outcome }}
           E2E_OUTCOME: ${{ steps.e2e.outcome }}
+          EVIDENCE_OUTCOME: ${{ steps.evidence.outcome }}
           PLAYWRIGHT_OUTCOME: ${{ steps.playwright.outcome }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
@@ -242,12 +349,28 @@ jobs:
             failure_class=INFRASTRUCTURE
             failure_phase=staging_e2e_setup
             retryable=true
+          elif [ "$EVIDENCE_OUTCOME" != success ]; then
+            status=FAILED
+            failure_class=CONTROL_PLANE
+            failure_phase=staging_e2e_evidence
           elif [ "$E2E_OUTCOME" != success ]; then
             status=FAILED
-            failure_class=E2E
-            failure_phase=staging_e2e
+            if [ -f staging-e2e-artifacts/evidence.json ] && \
+              [ "$(jq -r '.infrastructure_failure_count // 0' staging-e2e-artifacts/evidence.json)" -gt 0 ]; then
+              failure_class=INFRASTRUCTURE
+              failure_phase=staging_e2e_infrastructure
+              retryable=true
+            else
+              failure_class=E2E
+              failure_phase=staging_e2e
+            fi
           fi
-          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg status "$status" --arg failure_class "$failure_class" --arg failure_phase "$failure_phase" --argjson retryable "$retryable" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"complete",status:$status,failure_class:(if $failure_class == "null" then null else $failure_class end),failure_phase:(if $failure_phase == "null" then null else $failure_phase end),retryable:$retryable,summary:null,stages:[],jest:null,backend_evidence:null}')"
+          if [ -f staging-e2e-artifacts/evidence.json ]; then
+            evidence_digest="$(sha256sum staging-e2e-artifacts/evidence.json | cut -d' ' -f1)"
+          else
+            evidence_digest=''
+          fi
+          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg status "$status" --arg failure_class "$failure_class" --arg failure_phase "$failure_phase" --argjson retryable "$retryable" --arg evidence_digest "$evidence_digest" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"complete",status:$status,failure_class:(if $failure_class == "null" then null else $failure_class end),failure_phase:(if $failure_phase == "null" then null else $failure_phase end),retryable:$retryable,summary:{e2e_evidence_digest:(if $evidence_digest == "" then null else $evidence_digest end)},stages:[],jest:null,backend_evidence:null}')"
           curl --fail-with-body --silent --show-error \
             -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
             -H 'Content-Type: application/json' \
@@ -259,8 +382,10 @@ jobs:
         env:
           DEPENDENCIES_OUTCOME: ${{ steps.dependencies.outcome }}
           E2E_OUTCOME: ${{ steps.e2e.outcome }}
+          EVIDENCE_OUTCOME: ${{ steps.evidence.outcome }}
           PLAYWRIGHT_OUTCOME: ${{ steps.playwright.outcome }}
         run: |
           test "$DEPENDENCIES_OUTCOME" = success
           test "$PLAYWRIGHT_OUTCOME" = success
+          test "$EVIDENCE_OUTCOME" = success
           test "$E2E_OUTCOME" = success
