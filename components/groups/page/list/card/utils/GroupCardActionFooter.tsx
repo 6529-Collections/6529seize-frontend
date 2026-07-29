@@ -16,6 +16,7 @@ export default function GroupCardActionFooter({
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-3">
         <Button
           onClick={onCancel}
+          disabled={loading}
           variant="secondary"
           size="md"
         >

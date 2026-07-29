@@ -15,7 +15,7 @@ import { forwardRef, useImperativeHandle, useRef } from "react";
 import { CreateDropType, CreateDropViewType } from "../types";
 import type { CreateDropContentHandles } from "../utils/CreateDropContent";
 import CreateDropContent from "../utils/CreateDropContent";
-import { CreateDropScreenType } from "../utils/CreateDropWrapper";
+import type { CreateDropScreenType } from "../utils/CreateDropWrapper";
 import CreateDropSelectedFileIcon from "../utils/file/CreateDropSelectedFileIcon";
 import CreateDropSelectedFilePreview from "../utils/file/CreateDropSelectedFilePreview";
 
@@ -60,7 +60,6 @@ const CreateDropCompact = forwardRef<
     {
       waveId,
       editorState,
-      screenType,
       files,
       canSubmit,
       canAddPart,
@@ -158,11 +157,6 @@ const CreateDropCompact = forwardRef<
                         onClicked={onDrop}
                         disabled={!canSubmit || loading}
                         loading={loading}
-                        padding={
-                          screenType === CreateDropScreenType.MOBILE
-                            ? "tw-px-3 tw-py-2"
-                            : "tw-px-4 tw-py-2.5"
-                        }
                       >
                         {getSubmitText()}
                       </PrimaryButton>

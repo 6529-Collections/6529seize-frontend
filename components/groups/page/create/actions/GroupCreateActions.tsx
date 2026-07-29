@@ -75,6 +75,7 @@ export default function GroupCreateActions({
         <div className="tw-flex tw-items-center tw-gap-x-3">
           <Button
             onClick={onCompleted}
+            disabled={isSubmitting}
             variant="secondary"
             size="md"
           >

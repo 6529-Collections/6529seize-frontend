@@ -10,7 +10,6 @@ interface PrimaryButtonProps {
   readonly onClicked: () => void;
   readonly children: React.ReactNode;
   readonly size?: PrimaryButtonSize | undefined;
-  readonly padding?: string | undefined;
   readonly title?: string | undefined;
   readonly ariaLabel?: string | undefined;
   readonly className?: string | undefined;
@@ -30,7 +29,6 @@ export default function PrimaryButton({
   onClicked,
   children,
   size = "default",
-  padding,
   title,
   ariaLabel,
   className = "",
@@ -38,7 +36,6 @@ export default function PrimaryButton({
   href,
 }: PrimaryButtonProps) {
   const buttonSize = BUTTON_SIZE_BY_LEGACY_SIZE[size];
-  const classes = [padding, className].filter(Boolean).join(" ") || undefined;
 
   if (href && !disabled && !loading) {
     return (
@@ -48,7 +45,7 @@ export default function PrimaryButton({
         size={buttonSize}
         title={title}
         aria-label={ariaLabel}
-        className={classes}
+        className={className}
       >
         {children}
       </ButtonLink>
@@ -66,7 +63,7 @@ export default function PrimaryButton({
       size={buttonSize}
       title={title}
       aria-label={ariaLabel}
-      className={classes}
+      className={className}
     >
       {children}
     </Button>

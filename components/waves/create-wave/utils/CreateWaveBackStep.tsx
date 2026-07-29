@@ -1,10 +1,16 @@
+"use client";
+
 import Button from "@/components/utils/button/Button";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export default function CreateWaveBackStep({
   onPreviousStep,
 }: {
   readonly onPreviousStep: () => void;
 }) {
+  const locale = useBrowserLocale();
+
   return (
     <Button
       variant="secondary"
@@ -27,7 +33,7 @@ export default function CreateWaveBackStep({
         />
       </svg>
 
-      <span>Previous</span>
+      <span>{t(locale, "waves.create.actions.previous")}</span>
     </Button>
   );
 }

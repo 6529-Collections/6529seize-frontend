@@ -152,14 +152,14 @@ export default function CreateWaveOutcomesRepRank({
           size="lg"
           onClick={onCancel}
         >
-          Cancel
+          {t(locale, "waves.create.actions.cancel")}
         </Button>
         <Button
           variant="primary"
           size="lg"
           onClick={onSubmit}
         >
-          Save
+          {t(locale, "waves.create.actions.save")}
         </Button>
       </div>
     </div>

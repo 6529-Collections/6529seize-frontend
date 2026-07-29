@@ -222,6 +222,7 @@ export default function TransferPanel({
                 <Button
                   type="button"
                   onClick={() => setShowModal(true)}
+                  disabled={isLoading}
                   variant="primary"
                   size="md"
                   className="tw-pointer-events-auto tw-min-w-[100px]"

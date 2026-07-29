@@ -264,7 +264,7 @@ export function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
             <Button
               type="button"
               onClick={() => void handleDownloadScreenshot()}
-              disabled={shareStatus === SHARE_STATUS.SCREENSHOT_LOADING}
+              loading={shareStatus === SHARE_STATUS.SCREENSHOT_LOADING}
               variant="secondary"
               size="md"
               aria-label="Download wave score analysis screenshot"

@@ -78,6 +78,7 @@ export const WaveLeaderboardCurationEmptyState: React.FC<
           {onCreateDrop && (
             <Button
               onClick={onCreateDrop}
+              disabled={!canCreateDrop}
               variant="primary"
               size="sm"
               className="tw-px-4"
