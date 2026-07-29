@@ -1,0 +1,1706 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x820539f3",
+          "declaringDefinitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGasAuctionBid",
+          "outputs": [],
+          "selector": "0x820539f3",
+          "signature": "testGasAuctionBid()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x19dc5a32",
+          "declaringDefinitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGasAuctionBidderCreditWithdrawal",
+          "outputs": [],
+          "selector": "0x19dc5a32",
+          "signature": "testGasAuctionBidderCreditWithdrawal()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x0abad206",
+          "declaringDefinitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGasAuctionNearEndOutbid",
+          "outputs": [],
+          "selector": "0x0abad206",
+          "signature": "testGasAuctionNearEndOutbid()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x7acde772",
+          "declaringDefinitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGasAuctionProceedsWithdrawal",
+          "outputs": [],
+          "selector": "0x7acde772",
+          "signature": "testGasAuctionProceedsWithdrawal()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x0e10a420",
+          "declaringDefinitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGasAuctionSettlementNoBid",
+          "outputs": [],
+          "selector": "0x0e10a420",
+          "signature": "testGasAuctionSettlementNoBid()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0xc2ba0748",
+          "declaringDefinitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGasAuctionSettlementWithBid",
+          "outputs": [],
+          "selector": "0xc2ba0748",
+          "signature": "testGasAuctionSettlementWithBid()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x0125193f",
+          "declaringDefinitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGasCuratorCreditWithdrawal",
+          "outputs": [],
+          "selector": "0x0125193f",
+          "signature": "testGasCuratorCreditWithdrawal()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x800b216b",
+          "declaringDefinitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGasCuratorRewardClaim",
+          "outputs": [],
+          "selector": "0x800b216b",
+          "signature": "testGasCuratorRewardClaim()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x4c5ba61a",
+          "declaringDefinitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGasDependencyScriptRead",
+          "outputs": [],
+          "selector": "0x4c5ba61a",
+          "signature": "testGasDependencyScriptRead()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0xfc8c20f8",
+          "declaringDefinitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGasFinalOnchainTokenURI",
+          "outputs": [],
+          "selector": "0xfc8c20f8",
+          "signature": "testGasFinalOnchainTokenURI()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0xdd03f98e",
+          "declaringDefinitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGasFixedPriceCreditWithdrawal",
+          "outputs": [],
+          "selector": "0xdd03f98e",
+          "signature": "testGasFixedPriceCreditWithdrawal()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x663c9606",
+          "declaringDefinitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGasFixedPriceMint",
+          "outputs": [],
+          "selector": "0x663c9606",
+          "signature": "testGasFixedPriceMint()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x179c9d24",
+          "declaringDefinitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGasMintManagerMaxLaunchBatch",
+          "outputs": [],
+          "selector": "0x179c9d24",
+          "signature": "testGasMintManagerMaxLaunchBatch()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "testGasFixedPriceMint()",
+          "displaySignature": "testGasFixedPriceMint()",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x663c9606",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246MHg2NjNjOTYwNg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGasFixedPriceMint",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 806,
+            "byteStart": 1770,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L38-L59",
+            "lineEnd": 59,
+            "lineStart": 38,
+            "snippetSha256": "sha256:ec3139273909aff87c92117253b781f508e185b8d33ba0fe6768938b89f1705b",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": "0x663c9606",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGasFixedPriceCreditWithdrawal()",
+          "displaySignature": "testGasFixedPriceCreditWithdrawal()",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0xdd03f98e",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246MHhkZDAzZjk4ZQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGasFixedPriceCreditWithdrawal",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 407,
+            "byteStart": 2582,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L61-L70",
+            "lineEnd": 70,
+            "lineStart": 61,
+            "snippetSha256": "sha256:8d7daa0aef405cbc90732020bd1a77548dd348654476cb67b20ac6b36e02f0ca",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": "0xdd03f98e",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGasAuctionBid()",
+          "displaySignature": "testGasAuctionBid()",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x820539f3",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246MHg4MjA1MzlmMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGasAuctionBid",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 311,
+            "byteStart": 2995,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L72-L80",
+            "lineEnd": 80,
+            "lineStart": 72,
+            "snippetSha256": "sha256:6516a76a1788f2838f0bd0354fe6127905a032cc8a6bad0d0877581942951587",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": "0x820539f3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGasAuctionNearEndOutbid()",
+          "displaySignature": "testGasAuctionNearEndOutbid()",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x0abad206",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246MHgwYWJhZDIwNg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGasAuctionNearEndOutbid",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 555,
+            "byteStart": 3312,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L82-L94",
+            "lineEnd": 94,
+            "lineStart": 82,
+            "snippetSha256": "sha256:0ee6287852fefa1db526ca45cfce5622173a117351bcb7ae602ab43ede77edf2",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": "0x0abad206",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGasAuctionBidderCreditWithdrawal()",
+          "displaySignature": "testGasAuctionBidderCreditWithdrawal()",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x19dc5a32",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246MHgxOWRjNWEzMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGasAuctionBidderCreditWithdrawal",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 304,
+            "byteStart": 3873,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L96-L104",
+            "lineEnd": 104,
+            "lineStart": 96,
+            "snippetSha256": "sha256:42c4ca36ade16625b8ce650498df0bcbcdda2c82338eb217287b233c7ad224d1",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": "0x19dc5a32",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGasAuctionSettlementNoBid()",
+          "displaySignature": "testGasAuctionSettlementNoBid()",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x0e10a420",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246MHgwZTEwYTQyMA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGasAuctionSettlementNoBid",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 268,
+            "byteStart": 4183,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L106-L113",
+            "lineEnd": 113,
+            "lineStart": 106,
+            "snippetSha256": "sha256:06bbd3353b707ed36b17da84eb6cf1f53cdeefb2c0aad3408b54c6984466ee4d",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": "0x0e10a420",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGasAuctionSettlementWithBid()",
+          "displaySignature": "testGasAuctionSettlementWithBid()",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0xc2ba0748",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246MHhjMmJhMDc0OA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGasAuctionSettlementWithBid",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 420,
+            "byteStart": 4457,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L115-L125",
+            "lineEnd": 125,
+            "lineStart": 115,
+            "snippetSha256": "sha256:ac31f70a1e357ff949878c43d2e3e0e67d045255dc437261979464f239f46a45",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": "0xc2ba0748",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGasAuctionProceedsWithdrawal()",
+          "displaySignature": "testGasAuctionProceedsWithdrawal()",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x7acde772",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246MHg3YWNkZTc3Mg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGasAuctionProceedsWithdrawal",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 523,
+            "byteStart": 4883,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L127-L139",
+            "lineEnd": 139,
+            "lineStart": 127,
+            "snippetSha256": "sha256:ce6cb3263a8bebab4f4d073c6e496ce76d923d18ca8b8434f246e6ed9e721209",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": "0x7acde772",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGasCuratorRewardClaim()",
+          "displaySignature": "testGasCuratorRewardClaim()",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x800b216b",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246MHg4MDBiMjE2Yg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGasCuratorRewardClaim",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 424,
+            "byteStart": 5412,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L141-L150",
+            "lineEnd": 150,
+            "lineStart": 141,
+            "snippetSha256": "sha256:fce076534d1ff4031bec351e27b337b7e4ea7562890fb1bd7767aa7df8c87f40",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": "0x800b216b",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGasCuratorCreditWithdrawal()",
+          "displaySignature": "testGasCuratorCreditWithdrawal()",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x0125193f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246MHgwMTI1MTkzZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGasCuratorCreditWithdrawal",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 520,
+            "byteStart": 5842,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L152-L163",
+            "lineEnd": 163,
+            "lineStart": 152,
+            "snippetSha256": "sha256:559c8f7a1153b60b7ff5ce0c3c2fb8860b850c7cb2d4450aec4ff7f8638eca0d",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": "0x0125193f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGasFinalOnchainTokenURI()",
+          "displaySignature": "testGasFinalOnchainTokenURI()",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0xfc8c20f8",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246MHhmYzhjMjBmOA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGasFinalOnchainTokenURI",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 391,
+            "byteStart": 6368,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L165-L174",
+            "lineEnd": 174,
+            "lineStart": 165,
+            "snippetSha256": "sha256:850e50363f984cb9dc95a3e3488f8cdf8cd0aeb69bee1487254209e94db68515",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": "0xfc8c20f8",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGasDependencyScriptRead()",
+          "displaySignature": "testGasDependencyScriptRead()",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x4c5ba61a",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246MHg0YzViYTYxYQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGasDependencyScriptRead",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 704,
+            "byteStart": 6765,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L176-L189",
+            "lineEnd": 189,
+            "lineStart": 176,
+            "snippetSha256": "sha256:d5022d594a75f066831bde3756633744cfc94142900ac516bc178dc0ce53e9b8",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": "0x4c5ba61a",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGasMintManagerMaxLaunchBatch()",
+          "displaySignature": "testGasMintManagerMaxLaunchBatch()",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x179c9d24",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246MHgxNzljOWQyNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGasMintManagerMaxLaunchBatch",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 805,
+            "byteStart": 7475,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L191-L206",
+            "lineEnd": 206,
+            "lineStart": 191,
+            "snippetSha256": "sha256:7016776944b1407235054900918ab1612eeb138684dd821cb3839db4a019b2af",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": "0x179c9d24",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_createAuction()",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:_createAuction()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246X2NyZWF0ZUF1Y3Rpb24oKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_createAuction",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "AuctionSetup"
+            }
+          ],
+          "range": {
+            "byteLength": 1222,
+            "byteStart": 8579,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L221-L249",
+            "lineEnd": 249,
+            "lineStart": 221,
+            "snippetSha256": "sha256:3de0296e24aa7ef683ced268d53f181010d255876a8115176da29f4e3bad40da",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_executeFixedPriceDrop(DeployedStream,string)",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:_executeFixedPriceDrop(DeployedStream,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "DeployedStream"
+            },
+            {
+              "index": 1,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246X2V4ZWN1dGVGaXhlZFByaWNlRHJvcChEZXBsb3llZFN0cmVhbSxzdHJpbmcp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_executeFixedPriceDrop",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 682,
+            "byteStart": 9807,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L251-L269",
+            "lineEnd": 269,
+            "lineStart": 251,
+            "snippetSha256": "sha256:6033f55bc0f8ef39d56c341fe5f1e1872fe13f1da734b48e4707e93f34ec0f1f",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_outbidAuction(AuctionSetup)",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:_outbidAuction(AuctionSetup)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "AuctionSetup"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246X291dGJpZEF1Y3Rpb24oQXVjdGlvblNldHVwKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_outbidAuction",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 375,
+            "byteStart": 10495,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L271-L279",
+            "lineEnd": 279,
+            "lineStart": 271,
+            "snippetSha256": "sha256:b578e9a79902bc9810f5c8b9e18b510bb718d5f2a81f3f0df7c81ff86de6a4ae",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_deployCuratorPool()",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:_deployCuratorPool()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246X2RlcGxveUN1cmF0b3JQb29sKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_deployCuratorPool",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CuratorSetup"
+            }
+          ],
+          "range": {
+            "byteLength": 452,
+            "byteStart": 10876,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L281-L289",
+            "lineEnd": 289,
+            "lineStart": 281,
+            "snippetSha256": "sha256:358d3b5cb672c3b8dd252426b89b49785a1074df7b429bfcda20cc5acda7efdf",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_setSingleLeafRoot(StreamCuratorsPool,address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:_setSingleLeafRoot(StreamCuratorsPool,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "pool",
+              "type": "StreamCuratorsPool"
+            },
+            {
+              "index": 1,
+              "name": "rewardAddress",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246X3NldFNpbmdsZUxlYWZSb290KFN0cmVhbUN1cmF0b3JzUG9vbCxhZGRyZXNzLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_setSingleLeafRoot",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "proof",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            }
+          ],
+          "range": {
+            "byteLength": 415,
+            "byteStart": 11334,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L291-L299",
+            "lineEnd": 299,
+            "lineStart": 291,
+            "snippetSha256": "sha256:ff7db62afe84c5aede98dcbd5ac5b5bcec84fa19a9d324f7368a8235dd53504f",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_mintToken(DeployedStream,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:_mintToken(DeployedStream,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "DeployedStream"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "salt",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246X21pbnRUb2tlbihEZXBsb3llZFN0cmVhbSx1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_mintToken",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 220,
+            "byteStart": 11755,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L301-L304",
+            "lineEnd": 304,
+            "lineStart": 301,
+            "snippetSha256": "sha256:06e172aaf5abfc47b8a90c8c309b9e6961fc0e5508c4d8b3398fa91e39519366",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_setTokenMetadataInputs(StreamCore)",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:_setTokenMetadataInputs(StreamCore)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "core",
+              "type": "StreamCore"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246X3NldFRva2VuTWV0YWRhdGFJbnB1dHMoU3RyZWFtQ29yZSk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_setTokenMetadataInputs",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 444,
+            "byteStart": 11981,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L306-L316",
+            "lineEnd": 316,
+            "lineStart": 306,
+            "snippetSha256": "sha256:157f0de519c81f125f06fe211f1ee367f0aa4009276df4cebb5badffd4ccafed",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_configureMaxLaunchBatchPhase(StreamMintManager)",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:_configureMaxLaunchBatchPhase(StreamMintManager)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "manager",
+              "type": "StreamMintManager"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246X2NvbmZpZ3VyZU1heExhdW5jaEJhdGNoUGhhc2UoU3RyZWFtTWludE1hbmFnZXIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_configureMaxLaunchBatchPhase",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1589,
+            "byteStart": 12431,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L318-L347",
+            "lineEnd": 347,
+            "lineStart": 318,
+            "snippetSha256": "sha256:8b46c8d586e61e736fa36b5ba657584cea25b7be6fdeba20014e02810a8afd18",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_maxLaunchBatchRequest(StreamMintManager)",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:_maxLaunchBatchRequest(StreamMintManager)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "manager",
+              "type": "StreamMintManager"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246X21heExhdW5jaEJhdGNoUmVxdWVzdChTdHJlYW1NaW50TWFuYWdlcik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_maxLaunchBatchRequest",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "request",
+              "storageLocation": "memory",
+              "type": "IStreamMintManager.MintRequest"
+            }
+          ],
+          "range": {
+            "byteLength": 1270,
+            "byteStart": 14026,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L349-L379",
+            "lineEnd": 379,
+            "lineStart": 349,
+            "snippetSha256": "sha256:abebb34d0d3fbe09e9eecfcb7f786cb1ff5d85934701007ac4fde92875045bb1",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_emptyGateConfig()",
+          "functionKind": "function",
+          "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:_emptyGateConfig()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3QjZnVuY3Rpb246X2VtcHR5R2F0ZUNvbmZpZygp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_emptyGateConfig",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "IStreamMintManager.MintGateConfig"
+            }
+          ],
+          "range": {
+            "byteLength": 376,
+            "byteStart": 15302,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L381-L390",
+            "lineEnd": 390,
+            "lineStart": 381,
+            "snippetSha256": "sha256:6f6e42c5be858f3ac88e24dabbfa09431e2dd254c7c998df05a10ff18793ad3f",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "POSTER",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 757,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:695a59e12d896c6e13bf8a41a7b87f2dbedaa0e769d3f48d88cfb58046e19145",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 791,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:0ab9e750f7c6ea7ca35cb67c84e1deac4cd43cc2a6a45b284817308c28bdf2a2",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "valueSource": "address(0x1001)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 52,
+            "byteStart": 812,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:3e651fdfebdcfe0dd0fdc57a7c7e95dcc88555bb618ed67eaaae88bb2f03bb11",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 849,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:1e80055498f115d09b966c83a4320475410b3488cc2e25d7bd51229b835b3e62",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "valueSource": "address(0x5005)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PAYOUT",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 870,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:6de2ca19a7b0e6342b9c731f9156dbb66238022542868c0f1d32ade32ca072b7",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 904,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:f459905761015e37605475907d05df689f55b238aec15260d4f0510e5e363c1f",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "valueSource": "address(0x2002)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "CURATORS_POOL",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 925,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:c7bb6fdd9819faf3c363c0c7247b0cfebcb63e2077a5c446bc0035b0e17c4018",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 966,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:59382625991cd4bee04dd9942857caa65309d0e0d4b1f91c186b3b9845797e29",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "valueSource": "address(0x3003)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "BIDDER",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 987,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:e7ef27b835061eb97387ed119765068c5e8eafa4cf930470e119fdf02da08a7b",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1021,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:1f4fd140ad2c560f9c39ca5e51b0dd8d00bd16cb2bb0afd99e8b005b7136d9d7",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "valueSource": "address(0x4004)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SECOND_BIDDER",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 1042,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:4f5176c23e508c16b390e6fbfff7ad92b307c42f4b40055054818131f85faf7a",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1083,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:0f7e953274743995bd3bcc4eb8138651476ebbabd3917c40bc846d179ef9ff44",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "valueSource": "address(0x4005)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "CURATOR",
+          "natspec": "",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 1104,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:2f019099711ab8c876cfe0572a9040dc500a513becefc844960b438d1b7320a5",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1139,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:ac2733152df2595a308f253c6d663e57effbc243730ee25817f4fc7ed2c5c6b8",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "valueSource": "address(0x7007)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "MINT_MANAGER_EXECUTOR",
+          "natspec": "",
+          "range": {
+            "byteLength": 64,
+            "byteStart": 1160,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:69e0f65cf6376f73514b34328833202c5c516be84a220ab66b393e0ef38bd63c",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1209,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:10d11374d807282badd831bbfc6691cb61a5aba0957cac25fd5595fc40990c14",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "valueSource": "address(0x9009)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "WITHDRAW_RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 78,
+            "byteStart": 1230,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:a07f73ac3251a2246e099bf6f2658a061518f4f1a0070503da362c5d5dd7a3ea",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "type": "address payable",
+          "typeString": "address payable",
+          "valueRange": {
+            "byteLength": 24,
+            "byteStart": 1284,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:42f56d59bc8fccd41cbc81c34d46aa0a0fee56632e7151edb52b7bc6c75f2aab",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "valueSource": "payable(address(0x8008))",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COLLECTION_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 1315,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:cba8ff5a3b4148cc54bed7e4899604a5bc39c7815d1a23162a647a4813b0e087",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 1356,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TOKEN_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 1363,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:c73d15ab01ba31af3abe0a3398754b34011adc910a4aba23a00a8a747263c4fa",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 1399,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "FIXED_PRICE",
+          "natspec": "",
+          "range": {
+            "byteLength": 46,
+            "byteStart": 1406,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:421a2cb4993ccc5b399a7f94cc5b99932c42d119afa28165066afc3a829b06b0",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 7,
+            "byteStart": 1445,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:8ed26c817150283c6738520cd1cbcd9ab2444d660b342386f69edccb0a98e575",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "valueSource": "4 ether",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RESERVE_PRICE",
+          "natspec": "",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 1458,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L32",
+            "lineEnd": 32,
+            "lineStart": 32,
+            "snippetSha256": "sha256:5d220cdbd734b87afbb29e781ce1a0927c3f4a7259c1d16b10ddb926f6ededa1",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 7,
+            "byteStart": 1499,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L32",
+            "lineEnd": 32,
+            "lineStart": 32,
+            "snippetSha256": "sha256:89d2e8f6fbb5823cc4c82092cd5b652e6504bca12f3a7e4bf6dd158f7e1bd67a",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "valueSource": "5 ether",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SECOND_BID",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 1512,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L33",
+            "lineEnd": 33,
+            "lineStart": 33,
+            "snippetSha256": "sha256:d6e7e28579e1cfed0eb06d7e93683d0533231202e1e1dc27df10fc976d030145",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 7,
+            "byteStart": 1550,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L33",
+            "lineEnd": 33,
+            "lineStart": 33,
+            "snippetSha256": "sha256:a073dd9f791dbcff86197a52bb8aac26d3cc467e5138fdf43027e9abf73fe25e",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "valueSource": "6 ether",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "REWARD_AMOUNT",
+          "natspec": "",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 1563,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:87e12530eb2d3bcd45c165afe6959263b9d0afdef30e7bba317897327fe47209",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 7,
+            "byteStart": 1604,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:8676928d9f1d7ef12abcd817455b7554e16728300c5bbf8b345d04ffe21b5503",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "valueSource": "3 ether",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "GAS_PHASE_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 62,
+            "byteStart": 1617,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L35",
+            "lineEnd": 35,
+            "lineStart": 35,
+            "snippetSha256": "sha256:6e80aed8e1c0ca00bea96cb017271e020d00e6a24b88677448267b73e48d04b3",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 22,
+            "byteStart": 1657,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L35",
+            "lineEnd": 35,
+            "lineStart": 35,
+            "snippetSha256": "sha256:f52123f9af19b41653f414556d6a5b75f6ffab8b519e801c241ab1aad6a970ee",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "valueSource": "keccak256(\"gas-phase\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "GAS_AUTHORIZATION_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 78,
+            "byteStart": 1685,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L36",
+            "lineEnd": 36,
+            "lineStart": 36,
+            "snippetSha256": "sha256:17d2f1baace5049ae48fe838526bfb6e5b5d6d9ac1e22a7bd149ec930c8bd21e",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 30,
+            "byteStart": 1733,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L36",
+            "lineEnd": 36,
+            "lineStart": 36,
+            "snippetSha256": "sha256:1b4fe2e599fde8f106fd34c3567e99e6863feba7efda39df97376c7089d76144",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          },
+          "valueSource": "keccak256(\"gas-authorization\")",
+          "visibility": "private"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 8316,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L209",
+                "lineEnd": 209,
+                "lineStart": 209,
+                "snippetSha256": "sha256:67cd5d2d923d960771e4de7c95f232699d5ce27f40fe1105c89e6a57535a802e",
+                "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+              },
+              "type": "DeployedStream",
+              "typeString": "struct StreamFixture.DeployedStream"
+            },
+            {
+              "index": 1,
+              "name": "auctions",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 8349,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L210",
+                "lineEnd": 210,
+                "lineStart": 210,
+                "snippetSha256": "sha256:a3b7196e6549c4e665308750d1c91c4b213c8bb4ead75bdaf415a72abb8c6668",
+                "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+              },
+              "type": "StreamAuctions",
+              "typeString": "contract StreamAuctions"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 8382,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L211",
+                "lineEnd": 211,
+                "lineStart": 211,
+                "snippetSha256": "sha256:66875c39eec6445ab2b3787f7fe7517ed1914f5ebb02d7f9ee07cc370b8b605f",
+                "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "auctionEndTime",
+              "natspec": "",
+              "range": {
+                "byteLength": 22,
+                "byteStart": 8407,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L212",
+                "lineEnd": 212,
+                "lineStart": 212,
+                "snippetSha256": "sha256:26836db544badd824d9d43e4a4d94cfa624ba520242ffd2564fdefa634f79ba9",
+                "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            }
+          ],
+          "name": "AuctionSetup",
+          "natspec": "",
+          "range": {
+            "byteLength": 150,
+            "byteStart": 8286,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L208-L213",
+            "lineEnd": 213,
+            "lineStart": 208,
+            "snippetSha256": "sha256:c4bcb4287cf51d85cdf655b08adbd4f82ee50931a0929a9925b19811a90ce222",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          }
+        },
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "admins",
+              "natspec": "",
+              "range": {
+                "byteLength": 19,
+                "byteStart": 8472,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L216",
+                "lineEnd": 216,
+                "lineStart": 216,
+                "snippetSha256": "sha256:e9ae2d566c449a5a012c231b2dc96a19e64555e35905ef0dbc258709dcc444b9",
+                "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+              },
+              "type": "StreamAdmins",
+              "typeString": "contract StreamAdmins"
+            },
+            {
+              "index": 1,
+              "name": "delegation",
+              "natspec": "",
+              "range": {
+                "byteLength": 32,
+                "byteStart": 8501,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L217",
+                "lineEnd": 217,
+                "lineStart": 217,
+                "snippetSha256": "sha256:c6cee2268e998faf1060c4aaa186051e6fab636f6aae22448b1b023bb82cd0b7",
+                "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+              },
+              "type": "GasSnapshotDelegation",
+              "typeString": "contract GasSnapshotDelegation"
+            },
+            {
+              "index": 2,
+              "name": "pool",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 8543,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L218",
+                "lineEnd": 218,
+                "lineStart": 218,
+                "snippetSha256": "sha256:cca94bd7029963a070d60ab60d60d9f34f50e167cf175721809fa3de1f62b096",
+                "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+              },
+              "type": "StreamCuratorsPool",
+              "typeString": "contract StreamCuratorsPool"
+            }
+          ],
+          "name": "CuratorSetup",
+          "natspec": "",
+          "range": {
+            "byteLength": 131,
+            "byteStart": 8442,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L215-L219",
+            "lineEnd": 219,
+            "lineStart": 215,
+            "snippetSha256": "sha256:44e0819d47782eb37afc49be5f4b520a786834730538997cdad9a17a04e7c05e",
+            "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+        "name": "DropAuthTestHelper"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1HYXNTbmFwc2hvdC50LnNvbDpTdHJlYW1HYXNTbmFwc2hvdFRlc3Q",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamGasSnapshotTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 14997,
+      "byteStart": 683,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasSnapshot.t.sol#L18-L391",
+      "lineEnd": 391,
+      "lineStart": 18,
+      "snippetSha256": "sha256:f2f55d54365125a2187c1e79ca225a0638e63b8a94b3ec7d8954bf28425c3df6",
+      "sourceSha256": "sha256:8f0187aabdd173e5a190493a7dd8448fbff953142027f8dd2f6d25c56577c7fc"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamGasSnapshot.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 14
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 13
+    },
+    "totalCount": 14
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x0125193f",
+      "definitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x0abad206",
+      "definitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x0e10a420",
+      "definitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x179c9d24",
+      "definitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x19dc5a32",
+      "definitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x4c5ba61a",
+      "definitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x663c9606",
+      "definitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x7acde772",
+      "definitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x800b216b",
+      "definitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0x820539f3",
+      "definitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0xc2ba0748",
+      "definitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0xdd03f98e",
+      "definitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest#function:0xfc8c20f8",
+      "definitionId": "test/StreamGasSnapshot.t.sol:StreamGasSnapshotTest",
+      "severity": "advisory"
+    }
+  ]
+}

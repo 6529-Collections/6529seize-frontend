@@ -1,0 +1,562 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "vendored_dependency",
+    "classificationReason": "Source path is explicitly classified as vendored in the input manifest.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "verify(bytes32[],bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/MerkleProof.sol:MerkleProof#function:verify(bytes32[],bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "proof",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            },
+            {
+              "index": 1,
+              "name": "root",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "leaf",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01lcmtsZVByb29mLnNvbDpNZXJrbGVQcm9vZiNmdW5jdGlvbjp2ZXJpZnkoYnl0ZXMzMltdLGJ5dGVzMzIsYnl0ZXMzMik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "verify",
+          "natspec": "@dev Returns true if a `leaf` can be proved to be a part of a Merkle tree\n defined by `root`. For this, a `proof` must be provided, containing\n sibling hashes on the branch from the leaf to the root of the tree. Each\n pair of leaves and each pair of pre-images are assumed to be sorted.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 154,
+            "byteStart": 1157,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/MerkleProof.sol#L27-L29",
+            "lineEnd": 29,
+            "lineStart": 27,
+            "snippetSha256": "sha256:d8b3e5acd6697167e131f340f2b48a4eeefbd3669ff955151f14f0492369a04e",
+            "sourceSha256": "sha256:f8d37d07fb8fd1f3c25046daa12001560ced0b73fda6ed653bc0eb4d2112ae9a"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "verifyCalldata(bytes32[],bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/MerkleProof.sol:MerkleProof#function:verifyCalldata(bytes32[],bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "proof",
+              "storageLocation": "calldata",
+              "type": "bytes32[]"
+            },
+            {
+              "index": 1,
+              "name": "root",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "leaf",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01lcmtsZVByb29mLnNvbDpNZXJrbGVQcm9vZiNmdW5jdGlvbjp2ZXJpZnlDYWxsZGF0YShieXRlczMyW10sYnl0ZXMzMixieXRlczMyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "verifyCalldata",
+          "natspec": "@dev Calldata version of {verify}\n _Available since v4.7._",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 172,
+            "byteStart": 1412,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/MerkleProof.sol#L36-L38",
+            "lineEnd": 38,
+            "lineStart": 36,
+            "snippetSha256": "sha256:0274aee62722e8cc2953bfbfe52f79697786ebeb3385d7621f97ffdc156479e0",
+            "sourceSha256": "sha256:f8d37d07fb8fd1f3c25046daa12001560ced0b73fda6ed653bc0eb4d2112ae9a"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "processProof(bytes32[],bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/MerkleProof.sol:MerkleProof#function:processProof(bytes32[],bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "proof",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            },
+            {
+              "index": 1,
+              "name": "leaf",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01lcmtsZVByb29mLnNvbDpNZXJrbGVQcm9vZiNmdW5jdGlvbjpwcm9jZXNzUHJvb2YoYnl0ZXMzMltdLGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "processProof",
+          "natspec": "@dev Returns the rebuilt hash obtained by traversing a Merkle tree up\n from `leaf` using `proof`. A `proof` is valid if and only if the rebuilt\n hash matches the root of the tree. When processing the proof, the pairs\n of leafs & pre-images are assumed to be sorted.\n _Available since v4.4._",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 290,
+            "byteStart": 1935,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/MerkleProof.sol#L48-L54",
+            "lineEnd": 54,
+            "lineStart": 48,
+            "snippetSha256": "sha256:418b01a95abefb5beb11b3fd6db2bc4318be80c1630298d8420a590da3337f69",
+            "sourceSha256": "sha256:f8d37d07fb8fd1f3c25046daa12001560ced0b73fda6ed653bc0eb4d2112ae9a"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "processProofCalldata(bytes32[],bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/MerkleProof.sol:MerkleProof#function:processProofCalldata(bytes32[],bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "proof",
+              "storageLocation": "calldata",
+              "type": "bytes32[]"
+            },
+            {
+              "index": 1,
+              "name": "leaf",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01lcmtsZVByb29mLnNvbDpNZXJrbGVQcm9vZiNmdW5jdGlvbjpwcm9jZXNzUHJvb2ZDYWxsZGF0YShieXRlczMyW10sYnl0ZXMzMik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "processProofCalldata",
+          "natspec": "@dev Calldata version of {processProof}\n _Available since v4.7._",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 300,
+            "byteStart": 2332,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/MerkleProof.sol#L61-L67",
+            "lineEnd": 67,
+            "lineStart": 61,
+            "snippetSha256": "sha256:d72800fbd1954e3aa75db582743e98c202b2cab59d476152449ad0428c8fd192",
+            "sourceSha256": "sha256:f8d37d07fb8fd1f3c25046daa12001560ced0b73fda6ed653bc0eb4d2112ae9a"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "multiProofVerify(bytes32[],bool[],bytes32,bytes32[])",
+          "functionKind": "function",
+          "id": "smart-contracts/MerkleProof.sol:MerkleProof#function:multiProofVerify(bytes32[],bool[],bytes32,bytes32[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "proof",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            },
+            {
+              "index": 1,
+              "name": "proofFlags",
+              "storageLocation": "memory",
+              "type": "bool[]"
+            },
+            {
+              "index": 2,
+              "name": "root",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "leaves",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01lcmtsZVByb29mLnNvbDpNZXJrbGVQcm9vZiNmdW5jdGlvbjptdWx0aVByb29mVmVyaWZ5KGJ5dGVzMzJbXSxib29sW10sYnl0ZXMzMixieXRlczMyW10p",
+          "kind": "function",
+          "modifiers": [],
+          "name": "multiProofVerify",
+          "natspec": "@dev Returns true if the `leaves` can be simultaneously proven to be a part of a merkle tree defined by\n `root`, according to `proof` and `proofFlags` as described in {processMultiProof}.\n CAUTION: Not all merkle trees admit multiproofs. See {processMultiProof} for details.\n _Available since v4.7._",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 258,
+            "byteStart": 2993,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/MerkleProof.sol#L77-L84",
+            "lineEnd": 84,
+            "lineStart": 77,
+            "snippetSha256": "sha256:bd80a570c762daad39ec3be95a4ced179057dd654d992cda259e7eb571617945",
+            "sourceSha256": "sha256:f8d37d07fb8fd1f3c25046daa12001560ced0b73fda6ed653bc0eb4d2112ae9a"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "multiProofVerifyCalldata(bytes32[],bool[],bytes32,bytes32[])",
+          "functionKind": "function",
+          "id": "smart-contracts/MerkleProof.sol:MerkleProof#function:multiProofVerifyCalldata(bytes32[],bool[],bytes32,bytes32[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "proof",
+              "storageLocation": "calldata",
+              "type": "bytes32[]"
+            },
+            {
+              "index": 1,
+              "name": "proofFlags",
+              "storageLocation": "calldata",
+              "type": "bool[]"
+            },
+            {
+              "index": 2,
+              "name": "root",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "leaves",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01lcmtsZVByb29mLnNvbDpNZXJrbGVQcm9vZiNmdW5jdGlvbjptdWx0aVByb29mVmVyaWZ5Q2FsbGRhdGEoYnl0ZXMzMltdLGJvb2xbXSxieXRlczMyLGJ5dGVzMzJbXSk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "multiProofVerifyCalldata",
+          "natspec": "@dev Calldata version of {multiProofVerify}\n CAUTION: Not all merkle trees admit multiproofs. See {processMultiProof} for details.\n _Available since v4.7._",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 278,
+            "byteStart": 3462,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/MerkleProof.sol#L93-L100",
+            "lineEnd": 100,
+            "lineStart": 93,
+            "snippetSha256": "sha256:4450d366c1ca4bc3ebb2d8d0499f21c79eab76932b0c3184b98f09d741fcc81f",
+            "sourceSha256": "sha256:f8d37d07fb8fd1f3c25046daa12001560ced0b73fda6ed653bc0eb4d2112ae9a"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "processMultiProof(bytes32[],bool[],bytes32[])",
+          "functionKind": "function",
+          "id": "smart-contracts/MerkleProof.sol:MerkleProof#function:processMultiProof(bytes32[],bool[],bytes32[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "proof",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            },
+            {
+              "index": 1,
+              "name": "proofFlags",
+              "storageLocation": "memory",
+              "type": "bool[]"
+            },
+            {
+              "index": 2,
+              "name": "leaves",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01lcmtsZVByb29mLnNvbDpNZXJrbGVQcm9vZiNmdW5jdGlvbjpwcm9jZXNzTXVsdGlQcm9vZihieXRlczMyW10sYm9vbFtdLGJ5dGVzMzJbXSk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "processMultiProof",
+          "natspec": "@dev Returns the root of a tree reconstructed from `leaves` and sibling nodes in `proof`. The reconstruction\n proceeds by incrementally reconstructing all inner nodes by combining a leaf/inner node with either another\n leaf/inner node or a proof sibling node, depending on whether each `proofFlags` item is true or false\n respectively.\n CAUTION: Not all merkle trees admit multiproofs. To use multiproofs, it is sufficient to ensure that: 1) the tree\n is complete (but not necessarily perfect), 2) the leaves to be proven are in the opposite order they are in the\n tree (i.e., as seen from right to left starting at the deepest layer and continuing at the next layer).\n _Available since v4.7._",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "merkleRoot",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 2113,
+            "byteStart": 4519,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/MerkleProof.sol#L114-L157",
+            "lineEnd": 157,
+            "lineStart": 114,
+            "snippetSha256": "sha256:c716ce00dab2e651effe76e9a91535834d2e820caefd00bb431548d4610487f4",
+            "sourceSha256": "sha256:f8d37d07fb8fd1f3c25046daa12001560ced0b73fda6ed653bc0eb4d2112ae9a"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "processMultiProofCalldata(bytes32[],bool[],bytes32[])",
+          "functionKind": "function",
+          "id": "smart-contracts/MerkleProof.sol:MerkleProof#function:processMultiProofCalldata(bytes32[],bool[],bytes32[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "proof",
+              "storageLocation": "calldata",
+              "type": "bytes32[]"
+            },
+            {
+              "index": 1,
+              "name": "proofFlags",
+              "storageLocation": "calldata",
+              "type": "bool[]"
+            },
+            {
+              "index": 2,
+              "name": "leaves",
+              "storageLocation": "memory",
+              "type": "bytes32[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01lcmtsZVByb29mLnNvbDpNZXJrbGVQcm9vZiNmdW5jdGlvbjpwcm9jZXNzTXVsdGlQcm9vZkNhbGxkYXRhKGJ5dGVzMzJbXSxib29sW10sYnl0ZXMzMltdKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "processMultiProofCalldata",
+          "natspec": "@dev Calldata version of {processMultiProof}.\n CAUTION: Not all merkle trees admit multiproofs. See {processMultiProof} for details.\n _Available since v4.7._",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "merkleRoot",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 2125,
+            "byteStart": 6845,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/MerkleProof.sol#L166-L209",
+            "lineEnd": 209,
+            "lineStart": 166,
+            "snippetSha256": "sha256:884bbc66674a08826469123fc5cfead960d68969762a26b9086e8977ebbd61b0",
+            "sourceSha256": "sha256:f8d37d07fb8fd1f3c25046daa12001560ced0b73fda6ed653bc0eb4d2112ae9a"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_hashPair(bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/MerkleProof.sol:MerkleProof#function:_hashPair(bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "a",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "b",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01lcmtsZVByb29mLnNvbDpNZXJrbGVQcm9vZiNmdW5jdGlvbjpfaGFzaFBhaXIoYnl0ZXMzMixieXRlczMyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_hashPair",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 147,
+            "byteStart": 8976,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/MerkleProof.sol#L211-L213",
+            "lineEnd": 213,
+            "lineStart": 211,
+            "snippetSha256": "sha256:48cd76e9e77d2ac999a4957374a78877a0da91f3e32ae4775043baff91edbab9",
+            "sourceSha256": "sha256:f8d37d07fb8fd1f3c25046daa12001560ced0b73fda6ed653bc0eb4d2112ae9a"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_efficientHash(bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/MerkleProof.sol:MerkleProof#function:_efficientHash(bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "a",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "b",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL01lcmtsZVByb29mLnNvbDpNZXJrbGVQcm9vZiNmdW5jdGlvbjpfZWZmaWNpZW50SGFzaChieXRlczMyLGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_efficientHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 261,
+            "byteStart": 9129,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/MerkleProof.sol#L215-L222",
+            "lineEnd": 222,
+            "lineStart": 215,
+            "snippetSha256": "sha256:4033662a4ae8ec49f6b379eee945739efaa1af9f0b06530e29fbf4d11f2054dd",
+            "sourceSha256": "sha256:f8d37d07fb8fd1f3c25046daa12001560ced0b73fda6ed653bc0eb4d2112ae9a"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/MerkleProof.sol:MerkleProof",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL01lcmtsZVByb29mLnNvbDpNZXJrbGVQcm9vZg",
+    "kind": "library",
+    "linearizedDefinitionIds": [
+      "smart-contracts/MerkleProof.sol:MerkleProof"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "MerkleProof",
+    "natspec": "@dev These functions deal with verification of Merkle Tree proofs.\n The tree and the proofs can be generated using our\n https://github.com/OpenZeppelin/merkle-tree[JavaScript library].\n You will find a quickstart guide in the readme.\n WARNING: You should avoid using leaf values that are 64 bytes long prior to\n hashing, or use a hash function other than keccak256 for hashing leaves.\n This is because the concatenation of a sorted pair of internal nodes in\n the merkle tree could be reinterpreted as a leaf value.\n OpenZeppelin's JavaScript library generates merkle trees that are safe\n against this attack out of the box.",
+    "range": {
+      "byteLength": 8589,
+      "byteStart": 803,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/MerkleProof.sol#L20-L223",
+      "lineEnd": 223,
+      "lineStart": 20,
+      "snippetSha256": "sha256:2c8d790e9baedd23071e798252477c535bebb244cffb7d5749bf0e4060a8a50d",
+      "sourceSha256": "sha256:f8d37d07fb8fd1f3c25046daa12001560ced0b73fda6ed653bc0eb4d2112ae9a"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/MerkleProof.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

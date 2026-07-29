@@ -1,0 +1,663 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest#function:0x41c7b088",
+          "declaringDefinitionId": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCollectionMetadataLimitsRejectOversizedInputs",
+          "outputs": [],
+          "selector": "0x41c7b088",
+          "signature": "testCollectionMetadataLimitsRejectOversizedInputs()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest#function:0x504ae10d",
+          "declaringDefinitionId": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testDependencyMetadataLimitsRejectOversizedInputs",
+          "outputs": [],
+          "selector": "0x504ae10d",
+          "signature": "testDependencyMetadataLimitsRejectOversizedInputs()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest#function:0x5add8754",
+          "declaringDefinitionId": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGeneratedMetadataLimitsRejectOversizedOutput",
+          "outputs": [],
+          "selector": "0x5add8754",
+          "signature": "testGeneratedMetadataLimitsRejectOversizedOutput()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest#function:0x35f66b92",
+          "declaringDefinitionId": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMetadataSizeLimitsAcceptBoundaryStorageInputs",
+          "outputs": [],
+          "selector": "0x35f66b92",
+          "signature": "testMetadataSizeLimitsAcceptBoundaryStorageInputs()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest#function:0x4d4d09b1",
+          "declaringDefinitionId": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testTokenMetadataLimitsRejectOversizedInputs",
+          "outputs": [],
+          "selector": "0x4d4d09b1",
+          "signature": "testTokenMetadataLimitsRejectOversizedInputs()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "testMetadataSizeLimitsAcceptBoundaryStorageInputs()",
+          "displaySignature": "testMetadataSizeLimitsAcceptBoundaryStorageInputs()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest#function:0x35f66b92",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YVNpemVMaW1pdHMudC5zb2w6U3RyZWFtTWV0YWRhdGFTaXplTGltaXRzVGVzdCNmdW5jdGlvbjoweDM1ZjY2Yjky",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMetadataSizeLimitsAcceptBoundaryStorageInputs",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1657,
+            "byteStart": 615,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L19-L56",
+            "lineEnd": 56,
+            "lineStart": 19,
+            "snippetSha256": "sha256:e6e63a0c8179fd32a1eabf77fb4fcb006af7a5f9fa80d69f4eb65dbf586e50d1",
+            "sourceSha256": "sha256:4e662e6eba80d6ad10c8bda34eff5bfc0270788c099d391a7e28d2f8498891e4"
+          },
+          "selector": "0x35f66b92",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCollectionMetadataLimitsRejectOversizedInputs()",
+          "displaySignature": "testCollectionMetadataLimitsRejectOversizedInputs()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest#function:0x41c7b088",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YVNpemVMaW1pdHMudC5zb2w6U3RyZWFtTWV0YWRhdGFTaXplTGltaXRzVGVzdCNmdW5jdGlvbjoweDQxYzdiMDg4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCollectionMetadataLimitsRejectOversizedInputs",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3136,
+            "byteStart": 2278,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L58-L154",
+            "lineEnd": 154,
+            "lineStart": 58,
+            "snippetSha256": "sha256:6c2f7df13697ec06f076b28a06cf671b6ca2d24f46f7b7dc0da0b5519ddb9067",
+            "sourceSha256": "sha256:4e662e6eba80d6ad10c8bda34eff5bfc0270788c099d391a7e28d2f8498891e4"
+          },
+          "selector": "0x41c7b088",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testTokenMetadataLimitsRejectOversizedInputs()",
+          "displaySignature": "testTokenMetadataLimitsRejectOversizedInputs()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest#function:0x4d4d09b1",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YVNpemVMaW1pdHMudC5zb2w6U3RyZWFtTWV0YWRhdGFTaXplTGltaXRzVGVzdCNmdW5jdGlvbjoweDRkNGQwOWIx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testTokenMetadataLimitsRejectOversizedInputs",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2010,
+            "byteStart": 5420,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L156-L206",
+            "lineEnd": 206,
+            "lineStart": 156,
+            "snippetSha256": "sha256:3f0040de79b7e504f6f529491b78527c9dfc6a98bec86f8d01aa709a6d684100",
+            "sourceSha256": "sha256:4e662e6eba80d6ad10c8bda34eff5bfc0270788c099d391a7e28d2f8498891e4"
+          },
+          "selector": "0x4d4d09b1",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGeneratedMetadataLimitsRejectOversizedOutput()",
+          "displaySignature": "testGeneratedMetadataLimitsRejectOversizedOutput()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest#function:0x5add8754",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YVNpemVMaW1pdHMudC5zb2w6U3RyZWFtTWV0YWRhdGFTaXplTGltaXRzVGVzdCNmdW5jdGlvbjoweDVhZGQ4NzU0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGeneratedMetadataLimitsRejectOversizedOutput",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1212,
+            "byteStart": 7436,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L208-L236",
+            "lineEnd": 236,
+            "lineStart": 208,
+            "snippetSha256": "sha256:183c3ad29c6084052afa67230cee830b30100b5898d90f4fef84f1c6d9a791e2",
+            "sourceSha256": "sha256:4e662e6eba80d6ad10c8bda34eff5bfc0270788c099d391a7e28d2f8498891e4"
+          },
+          "selector": "0x5add8754",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testDependencyMetadataLimitsRejectOversizedInputs()",
+          "displaySignature": "testDependencyMetadataLimitsRejectOversizedInputs()",
+          "functionKind": "function",
+          "id": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest#function:0x504ae10d",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YVNpemVMaW1pdHMudC5zb2w6U3RyZWFtTWV0YWRhdGFTaXplTGltaXRzVGVzdCNmdW5jdGlvbjoweDUwNGFlMTBk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testDependencyMetadataLimitsRejectOversizedInputs",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1747,
+            "byteStart": 8654,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L238-L280",
+            "lineEnd": 280,
+            "lineStart": 238,
+            "snippetSha256": "sha256:3bfeebf5ef869c06e0b127fb9444b8473a04497b34f695e12ed5b31099da42bd",
+            "sourceSha256": "sha256:4e662e6eba80d6ad10c8bda34eff5bfc0270788c099d391a7e28d2f8498891e4"
+          },
+          "selector": "0x504ae10d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertMetadataLimitRevert(bytes,bytes32,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest#function:_assertMetadataLimitRevert(bytes,bytes32,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "reason",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 1,
+              "name": "field",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "maximum",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YVNpemVMaW1pdHMudC5zb2w6U3RyZWFtTWV0YWRhdGFTaXplTGltaXRzVGVzdCNmdW5jdGlvbjpfYXNzZXJ0TWV0YWRhdGFMaW1pdFJldmVydChieXRlcyxieXRlczMyLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertMetadataLimitRevert",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 734,
+            "byteStart": 10407,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L282-L300",
+            "lineEnd": 300,
+            "lineStart": 282,
+            "snippetSha256": "sha256:c1a428bdf6fb3c85579b1843caf83ac0515ab700515481835b357da619c78154",
+            "sourceSha256": "sha256:4e662e6eba80d6ad10c8bda34eff5bfc0270788c099d391a7e28d2f8498891e4"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_attributeWithValueSize(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest#function:_attributeWithValueSize(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "size",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YVNpemVMaW1pdHMudC5zb2w6U3RyZWFtTWV0YWRhdGFTaXplTGltaXRzVGVzdCNmdW5jdGlvbjpfYXR0cmlidXRlV2l0aFZhbHVlU2l6ZSh1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_attributeWithValueSize",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 423,
+            "byteStart": 11147,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L302-L309",
+            "lineEnd": 309,
+            "lineStart": 302,
+            "snippetSha256": "sha256:b8f6d5e0ea62556a76868e06f5637cddf7a0adee7bc93e13cb9a6918872019e3",
+            "sourceSha256": "sha256:4e662e6eba80d6ad10c8bda34eff5bfc0270788c099d391a7e28d2f8498891e4"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_ipfsUriWithSize(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest#function:_ipfsUriWithSize(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "size",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YVNpemVMaW1pdHMudC5zb2w6U3RyZWFtTWV0YWRhdGFTaXplTGltaXRzVGVzdCNmdW5jdGlvbjpfaXBmc1VyaVdpdGhTaXplKHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_ipfsUriWithSize",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 271,
+            "byteStart": 11576,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L311-L315",
+            "lineEnd": 315,
+            "lineStart": 311,
+            "snippetSha256": "sha256:a77045e1effe1c1c370a4c90ac103e8bcbb7572ec4c48db6ee5e043bc81f2afb",
+            "sourceSha256": "sha256:4e662e6eba80d6ad10c8bda34eff5bfc0270788c099d391a7e28d2f8498891e4"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_chunkArray(uint256,string)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest#function:_chunkArray(uint256,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "count",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "value",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YVNpemVMaW1pdHMudC5zb2w6U3RyZWFtTWV0YWRhdGFTaXplTGltaXRzVGVzdCNmdW5jdGlvbjpfY2h1bmtBcnJheSh1aW50MjU2LHN0cmluZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_chunkArray",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string[]"
+            }
+          ],
+          "range": {
+            "byteLength": 295,
+            "byteStart": 11853,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L317-L327",
+            "lineEnd": 327,
+            "lineStart": 317,
+            "snippetSha256": "sha256:f5a331522a022f6831f5fb3eebc6ba600a448c211d6413f33cc6f89dfc8d9f65",
+            "sourceSha256": "sha256:4e662e6eba80d6ad10c8bda34eff5bfc0270788c099d391a7e28d2f8498891e4"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_singleChunk(string)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest#function:_singleChunk(string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YVNpemVMaW1pdHMudC5zb2w6U3RyZWFtTWV0YWRhdGFTaXplTGltaXRzVGVzdCNmdW5jdGlvbjpfc2luZ2xlQ2h1bmsoc3RyaW5nKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_singleChunk",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string[]"
+            }
+          ],
+          "range": {
+            "byteLength": 189,
+            "byteStart": 12154,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L329-L333",
+            "lineEnd": 333,
+            "lineStart": 329,
+            "snippetSha256": "sha256:4e3e7dcfc3371f5deb529831fd4a7c4a2ccb9ff30af0be9a9ecc69c8150f7152",
+            "sourceSha256": "sha256:4e662e6eba80d6ad10c8bda34eff5bfc0270788c099d391a7e28d2f8498891e4"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_repeat(string,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest#function:_repeat(string,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "character",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 1,
+              "name": "count",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NZXRhZGF0YVNpemVMaW1pdHMudC5zb2w6U3RyZWFtTWV0YWRhdGFTaXplTGltaXRzVGVzdCNmdW5jdGlvbjpfcmVwZWF0KHN0cmluZyx1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_repeat",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 373,
+            "byteStart": 12349,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L335-L343",
+            "lineEnd": 343,
+            "lineStart": 335,
+            "snippetSha256": "sha256:9b10f6aa4d825fa6377a06c744a9faf651209c4efda10b4380f77b42f93fa55c",
+            "sourceSha256": "sha256:4e662e6eba80d6ad10c8bda34eff5bfc0270788c099d391a7e28d2f8498891e4"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COLLECTION_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 464,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:cba8ff5a3b4148cc54bed7e4899604a5bc39c7815d1a23162a647a4813b0e087",
+            "sourceSha256": "sha256:4e662e6eba80d6ad10c8bda34eff5bfc0270788c099d391a7e28d2f8498891e4"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 505,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:4e662e6eba80d6ad10c8bda34eff5bfc0270788c099d391a7e28d2f8498891e4"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TOKEN_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 512,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:c73d15ab01ba31af3abe0a3398754b34011adc910a4aba23a00a8a747263c4fa",
+            "sourceSha256": "sha256:4e662e6eba80d6ad10c8bda34eff5bfc0270788c099d391a7e28d2f8498891e4"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 548,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:4e662e6eba80d6ad10c8bda34eff5bfc0270788c099d391a7e28d2f8498891e4"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 53,
+            "byteStart": 555,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:9ad3cd03bccb87616377ded5a696e0eb9dcbd4debf5aabca58a379ad81e19501",
+            "sourceSha256": "sha256:4e662e6eba80d6ad10c8bda34eff5bfc0270788c099d391a7e28d2f8498891e4"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 16,
+            "byteStart": 592,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:ff90295fee849d58a9a67d401763bcdf9a2e87e84bdeb02ce3ca102c5621224f",
+            "sourceSha256": "sha256:4e662e6eba80d6ad10c8bda34eff5bfc0270788c099d391a7e28d2f8498891e4"
+          },
+          "valueSource": "address(0xA11CE)",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1NZXRhZGF0YVNpemVMaW1pdHMudC5zb2w6U3RyZWFtTWV0YWRhdGFTaXplTGltaXRzVGVzdA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamMetadataSizeLimitsTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 12447,
+      "byteStart": 277,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMetadataSizeLimits.t.sol#L10-L344",
+      "lineEnd": 344,
+      "lineStart": 10,
+      "snippetSha256": "sha256:4e24fa354c6f9687c24a8528031bfce079bf59064e2c24fb5d6f395bce9dff93",
+      "sourceSha256": "sha256:4e662e6eba80d6ad10c8bda34eff5bfc0270788c099d391a7e28d2f8498891e4"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamMetadataSizeLimits.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 6
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 5
+    },
+    "totalCount": 6
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest#function:0x35f66b92",
+      "definitionId": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest#function:0x41c7b088",
+      "definitionId": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest#function:0x4d4d09b1",
+      "definitionId": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest#function:0x504ae10d",
+      "definitionId": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest#function:0x5add8754",
+      "definitionId": "test/StreamMetadataSizeLimits.t.sol:StreamMetadataSizeLimitsTest",
+      "severity": "advisory"
+    }
+  ]
+}

@@ -403,23 +403,57 @@ export function assertSolidityReferenceIndex(
   value: unknown,
   identity: SolidityReferenceReviewIdentity
 ): asserts value is SolidityReferenceIndex {
+  const sourceIndexActiveVersion =
+    identity.sourceIndexActiveVersion ?? identity.activeVersion;
+  const sourceIndexAvailableVersions =
+    identity.sourceIndexAvailableVersions ?? identity.availableVersions;
+  if (!isRecord(value)) {
+    throw new Error("Invalid Solidity reference index identity.");
+  }
+  const versions = value["versions"];
   if (
-    !isRecord(value) ||
     value["schemaVersion"] !== SOLIDITY_REFERENCE_INDEX_SCHEMA ||
     value["reviewId"] !== identity.reviewId ||
-    value["activeVersion"] !== identity.activeVersion ||
-    !Array.isArray(value["versions"]) ||
-    value["versions"].length !== identity.availableVersions.length
+    !Array.isArray(versions)
   ) {
     throw new Error("Invalid Solidity reference index identity.");
   }
+  const hasExactIdentityShape = (
+    activeVersion: string,
+    availableVersions: readonly string[]
+  ): boolean =>
+    value["activeVersion"] === activeVersion &&
+    versions.length === availableVersions.length &&
+    versions.every(
+      (entry, index) =>
+        isRecord(entry) && entry["version"] === availableVersions[index]
+    );
+  const publishedVersionSet = new Set(identity.availableVersions);
+  const publishedProjectionVersions = sourceIndexAvailableVersions.filter(
+    (version) => publishedVersionSet.has(version)
+  );
+  const isFullSourceIndex = hasExactIdentityShape(
+    sourceIndexActiveVersion,
+    sourceIndexAvailableVersions
+  );
+  const isPublishedProjection = hasExactIdentityShape(
+    identity.activeVersion,
+    publishedProjectionVersions
+  );
+  if (!isFullSourceIndex && !isPublishedProjection) {
+    throw new Error("Invalid Solidity reference index identity.");
+  }
+  const expectedVersions = isFullSourceIndex
+    ? sourceIndexAvailableVersions
+    : publishedProjectionVersions;
   const seenVersions = new Set<string>();
   let activeVersionCommit: string | undefined;
-  for (const entry of value["versions"]) {
+  let sourceIndexActiveVersionCommit: string | undefined;
+  for (const entry of versions) {
     if (
       !isRecord(entry) ||
       typeof entry["version"] !== "string" ||
-      !identity.availableVersions.includes(entry["version"]) ||
+      !expectedVersions.includes(entry["version"]) ||
       entry["commit"] !== identity.sourceCommits[entry["version"]] ||
       typeof entry["bundlePath"] !== "string" ||
       !isSha256(entry["bundleSha256"]) ||
@@ -444,9 +478,24 @@ export function assertSolidityReferenceIndex(
     if (entry["version"] === identity.activeVersion) {
       activeVersionCommit = entry["commit"];
     }
+    if (entry["version"] === sourceIndexActiveVersion) {
+      sourceIndexActiveVersionCommit = entry["commit"];
+    }
+  }
+  if (
+    identity.availableVersions.some((version) => !seenVersions.has(version))
+  ) {
+    throw new Error("Missing public Solidity reference version.");
   }
   if (activeVersionCommit !== identity.activeSourceCommit) {
     throw new Error("Invalid active Solidity reference source commit.");
+  }
+  if (
+    isFullSourceIndex &&
+    sourceIndexActiveVersionCommit !==
+      identity.sourceCommits[sourceIndexActiveVersion]
+  ) {
+    throw new Error("Invalid source-index Solidity reference source commit.");
   }
 }
 

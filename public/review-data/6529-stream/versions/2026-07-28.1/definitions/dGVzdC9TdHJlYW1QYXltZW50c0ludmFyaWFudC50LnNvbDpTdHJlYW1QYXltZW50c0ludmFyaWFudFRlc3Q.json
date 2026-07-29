@@ -1,0 +1,342 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamPaymentsInvariant.t.sol:StreamPaymentsInvariantTest#function:0x0a9254e4",
+          "declaringDefinitionId": "test/StreamPaymentsInvariant.t.sol:StreamPaymentsInvariantTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "setUp",
+          "outputs": [],
+          "selector": "0x0a9254e4",
+          "signature": "setUp()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPaymentsInvariant.t.sol:StreamPaymentsInvariantTest#function:0xa6601cb9",
+          "declaringDefinitionId": "test/StreamPaymentsInvariant.t.sol:StreamPaymentsInvariantTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256[24]",
+              "name": "actionSeeds",
+              "type": "uint256[24]"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256[24]",
+              "name": "firstArgs",
+              "type": "uint256[24]"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256[24]",
+              "name": "secondArgs",
+              "type": "uint256[24]"
+            }
+          ],
+          "name": "testPaymentInvariantsHoldAcrossBoundedOperationSequences",
+          "outputs": [],
+          "selector": "0xa6601cb9",
+          "signature": "testPaymentInvariantsHoldAcrossBoundedOperationSequences(uint256[24],uint256[24],uint256[24])",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "setUp()",
+          "displaySignature": "setUp()",
+          "functionKind": "function",
+          "id": "test/StreamPaymentsInvariant.t.sol:StreamPaymentsInvariantTest#function:0x0a9254e4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QYXltZW50c0ludmFyaWFudC50LnNvbDpTdHJlYW1QYXltZW50c0ludmFyaWFudFRlc3QjZnVuY3Rpb246MHgwYTkyNTRlNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setUp",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 96,
+            "byteStart": 589,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPaymentsInvariant.t.sol#L18-L20",
+            "lineEnd": 20,
+            "lineStart": 18,
+            "snippetSha256": "sha256:0f9c1a85a1a9a88e4b12a30b0e5e660e5bfafd73b38b0f5818e82ae3e5331522",
+            "sourceSha256": "sha256:5d98b9adfd5444f5188b7ed3c4e67153f8fba9f4db059c31768809edf681175c"
+          },
+          "selector": "0x0a9254e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testPaymentInvariantsHoldAcrossBoundedOperationSequences(uint256[24],uint256[24],uint256[24])",
+          "displaySignature": "testPaymentInvariantsHoldAcrossBoundedOperationSequences(uint256[SEQUENCE_LENGTH],uint256[SEQUENCE_LENGTH],uint256[SEQUENCE_LENGTH])",
+          "functionKind": "function",
+          "id": "test/StreamPaymentsInvariant.t.sol:StreamPaymentsInvariantTest#function:0xa6601cb9",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "actionSeeds",
+              "storageLocation": "memory",
+              "type": "uint256[SEQUENCE_LENGTH]"
+            },
+            {
+              "index": 1,
+              "name": "firstArgs",
+              "storageLocation": "memory",
+              "type": "uint256[SEQUENCE_LENGTH]"
+            },
+            {
+              "index": 2,
+              "name": "secondArgs",
+              "storageLocation": "memory",
+              "type": "uint256[SEQUENCE_LENGTH]"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QYXltZW50c0ludmFyaWFudC50LnNvbDpTdHJlYW1QYXltZW50c0ludmFyaWFudFRlc3QjZnVuY3Rpb246MHhhNjYwMWNiOQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPaymentInvariantsHoldAcrossBoundedOperationSequences",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 453,
+            "byteStart": 691,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPaymentsInvariant.t.sol#L22-L32",
+            "lineEnd": 32,
+            "lineStart": 22,
+            "snippetSha256": "sha256:b0bd8351430670e0a33ce1a8222362d2fd7c6739fc7506951b5e6a8a244484ca",
+            "sourceSha256": "sha256:5d98b9adfd5444f5188b7ed3c4e67153f8fba9f4db059c31768809edf681175c"
+          },
+          "selector": "0xa6601cb9",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_runAction(uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamPaymentsInvariant.t.sol:StreamPaymentsInvariantTest#function:_runAction(uint256,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "actionSeed",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "firstArg",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "secondArg",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QYXltZW50c0ludmFyaWFudC50LnNvbDpTdHJlYW1QYXltZW50c0ludmFyaWFudFRlc3QjZnVuY3Rpb246X3J1bkFjdGlvbih1aW50MjU2LHVpbnQyNTYsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_runAction",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1915,
+            "byteStart": 1150,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPaymentsInvariant.t.sol#L34-L76",
+            "lineEnd": 76,
+            "lineStart": 34,
+            "snippetSha256": "sha256:d60942f688fee687957b4c80cc3dcfbb60d533cf7d6664f85395e863c6215a8f",
+            "sourceSha256": "sha256:5d98b9adfd5444f5188b7ed3c4e67153f8fba9f4db059c31768809edf681175c"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertPaymentInvariants()",
+          "functionKind": "function",
+          "id": "test/StreamPaymentsInvariant.t.sol:StreamPaymentsInvariantTest#function:_assertPaymentInvariants()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QYXltZW50c0ludmFyaWFudC50LnNvbDpTdHJlYW1QYXltZW50c0ludmFyaWFudFRlc3QjZnVuY3Rpb246X2Fzc2VydFBheW1lbnRJbnZhcmlhbnRzKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertPaymentInvariants",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 249,
+            "byteStart": 3071,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPaymentsInvariant.t.sol#L78-L82",
+            "lineEnd": 82,
+            "lineStart": 78,
+            "snippetSha256": "sha256:8d3f2a70b9748d9c07f2045afaba392f3874b0e76ca702bc4dc6eea19c7d73d1",
+            "sourceSha256": "sha256:5d98b9adfd5444f5188b7ed3c4e67153f8fba9f4db059c31768809edf681175c"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SEQUENCE_LENGTH",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 490,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPaymentsInvariant.t.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:2e0ccb1ffca871f55f5c9c748f01b7c34e3623771ea1eae7e30c7025b3f0acbc",
+            "sourceSha256": "sha256:5d98b9adfd5444f5188b7ed3c4e67153f8fba9f4db059c31768809edf681175c"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 2,
+            "byteStart": 533,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPaymentsInvariant.t.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:c2356069e9d1e79ca924378153cfbbfb4d4416b1f99d41a2940bfdb66c5319db",
+            "sourceSha256": "sha256:5d98b9adfd5444f5188b7ed3c4e67153f8fba9f4db059c31768809edf681175c"
+          },
+          "valueSource": "24",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "handler",
+          "natspec": "",
+          "range": {
+            "byteLength": 40,
+            "byteStart": 542,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPaymentsInvariant.t.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:24841b8a33a623f005683f0dd1105033f9bfd209c08590287777872fb6722a9c",
+            "sourceSha256": "sha256:5d98b9adfd5444f5188b7ed3c4e67153f8fba9f4db059c31768809edf681175c"
+          },
+          "selector": null,
+          "type": "PaymentsInvariantHandler",
+          "typeString": "contract PaymentsInvariantHandler",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamPaymentsInvariant.t.sol:StreamPaymentsInvariantTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+        "name": "DropAuthTestHelper"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1QYXltZW50c0ludmFyaWFudC50LnNvbDpTdHJlYW1QYXltZW50c0ludmFyaWFudFRlc3Q",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamPaymentsInvariant.t.sol:StreamPaymentsInvariantTest",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamPaymentsInvariantTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 2912,
+      "byteStart": 410,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPaymentsInvariant.t.sol#L13-L83",
+      "lineEnd": 83,
+      "lineStart": 13,
+      "snippetSha256": "sha256:281b6139e6a10fafff1f4a641d4cbba2097775ce71c2ea90814d4587edd3c2d9",
+      "sourceSha256": "sha256:5d98b9adfd5444f5188b7ed3c4e67153f8fba9f4db059c31768809edf681175c"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamPaymentsInvariant.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 3
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 2
+    },
+    "totalCount": 3
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamPaymentsInvariant.t.sol:StreamPaymentsInvariantTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPaymentsInvariant.t.sol:StreamPaymentsInvariantTest#function:0x0a9254e4",
+      "definitionId": "test/StreamPaymentsInvariant.t.sol:StreamPaymentsInvariantTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPaymentsInvariant.t.sol:StreamPaymentsInvariantTest#function:0xa6601cb9",
+      "definitionId": "test/StreamPaymentsInvariant.t.sol:StreamPaymentsInvariantTest",
+      "severity": "advisory"
+    }
+  ]
+}
