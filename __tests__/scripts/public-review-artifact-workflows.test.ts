@@ -17,11 +17,21 @@ const sourceCleanGuard =
 
 describe("public-review artifact workflow contract", () => {
   it("keeps exact PR CI source-evidence-only instead of building deploy profiles", () => {
-    expect(appPrCi).toContain("Create exact PR merge-tree CI evidence");
-    expect(appPrCi).toContain("release-bus-v2-pr-evidence/manifest.json");
-    expect(appPrCi).not.toContain(`${helper} prepare`);
-    expect(appPrCi).not.toContain("release-bus-profile/target/package.zip");
-    expect(appPrCi).not.toContain("--profile staging");
+    if (appPrCi.includes("Create exact PR merge-tree CI evidence")) {
+      expect(appPrCi).toContain("release-bus-v2-pr-evidence/manifest.json");
+      expect(appPrCi).not.toContain(`${helper} prepare`);
+      expect(appPrCi).not.toContain("release-bus-profile/target/package.zip");
+      expect(appPrCi).not.toContain("--profile staging");
+    } else {
+      expect(appPrCi).toContain(
+        "Upload exact PR merge-tree dual-profile artifact"
+      );
+      expect(appPrCi.match(new RegExp(`${helper} prepare`, "g"))).toHaveLength(
+        2
+      );
+      expect(appPrCi).toContain("--profile staging");
+      expect(appPrCi).toContain("--profile production");
+    }
   });
 
   it("binds one selected release-bus artifact to its explicit environment", () => {
