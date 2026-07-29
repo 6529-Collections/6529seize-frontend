@@ -281,7 +281,7 @@ export default function SubscriptionCoverageSummary({
           >
             {headline}
           </h3>
-          <p className="tw-mb-0 tw-mt-2 tw-max-w-2xl tw-text-sm tw-leading-6 tw-text-white/50 sm:tw-text-[15px]">
+          <p className="tw-mb-0 tw-mt-2 tw-max-w-2xl tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-400 sm:tw-text-[15px]">
             {t(locale, getDescriptionKey(coverage.status))}
           </p>
           {isError ? (
@@ -405,7 +405,7 @@ export default function SubscriptionCoverageSummary({
               date={coverage.next_unfunded.mint_at}
             />
           ) : null}
-          <div className="tw-grid tw-grid-cols-2 tw-gap-4 tw-py-1 lg:tw-grid-cols-1 lg:tw-gap-7">
+          <div className="tw-grid tw-grid-cols-2 tw-gap-4 lg:tw-grid-cols-1 lg:tw-gap-7">
             <div className="tw-grid tw-min-w-0 tw-grid-cols-[auto_1fr] tw-items-baseline tw-gap-x-1.5">
               <div className="tw-col-span-2 tw-mb-1 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
                 {t(locale, "subscriptions.coverage.capacity")}
@@ -431,7 +431,7 @@ export default function SubscriptionCoverageSummary({
               </div>
             </div>
           </div>
-          <p className="tw-m-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.04] tw-pt-4 tw-text-xs tw-leading-5 tw-text-iron-500">
+          <p className="tw-m-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.04] tw-pt-4 tw-text-pretty tw-text-xs tw-leading-5 tw-text-iron-500">
             {t(locale, "subscriptions.coverage.basis")}
           </p>
         </div>
