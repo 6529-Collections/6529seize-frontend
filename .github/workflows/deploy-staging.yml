@@ -22,7 +22,105 @@ env:
   STAGING_RUN_AS: ${{ vars.STAGING_RUN_AS || 'ubuntu' }}
 
 jobs:
+  manual-deployment-guard:
+    name: Authorize manual staging fallback
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+
+    steps:
+      - name: Require authoritative staging fallback readiness
+        env:
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          TARGET_ENVIRONMENT: staging
+          TARGET_LANE: STAGING
+        run: |
+          set -euo pipefail
+
+          test -n "$RELEASE_BUS_API_URL" || {
+            echo "::error::Release Bus API URL is unavailable; refusing manual staging deployment."
+            exit 1
+          }
+          test -n "$RELEASE_BUS_WORKFLOW_AUTH_TOKEN" || {
+            echo "::error::Release Bus workflow credential is unavailable; refusing manual staging deployment."
+            exit 1
+          }
+          [[ "$GITHUB_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]] || {
+            echo "::error::GitHub run identity is malformed; refusing manual staging deployment."
+            exit 1
+          }
+          [[ "$GITHUB_RUN_ATTEMPT" =~ ^[1-9][0-9]{0,8}$ ]] || {
+            echo "::error::GitHub run attempt is malformed; refusing manual staging deployment."
+            exit 1
+          }
+          [[ "$GITHUB_REF_NAME" =~ ^[A-Za-z0-9._/-]{1,255}$ ]] || {
+            echo "::error::GitHub source ref is malformed; refusing manual staging deployment."
+            exit 1
+          }
+          [[ "$GITHUB_SHA" =~ ^[a-f0-9]{40}$ ]] || {
+            echo "::error::GitHub source SHA is malformed; refusing manual staging deployment."
+            exit 1
+          }
+
+          payload="$(
+            jq -n \
+              --arg repository frontend \
+              --arg environment "$TARGET_ENVIRONMENT" \
+              --arg service frontend \
+              --arg workflow_run_id "$GITHUB_RUN_ID" \
+              --argjson workflow_run_attempt "$GITHUB_RUN_ATTEMPT" \
+              --arg source_ref "$GITHUB_REF_NAME" \
+              --arg source_sha "$GITHUB_SHA" \
+              '{repository:$repository,environment:$environment,service:$service,workflow_run_id:$workflow_run_id,workflow_run_attempt:$workflow_run_attempt,source_ref:$source_ref,source_sha:$source_sha}'
+          )"
+          response_file="$(mktemp)"
+          trap 'rm -f "$response_file"' EXIT
+          if ! http_status="$(
+            curl --silent --show-error \
+              --connect-timeout 10 \
+              --max-time 30 \
+              --output "$response_file" \
+              --write-out '%{http_code}' \
+              -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+              -H 'Content-Type: application/json' \
+              --data "$payload" \
+              "$RELEASE_BUS_API_URL/deploy/release-bus-v2/manual-deployment-readiness"
+          )"; then
+            echo "::error::Release Bus readiness is unavailable; refusing manual staging deployment."
+            exit 1
+          fi
+          if [ "$http_status" != 200 ]; then
+            echo "::error::Manual staging fallback readiness was rejected with HTTP $http_status."
+            exit 1
+          fi
+          if ! jq -e \
+            --arg repository frontend \
+            --arg environment "$TARGET_ENVIRONMENT" \
+            --arg service frontend \
+            --arg workflow_run_id "$GITHUB_RUN_ID" \
+            --arg workflow_run_attempt "$GITHUB_RUN_ATTEMPT" \
+            --arg source_ref "$GITHUB_REF_NAME" \
+            --arg source_sha "$GITHUB_SHA" \
+            --arg lane "$TARGET_LANE" \
+            'type == "object" and
+             .ready == true and
+             .mode == "manual" and
+             .lane == $lane and
+             .repository == $repository and
+             .environment == $environment and
+             .service == $service and
+             (.workflow_run_id | tostring) == $workflow_run_id and
+             (.workflow_run_attempt | tostring) == $workflow_run_attempt and
+             .source_ref == $source_ref and
+             .source_sha == $source_sha' \
+            "$response_file" >/dev/null; then
+            echo "::error::Release Bus returned malformed or mismatched readiness evidence; refusing manual staging deployment."
+            exit 1
+          fi
+
   deploy-staging:
+    needs: manual-deployment-guard
     runs-on: ubuntu-latest
     timeout-minutes: 75
     permissions:
@@ -35,7 +133,7 @@ jobs:
       - name: Checkout staging branch
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
-          ref: ${{ env.STAGING_BRANCH }}
+          ref: ${{ github.sha }}
           fetch-depth: 0
 
       - name: Resolve expected commit
