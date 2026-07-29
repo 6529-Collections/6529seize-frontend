@@ -137,7 +137,7 @@ function productionPack(
   suffix,
   description,
   specs,
-  triggers = ["cron", "manual"],
+  triggers = ["cron", "manual", "post-deploy"],
   timeoutMinutes = 15
 ) {
   return {
@@ -371,7 +371,13 @@ const PACKS = [
     "smoke",
     "Staging @smoke subset on both web shells.",
     SMOKE_SPECS,
-    { grep: "@smoke" }
+    {
+      grep: "@smoke",
+      // The complete staging pack already contains the same smoke specs.
+      // Keep this focused pack for manual diagnosis without duplicating
+      // manifest-bound post-deploy coverage.
+      triggers: ["manual"],
+    }
   ),
   stagingPack("core", "", "Staging core surfaces on both web shells.", [
     "tests/surfaces",
@@ -446,6 +452,12 @@ const PACKS = [
   ),
 
   productionPack(
+    "home-readonly",
+    "Production home-page read-only canary.",
+    ["tests/home/home.spec.ts"],
+    ["post-deploy", "manual"]
+  ),
+  productionPack(
     "social-readonly",
     "Production waves and profile read-only canary.",
     READONLY_SPECS.social
@@ -511,7 +523,9 @@ const PACKS = [
       ...READONLY_SPECS.profileDeepLinks,
       ...READONLY_SPECS.searchWaves,
     ],
-    ["post-deploy", "manual"],
+    // The disjoint post-deploy packs above cover this exact spec union and may
+    // run concurrently. Retain the aggregate only as an operator diagnostic.
+    ["manual"],
     60
   ),
 ];
