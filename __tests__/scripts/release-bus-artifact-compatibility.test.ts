@@ -672,7 +672,7 @@ describe("Release Bus artifact rollout compatibility", () => {
             package_digest: null,
             consumed_preflight_artifact: false,
             rebuilt: false,
-            source_evidence_reused: true,
+            source_evidence_reused: false,
             artifact_bytes_reused: false,
           },
         });
@@ -702,7 +702,7 @@ describe("Release Bus artifact rollout compatibility", () => {
             package_digest: null,
             consumed_preflight_artifact: false,
             rebuilt: false,
-            source_evidence_reused: true,
+            source_evidence_reused: false,
             artifact_bytes_reused: false,
           },
         });
@@ -1219,6 +1219,70 @@ describe("Release Bus artifact rollout compatibility", () => {
           },
         }).status
       ).toBe(0);
+
+      const verifyArtifact = findStep(
+        workflow,
+        "finalize",
+        "Verify structured artifact result"
+      );
+      const legacyArtifactRoot = fs.mkdtempSync(
+        path.join(os.tmpdir(), "release-bus-legacy-finalize-")
+      );
+      try {
+        writeArtifact(legacyArtifactRoot, "staging", 2);
+        const legacyEnv = {
+          AGGREGATE_CANDIDATE_EVIDENCE_DIGEST: "",
+          ARTIFACT_CONTRACT_VERSION: "legacy-v2",
+          ARTIFACT_ENVIRONMENT: "staging",
+          CANDIDATE_EVIDENCE_MODE: "legacy-whole-train",
+          EXPECTED_SHA,
+          REUSE_ARTIFACT_DIGEST: "",
+          REUSE_ARTIFACT_NAME: "",
+          REUSE_ARTIFACT_RUN_ID: "",
+          TRAIN_ID,
+        };
+        expect(
+          runShell(verifyArtifact.run!, {
+            cwd: legacyArtifactRoot,
+            env: legacyEnv,
+          }).status
+        ).toBe(0);
+
+        const manifestPath = path.join(
+          legacyArtifactRoot,
+          "release-bus-artifact",
+          "manifest.json"
+        );
+        const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+        manifest.profiles.staging.package_sha256 = "f".repeat(64);
+        fs.writeFileSync(manifestPath, JSON.stringify(manifest));
+        const artifactRoot = path.join(
+          legacyArtifactRoot,
+          "release-bus-artifact"
+        );
+        const checksumLines = fs
+          .readFileSync(path.join(artifactRoot, "SHA256SUMS"), "utf8")
+          .split("\n")
+          .filter(Boolean)
+          .map((line) =>
+            line.endsWith("./manifest.json")
+              ? `${sha256(fs.readFileSync(manifestPath))}  ./manifest.json`
+              : line
+          )
+          .join("\n");
+        fs.writeFileSync(
+          path.join(artifactRoot, "SHA256SUMS"),
+          `${checksumLines}\n`
+        );
+        expect(
+          runShell(verifyArtifact.run!, {
+            cwd: legacyArtifactRoot,
+            env: legacyEnv,
+          }).status
+        ).not.toBe(0);
+      } finally {
+        fs.rmSync(legacyArtifactRoot, { recursive: true, force: true });
+      }
       expect(
         runShell(authorize.run!, {
           env: {

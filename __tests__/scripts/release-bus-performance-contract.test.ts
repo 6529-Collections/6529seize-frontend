@@ -347,6 +347,12 @@ describe("Release Bus frontend performance contract", () => {
       expect(deployReport.run).toContain(
         'if [ "$ARTIFACT_OUTCOME" = success ]'
       );
+      expect(deployReport.run).toContain(
+        '[ "$ARTIFACT_CONTRACT" = environment-bound-v1 ]'
+      );
+      expect(deployReport.run).not.toContain(
+        '[ "$ARTIFACT_CONTRACT_VERSION" = environment-bound-v3 ] && printf true'
+      );
       expect(sourceVerification.run).toContain(
         environment === "staging"
           ? "git/ref/heads/1a-staging"

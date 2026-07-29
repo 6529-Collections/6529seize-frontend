@@ -117,6 +117,7 @@ const PACKAGE_SCRIPT_KEYS = Object.freeze([
   "test:e2e:production:admin-guards-readonly",
   "test:e2e:production:collections-readonly",
   "test:e2e:production:delegation-readonly",
+  "test:e2e:production:home-readonly",
   "test:e2e:production:media-readonly",
   "test:e2e:production:network-open-data-readonly",
   "test:e2e:production:profile-deep-links-readonly",
