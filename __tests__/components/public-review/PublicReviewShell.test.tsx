@@ -70,9 +70,13 @@ describe("PublicReviewShell", () => {
       "aria-controls",
       "public-review-feedback"
     );
-    expect(document.getElementById("public-review-feedback")).toHaveClass(
-      "tw-hidden"
+    expect(commentsToggle).toHaveAttribute("aria-expanded", "false");
+    expect(document.getElementById("public-review-feedback")).toHaveAttribute(
+      "hidden"
     );
+    expect(
+      screen.getByRole("navigation", { name: "Contract review areas" })
+    ).toBeInTheDocument();
     expect(
       screen.getAllByRole("link", { name: "The short answer" })
     ).toHaveLength(2);
@@ -109,9 +113,9 @@ describe("PublicReviewShell", () => {
       />
     );
 
+    await screen.findByRole("dialog", { name: "Page comments" });
     const commentsPanel = document.getElementById("public-review-feedback");
     expect(commentsPanel).toBeInTheDocument();
-    await waitFor(() => expect(commentsPanel).not.toHaveClass("tw-hidden"));
     await waitFor(() => expect(commentsPanel).toHaveFocus());
 
     window.localStorage.setItem("public-review-comment-panel-open", "false");
@@ -162,7 +166,7 @@ describe("PublicReviewShell", () => {
       `https://github.com/6529-Collections/6529Stream/tree/${historicalCommit}`
     );
     expect(
-      screen.getByRole("link", { name: "View the full feedback ledger" })
+      screen.getByRole("link", { name: /Public feedback/ })
     ).toHaveAttribute(
       "href",
       "/reviews/6529-stream/versions/2026-07-25.1/feedback"
@@ -202,7 +206,7 @@ describe("PublicReviewShell", () => {
     );
 
     expect(
-      screen.getByRole("link", { name: "View the full feedback ledger" })
+      screen.getByRole("link", { name: /Public feedback/ })
     ).toHaveAttribute(
       "href",
       "/reviews/another-contract/versions/candidate-2/feedback"
@@ -277,10 +281,10 @@ describe("PublicReviewShell", () => {
     );
 
     expect(
-      screen.getByRole("link", { name: "View the full feedback ledger" })
+      screen.getByRole("link", { name: /Public feedback/ })
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: "Jump to send feedback" })
+      screen.queryByRole("link", { name: "Send feedback" })
     ).not.toBeInTheDocument();
   });
 });

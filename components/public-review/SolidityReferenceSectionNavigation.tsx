@@ -1,9 +1,15 @@
 "use client";
 
 import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "@heroicons/react/24/outline";
+import {
+  useCallback,
   useEffect,
   useId,
   useRef,
+  useState,
   useSyncExternalStore,
   type KeyboardEvent,
   type ReactNode,
@@ -54,7 +60,7 @@ type SolidityReferencePanels = Readonly<
 >;
 
 const TAB_CLASSES =
-  "tw-m-0 tw-flex tw-min-h-12 tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-pb-4 tw-pt-3 tw-text-base tw-font-medium tw-leading-5 tw-transition-colors tw-duration-150 tw-ease-out motion-reduce:tw-transition-none focus:tw-outline-none focus-visible:tw-rounded-sm focus-visible:tw-bg-white/10";
+  "tw-m-0 tw-flex tw-min-h-11 tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1.5 tw-pb-3 tw-pt-2.5 tw-text-sm tw-font-medium tw-leading-5 tw-transition-colors tw-duration-150 tw-ease-out motion-reduce:tw-transition-none focus:tw-outline-none focus-visible:tw-rounded-sm focus-visible:tw-bg-white/10";
 
 function getSectionFromHash(hash: string): SolidityReferenceSectionId {
   const sectionId = hash.startsWith("#") ? hash.slice(1) : hash;
@@ -96,7 +102,43 @@ export function SolidityReferenceSectionNavigation({
   const tabRefs = useRef<
     Partial<Record<SolidityReferenceSectionId, HTMLButtonElement | null>>
   >({});
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
   const skipNextHashScrollRef = useRef(false);
+
+  const updateScrollControls = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) {
+      return;
+    }
+    const { clientWidth, scrollLeft, scrollWidth } = container;
+    setCanScrollLeft(scrollLeft > 1);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
+  }, []);
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) {
+      return;
+    }
+    updateScrollControls();
+    container.addEventListener("scroll", updateScrollControls, {
+      passive: true,
+    });
+    globalThis.addEventListener("resize", updateScrollControls);
+    const resizeObserver =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(updateScrollControls);
+    resizeObserver?.observe(container);
+
+    return () => {
+      container.removeEventListener("scroll", updateScrollControls);
+      globalThis.removeEventListener("resize", updateScrollControls);
+      resizeObserver?.disconnect();
+    };
+  }, [updateScrollControls]);
 
   useEffect(() => {
     if (locationHash !== `#${activeSection}`) {
@@ -164,16 +206,30 @@ export function SolidityReferenceSectionNavigation({
     }
   };
 
+  const scrollTabs = (direction: -1 | 1) => {
+    const container = scrollContainerRef.current;
+    if (!container) {
+      return;
+    }
+    container.scrollBy({
+      behavior: "smooth",
+      left: direction * Math.min(320, container.clientWidth * 0.7),
+    });
+  };
+
   const activeTabId = `${tabsId}-${activeSection}-tab`;
   const panelId = `${tabsId}-panel`;
 
   return (
     <div>
       <div className="tw-relative tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800">
-        <div className="tw-no-scrollbar tw-w-full tw-overflow-x-auto tw-overflow-y-hidden tw-overscroll-x-contain tw-scroll-smooth [touch-action:pan-x]">
+        <div
+          className="tw-no-scrollbar tw-w-full tw-overflow-x-auto tw-overflow-y-hidden tw-overscroll-x-contain tw-scroll-smooth [touch-action:pan-x]"
+          ref={scrollContainerRef}
+        >
           <div
             aria-label={t(DEFAULT_LOCALE, "publicReview.navigation.onThisPage")}
-            className="-tw-mb-px tw-flex tw-min-w-max tw-gap-x-2"
+            className="-tw-mb-px tw-flex tw-min-w-max tw-gap-x-3"
             role="tablist"
           >
             {REFERENCE_SECTIONS.map((section, index) => {
@@ -204,6 +260,50 @@ export function SolidityReferenceSectionNavigation({
             })}
           </div>
         </div>
+        {canScrollLeft ? (
+          <>
+            <div
+              aria-hidden="true"
+              className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-0 tw-z-10 tw-w-16 tw-bg-gradient-to-r tw-from-[#0D0D0F] tw-via-[#0D0D0F]/90 tw-to-transparent"
+            />
+            <button
+              aria-label={t(
+                DEFAULT_LOCALE,
+                "publicReview.reference.scrollSectionsLeft"
+              )}
+              className="tw-group tw-absolute tw-left-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-size-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
+              onClick={() => scrollTabs(-1)}
+              type="button"
+            >
+              <ChevronLeftIcon
+                aria-hidden="true"
+                className="tw-size-4 tw-transition-colors group-hover:tw-text-iron-100"
+              />
+            </button>
+          </>
+        ) : null}
+        {canScrollRight ? (
+          <>
+            <div
+              aria-hidden="true"
+              className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-z-10 tw-w-16 tw-bg-gradient-to-l tw-from-[#0D0D0F] tw-via-[#0D0D0F]/90 tw-to-transparent"
+            />
+            <button
+              aria-label={t(
+                DEFAULT_LOCALE,
+                "publicReview.reference.scrollSectionsRight"
+              )}
+              className="tw-group tw-absolute tw-right-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-size-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
+              onClick={() => scrollTabs(1)}
+              type="button"
+            >
+              <ChevronRightIcon
+                aria-hidden="true"
+                className="tw-size-4 tw-transition-colors group-hover:tw-text-iron-100"
+              />
+            </button>
+          </>
+        ) : null}
       </div>
       <div
         aria-labelledby={activeTabId}

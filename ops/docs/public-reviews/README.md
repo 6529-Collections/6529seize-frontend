@@ -60,6 +60,8 @@ Every page includes:
 
 - a persistent status area showing the lifecycle, deployment, and audit states;
   Stream currently shows **Public review**, **Not deployed**, and **Pre-audit**
+- a consistent **Review**, **Technical reference**, and **Public feedback**
+  switcher below the status area
 - the review version and a link to the exact source snapshot
 - navigation across the fourteen pages in the current version snapshot
 - an on-page contents list generated from the editorial headings
@@ -182,11 +184,12 @@ routes fail closed when that version's lifecycle is not public.
 
 Structured feedback is enabled on every editorial and technical reference
 page. Editorial pages place the current page's loaded comments and the existing
-structured feedback form in one collapsible rail. The rail opens beside the
-document when enough width is available and becomes a normal stacked section
-on narrower layouts, so it never covers the review text. The open or closed
-preference is retained in the browser. Opening the **Jump to send feedback**
-link reveals and focuses the rail when it was closed.
+structured feedback form in one collapsible rail. The rail starts closed until
+the reader opens it, appears beside the document when enough width is available,
+and becomes a dismissible right-side overlay on narrower layouts instead of
+reflowing the review text. An explicit open or closed preference is retained in
+the browser. Opening the **Jump to send feedback** link reveals and focuses the
+rail when it was closed.
 
 The rail initially reads the most recent 50 messages from the exact
 version-specific review discussion and shows entries attached to the current
@@ -214,7 +217,9 @@ ready.
 Submitting uses an immutable snapshot of the draft and its attached context.
 If the reviewer edits the draft or changes its page, section, or source range
 while a post is still in flight, a successful response does not clear the newer
-work. The next post receives a fresh submission ID.
+work. The next post receives a fresh submission ID. A successful post uses the
+standard app toast; the existing **Open discussion in the Wave** action remains
+the single route back to the posted discussion.
 
 The active feedback ledger at `/reviews/6529-stream/feedback` and each
 immutable ledger at `/reviews/6529-stream/versions/{version}/feedback` read the
