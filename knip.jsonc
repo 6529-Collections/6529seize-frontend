@@ -80,6 +80,9 @@
       "scripts/public-reviews/solidity-reference-lib.cjs": ["exports"],
       "scripts/public-reviews/stream-knowledge.cjs": ["exports"],
       "scripts/public-reviews/stream-knowledge-packs.cjs": ["exports"],
+      // Exact policy-bundle helpers are a testable CLI API. Knip intentionally
+      // excludes their focused Jest consumers from its usage graph.
+      "scripts/pr-ci-policy-bundle.cjs": ["exports"],
       "services/api/public-review/feedback-codec.ts": ["exports", "types"],
       "services/api/public-review/ledger.ts": ["exports"],
       "services/**": ["files"],

@@ -37,6 +37,15 @@ emergency fence blocks fallback. If Release Bus cannot safely self-deploy while
 `ON`, stop for explicit owner direction; never infer an exception from the
 component or GitHub actor.
 
+The legacy frontend staging and production workflows enforce this routing as
+their first job. They authenticate the exact current GitHub run with the
+backend readiness endpoint and reject before checkout, build, ref, credential,
+or deployment mutation unless the target lane is authoritatively `OFF`,
+`changeable: true`, free of hidden fences, and fully drained. Release Bus
+operations use the dedicated immutable-artifact workflows and their normal
+operation authorization; a valid operation identity never converts a legacy
+rebuilding workflow into a train deploy path.
+
 ## Dashboard read model
 
 `/deploy/ui/bus` presents Staging and Production as the two developer-facing
@@ -85,16 +94,19 @@ register backend first and declare it as the frontend prerequisite.
    dependency-closed set of newly ready candidates with zero fixed batch
    delay. A later ordinary train cannot omit or evict an admitted candidate.
 2. Frontend/backend composition and preparation run concurrently.
-3. A single exact PR merge-tree artifact is reused when eligible. Otherwise,
-   each application runs one combined sharded preflight and one immutable build.
-   Frontend staging/production profiles build concurrently into one checksummed
-   dual-profile artifact. For an affected repository, the staging release
+3. Exact green PR merge-tree source and test evidence is reused when eligible;
+   artifact bytes are freshly built for the exact staging composition. Backend
+   preparation installs dependencies once and builds/packages only selected
+   deploy units. Frontend builds only the staging profile and records one
+   immutable environment-bound manifest/digest. Repository-wide lint,
+   typecheck, test inventory, and full test matrices remain PR CI gates and do
+   not run in a normal train. For an affected repository, the staging release
    commit has the recorded current `1a-staging` SHA as its first parent. When
    the dependency-closed composition adds commits beyond that parent, it is the
    second parent; a fully current empty-cumulative composition intentionally
    produces a single-parent commit. Normal staging composition starts from that
-   recorded parent and merges current `main` plus every admitted candidate; only
-   rollback deliberately binds a last-validated replacement tree.
+   recorded parent and merges current `main` plus every admitted candidate;
+   only rollback deliberately binds a last-validated replacement tree.
 4. Preparation may finish while another train owns staging.
 5. The train acquires the staging lock and repeats the idle/ref snapshot. A
    carry-forward-only repository must already have `composed_sha` equal to its
@@ -181,13 +193,17 @@ New production trains use `CANDIDATE_STAGING_EVIDENCE_V1`:
 
 - persist each selected candidate's exact identity plus its staging train,
   validated manifest, and successful manifest-bound E2E operation/run;
-- freshly compose both repositories against the current trusted `main` bases;
+- freshly compose both repositories against the current trusted `main` bases
+  and freshly build only the target production profiles/deploy units;
+- reuse exact candidate source and PR CI/staging evidence, never staging
+  artifact bytes, because production may select a different dependency-closed
+  subset than the staging composition;
 - fail closed on moved heads, ambiguous or stale evidence, invalid dependency
   closure, composition/check/build/artifact failures, or either stale base;
 - persist `PRODUCTION_CANDIDATE_EVIDENCE_QUALIFIED` as an auditable production
   manifest without mutating shared staging;
-- never create `PRODUCTION_CANDIDATE_EVIDENCE_QUALIFIED` merely because the selected set
-  differs from a validated staging manifest;
+- never create a legacy `PRODUCTION_QUALIFICATION` child merely because the
+  selected set differs from a validated staging manifest;
 - compare-and-swap only the exact tested commits, deploy immutable artifacts in
   dependency order, verify exact versions, run production-safe read-only E2E,
   and create `PRODUCTION_DEPLOYED` only after terminal success.
