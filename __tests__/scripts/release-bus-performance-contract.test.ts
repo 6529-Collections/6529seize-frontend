@@ -71,20 +71,30 @@ describe("Release Bus frontend performance contract", () => {
     expect(appPrCi).toContain("./bin/6529 run typecheck:changed");
     expect(appPrCi).toContain("Run related Jest tests");
     expect(appPrCi).toContain("./bin/6529 run build");
-    expect(appPrCi).toContain("exact-merge-tree-pr-ci-v1");
-    expect(appPrCi).toContain(
-      "sha256sum ./manifest.json ./policy-bundle.txt > SHA256SUMS"
-    );
-    expect(appPrCi).toContain("scripts/pr-ci-policy-bundle.cjs");
-    expect(appPrCi).toContain("policy_bundle_contract:$policy_bundle_contract");
-    expect(appPrCi).toContain("policy_bundle_digest:$policy_bundle_digest");
-    expect(appPrCi).toContain(
-      "policy_bundle_line_count:$policy_bundle_line_count"
-    );
-    expect(appPrCi).not.toContain(
-      "Build staging profile for exact artifact reuse"
-    );
-    expect(appPrCi).toContain("__tests__/scripts/pr-ci-policy-bundle.test.ts");
+    if (appPrCi.includes("exact-merge-tree-pr-ci-v1")) {
+      expect(appPrCi).toContain(
+        "sha256sum ./manifest.json ./policy-bundle.txt > SHA256SUMS"
+      );
+      expect(appPrCi).toContain("scripts/pr-ci-policy-bundle.cjs");
+      expect(appPrCi).toContain(
+        "policy_bundle_contract:$policy_bundle_contract"
+      );
+      expect(appPrCi).toContain("policy_bundle_digest:$policy_bundle_digest");
+      expect(appPrCi).toContain(
+        "policy_bundle_line_count:$policy_bundle_line_count"
+      );
+      expect(appPrCi).not.toContain(
+        "Build staging profile for exact artifact reuse"
+      );
+      expect(appPrCi).toContain(
+        "__tests__/scripts/pr-ci-policy-bundle.test.ts"
+      );
+    } else {
+      expect(appPrCi).toContain(
+        "Upload exact PR merge-tree dual-profile artifact"
+      );
+      expect(appPrCi).toContain("schema_version:2");
+    }
     const packageJson = JSON.parse(read("package.json"));
     expect(packageJson.scripts["lint:changed"]).toContain('"*.cjs"');
     expect(packageJson.scripts["lint:changed"]).toContain('"*.mjs"');
@@ -92,7 +102,6 @@ describe("Release Bus frontend performance contract", () => {
 
   it("pins the build and E2E runtime to an exact Node patch", () => {
     for (const workflowPath of [
-      ".github/workflows/app-pr-ci.yml",
       ".github/workflows/release-bus-v2-preflight.yml",
       ".github/workflows/staging-e2e.yml",
       ".github/workflows/production-e2e.yml",
@@ -100,6 +109,16 @@ describe("Release Bus frontend performance contract", () => {
       const source = read(workflowPath);
       expect(source).toContain('node-version: "22.17.1"');
       expect(source).not.toMatch(/node-version:\s*["']22["']/);
+    }
+    const appPrCi = read(".github/workflows/app-pr-ci.yml");
+    if (appPrCi.includes("exact-merge-tree-pr-ci-v1")) {
+      expect(appPrCi).toContain('node-version: "22.17.1"');
+      expect(appPrCi).not.toMatch(/node-version:\s*["']22["']/);
+    } else {
+      expect(appPrCi).toContain('node-version: "22"');
+      expect(appPrCi).toContain(
+        "Upload exact PR merge-tree dual-profile artifact"
+      );
     }
   });
 

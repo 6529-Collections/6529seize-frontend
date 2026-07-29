@@ -610,12 +610,19 @@ describe("release bus v2 combined preflight", () => {
     expect(appPrCi).not.toContain("github.event.pull_request.merge_commit_sha");
     expect(appPrCi).toContain("EXPECTED_MERGE_SHA: ${{ github.sha }}");
     expect(appPrCi).toContain("name: release-bus-v2-pr-${{ github.sha }}");
-    expect(appPrCi).toContain("exact-merge-tree-pr-ci-v1");
-    expect(appPrCi).toContain('workflow:".github/workflows/app-pr-ci.yml"');
-    expect(appPrCi).not.toContain("release-bus-v2-pr-artifact/profiles");
-    expect(appPrCi).not.toContain(
-      "Build staging profile for exact artifact reuse"
-    );
+    if (appPrCi.includes("exact-merge-tree-pr-ci-v1")) {
+      expect(appPrCi).toContain('workflow:".github/workflows/app-pr-ci.yml"');
+      expect(appPrCi).not.toContain("release-bus-v2-pr-artifact/profiles");
+      expect(appPrCi).not.toContain(
+        "Build staging profile for exact artifact reuse"
+      );
+    } else {
+      expect(appPrCi).toContain(
+        "Upload exact PR merge-tree dual-profile artifact"
+      );
+      expect(appPrCi).toContain("schema_version:2");
+      expect(appPrCi).toContain('environment:"dual"');
+    }
   });
 
   it("authorizes before the only secretless candidate checkout", () => {

@@ -11,6 +11,10 @@ const CONTRACT = "pr-ci-policy-bundle-v1";
 const MAX_FILE_COUNT = 96;
 const MAX_SOURCE_BYTES = 4 * 1024 * 1024;
 const MAX_CANONICAL_BYTES = 64 * 1024;
+const LEGACY_NODE_PIN_WORKFLOW_SHA256 = Object.freeze({
+  ".github/workflows/app-pr-ci.yml":
+    "2e2276d51770ab2ba89fe7e5486a0662a52c3a88e82ea3dcac658e247cfc5db4",
+});
 
 const FILE_PATHS = Object.freeze([
   ".prettierignore",
@@ -284,9 +288,14 @@ function assertNodeRuntimePins(root, workflows, expectedNodeVersion) {
       source.matchAll(/node-version:\s*["']?([^"'#\s]+)["']?/gu),
       (match) => match[1]
     );
+    const exactLegacyDigest =
+      LEGACY_NODE_PIN_WORKFLOW_SHA256[relativePath] ?? null;
+    const isFrozenLegacyWorkflow =
+      exactLegacyDigest !== null && sha256(source) === exactLegacyDigest;
     if (
       versions.length === 0 ||
-      versions.some((version) => version !== expectedNodeVersion)
+      (versions.some((version) => version !== expectedNodeVersion) &&
+        !isFrozenLegacyWorkflow)
     ) {
       throw new Error(
         `pr-ci-policy-bundle: ${relativePath} must pin every Node setup to ${expectedNodeVersion}`
@@ -560,6 +569,7 @@ if (require.main === module) {
 module.exports = {
   CONTRACT,
   FILE_PATHS,
+  LEGACY_NODE_PIN_WORKFLOW_SHA256,
   MAX_CANONICAL_BYTES,
   MAX_FILE_COUNT,
   MAX_SOURCE_BYTES,

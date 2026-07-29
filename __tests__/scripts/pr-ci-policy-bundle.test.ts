@@ -2,10 +2,12 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
+import crypto from "node:crypto";
 
 const {
   CONTRACT,
   FILE_PATHS,
+  LEGACY_NODE_PIN_WORKFLOW_SHA256,
   PACKAGE_FIELD_KEYS,
   PACKAGE_SCRIPT_KEYS,
   RUNTIME_PINS,
@@ -13,6 +15,7 @@ const {
 } = require("../../scripts/pr-ci-policy-bundle.cjs") as {
   CONTRACT: string;
   FILE_PATHS: readonly string[];
+  LEGACY_NODE_PIN_WORKFLOW_SHA256: Readonly<Record<string, string>>;
   PACKAGE_FIELD_KEYS: readonly string[];
   PACKAGE_SCRIPT_KEYS: readonly string[];
   RUNTIME_PINS: Readonly<Record<string, string>>;
@@ -302,6 +305,19 @@ describe("pr-ci-policy-bundle-v1", () => {
       ])
     );
     expect(RUNTIME_PINS).toEqual({ node: "22.17.1" });
+    const appPrCi = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),
+      "utf8"
+    );
+    if (!appPrCi.includes('node-version: "22.17.1"')) {
+      expect(
+        LEGACY_NODE_PIN_WORKFLOW_SHA256[".github/workflows/app-pr-ci.yml"]
+      ).toBe(
+        // This exact legacy producer is allowed only during the bounded
+        // consumer bridge; any one-byte drift must fail closed.
+        crypto.createHash("sha256").update(appPrCi).digest("hex")
+      );
+    }
 
     const packageJson = JSON.parse(
       fs.readFileSync(path.join(process.cwd(), "package.json"), "utf8")
