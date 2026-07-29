@@ -1,12 +1,11 @@
 import "next/dist/compiled/server-only";
 
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import type { Metadata } from "next";
-import Link from "next/link";
 import type { ReactNode } from "react";
 
 import PublicReviewLedger from "@/components/public-review/PublicReviewLedger";
 import { PublicReviewStatusBanner } from "@/components/public-review/PublicReviewStatusBanner";
+import { PublicReviewSurfaceNavigation } from "@/components/public-review/PublicReviewSurfaceNavigation";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { isPublicReviewEnabled } from "@/config/publicReviews";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -22,6 +21,7 @@ import {
   STREAM_REVIEW_SLUG,
 } from "@/lib/public-review/streamReviewDefinition";
 import { isStreamReviewPubliclyAvailable } from "@/lib/public-review/streamReviewRoutes";
+import { getSolidityReferenceRootHref } from "@/lib/public-review/solidityReferenceRoutes";
 import type { SolidityReferenceManifest } from "@/lib/public-review/solidityReferenceTypes";
 import { getStreamSolidityReferenceReader } from "@/lib/public-review/streamSolidityReference";
 
@@ -68,6 +68,11 @@ function FeedbackPageShell({
   readonly manifest: SolidityReferenceManifest;
   readonly version: string;
 }) {
+  const routeVersion = immutable ? version : undefined;
+  const reviewHref = routeVersion
+    ? `/reviews/${STREAM_REVIEW_SLUG}/versions/${routeVersion}`
+    : `/reviews/${STREAM_REVIEW_SLUG}`;
+
   return (
     <div className="tailwind-scope tw-min-h-screen tw-bg-[#0D0D0F] tw-text-white">
       <div className="tw-mx-auto tw-w-full tw-max-w-[76rem] tw-px-4 tw-pb-20 tw-pt-6 sm:tw-px-7 lg:tw-px-10">
@@ -79,21 +84,16 @@ function FeedbackPageShell({
             commit: manifest.source.commit,
           }}
         />
-        <Link
-          href={
-            immutable
-              ? `/reviews/${STREAM_REVIEW_SLUG}/versions/${version}`
-              : `/reviews/${STREAM_REVIEW_SLUG}`
-          }
-          className="tw-mt-6 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-text-base tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-        >
-          <ArrowLeftIcon
-            aria-hidden="true"
-            className="tw-size-3.5 tw-flex-none"
-          />
-          {t(DEFAULT_LOCALE, "publicReview.reference.backToReview")}
-        </Link>
-        <header className="tw-mt-10 tw-max-w-[52rem] sm:tw-mt-12">
+        <PublicReviewSurfaceNavigation
+          activeSurface="feedback"
+          feedbackHref={getStreamReviewFeedbackHref(routeVersion)}
+          referenceHref={getSolidityReferenceRootHref({
+            reviewSlug: STREAM_REVIEW_SLUG,
+            version: routeVersion,
+          })}
+          reviewHref={reviewHref}
+        />
+        <header className="tw-mt-12 tw-max-w-[52rem]">
           <h1 className="tw-m-0 tw-text-[2rem] tw-font-semibold tw-leading-[1.05] tw-tracking-[-0.03em] sm:tw-text-5xl">
             {t(DEFAULT_LOCALE, "publicReview.ledger.pageTitle")}
           </h1>
