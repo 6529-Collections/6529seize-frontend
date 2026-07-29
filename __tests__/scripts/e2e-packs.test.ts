@@ -605,6 +605,40 @@ describe("manifest-driven E2E runner", () => {
       jest.useRealTimers();
     }
   });
+
+  it("truncates output while a noisy process is being terminated", async () => {
+    jest.useFakeTimers();
+    const fakeChild = Object.assign(new EventEmitter(), {
+      kill: jest.fn().mockReturnValue(true),
+      pid: 987654,
+      stderr: new PassThrough(),
+      stdout: new PassThrough(),
+    }) as unknown as ChildProcess;
+    const processKill = jest.spyOn(process, "kill").mockImplementation(() => {
+      throw Object.assign(new Error("No such process group"), {
+        code: "ESRCH",
+      });
+    });
+
+    try {
+      const resultPromise = runner.runProcessGroup("noisy", [], {
+        cwd: ROOT,
+        env: process.env,
+        maxBuffer: 32,
+        spawnProcess: () => fakeChild,
+        timeout: 10_000,
+      });
+      fakeChild.stdout!.emit("data", Buffer.alloc(4096, "x"));
+      fakeChild.stdout!.emit("data", Buffer.alloc(4096, "y"));
+      await jest.advanceTimersByTimeAsync(1000);
+      const result = await resultPromise;
+      expect(result.error?.code).toBe("ENOBUFS");
+      expect(Buffer.byteLength(result.stdout)).toBeLessThanOrEqual(32);
+    } finally {
+      processKill.mockRestore();
+      jest.useRealTimers();
+    }
+  });
 });
 
 describe("E2E runner CLI resolution", () => {

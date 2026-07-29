@@ -667,6 +667,11 @@ jobs:
               (.profiles.staging.package_sha256 | test("^[a-f0-9]{64}$")) and
               (.profiles.production.package_sha256 | test("^[a-f0-9]{64}$"))
             ' manifest.json >/dev/null
+            for profile in staging production; do
+              package_digest="$(sha256sum "profiles/$profile/target/package.zip" | cut -d' ' -f1)"
+              manifest_digest="$(jq -r --arg profile "$profile" '.profiles[$profile].package_sha256' manifest.json)"
+              test "$package_digest" = "$manifest_digest"
+            done
           fi
       - name: Report structured terminal result
         if: always() && steps.report-authorization.outcome == 'success'
