@@ -31,6 +31,14 @@ import {
 
 type StatusIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
+function NeutralStatusIcon(props: Readonly<SVGProps<SVGSVGElement>>) {
+  return (
+    <svg viewBox="0 0 14 14" fill="none" {...props}>
+      <circle cx="7" cy="7" r="2.5" fill="currentColor" />
+    </svg>
+  );
+}
+
 const TONE_CLASSES: Record<
   SubscriptionCoverageTone,
   {
@@ -41,27 +49,27 @@ const TONE_CLASSES: Record<
   }
 > = {
   neutral: {
-    icon: InformationCircleIcon,
-    panel: "tw-border-iron-700 tw-bg-iron-950",
+    icon: NeutralStatusIcon,
+    panel: "tw-border-white/[0.04] tw-bg-iron-950",
     pill: "tw-bg-iron-800 tw-text-iron-300 tw-ring-iron-700",
     text: "tw-text-iron-300",
   },
   positive: {
     icon: CheckCircleIcon,
-    panel: "tw-border-emerald-500/25 tw-bg-emerald-500/[0.06]",
+    panel: "tw-border-emerald-400/20 tw-bg-iron-950",
     pill:
       "tw-bg-emerald-400/10 tw-text-emerald-300 tw-ring-emerald-400/25",
     text: "tw-text-emerald-300",
   },
   caution: {
     icon: ClockIcon,
-    panel: "tw-border-amber-400/25 tw-bg-amber-400/[0.06]",
+    panel: "tw-border-amber-300/20 tw-bg-iron-950",
     pill: "tw-bg-amber-300/10 tw-text-amber-200 tw-ring-amber-300/25",
     text: "tw-text-amber-200",
   },
   danger: {
     icon: XCircleIcon,
-    panel: "tw-border-red-400/30 tw-bg-red-400/[0.07]",
+    panel: "tw-border-red-300/25 tw-bg-iron-950",
     pill: "tw-bg-red-300/10 tw-text-red-200 tw-ring-red-300/30",
     text: "tw-text-red-200",
   },
@@ -103,7 +111,7 @@ function CoveragePoint({
 
   return (
     <div className="tw-min-w-0">
-      <div className="tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
+      <div className="tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
         {label}
       </div>
       <div className="tw-mt-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-x-1.5 tw-gap-y-0.5">
@@ -129,16 +137,16 @@ function CoverageLoading() {
   return (
     <div
       aria-busy="true"
-      className="tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5 sm:tw-p-6"
+      className="tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-950 tw-p-4 tw-shadow-[0_15px_40px_rgba(0,0,0,0.35)] sm:tw-p-5 lg:tw-px-6 lg:tw-py-7"
     >
       <output className="tw-sr-only">
         {t(locale, "subscriptions.coverage.loading")}
       </output>
-      <div className="tw-animate-pulse tw-space-y-4">
-        <div className="tw-h-5 tw-w-40 tw-rounded tw-bg-iron-800" />
-        <div className="tw-h-8 tw-w-64 tw-max-w-full tw-rounded tw-bg-iron-800" />
+      <div className="tw-animate-pulse tw-space-y-3">
+        <div className="tw-h-5 tw-w-48 tw-max-w-full tw-rounded tw-bg-iron-800" />
+        <div className="tw-h-6 tw-w-64 tw-max-w-full tw-rounded tw-bg-iron-800" />
         <div className="tw-h-4 tw-w-full tw-max-w-2xl tw-rounded tw-bg-iron-900" />
-        <div className="tw-h-14 tw-w-full tw-rounded-xl tw-bg-iron-900" />
+        <div className="tw-h-12 tw-w-full tw-rounded-lg tw-bg-iron-900" />
       </div>
     </div>
   );
@@ -154,17 +162,17 @@ function CoverageUnavailable({
   const locale = useBrowserLocale();
 
   return (
-    <div className="tw-rounded-2xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-p-5 sm:tw-p-6">
-      <div className="tw-flex tw-items-start tw-gap-3">
+    <div className="tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-950 tw-p-4 tw-shadow-[0_15px_40px_rgba(0,0,0,0.35)] sm:tw-p-5 lg:tw-px-6 lg:tw-py-7">
+      <div className="tw-flex tw-flex-wrap tw-items-start tw-gap-3">
         <InformationCircleIcon
           className="tw-mt-0.5 tw-size-5 tw-flex-none tw-text-iron-400"
           aria-hidden="true"
         />
         <div className="tw-min-w-0 tw-flex-1">
-          <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-100">
+          <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
             {t(locale, "subscriptions.coverage.status.unknown")}
           </h3>
-          <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-leading-5 tw-text-iron-400">
             {t(locale, "subscriptions.coverage.unavailable")}
           </p>
         </div>
@@ -172,7 +180,7 @@ function CoverageUnavailable({
           <button
             type="button"
             onClick={onRefresh}
-            className="tw-inline-flex tw-min-h-10 tw-flex-none tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-border-iron-500"
+            className="tw-inline-flex tw-min-h-11 tw-flex-none tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/[0.07]"
           >
             <ArrowPathIcon className="tw-size-4" aria-hidden="true" />
             {t(locale, "subscriptions.coverage.refresh")}
@@ -237,40 +245,40 @@ export default function SubscriptionCoverageSummary({
   return (
     <div
       className={clsx(
-        "tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-p-5 tw-shadow-xl tw-shadow-black/20 sm:tw-p-6",
+        "tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-p-4 tw-shadow-[0_15px_40px_rgba(0,0,0,0.35)] sm:tw-p-5 lg:tw-px-6 lg:tw-py-7",
         tone.panel
       )}
     >
       <div
         aria-hidden="true"
-        className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-top-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-white/20 tw-to-transparent"
+        className="tw-pointer-events-none tw-absolute -tw-top-24 tw-right-[5%] tw-size-80 tw-bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.04),transparent_70%)] lg:-tw-top-32 lg:tw-right-[28%] lg:tw-size-[28rem]"
       />
-      <div className="tw-relative tw-grid tw-gap-6 lg:tw-grid-cols-[minmax(0,1fr)_minmax(250px,0.42fr)]">
+      <div className="tw-relative tw-grid tw-gap-4 lg:tw-grid-cols-[minmax(0,1.75fr)_minmax(280px,1fr)] lg:tw-gap-6">
         <div className="tw-min-w-0">
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-            <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-500">
+            <span className="tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
               {t(locale, "subscriptions.coverage.title")}
             </span>
             <span
               className={clsx(
-                "tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-ring-1 tw-ring-inset",
+                "tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-semibold tw-ring-1 tw-ring-inset",
                 tone.pill
               )}
             >
-              <StatusIcon className="tw-size-4" aria-hidden="true" />
+              <StatusIcon className="tw-size-3.5" aria-hidden="true" />
               {presentation.label}
             </span>
           </div>
 
           <h3
             className={clsx(
-              "tw-mb-0 tw-mt-4 tw-text-2xl tw-font-semibold tw-tracking-tight sm:tw-text-3xl",
+              "tw-mb-0 tw-mt-4 tw-text-xl tw-font-semibold tw-tracking-tight sm:tw-text-2xl",
               showFundedCount ? tone.text : "tw-text-iron-100"
             )}
           >
             {headline}
           </h3>
-          <p className="tw-mb-0 tw-mt-2 tw-max-w-2xl tw-text-sm tw-leading-6 tw-text-iron-400 sm:tw-text-base">
+          <p className="tw-mb-0 tw-mt-2 tw-max-w-2xl tw-text-sm tw-leading-6 tw-text-white/50 sm:tw-text-[15px]">
             {t(locale, getDescriptionKey(coverage.status))}
           </p>
           {isError ? (
@@ -318,7 +326,7 @@ export default function SubscriptionCoverageSummary({
           </div>
 
           {coverage.next_unfunded?.top_up_deadline ? (
-            <div className="tw-mt-4 tw-flex tw-items-start tw-gap-2 tw-rounded-xl tw-bg-black/20 tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 tw-text-iron-300 tw-ring-1 tw-ring-white/[0.06]">
+            <div className="tw-mt-3 tw-flex tw-items-start tw-gap-2 tw-rounded-lg tw-bg-black/20 tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 tw-text-iron-300 tw-ring-1 tw-ring-white/[0.06]">
               <ExclamationTriangleIcon
                 className={clsx("tw-mt-0.5 tw-size-4 tw-flex-none", tone.text)}
                 aria-hidden="true"
@@ -337,13 +345,13 @@ export default function SubscriptionCoverageSummary({
               </span>
             </div>
           ) : coverage.next_unfunded ? (
-            <p className="tw-mb-0 tw-mt-4 tw-text-xs tw-leading-5 tw-text-iron-500">
+            <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-500">
               {t(locale, "subscriptions.coverage.noDeadline")}
             </p>
           ) : null}
 
           {coverage.recommended_top_up ? (
-            <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-5 tw-text-iron-300">
+            <p className="tw-mb-0 tw-mt-2.5 tw-text-sm tw-leading-5 tw-text-iron-300">
               {t(locale, "subscriptions.coverage.recommendedThrough", {
                 amount: formatSubscriptionEth(
                   locale,
@@ -366,10 +374,10 @@ export default function SubscriptionCoverageSummary({
               <Link
                 href={actionHref}
                 className={clsx(
-                  "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-no-underline tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black",
+                  "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-no-underline tw-shadow-sm tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black",
                   isUrgentTopUp
-                    ? "tw-bg-primary-500 tw-text-white desktop-hover:hover:tw-bg-primary-400"
-                    : "tw-bg-iron-100 tw-text-iron-950 desktop-hover:hover:tw-bg-white"
+                    ? "tw-border-primary-400/60 tw-bg-primary-500 tw-text-white desktop-hover:hover:tw-bg-primary-400"
+                    : "tw-border-iron-100 tw-bg-iron-100 tw-text-iron-950 desktop-hover:hover:tw-border-white desktop-hover:hover:tw-bg-white"
                 )}
               >
                 {actionLabel}
@@ -379,7 +387,7 @@ export default function SubscriptionCoverageSummary({
           ) : null}
         </div>
 
-        <div className="tw-grid tw-content-start tw-gap-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-5 lg:tw-border-l lg:tw-border-t-0 lg:tw-pl-6 lg:tw-pt-0">
+        <div className="-tw-mx-4 -tw-mb-4 tw-grid tw-content-start tw-gap-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.04] tw-bg-black/35 tw-p-4 sm:-tw-mx-5 sm:-tw-mb-5 sm:tw-p-5 lg:tw-mx-0 lg:-tw-my-7 lg:-tw-mr-6 lg:tw-border-l lg:tw-border-t-0 lg:tw-px-6 lg:tw-py-7">
           {coverage.funded_through ? (
             <CoveragePoint
               label={t(locale, "subscriptions.coverage.fundedThrough")}
@@ -394,33 +402,33 @@ export default function SubscriptionCoverageSummary({
               date={coverage.next_unfunded.mint_at}
             />
           ) : null}
-          <div className="tw-grid tw-grid-cols-2 tw-gap-3">
-            <div className="tw-rounded-xl tw-bg-black/20 tw-p-3 tw-ring-1 tw-ring-white/[0.05]">
-              <div className="tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-600">
+          <div className="tw-grid tw-grid-cols-2 tw-gap-4 tw-py-1 lg:tw-grid-cols-1 lg:tw-gap-7">
+            <div className="tw-grid tw-min-w-0 tw-grid-cols-[auto_1fr] tw-items-baseline tw-gap-x-1.5">
+              <div className="tw-col-span-2 tw-mb-1 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
                 {t(locale, "subscriptions.coverage.capacity")}
               </div>
-              <div className="tw-mt-1 tw-text-lg tw-font-semibold tw-text-iron-200">
+              <div className="tw-break-words tw-text-3xl tw-font-light tw-leading-none tw-tracking-tight tw-text-iron-100">
                 {coverage.mint_capacity === null
                   ? "—"
                   : formatInteger(locale, coverage.mint_capacity)}
               </div>
-              <div className="tw-text-xs tw-text-iron-500">
+              <div className="tw-self-baseline tw-text-xs tw-leading-none tw-text-iron-500 sm:tw-text-sm">
                 {t(locale, "subscriptions.coverage.capacityUnit")}
               </div>
             </div>
-            <div className="tw-rounded-xl tw-bg-black/20 tw-p-3 tw-ring-1 tw-ring-white/[0.05]">
-              <div className="tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-600">
+            <div className="tw-grid tw-min-w-0 tw-grid-cols-[auto_1fr] tw-items-baseline tw-gap-x-1.5">
+              <div className="tw-col-span-2 tw-mb-1 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
                 {t(locale, "subscriptions.coverage.allocated")}
               </div>
-              <div className="tw-mt-1 tw-text-lg tw-font-semibold tw-text-iron-200">
+              <div className="tw-break-words tw-text-3xl tw-font-light tw-leading-none tw-tracking-tight tw-text-iron-100">
                 {formatInteger(locale, coverage.allocated_mints)}
               </div>
-              <div className="tw-text-xs tw-text-iron-500">
+              <div className="tw-self-baseline tw-text-xs tw-leading-none tw-text-iron-500 sm:tw-text-sm">
                 {t(locale, "subscriptions.coverage.allocatedUnit")}
               </div>
             </div>
           </div>
-          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-600">
+          <p className="tw-m-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.04] tw-pt-4 tw-text-xs tw-leading-5 tw-text-iron-500">
             {t(locale, "subscriptions.coverage.basis")}
           </p>
         </div>
