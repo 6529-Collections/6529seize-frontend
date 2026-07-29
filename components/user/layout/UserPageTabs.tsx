@@ -54,14 +54,12 @@ const getVisibilityContext = ({
   capacitorIsIos,
   country,
   isOwnProfile,
-  hasActiveProfileProxy,
 }: {
   readonly showWaves: boolean;
   readonly hasProfileWave: boolean;
   readonly capacitorIsIos: boolean;
   readonly country: string | null | undefined;
   readonly isOwnProfile: boolean;
-  readonly hasActiveProfileProxy: boolean;
 }): UserPageVisibilityContext => {
   return {
     showWaves,
@@ -71,7 +69,6 @@ const getVisibilityContext = ({
       country,
     }),
     isOwnProfile,
-    hasActiveProfileProxy,
   };
 };
 
@@ -95,8 +92,7 @@ export default function UserPageTabs({
   const searchString = searchParams.toString();
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
-  const { showWaves, connectedProfile, fetchingProfile, activeProfileProxy } =
-    useAuth();
+  const { showWaves, connectedProfile, fetchingProfile } = useAuth();
   const { address, connectionState } = useSeizeConnectContext();
   const { profile: viewedProfile } = useIdentity({
     handleOrWallet,
@@ -121,16 +117,8 @@ export default function UserPageTabs({
         capacitorIsIos: capacitor.isIos,
         country,
         isOwnProfile,
-        hasActiveProfileProxy: Boolean(activeProfileProxy),
       }),
-    [
-      activeProfileProxy,
-      capacitor.isIos,
-      country,
-      hasProfileWave,
-      isOwnProfile,
-      showWaves,
-    ]
+    [capacitor.isIos, country, hasProfileWave, isOwnProfile, showWaves]
   );
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -161,8 +149,7 @@ export default function UserPageTabs({
     });
   const preserveBrainTabWhileAccessLoads = shouldSuppressBrainRedirect;
   const resolvedTabNeedsOwnership =
-    resolvedTabFromPath === USER_PAGE_TAB_IDS.PROXY ||
-    resolvedTabFromPath === USER_PAGE_TAB_IDS["MENTION-SHORTCUTS"];
+    resolvedTabFromPath === USER_PAGE_TAB_IDS.PROXY;
   const shouldSuppressOwnerTabRedirect =
     resolvedTabNeedsOwnership &&
     shouldDelayUserPageOwnerTabRedirect({

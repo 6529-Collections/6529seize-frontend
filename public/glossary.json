@@ -484,14 +484,15 @@
         "personal mention aliases"
       ],
       "facts": [
-        "Quick Tags are managed from the owner-only Quick Tags profile tab.",
-        "The tab is hidden on other profiles and while acting through a proxy.",
-        "Browser Back and Forward restore the Quick Tags tab through its dedicated profile route.",
-        "Use /{user}/mention-shortcuts to manage Quick Tags on your own profile."
+        "Quick Tags are managed from the compact owner-only section beneath Activity on the Profile Brain tab.",
+        "The section shows up to three tags in one row and uses a +N more chip when additional tags exist.",
+        "Manage, a visible Quick Tag, and +N more open the Quick Tags manager.",
+        "The section is hidden on other profiles and while acting through a proxy.",
+        "Quick Tags do not have a dedicated profile tab or route."
       ],
-      "canonical_path": "/{user}/mention-shortcuts",
+      "canonical_path": "/{user}/brain",
       "related_paths": [
-        "/{user}/mention-shortcuts",
+        "/{user}/brain",
         "/waves"
       ],
       "tags": [

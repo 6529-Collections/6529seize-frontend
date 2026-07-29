@@ -7,24 +7,25 @@ Quick Tags let a profile save a private tag for several profiles. For example,
 
 ## Location in the Site
 
-- Route: `/{user}/mention-shortcuts`
-- Profile tab: `Quick Tags`, visible only on your own profile
+- Route: `/{user}/brain`
+- Section: `Quick Tags`, shown beneath `Activity` only on your own profile
 
 ## Entry Points
 
-- Open your own profile and select `Quick Tags`.
-- Open your own `/{user}/mention-shortcuts` route directly or from browser
-  history.
+- Open your own profile and select `Brain`.
+- Select `Manage`, a visible Quick Tag, or the `+N more` chip in the compact
+  `Quick Tags` section.
 
 ## User Journey
 
-1. Open your own profile and select `Quick Tags`.
-2. Select `New Quick Tag`.
-3. Create a tag with a 3–15 character name containing letters, numbers, or
+1. Open the `Brain` tab on your own profile.
+2. Find the compact `Quick Tags` section beneath `Activity`.
+3. Select `Manage`, then select `New Quick Tag`.
+4. Create a tag with a 3–15 character name containing letters, numbers, or
    underscores.
-4. Add between 1 and 25 profiles and save.
-5. Type that Quick Tag in a Wave composer.
-6. Select the suggestion or finish the token with Space to expand it into
+5. Add between 1 and 25 profiles and save.
+6. Type that Quick Tag in a Wave composer.
+7. Select the suggestion or finish the token with Space to expand it into
    ordinary profile mentions before sending.
 
 Reserved global mention names, including `@all`, `@everyone`, common
@@ -50,15 +51,15 @@ case-insensitive.
 ## Edge Cases
 
 - Quick Tags are private to the profile that created them.
-- The tab stays selected while sign-in and profile ownership are still being
-  restored, so browser Back and Forward can return to the Quick Tags route.
-- Quick Tags are hidden on other profiles and while acting through a proxy.
-- If ownership resolves to another profile, the app falls back to the first
-  visible profile tab.
+- The compact section shows up to three tags in one row and adds a `+N more`
+  chip when more tags exist.
+- The section is hidden on other profiles and while acting through a proxy.
+- Quick Tags do not have a dedicated profile tab or route.
 
 ## Failure and Recovery
 
-- If Quick Tags cannot be loaded, the tab shows an error; refresh to retry.
+- If Quick Tags cannot be loaded, the compact Brain section and manager show an
+  error; refresh to retry.
 - If saving or deleting fails, the app shows an error notification and keeps
   the existing Quick Tag state available for another attempt.
 - If a selected profile is no longer eligible, remove it and choose another
@@ -76,5 +77,6 @@ case-insensitive.
 - [Wave Mentions](feature-wave-mentions.md)
 - [Global Mentions](feature-global-mentions.md)
 - [Wave Composer](README.md)
+- [Profile Brain Tab](../../profiles/tabs/feature-brain-tab.md)
 - [Profile Routes and Tab Visibility](../../profiles/navigation/feature-tabs.md)
 - [Wave Drop Edit Mention Preservation](feature-edit-mention-preservation.md)

@@ -71,7 +71,6 @@ const renderTabs = ({
   country = "US",
   connectedProfile = null,
   fetchingProfile = false,
-  activeProfileProxy = null,
   pathname = "/[user]",
   address = undefined,
   connectionState = "disconnected",
@@ -81,7 +80,6 @@ const renderTabs = ({
   country?: string;
   connectedProfile?: any;
   fetchingProfile?: boolean;
-  activeProfileProxy?: object | null;
   pathname?: string;
   address?: string;
   connectionState?:
@@ -107,7 +105,6 @@ const renderTabs = ({
     showWaves,
     connectedProfile,
     fetchingProfile,
-    activeProfileProxy,
   });
   useIdentityMock.mockReturnValue({
     profile: { profile_wave_id: null },
@@ -156,32 +153,6 @@ describe("UserPageTabs", () => {
     expect(tabs).toContain(USER_PAGE_TAB_IDS.PROXY);
   });
 
-  it("shows Quick Tags only on the owner's profile without an active proxy", () => {
-    const { rerender } = renderTabs({
-      showWaves: false,
-      isIos: false,
-      connectedProfile: {
-        normalised_handle: "testuser",
-        wallets: [],
-      },
-    });
-
-    expect(getTabIds()).toContain(USER_PAGE_TAB_IDS["MENTION-SHORTCUTS"]);
-
-    useAuthMock.mockReturnValue({
-      showWaves: false,
-      connectedProfile: {
-        normalised_handle: "testuser",
-        wallets: [],
-      },
-      fetchingProfile: false,
-      activeProfileProxy: { id: "proxy-1" },
-    });
-    rerender(<UserPageTabs initialProfile={initialProfile} />);
-
-    expect(getTabIds()).not.toContain(USER_PAGE_TAB_IDS["MENTION-SHORTCUTS"]);
-  });
-
   it("shows proxy tab when viewing own profile by wallet", () => {
     renderTabs({
       showWaves: false,
@@ -224,43 +195,6 @@ describe("UserPageTabs", () => {
 
     const tabs = getTabIds();
     expect(tabs).toContain(USER_PAGE_TAB_IDS.PROXY);
-    expect(router.replace).not.toHaveBeenCalled();
-  });
-
-  it("keeps Quick Tags selected while ownership is still loading", () => {
-    const { router } = renderTabs({
-      showWaves: false,
-      isIos: false,
-      pathname: "/testuser/mention-shortcuts",
-      fetchingProfile: true,
-    });
-
-    expect(getTabIds()).toContain(USER_PAGE_TAB_IDS["MENTION-SHORTCUTS"]);
-    expect(getActiveTabIds()).toEqual([USER_PAGE_TAB_IDS["MENTION-SHORTCUTS"]]);
-    expect(router.replace).not.toHaveBeenCalled();
-  });
-
-  it("restores Quick Tags when browser history returns to its route", () => {
-    const { rerender, router } = renderTabs({
-      showWaves: true,
-      isIos: false,
-      connectedProfile: {
-        normalised_handle: "testuser",
-        wallets: [],
-      },
-      pathname: "/testuser/mention-shortcuts",
-    });
-
-    expect(getActiveTabIds()).toEqual([USER_PAGE_TAB_IDS["MENTION-SHORTCUTS"]]);
-
-    (usePathname as jest.Mock).mockReturnValue("/testuser/brain");
-    rerender(<UserPageTabs initialProfile={initialProfile} />);
-    expect(getActiveTabIds()).toEqual([USER_PAGE_TAB_IDS.BRAIN]);
-
-    (usePathname as jest.Mock).mockReturnValue("/testuser/mention-shortcuts");
-    rerender(<UserPageTabs initialProfile={initialProfile} />);
-
-    expect(getActiveTabIds()).toEqual([USER_PAGE_TAB_IDS["MENTION-SHORTCUTS"]]);
     expect(router.replace).not.toHaveBeenCalled();
   });
 
@@ -389,31 +323,6 @@ describe("UserPageTabs", () => {
         wallets: [{ wallet: "0xSomeOtherWallet" }],
       },
       fetchingProfile: false,
-    });
-
-    rerender(<UserPageTabs initialProfile={initialProfile} />);
-
-    await waitFor(() => {
-      expect(router.replace).toHaveBeenCalledWith("/testuser");
-    });
-  });
-
-  it("redirects away from Quick Tags after loading when the profile is not owned", async () => {
-    const { rerender, router } = renderTabs({
-      showWaves: false,
-      isIos: false,
-      pathname: "/testuser/mention-shortcuts",
-      fetchingProfile: true,
-    });
-
-    useAuthMock.mockReturnValue({
-      showWaves: false,
-      connectedProfile: {
-        normalised_handle: "someoneelse",
-        wallets: [{ wallet: "0xSomeOtherWallet" }],
-      },
-      fetchingProfile: false,
-      activeProfileProxy: null,
     });
 
     rerender(<UserPageTabs initialProfile={initialProfile} />);

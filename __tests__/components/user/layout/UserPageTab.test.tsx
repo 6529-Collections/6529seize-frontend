@@ -79,18 +79,4 @@ describe("UserPageTab", () => {
 
     expect(screen.getByRole("link", { name: "xTDH Beta" })).toBeInTheDocument();
   });
-
-  it("links Quick Tags to its dedicated profile route", () => {
-    render(
-      <UserPageTab
-        tab={USER_PAGE_TAB_MAP[USER_PAGE_TAB_IDS["MENTION-SHORTCUTS"]]}
-        activeTabId={USER_PAGE_TAB_IDS.REP}
-      />
-    );
-
-    expect(screen.getByRole("link", { name: "Quick Tags" })).toHaveAttribute(
-      "href",
-      "/bob/mention-shortcuts?address=0x1&locale=DE-de"
-    );
-  });
 });

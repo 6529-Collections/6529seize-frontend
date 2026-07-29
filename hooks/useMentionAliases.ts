@@ -6,10 +6,14 @@ import { fetchMentionAliases } from "@/services/api/mention-aliases-api";
 import { useQuery } from "@tanstack/react-query";
 import { useContext } from "react";
 
-export function useMentionAliases() {
+export function useMentionAliases({
+  enabled: requestedEnabled = true,
+}: {
+  readonly enabled?: boolean;
+} = {}) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const ownerProfileId = connectedProfile?.id ?? null;
-  const enabled = !!ownerProfileId && !activeProfileProxy;
+  const enabled = requestedEnabled && !!ownerProfileId && !activeProfileProxy;
   const query = useQuery({
     queryKey: [QueryKey.MENTION_ALIASES, ownerProfileId],
     queryFn: fetchMentionAliases,

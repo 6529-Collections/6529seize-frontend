@@ -2,6 +2,7 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import GroupCreateIdentitySelectedItems from "@/components/groups/page/create/config/GroupCreateIdentitySelectedItems";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type {
   MentionAlias,
@@ -30,6 +31,7 @@ import { t } from "@/i18n/messages";
 
 const MAX_MEMBERS = 25;
 const MIN_SEARCH_LENGTH = 3;
+const VISIBLE_QUICK_TAGS = 3;
 
 const getAvailableIdentities = (
   identities: CommunityMemberMinimal[],
@@ -364,14 +366,17 @@ export default function UserPageMentionShortcuts({
   const locale = useBrowserLocale();
   const { connectedProfile, activeProfileProxy, setToast } =
     useContext(AuthContext);
+  const isOwner =
+    !!profile.id && connectedProfile?.id === profile.id && !activeProfileProxy;
   const queryClient = useQueryClient();
-  const { aliases, isPending, isError } = useMentionAliases();
+  const { aliases, isPending, isError } = useMentionAliases({
+    enabled: isOwner,
+  });
+  const [isManagerOpen, setIsManagerOpen] = useState(false);
   const [editorAlias, setEditorAlias] = useState<
     MentionAlias | null | undefined
   >();
   const [aliasToDelete, setAliasToDelete] = useState<MentionAlias | null>(null);
-  const isOwner =
-    !!profile.id && connectedProfile?.id === profile.id && !activeProfileProxy;
 
   const deleteMutation = useMutation({
     mutationFn: deleteMentionAlias,
@@ -403,16 +408,31 @@ export default function UserPageMentionShortcuts({
     () => [...aliases].sort((a, b) => a.alias.localeCompare(b.alias)),
     [aliases]
   );
+  const visibleAliases = sortedAliases.slice(0, VISIBLE_QUICK_TAGS);
+  const hiddenAliasCount = sortedAliases.length - visibleAliases.length;
+
+  const getProfileCountLabel = (count: number) =>
+    count === 1
+      ? t(locale, "user.mentionShortcuts.profileCount", { count })
+      : t(locale, "user.mentionShortcuts.profileCountMany", { count });
+
+  const openManager = (alias?: MentionAlias | null) => {
+    setEditorAlias(alias);
+    setIsManagerOpen(true);
+  };
+
+  const closeManager = () => {
+    setAliasToDelete(null);
+    setEditorAlias(undefined);
+    setIsManagerOpen(false);
+  };
 
   if (!isOwner) {
     return null;
   }
 
   return (
-    <div
-      className="tailwind-scope tw-mx-auto tw-max-w-3xl tw-py-6"
-      data-testid="quick-tags-page"
-    >
+    <>
       {aliasToDelete && (
         <DeleteShortcutDialog
           alias={aliasToDelete}
@@ -421,91 +441,183 @@ export default function UserPageMentionShortcuts({
           onConfirm={() => deleteMutation.mutate(aliasToDelete.id)}
         />
       )}
-      <div className="tw-flex tw-flex-col tw-items-start tw-justify-between tw-gap-4 sm:tw-flex-row">
-        <div>
-          <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-white">
+
+      <section
+        aria-labelledby="quick-tags-heading"
+        className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/15 tw-bg-black tw-p-4 tw-shadow-2xl md:tw-p-5"
+        data-testid="quick-tags-section"
+      >
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
+          <h3
+            id="quick-tags-heading"
+            className="tw-m-0 tw-text-sm tw-font-bold tw-uppercase tw-tracking-wide tw-text-iron-50"
+          >
             {t(locale, "user.mentionShortcuts.title")}
-          </h1>
-          <p className="tw-mb-0 tw-mt-2 tw-max-w-2xl tw-text-sm tw-leading-6 tw-text-iron-400">
-            {t(locale, "user.mentionShortcuts.description")}
-          </p>
-        </div>
-        {editorAlias === undefined && (
+          </h3>
           <button
             type="button"
-            onClick={() => setEditorAlias(null)}
-            className="tw-min-h-11 tw-shrink-0 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white"
+            onClick={() => openManager()}
+            className="tw-min-h-11 tw-shrink-0 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-2 tw-py-1 tw-text-sm tw-font-semibold tw-text-primary-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           >
-            {t(locale, "user.mentionShortcuts.new")}
+            {t(locale, "user.mentionShortcuts.manage")}
           </button>
-        )}
-      </div>
-
-      {editorAlias !== undefined && (
-        <div className="tw-mt-6">
-          <AliasEditor
-            key={editorAlias?.id ?? "new"}
-            initialAlias={editorAlias}
-            onClose={() => setEditorAlias(undefined)}
-          />
         </div>
-      )}
-
-      <div className="tw-mt-6 tw-space-y-3">
-        <p aria-live="polite" className="tw-sr-only">
-          {deleteMutation.isPending
-            ? t(locale, "user.mentionShortcuts.deleting")
-            : ""}
+        <p className="tw-mb-0 tw-mt-1 tw-truncate tw-whitespace-nowrap tw-text-sm tw-text-iron-400">
+          {t(locale, "user.mentionShortcuts.summaryDescription")}
         </p>
-        {isPending && (
-          <p className="tw-m-0 tw-text-sm tw-text-iron-400">
-            {t(locale, "user.mentionShortcuts.loading")}
+
+        <div className="tw-mt-3 tw-flex tw-min-w-0 tw-flex-nowrap tw-gap-2 tw-overflow-hidden">
+          {isPending && (
+            <p className="tw-m-0 tw-text-sm tw-text-iron-400">
+              {t(locale, "user.mentionShortcuts.loading")}
+            </p>
+          )}
+          {isError && (
+            <p role="alert" className="tw-m-0 tw-text-sm tw-text-error">
+              {t(locale, "user.mentionShortcuts.loadError")}
+            </p>
+          )}
+          {!isPending && !isError && sortedAliases.length === 0 && (
+            <button
+              type="button"
+              onClick={() => openManager(null)}
+              className="tw-min-h-11 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-primary-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            >
+              {t(locale, "user.mentionShortcuts.new")}
+            </button>
+          )}
+          {!isPending &&
+            !isError &&
+            visibleAliases.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => openManager(item)}
+                className="tw-flex tw-min-h-11 tw-min-w-0 tw-max-w-[13rem] tw-flex-1 tw-items-center tw-gap-1 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-font-medium tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+              >
+                <span className="tw-min-w-0 tw-truncate tw-text-primary-300">
+                  @{item.alias}
+                </span>
+                <span className="tw-shrink-0 tw-text-iron-400 md:tw-hidden">
+                  · {item.members.length}
+                </span>
+                <span className="tw-hidden tw-shrink-0 tw-text-iron-400 md:tw-inline">
+                  · {getProfileCountLabel(item.members.length)}
+                </span>
+              </button>
+            ))}
+          {!isPending && !isError && hiddenAliasCount > 0 && (
+            <button
+              type="button"
+              onClick={() => openManager()}
+              className="tw-min-h-11 tw-shrink-0 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            >
+              {t(locale, "user.mentionShortcuts.more", {
+                count: hiddenAliasCount,
+              })}
+            </button>
+          )}
+        </div>
+      </section>
+
+      <MobileWrapperDialog
+        title={t(locale, "user.mentionShortcuts.title")}
+        isOpen={isManagerOpen}
+        onClose={closeManager}
+        tall
+        fixedHeight
+        tabletModal
+        showScrollbar
+        maxWidthClass="md:tw-max-w-3xl"
+        headerActions={
+          <p className="tw-m-0 tw-text-left tw-text-sm tw-text-iron-400">
+            {t(locale, "user.mentionShortcuts.description")}
           </p>
-        )}
-        {isError && (
-          <p role="alert" className="tw-m-0 tw-text-sm tw-text-error">
-            {t(locale, "user.mentionShortcuts.loadError")}
-          </p>
-        )}
-        {!isPending && !isError && sortedAliases.length === 0 && (
-          <div className="tw-rounded-xl tw-border tw-border-dashed tw-border-iron-700 tw-p-8 tw-text-center tw-text-sm tw-text-iron-400">
-            {t(locale, "user.mentionShortcuts.empty")}
-          </div>
-        )}
-        {sortedAliases.map((item) => (
-          <article
-            key={item.id}
-            className="tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between"
-          >
-            <div className="tw-min-w-0">
-              <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-text-primary-300">
-                @{item.alias}
-              </h2>
-              <p className="tw-mb-0 tw-mt-1 tw-truncate tw-text-sm tw-text-iron-400">
-                {item.members.map((member) => `@${member.handle}`).join(" · ")}
+        }
+      >
+        <div className="tw-px-4 sm:tw-px-6" data-testid="quick-tags-manager">
+          {editorAlias === undefined && (
+            <div className="tw-flex tw-justify-end">
+              <button
+                type="button"
+                onClick={() => setEditorAlias(null)}
+                className="tw-min-h-11 tw-shrink-0 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white"
+              >
+                {t(locale, "user.mentionShortcuts.new")}
+              </button>
+            </div>
+          )}
+
+          {editorAlias !== undefined && (
+            <div>
+              <AliasEditor
+                key={editorAlias?.id ?? "new"}
+                initialAlias={editorAlias}
+                onClose={() => setEditorAlias(undefined)}
+              />
+            </div>
+          )}
+
+          <div className="tw-mt-6 tw-space-y-3">
+            <p aria-live="polite" className="tw-sr-only">
+              {deleteMutation.isPending
+                ? t(locale, "user.mentionShortcuts.deleting")
+                : ""}
+            </p>
+            {isPending && (
+              <p className="tw-m-0 tw-text-sm tw-text-iron-400">
+                {t(locale, "user.mentionShortcuts.loading")}
               </p>
-            </div>
-            <div className="tw-flex tw-shrink-0 tw-gap-2">
-              <button
-                type="button"
-                onClick={() => setEditorAlias(item)}
-                className="tw-min-h-11 tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 sm:tw-flex-none"
+            )}
+            {isError && (
+              <p role="alert" className="tw-m-0 tw-text-sm tw-text-error">
+                {t(locale, "user.mentionShortcuts.loadError")}
+              </p>
+            )}
+            {!isPending && !isError && sortedAliases.length === 0 && (
+              <div className="tw-rounded-xl tw-border tw-border-dashed tw-border-iron-700 tw-p-8 tw-text-center tw-text-sm tw-text-iron-400">
+                {t(locale, "user.mentionShortcuts.empty")}
+              </div>
+            )}
+            {sortedAliases.map((item) => (
+              <article
+                key={item.id}
+                className="tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between"
               >
-                {t(locale, "user.mentionShortcuts.editAction")}
-              </button>
-              <button
-                type="button"
-                onClick={() => setAliasToDelete(item)}
-                disabled={deleteMutation.isPending}
-                aria-busy={deleteMutation.isPending}
-                className="tw-min-h-11 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-red/40 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-red disabled:tw-opacity-50 sm:tw-flex-none"
-              >
-                {t(locale, "user.mentionShortcuts.deleteAction")}
-              </button>
-            </div>
-          </article>
-        ))}
-      </div>
-    </div>
+                <div className="tw-min-w-0">
+                  <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-primary-300">
+                    @{item.alias}
+                  </h3>
+                  <p className="tw-mb-0 tw-mt-1 tw-truncate tw-text-sm tw-text-iron-400">
+                    {getProfileCountLabel(item.members.length)} ·{" "}
+                    {item.members
+                      .map((member) => `@${member.handle}`)
+                      .join(" · ")}
+                  </p>
+                </div>
+                <div className="tw-flex tw-shrink-0 tw-gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditorAlias(item)}
+                    className="tw-min-h-11 tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 sm:tw-flex-none"
+                  >
+                    {t(locale, "user.mentionShortcuts.editAction")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAliasToDelete(item)}
+                    disabled={deleteMutation.isPending}
+                    aria-busy={deleteMutation.isPending}
+                    className="tw-min-h-11 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-red/40 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-red disabled:tw-opacity-50 sm:tw-flex-none"
+                  >
+                    {t(locale, "user.mentionShortcuts.deleteAction")}
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </MobileWrapperDialog>
+    </>
   );
 }

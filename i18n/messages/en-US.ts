@@ -656,7 +656,6 @@ const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
   xtdh: "xTDH",
   subscriptions: "Subscriptions",
   proxy: "Proxy",
-  quickTags: "Quick Tags",
   "badges.beta": "Beta",
 } as const);
 
@@ -686,6 +685,11 @@ const MENTION_SHORTCUT_SETTINGS_MESSAGES = objectMessages(
     title: "Quick Tags",
     description:
       "Create private tags such as @frens. In a Wave composer, each Quick Tag expands into the profile handles you choose.",
+    summaryDescription: "Mention several profiles with one shortcut.",
+    manage: "Manage",
+    more: "+{count} more",
+    profileCount: "{count} profile",
+    profileCountMany: "{count} profiles",
     new: "New Quick Tag",
     create: "Create Quick Tag",
     edit: "Edit Quick Tag",

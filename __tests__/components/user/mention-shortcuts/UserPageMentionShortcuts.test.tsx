@@ -5,6 +5,23 @@ import { updateMentionAlias } from "@/services/api/mention-aliases-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
+jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
+  __esModule: true,
+  default: ({
+    children,
+    isOpen,
+    title,
+  }: {
+    children: React.ReactNode;
+    isOpen: boolean;
+    title: string;
+  }) =>
+    isOpen ? (
+      <div role="dialog" aria-label={title}>
+        {children}
+      </div>
+    ) : null,
+}));
 jest.mock("@/hooks/useMentionAliases", () => ({
   useMentionAliases: jest.fn(),
 }));
@@ -17,13 +34,20 @@ jest.mock("@/services/api/mention-aliases-api", () => ({
 const mockedUseMentionAliases = useMentionAliases as jest.MockedFunction<
   typeof useMentionAliases
 >;
-const mockedUpdateMentionAlias =
-  updateMentionAlias as jest.MockedFunction<typeof updateMentionAlias>;
+const mockedUpdateMentionAlias = updateMentionAlias as jest.MockedFunction<
+  typeof updateMentionAlias
+>;
 
 const profile = {
   id: "profile-1",
   handle: "alice",
 } as any;
+
+const makeAlias = (
+  id: string,
+  alias: string,
+  members: { profile_id: string; handle: string; pfp: null }[]
+) => ({ id, alias, members });
 
 function renderQuickTags({
   connectedProfileId = "profile-1",
@@ -62,45 +86,78 @@ describe("UserPageMentionShortcuts", () => {
   beforeEach(() => {
     mockedUseMentionAliases.mockReturnValue({
       aliases: [
-        {
-          id: "tag-1",
-          alias: "frens",
-          members: [
-            {
-              profile_id: "profile-2",
-              handle: "bob",
-              pfp: null,
-            },
-          ],
-        },
+        makeAlias("tag-1", "frens", [
+          {
+            profile_id: "profile-2",
+            handle: "bob",
+            pfp: null,
+          },
+        ]),
+        makeAlias("tag-2", "reviewers", [
+          {
+            profile_id: "profile-3",
+            handle: "carol",
+            pfp: null,
+          },
+        ]),
+        makeAlias("tag-3", "team", [
+          {
+            profile_id: "profile-4",
+            handle: "dave",
+            pfp: null,
+          },
+        ]),
+        makeAlias("tag-4", "writers", [
+          {
+            profile_id: "profile-5",
+            handle: "erin",
+            pfp: null,
+          },
+        ]),
       ],
       isPending: false,
       isError: false,
     } as ReturnType<typeof useMentionAliases>);
   });
 
-  it("renders owner-only Quick Tags as a standalone profile tab", () => {
+  it("renders owner-only Quick Tags as a compact single-row Brain section", () => {
     renderQuickTags();
 
-    expect(screen.getByTestId("quick-tags-page")).toBeInTheDocument();
+    const section = screen.getByTestId("quick-tags-section");
+    expect(section).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { level: 1, name: "Quick Tags" })
+      screen.getByRole("heading", { level: 3, name: "Quick Tags" })
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/each Quick Tag expands into the profile handles/i)
+      screen.getByText("Mention several profiles with one shortcut.")
+    ).toHaveClass("tw-whitespace-nowrap");
+    expect(screen.getByRole("button", { name: "Manage" })).toBeInTheDocument();
+    expect(screen.getByText("@frens")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "+1 more" })).toBeInTheDocument();
+    expect(screen.queryByText("@writers")).not.toBeInTheDocument();
+    expect(section.querySelector(".tw-flex-nowrap")).toBeInTheDocument();
+  });
+
+  it("opens the complete manager from Manage", () => {
+    renderQuickTags();
+
+    fireEvent.click(screen.getByRole("button", { name: "Manage" }));
+
+    expect(
+      screen.getByRole("dialog", { name: "Quick Tags" })
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "New Quick Tag" })
     ).toBeInTheDocument();
-    expect(screen.getByText("@frens")).toBeInTheDocument();
+    expect(screen.getByText("@writers")).toBeInTheDocument();
   });
 
   it("uses the shared selected-profile chips in the editor", () => {
     renderQuickTags();
 
-    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
+    fireEvent.click(screen.getByRole("button", { name: /@frens/i }));
 
-    expect(screen.getAllByText("@bob")).toHaveLength(2);
+    expect(screen.getByText("@bob")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Remove @bob" })
     ).toBeInTheDocument();
@@ -136,7 +193,7 @@ describe("UserPageMentionShortcuts", () => {
     });
     renderQuickTags();
 
-    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
+    fireEvent.click(screen.getByRole("button", { name: /@frens/i }));
     fireEvent.click(screen.getByRole("button", { name: "Save Quick Tag" }));
 
     await waitFor(() =>
@@ -152,7 +209,10 @@ describe("UserPageMentionShortcuts", () => {
       connectedProfileId: "profile-2",
     });
 
-    expect(screen.queryByTestId("quick-tags-page")).toBeNull();
+    expect(screen.queryByTestId("quick-tags-section")).toBeNull();
+    expect(mockedUseMentionAliases).toHaveBeenLastCalledWith({
+      enabled: false,
+    });
 
     const queryClient = new QueryClient();
     rerender(
@@ -171,6 +231,9 @@ describe("UserPageMentionShortcuts", () => {
       </QueryClientProvider>
     );
 
-    expect(screen.queryByTestId("quick-tags-page")).toBeNull();
+    expect(screen.queryByTestId("quick-tags-section")).toBeNull();
+    expect(mockedUseMentionAliases).toHaveBeenLastCalledWith({
+      enabled: false,
+    });
   });
 });
