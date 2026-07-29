@@ -209,7 +209,7 @@ export function SolidityReferenceOverview({
 
   return (
     <div className="tw-space-y-10">
-      <dl className="tw-m-0 tw-grid tw-grid-cols-2 tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] xl:tw-grid-cols-6">
+      <dl className="tw-m-0 tw-grid tw-grid-cols-3 tw-rounded-xl tw-bg-iron-950 tw-p-3 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] sm:tw-p-4 md:tw-grid-cols-6">
         <SolidityReferenceSummaryCard
           label={t(DEFAULT_LOCALE, "publicReview.reference.definitions")}
           value={manifest.summary.definitionCount}
