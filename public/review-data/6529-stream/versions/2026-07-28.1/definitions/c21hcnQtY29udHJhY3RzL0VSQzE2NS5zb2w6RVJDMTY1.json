@@ -1,0 +1,148 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/ERC165.sol:ERC165#function:0x01ffc9a7",
+          "declaringDefinitionId": "smart-contracts/ERC165.sol:ERC165",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": true,
+    "classification": "vendored_dependency",
+    "classificationReason": "Source path is explicitly classified as vendored in the input manifest.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "supportsInterface(bytes4)",
+          "displaySignature": "supportsInterface(bytes4)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC165.sol:ERC165#function:0x01ffc9a7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzE2NS5zb2w6RVJDMTY1I2Z1bmN0aW9uOjB4MDFmZmM5YTc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsInterface",
+          "natspec": "@dev See {IERC165-supportsInterface}.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 155,
+            "byteStart": 830,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC165.sol#L27-L29",
+            "lineEnd": 29,
+            "lineStart": 27,
+            "snippetSha256": "sha256:7db96cb37372577de0588656f1bb580ce6f84aeba978dd5c524de9e69ed77d7a",
+            "sourceSha256": "sha256:c8be91bb41c7c38afcb84529f3153c6d9e9f0e431dc00dc02064cdbd0ed6e5d8"
+          },
+          "selector": "0x01ffc9a7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/ERC165.sol:ERC165",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/IERC165.sol:IERC165",
+        "name": "IERC165"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0VSQzE2NS5zb2w6RVJDMTY1",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "smart-contracts/ERC165.sol:ERC165",
+      "smart-contracts/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "ERC165",
+    "natspec": "",
+    "range": {
+      "byteLength": 260,
+      "byteStart": 727,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC165.sol#L23-L30",
+      "lineEnd": 30,
+      "lineStart": 23,
+      "snippetSha256": "sha256:571e63d071b40e7816cda8aa1f34aa2e7f74386c18cace3da77f2290ddc00f78",
+      "sourceSha256": "sha256:c8be91bb41c7c38afcb84529f3153c6d9e9f0e431dc00dc02064cdbd0ed6e5d8"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/ERC165.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 1
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1
+    },
+    "totalCount": 1
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/ERC165.sol:ERC165",
+      "severity": "advisory"
+    }
+  ]
+}

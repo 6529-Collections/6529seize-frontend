@@ -165,6 +165,7 @@ const {
 const shaA = "a".repeat(40);
 const shaB = "b".repeat(40);
 const shaC = "c".repeat(40);
+const SYNTHETIC_FUTURE_VERSION = "2099-12-31.1";
 
 function loadConfig(): Config {
   return JSON.parse(
@@ -536,40 +537,29 @@ describe("public-review snapshot trust immutable history", () => {
 
   it("requires a future version to append exact immutable history", () => {
     const base = loadConfig();
+    const trustedVersions = [...base.output.retainedVersions];
     const candidate = cloneConfig(base);
-    candidate.reviewVersion = "2026-07-27.2";
+    candidate.reviewVersion = SYNTHETIC_FUTURE_VERSION;
     candidate.source.commit = shaA;
     candidate.source.tree = shaB;
-    candidate.output.directory =
-      "public/review-data/6529-stream/versions/2026-07-27.2";
+    candidate.output.directory = `public/review-data/6529-stream/versions/${SYNTHETIC_FUTURE_VERSION}`;
     candidate.output.retainedVersions = [
-      "2026-07-26.1",
-      "2026-07-27.1",
-      "2026-07-27.2",
+      ...trustedVersions,
+      SYNTHETIC_FUTURE_VERSION,
     ];
 
     expect(() =>
-      validateTrustedConfigPolicy(base, candidate, [
-        "2026-07-26.1",
-        "2026-07-27.1",
-      ])
+      validateTrustedConfigPolicy(base, candidate, trustedVersions)
     ).not.toThrow();
-    candidate.output.retainedVersions = ["2026-07-27.2"];
+    candidate.output.retainedVersions = [SYNTHETIC_FUTURE_VERSION];
     expect(() =>
-      validateTrustedConfigPolicy(base, candidate, [
-        "2026-07-26.1",
-        "2026-07-27.1",
-      ])
+      validateTrustedConfigPolicy(base, candidate, trustedVersions)
     ).toThrow("append to exact base history");
-    candidate.reviewVersion = "2026-07-27.1";
-    candidate.output.directory =
-      "public/review-data/6529-stream/versions/2026-07-27.1";
-    candidate.output.retainedVersions = ["2026-07-26.1", "2026-07-27.1"];
+    candidate.reviewVersion = base.reviewVersion;
+    candidate.output.directory = `public/review-data/6529-stream/versions/${base.reviewVersion}`;
+    candidate.output.retainedVersions = [...trustedVersions];
     expect(() =>
-      validateTrustedConfigPolicy(base, candidate, [
-        "2026-07-26.1",
-        "2026-07-27.1",
-      ])
+      validateTrustedConfigPolicy(base, candidate, trustedVersions)
     ).toThrow("strictly greater");
   });
 });
@@ -577,15 +567,13 @@ describe("public-review snapshot trust immutable history", () => {
 describe("public-review snapshot trust publication preload", () => {
   function futureConfig(): Config {
     const candidate = cloneConfig(loadConfig());
-    candidate.reviewVersion = "2026-07-28.1";
+    candidate.reviewVersion = SYNTHETIC_FUTURE_VERSION;
     candidate.source.commit = shaA;
     candidate.source.tree = shaB;
-    candidate.output.directory =
-      "public/review-data/6529-stream/versions/2026-07-28.1";
+    candidate.output.directory = `public/review-data/6529-stream/versions/${SYNTHETIC_FUTURE_VERSION}`;
     candidate.output.retainedVersions = [
-      "2026-07-26.1",
-      "2026-07-27.1",
-      "2026-07-28.1",
+      ...candidate.output.retainedVersions,
+      SYNTHETIC_FUTURE_VERSION,
     ];
     return candidate;
   }
@@ -595,7 +583,7 @@ describe("public-review snapshot trust publication preload", () => {
       JSON.stringify(loadPublication())
     ) as Publication;
     candidate.versions.push({
-      version: "2026-07-28.1",
+      version: SYNTHETIC_FUTURE_VERSION,
       lifecycleState: "DRAFT",
     });
     return candidate;
@@ -607,7 +595,7 @@ describe("public-review snapshot trust publication preload", () => {
         loadPublication(),
         draftPublication(),
         futureConfig(),
-        ["2026-07-26.1", "2026-07-27.1"]
+        loadConfig().output.retainedVersions
       )
     ).not.toThrow();
   });
@@ -669,29 +657,32 @@ describe("public-review snapshot trust publication preload", () => {
         loadPublication(),
         candidate,
         futureConfig(),
-        ["2026-07-26.1", "2026-07-27.1"]
+        loadConfig().output.retainedVersions
       )
     ).toThrow(message);
   });
 
   it("rejects publication history that does not match either trusted index", () => {
     const base = loadPublication();
+    const trustedVersions = loadConfig().output.retainedVersions;
     expect(() =>
       validateTrustedPublicationPolicy(
         base,
         draftPublication(),
         futureConfig(),
-        ["2026-07-26.1"]
+        trustedVersions.slice(0, -1)
       )
     ).toThrow("Trusted base publication versions drifted");
 
     const candidate = draftPublication();
-    candidate.versions.at(-1)!.version = "2026-07-29.1";
+    candidate.versions.at(-1)!.version = "2099-12-31.2";
     expect(() =>
-      validateTrustedPublicationPolicy(base, candidate, futureConfig(), [
-        "2026-07-26.1",
-        "2026-07-27.1",
-      ])
+      validateTrustedPublicationPolicy(
+        base,
+        candidate,
+        futureConfig(),
+        trustedVersions
+      )
     ).toThrow("must match retained review history");
   });
 
@@ -701,7 +692,7 @@ describe("public-review snapshot trust publication preload", () => {
         loadPublication(),
         null as unknown as Publication,
         futureConfig(),
-        ["2026-07-26.1", "2026-07-27.1"]
+        loadConfig().output.retainedVersions
       )
     ).toThrow("Candidate publication config is invalid");
   });
@@ -934,9 +925,8 @@ describe("public-review snapshot trust orchestration", () => {
     );
 
     const futureConfig = cloneConfig(baseConfig);
-    futureConfig.reviewVersion = "2026-07-28.1";
-    futureConfig.output.directory =
-      "public/review-data/6529-stream/versions/2026-07-28.1";
+    futureConfig.reviewVersion = SYNTHETIC_FUTURE_VERSION;
+    futureConfig.output.directory = `public/review-data/6529-stream/versions/${SYNTHETIC_FUTURE_VERSION}`;
     futureConfig.output.retainedVersions = [
       ...baseConfig.output.retainedVersions,
       futureConfig.reviewVersion,

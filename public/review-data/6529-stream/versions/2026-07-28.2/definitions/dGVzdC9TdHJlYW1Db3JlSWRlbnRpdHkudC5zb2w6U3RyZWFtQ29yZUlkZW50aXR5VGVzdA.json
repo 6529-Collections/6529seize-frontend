@@ -1,0 +1,1489 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xbd11215e",
+          "declaringDefinitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAbortRevertEventCompensatesRegistrationAcrossReuse",
+          "outputs": [],
+          "selector": "0xbd11215e",
+          "signature": "testAbortRevertEventCompensatesRegistrationAcrossReuse()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xef757aa3",
+          "declaringDefinitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAbortedPrepareRewindsAllocatorAndClearsIdentity",
+          "outputs": [],
+          "selector": "0xef757aa3",
+          "signature": "testAbortedPrepareRewindsAllocatorAndClearsIdentity()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0x8b47d657",
+          "declaringDefinitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCollectionBurnsBlockedAtBlockIsZeroUntilActivation",
+          "outputs": [],
+          "selector": "0x8b47d657",
+          "signature": "testCollectionBurnsBlockedAtBlockIsZeroUntilActivation()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xbdfd0b78",
+          "declaringDefinitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCollectionSupplyReadsTrackMintAndBurn",
+          "outputs": [],
+          "selector": "0xbdfd0b78",
+          "signature": "testCollectionSupplyReadsTrackMintAndBurn()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xaba9abc7",
+          "declaringDefinitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testEveryAllocatedTokenIdAnswersIdentityAndLifecycleDensely",
+          "outputs": [],
+          "selector": "0xaba9abc7",
+          "signature": "testEveryAllocatedTokenIdAnswersIdentityAndLifecycleDensely()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xbdcba86a",
+          "declaringDefinitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFirstMintEverAllocatesTokenIdOne",
+          "outputs": [],
+          "selector": "0xbdcba86a",
+          "signature": "testFirstMintEverAllocatesTokenIdOne()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xf54f8f01",
+          "declaringDefinitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testInterleavedMintsKeepGlobalIdsSequentialAndSerialsCollectionLocal",
+          "outputs": [],
+          "selector": "0xf54f8f01",
+          "signature": "testInterleavedMintsKeepGlobalIdsSequentialAndSerialsCollectionLocal()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0x672b5813",
+          "declaringDefinitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPresetHashOnNextSequentialIdDoesNotBlockItsMint",
+          "outputs": [],
+          "selector": "0x672b5813",
+          "signature": "testPresetHashOnNextSequentialIdDoesNotBlockItsMint()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xc49ad52d",
+          "declaringDefinitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testStreamTokenBurnedCarriesRetainedIdentityAndSchemaVersion",
+          "outputs": [],
+          "selector": "0xc49ad52d",
+          "signature": "testStreamTokenBurnedCarriesRetainedIdentityAndSchemaVersion()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0x5138fbad",
+          "declaringDefinitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSupportsInterfaceMatrixExcludesEnumerable",
+          "outputs": [],
+          "selector": "0x5138fbad",
+          "signature": "testSupportsInterfaceMatrixExcludesEnumerable()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xbe76e295",
+          "declaringDefinitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testTokenCollectionRegisteredEmitsBeforeDependentEffectsOnBothPaths",
+          "outputs": [],
+          "selector": "0xbe76e295",
+          "signature": "testTokenCollectionRegisteredEmitsBeforeDependentEffectsOnBothPaths()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0x64df5f5e",
+          "declaringDefinitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testTokenLifecycleTransitionsAcrossPreparedMintedAndBurned",
+          "outputs": [],
+          "selector": "0x64df5f5e",
+          "signature": "testTokenLifecycleTransitionsAcrossPreparedMintedAndBurned()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xb86114bb",
+          "declaringDefinitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testTransfersAndApprovalsStayOpenUnderFreezeAndPauses",
+          "outputs": [],
+          "selector": "0xb86114bb",
+          "signature": "testTransfersAndApprovalsStayOpenUnderFreezeAndPauses()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "testFirstMintEverAllocatesTokenIdOne()",
+          "displaySignature": "testFirstMintEverAllocatesTokenIdOne()",
+          "functionKind": "function",
+          "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xbdcba86a",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdCNmdW5jdGlvbjoweGJkY2JhODZh",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFirstMintEverAllocatesTokenIdOne",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 537,
+            "byteStart": 2985,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L77-L86",
+            "lineEnd": 86,
+            "lineStart": 77,
+            "snippetSha256": "sha256:54cf86821487ebaff2cb7144a8cb30c6d5c942af09cd421c30e2d97c4d31dde9",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": "0xbdcba86a",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testInterleavedMintsKeepGlobalIdsSequentialAndSerialsCollectionLocal()",
+          "displaySignature": "testInterleavedMintsKeepGlobalIdsSequentialAndSerialsCollectionLocal()",
+          "functionKind": "function",
+          "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xf54f8f01",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdCNmdW5jdGlvbjoweGY1NGY4ZjAx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testInterleavedMintsKeepGlobalIdsSequentialAndSerialsCollectionLocal",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1084,
+            "byteStart": 3528,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L88-L107",
+            "lineEnd": 107,
+            "lineStart": 88,
+            "snippetSha256": "sha256:35545109390a868053a8f2f2188ec862df84c87b645faf16ff65e85deb714410",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": "0xf54f8f01",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testTokenLifecycleTransitionsAcrossPreparedMintedAndBurned()",
+          "displaySignature": "testTokenLifecycleTransitionsAcrossPreparedMintedAndBurned()",
+          "functionKind": "function",
+          "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0x64df5f5e",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdCNmdW5jdGlvbjoweDY0ZGY1ZjVl",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testTokenLifecycleTransitionsAcrossPreparedMintedAndBurned",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1061,
+            "byteStart": 4618,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L109-L129",
+            "lineEnd": 129,
+            "lineStart": 109,
+            "snippetSha256": "sha256:230e331bfefb624db074ab3ba9ead845df070f37de328aa434010f95cd588156",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": "0x64df5f5e",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAbortedPrepareRewindsAllocatorAndClearsIdentity()",
+          "displaySignature": "testAbortedPrepareRewindsAllocatorAndClearsIdentity()",
+          "functionKind": "function",
+          "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xef757aa3",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdCNmdW5jdGlvbjoweGVmNzU3YWEz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAbortedPrepareRewindsAllocatorAndClearsIdentity",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1007,
+            "byteStart": 5685,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L131-L149",
+            "lineEnd": 149,
+            "lineStart": 131,
+            "snippetSha256": "sha256:d1a8995ea9f015577ae76a3055a788f013db786926b846373449e169863842b3",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": "0xef757aa3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAbortRevertEventCompensatesRegistrationAcrossReuse()",
+          "displaySignature": "testAbortRevertEventCompensatesRegistrationAcrossReuse()",
+          "functionKind": "function",
+          "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xbd11215e",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdCNmdW5jdGlvbjoweGJkMTEyMTVl",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAbortRevertEventCompensatesRegistrationAcrossReuse",
+          "natspec": "A prepared-mint abort emits TokenCollectionRegistrationReverted so an event-only\n reconstructor reverses the earlier registration for the reused ID; re-allocating the same\n ID to a different collection emits a fresh TokenCollectionRegistered, and replaying the\n Registered/Reverted/Registered stream in order yields the correct final mapping and supply.",
+          "outputs": [],
+          "range": {
+            "byteLength": 3738,
+            "byteStart": 7081,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L155-L212",
+            "lineEnd": 212,
+            "lineStart": 155,
+            "snippetSha256": "sha256:8b13a2ebb361dd25704eb799f3a91d46cb71bbecf30f39b74f6d9f6baaf5c9f5",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": "0xbd11215e",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testEveryAllocatedTokenIdAnswersIdentityAndLifecycleDensely()",
+          "displaySignature": "testEveryAllocatedTokenIdAnswersIdentityAndLifecycleDensely()",
+          "functionKind": "function",
+          "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xaba9abc7",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdCNmdW5jdGlvbjoweGFiYTlhYmM3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testEveryAllocatedTokenIdAnswersIdentityAndLifecycleDensely",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1159,
+            "byteStart": 10825,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L214-L235",
+            "lineEnd": 235,
+            "lineStart": 214,
+            "snippetSha256": "sha256:a09b3574af917f51ec9a16a933b3bdbcd963bde8723a1e3bde596fb03f39cb78",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": "0xaba9abc7",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testTokenCollectionRegisteredEmitsBeforeDependentEffectsOnBothPaths()",
+          "displaySignature": "testTokenCollectionRegisteredEmitsBeforeDependentEffectsOnBothPaths()",
+          "functionKind": "function",
+          "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xbe76e295",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdCNmdW5jdGlvbjoweGJlNzZlMjk1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testTokenCollectionRegisteredEmitsBeforeDependentEffectsOnBothPaths",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 867,
+            "byteStart": 11990,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L237-L254",
+            "lineEnd": 254,
+            "lineStart": 237,
+            "snippetSha256": "sha256:21981b682673fd653037ffd56fcd4e4cd2a18f3348cabe55d566666bb522d94b",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": "0xbe76e295",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testStreamTokenBurnedCarriesRetainedIdentityAndSchemaVersion()",
+          "displaySignature": "testStreamTokenBurnedCarriesRetainedIdentityAndSchemaVersion()",
+          "functionKind": "function",
+          "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xc49ad52d",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdCNmdW5jdGlvbjoweGM0OWFkNTJk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testStreamTokenBurnedCarriesRetainedIdentityAndSchemaVersion",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1514,
+            "byteStart": 12863,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L256-L286",
+            "lineEnd": 286,
+            "lineStart": 256,
+            "snippetSha256": "sha256:b6e1063f25081a956d9d47a78a7a29dd5c84a47ffb2061a31ae536e346572e23",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": "0xc49ad52d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCollectionSupplyReadsTrackMintAndBurn()",
+          "displaySignature": "testCollectionSupplyReadsTrackMintAndBurn()",
+          "functionKind": "function",
+          "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xbdfd0b78",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdCNmdW5jdGlvbjoweGJkZmQwYjc4",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCollectionSupplyReadsTrackMintAndBurn",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1317,
+            "byteStart": 14383,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L288-L311",
+            "lineEnd": 311,
+            "lineStart": 288,
+            "snippetSha256": "sha256:28bd5521c2f22f1998614dcc9736cc16e573d04e87898a4bcdbbfb043dbc2b72",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": "0xbdfd0b78",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCollectionBurnsBlockedAtBlockIsZeroUntilActivation()",
+          "displaySignature": "testCollectionBurnsBlockedAtBlockIsZeroUntilActivation()",
+          "functionKind": "function",
+          "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0x8b47d657",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdCNmdW5jdGlvbjoweDhiNDdkNjU3",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCollectionBurnsBlockedAtBlockIsZeroUntilActivation",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 418,
+            "byteStart": 15706,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L313-L319",
+            "lineEnd": 319,
+            "lineStart": 313,
+            "snippetSha256": "sha256:4eedd518af69a2ef176584e053d67a0d1ba89643605efcf2e5ec40fb2da56000",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": "0x8b47d657",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testTransfersAndApprovalsStayOpenUnderFreezeAndPauses()",
+          "displaySignature": "testTransfersAndApprovalsStayOpenUnderFreezeAndPauses()",
+          "functionKind": "function",
+          "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xb86114bb",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdCNmdW5jdGlvbjoweGI4NjExNGJi",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testTransfersAndApprovalsStayOpenUnderFreezeAndPauses",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1436,
+            "byteStart": 16130,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L321-L347",
+            "lineEnd": 347,
+            "lineStart": 321,
+            "snippetSha256": "sha256:9f99fcbd92ce90f96e09043e733b521f60c0f3623076f65e0215a90cc9b7a4b6",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": "0xb86114bb",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testPresetHashOnNextSequentialIdDoesNotBlockItsMint()",
+          "displaySignature": "testPresetHashOnNextSequentialIdDoesNotBlockItsMint()",
+          "functionKind": "function",
+          "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0x672b5813",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdCNmdW5jdGlvbjoweDY3MmI1ODEz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPresetHashOnNextSequentialIdDoesNotBlockItsMint",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1638,
+            "byteStart": 17572,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L349-L374",
+            "lineEnd": 374,
+            "lineStart": 349,
+            "snippetSha256": "sha256:422042e381e559eb16f5054cad1d4838b93b05260ee69a9822249d4ec0a388ad",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": "0x672b5813",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSupportsInterfaceMatrixExcludesEnumerable()",
+          "displaySignature": "testSupportsInterfaceMatrixExcludesEnumerable()",
+          "functionKind": "function",
+          "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0x5138fbad",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdCNmdW5jdGlvbjoweDUxMzhmYmFk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSupportsInterfaceMatrixExcludesEnumerable",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 708,
+            "byteStart": 19216,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L376-L386",
+            "lineEnd": 386,
+            "lineStart": 376,
+            "snippetSha256": "sha256:cc2672180b16169ab41357bc8cb2126fc4b708ce0497def91d70123193c17d66",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": "0x5138fbad",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_deployWithManager()",
+          "functionKind": "function",
+          "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:_deployWithManager()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdCNmdW5jdGlvbjpfZGVwbG95V2l0aE1hbmFnZXIoKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_deployWithManager",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "DeployedStream"
+            },
+            {
+              "index": 1,
+              "name": "manager",
+              "type": "IdentityMintManager"
+            }
+          ],
+          "range": {
+            "byteLength": 320,
+            "byteStart": 19930,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L388-L395",
+            "lineEnd": 395,
+            "lineStart": 388,
+            "snippetSha256": "sha256:537c8e6e02ae190539e4855dfa0f69dc3a6fb7d0dc0797d0f01faa6809e57ff4",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_createCollectionB(DeployedStream)",
+          "functionKind": "function",
+          "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:_createCollectionB(DeployedStream)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "DeployedStream"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdCNmdW5jdGlvbjpfY3JlYXRlQ29sbGVjdGlvbkIoRGVwbG95ZWRTdHJlYW0p",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_createCollectionB",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 795,
+            "byteStart": 20256,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L397-L416",
+            "lineEnd": 416,
+            "lineStart": 397,
+            "snippetSha256": "sha256:c121a3ed3892dae33645534ef77fe1b19128683093bf1c137b41f9111bae51b4",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertIdentity(StreamCore,uint256,uint256,uint256,bool)",
+          "functionKind": "function",
+          "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:_assertIdentity(StreamCore,uint256,uint256,uint256,bool)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "core",
+              "type": "StreamCore"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "expectedCollectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "expectedSerial",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "expectedBurned",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdCNmdW5jdGlvbjpfYXNzZXJ0SWRlbnRpdHkoU3RyZWFtQ29yZSx1aW50MjU2LHVpbnQyNTYsdWludDI1Nixib29sKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertIdentity",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 602,
+            "byteStart": 21057,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L418-L431",
+            "lineEnd": 431,
+            "lineStart": 418,
+            "snippetSha256": "sha256:cc6aa36d3484af278b24ab974aa8f5eaae4d3271927f567faf66f30065c6980c",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertIdentityEventBeforeTransfer(Vm.Log[],address,uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:_assertIdentityEventBeforeTransfer(Vm.Log[],address,uint256,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "core",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "serial",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdCNmdW5jdGlvbjpfYXNzZXJ0SWRlbnRpdHlFdmVudEJlZm9yZVRyYW5zZmVyKFZtLkxvZ1tdLGFkZHJlc3MsdWludDI1Nix1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertIdentityEventBeforeTransfer",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 791,
+            "byteStart": 21665,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L433-L452",
+            "lineEnd": 452,
+            "lineStart": 433,
+            "snippetSha256": "sha256:163d9ceb24d272f0012a78d27c7f2473cb4da8a38a82ec181e2ee22961d749ef",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_findIdentityEventIndex(Vm.Log[],address,uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:_findIdentityEventIndex(Vm.Log[],address,uint256,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "core",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "serial",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdCNmdW5jdGlvbjpfZmluZElkZW50aXR5RXZlbnRJbmRleChWbS5Mb2dbXSxhZGRyZXNzLHVpbnQyNTYsdWludDI1Nix1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_findIdentityEventIndex",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "identityIndex",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 1160,
+            "byteStart": 22462,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L454-L479",
+            "lineEnd": 479,
+            "lineStart": 454,
+            "snippetSha256": "sha256:3af8adccb99a7cd18a32e898a7be38d22f6a7e217d70d37b710e95c6f175ae02",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_findRegisteredEventIndex(Vm.Log[],address,uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:_findRegisteredEventIndex(Vm.Log[],address,uint256,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "core",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "serial",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdCNmdW5jdGlvbjpfZmluZFJlZ2lzdGVyZWRFdmVudEluZGV4KFZtLkxvZ1tdLGFkZHJlc3MsdWludDI1Nix1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_findRegisteredEventIndex",
+          "natspec": "Locate a TokenCollectionRegistered log for a specific (tokenId, collectionId) pair.\n Unlike _findIdentityEventIndex this tolerates multiple registrations in one stream\n (e.g. an aborted id later re-registered to a different collection).",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 1112,
+            "byteStart": 23887,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L484-L509",
+            "lineEnd": 509,
+            "lineStart": 484,
+            "snippetSha256": "sha256:25cd2de092d1dea8487ab280cfe125ec454cc7e58d79859a9b96a75c15d61c38",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertRegistrationRevertedEvent(Vm.Log[],address,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:_assertRegistrationRevertedEvent(Vm.Log[],address,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "core",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdCNmdW5jdGlvbjpfYXNzZXJ0UmVnaXN0cmF0aW9uUmV2ZXJ0ZWRFdmVudChWbS5Mb2dbXSxhZGRyZXNzLHVpbnQyNTYsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertRegistrationRevertedEvent",
+          "natspec": "Assert exactly one TokenCollectionRegistrationReverted for (tokenId, collectionId).",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 1027,
+            "byteStart": 25097,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L512-L534",
+            "lineEnd": 534,
+            "lineStart": 512,
+            "snippetSha256": "sha256:85ea0c770cb9974cf077d8e8ca0d3d9cd76217beb6cdc7f846aab678fd94ec90",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_reconstructTokenCollection(Vm.Log[],address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:_reconstructTokenCollection(Vm.Log[],address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "core",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdCNmdW5jdGlvbjpfcmVjb25zdHJ1Y3RUb2tlbkNvbGxlY3Rpb24oVm0uTG9nW10sYWRkcmVzcyx1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_reconstructTokenCollection",
+          "natspec": "Event-only reconstruction: apply TokenCollectionRegistered (set mapping, +1 live) and\n TokenCollectionRegistrationReverted (clear mapping, -1 live) in log order for one tokenId,\n returning the final collection and the number of live registrations that remain.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "collection",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "liveRegistrations",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 815,
+            "byteStart": 26412,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L539-L559",
+            "lineEnd": 559,
+            "lineStart": 539,
+            "snippetSha256": "sha256:dfb8996beb28b1a969f9aca2fa93c1fbd3f495d9221d834cd7bb9ab442051771",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_warpPastFinalSupplyWindow()",
+          "functionKind": "function",
+          "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:_warpPastFinalSupplyWindow()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdCNmdW5jdGlvbjpfd2FycFBhc3RGaW5hbFN1cHBseVdpbmRvdygp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_warpPastFinalSupplyWindow",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 101,
+            "byteStart": 27233,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L561-L563",
+            "lineEnd": 563,
+            "lineStart": 561,
+            "snippetSha256": "sha256:82a6688bff813f04a0b4678165717eac2ee27e3657eac19a004bc225f1440737",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TRANSFER_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 88,
+            "byteStart": 1961,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L58",
+            "lineEnd": 58,
+            "lineStart": 58,
+            "snippetSha256": "sha256:6f9adb72a69408ba856038d4573e590eca9b692bf2788d4284bfb209b547e2dc",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 46,
+            "byteStart": 2003,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L58",
+            "lineEnd": 58,
+            "lineStart": 58,
+            "snippetSha256": "sha256:3c4b3f42f2a17d7e382cf215ad60cfbde10335af99090dd07b51b3e2563c8869",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "valueSource": "keccak256(\"Transfer(address,address,uint256)\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TOKEN_COLLECTION_REGISTERED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 139,
+            "byteStart": 2055,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L59-L60",
+            "lineEnd": 60,
+            "lineStart": 59,
+            "snippetSha256": "sha256:f9baa3edd6a06ca0d76abd0172b924186271f04f9bf2b1ee15ea264e4105c5dc",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 70,
+            "byteStart": 2124,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L60",
+            "lineEnd": 60,
+            "lineStart": 60,
+            "snippetSha256": "sha256:1d298ff6c2a73e230af4238f0b6b97e1784a2d9543509a82eb99a45f5657f0d6",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "valueSource": "keccak256(\"TokenCollectionRegistered(uint16,uint256,uint256,uint256)\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STREAM_TOKEN_BURNED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 123,
+            "byteStart": 2200,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L61-L62",
+            "lineEnd": 62,
+            "lineStart": 61,
+            "snippetSha256": "sha256:ce6ef6a111a9b93f5aa8408f226b09b4001fea41de9abadaeedb8d033b7469c3",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 62,
+            "byteStart": 2261,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L62",
+            "lineEnd": 62,
+            "lineStart": 62,
+            "snippetSha256": "sha256:c2dbdcffd3c1c86855543e3462d503118ee32a0cb523e430be975a9fd19f33d8",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "valueSource": "keccak256(\"StreamTokenBurned(uint256,uint256,uint256,uint16)\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TOKEN_COLLECTION_REGISTRATION_REVERTED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 152,
+            "byteStart": 2329,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L63-L64",
+            "lineEnd": 64,
+            "lineStart": 63,
+            "snippetSha256": "sha256:eca7309055cb4fc4d63efc2679ad61cc7215a0dc4e2ee9836f3ffd4417481611",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 72,
+            "byteStart": 2409,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L64",
+            "lineEnd": 64,
+            "lineStart": 64,
+            "snippetSha256": "sha256:7472b691fae6c34a085f8ec38ad455b9fc641afcbad5c2c851d5b869e3d4141c",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "valueSource": "keccak256(\"TokenCollectionRegistrationReverted(uint16,uint256,uint256)\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COLLECTION_A",
+          "natspec": "",
+          "range": {
+            "byteLength": 41,
+            "byteStart": 2488,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L66",
+            "lineEnd": 66,
+            "lineStart": 66,
+            "snippetSha256": "sha256:126e6b979ce9812710b1f3cd5e831561c24f242fe6d10019da6997bd8b18b2ae",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 2528,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L66",
+            "lineEnd": 66,
+            "lineStart": 66,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COLLECTION_B",
+          "natspec": "",
+          "range": {
+            "byteLength": 41,
+            "byteStart": 2535,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L67",
+            "lineEnd": 67,
+            "lineStart": 67,
+            "snippetSha256": "sha256:1aeaa184912bfa4fdcc6d0b77de26d950603cab03c94a117c22b631db4fd91df",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 2575,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L67",
+            "lineEnd": 67,
+            "lineStart": 67,
+            "snippetSha256": "sha256:d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "valueSource": "2",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 53,
+            "byteStart": 2582,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L68",
+            "lineEnd": 68,
+            "lineStart": 68,
+            "snippetSha256": "sha256:9ad3cd03bccb87616377ded5a696e0eb9dcbd4debf5aabca58a379ad81e19501",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 16,
+            "byteStart": 2619,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L68",
+            "lineEnd": 68,
+            "lineStart": 68,
+            "snippetSha256": "sha256:ff90295fee849d58a9a67d401763bcdf9a2e87e84bdeb02ce3ca102c5621224f",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "valueSource": "address(0xA11CE)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "OTHER",
+          "natspec": "",
+          "range": {
+            "byteLength": 47,
+            "byteStart": 2641,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L69",
+            "lineEnd": 69,
+            "lineStart": 69,
+            "snippetSha256": "sha256:812a33401fa99f89bf35df2be8cf8d44058ede8355d69f751ba6961cbe8eff9c",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 14,
+            "byteStart": 2674,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L69",
+            "lineEnd": 69,
+            "lineStart": 69,
+            "snippetSha256": "sha256:709352300061ce078029f9ba1b4b1f3253093f688f2a601206cfbad2795a3d6a",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "valueSource": "address(0xB0B)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PAUSE_REASON",
+          "natspec": "",
+          "range": {
+            "byteLength": 65,
+            "byteStart": 2694,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L70",
+            "lineEnd": 70,
+            "lineStart": 70,
+            "snippetSha256": "sha256:ccc9e6f4b07854fb26f29c4c3c4338924e8db3e4b2d7a5ef37353e185594acd8",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 25,
+            "byteStart": 2734,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L70",
+            "lineEnd": 70,
+            "lineStart": 70,
+            "snippetSha256": "sha256:890ff14670dc1a6473e81d7bd51b31ec35ab63579d2d5267b074c3af36ea0732",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "valueSource": "bytes32(\"identity-suite\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "LIFECYCLE_UNKNOWN",
+          "natspec": "",
+          "range": {
+            "byteLength": 46,
+            "byteStart": 2766,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L72",
+            "lineEnd": 72,
+            "lineStart": 72,
+            "snippetSha256": "sha256:f94e660e99d66ac20676f789a8406759e80964cf080f8ee1d853875282bce0be",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 2811,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L72",
+            "lineEnd": 72,
+            "lineStart": 72,
+            "snippetSha256": "sha256:5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "valueSource": "0",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "LIFECYCLE_PREPARED_INCOMPLETE",
+          "natspec": "",
+          "range": {
+            "byteLength": 58,
+            "byteStart": 2818,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L73",
+            "lineEnd": 73,
+            "lineStart": 73,
+            "snippetSha256": "sha256:a1c98f6795a1458b564e2aaab3f2c50c608c5bd4152e7f0c932219cb8f8ba1cd",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 2875,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L73",
+            "lineEnd": 73,
+            "lineStart": 73,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "LIFECYCLE_MINTED",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 2882,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L74",
+            "lineEnd": 74,
+            "lineStart": 74,
+            "snippetSha256": "sha256:473904b62a6d1c6a8f323b37b9c68f54960ed60871ab088a3a6805271e9f732f",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 2926,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L74",
+            "lineEnd": 74,
+            "lineStart": 74,
+            "snippetSha256": "sha256:d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "valueSource": "2",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "LIFECYCLE_BURNED",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 2933,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L75",
+            "lineEnd": 75,
+            "lineStart": 75,
+            "snippetSha256": "sha256:afd7f3a2b17387106dbad713fb7044ea7c758b297f27c9391effffc9b65ed752",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 2977,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L75",
+            "lineEnd": 75,
+            "lineStart": 75,
+            "snippetSha256": "sha256:4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+            "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+          },
+          "valueSource": "3",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Db3JlSWRlbnRpdHkudC5zb2w6U3RyZWFtQ29yZUlkZW50aXR5VGVzdA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamCoreIdentityTest",
+    "natspec": "Golden vectors for the sequential Core-owned token identity model:\n one global allocator from 1, stored per-token (collectionId, collectionSerial),\n lifecycle vocabulary, identity events, enumeration reads, and transfer openness.",
+    "range": {
+      "byteLength": 25623,
+      "byteStart": 1713,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreIdentity.t.sol#L51-L564",
+      "lineEnd": 564,
+      "lineStart": 51,
+      "snippetSha256": "sha256:e947dce433cfbe498caccd2c5ae2124e8cd10181c479433536a8eb993b248f0b",
+      "sourceSha256": "sha256:f577a40c19b55b1600dbc2e6af6273ee0dbc86ca42cad9a671d482c361411c42"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamCoreIdentity.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 12
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 12
+    },
+    "totalCount": 12
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0x5138fbad",
+      "definitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0x64df5f5e",
+      "definitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0x672b5813",
+      "definitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0x8b47d657",
+      "definitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xaba9abc7",
+      "definitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xb86114bb",
+      "definitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xbdcba86a",
+      "definitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xbdfd0b78",
+      "definitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xbe76e295",
+      "definitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xc49ad52d",
+      "definitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xef757aa3",
+      "definitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest#function:0xf54f8f01",
+      "definitionId": "test/StreamCoreIdentity.t.sol:StreamCoreIdentityTest",
+      "severity": "advisory"
+    }
+  ]
+}

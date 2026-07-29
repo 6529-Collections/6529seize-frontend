@@ -1,0 +1,1381 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#event:DropAuthorizationCancelled(bytes32,address)",
+          "declaringDefinitionId": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "dropId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "name": "DropAuthorizationCancelled",
+          "signature": "DropAuthorizationCancelled(bytes32,address)",
+          "topic0": "0x7ea730944eaf7b45eb63a5f4a1085439c3d63730f8ce0aa640f18cfc2e3a1e5a"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#event:DropAuthorizationConsumed(bytes32,address,address,address,address,uint256,uint8,bytes32,uint256,uint256)",
+          "declaringDefinitionId": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "dropId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "signer",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "poster",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "address",
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "uint8",
+              "name": "saleMode",
+              "type": "uint8"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "tokenDataHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "deadline",
+              "type": "uint256"
+            },
+            {
+              "index": 9,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "signerEpoch",
+              "type": "uint256"
+            }
+          ],
+          "name": "DropAuthorizationConsumed",
+          "signature": "DropAuthorizationConsumed(bytes32,address,address,address,address,uint256,uint8,bytes32,uint256,uint256)",
+          "topic0": "0x7e3045d3a2a1fef2fc94a01efa83491c5f85085bbdd39006e21b9283a1b385ab"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#event:DropSignerChanged(address,address,uint256)",
+          "declaringDefinitionId": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "oldSigner",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "newSigner",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "signerEpoch",
+              "type": "uint256"
+            }
+          ],
+          "name": "DropSignerChanged",
+          "signature": "DropSignerChanged(address,address,uint256)",
+          "topic0": "0xb95c78d8a41e773c8a1d707cb7e529da07505432bbd3cf05bcc3d094eec4a7da"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#event:SignerEpochChanged(uint256,uint256)",
+          "declaringDefinitionId": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "oldEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "newEpoch",
+              "type": "uint256"
+            }
+          ],
+          "name": "SignerEpochChanged",
+          "signature": "SignerEpochChanged(uint256,uint256)",
+          "topic0": "0x3bba831784668765a4bf4d687020f37a478866bd644c140557d4ddac9227fbfe"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:0x0a9254e4",
+          "declaringDefinitionId": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "setUp",
+          "outputs": [],
+          "selector": "0x0a9254e4",
+          "signature": "setUp()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:0x3b5b5dd1",
+          "declaringDefinitionId": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "rawScenario",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "rawDeadlineOffset",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "rawSalt",
+              "type": "uint256"
+            }
+          ],
+          "name": "testFuzzSignerCompromiseInvalidActionsDoNotMutateState",
+          "outputs": [],
+          "selector": "0x3b5b5dd1",
+          "signature": "testFuzzSignerCompromiseInvalidActionsDoNotMutateState(uint8,uint64,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:0x109a4163",
+          "declaringDefinitionId": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSignerCompromisePauseRotateCancelAndRecoverySequence",
+          "outputs": [],
+          "selector": "0x109a4163",
+          "signature": "testSignerCompromisePauseRotateCancelAndRecoverySequence()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 288454,
+          "canonicalSignature": "DropAuthorizationConsumed(bytes32,address,address,address,address,uint256,uint8,bytes32,uint256,uint256)",
+          "displaySignature": "DropAuthorizationConsumed(bytes32,address,address,address,address,uint256,uint8,bytes32,uint256,uint256)",
+          "id": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#event:DropAuthorizationConsumed(bytes32,address,address,address,address,uint256,uint8,bytes32,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "dropId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "signer",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "poster",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "name": "saleMode",
+              "type": "uint8"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "name": "tokenDataHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "name": "deadline",
+              "type": "uint256"
+            },
+            {
+              "index": 9,
+              "indexed": false,
+              "name": "signerEpoch",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TaWduZXJDb21wcm9taXNlRnV6ei50LnNvbDpTdHJlYW1TaWduZXJDb21wcm9taXNlRnV6elRlc3QjZXZlbnQ6RHJvcEF1dGhvcml6YXRpb25Db25zdW1lZChieXRlczMyLGFkZHJlc3MsYWRkcmVzcyxhZGRyZXNzLGFkZHJlc3MsdWludDI1Nix1aW50OCxieXRlczMyLHVpbnQyNTYsdWludDI1Nik",
+          "kind": "event",
+          "name": "DropAuthorizationConsumed",
+          "natspec": "",
+          "range": {
+            "byteLength": 324,
+            "byteStart": 489,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L16-L27",
+            "lineEnd": 27,
+            "lineStart": 16,
+            "snippetSha256": "sha256:6984747a8ef416357208f0cde782fb0d50586b5fce8c2ca72cdd6d94cf1cea05",
+            "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+          },
+          "topic0": "0x7e3045d3a2a1fef2fc94a01efa83491c5f85085bbdd39006e21b9283a1b385ab"
+        },
+        {
+          "anonymous": false,
+          "astId": 288460,
+          "canonicalSignature": "DropAuthorizationCancelled(bytes32,address)",
+          "displaySignature": "DropAuthorizationCancelled(bytes32,address)",
+          "id": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#event:DropAuthorizationCancelled(bytes32,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "dropId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TaWduZXJDb21wcm9taXNlRnV6ei50LnNvbDpTdHJlYW1TaWduZXJDb21wcm9taXNlRnV6elRlc3QjZXZlbnQ6RHJvcEF1dGhvcml6YXRpb25DYW5jZWxsZWQoYnl0ZXMzMixhZGRyZXNzKQ",
+          "kind": "event",
+          "name": "DropAuthorizationCancelled",
+          "natspec": "",
+          "range": {
+            "byteLength": 80,
+            "byteStart": 818,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:ff27749d76147b03320a7caf6f47d6abeb1a443e69064a9377a82184d1c01f28",
+            "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+          },
+          "topic0": "0x7ea730944eaf7b45eb63a5f4a1085439c3d63730f8ce0aa640f18cfc2e3a1e5a"
+        },
+        {
+          "anonymous": false,
+          "astId": 288466,
+          "canonicalSignature": "SignerEpochChanged(uint256,uint256)",
+          "displaySignature": "SignerEpochChanged(uint256,uint256)",
+          "id": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#event:SignerEpochChanged(uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "oldEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "newEpoch",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TaWduZXJDb21wcm9taXNlRnV6ei50LnNvbDpTdHJlYW1TaWduZXJDb21wcm9taXNlRnV6elRlc3QjZXZlbnQ6U2lnbmVyRXBvY2hDaGFuZ2VkKHVpbnQyNTYsdWludDI1Nik",
+          "kind": "event",
+          "name": "SignerEpochChanged",
+          "natspec": "",
+          "range": {
+            "byteLength": 77,
+            "byteStart": 903,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:6a247437d895dfc04b1e12f008afab7fda4da52071d9c5fa2be57c8ab10a3e86",
+            "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+          },
+          "topic0": "0x3bba831784668765a4bf4d687020f37a478866bd644c140557d4ddac9227fbfe"
+        },
+        {
+          "anonymous": false,
+          "astId": 288474,
+          "canonicalSignature": "DropSignerChanged(address,address,uint256)",
+          "displaySignature": "DropSignerChanged(address,address,uint256)",
+          "id": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#event:DropSignerChanged(address,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "oldSigner",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "newSigner",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "signerEpoch",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TaWduZXJDb21wcm9taXNlRnV6ei50LnNvbDpTdHJlYW1TaWduZXJDb21wcm9taXNlRnV6elRlc3QjZXZlbnQ6RHJvcFNpZ25lckNoYW5nZWQoYWRkcmVzcyxhZGRyZXNzLHVpbnQyNTYp",
+          "kind": "event",
+          "name": "DropSignerChanged",
+          "natspec": "",
+          "range": {
+            "byteLength": 121,
+            "byteStart": 985,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L30-L32",
+            "lineEnd": 32,
+            "lineStart": 30,
+            "snippetSha256": "sha256:fc1b11721e7131dcce46b5e28dd02c0c87d060491e2fb1076419ba7d01f00d18",
+            "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+          },
+          "topic0": "0xb95c78d8a41e773c8a1d707cb7e529da07505432bbd3cf05bcc3d094eec4a7da"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "setUp()",
+          "displaySignature": "setUp()",
+          "functionKind": "function",
+          "id": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:0x0a9254e4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1TaWduZXJDb21wcm9taXNlRnV6ei50LnNvbDpTdHJlYW1TaWduZXJDb21wcm9taXNlRnV6elRlc3QjZnVuY3Rpb246MHgwYTkyNTRlNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setUp",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 70,
+            "byteStart": 1323,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L43-L45",
+            "lineEnd": 45,
+            "lineStart": 43,
+            "snippetSha256": "sha256:abae456dd761f8b405addd44685cb5af3219d4d684010f4208b002ad7b4f957a",
+            "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+          },
+          "selector": "0x0a9254e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSignerCompromisePauseRotateCancelAndRecoverySequence()",
+          "displaySignature": "testSignerCompromisePauseRotateCancelAndRecoverySequence()",
+          "functionKind": "function",
+          "id": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:0x109a4163",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1TaWduZXJDb21wcm9taXNlRnV6ei50LnNvbDpTdHJlYW1TaWduZXJDb21wcm9taXNlRnV6elRlc3QjZnVuY3Rpb246MHgxMDlhNDE2Mw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSignerCompromisePauseRotateCancelAndRecoverySequence",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 5433,
+            "byteStart": 1399,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L47-L165",
+            "lineEnd": 165,
+            "lineStart": 47,
+            "snippetSha256": "sha256:6e47fd0369ee3fd1cc60b1707b9279b16f0a12944a5cb9b7c37e0dd1cbad4440",
+            "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+          },
+          "selector": "0x109a4163",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testFuzzSignerCompromiseInvalidActionsDoNotMutateState(uint8,uint64,uint256)",
+          "displaySignature": "testFuzzSignerCompromiseInvalidActionsDoNotMutateState(uint8,uint64,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:0x3b5b5dd1",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "rawScenario",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "rawDeadlineOffset",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "name": "rawSalt",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TaWduZXJDb21wcm9taXNlRnV6ei50LnNvbDpTdHJlYW1TaWduZXJDb21wcm9taXNlRnV6elRlc3QjZnVuY3Rpb246MHgzYjViNWRkMQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFuzzSignerCompromiseInvalidActionsDoNotMutateState",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1147,
+            "byteStart": 6838,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L167-L191",
+            "lineEnd": 191,
+            "lineStart": 167,
+            "snippetSha256": "sha256:2328fcf7d9350d9d223ce1865ed592e453613d84b4fcfdd7529fa0ad0869a50a",
+            "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+          },
+          "selector": "0x3b5b5dd1",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_exerciseFuzzScenario(StreamDrops.DropAuthorization,string,bytes,uint8,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:_exerciseFuzzScenario(StreamDrops.DropAuthorization,string,bytes,uint8,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            },
+            {
+              "index": 1,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "name": "signature",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 3,
+              "name": "scenario",
+              "type": "uint8"
+            },
+            {
+              "index": 4,
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TaWduZXJDb21wcm9taXNlRnV6ei50LnNvbDpTdHJlYW1TaWduZXJDb21wcm9taXNlRnV6elRlc3QjZnVuY3Rpb246X2V4ZXJjaXNlRnV6elNjZW5hcmlvKFN0cmVhbURyb3BzLkRyb3BBdXRob3JpemF0aW9uLHN0cmluZyxieXRlcyx1aW50OCx1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_exerciseFuzzScenario",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1041,
+            "byteStart": 7991,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L193-L215",
+            "lineEnd": 215,
+            "lineStart": 193,
+            "snippetSha256": "sha256:f71379ffedca096a92710e82a35b55136f96a17f48179378c3ee676c6e09f48a",
+            "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_applyCompromisePreconditions(bytes32,uint8,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:_applyCompromisePreconditions(bytes32,uint8,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "dropId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "scenario",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "deadline",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TaWduZXJDb21wcm9taXNlRnV6ei50LnNvbDpTdHJlYW1TaWduZXJDb21wcm9taXNlRnV6elRlc3QjZnVuY3Rpb246X2FwcGx5Q29tcHJvbWlzZVByZWNvbmRpdGlvbnMoYnl0ZXMzMix1aW50OCx1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_applyCompromisePreconditions",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 677,
+            "byteStart": 9038,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L217-L236",
+            "lineEnd": 236,
+            "lineStart": 217,
+            "snippetSha256": "sha256:b57f6b355ea78bf01ac1b481438fafe6b3dbe2ea7486f2c619ba2fb62f95d827",
+            "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_scenarioShouldSucceed(uint8)",
+          "functionKind": "function",
+          "id": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:_scenarioShouldSucceed(uint8)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scenario",
+              "type": "uint8"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TaWduZXJDb21wcm9taXNlRnV6ei50LnNvbDpTdHJlYW1TaWduZXJDb21wcm9taXNlRnV6elRlc3QjZnVuY3Rpb246X3NjZW5hcmlvU2hvdWxkU3VjY2VlZCh1aW50OCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_scenarioShouldSucceed",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 120,
+            "byteStart": 9721,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L238-L240",
+            "lineEnd": 240,
+            "lineStart": 238,
+            "snippetSha256": "sha256:50da6d58961c7ff3d13988fe5bc68d5c66f3d0d5c72c79ecb19b7c60dfcc6e83",
+            "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_buildFreeFixedPriceAuthorization(string,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:_buildFreeFixedPriceAuthorization(string,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 1,
+              "name": "deadline",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "salt",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TaWduZXJDb21wcm9taXNlRnV6ei50LnNvbDpTdHJlYW1TaWduZXJDb21wcm9taXNlRnV6elRlc3QjZnVuY3Rpb246X2J1aWxkRnJlZUZpeGVkUHJpY2VBdXRob3JpemF0aW9uKHN0cmluZyx1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_buildFreeFixedPriceAuthorization",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            }
+          ],
+          "range": {
+            "byteLength": 570,
+            "byteStart": 9847,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L242-L260",
+            "lineEnd": 260,
+            "lineStart": 242,
+            "snippetSha256": "sha256:46b2ac91253ab58c13bd5c9ceeba70993bef0ae754ee85548db90ecc0e14e499",
+            "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_buildAuctionAuthorization(string,uint256,uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:_buildAuctionAuthorization(string,uint256,uint256,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 1,
+              "name": "reservePrice",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "auctionEndTime",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "deadline",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "salt",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TaWduZXJDb21wcm9taXNlRnV6ei50LnNvbDpTdHJlYW1TaWduZXJDb21wcm9taXNlRnV6elRlc3QjZnVuY3Rpb246X2J1aWxkQXVjdGlvbkF1dGhvcml6YXRpb24oc3RyaW5nLHVpbnQyNTYsdWludDI1Nix1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_buildAuctionAuthorization",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            }
+          ],
+          "range": {
+            "byteLength": 629,
+            "byteStart": 10423,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L262-L282",
+            "lineEnd": 282,
+            "lineStart": 262,
+            "snippetSha256": "sha256:e63a8eedd60d4b5c88233e0e52aa8b5930c89cce11ee91f8be1c0da488913ca6",
+            "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_nextProtocolNonce()",
+          "functionKind": "function",
+          "id": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:_nextProtocolNonce()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1TaWduZXJDb21wcm9taXNlRnV6ei50LnNvbDpTdHJlYW1TaWduZXJDb21wcm9taXNlRnV6elRlc3QjZnVuY3Rpb246X25leHRQcm90b2NvbE5vbmNlKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_nextProtocolNonce",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "nonce",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 145,
+            "byteStart": 11058,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L284-L287",
+            "lineEnd": 287,
+            "lineStart": 284,
+            "snippetSha256": "sha256:c06e3b481ae84fb0489a89534885339f6c1811c2163e6c0415585e7126d6ec8d",
+            "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_snapshotMutationState()",
+          "functionKind": "function",
+          "id": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:_snapshotMutationState()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1TaWduZXJDb21wcm9taXNlRnV6ei50LnNvbDpTdHJlYW1TaWduZXJDb21wcm9taXNlRnV6elRlc3QjZnVuY3Rpb246X3NuYXBzaG90TXV0YXRpb25TdGF0ZSgp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_snapshotMutationState",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "snapshot",
+              "storageLocation": "memory",
+              "type": "MutationSnapshot"
+            }
+          ],
+          "range": {
+            "byteLength": 522,
+            "byteStart": 11209,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L289-L298",
+            "lineEnd": 298,
+            "lineStart": 289,
+            "snippetSha256": "sha256:b05180a6af998b203e9318e588410d2f9248113f908b5bec5e5323f009b29c2f",
+            "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertMintFailsWithoutMutation(StreamDrops.DropAuthorization,string,bytes,string,bool)",
+          "functionKind": "function",
+          "id": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:_assertMintFailsWithoutMutation(StreamDrops.DropAuthorization,string,bytes,string,bool)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            },
+            {
+              "index": 1,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "name": "signature",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 3,
+              "name": "expectedRevert",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 4,
+              "name": "expectedCancelled",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TaWduZXJDb21wcm9taXNlRnV6ei50LnNvbDpTdHJlYW1TaWduZXJDb21wcm9taXNlRnV6elRlc3QjZnVuY3Rpb246X2Fzc2VydE1pbnRGYWlsc1dpdGhvdXRNdXRhdGlvbihTdHJlYW1Ecm9wcy5Ecm9wQXV0aG9yaXphdGlvbixzdHJpbmcsYnl0ZXMsc3RyaW5nLGJvb2wp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertMintFailsWithoutMutation",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 598,
+            "byteStart": 11737,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L300-L311",
+            "lineEnd": 311,
+            "lineStart": 300,
+            "snippetSha256": "sha256:b055e5047f08732cfb220f9a953360f2b30720e8027f0ac4cdd8da5246803971",
+            "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertNoInvalidExecutionMutation(StreamDrops.DropAuthorization,MutationSnapshot,bool)",
+          "functionKind": "function",
+          "id": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:_assertNoInvalidExecutionMutation(StreamDrops.DropAuthorization,MutationSnapshot,bool)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            },
+            {
+              "index": 1,
+              "name": "beforeAttempt",
+              "storageLocation": "memory",
+              "type": "MutationSnapshot"
+            },
+            {
+              "index": 2,
+              "name": "expectedCancelled",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TaWduZXJDb21wcm9taXNlRnV6ei50LnNvbDpTdHJlYW1TaWduZXJDb21wcm9taXNlRnV6elRlc3QjZnVuY3Rpb246X2Fzc2VydE5vSW52YWxpZEV4ZWN1dGlvbk11dGF0aW9uKFN0cmVhbURyb3BzLkRyb3BBdXRob3JpemF0aW9uLE11dGF0aW9uU25hcHNob3QsYm9vbCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertNoInvalidExecutionMutation",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1553,
+            "byteStart": 12341,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L313-L339",
+            "lineEnd": 339,
+            "lineStart": 313,
+            "snippetSha256": "sha256:c36ee6941a0c39f0f1b130098f055628ccb64e3e8906cb5298494063dea12192",
+            "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertSuccessfulMintState(StreamDrops.DropAuthorization,bool,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:_assertSuccessfulMintState(StreamDrops.DropAuthorization,bool,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            },
+            {
+              "index": 1,
+              "name": "auctionMode",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "expectedSupply",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TaWduZXJDb21wcm9taXNlRnV6ei50LnNvbDpTdHJlYW1TaWduZXJDb21wcm9taXNlRnV6elRlc3QjZnVuY3Rpb246X2Fzc2VydFN1Y2Nlc3NmdWxNaW50U3RhdGUoU3RyZWFtRHJvcHMuRHJvcEF1dGhvcml6YXRpb24sYm9vbCx1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertSuccessfulMintState",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1087,
+            "byteStart": 13900,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L341-L361",
+            "lineEnd": 361,
+            "lineStart": 341,
+            "snippetSha256": "sha256:50f566164f22dc3e40fda6ec121d9331a7437e66653705e2e45cf7e3d4fac31f",
+            "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertReplayAndConsumedCancelFail(StreamDrops.DropAuthorization,string,bytes)",
+          "functionKind": "function",
+          "id": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:_assertReplayAndConsumedCancelFail(StreamDrops.DropAuthorization,string,bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            },
+            {
+              "index": 1,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "name": "signature",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TaWduZXJDb21wcm9taXNlRnV6ei50LnNvbDpTdHJlYW1TaWduZXJDb21wcm9taXNlRnV6elRlc3QjZnVuY3Rpb246X2Fzc2VydFJlcGxheUFuZENvbnN1bWVkQ2FuY2VsRmFpbChTdHJlYW1Ecm9wcy5Ecm9wQXV0aG9yaXphdGlvbixzdHJpbmcsYnl0ZXMp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertReplayAndConsumedCancelFail",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1159,
+            "byteStart": 14993,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L363-L385",
+            "lineEnd": 385,
+            "lineStart": 363,
+            "snippetSha256": "sha256:69fa4326f78b34f89f085432c1d1c8544ef3bba5666c5a5d93b779b27706afc0",
+            "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_expectedInvalidMessage(uint8)",
+          "functionKind": "function",
+          "id": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:_expectedInvalidMessage(uint8)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scenario",
+              "type": "uint8"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TaWduZXJDb21wcm9taXNlRnV6ei50LnNvbDpTdHJlYW1TaWduZXJDb21wcm9taXNlRnV6elRlc3QjZnVuY3Rpb246X2V4cGVjdGVkSW52YWxpZE1lc3NhZ2UodWludDgp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_expectedInvalidMessage",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 497,
+            "byteStart": 16158,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L387-L404",
+            "lineEnd": 404,
+            "lineStart": 387,
+            "snippetSha256": "sha256:a372edeec6e41fcb866b1c3e411f38b97f90b252e54f18648e4961578554799f",
+            "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_callMintDrop(StreamDrops.DropAuthorization,string,bytes)",
+          "functionKind": "function",
+          "id": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:_callMintDrop(StreamDrops.DropAuthorization,string,bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            },
+            {
+              "index": 1,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "name": "signature",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TaWduZXJDb21wcm9taXNlRnV6ei50LnNvbDpTdHJlYW1TaWduZXJDb21wcm9taXNlRnV6elRlc3QjZnVuY3Rpb246X2NhbGxNaW50RHJvcChTdHJlYW1Ecm9wcy5Ecm9wQXV0aG9yaXphdGlvbixzdHJpbmcsYnl0ZXMp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_callMintDrop",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "success",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 471,
+            "byteStart": 16661,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L406-L417",
+            "lineEnd": 417,
+            "lineStart": 406,
+            "snippetSha256": "sha256:cc365103d22b86377e7e8837fa75cf69a96990832d6da57fa6bde4337747068d",
+            "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertRevertedWithMessage(bool,bytes,string)",
+          "functionKind": "function",
+          "id": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:_assertRevertedWithMessage(bool,bytes,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "success",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "expectedMessage",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TaWduZXJDb21wcm9taXNlRnV6ei50LnNvbDpTdHJlYW1TaWduZXJDb21wcm9taXNlRnV6elRlc3QjZnVuY3Rpb246X2Fzc2VydFJldmVydGVkV2l0aE1lc3NhZ2UoYm9vbCxieXRlcyxzdHJpbmcp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertRevertedWithMessage",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 406,
+            "byteStart": 17138,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L419-L430",
+            "lineEnd": 430,
+            "lineStart": 419,
+            "snippetSha256": "sha256:3b5e37965c1ffcb77f22693bd39557259755ee17648ff7e965c113a28aed499a",
+            "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "totalSupply",
+              "natspec": "",
+              "range": {
+                "byteLength": 19,
+                "byteStart": 1146,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L35",
+                "lineEnd": 35,
+                "lineStart": 35,
+                "snippetSha256": "sha256:df2b95e05318c025122a7736f406522fb89b11220464e18b1724cfc7e63e115f",
+                "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "dropCount",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 1175,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L36",
+                "lineEnd": 36,
+                "lineStart": 36,
+                "snippetSha256": "sha256:12e2d2a4302138b209b75ace6aac9a6e7af6827179f76649fb2b22bdd40a3499",
+                "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "dropsOwed",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 1202,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L37",
+                "lineEnd": 37,
+                "lineStart": 37,
+                "snippetSha256": "sha256:e92044fd37d59dcbf0268fe4a1cd179f2b13a049f19b7c2e232135274e25c9c4",
+                "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "dropsBalance",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 1229,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L38",
+                "lineEnd": 38,
+                "lineStart": 38,
+                "snippetSha256": "sha256:963f41f6c2a254d01efe5660b6db1e787f529081df58a00d4a88509bcc8500d9",
+                "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "auctionOwed",
+              "natspec": "",
+              "range": {
+                "byteLength": 19,
+                "byteStart": 1259,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L39",
+                "lineEnd": 39,
+                "lineStart": 39,
+                "snippetSha256": "sha256:1c53d7090eb462a578008dc12a2126ab975e0794869aab64cdc68255ab652b20",
+                "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "auctionBalance",
+              "natspec": "",
+              "range": {
+                "byteLength": 22,
+                "byteStart": 1288,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L40",
+                "lineEnd": 40,
+                "lineStart": 40,
+                "snippetSha256": "sha256:3eaefb732b203a41b43e2dde6a0995d00b222c8c7bf9a1f12f34f2a4529a3763",
+                "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            }
+          ],
+          "name": "MutationSnapshot",
+          "natspec": "",
+          "range": {
+            "byteLength": 205,
+            "byteStart": 1112,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L34-L41",
+            "lineEnd": 41,
+            "lineStart": 34,
+            "snippetSha256": "sha256:e596ab5f00634935b70039182a7441a0aef30f0f324dd492bc8c1cc94324fbc3",
+            "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine",
+        "name": "ProtocolStateMachine"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1TaWduZXJDb21wcm9taXNlRnV6ei50LnNvbDpTdHJlYW1TaWduZXJDb21wcm9taXNlRnV6elRlc3Q",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest",
+      "test/helpers/ProtocolStateMachine.sol:ProtocolStateMachine",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamSignerCompromiseFuzzTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 17261,
+      "byteStart": 285,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSignerCompromiseFuzz.t.sol#L10-L431",
+      "lineEnd": 431,
+      "lineStart": 10,
+      "snippetSha256": "sha256:1cc27da38558d4040983e5d3b80bb5ca752756533cd0b6dc3ca086d1cb6fe67c",
+      "sourceSha256": "sha256:60b96e50b3bf22b027c9eadac43fbf4db1c207559f3d2f96b6af5cb4074075e8"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamSignerCompromiseFuzz.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:0x0a9254e4",
+      "definitionId": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:0x109a4163",
+      "definitionId": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest#function:0x3b5b5dd1",
+      "definitionId": "test/StreamSignerCompromiseFuzz.t.sol:StreamSignerCompromiseFuzzTest",
+      "severity": "advisory"
+    }
+  ]
+}
