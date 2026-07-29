@@ -162,6 +162,7 @@ describe("SubscriptionCoverageSummary", () => {
     expect(
       screen.getByRole("heading", { name: "Not set up" })
     ).toBeInTheDocument();
+    expect(screen.getAllByText("Not set up")).toHaveLength(1);
     expect(screen.queryByText("0 drops funded")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Set up" })).toHaveAttribute(
       "href",
