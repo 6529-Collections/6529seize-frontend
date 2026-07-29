@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import { createServer } from "node:http";
+import type { ServerResponse } from "node:http";
 import path from "node:path";
 
 type RunResult = {
@@ -118,15 +119,25 @@ async function runManualNotifier({
       committer: { login: "Commit-Committer", type: "User" },
     },
   ],
+  githubResponseOverride,
+  notifierOverrides = {},
 }: {
   readonly fixture?: ManualWorkflowFixture;
   readonly currentRunOverrides?: Record<string, unknown>;
   readonly commits?: readonly Record<string, unknown>[];
   readonly pullRequests?: readonly Record<string, unknown>[];
   readonly pullCommits?: readonly Record<string, unknown>[];
+  readonly githubResponseOverride?: (
+    pathName: string,
+    response: ServerResponse
+  ) => boolean;
+  readonly notifierOverrides?: Record<string, string>;
 } = {}): Promise<RunResult> {
   const githubServer = createServer((request, response) => {
     const pathName = request.url ?? "";
+    if (githubResponseOverride?.(pathName, response)) {
+      return;
+    }
     let body: unknown;
     if (pathName.endsWith("/actions/runs/123")) {
       body = {
@@ -192,8 +203,10 @@ async function runManualNotifier({
       GITHUB_REF_NAME: fixture.branch,
       GITHUB_TOKEN: "test-token",
       GITHUB_API_URL: `http://127.0.0.1:${address.port}`,
+      ...notifierOverrides,
     });
   } finally {
+    githubServer.closeAllConnections();
     await new Promise<void>((resolve, reject) =>
       githubServer.close((error) => (error ? reject(error) : resolve()))
     );
@@ -237,6 +250,117 @@ describe("notify-ci-wave Release Train metadata", () => {
         "Commit-Committer",
       ],
     });
+  });
+
+  it("aborts stalled GitHub evidence and still sends the CI notification", async () => {
+    const startedAt = Date.now();
+    const result = await runManualNotifier({
+      githubResponseOverride: (pathName) =>
+        pathName.endsWith("/actions/runs/123"),
+      notifierOverrides: {
+        CI_GITHUB_EVIDENCE_REQUEST_TIMEOUT_MS: "50",
+        CI_GITHUB_EVIDENCE_DEADLINE_MS: "500",
+      },
+    });
+
+    expect(Date.now() - startedAt).toBeLessThan(2_000);
+    expect(result.code).toBe(0);
+    expect(result.stderr).toContain(
+      "GitHub contributor evidence request timed out after 50ms"
+    );
+    expect(result.payload).toMatchObject({
+      run_id: "123",
+      status: "success",
+    });
+    expect(result.payload).not.toHaveProperty("contributor_evidence");
+    expect(result.payload).not.toHaveProperty("contributor_github_logins");
+  });
+
+  it.each([
+    [403, { "retry-after": "0", "x-ratelimit-remaining": "0" }],
+    [429, { "retry-after": "0" }],
+  ])(
+    "retries bounded GitHub evidence response %s and preserves attribution",
+    async (status, headers) => {
+      let currentRunRequests = 0;
+      const result = await runManualNotifier({
+        githubResponseOverride: (pathName, response) => {
+          if (!pathName.endsWith("/actions/runs/123")) return false;
+          currentRunRequests += 1;
+          if (currentRunRequests === 1) {
+            response.writeHead(status, headers);
+            response.end();
+            return true;
+          }
+          return false;
+        },
+        notifierOverrides: {
+          CI_GITHUB_EVIDENCE_REQUEST_TIMEOUT_MS: "1000",
+          CI_GITHUB_EVIDENCE_DEADLINE_MS: "10000",
+        },
+      });
+
+      expect(currentRunRequests).toBe(2);
+      expect(result.payload).toMatchObject({
+        contributor_evidence: "manual-range",
+        contributor_github_logins: [
+          "Commit-Author",
+          "PR-Author",
+          "Commit-Committer",
+        ],
+      });
+    }
+  );
+
+  it("does not retry a rate-limit delay beyond the evidence deadline", async () => {
+    let currentRunRequests = 0;
+    const result = await runManualNotifier({
+      githubResponseOverride: (pathName, response) => {
+        if (!pathName.endsWith("/actions/runs/123")) return false;
+        currentRunRequests += 1;
+        response.writeHead(429, { "retry-after": "10" });
+        response.end();
+        return true;
+      },
+      notifierOverrides: {
+        CI_GITHUB_EVIDENCE_REQUEST_TIMEOUT_MS: "100",
+        CI_GITHUB_EVIDENCE_DEADLINE_MS: "500",
+      },
+    });
+
+    expect(currentRunRequests).toBe(1);
+    expect(result.stderr).toContain(
+      "GitHub contributor evidence deadline expired after 500ms"
+    );
+    expect(result.payload).not.toHaveProperty("contributor_github_logins");
+  });
+
+  it("omits contributors after bounded GitHub retries are exhausted", async () => {
+    let currentRunRequests = 0;
+    const result = await runManualNotifier({
+      githubResponseOverride: (pathName, response) => {
+        if (!pathName.endsWith("/actions/runs/123")) return false;
+        currentRunRequests += 1;
+        response.writeHead(429, { "retry-after": "0" });
+        response.end();
+        return true;
+      },
+      notifierOverrides: {
+        CI_GITHUB_EVIDENCE_REQUEST_TIMEOUT_MS: "1000",
+        CI_GITHUB_EVIDENCE_DEADLINE_MS: "10000",
+      },
+    });
+
+    expect(currentRunRequests).toBe(3);
+    expect(result.stderr).toContain(
+      "GitHub contributor evidence request failed after 3 attempts: 429"
+    );
+    expect(result.payload).toMatchObject({
+      run_id: "123",
+      status: "success",
+    });
+    expect(result.payload).not.toHaveProperty("contributor_evidence");
+    expect(result.payload).not.toHaveProperty("contributor_github_logins");
   });
 
   it.each([

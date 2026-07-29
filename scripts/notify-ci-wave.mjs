@@ -30,6 +30,8 @@ const {
   GITHUB_ACTOR,
   GITHUB_TOKEN,
   GITHUB_API_URL = "https://api.github.com",
+  CI_GITHUB_EVIDENCE_REQUEST_TIMEOUT_MS,
+  CI_GITHUB_EVIDENCE_DEADLINE_MS,
 } = process.env;
 
 function requireValue(name, value) {
@@ -60,6 +62,28 @@ function getFetchFailureMessage(error) {
   }
   return "unknown request error";
 }
+
+function boundedDuration(value, fallback, minimum, maximum) {
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed >= minimum && parsed <= maximum
+    ? parsed
+    : fallback;
+}
+
+const GITHUB_EVIDENCE_REQUEST_TIMEOUT_MS = boundedDuration(
+  CI_GITHUB_EVIDENCE_REQUEST_TIMEOUT_MS,
+  3_000,
+  25,
+  10_000
+);
+const GITHUB_EVIDENCE_DEADLINE_MS = boundedDuration(
+  CI_GITHUB_EVIDENCE_DEADLINE_MS,
+  12_000,
+  50,
+  30_000
+);
+const GITHUB_EVIDENCE_MAX_ATTEMPTS = 3;
+const GITHUB_EVIDENCE_FALLBACK_RETRY_MS = 250;
 
 function isContributorGithubLogin(value) {
   return (
@@ -119,24 +143,98 @@ function parseReleaseContributors(value) {
   return contributors;
 }
 
-async function githubApi(repository, path) {
-  const response = await fetch(
-    `${GITHUB_API_URL.replace(/\/$/, "")}/repos/${repository}${path}`,
-    {
-      headers: {
-        Accept: "application/vnd.github+json",
-        ...(GITHUB_TOKEN ? { Authorization: `Bearer ${GITHUB_TOKEN}` } : {}),
-        "User-Agent": "6529-ci-contributor-attribution",
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
+function githubRetryDelayMs(response, attempt) {
+  const retryAfter = response.headers.get("retry-after");
+  if (retryAfter !== null) {
+    const seconds = Number(retryAfter);
+    if (Number.isFinite(seconds) && seconds >= 0) {
+      return Math.ceil(seconds * 1_000);
     }
-  );
-  if (!response.ok) {
-    throw new Error(
-      `GitHub contributor evidence request failed: ${response.status} ${response.statusText}`
-    );
+    const retryAt = Date.parse(retryAfter);
+    if (Number.isFinite(retryAt)) {
+      return Math.max(0, retryAt - Date.now());
+    }
   }
-  return response.json();
+  const rateLimitReset = Number(response.headers.get("x-ratelimit-reset"));
+  if (Number.isFinite(rateLimitReset) && rateLimitReset > 0) {
+    return Math.max(0, rateLimitReset * 1_000 - Date.now());
+  }
+  return GITHUB_EVIDENCE_FALLBACK_RETRY_MS * 2 ** (attempt - 1);
+}
+
+function isRetryableGithubEvidenceResponse(response) {
+  if (response.status === 429) return true;
+  return (
+    response.status === 403 &&
+    (response.headers.has("retry-after") ||
+      response.headers.get("x-ratelimit-remaining") === "0" ||
+      response.headers.has("x-ratelimit-reset"))
+  );
+}
+
+function githubEvidenceDeadlineError() {
+  return new Error(
+    `GitHub contributor evidence deadline expired after ${GITHUB_EVIDENCE_DEADLINE_MS}ms`
+  );
+}
+
+async function githubApi(repository, path, evidenceBudget) {
+  for (let attempt = 1; attempt <= GITHUB_EVIDENCE_MAX_ATTEMPTS; attempt += 1) {
+    const remainingMs = evidenceBudget.deadlineAt - Date.now();
+    if (remainingMs <= 0) throw githubEvidenceDeadlineError();
+    const requestTimeoutMs = Math.min(
+      GITHUB_EVIDENCE_REQUEST_TIMEOUT_MS,
+      remainingMs
+    );
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), requestTimeoutMs);
+    let response;
+    try {
+      response = await fetch(
+        `${GITHUB_API_URL.replace(/\/$/, "")}/repos/${repository}${path}`,
+        {
+          headers: {
+            Accept: "application/vnd.github+json",
+            ...(GITHUB_TOKEN
+              ? { Authorization: `Bearer ${GITHUB_TOKEN}` }
+              : {}),
+            "User-Agent": "6529-ci-contributor-attribution",
+            "X-GitHub-Api-Version": "2022-11-28",
+          },
+          signal: controller.signal,
+        }
+      );
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        if (Date.now() >= evidenceBudget.deadlineAt) {
+          throw githubEvidenceDeadlineError();
+        }
+        throw new Error(
+          `GitHub contributor evidence request timed out after ${requestTimeoutMs}ms: ${path}`
+        );
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
+    const retryable = isRetryableGithubEvidenceResponse(response);
+    if (!retryable || attempt === GITHUB_EVIDENCE_MAX_ATTEMPTS) {
+      throw new Error(
+        `GitHub contributor evidence request failed after ${attempt} attempt${attempt === 1 ? "" : "s"}: ${response.status} ${response.statusText}`
+      );
+    }
+    const retryDelayMs = githubRetryDelayMs(response, attempt);
+    const retryBudgetMs = evidenceBudget.deadlineAt - Date.now();
+    if (retryDelayMs >= retryBudgetMs) {
+      throw githubEvidenceDeadlineError();
+    }
+    await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+  }
+  throw new Error("GitHub contributor evidence request exhausted retries");
 }
 
 const MANUAL_FRONTEND_WORKFLOWS = Object.freeze({
@@ -200,12 +298,14 @@ async function listPreviousWorkflowRuns({
   currentRun,
   currentSha,
   branch,
+  evidenceBudget,
 }) {
   const runs = [];
   for (let page = 1; page <= 10; page += 1) {
     const payload = await githubApi(
       repository,
-      `/actions/workflows/${encodeURIComponent(workflowFile)}/runs?status=success&branch=${encodeURIComponent(branch)}&per_page=100&page=${page}`
+      `/actions/workflows/${encodeURIComponent(workflowFile)}/runs?status=success&branch=${encodeURIComponent(branch)}&per_page=100&page=${page}`,
+      evidenceBudget
     );
     const pageRuns = payload.workflow_runs ?? [];
     if (!Array.isArray(pageRuns)) {
@@ -241,11 +341,18 @@ async function deriveManualRangeContributors({
   deployedSha,
   branch,
 }) {
+  const evidenceBudget = {
+    deadlineAt: Date.now() + GITHUB_EVIDENCE_DEADLINE_MS,
+  };
   const workflowFile = MANUAL_FRONTEND_WORKFLOWS[workflow];
   if (!workflowFile) {
     throw new Error(`Workflow ${workflow} is not an approved manual path`);
   }
-  const currentRun = await githubApi(repository, `/actions/runs/${runId}`);
+  const currentRun = await githubApi(
+    repository,
+    `/actions/runs/${runId}`,
+    evidenceBudget
+  );
   validateCurrentManualWorkflowRun({
     currentRun,
     runId,
@@ -268,6 +375,7 @@ async function deriveManualRangeContributors({
           currentRun,
           currentSha: deployedSha,
           branch,
+          evidenceBudget,
         })
       )
     )
@@ -286,7 +394,8 @@ async function deriveManualRangeContributors({
   for (let page = 1; page <= 3; page += 1) {
     const comparison = await githubApi(
       repository,
-      `/compare/${encodeURIComponent(baseline.head_sha)}...${encodeURIComponent(deployedSha)}?per_page=100&page=${page}`
+      `/compare/${encodeURIComponent(baseline.head_sha)}...${encodeURIComponent(deployedSha)}?per_page=100&page=${page}`,
+      evidenceBudget
     );
     if (comparison.status !== "ahead" && comparison.status !== "identical") {
       throw new Error("Deployment comparison is not a forward range");
@@ -307,7 +416,8 @@ async function deriveManualRangeContributors({
     users.push(commit.author, commit.committer);
     const associated = await githubApi(
       repository,
-      `/commits/${encodeURIComponent(commit.sha)}/pulls`
+      `/commits/${encodeURIComponent(commit.sha)}/pulls`,
+      evidenceBudget
     );
     if (!Array.isArray(associated)) {
       throw new Error(
@@ -325,7 +435,8 @@ async function deriveManualRangeContributors({
     for (let page = 1; page <= 3; page += 1) {
       const pullCommits = await githubApi(
         repository,
-        `/pulls/${pull.number}/commits?per_page=100&page=${page}`
+        `/pulls/${pull.number}/commits?per_page=100&page=${page}`,
+        evidenceBudget
       );
       if (!Array.isArray(pullCommits)) {
         throw new Error(`PR #${pull.number} commit evidence is malformed`);
