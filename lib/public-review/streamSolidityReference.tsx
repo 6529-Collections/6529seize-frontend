@@ -18,7 +18,6 @@ import {
 } from "@/components/public-review/SolidityReferenceViews";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
-import streamReferenceConfig from "@/config/public-reviews/6529-stream.reference.json";
 import { isPublicReviewEnabled } from "@/config/publicReviews";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -51,16 +50,15 @@ import {
 import type {
   SolidityDeclarationKind,
   SolidityReferenceManifest,
-  SolidityReferenceReviewIdentity,
   SolidityTopLevelDeclaration,
 } from "@/lib/public-review/solidityReferenceTypes";
 import {
   getStreamReviewFeedbackHref,
-  getStreamReviewVersion,
   isStreamReviewVersionPubliclyAvailable,
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_SLUG,
 } from "@/lib/public-review/streamReviewDefinition";
+import { STREAM_SOLIDITY_REFERENCE_IDENTITY } from "@/lib/public-review/streamSolidityReferenceIdentity.server";
 import type {
   PublicReviewDiscussionDestination,
   PublicReviewFeedbackConfig,
@@ -71,58 +69,6 @@ export interface StreamSolidityReferenceRouteParams {
   readonly review: string;
   readonly version?: string | undefined;
 }
-
-const activeStreamReviewVersion = getStreamReviewVersion();
-if (!activeStreamReviewVersion) {
-  throw new Error("The active Stream review version is unavailable.");
-}
-
-const publiclyAvailableStreamReviewVersions =
-  STREAM_REVIEW_DEFINITION.versions.filter((candidate) =>
-    isStreamReviewVersionPubliclyAvailable(candidate.version)
-  );
-const referenceActiveStreamReviewVersion =
-  publiclyAvailableStreamReviewVersions.find(
-    (candidate) => candidate.version === STREAM_REVIEW_DEFINITION.activeVersion
-  ) ??
-  publiclyAvailableStreamReviewVersions.at(-1) ??
-  activeStreamReviewVersion;
-
-const streamReferenceSourceCommits = Object.fromEntries(
-  STREAM_REVIEW_DEFINITION.versions.map((candidate) => [
-    candidate.version,
-    candidate.source.commit,
-  ])
-);
-streamReferenceSourceCommits[streamReferenceConfig.reviewVersion] =
-  streamReferenceConfig.source.commit;
-
-if (
-  streamReferenceConfig.reviewId !== STREAM_REVIEW_SLUG ||
-  streamReferenceConfig.source.repository !==
-    activeStreamReviewVersion.source.repository ||
-  !streamReferenceConfig.output.retainedVersions.includes(
-    streamReferenceConfig.reviewVersion
-  ) ||
-  streamReferenceConfig.output.retainedVersions.some(
-    (version) => !streamReferenceSourceCommits[version]
-  )
-) {
-  throw new Error("The Stream Solidity source-index identity is invalid.");
-}
-
-const STREAM_SOLIDITY_REFERENCE_IDENTITY: SolidityReferenceReviewIdentity = {
-  activeSourceCommit: referenceActiveStreamReviewVersion.source.commit,
-  activeVersion: referenceActiveStreamReviewVersion.version,
-  availableVersions: publiclyAvailableStreamReviewVersions.map(
-    (candidate) => candidate.version
-  ),
-  reviewId: STREAM_REVIEW_SLUG,
-  sourceCommits: streamReferenceSourceCommits,
-  sourceIndexActiveVersion: streamReferenceConfig.reviewVersion,
-  sourceIndexAvailableVersions: streamReferenceConfig.output.retainedVersions,
-  sourceRepository: activeStreamReviewVersion.source.repository,
-};
 
 let defaultReader: SolidityReferenceReader | undefined;
 

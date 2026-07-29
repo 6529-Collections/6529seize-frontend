@@ -16,13 +16,13 @@ import {
   getSoliditySourceHref,
   resolveSoliditySourcePath,
 } from "@/lib/public-review/solidityReferenceRoutes";
-import type { SolidityReferenceReviewIdentity } from "@/lib/public-review/solidityReferenceTypes";
 import {
   isStreamReviewVersionPubliclyAvailable,
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_SLUG,
   STREAM_REVIEW_VERSION,
 } from "@/lib/public-review/streamReviewDefinition";
+import { STREAM_SOLIDITY_REFERENCE_IDENTITY } from "@/lib/public-review/streamSolidityReferenceIdentity.server";
 
 const FIXTURE_ROOT =
   process.env["PUBLIC_REVIEW_SOLIDITY_FIXTURE_ROOT"] ??
@@ -54,27 +54,7 @@ const REFERENCE_ACTIVE_REVIEW_VERSION =
   ) ??
   PUBLICLY_AVAILABLE_REVIEW_VERSIONS.at(-1) ??
   ACTIVE_REVIEW_VERSION;
-const SOURCE_COMMITS = Object.fromEntries(
-  STREAM_REVIEW_DEFINITION.versions.map(({ source, version }) => [
-    version,
-    source.commit,
-  ])
-);
-SOURCE_COMMITS[streamReferenceConfig.reviewVersion] =
-  streamReferenceConfig.source.commit;
-
-const IDENTITY: SolidityReferenceReviewIdentity = {
-  activeSourceCommit: REFERENCE_ACTIVE_REVIEW_VERSION.source.commit,
-  activeVersion: REFERENCE_ACTIVE_REVIEW_VERSION.version,
-  availableVersions: PUBLICLY_AVAILABLE_REVIEW_VERSIONS.map(
-    ({ version }) => version
-  ),
-  reviewId: STREAM_REVIEW_SLUG,
-  sourceCommits: SOURCE_COMMITS,
-  sourceIndexActiveVersion: streamReferenceConfig.reviewVersion,
-  sourceIndexAvailableVersions: streamReferenceConfig.output.retainedVersions,
-  sourceRepository: ACTIVE_REVIEW_VERSION.source.repository,
-};
+const IDENTITY = STREAM_SOLIDITY_REFERENCE_IDENTITY;
 
 describe("Solidity reference route identities", () => {
   const definitionId = "smart-contracts/StreamCore.sol:StreamCore";
