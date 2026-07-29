@@ -71,9 +71,9 @@ describe("PublicReviewShell", () => {
       "public-review-feedback"
     );
     expect(commentsToggle).toHaveAttribute("aria-expanded", "false");
-    expect(
-      document.getElementById("public-review-feedback")
-    ).not.toBeInTheDocument();
+    expect(document.getElementById("public-review-feedback")).toHaveAttribute(
+      "hidden"
+    );
     expect(
       screen.getByRole("navigation", { name: "Contract review areas" })
     ).toBeInTheDocument();

@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import { PublicReviewReadingLayout } from "@/components/public-review/PublicReviewReadingLayout";
 
@@ -27,9 +28,9 @@ describe("PublicReviewReadingLayout", () => {
         bottom: 800,
         height: 800,
         left: 0,
-        right: 800,
+        right: 760,
         top: 0,
-        width: 800,
+        width: 760,
         x: 0,
         y: 0,
         toJSON: () => ({}),
@@ -98,6 +99,42 @@ describe("PublicReviewReadingLayout", () => {
     expect(dialog).toBeInTheDocument();
     await waitFor(() =>
       expect(document.getElementById("public-review-feedback")).toHaveFocus()
+    );
+  });
+
+  it("keeps the controlled panel mounted and restores focus after Escape", async () => {
+    const user = userEvent.setup();
+    window.localStorage.setItem("public-review-comment-panel-open", "false");
+
+    render(
+      <PublicReviewReadingLayout
+        content={<div>Review content</div>}
+        feedbackAvailable
+        panel={<div>Feedback panel</div>}
+        toolbar={<div>Page 1</div>}
+      />
+    );
+
+    const toggle = screen.getByRole("button", { name: "Show feedback" });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(document.getElementById("public-review-feedback")).toHaveAttribute(
+      "hidden"
+    );
+
+    await user.click(toggle);
+    await screen.findByRole("dialog", { name: "Page comments" });
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+
+    await user.keyboard("{Escape}");
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("dialog", { name: "Page comments" })
+      ).not.toBeInTheDocument()
+    );
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(toggle).toHaveFocus();
+    expect(document.getElementById("public-review-feedback")).toHaveAttribute(
+      "hidden"
     );
   });
 });

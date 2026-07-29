@@ -95,15 +95,11 @@ export function PublicReviewReadingLayout({
   );
   const [focusRequest, setFocusRequest] = useState(0);
   const [isOverlayLayout, setIsOverlayLayout] = useState<boolean | null>(null);
-  const feedbackToggleRef = useRef<HTMLButtonElement>(null);
   const handledFocusRequestRef = useRef(0);
   const layoutRef = useRef<HTMLElement>(null);
 
   const closePanel = (): void => {
     updatePanelPreference(false);
-    window.requestAnimationFrame(() => {
-      feedbackToggleRef.current?.focus({ preventScroll: true });
-    });
   };
 
   useLayoutEffect(() => {
@@ -224,8 +220,10 @@ export function PublicReviewReadingLayout({
     </PublicReviewCommentPanelOpenContext.Provider>
   );
 
+  const overlayIsOpen = isOverlayLayout === true && isPanelOpen;
+  const inlinePanelIsVisible = isOverlayLayout === false && isPanelOpen;
   const overlayPanel =
-    isOverlayLayout && isPanelOpen && typeof document !== "undefined"
+    overlayIsOpen && typeof document !== "undefined"
       ? createPortal(
           <Dialog
             aria-label={t(DEFAULT_LOCALE, "publicReview.comments.title")}
@@ -260,7 +258,6 @@ export function PublicReviewReadingLayout({
             onClick={() =>
               isPanelOpen ? closePanel() : updatePanelPreference(true)
             }
-            ref={feedbackToggleRef}
             type="button"
           >
             {isPanelOpen ? (
@@ -295,18 +292,19 @@ export function PublicReviewReadingLayout({
           {content}
         </div>
 
-        {isOverlayLayout === false ? (
+        {overlayIsOpen ? null : (
           <aside
             id={COMMENT_PANEL_ID}
             aria-label={t(DEFAULT_LOCALE, "publicReview.comments.title")}
             className={`tw-order-1 tw-scroll-mt-20 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400 @[760px]:tw-sticky @[760px]:tw-top-16 @[760px]:tw-order-2 @[760px]:tw-h-[calc(100dvh-4rem)] @[760px]:tw-overflow-hidden @[760px]:tw-border-b-0 @[760px]:tw-border-l ${
-              isPanelOpen ? "tw-block" : "tw-hidden"
+              inlinePanelIsVisible ? "tw-block" : "tw-hidden"
             }`}
+            hidden={!inlinePanelIsVisible}
             tabIndex={-1}
           >
             {panelContents(false)}
           </aside>
-        ) : null}
+        )}
       </div>
       {overlayPanel}
     </section>

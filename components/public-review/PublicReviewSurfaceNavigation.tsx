@@ -64,7 +64,7 @@ export function PublicReviewSurfaceNavigation({
                   aria-current={isActive ? "page" : undefined}
                   className={`tw-inline-flex tw-min-h-10 tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-lg tw-px-1.5 tw-text-xs tw-font-medium tw-tracking-[0.01em] tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-gap-2 sm:tw-px-3 sm:tw-text-sm ${
                     isActive
-                      ? "tw-pointer-events-none tw-bg-white/[0.055] tw-text-iron-100 tw-shadow-[inset_0_0_0_1px_rgba(0,0,0,0.46),0_1px_2px_rgba(0,0,0,0.16)]"
+                      ? "tw-cursor-default tw-bg-white/[0.055] tw-text-iron-100 tw-shadow-[inset_0_0_0_1px_rgba(0,0,0,0.46),0_1px_2px_rgba(0,0,0,0.16)]"
                       : "tw-bg-transparent tw-text-iron-500 hover:tw-bg-white/[0.025] hover:tw-text-iron-200"
                   }`}
                   href={surface.href}
