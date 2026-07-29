@@ -176,7 +176,7 @@ function TDHHeader({ locale }: { readonly locale: SupportedLocale }) {
           {m(locale, "network.tdh.hero.title")}
         </h1>
       </div>
-      <p className="tw-m-0 tw-max-w-3xl tw-text-base tw-font-light tw-leading-7 tw-text-iron-400">
+      <p className="tw-m-0 tw-max-w-3xl tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300">
         {m(locale, "network.tdh.hero.intro")}
       </p>
     </section>

@@ -1,13 +1,13 @@
-import styles from "@/styles/Home.module.css";
 import PrenodesStatus from "@/components/prenodes/PrenodesStatus";
+import { NETWORK_REFERENCE_PAGE_CLASSES } from "@/components/network/networkPageLayoutClasses";
 import { getAppMetadata } from "@/components/providers/metadata";
 
 export default function PrenodesPage() {
   return (
-    <main className={`${styles["main"]} tailwind-scope`}>
-      <section className={`${styles["leaderboardContainer"]} tailwind-scope`}>
-        <PrenodesStatus />
-      </section>
+    <main
+      className={`${NETWORK_REFERENCE_PAGE_CLASSES} tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F] tw-text-iron-100`}
+    >
+      <PrenodesStatus />
     </main>
   );
 }
