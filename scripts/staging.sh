@@ -7,6 +7,16 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 cd "$REPO_ROOT"
 
+public_review_destinations_source="${PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE:-}"
+unset PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE
+
+if [[ -z "$public_review_destinations_source" ]] ||
+  [[ ! -f "$public_review_destinations_source" ]] ||
+  [[ ! -r "$public_review_destinations_source" ]]; then
+  echo "A readable PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE is required." >&2
+  exit 1
+fi
+
 # Function to print messages
 print_message() {
   echo
@@ -31,12 +41,27 @@ print_message "Reinstalling dependencies..."
 
 # Step 3: Rebuild the project
 print_message "Rebuilding the project..."
-./bin/6529 run build
+# Other staging endpoints remain sourced from the established EC2 build environment.
+BASE_ENDPOINT=https://staging.6529.io \
+  ./bin/6529 run build
 
-# Step 4: Restart PM2 services
+# Step 4: Prepare private runtime configuration
+print_message "Preparing staging runtime configuration..."
+runtime_secrets_dir="$REPO_ROOT/.next/runtime-secrets"
+public_review_destinations_file="$runtime_secrets_dir/public-review-discussion-destinations.json"
+./bin/6529 exec node scripts/public-review-discussion-destinations.cjs \
+  --input source-file \
+  --source "$public_review_destinations_source" \
+  --destination "$public_review_destinations_file"
+unset public_review_destinations_source
+
+# Step 5: Restart PM2 services
 print_message "Restarting PM2 services..."
 pm2 delete 6529seize >/dev/null 2>&1 || true
-pm2 start bash --name=6529seize -- -lc "cd \"$REPO_ROOT\" && ./bin/6529 run start:standalone"
+STANDALONE_ARTIFACT_PROFILE=staging \
+PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE="$public_review_destinations_file" \
+  pm2 start bash --name=6529seize -- \
+  -lc "cd \"$REPO_ROOT\" && ./bin/6529 run start:standalone"
 pm2 save >/dev/null 2>&1 || true
 
 print_message "Update completed successfully!"
