@@ -1,12 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useFavouriteWavesOfIdentity } from "@/hooks/useFavouriteWavesOfIdentity";
 import { useProfileWaveActivity } from "@/hooks/useProfileWaveActivity";
 import { useWaves } from "@/hooks/useWaves";
 import { useWaveCreatorPreviewModal } from "@/hooks/useWaveCreatorPreviewModal";
 import { WaveCreatorPreviewModal } from "@/components/waves/drops/WaveCreatorPreviewModal";
+import { useMemo } from "react";
 import UserPageBrainSidebarCreated from "./UserPageBrainSidebarCreated";
 import UserPageBrainSidebarMobileStrip from "./UserPageBrainSidebarMobileStrip";
 import UserPageBrainSidebarMostActive from "./UserPageBrainSidebarMostActive";

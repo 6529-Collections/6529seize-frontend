@@ -18,11 +18,14 @@ export class ApiSessionLoginRequest {
     'client_address': string;
     'client_signature': string;
     /**
-    * Server-signed structured challenge token. /auth/session-login only accepts first_party_web challenges for web cookie sessions and matching native or desktop challenges for refresh-token sessions; external_client challenges use /auth/login bearer-token auth instead.
+    * Opaque server-signed challenge token. New web tokens bind the exact SIWE message, web client type, frontend Origin, API audience, and expiration. /auth/session-login temporarily accepts valid outstanding first_party_web structured challenges for web cookie sessions and continues to require matching native or desktop challenges for refresh-token sessions. external_client challenges use /auth/login bearer-token auth instead.
     */
     'server_signature': string;
     'role'?: string | null;
     'wallet_kind_hint'?: ApiSessionLoginRequestWalletKindHintEnum | null;
+    /**
+    * Optional 6529 session-signature protocol compatibility field. This is not the ERC-4361 SIWE Version field; SIWE messages always use Version 1.
+    */
     'signature_version'?: ApiSessionLoginRequestSignatureVersionEnum;
 
     static readonly discriminator: string | undefined = undefined;

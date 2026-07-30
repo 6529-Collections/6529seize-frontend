@@ -22,6 +22,8 @@ export enum ReleaseBusV2CandidateStatus {
     StagingValidating = 'STAGING_VALIDATING',
     StagingValidated = 'STAGING_VALIDATED',
     ReadyForProduction = 'READY_FOR_PRODUCTION',
+    ReadyForCandidateEvidenceProduction = 'READY_FOR_CANDIDATE_EVIDENCE_PRODUCTION',
+    WaitingForProductionReplan = 'WAITING_FOR_PRODUCTION_REPLAN',
     ProductionInTrain = 'PRODUCTION_IN_TRAIN',
     ProductionBuildingOrQualifying = 'PRODUCTION_BUILDING_OR_QUALIFYING',
     ProductionDeploying = 'PRODUCTION_DEPLOYING',
