@@ -1,4 +1,6 @@
 "use client";
+
+import Button from "@/components/utils/button/Button";
 import styles from "./AppWallet.module.css";
 import type { KeyboardEvent, ReactNode, RefObject } from "react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
@@ -252,31 +254,36 @@ export function CreateAppWalletModal(
       title={`${importData ? "Import" : "Create New"} Wallet`}
       footer={
         <>
-          <button
+          <Button
             type="button"
-            className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#6c757d] tw-bg-[#6c757d] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#565e64] enabled:hover:tw-bg-[#5c636a] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
             onClick={() => handleHide()}
+            variant="secondary"
+            size="md"
           >
             Cancel
-          </button>
+          </Button>
           {importData ? (
-            <button
+            <Button
               type="button"
-              className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#0d6efd] tw-bg-[#0d6efd] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#0a58ca] enabled:hover:tw-bg-[#0b5ed7] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
-              disabled={!walletName || !walletPass || isAdding}
+              disabled={!walletName || !walletPass}
+              loading={isAdding}
               onClick={handleImport}
+              variant="action"
+              size="md"
             >
               {isAdding ? "Importing..." : "Import"}
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
               type="button"
-              className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#0d6efd] tw-bg-[#0d6efd] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#0a58ca] enabled:hover:tw-bg-[#0b5ed7] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
-              disabled={!walletName || !walletPass || isAdding}
+              disabled={!walletName || !walletPass}
+              loading={isAdding}
               onClick={handleCreate}
+              variant="action"
+              size="md"
             >
               {isAdding ? "Creating..." : "Create"}
-            </button>
+            </Button>
           )}
         </>
       }
@@ -457,21 +464,24 @@ export function UnlockAppWalletModal(
       title="Unlock Wallet"
       footer={
         <>
-          <button
+          <Button
             type="button"
-            className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#6c757d] tw-bg-[#6c757d] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#565e64] enabled:hover:tw-bg-[#5c636a] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
             onClick={() => handleHide()}
+            variant="secondary"
+            size="md"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#0d6efd] tw-bg-[#0d6efd] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#0a58ca] enabled:hover:tw-bg-[#0b5ed7] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
             disabled={!canUnlock}
+            loading={unlocking}
             onClick={handleUnlock}
+            variant="action"
+            size="md"
           >
             {unlocking ? "Unlocking..." : "Unlock"}
-          </button>
+          </Button>
         </>
       }
     >

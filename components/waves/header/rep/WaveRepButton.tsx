@@ -1,6 +1,7 @@
 "use client";
 
 import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTooltip";
+import Button from "@/components/utils/button/Button";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { formatNumber } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -39,24 +40,20 @@ export default function WaveRepButton({
     : t(WAVE_REP_ACTION_LOCALE, "waves.rep.action.addAriaLabel");
   const tooltipContent = t(WAVE_REP_ACTION_LOCALE, "waves.rep.action.tooltip");
   const tooltipId = `wave-rep-rating-${wave.id}`;
-  const isCompact = variant === "compact";
-  const sizeClasses = isCompact
-    ? "tw-h-7 tw-min-w-7 tw-gap-x-1 tw-rounded-md tw-px-1.5 tw-text-[11px]"
-    : "tw-h-8 tw-min-w-8 tw-gap-x-1.5 tw-rounded-lg tw-px-2.5 tw-text-xs";
-
   return (
     <>
-      <button
+      <Button
         type="button"
         aria-label={label}
         data-tooltip-id={tooltipId}
         data-tooltip-content={tooltipContent}
         onClick={() => setIsModalOpen(true)}
-        className={`tw-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-font-semibold tw-text-iron-200 tw-transition-all tw-duration-200 hover:tw-border-primary-400/70 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${sizeClasses}`}
+        variant="tertiary"
+        size={variant === "compact" ? "xs" : "sm"}
       >
         <ScaleIcon className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
         <span>{actionText}</span>
-      </button>
+      </Button>
       <MyStreamActionTooltip id={tooltipId} />
       {isModalOpen && (
         <WaveRepRatingModal wave={wave} onClose={() => setIsModalOpen(false)} />

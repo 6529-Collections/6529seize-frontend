@@ -91,10 +91,4 @@ export const CHECKBOX_CLASS =
 export const LOCK_SELECT_CLASS =
   "tw-block tw-min-h-11 tw-w-full tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-300 tw-bg-white tw-px-3 tw-py-2 tw-text-base tw-leading-6 tw-text-black focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-bg-iron-200 disabled:tw-text-iron-500";
 
-export const PRIMARY_ACTION_CLASS =
-  "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-4 tw-py-2.5 tw-text-base tw-font-semibold tw-text-black tw-transition-colors hover:tw-bg-iron-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-border-iron-600 disabled:tw-bg-iron-700 disabled:tw-text-iron-400";
-
-export const DANGER_ACTION_CLASS =
-  "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-red tw-bg-red tw-px-4 tw-py-2.5 tw-text-base tw-font-semibold tw-text-white tw-transition-colors hover:tw-bg-[#e05f57] focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-red disabled:tw-cursor-not-allowed disabled:tw-border-iron-700 disabled:tw-bg-iron-700 disabled:tw-text-iron-400";
-
 export const BUTTON_ICON_CLASS = "tw-h-4 tw-w-4 tw-flex-none";

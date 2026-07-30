@@ -1,6 +1,7 @@
 "use client";
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import Button from "@/components/utils/button/Button";
 import { faRightLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useRef } from "react";
@@ -39,7 +40,7 @@ export default function TransferToggle() {
   };
 
   return (
-    <button
+    <Button
       ref={buttonRef}
       type="button"
       onClick={() => {
@@ -57,13 +58,11 @@ export default function TransferToggle() {
           setTransferEnabled(true);
         }
       }}
-      className={[
-        "tw-inline-flex tw-h-10 tw-items-center tw-gap-x-2 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-bg-white tw-px-4 tw-text-sm tw-font-medium tw-text-iron-950 tw-transition-colors hover:tw-bg-iron-100",
-        "focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950",
-      ].join(" ")}
+      variant="primary"
+      size="md"
     >
       {t.enabled ? "Exit Transfer" : "Transfer"}
       <FontAwesomeIcon icon={faRightLeft} />
-    </button>
+    </Button>
   );
 }
