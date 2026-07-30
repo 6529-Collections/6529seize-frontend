@@ -24,6 +24,15 @@ describe("Release Bus v2 staging ref advancement workflow", () => {
   });
 
   it("performs an exact leased fast-forward and verifies its postcondition", () => {
+    const ancestry = workflow.indexOf(
+      'git merge-base --is-ancestor "$EXPECTED_OLD_SHA" "$EXPECTED_SHA"'
+    );
+    const alreadyAtTarget = workflow.indexOf(
+      'if [ "$observed" = "$EXPECTED_SHA" ]; then'
+    );
+
+    expect(ancestry).toBeGreaterThan(0);
+    expect(alreadyAtTarget).toBeGreaterThan(ancestry);
     expect(workflow).toContain(
       'git merge-base --is-ancestor "$EXPECTED_OLD_SHA" "$EXPECTED_SHA"'
     );
@@ -37,6 +46,12 @@ describe("Release Bus v2 staging ref advancement workflow", () => {
     );
     expect(workflow).toContain(
       "write_result FAILED INFRASTRUCTURE staging_ref_transport true"
+    );
+    expect(workflow).toContain(
+      'write_result SUCCEEDED "" "" false "$observed" false'
+    );
+    expect(workflow).toContain(
+      'if ! [[ "$observed" =~ ^[a-f0-9]{40}$ ]]; then'
     );
   });
 
@@ -59,6 +74,9 @@ describe("Release Bus v2 staging ref advancement workflow", () => {
     );
     expect(workflow).toContain(
       'test "$ADVANCE_OUTCOME" = success -a "$REPORT_OUTCOME" = success'
+    );
+    expect(workflow).toContain(
+      "failure_class=CONTROL_PLANE\n              failure_phase=authorization\n              retryable=false"
     );
   });
 });

@@ -42,6 +42,7 @@ jobs:
           [[ "$PHASE" =~ ^(release|rollback)$ ]]
 
       - name: Authorize exact v2 operation
+        id: authorize
         env:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
           OPERATION_KEY: ${{ inputs.operation_key }}
@@ -111,6 +112,17 @@ jobs:
             write_result FAILED CONTROL_PLANE staging_ref_missing false "$observed" false
             exit 1
           fi
+
+          git fetch --no-tags origin "$EXPECTED_OLD_SHA" "$EXPECTED_SHA"
+          if ! git merge-base --is-ancestor "$EXPECTED_OLD_SHA" "$EXPECTED_SHA"; then
+            write_result FAILED CONTROL_PLANE staging_ref_non_fast_forward false "$observed" false
+            exit 1
+          fi
+
+          # The environment lease admits only one staging train, and this
+          # repository concurrency group serializes its attempts. Re-observing
+          # the exact target is therefore idempotent convergence for this
+          # authorized operation, never ownership inferred from unrelated work.
           if [ "$observed" = "$EXPECTED_SHA" ]; then
             write_result SUCCEEDED "" "" false "$observed" false
             exit 0
@@ -120,20 +132,20 @@ jobs:
             exit 1
           fi
 
-          git fetch --no-tags origin "$EXPECTED_OLD_SHA" "$EXPECTED_SHA"
-          if ! git merge-base --is-ancestor "$EXPECTED_OLD_SHA" "$EXPECTED_SHA"; then
-            write_result FAILED CONTROL_PLANE staging_ref_non_fast_forward false "$observed" false
-            exit 1
-          fi
-
           if ! git push \
             --force-with-lease="refs/heads/1a-staging:$EXPECTED_OLD_SHA" \
             origin "$EXPECTED_SHA:refs/heads/1a-staging"
           then
             observed="$(git ls-remote origin refs/heads/1a-staging | cut -f1 || true)"
             if [ "$observed" = "$EXPECTED_SHA" ]; then
-              write_result SUCCEEDED "" "" false "$observed" true
+              # The push transport was ambiguous, so do not attribute the
+              # mutation to this run. Exact target convergence is still safe.
+              write_result SUCCEEDED "" "" false "$observed" false
               exit 0
+            fi
+            if ! [[ "$observed" =~ ^[a-f0-9]{40}$ ]]; then
+              write_result FAILED INFRASTRUCTURE staging_ref_transport true "$observed" false
+              exit 1
             fi
             if [ "$observed" != "$EXPECTED_OLD_SHA" ]; then
               write_result FAILED INTERACTION staging_ref_moved false "$observed" false
@@ -155,6 +167,7 @@ jobs:
         if: always()
         env:
           ADVANCE_OUTCOME: ${{ steps.advance.outcome }}
+          AUTHORIZE_OUTCOME: ${{ steps.authorize.outcome }}
           OPERATION_KEY: ${{ inputs.operation_key }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
@@ -163,11 +176,23 @@ jobs:
           set -euo pipefail
           result="$RUNNER_TEMP/staging-ref-result.json"
           if [ ! -s "$result" ]; then
-            jq -n '{
+            failure_class=INFRASTRUCTURE
+            failure_phase=staging_ref_runner
+            retryable=true
+            if [ "$AUTHORIZE_OUTCOME" != success ]; then
+              failure_class=CONTROL_PLANE
+              failure_phase=authorization
+              retryable=false
+            fi
+            jq -n \
+              --arg failure_class "$failure_class" \
+              --arg failure_phase "$failure_phase" \
+              --argjson retryable "$retryable" \
+              '{
               status:"FAILED",
-              failure_class:"INFRASTRUCTURE",
-              failure_phase:"staging_ref_runner",
-              retryable:true,
+              failure_class:$failure_class,
+              failure_phase:$failure_phase,
+              retryable:$retryable,
               summary:null
             }' > "$result"
           fi
