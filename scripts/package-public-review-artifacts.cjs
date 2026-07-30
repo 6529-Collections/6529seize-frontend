@@ -56,6 +56,17 @@ function invariant(condition, message) {
   }
 }
 
+function hasValidPublicationMetadata(version) {
+  const hasNoPublicationMetadata =
+    version.lifecycleState === "DRAFT" &&
+    version.deploymentStatus === undefined &&
+    version.auditStatus === undefined;
+  const hasCompletePublicationMetadata =
+    PUBLIC_REVIEW_DEPLOYMENT_STATUSES.has(version.deploymentStatus) &&
+    PUBLIC_REVIEW_AUDIT_STATUSES.has(version.auditStatus);
+  return hasNoPublicationMetadata || hasCompletePublicationMetadata;
+}
+
 function normalizeRelativePath(value) {
   return value.split(path.sep).join("/");
 }
@@ -264,8 +275,7 @@ function getPublicReviewPublicationConfigs(repoRoot) {
               SAFE_VERSION_PATTERN.test(version.version) &&
               PUBLIC_REVIEW_LIFECYCLE_STATES.has(version.lifecycleState) &&
               SOURCE_PIN_PATTERN.test(version.sourceCommit) &&
-              PUBLIC_REVIEW_DEPLOYMENT_STATUSES.has(version.deploymentStatus) &&
-              PUBLIC_REVIEW_AUDIT_STATUSES.has(version.auditStatus)
+              hasValidPublicationMetadata(version)
           ) &&
           new Set(config.versions.map((version) => version.version)).size ===
             config.versions.length,
@@ -1445,6 +1455,7 @@ module.exports = {
   directoryIdentity,
   expectedBundleEntries,
   getPublishedReviewIds,
+  hasValidPublicationMetadata,
   main,
   parseCli,
   parseZipListing,

@@ -1,5 +1,6 @@
 import {
   getStreamReviewVersionPublication,
+  parseStreamReviewPublicationMetadata,
   parseStreamReviewVersionIdentities,
   STREAM_REVIEW_VERSION_IDENTITIES,
 } from "@/lib/public-review/streamReviewPublication";
@@ -36,6 +37,27 @@ describe("Stream public-review version identities", () => {
     expect(
       Object.isFrozen(getStreamReviewVersionPublication("2026-07-27.1"))
     ).toBe(true);
+  });
+
+  it("accepts a draft identity before publication metadata is assigned", () => {
+    expect(parseStreamReviewPublicationMetadata({}, "DRAFT")).toBeUndefined();
+  });
+
+  it.each([
+    {
+      label: "published version without metadata",
+      lifecycleState: "PUBLIC_REVIEW" as const,
+      metadata: {},
+    },
+    {
+      label: "draft with partial metadata",
+      lifecycleState: "DRAFT" as const,
+      metadata: { deploymentStatus: "NOT_DEPLOYED" },
+    },
+  ])("rejects a $label", ({ lifecycleState, metadata }) => {
+    expect(() =>
+      parseStreamReviewPublicationMetadata(metadata, lifecycleState)
+    ).toThrow("The Stream public-review version config is invalid.");
   });
 
   it.each([

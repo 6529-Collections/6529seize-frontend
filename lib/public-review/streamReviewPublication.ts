@@ -15,6 +15,8 @@ const STREAM_REVIEW_AUDIT_STATUSES = [
 ] as const;
 const STREAM_REVIEW_SOURCE_COMMIT_PATTERN = /^[0-9a-f]{40}$/;
 const STREAM_REVIEW_VERSION_PATTERN = /^\d{4}-\d{2}-\d{2}\.\d+$/;
+const STREAM_REVIEW_VERSION_CONFIG_ERROR =
+  "The Stream public-review version config is invalid.";
 
 type StreamReviewDeploymentStatus =
   (typeof STREAM_REVIEW_DEPLOYMENT_STATUSES)[number];
@@ -25,10 +27,13 @@ export interface StreamReviewVersionIdentity {
   readonly version: string;
 }
 
-interface StreamReviewVersionPublication extends StreamReviewVersionIdentity {
+export interface StreamReviewPublicationMetadata {
   readonly deploymentStatus: StreamReviewDeploymentStatus;
   readonly auditStatus: StreamReviewAuditStatus;
 }
+
+interface StreamReviewVersionPublication
+  extends StreamReviewVersionIdentity, StreamReviewPublicationMetadata {}
 
 function isStreamReviewDeploymentStatus(
   value: unknown
@@ -52,11 +57,36 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
+export function parseStreamReviewPublicationMetadata(
+  value: unknown,
+  lifecycleState: PublicReviewLifecycleState
+): StreamReviewPublicationMetadata | undefined {
+  if (!isRecord(value)) {
+    throw new Error(STREAM_REVIEW_VERSION_CONFIG_ERROR);
+  }
+  const deploymentStatus = value["deploymentStatus"];
+  const auditStatus = value["auditStatus"];
+  if (
+    lifecycleState === "DRAFT" &&
+    deploymentStatus === undefined &&
+    auditStatus === undefined
+  ) {
+    return undefined;
+  }
+  if (
+    !isStreamReviewDeploymentStatus(deploymentStatus) ||
+    !isStreamReviewAuditStatus(auditStatus)
+  ) {
+    throw new Error(STREAM_REVIEW_VERSION_CONFIG_ERROR);
+  }
+  return Object.freeze({ deploymentStatus, auditStatus });
+}
+
 export function parseStreamReviewVersionIdentities(
   value: unknown
 ): readonly StreamReviewVersionIdentity[] {
   if (!Array.isArray(value) || value.length === 0) {
-    throw new Error("The Stream public-review version config is invalid.");
+    throw new Error(STREAM_REVIEW_VERSION_CONFIG_ERROR);
   }
 
   const seenVersions = new Set<string>();
@@ -70,7 +100,7 @@ export function parseStreamReviewVersionIdentities(
       !STREAM_REVIEW_SOURCE_COMMIT_PATTERN.test(candidate["sourceCommit"]) ||
       seenVersions.has(candidate["version"])
     ) {
-      throw new Error("The Stream public-review version config is invalid.");
+      throw new Error(STREAM_REVIEW_VERSION_CONFIG_ERROR);
     }
     seenVersions.add(candidate["version"]);
     return Object.freeze({
@@ -108,21 +138,9 @@ const STREAM_REVIEW_VERSION_LIFECYCLE_STATES = new Map<
 const STREAM_REVIEW_VERSION_SOURCE_COMMITS = new Map<string, string>();
 for (const [index, identity] of STREAM_REVIEW_VERSION_IDENTITIES.entries()) {
   const version = publication.versions[index];
-  if (
-    !version ||
-    !isStreamReviewDeploymentStatus(version.deploymentStatus) ||
-    !isStreamReviewAuditStatus(version.auditStatus)
-  ) {
-    throw new Error("The Stream public-review version config is invalid.");
+  if (!version) {
+    throw new Error(STREAM_REVIEW_VERSION_CONFIG_ERROR);
   }
-  STREAM_REVIEW_VERSION_PUBLICATIONS.set(
-    identity.version,
-    Object.freeze({
-      ...identity,
-      deploymentStatus: version.deploymentStatus,
-      auditStatus: version.auditStatus,
-    })
-  );
   STREAM_REVIEW_VERSION_LIFECYCLE_STATES.set(
     identity.version,
     identity.lifecycleState
@@ -131,6 +149,19 @@ for (const [index, identity] of STREAM_REVIEW_VERSION_IDENTITIES.entries()) {
     identity.version,
     identity.sourceCommit
   );
+  const metadata = parseStreamReviewPublicationMetadata(
+    version,
+    identity.lifecycleState
+  );
+  if (metadata) {
+    STREAM_REVIEW_VERSION_PUBLICATIONS.set(
+      identity.version,
+      Object.freeze({
+        ...identity,
+        ...metadata,
+      })
+    );
+  }
 }
 
 export function getStreamReviewVersionPublication(
