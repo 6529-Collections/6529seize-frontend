@@ -195,6 +195,7 @@ export default function DropForgeLaunchClaimPageClient({
         message: TRANSACTION_DETAILS_CHANGED_MESSAGE,
         type: "error",
       }),
+    switchToConnectedAccount: true,
   });
 
   const {

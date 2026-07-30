@@ -8,16 +8,23 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 
 const useSeizeConnectContextMock = jest.mocked(useSeizeConnectContext);
 const seizeConnect = jest.fn();
+const seizeSwitchConnectedAccount = jest.fn();
 
 function createConnectionState({
   canSignActiveWallet,
+  connectedAccounts = [],
 }: Readonly<{
   canSignActiveWallet: boolean;
+  connectedAccounts?: ReturnType<
+    typeof useSeizeConnectContext
+  >["connectedAccounts"];
 }>): ReturnType<typeof useSeizeConnectContext> {
   return {
     canSignActiveWallet,
+    connectedAccounts,
     seizeConnect,
     seizeConnectOpen: false,
+    seizeSwitchConnectedAccount,
   } as unknown as ReturnType<typeof useSeizeConnectContext>;
 }
 
@@ -165,6 +172,73 @@ describe("useConnectedAction", () => {
       ...connectionState,
       canSignActiveWallet: true,
       seizeConnectOpen: false,
+    };
+    rerender();
+
+    expect(action).not.toHaveBeenCalled();
+    expect(onContextChanged).toHaveBeenCalledTimes(1);
+  });
+
+  it("switches to a newly connected authenticated account before retrying", () => {
+    const firstAddress = "0x0000000000000000000000000000000000000001";
+    const secondAddress = "0x0000000000000000000000000000000000000002";
+    let connectionState = createConnectionState({
+      canSignActiveWallet: false,
+      connectedAccounts: [
+        {
+          address: firstAddress,
+          role: null,
+          profileId: "profile-1",
+          profileHandle: "first",
+          isActive: true,
+          isConnected: false,
+        },
+        {
+          address: secondAddress,
+          role: null,
+          profileId: "profile-2",
+          profileHandle: "second",
+          isActive: false,
+          isConnected: false,
+        },
+      ],
+    });
+    let contextFingerprint = "first-profile";
+    useSeizeConnectContextMock.mockImplementation(() => connectionState);
+    const action = jest.fn();
+    const onContextChanged = jest.fn();
+    const { result, rerender } = renderHook(() =>
+      useConnectedAction({
+        contextFingerprint,
+        onContextChanged,
+        switchToConnectedAccount: true,
+      })
+    );
+
+    act(() => result.current(action));
+    connectionState = {
+      ...connectionState,
+      seizeConnectOpen: true,
+      connectedAccounts: connectionState.connectedAccounts.map((account) => ({
+        ...account,
+        isConnected: account.address === secondAddress,
+      })),
+    };
+    rerender();
+
+    expect(seizeSwitchConnectedAccount).toHaveBeenCalledTimes(1);
+    expect(seizeSwitchConnectedAccount).toHaveBeenCalledWith(secondAddress);
+    expect(action).not.toHaveBeenCalled();
+
+    contextFingerprint = "second-profile";
+    connectionState = {
+      ...connectionState,
+      canSignActiveWallet: true,
+      seizeConnectOpen: false,
+      connectedAccounts: connectionState.connectedAccounts.map((account) => ({
+        ...account,
+        isActive: account.address === secondAddress,
+      })),
     };
     rerender();
 

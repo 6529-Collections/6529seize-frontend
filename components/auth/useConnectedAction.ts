@@ -10,6 +10,11 @@ const CONNECTED_ACTION_CLOSE_GRACE_MS = 1000;
 interface UseConnectedActionOptions {
   readonly contextFingerprint?: string | undefined;
   readonly onContextChanged?: (() => void) | undefined;
+  /**
+   * Switch to a different authenticated account selected in the wallet modal.
+   * Callers enabling this must fingerprint every transaction-relevant input.
+   */
+  readonly switchToConnectedAccount?: boolean | undefined;
 }
 
 function normalizeFingerprintValue(value: unknown): unknown {
@@ -39,12 +44,18 @@ export function getConnectedActionFingerprint(value: unknown): string {
 export function useConnectedAction(
   options: Readonly<UseConnectedActionOptions> = {}
 ): RunConnectedAction {
-  const { canSignActiveWallet, seizeConnect, seizeConnectOpen } =
-    useSeizeConnectContext();
+  const {
+    canSignActiveWallet,
+    connectedAccounts = [],
+    seizeConnect,
+    seizeConnectOpen,
+    seizeSwitchConnectedAccount,
+  } = useSeizeConnectContext();
   const latestOptionsRef = useRef(options);
   const pendingActionRef = useRef<(() => void) | null>(null);
   const connectRequestedRef = useRef(false);
   const connectModalOpenedRef = useRef(false);
+  const accountSwitchRequestedRef = useRef<string | null>(null);
   const cancelPendingActionTimeoutRef = useRef<ReturnType<
     typeof setTimeout
   > | null>(null);
@@ -61,6 +72,7 @@ export function useConnectedAction(
     pendingActionRef.current = null;
     connectRequestedRef.current = false;
     connectModalOpenedRef.current = false;
+    accountSwitchRequestedRef.current = null;
   }, []);
 
   const runConnectedAction = useCallback<RunConnectedAction>(
@@ -118,6 +130,21 @@ export function useConnectedAction(
       return;
     }
 
+    const newlyConnectedAccount = connectedAccounts.find(
+      (account) => account.isConnected && !account.isActive
+    );
+    if (
+      connectModalOpenedRef.current &&
+      pendingActionRef.current &&
+      latestOptionsRef.current.switchToConnectedAccount &&
+      newlyConnectedAccount &&
+      accountSwitchRequestedRef.current !== newlyConnectedAccount.address
+    ) {
+      accountSwitchRequestedRef.current = newlyConnectedAccount.address;
+      seizeSwitchConnectedAccount(newlyConnectedAccount.address);
+      return;
+    }
+
     if (
       connectModalOpenedRef.current &&
       !seizeConnectOpen &&
@@ -128,7 +155,13 @@ export function useConnectedAction(
         CONNECTED_ACTION_CLOSE_GRACE_MS
       );
     }
-  }, [canSignActiveWallet, clearPendingAction, seizeConnectOpen]);
+  }, [
+    canSignActiveWallet,
+    clearPendingAction,
+    connectedAccounts,
+    seizeConnectOpen,
+    seizeSwitchConnectedAccount,
+  ]);
 
   useEffect(() => clearPendingAction, [clearPendingAction]);
 

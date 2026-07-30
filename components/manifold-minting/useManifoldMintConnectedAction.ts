@@ -54,5 +54,6 @@ export function useManifoldMintConnectedAction({
   return useConnectedAction({
     contextFingerprint,
     onContextChanged: () => setMintError(MINT_DETAILS_CHANGED_MESSAGE),
+    switchToConnectedAccount: true,
   });
 }

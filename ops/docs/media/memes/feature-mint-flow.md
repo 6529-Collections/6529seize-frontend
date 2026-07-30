@@ -30,8 +30,10 @@
    `Retrieving Mint information`.
 3. After load, users see artwork, drop details (`Distribution Plan`, edition
    size, mint price, status), countdown context, and mint controls.
-4. User connects a wallet (if not already connected), then chooses either
-   `Mint for me` or `Mint for fren`.
+4. A first-time visitor connects a wallet, then chooses either `Mint for me` or
+   `Mint for fren`. If a remembered profile is active but its signer is
+   disconnected, the separate connect control is hidden and `SEIZE xN` opens
+   wallet connection when needed.
 5. For `Mint for me`:
    - Recipient is the connected profile.
    - Connected wallet is selected by default.
@@ -44,9 +46,11 @@
 7. User selects mint count.
    - Public phase: numeric input.
    - Allowlist phases: selectable up to available unminted spots.
-8. User selects `SEIZE xN`. If the authorized wallet is not currently
-   connected, the wallet connection dialog opens and the mint continues after
-   connection succeeds.
+8. User selects `SEIZE xN`. If the active profile's authorized wallet is not
+   currently connected, the wallet connection dialog opens and the mint
+   continues after the same wallet reconnects. Selecting another authenticated
+   wallet switches the active profile, refreshes mint details, and cancels the
+   pending mint so the user can review and select `SEIZE xN` again.
 9. The on-chain transaction modal shows `Confirm in your wallet`, then
    `Transaction Submitted - SEIZING` with a `View Tx` link.
 10. After confirmation, the modal updates to `SEIZED!` with the same
@@ -104,6 +108,12 @@
   opens wallet connection and continues the intended mint after connection.
   Closing the connection dialog cancels the pending mint without showing a
   transaction error.
+- If a different already-authenticated wallet is selected, the app switches to
+  that wallet's profile. Because recipient, eligibility, price, or transaction
+  arguments may have changed, the old pending mint is cancelled and the user
+  reviews the refreshed details before selecting `SEIZE xN` again.
+- If the selected wallet is not authenticated, the normal authentication flow
+  is required before it can become the connected profile.
 - If transaction-relevant mint details change while wallet connection is open,
   the pending mint is cancelled so the user can review the updated details and
   retry instead of submitting stale inputs.
