@@ -66,7 +66,7 @@ describe("baseline-adoption automatic E2E decision client", () => {
       response({
         decision: "DEFERRED",
         adoption_id: INTENT_ID,
-        operation_key: `rb2:${INTENT_ID}:baseline-adoption-e2e:staging:a1`,
+        operation_key: `rb2:${INTENT_ID}:baseline-adoption-e2e:staging`,
         expires_at: NOW + 60_000,
         manifest_ready: false,
       })
@@ -83,7 +83,7 @@ describe("baseline-adoption automatic E2E decision client", () => {
       response({
         decision: "DEFERRED",
         adoption_id: INTENT_ID,
-        operation_key: `rb2:${INTENT_ID}:baseline-adoption-e2e:staging:a1`,
+        operation_key: `rb2:${INTENT_ID}:baseline-adoption-e2e:staging`,
         expires_at: NOW + 60_000,
         manifest_ready: true,
       })
@@ -106,8 +106,30 @@ describe("baseline-adoption automatic E2E decision client", () => {
         response({
           decision: "DEFERRED",
           adoption_id: INTENT_ID,
-          operation_key: `rb2:${INTENT_ID}:baseline-adoption-e2e:staging:a1`,
+          operation_key: `rb2:${INTENT_ID}:baseline-adoption-e2e:staging`,
           expires_at: NOW,
+          manifest_ready: false,
+        }),
+    ],
+    [
+      "dispatcher-owned attempt suffix in the durable operation key",
+      async () =>
+        response({
+          decision: "DEFERRED",
+          adoption_id: INTENT_ID,
+          operation_key: `rb2:${INTENT_ID}:baseline-adoption-e2e:staging:a1`,
+          expires_at: NOW + 60_000,
+          manifest_ready: false,
+        }),
+    ],
+    [
+      "double attempt suffix in the durable operation key",
+      async () =>
+        response({
+          decision: "DEFERRED",
+          adoption_id: INTENT_ID,
+          operation_key: `rb2:${INTENT_ID}:baseline-adoption-e2e:staging:a1:a1`,
+          expires_at: NOW + 60_000,
           manifest_ready: false,
         }),
     ],
@@ -129,7 +151,7 @@ describe("baseline-adoption automatic E2E decision client", () => {
           decision: "DEFERRED",
           adoption_id: "8af60034-9741-3b9d-bb1c-80b483f75455",
           operation_key:
-            "rb2:8af60034-9741-3b9d-bb1c-80b483f75455:baseline-adoption-e2e:staging:a1",
+            "rb2:8af60034-9741-3b9d-bb1c-80b483f75455:baseline-adoption-e2e:staging",
           expires_at: NOW + 60_000,
           manifest_ready: false,
         }),
