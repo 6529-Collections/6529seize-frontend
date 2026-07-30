@@ -241,6 +241,7 @@ export function HeaderSearchSiteResults({
   const goToProfile = useCallback(
     (profile: CommunityMemberMinimal) => {
       rememberCurrentSearch();
+      onClose();
       router.push(
         getProfileTargetRoute({
           handleOrWallet: profile.handle ?? profile.wallet.toLowerCase(),
@@ -248,7 +249,6 @@ export function HeaderSearchSiteResults({
           defaultPath: USER_PAGE_TAB_IDS.REP,
         })
       );
-      onClose();
     },
     [onClose, pathname, rememberCurrentSearch, router]
   );
@@ -256,13 +256,13 @@ export function HeaderSearchSiteResults({
   const goToWave = useCallback(
     (wave: ApiWave) => {
       rememberCurrentSearch();
+      onClose();
       const isDirectMessage = isHeaderSearchWaveDirectMessage(wave);
       if (myStream) {
         myStream.activeWave.set(wave.id, { isDirectMessage });
       } else {
         router.push(getHeaderSearchWavePath({ wave, isApp }));
       }
-      onClose();
     },
     [isApp, myStream, onClose, rememberCurrentSearch, router]
   );
@@ -271,14 +271,14 @@ export function HeaderSearchSiteResults({
     (item: HeaderSearchModalItemType) => {
       if (isPageResult(item)) {
         rememberCurrentSearch();
-        router.push(item.href);
         onClose();
+        router.push(item.href);
       } else if (isNftResult(item)) {
         const collection = getNftCollectionMap()[item.contract.toLowerCase()];
         if (!collection) return;
         rememberCurrentSearch();
-        router.push(`${collection.path}/${item.id}`);
         onClose();
+        router.push(`${collection.path}/${item.id}`);
       } else if (isProfileResult(item)) {
         goToProfile(item);
       } else if (isWaveResult(item)) {
