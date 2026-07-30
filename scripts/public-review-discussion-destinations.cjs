@@ -2,6 +2,7 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
+const { randomUUID } = require("node:crypto");
 
 const STREAM_REVIEW_UUID_V4 =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
@@ -57,85 +58,159 @@ function decodeDestinationsBase64(encodedValue) {
 
 function readDestinationsFile(sourceFile) {
   invariant(sourceFile, "A public-review destinations source file is required.");
-  let stats;
+  let sourceDescriptor;
   try {
-    stats = fs.lstatSync(sourceFile);
-  } catch {
-    throw new Error("Public-review destinations source file is unavailable.");
+    sourceDescriptor = fs.openSync(
+      sourceFile,
+      fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW
+    );
+    invariant(
+      fs.fstatSync(sourceDescriptor).isFile(),
+      "Public-review destinations source must be a regular file."
+    );
+    return validateDestinationsJson(
+      fs.readFileSync(sourceDescriptor, "utf8")
+    );
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      throw new Error("Public-review destinations source file is unavailable.");
+    }
+    throw error;
+  } finally {
+    if (sourceDescriptor !== undefined) {
+      fs.closeSync(sourceDescriptor);
+    }
   }
-  invariant(
-    stats.isFile() && !stats.isSymbolicLink(),
-    "Public-review destinations source must be a regular file."
-  );
-  return validateDestinationsJson(fs.readFileSync(sourceFile, "utf8"));
 }
 
-function assertPrivateRuntimeFile(
+function withPrivateRuntimeFile(
   destinationFile,
   expectedIdentity = {
     uid: process.getuid?.(),
     gid: process.getgid?.(),
-  }
+  },
+  readFile
 ) {
   const destinationDirectory = path.dirname(destinationFile);
-  const directoryStats = fs.lstatSync(destinationDirectory);
-  const fileStats = fs.lstatSync(destinationFile);
-
-  invariant(
-    directoryStats.isDirectory() && !directoryStats.isSymbolicLink(),
-    "Public-review runtime directory must be a regular directory."
-  );
-  invariant(
-    fileStats.isFile() && !fileStats.isSymbolicLink(),
-    "Public-review runtime configuration must be a regular file."
-  );
-  invariant(
-    (directoryStats.mode & 0o777) === 0o700,
-    "Public-review runtime directory permissions must be 0700."
-  );
-  invariant(
-    (fileStats.mode & 0o777) === 0o600,
-    "Public-review runtime configuration permissions must be 0600."
-  );
-  if (
-    expectedIdentity.uid !== undefined &&
-    expectedIdentity.gid !== undefined
-  ) {
-    invariant(
-      directoryStats.uid === expectedIdentity.uid &&
-        directoryStats.gid === expectedIdentity.gid &&
-        fileStats.uid === expectedIdentity.uid &&
-        fileStats.gid === expectedIdentity.gid,
-      "Public-review runtime configuration ownership is invalid."
+  let directoryDescriptor;
+  let fileDescriptor;
+  try {
+    directoryDescriptor = fs.openSync(
+      destinationDirectory,
+      fs.constants.O_RDONLY |
+        fs.constants.O_DIRECTORY |
+        fs.constants.O_NOFOLLOW
     );
+    fileDescriptor = fs.openSync(
+      destinationFile,
+      fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW
+    );
+    const directoryStats = fs.fstatSync(directoryDescriptor);
+    const fileStats = fs.fstatSync(fileDescriptor);
+
+    invariant(
+      directoryStats.isDirectory(),
+      "Public-review runtime directory must be a regular directory."
+    );
+    invariant(
+      fileStats.isFile(),
+      "Public-review runtime configuration must be a regular file."
+    );
+    invariant(
+      (directoryStats.mode & 0o777) === 0o700,
+      "Public-review runtime directory permissions must be 0700."
+    );
+    invariant(
+      (fileStats.mode & 0o777) === 0o600,
+      "Public-review runtime configuration permissions must be 0600."
+    );
+    if (
+      expectedIdentity.uid !== undefined &&
+      expectedIdentity.gid !== undefined
+    ) {
+      invariant(
+        directoryStats.uid === expectedIdentity.uid &&
+          directoryStats.gid === expectedIdentity.gid &&
+          fileStats.uid === expectedIdentity.uid &&
+          fileStats.gid === expectedIdentity.gid,
+        "Public-review runtime configuration ownership is invalid."
+      );
+    }
+    return readFile?.(fileDescriptor);
+  } finally {
+    if (fileDescriptor !== undefined) {
+      fs.closeSync(fileDescriptor);
+    }
+    if (directoryDescriptor !== undefined) {
+      fs.closeSync(directoryDescriptor);
+    }
   }
+}
+
+function assertPrivateRuntimeFile(destinationFile, expectedIdentity) {
+  withPrivateRuntimeFile(destinationFile, expectedIdentity);
+}
+
+function readPrivateRuntimeFile(destinationFile, expectedIdentity) {
+  return withPrivateRuntimeFile(
+    destinationFile,
+    expectedIdentity,
+    (fileDescriptor) =>
+      validateDestinationsJson(fs.readFileSync(fileDescriptor, "utf8"))
+  );
 }
 
 function writePrivateRuntimeFile(rawValue, destinationFile) {
   const value = validateDestinationsJson(rawValue);
   const destinationDirectory = path.dirname(destinationFile);
 
-  if (fs.existsSync(destinationDirectory)) {
-    const stats = fs.lstatSync(destinationDirectory);
+  fs.mkdirSync(destinationDirectory, { recursive: true, mode: 0o700 });
+  let directoryDescriptor;
+  try {
+    directoryDescriptor = fs.openSync(
+      destinationDirectory,
+      fs.constants.O_RDONLY |
+        fs.constants.O_DIRECTORY |
+        fs.constants.O_NOFOLLOW
+    );
     invariant(
-      stats.isDirectory() && !stats.isSymbolicLink(),
+      fs.fstatSync(directoryDescriptor).isDirectory(),
       "Public-review runtime destination parent must be a regular directory."
     );
-    fs.chmodSync(destinationDirectory, 0o700);
-  } else {
-    fs.mkdirSync(destinationDirectory, { recursive: true, mode: 0o700 });
+    fs.fchmodSync(directoryDescriptor, 0o700);
+  } finally {
+    if (directoryDescriptor !== undefined) {
+      fs.closeSync(directoryDescriptor);
+    }
   }
 
-  if (fs.existsSync(destinationFile)) {
-    const stats = fs.lstatSync(destinationFile);
-    invariant(
-      stats.isFile() && !stats.isSymbolicLink(),
-      "Public-review runtime destination must be a regular file."
+  const temporaryFile = path.join(
+    destinationDirectory,
+    `.${path.basename(destinationFile)}.${process.pid}.${randomUUID()}.tmp`
+  );
+  let temporaryDescriptor;
+  try {
+    temporaryDescriptor = fs.openSync(
+      temporaryFile,
+      fs.constants.O_WRONLY |
+        fs.constants.O_CREAT |
+        fs.constants.O_EXCL |
+        fs.constants.O_NOFOLLOW,
+      0o600
     );
+    fs.writeFileSync(temporaryDescriptor, `${value}\n`);
+    fs.fchmodSync(temporaryDescriptor, 0o600);
+    fs.fsyncSync(temporaryDescriptor);
+    fs.closeSync(temporaryDescriptor);
+    temporaryDescriptor = undefined;
+    fs.renameSync(temporaryFile, destinationFile);
+  } finally {
+    if (temporaryDescriptor !== undefined) {
+      fs.closeSync(temporaryDescriptor);
+    }
+    fs.rmSync(temporaryFile, { force: true });
   }
 
-  fs.writeFileSync(destinationFile, `${value}\n`, { mode: 0o600 });
-  fs.chmodSync(destinationFile, 0o600);
   assertPrivateRuntimeFile(destinationFile);
   return destinationFile;
 }
@@ -200,5 +275,6 @@ module.exports = {
   decodeDestinationsBase64,
   prepareRuntimeFile,
   readDestinationsFile,
+  readPrivateRuntimeFile,
   validateDestinationsJson,
 };

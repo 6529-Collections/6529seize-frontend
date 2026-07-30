@@ -4,8 +4,7 @@ const { cpSync, existsSync, mkdirSync } = require("node:fs");
 const { spawnSync } = require("node:child_process");
 const { resolve } = require("node:path");
 const {
-  assertPrivateRuntimeFile,
-  readDestinationsFile,
+  readPrivateRuntimeFile,
 } = require("./public-review-discussion-destinations.cjs");
 
 const repoRoot = resolve(__dirname, "..");
@@ -85,8 +84,7 @@ const runtimeEnv = { ...process.env };
 if (publicReviewDestinationsFile) {
   let publicReviewDiscussionDestinations;
   try {
-    assertPrivateRuntimeFile(publicReviewDestinationsFile);
-    publicReviewDiscussionDestinations = readDestinationsFile(
+    publicReviewDiscussionDestinations = readPrivateRuntimeFile(
       publicReviewDestinationsFile
     );
   } catch (error) {

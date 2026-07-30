@@ -7,6 +7,7 @@ const {
   decodeDestinationsBase64,
   prepareRuntimeFile,
   readDestinationsFile,
+  readPrivateRuntimeFile,
   validateDestinationsJson,
 } = require("../../scripts/public-review-discussion-destinations.cjs");
 
@@ -43,7 +44,9 @@ describe("public-review discussion destination runtime configuration", () => {
       destinationFile: fixture.destination,
     });
 
-    expect(readDestinationsFile(fixture.destination)).toBe(VALID_DESTINATIONS);
+    expect(readPrivateRuntimeFile(fixture.destination)).toBe(
+      VALID_DESTINATIONS
+    );
     expect(fs.statSync(path.dirname(fixture.destination)).mode & 0o777).toBe(
       0o700
     );
