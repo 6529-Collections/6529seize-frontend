@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateWaveInlineGroupXtdhGrant from "@/components/waves/create-wave/groups/CreateWaveInlineGroupXtdhGrant";
 import { ApiGroupBeneficiaryGrantMatchMode } from "@/generated/models/ApiGroupBeneficiaryGrantMatchMode";
@@ -13,7 +13,9 @@ import { useXtdhGrantsSearchQuery } from "@/hooks/useXtdhGrantsSearchQuery";
 // render) keeps the two debounced state syncs from looping.
 jest.mock("react-use", () => {
   const { useEffect } = jest.requireActual<typeof import("react")>("react");
+  const actual = jest.requireActual<typeof import("react-use")>("react-use");
   return {
+    ...actual,
     useDebounce: (fn: () => void, _ms: number, deps: readonly unknown[]) => {
       useEffect(fn, deps);
     },
@@ -477,18 +479,34 @@ describe("CreateWaveInlineGroupXtdhGrant", () => {
       expect(refetch).toHaveBeenCalledTimes(1);
     });
 
-    it("swallows a rejected retry instead of surfacing an unhandled rejection", async () => {
-      const refetch = jest.fn().mockRejectedValue(new Error("still down"));
-      mockedSearchQuery.mockReturnValue(
-        searchQueryResult({ isError: true, refetch })
-      );
-      renderGrantPicker();
-      await openFinder();
+    it("keeps rendering the error state when a retry itself rejects", async () => {
+      const unhandled: unknown[] = [];
+      const onUnhandled = (reason: unknown) => unhandled.push(reason);
+      process.on("unhandledRejection", onUnhandled);
 
-      expect(screen.getByText("Unable to load grants.")).toBeInTheDocument();
-      await userEvent.click(screen.getByRole("button", { name: "Retry" }));
+      try {
+        const refetch = jest.fn().mockRejectedValue(new Error("still down"));
+        mockedSearchQuery.mockReturnValue(
+          searchQueryResult({ isError: true, refetch })
+        );
+        renderGrantPicker();
+        await openFinder();
 
-      expect(refetch).toHaveBeenCalledTimes(1);
+        expect(screen.getByText("Unable to load grants.")).toBeInTheDocument();
+        await userEvent.click(screen.getByRole("button", { name: "Retry" }));
+        // Let the rejected retry settle before asserting.
+        await act(async () => {
+          await Promise.resolve();
+        });
+
+        expect(refetch).toHaveBeenCalledTimes(1);
+        expect(unhandled).toEqual([]);
+        // The component is still mounted and still showing the error UI rather
+        // than having been torn down by the rejection.
+        expect(screen.getByText("Unable to load grants.")).toBeInTheDocument();
+      } finally {
+        process.off("unhandledRejection", onUnhandled);
+      }
     });
 
     it("lists results with the total count and marks the selected row", async () => {

@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { createRef } from "react";
 import CreateWaveStepContent from "@/components/waves/create-wave/CreateWaveStepContent";
 import type { CreateWaveDescriptionHandles } from "@/components/waves/create-wave/description/CreateWaveDescription";
@@ -307,7 +308,9 @@ describe("CreateWaveStepContent", () => {
     const controller = buildController();
     renderStep({ controller });
 
-    screen.getByRole("button", { name: "enable-ongoing" }).click();
+    await userEvent.click(
+      screen.getByRole("button", { name: "enable-ongoing" })
+    );
 
     expect(controller.setDates).toHaveBeenCalledWith(
       expect.objectContaining({ ongoingRanking: true, votingStartDate: 2 })
@@ -434,10 +437,8 @@ describe("CreateWaveStepContent", () => {
 
   it("previews a picked overview image as an object URL on the description step", () => {
     const createObjectURL = jest
-      .fn()
+      .spyOn(URL, "createObjectURL")
       .mockReturnValue("blob:https://6529.io/preview");
-    const originalCreateObjectURL = URL.createObjectURL;
-    URL.createObjectURL = createObjectURL;
 
     try {
       const config = buildConfig();
@@ -460,7 +461,7 @@ describe("CreateWaveStepContent", () => {
         "blob:https://6529.io/preview"
       );
     } finally {
-      URL.createObjectURL = originalCreateObjectURL;
+      createObjectURL.mockRestore();
     }
   });
 });

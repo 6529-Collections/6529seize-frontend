@@ -315,6 +315,64 @@ describe("CreateWaveOutcomesManual", () => {
     ).not.toBeInTheDocument();
   });
 
+  // Characterization, not endorsement: `parsePositions` filters rejected
+  // segments out instead of failing the whole input, so a list that mixes a
+  // valid position with an invalid one submits the valid part silently. Pinned
+  // here so any future change to that trade-off is a deliberate one.
+  describe("mixed valid and invalid segments (current behavior)", () => {
+    const submitPositions = async (input: string) => {
+      const mockOnOutcome = jest.fn();
+      render(
+        <CreateWaveOutcomesManual
+          {...defaultProps}
+          waveType={ApiWaveType.Rank}
+          onOutcome={mockOnOutcome}
+        />
+      );
+
+      await userEvent.type(
+        screen.getByLabelText("Manual action"),
+        "Rank action"
+      );
+      await userEvent.type(screen.getByLabelText(/Winning Positions/i), input);
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+      return mockOnOutcome;
+    };
+
+    it("keeps the valid position and drops a below-range segment without erroring", async () => {
+      const mockOnOutcome = await submitPositions("1,0-2");
+
+      expect(
+        screen.queryByText("Invalid position format")
+      ).not.toBeInTheDocument();
+      expect(mockOnOutcome).toHaveBeenCalledWith(
+        expect.objectContaining({
+          winnersConfig: expect.objectContaining({
+            totalAmount: 1,
+            winners: [{ value: 1 }],
+          }),
+        })
+      );
+    });
+
+    it("keeps the valid position and drops an oversized range without erroring", async () => {
+      const mockOnOutcome = await submitPositions("1,1-5000000000");
+
+      expect(
+        screen.queryByText("Invalid position format")
+      ).not.toBeInTheDocument();
+      expect(mockOnOutcome).toHaveBeenCalledWith(
+        expect.objectContaining({
+          winnersConfig: expect.objectContaining({
+            totalAmount: 1,
+            winners: [{ value: 1 }],
+          }),
+        })
+      );
+    });
+  });
+
   describe("error announcement", () => {
     it("leaves the manual action field valid and undescribed before submitting", () => {
       render(<CreateWaveOutcomesManual {...defaultProps} />);
@@ -363,14 +421,12 @@ describe("CreateWaveOutcomesManual", () => {
         "Winner action"
       );
       await userEvent.type(
-        screen.getByLabelText("Winning Positions (e.g. 1-3, 5, 7-9)"),
+        screen.getByLabelText(/Winning Positions/i),
         "3-1"
       );
       await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
-      const positionsInput = screen.getByLabelText(
-        "Winning Positions (e.g. 1-3, 5, 7-9)"
-      );
+      const positionsInput = screen.getByLabelText(/Winning Positions/i);
       expect(positionsInput).toHaveAttribute("aria-invalid", "true");
       const errorId = positionsInput.getAttribute("aria-describedby");
       expect(errorId).toBeTruthy();
@@ -398,13 +454,11 @@ describe("CreateWaveOutcomesManual", () => {
       );
 
       await userEvent.type(
-        screen.getByLabelText("Winning Positions (e.g. 1-3, 5, 7-9)"),
+        screen.getByLabelText(/Winning Positions/i),
         "1"
       );
 
-      const positionsInput = screen.getByLabelText(
-        "Winning Positions (e.g. 1-3, 5, 7-9)"
-      );
+      const positionsInput = screen.getByLabelText(/Winning Positions/i);
       expect(positionsInput).not.toHaveAttribute("aria-invalid");
       expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     });

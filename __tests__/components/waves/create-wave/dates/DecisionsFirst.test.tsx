@@ -23,13 +23,19 @@ jest.mock(
           data-selected-timestamp={props.selectedTimestamp}
           data-min-timestamp={props.minTimestamp ?? ""}
           data-max-timestamp={props.maxTimestamp ?? ""}>
-          <input aria-label="next-timestamp" defaultValue="1000" />
+          <input
+            id="next-timestamp"
+            aria-label="next-timestamp"
+            defaultValue="1000"
+          />
           <button
             type="button"
-            onClick={(event) => {
-              const input = event.currentTarget
-                .previousElementSibling as HTMLInputElement;
-              props.setSelectedTimestamp(Number(input.value));
+            onClick={() => {
+              // Looked up by id rather than sibling order so the stub survives
+              // any reshuffling of its own markup.
+              const input =
+                document.querySelector<HTMLInputElement>("#next-timestamp");
+              props.setSelectedTimestamp(Number(input?.value));
             }}>
             calendar
           </button>

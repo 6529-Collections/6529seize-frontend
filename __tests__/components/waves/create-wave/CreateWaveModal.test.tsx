@@ -101,11 +101,7 @@ describe("CreateWaveModal", () => {
     await userEvent.click(screen.getByTestId("create-wave"));
     expect(onClose).not.toHaveBeenCalled();
 
-    const backdrop = screen
-      .getByRole("heading", { name: "Create Wave" })
-      .closest("div.tw-fixed");
-    expect(backdrop).not.toBeNull();
-    await userEvent.click(backdrop as HTMLElement);
+    await userEvent.click(screen.getByTestId("create-wave-modal-backdrop"));
 
     expect(onClose).toHaveBeenCalledTimes(1);
   });
