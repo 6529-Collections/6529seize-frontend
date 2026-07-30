@@ -25,8 +25,8 @@ Public Core records expose collection identity onchain.
 The tradeoff is real. A defect or governance failure in the shared Core can
 affect many collections. Each artist's collection uses a Core record within the
 shared ERC-721 contract. Ethereum has no native subcollection identity
-standard, so address-only marketplaces may present one Stream contract rather
-than one contract per artist.
+standard, so address-only marketplaces may group every Stream artist and
+collection under one contract.
 
 The accepted design addresses that presentation problem with Core collection
 reads, per-collection metadata, and `properties.stream.collection` fields in
