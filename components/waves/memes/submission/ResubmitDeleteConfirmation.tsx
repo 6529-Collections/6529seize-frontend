@@ -83,7 +83,7 @@ export function ResubmitDeleteConfirmation({
             onClicked={onDeleteOriginal}
             disabled={false}
             loading={isDeleting}
-            padding="tw-px-5 tw-py-2.5"
+            size="lg"
           >
             Delete Original
           </PrimaryButton>

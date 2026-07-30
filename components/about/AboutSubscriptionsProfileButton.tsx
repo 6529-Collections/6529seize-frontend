@@ -3,15 +3,12 @@
 import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import { useProfileSubscriptionsNavigation } from "@/components/user/subscriptions/useProfileSubscriptionsNavigation";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCapacitor from "@/hooks/useCapacitor";
 import { t } from "@/i18n/messages";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
-
-const BLUE_PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME =
-  "tw-inline-flex tw-min-h-10 tw-max-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/60 tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-center tw-text-sm tw-font-semibold tw-leading-5 tw-text-white tw-shadow-sm tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-bg-primary-600";
 
 type SubscriptionActionVariant = "blue" | "white";
 
@@ -61,57 +58,39 @@ export default function AboutSubscriptionsProfileButton({
     canNavigateToProfileSubscriptionsDirectly
       ? profileSubscriptionsHref
       : undefined;
-
-  if (variant === "white") {
-    return (
-      <PrimaryButton
-        loading={isConnecting}
-        disabled={isConnecting}
-        onClicked={handleOpenProfileSubscriptions}
-        href={directProfileSubscriptionsHref}
-      >
-        {subscriptionActionLabel}
-        {profileSubscriptionsHref && (
-          <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
-        )}
-      </PrimaryButton>
-    );
-  }
-
-  if (!profileSubscriptionsHref) {
-    return (
-      <button
-        type="button"
-        disabled={isConnecting}
-        onClick={handleOpenProfileSubscriptions}
-        className={`${BLUE_PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME} disabled:tw-cursor-not-allowed disabled:tw-opacity-60`}
-      >
-        {connectToSubscribeLabel}
-      </button>
-    );
-  }
-
-  if (!canNavigateToProfileSubscriptionsDirectly) {
-    return (
-      <button
-        type="button"
-        disabled={isConnecting}
-        onClick={handleOpenProfileSubscriptions}
-        className={`${BLUE_PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME} disabled:tw-cursor-not-allowed disabled:tw-opacity-60`}
-      >
-        {subscriptionActionLabel}
+  const buttonVariant = variant === "white" ? "primary" : "action";
+  const buttonContent = (
+    <>
+      {subscriptionActionLabel}
+      {profileSubscriptionsHref && (
         <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
-      </button>
+      )}
+    </>
+  );
+
+  if (directProfileSubscriptionsHref) {
+    return (
+      <ButtonLink
+        href={directProfileSubscriptionsHref}
+        variant={buttonVariant}
+        size="md"
+        className="tw-max-w-full"
+      >
+        {buttonContent}
+      </ButtonLink>
     );
   }
 
   return (
-    <Link
-      href={profileSubscriptionsHref}
-      className={`${BLUE_PROFILE_SUBSCRIPTIONS_BUTTON_CLASS_NAME} tw-no-underline desktop-hover:hover:tw-text-white`}
+    <Button
+      type="button"
+      loading={isConnecting}
+      onClick={handleOpenProfileSubscriptions}
+      variant={buttonVariant}
+      size="md"
+      className="tw-max-w-full"
     >
-      {manageSubscriptionsLabel}
-      <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
-    </Link>
+      {buttonContent}
+    </Button>
   );
 }

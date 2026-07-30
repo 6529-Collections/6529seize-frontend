@@ -215,15 +215,15 @@ describe("TransferModal", () => {
     expect(transferButton).toHaveClass(
       "tw-h-10",
       "tw-text-sm",
-      "tw-font-medium",
-      "disabled:tw-bg-white/5"
+      "tw-font-semibold",
+      "tw-bg-iron-200",
+      "disabled:tw-opacity-50"
     );
-    expect(transferButton).not.toHaveClass("tw-font-semibold");
     expect(cancelButton).toHaveClass(
       "tw-h-10",
       "tw-text-sm",
-      "tw-font-medium",
-      "tw-bg-white/5"
+      "tw-font-semibold",
+      "tw-bg-white/[0.07]"
     );
     expect(closeButton).toHaveClass("tw-size-10", "tw-bg-white/5");
   });
@@ -402,8 +402,9 @@ describe("TransferModal", () => {
     expect(closeButton).toHaveClass(
       "tw-h-10",
       "tw-text-sm",
-      "tw-font-medium",
-      "tw-border-transparent"
+      "tw-font-semibold",
+      "tw-border-iron-200",
+      "tw-bg-iron-200"
     );
   });
 

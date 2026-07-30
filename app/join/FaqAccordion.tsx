@@ -73,7 +73,7 @@ export function FaqAccordion({
               <div className="tw-min-h-0 tw-overflow-hidden">
                 <div
                   className={cx(
-                    "tw-transform-gpu tw-px-6 tw-pb-6 tw-text-[15px] tw-font-light tw-leading-6 tw-text-iron-500 tw-transition-transform tw-duration-300 tw-ease-out motion-reduce:tw-transition-none",
+                    "tw-transform-gpu tw-px-6 tw-pb-6 tw-text-[15px] tw-font-normal tw-leading-6 tw-text-iron-300 tw-transition-transform tw-duration-300 tw-ease-out motion-reduce:tw-transition-none",
                     isOpen ? "tw-translate-y-0" : "-tw-translate-y-1"
                   )}
                 >

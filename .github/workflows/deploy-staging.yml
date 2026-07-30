@@ -281,11 +281,20 @@ jobs:
           BRANCH: ${{ env.STAGING_BRANCH }}
           EXPECTED_SHA: ${{ steps.expected-commit.outputs.sha }}
           INSTANCE_ID: ${{ secrets.STAGING_INSTANCE_ID }}
+          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS }}
           REPO_DIR: ${{ env.STAGING_REPO_DIR }}
           RUN_AS: ${{ env.STAGING_RUN_AS }}
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+
+          jq -e '
+            type == "object" and
+            has("staging") and
+            (.staging | type == "object") and
+            (.staging["stream-review"] | type == "string" and test("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")) and
+            (has("production") | not)
+          ' <<<"$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" >/dev/null
 
           node ops/scripts/deployment-bus.cjs github-create-status \
             --deployment-id "${{ steps.deployment-record.outputs.deployment_id }}" \
@@ -298,6 +307,10 @@ jobs:
           run_as_q="$(printf '%q' "$RUN_AS")"
           branch_q="$(printf '%q' "$BRANCH")"
           expected_sha_q="$(printf '%q' "$EXPECTED_SHA")"
+          public_review_destinations_b64_q="$(
+            printf '%q' \
+              "$(printf '%s' "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" | base64 -w0)"
+          )"
 
           remote_script="$(
             cat <<REMOTE_SCRIPT_VARS
@@ -306,6 +319,7 @@ jobs:
           RUN_AS=$run_as_q
           BRANCH=$branch_q
           EXPECTED_SHA=$expected_sha_q
+          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64=$public_review_destinations_b64_q
           REMOTE_SCRIPT_VARS
             cat <<'REMOTE_SCRIPT_BODY'
 
@@ -320,6 +334,13 @@ jobs:
             echo "Repo directory '$REPO_DIR' is not a git checkout." >&2
             exit 1
           fi
+
+          for required_command in base64 jq; do
+            if ! command -v "$required_command" >/dev/null 2>&1; then
+              echo "Required staging command '$required_command' is unavailable." >&2
+              exit 1
+            fi
+          done
 
           sfw_bin="$(command -v sfw || true)"
           if [ -n "$sfw_bin" ] && command -v node >/dev/null 2>&1; then
@@ -364,10 +385,31 @@ jobs:
           fi
 
           deploy_script="$(mktemp /tmp/6529-staging-deploy.XXXXXX.sh)"
+          public_review_destinations_file="$(
+            mktemp /tmp/6529-public-review-destinations.XXXXXX.json
+          )"
           cleanup() {
-            rm -f "$deploy_script"
+            rm -f \
+              "$deploy_script" \
+              "$public_review_destinations_file"
           }
           trap cleanup EXIT HUP INT TERM
+
+          if ! printf '%s' "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64" |
+            base64 -d > "$public_review_destinations_file"; then
+            echo "Unable to decode the staging public-review destinations." >&2
+            exit 1
+          fi
+          unset PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64
+          jq -e '
+            type == "object" and
+            has("staging") and
+            (.staging | type == "object") and
+            (.staging["stream-review"] | type == "string" and test("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")) and
+            (has("production") | not)
+          ' "$public_review_destinations_file" >/dev/null
+          chown "$RUN_AS:$RUN_AS" "$public_review_destinations_file"
+          chmod 600 "$public_review_destinations_file"
 
           cat > "$deploy_script" <<'DEPLOY_SCRIPT'
           #!/usr/bin/env bash
@@ -419,7 +461,9 @@ jobs:
           DEPLOY_SCRIPT
 
           chmod 755 "$deploy_script"
-          sudo -H -u "$RUN_AS" bash "$deploy_script" "$REPO_DIR" "$BRANCH" "$EXPECTED_SHA"
+          sudo -H -u "$RUN_AS" env \
+            "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE=$public_review_destinations_file" \
+            bash "$deploy_script" "$REPO_DIR" "$BRANCH" "$EXPECTED_SHA"
           REMOTE_SCRIPT_BODY
           )"
 

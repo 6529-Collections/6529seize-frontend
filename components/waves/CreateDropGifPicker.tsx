@@ -15,6 +15,7 @@ import {
   type ComponentProps,
   type RefObject,
 } from "react";
+import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
@@ -123,14 +124,15 @@ function GifPickerUnavailable({
         </p>
         <p className="tw-mb-0 tw-text-sm tw-text-iron-400">{hint}</p>
       </div>
-      <button
+      <Button
         ref={closeButtonRef}
         type="button"
         onClick={onClose}
-        className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-white/10 tw-bg-iron-800 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition tw-duration-200 hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
+        variant="secondary"
+        size="md"
       >
         {closeLabel}
-      </button>
+      </Button>
     </div>
   );
 }

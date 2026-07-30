@@ -2,6 +2,7 @@
 
 import { WAVE_SCORE_DISCOVERY_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import { ExploreWavesSection } from "@/components/home/explore-waves/ExploreWavesSection";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
@@ -16,7 +17,6 @@ import {
   ShieldCheckIcon,
   Squares2X2Icon,
 } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { KeyboardEvent } from "react";
 import { useCallback, useMemo } from "react";
@@ -211,14 +211,15 @@ const SORT_ITEMS: readonly CommonSelectItem<DiscoverSort>[] = SORT_OPTIONS.map(
 
 function ScoreFormulaLink() {
   return (
-    <Link
+    <ButtonLink
       href="/network/wave-score"
       aria-label="View wave score formula"
-      className="tw-inline-flex tw-h-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-px-3 tw-text-xs tw-font-medium tw-text-iron-300 tw-no-underline tw-transition-all tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100"
+      variant="tertiary"
+      size="sm"
     >
       <CalculatorIcon className="tw-size-4" aria-hidden="true" />
       Score formula
-    </Link>
+    </ButtonLink>
   );
 }
 

@@ -252,7 +252,7 @@ describe("notify-ci-wave Release Train metadata", () => {
 
   it("credits a main-targeted PR carried into manual staging", async () => {
     const result = await runManualNotifier({
-      fixture: MANUAL_WORKFLOW_FIXTURES[0],
+      fixture: MANUAL_WORKFLOW_FIXTURES[0]!,
       commits: [
         {
           sha: "c".repeat(40),
@@ -305,9 +305,7 @@ describe("notify-ci-wave Release Train metadata", () => {
       fixture,
       githubResponseOverride: (pathName, response) => {
         if (
-          pathName.includes(
-            `/actions/workflows/${fixture.workflowFile}/runs`
-          )
+          pathName.includes(`/actions/workflows/${fixture.workflowFile}/runs`)
         ) {
           response.writeHead(200, { "content-type": "application/json" });
           response.end(

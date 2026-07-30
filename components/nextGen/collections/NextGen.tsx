@@ -1,3 +1,4 @@
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -19,9 +20,6 @@ interface Props {
   collection: NextGenCollection;
   setView: (view: NextgenView) => void;
 }
-
-const PRIMARY_LINK_CLASSES =
-  "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-bg-white tw-px-5 tw-py-2.5 tw-text-base tw-font-semibold tw-text-iron-950 tw-no-underline tw-shadow-sm tw-transition-colors tw-duration-200 hover:tw-bg-iron-300 hover:tw-text-iron-900 active:tw-bg-iron-400 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950";
 
 export default function NextGen(props: Readonly<Props>) {
   const locale = useBrowserLocale();
@@ -74,9 +72,13 @@ export default function NextGen(props: Readonly<Props>) {
               <NextGenMintCounts collection={props.collection} />
             </div>
             <div className="tw-mt-5">
-              <Link href={collectionHref} className={PRIMARY_LINK_CLASSES}>
+              <ButtonLink
+                href={collectionHref}
+                variant="primary"
+                size="lg"
+              >
                 {t(locale, "nextgen.home.exploreCollection")}
-              </Link>
+              </ButtonLink>
             </div>
             <div className="tw-mt-5 tw-max-w-xl">
               <NextGenCountdown collection={props.collection} />
@@ -90,8 +92,10 @@ export default function NextGen(props: Readonly<Props>) {
           {t(locale, "nextgen.home.summary")}
         </p>
         <div className="tw-mt-4 tw-text-center">
-          <Link
+          <ButtonLink
             href="/nextgen/about"
+            variant="primary"
+            size="lg"
             scroll={false}
             onClick={(event) => {
               if (
@@ -108,10 +112,9 @@ export default function NextGen(props: Readonly<Props>) {
               props.setView(NextgenView.ABOUT);
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
-            className={PRIMARY_LINK_CLASSES}
           >
             {t(locale, "nextgen.home.learnMore")}
-          </Link>
+          </ButtonLink>
         </div>
       </section>
 
@@ -161,15 +164,13 @@ export function DistributionLink(
   ) {
     return (
       <div className={`tw-pt-1 ${props.class ?? ""}`}>
-        <Link
+        <ButtonLink
           href={`/nextgen/collection/${formatNameForUrl(
             props.collection.name
           )}/distribution-plan`}
-          className={
-            props.emphasized
-              ? "tw-group tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/15 tw-bg-white/5 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-no-underline tw-transition-colors tw-duration-200 hover:tw-border-white/25 hover:tw-bg-white/10 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 active:tw-bg-white/15"
-              : "tw-inline-flex tw-min-h-10 tw-items-center tw-rounded-md tw-px-2 tw-text-sm tw-font-medium tw-text-iron-200 tw-no-underline hover:tw-bg-white/5 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-          }
+          variant="tertiary"
+          size={props.emphasized ? "lg" : "md"}
+          className="tw-group"
         >
           <span>{t(locale, "nextgen.home.distributionPlan")}</span>
           {props.emphasized && (
@@ -178,7 +179,7 @@ export function DistributionLink(
               className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-300 tw-transition-colors group-hover:tw-text-white"
             />
           )}
-        </Link>
+        </ButtonLink>
       </div>
     );
   }

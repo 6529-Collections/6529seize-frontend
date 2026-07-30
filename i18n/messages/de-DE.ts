@@ -419,6 +419,11 @@ export const DE_DE_MESSAGES = {
   "waves.gifPicker.unavailable.hint":
     "Du kannst stattdessen eine GIF-Datei hochladen.",
   "common.close": "Schliessen",
+  "waves.create.actions.cancel": "Abbrechen",
+  "waves.create.actions.complete": "Abschließen",
+  "waves.create.actions.next": "Weiter",
+  "waves.create.actions.previous": "Zurück",
+  "waves.create.actions.save": "Speichern",
   ...DE_DE_PAGINATION_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} in dieser Runde übrig",
   "memes.quickVote.unrated": "{count} unbewertet",

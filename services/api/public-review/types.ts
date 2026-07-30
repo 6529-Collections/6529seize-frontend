@@ -156,6 +156,7 @@ export type PublicReviewLedgerWarningCode =
 export interface PublicReviewLedgerWarning {
   readonly code: PublicReviewLedgerWarningCode;
   readonly dropId: string;
+  readonly reason: string;
 }
 
 export interface PublicReviewLedgerPage {

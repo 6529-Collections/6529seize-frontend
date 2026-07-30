@@ -87,7 +87,7 @@ function encode(lineStart: string | number = "42") {
     page: {
       pageId: "architecture",
       pageTitle: "Architecture",
-      canonicalPath: "/stream/review/architecture",
+      canonicalPath: "/reviews/6529-stream/architecture",
       sectionId: "storage",
       sectionTitle: "Storage",
     },
@@ -198,6 +198,9 @@ describe("public review feedback codec", () => {
     expect(payload.parts[0]!.content).toContain(
       `/blob/${COMMIT}/src/Stream.sol#L42-L45`
     );
+    expect(payload.parts[0]!.content).toContain(
+      "**Page:** [Architecture](https://staging.6529.io/reviews/6529-stream/architecture)"
+    );
   });
 
   it("extracts the primary comment without exposing review metadata", () => {
@@ -207,9 +210,9 @@ describe("public review feedback codec", () => {
       throw new Error("Expected encoded feedback to contain a text part.");
     }
 
-    expect(
-      getPublicReviewFeedbackPrimaryComment(primaryContent)
-    ).toBe(draft.comment);
+    expect(getPublicReviewFeedbackPrimaryComment(primaryContent)).toBe(
+      draft.comment
+    );
     expect(
       getPublicReviewFeedbackPrimaryComment("  Plain Wave comment  ")
     ).toBe("Plain Wave comment");
@@ -236,7 +239,7 @@ describe("public review feedback codec", () => {
         page: {
           pageId: "architecture",
           pageTitle: "Architecture",
-          canonicalPath: "/stream/review/architecture",
+          canonicalPath: "/reviews/6529-stream/architecture",
         },
         referenceSelection: {
           kind: "code",
@@ -262,7 +265,7 @@ describe("public review feedback codec", () => {
       page: {
         pageId: "architecture",
         pageTitle: "Architecture",
-        canonicalPath: "/stream/review/architecture",
+        canonicalPath: "/reviews/6529-stream/architecture",
       },
       signer: { address: SIGNER_ADDRESS, isSafeWallet: false },
       submissionId: SUBMISSION_ID,
@@ -291,7 +294,7 @@ describe("public review feedback codec", () => {
         page: {
           pageId: "architecture",
           pageTitle: "Architecture",
-          canonicalPath: "/stream/review/architecture",
+          canonicalPath: "/reviews/6529-stream/architecture",
         },
         signer: { address: SIGNER_ADDRESS, isSafeWallet: false },
         submissionId: SUBMISSION_ID,
@@ -312,7 +315,7 @@ describe("public review feedback codec", () => {
         page: {
           pageId: "architecture",
           pageTitle: "Architecture",
-          canonicalPath: "/stream/review/architecture",
+          canonicalPath: "/reviews/6529-stream/architecture",
         },
         signer: { address: SIGNER_ADDRESS, isSafeWallet: false },
         submissionId: SUBMISSION_ID,
@@ -331,7 +334,7 @@ describe("public review feedback codec", () => {
       page: {
         pageId: "architecture",
         pageTitle: "Architecture",
-        canonicalPath: "/stream/review/architecture",
+        canonicalPath: "/reviews/6529-stream/architecture",
       },
       signer: { address: SIGNER_ADDRESS, isSafeWallet: false },
       submissionId: SUBMISSION_ID,
@@ -363,7 +366,7 @@ describe("public review feedback codec", () => {
         page: {
           pageId: "architecture",
           pageTitle: "Architecture",
-          canonicalPath: "/stream/review/architecture",
+          canonicalPath: "/reviews/6529-stream/architecture",
         },
         referenceSelection: {
           kind: "code",
@@ -390,7 +393,7 @@ describe("public review feedback codec", () => {
         page: {
           pageId: "architecture",
           pageTitle: "Architecture",
-          canonicalPath: "/stream/review/architecture",
+          canonicalPath: "/reviews/6529-stream/architecture",
           sectionId: "forged-section",
         },
         signer: { address: SIGNER_ADDRESS, isSafeWallet: false },
@@ -407,7 +410,7 @@ describe("public review feedback codec", () => {
       page: {
         pageId: "architecture",
         pageTitle: "Architecture",
-        canonicalPath: "/stream/review/architecture",
+        canonicalPath: "/reviews/6529-stream/architecture",
       },
       signer: { address: SIGNER_ADDRESS.toLowerCase(), isSafeWallet: true },
       submissionId: SUBMISSION_ID,
@@ -427,7 +430,7 @@ describe("public review feedback codec", () => {
         page: {
           pageId: "architecture",
           pageTitle: "Architecture",
-          canonicalPath: "/stream/review/architecture",
+          canonicalPath: "/reviews/6529-stream/architecture",
         },
         signer: { address: "", isSafeWallet: false },
         submissionId: SUBMISSION_ID,
@@ -446,7 +449,7 @@ describe("public review feedback codec", () => {
           page: {
             pageId: "architecture",
             pageTitle: "Architecture",
-            canonicalPath: "/stream/review/architecture",
+            canonicalPath: "/reviews/6529-stream/architecture",
           },
           referenceSelection: {
             kind: "code",
@@ -482,7 +485,7 @@ describe("public review feedback codec", () => {
         page: {
           pageId: "architecture",
           pageTitle: "Architecture",
-          canonicalPath: "/stream/review/architecture",
+          canonicalPath: "/reviews/6529-stream/architecture",
         },
         signer: { address: SIGNER_ADDRESS, isSafeWallet: false },
         submissionId: SUBMISSION_ID,
@@ -490,7 +493,7 @@ describe("public review feedback codec", () => {
     ).toThrow("checksum URN");
   });
 
-  it("round-trips canonical metadata and rejects reordered fields", () => {
+  it("round-trips metadata independently of API row order", () => {
     const payload = encode();
     const decoded = decodePublicReviewFeedbackMetadata({
       config,
@@ -514,7 +517,7 @@ describe("public review feedback codec", () => {
         severity: "critical",
       },
     });
-    expect(reordered.ok).toBe(false);
+    expect(reordered).toEqual(decoded);
   });
 
   it("rejects non-canonical context JSON even when its values match", () => {
