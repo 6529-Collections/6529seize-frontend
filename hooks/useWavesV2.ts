@@ -94,8 +94,13 @@ export const useWavesV2 = ({
     setLastErrorTimestamp(Date.now());
   }, []);
 
+  const queryKey = useMemo(
+    () => [QueryKey.WAVES_V2, queryKeyParams] as const,
+    [queryKeyParams]
+  );
+
   const query = useInfiniteQuery({
-    queryKey: [QueryKey.WAVES_V2, queryKeyParams],
+    queryKey,
     queryFn: async ({ pageParam }: { pageParam: number }) =>
       await fetchWavesV2Page({
         page: pageParam,
@@ -179,7 +184,9 @@ export const useWavesV2 = ({
       fetchNextPage,
       status: query.status,
       refetch,
+      queryKey,
+      dataUpdatedAt: query.dataUpdatedAt,
     }),
-    [waves, query, fetchNextPage, refetch]
+    [waves, query, fetchNextPage, refetch, queryKey]
   );
 };

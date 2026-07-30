@@ -11,6 +11,7 @@ import { SIDEBAR_MOBILE_BREAKPOINT } from "@/constants/sidebar";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { t } from "@/i18n/messages";
 import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
 import {
@@ -113,11 +114,11 @@ export default function QuickDirectMessages() {
     state.view === "chat" &&
     state.waveId !== null &&
     (directMessages.isFetching || selectedWave !== null);
-  const totalUnreadCount = useMemo(
-    () => waves.reduce((count, wave) => count + getUnreadCount(wave), 0),
-    [waves]
-  );
-  const hasUnread = totalUnreadCount > 0;
+  const { hasUnread, unreadCount: totalUnreadCount } = useUnreadIndicator({
+    type: "messages",
+    handle: connectedProfile?.handle ?? null,
+    localDirectMessages: waves,
+  });
   const displayUnreadCount =
     totalUnreadCount > 99 ? "99+" : `${totalUnreadCount}`;
   const hasUnreadOutsideCurrentChat = useMemo(

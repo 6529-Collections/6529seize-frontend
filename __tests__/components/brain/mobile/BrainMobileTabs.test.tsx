@@ -96,7 +96,10 @@ describe("BrainMobileTabs", () => {
       isRankWave: false,
       isApproveWave: false,
     });
-    (useUnreadIndicator as jest.Mock).mockReturnValue({ hasUnread: false });
+    (useUnreadIndicator as jest.Mock).mockReturnValue({
+      hasUnread: false,
+      unreadCount: 0,
+    });
     (useUnreadNotifications as jest.Mock).mockReturnValue({
       haveUnreadNotifications: false,
     });
@@ -187,7 +190,10 @@ describe("BrainMobileTabs", () => {
       isRankWave: false,
       isApproveWave: false,
     });
-    (useUnreadIndicator as jest.Mock).mockReturnValue({ hasUnread: true });
+    (useUnreadIndicator as jest.Mock).mockReturnValue({
+      hasUnread: true,
+      unreadCount: 1,
+    });
     (useUnreadNotifications as jest.Mock).mockReturnValue({
       haveUnreadNotifications: true,
     });
