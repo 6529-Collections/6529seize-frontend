@@ -311,9 +311,7 @@ button {
 
 /* Variant cursor utilities (for example disabled:tw-cursor-not-allowed) do not
    override the enabled pointer state. Preserve only explicit base overrides. */
-button:not(:disabled):not([class^="tw-cursor-"]):not(
-    [class*=" tw-cursor-"]
-  ) {
+button:not(:disabled):not([class^="tw-cursor-"]):not([class*=" tw-cursor-"]) {
   cursor: pointer;
 }
 
