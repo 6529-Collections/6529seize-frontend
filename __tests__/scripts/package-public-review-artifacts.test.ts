@@ -47,6 +47,16 @@ const { bundleOutputSha256 } =
   require("../../scripts/public-reviews/solidity-reference-lib.cjs") as {
     bundleOutputSha256(bundle: Record<string, unknown>): string;
   };
+const { generateKnowledgePacks } =
+  require("../../scripts/public-reviews/stream-knowledge-packs.cjs") as {
+    generateKnowledgePacks(input: {
+      readonly repoRoot: string;
+      readonly checkOnly?: boolean;
+      readonly refreshRetained?: boolean;
+      readonly reviewId?: string;
+      readonly writeOutput?: (value: string) => void;
+    }): void;
+  };
 
 type ArtifactProfile = "production" | "staging";
 
@@ -167,6 +177,8 @@ function createFixture(lifecycleState = "PUBLIC_REVIEW"): {
         version: REVIEW_VERSION,
         lifecycleState,
         sourceCommit: SOURCE_COMMIT,
+        deploymentStatus: "NOT_DEPLOYED",
+        auditStatus: "PRE_AUDIT",
       },
     ],
   });
@@ -183,6 +195,21 @@ function createFixture(lifecycleState = "PUBLIC_REVIEW"): {
       id: DEFINITION_ID,
       key: DEFINITION_KEY,
       name: "StreamCore",
+      kind: "contract",
+      scope: "protocol",
+      classification: "production_release_contract",
+      classificationReason: "Fixture release contract.",
+      sourcePath: SOURCE_PATH,
+      declarations: {
+        functions: [],
+        events: [],
+        errors: [],
+        stateVariables: [],
+        modifiers: [],
+        structs: [],
+        enums: [],
+        userDefinedValueTypes: [],
+      },
     },
   };
   const shardText = `${JSON.stringify(shard, null, 2)}\n`;
@@ -224,6 +251,11 @@ function createFixture(lifecycleState = "PUBLIC_REVIEW"): {
     definitionIndex: [
       {
         id: DEFINITION_ID,
+        key: DEFINITION_KEY,
+        name: "StreamCore",
+        kind: "contract",
+        scope: "protocol",
+        classification: "production_release_contract",
         shardPath: `/review-data/${REVIEW_ID}/versions/${REVIEW_VERSION}/definitions/${shardRelativePath}`,
         shardSha256: sha256Urn(shardText),
       },
@@ -268,6 +300,10 @@ function createFixture(lifecycleState = "PUBLIC_REVIEW"): {
       pages: [{ id: "overview", title: "Overview", file: "overview.md" }],
     }
   );
+  generateKnowledgePacks({
+    repoRoot,
+    writeOutput: () => undefined,
+  });
 
   return {
     repoRoot,
@@ -316,11 +352,15 @@ function addHistoricalVersion({
           version: HISTORICAL_VERSION,
           lifecycleState: historicalLifecycleState,
           sourceCommit: HISTORICAL_COMMIT,
+          deploymentStatus: "NOT_DEPLOYED",
+          auditStatus: "PRE_AUDIT",
         },
         {
           version: REVIEW_VERSION,
           lifecycleState: activeLifecycleState,
           sourceCommit: SOURCE_COMMIT,
+          deploymentStatus: "NOT_DEPLOYED",
+          auditStatus: "PRE_AUDIT",
         },
       ],
     }
@@ -426,6 +466,17 @@ function addHistoricalVersion({
       pages: [{ id: "overview", title: "Overview", file: "overview.md" }],
     }
   );
+  fs.rmSync(
+    path.join(
+      fixture.repoRoot,
+      `ops/public-review-knowledge/${REVIEW_ID}/versions/${REVIEW_VERSION}/knowledge`
+    ),
+    { recursive: true, force: true }
+  );
+  generateKnowledgePacks({
+    repoRoot: fixture.repoRoot,
+    writeOutput: () => undefined,
+  });
 
   return {
     historicalBundleFile,
@@ -461,12 +512,16 @@ function addOlderPublicVersion(
       version: string;
       lifecycleState: string;
       sourceCommit: string;
+      deploymentStatus: string;
+      auditStatus: string;
     }[];
   };
   publication.versions.unshift({
     version: OLDER_HISTORICAL_VERSION,
     lifecycleState: "REVIEW_CLOSED",
     sourceCommit: OLDER_HISTORICAL_COMMIT,
+    deploymentStatus: "NOT_DEPLOYED",
+    auditStatus: "PRE_AUDIT",
   });
   fs.writeFileSync(
     publicationPath,
@@ -568,6 +623,10 @@ function addOlderPublicVersion(
     bundleSha256: olderBundle.generator.outputSha256,
   });
   fs.writeFileSync(indexPath, `${JSON.stringify(index, null, 2)}\n`);
+  generateKnowledgePacks({
+    repoRoot: fixture.repoRoot,
+    writeOutput: () => undefined,
+  });
 }
 
 function mirrorTamper(sourcePath: string, repoRoot: string, value: string) {
@@ -601,6 +660,50 @@ afterEach(() => {
 });
 
 describe("profile-aware public-review artifact packaging", () => {
+  it("rejects incompatible knowledge generation modes", () => {
+    expect(() =>
+      generateKnowledgePacks({
+        repoRoot: process.cwd(),
+        checkOnly: true,
+        refreshRetained: true,
+        writeOutput: () => undefined,
+      })
+    ).toThrow("--check cannot be combined with --refresh-retained.");
+  });
+
+  it("rejects unsafe knowledge review IDs before resolving paths", () => {
+    expect(() =>
+      generateKnowledgePacks({
+        repoRoot: process.cwd(),
+        reviewId: "../unsafe",
+        writeOutput: () => undefined,
+      })
+    ).toThrow("--review-id requires a safe review id value.");
+  });
+
+  it("reports malformed knowledge version inventories as drift", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    const publicationPath = path.join(
+      fixture.repoRoot,
+      `config/public-reviews/${REVIEW_ID}.publication.json`
+    );
+    const publication = JSON.parse(fs.readFileSync(publicationPath, "utf8"));
+    publication.versions = null;
+    fs.writeFileSync(
+      publicationPath,
+      `${JSON.stringify(publication, null, 2)}\n`
+    );
+
+    expect(() =>
+      generateKnowledgePacks({
+        repoRoot: fixture.repoRoot,
+        checkOnly: true,
+        writeOutput: () => undefined,
+      })
+    ).toThrow(`${REVIEW_ID} publication and reference indexes drifted.`);
+  });
+
   it("copies ordinary public assets while omitting every production review input", () => {
     const fixture = createFixture();
     fixtureRoots.push(fixture.repoRoot);
@@ -717,6 +820,22 @@ describe("profile-aware public-review artifact packaging", () => {
         path.join(
           fixture.bundleRoot,
           `public/review-data/${REVIEW_ID}/versions/${REVIEW_VERSION}/reference-manifest.json`
+        )
+      )
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(
+          fixture.bundleRoot,
+          `public/review-data/${REVIEW_ID}/versions/${REVIEW_VERSION}/knowledge/manifest.json`
+        )
+      )
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(
+          fixture.bundleRoot,
+          `public/review-data/${REVIEW_ID}/versions/${REVIEW_VERSION}/knowledge/search-index.json`
         )
       )
     ).toBe(true);
@@ -958,6 +1077,28 @@ describe("profile-aware public-review artifact packaging", () => {
     expect(
       fs.existsSync(path.join(fixture.bundleRoot, "content/public-reviews"))
     ).toBe(false);
+  });
+
+  it("reports a missing published knowledge pack before copying", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    fs.rmSync(
+      path.join(
+        fixture.repoRoot,
+        `ops/public-review-knowledge/${REVIEW_ID}/versions/${REVIEW_VERSION}/knowledge`
+      ),
+      { recursive: true, force: true }
+    );
+
+    expect(() =>
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "staging",
+      })
+    ).toThrow(
+      `${REVIEW_ID}@${REVIEW_VERSION} knowledge pack is missing; run 6529 run public-review:knowledge.`
+    );
   });
 
   it("keeps public history while omitting an active draft version", () => {
@@ -1340,6 +1481,54 @@ describe("profile-aware public-review artifact packaging", () => {
         profile: "staging",
       })
     ).toThrow("reference bundle semantic checksum drifted");
+  });
+
+  it("rejects a packaged knowledge catalog whose checksum drifted", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    prepareProfileBundle({
+      repoRoot: fixture.repoRoot,
+      bundleRoot: fixture.bundleRoot,
+      profile: "staging",
+    });
+    const searchIndex = path.join(
+      fixture.bundleRoot,
+      `public/review-data/${REVIEW_ID}/versions/${REVIEW_VERSION}/knowledge/search-index.json`
+    );
+    fs.writeFileSync(searchIndex, '{"records":[]}\n');
+
+    expect(() =>
+      assertProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "staging",
+      })
+    ).toThrow("knowledge search-index checksum drifted");
+  });
+
+  it("rejects a packaged knowledge manifest that no longer matches review identity", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    prepareProfileBundle({
+      repoRoot: fixture.repoRoot,
+      bundleRoot: fixture.bundleRoot,
+      profile: "staging",
+    });
+    const manifestPath = path.join(
+      fixture.bundleRoot,
+      `public/review-data/${REVIEW_ID}/versions/${REVIEW_VERSION}/knowledge/manifest.json`
+    );
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+    manifest.source.commit = "0".repeat(40);
+    fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+
+    expect(() =>
+      assertProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "staging",
+      })
+    ).toThrow("knowledge identity drifted");
   });
 });
 
