@@ -277,11 +277,20 @@ jobs:
           BRANCH: ${{ env.STAGING_BRANCH }}
           EXPECTED_SHA: ${{ steps.expected-commit.outputs.sha }}
           INSTANCE_ID: ${{ secrets.STAGING_INSTANCE_ID }}
+          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS }}
           REPO_DIR: ${{ env.STAGING_REPO_DIR }}
           RUN_AS: ${{ env.STAGING_RUN_AS }}
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+
+          jq -e '
+            type == "object" and
+            has("staging") and
+            (.staging | type == "object") and
+            (.staging["stream-review"] | type == "string" and test("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")) and
+            (has("production") | not)
+          ' <<<"$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" >/dev/null
 
           node ops/scripts/deployment-bus.cjs github-create-status \
             --deployment-id "${{ steps.deployment-record.outputs.deployment_id }}" \
@@ -294,6 +303,13 @@ jobs:
           run_as_q="$(printf '%q' "$RUN_AS")"
           branch_q="$(printf '%q' "$BRANCH")"
           expected_sha_q="$(printf '%q' "$EXPECTED_SHA")"
+          public_review_destinations_b64="$(
+            printf '%s' "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" | base64 -w0
+          )"
+          [[ "$public_review_destinations_b64" =~ ^[A-Za-z0-9+/=]+$ ]]
+          public_review_destinations_b64_q="$(
+            printf '%q' "$public_review_destinations_b64"
+          )"
 
           remote_script="$(
             cat <<REMOTE_SCRIPT_VARS
@@ -302,6 +318,7 @@ jobs:
           RUN_AS=$run_as_q
           BRANCH=$branch_q
           EXPECTED_SHA=$expected_sha_q
+          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64=$public_review_destinations_b64_q
           REMOTE_SCRIPT_VARS
             cat <<'REMOTE_SCRIPT_BODY'
 
@@ -415,7 +432,10 @@ jobs:
           DEPLOY_SCRIPT
 
           chmod 755 "$deploy_script"
-          sudo -H -u "$RUN_AS" bash "$deploy_script" "$REPO_DIR" "$BRANCH" "$EXPECTED_SHA"
+          sudo -H -u "$RUN_AS" env \
+            "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64=$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64" \
+            bash "$deploy_script" "$REPO_DIR" "$BRANCH" "$EXPECTED_SHA"
+          unset PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64
           REMOTE_SCRIPT_BODY
           )"
 

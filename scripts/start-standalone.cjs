@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { cpSync, existsSync, mkdirSync } = require("node:fs");
+const { cpSync, existsSync, mkdirSync, readFileSync } = require("node:fs");
 const { spawnSync } = require("node:child_process");
 const { resolve } = require("node:path");
 
@@ -11,6 +11,15 @@ const staticSource = resolve(repoRoot, ".next", "static");
 const staticDest = resolve(standaloneRoot, ".next", "static");
 const publicSource = resolve(repoRoot, "public");
 const publicDest = resolve(standaloneRoot, "public");
+const publicReviewPackager = resolve(
+  repoRoot,
+  "scripts",
+  "package-public-review-artifacts.cjs"
+);
+const standaloneArtifactProfile =
+  process.env["STANDALONE_ARTIFACT_PROFILE"]?.trim();
+const publicReviewDestinationsFile =
+  process.env["PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE"]?.trim();
 
 if (!existsSync(serverEntry)) {
   console.error(
@@ -29,16 +38,71 @@ if (!existsSync(staticSource)) {
 mkdirSync(resolve(standaloneRoot, ".next"), { recursive: true });
 cpSync(staticSource, staticDest, { recursive: true, force: true });
 
-if (existsSync(publicSource)) {
+if (standaloneArtifactProfile) {
+  if (standaloneArtifactProfile !== "staging") {
+    console.error(
+      `Unsupported standalone artifact profile: ${standaloneArtifactProfile}`
+    );
+    process.exit(1);
+  }
+
+  const packageResult = spawnSync(
+    process.execPath,
+    [
+      publicReviewPackager,
+      "prepare",
+      "--profile",
+      standaloneArtifactProfile,
+      "--bundle-root",
+      standaloneRoot,
+    ],
+    {
+      cwd: repoRoot,
+      env: process.env,
+      stdio: "inherit",
+    }
+  );
+
+  if (packageResult.error) {
+    throw packageResult.error;
+  }
+  if (packageResult.status !== 0) {
+    process.exit(packageResult.status ?? 1);
+  }
+} else if (existsSync(publicSource)) {
   cpSync(publicSource, publicDest, { recursive: true, force: true });
 }
+
+const runtimeEnv = { ...process.env };
+if (publicReviewDestinationsFile) {
+  if (!existsSync(publicReviewDestinationsFile)) {
+    console.error(
+      "Configured public-review discussion destinations file is unavailable."
+    );
+    process.exit(1);
+  }
+  const publicReviewDiscussionDestinations = readFileSync(
+    publicReviewDestinationsFile,
+    "utf8"
+  ).trim();
+  if (!publicReviewDiscussionDestinations) {
+    console.error(
+      "Configured public-review discussion destinations file is empty."
+    );
+    process.exit(1);
+  }
+  runtimeEnv["PUBLIC_REVIEW_DISCUSSION_DESTINATIONS"] =
+    publicReviewDiscussionDestinations;
+  delete runtimeEnv["PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE"];
+}
+delete runtimeEnv["STANDALONE_ARTIFACT_PROFILE"];
 
 const result = spawnSync(process.execPath, [serverEntry], {
   cwd: repoRoot,
   env: {
-    ...process.env,
-    PORT: process.env.PORT || "3001",
-    HOSTNAME: process.env.HOSTNAME || "0.0.0.0",
+    ...runtimeEnv,
+    PORT: runtimeEnv["PORT"] || "3001",
+    HOSTNAME: runtimeEnv["HOSTNAME"] || "0.0.0.0",
   },
   stdio: "inherit",
 });
