@@ -120,6 +120,5 @@ if (require.main === module) {
 module.exports = {
   decide,
   exactDecision,
-  exactEnvironment,
   formatDecisionToken,
 };
