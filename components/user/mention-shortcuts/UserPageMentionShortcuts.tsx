@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
+import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import GroupCreateIdentitySelectedItems from "@/components/groups/page/create/config/GroupCreateIdentitySelectedItems";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -35,7 +36,8 @@ const VISIBLE_QUICK_TAGS = 3;
 
 const getAvailableIdentities = (
   identities: CommunityMemberMinimal[],
-  members: MentionAliasMember[]
+  members: MentionAliasMember[],
+  ownerProfileId: string | null
 ) => {
   const selectedProfileIds = new Set(
     members.map((member) => member.profile_id)
@@ -44,6 +46,7 @@ const getAvailableIdentities = (
     (identity) =>
       !!identity.profile_id &&
       !!identity.handle &&
+      identity.profile_id !== ownerProfileId &&
       !selectedProfileIds.has(identity.profile_id)
   );
 };
@@ -110,11 +113,14 @@ function AliasEditor({
   readonly onClose: () => void;
 }) {
   const locale = useBrowserLocale();
-  const { setToast } = useContext(AuthContext);
+  const { connectedProfile, setToast } = useContext(AuthContext);
+  const ownerProfileId = connectedProfile?.id ?? null;
   const queryClient = useQueryClient();
   const [alias, setAlias] = useState(initialAlias?.alias ?? "");
-  const [members, setMembers] = useState<MentionAliasMember[]>(
-    initialAlias?.members ?? []
+  const [members, setMembers] = useState<MentionAliasMember[]>(() =>
+    (initialAlias?.members ?? []).filter(
+      (member) => member.profile_id !== ownerProfileId
+    )
   );
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebouncedValue(search, 200);
@@ -175,7 +181,11 @@ function AliasEditor({
     },
   });
 
-  const availableIdentities = getAvailableIdentities(identities, members);
+  const availableIdentities = getAvailableIdentities(
+    identities,
+    members,
+    ownerProfileId
+  );
   let searchStatus = t(locale, "user.mentionShortcuts.searchPrompt");
   if (search.length >= 3) {
     searchStatus =
@@ -188,7 +198,14 @@ function AliasEditor({
 
   const addMember = (identity: CommunityMemberMinimal) => {
     const { profile_id: profileId, handle } = identity;
-    if (!profileId || !handle || members.length >= MAX_MEMBERS) return;
+    if (
+      !profileId ||
+      !handle ||
+      profileId === ownerProfileId ||
+      members.length >= MAX_MEMBERS
+    ) {
+      return;
+    }
     setMembers((current) => [
       ...current,
       {
@@ -205,7 +222,11 @@ function AliasEditor({
     mutation.mutate({
       alias: normalizedAlias,
       member_profile_ids: [
-        ...new Set(members.map((member) => member.profile_id)),
+        ...new Set(
+          members
+            .map((member) => member.profile_id)
+            .filter((profileId) => profileId !== ownerProfileId)
+        ),
       ],
     });
   };
@@ -502,17 +523,26 @@ export default function UserPageMentionShortcuts({
                 key={item.id}
                 type="button"
                 onClick={() => openManager(item)}
-                className="tw-flex tw-min-h-9 tw-min-w-0 tw-max-w-[13rem] tw-flex-1 tw-items-center tw-gap-1 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-left tw-text-sm tw-font-medium tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                className="group tw-inline-flex tw-min-h-11 tw-min-w-0 tw-max-w-[18rem] tw-flex-none tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-[#18191B] tw-px-3 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-text-iron-100 tw-transition-all tw-duration-300 tw-ease-out hover:tw-border-white/20 hover:tw-bg-white/10 hover:tw-shadow-md focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
               >
                 <span className="tw-min-w-0 tw-truncate tw-text-primary-300">
                   @{item.alias}
                 </span>
-                <span className="tw-shrink-0 tw-text-iron-400 md:tw-hidden">
-                  · {item.members.length}
-                </span>
-                <span className="tw-hidden tw-shrink-0 tw-text-iron-400 md:tw-inline">
-                  · {getProfileCountLabel(item.members.length)}
-                </span>
+                {item.members.length > 0 && (
+                  <span className="tw-inline-flex tw-shrink-0">
+                    <OverlappingAvatars
+                      items={item.members.map((member) => ({
+                        key: member.profile_id,
+                        pfpUrl: member.pfp,
+                        ariaLabel: member.handle,
+                        fallback: member.handle.charAt(0).toUpperCase(),
+                        title: member.handle,
+                      }))}
+                      size="sm"
+                      maxCount={5}
+                    />
+                  </span>
+                )}
               </button>
             ))}
           {!isPending && !isError && hiddenAliasCount > 0 && (

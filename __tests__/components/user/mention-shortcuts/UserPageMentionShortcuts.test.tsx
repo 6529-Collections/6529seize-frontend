@@ -1,6 +1,8 @@
 import { AuthContext } from "@/components/auth/Auth";
 import UserPageMentionShortcuts from "@/components/user/mention-shortcuts/UserPageMentionShortcuts";
+import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { useMentionAliases } from "@/hooks/useMentionAliases";
+import { commonApiFetch } from "@/services/api/common-api";
 import { updateMentionAlias } from "@/services/api/mention-aliases-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
@@ -36,12 +38,18 @@ jest.mock("@/services/api/mention-aliases-api", () => ({
   deleteMentionAlias: jest.fn(),
   updateMentionAlias: jest.fn(),
 }));
+jest.mock("@/services/api/common-api", () => ({
+  commonApiFetch: jest.fn(),
+}));
 
 const mockedUseMentionAliases = useMentionAliases as jest.MockedFunction<
   typeof useMentionAliases
 >;
 const mockedUpdateMentionAlias = updateMentionAlias as jest.MockedFunction<
   typeof updateMentionAlias
+>;
+const mockedCommonApiFetch = commonApiFetch as jest.MockedFunction<
+  typeof commonApiFetch
 >;
 
 const profile = {
@@ -90,6 +98,7 @@ function renderQuickTags({
 
 describe("UserPageMentionShortcuts", () => {
   beforeEach(() => {
+    mockedCommonApiFetch.mockResolvedValue([]);
     mockedUseMentionAliases.mockReturnValue({
       aliases: [
         makeAlias("tag-1", "frens", [
@@ -139,6 +148,8 @@ describe("UserPageMentionShortcuts", () => {
     ).toHaveClass("tw-whitespace-nowrap");
     expect(screen.getByRole("button", { name: "Manage" })).toBeInTheDocument();
     expect(screen.getByText("@frens")).toBeInTheDocument();
+    expect(screen.queryByText("1 profile")).not.toBeInTheDocument();
+    expect(screen.getByText("B")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "+1 more" })).toBeInTheDocument();
     expect(screen.queryByText("@writers")).not.toBeInTheDocument();
     expect(section.querySelector(".tw-flex-nowrap")).toBeInTheDocument();
@@ -186,13 +197,18 @@ describe("UserPageMentionShortcuts", () => {
     ).toBeInTheDocument();
   });
 
-  it("deduplicates pre-populated profile ids when saving", async () => {
+  it("removes the owner and deduplicates pre-populated profile ids when saving", async () => {
     mockedUseMentionAliases.mockReturnValue({
       aliases: [
         {
           id: "tag-1",
           alias: "frens",
           members: [
+            {
+              profile_id: "profile-1",
+              handle: "alice",
+              pfp: null,
+            },
             {
               profile_id: "profile-2",
               handle: "bob",
@@ -217,6 +233,7 @@ describe("UserPageMentionShortcuts", () => {
     renderQuickTags();
 
     fireEvent.click(screen.getByRole("button", { name: /@frens/i }));
+    expect(screen.queryByText("@alice")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Save Quick Tag" }));
 
     await waitFor(() =>
@@ -225,6 +242,46 @@ describe("UserPageMentionShortcuts", () => {
         member_profile_ids: ["profile-2"],
       })
     );
+  });
+
+  it("excludes the connected profile from search results", async () => {
+    const searchResults: CommunityMemberMinimal[] = [
+      {
+        profile_id: "profile-1",
+        handle: "alice",
+        display: "Alice",
+        pfp: null,
+      },
+      {
+        profile_id: "profile-6",
+        handle: "alex",
+        display: "Alex",
+        pfp: null,
+      },
+    ];
+    mockedCommonApiFetch.mockResolvedValue(searchResults);
+    renderQuickTags();
+
+    fireEvent.click(screen.getByRole("button", { name: "Manage" }));
+    fireEvent.click(screen.getByRole("button", { name: "New Quick Tag" }));
+    fireEvent.change(screen.getByLabelText("Search profiles by handle"), {
+      target: { value: "ali" },
+    });
+
+    await waitFor(() =>
+      expect(mockedCommonApiFetch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endpoint: "community-members",
+          params: expect.objectContaining({ param: "ali" }),
+        })
+      )
+    );
+    expect(
+      screen.queryByRole("button", { name: /@alice/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /@alex/i })
+    ).toBeInTheDocument();
   });
 
   it("does not render on another profile or while acting as a proxy", () => {
