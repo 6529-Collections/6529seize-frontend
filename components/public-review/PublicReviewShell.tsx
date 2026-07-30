@@ -1,7 +1,4 @@
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -102,6 +99,7 @@ export function PublicReviewShell({
   routeVersion,
   displayedVersion,
   feedbackSlot,
+  introNotice,
   source,
 }: {
   readonly editorialMarkdown: string;
@@ -112,6 +110,7 @@ export function PublicReviewShell({
   readonly routeVersion?: string | undefined;
   readonly displayedVersion: string;
   readonly feedbackSlot: ReactNode;
+  readonly introNotice?: ReactNode;
   readonly source: PublicReviewSource;
 }) {
   const pageIndex = reviewVersion.pages.findIndex(
@@ -184,6 +183,8 @@ export function PublicReviewShell({
                     {t(DEFAULT_LOCALE, page.summaryKey)}
                   </p>
                 </header>
+
+                {introNotice}
 
                 {page.id === "overview" && (
                   <div className="tw-mt-10 tw-w-full">

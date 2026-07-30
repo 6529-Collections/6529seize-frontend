@@ -1,0 +1,1404 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#event:GasParameterRegistered(uint16,bytes32,string,uint256,uint256,uint8)",
+          "declaringDefinitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "genesisValue",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "floor",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint8",
+              "name": "failureClass",
+              "type": "uint8"
+            }
+          ],
+          "name": "GasParameterRegistered",
+          "signature": "GasParameterRegistered(uint16,bytes32,string,uint256,uint256,uint8)",
+          "topic0": "0xfdd41cabb6d4b167ea1a6ab7738a933e6f7e4223f1d0051261b08f4558959e58"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#event:GasParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)",
+          "declaringDefinitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "host",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "oldValue",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "newValue",
+              "type": "uint256"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "floor",
+              "type": "uint256"
+            }
+          ],
+          "name": "GasParameterUpdated",
+          "signature": "GasParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)",
+          "topic0": "0x587835584450495af0ebae742cc2f7c3927ade7498ab91baaebb9525d68e14dc"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x0a9254e4",
+          "declaringDefinitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "setUp",
+          "outputs": [],
+          "selector": "0x0a9254e4",
+          "signature": "setUp()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x0738f36d",
+          "declaringDefinitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAuthorityMarkerAndContextRejectMalformedAbi",
+          "outputs": [],
+          "selector": "0x0738f36d",
+          "signature": "testAuthorityMarkerAndContextRejectMalformedAbi()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0xc503eba6",
+          "declaringDefinitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAuthorityMarkerIsExactAndForwardsAvailableGas",
+          "outputs": [],
+          "selector": "0xc503eba6",
+          "signature": "testAuthorityMarkerIsExactAndForwardsAvailableGas()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0xe1feb93f",
+          "declaringDefinitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCurrentActionReadRejectsMalformedResponsesAndForwardsAvailableGas",
+          "outputs": [],
+          "selector": "0xe1feb93f",
+          "signature": "testCurrentActionReadRejectsMalformedResponsesAndForwardsAvailableGas()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x310f839f",
+          "declaringDefinitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testDelayedRaiseConsumesExactContextAndEmits",
+          "outputs": [],
+          "selector": "0x310f839f",
+          "signature": "testDelayedRaiseConsumesExactContextAndEmits()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x11da4b26",
+          "declaringDefinitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testExactContextRejectsInactiveZeroIdWrongClassAndHashDrift",
+          "outputs": [],
+          "selector": "0x11da4b26",
+          "signature": "testExactContextRejectsInactiveZeroIdWrongClassAndHashDrift()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0xadc323ae",
+          "declaringDefinitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testOneActionCannotCompoundMultipleRaisesForSameParameter",
+          "outputs": [],
+          "selector": "0xadc323ae",
+          "signature": "testOneActionCannotCompoundMultipleRaisesForSameParameter()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0xdb2fa108",
+          "declaringDefinitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testOnlyAuthorityCanRaiseAndZeroAuthorityIsImmutable",
+          "outputs": [],
+          "selector": "0xdb2fa108",
+          "signature": "testOnlyAuthorityCanRaiseAndZeroAuthorityIsImmutable()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x6b7e57e4",
+          "declaringDefinitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRaiseMustBeStrictAndAtMostDouble",
+          "outputs": [],
+          "selector": "0x6b7e57e4",
+          "signature": "testRaiseMustBeStrictAndAtMostDouble()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x4264913c",
+          "declaringDefinitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRegistrationAndIntrospectionAreExact",
+          "outputs": [],
+          "selector": "0x4264913c",
+          "signature": "testRegistrationAndIntrospectionAreExact()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x935e4e1e",
+          "declaringDefinitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRegistrationEventUsesRaiseOnlySchema",
+          "outputs": [],
+          "selector": "0x935e4e1e",
+          "signature": "testRegistrationEventUsesRaiseOnlySchema()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x0917bcd3",
+          "declaringDefinitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRemovedMutationSelectorsAreUnreachable",
+          "outputs": [],
+          "selector": "0x0917bcd3",
+          "signature": "testRemovedMutationSelectorsAreUnreachable()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x3911d4eb",
+          "declaringDefinitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRepeatedBoundedRaisesRemainAvailable",
+          "outputs": [],
+          "selector": "0x3911d4eb",
+          "signature": "testRepeatedBoundedRaisesRemainAvailable()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0xb0bba1db",
+          "declaringDefinitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRevisionCommitmentRejectsAbaAndStaleContext",
+          "outputs": [],
+          "selector": "0xb0bba1db",
+          "signature": "testRevisionCommitmentRejectsAbaAndStaleContext()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0xde2fff23",
+          "declaringDefinitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRevisionOverflowFailsClosed",
+          "outputs": [],
+          "selector": "0xde2fff23",
+          "signature": "testRevisionOverflowFailsClosed()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x1d201e02",
+          "declaringDefinitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testUnknownIdAndInvalidConfigurationsFailClosed",
+          "outputs": [],
+          "selector": "0x1d201e02",
+          "signature": "testUnknownIdAndInvalidConfigurationsFailClosed()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 155178,
+          "canonicalSignature": "GasParameterRegistered(uint16,bytes32,string,uint256,uint256,uint8)",
+          "displaySignature": "GasParameterRegistered(uint16,bytes32,string,uint256,uint256,uint8)",
+          "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#event:GasParameterRegistered(uint16,bytes32,string,uint256,uint256,uint8)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "genesisValue",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "floor",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "failureClass",
+              "type": "uint8"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3QjZXZlbnQ6R2FzUGFyYW1ldGVyUmVnaXN0ZXJlZCh1aW50MTYsYnl0ZXMzMixzdHJpbmcsdWludDI1Nix1aW50MjU2LHVpbnQ4KQ",
+          "kind": "event",
+          "name": "GasParameterRegistered",
+          "natspec": "",
+          "range": {
+            "byteLength": 204,
+            "byteStart": 1224,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L29-L36",
+            "lineEnd": 36,
+            "lineStart": 29,
+            "snippetSha256": "sha256:a08b69fbb1a3a9eead6a33de79e3c2233b2474369ef85263d1f85c5010f894b3",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "topic0": "0xfdd41cabb6d4b167ea1a6ab7738a933e6f7e4223f1d0051261b08f4558959e58"
+        },
+        {
+          "anonymous": false,
+          "astId": 155194,
+          "canonicalSignature": "GasParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)",
+          "displaySignature": "GasParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)",
+          "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#event:GasParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "host",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "oldValue",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "newValue",
+              "type": "uint256"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "name": "floor",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3QjZXZlbnQ6R2FzUGFyYW1ldGVyVXBkYXRlZCh1aW50MTYsYnl0ZXMzMixhZGRyZXNzLGJ5dGVzMzIsdWludDI1Nix1aW50MjU2LHVpbnQyNTYp",
+          "kind": "event",
+          "name": "GasParameterUpdated",
+          "natspec": "",
+          "range": {
+            "byteLength": 238,
+            "byteStart": 1434,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L38-L46",
+            "lineEnd": 46,
+            "lineStart": 38,
+            "snippetSha256": "sha256:a95e03963c2ff3d11454a011bcc14750c15218a5b252ce8fc327e45ce6aad64a",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "topic0": "0x587835584450495af0ebae742cc2f7c3927ade7498ab91baaebb9525d68e14dc"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "setUp()",
+          "displaySignature": "setUp()",
+          "functionKind": "function",
+          "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x0a9254e4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3QjZnVuY3Rpb246MHgwYTkyNTRlNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setUp",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 185,
+            "byteStart": 1785,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L51-L54",
+            "lineEnd": 54,
+            "lineStart": 51,
+            "snippetSha256": "sha256:5601ee935da145ae058991b3a79aad6a139c9d87fae6fdb9a8114f365538b17d",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": "0x0a9254e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRegistrationAndIntrospectionAreExact()",
+          "displaySignature": "testRegistrationAndIntrospectionAreExact()",
+          "functionKind": "function",
+          "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x4264913c",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3QjZnVuY3Rpb246MHg0MjY0OTEzYw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRegistrationAndIntrospectionAreExact",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1176,
+            "byteStart": 1976,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L56-L74",
+            "lineEnd": 74,
+            "lineStart": 56,
+            "snippetSha256": "sha256:404f3327752b5d8059d44bf10a9bc7105f9ac3c32cb600df38ef3c40a84a71e7",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": "0x4264913c",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRegistrationEventUsesRaiseOnlySchema()",
+          "displaySignature": "testRegistrationEventUsesRaiseOnlySchema()",
+          "functionKind": "function",
+          "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x935e4e1e",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3QjZnVuY3Rpb246MHg5MzVlNGUxZQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRegistrationEventUsesRaiseOnlySchema",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 315,
+            "byteStart": 3158,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L76-L82",
+            "lineEnd": 82,
+            "lineStart": 76,
+            "snippetSha256": "sha256:610d43a06d75312fb32c055740354726fc2ed1c1a96dc6a5bb48b78d3b1c2bee",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": "0x935e4e1e",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testDelayedRaiseConsumesExactContextAndEmits()",
+          "displaySignature": "testDelayedRaiseConsumesExactContextAndEmits()",
+          "functionKind": "function",
+          "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x310f839f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3QjZnVuY3Rpb246MHgzMTBmODM5Zg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testDelayedRaiseConsumesExactContextAndEmits",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 622,
+            "byteStart": 3479,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L84-L97",
+            "lineEnd": 97,
+            "lineStart": 84,
+            "snippetSha256": "sha256:1f721b351e76896723954c4a53ff61bed887c8ca77f2c68efb240da05fb86758",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": "0x310f839f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRepeatedBoundedRaisesRemainAvailable()",
+          "displaySignature": "testRepeatedBoundedRaisesRemainAvailable()",
+          "functionKind": "function",
+          "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x3911d4eb",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3QjZnVuY3Rpb246MHgzOTExZDRlYg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRepeatedBoundedRaisesRemainAvailable",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 672,
+            "byteStart": 4107,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L99-L112",
+            "lineEnd": 112,
+            "lineStart": 99,
+            "snippetSha256": "sha256:6c79fd3cbe9562972d47bebb2c41cbb82f7910885d9f71ca5c382d2fc2abf0a6",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": "0x3911d4eb",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testOneActionCannotCompoundMultipleRaisesForSameParameter()",
+          "displaySignature": "testOneActionCannotCompoundMultipleRaisesForSameParameter()",
+          "functionKind": "function",
+          "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0xadc323ae",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3QjZnVuY3Rpb246MHhhZGMzMjNhZQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testOneActionCannotCompoundMultipleRaisesForSameParameter",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 891,
+            "byteStart": 4785,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L114-L133",
+            "lineEnd": 133,
+            "lineStart": 114,
+            "snippetSha256": "sha256:3092e79540a22a2004960e8012171d8984b950642f40242e046ba8559976fe13",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": "0xadc323ae",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testOnlyAuthorityCanRaiseAndZeroAuthorityIsImmutable()",
+          "displaySignature": "testOnlyAuthorityCanRaiseAndZeroAuthorityIsImmutable()",
+          "functionKind": "function",
+          "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0xdb2fa108",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3QjZnVuY3Rpb246MHhkYjJmYTEwOA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testOnlyAuthorityCanRaiseAndZeroAuthorityIsImmutable",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 670,
+            "byteStart": 5682,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L135-L151",
+            "lineEnd": 151,
+            "lineStart": 135,
+            "snippetSha256": "sha256:3cfdcd607d7b33c702dcad82cd0a16b9eb786a1b7d1f750644404271b486ae00",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": "0xdb2fa108",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRaiseMustBeStrictAndAtMostDouble()",
+          "displaySignature": "testRaiseMustBeStrictAndAtMostDouble()",
+          "functionKind": "function",
+          "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x6b7e57e4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3QjZnVuY3Rpb246MHg2YjdlNTdlNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRaiseMustBeStrictAndAtMostDouble",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1119,
+            "byteStart": 6358,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L153-L186",
+            "lineEnd": 186,
+            "lineStart": 153,
+            "snippetSha256": "sha256:a7ec4a717e8d7ba52bb36a1e1970d4b012c6fee9ae4eb07634a4650bf5cc838a",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": "0x6b7e57e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRevisionOverflowFailsClosed()",
+          "displaySignature": "testRevisionOverflowFailsClosed()",
+          "functionKind": "function",
+          "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0xde2fff23",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3QjZnVuY3Rpb246MHhkZTJmZmYyMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRevisionOverflowFailsClosed",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 393,
+            "byteStart": 7483,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L188-L197",
+            "lineEnd": 197,
+            "lineStart": 188,
+            "snippetSha256": "sha256:8c1b9e4851c77b4b5cb47d18dc6a2648e57c9b7fbd3e621922be3a473ecd720b",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": "0xde2fff23",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testExactContextRejectsInactiveZeroIdWrongClassAndHashDrift()",
+          "displaySignature": "testExactContextRejectsInactiveZeroIdWrongClassAndHashDrift()",
+          "functionKind": "function",
+          "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x11da4b26",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3QjZnVuY3Rpb246MHgxMWRhNGIyNg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testExactContextRejectsInactiveZeroIdWrongClassAndHashDrift",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2720,
+            "byteStart": 7882,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L199-L261",
+            "lineEnd": 261,
+            "lineStart": 199,
+            "snippetSha256": "sha256:f33b23dd3af6129e335fa3752c40191f98372a1db198e7d4cd28f82bdd9cf6e5",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": "0x11da4b26",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRevisionCommitmentRejectsAbaAndStaleContext()",
+          "displaySignature": "testRevisionCommitmentRejectsAbaAndStaleContext()",
+          "functionKind": "function",
+          "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0xb0bba1db",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3QjZnVuY3Rpb246MHhiMGJiYTFkYg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRevisionCommitmentRejectsAbaAndStaleContext",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1274,
+            "byteStart": 10608,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L263-L292",
+            "lineEnd": 292,
+            "lineStart": 263,
+            "snippetSha256": "sha256:2fe91b7be61f5ce7893489f5ca481e46a95616747ae8e9e9c06ac6350174a81b",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": "0xb0bba1db",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCurrentActionReadRejectsMalformedResponsesAndForwardsAvailableGas()",
+          "displaySignature": "testCurrentActionReadRejectsMalformedResponsesAndForwardsAvailableGas()",
+          "functionKind": "function",
+          "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0xe1feb93f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3QjZnVuY3Rpb246MHhlMWZlYjkzZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCurrentActionReadRejectsMalformedResponsesAndForwardsAvailableGas",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1262,
+            "byteStart": 11888,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L294-L319",
+            "lineEnd": 319,
+            "lineStart": 294,
+            "snippetSha256": "sha256:40816166519f44f32fab476a23d033ace40becf0965e96c8d61308c6a49da286",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": "0xe1feb93f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRemovedMutationSelectorsAreUnreachable()",
+          "displaySignature": "testRemovedMutationSelectorsAreUnreachable()",
+          "functionKind": "function",
+          "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x0917bcd3",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3QjZnVuY3Rpb246MHgwOTE3YmNkMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRemovedMutationSelectorsAreUnreachable",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1120,
+            "byteStart": 13156,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L321-L342",
+            "lineEnd": 342,
+            "lineStart": 321,
+            "snippetSha256": "sha256:bc04e9afb800b53581ebc523b93dbfab711c591c210c8884f25fb28dc2031d4e",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": "0x0917bcd3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testUnknownIdAndInvalidConfigurationsFailClosed()",
+          "displaySignature": "testUnknownIdAndInvalidConfigurationsFailClosed()",
+          "functionKind": "function",
+          "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x1d201e02",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3QjZnVuY3Rpb246MHgxZDIwMWUwMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testUnknownIdAndInvalidConfigurationsFailClosed",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2514,
+            "byteStart": 14282,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L344-L403",
+            "lineEnd": 403,
+            "lineStart": 344,
+            "snippetSha256": "sha256:a9ed755ebdbee1025a6268212685b4d2a8b45483e09c29d8fec1ad4e290e2b55",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": "0x1d201e02",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAuthorityMarkerIsExactAndForwardsAvailableGas()",
+          "displaySignature": "testAuthorityMarkerIsExactAndForwardsAvailableGas()",
+          "functionKind": "function",
+          "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0xc503eba6",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3QjZnVuY3Rpb246MHhjNTAzZWJhNg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAuthorityMarkerIsExactAndForwardsAvailableGas",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1423,
+            "byteStart": 16802,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L405-L437",
+            "lineEnd": 437,
+            "lineStart": 405,
+            "snippetSha256": "sha256:cafa4937fb35886e38a264052a71ff9344d228595476ec04e812d1939bcf91fa",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": "0xc503eba6",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAuthorityMarkerAndContextRejectMalformedAbi()",
+          "displaySignature": "testAuthorityMarkerAndContextRejectMalformedAbi()",
+          "functionKind": "function",
+          "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x0738f36d",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3QjZnVuY3Rpb246MHgwNzM4ZjM2ZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAuthorityMarkerAndContextRejectMalformedAbi",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2043,
+            "byteStart": 18231,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L439-L478",
+            "lineEnd": 478,
+            "lineStart": 439,
+            "snippetSha256": "sha256:ba6f4b7b7739ab817552965e5cfc8ba150555ff04244a3288b341d1429601ea2",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": "0x0738f36d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_setContext(StreamGasParameterStore,bytes32,uint256,bytes32,uint8)",
+          "functionKind": "function",
+          "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:_setContext(StreamGasParameterStore,bytes32,uint256,bytes32,uint8)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "store",
+              "type": "StreamGasParameterStore"
+            },
+            {
+              "index": 1,
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "newValue",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "actionClass",
+              "type": "uint8"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3QjZnVuY3Rpb246X3NldENvbnRleHQoU3RyZWFtR2FzUGFyYW1ldGVyU3RvcmUsYnl0ZXMzMix1aW50MjU2LGJ5dGVzMzIsdWludDgp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_setContext",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 451,
+            "byteStart": 20280,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L480-L492",
+            "lineEnd": 492,
+            "lineStart": 480,
+            "snippetSha256": "sha256:63b3bad66bb51b854d44856ccdfc15a7df8d39bea5c041bdf5ea038a0f44374b",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_transitionHashes(StreamGasParameterStore,bytes32,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:_transitionHashes(StreamGasParameterStore,bytes32,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "store",
+              "type": "StreamGasParameterStore"
+            },
+            {
+              "index": 1,
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "newValue",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3QjZnVuY3Rpb246X3RyYW5zaXRpb25IYXNoZXMoU3RyZWFtR2FzUGFyYW1ldGVyU3RvcmUsYnl0ZXMzMix1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_transitionHashes",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "oldStateHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "newStateHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 735,
+            "byteStart": 20737,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L494-L509",
+            "lineEnd": 509,
+            "lineStart": 494,
+            "snippetSha256": "sha256:8ea4dcdb2a4e50ee6fb3129190a9545a8d0f047f5d3fb77742a66d79398fea00",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_singleConfig()",
+          "functionKind": "function",
+          "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:_singleConfig()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3QjZnVuY3Rpb246X3NpbmdsZUNvbmZpZygp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_singleConfig",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "configs",
+              "storageLocation": "memory",
+              "type": "IStreamGasParameterHost.GasParameterConfig[]"
+            }
+          ],
+          "range": {
+            "byteLength": 293,
+            "byteStart": 21478,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L511-L518",
+            "lineEnd": 518,
+            "lineStart": 511,
+            "snippetSha256": "sha256:a79919ec89c29d745f3769fc803bfc6ced3b6d0c289a209921ab273ff932ae93",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_config(string,uint256,uint256,uint8)",
+          "functionKind": "function",
+          "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:_config(string,uint256,uint256,uint8)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "name",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 1,
+              "name": "genesisValue",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "floor",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "failureClass",
+              "type": "uint8"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3QjZnVuY3Rpb246X2NvbmZpZyhzdHJpbmcsdWludDI1Nix1aW50MjU2LHVpbnQ4KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_config",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "IStreamGasParameterHost.GasParameterConfig"
+            }
+          ],
+          "range": {
+            "byteLength": 367,
+            "byteStart": 21777,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L520-L528",
+            "lineEnd": 528,
+            "lineStart": 520,
+            "snippetSha256": "sha256:6ecce034387041f24d98fd777a49a49330fc3ea2d01d937eea94d6a0196023e0",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SCOPE_DOMAIN_V2",
+          "natspec": "",
+          "range": {
+            "byteLength": 117,
+            "byteStart": 800,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L22-L23",
+            "lineEnd": 23,
+            "lineStart": 22,
+            "snippetSha256": "sha256:3e088587b0f4376af133b694a14ce0487b5923e26acbfd0060408f2e97be5f88",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 851,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:54dbcffdf0605b50d194000cb97fa20055db2ec9138cfb86c6fddd9436604c39",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "valueSource": "0x9533611d402c2b44cf950a4a8900d25f6829bfac541dc4d5353094f966bb1a71",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STATE_DOMAIN_V2",
+          "natspec": "",
+          "range": {
+            "byteLength": 117,
+            "byteStart": 923,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L24-L25",
+            "lineEnd": 25,
+            "lineStart": 24,
+            "snippetSha256": "sha256:83f88b420341c7a037c57175b5a53882d3ef5c6610241eb66a1b39ff6d800eed",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 974,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:992665ffee98da588ba4fad23f5bfc2d9d4546486e47720e0dc0292e1dc8347d",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "valueSource": "0x5059a253d3f7dd63b5d9fd1f0568caf72967f501a3db678b31cefe911334159c",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PARAMETER_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 94,
+            "byteStart": 1046,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:485ea192530130c849c833fdd9bfd6f9aa73801194096a3bcb314f2d6e5a97c5",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 54,
+            "byteStart": 1086,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:a74d44fb53a141d37736b4eecc2cf8af93e784d32d003832e2a904f0483890dd",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "valueSource": "keccak256(\"6529STREAM_GGP_ROYALTY_RESOLVER_GAS_LIMIT\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ACTION_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 71,
+            "byteStart": 1146,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:40474d1f6db74d49ae64287a5fff162bce4e077a9f7b1b03d11a9709a45c267d",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 34,
+            "byteStart": 1183,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:52582f8c6c1129727ea03a8ef7ec9a97d3c13971e20fbfc325e58528096d6768",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "valueSource": "keccak256(\"raise-only-gas-action\")",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_authority",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 1678,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L48",
+            "lineEnd": 48,
+            "lineStart": 48,
+            "snippetSha256": "sha256:11b64c058f583a9703f5e73d3e8dc8e0f89ce54c83e619ae87fd77ba27a2f199",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": null,
+          "type": "MockGovernedParameterAuthority",
+          "typeString": "contract MockGovernedParameterAuthority",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_store",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 1733,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L49",
+            "lineEnd": 49,
+            "lineStart": 49,
+            "snippetSha256": "sha256:c68b67d83c90ae39df73cb8e42343c0ebdd0a1d1c91a9492e1a2d89ab2a0a4df",
+            "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+          },
+          "selector": null,
+          "type": "StreamGasParameterStoreHarness",
+          "typeString": "contract StreamGasParameterStoreHarness",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZS50LnNvbDpTdHJlYW1HYXNQYXJhbWV0ZXJTdG9yZVRlc3Q",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamGasParameterStoreTest",
+    "natspec": "@notice Launch-v1 raise-only GGP acceptance and adversarial regressions.",
+    "range": {
+      "byteLength": 21417,
+      "byteStart": 729,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGasParameterStore.t.sol#L21-L529",
+      "lineEnd": 529,
+      "lineStart": 21,
+      "snippetSha256": "sha256:1c159b095e897f8406b9859340dbd62ece6cbf20d29839ea2498348a268d7656",
+      "sourceSha256": "sha256:89a1dbcd4ebc3b91064dcd8595dbf5ab6d123a3aea52d06ec6e61357515b025a"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamGasParameterStore.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-30.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 16
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 16
+    },
+    "totalCount": 16
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x0738f36d",
+      "definitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x0917bcd3",
+      "definitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x0a9254e4",
+      "definitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x11da4b26",
+      "definitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x1d201e02",
+      "definitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x310f839f",
+      "definitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x3911d4eb",
+      "definitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x4264913c",
+      "definitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x6b7e57e4",
+      "definitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0x935e4e1e",
+      "definitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0xadc323ae",
+      "definitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0xb0bba1db",
+      "definitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0xc503eba6",
+      "definitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0xdb2fa108",
+      "definitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0xde2fff23",
+      "definitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest#function:0xe1feb93f",
+      "definitionId": "test/StreamGasParameterStore.t.sol:StreamGasParameterStoreTest",
+      "severity": "advisory"
+    }
+  ]
+}

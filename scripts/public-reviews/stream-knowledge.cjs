@@ -280,6 +280,17 @@ function uniqueStrings(values) {
   ].sort(compareStrings);
 }
 
+function orderedUniqueStrings(values) {
+  return [
+    ...new Set(
+      values
+        .filter((value) => typeof value === "string")
+        .map((value) => value.trim())
+        .filter(Boolean)
+    ),
+  ];
+}
+
 function identifierAliases(value) {
   const original = String(value ?? "").trim();
   if (!original) {
@@ -400,7 +411,7 @@ function splitEditorialPage({
       reviewVersion,
       page.id
     )}${currentSection.anchor ? `#${currentSection.anchor}` : ""}`;
-    const headingPath = uniqueStrings([
+    const headingPath = orderedUniqueStrings([
       pageHeading,
       currentSection.parentTitle,
       currentSection.title,
@@ -590,9 +601,45 @@ function sourceExcerpt(sourceText, range, { scope, kind }) {
   if (excerpt.length <= maxCharacters) {
     return excerpt;
   }
-  const headLength = Math.floor(maxCharacters * 0.72);
-  const tailLength = maxCharacters - headLength - 7;
-  return `${excerpt.slice(0, headLength)}\n…\n${excerpt.slice(-tailLength)}`;
+  const marker = "\n…\n";
+  const availableCharacters = maxCharacters - marker.length;
+  const headBudget = Math.floor(availableCharacters * 0.72);
+  const tailBudget = availableCharacters - headBudget;
+  const excerptLines = excerpt.split("\n");
+  const headLines = [];
+  let headCharacters = 0;
+  let headEnd = 0;
+  while (headEnd < excerptLines.length) {
+    const line = excerptLines[headEnd];
+    const nextLength =
+      headCharacters + (headLines.length > 0 ? 1 : 0) + line.length;
+    if (nextLength > headBudget) {
+      break;
+    }
+    headLines.push(line);
+    headCharacters = nextLength;
+    headEnd += 1;
+  }
+
+  const tailLines = [];
+  let tailCharacters = 0;
+  let tailStart = excerptLines.length;
+  while (tailStart > headEnd) {
+    const line = excerptLines[tailStart - 1];
+    const nextLength =
+      tailCharacters + (tailLines.length > 0 ? 1 : 0) + line.length;
+    if (nextLength > tailBudget) {
+      break;
+    }
+    tailLines.unshift(line);
+    tailCharacters = nextLength;
+    tailStart -= 1;
+  }
+
+  if (headLines.length === 0 || tailLines.length === 0) {
+    return "";
+  }
+  return `${headLines.join("\n")}${marker}${tailLines.join("\n")}`;
 }
 
 function sourceReviewPath(reviewId, version, sourcePath, range) {

@@ -1,0 +1,3545 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0xc488549d",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "name": "EmptyRandomWords",
+          "selector": "0xc488549d",
+          "signature": "EmptyRandomWords(uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0x5e315374",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "retryCount",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "maxRetryCount",
+              "type": "uint256"
+            }
+          ],
+          "name": "RandomnessPostProcessingRetryLimitReached",
+          "selector": "0x5e315374",
+          "signature": "RandomnessPostProcessingRetryLimitReached(uint256,uint256,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0xbc1cb82b",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "name": "RandomnessRequestAlreadyExists",
+          "selector": "0xbc1cb82b",
+          "signature": "RandomnessRequestAlreadyExists(uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0x8b6fdc0a",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "enum StreamRandomizerLifecycle.RandomnessRequestState",
+              "name": "state",
+              "type": "uint8"
+            }
+          ],
+          "name": "RandomnessRequestNotFailedPostProcessing",
+          "selector": "0x8b6fdc0a",
+          "signature": "RandomnessRequestNotFailedPostProcessing(uint256,uint8)"
+        },
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0xfae276cd",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "enum StreamRandomizerLifecycle.RandomnessRequestState",
+              "name": "state",
+              "type": "uint8"
+            }
+          ],
+          "name": "RandomnessRequestNotFulfilled",
+          "selector": "0xfae276cd",
+          "signature": "RandomnessRequestNotFulfilled(uint256,uint8)"
+        },
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0x685e6fed",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "enum StreamRandomizerLifecycle.RandomnessRequestState",
+              "name": "state",
+              "type": "uint8"
+            }
+          ],
+          "name": "RandomnessRequestNotPending",
+          "selector": "0x685e6fed",
+          "signature": "RandomnessRequestNotPending(uint256,uint8)"
+        },
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0x95d22d86",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "expectedEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "actualEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "address",
+              "name": "expectedProvider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "internalType": "address",
+              "name": "actualProvider",
+              "type": "address"
+            }
+          ],
+          "name": "StaleRandomnessRequest",
+          "selector": "0x95d22d86",
+          "signature": "StaleRandomnessRequest(uint256,uint256,uint256,address,address)"
+        },
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0xa68fbeff",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "name": "TokenRandomnessRequestAlreadyExists",
+          "selector": "0xa68fbeff",
+          "signature": "TokenRandomnessRequestAlreadyExists(uint256,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0xab2112a6",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "name": "UnknownRandomnessRequest",
+          "selector": "0xab2112a6",
+          "signature": "UnknownRandomnessRequest(uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0xc1ae599b",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "expectedProvider",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "actualProvider",
+              "type": "address"
+            }
+          ],
+          "name": "WrongRandomnessProvider",
+          "selector": "0xc1ae599b",
+          "signature": "WrongRandomnessProvider(uint256,address,address)"
+        },
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0xd6d556a3",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "expectedCollectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "uint256",
+              "name": "actualCollectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "WrongRandomnessTokenCollection",
+          "selector": "0xd6d556a3",
+          "signature": "WrongRandomnessTokenCollection(uint256,uint256,uint256,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0x490dd684",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "name": "ZeroDerivedSeed",
+          "selector": "0x490dd684",
+          "signature": "ZeroDerivedSeed(uint256)"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#event:BurnedTokenRandomnessRecorded(uint256,uint256,uint256,address,uint256,bytes32,bytes32)",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "derivedSeed",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "rawOutputHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "BurnedTokenRandomnessRecorded",
+          "signature": "BurnedTokenRandomnessRecorded(uint256,uint256,uint256,address,uint256,bytes32,bytes32)",
+          "topic0": "0xfde245e26e3b5b676c8c9c34f0b1b92b8d8f2f14e91c619303c1f48f99838694"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#event:RandomnessFulfilled(uint256,uint256,uint256,address,uint256,bytes32,bytes32)",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "derivedSeed",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "rawOutputHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RandomnessFulfilled",
+          "signature": "RandomnessFulfilled(uint256,uint256,uint256,address,uint256,bytes32,bytes32)",
+          "topic0": "0xfd85cce4bf4d4f47a0065961da09b066c83ecec24be36440988898305b8db17c"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#event:RandomnessPostProcessingFailed(uint256,uint256,uint256,address,uint256,bytes32,bytes32,bytes32)",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "derivedSeed",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "rawOutputHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "failureDataHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RandomnessPostProcessingFailed",
+          "signature": "RandomnessPostProcessingFailed(uint256,uint256,uint256,address,uint256,bytes32,bytes32,bytes32)",
+          "topic0": "0x301e99f83c934f6f0766cd151931e3b38ac1abe70e9d956b6eb0b7eef7aff13c"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#event:RandomnessPostProcessingRetried(uint256,uint256,uint256,address,uint256,uint256,bytes32,bytes32)",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "retryCount",
+              "type": "uint256"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "derivedSeed",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "rawOutputHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RandomnessPostProcessingRetried",
+          "signature": "RandomnessPostProcessingRetried(uint256,uint256,uint256,address,uint256,uint256,bytes32,bytes32)",
+          "topic0": "0xc811cb1f3e4d0329bd50ef54ae5824d9339edcd7e47031f7babbbef5abfb2773"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#event:RandomnessPostProcessingRetryFailed(uint256,uint256,uint256,address,uint256,uint256,bytes32,bytes32,bytes32)",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "retryCount",
+              "type": "uint256"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "derivedSeed",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "rawOutputHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "failureDataHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RandomnessPostProcessingRetryFailed",
+          "signature": "RandomnessPostProcessingRetryFailed(uint256,uint256,uint256,address,uint256,uint256,bytes32,bytes32,bytes32)",
+          "topic0": "0xc11e913ac38116ce1ad83f1578d7f0a97637ad09a6cb66fbcf5029e99d2852c6"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#event:RandomnessRequestMarkedStale(uint256,uint256,uint256,address,uint256)",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            }
+          ],
+          "name": "RandomnessRequestMarkedStale",
+          "signature": "RandomnessRequestMarkedStale(uint256,uint256,uint256,address,uint256)",
+          "topic0": "0xaf0065c93d2cdea9da65154eb41719040a346336bdf5f16b403067edf22294a0"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#event:RandomnessRequested(uint256,uint256,uint256,address,uint256)",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            }
+          ],
+          "name": "RandomnessRequested",
+          "signature": "RandomnessRequested(uint256,uint256,uint256,address,uint256)",
+          "topic0": "0x4dd68c3d3b4fe85a1bb1d02c49f9c3e99963314aedff0d58ef155634fc9dd118"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0xe3a51e5a",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [],
+          "name": "MAX_RANDOMNESS_POST_PROCESSING_RETRIES",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xe3a51e5a",
+          "signature": "MAX_RANDOMNESS_POST_PROCESSING_RETRIES()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x50e4c060",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [],
+          "name": "RANDOMNESS_SEED_TYPEHASH",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x50e4c060",
+          "signature": "RANDOMNESS_SEED_TYPEHASH()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0xdd26bdd1",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "pendingRandomnessRequests",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xdd26bdd1",
+          "signature": "pendingRandomnessRequests(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0xba73a1d8",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "_requestId",
+              "type": "uint256"
+            }
+          ],
+          "name": "randomnessRequestState",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "enum StreamRandomizerLifecycle.RandomnessRequestState",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0xba73a1d8",
+          "signature": "randomnessRequestState(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x841940f9",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "randomnessRequestStateForToken",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "enum StreamRandomizerLifecycle.RandomnessRequestState",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x841940f9",
+          "signature": "randomnessRequestStateForToken(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x1370ba38",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "requestToToken",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x1370ba38",
+          "signature": "requestToToken(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x677e25c7",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "_requestId",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveRandomnessRequest",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamRandomizerLifecycle.RandomnessRequest",
+              "name": "",
+              "type": "(uint256,uint256,address,uint256,uint256,uint8,uint256,uint256,uint256,uint256,bytes32,bytes32,bytes32,uint256)"
+            }
+          ],
+          "selector": "0x677e25c7",
+          "signature": "retrieveRandomnessRequest(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x60e26604",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "retrieveRandomnessRequestForToken",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamRandomizerLifecycle.RandomnessRequest",
+              "name": "",
+              "type": "(uint256,uint256,address,uint256,uint256,uint8,uint256,uint256,uint256,uint256,bytes32,bytes32,bytes32,uint256)"
+            }
+          ],
+          "selector": "0x60e26604",
+          "signature": "retrieveRandomnessRequestForToken(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x81d673e0",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [],
+          "name": "supportsRandomizerLifecycle",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x81d673e0",
+          "signature": "supportsRandomizerLifecycle()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x94b8ae9d",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenIdToCollection",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x94b8ae9d",
+          "signature": "tokenIdToCollection(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0xaa419ba4",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenToRequest",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xaa419ba4",
+          "signature": "tokenToRequest(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0xe231f9df",
+          "declaringDefinitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+          "inherited": false,
+          "inputs": [],
+          "name": "totalPendingRandomnessRequests",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xe231f9df",
+          "signature": "totalPendingRandomnessRequests()",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": true,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [
+        {
+          "memberDetails": [
+            {
+              "index": 0,
+              "name": "None",
+              "range": {
+                "byteLength": 4,
+                "byteStart": 476,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L14",
+                "lineEnd": 14,
+                "lineStart": 14,
+                "snippetSha256": "sha256:dc937b59892604f5a86ac96936cd7ff09e25f18ae6b758e8014a24c7fa039e91",
+                "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+              }
+            },
+            {
+              "index": 1,
+              "name": "Pending",
+              "range": {
+                "byteLength": 7,
+                "byteStart": 490,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L15",
+                "lineEnd": 15,
+                "lineStart": 15,
+                "snippetSha256": "sha256:331551b0de4157c9abc7b72b61b96a2a928fd6db3cdf029c1fc44b08ad633aa6",
+                "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Fulfilled",
+              "range": {
+                "byteLength": 9,
+                "byteStart": 507,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L16",
+                "lineEnd": 16,
+                "lineStart": 16,
+                "snippetSha256": "sha256:b7c6220ada3d1bc4d2365d306a468e5ad4f5df7cc2d432284d9bbb3d8dad0003",
+                "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Stale",
+              "range": {
+                "byteLength": 5,
+                "byteStart": 526,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L17",
+                "lineEnd": 17,
+                "lineStart": 17,
+                "snippetSha256": "sha256:40c9e59c5e152b0ae9affc84d8461c29b75a7709e4506307eeedf246b526014e",
+                "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+              }
+            },
+            {
+              "index": 4,
+              "name": "FailedPostProcessing",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 541,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L18",
+                "lineEnd": 18,
+                "lineStart": 18,
+                "snippetSha256": "sha256:4e666d2d012a54e911a639222c806704fb13333540c7bdac3c9e6973c1f43be0",
+                "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+              }
+            }
+          ],
+          "members": [
+            "None",
+            "Pending",
+            "Fulfilled",
+            "Stale",
+            "FailedPostProcessing"
+          ],
+          "name": "RandomnessRequestState",
+          "natspec": "",
+          "range": {
+            "byteLength": 129,
+            "byteStart": 438,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L13-L19",
+            "lineEnd": 19,
+            "lineStart": 13,
+            "snippetSha256": "sha256:7c1ad50c5962dfe191948c1240d11967eb5d07ee4920d9a4604e3d450795dbd7",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          }
+        }
+      ],
+      "errors": [
+        {
+          "astId": 77468,
+          "canonicalSignature": "UnknownRandomnessRequest(uint256)",
+          "displaySignature": "UnknownRandomnessRequest(uint256)",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0xab2112a6",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZXJyb3I6MHhhYjIxMTJhNg",
+          "kind": "error",
+          "name": "UnknownRandomnessRequest",
+          "natspec": "",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 1069,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L38",
+            "lineEnd": 38,
+            "lineStart": 38,
+            "snippetSha256": "sha256:0eec5d50d69bfb445b1fba191d45272eca9db0cd17f8c60c189a569637942f8e",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0xab2112a6"
+        },
+        {
+          "astId": 77472,
+          "canonicalSignature": "RandomnessRequestAlreadyExists(uint256)",
+          "displaySignature": "RandomnessRequestAlreadyExists(uint256)",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0xbc1cb82b",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZXJyb3I6MHhiYzFjYjgyYg",
+          "kind": "error",
+          "name": "RandomnessRequestAlreadyExists",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 1124,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L39",
+            "lineEnd": 39,
+            "lineStart": 39,
+            "snippetSha256": "sha256:d0ad2bca144e377243e429b5e207ae1cf143636a75570eea2935fb1b67e8f7a0",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0xbc1cb82b"
+        },
+        {
+          "astId": 77478,
+          "canonicalSignature": "TokenRandomnessRequestAlreadyExists(uint256,uint256)",
+          "displaySignature": "TokenRandomnessRequestAlreadyExists(uint256,uint256)",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0xa68fbeff",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZXJyb3I6MHhhNjhmYmVmZg",
+          "kind": "error",
+          "name": "TokenRandomnessRequestAlreadyExists",
+          "natspec": "",
+          "range": {
+            "byteLength": 78,
+            "byteStart": 1185,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L40",
+            "lineEnd": 40,
+            "lineStart": 40,
+            "snippetSha256": "sha256:0e2b84af39461dd6a0d498a0208c0186c4c31c3fdf2bbd18fe92c3cfebfbc7a1",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0xa68fbeff"
+        },
+        {
+          "astId": 77485,
+          "canonicalSignature": "RandomnessRequestNotPending(uint256,uint8)",
+          "displaySignature": "RandomnessRequestNotPending(uint256,RandomnessRequestState)",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0x685e6fed",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "state",
+              "type": "RandomnessRequestState"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZXJyb3I6MHg2ODVlNmZlZA",
+          "kind": "error",
+          "name": "RandomnessRequestNotPending",
+          "natspec": "",
+          "range": {
+            "byteLength": 83,
+            "byteStart": 1268,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L41",
+            "lineEnd": 41,
+            "lineStart": 41,
+            "snippetSha256": "sha256:32d8ee07b3a7bbb32e3f4037ca88c3bebd19928eac2ae4ba07ddfab8bd847cae",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0x685e6fed"
+        },
+        {
+          "astId": 77493,
+          "canonicalSignature": "WrongRandomnessProvider(uint256,address,address)",
+          "displaySignature": "WrongRandomnessProvider(uint256,address,address)",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0xc1ae599b",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "expectedProvider",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "actualProvider",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZXJyb3I6MHhjMWFlNTk5Yg",
+          "kind": "error",
+          "name": "WrongRandomnessProvider",
+          "natspec": "",
+          "range": {
+            "byteLength": 113,
+            "byteStart": 1356,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L42-L44",
+            "lineEnd": 44,
+            "lineStart": 42,
+            "snippetSha256": "sha256:8eb82c7363be37bbb6a4c9f377d754247b34e4b701754c53611dab8a202de459",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0xc1ae599b"
+        },
+        {
+          "astId": 77503,
+          "canonicalSignature": "WrongRandomnessTokenCollection(uint256,uint256,uint256,uint256)",
+          "displaySignature": "WrongRandomnessTokenCollection(uint256,uint256,uint256,uint256)",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0xd6d556a3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "expectedCollectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "actualCollectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZXJyb3I6MHhkNmQ1NTZhMw",
+          "kind": "error",
+          "name": "WrongRandomnessTokenCollection",
+          "natspec": "",
+          "range": {
+            "byteLength": 145,
+            "byteStart": 1474,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L45-L47",
+            "lineEnd": 47,
+            "lineStart": 45,
+            "snippetSha256": "sha256:6069516f487508afa27bf8cb061e79a03bbbd373e3c1886bdfdb00f4921e157d",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0xd6d556a3"
+        },
+        {
+          "astId": 77515,
+          "canonicalSignature": "StaleRandomnessRequest(uint256,uint256,uint256,address,address)",
+          "displaySignature": "StaleRandomnessRequest(uint256,uint256,uint256,address,address)",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0x95d22d86",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "expectedEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "actualEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "expectedProvider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "name": "actualProvider",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZXJyb3I6MHg5NWQyMmQ4Ng",
+          "kind": "error",
+          "name": "StaleRandomnessRequest",
+          "natspec": "",
+          "range": {
+            "byteLength": 188,
+            "byteStart": 1624,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L48-L54",
+            "lineEnd": 54,
+            "lineStart": 48,
+            "snippetSha256": "sha256:2847dc6c8966e9de5249ddf80849ad272fd8b52be0c57059dd8a779dd047ea8e",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0x95d22d86"
+        },
+        {
+          "astId": 77519,
+          "canonicalSignature": "EmptyRandomWords(uint256)",
+          "displaySignature": "EmptyRandomWords(uint256)",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0xc488549d",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZXJyb3I6MHhjNDg4NTQ5ZA",
+          "kind": "error",
+          "name": "EmptyRandomWords",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 1817,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L55",
+            "lineEnd": 55,
+            "lineStart": 55,
+            "snippetSha256": "sha256:8e82c7478b0ee3415fecac9c78d7c48b061920181404ad939ee7f27cb7758e13",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0xc488549d"
+        },
+        {
+          "astId": 77523,
+          "canonicalSignature": "ZeroDerivedSeed(uint256)",
+          "displaySignature": "ZeroDerivedSeed(uint256)",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0x490dd684",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZXJyb3I6MHg0OTBkZDY4NA",
+          "kind": "error",
+          "name": "ZeroDerivedSeed",
+          "natspec": "",
+          "range": {
+            "byteLength": 41,
+            "byteStart": 1864,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L56",
+            "lineEnd": 56,
+            "lineStart": 56,
+            "snippetSha256": "sha256:109d101efcde47068666beac436b7aab7f05fe57707657631074ba9232b8871d",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0x490dd684"
+        },
+        {
+          "astId": 77530,
+          "canonicalSignature": "RandomnessRequestNotFulfilled(uint256,uint8)",
+          "displaySignature": "RandomnessRequestNotFulfilled(uint256,RandomnessRequestState)",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0xfae276cd",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "state",
+              "type": "RandomnessRequestState"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZXJyb3I6MHhmYWUyNzZjZA",
+          "kind": "error",
+          "name": "RandomnessRequestNotFulfilled",
+          "natspec": "",
+          "range": {
+            "byteLength": 85,
+            "byteStart": 1910,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L57",
+            "lineEnd": 57,
+            "lineStart": 57,
+            "snippetSha256": "sha256:5b0f6ead7fb4f9cd0d03cae961c5b6ca1a62d48c21795327c6dffc623e99b469",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0xfae276cd"
+        },
+        {
+          "astId": 77537,
+          "canonicalSignature": "RandomnessRequestNotFailedPostProcessing(uint256,uint8)",
+          "displaySignature": "RandomnessRequestNotFailedPostProcessing(uint256,RandomnessRequestState)",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0x8b6fdc0a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "state",
+              "type": "RandomnessRequestState"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZXJyb3I6MHg4YjZmZGMwYQ",
+          "kind": "error",
+          "name": "RandomnessRequestNotFailedPostProcessing",
+          "natspec": "",
+          "range": {
+            "byteLength": 96,
+            "byteStart": 2000,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L58",
+            "lineEnd": 58,
+            "lineStart": 58,
+            "snippetSha256": "sha256:4afc338f49ab665489b4b48d3a213a31c47e4e835078982b6599d957e32a10eb",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0x8b6fdc0a"
+        },
+        {
+          "astId": 77545,
+          "canonicalSignature": "RandomnessPostProcessingRetryLimitReached(uint256,uint256,uint256)",
+          "displaySignature": "RandomnessPostProcessingRetryLimitReached(uint256,uint256,uint256)",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#error:0x5e315374",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "retryCount",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "maxRetryCount",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZXJyb3I6MHg1ZTMxNTM3NA",
+          "kind": "error",
+          "name": "RandomnessPostProcessingRetryLimitReached",
+          "natspec": "",
+          "range": {
+            "byteLength": 124,
+            "byteStart": 2101,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L59-L61",
+            "lineEnd": 61,
+            "lineStart": 59,
+            "snippetSha256": "sha256:3d20526cd03d6532931df74390a0efdc8c9bfff8b4de994cf8099415ea056968",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0x5e315374"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 77580,
+          "canonicalSignature": "RandomnessRequested(uint256,uint256,uint256,address,uint256)",
+          "displaySignature": "RandomnessRequested(uint256,uint256,uint256,address,uint256)",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#event:RandomnessRequested(uint256,uint256,uint256,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZXZlbnQ6UmFuZG9tbmVzc1JlcXVlc3RlZCh1aW50MjU2LHVpbnQyNTYsdWludDI1NixhZGRyZXNzLHVpbnQyNTYp",
+          "kind": "event",
+          "name": "RandomnessRequested",
+          "natspec": "",
+          "range": {
+            "byteLength": 197,
+            "byteStart": 2602,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L70-L76",
+            "lineEnd": 76,
+            "lineStart": 70,
+            "snippetSha256": "sha256:52f2e9bf5a16e259e87f9b7f3c58b661ee161c5466823a36221612e993e5b8b5",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "topic0": "0x4dd68c3d3b4fe85a1bb1d02c49f9c3e99963314aedff0d58ef155634fc9dd118"
+        },
+        {
+          "anonymous": false,
+          "astId": 77596,
+          "canonicalSignature": "RandomnessFulfilled(uint256,uint256,uint256,address,uint256,bytes32,bytes32)",
+          "displaySignature": "RandomnessFulfilled(uint256,uint256,uint256,address,uint256,bytes32,bytes32)",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#event:RandomnessFulfilled(uint256,uint256,uint256,address,uint256,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "derivedSeed",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "name": "rawOutputHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZXZlbnQ6UmFuZG9tbmVzc0Z1bGZpbGxlZCh1aW50MjU2LHVpbnQyNTYsdWludDI1NixhZGRyZXNzLHVpbnQyNTYsYnl0ZXMzMixieXRlczMyKQ",
+          "kind": "event",
+          "name": "RandomnessFulfilled",
+          "natspec": "",
+          "range": {
+            "byteLength": 257,
+            "byteStart": 2804,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L77-L85",
+            "lineEnd": 85,
+            "lineStart": 77,
+            "snippetSha256": "sha256:57d9714fd22d7c4a53b4ca1abd7db0f042968878ddf44bd7342205a85f2c724c",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "topic0": "0xfd85cce4bf4d4f47a0065961da09b066c83ecec24be36440988898305b8db17c"
+        },
+        {
+          "anonymous": false,
+          "astId": 77608,
+          "canonicalSignature": "RandomnessRequestMarkedStale(uint256,uint256,uint256,address,uint256)",
+          "displaySignature": "RandomnessRequestMarkedStale(uint256,uint256,uint256,address,uint256)",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#event:RandomnessRequestMarkedStale(uint256,uint256,uint256,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZXZlbnQ6UmFuZG9tbmVzc1JlcXVlc3RNYXJrZWRTdGFsZSh1aW50MjU2LHVpbnQyNTYsdWludDI1NixhZGRyZXNzLHVpbnQyNTYp",
+          "kind": "event",
+          "name": "RandomnessRequestMarkedStale",
+          "natspec": "",
+          "range": {
+            "byteLength": 206,
+            "byteStart": 3066,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L86-L92",
+            "lineEnd": 92,
+            "lineStart": 86,
+            "snippetSha256": "sha256:7901ac5bb2b17aa32920aba7363d99a0089b50c82e7b7c60294274b783518572",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "topic0": "0xaf0065c93d2cdea9da65154eb41719040a346336bdf5f16b403067edf22294a0"
+        },
+        {
+          "anonymous": false,
+          "astId": 77626,
+          "canonicalSignature": "RandomnessPostProcessingFailed(uint256,uint256,uint256,address,uint256,bytes32,bytes32,bytes32)",
+          "displaySignature": "RandomnessPostProcessingFailed(uint256,uint256,uint256,address,uint256,bytes32,bytes32,bytes32)",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#event:RandomnessPostProcessingFailed(uint256,uint256,uint256,address,uint256,bytes32,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "derivedSeed",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "name": "rawOutputHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "name": "failureDataHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZXZlbnQ6UmFuZG9tbmVzc1Bvc3RQcm9jZXNzaW5nRmFpbGVkKHVpbnQyNTYsdWludDI1Nix1aW50MjU2LGFkZHJlc3MsdWludDI1NixieXRlczMyLGJ5dGVzMzIsYnl0ZXMzMik",
+          "kind": "event",
+          "name": "RandomnessPostProcessingFailed",
+          "natspec": "",
+          "range": {
+            "byteLength": 301,
+            "byteStart": 3277,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L93-L102",
+            "lineEnd": 102,
+            "lineStart": 93,
+            "snippetSha256": "sha256:8432652a3ac8d2dbd4c74bdb90d321716a9a6397e0eafd34d8abde191cbd1978",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "topic0": "0x301e99f83c934f6f0766cd151931e3b38ac1abe70e9d956b6eb0b7eef7aff13c"
+        },
+        {
+          "anonymous": false,
+          "astId": 77644,
+          "canonicalSignature": "RandomnessPostProcessingRetried(uint256,uint256,uint256,address,uint256,uint256,bytes32,bytes32)",
+          "displaySignature": "RandomnessPostProcessingRetried(uint256,uint256,uint256,address,uint256,uint256,bytes32,bytes32)",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#event:RandomnessPostProcessingRetried(uint256,uint256,uint256,address,uint256,uint256,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "retryCount",
+              "type": "uint256"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "name": "derivedSeed",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "name": "rawOutputHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZXZlbnQ6UmFuZG9tbmVzc1Bvc3RQcm9jZXNzaW5nUmV0cmllZCh1aW50MjU2LHVpbnQyNTYsdWludDI1NixhZGRyZXNzLHVpbnQyNTYsdWludDI1NixieXRlczMyLGJ5dGVzMzIp",
+          "kind": "event",
+          "name": "RandomnessPostProcessingRetried",
+          "natspec": "",
+          "range": {
+            "byteLength": 297,
+            "byteStart": 3583,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L103-L112",
+            "lineEnd": 112,
+            "lineStart": 103,
+            "snippetSha256": "sha256:035736b7e598c8bc68ab9ff1e539fcea07466eec3a005adda06b30b0ecc6b4df",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "topic0": "0xc811cb1f3e4d0329bd50ef54ae5824d9339edcd7e47031f7babbbef5abfb2773"
+        },
+        {
+          "anonymous": false,
+          "astId": 77664,
+          "canonicalSignature": "RandomnessPostProcessingRetryFailed(uint256,uint256,uint256,address,uint256,uint256,bytes32,bytes32,bytes32)",
+          "displaySignature": "RandomnessPostProcessingRetryFailed(uint256,uint256,uint256,address,uint256,uint256,bytes32,bytes32,bytes32)",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#event:RandomnessPostProcessingRetryFailed(uint256,uint256,uint256,address,uint256,uint256,bytes32,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "retryCount",
+              "type": "uint256"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "name": "derivedSeed",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "name": "rawOutputHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "name": "failureDataHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZXZlbnQ6UmFuZG9tbmVzc1Bvc3RQcm9jZXNzaW5nUmV0cnlGYWlsZWQodWludDI1Nix1aW50MjU2LHVpbnQyNTYsYWRkcmVzcyx1aW50MjU2LHVpbnQyNTYsYnl0ZXMzMixieXRlczMyLGJ5dGVzMzIp",
+          "kind": "event",
+          "name": "RandomnessPostProcessingRetryFailed",
+          "natspec": "",
+          "range": {
+            "byteLength": 334,
+            "byteStart": 3885,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L113-L123",
+            "lineEnd": 123,
+            "lineStart": 113,
+            "snippetSha256": "sha256:b9440d68c45775daf873263055280f7e1b042db0cf2ffc061923e97fc6b93873",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "topic0": "0xc11e913ac38116ce1ad83f1578d7f0a97637ad09a6cb66fbcf5029e99d2852c6"
+        },
+        {
+          "anonymous": false,
+          "astId": 77680,
+          "canonicalSignature": "BurnedTokenRandomnessRecorded(uint256,uint256,uint256,address,uint256,bytes32,bytes32)",
+          "displaySignature": "BurnedTokenRandomnessRecorded(uint256,uint256,uint256,address,uint256,bytes32,bytes32)",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#event:BurnedTokenRandomnessRecorded(uint256,uint256,uint256,address,uint256,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "derivedSeed",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "name": "rawOutputHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZXZlbnQ6QnVybmVkVG9rZW5SYW5kb21uZXNzUmVjb3JkZWQodWludDI1Nix1aW50MjU2LHVpbnQyNTYsYWRkcmVzcyx1aW50MjU2LGJ5dGVzMzIsYnl0ZXMzMik",
+          "kind": "event",
+          "name": "BurnedTokenRandomnessRecorded",
+          "natspec": "",
+          "range": {
+            "byteLength": 267,
+            "byteStart": 4224,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L124-L132",
+            "lineEnd": 132,
+            "lineStart": 124,
+            "snippetSha256": "sha256:a188cd14e0f2fb4b66ad012eda694d817ff6cb08a3d22c9d53c9728c7e8eb058",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "topic0": "0xfde245e26e3b5b676c8c9c34f0b1b92b8d8f2f14e91c619303c1f48f99838694"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "MAX_RANDOMNESS_POST_PROCESSING_RETRIES()",
+          "displaySignature": "MAX_RANDOMNESS_POST_PROCESSING_RETRIES()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0xe3a51e5a",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246MHhlM2E1MWU1YQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "MAX_RANDOMNESS_POST_PROCESSING_RETRIES",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 66,
+            "byteStart": 138,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L8",
+            "lineEnd": 8,
+            "lineStart": 8,
+            "snippetSha256": "sha256:2bb937b8b75680f42bb49e7257166e2dd1f2fc43696f63ea13699666a52e019c",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0xe3a51e5a",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "RANDOMNESS_SEED_TYPEHASH()",
+          "displaySignature": "RANDOMNESS_SEED_TYPEHASH()",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x50e4c060",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246MHg1MGU0YzA2MA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "RANDOMNESS_SEED_TYPEHASH",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 221,
+            "byteStart": 210,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L9-L11",
+            "lineEnd": 11,
+            "lineStart": 9,
+            "snippetSha256": "sha256:62a96a57d90d0d07d1a65647c71a0d6e0c47e4a07e59da3a869018bb8db4daa5",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0x50e4c060",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "requestToToken(uint256)",
+          "displaySignature": "requestToToken(uint256)",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x1370ba38",
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246MHgxMzcwYmEzOA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestToToken",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 49,
+            "byteStart": 2301,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L64",
+            "lineEnd": 64,
+            "lineStart": 64,
+            "snippetSha256": "sha256:4ee26e856cfd0519bb5a95937b3059ab15fbdf8168d9ad330c55f86b203716b1",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0x1370ba38",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "tokenToRequest(uint256)",
+          "displaySignature": "tokenToRequest(uint256)",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0xaa419ba4",
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246MHhhYTQxOWJhNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "tokenToRequest",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 49,
+            "byteStart": 2356,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L65",
+            "lineEnd": 65,
+            "lineStart": 65,
+            "snippetSha256": "sha256:d1e343bd081e6153e0aa52b8f6c4e7222927258c8f579777409f8aa27f968fc1",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0xaa419ba4",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "tokenIdToCollection(uint256)",
+          "displaySignature": "tokenIdToCollection(uint256)",
+          "functionKind": "getter",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x94b8ae9d",
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246MHg5NGI4YWU5ZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "tokenIdToCollection",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 54,
+            "byteStart": 2411,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L66",
+            "lineEnd": 66,
+            "lineStart": 66,
+            "snippetSha256": "sha256:c47b04e8a6c13ec218beef4e0f90090b3e57302f9aa0af0fc3311d9f740bfed3",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0x94b8ae9d",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "retrieveRandomnessRequest(uint256)",
+          "displaySignature": "retrieveRandomnessRequest(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x677e25c7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_requestId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246MHg2NzdlMjVjNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveRandomnessRequest",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "RandomnessRequest"
+            }
+          ],
+          "range": {
+            "byteLength": 184,
+            "byteStart": 4497,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L134-L140",
+            "lineEnd": 140,
+            "lineStart": 134,
+            "snippetSha256": "sha256:b364ae47c531bef439ddac97a8c5247dad1ffc711d098c5ab3441042223dbbca",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0x677e25c7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "randomnessRequestState(uint256)",
+          "displaySignature": "randomnessRequestState(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0xba73a1d8",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_requestId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246MHhiYTczYTFkOA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "randomnessRequestState",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "RandomnessRequestState"
+            }
+          ],
+          "range": {
+            "byteLength": 185,
+            "byteStart": 4687,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L142-L148",
+            "lineEnd": 148,
+            "lineStart": 142,
+            "snippetSha256": "sha256:e47352c212fe712dc0d3d7691132d26d31ac8f8d98a82ed4f985c9c758a44a51",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0xba73a1d8",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "retrieveRandomnessRequestForToken(uint256)",
+          "displaySignature": "retrieveRandomnessRequestForToken(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x60e26604",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246MHg2MGUyNjYwNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "retrieveRandomnessRequestForToken",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "RandomnessRequest"
+            }
+          ],
+          "range": {
+            "byteLength": 202,
+            "byteStart": 4878,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L150-L156",
+            "lineEnd": 156,
+            "lineStart": 150,
+            "snippetSha256": "sha256:f550acb286f3a95ac5d821310ce3783db22508ef42afee72eed9ee3190723b3f",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0x60e26604",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "randomnessRequestStateForToken(uint256)",
+          "displaySignature": "randomnessRequestStateForToken(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x841940f9",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246MHg4NDE5NDBmOQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "randomnessRequestStateForToken",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "RandomnessRequestState"
+            }
+          ],
+          "range": {
+            "byteLength": 203,
+            "byteStart": 5086,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L158-L164",
+            "lineEnd": 164,
+            "lineStart": 158,
+            "snippetSha256": "sha256:7520ce33da7fa6ab728d1f33eb84f7e09f08b93f53f39e3a1c2b6221c391b1ca",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0x841940f9",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "supportsRandomizerLifecycle()",
+          "displaySignature": "supportsRandomizerLifecycle()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x81d673e0",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246MHg4MWQ2NzNlMA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsRandomizerLifecycle",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 96,
+            "byteStart": 5295,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L166-L168",
+            "lineEnd": 168,
+            "lineStart": 166,
+            "snippetSha256": "sha256:d364e4cc91838504f4ec9b3462ae9c71da615a2194a9a444fef6d45532e0064f",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0x81d673e0",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "pendingRandomnessRequests(uint256)",
+          "displaySignature": "pendingRandomnessRequests(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0xdd26bdd1",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246MHhkZDI2YmRkMQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "pendingRandomnessRequests",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 162,
+            "byteStart": 5397,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L170-L172",
+            "lineEnd": 172,
+            "lineStart": 170,
+            "snippetSha256": "sha256:67e5a59a24da9f09231b55879ecbee61973a6e56e5d25ddccd1bc87fdac5f244",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0xdd26bdd1",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "totalPendingRandomnessRequests()",
+          "displaySignature": "totalPendingRandomnessRequests()",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0xe231f9df",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246MHhlMjMxZjlkZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "totalPendingRandomnessRequests",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 125,
+            "byteStart": 5565,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L174-L176",
+            "lineEnd": 176,
+            "lineStart": 174,
+            "snippetSha256": "sha256:03bb0fb6018655ae6de045208159bc2f4f3bde3866e0b6e213b869fa396428b3",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0xe231f9df",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_recordRandomnessRequest(uint256,uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:_recordRandomnessRequest(uint256,uint256,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "_collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "_tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "_randomizerEpoch",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246X3JlY29yZFJhbmRvbW5lc3NSZXF1ZXN0KHVpbnQyNTYsdWludDI1Nix1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_recordRandomnessRequest",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1867,
+            "byteStart": 5696,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L178-L222",
+            "lineEnd": 222,
+            "lineStart": 178,
+            "snippetSha256": "sha256:02fbd13e6bc7720837b28acd33b80c3fc76061a6c09a0cd6badf24ae9e0b3e33",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_fulfillRandomnessRequest(IStreamCore,uint256,uint256[])",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:_fulfillRandomnessRequest(IStreamCore,uint256,uint256[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_core",
+              "type": "IStreamCore"
+            },
+            {
+              "index": 1,
+              "name": "_requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "_randomWords",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246X2Z1bGZpbGxSYW5kb21uZXNzUmVxdWVzdChJU3RyZWFtQ29yZSx1aW50MjU2LHVpbnQyNTZbXSk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_fulfillRandomnessRequest",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "derivedSeed",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 2559,
+            "byteStart": 7569,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L224-L282",
+            "lineEnd": 282,
+            "lineStart": 224,
+            "snippetSha256": "sha256:6d3d4dbad54a62a5063d610b4e83da95deac4ed07dcab27739e9212222d69b2e",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_confirmRandomnessFulfillment(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:_confirmRandomnessFulfillment(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_requestId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246X2NvbmZpcm1SYW5kb21uZXNzRnVsZmlsbG1lbnQodWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_confirmRandomnessFulfillment",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 697,
+            "byteStart": 10134,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L284-L302",
+            "lineEnd": 302,
+            "lineStart": 284,
+            "snippetSha256": "sha256:3c770ceb279c03b99c14d9a64f8ed13a9e289996e4c0389d7c29a719a239b64d",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_confirmBurnedTokenRandomnessRecorded(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:_confirmBurnedTokenRandomnessRecorded(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_requestId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246X2NvbmZpcm1CdXJuZWRUb2tlblJhbmRvbW5lc3NSZWNvcmRlZCh1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_confirmBurnedTokenRandomnessRecorded",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 715,
+            "byteStart": 10837,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L304-L322",
+            "lineEnd": 322,
+            "lineStart": 304,
+            "snippetSha256": "sha256:c3622e2576c6dcea171c4c20c8f447b7da51b19402f4f6067812298547d16023",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_markRandomnessPostProcessingFailed(uint256,bytes)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:_markRandomnessPostProcessingFailed(uint256,bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "failureData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246X21hcmtSYW5kb21uZXNzUG9zdFByb2Nlc3NpbmdGYWlsZWQodWludDI1NixieXRlcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_markRandomnessPostProcessingFailed",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "failureDataHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 636,
+            "byteStart": 11558,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L324-L341",
+            "lineEnd": 341,
+            "lineStart": 324,
+            "snippetSha256": "sha256:c4bc0e2c6c896d2dd9c2e091e29ad2f85d458335d96f49d124a9ed43ec9e1e1f",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_setRandomnessPostProcessingFailedState(uint256,bytes)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:_setRandomnessPostProcessingFailedState(uint256,bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "failureData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246X3NldFJhbmRvbW5lc3NQb3N0UHJvY2Vzc2luZ0ZhaWxlZFN0YXRlKHVpbnQyNTYsYnl0ZXMp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_setRandomnessPostProcessingFailedState",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "failureDataHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 690,
+            "byteStart": 12200,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L343-L358",
+            "lineEnd": 358,
+            "lineStart": 343,
+            "snippetSha256": "sha256:b97f0951b1fe903531ebca7242c92e8769f8dde75029db5b1566cd2241cb0441",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_prepareRandomnessPostProcessingRetry(IStreamCore,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:_prepareRandomnessPostProcessingRetry(IStreamCore,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_core",
+              "type": "IStreamCore"
+            },
+            {
+              "index": 1,
+              "name": "_requestId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246X3ByZXBhcmVSYW5kb21uZXNzUG9zdFByb2Nlc3NpbmdSZXRyeShJU3RyZWFtQ29yZSx1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_prepareRandomnessPostProcessingRetry",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "derivedSeed",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "retryCount",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 2140,
+            "byteStart": 12896,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L360-L405",
+            "lineEnd": 405,
+            "lineStart": 360,
+            "snippetSha256": "sha256:87474b3c49e0d3a1a223e9eed2c886231b3be73b091548a7678df6e37570d562",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_confirmRandomnessPostProcessingRetry(uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:_confirmRandomnessPostProcessingRetry(uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "retryCount",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246X2NvbmZpcm1SYW5kb21uZXNzUG9zdFByb2Nlc3NpbmdSZXRyeSh1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_confirmRandomnessPostProcessingRetry",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 926,
+            "byteStart": 15042,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L407-L432",
+            "lineEnd": 432,
+            "lineStart": 407,
+            "snippetSha256": "sha256:e40ca04d25efe1bce93c07b8004b216e094d7534d11068641c9dee5e3e7b413f",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_markRandomnessPostProcessingRetryFailed(uint256,bytes,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:_markRandomnessPostProcessingRetryFailed(uint256,bytes,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "failureData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "retryCount",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246X21hcmtSYW5kb21uZXNzUG9zdFByb2Nlc3NpbmdSZXRyeUZhaWxlZCh1aW50MjU2LGJ5dGVzLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_markRandomnessPostProcessingRetryFailed",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 673,
+            "byteStart": 15974,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L434-L452",
+            "lineEnd": 452,
+            "lineStart": 434,
+            "snippetSha256": "sha256:270f53166b4017ed0b2ebf317899325dcf838613fdd8c5c9b2e5e8c4dce132aa",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_markRandomnessRequestStale(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:_markRandomnessRequestStale(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_requestId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246X21hcmtSYW5kb21uZXNzUmVxdWVzdFN0YWxlKHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_markRandomnessRequestStale",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 752,
+            "byteStart": 16653,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L454-L472",
+            "lineEnd": 472,
+            "lineStart": 454,
+            "snippetSha256": "sha256:b12efce91c1159c39fe660392b276f5e377d2e96c1f6305b4bf37d0a58a2e2cc",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_decrementPendingRandomnessRequest(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:_decrementPendingRandomnessRequest(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246X2RlY3JlbWVudFBlbmRpbmdSYW5kb21uZXNzUmVxdWVzdCh1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_decrementPendingRandomnessRequest",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 287,
+            "byteStart": 17411,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L474-L478",
+            "lineEnd": 478,
+            "lineStart": 474,
+            "snippetSha256": "sha256:06104286744aff77ed32c70e6f3abe0fa0d57656444052f9c0063a43e823a6d8",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_hashRawRandomWords(uint256[])",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:_hashRawRandomWords(uint256[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_randomWords",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246X2hhc2hSYXdSYW5kb21Xb3Jkcyh1aW50MjU2W10p",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_hashRawRandomWords",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 150,
+            "byteStart": 17704,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L480-L482",
+            "lineEnd": 482,
+            "lineStart": 480,
+            "snippetSha256": "sha256:f01a68e9454cecbc95a97cdf79f9d1e10a0ae5efbe5bb6c11918f1ca56ca8440",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_deriveRandomnessSeed(address,uint256,uint256,uint256,uint256,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:_deriveRandomnessSeed(address,uint256,uint256,uint256,uint256,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "rawOutputHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUjZnVuY3Rpb246X2Rlcml2ZVJhbmRvbW5lc3NTZWVkKGFkZHJlc3MsdWludDI1Nix1aW50MjU2LHVpbnQyNTYsdWludDI1NixieXRlczMyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_deriveRandomnessSeed",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 535,
+            "byteStart": 17860,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L484-L503",
+            "lineEnd": 503,
+            "lineStart": 484,
+            "snippetSha256": "sha256:f1ac0e595dd5444557151accd6a7da0e7c0a7099902f17aa95cf624e1c318420",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0xe3a51e5a",
+          "immutable": false,
+          "name": "MAX_RANDOMNESS_POST_PROCESSING_RETRIES",
+          "natspec": "",
+          "range": {
+            "byteLength": 66,
+            "byteStart": 138,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L8",
+            "lineEnd": 8,
+            "lineStart": 8,
+            "snippetSha256": "sha256:2bb937b8b75680f42bb49e7257166e2dd1f2fc43696f63ea13699666a52e019c",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0xe3a51e5a",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 203,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L8",
+            "lineEnd": 8,
+            "lineStart": 8,
+            "snippetSha256": "sha256:4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "valueSource": "3",
+          "visibility": "public"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x50e4c060",
+          "immutable": false,
+          "name": "RANDOMNESS_SEED_TYPEHASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 221,
+            "byteStart": 210,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L9-L11",
+            "lineEnd": 11,
+            "lineStart": 9,
+            "snippetSha256": "sha256:62a96a57d90d0d07d1a65647c71a0d6e0c47e4a07e59da3a869018bb8db4daa5",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0x50e4c060",
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 170,
+            "byteStart": 261,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L9-L11",
+            "lineEnd": 11,
+            "lineStart": 9,
+            "snippetSha256": "sha256:66a4b794c26192e8ab011adf04443fc22cfc01ca8e9468b8313b0430f2c80cca",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "valueSource": "keccak256(\n        \"6529StreamRandomnessSeed(address provider,uint256 requestId,uint256 collectionId,uint256 tokenId,uint256 randomizerEpoch,bytes32 rawOutputHash)\"\n    )",
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "randomnessRequests",
+          "natspec": "",
+          "range": {
+            "byteLength": 64,
+            "byteStart": 2231,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L63",
+            "lineEnd": 63,
+            "lineStart": 63,
+            "snippetSha256": "sha256:20ddc4bff8053fab0b0ea02e4f6ee6704ac2197cd978fc9fd6810c7f47c8ec26",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => RandomnessRequest)",
+          "typeString": "mapping(uint256 => struct StreamRandomizerLifecycle.RandomnessRequest)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x1370ba38",
+          "immutable": false,
+          "name": "requestToToken",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 2301,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L64",
+            "lineEnd": 64,
+            "lineStart": 64,
+            "snippetSha256": "sha256:4ee26e856cfd0519bb5a95937b3059ab15fbdf8168d9ad330c55f86b203716b1",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0x1370ba38",
+          "type": "mapping(uint256 => uint256)",
+          "typeString": "mapping(uint256 => uint256)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0xaa419ba4",
+          "immutable": false,
+          "name": "tokenToRequest",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 2356,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L65",
+            "lineEnd": 65,
+            "lineStart": 65,
+            "snippetSha256": "sha256:d1e343bd081e6153e0aa52b8f6c4e7222927258c8f579777409f8aa27f968fc1",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0xaa419ba4",
+          "type": "mapping(uint256 => uint256)",
+          "typeString": "mapping(uint256 => uint256)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x94b8ae9d",
+          "immutable": false,
+          "name": "tokenIdToCollection",
+          "natspec": "",
+          "range": {
+            "byteLength": 54,
+            "byteStart": 2411,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L66",
+            "lineEnd": 66,
+            "lineStart": 66,
+            "snippetSha256": "sha256:c47b04e8a6c13ec218beef4e0f90090b3e57302f9aa0af0fc3311d9f740bfed3",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": "0x94b8ae9d",
+          "type": "mapping(uint256 => uint256)",
+          "typeString": "mapping(uint256 => uint256)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "pendingRandomnessRequestsByCollection",
+          "natspec": "",
+          "range": {
+            "byteLength": 73,
+            "byteStart": 2471,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L67",
+            "lineEnd": 67,
+            "lineStart": 67,
+            "snippetSha256": "sha256:4c00458c134e0b2c94ec6ebe934c30e3aa208b01447076d88185cfacc3f0284f",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => uint256)",
+          "typeString": "mapping(uint256 => uint256)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "pendingRandomnessRequestCount",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 2550,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L68",
+            "lineEnd": 68,
+            "lineStart": 68,
+            "snippetSha256": "sha256:0240dd523935b9babec3f8362bb0666a9a85146dd6213a76676303e1ca25753d",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 608,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L22",
+                "lineEnd": 22,
+                "lineStart": 22,
+                "snippetSha256": "sha256:59d930bd0f2dfed41bacd10f1ff469fcacef2b565f94ee3556e462d42461f316",
+                "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 638,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L23",
+                "lineEnd": 23,
+                "lineStart": 23,
+                "snippetSha256": "sha256:66875c39eec6445ab2b3787f7fe7517ed1914f5ebb02d7f9ee07cc370b8b605f",
+                "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "provider",
+              "natspec": "",
+              "range": {
+                "byteLength": 16,
+                "byteStart": 663,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L24",
+                "lineEnd": 24,
+                "lineStart": 24,
+                "snippetSha256": "sha256:1dcbaabe926a15813b14eebbc6c4550c100d89063c962c55a143c0d628e83fbe",
+                "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 3,
+              "name": "providerRequestId",
+              "natspec": "",
+              "range": {
+                "byteLength": 25,
+                "byteStart": 689,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L25",
+                "lineEnd": 25,
+                "lineStart": 25,
+                "snippetSha256": "sha256:10c6cbf323ae4ebabac5b690d7ee32a37e5f5cc1dc769be00e11572638f59bd3",
+                "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "randomizerEpoch",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 724,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L26",
+                "lineEnd": 26,
+                "lineStart": 26,
+                "snippetSha256": "sha256:550552d2f417f7119e59fc932efdc40f17c847ec31e8b5a1cc1f0c4617540359",
+                "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "state",
+              "natspec": "",
+              "range": {
+                "byteLength": 28,
+                "byteStart": 757,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L27",
+                "lineEnd": 27,
+                "lineStart": 27,
+                "snippetSha256": "sha256:dee8395eaeb74aaa6063a3eb14d03f360a4f64baf85a9912b159f79df2a11dc1",
+                "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+              },
+              "type": "RandomnessRequestState",
+              "typeString": "enum StreamRandomizerLifecycle.RandomnessRequestState"
+            },
+            {
+              "index": 6,
+              "name": "requestedBlock",
+              "natspec": "",
+              "range": {
+                "byteLength": 22,
+                "byteStart": 795,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L28",
+                "lineEnd": 28,
+                "lineStart": 28,
+                "snippetSha256": "sha256:91df698084a53564de989f3d82bb23082b85b8f5064c353ae6b9e4f70a3c117f",
+                "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 7,
+              "name": "requestedTimestamp",
+              "natspec": "",
+              "range": {
+                "byteLength": 26,
+                "byteStart": 827,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L29",
+                "lineEnd": 29,
+                "lineStart": 29,
+                "snippetSha256": "sha256:a0d2a2ac5d36b40d4a3d6e5443851c4f2365685594071183f387991413067d82",
+                "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 8,
+              "name": "fulfilledBlock",
+              "natspec": "",
+              "range": {
+                "byteLength": 22,
+                "byteStart": 863,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L30",
+                "lineEnd": 30,
+                "lineStart": 30,
+                "snippetSha256": "sha256:15a5c5441350127c6731dc7d7bd20a5e5f044af040d95ade01218a029ae14e58",
+                "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 9,
+              "name": "fulfilledTimestamp",
+              "natspec": "",
+              "range": {
+                "byteLength": 26,
+                "byteStart": 895,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L31",
+                "lineEnd": 31,
+                "lineStart": 31,
+                "snippetSha256": "sha256:f9d0fe4cc02f544dd2f10261712241f87e905b88db6f1043b2afaa9b84cf2bc8",
+                "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 10,
+              "name": "derivedSeed",
+              "natspec": "",
+              "range": {
+                "byteLength": 19,
+                "byteStart": 931,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L32",
+                "lineEnd": 32,
+                "lineStart": 32,
+                "snippetSha256": "sha256:166f576aec3f675c984aa6c7b39a99a47403adb3f97571900c40d01ff862955c",
+                "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 11,
+              "name": "rawOutputHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 21,
+                "byteStart": 960,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L33",
+                "lineEnd": 33,
+                "lineStart": 33,
+                "snippetSha256": "sha256:e8d26a6609bdd16c07ce4525b722d7e16c020142bd4ecb4291e33d928446cfea",
+                "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 12,
+              "name": "failureDataHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 991,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L34",
+                "lineEnd": 34,
+                "lineStart": 34,
+                "snippetSha256": "sha256:9ee3e627456eea4983cfdd22af9d8cdb2d5c740ebd17bf9f3e6e353cfa77fb1e",
+                "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 13,
+              "name": "postProcessingRetryCount",
+              "natspec": "",
+              "range": {
+                "byteLength": 32,
+                "byteStart": 1024,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L35",
+                "lineEnd": 35,
+                "lineStart": 35,
+                "snippetSha256": "sha256:3a4b8d0785332f3a95da6b77206ffc0bb439562e26b9f7e6d120a119196c06f6",
+                "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            }
+          ],
+          "name": "RandomnessRequest",
+          "natspec": "",
+          "range": {
+            "byteLength": 490,
+            "byteStart": 573,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L21-L36",
+            "lineEnd": 36,
+            "lineStart": 21,
+            "snippetSha256": "sha256:976e36a09704fb5931278aeac283a2df21d566986a410e1b72614f9c1a0a7ffa",
+            "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGUuc29sOlN0cmVhbVJhbmRvbWl6ZXJMaWZlY3ljbGU",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamRandomizerLifecycle",
+    "natspec": "",
+    "range": {
+      "byteLength": 18309,
+      "byteStart": 88,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamRandomizerLifecycle.sol#L7-L504",
+      "lineEnd": 504,
+      "lineStart": 7,
+      "snippetSha256": "sha256:b91f3a5de23830f5f3a80660c03406700bd3ac8fe382892986ccfa5db77ae52e",
+      "sourceSha256": "sha256:243f6a49ab595bb3ee46d1d6719d7783a1dfb63519c9942819e6c085e07ac51f"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/StreamRandomizerLifecycle.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-30.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 13
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 12
+    },
+    "totalCount": 13
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x1370ba38",
+      "definitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x50e4c060",
+      "definitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x60e26604",
+      "definitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x677e25c7",
+      "definitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x81d673e0",
+      "definitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x841940f9",
+      "definitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0x94b8ae9d",
+      "definitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0xaa419ba4",
+      "definitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0xba73a1d8",
+      "definitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0xdd26bdd1",
+      "definitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0xe231f9df",
+      "definitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle#function:0xe3a51e5a",
+      "definitionId": "smart-contracts/StreamRandomizerLifecycle.sol:StreamRandomizerLifecycle",
+      "severity": "advisory"
+    }
+  ]
+}
