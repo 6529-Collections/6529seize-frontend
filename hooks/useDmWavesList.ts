@@ -15,6 +15,8 @@ import { getAuthJwt, isAuthJwtUsable } from "@/services/auth/auth.utils";
 
 const noopWaveAction = () => {};
 const MAX_RECONCILIATION_ATTEMPTS_PER_VIEWER = 2;
+const RECONCILIATION_REARM_INTERVAL_MS =
+  SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS * 5;
 
 interface UseDmWavesListOptions {
   readonly enabled?: boolean | undefined;
@@ -94,6 +96,7 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
     readonly viewerIdentityKey: string;
     readonly attempts: number;
     readonly lastDataUpdatedAt: number;
+    readonly lastAttemptAt: number;
   } | null>(null);
   const listedUnreadDropsCount = useMemo(
     () =>
@@ -118,14 +121,27 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       return;
     }
 
-    const previousState =
+    const now = Date.now();
+    const previousViewerState =
       reconciliationStateRef.current?.viewerIdentityKey === viewerIdentityKey
         ? reconciliationStateRef.current
         : {
             viewerIdentityKey,
             attempts: 0,
             lastDataUpdatedAt: -1,
+            lastAttemptAt: 0,
           };
+    const shouldRearm =
+      previousViewerState.attempts >=
+        MAX_RECONCILIATION_ATTEMPTS_PER_VIEWER &&
+      now - previousViewerState.lastAttemptAt >=
+        RECONCILIATION_REARM_INTERVAL_MS;
+    const previousState = shouldRearm
+      ? {
+          ...previousViewerState,
+          attempts: 0,
+        }
+      : previousViewerState;
     const hasNewDmSnapshot =
       previousState.lastDataUpdatedAt !== dmWavesDataUpdatedAt;
     if (
@@ -139,9 +155,10 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       viewerIdentityKey,
       attempts: previousState.attempts + 1,
       lastDataUpdatedAt: dmWavesDataUpdatedAt,
+      lastAttemptAt: now,
     };
-    // Retry only when a fresh DM snapshot is still behind, then let regular
-    // polling continue without creating an unbounded reconciliation loop.
+    // Retry only for fresh snapshots, cap each burst, and periodically re-arm
+    // so a transiently divergent summary cannot leave the overview stale.
     void queryClient.refetchQueries({
       queryKey: dmWavesQueryKey,
       exact: true,

@@ -26,6 +26,11 @@ interface UseUnreadIndicatorProps {
 
 interface UseUnreadIndicatorReturn {
   readonly hasUnread: boolean;
+  /**
+   * Best-effort count used by the quick-DM badge. The aggregate summary and
+   * paged realtime list can overlap without per-wave summary attribution, so
+   * their totals must not be added together.
+   */
   readonly unreadCount: number;
 }
 
@@ -66,7 +71,7 @@ export function useUnreadIndicator({
   );
 
   return {
-    hasUnread: unreadMessagesCount > 0,
+    hasUnread: unreadDmDropsCount > 0 || localUnreadMessagesCount > 0,
     unreadCount: unreadMessagesCount,
   };
 }

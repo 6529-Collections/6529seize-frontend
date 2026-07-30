@@ -104,6 +104,8 @@ describe("useDmWavesList", () => {
     let isFetching = false;
     let unreadDmDropsCount = 1;
     let dataUpdatedAt = 100;
+    let now = 1_000;
+    const dateNowSpy = jest.spyOn(Date, "now").mockImplementation(() => now);
     useUnreadDmDropsMock.mockReturnValue({
       get unreadDmDropsCount() {
         return unreadDmDropsCount;
@@ -154,12 +156,26 @@ describe("useDmWavesList", () => {
     rerender();
     expect(refetchQueries).toHaveBeenCalledTimes(2);
 
+    now += SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS * 5;
+    dataUpdatedAt = 400;
+    rerender();
+    expect(refetchQueries).toHaveBeenCalledTimes(3);
+
+    dataUpdatedAt = 500;
+    rerender();
+    expect(refetchQueries).toHaveBeenCalledTimes(4);
+
+    dataUpdatedAt = 600;
+    rerender();
+    expect(refetchQueries).toHaveBeenCalledTimes(4);
+
     unreadDmDropsCount = 0;
     rerender();
     unreadDmDropsCount = 1;
     rerender();
 
-    expect(refetchQueries).toHaveBeenCalledTimes(3);
+    expect(refetchQueries).toHaveBeenCalledTimes(5);
+    dateNowSpy.mockRestore();
   });
 
   it("does not refetch when the DM rows account for the unread summary", () => {

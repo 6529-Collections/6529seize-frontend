@@ -116,6 +116,8 @@ function useEnhancedWavesListCore(
       unreadState.identityKey === options.stateIdentityKey
         ? unreadState
         : {
+            // useMemo keeps this empty identity snapshot stable until either
+            // the identity or committed unread state changes.
             identityKey: options.stateIdentityKey,
             clearedWaveIds: new Set<string>(),
             forcedCounts: {},
