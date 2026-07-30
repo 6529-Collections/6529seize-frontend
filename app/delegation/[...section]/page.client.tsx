@@ -112,7 +112,7 @@ export default function DelegationPageClient(props: {
   }, [addressQuery, collectionQuery, useCaseQuery]);
 
   return (
-    <main className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
+    <main className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-font-normal tw-text-iron-100">
       <DelegationCenterMenu
         section={section}
         path={props.path}
