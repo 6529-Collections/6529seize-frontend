@@ -54,6 +54,8 @@ describe("CreateDropSubmit", () => {
       "lg:tw-w-[3.875rem]",
       "lg:tw-px-3.5"
     );
+    // The shared `lg` preset adds `tw-px-5`, leaving this fixed-width button
+    // with no content width and shrinking the mobile icon to 0px.
     expect(btn).not.toHaveClass("tw-px-5");
 
     const icon = btn.querySelector("svg");
