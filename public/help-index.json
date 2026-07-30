@@ -1102,6 +1102,7 @@
       ],
       "facts": [
         "Network definitions explain Cards Collected, Unique Memes, Meme Sets, TDH variants, purchases, sales, transfers, and related Network metrics.",
+        "The glossary groups terms into Collection metrics, Activity metrics, and TDH metrics.",
         "Genesis Sets are complete sets of the first three Meme NFTs.",
         "Use the definitions page when users ask what a Network metric means.",
         "For a single TDH explanation, point users to the TDH page."
@@ -5275,7 +5276,8 @@
       "keywords": ["tdh", "historic", "boosts", "rules", "versions"],
       "facts": [
         "Historic TDH boost rules live at /network/tdh/historic-boosts.",
-        "The page documents archived rule models and version differences.",
+        "The page compares archived versions in a table on tablet and desktop and in summary cards on mobile.",
+        "Use the row details control or Show rules button to expand the complete Category A, B, and C rules for a version.",
         "Use the main TDH page for the current TDH explanation."
       ],
       "canonical_path": "/network/tdh/historic-boosts",
@@ -5288,6 +5290,7 @@
       "tags": ["network", "tdh", "historic"],
       "source_refs": [
         "app/network/tdh/historic-boosts/page.tsx",
+        "app/network/tdh/historic-boosts/page.client.tsx",
         "ops/docs/network/feature-tdh-historic-boosts.md"
       ]
     },

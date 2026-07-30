@@ -1,112 +1,192 @@
 "use client";
 
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
-import { NETWORK_REFERENCE_PAGE_CLASSES } from "@/components/network/networkPageLayoutClasses";
+import NetworkReferenceNavigation from "@/components/network/NetworkReferenceNavigation";
+import {
+  NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
+  NETWORK_REFERENCE_PAGE_CLASSES,
+} from "@/components/network/networkPageLayoutClasses";
 import { useSetTitle } from "@/contexts/TitleContext";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t, tRich, type MessageKey } from "@/i18n/messages";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
-const NAV_LINKS = [
-  { href: "/network/tdh", label: "TDH" },
-  { href: "/network/tdh/historic-boosts", label: "TDH Historic Boosts" },
-  { href: "/network/health/network-tdh", label: "Network TDH Stats" },
-  { href: "/network/levels", label: "Levels" },
-] as const;
+type DefinitionsMessageKey = Extract<
+  MessageKey,
+  `network.definitions.${string}`
+>;
 
-const BUTTON_LINK_CLASSES =
-  "tw-flex-1 tw-min-w-[150px] tw-text-center tw-inline-block tw-rounded-md tw-bg-[#eee] tw-text-black tw-font-medium hover:tw-bg-[#ddd] hover:tw-text-black tw-border-solid tw-border-[#222] tw-px-4 tw-py-2 tw-no-underline tw-w-full sm:tw-w-auto sm:tw-whitespace-nowrap";
+interface GlossaryEntry {
+  readonly id: string;
+  readonly term: string;
+  readonly description: ReactNode;
+}
+
+interface GlossarySection {
+  readonly id: string;
+  readonly title: string;
+  readonly entries: readonly GlossaryEntry[];
+}
+
+const m = (
+  locale: SupportedLocale,
+  key: DefinitionsMessageKey,
+  params: Parameters<typeof t>[2] = {}
+) => t(locale, key, params);
 
 export default function DefinitionsClient() {
-  useSetTitle("Definitions | Network");
+  const locale = useBrowserLocale();
+  const sections = getGlossarySections(locale);
+
+  useSetTitle(m(locale, "network.definitions.metadata.title"));
 
   return (
-    <main className={NETWORK_REFERENCE_PAGE_CLASSES}>
-      <AboutContentsDropdown currentHref="/network/definitions" />
-      <h1>Definitions</h1>
+    <main
+      className={`${NETWORK_REFERENCE_PAGE_CLASSES} tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F] tw-text-iron-100`}
+    >
+      <div className="tw-w-full">
+        <AboutContentsDropdown
+          className={NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES}
+          currentHref="/network/definitions"
+          locale={locale}
+          withDivider
+        />
 
-      <div className="tw-mt-6 tw-space-y-3 tw-text-base lg:tw-text-lg">
-        <p>
-          <b>
-            <u>Cards Collected:</u>
-          </b>{" "}
-          Total number of The Memes NFTs owned.
-        </p>
-        <p>
-          <b>
-            <u>Unique Memes:</u>
-          </b>{" "}
-          Total number of unique Meme NFTs owned.
-        </p>
-        <p>
-          <b>
-            <u>Meme Sets:</u>
-          </b>{" "}
-          Number of complete sets of The Memes (all SZNs or a specific SZN).
-        </p>
-        <p>
-          <b>
-            <u>Meme Sets -1 / -2:</u>
-          </b>{" "}
-          Complete sets missing 1 or 2 cards respectively.
-        </p>
-        <p>
-          <b>
-            <u>Genesis Sets:</u>
-          </b>{" "}
-          Complete set of the first three Meme NFTs.
-        </p>
-        <p>
-          <b>
-            <u>Purchases / Sales:</u>
-          </b>{" "}
-          Count of bought/sold NFTs (Memes or Gradients).
-        </p>
-        <p>
-          <b>
-            <u>Purchases (ETH) / Sales (ETH):</u>
-          </b>{" "}
-          ETH spent/received for those NFTs.
-        </p>
-        <p>
-          <b>
-            <u>Transfers In / Out:</u>
-          </b>{" "}
-          NFTs moved into/out of an address.
-        </p>
-        <p>
-          <b>
-            <u>TDH (unweighted):</u>
-          </b>{" "}
-          &quot;Total Days Held&quot; — each NFT contributes one unit per day
-          held, summed across NFTs, calculated daily at 00:00 UTC.
-        </p>
-        <p>
-          <b>
-            <u>TDH (unboosted):</u>
-          </b>{" "}
-          TDH weighted by edition size (FirstGM 3,941 = 1.0 baseline).
-        </p>
-        <p>
-          <b>
-            <u>TDH:</u>
-          </b>{" "}
-          TDH (unboosted) &times; boosters. For the current rules, see{" "}
-          <Link
-            href="/network/tdh"
-            className="tw-inline-block tw-rounded-md tw-border-solid tw-border-[#222] tw-bg-[#eee] tw-px-1 tw-py-0.5 tw-text-md tw-font-medium tw-text-black tw-no-underline hover:tw-bg-[#ddd] hover:tw-text-black"
-          >
-            TDH
-          </Link>
-          .
-        </p>
-      </div>
+        <article className="tw-pb-12 tw-pt-4 max-sm:tw-px-1 sm:tw-pt-8">
+          <header className="tw-pb-8 sm:tw-pb-10">
+            <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
+              {m(locale, "network.definitions.hero.title")}
+            </h1>
+          </header>
 
-      <div className="tw-mt-10 tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-flex-wrap sm:tw-gap-3">
-        {NAV_LINKS.map(({ href, label }) => (
-          <Link key={href} href={href} className={BUTTON_LINK_CLASSES}>
-            {label}
-          </Link>
-        ))}
+          {sections.map((section) => (
+            <GlossarySectionBlock key={section.id} section={section} />
+          ))}
+
+          <NetworkReferenceNavigation
+            currentHref="/network/definitions"
+            locale={locale}
+          />
+        </article>
       </div>
     </main>
+  );
+}
+
+function getGlossarySections(
+  locale: SupportedLocale
+): readonly GlossarySection[] {
+  const currentRulesLink = (
+    <Link
+      className="tw-rounded-sm tw-font-medium tw-text-primary-300 tw-underline tw-decoration-primary-400/40 tw-underline-offset-4 hover:tw-text-primary-300 hover:tw-decoration-primary-300 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+      href="/network/tdh"
+      key="current-tdh-rules"
+    >
+      {m(locale, "network.definitions.terms.tdh.currentRulesLink")}
+    </Link>
+  );
+
+  return [
+    {
+      id: "holdings",
+      title: m(locale, "network.definitions.sections.holdings"),
+      entries: [
+        createEntry(locale, "cards-collected", "cardsCollected"),
+        createEntry(locale, "unique-memes", "uniqueMemes"),
+        createEntry(locale, "meme-sets", "memeSets"),
+        createEntry(locale, "meme-sets-minus", "memeSetsMinus"),
+        createEntry(locale, "genesis-sets", "genesisSets"),
+      ],
+    },
+    {
+      id: "activity",
+      title: m(locale, "network.definitions.sections.activity"),
+      entries: [
+        createEntry(locale, "purchases-sales", "purchasesSales"),
+        createEntry(locale, "purchases-sales-eth", "purchasesSalesEth"),
+        createEntry(locale, "transfers", "transfers"),
+      ],
+    },
+    {
+      id: "tdh",
+      title: m(locale, "network.definitions.sections.tdh"),
+      entries: [
+        createEntry(locale, "tdh-unweighted", "tdhUnweighted"),
+        createEntry(locale, "tdh-unboosted", "tdhUnboosted"),
+        {
+          id: "tdh",
+          term: m(locale, "network.definitions.terms.tdh.term"),
+          description: tRich(
+            locale,
+            "network.definitions.terms.tdh.description",
+            { currentRulesLink }
+          ),
+        },
+      ],
+    },
+  ];
+}
+
+function createEntry(
+  locale: SupportedLocale,
+  id: string,
+  key:
+    | "cardsCollected"
+    | "uniqueMemes"
+    | "memeSets"
+    | "memeSetsMinus"
+    | "genesisSets"
+    | "purchasesSales"
+    | "purchasesSalesEth"
+    | "transfers"
+    | "tdhUnweighted"
+    | "tdhUnboosted"
+): GlossaryEntry {
+  return {
+    id,
+    term: m(locale, `network.definitions.terms.${key}.term`),
+    description: m(locale, `network.definitions.terms.${key}.description`),
+  };
+}
+
+function GlossarySectionBlock({
+  section,
+}: {
+  readonly section: GlossarySection;
+}) {
+  const headingId = `definitions-${section.id}-heading`;
+
+  return (
+    <section
+      aria-labelledby={headingId}
+      className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-6 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-py-8 sm:tw-py-12 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,2.5fr)] lg:tw-gap-12"
+    >
+      <div className="lg:tw-sticky lg:tw-top-28">
+        <h2
+          className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl"
+          id={headingId}
+        >
+          {section.title}
+        </h2>
+      </div>
+
+      <dl className="tw-m-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10">
+        {section.entries.map((entry) => (
+          <div
+            className="tw-grid tw-grid-cols-1 tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-py-5 sm:tw-grid-cols-[minmax(10rem,0.7fr)_minmax(0,1.3fr)] sm:tw-gap-6"
+            key={entry.id}
+          >
+            <dt className="tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-100">
+              {entry.term}
+            </dt>
+            <dd className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-400">
+              {entry.description}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </section>
   );
 }
