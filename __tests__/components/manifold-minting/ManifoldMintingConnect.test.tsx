@@ -96,7 +96,10 @@ describe("ManifoldMintingConnect", () => {
   });
 
   it("shows connect prompt when not connected", () => {
-    (mockedConnect as jest.Mock).mockReturnValue({ isConnected: false });
+    (mockedConnect as jest.Mock).mockReturnValue({
+      hasActiveWalletAddress: false,
+      isConnected: false,
+    });
     render(
       <CookieConsentProvider>
         <ManifoldMintingConnect onMintFor={jest.fn()} />
@@ -105,8 +108,25 @@ describe("ManifoldMintingConnect", () => {
     expect(screen.getByTestId("header-connect")).toBeInTheDocument();
   });
 
+  it("hides the duplicate connect prompt for a remembered active wallet", () => {
+    (mockedConnect as jest.Mock).mockReturnValue({
+      address: "0xabc000000000000000000000000000000000abcd",
+      hasActiveWalletAddress: true,
+      isConnected: false,
+    });
+    render(
+      <CookieConsentProvider>
+        <ManifoldMintingConnect onMintFor={jest.fn()} />
+      </CookieConsentProvider>
+    );
+    expect(screen.queryByTestId("header-connect")).not.toBeInTheDocument();
+  });
+
   it("hides connect prompt when requested", () => {
-    (mockedConnect as jest.Mock).mockReturnValue({ isConnected: false });
+    (mockedConnect as jest.Mock).mockReturnValue({
+      hasActiveWalletAddress: false,
+      isConnected: false,
+    });
     render(
       <CookieConsentProvider>
         <ManifoldMintingConnect onMintFor={jest.fn()} hideConnect />

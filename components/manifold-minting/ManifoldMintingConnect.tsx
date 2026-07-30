@@ -199,7 +199,7 @@ export default function ManifoldMintingConnect(
   }
 
   if (!account.isConnected) {
-    if (hideConnect) {
+    if (hideConnect || account.hasActiveWalletAddress) {
       return null;
     }
     return (
