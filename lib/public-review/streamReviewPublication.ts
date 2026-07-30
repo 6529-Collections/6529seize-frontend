@@ -27,7 +27,7 @@ export interface StreamReviewVersionIdentity {
   readonly version: string;
 }
 
-export interface StreamReviewPublicationMetadata {
+interface StreamReviewPublicationMetadata {
   readonly deploymentStatus: StreamReviewDeploymentStatus;
   readonly auditStatus: StreamReviewAuditStatus;
 }
