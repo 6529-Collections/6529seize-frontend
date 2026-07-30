@@ -31,7 +31,10 @@ import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import DotLoader from "../dotLoader/DotLoader";
 import Button from "../utils/button/Button";
 import ManifoldMintingConnect from "./ManifoldMintingConnect";
-import { getTransactionModalTitle } from "./ManifoldMintingWidget.utils";
+import {
+  getTransactionModalTitle,
+  normalizeMintCount,
+} from "./ManifoldMintingWidget.utils";
 import { useManifoldMintConnectedAction } from "./useManifoldMintConnectedAction";
 import {
   isAddress,
@@ -45,17 +48,6 @@ const MINT_PROXY_FUNCTION_NAME = "mintProxy";
 type ReadContractCall = ContractFunctionParameters & {
   readonly chainId?: number | undefined;
 };
-
-function normalizeMintCount(value: number | string | null | undefined): number {
-  const parsed =
-    typeof value === "string" ? Number.parseInt(value, 10) : Number(value ?? 0);
-
-  if (!Number.isFinite(parsed) || Number.isNaN(parsed)) {
-    return 0;
-  }
-
-  return Math.max(0, Math.trunc(parsed));
-}
 
 function resolveMintErrorMessage(fullError: string): string {
   const resolvedError = fullError

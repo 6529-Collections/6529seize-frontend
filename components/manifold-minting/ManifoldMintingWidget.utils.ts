@@ -3,6 +3,19 @@ import { areEqualAddresses } from "@/helpers/Helpers";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
+export function normalizeMintCount(
+  value: number | string | null | undefined
+): number {
+  const parsed =
+    typeof value === "string" ? Number.parseInt(value, 10) : Number(value ?? 0);
+
+  if (!Number.isFinite(parsed) || Number.isNaN(parsed)) {
+    return 0;
+  }
+
+  return Math.max(0, Math.trunc(parsed));
+}
+
 export function getTransactionModalTitle(
   locale: SupportedLocale,
   contract: string,
