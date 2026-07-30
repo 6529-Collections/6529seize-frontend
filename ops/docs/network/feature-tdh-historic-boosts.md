@@ -21,6 +21,18 @@ Current TDH rules are on `/network/tdh`.
 - Select `View Historic Boosts` on `/network/tdh`.
 - Select `TDH Historic Boosts` on `/network/definitions`.
 
+## User Journey
+
+1. Open `TDH — Historic Boosts`.
+2. Compare the archived versions, effective periods, and Category A, B, and C
+   summaries.
+3. On tablet or desktop, use the details control at the end of a table row.
+   On mobile, use `Show rules` on the version card.
+4. Review the complete Category A, B, and C rules for any expanded version.
+5. Expand more than one version when comparing rules.
+6. Use `Explore Network references` to open current TDH, Definitions, Network
+   TDH Stats, or Levels.
+
 ## Archived Rule Model
 
 All archived versions use this combination model:
@@ -58,18 +70,33 @@ All archived versions use this combination model:
 - No query params, sorting, filtering, or group-scope controls.
 - Same content for signed-in and signed-out users.
 - All three version sections are collapsed until opened.
+- Tablet and desktop widths use a semantic comparison table. Category C is
+  omitted from the compact tablet columns and remains available in the
+  expanded rules.
+- Mobile widths use stacked version cards with the same Category summaries.
+- Detail controls are keyboard accessible, expose their expanded state, and
+  have practical touch targets.
 
 ## Common Scenarios
 
 - Compare archived multipliers with current rules on `/network/tdh`.
 - Confirm version handoff dates between `TDH 1.3` and `TDH 1.4`.
 - Check which season range each archived version supported.
+- Expand multiple versions to compare complete-set multipliers or season
+  coverage without losing the other open rule.
+
+## Edge Cases
+
+- Resizing between mobile and desktop keeps the expanded version state.
+- Long localized dates can wrap on mobile without covering the rules control.
+- The page has no wallet-gated, loading, empty, or API error state because the
+  archive is static.
 
 ## Failure and Recovery
 
 - If the route does not load, retry from `/network/tdh` or
   `/network/definitions`.
-- If navigation buttons fail, open targets directly:
+- If reference links fail, open targets directly:
   `/network/tdh`, `/network/definitions`, `/network/health/network-tdh`,
   `/network/levels`.
 
@@ -78,6 +105,7 @@ All archived versions use this combination model:
 - This page is archival reference only; it does not drive current TDH scoring.
 - Current scoring rules are documented on `/network/tdh`.
 - This page is not a wallet-level TDH calculator.
+- Versions are fixed in newest-to-oldest order and are not sortable.
 
 ## Related Pages
 

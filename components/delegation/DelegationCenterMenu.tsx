@@ -287,10 +287,10 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
       <button
         type="button"
         onClick={() => props.setActiveSection(section)}
-        className={`tw-min-h-11 tw-w-full tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
+        className={`tw-h-full tw-min-h-11 tw-w-full tw-whitespace-normal tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-leading-5 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
           active
             ? "tw-border-primary-400 tw-bg-primary-500 tw-text-white"
-            : "tw-border-white/10 tw-bg-iron-900 tw-text-iron-300 hover:tw-border-white/20 hover:tw-bg-iron-800 hover:tw-text-white"
+            : "hover:tw-border-white/12 tw-border-white/[0.06] tw-bg-iron-900 tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-200"
         }`}
         aria-current={active ? "page" : undefined}
       >
@@ -300,8 +300,17 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
   }
 
   function printMenuRows() {
-    return DELEGATION_MENU_ITEMS.map((item) => (
-      <div key={item.section}>{printMenuButton(item.section, item.label)}</div>
+    return DELEGATION_MENU_ITEMS.map((item, index) => (
+      <div
+        key={item.section}
+        className={
+          index === DELEGATION_MENU_ITEMS.length - 1
+            ? "tw-col-span-2 lg:tw-col-span-1"
+            : undefined
+        }
+      >
+        {printMenuButton(item.section, item.label)}
+      </div>
     ));
   }
 
@@ -312,11 +321,11 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
   return (
     <div className="tw-mx-auto tw-w-full tw-max-w-[1440px] tw-px-4 tw-py-6 sm:tw-px-6 lg:tw-px-8">
       {showNavigation && (
-        <nav aria-label="Delegation center" className="tw-mb-8">
+        <nav aria-label="Delegation center" className="tw-mb-7 sm:tw-mb-8">
           <div className="tw-mb-3 tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-2 sm:tw-justify-end">
             {printExternalLinkRows()}
           </div>
-          <div className="tw-grid tw-grid-cols-1 tw-gap-2 sm:tw-grid-cols-2 lg:tw-grid-cols-3 xl:tw-grid-cols-5">
+          <div className="tw-grid tw-grid-cols-2 tw-gap-2 lg:tw-grid-cols-3 xl:tw-grid-cols-5">
             {printMenuRows()}
           </div>
         </nav>
@@ -343,13 +352,20 @@ function EtherscanLink() {
       }
       target="_blank"
       rel="noopener noreferrer"
-      className="tw-group tw-inline-flex tw-min-h-10 tw-items-center tw-gap-2 tw-rounded-md tw-px-1 tw-py-1.5 tw-text-sm tw-font-medium tw-text-white tw-no-underline tw-transition-all hover:-tw-translate-y-0.5 hover:tw-text-white hover:tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+      className="tw-group tw-inline-flex tw-min-h-9 tw-items-center tw-gap-1.5 tw-rounded-md tw-px-1 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-iron-100 hover:tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
     >
-      <Image unoptimized src="/etherscan_w.png" alt="" width={24} height={24} />
+      <Image
+        unoptimized
+        src="/etherscan_w.png"
+        alt=""
+        width={20}
+        height={20}
+        className="tw-opacity-60 tw-transition-opacity group-hover:tw-opacity-90"
+      />
       <span>Etherscan</span>
       <FontAwesomeIcon
         icon={faArrowUpRightFromSquare}
-        className="tw-h-3.5 tw-w-3.5 tw-text-white tw-transition-colors group-hover:tw-text-primary-300"
+        className="tw-size-3 tw-text-iron-500 tw-transition-colors group-hover:tw-text-iron-300"
         aria-hidden="true"
       />
     </Link>
@@ -362,13 +378,20 @@ function GithubLink() {
       href={`https://github.com/6529-Collections/nftdelegation`}
       target="_blank"
       rel="noopener noreferrer"
-      className="tw-group tw-inline-flex tw-min-h-10 tw-items-center tw-gap-2 tw-rounded-md tw-px-1 tw-py-1.5 tw-text-sm tw-font-medium tw-text-white tw-no-underline tw-transition-all hover:-tw-translate-y-0.5 hover:tw-text-white hover:tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+      className="tw-group tw-inline-flex tw-min-h-9 tw-items-center tw-gap-1.5 tw-rounded-md tw-px-1 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-iron-100 hover:tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
     >
-      <Image unoptimized src="/github_w.png" alt="" width={24} height={24} />
+      <Image
+        unoptimized
+        src="/github_w.png"
+        alt=""
+        width={20}
+        height={20}
+        className="tw-opacity-60 tw-transition-opacity group-hover:tw-opacity-90"
+      />
       <span>GitHub</span>
       <FontAwesomeIcon
         icon={faArrowUpRightFromSquare}
-        className="tw-h-3.5 tw-w-3.5 tw-text-white tw-transition-colors group-hover:tw-text-primary-300"
+        className="tw-size-3 tw-text-iron-500 tw-transition-colors group-hover:tw-text-iron-300"
         aria-hidden="true"
       />
     </Link>

@@ -208,7 +208,7 @@ function CategoryB({ locale }: { readonly locale: SupportedLocale }) {
           <h4 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
             {m(locale, "network.tdh.current.categoryB.szn1")}
           </h4>
-          <ul className="tw-m-0 tw-mt-3 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-500 marker:tw-text-iron-600">
+          <ul className="tw-m-0 tw-mt-3 tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400 marker:tw-text-iron-600">
             <li>
               {m(locale, "network.tdh.current.categoryB.completeSet")}{" "}
               <Multiplier locale={locale} value={1.05} />{" "}
