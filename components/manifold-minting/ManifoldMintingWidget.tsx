@@ -29,6 +29,7 @@ import { t } from "@/i18n/messages";
 import { getMemesMintingProofsByAddress } from "@/services/api/memes-minting-claims-api";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import DotLoader from "../dotLoader/DotLoader";
+import Button from "../utils/button/Button";
 import ManifoldMintingConnect from "./ManifoldMintingConnect";
 import { getTransactionModalTitle } from "./ManifoldMintingWidget.utils";
 import { useManifoldMintConnectedAction } from "./useManifoldMintConnectedAction";
@@ -611,18 +612,20 @@ export default function ManifoldMintingWidget(
           </div>
         </div>
         <div className="tw-pt-3">
-          <button
+          <Button
+            variant="action"
+            size="md"
+            fullWidth
             disabled={
               mintWrite.isPending ||
               props.claim.status !== ManifoldClaimStatus.ACTIVE ||
               safeMintCount <= 0 ||
               !hasValidMintForAddress
             }
-            className="tw-w-full tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-font-semibold tw-text-white tw-ring-1 tw-ring-inset tw-ring-primary-500 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-primary-600 hover:tw-ring-primary-600 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
             onClick={onMint}
           >
-            <b>{getButtonText()}</b>
-          </button>
+            {getButtonText()}
+          </Button>
         </div>
         {mintError && !hasOnchainTransactionError && (
           <div className="tw-pt-3 tw-text-base tw-text-red">{mintError}</div>

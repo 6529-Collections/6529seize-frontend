@@ -605,7 +605,6 @@ const CreateDropWrapper = forwardRef<
       [CreateDropViewType.COMPACT]: (
         <CreateDropCompact
           ref={createDropContendCompactRef}
-          screenType={screenType}
           editorState={editorState}
           files={files}
           canSubmit={canSubmit}

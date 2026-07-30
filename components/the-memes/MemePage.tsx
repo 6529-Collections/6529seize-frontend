@@ -15,6 +15,8 @@ import LatestDropNextMintSubscribe from "@/components/home/now-minting/LatestDro
 import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";
 import { getMemeYearFromMintNumber } from "@/components/the-memes/theMemesFilters";
 import { getTheMemesRouteHrefWithLocale } from "@/components/the-memes/theMemesRouteParams";
+import Button from "@/components/utils/button/Button";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
@@ -158,13 +160,15 @@ function UpcomingMemeDistributionHeaderLink({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <Link
+    <ButtonLink
       href={getDistributionDetailHref({
         basePath: "/the-memes",
         id,
         locale,
       })}
-      className="tw-ml-auto tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1.5 tw-rounded-md tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-text-sm"
+      variant="tertiary"
+      size="xs"
+      className="tw-ml-auto"
     >
       <span className="tw-whitespace-nowrap">
         {t(locale, "distribution.planLink")}
@@ -173,7 +177,7 @@ function UpcomingMemeDistributionHeaderLink({
         aria-hidden="true"
         className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-400"
       />
-    </Link>
+    </ButtonLink>
   );
 }
 
@@ -744,13 +748,14 @@ export default function MemePage({
             <p className="tw-m-0 tw-text-sm tw-text-iron-300">
               {t(locale, "theMemes.detail.loadError.message")}
             </p>
-            <button
-              type="button"
+            <Button
+              variant="action"
+              size="sm"
               onClick={retryCardData}
-              className="tw-mt-4 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors tw-duration-150 hover:tw-bg-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none"
+              className="tw-mt-4"
             >
               {t(locale, "theMemes.detail.loadError.retry")}
-            </button>
+            </Button>
           </div>
         )}
         {isLoadingNft && <MemePageSkeleton />}

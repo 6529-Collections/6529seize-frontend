@@ -7,6 +7,7 @@ import type { ReactElement } from "react";
 import type { ApiXTdhCollectionsPage } from "@/generated/models/ApiXTdhCollectionsPage";
 import { useXtdhCollectionsQuery } from "@/hooks/useXtdhCollectionsQuery";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import Button from "@/components/utils/button/Button";
 
 import { XtdhCollectionsControls } from "./collections-controls";
 import { useXtdhCollectionsFilters } from "./hooks/useXtdhCollectionsFilters";
@@ -149,14 +150,14 @@ export default function XtdhReceivedSection({
           />
           {showLoadMore ? (
             <div className="tw-flex tw-justify-center tw-px-6 tw-pb-6">
-              <button
-                type="button"
+              <Button
+                variant="tertiary"
+                size="md"
                 onClick={handleLoadMore}
-                disabled={isFetchingNextPage}
-                className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-text-iron-400 tw-transition desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300"
+                loading={isFetchingNextPage}
               >
-                {isFetchingNextPage ? "Loading..." : "Load More"}
-              </button>
+                Load More
+              </Button>
             </div>
           ) : null}
         </>

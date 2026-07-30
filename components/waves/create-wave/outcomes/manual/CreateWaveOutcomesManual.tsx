@@ -7,7 +7,7 @@ import {
   CreateWaveOutcomeConfigWinnersCreditValueType,
 } from "@/types/waves.types";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
 
 export default function CreateWaveOutcomesManual({
   waveType,
@@ -233,21 +233,20 @@ export default function CreateWaveOutcomesManual({
           )}
         </div>
         <div className="tw-relative tw-z-50 tw-mt-6 tw-flex tw-justify-end tw-gap-x-3">
-          <button
+          <Button
+            variant="secondary"
+            size="lg"
             onClick={onCancel}
-            type="button"
-            className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-border-iron-700 hover:tw-bg-iron-700 focus:!tw-outline focus-visible:!tw-outline-2 focus-visible:!tw-outline-offset-2 focus-visible:!tw-outline-primary-400"
           >
             Cancel
-          </button>
-          <PrimaryButton
-            onClicked={onSubmit}
-            disabled={false}
-            loading={false}
-            padding="tw-px-4 tw-py-3"
+          </Button>
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={onSubmit}
           >
             Save
-          </PrimaryButton>
+          </Button>
         </div>
       </div>
     </div>

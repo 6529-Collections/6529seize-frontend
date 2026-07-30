@@ -3,28 +3,6 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { CreateDropSubmit } from "@/components/waves/CreateDropSubmit";
 
-jest.mock("@/components/utils/button/PrimaryButton", () => ({
-  __esModule: true,
-  default: ({
-    onClicked,
-    children,
-    disabled,
-    loading,
-    ariaLabel,
-    hideChildrenWhenLoading,
-  }: any) => (
-    <button
-      onClick={onClicked}
-      disabled={disabled}
-      data-loading={loading}
-      aria-label={ariaLabel}
-    >
-      {loading ? <span data-testid="loader" /> : null}
-      {loading && hideChildrenWhenLoading ? null : children}
-    </button>
-  ),
-}));
-
 describe("CreateDropSubmit", () => {
   it("renders drop text and triggers callback", async () => {
     const onDrop = jest.fn();
@@ -54,7 +32,7 @@ describe("CreateDropSubmit", () => {
     );
     const btn = screen.getByRole("button", { name: "Post in progress" });
     expect(btn).toBeDisabled();
-    expect(screen.getByTestId("loader")).toBeInTheDocument();
+    expect(btn.querySelector('[role="status"]')).toBeInTheDocument();
     expect(btn).not.toHaveTextContent("Post");
   });
 });

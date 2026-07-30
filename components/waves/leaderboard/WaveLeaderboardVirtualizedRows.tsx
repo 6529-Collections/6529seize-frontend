@@ -14,6 +14,7 @@ import {
   useRef,
   useState,
 } from "react";
+import Button from "@/components/utils/button/Button";
 
 type LeaderboardVirtualLayout = "list" | "grid" | "gallery";
 type LeaderboardColumnCount = 1 | 2 | 3;
@@ -516,16 +517,16 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
                   <span className="tw-sr-only" role="alert">
                     {t(locale, "waves.leaderboard.previousLoadError")}
                   </span>
-                  <button
-                    type="button"
+                  <Button
                     onClick={() => {
                       previousTriggerKeyRef.current = null;
                       loadPreviousPage();
                     }}
-                    className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-text-iron-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                    variant="tertiary"
+                    size="sm"
                   >
                     {t(locale, "waves.leaderboard.retryEarlier")}
-                  </button>
+                  </Button>
                 </div>
               ) : (
                 placeholderLogicalIndexes.map((logicalIndex) => (
@@ -579,31 +580,31 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
           <span className="tw-sr-only" role="alert">
             {t(locale, "waves.leaderboard.nextLoadError")}
           </span>
-          <button
-            type="button"
+          <Button
             onClick={() => {
               nextTriggerKeyRef.current = null;
               loadNextPage();
             }}
-            className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-text-iron-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            variant="tertiary"
+            size="sm"
           >
             {t(locale, "waves.leaderboard.retryMore")}
-          </button>
+          </Button>
         </div>
       ) : null}
 
       {!autoLoadNext && hasNextPage && !isFetchNextPageError ? (
         <div className="tw-mb-2 tw-mt-4 tw-flex tw-justify-center">
-          <button
-            type="button"
+          <Button
             onClick={loadNextPage}
-            disabled={isFetchingNextPage}
-            className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-text-iron-400 tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300"
+            loading={isFetchingNextPage}
+            variant="tertiary"
+            size="sm"
           >
             {isFetchingNextPage
               ? t(locale, "waves.leaderboard.loadingMoreButton")
               : t(locale, "waves.leaderboard.loadMore")}
-          </button>
+          </Button>
         </div>
       ) : null}
     </div>

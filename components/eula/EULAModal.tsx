@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/utils/button/Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEULAConsent } from "./EULAConsentContext";
 import { useEffect, useRef, useState } from "react";
@@ -764,15 +765,14 @@ export default function EULAModal() {
           </div>
         </div>
         <div className="tw-mt-6 tw-flex tw-justify-center">
-          <button
+          <Button
             onClick={consent}
             disabled={!scrolledToBottom}
-            className={`tw-rounded tw-border-none tw-bg-white tw-px-8 tw-py-3 tw-font-medium tw-text-gray-900 tw-shadow tw-transition tw-duration-150 hover:tw-bg-iron-300 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-gray-300 ${
-              !scrolledToBottom ? "tw-cursor-not-allowed tw-opacity-50" : ""
-            }`}
+            variant="primary"
+            size="lg"
           >
             Agree
-          </button>
+          </Button>
         </div>
       </div>
     </div>
