@@ -35,4 +35,28 @@ describe("CreateDropSubmit", () => {
     expect(btn.querySelector('[role="status"]')).toBeInTheDocument();
     expect(btn).not.toHaveTextContent("Post");
   });
+
+  it("keeps the mobile submit icon from collapsing inside the fixed-width button", () => {
+    render(
+      <CreateDropSubmit
+        submitting={false}
+        canSubmit={false}
+        isDropMode={false}
+        onDrop={jest.fn()}
+      />
+    );
+
+    const btn = screen.getByRole("button", { name: "Post" });
+    expect(btn).toHaveClass(
+      "tw-min-h-11",
+      "tw-w-10",
+      "tw-px-0",
+      "lg:tw-w-[3.875rem]",
+      "lg:tw-px-3.5"
+    );
+    expect(btn).not.toHaveClass("tw-px-5");
+
+    const icon = btn.querySelector("svg");
+    expect(icon).toHaveClass("tw-size-5", "tw-flex-shrink-0", "lg:tw-hidden");
+  });
 });
