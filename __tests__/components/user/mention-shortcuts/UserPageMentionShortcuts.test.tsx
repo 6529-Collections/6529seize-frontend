@@ -107,6 +107,31 @@ describe("UserPageMentionShortcuts", () => {
             handle: "bob",
             pfp: null,
           },
+          {
+            profile_id: "profile-6",
+            handle: "frank",
+            pfp: null,
+          },
+          {
+            profile_id: "profile-7",
+            handle: "grace",
+            pfp: null,
+          },
+          {
+            profile_id: "profile-8",
+            handle: "heidi",
+            pfp: null,
+          },
+          {
+            profile_id: "profile-9",
+            handle: "ivan",
+            pfp: null,
+          },
+          {
+            profile_id: "profile-10",
+            handle: "judy",
+            pfp: null,
+          },
         ]),
         makeAlias("tag-2", "reviewers", [
           {
@@ -148,7 +173,7 @@ describe("UserPageMentionShortcuts", () => {
     ).toHaveClass("tw-whitespace-nowrap");
     expect(screen.getByRole("button", { name: "Manage" })).toBeInTheDocument();
     expect(screen.getByText("@frens")).toBeInTheDocument();
-    expect(screen.queryByText("1 profile")).not.toBeInTheDocument();
+    expect(screen.getByText("6 members")).toBeInTheDocument();
     expect(screen.getByText("B")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "+1 more" })).toBeInTheDocument();
     expect(screen.queryByText("@writers")).not.toBeInTheDocument();
@@ -170,6 +195,11 @@ describe("UserPageMentionShortcuts", () => {
       screen.getByRole("button", { name: "New Quick Tag" })
     ).toHaveTextContent("+ New");
     expect(screen.getByText("@writers")).toBeInTheDocument();
+    expect(screen.getByText("@bob")).toBeInTheDocument();
+    expect(screen.getByText("@judy")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Remove @bob" })
+    ).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "New Quick Tag" }));
 

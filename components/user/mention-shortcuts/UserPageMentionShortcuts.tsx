@@ -438,10 +438,10 @@ export default function UserPageMentionShortcuts({
   const visibleAliases = sortedAliases.slice(0, VISIBLE_QUICK_TAGS);
   const hiddenAliasCount = sortedAliases.length - visibleAliases.length;
 
-  const getProfileCountLabel = (count: number) =>
+  const getMemberCountLabel = (count: number) =>
     count === 1
-      ? t(locale, "user.mentionShortcuts.profileCount", { count })
-      : t(locale, "user.mentionShortcuts.profileCountMany", { count });
+      ? t(locale, "user.mentionShortcuts.memberCount", { count })
+      : t(locale, "user.mentionShortcuts.memberCountMany", { count });
 
   const openManager = (alias?: MentionAlias | null) => {
     setEditorAlias(alias);
@@ -543,6 +543,9 @@ export default function UserPageMentionShortcuts({
                     />
                   </span>
                 )}
+                <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-iron-400">
+                  {getMemberCountLabel(item.members.length)}
+                </span>
               </button>
             ))}
           {!isPending && !isError && hiddenAliasCount > 0 && (
@@ -621,12 +624,14 @@ export default function UserPageMentionShortcuts({
                     <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-primary-300">
                       @{item.alias}
                     </h3>
-                    <p className="tw-mb-0 tw-mt-1 tw-truncate tw-text-sm tw-text-iron-400">
-                      {getProfileCountLabel(item.members.length)} ·{" "}
-                      {item.members
-                        .map((member) => `@${member.handle}`)
-                        .join(" · ")}
-                    </p>
+                    <GroupCreateIdentitySelectedItems
+                      selectedIdentities={item.members.map((member) => ({
+                        wallet: member.profile_id,
+                        handle: member.handle,
+                        pfp: member.pfp,
+                      }))}
+                      handlePrefix="@"
+                    />
                   </div>
                   <div className="tw-flex tw-shrink-0 tw-gap-2">
                     <button

@@ -37,4 +37,17 @@ describe("GroupCreateIdentitySelectedItems", () => {
       screen.getByRole("button", { name: "Remove @alice" })
     ).toBeInTheDocument();
   });
+
+  it("supports read-only selected identities", () => {
+    render(
+      <GroupCreateIdentitySelectedItems
+        selectedIdentities={identities as any}
+        handlePrefix="@"
+      />
+    );
+
+    expect(screen.getByText("@alice")).toBeInTheDocument();
+    expect(screen.getByText("@bob")).toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
 });
