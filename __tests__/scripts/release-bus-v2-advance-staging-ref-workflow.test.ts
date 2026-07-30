@@ -78,5 +78,12 @@ describe("Release Bus v2 staging ref advancement workflow", () => {
     expect(workflow).toContain(
       "failure_class=CONTROL_PLANE\n              failure_phase=authorization\n              retryable=false"
     );
+    expect(workflow).toContain(
+      "CHECKOUT_OUTCOME: ${{ steps.checkout.outcome }}"
+    );
+    expect(workflow).toContain('elif [ "$CHECKOUT_OUTCOME" != success ]; then');
+    expect(workflow).toContain("failure_phase=checkout");
+    expect(workflow.match(/--connect-timeout 10/g)).toHaveLength(2);
+    expect(workflow.match(/--max-time 60/g)).toHaveLength(2);
   });
 });

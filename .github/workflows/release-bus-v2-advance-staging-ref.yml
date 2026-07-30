@@ -58,12 +58,15 @@ jobs:
             --arg expected_sha "$EXPECTED_SHA" \
             '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"staging",service:null,expected_sha:$expected_sha,artifact_digest:null}')"
           curl --fail-with-body --silent --show-error \
+            --connect-timeout 10 \
+            --max-time 60 \
             -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
             -H 'Content-Type: application/json' \
             --data "$payload" \
             "$RELEASE_BUS_API_URL/deploy/release-bus-v2/authorize"
 
       - name: Check out exact target with the workflow token
+        id: checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: ${{ inputs.expected_sha }}
@@ -168,6 +171,7 @@ jobs:
         env:
           ADVANCE_OUTCOME: ${{ steps.advance.outcome }}
           AUTHORIZE_OUTCOME: ${{ steps.authorize.outcome }}
+          CHECKOUT_OUTCOME: ${{ steps.checkout.outcome }}
           OPERATION_KEY: ${{ inputs.operation_key }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
@@ -182,6 +186,10 @@ jobs:
             if [ "$AUTHORIZE_OUTCOME" != success ]; then
               failure_class=CONTROL_PLANE
               failure_phase=authorization
+              retryable=false
+            elif [ "$CHECKOUT_OUTCOME" != success ]; then
+              failure_class=CONTROL_PLANE
+              failure_phase=checkout
               retryable=false
             fi
             jq -n \
@@ -212,6 +220,8 @@ jobs:
             --argjson summary "$summary" \
             '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"advance_staging_ref",status:$status,failure_class:(if $failure_class == "" then null else $failure_class end),failure_phase:(if $failure_phase == "" then null else $failure_phase end),retryable:$retryable,summary:$summary,stages:[],jest:null,backend_evidence:null}')"
           curl --fail-with-body --silent --show-error \
+            --connect-timeout 10 \
+            --max-time 60 \
             -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
             -H 'Content-Type: application/json' \
             --data "$payload" \
