@@ -17,12 +17,20 @@ import { Fragment } from "react";
 import { ALL_USE_CASES, SUPPORTED_COLLECTIONS } from "../delegation-constants";
 
 const TABLE_CLASS =
-  "tw-w-full tw-min-w-[720px] tw-border-separate tw-border-spacing-y-1 tw-text-sm [&_tbody_tr]:tw-bg-iron-950";
+  "tw-w-full tw-min-w-[720px] tw-border-separate tw-border-spacing-y-1.5 tw-text-sm [&_tbody_tr]:tw-bg-black/25 [&_tbody_tr]:tw-transition-colors hover:[&_tbody_tr]:tw-bg-black/40";
 const TABLE_HEADER_CELL_CLASS =
-  "tw-px-4 tw-py-2 tw-text-left tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400";
+  "tw-px-4 tw-py-2 tw-text-left tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-widest tw-text-iron-500";
 const TABLE_CELL_CLASS =
-  "tw-px-4 tw-py-3 tw-align-middle tw-text-iron-100 first:tw-rounded-l-lg last:tw-rounded-r-lg";
+  "tw-px-4 tw-py-3.5 tw-align-middle tw-font-normal tw-leading-6 tw-text-iron-300 first:tw-rounded-l-lg last:tw-rounded-r-lg";
 const TABLE_CENTER_CELL_CLASS = `${TABLE_CELL_CLASS} tw-text-center`;
+const RESULT_SECTION_CLASS =
+  "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-[#111115] tw-p-5 sm:tw-p-6";
+const RESULT_TITLE_CLASS =
+  "tw-mb-4 tw-mt-0 tw-text-lg tw-font-semibold tw-leading-7 tw-text-iron-100";
+const RESULT_EMPTY_CLASS =
+  "tw-mb-0 tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-500";
+const SUCCESS_PANEL_CLASS =
+  "tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.05] tw-border-l-success/50 tw-bg-black/20 tw-p-4 sm:tw-p-5";
 
 export interface ConsolidationDisplay {
   from: string;
@@ -193,9 +201,9 @@ function DelegationsResults(
 
   return (
     <>
-      <section className="tw-mt-6 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5 sm:tw-p-6">
+      <section className={`tw-mt-6 ${RESULT_SECTION_CLASS}`}>
         <div className="tw-w-full">
-          <h2 className="tw-mb-4 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
+          <h2 className={RESULT_TITLE_CLASS}>
             {t(
               locale,
               "delegation.collection.walletChecker.delegations.title",
@@ -271,7 +279,7 @@ function DelegationsResults(
               </table>
             </div>
           ) : (
-            <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
+            <p className={RESULT_EMPTY_CLASS}>
               {t(
                 locale,
                 "delegation.collection.walletChecker.delegations.empty"
@@ -279,7 +287,7 @@ function DelegationsResults(
             </p>
           )}
           {props.activeDelegation && (
-            <div className="tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-success/25 tw-bg-success/5 tw-p-4 sm:tw-p-5">
+            <div className={SUCCESS_PANEL_CLASS}>
               <h3 className="tw-mb-3 tw-mt-0 tw-text-base tw-font-semibold tw-text-success">
                 {t(
                   locale,
@@ -334,9 +342,9 @@ function DelegationsResults(
           )}
         </div>
       </section>
-      <section className="tw-mt-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5 sm:tw-p-6">
+      <section className={`tw-mt-4 ${RESULT_SECTION_CLASS}`}>
         <div className="tw-w-full">
-          <h2 className="tw-mb-4 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
+          <h2 className={RESULT_TITLE_CLASS}>
             {t(locale, "delegation.collection.walletChecker.managers.title", {
               count: formatInteger(locale, props.subDelegations.length),
             })}
@@ -379,7 +387,7 @@ function DelegationsResults(
               </table>
             </div>
           ) : (
-            <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
+            <p className={RESULT_EMPTY_CLASS}>
               {t(locale, "delegation.collection.walletChecker.managers.empty")}
             </p>
           )}
@@ -401,9 +409,9 @@ function ConsolidationsResults(
   const { locale } = props;
 
   return (
-    <section className="tw-mt-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5 sm:tw-p-6">
+    <section className={`tw-mt-4 ${RESULT_SECTION_CLASS}`}>
       <div className="tw-w-full">
-        <h2 className="tw-mb-4 tw-mt-0 tw-text-xl tw-font-semibold tw-text-white">
+        <h2 className={RESULT_TITLE_CLASS}>
           {t(
             locale,
             "delegation.collection.walletChecker.consolidations.title",
@@ -419,9 +427,9 @@ function ConsolidationsResults(
                 {props.consolidations.map((consolidation) => (
                   <tr
                     key={getConsolidationKey("consolidation", consolidation)}
-                    className="tw-bg-iron-950"
+                    className="tw-bg-black/25 tw-transition-colors hover:tw-bg-black/40"
                   >
-                    <td className="tw-flex tw-items-center tw-gap-4 tw-rounded-lg tw-px-4 tw-py-3">
+                    <td className="tw-flex tw-items-center tw-gap-4 tw-rounded-lg tw-px-4 tw-py-3 tw-font-normal tw-text-iron-300">
                       <CheckedWalletAddress
                         checkedAddress={props.fetchedAddress}
                         address={consolidation.from}
@@ -444,7 +452,7 @@ function ConsolidationsResults(
             </table>
           </div>
         ) : (
-          <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
+          <p className={RESULT_EMPTY_CLASS}>
             {t(
               locale,
               "delegation.collection.walletChecker.consolidations.empty"
@@ -453,7 +461,7 @@ function ConsolidationsResults(
         )}
         {props.consolidations.length > 1 &&
           props.consolidatedWallets.length > 1 && (
-            <div className="tw-mt-5 tw-rounded-lg tw-border tw-border-solid tw-border-success/25 tw-bg-success/5 tw-p-4 sm:tw-p-5">
+            <div className={SUCCESS_PANEL_CLASS}>
               <h3 className="tw-mb-3 tw-mt-0 tw-text-base tw-font-semibold tw-text-success">
                 {t(
                   locale,
@@ -487,7 +495,7 @@ function ConsolidationsResults(
           )}
         {props.consolidationActions.length > 0 && (
           <>
-            <div className="tw-mt-5 tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-error/20 tw-bg-error/5 tw-p-4 tw-font-semibold tw-text-error">
+            <div className="tw-mt-5 tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.05] tw-border-l-error/50 tw-bg-black/20 tw-p-4 tw-font-semibold tw-text-error">
               <FontAwesomeIcon icon={faXmark} className="tw-h-5 tw-w-5" />
               {t(
                 locale,
