@@ -45,7 +45,7 @@ export default function LevelsClient() {
             <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
               {m(locale, "network.levels.hero.title")}
             </h1>
-            <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-base tw-font-light tw-leading-7 tw-text-iron-400">
+            <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300">
               {m(locale, "network.levels.intro")}
             </p>
           </header>
@@ -69,7 +69,7 @@ export default function LevelsClient() {
                 <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-300">
                   {m(locale, "network.levels.trust")}
                 </p>
-                <div className="tw-mt-4 tw-space-y-3 tw-text-sm tw-leading-6 tw-text-iron-500">
+                <div className="tw-mt-4 tw-space-y-3 tw-text-sm tw-leading-6 tw-text-iron-400">
                   <p className="tw-m-0">{m(locale, "network.levels.limit")}</p>
                   <p className="tw-m-0">
                     {m(locale, "network.levels.determinedByTable")}
