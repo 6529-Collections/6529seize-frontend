@@ -15,7 +15,7 @@ import {
 
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import Button from "@/components/utils/button/Button";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import UserPageIdentityHeaderCICRateStats from "./UserPageIdentityHeaderCICRateStats";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -240,24 +240,6 @@ export default function UserPageIdentityHeaderCICRate({
     </div>
   );
 
-  const tooltipButtonContent = mutating ? (
-    <div className="tw-w-8">
-      <CircleLoader />
-    </div>
-  ) : (
-    <>Rate</>
-  );
-
-  const fullButtonContent = mutating ? (
-    <div className="tw-flex tw-items-center tw-justify-center">
-      <div className="tw-w-8">
-        <CircleLoader />
-      </div>
-    </div>
-  ) : (
-    <>Rate</>
-  );
-
   const adjustmentHelper = (
     <UserRateAdjustmentHelper
       inLineValues={isTooltip}
@@ -293,17 +275,17 @@ export default function UserPageIdentityHeaderCICRate({
               </div>
               <div className="tw-w-full sm:tw-w-auto">
                 <div className="tw-inline-flex tw-w-full tw-items-end tw-space-x-6 sm:tw-w-auto">
-                  <button
+                  <Button
                     type="submit"
                     disabled={isSaveDisabled}
-                    className={`${
-                      !isSaveDisabled
-                        ? "hover:tw-border-emerald-400 hover:tw-bg-emerald-400"
-                        : "tw-cursor-not-allowed tw-opacity-50"
-                    } tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-emerald-500 tw-bg-emerald-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-shadow-lg tw-shadow-emerald-500/20 tw-transition tw-duration-300 tw-ease-out sm:tw-w-auto`}
+                    loading={mutating}
+                    variant="success"
+                    size="lg"
+                    fullWidth
+                    className="sm:tw-w-auto"
                   >
-                    {tooltipButtonContent}
-                  </button>
+                    Rate
+                  </Button>
                 </div>
               </div>
             </div>
@@ -323,25 +305,27 @@ export default function UserPageIdentityHeaderCICRate({
             {adjustmentHelper}
 
             <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-3 md:tw-flex-row-reverse">
-              <button
+              <Button
                 type="submit"
                 disabled={isSaveDisabled}
-                className={`${
-                  isSaveDisabled
-                    ? "tw-cursor-not-allowed tw-opacity-40"
-                    : "hover:tw-border-emerald-500 hover:tw-bg-emerald-500 active:tw-scale-[0.98]"
-                } tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-emerald-600 tw-bg-emerald-600 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-shadow-lg tw-shadow-emerald-500/20 tw-transition tw-duration-300 tw-ease-out md:tw-flex-1`}
+                loading={mutating}
+                variant="success"
+                size="lg"
+                fullWidth
+                className="md:tw-w-auto md:tw-flex-1"
               >
-                {fullButtonContent}
-              </button>
+                Rate
+              </Button>
               {onCancel && (
-                <button
+                <Button
                   onClick={onCancel}
-                  type="button"
-                  className="tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 md:tw-flex-1"
+                  variant="secondary"
+                  size="lg"
+                  fullWidth
+                  className="md:tw-w-auto md:tw-flex-1"
                 >
                   Cancel
-                </button>
+                </Button>
               )}
             </div>
           </>

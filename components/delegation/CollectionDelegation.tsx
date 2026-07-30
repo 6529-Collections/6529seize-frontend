@@ -8,6 +8,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { DelegationCenterSection } from "@/types/enums";
+import Button from "@/components/utils/button/Button";
 import { faCircleArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
@@ -258,15 +259,16 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   <p className="tw-mb-4 tw-text-base tw-leading-6 tw-text-iron-300">
                     {t(locale, "delegation.collection.connect.description")}
                   </p>
-                  <button
+                  <Button
                     type="button"
-                    className="tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-5 tw-py-2.5 tw-text-base tw-font-semibold tw-text-black tw-transition-colors hover:tw-bg-iron-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                    variant="primary"
+                    size="lg"
                     onClick={() => {
                       accountResolution.seizeConnect();
                     }}
                   >
                     {t(locale, "delegation.collection.connect.button")}
-                  </button>
+                  </Button>
                 </section>
               ) : (
                 <>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useId, useMemo, useRef } from "react";
 import type { MouseEvent } from "react";
 import { createPortal } from "react-dom";
+import Button from "@/components/utils/button/Button";
 import { t } from "@/i18n/messages";
 import DotLoader from "../dotLoader/DotLoader";
 import {
@@ -197,23 +198,27 @@ export function AuthSignModal({
         <div className={styles["signModalFooter"]}>
           {!isSignRequestInProgress &&
             (!isSessionUpgradePrompt || sessionUpgradeCanDismiss) && (
-              <button
+              <Button
                 type="button"
-                className={styles["signModalCancelButton"]}
                 onClick={onCancelSignRequest}
+                variant="secondary"
+                size="md"
+                className="tw-min-w-32 max-[576px]:tw-min-w-0 max-[576px]:tw-flex-1"
               >
                 {isSessionUpgradePrompt && sessionUpgradeHasDeadline
                   ? t(AUTH_MODAL_LOCALE, "auth.signModal.remindLater")
                   : t(AUTH_MODAL_LOCALE, "auth.signModal.cancel")}
-              </button>
+              </Button>
             )}
           {!isConnectionShareUpgradePrompt && (
-            <button
+            <Button
               type="button"
-              className={styles["signModalConfirmButton"]}
               data-auth-sign-primary
               onClick={onConfirmSignRequest}
               disabled={isSignRequestInProgress}
+              variant="action"
+              size="md"
+              className="tw-min-w-32 max-[576px]:tw-min-w-0 max-[576px]:tw-flex-1"
             >
               {isSigningPending ? (
                 <span className={styles["signModalButtonContent"]}>
@@ -223,7 +228,7 @@ export function AuthSignModal({
               ) : (
                 signModalConfirmText
               )}
-            </button>
+            </Button>
           )}
         </div>
       </div>

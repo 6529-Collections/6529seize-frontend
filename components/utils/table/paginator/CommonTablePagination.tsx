@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
@@ -48,11 +49,11 @@ export default function CommonTablePagination({
 
         <span className="tw-isolate tw-inline-flex tw-gap-x-3 tw-rounded-md tw-shadow-sm">
           {currentPage > 1 && (
-            <button
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => setCurrentPage(currentPage - 1)}
               disabled={loading}
-              type="button"
-              className="tw-relative tw-inline-flex tw-items-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus:tw-z-10 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
             >
               <svg
                 className="-tw-ml-1.5 tw-h-5 tw-w-5"
@@ -67,14 +68,14 @@ export default function CommonTablePagination({
                 />
               </svg>
               <span>{t(locale, "common.pagination.previous")}</span>
-            </button>
+            </Button>
           )}
           {haveNextPage && (
-            <button
+            <Button
+              variant="secondary"
+              size="sm"
               disabled={loading}
               onClick={() => setCurrentPage(currentPage + 1)}
-              type="button"
-              className="tw-relative tw-inline-flex tw-items-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus:tw-z-10 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
             >
               <span>{t(locale, "common.pagination.next")}</span>
               <svg
@@ -89,7 +90,7 @@ export default function CommonTablePagination({
                   clipRule="evenodd"
                 />
               </svg>
-            </button>
+            </Button>
           )}
         </span>
       </div>

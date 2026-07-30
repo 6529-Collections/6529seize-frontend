@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/utils/button/Button";
 import { publicEnv } from "@/config/env";
 import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants/constants";
 import type { NFT } from "@/entities/INFT";
@@ -35,8 +36,6 @@ interface Props {
   verifiedRememe(r: ProcessedRememe | undefined, references: number[]): void;
 }
 
-const PRIMARY_BUTTON_CLASS =
-  "tw-rounded-none tw-border-0 tw-bg-[#267c93] tw-px-5 tw-py-[0.375rem] tw-font-bold tw-leading-6 tw-text-white tw-transition-colors disabled:tw-pointer-events-none disabled:tw-opacity-65 desktop-hover:hover:tw-bg-[#2b8aa3]";
 const LINK_BUTTON_CLASS =
   "tw-rounded-none tw-border-0 tw-bg-transparent tw-px-5 tw-py-[0.375rem] tw-font-bold tw-leading-6 tw-text-white tw-underline desktop-hover:hover:tw-text-[#9a9a9a]";
 
@@ -428,10 +427,12 @@ export default function RememeAddComponent(props: Readonly<Props>) {
         <div className="tw-pt-4">
           <div>
             {!verified ? (
-              <button
+              <Button
                 type="button"
                 onClick={() => validate()}
-                className={`${PRIMARY_BUTTON_CLASS} ${styles["validateButton"]}`}
+                variant="action"
+                size="md"
+                className={styles["validateButton"]}
                 disabled={
                   !contract || !tokenIdDisplay || references.length === 0
                 }
@@ -447,7 +448,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
                     </span>
                   </span>
                 )}
-              </button>
+              </Button>
             ) : (
               <div className="tw-flex tw-items-center tw-justify-start tw-gap-2">
                 <span className="tw-flex tw-items-center tw-justify-start tw-gap-2">

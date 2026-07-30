@@ -295,7 +295,7 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
               onClicked={onSubmit}
               disabled={!formValid}
               loading={isSubmitting}
-              padding="tw-px-6 tw-py-3"
+              size="lg"
             >
               {submitLabel}
             </PrimaryButton>

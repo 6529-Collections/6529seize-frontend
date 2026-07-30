@@ -51,7 +51,7 @@ export function ResubmitAcknowledgement({
             onClicked={onAccept}
             disabled={false}
             loading={false}
-            padding="tw-px-5 tw-py-2.5"
+            size="lg"
           >
             I Understand, Start Resubmission
           </PrimaryButton>

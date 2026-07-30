@@ -15,6 +15,7 @@ import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { formatInteger } from "@/i18n/format";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import Button from "@/components/utils/button/Button";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "@/entities/ISort";
 import type { CICType } from "@/entities/IProfile";
@@ -438,16 +439,17 @@ function CollectorsCsvDownloadControls({
   return (
     <div className="tw-flex tw-flex-col tw-items-end tw-gap-2">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-3">
-        <button
+        <Button
           type="button"
           onClick={handleCsvDownload}
           disabled={isCsvDownloading}
           aria-busy={isCsvDownloading}
+          variant="secondary"
+          size="sm"
           aria-label={t(
             locale,
             "theMemes.detail.collectors.downloadCsvAriaLabel"
           )}
-          className="tw-inline-flex tw-h-10 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-200 tw-transition-colors tw-duration-300 tw-ease-out hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
         >
           <span className="tw-whitespace-nowrap">
             {isCsvDownloading
@@ -459,7 +461,7 @@ function CollectorsCsvDownloadControls({
             className={`tw-size-3.5 ${isCsvDownloading ? "motion-safe:tw-animate-spin" : ""}`}
             aria-hidden="true"
           />
-        </button>
+        </Button>
         {children}
       </div>
       <span className="tw-sr-only" role="status" aria-live="polite">
