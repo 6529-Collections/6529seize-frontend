@@ -1,7 +1,6 @@
 "use client";
 
 import { BoltIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import {
   useCallback,
   useEffect,
@@ -18,7 +17,8 @@ import OnchainTransactionModal, {
   type OnchainTransactionModalStatus,
 } from "@/components/common/OnchainTransactionModal";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import {
   displayedEonNumberFromIndex,
   displayedEpochNumberFromIndex,
@@ -456,14 +456,16 @@ export default function UserPageSubscriptionsTopUp({
   };
 
   const iOsContent = mounted ? (
-    <Link
+    <ButtonLink
       href={window.location.href}
-      className="tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-300 tw-bg-iron-100 tw-px-3 tw-py-2 tw-font-semibold tw-text-iron-950 tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+      variant="primary"
+      size="lg"
+      fullWidth
       target="_blank"
       rel="noopener noreferrer"
     >
       Top-up on 6529.io
-    </Link>
+    </ButtonLink>
   ) : null;
 
   const printRemainingMints = (
@@ -609,16 +611,19 @@ export default function UserPageSubscriptionsTopUp({
           </div>
         </div>
         <div className="tw-flex tw-items-center tw-justify-end sm:tw-flex-shrink-0">
-          <PrimaryButton
+          <Button
+            variant="primary"
+            size="lg"
             loading={isSending}
             disabled={isSendDisabled}
-            onClicked={handleSend}
-            ariaLabel={submitLabel}
-            className="tw-min-h-11 tw-w-full sm:tw-w-auto"
+            onClick={handleSend}
+            aria-label={submitLabel}
+            fullWidth
+            className="sm:tw-w-auto"
           >
             <BoltIcon className="tw-size-4" aria-hidden="true" />
             {submitLabel}
-          </PrimaryButton>
+          </Button>
         </div>
       </div>
     </>

@@ -3,6 +3,7 @@
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import NextGenContractWriteStatus from "@/components/nextGen/NextGenContractWriteStatus";
+import Button from "@/components/utils/button/Button";
 import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_MINTER,
@@ -32,7 +33,6 @@ import { useEffect, useState } from "react";
 import { useChainId, useEnsAddress, useEnsName, useWriteContract } from "wagmi";
 import { Spinner } from "./NextGenMint";
 import {
-  MINT_ACTION_BUTTON_CLASSNAME,
   MINT_INPUT_CLASSNAME,
   MINT_SELECT_CLASSNAME,
   MintInfoTooltip,
@@ -505,15 +505,17 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
               </select>
             </div>
             <div>
-              <button
+              <Button
                 type="button"
-                className={MINT_ACTION_BUTTON_CLASSNAME}
+                variant="success"
+                size="lg"
+                fullWidth
                 disabled={disableMint()}
                 onClick={handleMintClick}
               >
                 {renderButtonText()}
                 {isMinting && <Spinner />}
-              </button>
+              </Button>
             </div>
           </div>
         </fieldset>

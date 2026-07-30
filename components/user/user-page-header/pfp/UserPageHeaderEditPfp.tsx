@@ -9,8 +9,7 @@ import {
 import UserSettingsImgSelectFile from "@/components/user/settings/UserSettingsImgSelectFile";
 import type { NFTLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
 import UserSettingsImgSelectMeme from "@/components/user/settings/UserSettingsImgSelectMeme";
-import ActionButton from "@/components/utils/button/ActionButton";
-import SecondaryButton from "@/components/utils/button/SecondaryButton";
+import Button from "@/components/utils/button/Button";
 import type { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
@@ -232,21 +231,27 @@ export default function UserPageHeaderEditPfp({
               </p>
             )}
             <div className="tw-flex tw-flex-col tw-gap-2 tw-pt-5 sm:tw-flex-row-reverse sm:tw-justify-start">
-              <ActionButton
+              <Button
                 type="submit"
+                variant="action"
+                size="lg"
                 loading={saving}
                 disabled={!file && !selectedMeme}
-                className="tw-min-h-11 tw-w-full sm:tw-w-auto"
+                fullWidth
+                className="sm:tw-w-auto"
               >
                 Save PFP
-              </ActionButton>
-              <SecondaryButton
+              </Button>
+              <Button
+                variant="secondary"
+                size="lg"
                 disabled={saving}
-                onClicked={onClose}
-                className="tw-min-h-11 tw-w-full sm:tw-w-auto"
+                onClick={onClose}
+                fullWidth
+                className="sm:tw-w-auto"
               >
                 Cancel
-              </SecondaryButton>
+              </Button>
             </div>
           </form>
         </div>

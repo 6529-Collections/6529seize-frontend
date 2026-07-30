@@ -134,7 +134,7 @@ describe('UserPageIdentityDeleteStatementModal', () => {
     expect(mockOnClose).toHaveBeenCalled();
   });
 
-  it('shows loading state when delete is in progress', async () => {
+  it('uses the shared destructive button when idle', async () => {
     const mockOnClose = jest.fn();
     
     // Test that the delete button has the correct structure for loading states
@@ -150,9 +150,11 @@ describe('UserPageIdentityDeleteStatementModal', () => {
     // The button should contain text "Delete"
     expect(deleteButton).toHaveTextContent('Delete');
     
-    // Check that the button has conditional styling classes that will change based on loading state
-    expect(deleteButton).toHaveClass('tw-cursor-pointer');
-    expect(deleteButton).toHaveClass('tw-bg-[#F04438]');
+    expect(deleteButton).toHaveClass(
+      'enabled:tw-cursor-pointer',
+      'tw-bg-red',
+      'focus-visible:tw-outline-red'
+    );
   });
 
   it('handles successful deletion', async () => {

@@ -1,14 +1,24 @@
 import type { TimelineStepId } from "./page.content";
 
-export interface CurrentPanelAction {
-  readonly kind: "button" | "link";
+interface CurrentPanelButtonAction {
+  readonly kind: "button";
   readonly label: string;
-  readonly href?: string;
   readonly busy?: boolean;
   readonly busyLabel?: string;
   readonly onClick?: () => void;
+}
+
+interface CurrentPanelLinkAction {
+  readonly kind: "link";
+  readonly label: string;
+  readonly href: string;
+  readonly onClick?: () => void;
   readonly onNavigate?: () => void;
 }
+
+export type CurrentPanelAction =
+  | CurrentPanelButtonAction
+  | CurrentPanelLinkAction;
 
 export type JoinPageState = "loggedOut" | "inProgress" | "loggedIn";
 export type StepStatus = "complete" | "current" | "pending";

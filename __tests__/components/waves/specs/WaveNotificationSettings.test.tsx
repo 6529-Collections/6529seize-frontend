@@ -585,7 +585,7 @@ describe("WaveNotificationSettings", () => {
 
     const retryButton = screen.getByLabelText("Retry notification settings");
     expect(retryButton).toBeEnabled();
-    expect(retryButton).toHaveClass("tw-cursor-pointer");
+    expect(retryButton).toHaveClass("enabled:tw-cursor-pointer");
     expect(screen.getByLabelText("Mute wave")).toBeInTheDocument();
     expect(
       screen.queryByLabelText("Open notification settings")

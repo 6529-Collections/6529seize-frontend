@@ -9,6 +9,7 @@ import ProxyCreateAction from "../proxy/create-action/ProxyCreateAction";
 import CommonChangeAnimation from "@/components/utils/animation/CommonChangeAnimation";
 import { PROFILE_PROXY_AVAILABLE_ACTIONS } from "@/entities/IProxy";
 import Link from "next/link";
+import Button from "@/components/utils/button/Button";
 
 enum VIEW_TYPE {
   LIST = "LIST",
@@ -129,10 +130,11 @@ export default function ProxyListItem({
         </div>
         <div>
           {canAddNewAction && (
-            <button
-              type="button"
+            <Button
+              variant="primary"
+              size="md"
               onClick={() => setViewType(VIEW_TYPE.CREATE_NEW)}
-              className="tw-flex tw-items-center tw-justify-center tw-relative tw-bg-iron-50 tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-text-iron-700 tw-border tw-border-solid tw-border-iron-50 tw-rounded-lg hover:tw-bg-iron-300 hover:tw-border-iron-300 tw-transition tw-duration-300 tw-ease-out tw-text-nowrap">
+            >
               <svg
                 className="tw-w-5 tw-h-5 tw-mr-1.5 -tw-ml-1"
                 viewBox="0 0 24 24"
@@ -148,7 +150,7 @@ export default function ProxyListItem({
                 />
               </svg>
               <span>Add A Proxy</span>
-            </button>
+            </Button>
           )}
         </div>
       </div>

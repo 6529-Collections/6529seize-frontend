@@ -203,7 +203,6 @@ export default function BlockFinderClient() {
                 onClicked={onSubmit}
                 disabled={!date || !time}
                 loading={loading}
-                padding="tw-px-4 tw-py-3"
               >
                 Submit
               </PrimaryButton>
