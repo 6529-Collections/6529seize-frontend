@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 
-const { cpSync, existsSync, mkdirSync, readFileSync } = require("node:fs");
+const { cpSync, existsSync, mkdirSync } = require("node:fs");
 const { spawnSync } = require("node:child_process");
 const { resolve } = require("node:path");
+const {
+  assertPrivateRuntimeFile,
+  readDestinationsFile,
+} = require("./public-review-discussion-destinations.cjs");
 
 const repoRoot = resolve(__dirname, "..");
 const standaloneRoot = resolve(repoRoot, ".next", "standalone");
@@ -79,20 +83,14 @@ if (standaloneArtifactProfile) {
 
 const runtimeEnv = { ...process.env };
 if (publicReviewDestinationsFile) {
-  if (!existsSync(publicReviewDestinationsFile)) {
-    console.error(
-      "Configured public-review discussion destinations file is unavailable."
+  let publicReviewDiscussionDestinations;
+  try {
+    assertPrivateRuntimeFile(publicReviewDestinationsFile);
+    publicReviewDiscussionDestinations = readDestinationsFile(
+      publicReviewDestinationsFile
     );
-    process.exit(1);
-  }
-  const publicReviewDiscussionDestinations = readFileSync(
-    publicReviewDestinationsFile,
-    "utf8"
-  ).trim();
-  if (!publicReviewDiscussionDestinations) {
-    console.error(
-      "Configured public-review discussion destinations file is empty."
-    );
+  } catch (error) {
+    console.error(error.message);
     process.exit(1);
   }
   runtimeEnv["PUBLIC_REVIEW_DISCUSSION_DESTINATIONS"] =

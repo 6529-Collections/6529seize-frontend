@@ -93,30 +93,26 @@ describe("public-review artifact workflow contract", () => {
 
   it("keeps legacy staging aligned with the public-review bundle contract", () => {
     expect(legacyStaging).toContain(
-      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_PARAMETER: ${{ vars.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_PARAMETER"
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS }}"
     );
-    expect(legacyStaging).toContain("aws ssm get-parameter");
-    expect(legacyStaging).toContain("--with-decryption");
     expect(legacyStaging).toContain(
-      "--query 'Parameter.{Type:Type,Value:Value}'"
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64"
     );
-    expect(legacyStaging).toContain('.Type == "SecureString"');
-    expect(legacyStaging).not.toContain("--query 'Parameter.Value'");
+    expect(legacyStaging).toContain("base64 -d");
+    expect(legacyStaging).not.toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_PARAMETER"
+    );
+    expect(legacyStaging).not.toContain("aws ssm get-parameter");
     expect(legacyStaging).toContain(
       "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE=$public_review_destinations_file"
-    );
-    expect(legacyStaging).not.toContain(
-      "secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS"
-    );
-    expect(legacyStaging).not.toContain(
-      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64"
     );
     expect(legacyStaging).toContain('(has("production") | not)');
     expect(stagingScript).toContain(
       'public_review_destinations_source="${PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE:-}"'
     );
-    expect(stagingScript).toContain("command -v jq");
-    expect(stagingScript).toContain("stat -c '%U:%G'");
+    expect(stagingScript).toContain(
+      "scripts/public-review-discussion-destinations.cjs"
+    );
     expect(stagingScript).toContain("STANDALONE_ARTIFACT_PROFILE=staging");
     expect(stagingScript).toContain(
       "BASE_ENDPOINT=https://staging.6529.io \\\n  ./bin/6529 run build"
