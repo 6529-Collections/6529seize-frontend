@@ -32,6 +32,7 @@ const {
   GITHUB_API_URL = "https://api.github.com",
   CI_GITHUB_EVIDENCE_REQUEST_TIMEOUT_MS,
   CI_GITHUB_EVIDENCE_DEADLINE_MS,
+  CI_PIPELINES_ALERT_TIMEOUT_MS,
 } = process.env;
 
 function requireValue(name, value) {
@@ -84,6 +85,12 @@ const GITHUB_EVIDENCE_DEADLINE_MS = boundedDuration(
 );
 const GITHUB_EVIDENCE_MAX_ATTEMPTS = 3;
 const GITHUB_EVIDENCE_FALLBACK_RETRY_MS = 250;
+const PIPELINES_ALERT_TIMEOUT_MS = boundedDuration(
+  CI_PIPELINES_ALERT_TIMEOUT_MS,
+  10_000,
+  25,
+  30_000
+);
 
 function isContributorGithubLogin(value) {
   return (
@@ -245,8 +252,16 @@ async function githubApi(repository, path, evidenceBudget) {
 }
 
 const MANUAL_FRONTEND_WORKFLOWS = Object.freeze({
-  "Web Deploy - STAGING": "deploy-staging.yml",
-  "Web Deploy - PROD": "build-upload-deploy-prod.yml",
+  "Web Deploy - STAGING": Object.freeze({
+    workflowFile: "deploy-staging.yml",
+    branch: "1a-staging",
+    pullRequestBase: "main",
+  }),
+  "Web Deploy - PROD": Object.freeze({
+    workflowFile: "build-upload-deploy-prod.yml",
+    branch: "main",
+    pullRequestBase: "main",
+  }),
 });
 const APPROVED_FRONTEND_PRODUCTION_WORKFLOWS = Object.freeze({
   "Web Deploy - PROD": "build-upload-deploy-prod.yml",
@@ -259,6 +274,7 @@ function validateCurrentManualWorkflowRun({
   runId,
   workflow,
   workflowFile,
+  approvedBranch,
   deployedSha,
   branch,
 }) {
@@ -275,6 +291,11 @@ function validateCurrentManualWorkflowRun({
   }
   if (currentRun.head_sha !== deployedSha) {
     throw new Error("Current workflow run SHA does not match the deployed SHA");
+  }
+  if (branch !== approvedBranch) {
+    throw new Error(
+      `Deployment branch ${branch} is not approved for workflow ${workflow}`
+    );
   }
   if (currentRun.head_branch !== branch) {
     throw new Error(
@@ -303,7 +324,6 @@ async function listPreviousWorkflowRuns({
   workflowName,
   workflowFile,
   currentRun,
-  currentSha,
   branch,
   evidenceBudget,
 }) {
@@ -321,7 +341,6 @@ async function listPreviousWorkflowRuns({
     for (const run of pageRuns) {
       if (
         String(run.id) === String(currentRun.id) ||
-        run.head_sha === currentSha ||
         run.name !== workflowName ||
         run.path?.split("@")[0] !== `.github/workflows/${workflowFile}` ||
         run.status !== "completed" ||
@@ -352,10 +371,12 @@ async function deriveManualRangeContributors({
   const evidenceBudget = {
     deadlineAt: Date.now() + GITHUB_EVIDENCE_DEADLINE_MS,
   };
-  const workflowFile = MANUAL_FRONTEND_WORKFLOWS[workflow];
-  if (!workflowFile) {
+  const workflowConfig = MANUAL_FRONTEND_WORKFLOWS[workflow];
+  if (!workflowConfig) {
     throw new Error(`Workflow ${workflow} is not an approved manual path`);
   }
+  const { workflowFile, branch: approvedBranch, pullRequestBase } =
+    workflowConfig;
   const currentRun = await githubApi(
     repository,
     `/actions/runs/${runId}`,
@@ -366,6 +387,7 @@ async function deriveManualRangeContributors({
     runId,
     workflow,
     workflowFile,
+    approvedBranch,
     deployedSha,
     branch,
   });
@@ -381,7 +403,6 @@ async function deriveManualRangeContributors({
           workflowName: name,
           workflowFile: file,
           currentRun,
-          currentSha: deployedSha,
           branch,
           evidenceBudget,
         })
@@ -433,7 +454,7 @@ async function deriveManualRangeContributors({
       );
     }
     for (const pull of associated) {
-      if (pull.merged_at && pull.base?.ref === branch) {
+      if (pull.merged_at && pull.base?.ref === pullRequestBase) {
         pullRequests.set(pull.number, pull);
       }
     }
@@ -644,9 +665,13 @@ if (CI_PIPELINES_ALERT_API_AUTH) {
 }
 
 const controller = new AbortController();
-const timeoutId = setTimeout(() => controller.abort(), 10_000);
+const timeoutId = setTimeout(
+  () => controller.abort(),
+  PIPELINES_ALERT_TIMEOUT_MS
+);
 
 let response;
+let outcome = null;
 try {
   response = await fetch(CI_PIPELINES_ALERT_URL, {
     method: "POST",
@@ -654,6 +679,20 @@ try {
     body,
     signal: controller.signal,
   });
+  if (!response.ok) {
+    console.error(
+      `CI pipeline wave notification failed: ${response.status} ${response.statusText}`
+    );
+    process.exit(1);
+  }
+  try {
+    outcome = await response.json();
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw error;
+    }
+    // Older receivers returned an empty response. Preserve rollout compatibility.
+  }
 } catch (error) {
   console.error(
     `CI pipeline wave notification request failed: ${getFetchFailureMessage(error)}`
@@ -661,20 +700,6 @@ try {
   process.exit(1);
 } finally {
   clearTimeout(timeoutId);
-}
-
-if (!response.ok) {
-  console.error(
-    `CI pipeline wave notification failed: ${response.status} ${response.statusText}`
-  );
-  process.exit(1);
-}
-
-let outcome = null;
-try {
-  outcome = await response.json();
-} catch {
-  // Older receivers returned an empty response. Preserve rollout compatibility.
 }
 if (outcome?.ci_drop === "accepted") {
   console.log("CI drop accepted.");

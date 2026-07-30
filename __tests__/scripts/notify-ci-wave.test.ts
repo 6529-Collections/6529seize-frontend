@@ -34,7 +34,8 @@ const MANUAL_WORKFLOW_FIXTURES: readonly ManualWorkflowFixture[] = [
 ];
 
 async function runNotifier(
-  overrides: Record<string, string> = {}
+  overrides: Record<string, string> = {},
+  options: { readonly stallResponseBody?: boolean } = {}
 ): Promise<RunResult> {
   let payload: Record<string, unknown> | null = null;
   let requestError: Error | null = null;
@@ -47,6 +48,14 @@ async function runNotifier(
           string,
           unknown
         >;
+        if (options.stallResponseBody) {
+          response.writeHead(200, {
+            "content-type": "application/json",
+            "content-length": "100",
+          });
+          response.flushHeaders();
+          return;
+        }
         response.writeHead(204);
         response.end();
       } catch (error) {
@@ -91,6 +100,7 @@ async function runNotifier(
   const code = await new Promise<number | null>((resolve) =>
     child.on("exit", resolve)
   );
+  server.closeAllConnections();
   await new Promise<void>((resolve, reject) =>
     server.close((error) => (error ? reject(error) : resolve()))
   );
@@ -113,7 +123,7 @@ async function runManualNotifier({
       number: 3498,
       merged_at: "2026-07-23T10:00:00Z",
       user: { login: "PR-Author", type: "User" },
-      base: { ref: fixture.branch },
+      base: { ref: "main" },
     },
   ],
   pullCommits = [
@@ -240,6 +250,37 @@ describe("notify-ci-wave Release Train metadata", () => {
     }
   );
 
+  it("credits a main-targeted PR carried into manual staging", async () => {
+    const result = await runManualNotifier({
+      fixture: MANUAL_WORKFLOW_FIXTURES[0],
+      commits: [
+        {
+          sha: "c".repeat(40),
+          author: null,
+          committer: null,
+        },
+      ],
+      pullRequests: [
+        {
+          number: 3498,
+          merged_at: "2026-07-23T10:00:00Z",
+          user: { login: "Staging-PR-Author", type: "User" },
+          base: { ref: "main" },
+        },
+      ],
+      pullCommits: [],
+    });
+
+    expect(result).toMatchObject({
+      code: 0,
+      stderr: "",
+      payload: {
+        contributor_evidence: "manual-range",
+        contributor_github_logins: ["Staging-PR-Author"],
+      },
+    });
+  });
+
   it("supports completed successful manual notification replays", async () => {
     const result = await runManualNotifier({
       currentRunOverrides: {
@@ -256,6 +297,56 @@ describe("notify-ci-wave Release Train metadata", () => {
         "Commit-Committer",
       ],
     });
+  });
+
+  it("omits contributors for an exact same-SHA manual redeployment", async () => {
+    const fixture = DEFAULT_MANUAL_WORKFLOW_FIXTURE;
+    const result = await runManualNotifier({
+      fixture,
+      githubResponseOverride: (pathName, response) => {
+        if (
+          pathName.includes(
+            `/actions/workflows/${fixture.workflowFile}/runs`
+          )
+        ) {
+          response.writeHead(200, { "content-type": "application/json" });
+          response.end(
+            JSON.stringify({
+              workflow_runs: [
+                {
+                  id: 122,
+                  name: fixture.workflow,
+                  path: `.github/workflows/${fixture.workflowFile}@refs/heads/${fixture.branch}`,
+                  head_sha: "a".repeat(40),
+                  head_branch: fixture.branch,
+                  status: "completed",
+                  conclusion: "success",
+                  created_at: "2026-07-22T11:38:00Z",
+                },
+              ],
+            })
+          );
+          return true;
+        }
+        if (pathName.includes("/compare/")) {
+          response.writeHead(200, { "content-type": "application/json" });
+          response.end(JSON.stringify({ status: "identical", commits: [] }));
+          return true;
+        }
+        return false;
+      },
+    });
+
+    expect(result).toMatchObject({
+      code: 0,
+      stderr: "",
+      payload: {
+        run_id: "123",
+        status: "success",
+      },
+    });
+    expect(result.payload).not.toHaveProperty("contributor_evidence");
+    expect(result.payload).not.toHaveProperty("contributor_github_logins");
   });
 
   it("stops paging deployment history after finding an approved baseline", async () => {
@@ -357,6 +448,23 @@ describe("notify-ci-wave Release Train metadata", () => {
     }
   );
 
+  it("rejects an otherwise matching manual workflow on an unapproved branch", async () => {
+    const result = await runManualNotifier({
+      currentRunOverrides: {
+        head_branch: "feature/unapproved-production",
+      },
+      notifierOverrides: {
+        GITHUB_REF_NAME: "feature/unapproved-production",
+      },
+    });
+
+    expect(result.code).toBe(0);
+    expect(result.stderr).toContain(
+      "Deployment branch feature/unapproved-production is not approved for workflow Web Deploy - PROD"
+    );
+    expect(result.payload).not.toHaveProperty("contributor_github_logins");
+  });
+
   it("does not retry a rate-limit delay beyond the evidence deadline", async () => {
     let currentRunRequests = 0;
     const result = await runManualNotifier({
@@ -368,14 +476,14 @@ describe("notify-ci-wave Release Train metadata", () => {
         return true;
       },
       notifierOverrides: {
-        CI_GITHUB_EVIDENCE_REQUEST_TIMEOUT_MS: "100",
-        CI_GITHUB_EVIDENCE_DEADLINE_MS: "500",
+        CI_GITHUB_EVIDENCE_REQUEST_TIMEOUT_MS: "1000",
+        CI_GITHUB_EVIDENCE_DEADLINE_MS: "1500",
       },
     });
 
     expect(currentRunRequests).toBe(1);
     expect(result.stderr).toContain(
-      "GitHub contributor evidence deadline expired after 500ms"
+      "GitHub contributor evidence deadline expired after 1500ms"
     );
     expect(result.payload).not.toHaveProperty("contributor_github_logins");
   });
@@ -604,6 +712,24 @@ describe("notify-ci-wave Release Train metadata", () => {
     expect(
       Number.isNaN(Date.parse(String(result.payload?.["deployed_at"])))
     ).toBe(false);
+  });
+
+  it("bounds a receiver response body that never completes", async () => {
+    const result = await runNotifier(
+      {
+        CI_PIPELINES_ALERT_TIMEOUT_MS: "2000",
+      },
+      { stallResponseBody: true }
+    );
+
+    expect(result.code).toBe(1);
+    expect(result.stderr).toContain(
+      "CI pipeline wave notification request failed: request timed out"
+    );
+    expect(result.payload).toMatchObject({
+      run_id: "123",
+      status: "success",
+    });
   });
 
   it("does not trust user-supplied contributors on a manual deployment", async () => {
