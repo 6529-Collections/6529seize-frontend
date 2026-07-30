@@ -308,6 +308,8 @@ function useNewDropCounter(
       }
 
       setRawNewDropsCounts((prev) => {
+        // Every counter write first commits server-authoritative reconciliation
+        // for all tracked waves so covered sibling counts cannot reappear.
         const current = reconcileNewDropsCounts({
           newDropsCounts: prev,
           waves: wavesRef.current,

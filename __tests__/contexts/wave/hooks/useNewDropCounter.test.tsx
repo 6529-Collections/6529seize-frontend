@@ -200,6 +200,54 @@ describe("useNewDropCounter", () => {
     });
   });
 
+  it("commits covered sibling reconciliation during a wave reset", () => {
+    const { result, rerender } = renderHook(
+      ({ wave2SnapshotTimestamp }) =>
+        useNewDropCounter(
+          null,
+          [
+            {
+              id: "wave1",
+              latestDropTimestamp: 10,
+              latestReadTimestamp: 10,
+              serverSnapshotLatestDropTimestamp: 10,
+            },
+            {
+              id: "wave2",
+              latestDropTimestamp: wave2SnapshotTimestamp,
+              latestReadTimestamp: 20,
+              serverSnapshotLatestDropTimestamp: wave2SnapshotTimestamp,
+            },
+          ] as any,
+          jest.fn()
+        ),
+      {
+        wrapper,
+        initialProps: { wave2SnapshotTimestamp: 20 },
+      }
+    );
+
+    act(() => {
+      result.current.resetWaveNewDropsCount("wave1");
+    });
+    emitDropUpdate({ createdAt: 30, serialNo: 5, waveId: "wave2" });
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(1);
+
+    rerender({ wave2SnapshotTimestamp: 31 });
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(0);
+
+    act(() => {
+      result.current.resetWaveNewDropsCount("wave1");
+    });
+    rerender({ wave2SnapshotTimestamp: 20 });
+
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 0,
+      latestDropTimestamp: 31,
+      firstUnreadSerialNo: null,
+    });
+  });
+
   it("commits reconciled state when resetting all waves", () => {
     const { result, rerender } = renderHook(
       ({ latestReadTimestamp }) =>

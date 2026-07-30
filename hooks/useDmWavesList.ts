@@ -96,7 +96,7 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
     readonly viewerIdentityKey: string;
     readonly attempts: number;
     readonly lastDataUpdatedAt: number;
-    readonly lastAttemptAt: number;
+    readonly attemptWindowStartedAt: number;
   } | null>(null);
   const listedUnreadDropsCount = useMemo(
     () =>
@@ -121,7 +121,6 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       return;
     }
 
-    const now = Date.now();
     const previousViewerState =
       reconciliationStateRef.current?.viewerIdentityKey === viewerIdentityKey
         ? reconciliationStateRef.current
@@ -129,17 +128,18 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
             viewerIdentityKey,
             attempts: 0,
             lastDataUpdatedAt: -1,
-            lastAttemptAt: 0,
+            attemptWindowStartedAt: dmWavesDataUpdatedAt,
           };
     const shouldRearm =
       previousViewerState.attempts >=
         MAX_RECONCILIATION_ATTEMPTS_PER_VIEWER &&
-      now - previousViewerState.lastAttemptAt >=
+      dmWavesDataUpdatedAt - previousViewerState.attemptWindowStartedAt >=
         RECONCILIATION_REARM_MIN_INTERVAL_MS;
     const previousState = shouldRearm
       ? {
           ...previousViewerState,
           attempts: 0,
+          attemptWindowStartedAt: dmWavesDataUpdatedAt,
         }
       : previousViewerState;
     const hasNewDmSnapshot =
@@ -155,11 +155,10 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       viewerIdentityKey,
       attempts: previousState.attempts + 1,
       lastDataUpdatedAt: dmWavesDataUpdatedAt,
-      lastAttemptAt: now,
+      attemptWindowStartedAt: previousState.attemptWindowStartedAt,
     };
-    // The overview query polls every minute and advances dataUpdatedAt after a
-    // successful fetch. Re-arm on that next snapshot instead of adding a
-    // second timer, while still capping each reconciliation burst.
+    // Use the successful overview snapshot timestamp as the only clock. This
+    // avoids a separate timer while capping each reconciliation burst.
     void queryClient.refetchQueries({
       queryKey: dmWavesQueryKey,
       exact: true,
