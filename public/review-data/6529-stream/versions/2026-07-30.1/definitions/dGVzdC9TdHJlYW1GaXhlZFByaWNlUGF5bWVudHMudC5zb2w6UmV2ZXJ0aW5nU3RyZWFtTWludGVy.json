@@ -1,0 +1,654 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter#function:0x930e79f1",
+          "declaringDefinitionId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "getAuctionEndTime",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x930e79f1",
+          "signature": "getAuctionEndTime(uint256)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter#function:0x7765c52c",
+          "declaringDefinitionId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "getAuctionStatus",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x7765c52c",
+          "signature": "getAuctionStatus(uint256)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter#function:0x9067b677",
+          "declaringDefinitionId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "getEndTime",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x9067b677",
+          "signature": "getEndTime(uint256)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter#function:0xfb9422ff",
+          "declaringDefinitionId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter",
+          "inherited": false,
+          "inputs": [],
+          "name": "isMinterContract",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xfb9422ff",
+          "signature": "isMinterContract()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter#function:0x1f14ec74",
+          "declaringDefinitionId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address[]",
+              "name": "",
+              "type": "address[]"
+            },
+            {
+              "index": 1,
+              "internalType": "string[]",
+              "name": "",
+              "type": "string[]"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256[]",
+              "name": "",
+              "type": "uint256[]"
+            },
+            {
+              "index": 3,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "internalType": "uint256[]",
+              "name": "",
+              "type": "uint256[]"
+            }
+          ],
+          "name": "mint",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x1f14ec74",
+          "signature": "mint(address[],string[],uint256[],uint256,uint256[])",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter#function:0x46372ba6",
+          "declaringDefinitionId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "mintAndAuction",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x46372ba6",
+          "signature": "mintAndAuction(address,string,uint256,uint256,uint256)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter#function:0xd9f303a2",
+          "declaringDefinitionId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "updateAuctionEndTime",
+          "outputs": [],
+          "selector": "0xd9f303a2",
+          "signature": "updateAuctionEndTime(uint256,uint256)",
+          "stateMutability": "pure"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "isMinterContract()",
+          "displaySignature": "isMinterContract()",
+          "functionKind": "function",
+          "id": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter#function:0xfb9422ff",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUGF5bWVudHMudC5zb2w6UmV2ZXJ0aW5nU3RyZWFtTWludGVyI2Z1bmN0aW9uOjB4ZmI5NDIyZmY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isMinterContract",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 85,
+            "byteStart": 21426,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPricePayments.t.sol#L445-L447",
+            "lineEnd": 447,
+            "lineStart": 445,
+            "snippetSha256": "sha256:f93ce9a1e3d3fca4d03943e665a0b5ebf9dad1bfe4bc6dc0876783f66afe5c4e",
+            "sourceSha256": "sha256:e4a59529a870ab1717615dc9a6fa2ef7584389eaab1b7fa2640cb2727ad7329a"
+          },
+          "selector": "0xfb9422ff",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "getEndTime(uint256)",
+          "displaySignature": "getEndTime(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter#function:0x9067b677",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUGF5bWVudHMudC5zb2w6UmV2ZXJ0aW5nU3RyZWFtTWludGVyI2Z1bmN0aW9uOjB4OTA2N2I2Nzc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getEndTime",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 102,
+            "byteStart": 21517,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPricePayments.t.sol#L449-L451",
+            "lineEnd": 451,
+            "lineStart": 449,
+            "snippetSha256": "sha256:bfce35379e4de55d63ac9388d967dd12364cb2266946ba62cce4d3a7570babc9",
+            "sourceSha256": "sha256:e4a59529a870ab1717615dc9a6fa2ef7584389eaab1b7fa2640cb2727ad7329a"
+          },
+          "selector": "0x9067b677",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "getAuctionEndTime(uint256)",
+          "displaySignature": "getAuctionEndTime(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter#function:0x930e79f1",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUGF5bWVudHMudC5zb2w6UmV2ZXJ0aW5nU3RyZWFtTWludGVyI2Z1bmN0aW9uOjB4OTMwZTc5ZjE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getAuctionEndTime",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 93,
+            "byteStart": 21625,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPricePayments.t.sol#L453-L455",
+            "lineEnd": 455,
+            "lineStart": 453,
+            "snippetSha256": "sha256:39c8d4fd8526d9d9546c0868a93862da7d7d91784858cb21406a5a2520df8c04",
+            "sourceSha256": "sha256:e4a59529a870ab1717615dc9a6fa2ef7584389eaab1b7fa2640cb2727ad7329a"
+          },
+          "selector": "0x930e79f1",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "getAuctionStatus(uint256)",
+          "displaySignature": "getAuctionStatus(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter#function:0x7765c52c",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUGF5bWVudHMudC5zb2w6UmV2ZXJ0aW5nU3RyZWFtTWludGVyI2Z1bmN0aW9uOjB4Nzc2NWM1MmM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getAuctionStatus",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 93,
+            "byteStart": 21724,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPricePayments.t.sol#L457-L459",
+            "lineEnd": 459,
+            "lineStart": 457,
+            "snippetSha256": "sha256:a371cc3e11a8675bb5b0fa419b8e437b090e8eb1f3d4ad1a7d9688c3a6636b1a",
+            "sourceSha256": "sha256:e4a59529a870ab1717615dc9a6fa2ef7584389eaab1b7fa2640cb2727ad7329a"
+          },
+          "selector": "0x7765c52c",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "mint(address[],string[],uint256[],uint256,uint256[])",
+          "displaySignature": "mint(address[],string[],uint256[],uint256,uint256[])",
+          "functionKind": "function",
+          "id": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter#function:0x1f14ec74",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "address[]"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string[]"
+            },
+            {
+              "index": 2,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            },
+            {
+              "index": 3,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUGF5bWVudHMudC5zb2w6UmV2ZXJ0aW5nU3RyZWFtTWludGVyI2Z1bmN0aW9uOjB4MWYxNGVjNzQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "mint",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 192,
+            "byteStart": 21823,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPricePayments.t.sol#L461-L467",
+            "lineEnd": 467,
+            "lineStart": 461,
+            "snippetSha256": "sha256:8607d924afc666788353af974ae8969ff21aaaf209da673e8c013709d420dba9",
+            "sourceSha256": "sha256:e4a59529a870ab1717615dc9a6fa2ef7584389eaab1b7fa2640cb2727ad7329a"
+          },
+          "selector": "0x1f14ec74",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "mintAndAuction(address,string,uint256,uint256,uint256)",
+          "displaySignature": "mintAndAuction(address,string,uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter#function:0x46372ba6",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUGF5bWVudHMudC5zb2w6UmV2ZXJ0aW5nU3RyZWFtTWludGVyI2Z1bmN0aW9uOjB4NDYzNzJiYTY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "mintAndAuction",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 173,
+            "byteStart": 22021,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPricePayments.t.sol#L469-L475",
+            "lineEnd": 475,
+            "lineStart": 469,
+            "snippetSha256": "sha256:fea907feb265c6958bdef8d4be2aaba83f818b7cb733a0cbdda7af698c0495e0",
+            "sourceSha256": "sha256:e4a59529a870ab1717615dc9a6fa2ef7584389eaab1b7fa2640cb2727ad7329a"
+          },
+          "selector": "0x46372ba6",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "updateAuctionEndTime(uint256,uint256)",
+          "displaySignature": "updateAuctionEndTime(uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter#function:0xd9f303a2",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUGF5bWVudHMudC5zb2w6UmV2ZXJ0aW5nU3RyZWFtTWludGVyI2Z1bmN0aW9uOjB4ZDlmMzAzYTI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "updateAuctionEndTime",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 65,
+            "byteStart": 22200,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPricePayments.t.sol#L477",
+            "lineEnd": 477,
+            "lineStart": 477,
+            "snippetSha256": "sha256:d8d76eec7e191cc1cd3e3386eb5d4d8583f034b7845ea27c99da7d01fa00db31",
+            "sourceSha256": "sha256:e4a59529a870ab1717615dc9a6fa2ef7584389eaab1b7fa2640cb2727ad7329a"
+          },
+          "selector": "0xd9f303a2",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUGF5bWVudHMudC5zb2w6UmV2ZXJ0aW5nU3RyZWFtTWludGVy",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "RevertingStreamMinter",
+    "natspec": "",
+    "range": {
+      "byteLength": 878,
+      "byteStart": 21389,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPricePayments.t.sol#L444-L478",
+      "lineEnd": 478,
+      "lineStart": 444,
+      "snippetSha256": "sha256:f70501f914bfdd2b8656fdb648873ddc88fc2f113a92d1ae9c646113aa48e6af",
+      "sourceSha256": "sha256:e4a59529a870ab1717615dc9a6fa2ef7584389eaab1b7fa2640cb2727ad7329a"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamFixedPricePayments.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-30.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 8
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 7
+    },
+    "totalCount": 8
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter#function:0x1f14ec74",
+      "definitionId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter#function:0x46372ba6",
+      "definitionId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter#function:0x7765c52c",
+      "definitionId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter#function:0x9067b677",
+      "definitionId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter#function:0x930e79f1",
+      "definitionId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter#function:0xd9f303a2",
+      "definitionId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter#function:0xfb9422ff",
+      "definitionId": "test/StreamFixedPricePayments.t.sol:RevertingStreamMinter",
+      "severity": "advisory"
+    }
+  ]
+}

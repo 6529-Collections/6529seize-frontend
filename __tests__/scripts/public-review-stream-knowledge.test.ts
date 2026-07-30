@@ -13,8 +13,8 @@ const {
 
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
 const REVIEW_ID = "6529-stream";
-const ACTIVE_VERSION = "2026-07-27.1";
-const HISTORICAL_VERSION = "2026-07-26.1";
+const ACTIVE_VERSION = "2026-07-30.1";
+const HISTORICAL_VERSION = "2026-07-27.1";
 const PINNED_COMMIT = "513bd7e079eafe109df6ae1ae21bfbca6fec6786";
 const KNOWLEDGE_ROOT = path.join(
   REPO_ROOT,
