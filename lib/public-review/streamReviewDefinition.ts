@@ -10,6 +10,7 @@ import { getPublicReviewLifecycleCapabilities } from "@/lib/public-review/public
 import { createPublicReviewRouteBuilder } from "@/lib/public-review/publicReviewRoutes";
 import {
   getStreamReviewVersionLifecycleState,
+  getStreamReviewVersionPublication,
   getStreamReviewVersionSourceCommit,
   STREAM_REVIEW_LIFECYCLE_STATE,
 } from "@/lib/public-review/streamReviewPublication";
@@ -22,6 +23,11 @@ export const STREAM_REVIEW_SOURCE_COMMIT = getStreamReviewVersionSourceCommit(
 );
 const STREAM_REVIEW_VERSION_LIFECYCLE_STATE =
   getStreamReviewVersionLifecycleState(STREAM_REVIEW_VERSION);
+const STREAM_REVIEW_VERSION_PUBLICATION = getStreamReviewVersionPublication(
+  STREAM_REVIEW_VERSION
+);
+const STREAM_REVIEW_PREVIOUS_VERSION_PUBLICATION =
+  getStreamReviewVersionPublication(STREAM_REVIEW_PREVIOUS_VERSION);
 
 if (STREAM_REVIEW_VERSION_LIFECYCLE_STATE !== STREAM_REVIEW_LIFECYCLE_STATE) {
   throw new Error(
@@ -322,8 +328,8 @@ export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
     {
       version: STREAM_REVIEW_VERSION,
       status: STREAM_REVIEW_VERSION_LIFECYCLE_STATE,
-      deploymentStatus: "NOT_DEPLOYED",
-      auditStatus: "PRE_AUDIT",
+      deploymentStatus: STREAM_REVIEW_VERSION_PUBLICATION.deploymentStatus,
+      auditStatus: STREAM_REVIEW_VERSION_PUBLICATION.auditStatus,
       source: {
         repository: "6529-Collections/6529Stream",
         commit: STREAM_REVIEW_SOURCE_COMMIT,
@@ -336,8 +342,9 @@ export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
       status: getStreamReviewVersionLifecycleState(
         STREAM_REVIEW_PREVIOUS_VERSION
       ),
-      deploymentStatus: "NOT_DEPLOYED",
-      auditStatus: "PRE_AUDIT",
+      deploymentStatus:
+        STREAM_REVIEW_PREVIOUS_VERSION_PUBLICATION.deploymentStatus,
+      auditStatus: STREAM_REVIEW_PREVIOUS_VERSION_PUBLICATION.auditStatus,
       source: {
         repository: "6529-Collections/6529Stream",
         commit: getStreamReviewVersionSourceCommit(
@@ -349,8 +356,8 @@ export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
     },
   ],
   status: STREAM_REVIEW_LIFECYCLE_STATE,
-  deploymentStatus: "NOT_DEPLOYED",
-  auditStatus: "PRE_AUDIT",
+  deploymentStatus: STREAM_REVIEW_VERSION_PUBLICATION.deploymentStatus,
+  auditStatus: STREAM_REVIEW_VERSION_PUBLICATION.auditStatus,
   feedbackAvailable: true,
 };
 

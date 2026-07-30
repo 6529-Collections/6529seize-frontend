@@ -6,22 +6,30 @@
     {
       "version": "2026-07-26.1",
       "lifecycleState": "REVIEW_CLOSED",
-      "sourceCommit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786"
+      "sourceCommit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786",
+      "deploymentStatus": "NOT_DEPLOYED",
+      "auditStatus": "PRE_AUDIT"
     },
     {
       "version": "2026-07-27.1",
       "lifecycleState": "PUBLIC_REVIEW",
-      "sourceCommit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786"
+      "sourceCommit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786",
+      "deploymentStatus": "NOT_DEPLOYED",
+      "auditStatus": "PRE_AUDIT"
     },
     {
       "version": "2026-07-28.1",
       "lifecycleState": "DRAFT",
-      "sourceCommit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786"
+      "sourceCommit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786",
+      "deploymentStatus": "NOT_DEPLOYED",
+      "auditStatus": "PRE_AUDIT"
     },
     {
       "version": "2026-07-28.2",
       "lifecycleState": "DRAFT",
-      "sourceCommit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786"
+      "sourceCommit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786",
+      "deploymentStatus": "NOT_DEPLOYED",
+      "auditStatus": "PRE_AUDIT"
     }
   ]
 }

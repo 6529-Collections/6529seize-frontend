@@ -112,6 +112,40 @@ in `en-US` only and falls back to English for all supported locales. Localized
 editorial versions are follow-up work; the English-only state must remain
 visible in future language controls.
 
+## Help Bot Knowledge Pack
+
+Each retained Stream version also owns a generated Help Bot knowledge pack
+under
+`ops/public-review-knowledge/6529-stream/versions/{version}/knowledge/`. The
+pack is derived offline from that version's editorial manifest, generated
+Solidity reference, readiness evidence, risk register, and pinned source
+commit. Staging packaging projects only published versions into
+`/review-data/6529-stream/versions/{version}/knowledge/`; this keeps the
+generated source corpus outside the protected reference-snapshot tree while
+preserving the existing review-data runtime namespace. It contains:
+
+- a checksummed manifest binding the review version, commit, reference bundle,
+  editorial corpus, publication status, record inventory, and shard paths
+- a compact search catalog for deterministic symbol/selector/topic lookup and
+  weighted conceptual retrieval
+- bounded content shards containing the selected editorial, technical, status,
+  risk, and release evidence supplied to the answering backend
+
+The exhaustive records do not enter the generic `/help-index.json`; that index
+keeps only concise Stream routing and summary records. The backend first reads
+the published review index, validates the active knowledge identity, searches
+the compact catalog, and fetches only the shards needed for a bounded evidence
+packet.
+
+`./bin/6529 run public-review:generate` regenerates the active knowledge pack
+after the Solidity reference. `./bin/6529 run public-review:check` verifies
+deterministic bytes, exact coverage, checksums, and version identity. Staging
+packaging validates the pack against the same publication entry and reference
+bundle used by the pages. There is no separate Help Bot publication flag:
+public versions include matching knowledge, excluded or `DRAFT` versions
+include none, and the current production profile contains neither review
+evidence nor knowledge.
+
 ## Lifecycle Capabilities
 
 The reusable review module supports `DRAFT`, `SCHEDULED`, `PUBLIC_REVIEW`,
