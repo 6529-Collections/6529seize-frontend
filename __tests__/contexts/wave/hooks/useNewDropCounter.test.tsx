@@ -87,13 +87,14 @@ describe("useNewDropCounter", () => {
     expect(result.current.newDropsCounts["wave2"]?.count).toBe(0);
   });
 
-  it("keeps websocket unread state until a server snapshot covers it", () => {
+  it("keeps websocket unread state until a trusted server snapshot covers it", () => {
     const refetch = jest.fn();
     const { result, rerender } = renderHook(
       ({
         latestDropTimestamp,
         latestReadTimestamp,
         serverSnapshotLatestDropTimestamp,
+        trustServerSnapshotUnreadState,
         unreadDropsCount,
       }) =>
         useNewDropCounter(
@@ -107,7 +108,8 @@ describe("useNewDropCounter", () => {
               unreadDropsCount,
             },
           ] as any,
-          refetch
+          refetch,
+          { trustServerSnapshotUnreadState }
         ),
       {
         wrapper,
@@ -115,6 +117,7 @@ describe("useNewDropCounter", () => {
           latestDropTimestamp: 20,
           latestReadTimestamp: 20,
           serverSnapshotLatestDropTimestamp: 20,
+          trustServerSnapshotUnreadState: false,
           unreadDropsCount: 0,
         },
       }
@@ -131,6 +134,7 @@ describe("useNewDropCounter", () => {
       latestDropTimestamp: 31,
       latestReadTimestamp: 20,
       serverSnapshotLatestDropTimestamp: 20,
+      trustServerSnapshotUnreadState: false,
       unreadDropsCount: 0,
     });
 
@@ -144,6 +148,17 @@ describe("useNewDropCounter", () => {
       latestDropTimestamp: 31,
       latestReadTimestamp: 20,
       serverSnapshotLatestDropTimestamp: 31,
+      trustServerSnapshotUnreadState: false,
+      unreadDropsCount: 0,
+    });
+
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(1);
+
+    rerender({
+      latestDropTimestamp: 31,
+      latestReadTimestamp: 20,
+      serverSnapshotLatestDropTimestamp: 31,
+      trustServerSnapshotUnreadState: true,
       unreadDropsCount: 0,
     });
 
@@ -219,7 +234,8 @@ describe("useNewDropCounter", () => {
               serverSnapshotLatestDropTimestamp: wave2SnapshotTimestamp,
             },
           ] as any,
-          jest.fn()
+          jest.fn(),
+          { trustServerSnapshotUnreadState: true }
         ),
       {
         wrapper,
@@ -297,7 +313,8 @@ describe("useNewDropCounter", () => {
               serverSnapshotLatestDropTimestamp,
             },
           ] as any,
-          jest.fn()
+          jest.fn(),
+          { trustServerSnapshotUnreadState: true }
         ),
       {
         wrapper,

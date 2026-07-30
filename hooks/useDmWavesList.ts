@@ -88,10 +88,10 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
     refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
     refetchIntervalInBackground: false,
   });
-  const { unreadDmDropsCount } = useUnreadDmDrops(
-    connectedProfile?.handle ?? null,
-    { enabled: shouldFetchDmWaves }
-  );
+  const { unreadDmDropsCount, dataUpdatedAt: unreadDmDropsDataUpdatedAt } =
+    useUnreadDmDrops(connectedProfile?.handle ?? null, {
+      enabled: shouldFetchDmWaves,
+    });
   const reconciliationStateRef = useRef<{
     readonly viewerIdentityKey: string;
     readonly attempts: number;
@@ -105,6 +105,12 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
         0
       ),
     [mainWaves]
+  );
+  const canTrustServerSnapshotUnreadState = Boolean(
+    shouldFetchDmWaves &&
+    dmWavesDataUpdatedAt > 0 &&
+    unreadDmDropsDataUpdatedAt >= dmWavesDataUpdatedAt &&
+    unreadDmDropsCount === listedUnreadDropsCount
   );
 
   useEffect(() => {
@@ -131,8 +137,7 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
             attemptWindowStartedAt: dmWavesDataUpdatedAt,
           };
     const shouldRearm =
-      previousViewerState.attempts >=
-        MAX_RECONCILIATION_ATTEMPTS_PER_VIEWER &&
+      previousViewerState.attempts >= MAX_RECONCILIATION_ATTEMPTS_PER_VIEWER &&
       dmWavesDataUpdatedAt - previousViewerState.attemptWindowStartedAt >=
         RECONCILIATION_REARM_MIN_INTERVAL_MS;
     const previousState = shouldRearm
@@ -222,6 +227,7 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       mainWavesRefetch: refetchStable,
       refetchAllWaves: refetchStable,
       viewerIdentityKey,
+      canTrustServerSnapshotUnreadState,
     }),
     [
       sorted,
@@ -234,6 +240,7 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       refetchStable,
       shouldFetchDmWaves,
       viewerIdentityKey,
+      canTrustServerSnapshotUnreadState,
     ]
   );
 };

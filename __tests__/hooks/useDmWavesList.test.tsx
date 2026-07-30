@@ -63,11 +63,12 @@ describe("useDmWavesList", () => {
     });
     useUnreadDmDropsMock.mockReturnValue({
       unreadDmDropsCount: 0,
+      dataUpdatedAt: 100,
     });
     useWavesV2Mock.mockReturnValue({
       waves: [
-        { id: "older", latestDropTimestamp: 100 },
-        { id: "newer", latestDropTimestamp: 200 },
+        { id: "older", latestDropTimestamp: 100, unreadDropsCount: 0 },
+        { id: "newer", latestDropTimestamp: 200, unreadDropsCount: 0 },
       ],
       isFetching: false,
       isFetchingNextPage: false,
@@ -107,6 +108,9 @@ describe("useDmWavesList", () => {
     useUnreadDmDropsMock.mockReturnValue({
       get unreadDmDropsCount() {
         return unreadDmDropsCount;
+      },
+      get dataUpdatedAt() {
+        return dataUpdatedAt;
       },
     });
     useWavesV2Mock.mockImplementation(() => ({
@@ -154,8 +158,7 @@ describe("useDmWavesList", () => {
     rerender();
     expect(refetchQueries).toHaveBeenCalledTimes(2);
 
-    dataUpdatedAt =
-      100 + SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS * 5;
+    dataUpdatedAt = 100 + SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS * 5;
     rerender();
     expect(refetchQueries).toHaveBeenCalledTimes(3);
 
@@ -179,6 +182,7 @@ describe("useDmWavesList", () => {
     const refetch = jest.fn();
     useUnreadDmDropsMock.mockReturnValue({
       unreadDmDropsCount: 1,
+      dataUpdatedAt: 100,
     });
     useWavesV2Mock.mockReturnValue({
       waves: [
@@ -198,9 +202,66 @@ describe("useDmWavesList", () => {
       dataUpdatedAt: 100,
     });
 
-    renderHook(() => useDmWavesList());
+    const { result } = renderHook(() => useDmWavesList());
 
     expect(refetchQueries).not.toHaveBeenCalled();
+    expect(result.current.canTrustServerSnapshotUnreadState).toBe(true);
+  });
+
+  it("does not trust row snapshots while the unread aggregate diverges", () => {
+    useUnreadDmDropsMock.mockReturnValue({
+      unreadDmDropsCount: 1,
+      dataUpdatedAt: 200,
+    });
+    useWavesV2Mock.mockReturnValue({
+      waves: [
+        {
+          id: "wave-1",
+          latestDropTimestamp: 200,
+          unreadDropsCount: 0,
+        },
+      ],
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      status: "success",
+      refetch: jest.fn(),
+      queryKey: dmWavesQueryKey,
+      dataUpdatedAt: 100,
+    });
+
+    const { result } = renderHook(() => useDmWavesList());
+
+    expect(result.current.canTrustServerSnapshotUnreadState).toBe(false);
+  });
+
+  it("does not trust a stale unread aggregate even when row totals agree", () => {
+    useUnreadDmDropsMock.mockReturnValue({
+      unreadDmDropsCount: 1,
+      dataUpdatedAt: 99,
+    });
+    useWavesV2Mock.mockReturnValue({
+      waves: [
+        {
+          id: "wave-1",
+          latestDropTimestamp: 200,
+          unreadDropsCount: 1,
+        },
+      ],
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      status: "success",
+      refetch: jest.fn(),
+      queryKey: dmWavesQueryKey,
+      dataUpdatedAt: 100,
+    });
+
+    const { result } = renderHook(() => useDmWavesList());
+
+    expect(result.current.canTrustServerSnapshotUnreadState).toBe(false);
   });
 
   it("disables the DM query while the auth JWT is unusable", () => {
@@ -227,8 +288,8 @@ describe("useDmWavesList", () => {
     });
     useWavesV2Mock.mockReturnValue({
       waves: [
-        { id: "older", latestDropTimestamp: 100 },
-        { id: "newer", latestDropTimestamp: 200 },
+        { id: "older", latestDropTimestamp: 100, unreadDropsCount: 0 },
+        { id: "newer", latestDropTimestamp: 200, unreadDropsCount: 0 },
       ],
       isFetching: true,
       isFetchingNextPage: true,
@@ -268,8 +329,8 @@ describe("useDmWavesList", () => {
     const refetch = jest.fn();
     useWavesV2Mock.mockReturnValue({
       waves: [
-        { id: "older", latestDropTimestamp: 100 },
-        { id: "newer", latestDropTimestamp: 200 },
+        { id: "older", latestDropTimestamp: 100, unreadDropsCount: 0 },
+        { id: "newer", latestDropTimestamp: 200, unreadDropsCount: 0 },
       ],
       isFetching: true,
       isFetchingNextPage: true,

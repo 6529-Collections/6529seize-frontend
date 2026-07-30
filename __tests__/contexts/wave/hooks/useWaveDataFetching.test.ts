@@ -139,7 +139,11 @@ describe("useWaveDataFetching", () => {
   it("keeps the initial guard until a queued seed commits, then syncs newer drops", async () => {
     jest.useFakeTimers();
     formatWaveMessages.mockImplementation(
-      (waveId: string, drops: any[], options: Record<string, unknown> = {}) => ({
+      (
+        waveId: string,
+        drops: any[],
+        options: Record<string, unknown> = {}
+      ) => ({
         key: waveId,
         drops,
         ...options,
@@ -268,7 +272,7 @@ describe("useWaveDataFetching", () => {
     });
   });
 
-  it("ignores abort errors", async () => {
+  it("ignores abort errors without clearing a replacement request", async () => {
     const abortError = new DOMException("aborted", "AbortError");
     fetchWaveMessages.mockRejectedValue(abortError);
     createEmptyWaveMessages.mockReturnValue({ key: "wave1", drops: [] });
@@ -283,6 +287,7 @@ describe("useWaveDataFetching", () => {
     });
 
     expect(updateData).toHaveBeenCalledTimes(1); // only initial empty state
+    expect(clearLoadingState).not.toHaveBeenCalled();
     expect(consoleSpy).not.toHaveBeenCalled();
     expect(mockTrackWaveFeedLoadCancelled).toHaveBeenCalledWith({
       durationMs: 0,
@@ -715,6 +720,7 @@ describe("useWaveDataFetching", () => {
       "wave1-newest-sync",
       "wave_deactivated"
     );
+    expect(clearLoadingState).toHaveBeenCalledWith("wave1");
   });
 
   it("does not schedule native initial backfill for targeted serial restores", async () => {
