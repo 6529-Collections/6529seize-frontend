@@ -146,4 +146,25 @@ describe("useUnreadIndicator", () => {
 
     expect(result.current).toEqual({ hasUnread: true, unreadCount: 5 });
   });
+
+  it("normalizes a missing summary count before rendering the badge", () => {
+    mockUseUnreadDmDrops.mockReturnValue({
+      haveUnreadDmDrops: false,
+      unreadDmDrops: undefined,
+      unreadDmDropsCount: undefined,
+    });
+    mockUseUnreadNotifications.mockReturnValue({
+      haveUnreadNotifications: false,
+    });
+
+    const { result } = renderHook(() =>
+      useUnreadIndicator({
+        type: "messages",
+        handle: "me",
+        localDirectMessages: [{ newDropsCount: { count: 1 } }],
+      })
+    );
+
+    expect(result.current).toEqual({ hasUnread: true, unreadCount: 1 });
+  });
 });

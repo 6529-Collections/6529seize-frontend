@@ -15,7 +15,7 @@ import { getAuthJwt, isAuthJwtUsable } from "@/services/auth/auth.utils";
 
 const noopWaveAction = () => {};
 const MAX_RECONCILIATION_ATTEMPTS_PER_VIEWER = 2;
-const RECONCILIATION_REARM_INTERVAL_MS =
+const RECONCILIATION_REARM_MIN_INTERVAL_MS =
   SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS * 5;
 
 interface UseDmWavesListOptions {
@@ -135,7 +135,7 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       previousViewerState.attempts >=
         MAX_RECONCILIATION_ATTEMPTS_PER_VIEWER &&
       now - previousViewerState.lastAttemptAt >=
-        RECONCILIATION_REARM_INTERVAL_MS;
+        RECONCILIATION_REARM_MIN_INTERVAL_MS;
     const previousState = shouldRearm
       ? {
           ...previousViewerState,
@@ -157,8 +157,9 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       lastDataUpdatedAt: dmWavesDataUpdatedAt,
       lastAttemptAt: now,
     };
-    // Retry only for fresh snapshots, cap each burst, and periodically re-arm
-    // so a transiently divergent summary cannot leave the overview stale.
+    // The overview query polls every minute and advances dataUpdatedAt after a
+    // successful fetch. Re-arm on that next snapshot instead of adding a
+    // second timer, while still capping each reconciliation burst.
     void queryClient.refetchQueries({
       queryKey: dmWavesQueryKey,
       exact: true,
