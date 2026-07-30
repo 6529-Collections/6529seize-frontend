@@ -209,7 +209,7 @@ describe("CreateWaveOutcomesManual", () => {
     const positionsInput = screen.getByLabelText(/Winning Positions/i);
     await userEvent.type(positionsInput, "3-1");
 
-    await userEvent.click(screen.getByTestId("primary-button"));
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
     expect(screen.getByText("Invalid position format")).toBeInTheDocument();
     expect(mockOnOutcome).not.toHaveBeenCalled();
@@ -231,7 +231,7 @@ describe("CreateWaveOutcomesManual", () => {
     const positionsInput = screen.getByLabelText(/Winning Positions/i);
     await userEvent.type(positionsInput, "0-2");
 
-    await userEvent.click(screen.getByTestId("primary-button"));
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
     expect(screen.getByText("Invalid position format")).toBeInTheDocument();
     expect(mockOnOutcome).not.toHaveBeenCalled();
@@ -255,7 +255,7 @@ describe("CreateWaveOutcomesManual", () => {
     // throw "RangeError: Invalid array length".
     await userEvent.type(positionsInput, "5000000000");
 
-    await userEvent.click(screen.getByTestId("primary-button"));
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
     expect(screen.getByText("Invalid position format")).toBeInTheDocument();
     expect(mockOnOutcome).not.toHaveBeenCalled();
@@ -277,7 +277,7 @@ describe("CreateWaveOutcomesManual", () => {
     const positionsInput = screen.getByLabelText(/Winning Positions/i);
     await userEvent.type(positionsInput, "1-5000000000");
 
-    await userEvent.click(screen.getByTestId("primary-button"));
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
     expect(screen.getByText("Invalid position format")).toBeInTheDocument();
     expect(mockOnOutcome).not.toHaveBeenCalled();
@@ -327,7 +327,7 @@ describe("CreateWaveOutcomesManual", () => {
     it("marks the manual action field invalid and points it at the announced error", async () => {
       render(<CreateWaveOutcomesManual {...defaultProps} />);
 
-      await userEvent.click(screen.getByTestId("primary-button"));
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
       const actionInput = screen.getByLabelText("Manual action");
       expect(actionInput).toHaveAttribute("aria-invalid", "true");
@@ -342,7 +342,7 @@ describe("CreateWaveOutcomesManual", () => {
     it("drops the invalid state once the manual action is filled in", async () => {
       render(<CreateWaveOutcomesManual {...defaultProps} />);
 
-      await userEvent.click(screen.getByTestId("primary-button"));
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
       await userEvent.type(screen.getByLabelText("Manual action"), "Action");
 
       const actionInput = screen.getByLabelText("Manual action");
@@ -366,7 +366,7 @@ describe("CreateWaveOutcomesManual", () => {
         screen.getByLabelText("Winning Positions (e.g. 1-3, 5, 7-9)"),
         "3-1"
       );
-      await userEvent.click(screen.getByTestId("primary-button"));
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
       const positionsInput = screen.getByLabelText(
         "Winning Positions (e.g. 1-3, 5, 7-9)"
@@ -392,7 +392,7 @@ describe("CreateWaveOutcomesManual", () => {
         screen.getByLabelText("Manual action"),
         "Winner action"
       );
-      await userEvent.click(screen.getByTestId("primary-button"));
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
       expect(screen.getByRole("alert")).toHaveTextContent(
         "Please enter positions"
       );
