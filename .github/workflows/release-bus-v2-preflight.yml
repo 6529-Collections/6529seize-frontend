@@ -142,6 +142,7 @@ jobs:
         continue-on-error: true
         env:
           CANDIDATE_EVIDENCE_MODE: ${{ inputs.candidate_evidence_mode }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
           GH_TOKEN: ${{ github.token }}
           REUSE_ARTIFACT_DIGEST: ${{ inputs.reuse_artifact_digest }}
           REUSE_ARTIFACT_NAME: ${{ inputs.reuse_artifact_name }}
@@ -188,6 +189,7 @@ jobs:
 
           validate_reuse_artifact_identity
           merge_sha="${REUSE_ARTIFACT_NAME#release-bus-v2-pr-}"
+          test "$merge_sha" = "$EXPECTED_SHA"
           set +e
           run="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$REUSE_ARTIFACT_RUN_ID" 2>&1)"
           run_status=$?
@@ -230,7 +232,7 @@ jobs:
           )"
           test "$(cat "$evidence_root/SHA256SUMS")" = "$expected_checksums"
           (cd "$evidence_root" && sha256sum -c SHA256SUMS)
-          jq -e --arg merge_sha "$merge_sha" '
+          jq -e --arg merge_sha "$EXPECTED_SHA" '
             .schema_version == 1 and
             .evidence_contract == "exact-merge-tree-pr-ci-v1" and
             .repository == "frontend" and
