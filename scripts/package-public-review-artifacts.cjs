@@ -12,12 +12,16 @@ const {
   configSha256,
   generatorSourceSha256,
 } = require("./public-reviews/solidity-reference.cjs");
+const {
+  KNOWLEDGE_SOURCE_DIRECTORY,
+  validateKnowledgePack,
+} = require("./public-reviews/stream-knowledge.cjs");
 
 const PROFILES = new Set(["production", "staging"]);
 const PUBLIC_REVIEW_CONFIG_DIRECTORY = "config/public-reviews";
 const PUBLIC_REVIEW_DATA_DIRECTORY = "public/review-data";
 const PUBLIC_REVIEW_EDITORIAL_DIRECTORY = "content/public-reviews";
-const PUBLIC_REVIEW_PUBLICATION_SCHEMA = "public-review.publication.v2";
+const PUBLIC_REVIEW_PUBLICATION_SCHEMA = "public-review.publication.v3";
 const PUBLIC_REVIEW_LIFECYCLE_STATES = new Set([
   "DRAFT",
   "SCHEDULED",
@@ -32,6 +36,12 @@ const PUBLIC_REVIEW_LIFECYCLE_STATES = new Set([
 const PUBLIC_REVIEW_PUBLIC_ROUTE_STATES = new Set(
   [...PUBLIC_REVIEW_LIFECYCLE_STATES].filter((state) => state !== "DRAFT")
 );
+const PUBLIC_REVIEW_DEPLOYMENT_STATUSES = new Set(["NOT_DEPLOYED", "DEPLOYED"]);
+const PUBLIC_REVIEW_AUDIT_STATUSES = new Set([
+  "PRE_AUDIT",
+  "AUDIT_IN_PROGRESS",
+  "AUDIT_COMPLETE",
+]);
 const PRODUCTION_BASE_ENDPOINT = "https://6529.io";
 const RUNTIME_CONFIG_PATH = ".next/PUBLIC_RUNTIME.json";
 const SHA256_URN_PATTERN = /^sha256:[0-9a-f]{64}$/;
@@ -44,6 +54,17 @@ function invariant(condition, message) {
   if (!condition) {
     throw new Error(message);
   }
+}
+
+function hasValidPublicationMetadata(version) {
+  const hasNoPublicationMetadata =
+    version.lifecycleState === "DRAFT" &&
+    version.deploymentStatus === undefined &&
+    version.auditStatus === undefined;
+  const hasCompletePublicationMetadata =
+    PUBLIC_REVIEW_DEPLOYMENT_STATUSES.has(version.deploymentStatus) &&
+    PUBLIC_REVIEW_AUDIT_STATUSES.has(version.auditStatus);
+  return hasNoPublicationMetadata || hasCompletePublicationMetadata;
 }
 
 function normalizeRelativePath(value) {
@@ -144,6 +165,7 @@ function captureSourceIdentity(repoRoot) {
     "public",
     PUBLIC_REVIEW_EDITORIAL_DIRECTORY,
     PUBLIC_REVIEW_CONFIG_DIRECTORY,
+    KNOWLEDGE_SOURCE_DIRECTORY,
   ];
   return roots.map((relativePath) => {
     const absolutePath = path.join(repoRoot, relativePath);
@@ -219,6 +241,16 @@ function isReviewDataPath(relativePath) {
   );
 }
 
+function isKnowledgeProjectionPath(relativePath) {
+  const segments = normalizeRelativePath(relativePath).split("/");
+  return (
+    segments[0] === "review-data" &&
+    segments[2] === "versions" &&
+    segments.length >= 5 &&
+    segments[4] === "knowledge"
+  );
+}
+
 function getPublicReviewPublicationConfigs(repoRoot) {
   const directory = path.join(repoRoot, PUBLIC_REVIEW_CONFIG_DIRECTORY);
   const publications = sortedDirectoryEntries(directory)
@@ -241,7 +273,9 @@ function getPublicReviewPublicationConfigs(repoRoot) {
               version !== null &&
               typeof version === "object" &&
               SAFE_VERSION_PATTERN.test(version.version) &&
-              PUBLIC_REVIEW_LIFECYCLE_STATES.has(version.lifecycleState)
+              PUBLIC_REVIEW_LIFECYCLE_STATES.has(version.lifecycleState) &&
+              SOURCE_PIN_PATTERN.test(version.sourceCommit) &&
+              hasValidPublicationMetadata(version)
           ) &&
           new Set(config.versions.map((version) => version.version)).size ===
             config.versions.length,
@@ -322,6 +356,13 @@ function getPublicReviewPublicationPlans(repoRoot) {
           ) === JSON.stringify(retainedVersions),
         `${publication.reviewId} source review index drifted from publication config.`
       );
+      invariant(
+        sourceIndex.versions.every(
+          (entry, index) =>
+            entry.commit === publication.versions[index].sourceCommit
+        ),
+        `${publication.reviewId} source review index commits drifted from trusted publication identities.`
+      );
 
       const publishedVersions = new Set(
         publication.versions
@@ -341,8 +382,10 @@ function getPublicReviewPublicationPlans(repoRoot) {
         (version) => version.version === reference.config.reviewVersion
       );
       invariant(
-        sourceActivePublication,
-        `${publication.reviewId} has no publication entry for its source-active version.`
+        sourceActivePublication &&
+          sourceActivePublication.sourceCommit ===
+            reference.config.source.commit,
+        `${publication.reviewId} source-active publication identity drifted from source config.`
       );
       if (sourceActivePublication.lifecycleState !== "DRAFT") {
         invariant(
@@ -730,6 +773,7 @@ function assertDefinitionShards(bundle, versionRoot) {
 }
 
 function assertCanonicalReviewEvidence({
+  repoRoot,
   bundlePublicRoot,
   configPath,
   publicationPlan,
@@ -854,6 +898,33 @@ function assertCanonicalReviewEvidence({
 
       assertSourceFiles(bundle, versionRoot);
       assertDefinitionShards(bundle, versionRoot);
+      const sourceKnowledgeRoot = path.join(
+        repoRoot,
+        KNOWLEDGE_SOURCE_DIRECTORY,
+        config.reviewId,
+        "versions",
+        entry.version,
+        "knowledge"
+      );
+      const bundleKnowledgeRoot = path.join(versionRoot, "knowledge");
+      // Validate bytes from the packaged tree while comparing them with the
+      // canonical source pack rooted in the checkout.
+      validateKnowledgePack({
+        repoRoot: path.dirname(bundlePublicRoot),
+        reviewId: config.reviewId,
+        reviewVersion: entry.version,
+        requireCurrentGenerator: entry.version === config.reviewVersion,
+        publicationOverride: publicationPlan.publication.versions.find(
+          (version) => version.version === entry.version
+        ),
+        referenceIndexEntryOverride: entry,
+        knowledgeRootOverride: bundleKnowledgeRoot,
+      });
+      invariant(
+        directoryIdentity(sourceKnowledgeRoot) ===
+          directoryIdentity(bundleKnowledgeRoot),
+        `${config.reviewId}@${entry.version} packaged knowledge does not exactly match the canonical source pack.`
+      );
 
       return {
         reviewId: config.reviewId,
@@ -959,13 +1030,19 @@ function assertStagingEvidence(
         const publicRelativePath = `review-data/${relativePath}`;
         return (
           isReviewIndexPath(publicRelativePath, publicationPlans) ||
-          isUnpublishedReviewDataPath(publicRelativePath, publicationPlans)
+          isUnpublishedReviewDataPath(publicRelativePath, publicationPlans) ||
+          isKnowledgeProjectionPath(publicRelativePath)
         );
       },
     }) ===
       directoryIdentity(bundlePublicReviewRoot, {
-        ignore: (relativePath) =>
-          isReviewIndexPath(`review-data/${relativePath}`, publicationPlans),
+        ignore: (relativePath) => {
+          const publicRelativePath = `review-data/${relativePath}`;
+          return (
+            isReviewIndexPath(publicRelativePath, publicationPlans) ||
+            isKnowledgeProjectionPath(publicRelativePath)
+          );
+        },
       }),
     "Staging public-review data does not exactly match the trusted source tree."
   );
@@ -990,6 +1067,7 @@ function assertStagingEvidence(
   const reviews = [...publicationPlans.values()].flatMap((plan) =>
     plan.publishedVersions.size > 0
       ? assertCanonicalReviewEvidence({
+          repoRoot,
           bundlePublicRoot: path.join(bundleRoot, "public"),
           configPath: plan.configPath,
           publicationPlan: plan,
@@ -1036,11 +1114,16 @@ function assertPublicCopyIdentity(
   const sourcePublic = path.join(repoRoot, "public");
   const bundlePublic = path.join(bundleRoot, "public");
   const options = {
-    ignore: (relativePath) =>
-      profile === "production"
-        ? isReviewDataPath(relativePath)
-        : isReviewIndexPath(relativePath, publicationPlans) ||
-          isUnpublishedReviewDataPath(relativePath, publicationPlans),
+    ignore: (relativePath) => {
+      if (profile === "production") {
+        return isReviewDataPath(relativePath);
+      }
+      return (
+        isReviewIndexPath(relativePath, publicationPlans) ||
+        isUnpublishedReviewDataPath(relativePath, publicationPlans) ||
+        isKnowledgeProjectionPath(relativePath)
+      );
+    },
   };
   invariant(
     directoryIdentity(sourcePublic, options) ===
@@ -1112,6 +1195,34 @@ function removeDirectoryIfPresent(directory) {
   fs.rmSync(directory, { recursive: true });
 }
 
+function copyPublishedKnowledgePacks(repoRoot, bundleRoot, publicationPlans) {
+  for (const [reviewId, plan] of publicationPlans) {
+    for (const reviewVersion of plan.publishedVersions) {
+      const source = path.join(
+        repoRoot,
+        KNOWLEDGE_SOURCE_DIRECTORY,
+        reviewId,
+        "versions",
+        reviewVersion,
+        "knowledge"
+      );
+      invariant(
+        fs.existsSync(source),
+        `${reviewId}@${reviewVersion} knowledge pack is missing; run 6529 run public-review:knowledge.`
+      );
+      const destination = path.join(
+        bundleRoot,
+        PUBLIC_REVIEW_DATA_DIRECTORY,
+        reviewId,
+        "versions",
+        reviewVersion,
+        "knowledge"
+      );
+      copyDirectory(source, destination);
+    }
+  }
+}
+
 function prepareProfileBundle({ repoRoot, bundleRoot, profile }) {
   invariant(PROFILES.has(profile), `Unsupported artifact profile: ${profile}`);
   const sourceIdentity = captureSourceIdentity(repoRoot);
@@ -1126,6 +1237,7 @@ function prepareProfileBundle({ repoRoot, bundleRoot, profile }) {
   });
   if (profile === "staging") {
     writePublishedReviewIndexes(bundleRoot, publicationPlans);
+    copyPublishedKnowledgePacks(repoRoot, bundleRoot, publicationPlans);
   }
 
   if (profile === "staging") {
@@ -1343,6 +1455,7 @@ module.exports = {
   directoryIdentity,
   expectedBundleEntries,
   getPublishedReviewIds,
+  hasValidPublicationMetadata,
   main,
   parseCli,
   parseZipListing,

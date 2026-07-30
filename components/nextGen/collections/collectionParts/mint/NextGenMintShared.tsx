@@ -10,9 +10,6 @@ export const MINT_INPUT_CLASSNAME =
 export const MINT_SELECT_CLASSNAME =
   "tw-min-h-11 tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/20 tw-px-3 tw-py-2 tw-text-base tw-text-white tw-[color-scheme:dark] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-bg-black/10 disabled:tw-text-iron-500";
 
-export const MINT_ACTION_BUTTON_CLASSNAME =
-  "tw-inline-flex tw-min-h-11 tw-w-full tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-[#208359] tw-px-5 tw-py-2.5 tw-text-base tw-font-semibold tw-text-white tw-transition hover:tw-bg-[#2aac75] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-bg-iron-800 disabled:tw-text-iron-500";
-
 export function MintInfoTooltip(
   props: Readonly<{ id: string; label: string; content: string }>
 ) {

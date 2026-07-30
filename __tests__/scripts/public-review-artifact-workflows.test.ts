@@ -10,50 +10,62 @@ function workflow(name: string): string {
 
 const appPrCi = workflow("app-pr-ci.yml");
 const releaseBusPreflight = workflow("release-bus-v2-preflight.yml");
+const legacyStaging = workflow("deploy-staging.yml");
 const legacyProduction = workflow("build-upload-deploy-prod.yml");
+const stagingScript = fs.readFileSync(
+  path.join(process.cwd(), "scripts", "staging.sh"),
+  "utf8"
+);
+const proxySource = fs.readFileSync(
+  path.join(process.cwd(), "proxy.ts"),
+  "utf8"
+);
+const standaloneStart = fs.readFileSync(
+  path.join(process.cwd(), "scripts", "start-standalone.cjs"),
+  "utf8"
+);
 const helper = "node scripts/package-public-review-artifacts.cjs";
 const sourceCleanGuard =
   "git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews";
 
 describe("public-review artifact workflow contract", () => {
-  it("uses one profile-aware helper for both exact PR artifact profiles", () => {
-    expect(appPrCi.match(new RegExp(`${helper} prepare`, "g"))).toHaveLength(2);
-    expect(appPrCi.match(new RegExp(`${helper} assert-zip`, "g"))).toHaveLength(
-      2
-    );
-    expect(
-      appPrCi.match(new RegExp(`${helper} assert-listing`, "g"))
-    ).toHaveLength(2);
-    expect(appPrCi.match(/--profile production/g)).toHaveLength(3);
-    expect(appPrCi.match(/--profile staging/g)).toHaveLength(3);
-    expect(appPrCi.match(/unzip -Z1/g)).toHaveLength(2);
-    expect(appPrCi.match(/unzip -q/g)).toHaveLength(2);
-    expect(appPrCi.match(/--extracted-root "\$zip_extract"/g)).toHaveLength(2);
-    expect(
-      appPrCi.match(
-        /test -z "\$\(find "\$profile\/target\/_next" -type l -print -quit\)"/g
-      )
-    ).toHaveLength(2);
-    expect(appPrCi.match(new RegExp(sourceCleanGuard, "g"))).toHaveLength(2);
-    expect(appPrCi).not.toMatch(/\bcp -r public\b/);
+  it("keeps exact PR CI source-evidence-only instead of building deploy profiles", () => {
+    if (appPrCi.includes("Create exact PR merge-tree CI evidence")) {
+      expect(appPrCi).toContain("release-bus-v2-pr-evidence/manifest.json");
+      expect(appPrCi).not.toContain(`${helper} prepare`);
+      expect(appPrCi).not.toContain("release-bus-profile/target/package.zip");
+      expect(appPrCi).not.toContain("--profile staging");
+    } else {
+      expect(appPrCi).toContain(
+        "Upload exact PR merge-tree dual-profile artifact"
+      );
+      expect(appPrCi.match(new RegExp(`${helper} prepare`, "g"))).toHaveLength(
+        2
+      );
+      expect(appPrCi).toContain("--profile staging");
+      expect(appPrCi).toContain("--profile production");
+    }
   });
 
-  it("binds release-bus matrix artifacts to their explicit environment", () => {
+  it("binds one selected release-bus artifact to its explicit environment", () => {
     expect(releaseBusPreflight).toContain(
-      `${helper} prepare \\\n            --profile "$BUILD_ENVIRONMENT"`
+      `${helper} prepare \\\n              --profile "$profile"`
     );
     expect(releaseBusPreflight).toContain(
-      `${helper} assert-zip \\\n            --profile "$BUILD_ENVIRONMENT"`
+      `${helper} assert-zip \\\n              --profile "$profile"`
     );
     expect(releaseBusPreflight).toContain(
-      `${helper} assert-listing \\\n            --profile "$BUILD_ENVIRONMENT"`
+      `${helper} assert-listing \\\n              --profile "$profile"`
     );
     expect(releaseBusPreflight).toContain(
-      "unzip -Z1 release-bus-profile/target/package.zip"
+      'unzip -Z1 "$destination/target/package.zip"'
+    );
+    expect(releaseBusPreflight).toContain(
+      'build_profile "$ARTIFACT_ENVIRONMENT" release-bus-artifact'
     );
     expect(releaseBusPreflight).toContain(sourceCleanGuard);
     expect(releaseBusPreflight).toContain(
-      'test -z "$(find release-bus-profile/target/_next -type l -print -quit)"'
+      'test -z "$(find "$destination/target/_next" -type l -print -quit)"'
     );
     expect(releaseBusPreflight).toContain('--extracted-root "$zip_extract"');
     expect(releaseBusPreflight).not.toMatch(/\bcp -r public\b/);
@@ -79,7 +91,112 @@ describe("public-review artifact workflow contract", () => {
     expect(legacyProduction).not.toMatch(/\bcp -r public\b/);
   });
 
-  it("preserves production identity and staging help and agent regeneration", () => {
+  it("keeps legacy staging aligned with the public-review bundle contract", () => {
+    expect(legacyStaging).toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS }}"
+    );
+    expect(legacyStaging).toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64"
+    );
+    expect(legacyStaging).toContain("base64 -d");
+    expect(legacyStaging).not.toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_PARAMETER"
+    );
+    expect(legacyStaging).not.toContain("aws ssm get-parameter");
+    expect(legacyStaging).toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE=$public_review_destinations_file"
+    );
+    expect(legacyStaging).toContain('(has("production") | not)');
+    expect(stagingScript).toContain(
+      'public_review_destinations_source="${PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE:-}"'
+    );
+    expect(stagingScript).toContain(
+      "scripts/public-review-discussion-destinations.cjs"
+    );
+    expect(stagingScript).toContain("STANDALONE_ARTIFACT_PROFILE=staging");
+    expect(stagingScript).toContain(
+      "BASE_ENDPOINT=https://staging.6529.io \\\n  ./bin/6529 run build"
+    );
+    expect(stagingScript).toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE="
+    );
+    expect(standaloneStart).toContain('"package-public-review-artifacts.cjs"');
+    expect(standaloneStart).toContain('"prepare"');
+    expect(standaloneStart).toContain(
+      'process.env["STANDALONE_ARTIFACT_PROFILE"]'
+    );
+    expect(standaloneStart).toContain(
+      'process.env["PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE"]'
+    );
+    expect(standaloneStart).toContain(
+      'delete packagingEnv["PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE"]'
+    );
+  });
+
+  it("generates help and agent artifacts after configuring each release-bus profile", () => {
+    const generateStepStart = releaseBusPreflight.indexOf(
+      "      - name: Generate source-stable environment schema once"
+    );
+    const packageStepStart = releaseBusPreflight.indexOf(
+      "      - name: Build and package only the authorized environment contract"
+    );
+    const generateStep = releaseBusPreflight.slice(
+      generateStepStart,
+      packageStepStart
+    );
+    const buildProfileStart = releaseBusPreflight.indexOf(
+      "          build_profile() {"
+    );
+    const buildProfileEnd = releaseBusPreflight.indexOf(
+      "\n          rm -rf release-bus-artifact",
+      buildProfileStart
+    );
+    const buildProfile = releaseBusPreflight.slice(
+      buildProfileStart,
+      buildProfileEnd
+    );
+    const configureProfileIndex = buildProfile.indexOf(
+      'configure_profile "$profile"'
+    );
+    const helpIndexSyncIndex = buildProfile.indexOf(
+      "./bin/6529 run help-index:sync"
+    );
+    const agentFilesSyncIndex = buildProfile.indexOf(
+      "./bin/6529 run agent-files:sync"
+    );
+    const baseBuildIndex = buildProfile.indexOf("./bin/6529 run base-build");
+
+    expect(generateStepStart).toBeGreaterThanOrEqual(0);
+    expect(packageStepStart).toBeGreaterThan(generateStepStart);
+    expect(generateStep).toContain("./bin/6529 run build:env-schema");
+    expect(generateStep).not.toContain("./bin/6529 run help-index:sync");
+    expect(generateStep).not.toContain("./bin/6529 run agent-files:sync");
+    expect(configureProfileIndex).toBeGreaterThanOrEqual(0);
+    expect(helpIndexSyncIndex).toBeGreaterThan(configureProfileIndex);
+    expect(agentFilesSyncIndex).toBeGreaterThan(helpIndexSyncIndex);
+    expect(baseBuildIndex).toBeGreaterThan(agentFilesSyncIndex);
+  });
+
+  it("ships the shared Stream artifact exception in manual and release-bus staging", () => {
+    expect(proxySource).toContain(
+      'const STREAM_REVIEW_DATA_PREFIX = "/review-data/6529-stream/";'
+    );
+    expect(proxySource).toContain(
+      "isPublicStreamReviewDataPath(req, pathname)"
+    );
+    expect(proxySource).toContain("rawPathname === pathname");
+    expect(stagingScript).toContain("./bin/6529 run build");
+    expect(stagingScript).toContain("./bin/6529 run start:standalone");
+    expect(releaseBusPreflight).toContain(
+      'build_profile "$ARTIFACT_ENVIRONMENT" release-bus-artifact'
+    );
+    expect(releaseBusPreflight).toContain(
+      "build_profile staging release-bus-artifact/profiles/staging"
+    );
+    expect(releaseBusPreflight).toContain("./bin/6529 run base-build");
+  });
+
+  it("preserves production identity for every deployment constructor", () => {
     expect(appPrCi).toContain('BASE_ENDPOINT: "https://6529.io"');
     expect(appPrCi).toContain("GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY }}");
     expect(releaseBusPreflight).toContain(
@@ -88,7 +205,5 @@ describe("public-review artifact workflow contract", () => {
     expect(legacyProduction).toContain(
       "GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY || secrets.GIPHY_API_KEY }}"
     );
-    expect(appPrCi).toContain("./bin/6529 run help-index:sync");
-    expect(appPrCi).toContain("./bin/6529 run agent-files:sync");
   });
 });

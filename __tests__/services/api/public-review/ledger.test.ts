@@ -150,7 +150,11 @@ describe("public review ledger projection", () => {
 
     expect(page.records).toEqual([]);
     expect(page.warnings).toEqual([
-      { code: "METADATA_HYDRATION_FAILED", dropId: "drop-100" },
+      {
+        code: "METADATA_HYDRATION_FAILED",
+        dropId: "drop-100",
+        reason: "Feedback metadata could not be loaded.",
+      },
     ]);
   });
 
@@ -173,8 +177,35 @@ describe("public review ledger projection", () => {
 
     expect(page.records).toEqual([]);
     expect(page.warnings).toEqual([
-      { code: "INVALID_REVIEW_METADATA", dropId: "drop-100" },
+      {
+        code: "INVALID_REVIEW_METADATA",
+        dropId: "drop-100",
+        reason: "Feedback uses a different schema version.",
+      },
     ]);
+  });
+
+  it("projects valid feedback when metadata rows are returned out of order", async () => {
+    const metadata = makeMetadata();
+    const api = makeApi({
+      drops: [makeDrop(100)],
+      metadata: async () => [
+        metadata[3]!,
+        metadata[1]!,
+        metadata[0]!,
+        metadata[2]!,
+      ],
+    });
+
+    const page = await fetchPublicReviewLedgerPage({
+      api,
+      config,
+      destination,
+    });
+
+    expect(page.warnings).toEqual([]);
+    expect(page.records).toHaveLength(1);
+    expect(page.records[0]?.dropId).toBe("drop-100");
   });
 
   it("projects valid feedback with deterministic NEW disposition", async () => {

@@ -7,7 +7,7 @@ import UserSettingsBannerImageInput from "@/components/user/settings/UserSetting
 import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
-import SecondaryButton from "@/components/utils/button/SecondaryButton";
+import Button from "@/components/utils/button/Button";
 import type { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
@@ -262,13 +262,16 @@ export default function UserPageHeaderEditBanner({
             <div className="tw-pt-6">
               <div className="tw-gap-x-3 sm:tw-flex sm:tw-flex-row-reverse">
                 <UserSettingsSave loading={isSaving} disabled={!haveChanges} />
-                <SecondaryButton
+                <Button
+                  variant="secondary"
+                  size="lg"
                   disabled={isSaving}
-                  onClicked={handleClose}
-                  className="tw-mt-3 tw-w-full sm:tw-mt-0 sm:tw-w-auto"
+                  onClick={handleClose}
+                  fullWidth
+                  className="tw-mt-3 sm:tw-mt-0 sm:tw-w-auto"
                 >
                   Cancel
-                </SecondaryButton>
+                </Button>
               </div>
             </div>
           </form>

@@ -48,7 +48,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: "22"
+          node-version: "22.17.1"
 
       - name: Activate pinned pnpm
         run: |
@@ -190,7 +190,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: "22"
+          node-version: "22.17.1"
 
       - name: Activate pinned pnpm
         run: |
@@ -237,24 +237,21 @@ jobs:
         run: ./bin/6529 run test:no-coverage -- __tests__/scripts/sync-agent-files.test.ts
 
       - name: Verify Release Bus v2 workflow contract
-        env:
-          BASE_REF: ${{ github.base_ref }}
         run: |
           set -euo pipefail
-          if git diff --quiet "origin/${BASE_REF}...HEAD" -- \
-            .github/workflows/app-pr-ci.yml \
-            .github/workflows/release-bus-*.yml \
-            .github/workflows/staging-e2e.yml \
-            .github/workflows/production-e2e.yml \
-            scripts/release-bus-install-dependencies.cjs \
-            __tests__/scripts/release-bus-install-dependencies.test.ts \
-            __tests__/scripts/deployment-bus.test.ts; then
-            echo "Release Bus v2 workflow files are unchanged."
-            exit 0
-          fi
           ./bin/6529 run test:no-coverage --runInBand --runTestsByPath \
+            __tests__/scripts/pr-ci-policy-bundle.test.ts \
             __tests__/scripts/deployment-bus.test.ts \
-            __tests__/scripts/release-bus-install-dependencies.test.ts
+                __tests__/scripts/e2e-packs.test.ts \
+                __tests__/scripts/package-public-review-artifacts.test.ts \
+                __tests__/scripts/public-review-artifact-workflows.test.ts \
+                __tests__/scripts/release-bus-artifact-compatibility.test.ts \
+                __tests__/scripts/release-bus-performance-contract.test.ts \
+                __tests__/scripts/release-bus-v2-advance-staging-ref-workflow.test.ts \
+                __tests__/scripts/release-bus-v2-compose-workflow.test.ts \
+            __tests__/scripts/sync-e2e-manifest.test.ts \
+            __tests__/scripts/release-bus-install-dependencies.test.ts \
+            ops/scripts/release-bus-status.test.ts
 
       - name: Lint changed source
         if: needs.plan.outputs.lint_changed_required == 'true'
@@ -277,7 +274,7 @@ jobs:
 
           mapfile -d '' changed_files < <(
             git diff --name-only -z --diff-filter=ACMRD "origin/${BASE_REF}...HEAD" -- \
-              "*.js" "*.jsx" "*.ts" "*.tsx" ":(exclude)generated/**"
+              "*.js" "*.jsx" "*.cjs" "*.mjs" "*.ts" "*.tsx" ":(exclude)generated/**"
           )
           existing_files=()
           for file in "${changed_files[@]}"; do
@@ -407,126 +404,69 @@ jobs:
           set -euo pipefail
           ./bin/6529 run build
 
-      - name: Package exact PR merge-tree production profile
-        if: needs.plan.outputs.build_required == 'true'
+      - name: Create exact PR merge-tree CI evidence
         env:
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           EXPECTED_MERGE_SHA: ${{ github.sha }}
+          BUILD_REQUIRED: ${{ needs.plan.outputs.build_required }}
         run: |
           set -euo pipefail
           [[ "$EXPECTED_MERGE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$EXPECTED_HEAD_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$BUILD_REQUIRED" =~ ^(true|false)$ ]]
           test "$(git rev-parse HEAD)" = "$EXPECTED_MERGE_SHA"
-          profile=release-bus-v2-pr-artifact/profiles/production
-          rm -rf "$profile"
-          mkdir -p "$profile/target/_next" "$profile/bundle/.next"
-          cp -r .next/standalone/. "$profile/bundle/"
-          cp -r .next/static "$profile/target/_next/"
-          cp -r .next/static "$profile/bundle/.next/"
-          cp -r Procfile .ebextensions "$profile/bundle/"
-          if [ -d .platform ]; then cp -r .platform "$profile/bundle/"; fi
-          find "$profile/bundle" -xtype l -delete
-          for file in BUILD_ID PUBLIC_RUNTIME.json ASSETS_FROM_S3; do
-            if [ -f ".next/$file" ]; then cp ".next/$file" "$profile/bundle/.next/$file"; fi
-          done
-          node scripts/package-public-review-artifacts.cjs prepare \
-            --profile production \
-            --bundle-root "$profile/bundle"
-          test -z "$(find "$profile/target/_next" -type l -print -quit)"
-          (cd "$profile/bundle" && zip -yr ../target/package.zip .)
-          zip_listing="$(mktemp)"
-          zip_extract="$(mktemp -d)"
-          trap 'rm -f "$zip_listing"; rm -rf "$zip_extract"' EXIT
-          unzip -Z1 "$profile/target/package.zip" > "$zip_listing"
-          node scripts/package-public-review-artifacts.cjs assert-listing \
-            --profile production \
-            --bundle-root "$profile/bundle" \
-            --listing-file "$zip_listing"
-          unzip -q "$profile/target/package.zip" -d "$zip_extract"
-          node scripts/package-public-review-artifacts.cjs assert-zip \
-            --profile production \
-            --bundle-root "$profile/bundle" \
-            --listing-file "$zip_listing" \
-            --extracted-root "$zip_extract"
-          rm -f "$zip_listing"
-          rm -rf "$zip_extract"
-          trap - EXIT
-          test -z "$(git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews)"
+          rm -rf release-bus-v2-pr-evidence
+          mkdir -p release-bus-v2-pr-evidence
+          policy_bundle="$(node scripts/pr-ci-policy-bundle.cjs \
+            --expected-git-ref "$EXPECTED_MERGE_SHA" \
+            --output release-bus-v2-pr-evidence/policy-bundle.txt)"
+          policy_bundle_contract="$(jq -er .contract <<< "$policy_bundle")"
+          policy_bundle_digest="$(jq -er .digest <<< "$policy_bundle")"
+          policy_bundle_line_count="$(jq -er .line_count <<< "$policy_bundle")"
+          test "$policy_bundle_contract" = pr-ci-policy-bundle-v1
+          [[ "$policy_bundle_digest" =~ ^[a-f0-9]{64}$ ]]
+          [[ "$policy_bundle_line_count" =~ ^[1-9][0-9]{0,3}$ ]]
+          jq -n \
+            --arg merge_sha "$EXPECTED_MERGE_SHA" \
+            --arg head_sha "$EXPECTED_HEAD_SHA" \
+            --arg policy_bundle_contract "$policy_bundle_contract" \
+            --arg policy_bundle_digest "$policy_bundle_digest" \
+            --argjson policy_bundle_line_count "$policy_bundle_line_count" \
+            --argjson build_required "$BUILD_REQUIRED" \
+            '{
+              schema_version:1,
+              evidence_contract:"exact-merge-tree-pr-ci-v1",
+              repository:"frontend",
+              event:"pull_request",
+              workflow:".github/workflows/app-pr-ci.yml",
+              merge_sha:$merge_sha,
+              head_sha:$head_sha,
+              production_build_required:$build_required,
+              policy_bundle_contract:$policy_bundle_contract,
+              policy_bundle_digest:$policy_bundle_digest,
+              policy_bundle_line_count:$policy_bundle_line_count,
+              required_gates:[
+                "package-manager-discipline",
+                "dependency-analysis",
+                "reviewbot-contract",
+                "generated-agent-files",
+                "release-bus-workflow-contract",
+                "changed-lint",
+                "changed-typecheck",
+                "test-typecheck",
+                "related-jest-selection",
+                "production-build-or-plan-not-required",
+                "pr-ci-policy-bundle"
+              ]
+            }' > release-bus-v2-pr-evidence/manifest.json
+          (cd release-bus-v2-pr-evidence && \
+            sha256sum ./manifest.json ./policy-bundle.txt > SHA256SUMS)
 
-      - name: Build staging profile for exact artifact reuse
-        if: needs.plan.outputs.build_required == 'true'
-        env:
-          NODE_ENV: production
-          API_ENDPOINT: ${{ vars.STAGING_API_ENDPOINT || 'https://api.staging.6529.io' }}
-          WS_ENDPOINT: ${{ vars.STAGING_WS_ENDPOINT || 'wss://ws.staging.6529.io' }}
-          ALLOWLIST_API_ENDPOINT: ${{ vars.STAGING_ALLOWLIST_API_ENDPOINT || 'https://allowlist-api.staging.6529.io' }}
-          BASE_ENDPOINT: https://staging.6529.io
-          NEXTGEN_CHAIN_ID: ${{ vars.STAGING_NEXTGEN_CHAIN_ID || '11155111' }}
-          ASSETS_FROM_S3: "false"
-          ANNOUNCED_VERSION_ENDPOINT: ""
-        run: |
-          set -euo pipefail
-          unset ANNOUNCED_VERSION_ENDPOINT
-          rm -rf .next
-          ./bin/6529 run help-index:sync
-          ./bin/6529 run agent-files:sync
-          ./bin/6529 run base-build
-
-      - name: Package exact PR merge-tree staging profile
-        if: needs.plan.outputs.build_required == 'true'
-        env:
-          EXPECTED_MERGE_SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-          [[ "$EXPECTED_MERGE_SHA" =~ ^[a-f0-9]{40}$ ]]
-          test "$(git rev-parse HEAD)" = "$EXPECTED_MERGE_SHA"
-          profile=release-bus-v2-pr-artifact/profiles/staging
-          rm -rf "$profile"
-          mkdir -p "$profile/target/_next" "$profile/bundle/.next"
-          cp -r .next/standalone/. "$profile/bundle/"
-          cp -r .next/static "$profile/target/_next/"
-          cp -r .next/static "$profile/bundle/.next/"
-          cp -r Procfile .ebextensions "$profile/bundle/"
-          if [ -d .platform ]; then cp -r .platform "$profile/bundle/"; fi
-          find "$profile/bundle" -xtype l -delete
-          for file in BUILD_ID PUBLIC_RUNTIME.json ASSETS_FROM_S3; do
-            if [ -f ".next/$file" ]; then cp ".next/$file" "$profile/bundle/.next/$file"; fi
-          done
-          node scripts/package-public-review-artifacts.cjs prepare \
-            --profile staging \
-            --bundle-root "$profile/bundle"
-          test -z "$(find "$profile/target/_next" -type l -print -quit)"
-          (cd "$profile/bundle" && zip -yr ../target/package.zip .)
-          zip_listing="$(mktemp)"
-          zip_extract="$(mktemp -d)"
-          trap 'rm -f "$zip_listing"; rm -rf "$zip_extract"' EXIT
-          unzip -Z1 "$profile/target/package.zip" > "$zip_listing"
-          node scripts/package-public-review-artifacts.cjs assert-listing \
-            --profile staging \
-            --bundle-root "$profile/bundle" \
-            --listing-file "$zip_listing"
-          unzip -q "$profile/target/package.zip" -d "$zip_extract"
-          node scripts/package-public-review-artifacts.cjs assert-zip \
-            --profile staging \
-            --bundle-root "$profile/bundle" \
-            --listing-file "$zip_listing" \
-            --extracted-root "$zip_extract"
-          rm -f "$zip_listing"
-          rm -rf "$zip_extract"
-          trap - EXIT
-          test -z "$(git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews)"
-          staging_digest="$(sha256sum release-bus-v2-pr-artifact/profiles/staging/target/package.zip | cut -d' ' -f1)"
-          production_digest="$(sha256sum release-bus-v2-pr-artifact/profiles/production/target/package.zip | cut -d' ' -f1)"
-          jq -n --arg source_sha "$EXPECTED_MERGE_SHA" --arg staging_digest "$staging_digest" --arg production_digest "$production_digest" \
-            '{schema_version:2,repository:"frontend",source_sha:$source_sha,environment:"dual",profiles:{staging:{package_sha256:$staging_digest},production:{package_sha256:$production_digest}}}' \
-            > release-bus-v2-pr-artifact/manifest.json
-          (cd release-bus-v2-pr-artifact && find . -type f ! -path ./SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)
-
-      - name: Upload exact PR merge-tree dual-profile artifact
-        if: needs.plan.outputs.build_required == 'true'
+      - name: Upload exact PR merge-tree CI evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: release-bus-v2-pr-${{ github.sha }}
-          path: release-bus-v2-pr-artifact
-          include-hidden-files: true
+          path: release-bus-v2-pr-evidence
           if-no-files-found: error
           retention-days: 30
 

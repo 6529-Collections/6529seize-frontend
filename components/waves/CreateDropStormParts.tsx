@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/utils/button/Button";
 import type { CreateDropPart, ReferencedNft } from "@/entities/IDrop";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
@@ -198,21 +199,23 @@ const CreateDropStormParts: FC<CreateDropStormPartsProps> = ({
                   {t(locale, "waves.stormComposer.discardConfirmation")}
                 </p>
                 <div className="tw-flex tw-flex-none tw-items-center tw-justify-end tw-gap-2">
-                  <button
+                  <Button
                     ref={keepDraftRef}
                     type="button"
                     onClick={handleKeepDraft}
-                    className="tw-inline-flex tw-h-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.03] tw-px-3 tw-text-xs tw-font-semibold tw-text-iron-200 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/[0.06]"
+                    variant="secondary"
+                    size="md"
                   >
                     {t(locale, "waves.stormComposer.keepDraft")}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
                     onClick={handleDiscard}
-                    className="tw-inline-flex tw-h-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-error/40 tw-bg-error/10 tw-px-3 tw-text-xs tw-font-semibold tw-text-error tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-error desktop-hover:hover:tw-bg-error/15"
+                    variant="destructive"
+                    size="md"
                   >
                     {t(locale, "waves.stormComposer.discardDraft")}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </m.div>

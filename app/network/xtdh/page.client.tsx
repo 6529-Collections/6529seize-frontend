@@ -15,7 +15,7 @@ const REFERENCE_SECTION_CLASSES = `${EDITORIAL_GRID_CLASSES} tw-border-0 tw-bord
 const REFERENCE_CONTENT_CLASSES =
   "tw-min-w-0 tw-space-y-5 tw-text-base tw-leading-7 tw-text-iron-300";
 const INTRO_CONTENT_CLASSES =
-  "tw-min-w-0 tw-max-w-3xl tw-space-y-5 tw-text-base tw-font-light tw-leading-7 tw-text-iron-400";
+  "tw-min-w-0 tw-max-w-3xl tw-space-y-5 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300";
 const SECTION_HEADING_CLASSES =
   "tw-m-0 tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl";
 const FORMULA_CLASSES =
@@ -213,7 +213,7 @@ export default function XTDHMainPage() {
                 xtdh_rate = produced_today - granted_out_today + received_today
               </code>
             </pre>
-            <p className="tw-m-0 tw-pl-2 tw-font-mono tw-text-xs tw-text-iron-500">
+            <p className="tw-m-0 tw-pl-2 tw-font-mono tw-text-xs tw-text-iron-400">
               ... and ...
             </p>
             <pre className={FORMULA_CLASSES}>

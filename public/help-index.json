@@ -1076,6 +1076,7 @@
       ],
       "facts": [
         "Network definitions explain Cards Collected, Unique Memes, Meme Sets, TDH variants, purchases, sales, transfers, and related Network metrics.",
+        "The glossary groups terms into Collection metrics, Activity metrics, and TDH metrics.",
         "Genesis Sets are complete sets of the first three Meme NFTs.",
         "Use the definitions page when users ask what a Network metric means.",
         "For a single TDH explanation, point users to the TDH page."
@@ -5230,7 +5231,8 @@
       "keywords": ["tdh", "historic", "boosts", "rules", "versions"],
       "facts": [
         "Historic TDH boost rules live at /network/tdh/historic-boosts.",
-        "The page documents archived rule models and version differences.",
+        "The page compares archived versions in a table on tablet and desktop and in summary cards on mobile.",
+        "Use the row details control or Show rules button to expand the complete Category A, B, and C rules for a version.",
         "Use the main TDH page for the current TDH explanation."
       ],
       "canonical_path": "/network/tdh/historic-boosts",
@@ -5243,6 +5245,7 @@
       "tags": ["network", "tdh", "historic"],
       "source_refs": [
         "app/network/tdh/historic-boosts/page.tsx",
+        "app/network/tdh/historic-boosts/page.client.tsx",
         "ops/docs/network/feature-tdh-historic-boosts.md"
       ]
     },
@@ -5371,6 +5374,10 @@
       "facts": [
         "The Memes mint route lives at /the-memes/mint.",
         "Mint flow docs explain entry points, common scenarios, and recovery.",
+        "If a remembered profile's authorized wallet is disconnected, the mint page hides the duplicate Connect control; selecting SEIZE opens wallet connection and continues when the same wallet reconnects and transaction details are unchanged.",
+        "Selecting a different already-authenticated wallet switches the active profile and cancels the old pending mint so refreshed recipient, eligibility, price, and transaction details can be reviewed before selecting SEIZE again; an unauthenticated wallet must complete normal authentication first.",
+        "Wallet confirmation, submitted, successful, and on-chain error states appear in the shared transaction modal; local recipient and mint-count validation stays inline.",
+        "The shared transaction modal identifies the current card as Mint: The Memes #{id} when a valid token ID is available, and otherwise keeps the generic Mint The Memes title.",
         "Mint eligibility is separate from subscription mode and allowlist rules."
       ],
       "canonical_path": "/the-memes/mint",
@@ -5378,6 +5385,7 @@
       "tags": ["memes", "minting"],
       "source_refs": [
         "app/the-memes/mint/page.tsx",
+        "components/manifold-minting/ManifoldMintingWidget.tsx",
         "ops/docs/media/memes/feature-mint-flow.md"
       ]
     },
@@ -6119,6 +6127,7 @@
       "facts": [
         "Drop Forge launch claims live under /drop-forge/launch.",
         "Launch claim detail pages use /drop-forge/launch/{id}.",
+        "If the authorized wallet is disconnected, a launch on-chain action opens wallet connection and continues after connection succeeds when its transaction details are unchanged; refreshed details cancel the pending action so the user can review and retry.",
         "Launch claim pages can include mint stats and subscription airdrop sections when configured."
       ],
       "canonical_path": "/drop-forge/launch",

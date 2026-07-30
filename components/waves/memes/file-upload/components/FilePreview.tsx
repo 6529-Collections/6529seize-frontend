@@ -6,6 +6,7 @@ import VideoFallbackPreview from "./VideoFallbackPreview";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowsRotate, faCube } from "@fortawesome/free-solid-svg-icons";
 import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
+import Button from "@/components/utils/button/Button";
 
 // Dynamically import GLB viewer to avoid SSR issues
 const MediaDisplayGLB = dynamic(
@@ -173,9 +174,11 @@ const FilePreview: React.FC<FilePreviewProps> = ({
 
       {/* Control buttons */}
       <div className="tw-absolute tw-right-3 tw-top-3 tw-z-30 tw-flex tw-gap-2">
-        <button
+        <Button
+          type="button"
           onClick={onRemove}
-          className="tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-800 tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-300 tw-shadow-sm tw-ring-1 tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-border-iron-700 hover:tw-bg-iron-700 hover:tw-ring-iron-650 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700"
+          variant="tertiary"
+          size="xs"
           aria-label="Change uploaded file"
           tabIndex={0}
           data-testid="artwork-replace-button"
@@ -185,7 +188,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
             className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0"
           />
           Change
-        </button>
+        </Button>
       </div>
     </motion.div>
   );

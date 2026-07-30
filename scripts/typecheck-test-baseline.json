@@ -315,7 +315,6 @@
     "__tests__/components/levels/ProgressChart.test.tsx": 3,
     "__tests__/components/lfg-slideshow/LFGSlideshow.test.tsx": 4,
     "__tests__/components/manifold-minting/ManifoldMinting.test.tsx": 5,
-    "__tests__/components/manifold-minting/ManifoldMintingWidget.test.tsx": 2,
     "__tests__/components/ManifoldMintingWidget.test.tsx": 1,
     "__tests__/components/meme-calendar/meme-calendar.helpers.test.ts": 4,
     "__tests__/components/meme-calendar/meme-calendar.helpers.timezone.test.ts": 4,

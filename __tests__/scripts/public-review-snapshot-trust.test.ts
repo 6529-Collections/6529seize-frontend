@@ -23,7 +23,11 @@ type Publication = {
   schemaVersion: string;
   reviewId: string;
   lifecycleState: string;
-  versions: Array<{ version: string; lifecycleState: string }>;
+  versions: Array<{
+    version: string;
+    lifecycleState: string;
+    sourceCommit: string;
+  }>;
   [key: string]: unknown;
 };
 
@@ -585,19 +589,66 @@ describe("public-review snapshot trust publication preload", () => {
     candidate.versions.push({
       version: SYNTHETIC_FUTURE_VERSION,
       lifecycleState: "DRAFT",
+      sourceCommit: shaA,
     });
     return candidate;
   }
 
-  it("allows exactly one new DRAFT entry while preserving published state", () => {
+  it("accepts exactly one future DRAFT with the explicit configured source commit", () => {
+    const base = loadPublication();
+    const candidate = draftPublication();
+
+    expect(candidate.lifecycleState).toBe(base.lifecycleState);
+    expect(candidate.versions.slice(0, -1)).toEqual(base.versions);
+    expect(candidate.versions.at(-1)).toEqual({
+      version: SYNTHETIC_FUTURE_VERSION,
+      lifecycleState: "DRAFT",
+      sourceCommit: shaA,
+    });
     expect(() =>
       validateTrustedPublicationPolicy(
-        loadPublication(),
-        draftPublication(),
+        base,
+        candidate,
         futureConfig(),
         loadConfig().output.retainedVersions
       )
     ).not.toThrow();
+  });
+
+  it.each([
+    {
+      label: "missing",
+      sourceCommit: undefined,
+    },
+    {
+      label: "malformed",
+      sourceCommit: "not-a-full-lowercase-sha",
+    },
+    {
+      label: "mismatched",
+      sourceCommit: shaB,
+    },
+  ])("fails closed for a $label sourceCommit", ({ sourceCommit }) => {
+    const candidate = draftPublication();
+    const appendedVersion = candidate.versions.at(-1)! as {
+      sourceCommit?: string;
+    };
+    if (sourceCommit === undefined) {
+      delete appendedVersion.sourceCommit;
+    } else {
+      appendedVersion.sourceCommit = sourceCommit;
+    }
+
+    expect(() =>
+      validateTrustedPublicationPolicy(
+        loadPublication(),
+        candidate,
+        futureConfig(),
+        loadConfig().output.retainedVersions
+      )
+    ).toThrow(
+      "Candidate publication must preserve trusted state and append exactly one DRAFT version"
+    );
   });
 
   it.each([
@@ -619,6 +670,13 @@ describe("public-review snapshot trust publication preload", () => {
       label: "a historical lifecycle change",
       mutate: (candidate: Publication) => {
         candidate.versions[0]!.lifecycleState = "ARCHIVED";
+      },
+      message: "append exactly one DRAFT version",
+    },
+    {
+      label: "a historical source commit change",
+      mutate: (candidate: Publication) => {
+        candidate.versions[0]!.sourceCommit = shaB;
       },
       message: "append exactly one DRAFT version",
     },
@@ -660,6 +718,28 @@ describe("public-review snapshot trust publication preload", () => {
         loadConfig().output.retainedVersions
       )
     ).toThrow(message);
+  });
+
+  it("rejects a missing or duplicated appended version", () => {
+    expect(() =>
+      validateTrustedPublicationPolicy(
+        loadPublication(),
+        loadPublication(),
+        futureConfig(),
+        loadConfig().output.retainedVersions
+      )
+    ).toThrow("must match retained review history");
+
+    const candidate = draftPublication();
+    candidate.versions.push({ ...candidate.versions.at(-1)! });
+    expect(() =>
+      validateTrustedPublicationPolicy(
+        loadPublication(),
+        candidate,
+        futureConfig(),
+        loadConfig().output.retainedVersions
+      )
+    ).toThrow("must match retained review history");
   });
 
   it("rejects publication history that does not match either trusted index", () => {
@@ -940,6 +1020,7 @@ describe("public-review snapshot trust orchestration", () => {
     candidatePublicationObject.versions.push({
       version: futureConfig.reviewVersion,
       lifecycleState: "DRAFT",
+      sourceCommit: futureConfig.source.commit,
     });
     const candidatePublication = Buffer.from(
       `${JSON.stringify(candidatePublicationObject, null, 2)}\n`

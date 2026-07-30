@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 
 import { PublicReviewShell } from "@/components/public-review/PublicReviewShell";
+import { StreamReviewBotAuthorshipNote } from "@/components/public-review/StreamReviewBotAuthorshipNote";
 import {
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_SOURCE_COMMIT,
@@ -28,6 +29,7 @@ describe("PublicReviewShell", () => {
         sections={[{ id: "the-short-answer", title: "The short answer" }]}
         displayedVersion={STREAM_REVIEW_DEFINITION.activeVersion}
         feedbackSlot={<div>Feedback form</div>}
+        introNotice={<StreamReviewBotAuthorshipNote />}
         source={ACTIVE_REVIEW_VERSION.source}
       />
     );
@@ -36,9 +38,14 @@ describe("PublicReviewShell", () => {
       screen.getByRole("heading", { level: 1, name: "Overview" })
     ).toBeInTheDocument();
     expect(screen.getByText("Public review")).toBeInTheDocument();
-    expect(screen.getByText("Not deployed")).toBeInTheDocument();
+    expect(screen.getByText("Predeployment")).toBeInTheDocument();
     expect(screen.getByText("Pre-audit")).toBeInTheDocument();
     expect(screen.getByText("Page 1 of 14")).toBeInTheDocument();
+    expect(
+      screen.getByRole("complementary", { name: "A small human disclosure" })
+    ).toHaveTextContent(
+      "punk6529 would like the record to show that bots wrote this"
+    );
     expect(
       screen.getByRole("heading", { name: "Choose a reading path" })
     ).toBeInTheDocument();
@@ -70,9 +77,13 @@ describe("PublicReviewShell", () => {
       "aria-controls",
       "public-review-feedback"
     );
-    expect(document.getElementById("public-review-feedback")).toHaveClass(
-      "tw-hidden"
+    expect(commentsToggle).toHaveAttribute("aria-expanded", "false");
+    expect(document.getElementById("public-review-feedback")).toHaveAttribute(
+      "hidden"
     );
+    expect(
+      screen.getByRole("navigation", { name: "Contract review areas" })
+    ).toBeInTheDocument();
     expect(
       screen.getAllByRole("link", { name: "The short answer" })
     ).toHaveLength(2);
@@ -109,9 +120,9 @@ describe("PublicReviewShell", () => {
       />
     );
 
+    await screen.findByRole("dialog", { name: "Page comments" });
     const commentsPanel = document.getElementById("public-review-feedback");
     expect(commentsPanel).toBeInTheDocument();
-    await waitFor(() => expect(commentsPanel).not.toHaveClass("tw-hidden"));
     await waitFor(() => expect(commentsPanel).toHaveFocus());
 
     window.localStorage.setItem("public-review-comment-panel-open", "false");
@@ -162,7 +173,7 @@ describe("PublicReviewShell", () => {
       `https://github.com/6529-Collections/6529Stream/tree/${historicalCommit}`
     );
     expect(
-      screen.getByRole("link", { name: "View the full feedback ledger" })
+      screen.getByRole("link", { name: /Public feedback/ })
     ).toHaveAttribute(
       "href",
       "/reviews/6529-stream/versions/2026-07-25.1/feedback"
@@ -202,7 +213,7 @@ describe("PublicReviewShell", () => {
     );
 
     expect(
-      screen.getByRole("link", { name: "View the full feedback ledger" })
+      screen.getByRole("link", { name: /Public feedback/ })
     ).toHaveAttribute(
       "href",
       "/reviews/another-contract/versions/candidate-2/feedback"
@@ -277,10 +288,10 @@ describe("PublicReviewShell", () => {
     );
 
     expect(
-      screen.getByRole("link", { name: "View the full feedback ledger" })
+      screen.getByRole("link", { name: /Public feedback/ })
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: "Jump to send feedback" })
+      screen.queryByRole("link", { name: "Send feedback" })
     ).not.toBeInTheDocument();
   });
 });

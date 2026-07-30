@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Button from "@/components/utils/button/Button";
 
 interface ListMessageProps {
   readonly children: ReactNode;
@@ -41,12 +42,12 @@ export function InlineRetry({ message, onRetry }: Readonly<RetryableMessageProps
 
 function RetryButton({ onRetry }: Readonly<{ onRetry: () => void }>) {
   return (
-    <button
-      type="button"
+    <Button
+      variant="tertiary"
+      size="sm"
       onClick={onRetry}
-      className="tw-inline-flex tw-items-center tw-justify-center tw-rounded tw-bg-primary-500 tw-border tw-border-solid tw-border-primary-400 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-white hover:tw-bg-primary-400"
     >
       Retry
-    </button>
+    </Button>
   );
 }

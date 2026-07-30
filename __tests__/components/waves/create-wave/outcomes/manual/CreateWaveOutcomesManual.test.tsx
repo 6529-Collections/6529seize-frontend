@@ -3,25 +3,6 @@ import userEvent from "@testing-library/user-event";
 import CreateWaveOutcomesManual from "@/components/waves/create-wave/outcomes/manual/CreateWaveOutcomesManual";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
-jest.mock("@/components/utils/button/PrimaryButton", () => {
-  return function MockPrimaryButton({
-    children,
-    onClicked,
-    disabled,
-    loading,
-  }: any) {
-    return (
-      <button
-        data-testid="primary-button"
-        onClick={onClicked}
-        disabled={disabled || loading}
-      >
-        {children}
-      </button>
-    );
-  };
-});
-
 describe("CreateWaveOutcomesManual", () => {
   const defaultProps = {
     waveType: ApiWaveType.Approve,
@@ -78,7 +59,7 @@ describe("CreateWaveOutcomesManual", () => {
   it("shows error when submitting without manual action", async () => {
     render(<CreateWaveOutcomesManual {...defaultProps} />);
 
-    const saveButton = screen.getByTestId("primary-button");
+    const saveButton = screen.getByRole("button", { name: "Save" });
     await userEvent.click(saveButton);
 
     expect(
@@ -94,7 +75,7 @@ describe("CreateWaveOutcomesManual", () => {
     const actionInput = screen.getByLabelText("Manual action");
     await userEvent.type(actionInput, "Test action");
 
-    const saveButton = screen.getByTestId("primary-button");
+    const saveButton = screen.getByRole("button", { name: "Save" });
     await userEvent.click(saveButton);
 
     expect(screen.getByText("Please enter positions")).toBeInTheDocument();
@@ -116,7 +97,7 @@ describe("CreateWaveOutcomesManual", () => {
     const positionsInput = screen.getByLabelText(/Winning Positions/i);
     await userEvent.type(positionsInput, "1,3,5");
 
-    const saveButton = screen.getByTestId("primary-button");
+    const saveButton = screen.getByRole("button", { name: "Save" });
     await userEvent.click(saveButton);
 
     expect(mockOnOutcome).toHaveBeenCalled();
@@ -134,7 +115,7 @@ describe("CreateWaveOutcomesManual", () => {
     // Use a value that passes the input filter but fails format validation
     await userEvent.type(positionsInput, "1--3");
 
-    const saveButton = screen.getByTestId("primary-button");
+    const saveButton = screen.getByRole("button", { name: "Save" });
     await userEvent.click(saveButton);
 
     expect(screen.getByText("Invalid position format")).toBeInTheDocument();
@@ -165,7 +146,7 @@ describe("CreateWaveOutcomesManual", () => {
     const actionInput = screen.getByLabelText("Manual action");
     await userEvent.type(actionInput, "Approve action");
 
-    const saveButton = screen.getByTestId("primary-button");
+    const saveButton = screen.getByRole("button", { name: "Save" });
     await userEvent.click(saveButton);
 
     expect(mockOnOutcome).toHaveBeenCalledWith(
@@ -192,7 +173,7 @@ describe("CreateWaveOutcomesManual", () => {
     const positionsInput = screen.getByLabelText(/Winning Positions/i);
     await userEvent.type(positionsInput, "1-3,5");
 
-    const saveButton = screen.getByTestId("primary-button");
+    const saveButton = screen.getByRole("button", { name: "Save" });
     await userEvent.click(saveButton);
 
     expect(mockOnOutcome).toHaveBeenCalledWith(
@@ -318,7 +299,7 @@ describe("CreateWaveOutcomesManual", () => {
     render(<CreateWaveOutcomesManual {...defaultProps} />);
 
     // First trigger the error
-    const saveButton = screen.getByTestId("primary-button");
+    const saveButton = screen.getByRole("button", { name: "Save" });
     await userEvent.click(saveButton);
 
     expect(

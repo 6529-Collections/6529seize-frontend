@@ -34,10 +34,10 @@ describe("MemePageMainStageSubmissionLink", () => {
     });
     expect(link).toHaveAttribute("href", "/waves/main-stage-wave?drop=drop-1");
     expect(link).toHaveClass(
-      "tw-inline-flex",
-      "tw-rounded-md",
-      "tw-px-4",
-      "tw-py-2"
+      "tw-rounded-lg",
+      "tw-bg-iron-950",
+      "tw-h-8",
+      "tw-px-2.5"
     );
     expect(commonApiFetchMock).toHaveBeenCalledWith(
       expect.objectContaining({

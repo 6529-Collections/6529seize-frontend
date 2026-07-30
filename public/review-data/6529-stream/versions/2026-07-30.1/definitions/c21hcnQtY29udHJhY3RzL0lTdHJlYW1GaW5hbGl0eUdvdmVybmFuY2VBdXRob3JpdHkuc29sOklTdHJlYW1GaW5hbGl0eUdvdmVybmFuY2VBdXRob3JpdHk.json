@@ -1,0 +1,217 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IStreamFinalityGovernanceAuthority.sol:IStreamFinalityGovernanceAuthority#function:0xc17db092",
+          "declaringDefinitionId": "smart-contracts/IStreamFinalityGovernanceAuthority.sol:IStreamFinalityGovernanceAuthority",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "roleId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "hasStreamRole",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xc17db092",
+          "signature": "hasStreamRole(bytes32,address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamFinalityGovernanceAuthority.sol:IStreamFinalityGovernanceAuthority#function:0xe6f22dba",
+          "declaringDefinitionId": "smart-contracts/IStreamFinalityGovernanceAuthority.sol:IStreamFinalityGovernanceAuthority",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "terminalFreezeVetoGuardian",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "guardian",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "vetoDeadline",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0xe6f22dba",
+          "signature": "terminalFreezeVetoGuardian(bytes32)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "hasStreamRole(bytes32,address)",
+          "displaySignature": "hasStreamRole(bytes32,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamFinalityGovernanceAuthority.sol:IStreamFinalityGovernanceAuthority#function:0xc17db092",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "roleId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1GaW5hbGl0eUdvdmVybmFuY2VBdXRob3JpdHkuc29sOklTdHJlYW1GaW5hbGl0eUdvdmVybmFuY2VBdXRob3JpdHkjZnVuY3Rpb246MHhjMTdkYjA5Mg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "hasStreamRole",
+          "natspec": "@notice True when `account` currently holds the [GOV-ROLES] role `roleId`.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 85,
+            "byteStart": 705,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamFinalityGovernanceAuthority.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:13d7ddb4999e8742ffb49fab6c536968951cd001d20c50334560a7c8857674ec",
+            "sourceSha256": "sha256:da957985c2cc92395c63106e24ae430e71e190f20fd3822db4cbb61d5ae2a4cb"
+          },
+          "selector": "0xc17db092",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "terminalFreezeVetoGuardian(bytes32)",
+          "displaySignature": "terminalFreezeVetoGuardian(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamFinalityGovernanceAuthority.sol:IStreamFinalityGovernanceAuthority#function:0xe6f22dba",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scopeHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1GaW5hbGl0eUdvdmVybmFuY2VBdXRob3JpdHkuc29sOklTdHJlYW1GaW5hbGl0eUdvdmVybmFuY2VBdXRob3JpdHkjZnVuY3Rpb246MHhlNmYyMmRiYQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "terminalFreezeVetoGuardian",
+          "natspec": "@notice Terminal-freeze veto guardian for a staged-freeze scope key\n         ([GOV-WINDOWS] veto surface shape).\n @dev The registry requires a nonzero guardian to schedule any terminal freeze and\n      re-resolves the guardian at veto time; it enforces its own veto window\n      (`notBefore`, floored at 72 hours), so `vetoDeadline` is informational here.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "guardian",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "vetoDeadline",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 141,
+            "byteStart": 1188,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamFinalityGovernanceAuthority.sol#L19-L22",
+            "lineEnd": 22,
+            "lineStart": 19,
+            "snippetSha256": "sha256:503c2cf0b83bee2bf275edc101195cbbec9aeffa882c10c33167ad606ae1096b",
+            "sourceSha256": "sha256:da957985c2cc92395c63106e24ae430e71e190f20fd3822db4cbb61d5ae2a4cb"
+          },
+          "selector": "0xe6f22dba",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IStreamFinalityGovernanceAuthority.sol:IStreamFinalityGovernanceAuthority",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1GaW5hbGl0eUdvdmVybmFuY2VBdXRob3JpdHkuc29sOklTdHJlYW1GaW5hbGl0eUdvdmVybmFuY2VBdXRob3JpdHk",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IStreamFinalityGovernanceAuthority.sol:IStreamFinalityGovernanceAuthority"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "IStreamFinalityGovernanceAuthority",
+    "natspec": "@notice Narrow authority seam the finality registry resolves roles and the terminal-freeze\n         veto guardian through (ADR 0004 [GOV-ROLES], [GOV-WINDOWS]).\n @dev The ADR 0004 governed admin registry is built in a parallel worktree; this file pins\n      only the two reads this registry needs so the executor (or an interim multisig-backed\n      shim) can be bound at integration. Both are role references resolved at call time,\n      never raw frozen addresses (ADR 0004 execution rules).",
+    "range": {
+      "byteLength": 760,
+      "byteStart": 571,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamFinalityGovernanceAuthority.sol#L10-L23",
+      "lineEnd": 23,
+      "lineStart": 10,
+      "snippetSha256": "sha256:5d3c9afb99d5d01d6a81d3b1ed05e375a235f35c2461ef20639a63660445c48d",
+      "sourceSha256": "sha256:da957985c2cc92395c63106e24ae430e71e190f20fd3822db4cbb61d5ae2a4cb"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IStreamFinalityGovernanceAuthority.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-30.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

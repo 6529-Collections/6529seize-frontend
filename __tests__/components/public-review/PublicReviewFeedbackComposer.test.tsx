@@ -30,6 +30,13 @@ jest.mock("next/link", () => ({
   ),
 }));
 
+jest.mock("@/components/drops/view/part/DropPartMarkdown", () => ({
+  __esModule: true,
+  default: ({ partContent }: { readonly partContent: string }) => (
+    <div>{partContent}</div>
+  ),
+}));
+
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
 }));
@@ -45,6 +52,7 @@ jest.mock("@/services/api/waves-v2-api", () => ({
 const useAuthMock = jest.mocked(useAuth);
 const useSeizeConnectContextMock = jest.mocked(useSeizeConnectContext);
 const fetchWaveByIdMock = jest.mocked(fetchWaveById);
+const setToastMock = jest.fn();
 
 const destination: PublicReviewDiscussionDestination = {
   logicalKey: "stream-review",
@@ -141,6 +149,7 @@ describe("PublicReviewFeedbackComposer", () => {
     useAuthMock.mockReturnValue({
       connectedProfile: { id: "profile-1" },
       requestAuth: jest.fn(),
+      setToast: setToastMock,
     } as unknown as ReturnType<typeof useAuth>);
     useSeizeConnectContextMock.mockReturnValue({
       address: "0x000000000000000000000000000000000000dEaD",
@@ -249,14 +258,15 @@ describe("PublicReviewFeedbackComposer", () => {
         }),
       ],
     });
-    const successLink = screen.getByRole("link", {
-      name: "Open your feedback in the Wave",
+    expect(setToastMock).toHaveBeenCalledWith({
+      message: "Feedback posted successfully.",
+      type: "success",
     });
-    expect(successLink).toHaveAttribute(
-      "href",
-      expect.stringContaining("serialNo=12")
-    );
-    await waitFor(() => expect(successLink.closest("output")).toHaveFocus());
+    expect(
+      screen.queryByRole("link", {
+        name: "Open your feedback in the Wave",
+      })
+    ).not.toBeInTheDocument();
   });
 
   it("does not erase a newer draft when an earlier submission resolves", async () => {
@@ -387,9 +397,16 @@ describe("PublicReviewFeedbackComposer", () => {
     await user.click(
       screen.getByRole("button", { name: "Preview Wave message" })
     );
-    expect(
-      screen.getByRole("heading", { name: "Wave message preview" })
-    ).toBeInTheDocument();
+    const previewHeading = screen.getByRole("heading", {
+      name: "Wave message preview",
+    });
+    expect(previewHeading).toBeInTheDocument();
+    await waitFor(() => expect(previewHeading).toHaveFocus());
+    expect(previewHeading.closest("section")).not.toHaveAttribute("aria-live");
+    expect(previewHeading.closest("section")).not.toHaveAttribute(
+      "role",
+      "status"
+    );
     expect(screen.getByText(/lines 10-12/)).toBeInTheDocument();
 
     rerenderSelection({

@@ -20,7 +20,105 @@ env:
   STAGING_RUN_AS: ${{ vars.STAGING_RUN_AS || 'ubuntu' }}
 
 jobs:
+  manual-deployment-guard:
+    name: Authorize manual staging fallback
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+
+    steps:
+      - name: Require authoritative staging fallback readiness
+        env:
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          TARGET_ENVIRONMENT: staging
+          TARGET_LANE: STAGING
+        run: |
+          set -euo pipefail
+
+          test -n "$RELEASE_BUS_API_URL" || {
+            echo "::error::Release Bus API URL is unavailable; refusing manual staging deployment."
+            exit 1
+          }
+          test -n "$RELEASE_BUS_WORKFLOW_AUTH_TOKEN" || {
+            echo "::error::Release Bus workflow credential is unavailable; refusing manual staging deployment."
+            exit 1
+          }
+          [[ "$GITHUB_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]] || {
+            echo "::error::GitHub run identity is malformed; refusing manual staging deployment."
+            exit 1
+          }
+          [[ "$GITHUB_RUN_ATTEMPT" =~ ^[1-9][0-9]{0,8}$ ]] || {
+            echo "::error::GitHub run attempt is malformed; refusing manual staging deployment."
+            exit 1
+          }
+          [[ "$GITHUB_REF_NAME" =~ ^[A-Za-z0-9._/-]{1,255}$ ]] || {
+            echo "::error::GitHub source ref is malformed; refusing manual staging deployment."
+            exit 1
+          }
+          [[ "$GITHUB_SHA" =~ ^[a-f0-9]{40}$ ]] || {
+            echo "::error::GitHub source SHA is malformed; refusing manual staging deployment."
+            exit 1
+          }
+
+          payload="$(
+            jq -n \
+              --arg repository frontend \
+              --arg environment "$TARGET_ENVIRONMENT" \
+              --arg service frontend \
+              --arg workflow_run_id "$GITHUB_RUN_ID" \
+              --argjson workflow_run_attempt "$GITHUB_RUN_ATTEMPT" \
+              --arg source_ref "$GITHUB_REF_NAME" \
+              --arg source_sha "$GITHUB_SHA" \
+              '{repository:$repository,environment:$environment,service:$service,workflow_run_id:$workflow_run_id,workflow_run_attempt:$workflow_run_attempt,source_ref:$source_ref,source_sha:$source_sha}'
+          )"
+          response_file="$(mktemp)"
+          trap 'rm -f "$response_file"' EXIT
+          if ! http_status="$(
+            curl --silent --show-error \
+              --connect-timeout 10 \
+              --max-time 30 \
+              --output "$response_file" \
+              --write-out '%{http_code}' \
+              -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+              -H 'Content-Type: application/json' \
+              --data "$payload" \
+              "$RELEASE_BUS_API_URL/deploy/release-bus-v2/manual-deployment-readiness"
+          )"; then
+            echo "::error::Release Bus readiness is unavailable; refusing manual staging deployment."
+            exit 1
+          fi
+          if [ "$http_status" != 200 ]; then
+            echo "::error::Manual staging fallback readiness was rejected with HTTP $http_status."
+            exit 1
+          fi
+          if ! jq -e \
+            --arg repository frontend \
+            --arg environment "$TARGET_ENVIRONMENT" \
+            --arg service frontend \
+            --arg workflow_run_id "$GITHUB_RUN_ID" \
+            --arg workflow_run_attempt "$GITHUB_RUN_ATTEMPT" \
+            --arg source_ref "$GITHUB_REF_NAME" \
+            --arg source_sha "$GITHUB_SHA" \
+            --arg lane "$TARGET_LANE" \
+            'type == "object" and
+             .ready == true and
+             .mode == "manual" and
+             .lane == $lane and
+             .repository == $repository and
+             .environment == $environment and
+             .service == $service and
+             (.workflow_run_id | tostring) == $workflow_run_id and
+             (.workflow_run_attempt | tostring) == $workflow_run_attempt and
+             .source_ref == $source_ref and
+             .source_sha == $source_sha' \
+            "$response_file" >/dev/null; then
+            echo "::error::Release Bus returned malformed or mismatched readiness evidence; refusing manual staging deployment."
+            exit 1
+          fi
+
   deploy-staging:
+    needs: manual-deployment-guard
     runs-on: ubuntu-latest
     timeout-minutes: 75
     permissions:
@@ -31,7 +129,7 @@ jobs:
       - name: Checkout staging branch
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
-          ref: ${{ env.STAGING_BRANCH }}
+          ref: ${{ github.sha }}
           fetch-depth: 0
 
       - name: Resolve expected commit
@@ -179,11 +277,20 @@ jobs:
           BRANCH: ${{ env.STAGING_BRANCH }}
           EXPECTED_SHA: ${{ steps.expected-commit.outputs.sha }}
           INSTANCE_ID: ${{ secrets.STAGING_INSTANCE_ID }}
+          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS }}
           REPO_DIR: ${{ env.STAGING_REPO_DIR }}
           RUN_AS: ${{ env.STAGING_RUN_AS }}
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+
+          jq -e '
+            type == "object" and
+            has("staging") and
+            (.staging | type == "object") and
+            (.staging["stream-review"] | type == "string" and test("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")) and
+            (has("production") | not)
+          ' <<<"$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" >/dev/null
 
           node ops/scripts/deployment-bus.cjs github-create-status \
             --deployment-id "${{ steps.deployment-record.outputs.deployment_id }}" \
@@ -196,6 +303,10 @@ jobs:
           run_as_q="$(printf '%q' "$RUN_AS")"
           branch_q="$(printf '%q' "$BRANCH")"
           expected_sha_q="$(printf '%q' "$EXPECTED_SHA")"
+          public_review_destinations_b64_q="$(
+            printf '%q' \
+              "$(printf '%s' "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" | base64 -w0)"
+          )"
 
           remote_script="$(
             cat <<REMOTE_SCRIPT_VARS
@@ -204,6 +315,7 @@ jobs:
           RUN_AS=$run_as_q
           BRANCH=$branch_q
           EXPECTED_SHA=$expected_sha_q
+          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64=$public_review_destinations_b64_q
           REMOTE_SCRIPT_VARS
             cat <<'REMOTE_SCRIPT_BODY'
 
@@ -218,6 +330,13 @@ jobs:
             echo "Repo directory '$REPO_DIR' is not a git checkout." >&2
             exit 1
           fi
+
+          for required_command in base64 jq; do
+            if ! command -v "$required_command" >/dev/null 2>&1; then
+              echo "Required staging command '$required_command' is unavailable." >&2
+              exit 1
+            fi
+          done
 
           sfw_bin="$(command -v sfw || true)"
           if [ -n "$sfw_bin" ] && command -v node >/dev/null 2>&1; then
@@ -262,10 +381,31 @@ jobs:
           fi
 
           deploy_script="$(mktemp /tmp/6529-staging-deploy.XXXXXX.sh)"
+          public_review_destinations_file="$(
+            mktemp /tmp/6529-public-review-destinations.XXXXXX.json
+          )"
           cleanup() {
-            rm -f "$deploy_script"
+            rm -f \
+              "$deploy_script" \
+              "$public_review_destinations_file"
           }
           trap cleanup EXIT HUP INT TERM
+
+          if ! printf '%s' "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64" |
+            base64 -d > "$public_review_destinations_file"; then
+            echo "Unable to decode the staging public-review destinations." >&2
+            exit 1
+          fi
+          unset PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64
+          jq -e '
+            type == "object" and
+            has("staging") and
+            (.staging | type == "object") and
+            (.staging["stream-review"] | type == "string" and test("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")) and
+            (has("production") | not)
+          ' "$public_review_destinations_file" >/dev/null
+          chown "$RUN_AS:$RUN_AS" "$public_review_destinations_file"
+          chmod 600 "$public_review_destinations_file"
 
           cat > "$deploy_script" <<'DEPLOY_SCRIPT'
           #!/usr/bin/env bash
@@ -317,7 +457,9 @@ jobs:
           DEPLOY_SCRIPT
 
           chmod 755 "$deploy_script"
-          sudo -H -u "$RUN_AS" bash "$deploy_script" "$REPO_DIR" "$BRANCH" "$EXPECTED_SHA"
+          sudo -H -u "$RUN_AS" env \
+            "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE=$public_review_destinations_file" \
+            bash "$deploy_script" "$REPO_DIR" "$BRANCH" "$EXPECTED_SHA"
           REMOTE_SCRIPT_BODY
           )"
 
