@@ -63,8 +63,9 @@ describe("UserFollowBtn", () => {
   it("follows when not following", async () => {
     const user = userEvent.setup();
     const { mutateFollow, requestAuth } = setup({ following: false });
-    expect(screen.getByText("Follow")).toHaveClass("tw-font-semibold");
-    await user.click(screen.getByRole("button"));
+    const followButton = screen.getByRole("button", { name: "Follow" });
+    expect(followButton).toHaveClass("tw-font-semibold");
+    await user.click(followButton);
     expect(requestAuth).toHaveBeenCalled();
     expect(mutateFollow).toHaveBeenCalled();
   });

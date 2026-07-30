@@ -1,3 +1,5 @@
+import Button from "@/components/utils/button/Button";
+
 export const FingerprintIcon = ({
   className,
 }: {
@@ -31,12 +33,8 @@ export function RateNicButton({
   readonly onRateClick: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onRateClick}
-      className="tw-flex tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-emerald-600 tw-bg-emerald-600 tw-px-3 tw-py-2 tw-text-xs tw-font-bold tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-border-emerald-500 hover:tw-bg-emerald-500"
-    >
+    <Button variant="success" size="xs" onClick={onRateClick}>
       Rate NIC
-    </button>
+    </Button>
   );
 }

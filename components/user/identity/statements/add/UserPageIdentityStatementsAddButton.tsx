@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import UserPageIdentityAddStatements from "./UserPageIdentityAddStatements";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
 
 export default function UserPageIdentityStatementsAddButton({
   profile,
@@ -20,10 +20,7 @@ export default function UserPageIdentityStatementsAddButton({
 
   return (
     <div>
-      <PrimaryButton
-        loading={false}
-        disabled={false}
-        onClicked={() => setIsAddStatementsOpen(!isAddStatementsOpen)}>
+      <Button onClick={() => setIsAddStatementsOpen(!isAddStatementsOpen)}>
         <svg
           className="tw-h-5 tw-w-5 -tw-ml-1"
           viewBox="0 0 24 24"
@@ -38,7 +35,7 @@ export default function UserPageIdentityStatementsAddButton({
           />
         </svg>
         <span>Add</span>
-      </PrimaryButton>
+      </Button>
 
       {isMounted && isAddStatementsOpen && (
         <UserPageIdentityAddStatements

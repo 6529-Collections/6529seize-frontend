@@ -83,55 +83,6 @@
   border-top: 1px solid rgba(147, 147, 159, 0.22) !important;
 }
 
-.signModalCancelButton,
-.signModalConfirmButton {
-  min-width: 8rem;
-  height: 2.55rem;
-  border-radius: 0.7rem !important;
-  border: 1px solid transparent !important;
-  padding: 0 1rem !important;
-  font-weight: 600 !important;
-  font-size: 0.98rem !important;
-  line-height: 1 !important;
-  text-decoration: none !important;
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.signModalCancelButton {
-  background: #1c1c21 !important;
-  border-color: #37373e !important;
-  color: #f5f5f5 !important;
-}
-
-.signModalCancelButton:hover:not(:disabled),
-.signModalCancelButton:focus-visible:not(:disabled) {
-  background: #26272b !important;
-  color: #ffffff !important;
-}
-
-.signModalConfirmButton {
-  background: #365ce0 !important;
-  border-color: #365ce0 !important;
-  color: #ffffff !important;
-}
-
-.signModalConfirmButton:hover:not(:disabled),
-.signModalConfirmButton:focus-visible:not(:disabled) {
-  background: #2f56d6 !important;
-  border-color: #2f56d6 !important;
-  color: #ffffff !important;
-}
-
-.signModalCancelButton:disabled,
-.signModalConfirmButton:disabled {
-  opacity: 0.55 !important;
-  cursor: not-allowed !important;
-}
-
 .signModalButtonContent {
   display: inline-flex;
   align-items: center;
@@ -153,12 +104,6 @@
   }
   .signModalFooter {
     justify-content: space-between !important;
-  }
-  .signModalCancelButton,
-  .signModalConfirmButton {
-    flex: 1;
-    min-width: 0;
-    font-size: 0.95rem !important;
   }
   .signModalLead {
     font-size: 0.95rem;

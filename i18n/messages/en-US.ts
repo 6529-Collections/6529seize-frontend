@@ -943,6 +943,14 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
     "Warning: You are not included in this group. If it controls who can view the wave, you may not be able to access the wave after creating it.",
 } as const);
 
+const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
+  cancel: "Cancel",
+  complete: "Complete",
+  next: "Next",
+  previous: "Previous",
+  save: "Save",
+} as const);
+
 const WAVE_CREATE_RANK_MODE_MESSAGES = objectMessages(
   "waves.create.rank.mode",
   {
@@ -2416,6 +2424,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_GIF_PICKER_MESSAGES,
   ...WAVE_HEADER_MESSAGES,
   ...WAVE_NOTIFICATION_SETTINGS_MESSAGES,
+  ...WAVE_CREATE_ACTIONS_MESSAGES,
   ...WAVE_CREATE_GROUPS_MESSAGES,
   ...WAVE_CREATE_RANK_MODE_MESSAGES,
   ...WAVE_CREATE_DROPS_MESSAGES,

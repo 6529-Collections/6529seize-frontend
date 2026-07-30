@@ -1,6 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 import type React from "react";
+import Button from "@/components/utils/button/Button";
 
 type ButtonRef = React.Ref<HTMLButtonElement>;
 
@@ -29,16 +30,19 @@ export function AllTokensSelectedCard({
                 </span>
             </span>
 
-            <button
+            <Button
                 ref={buttonRef}
                 type="button"
                 onClick={onDeselect}
                 aria-label="Deselect all tokens and return to manual selection"
-                className="tw-flex tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-iron-700 tw-bg-primary-600 tw-px-4 tw-py-2.5 tw-font-medium tw-text-white tw-transition-all hover:tw-bg-primary-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-ring-offset-2 focus:tw-ring-offset-iron-900 active:tw-scale-95 disabled:tw-cursor-not-allowed disabled:tw-bg-iron-800 disabled:tw-text-iron-500 @md:tw-w-auto @md:tw-shrink-0"
+                variant="action"
+                size="md"
+                fullWidth
+                className="@md:tw-w-auto @md:tw-shrink-0"
             >
                 <FontAwesomeIcon icon={faCheckCircle} className="tw-h-5 tw-w-5 tw-text-white" aria-hidden="true" />
                 Deselect All
-            </button>
+            </Button>
         </output>
     );
 }

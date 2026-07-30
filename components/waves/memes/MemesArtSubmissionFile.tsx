@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import { AuthContext } from "@/components/auth/Auth";
 import { TabToggle } from "@/components/common/TabToggle";
 import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
+import Button from "@/components/utils/button/Button";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 
@@ -430,14 +431,15 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
               </div>
 
               <div className="tw-flex tw-items-center">
-                <button
+                <Button
                   type="button"
                   onClick={onClearExternalMedia}
-                  className="tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-200 tw-transition disabled:tw-cursor-not-allowed disabled:tw-opacity-40 desktop-hover:hover:tw-bg-iron-800"
                   disabled={!externalHash}
+                  variant="tertiary"
+                  size="xs"
                 >
                   Clear Hash
-                </button>
+                </Button>
               </div>
 
               <div className="tw-flex tw-min-h-[260px] tw-flex-1 tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 sm:tw-min-h-[320px] lg:tw-min-h-[360px]">
