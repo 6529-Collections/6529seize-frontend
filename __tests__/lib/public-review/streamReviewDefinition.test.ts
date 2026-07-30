@@ -160,4 +160,38 @@ describe("6529 Stream public review definition", () => {
 
     expect(understatedPages).toEqual([]);
   });
+
+  it("uses direct prose throughout the active editorial", () => {
+    const editorialRoot = path.join(
+      process.cwd(),
+      "content",
+      "public-reviews",
+      "6529-stream",
+      "versions",
+      STREAM_REVIEW_VERSION,
+      "editorial"
+    );
+    const contrastPatterns = [
+      /\bnot\s+(?:just|merely|only)\b/i,
+      /\bnot\b[^.!?]{0,160}\bbut\b/i,
+      /\brather\s+than\b/i,
+      /\binstead\s+of\b/i,
+      /\bisn['’]t\b/i,
+      /\baren['’]t\b/i,
+    ];
+
+    const findings = STREAM_REVIEW_PAGES.flatMap((page) => {
+      const markdown = fs
+        .readFileSync(path.join(editorialRoot, page.editorialFile), "utf8")
+        .replace(/\s+/g, " ");
+
+      return contrastPatterns.flatMap((pattern) =>
+        pattern.test(markdown)
+          ? [{ page: page.id, pattern: pattern.toString() }]
+          : []
+      );
+    });
+
+    expect(findings).toEqual([]);
+  });
 });
