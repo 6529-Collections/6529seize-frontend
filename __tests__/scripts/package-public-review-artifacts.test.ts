@@ -15,6 +15,7 @@ const {
   assertZipListingSafety,
   expectedBundleEntries,
   getPublishedReviewIds,
+  hasValidPublicationMetadata,
   parseCli,
   parseZipListing,
   prepareProfileBundle,
@@ -31,6 +32,7 @@ const {
   ): readonly ReviewEvidence[];
   expectedBundleEntries(bundleRoot: string): readonly string[];
   getPublishedReviewIds(repoRoot: string): ReadonlySet<string>;
+  hasValidPublicationMetadata(version: Record<string, unknown>): boolean;
   parseCli(argv: readonly string[]): {
     readonly command: "prepare" | "assert-listing" | "assert-zip";
     readonly profile: ArtifactProfile;
@@ -89,6 +91,32 @@ const SOURCE_REPOSITORY = "6529-Collections/6529Stream";
 const SOURCE_PATH = "smart-contracts/StreamCore.sol";
 const DEFINITION_ID = `${SOURCE_PATH}:StreamCore`;
 const DEFINITION_KEY = Buffer.from(DEFINITION_ID).toString("base64url");
+
+describe("public-review publication metadata", () => {
+  it("accepts a minimal hidden draft", () => {
+    expect(
+      hasValidPublicationMetadata({
+        lifecycleState: "DRAFT",
+      })
+    ).toBe(true);
+  });
+
+  it.each([
+    {
+      label: "published version without metadata",
+      version: { lifecycleState: "PUBLIC_REVIEW" },
+    },
+    {
+      label: "draft with partial metadata",
+      version: {
+        lifecycleState: "DRAFT",
+        deploymentStatus: "NOT_DEPLOYED",
+      },
+    },
+  ])("rejects a $label", ({ version }) => {
+    expect(hasValidPublicationMetadata(version)).toBe(false);
+  });
+});
 
 function sha256Urn(value: string | Buffer): string {
   return `sha256:${crypto.createHash("sha256").update(value).digest("hex")}`;
