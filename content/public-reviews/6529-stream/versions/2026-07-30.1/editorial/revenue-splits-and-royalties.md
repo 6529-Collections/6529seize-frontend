@@ -85,21 +85,24 @@ The separately deployed
 records and settles primary-sale value. It uses each typed settlement key once,
 giving every sale one official credit.
 
-A settlement record is intended to bind:
+A settlement key binds:
 
 - sale identity;
 - token or collection context;
 - payer and other participant context;
-- asset;
 - amount;
-- revenue class;
-- selected profile or template;
-- policy context.
+- revenue class.
 
 That binding places "already paid" in durable contract state. A successor
 settlement caller, retried transaction, or alternate sale
 adapter must reach the same answer about whether the value has already been
 consumed.
+
+For ERC-20 settlement, an approved caller supplies the asset separately to
+`settleERC20PrimarySale`. The `PrimarySale` value and its settlement key omit
+that asset, so any active asset can win the first successful call and consume
+the shared key. A collector-to-settlement integration must bind the ERC-20
+asset in its signed sale intent and replay identity before release.
 
 This contract is a foundation awaiting a collector-to-mint integration. It
 accepts only owner-approved settlement callers, and the rehearsal still needs

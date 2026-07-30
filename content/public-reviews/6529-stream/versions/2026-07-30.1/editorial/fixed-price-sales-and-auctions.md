@@ -61,9 +61,10 @@ payment, and Core-entry behavior as a composition.
 
 A fixed-price authorization can describe a paid mint or a zero-price claim.
 
-For a paid mint, submitted ETH must match the authorized economics and signed
-price. The product must describe the currency as ETH, the sole asset in the
-current authorization.
+For a paid mint, the caller equals the signed payer and submitted ETH equals
+the signed price. The product must describe the currency as ETH, the sole asset
+in the current authorization. The recipient is signed separately and must be a
+nonzero address.
 
 The current Drop contract selects a local proceeds split in token, collection,
 then contract-default order. It creates separate poster, protocol, and
@@ -72,10 +73,10 @@ curator-reserve credits for later withdrawal. See
 and
 [`_creditFixedPriceProceeds`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamDrops.sol#L635-L680).
 
-A zero-price authorization retains the full policy around replay, collection,
-quantity, recipient, token data, deadline, mint capacity, and freeze checks.
-"Free" describes price; the authorization still defines the permitted caller
-and artwork.
+A zero-price authorization carries the zero address as payer and accepts
+submission from any account. The signed nonzero recipient and token-data hash
+keep the artwork destination fixed. Replay, collection, quantity, deadline,
+mint capacity, and freeze checks still apply.
 
 The current signed Drop requires `quantity == 1`; one authorization mints one
 token. Stream can represent editions at the collection level; the current
@@ -98,6 +99,10 @@ reserve, and end-time context with
 [`AuctionContract.sol`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/AuctionContract.sol).
 The authorization initializes auction registration from the curation decision.
 Bids begin after registration.
+
+Registration carries zero values for payer, recipient, fixed price, and
+submitted ETH. The signed reserve and end time define the initial auction
+economics.
 
 The token is minted into auction custody during registration. Registration
 confirms that custody before the auction becomes active. That ordering protects

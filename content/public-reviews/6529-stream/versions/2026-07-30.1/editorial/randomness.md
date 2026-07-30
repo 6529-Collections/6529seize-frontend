@@ -27,8 +27,10 @@ callback gas limit, confirmation count, and word count. The arRNG adapter
 depends on a controller fixed at construction plus a mutable per-request ETH
 cost.
 
-In both cases, Stream pins the provider address and Core randomizer epoch to the
-request. Operational evidence must establish subscription funding, controller
+In both cases, the request records the provider-adapter address and Core
+randomizer epoch. Each adapter separately holds an admin-mutable Core target
+through `updateCoreContract`; the request record omits that target address.
+Operational evidence must establish subscription funding, controller
 availability and integrity, and appropriate mutable parameters.
 
 The shared lifecycle standardizes what Stream records around a request. Each
@@ -43,8 +45,8 @@ reverts. See
 [`StreamCore.addRandomizer`](https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamCore.sol#L411-L443).
 
 Each request records the provider and current Core epoch. Fulfillment checks
-that the collection still points to that same provider and epoch before
-accepting output.
+the provider assignment and epoch against the adapter's current Core target
+before accepting output.
 
 This prevents a callback from one provider era from being mistaken for a
 current result after migration. A simple provider pointer with no request-bound
@@ -52,10 +54,16 @@ epoch would leave the contract unable to distinguish an authorized old callback
 from an unauthorized current one.
 
 The current epoch has a narrow scope. It changes through the Core provider
-assignment path. Settings inside the same adapter—such as VRF callback gas, key
-hash, subscription, confirmations, word count, or arRNG cost—remain within the
-same Core epoch. A new authorization era begins when the Core randomizer
-assignment changes.
+assignment path. Settings inside the same adapter—including its Core target,
+VRF callback gas, key hash, subscription, confirmations, word count, or arRNG
+cost—remain within the same Core epoch. A new authorization era begins when the
+Core randomizer assignment changes.
+
+An adapter Core-target change can redirect an existing request's fulfillment
+checks and final seed write to a different Core. The stored request lacks the
+assignment-era Core address needed to authenticate that destination. Binding
+the Core target to each request, or enforcing an equivalent immutable
+assignment rule through every pending and retry state, is a release blocker.
 
 ## Each request has an explicit state
 
@@ -130,8 +138,10 @@ should be reviewed byte for byte.
 ## Fulfillment checks more than the callback sender
 
 A callback is accepted only for a known `Pending` request. The lifecycle checks
-the token's collection, the recorded provider, and the live Core provider and
-epoch before deriving a seed.
+the token's collection, the recorded provider, and the provider assignment and
+epoch reported by the adapter's current Core target before deriving a seed.
+The final `setTokenHash` call also uses that current target. These checks protect
+the assignment era while the adapter's Core target remains unchanged.
 
 Those checks prevent:
 
@@ -277,6 +287,8 @@ The right simplification is the smallest complete state machine.
 ## What can fail
 
 - Mutable provider settings change without a new Core epoch.
+- An adapter Core-target update redirects checks or delivery for an existing
+  request.
 - An authorized admin marks a healthy request stale immediately.
 - Terminal stale state leaves a token permanently unresolved.
 - Provider replacement strands a `FailedPostProcessing` request.
@@ -291,17 +303,19 @@ The right simplification is the smallest complete state machine.
 
 ## Questions for reviewers
 
-1. Which provider properties and configuration changes must create a new Core
+1. How should each request bind its assignment-era Core target through
+   fulfillment and retries?
+2. Which provider properties and configuration changes must create a new Core
    epoch?
-2. Should stale marking require a minimum elapsed time, and how should that time
+3. Should stale marking require a minimum elapsed time, and how should that time
    be measured?
-3. Should a stale token have exactly one recovery route, or is permanent
+4. Should a stale token have exactly one recovery route, or is permanent
    unresolved state intentional?
-4. Can provider replacement occur while any accepted seed still needs
+5. Can provider replacement occur while any accepted seed still needs
    post-processing?
-5. Is three the right maximum for deterministic same-seed Core-write retries?
-6. Where must raw provider output remain available so its hash can be checked?
-7. Which provider funding, callback, monitoring, and failure-drill evidence must
+6. Is three the right maximum for deterministic same-seed Core-write retries?
+7. Where must raw provider output remain available so its hash can be checked?
+8. Which provider funding, callback, monitoring, and failure-drill evidence must
    block production use?
-8. Does every supported provider give artists and collectors an equally clear
+9. Does every supported provider give artists and collectors an equally clear
    provenance record even though its trust model differs?

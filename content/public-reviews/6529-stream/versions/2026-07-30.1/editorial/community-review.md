@@ -40,7 +40,7 @@ This review needs different kinds of expertise:
 
 Solidity knowledge is optional for identifying an unclear promise, unfair
 workflow, missing recovery case, unacceptable authority, or term that means
-something different to an ordinary reader.
+something different from an ordinary reader.
 
 ## Start from the page you are reading
 

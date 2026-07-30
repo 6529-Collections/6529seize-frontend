@@ -25,7 +25,10 @@ A typical flow is:
 1. an offchain process applies the published curation or TDH rules;
 2. a service constructs the exact mint or auction authorization;
 3. the configured signer signs the EIP-712 payload;
-4. the payer or another caller submits that signed payload to Stream;
+4. execution follows the signed mode: the signed payer submits a paid
+   fixed-price mint; any account can submit a free fixed-price claim carrying a
+   zero payer; and auction registration carries a zero payer, recipient, and
+   fixed price;
 5. Stream verifies the signature, signer epoch, deadline, replay state, and
    bound values;
 6. Stream executes only the sale mode and parameters contained in the
@@ -175,14 +178,20 @@ minting, the current path checks:
 All checks apply alongside signature validity. If execution fails, transaction
 rollback preserves the authorization and token state atomically.
 
-A free authorization still needs identity, recipient, replay, deadline, phase,
-and supply protection. Its policy remains fully specified.
+For a paid mint, the recipient is a nonzero address, the signed payer equals
+the caller, and the submitted ETH equals the signed price. For a free claim,
+the recipient remains nonzero, the signed payer is the zero address, and the
+submitted value is zero. Identity, replay, deadline, phase, and supply
+protections apply to both forms.
 
 ## Auction registration
 
 An auction-mode authorization registers the intended auction parameters. The
 auction contract then owns custody and governs bidding, extensions,
 cancellation, refunds, and settlement.
+
+At registration, payer, recipient, fixed price, and submitted value are all
+zero. The signed reserve and end time initialize the auction state.
 
 The signed payload bridges the curation decision and the initial auction state.
 The first auction consumes it; bids then follow auction state.
