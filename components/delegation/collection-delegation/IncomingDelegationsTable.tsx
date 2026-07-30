@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/utils/button/Button";
 import { DELEGATION_ALL_ADDRESS } from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -15,8 +16,6 @@ import {
 import {
   BUTTON_ICON_CLASS,
   CHECKBOX_CLASS,
-  DANGER_ACTION_CLASS,
-  PRIMARY_ACTION_CLASS,
 } from "./collection-delegation-helpers";
 import { DelegationRowDetails } from "./DelegationRowDetails";
 import {
@@ -123,32 +122,35 @@ export function IncomingDelegationsTable(
               {t(locale, "delegation.collection.incoming.actionsDescription")}
             </p>
             <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-              <button
+              <Button
                 type="button"
                 disabled={subDelegationOriginalDelegator === undefined}
-                className={PRIMARY_ACTION_CLASS}
+                variant="primary"
+                size="lg"
                 onClick={() => {
                   onShowSubForm("delegation");
                 }}
               >
                 <FontAwesomeIcon icon={faPlus} className={BUTTON_ICON_CLASS} />
                 {t(locale, "delegation.collection.incoming.registerDelegation")}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 disabled={subDelegationOriginalDelegator === undefined}
-                className={PRIMARY_ACTION_CLASS}
+                variant="primary"
+                size="lg"
                 onClick={() => {
                   onShowSubForm("subDelegation");
                 }}
               >
                 <FontAwesomeIcon icon={faPlus} className={BUTTON_ICON_CLASS} />
                 {t(locale, "delegation.collection.incoming.registerManager")}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 disabled={subDelegationOriginalDelegator === undefined}
-                className={PRIMARY_ACTION_CLASS}
+                variant="primary"
+                size="lg"
                 onClick={() => {
                   onShowSubForm("consolidation");
                 }}
@@ -158,13 +160,14 @@ export function IncomingDelegationsTable(
                   locale,
                   "delegation.collection.incoming.registerConsolidation"
                 )}
-              </button>
+              </Button>
               {(collection.contract === DELEGATION_ALL_ADDRESS ||
                 collection.contract === MEMES_COLLECTION.contract) && (
-                <button
+                <Button
                   type="button"
                   disabled={subDelegationOriginalDelegator === undefined}
-                  className={PRIMARY_ACTION_CLASS}
+                  variant="primary"
+                  size="lg"
                   onClick={() => {
                     onShowSubForm("primaryAddress");
                   }}
@@ -174,19 +177,20 @@ export function IncomingDelegationsTable(
                     className={BUTTON_ICON_CLASS}
                   />
                   {t(locale, "delegation.collection.incoming.assignPrimary")}
-                </button>
+                </Button>
               )}
-              <button
+              <Button
                 type="button"
                 disabled={subDelegationOriginalDelegator === undefined}
-                className={DANGER_ACTION_CLASS}
+                variant="destructive"
+                size="lg"
                 onClick={() => {
                   onShowSubForm("revocation");
                 }}
               >
                 <FontAwesomeIcon icon={faMinus} className={BUTTON_ICON_CLASS} />
                 {t(locale, "delegation.collection.incoming.revoke")}
-              </button>
+              </Button>
             </span>
           </div>
         </td>

@@ -10,6 +10,7 @@ import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import UserPageRepNewRepSearchDropdown from "./UserPageRepNewRepSearchDropdown";
 import { RepSearchState } from "./rep-search-types";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import Button from "@/components/utils/button/Button";
 import UserPageRepNewRepError from "./UserPageRepNewRepError";
 import {
   QueryKey,
@@ -504,32 +505,27 @@ export default function UserPageRepNewRepSearch({
                 </div>
               </div>
               <div className="tw-mt-4 tw-flex tw-flex-col tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/60 tw-px-4 tw-pt-4 sm:tw-flex-row-reverse sm:tw-gap-3 sm:tw-px-6">
-                <button
-                  type="button"
+                <Button
                   disabled={isGrantDisabled}
                   onClick={onGrantRep}
-                  className={`${
-                    isGrantDisabled
-                      ? "tw-cursor-not-allowed tw-opacity-50"
-                      : "tw-cursor-pointer hover:tw-border-primary-600 hover:tw-bg-primary-600"
-                  } tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white tw-transition tw-duration-300 tw-ease-out sm:tw-flex-1`}
+                  loading={mutating}
+                  size="lg"
+                  fullWidth
+                  className="sm:tw-flex-1"
                 >
-                  {mutating ? (
-                    <div className="tw-w-12">
-                      <CircleLoader />
-                    </div>
-                  ) : (
-                    t(locale, "rep.categories.grant.actions.grant")
-                  )}
-                </button>
+                  {t(locale, "rep.categories.grant.actions.grant")}
+                </Button>
                 {onCancel && (
-                  <button
-                    type="button"
+                  <Button
                     onClick={onCancel}
-                    className="tw-mt-3 tw-w-full tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 sm:tw-mt-0 sm:tw-flex-1"
+                    disabled={mutating}
+                    variant="secondary"
+                    size="lg"
+                    fullWidth
+                    className="tw-mt-3 sm:tw-mt-0 sm:tw-flex-1"
                   >
                     {t(locale, "rep.categories.grant.actions.cancel")}
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>

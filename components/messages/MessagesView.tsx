@@ -4,7 +4,7 @@ import React from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import MyStreamWave from "../brain/my-stream/MyStreamWave";
 import BrainContent from "../brain/content/BrainContent";
-import PrimaryButton from "../utils/button/PrimaryButton";
+import Button from "../utils/button/Button";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
@@ -41,17 +41,13 @@ const MessagesView: React.FC = () => {
           Choose a direct message conversation from the sidebar to view messages
           and continue the discussion.
         </p>
-        <PrimaryButton
-          onClicked={openDirectMessage}
-          loading={false}
-          disabled={false}
-        >
+        <Button onClick={openDirectMessage} variant="primary" size="md">
           <FontAwesomeIcon
             icon={faPaperPlane}
-            className="tw-mr-2 tw-size-4 tw-flex-shrink-0"
+            className="tw-size-4 tw-flex-shrink-0"
           />
           <span>Create DM</span>
-        </PrimaryButton>
+        </Button>
       </div>
     );
   }

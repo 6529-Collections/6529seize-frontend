@@ -233,9 +233,10 @@ describe("WaveRepRatingModal", () => {
         type: "error",
       })
     );
-    await waitFor(() =>
-      expect(saveButton).toHaveAttribute("aria-busy", "false")
-    );
+    await waitFor(() => {
+      expect(saveButton).not.toHaveAttribute("aria-busy");
+      expect(saveButton).toBeEnabled();
+    });
   });
 
   it("posts the rating and invalidates Wave REP allocation queries", async () => {

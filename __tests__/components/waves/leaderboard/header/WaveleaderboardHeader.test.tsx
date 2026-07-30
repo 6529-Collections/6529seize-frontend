@@ -54,17 +54,6 @@ jest.mock("@/hooks/waves/useWaveMetadata", () => ({
   useWaveSubmissionButtonLabel: () => mockSubmissionButtonLabel,
 }));
 
-jest.mock("@/components/utils/button/PrimaryButton", () => (props: any) => (
-  <button
-    data-testid="create"
-    data-padding={props.padding}
-    onClick={props.onClicked}
-    disabled={props.disabled}
-  >
-    {props.children}
-  </button>
-));
-
 jest.mock("react-use", () => {
   const React = require("react");
 
@@ -148,7 +137,7 @@ it("renders meme controls and handles actions", async () => {
   await user.click(screen.getByTestId("sort"));
   expect(onSortChange).toHaveBeenCalledWith("SORT");
   // create drop
-  await user.click(screen.getByTestId("create"));
+  await user.click(screen.getByRole("button", { name: "Drop" }));
   expect(onCreate).toHaveBeenCalled();
 });
 
@@ -413,9 +402,8 @@ it("renders curation price controls and commits range updates", async () => {
     "data-wrap",
     "no"
   );
-  const createButton = screen.getByTestId("create");
-  expect(createButton).toHaveAttribute("data-padding", "tw-px-3.5 tw-py-2");
-  expect(screen.getAllByText("Drop Art").length).toBeGreaterThan(0);
+  const createButton = screen.getByRole("button", { name: "Drop Art" });
+  expect(createButton).toHaveClass("tw-h-9", "tw-px-3.5", "tw-text-xs");
   const createIcon = createButton.querySelector("svg");
   expect(createIcon).toHaveClass("tw-h-4", "tw-w-4");
 
@@ -498,8 +486,7 @@ it("uses custom create label for leaderboard create actions", async () => {
     </AuthContext.Provider>
   );
 
-  const createButton = screen.getByTestId("create");
-  expect(createButton).toHaveTextContent("Apply");
+  const createButton = screen.getByRole("button", { name: "Apply" });
   await userEvent.click(createButton);
   expect(onCreateDrop).toHaveBeenCalledTimes(1);
 });
@@ -1145,8 +1132,8 @@ it("renders icon-only curation actions with drop glyph when layout requests comp
   expect(actionsRow).toHaveAttribute("data-action-mode", "icon");
   expect(actionsRow).toHaveAttribute("data-wrap", "no");
 
-  const createButton = screen.getByTestId("create");
-  expect(createButton).toHaveAttribute("data-padding", "tw-px-2.5 tw-py-2");
+  const createButton = screen.getByRole("button", { name: "Drop" });
+  expect(createButton).toHaveClass("tw-h-9", "tw-w-9", "tw-px-0");
   expect(createButton.querySelector('path[d^="M8.62826"]')).not.toBeNull();
 });
 

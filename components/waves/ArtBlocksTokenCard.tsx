@@ -10,6 +10,8 @@ import {
   type ReactNode,
 } from "react";
 
+import Button from "@/components/utils/button/Button";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import {
   fetchArtBlocksMeta,
   inferSeries,
@@ -332,25 +334,27 @@ export default function ArtBlocksTokenCard({
       </div>
 
       <div className="tw-mt-auto tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-border-t tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-3">
-        <button
+        <Button
           type="button"
-          className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-primary-500 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-white tw-transition hover:tw-bg-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-300"
+          variant="action"
+          size="sm"
           aria-label="View live render on Art Blocks"
           aria-expanded={showLive}
           onClick={(event) => openLiveViewer(event.currentTarget)}
         >
           View live
-        </button>
-        <a
+        </Button>
+        <ButtonLink
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-iron-700 tw-bg-transparent tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-transition hover:tw-border-primary-400 hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+          variant="tertiary"
+          size="sm"
           aria-label="Open this token on Art Blocks"
           onClick={handleAnchorClick}
         >
           Open on Art Blocks
-        </a>
+        </ButtonLink>
       </div>
 
       {showLive && (

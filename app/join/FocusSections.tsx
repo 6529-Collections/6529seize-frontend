@@ -175,7 +175,7 @@ function ThingCard({
       <h3 className={cx("tw-relative tw-z-10", BENTO_THING_HEADING_CLASS)}>
         {m(locale, item.titleKey)}
       </h3>
-      <span className="tw-relative tw-z-10 tw-mt-4 tw-block tw-max-w-[34ch] tw-text-pretty tw-text-[15px] tw-font-light tw-leading-6 tw-text-iron-500">
+      <span className="tw-relative tw-z-10 tw-mt-4 tw-block tw-max-w-[34ch] tw-text-pretty tw-text-[15px] tw-font-normal tw-leading-6 tw-text-iron-400">
         {m(locale, item.bodyKey)}
       </span>
       <span
@@ -242,7 +242,7 @@ function FeatureCopy({
       <h3 className={BENTO_HEADING_CLASS}>{m(locale, feature.titleKey)}</h3>
       <p
         className={cx(
-          "tw-mt-4 tw-max-w-[34ch] tw-text-pretty tw-text-[15px] tw-font-light tw-leading-6 tw-text-iron-500",
+          "tw-mt-4 tw-max-w-[34ch] tw-text-pretty tw-text-[15px] tw-font-normal tw-leading-6 tw-text-iron-400",
           size === "showcase" && "tw-mb-2"
         )}
       >

@@ -7,6 +7,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import { useWaveCurationDrops } from "@/hooks/useWaveCurationDrops";
 import { PlusIcon } from "@heroicons/react/24/outline";
+import Button from "@/components/utils/button/Button";
 import { resolveProfileCurationViewState } from "./userPageProfileWave.helpers";
 import {
   CurationEmptyPanel,
@@ -153,13 +154,13 @@ function ProfileCurationActionButton({
   readonly onClick: () => void;
 }) {
   return (
-    <button
-      type="button"
+    <Button
+      variant="primary"
+      size="md"
       onClick={onClick}
-      className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white disabled:tw-cursor-not-allowed disabled:tw-border-white/15 disabled:tw-bg-white/10 disabled:tw-text-iron-400 desktop-hover:hover:tw-border-iron-200 desktop-hover:hover:tw-bg-iron-100"
     >
       <PlusIcon className="-tw-ml-0.5 tw-h-5 tw-w-5 tw-flex-shrink-0" />
       <span>{label}</span>
-    </button>
+    </Button>
   );
 }

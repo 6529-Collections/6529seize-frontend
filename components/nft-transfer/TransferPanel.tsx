@@ -1,6 +1,7 @@
 "use client";
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import Button from "@/components/utils/button/Button";
 import {
   faChevronDown,
   faChevronUp,
@@ -203,27 +204,32 @@ export default function TransferPanel({
                   )}
                 </div>
               )}
-              <button
+              <Button
                 type="button"
                 onClick={() => {
                   t.setEnabled(false);
                   t.clear();
                 }}
                 disabled={isLoading}
-                className="tw-pointer-events-auto tw-flex tw-h-10 tw-min-w-24 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-4 tw-text-sm tw-font-medium tw-text-iron-100 tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/10 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+                variant="secondary"
+                size="md"
+                className="tw-pointer-events-auto tw-min-w-[100px]"
                 aria-label={translate(locale, "transfer.modal.cancel")}
               >
                 {translate(locale, "transfer.modal.cancel")}
-              </button>
+              </Button>
               {items.length > 0 && (
-                <button
+                <Button
                   type="button"
                   onClick={() => setShowModal(true)}
-                  className="tw-pointer-events-auto tw-flex tw-h-10 tw-min-w-24 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-bg-white tw-px-4 tw-text-sm tw-font-medium tw-text-iron-950 tw-transition-colors hover:tw-bg-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
+                  disabled={isLoading}
+                  variant="primary"
+                  size="md"
+                  className="tw-pointer-events-auto tw-min-w-[100px]"
                   aria-label={translate(locale, "transfer.panel.continue")}
                 >
                   {translate(locale, "transfer.panel.continue")}
-                </button>
+                </Button>
               )}
             </div>
           </div>
