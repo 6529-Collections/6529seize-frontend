@@ -1,7 +1,5 @@
 "use strict";
 
-const fs = require("node:fs");
-
 const SHA_PATTERN = /^[a-f0-9]{40}$/;
 const RUN_ID_PATTERN = /^[1-9]\d{0,19}$/;
 const UUID_PATTERN =
@@ -38,7 +36,6 @@ function exactEnvironment(environment) {
   return {
     apiUrl,
     token: required(environment, "RELEASE_BUS_WORKFLOW_AUTH_TOKEN"),
-    outputPath: required(environment, "GITHUB_OUTPUT"),
     body: {
       e2e_workflow_run_id: e2eWorkflowRunId,
       deploy_workflow_run_id: deployWorkflowRunId,
@@ -100,20 +97,13 @@ async function decide(environment, fetchImpl = fetch, now = Date.now()) {
     );
   }
   const decision = exactDecision(await response.json(), now);
-  fs.appendFileSync(
-    identity.outputPath,
-    `decision=${decision.decision}\nmanifest_ready=${decision.manifestReady}\n`,
-    "utf8"
-  );
   return decision;
 }
 
 if (require.main === module) {
   decide(process.env)
     .then(({ decision, manifestReady }) => {
-      process.stdout.write(
-        `Automatic staging E2E decision: ${decision} (manifest_ready=${manifestReady})\n`
-      );
+      process.stdout.write(`${decision}:${manifestReady}\n`);
     })
     .catch((error) => {
       process.stderr.write(

@@ -91,8 +91,21 @@ jobs:
         with:
           ref: ${{ github.workflow_sha }}
           persist-credentials: false
-          sparse-checkout: scripts/release-bus-baseline-adoption-decision.cjs
+          sparse-checkout: |
+            bin/6529
+            package.json
+            scripts/release-bus-baseline-adoption-decision.cjs
           sparse-checkout-cone-mode: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.17.1"
+
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable pnpm
+          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
 
       - name: Resolve exact automatic E2E decision
         id: decision
@@ -102,7 +115,24 @@ jobs:
           DEPLOY_WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
-        run: node scripts/release-bus-baseline-adoption-decision.cjs
+        run: |
+          set -euo pipefail
+          result="$(./bin/6529 exec node scripts/release-bus-baseline-adoption-decision.cjs)"
+          case "$result" in
+            LEGACY:false)
+              printf 'decision=LEGACY\nmanifest_ready=false\n'
+              ;;
+            DEFERRED:false)
+              printf 'decision=DEFERRED\nmanifest_ready=false\n'
+              ;;
+            DEFERRED:true)
+              printf 'decision=DEFERRED\nmanifest_ready=true\n'
+              ;;
+            *)
+              echo "Baseline-adoption decision returned an invalid exact token" >&2
+              exit 1
+              ;;
+          esac >> "$GITHUB_OUTPUT"
 
   staging-packs:
     name: Staging E2E packs

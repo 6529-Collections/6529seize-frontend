@@ -1,5 +1,4 @@
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
 
 const {
@@ -12,7 +11,7 @@ const SHA = "a".repeat(40);
 const INTENT_ID = "8af60034-9741-4b9d-bb1c-80b483f75455";
 const NOW = 1_900_000_000_000;
 
-function environment(outputPath: string) {
+function environment() {
   return {
     RELEASE_BUS_API_URL: "http://127.0.0.1:9876",
     RELEASE_BUS_WORKFLOW_AUTH_TOKEN: "workflow-secret",
@@ -20,7 +19,6 @@ function environment(outputPath: string) {
     DEPLOY_WORKFLOW_RUN_ID: "67890",
     DEPLOYED_REF: "1a-staging",
     DEPLOYED_SHA: SHA,
-    GITHUB_OUTPUT: outputPath,
   };
 }
 
@@ -33,18 +31,6 @@ function response(body: unknown, status = 200) {
 }
 
 describe("baseline-adoption automatic E2E decision client", () => {
-  let directory: string;
-  let outputPath: string;
-
-  beforeEach(() => {
-    directory = fs.mkdtempSync(path.join(os.tmpdir(), "rb2-decision-"));
-    outputPath = path.join(directory, "github-output");
-  });
-
-  afterEach(() => {
-    fs.rmSync(directory, { recursive: true, force: true });
-  });
-
   it("preserves ordinary legacy E2E on the exact no-intent response", async () => {
     const fetchImpl = jest.fn(async (_url, request) => {
       expect(request).toMatchObject({
@@ -68,18 +54,13 @@ describe("baseline-adoption automatic E2E decision client", () => {
       });
     });
 
-    await expect(
-      decide(environment(outputPath), fetchImpl, NOW)
-    ).resolves.toEqual({
+    await expect(decide(environment(), fetchImpl, NOW)).resolves.toEqual({
       decision: "LEGACY",
       manifestReady: false,
     });
-    expect(fs.readFileSync(outputPath, "utf8")).toBe(
-      "decision=LEGACY\nmanifest_ready=false\n"
-    );
   });
 
-  it("writes an exact DEFERRED decision without manufacturing evidence", async () => {
+  it("returns an exact DEFERRED decision without manufacturing evidence", async () => {
     const fetchImpl = jest.fn(async () =>
       response({
         decision: "DEFERRED",
@@ -90,13 +71,10 @@ describe("baseline-adoption automatic E2E decision client", () => {
       })
     );
 
-    await expect(
-      decide(environment(outputPath), fetchImpl, NOW)
-    ).resolves.toEqual({
+    await expect(decide(environment(), fetchImpl, NOW)).resolves.toEqual({
       decision: "DEFERRED",
       manifestReady: false,
     });
-    expect(fs.readFileSync(outputPath, "utf8")).toContain("decision=DEFERRED");
   });
 
   it("keeps a manifest-ready automatic callback DEFERRED so only the bound dispatch can run tests", async () => {
@@ -110,15 +88,10 @@ describe("baseline-adoption automatic E2E decision client", () => {
       })
     );
 
-    await expect(
-      decide(environment(outputPath), fetchImpl, NOW)
-    ).resolves.toEqual({
+    await expect(decide(environment(), fetchImpl, NOW)).resolves.toEqual({
       decision: "DEFERRED",
       manifestReady: true,
     });
-    expect(fs.readFileSync(outputPath, "utf8")).toBe(
-      "decision=DEFERRED\nmanifest_ready=true\n"
-    );
   });
 
   it.each([
@@ -162,19 +135,14 @@ describe("baseline-adoption automatic E2E decision client", () => {
     ],
   ])("fails closed on %s", async (_label, fetchImpl) => {
     await expect(
-      decide(environment(outputPath), jest.fn(fetchImpl), NOW)
+      decide(environment(), jest.fn(fetchImpl), NOW)
     ).rejects.toThrow();
-    expect(fs.existsSync(outputPath)).toBe(false);
   });
 
   it("rejects malformed deployment identity before network access", async () => {
     const fetchImpl = jest.fn();
     await expect(
-      decide(
-        { ...environment(outputPath), DEPLOYED_REF: "main" },
-        fetchImpl,
-        NOW
-      )
+      decide({ ...environment(), DEPLOYED_REF: "main" }, fetchImpl, NOW)
     ).rejects.toThrow("identity is malformed");
     expect(fetchImpl).not.toHaveBeenCalled();
   });
@@ -200,8 +168,11 @@ describe("baseline-adoption automatic E2E decision client", () => {
     );
     expect(workflow).toContain("baseline-adoption-decision:");
     expect(workflow).toContain(
-      "run: node scripts/release-bus-baseline-adoption-decision.cjs"
+      "./bin/6529 exec node scripts/release-bus-baseline-adoption-decision.cjs"
     );
+    expect(workflow).toContain("bin/6529");
+    expect(workflow).toContain("LEGACY:false)");
+    expect(workflow).toContain("DEFERRED:true)");
     expect(workflow).toContain("needs: baseline-adoption-decision");
     expect(workflow).toContain(
       "needs.baseline-adoption-decision.outputs.decision == 'LEGACY'"
@@ -227,15 +198,22 @@ describe("baseline-adoption automatic E2E decision client", () => {
       "needs.baseline-adoption-decision.outputs.decision == 'LEGACY'"
     );
     expect(parsed.jobs["staging-packs"].if).not.toContain("DEFERRED");
-    expect(parsed.jobs["baseline-adoption-decision"].steps).toHaveLength(2);
+    expect(parsed.jobs["baseline-adoption-decision"].steps).toHaveLength(4);
     expect(
       parsed.jobs["baseline-adoption-decision"].steps[0].with
     ).toMatchObject({
       ref: "${{ github.workflow_sha }}",
       "persist-credentials": false,
     });
+    expect(parsed.jobs["baseline-adoption-decision"].steps[1]).toMatchObject({
+      uses: "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+      with: { "node-version": "22.17.1" },
+    });
+    expect(parsed.jobs["baseline-adoption-decision"].steps[2].run).toContain(
+      "corepack prepare"
+    );
     expect(
-      parsed.jobs["baseline-adoption-decision"].steps[1].env
+      parsed.jobs["baseline-adoption-decision"].steps[3].env
     ).toMatchObject({
       DEPLOYED_REF: "${{ github.event.workflow_run.head_branch }}",
       DEPLOYED_SHA: "${{ github.event.workflow_run.head_sha }}",

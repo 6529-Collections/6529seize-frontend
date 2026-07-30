@@ -152,6 +152,11 @@ selection never changes shared staging membership.
 
 ## Exact deployed-baseline adoption
 
+Before preparing an intent or performing any manual deployment, run
+`./bin/6529 exec node ops/scripts/release-bus-status.mjs` and follow the
+`deploy-6529` instructions. Continue only when both effective lanes are
+authoritatively `OFF` and changeable and the required drain gate passes.
+
 The backend provides an operator-only one-shot capability for a separately
 authorized brief manual freeze. Deploying the capability is not permission to
 invoke it. Keep both effective lanes `OFF` and changeable, keep `ALL` unpaused,
