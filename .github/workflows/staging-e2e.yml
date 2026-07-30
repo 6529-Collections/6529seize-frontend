@@ -71,19 +71,58 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  baseline-adoption-decision:
+    name: Resolve pending baseline adoption
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.head_branch == '1a-staging'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      decision: ${{ steps.decision.outputs.decision }}
+      manifest_ready: ${{ steps.decision.outputs.manifest_ready }}
+    steps:
+      - name: Check out trusted decision client
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: scripts/release-bus-baseline-adoption-decision.cjs
+          sparse-checkout-cone-mode: false
+
+      - name: Resolve exact automatic E2E decision
+        id: decision
+        env:
+          DEPLOYED_REF: ${{ github.event.workflow_run.head_branch }}
+          DEPLOYED_SHA: ${{ github.event.workflow_run.head_sha }}
+          DEPLOY_WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id }}
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+        run: node scripts/release-bus-baseline-adoption-decision.cjs
+
   staging-packs:
     name: Staging E2E packs
+    needs: baseline-adoption-decision
     # Trust gate: this job holds a secret and executes checked-out code, so
     # workflow_run triggers must come from this repository's own 1a-staging
     # branch (staging deploys are push-triggered; forks cannot push there).
     # The explicit head_repository/head_branch conditions keep that invariant
     # enforced even if the upstream deploy workflow's triggers ever change.
     if: >-
-      github.event_name == 'workflow_dispatch' ||
+      always() &&
       (
-        github.event.workflow_run.conclusion == 'success' &&
-        github.event.workflow_run.head_repository.full_name == github.repository &&
-        github.event.workflow_run.head_branch == '1a-staging'
+        github.event_name == 'workflow_dispatch' ||
+        (
+          needs.baseline-adoption-decision.result == 'success' &&
+          needs.baseline-adoption-decision.outputs.decision == 'LEGACY' &&
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.head_repository.full_name == github.repository &&
+          github.event.workflow_run.head_branch == '1a-staging'
+        )
       )
     runs-on: ubuntu-latest
     timeout-minutes: 90

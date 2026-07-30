@@ -150,6 +150,58 @@ The departing candidate's declared units are redeployed from the new
 candidate-free composition so prior runtime bytes cannot survive. Production
 selection never changes shared staging membership.
 
+## Exact deployed-baseline adoption
+
+The backend provides an operator-only one-shot capability for a separately
+authorized brief manual freeze. Deploying the capability is not permission to
+invoke it. Keep both effective lanes `OFF` and changeable, keep `ALL` unpaused,
+and do not start until the staging lock, staging mutation/E2E workflows and
+already-dispatched exact operations are fully drained.
+
+Before moving either `1a-staging` ref or dispatching a manual staging
+deployment, prepare one authenticated immutable intent through
+`POST /deploy/release-bus-v2/maintenance/adopt-exact-staging-baseline`. Bind
+the UUID v4 identity and expiry to the unchanged authoritative staging-state
+row version, exact target frontend/backend refs and SHAs, required runtime SHAs,
+every required backend deployment unit/SHA, and the exact zero-or-known
+candidate inventory/row versions. Preparation writes only an audited intent:
+it creates no train, manifest, operation or lock, and performs no deployment or
+ref/state mutation. The target refs and runtimes are revalidated after the
+later deployments.
+
+The existing manual backend workflow emits one authenticated terminal event
+for each staging unit while leaving ordinary no-intent deployments unchanged.
+The normal frontend `Web Deploy - STAGING` success still triggers
+`staging-e2e.yml`. For that `workflow_run`, the trusted decision client makes
+one authenticated lookup:
+
+- `LEGACY` means there is no active intent, and the existing expensive
+  automatic E2E runs unchanged;
+- `DEFERRED` means one unique unexpired intent exactly matches the upstream
+  deploy/ref/SHA; frontend deployment/runtime evidence and the defer are
+  recorded idempotently, and the expensive packs are skipped;
+- unavailable, stale, moved, expired, malformed, ambiguous or
+  identity-mismatched evidence fails closed and cannot validate or adopt.
+
+The last exact required frontend/backend deployment event revalidates the state
+version, refs, runtimes, candidate membership, OFF controls, drain and staging
+lock. Only then does one transaction create the real
+`ADOPT_EXACT_DEPLOYED_BASELINE_V1` train, acquire the existing staging lock,
+freeze the immutable manifest, and create one manifest-bound `E2E_STAGING`
+operation. It dispatches one `staging-e2e.yml` `workflow_dispatch`; if the
+frontend event was last, workflow concurrency queues it behind the short
+automatic decision run with `cancel-in-progress: false`.
+
+Only the exact authenticated terminal success of that sole bound E2E may
+CAS-adopt the exact pair as authoritative `LIVE` staging state. Final ref,
+runtime, control, state-version, candidate, lock, workflow, manifest and
+operation identities are all revalidated first. Failure leaves authoritative
+state and developer/production intent unchanged and releases only the owned
+staging lock. Retries reuse the same immutable intent/operation and cannot
+dispatch a second expensive E2E. There is no polling runner, synthetic proof
+train, cancellation, bypass, new shared lease/watchdog, automatic handoff or
+manual-workflow guard.
+
 ## Production lifecycle
 
 Staging validation never creates production readiness. A developer explicitly
