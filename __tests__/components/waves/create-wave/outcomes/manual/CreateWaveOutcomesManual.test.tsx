@@ -333,4 +333,99 @@ describe("CreateWaveOutcomesManual", () => {
       screen.queryByText("Please enter your manual action")
     ).not.toBeInTheDocument();
   });
+
+  describe("error announcement", () => {
+    it("leaves the manual action field valid and undescribed before submitting", () => {
+      render(<CreateWaveOutcomesManual {...defaultProps} />);
+
+      const actionInput = screen.getByLabelText("Manual action");
+      expect(actionInput).not.toHaveAttribute("aria-invalid");
+      expect(actionInput).not.toHaveAttribute("aria-describedby");
+    });
+
+    it("marks the manual action field invalid and points it at the announced error", async () => {
+      render(<CreateWaveOutcomesManual {...defaultProps} />);
+
+      await userEvent.click(screen.getByTestId("primary-button"));
+
+      const actionInput = screen.getByLabelText("Manual action");
+      expect(actionInput).toHaveAttribute("aria-invalid", "true");
+      const errorId = actionInput.getAttribute("aria-describedby");
+      expect(errorId).toBeTruthy();
+
+      const alert = screen.getByRole("alert");
+      expect(alert).toHaveAttribute("id", errorId);
+      expect(alert).toHaveTextContent("Please enter your manual action");
+    });
+
+    it("drops the invalid state once the manual action is filled in", async () => {
+      render(<CreateWaveOutcomesManual {...defaultProps} />);
+
+      await userEvent.click(screen.getByTestId("primary-button"));
+      await userEvent.type(screen.getByLabelText("Manual action"), "Action");
+
+      const actionInput = screen.getByLabelText("Manual action");
+      expect(actionInput).not.toHaveAttribute("aria-invalid");
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+
+    it("marks the positions field invalid and points it at the announced error", async () => {
+      render(
+        <CreateWaveOutcomesManual
+          {...defaultProps}
+          waveType={ApiWaveType.Rank}
+        />
+      );
+
+      await userEvent.type(
+        screen.getByLabelText("Manual action"),
+        "Winner action"
+      );
+      await userEvent.type(
+        screen.getByLabelText("Winning Positions (e.g. 1-3, 5, 7-9)"),
+        "3-1"
+      );
+      await userEvent.click(screen.getByTestId("primary-button"));
+
+      const positionsInput = screen.getByLabelText(
+        "Winning Positions (e.g. 1-3, 5, 7-9)"
+      );
+      expect(positionsInput).toHaveAttribute("aria-invalid", "true");
+      const errorId = positionsInput.getAttribute("aria-describedby");
+      expect(errorId).toBeTruthy();
+
+      const alert = screen.getByRole("alert");
+      expect(alert).toHaveAttribute("id", errorId);
+      expect(alert).toHaveTextContent("Invalid position format");
+    });
+
+    it("clears the positions error state once the field is edited again", async () => {
+      render(
+        <CreateWaveOutcomesManual
+          {...defaultProps}
+          waveType={ApiWaveType.Rank}
+        />
+      );
+
+      await userEvent.type(
+        screen.getByLabelText("Manual action"),
+        "Winner action"
+      );
+      await userEvent.click(screen.getByTestId("primary-button"));
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Please enter positions"
+      );
+
+      await userEvent.type(
+        screen.getByLabelText("Winning Positions (e.g. 1-3, 5, 7-9)"),
+        "1"
+      );
+
+      const positionsInput = screen.getByLabelText(
+        "Winning Positions (e.g. 1-3, 5, 7-9)"
+      );
+      expect(positionsInput).not.toHaveAttribute("aria-invalid");
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+  });
 });

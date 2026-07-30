@@ -15,6 +15,11 @@ import PrimaryButton from "@/components/utils/button/PrimaryButton";
 // maximum and reject anything larger as invalid input.
 const MAX_WINNING_POSITION = 10_000;
 
+// Error copy is announced and programmatically tied to its field (WCAG 2.2 AA
+// 3.3.1 / 4.1.3) rather than being visual-only.
+const OUTCOME_ERROR_ID = "outcome-manual-error";
+const POSITIONS_ERROR_ID = "outcome-positions-error";
+
 export default function CreateWaveOutcomesManual({
   waveType,
   onOutcome,
@@ -150,6 +155,10 @@ export default function CreateWaveOutcomesManual({
                 value={value}
                 onChange={onValueChange}
                 id="outcome-manual"
+                aria-invalid={isInputEmptyError ? true : undefined}
+                aria-describedby={
+                  isInputEmptyError ? OUTCOME_ERROR_ID : undefined
+                }
                 autoComplete="off"
                 className={`${
                   isInputEmptyError
@@ -172,7 +181,10 @@ export default function CreateWaveOutcomesManual({
               </label>
             </div>
             {isInputEmptyError && (
-              <div className="tw-flex tw-items-center tw-gap-x-2 tw-pt-1.5">
+              <div
+                id={OUTCOME_ERROR_ID}
+                role="alert"
+                className="tw-flex tw-items-center tw-gap-x-2 tw-pt-1.5">
                 <svg
                   className="tw-size-5 tw-flex-shrink-0 tw-text-error"
                   viewBox="0 0 24 24"
@@ -202,6 +214,10 @@ export default function CreateWaveOutcomesManual({
                   value={positions}
                   onChange={onPositionsChange}
                   id="outcome-positions"
+                  aria-invalid={positionsError ? true : undefined}
+                  aria-describedby={
+                    positionsError ? POSITIONS_ERROR_ID : undefined
+                  }
                   autoComplete="off"
                   className={`${
                     positionsError
@@ -224,7 +240,10 @@ export default function CreateWaveOutcomesManual({
                 </label>
               </div>
               {positionsError && (
-                <div className="tw-flex tw-items-center tw-gap-x-2 tw-pt-1.5">
+                <div
+                  id={POSITIONS_ERROR_ID}
+                  role="alert"
+                  className="tw-flex tw-items-center tw-gap-x-2 tw-pt-1.5">
                   <svg
                     className="tw-size-5 tw-flex-shrink-0 tw-text-error"
                     viewBox="0 0 24 24"
