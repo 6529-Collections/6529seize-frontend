@@ -338,15 +338,13 @@ jobs:
           RELEASE_BUS_SOCKET_FIREWALL_OUTCOME: ${{ steps.socket-firewall.outcome }}
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
         run: node scripts/release-bus-install-dependencies.cjs
-      - name: Generate source-stable build inputs once
+      - name: Generate source-stable environment schema once
         id: generate
         if: steps.dependencies.outcome == 'success'
         continue-on-error: true
         run: |
           set -euo pipefail
           ./bin/6529 run build:env-schema
-          ./bin/6529 run help-index:sync
-          ./bin/6529 run agent-files:sync
       - name: Build and package only the authorized environment contract
         id: package
         if: steps.generate.outcome == 'success'
@@ -431,6 +429,8 @@ jobs:
             local profile="$1"
             local destination="$2"
             configure_profile "$profile"
+            ./bin/6529 run help-index:sync
+            ./bin/6529 run agent-files:sync
             rm -rf .next
             ./bin/6529 run base-build
             package_profile "$profile" "$destination"
