@@ -4,22 +4,29 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ButtonVariant } from "@/components/utils/button/buttonStyles";
+import type { ReactNode } from "react";
 
-let capturedActionProps: any;
+interface MockButtonProps {
+  readonly variant?: ButtonVariant;
+  readonly type?: "button" | "reset" | "submit";
+  readonly disabled?: boolean;
+  readonly children?: ReactNode;
+}
+
+let capturedActionProps: MockButtonProps;
 let capturedClassificationProps: any;
 
-jest.mock("@/components/utils/button/ActionButton", () => (props: any) => {
-  capturedActionProps = props;
+jest.mock("@/components/utils/button/Button", () => (props: MockButtonProps) => {
+  if (props.variant === "action") {
+    capturedActionProps = props;
+  }
   return (
     <button type={props.type} disabled={props.disabled}>
-      save
+      {props.children}
     </button>
   );
 });
-
-jest.mock("@/components/utils/button/SecondaryButton", () => () => (
-  <button type="button">cancel</button>
-));
 
 jest.mock(
   "@/components/user/settings/UserSettingsClassification",

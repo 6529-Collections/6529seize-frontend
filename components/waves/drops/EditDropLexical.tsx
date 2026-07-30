@@ -43,6 +43,7 @@ import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 
 import ExampleTheme from "@/components/drops/create/lexical/ExampleTheme";
+import Button from "@/components/utils/button/Button";
 import { EmojiNode } from "@/components/drops/create/lexical/nodes/EmojiNode";
 import { HashtagNode } from "@/components/drops/create/lexical/nodes/HashtagNode";
 import {
@@ -732,21 +733,23 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
       {isApp && (
         <div className="tw-mb-2 tw-mt-3">
           <div className="tw-flex tw-gap-x-2">
-            <button
+            <Button
               onClick={onCancel}
               disabled={isSaving}
-              className="tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-150 active:tw-bg-iron-700 disabled:tw-opacity-50"
+              variant="secondary"
+              size="sm"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleSave}
               disabled={isSaving || isSaveBlockedByLinks}
               title={isSaveBlockedByLinks ? linkRestrictionMessage : undefined}
-              className="tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-text-white tw-transition-colors tw-duration-150 active:tw-bg-primary-600 disabled:tw-opacity-50"
+              variant="action"
+              size="sm"
             >
               {isSaving ? "Saving..." : "Save"}
-            </button>
+            </Button>
           </div>
         </div>
       )}

@@ -22,6 +22,7 @@ import {
 } from "../drop/SingleWaveDropVote";
 import { SubmissionPosition } from "./SubmissionPosition";
 import type { WaveCompetitionPreviewTab } from "./WaveCompetitionBadges";
+import Button from "@/components/utils/button/Button";
 
 interface WaveCompetitionEntriesProps {
   readonly authorId: string;
@@ -117,13 +118,13 @@ export const WaveCompetitionEntries = ({
         <p className="tw-m-0 tw-text-sm tw-text-iron-300" role="alert">
           {t(locale, "waves.competitionBadges.error")}
         </p>
-        <button
-          type="button"
+        <Button
           onClick={() => refetch()}
-          className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:tw-bg-iron-800"
+          variant="tertiary"
+          size="sm"
         >
           {t(locale, "waves.competitionBadges.retry")}
-        </button>
+        </Button>
       </div>
     );
   }
@@ -244,11 +245,11 @@ export const WaveCompetitionEntries = ({
       </div>
       {hasNextPage && (
         <div className="tw-mt-6 tw-flex tw-justify-center">
-          <button
-            type="button"
+          <Button
             onClick={() => fetchNextPage()}
-            disabled={isFetchingNextPage}
-            className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 disabled:tw-cursor-wait disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-800"
+            loading={isFetchingNextPage}
+            variant="tertiary"
+            size="sm"
           >
             {t(
               locale,
@@ -256,7 +257,7 @@ export const WaveCompetitionEntries = ({
                 ? "waves.competitionBadges.loadingMore"
                 : "waves.competitionBadges.loadMore"
             )}
-          </button>
+          </Button>
         </div>
       )}
     </div>

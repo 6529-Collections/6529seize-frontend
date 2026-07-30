@@ -2,7 +2,7 @@
 
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
-import PrimaryButtonLink from "@/components/utils/button/PrimaryButtonLink";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import Link from "next/link";
 import { ChevronRightIcon, PlusIcon } from "@heroicons/react/24/outline";
 import type { GroupSelectVariant } from "../select/groupSelect.types";
@@ -40,9 +40,11 @@ export default function GroupHeaderSelect({
     }
 
     return (
-      <PrimaryButtonLink
+      <ButtonLink
         href="/network/groups"
-        padding="tw-px-3 tw-py-2 tw-w-full"
+        variant="primary"
+        size="md"
+        fullWidth
       >
         <svg
           className="tw-h-5 tw-w-5"
@@ -60,7 +62,7 @@ export default function GroupHeaderSelect({
           />
         </svg>
         <span>Create A Group</span>
-      </PrimaryButtonLink>
+      </ButtonLink>
     );
   }
 

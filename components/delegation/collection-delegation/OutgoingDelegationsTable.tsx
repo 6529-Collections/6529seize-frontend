@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/utils/button/Button";
 import { DELEGATION_ALL_ADDRESS } from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -13,10 +14,7 @@ import type { ContractDelegation } from "../CollectionDelegation.utils";
 import type { DelegationCollection } from "../delegation-constants";
 import { MAX_BULK_ACTIONS } from "../delegation-constants";
 import type { DelegationToastState } from "../DelegationToast";
-import {
-  CHECKBOX_CLASS,
-  DANGER_ACTION_CLASS,
-} from "./collection-delegation-helpers";
+import { CHECKBOX_CLASS } from "./collection-delegation-helpers";
 import { DelegationRowDetails } from "./DelegationRowDetails";
 import {
   DelegationsTable,
@@ -215,10 +213,11 @@ export function OutgoingDelegationsTable(
                     : formatInteger(locale, bulkRevocations.length),
               })}
             </span>
-            <button
+            <Button
               type="button"
               disabled={bulkRevocations.length < 2}
-              className={DANGER_ACTION_CLASS}
+              variant="destructive"
+              size="lg"
               onClick={() => {
                 const title = t(
                   locale,
@@ -260,7 +259,7 @@ export function OutgoingDelegationsTable(
                   </span>
                 </output>
               )}
-            </button>
+            </Button>
           </div>
         </td>
       </tr>

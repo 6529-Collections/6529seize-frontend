@@ -1,5 +1,6 @@
 import type { FormEvent } from "react";
 
+import Button from "@/components/utils/button/Button";
 import type { SidebarWave } from "@/types/waves.types";
 import {
   ArrowLongRightIcon,
@@ -252,10 +253,11 @@ export function CalculatorPanel({
               autoComplete="off"
             />
           </div>
-          <button
+          <Button
             type="submit"
             disabled={isLoading}
-            className="tw-inline-flex tw-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-text-sm tw-font-semibold tw-text-white tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-bg-primary-400"
+            variant="action"
+            size="lg"
           >
             {isLoading ? (
               <ArrowPathIcon
@@ -266,7 +268,7 @@ export function CalculatorPanel({
               <CalculatorIcon className="tw-size-4" aria-hidden="true" />
             )}
             <span>{isLoading ? "Loading" : "Score"}</span>
-          </button>
+          </Button>
         </div>
       </form>
 

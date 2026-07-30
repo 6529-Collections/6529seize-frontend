@@ -3,6 +3,8 @@ import RecipientSelector from "@/components/common/RecipientSelector";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import Button from "@/components/utils/button/Button";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -13,15 +15,8 @@ import {
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Link from "next/link";
 import type { PublicClient } from "viem";
 import type { FlowState, TxEntry, TxState } from "./TransferModal.types";
-
-const MODAL_ACTION_BASE_CLASSES =
-  "tw-inline-flex tw-h-10 tw-min-w-24 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-text-sm tw-font-medium tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950";
-const MODAL_SECONDARY_ACTION_CLASSES = `${MODAL_ACTION_BASE_CLASSES} tw-border-white/10 tw-bg-white/5 tw-text-iron-100 hover:tw-border-white/20 hover:tw-bg-white/10 hover:tw-text-white`;
-const MODAL_PRIMARY_ACTION_CLASSES = `${MODAL_ACTION_BASE_CLASSES} tw-border-transparent tw-bg-white tw-text-iron-950 hover:tw-bg-iron-100 disabled:tw-cursor-not-allowed disabled:tw-border-white/5 disabled:tw-bg-white/5 disabled:tw-text-iron-500 disabled:tw-opacity-100`;
-const MODAL_DISABLED_ACTION_CLASSES = `${MODAL_ACTION_BASE_CLASSES} tw-cursor-not-allowed tw-border-white/5 tw-bg-white/5 tw-text-iron-500`;
 
 function computeFlowTitle(
   locale: SupportedLocale,
@@ -252,14 +247,16 @@ function TxStatusList({
   const txLink = (hash: string) => {
     if (!explorer) return null;
     return (
-      <Link
+      <ButtonLink
         href={`${explorer}/tx/${hash}`}
         target="_blank"
         rel="noreferrer"
-        className="tw-ml-2 tw-inline-block tw-rounded-md tw-border tw-border-solid tw-border-black tw-bg-white tw-px-2 tw-py-1 !tw-text-sm tw-text-black tw-no-underline hover:tw-bg-white/80 hover:tw-text-black"
+        variant="primary"
+        size="xs"
+        className="tw-ml-2"
       >
         {translate(locale, "transfer.modal.viewTransaction")}
-      </Link>
+      </ButtonLink>
     );
   };
 
@@ -370,21 +367,23 @@ export function FooterActions({
   if (flow === "review") {
     return (
       <div className="tw-flex tw-items-center tw-gap-2">
-        <button
+        <Button
           type="button"
           onClick={onCancel}
-          className={MODAL_SECONDARY_ACTION_CLASSES}
+          variant="secondary"
+          size="md"
         >
           {translate(locale, "transfer.modal.cancel")}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           disabled={!canConfirm}
           onClick={onConfirm}
-          className={MODAL_PRIMARY_ACTION_CLASSES}
+          variant="primary"
+          size="md"
         >
           {translate(locale, "transfer.modal.transfer")}
-        </button>
+        </Button>
       </div>
     );
   }
@@ -392,20 +391,26 @@ export function FooterActions({
   const anyPending = anyTxsPending(txs);
   if (anyPending) {
     return (
-      <button type="button" disabled className={MODAL_DISABLED_ACTION_CLASSES}>
+      <Button
+        type="button"
+        disabled
+        variant="secondary"
+        size="md"
+      >
         {translate(locale, "transfer.modal.processing")}
-      </button>
+      </Button>
     );
   }
 
   return (
-    <button
+    <Button
       type="button"
       onClick={onClose}
-      className={MODAL_PRIMARY_ACTION_CLASSES}
+      variant="primary"
+      size="md"
     >
       {translate(locale, "common.close")}
-    </button>
+    </Button>
   );
 }
 

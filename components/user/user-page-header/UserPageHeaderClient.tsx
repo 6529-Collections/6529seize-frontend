@@ -1,13 +1,13 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useContext, useMemo, useState } from "react";
 
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { amIUser } from "@/helpers/Helpers";
@@ -247,8 +247,8 @@ export default function UserPageHeaderClient({
                       <UserPageHeaderSubscriptionStatus profile={profile} />
                     ) : null}
                     {websiteAction ? (
-                      <Link
-                        className="tw-inline-flex tw-h-9 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 tw-transition hover:tw-border-primary-400 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 md:tw-h-10"
+                      <ButtonLink
+                        variant="secondary"
                         href={websiteAction.href}
                         aria-label={t(locale, "profileCms.header.openWebsite", {
                           handle: websiteAction.handle,
@@ -256,7 +256,7 @@ export default function UserPageHeaderClient({
                       >
                         <WebsiteIcon />
                         <span>{t(locale, "profileCms.header.website")}</span>
-                      </Link>
+                      </ButtonLink>
                     ) : null}
                     {followHandle ? (
                       <UserFollowBtn

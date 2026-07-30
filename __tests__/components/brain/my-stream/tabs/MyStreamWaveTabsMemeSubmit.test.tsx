@@ -16,21 +16,6 @@ jest.mock("@/hooks/useCountdown", () => ({
   useCountdown: (...args: any[]) => useCountdown(...args),
 }));
 
-jest.mock("@/components/utils/button/PrimaryButton", () => ({
-  __esModule: true,
-  default: ({ children, loading, onClicked, size, ...props }: any) => (
-    <button
-      data-testid="primary"
-      data-loading={String(loading)}
-      data-size={size ?? ""}
-      onClick={onClicked}
-      {...props}
-    >
-      {children}
-    </button>
-  ),
-}));
-
 const baseInfo = {
   voting: {},
   chat: {},
@@ -186,12 +171,12 @@ describe("MyStreamWaveTabsMemeSubmit", () => {
         endTime: now + 3 * 60 * 60 * 1000,
       },
     });
-    const button = screen.getByTestId("primary");
+    const button = screen.getByRole("button", { name: /Submit Meme/ });
     expect(button).toHaveAttribute(
       "title",
       expect.stringContaining("You have")
     );
-    expect(button).toHaveAttribute("data-size", "sm");
+    expect(button).toHaveClass("tw-h-8", "tw-text-xs");
     expect(button).not.toBeDisabled();
     expect(screen.getByText("Submit Meme")).toBeInTheDocument();
     expect(screen.getByText("Closing 3h")).toHaveClass("tw-hidden");
