@@ -64,7 +64,8 @@ function exactDecision(value, now = Date.now()) {
     value.decision === "DEFERRED" &&
     typeof value.adoption_id === "string" &&
     UUID_PATTERN.test(value.adoption_id) &&
-    value.operation_key === `rb2:${value.adoption_id}:e2e:staging` &&
+    value.operation_key ===
+      `rb2:${value.adoption_id}:baseline-adoption-e2e:staging:a1` &&
     Number.isSafeInteger(value.expires_at) &&
     value.expires_at > now &&
     typeof value.manifest_ready === "boolean"

@@ -84,7 +84,7 @@ describe("baseline-adoption automatic E2E decision client", () => {
       response({
         decision: "DEFERRED",
         adoption_id: INTENT_ID,
-        operation_key: `rb2:${INTENT_ID}:e2e:staging`,
+        operation_key: `rb2:${INTENT_ID}:baseline-adoption-e2e:staging:a1`,
         expires_at: NOW + 60_000,
         manifest_ready: false,
       })
@@ -104,7 +104,7 @@ describe("baseline-adoption automatic E2E decision client", () => {
       response({
         decision: "DEFERRED",
         adoption_id: INTENT_ID,
-        operation_key: `rb2:${INTENT_ID}:e2e:staging`,
+        operation_key: `rb2:${INTENT_ID}:baseline-adoption-e2e:staging:a1`,
         expires_at: NOW + 60_000,
         manifest_ready: true,
       })
@@ -132,7 +132,7 @@ describe("baseline-adoption automatic E2E decision client", () => {
         response({
           decision: "DEFERRED",
           adoption_id: INTENT_ID,
-          operation_key: `rb2:${INTENT_ID}:e2e:staging`,
+          operation_key: `rb2:${INTENT_ID}:baseline-adoption-e2e:staging:a1`,
           expires_at: NOW,
           manifest_ready: false,
         }),
@@ -143,7 +143,7 @@ describe("baseline-adoption automatic E2E decision client", () => {
         response({
           decision: "DEFERRED",
           adoption_id: INTENT_ID,
-          operation_key: "rb2:different:e2e:staging",
+          operation_key: "rb2:different:baseline-adoption-e2e:staging:a1",
           expires_at: NOW + 60_000,
           manifest_ready: false,
         }),
@@ -154,7 +154,8 @@ describe("baseline-adoption automatic E2E decision client", () => {
         response({
           decision: "DEFERRED",
           adoption_id: "8af60034-9741-3b9d-bb1c-80b483f75455",
-          operation_key: "rb2:8af60034-9741-3b9d-bb1c-80b483f75455:e2e:staging",
+          operation_key:
+            "rb2:8af60034-9741-3b9d-bb1c-80b483f75455:baseline-adoption-e2e:staging:a1",
           expires_at: NOW + 60_000,
           manifest_ready: false,
         }),

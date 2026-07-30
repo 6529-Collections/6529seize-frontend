@@ -163,14 +163,19 @@ deployment, prepare one authenticated immutable intent through
 `POST /deploy/release-bus-v2/maintenance/adopt-exact-staging-baseline`. Bind
 the UUID v4 identity and expiry to the unchanged authoritative staging-state
 row version, exact target frontend/backend refs and SHAs, required runtime SHAs,
-every required backend deployment unit/SHA, and the exact zero-or-known
-candidate inventory/row versions. Preparation writes only an audited intent:
-it creates no train, manifest, operation or lock, and performs no deployment or
-ref/state mutation. The target refs and runtimes are revalidated after the
+the single runtime-verifiable `api` deployment unit/SHA, and the exact
+zero-or-known candidate inventory/row versions. A non-API unit cannot be
+accepted on workflow success alone. Preparation writes only an audited intent:
+it creates no train, manifest, operation or lock, and performs no deployment
+or ref/state mutation. The target refs and runtimes are revalidated after the
 later deployments.
 
 The existing manual backend workflow emits one authenticated terminal event
-for each staging unit while leaving ordinary no-intent deployments unchanged.
+for each staging service while leaving ordinary no-intent deployments
+unchanged. Only the exact API event can advance an intent; a different service
+during the held freeze fails that intent closed. Its additive callback step is
+non-blocking for the ordinary deploy job: unavailable evidence prevents
+adoption freeze without failing an unrelated manual deploy.
 The normal frontend `Web Deploy - STAGING` success still triggers
 `staging-e2e.yml`. For that `workflow_run`, the trusted decision client makes
 one authenticated lookup:
@@ -191,6 +196,9 @@ freeze the immutable manifest, and create one manifest-bound `E2E_STAGING`
 operation. It dispatches one `staging-e2e.yml` `workflow_dispatch`; if the
 frontend event was last, workflow concurrency queues it behind the short
 automatic decision run with `cancel-in-progress: false`.
+The sole operation identity is
+`rb2:<adoption-id>:baseline-adoption-e2e:staging:a1`, so ordinary E2E callbacks
+cannot enter its adoption handler.
 
 Only the exact authenticated terminal success of that sole bound E2E may
 CAS-adopt the exact pair as authoritative `LIVE` staging state. Final ref,
