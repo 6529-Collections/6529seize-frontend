@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { DELEGATION_ABI } from "@/abis/abis";
+import Button from "@/components/utils/button/Button";
 import {
   DELEGATION_ALL_ADDRESS,
   DELEGATION_CONTRACT,
@@ -18,14 +19,12 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
-import { Spinner } from "../../dotLoader/DotLoader";
 import type { DelegationCollection } from "../delegation-constants";
 import { ALL_USE_CASES, ANY_COLLECTION_PATH } from "../delegation-constants";
 import type { DelegationToastState } from "../DelegationToast";
 import {
   BUTTON_ICON_CLASS,
   LOCK_SELECT_CLASS,
-  PRIMARY_ACTION_CLASS,
 } from "./collection-delegation-helpers";
 import type { CollectionLocks } from "./useCollectionLocks";
 
@@ -97,10 +96,15 @@ function CollectionWalletLockButton(
   const { showDelegationToast } = props;
 
   return (
-    <button
+    <Button
       type="button"
       disabled={Boolean(locks.collectionLockReadGlobal.data)}
-      className={PRIMARY_ACTION_CLASS}
+      loading={
+        locks.collectionLockWrite.isPending ||
+        locks.waitCollectionLockWrite.isLoading
+      }
+      variant="primary"
+      size="lg"
       onClick={() => {
         const title = t(
           locale,
@@ -145,9 +149,7 @@ function CollectionWalletLockButton(
       !areEqualAddresses(collection.contract, DELEGATION_ALL_ADDRESS)
         ? ` *`
         : ``}
-      {(locks.collectionLockWrite.isPending ||
-        locks.waitCollectionLockWrite.isLoading) && <Spinner />}
-    </button>
+    </Button>
   );
 }
 
@@ -205,9 +207,14 @@ export function CollectionDelegationLocks(
     );
   } else {
     useCaseAction = (
-      <button
+      <Button
         type="button"
-        className={PRIMARY_ACTION_CLASS}
+        loading={
+          locks.useCaseLockWrite.isPending ||
+          locks.waitUseCaseLockWrite.isLoading
+        }
+        variant="primary"
+        size="lg"
         onClick={() => {
           const title = t(
             locale,
@@ -257,9 +264,7 @@ export function CollectionDelegationLocks(
             ? "delegation.collection.locks.useCase.unlock"
             : "delegation.collection.locks.useCase.lock"
         )}
-        {(locks.useCaseLockWrite.isPending ||
-          locks.waitUseCaseLockWrite.isLoading) && <Spinner />}
-      </button>
+      </Button>
     );
   }
 

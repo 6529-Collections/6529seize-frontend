@@ -37,6 +37,7 @@ import {
   resolveWaveSubmissionExperience,
   WaveSubmissionExperience,
 } from "@/helpers/waves/wave-submission-experience.helpers";
+import Button from "@/components/utils/button/Button";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -700,13 +701,13 @@ export default function CreateDrop({
         />
         {!isQuorumProposalModalOpen && (
           <div className="tw-flex tw-w-full tw-justify-end">
-            <button
-              type="button"
+            <Button
               onClick={onOpenQuorumProposal}
-              className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800"
+              variant="tertiary"
+              size="sm"
             >
               Create Proposal
-            </button>
+            </Button>
           </div>
         )}
       </>

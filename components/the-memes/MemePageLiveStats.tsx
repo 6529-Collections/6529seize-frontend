@@ -7,6 +7,7 @@ import ProfileAvatar, {
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import { getDistributionDetailHref } from "@/components/distribution/distributionRouteParams";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { BaseNFT, NFT } from "@/entities/INFT";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
@@ -542,15 +543,16 @@ function MemeDistributionPlanLink({
   const distributionPlanLink = getDistributionPlanLink(nft, locale);
 
   return (
-    <Link
+    <ButtonLink
       href={distributionPlanLink}
+      variant="tertiary"
+      size="xs"
       target={nft.has_distribution ? "_self" : "_blank"}
       rel={nft.has_distribution ? undefined : "noopener noreferrer"}
-      className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
     >
       <span>{t(locale, "distribution.planLink")}</span>
       <ArrowUpRightIcon className="-tw-mr-1 tw-h-4 tw-w-4 tw-text-iron-500" />
-    </Link>
+    </ButtonLink>
   );
 }
 
