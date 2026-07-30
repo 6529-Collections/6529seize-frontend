@@ -201,5 +201,4 @@ module.exports = {
   prepareRuntimeFile,
   readDestinationsFile,
   validateDestinationsJson,
-  writePrivateRuntimeFile,
 };
