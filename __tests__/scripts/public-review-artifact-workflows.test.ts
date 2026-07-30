@@ -94,6 +94,11 @@ describe("public-review artifact workflow contract", () => {
     expect(legacyStaging).toContain("aws ssm get-parameter");
     expect(legacyStaging).toContain("--with-decryption");
     expect(legacyStaging).toContain(
+      "--query 'Parameter.{Type:Type,Value:Value}'"
+    );
+    expect(legacyStaging).toContain('.Type == "SecureString"');
+    expect(legacyStaging).not.toContain("--query 'Parameter.Value'");
+    expect(legacyStaging).toContain(
       "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE=$public_review_destinations_file"
     );
     expect(legacyStaging).not.toContain(

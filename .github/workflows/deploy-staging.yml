@@ -379,24 +379,41 @@ jobs:
           fi
 
           deploy_script="$(mktemp /tmp/6529-staging-deploy.XXXXXX.sh)"
+          public_review_parameter_file="$(
+            mktemp /tmp/6529-public-review-parameter.XXXXXX.json
+          )"
           public_review_destinations_file="$(
             mktemp /tmp/6529-public-review-destinations.XXXXXX.json
           )"
           cleanup() {
-            rm -f "$deploy_script" "$public_review_destinations_file"
+            rm -f \
+              "$deploy_script" \
+              "$public_review_parameter_file" \
+              "$public_review_destinations_file"
           }
           trap cleanup EXIT HUP INT TERM
 
           if ! aws ssm get-parameter \
             --name "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_PARAMETER" \
             --with-decryption \
-            --query 'Parameter.Value' \
-            --output text \
+            --query 'Parameter.{Type:Type,Value:Value}' \
+            --output json \
             --region "$AWS_REGION" \
-            > "$public_review_destinations_file"; then
+            > "$public_review_parameter_file"; then
             echo "Unable to retrieve the staging public-review SecureString." >&2
             exit 1
           fi
+          if ! jq -er '
+            if .Type == "SecureString" and (.Value | type == "string") then
+              .Value
+            else
+              error("Parameter must be a SecureString with a string value.")
+            end
+          ' "$public_review_parameter_file" > "$public_review_destinations_file"; then
+            echo "The staging public-review parameter must be a SecureString." >&2
+            exit 1
+          fi
+          rm -f "$public_review_parameter_file"
           jq -e '
             type == "object" and
             has("staging") and
