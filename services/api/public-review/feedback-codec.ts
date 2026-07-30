@@ -284,6 +284,7 @@ export function getPublicReviewFeedbackPrimaryComment(body: string): string {
 
 function buildFeedbackBody({
   categoryLabel,
+  destination,
   draft,
   page,
   reference,
@@ -292,6 +293,7 @@ function buildFeedbackBody({
   severityLabel,
 }: {
   readonly categoryLabel: string;
+  readonly destination: PublicReviewDiscussionDestination;
   readonly draft: PublicReviewFeedbackDraft;
   readonly page: PublicReviewPageContext;
   readonly reference: PublicReviewReference | undefined;
@@ -299,11 +301,20 @@ function buildFeedbackBody({
   readonly reviewVersion: string;
   readonly severityLabel: string;
 }): string {
+  let pageOrigin = "http://localhost:3001";
+  if (destination.environment === "production") {
+    pageOrigin = "https://6529.io";
+  } else if (destination.environment === "staging") {
+    pageOrigin = "https://staging.6529.io";
+  } else if (typeof window !== "undefined") {
+    pageOrigin = window.location.origin;
+  }
+  const pageHref = new URL(page.canonicalPath, pageOrigin).toString();
   const sections = [
     `## ${categoryLabel}`,
     draft.comment.trim(),
     `${PUBLIC_REVIEW_FEEDBACK_REVIEW_MARKER} ${reviewTitle} (${reviewVersion})`,
-    `**Page:** [${page.pageTitle}](${page.canonicalPath})`,
+    `**Page:** [${page.pageTitle}](${pageHref})`,
     `**Suspected severity:** ${severityLabel}`,
   ];
 
@@ -434,6 +445,7 @@ export function encodePublicReviewFeedback({
   });
   const body = buildFeedbackBody({
     categoryLabel: category.label,
+    destination,
     draft,
     page,
     reference,
@@ -678,10 +690,12 @@ export function decodePublicReviewFeedbackMetadata({
     if (metadata.length !== PUBLIC_REVIEW_METADATA_KEYS.length) {
       throw new Error("Feedback metadata must contain exactly four fields.");
     }
-    const keys = metadata.map((item) => item.data_key);
+    const metadataByKey = new Map(
+      metadata.map((item) => [item.data_key, item.data_value])
+    );
     if (
-      new Set(keys).size !== keys.length ||
-      !keys.every((key, index) => key === PUBLIC_REVIEW_METADATA_KEYS[index])
+      metadataByKey.size !== metadata.length ||
+      !PUBLIC_REVIEW_METADATA_KEYS.every((key) => metadataByKey.has(key))
     ) {
       throw new Error("Feedback metadata is not canonical.");
     }
@@ -693,9 +707,9 @@ export function decodePublicReviewFeedbackMetadata({
       throw new Error("Feedback metadata exceeds the API value limit.");
     }
 
-    const schema = metadata[0]!.data_value;
-    const category = metadata[1]!.data_value;
-    const severity = metadata[2]!.data_value;
+    const schema = metadataByKey.get(PUBLIC_REVIEW_METADATA_KEYS[0])!;
+    const category = metadataByKey.get(PUBLIC_REVIEW_METADATA_KEYS[1])!;
+    const severity = metadataByKey.get(PUBLIC_REVIEW_METADATA_KEYS[2])!;
     if (schema !== config.feedbackSchemaVersion) {
       throw new Error("Feedback uses a different schema version.");
     }
@@ -714,7 +728,7 @@ export function decodePublicReviewFeedbackMetadata({
         severity,
         context: decodeContext({
           config,
-          rawContext: metadata[3]!.data_value,
+          rawContext: metadataByKey.get(PUBLIC_REVIEW_METADATA_KEYS[3])!,
         }),
       },
     };
