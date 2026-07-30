@@ -41,6 +41,7 @@ print_message "Reinstalling dependencies..."
 
 # Step 3: Rebuild the project
 print_message "Rebuilding the project..."
+# Other staging endpoints remain sourced from the established EC2 build environment.
 BASE_ENDPOINT=https://staging.6529.io \
   ./bin/6529 run build
 

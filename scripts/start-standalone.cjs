@@ -97,8 +97,8 @@ if (publicReviewDestinationsFile) {
   }
   runtimeEnv["PUBLIC_REVIEW_DISCUSSION_DESTINATIONS"] =
     publicReviewDiscussionDestinations;
-  delete runtimeEnv["PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE"];
 }
+delete runtimeEnv["PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE"];
 delete runtimeEnv["STANDALONE_ARTIFACT_PROFILE"];
 
 const result = spawnSync(process.execPath, [serverEntry], {

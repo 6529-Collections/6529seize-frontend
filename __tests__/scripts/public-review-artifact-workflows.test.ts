@@ -186,8 +186,9 @@ describe("public-review artifact workflow contract", () => {
       'const STREAM_REVIEW_DATA_PREFIX = "/review-data/6529-stream/";'
     );
     expect(proxySource).toContain(
-      "normalizedPathname.startsWith(STREAM_REVIEW_DATA_PREFIX)"
+      "isPublicStreamReviewDataPath(req, pathname)"
     );
+    expect(proxySource).toContain("rawPathname === pathname");
     expect(stagingScript).toContain("./bin/6529 run build");
     expect(stagingScript).toContain("./bin/6529 run start:standalone");
     expect(releaseBusPreflight).toContain(

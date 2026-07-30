@@ -14,11 +14,16 @@ jest.mock("next/server", () => ({
   },
 }));
 
-function createRequest(pathname: string): NextRequest {
-  const url = new URL(`https://staging.6529.io${pathname}`);
+function createRequest(
+  pathname: string,
+  nextUrlPathname: string = pathname
+): NextRequest {
+  const requestUrl = new URL(`https://staging.6529.io${pathname}`);
+  const nextUrl = new URL(requestUrl);
+  nextUrl.pathname = nextUrlPathname;
   return {
-    url: url.toString(),
-    nextUrl: url,
+    url: requestUrl.toString(),
+    nextUrl,
     headers: {
       get: jest.fn(() => ""),
     },
@@ -75,6 +80,25 @@ describe("proxy", () => {
     fetchMock.mockClear();
 
     const response = await proxy(createRequest(path));
+
+    expect(response).toEqual({ kind: "next" });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(mockNext).toHaveBeenCalledTimes(1);
+    expect(mockRedirect).not.toHaveBeenCalled();
+  });
+
+  it("keeps an encoded-slash request gated if Next exposes a decoded pathname", async () => {
+    const fetchMock = jest
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue({ status: 200 } as Response);
+    fetchMock.mockClear();
+
+    const response = await proxy(
+      createRequest(
+        "/review-data/6529-stream%2Fversions/index.json",
+        "/review-data/6529-stream/versions/index.json"
+      )
+    );
 
     expect(response).toEqual({ kind: "next" });
     expect(fetchMock).toHaveBeenCalledTimes(1);

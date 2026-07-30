@@ -98,6 +98,14 @@ const STATIC_PATH_SUFFIXES = [
   ".webp",
 ] as const;
 
+function isPublicStreamReviewDataPath(req: NextRequest, pathname: string) {
+  const rawPathname = new URL(req.url).pathname;
+  return (
+    rawPathname === pathname &&
+    pathname.startsWith(STREAM_REVIEW_DATA_PREFIX)
+  );
+}
+
 function stripTrailingSlashes(value: string): string {
   let end = value.length;
   while (end > 0 && value[end - 1] === "/") {
@@ -322,7 +330,7 @@ export default async function proxy(req: NextRequest) {
 
     if (
       STATIC_PATHS.has(normalizedPathname) ||
-      normalizedPathname.startsWith(STREAM_REVIEW_DATA_PREFIX) ||
+      isPublicStreamReviewDataPath(req, pathname) ||
       STATIC_PATH_PREFIXES.some((prefix) =>
         normalizedPathname.startsWith(prefix)
       ) ||
