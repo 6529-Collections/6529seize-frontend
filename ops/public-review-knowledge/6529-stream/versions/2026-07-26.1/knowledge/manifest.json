@@ -1,0 +1,432 @@
+{
+  "counts": {
+    "byCategory": {
+      "editorial": 283,
+      "status": 37,
+      "technical": 8264
+    },
+    "byKind": {
+      "contract": 334,
+      "editorial_section": 283,
+      "enum": 15,
+      "error": 492,
+      "event": 262,
+      "function": 4858,
+      "interface": 66,
+      "library": 20,
+      "modifier": 20,
+      "readiness_requirement": 20,
+      "release_evidence": 2,
+      "review_status": 1,
+      "risk": 14,
+      "state_variable": 2054,
+      "struct": 111,
+      "top_level_enum": 6,
+      "top_level_struct": 26
+    },
+    "byScope": {
+      "protocol": 3636,
+      "script": 141,
+      "test": 4487
+    },
+    "total": 8584
+  },
+  "editorial": {
+    "corpusSha256": "sha256:954bbd5484948fd269ccef8c8500b38230d8e364fdacfdc2e723fa2a3e27282d",
+    "manifestPath": "/content/public-reviews/6529-stream/versions/2026-07-26.1/editorial/manifest.json",
+    "manifestSha256": "sha256:832f19588ccb77b7aad57e703c34aeb2e51a0860c237ae9c8aa9f66fec88b711",
+    "pageCount": 14,
+    "sectionCount": 283
+  },
+  "generator": {
+    "name": "6529-public-review-stream-knowledge",
+    "sourceSha256": "sha256:423f1c4b948a1f74ed5e5c8235bf1b6170fe7700a41a718342b59432541eb7cc",
+    "version": "1"
+  },
+  "knowledgeSha256": "sha256:e4ea0e479fe25cf4e0fdff6e51aa21552732ad042e4e692a99680f163dd4f70b",
+  "publication": {
+    "auditStatus": "PRE_AUDIT",
+    "deploymentStatus": "NOT_DEPLOYED",
+    "lifecycleState": "REVIEW_CLOSED"
+  },
+  "recordShards": [
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/000.json",
+      "recordCount": 120,
+      "sha256": "sha256:49ca53d80d188790b03daa7aa719fe25f54192fb6ecc096d9dc099e2de67cf9b"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/001.json",
+      "recordCount": 120,
+      "sha256": "sha256:4756c0e1be49f8bb3d9b1fcf53e7ebb12b34d5465d2561aa9685771943250d20"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/002.json",
+      "recordCount": 120,
+      "sha256": "sha256:8c8bc3e975cd7370c6a24dca4fec07396d9c4efc5e7530eaf179339308dc74f0"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/003.json",
+      "recordCount": 120,
+      "sha256": "sha256:d2eb8a1f2610557ce2a76033018557148106a41d18d8bd0c1724bf314f748928"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/004.json",
+      "recordCount": 120,
+      "sha256": "sha256:0ba186867ffdc28de8d9a36e4139ce86d6c38f02904eca8e0a26e3fd44b3779f"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/005.json",
+      "recordCount": 120,
+      "sha256": "sha256:5c29d878f54f01fad93468b6468b3dcc6ef0fb071a5198a142b1aa8d8ea8af83"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/006.json",
+      "recordCount": 120,
+      "sha256": "sha256:bc2394a241c1a1fd48ba6ec6576d6166d362b41ca5153ab3b97082d8ae7c9fe2"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/007.json",
+      "recordCount": 120,
+      "sha256": "sha256:b9ad8abf07b05e5b383c86e6ffad3450878a20e3fc1676d1199bb21d61889d1c"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/008.json",
+      "recordCount": 120,
+      "sha256": "sha256:d99033116faec62c183b05d8ba994e4db8cd8243af9c8938efa91982517fae64"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/009.json",
+      "recordCount": 120,
+      "sha256": "sha256:5d209087ac759de0b257463bc7ce4c95c95c4b3bc3b6221215724fcedda98f71"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/010.json",
+      "recordCount": 120,
+      "sha256": "sha256:4eac1d970b70c66940ac4145000f48d2bb1f3e93592ffeb449c3ab16c133efe4"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/011.json",
+      "recordCount": 120,
+      "sha256": "sha256:96ae943a68c18e88ab6b1126c55a9ebfefdd0ebc737b39bbbfeecf7494d113e9"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/012.json",
+      "recordCount": 120,
+      "sha256": "sha256:7093b3264bf1b3eeca8eb00815ca8eb672bd6af5592cd6997bdf27ab99750769"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/013.json",
+      "recordCount": 120,
+      "sha256": "sha256:a10fbd6c299909128d4163108d353b6201f5aecb65a0761d70f1451b89c77722"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/014.json",
+      "recordCount": 120,
+      "sha256": "sha256:48438430804cf46fa6ae44cb8d0610efbd9acd58d5cb8aa4901709cc7e50b3a5"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/015.json",
+      "recordCount": 120,
+      "sha256": "sha256:f2d6f67e0de80addf985e4b0936c20ad522623a4f0251a6754719f15538976b5"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/016.json",
+      "recordCount": 120,
+      "sha256": "sha256:a0c0741eaf9fb3e7e9280b48b3e26c97884d7b89aad72b94aadc1472617a82de"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/017.json",
+      "recordCount": 120,
+      "sha256": "sha256:3bbc4ccc93fcef03953f4c800c94a62c843679d8a641e1a24b788602a1e9d1fe"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/018.json",
+      "recordCount": 120,
+      "sha256": "sha256:f1c827a0e006481a1f060a24fc1eee3f7bbb583bcb037db25719f03080e83b92"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/019.json",
+      "recordCount": 120,
+      "sha256": "sha256:9984b1f5ed38b5961fec806a6d246672e316bd8af043689cf190dc45d71ae6e1"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/020.json",
+      "recordCount": 120,
+      "sha256": "sha256:13b3f9fb3cc957acd8d810ed8f0cc2c6169a265add73e3d7260da567b2464b0b"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/021.json",
+      "recordCount": 120,
+      "sha256": "sha256:304bb9a9ae18ee8c1881f4e6cdf9fde8f44b5e5f7c722c369c7b392f107c7775"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/022.json",
+      "recordCount": 120,
+      "sha256": "sha256:b3fccd845e5137b8ecc52a83b902ca38c35527eeb7e5d952c35d3c371bfe2c99"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/023.json",
+      "recordCount": 120,
+      "sha256": "sha256:3f52eefc6f298f1d93ffb050e70d21979a9606f56b18006b8e33979081d70800"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/024.json",
+      "recordCount": 120,
+      "sha256": "sha256:4997b02a0e50b9ddf9b6c012bf93e00ba1c2825e778953fb5cf8bad3b38d96a8"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/025.json",
+      "recordCount": 120,
+      "sha256": "sha256:59f48f4b5d5cb6a395d4b35125abdcee0588c7b7cbf401760e6f6a7ef4c5518a"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/026.json",
+      "recordCount": 120,
+      "sha256": "sha256:561a66d9dafe70f14bf3e4bf58d2bacbaf040751b3d04746a8363bf8db4d96c4"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/027.json",
+      "recordCount": 120,
+      "sha256": "sha256:2f4862a0f8b702d6a3191bf1242dc5db746321c5a04f6ce7502aa888d1162245"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/028.json",
+      "recordCount": 120,
+      "sha256": "sha256:d280e1845d6fe6e1d426fb9313459aa3eda78f35a61ca2466a132913a70a4906"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/029.json",
+      "recordCount": 120,
+      "sha256": "sha256:b834e6267f522e21c570f366ad27dee59febf84c8cb2c61e83580ef29412e98d"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/030.json",
+      "recordCount": 120,
+      "sha256": "sha256:eb41cd9286a4aa023b0055b7d67449171541f99da44ecaa4c9650311c9b4bd8f"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/031.json",
+      "recordCount": 120,
+      "sha256": "sha256:0c229cab41d71ae07e04f81494ee43d71a0893e6f0d1e5ca31e34904eb7d8ba6"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/032.json",
+      "recordCount": 120,
+      "sha256": "sha256:2d402e1e69fed35ff0bef1c1ad850c63502aa8c8005295b1a4db55283f81e0e7"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/033.json",
+      "recordCount": 120,
+      "sha256": "sha256:7f24a9773874a0dc46144018e11223a608f3e078c75817f126db0bc6fd97e258"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/034.json",
+      "recordCount": 120,
+      "sha256": "sha256:a2ebd029032520767dc5b728b3b569992f409efb3471d7598bfb4a289b77e1dd"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/035.json",
+      "recordCount": 120,
+      "sha256": "sha256:7e823c247b66a761639fb56cebc3d3e276eaa6105caea7d1223328c7b9743c5f"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/036.json",
+      "recordCount": 120,
+      "sha256": "sha256:7905445bdaee733fe0836c71320c35eee6eda278c202800c4325284bb5c791bb"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/037.json",
+      "recordCount": 120,
+      "sha256": "sha256:dd8b4832005d00188bc63e1b1203aaeaa79cde9d7aff4e2dc1a7fd7c83f8859e"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/038.json",
+      "recordCount": 120,
+      "sha256": "sha256:28d70a8fb5eb5e9928dcb13160a2704d8a3b9c3fdd3e04881b9bfe0dba0d3667"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/039.json",
+      "recordCount": 120,
+      "sha256": "sha256:ed144d3ab309b88a484587a53a77f3ab390adaa253c5234a7c0564b9917a0c8d"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/040.json",
+      "recordCount": 120,
+      "sha256": "sha256:4d63678d7e71bc5900bfcf65524e41ada86a29f6207d1398ed3fbc1100afec2b"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/041.json",
+      "recordCount": 120,
+      "sha256": "sha256:87c63fee4bf73280cfe1be49eb648034d1e91185d80829bff52ee18587f417b3"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/042.json",
+      "recordCount": 120,
+      "sha256": "sha256:b59b58da2130790d50be4312e444a459e17f16eb9dd51de1b2b6fb15cf258828"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/043.json",
+      "recordCount": 120,
+      "sha256": "sha256:3e8d111db81c9250a45b29a48ef4251da6857e9a1aa7e48b77d98549da39d07c"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/044.json",
+      "recordCount": 120,
+      "sha256": "sha256:75ca179e96e9db0ffa61fdd1e02d552f9dbc8e1c79efd470393e5ebd0a43b9ef"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/045.json",
+      "recordCount": 120,
+      "sha256": "sha256:0c5411078937065c67fa8ab81b5af6b4e62346635629663d7731c81ee5d2bb73"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/046.json",
+      "recordCount": 120,
+      "sha256": "sha256:b4a13473e7677f7c07b095d9781d48c4cfce8bd0288bf1c3ccbb415ce4f266b2"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/047.json",
+      "recordCount": 120,
+      "sha256": "sha256:d6180b61e4088e14463cf443c3aaaf78b33ebc19f7a96b77fe4394b6cdf3219b"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/048.json",
+      "recordCount": 120,
+      "sha256": "sha256:1ee9c17998f76d9a8f867620cae68b2351cbbf4d3c4c33c97610c8bb432006c4"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/049.json",
+      "recordCount": 120,
+      "sha256": "sha256:8a59f7a707d914a2366772f840ffdbbebfc74ef3ad7190fd6146e47f9d978f8a"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/050.json",
+      "recordCount": 120,
+      "sha256": "sha256:a6500d679b0adc8dc6e58205642af6451514a78f29b18dcd66009ec864e500ca"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/051.json",
+      "recordCount": 120,
+      "sha256": "sha256:284efda8f32480921f66abe62b0185a44c0816d8f9ec2855565c3389a90498b8"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/052.json",
+      "recordCount": 120,
+      "sha256": "sha256:6700dca1dffa82eae7fe052ef5ac8bf7063fb5a0327f4d9271b180fa43bfdf9c"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/053.json",
+      "recordCount": 120,
+      "sha256": "sha256:f48fe8f4caf13dc27f5fd1d58afe8fcd95bfaf75f5a7446e03775dc1a100ce4d"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/054.json",
+      "recordCount": 120,
+      "sha256": "sha256:ab80e6be87f468fc678760af7be3390e346a53bca824cccd7e5a01920ed0d156"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/055.json",
+      "recordCount": 120,
+      "sha256": "sha256:75148047aa86f4d7f737a4a2737363b70a723c2d6b72fc76893c04add8daf78a"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/056.json",
+      "recordCount": 120,
+      "sha256": "sha256:8ac9b147099b817b2e8398dce839acdb41742e9364b8f657e627dbfdbb6b42e9"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/057.json",
+      "recordCount": 120,
+      "sha256": "sha256:0b224f894de5c0459fc408dbe93d10dc7173d8c70ef0d6c04f7b0bb3077aea87"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/058.json",
+      "recordCount": 120,
+      "sha256": "sha256:8511bbb1ab1d95b580732f39c3f0b5ddc071470e5a26876ecdf2b32822d2e7cd"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/059.json",
+      "recordCount": 120,
+      "sha256": "sha256:1073dbab3d1234de80ef871f7026d0bbcef61874c81e4efa7d79ffc36f2c9d92"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/060.json",
+      "recordCount": 120,
+      "sha256": "sha256:8b7cacb34d74101d157a4e73af945b2153f8904356df38950030e6249a7f614f"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/061.json",
+      "recordCount": 120,
+      "sha256": "sha256:15bcd0a15887c832e14044595050c0ba8f0b054114e678f10be6b114ce274dcb"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/062.json",
+      "recordCount": 120,
+      "sha256": "sha256:7949d6a9ba3d5b0add523eb779b18b759e534c623e202744c8564d4180d3e1fb"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/063.json",
+      "recordCount": 120,
+      "sha256": "sha256:90eff3131020809e35ef62580d250dcf05f220f5ab49f31d8b13ab9a767c6091"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/064.json",
+      "recordCount": 120,
+      "sha256": "sha256:1afb1f59e275b4bffb8fbbdb7c4130acc781cb47c53aeb970904618642b54e84"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/065.json",
+      "recordCount": 120,
+      "sha256": "sha256:56ecd9f74a96b5b8ff8992ff67e945a8c8f60d17371fcbf5655975dc6880a80e"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/066.json",
+      "recordCount": 120,
+      "sha256": "sha256:c5819c8d3b457d7cfe7c2556227283ca330f6b24400d72a247a5d442eb5efc54"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/067.json",
+      "recordCount": 120,
+      "sha256": "sha256:544f19727f3e0b6b5cab3f77325f423f763e930470bf925b68bca6b46838315c"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/068.json",
+      "recordCount": 120,
+      "sha256": "sha256:dbf9aa240386e175fd32ad3dae07898f9a9d919f3eb6ba0720342be536bf474e"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/069.json",
+      "recordCount": 120,
+      "sha256": "sha256:4360949b739fe00785340b10e3f161b1b5f578e42ae888c36ab8b9a6d7da901f"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/070.json",
+      "recordCount": 120,
+      "sha256": "sha256:0624a512b6269b687d71752960370dc1c9deae2119e29227e723db049ad30d5c"
+    },
+    {
+      "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/records/071.json",
+      "recordCount": 64,
+      "sha256": "sha256:c0a9b02fc4868dd2918ab72f582563b21eb989377c5d10550c7038bfc67753eb"
+    }
+  ],
+  "reference": {
+    "bundleSha256": "sha256:17c1bc7c0745e562fe7df860a0bdfc14f47b0c3cb12398d9b17367c78558e0b9",
+    "manifestPath": "/review-data/6529-stream/versions/2026-07-26.1/reference-manifest.json",
+    "manifestSha256": "sha256:74038d69ccde783b8e41d149234d8be94fd3d9625f9d542e7ba1ad6c0643d57a"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "schemaVersion": "public-review.knowledge-manifest.v1",
+  "searchIndex": {
+    "path": "/review-data/6529-stream/versions/2026-07-26.1/knowledge/search-index.json",
+    "recordCount": 8584,
+    "sha256": "sha256:e9beda972df3aeaef0043e2a7634e9f23d7ed193900461889cd2f2cd7ca5c156"
+  },
+  "source": {
+    "commit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786",
+    "repository": "6529-Collections/6529Stream",
+    "tree": "b50ec53109f5f8d6b4f4b07f4cb6fd3c1d0e3100"
+  }
+}

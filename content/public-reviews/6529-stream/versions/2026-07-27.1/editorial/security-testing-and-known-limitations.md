@@ -224,9 +224,10 @@ This is meaningful engineering evidence. It does not prove the absence of:
 - key-management failure;
 - long-term storage, browser, RPC, or marketplace failure.
 
-In particular, tests of both mint lanes do not establish a signed-Drop-to-
-MintManager integration that the rehearsal does not contain. Tests of individual
-revenue contracts do not create one unified settlement path.
+In particular, tests of both mint lanes do not establish a
+signed-Drop-to-MintManager integration that the rehearsal does not contain.
+Tests of individual revenue contracts do not create one unified settlement
+path.
 
 ## Static analysis
 

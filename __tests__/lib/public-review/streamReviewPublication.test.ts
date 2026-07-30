@@ -1,4 +1,5 @@
 import {
+  getStreamReviewVersionPublication,
   parseStreamReviewVersionIdentities,
   STREAM_REVIEW_VERSION_IDENTITIES,
 } from "@/lib/public-review/streamReviewPublication";
@@ -29,6 +30,12 @@ describe("Stream public-review version identities", () => {
         sourceCommit: SOURCE_COMMIT,
       },
     ]);
+  });
+
+  it("exposes immutable per-version publication records", () => {
+    expect(
+      Object.isFrozen(getStreamReviewVersionPublication("2026-07-27.1"))
+    ).toBe(true);
   });
 
   it.each([
