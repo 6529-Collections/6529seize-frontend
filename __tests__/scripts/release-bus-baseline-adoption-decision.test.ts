@@ -4,6 +4,7 @@ import path from "node:path";
 const {
   decide,
   exactDecision,
+  formatDecisionToken,
 } = require("../../scripts/release-bus-baseline-adoption-decision.cjs");
 const YAML = require("yaml");
 
@@ -161,6 +162,14 @@ describe("baseline-adoption automatic E2E decision client", () => {
     ).toThrow("malformed");
   });
 
+  it.each([
+    [{ decision: "LEGACY", manifestReady: false }, "LEGACY:false\n"],
+    [{ decision: "DEFERRED", manifestReady: false }, "DEFERRED:false\n"],
+    [{ decision: "DEFERRED", manifestReady: true }, "DEFERRED:true\n"],
+  ])("formats the exact workflow token for %j", (decision, expected) => {
+    expect(formatDecisionToken(decision)).toBe(expected);
+  });
+
   it("gates the expensive staging suite on LEGACY while bound dispatch remains unchanged", () => {
     const workflow = fs.readFileSync(
       path.join(process.cwd(), ".github/workflows/staging-e2e.yml"),
@@ -172,7 +181,11 @@ describe("baseline-adoption automatic E2E decision client", () => {
     );
     expect(workflow).toContain("bin/6529");
     expect(workflow).toContain("LEGACY:false)");
+    expect(workflow).toContain("DEFERRED:false)");
     expect(workflow).toContain("DEFERRED:true)");
+    expect(workflow).toContain(
+      'if ! result="$(./bin/6529 exec node scripts/release-bus-baseline-adoption-decision.cjs)"; then'
+    );
     expect(workflow).toContain("needs: baseline-adoption-decision");
     expect(workflow).toContain(
       "needs.baseline-adoption-decision.outputs.decision == 'LEGACY'"

@@ -117,7 +117,10 @@ jobs:
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
         run: |
           set -euo pipefail
-          result="$(./bin/6529 exec node scripts/release-bus-baseline-adoption-decision.cjs)"
+          if ! result="$(./bin/6529 exec node scripts/release-bus-baseline-adoption-decision.cjs)"; then
+            echo "Baseline-adoption decision client failed closed" >&2
+            exit 1
+          fi
           case "$result" in
             LEGACY:false)
               printf 'decision=LEGACY\nmanifest_ready=false\n'

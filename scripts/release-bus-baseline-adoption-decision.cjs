@@ -100,10 +100,14 @@ async function decide(environment, fetchImpl = fetch, now = Date.now()) {
   return decision;
 }
 
+function formatDecisionToken({ decision, manifestReady }) {
+  return `${decision}:${manifestReady}\n`;
+}
+
 if (require.main === module) {
   decide(process.env)
     .then(({ decision, manifestReady }) => {
-      process.stdout.write(`${decision}:${manifestReady}\n`);
+      process.stdout.write(formatDecisionToken({ decision, manifestReady }));
     })
     .catch((error) => {
       process.stderr.write(
@@ -113,4 +117,9 @@ if (require.main === module) {
     });
 }
 
-module.exports = { decide, exactDecision, exactEnvironment };
+module.exports = {
+  decide,
+  exactDecision,
+  exactEnvironment,
+  formatDecisionToken,
+};
