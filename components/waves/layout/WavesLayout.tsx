@@ -9,6 +9,7 @@ import {
   scheduleMobileLaunchFlush,
 } from "../../../utils/monitoring/mobileLaunchTiming";
 import WavesMobile from "../WavesMobile";
+import useBodyScrollLock from "@/hooks/useBodyScrollLock";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
@@ -140,14 +141,7 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   // system's measured content height (see CreateWaveFlow.nativeBoundedStyle),
   // so the sticky footer pins inside the app shell's transformed wrappers
   // instead of relying on document scroll (which the transforms break).
-  useEffect(() => {
-    const previousBodyOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = previousBodyOverflow;
-    };
-  }, []);
+  useBodyScrollLock();
 
   // tw-min-h-0 lets this flex item shrink below its content height so a child
   // (e.g. the create-wave flow) can own an internal scroll region instead of
