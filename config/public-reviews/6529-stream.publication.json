@@ -34,9 +34,7 @@
     {
       "version": "2026-07-30.1",
       "lifecycleState": "DRAFT",
-      "sourceCommit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786",
-      "deploymentStatus": "NOT_DEPLOYED",
-      "auditStatus": "PRE_AUDIT"
+      "sourceCommit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786"
     }
   ]
 }
