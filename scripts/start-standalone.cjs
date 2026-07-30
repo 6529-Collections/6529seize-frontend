@@ -20,6 +20,10 @@ const standaloneArtifactProfile =
   process.env["STANDALONE_ARTIFACT_PROFILE"]?.trim();
 const publicReviewDestinationsFile =
   process.env["PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE"]?.trim();
+const packagingEnv = { ...process.env };
+delete packagingEnv["PUBLIC_REVIEW_DISCUSSION_DESTINATIONS"];
+delete packagingEnv["PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE"];
+delete packagingEnv["STANDALONE_ARTIFACT_PROFILE"];
 
 if (!existsSync(serverEntry)) {
   console.error(
@@ -58,7 +62,7 @@ if (standaloneArtifactProfile) {
     ],
     {
       cwd: repoRoot,
-      env: process.env,
+      env: packagingEnv,
       stdio: "inherit",
     }
   );
@@ -93,8 +97,8 @@ if (publicReviewDestinationsFile) {
   }
   runtimeEnv["PUBLIC_REVIEW_DISCUSSION_DESTINATIONS"] =
     publicReviewDiscussionDestinations;
-  delete runtimeEnv["PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE"];
 }
+delete runtimeEnv["PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE"];
 delete runtimeEnv["STANDALONE_ARTIFACT_PROFILE"];
 
 const result = spawnSync(process.execPath, [serverEntry], {

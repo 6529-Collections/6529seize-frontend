@@ -7,11 +7,13 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 cd "$REPO_ROOT"
 
-public_review_destinations_b64="${PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64:-}"
-unset PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64
+public_review_destinations_source="${PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE:-}"
+unset PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE
 
-if [[ -z "$public_review_destinations_b64" ]]; then
-  echo "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64 is required." >&2
+if [[ -z "$public_review_destinations_source" ]] ||
+  [[ ! -f "$public_review_destinations_source" ]] ||
+  [[ ! -r "$public_review_destinations_source" ]]; then
+  echo "A readable PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE is required." >&2
   exit 1
 fi
 
@@ -39,20 +41,23 @@ print_message "Reinstalling dependencies..."
 
 # Step 3: Rebuild the project
 print_message "Rebuilding the project..."
-./bin/6529 run build
+# Other staging endpoints remain sourced from the established EC2 build environment.
+BASE_ENDPOINT=https://staging.6529.io \
+  ./bin/6529 run build
 
 # Step 4: Prepare private runtime configuration
 print_message "Preparing staging runtime configuration..."
 runtime_secrets_dir="$REPO_ROOT/.next/runtime-secrets"
 public_review_destinations_file="$runtime_secrets_dir/public-review-discussion-destinations.json"
 install -d -m 700 "$runtime_secrets_dir"
-if ! printf '%s' "$public_review_destinations_b64" | base64 -d \
-  > "$public_review_destinations_file"; then
-  echo "Public-review discussion destinations could not be decoded." >&2
+install -m 600 \
+  "$public_review_destinations_source" \
+  "$public_review_destinations_file"
+unset public_review_destinations_source
+if ! command -v jq >/dev/null 2>&1; then
+  echo "jq is required to validate staging public-review configuration." >&2
   exit 1
 fi
-unset public_review_destinations_b64
-chmod 600 "$public_review_destinations_file"
 jq -e '
   type == "object" and
   has("staging") and
@@ -60,6 +65,20 @@ jq -e '
   (.staging["stream-review"] | type == "string" and test("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")) and
   (has("production") | not)
 ' "$public_review_destinations_file" >/dev/null
+expected_owner_group="$(id -un):$(id -gn)"
+actual_owner_group="$(
+  stat -c '%U:%G' "$runtime_secrets_dir" "$public_review_destinations_file" |
+    sort -u
+)"
+if [[ "$actual_owner_group" != "$expected_owner_group" ]]; then
+  echo "Staging runtime configuration ownership is invalid." >&2
+  exit 1
+fi
+if [[ "$(stat -c '%a' "$runtime_secrets_dir")" != "700" ]] ||
+  [[ "$(stat -c '%a' "$public_review_destinations_file")" != "600" ]]; then
+  echo "Staging runtime configuration permissions are invalid." >&2
+  exit 1
+fi
 
 # Step 5: Restart PM2 services
 print_message "Restarting PM2 services..."

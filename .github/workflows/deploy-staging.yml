@@ -277,20 +277,17 @@ jobs:
           BRANCH: ${{ env.STAGING_BRANCH }}
           EXPECTED_SHA: ${{ steps.expected-commit.outputs.sha }}
           INSTANCE_ID: ${{ secrets.STAGING_INSTANCE_ID }}
-          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS }}
+          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_PARAMETER: ${{ vars.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_PARAMETER || '/6529/frontend/staging/public-review-discussion-destinations' }}
           REPO_DIR: ${{ env.STAGING_REPO_DIR }}
           RUN_AS: ${{ env.STAGING_RUN_AS }}
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
 
-          jq -e '
-            type == "object" and
-            has("staging") and
-            (.staging | type == "object") and
-            (.staging["stream-review"] | type == "string" and test("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")) and
-            (has("production") | not)
-          ' <<<"$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" >/dev/null
+          if ! [[ "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_PARAMETER" =~ ^/[A-Za-z0-9_./-]{1,1010}$ ]]; then
+            echo "Public-review Parameter Store name is missing or malformed." >&2
+            exit 1
+          fi
 
           node ops/scripts/deployment-bus.cjs github-create-status \
             --deployment-id "${{ steps.deployment-record.outputs.deployment_id }}" \
@@ -303,12 +300,9 @@ jobs:
           run_as_q="$(printf '%q' "$RUN_AS")"
           branch_q="$(printf '%q' "$BRANCH")"
           expected_sha_q="$(printf '%q' "$EXPECTED_SHA")"
-          public_review_destinations_b64="$(
-            printf '%s' "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" | base64 -w0
-          )"
-          [[ "$public_review_destinations_b64" =~ ^[A-Za-z0-9+/=]+$ ]]
-          public_review_destinations_b64_q="$(
-            printf '%q' "$public_review_destinations_b64"
+          aws_region_q="$(printf '%q' "$AWS_REGION")"
+          public_review_destinations_parameter_q="$(
+            printf '%q' "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_PARAMETER"
           )"
 
           remote_script="$(
@@ -318,7 +312,8 @@ jobs:
           RUN_AS=$run_as_q
           BRANCH=$branch_q
           EXPECTED_SHA=$expected_sha_q
-          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64=$public_review_destinations_b64_q
+          AWS_REGION=$aws_region_q
+          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_PARAMETER=$public_review_destinations_parameter_q
           REMOTE_SCRIPT_VARS
             cat <<'REMOTE_SCRIPT_BODY'
 
@@ -333,6 +328,13 @@ jobs:
             echo "Repo directory '$REPO_DIR' is not a git checkout." >&2
             exit 1
           fi
+
+          for required_command in aws jq; do
+            if ! command -v "$required_command" >/dev/null 2>&1; then
+              echo "Required staging command '$required_command' is unavailable." >&2
+              exit 1
+            fi
+          done
 
           sfw_bin="$(command -v sfw || true)"
           if [ -n "$sfw_bin" ] && command -v node >/dev/null 2>&1; then
@@ -377,10 +379,50 @@ jobs:
           fi
 
           deploy_script="$(mktemp /tmp/6529-staging-deploy.XXXXXX.sh)"
+          public_review_parameter_file="$(
+            mktemp /tmp/6529-public-review-parameter.XXXXXX.json
+          )"
+          public_review_destinations_file="$(
+            mktemp /tmp/6529-public-review-destinations.XXXXXX.json
+          )"
           cleanup() {
-            rm -f "$deploy_script"
+            rm -f \
+              "$deploy_script" \
+              "$public_review_parameter_file" \
+              "$public_review_destinations_file"
           }
           trap cleanup EXIT HUP INT TERM
+
+          if ! aws ssm get-parameter \
+            --name "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_PARAMETER" \
+            --with-decryption \
+            --query 'Parameter.{Type:Type,Value:Value}' \
+            --output json \
+            --region "$AWS_REGION" \
+            > "$public_review_parameter_file"; then
+            echo "Unable to retrieve the staging public-review SecureString." >&2
+            exit 1
+          fi
+          if ! jq -er '
+            if .Type == "SecureString" and (.Value | type == "string") then
+              .Value
+            else
+              error("Parameter must be a SecureString with a string value.")
+            end
+          ' "$public_review_parameter_file" > "$public_review_destinations_file"; then
+            echo "The staging public-review parameter must be a SecureString." >&2
+            exit 1
+          fi
+          rm -f "$public_review_parameter_file"
+          jq -e '
+            type == "object" and
+            has("staging") and
+            (.staging | type == "object") and
+            (.staging["stream-review"] | type == "string" and test("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")) and
+            (has("production") | not)
+          ' "$public_review_destinations_file" >/dev/null
+          chown "$RUN_AS:$RUN_AS" "$public_review_destinations_file"
+          chmod 600 "$public_review_destinations_file"
 
           cat > "$deploy_script" <<'DEPLOY_SCRIPT'
           #!/usr/bin/env bash
@@ -433,9 +475,8 @@ jobs:
 
           chmod 755 "$deploy_script"
           sudo -H -u "$RUN_AS" env \
-            "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64=$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64" \
+            "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE=$public_review_destinations_file" \
             bash "$deploy_script" "$REPO_DIR" "$BRANCH" "$EXPECTED_SHA"
-          unset PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64
           REMOTE_SCRIPT_BODY
           )"
 

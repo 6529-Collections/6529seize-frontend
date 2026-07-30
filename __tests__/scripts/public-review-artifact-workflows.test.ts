@@ -16,6 +16,10 @@ const stagingScript = fs.readFileSync(
   path.join(process.cwd(), "scripts", "staging.sh"),
   "utf8"
 );
+const proxySource = fs.readFileSync(
+  path.join(process.cwd(), "proxy.ts"),
+  "utf8"
+);
 const standaloneStart = fs.readFileSync(
   path.join(process.cwd(), "scripts", "start-standalone.cjs"),
   "utf8"
@@ -89,22 +93,38 @@ describe("public-review artifact workflow contract", () => {
 
   it("keeps legacy staging aligned with the public-review bundle contract", () => {
     expect(legacyStaging).toContain(
-      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS }}"
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_PARAMETER: ${{ vars.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_PARAMETER"
     );
+    expect(legacyStaging).toContain("aws ssm get-parameter");
+    expect(legacyStaging).toContain("--with-decryption");
     expect(legacyStaging).toContain(
+      "--query 'Parameter.{Type:Type,Value:Value}'"
+    );
+    expect(legacyStaging).toContain('.Type == "SecureString"');
+    expect(legacyStaging).not.toContain("--query 'Parameter.Value'");
+    expect(legacyStaging).toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE=$public_review_destinations_file"
+    );
+    expect(legacyStaging).not.toContain(
+      "secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS"
+    );
+    expect(legacyStaging).not.toContain(
       "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64"
     );
     expect(legacyStaging).toContain('(has("production") | not)');
     expect(stagingScript).toContain(
-      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64"
+      'public_review_destinations_source="${PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE:-}"'
     );
+    expect(stagingScript).toContain("command -v jq");
+    expect(stagingScript).toContain("stat -c '%U:%G'");
     expect(stagingScript).toContain("STANDALONE_ARTIFACT_PROFILE=staging");
+    expect(stagingScript).toContain(
+      "BASE_ENDPOINT=https://staging.6529.io \\\n  ./bin/6529 run build"
+    );
     expect(stagingScript).toContain(
       "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE="
     );
-    expect(standaloneStart).toContain(
-      '"package-public-review-artifacts.cjs"'
-    );
+    expect(standaloneStart).toContain('"package-public-review-artifacts.cjs"');
     expect(standaloneStart).toContain('"prepare"');
     expect(standaloneStart).toContain(
       'process.env["STANDALONE_ARTIFACT_PROFILE"]'
@@ -112,9 +132,75 @@ describe("public-review artifact workflow contract", () => {
     expect(standaloneStart).toContain(
       'process.env["PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE"]'
     );
+    expect(standaloneStart).toContain(
+      'delete packagingEnv["PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE"]'
+    );
   });
 
-  it("preserves production identity and staging help and agent regeneration", () => {
+  it("generates help and agent artifacts after configuring each release-bus profile", () => {
+    const generateStepStart = releaseBusPreflight.indexOf(
+      "      - name: Generate source-stable environment schema once"
+    );
+    const packageStepStart = releaseBusPreflight.indexOf(
+      "      - name: Build and package only the authorized environment contract"
+    );
+    const generateStep = releaseBusPreflight.slice(
+      generateStepStart,
+      packageStepStart
+    );
+    const buildProfileStart = releaseBusPreflight.indexOf(
+      "          build_profile() {"
+    );
+    const buildProfileEnd = releaseBusPreflight.indexOf(
+      "\n          rm -rf release-bus-artifact",
+      buildProfileStart
+    );
+    const buildProfile = releaseBusPreflight.slice(
+      buildProfileStart,
+      buildProfileEnd
+    );
+    const configureProfileIndex = buildProfile.indexOf(
+      'configure_profile "$profile"'
+    );
+    const helpIndexSyncIndex = buildProfile.indexOf(
+      "./bin/6529 run help-index:sync"
+    );
+    const agentFilesSyncIndex = buildProfile.indexOf(
+      "./bin/6529 run agent-files:sync"
+    );
+    const baseBuildIndex = buildProfile.indexOf("./bin/6529 run base-build");
+
+    expect(generateStepStart).toBeGreaterThanOrEqual(0);
+    expect(packageStepStart).toBeGreaterThan(generateStepStart);
+    expect(generateStep).toContain("./bin/6529 run build:env-schema");
+    expect(generateStep).not.toContain("./bin/6529 run help-index:sync");
+    expect(generateStep).not.toContain("./bin/6529 run agent-files:sync");
+    expect(configureProfileIndex).toBeGreaterThanOrEqual(0);
+    expect(helpIndexSyncIndex).toBeGreaterThan(configureProfileIndex);
+    expect(agentFilesSyncIndex).toBeGreaterThan(helpIndexSyncIndex);
+    expect(baseBuildIndex).toBeGreaterThan(agentFilesSyncIndex);
+  });
+
+  it("ships the shared Stream artifact exception in manual and release-bus staging", () => {
+    expect(proxySource).toContain(
+      'const STREAM_REVIEW_DATA_PREFIX = "/review-data/6529-stream/";'
+    );
+    expect(proxySource).toContain(
+      "isPublicStreamReviewDataPath(req, pathname)"
+    );
+    expect(proxySource).toContain("rawPathname === pathname");
+    expect(stagingScript).toContain("./bin/6529 run build");
+    expect(stagingScript).toContain("./bin/6529 run start:standalone");
+    expect(releaseBusPreflight).toContain(
+      'build_profile "$ARTIFACT_ENVIRONMENT" release-bus-artifact'
+    );
+    expect(releaseBusPreflight).toContain(
+      "build_profile staging release-bus-artifact/profiles/staging"
+    );
+    expect(releaseBusPreflight).toContain("./bin/6529 run base-build");
+  });
+
+  it("preserves production identity for every deployment constructor", () => {
     expect(appPrCi).toContain('BASE_ENDPOINT: "https://6529.io"');
     expect(appPrCi).toContain("GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY }}");
     expect(releaseBusPreflight).toContain(
@@ -123,7 +209,5 @@ describe("public-review artifact workflow contract", () => {
     expect(legacyProduction).toContain(
       "GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY || secrets.GIPHY_API_KEY }}"
     );
-    expect(releaseBusPreflight).toContain("./bin/6529 run help-index:sync");
-    expect(releaseBusPreflight).toContain("./bin/6529 run agent-files:sync");
   });
 });
