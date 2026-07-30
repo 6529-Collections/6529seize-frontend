@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { execFileSync, spawnSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import YAML from "yaml";
 
 const ROOT = process.cwd();
@@ -10,6 +10,7 @@ const EXPECTED_SHA = "a".repeat(40);
 const TRAIN_ID = "compatibility-train";
 
 type WorkflowStep = {
+  env?: Record<string, string>;
   name?: string;
   run?: string;
   uses?: string;
@@ -888,10 +889,7 @@ describe("Release Bus artifact rollout compatibility", () => {
         ARTIFACT_ENVIRONMENT: "staging",
         CANDIDATE_EVIDENCE_MODE: "strict-single",
         DEPLOY_UNITS: "[]",
-        EXPECTED_SHA: execFileSync("git", ["rev-parse", "HEAD"], {
-          cwd: ROOT,
-          encoding: "utf8",
-        }).trim(),
+        EXPECTED_SHA: mergeSha,
         GITHUB_REPOSITORY: "6529-Collections/6529seize-frontend",
         GITHUB_OUTPUT: evidenceOutput,
         MOCK_ARTIFACT_DIGEST: artifactDigest,
@@ -918,6 +916,12 @@ describe("Release Bus artifact rollout compatibility", () => {
       );
       expect(workflow.jobs.evidence.needs).toBe("authorize");
       expect(workflow.jobs.build.needs).toBe("evidence");
+      expect(validateEvidence.env).toMatchObject({
+        EXPECTED_SHA: "${{ inputs.expected_sha }}",
+      });
+      expect(validateEvidence.run).toContain(
+        'test "$merge_sha" = "$EXPECTED_SHA"'
+      );
       expect(runShell(validateLocal.run!, { env: baseEnv }).status).toBe(0);
       expect(fs.existsSync(ghInvocations)).toBe(false);
       expect(
@@ -936,9 +940,15 @@ describe("Release Bus artifact rollout compatibility", () => {
       ).toBe(0);
       expect(fs.existsSync(curlPayload)).toBe(true);
       expect(runShell(validateEvidence.run!, { env: baseEnv }).status).toBe(0);
+      expect(baseEnv.EXPECTED_SHA).not.toBe(baseEnv.MOCK_HEAD_SHA);
       expect(fs.readFileSync(ghInvocations, "utf8")).toContain(
         "actions/runs/1234/artifacts"
       );
+      expect(
+        runShell(validateEvidence.run!, {
+          env: { ...baseEnv, EXPECTED_SHA: baseEnv.MOCK_HEAD_SHA },
+        }).status
+      ).not.toBe(0);
       expect(
         runShell(validateEvidence.run!, {
           env: { ...baseEnv, MOCK_HEAD_SHA: "a".repeat(40) },

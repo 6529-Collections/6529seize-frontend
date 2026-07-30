@@ -78,7 +78,7 @@ test("renders fetched html", async () => {
   await waitFor(() =>
     expect(mockLoadDelegationArticleHtml).toHaveBeenCalledWith("page")
   );
-  const container = document.querySelector(".htmlContainer") as HTMLElement;
+  const container = document.querySelector("[aria-busy]") as HTMLElement;
   await waitFor(() => expect(container.innerHTML).toContain("hi"));
   expect(
     screen.getByRole("heading", { name: "Hello World" })
@@ -118,12 +118,12 @@ test("keeps FAQ context and article hierarchy on child pages", async () => {
 
   const allTopicsLink = screen.getByRole("link", { name: "All FAQ topics" });
   expect(allTopicsLink).toHaveAttribute("href", "/delegation/delegation-faq");
-  expect(allTopicsLink).toHaveClass("tw-text-white");
+  expect(allTopicsLink).toHaveClass("tw-text-iron-300");
   expect(allTopicsLink.querySelector("svg")).toBeInTheDocument();
   expect(screen.queryByText("Back to Delegation FAQ")).not.toBeInTheDocument();
   expect(screen.getByText("A test article.")).toHaveClass(
-    "tw-font-semibold",
-    "tw-text-white"
+    "tw-font-normal",
+    "tw-text-iron-300"
   );
 
   await waitFor(() =>
@@ -153,18 +153,17 @@ test("keeps the FAQ section title aligned inside the article shell", async () =>
     level: 1,
     name: "Delegation FAQ",
   });
-  const titleClasses = indexTitle.getAttribute("class");
-  expect(indexTitle.parentElement).toHaveClass("tw-mb-6");
-  expect(indexTitle.parentElement?.parentElement).toHaveClass("tw-mx-auto");
+  expect(indexTitle.parentElement).toHaveClass("tw-mb-8", "tw-pb-6");
+  expect(indexTitle.parentElement?.parentElement).toHaveClass("tw-w-full");
 
   rerender(<DelegationHTML path="child" />);
   const childSectionTitle = screen.getByText("Delegation FAQ", {
     selector: "p",
   });
-  expect(childSectionTitle).toHaveAttribute("class", titleClasses);
-  expect(childSectionTitle.parentElement).toHaveClass("tw-mb-6");
-  expect(childSectionTitle.parentElement?.parentElement).toHaveClass(
-    "tw-mx-auto"
+  expect(childSectionTitle).toHaveClass("tw-uppercase", "tw-text-primary-300");
+  expect(childSectionTitle.closest("header")).toHaveClass("tw-mb-8", "tw-pb-6");
+  expect(childSectionTitle.closest("header")?.parentElement).toHaveClass(
+    "tw-w-full"
   );
 });
 

@@ -246,8 +246,9 @@ jobs:
                 __tests__/scripts/package-public-review-artifacts.test.ts \
                 __tests__/scripts/public-review-artifact-workflows.test.ts \
                 __tests__/scripts/release-bus-artifact-compatibility.test.ts \
-            __tests__/scripts/release-bus-performance-contract.test.ts \
-            __tests__/scripts/release-bus-v2-compose-workflow.test.ts \
+                __tests__/scripts/release-bus-performance-contract.test.ts \
+                __tests__/scripts/release-bus-v2-advance-staging-ref-workflow.test.ts \
+                __tests__/scripts/release-bus-v2-compose-workflow.test.ts \
             __tests__/scripts/sync-e2e-manifest.test.ts \
             __tests__/scripts/release-bus-install-dependencies.test.ts \
             ops/scripts/release-bus-status.test.ts
