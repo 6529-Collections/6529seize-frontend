@@ -114,11 +114,11 @@ function WalletCheckerView(props: Readonly<WalletCheckerViewProps>) {
 
   return (
     <div className="tw-w-full">
-      <header className="tw-mb-6">
-        <h1 className="tw-mb-2 tw-mt-0 tw-text-3xl tw-font-bold tw-text-white">
+      <header className="tw-mb-10 sm:tw-mb-12">
+        <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
           Wallet Checker
         </h1>
-        <p className="tw-mb-0 tw-max-w-4xl tw-text-base tw-leading-6 tw-text-iron-300">
+        <p className="tw-mb-0 tw-mt-2 tw-max-w-3xl tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300">
           Check delegation, delegation manager, and consolidation records for a
           wallet. This is read-only and does not require wallet connection.
         </p>
@@ -126,69 +126,71 @@ function WalletCheckerView(props: Readonly<WalletCheckerViewProps>) {
 
       <form onSubmit={handleSubmit}>
         {!props.fetchedAddress ? (
-          <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5 sm:tw-p-6">
+          <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-[#111115] tw-p-5 sm:tw-p-6">
             <label
               htmlFor="wallet-checker-address"
-              className="tw-mb-2 tw-block tw-text-sm tw-font-semibold tw-text-iron-100"
+              className="tw-mb-2 tw-block tw-text-sm tw-font-semibold tw-text-iron-200"
             >
               Wallet address or ENS name
             </label>
-            <EnsAddressInput
-              id="wallet-checker-address"
-              autoFocus
-              placeholder="0x... or ENS"
-              className="tw-rounded-lg tw-border-iron-600 tw-px-4 tw-py-3"
-              ariaDescribedBy="wallet-checker-feedback"
-              value={props.walletInputValue}
-              onAddressChange={(address) =>
-                props.onAddressChange(address.trim())
-              }
-              onValueChange={props.onValueChange}
-              onLoadingChange={props.onLoadingChange}
-              onError={props.onError}
-            />
+            <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center">
+              <EnsAddressInput
+                id="wallet-checker-address"
+                autoFocus
+                placeholder="0x... or ENS"
+                className="!tw-h-11 !tw-min-w-0 !tw-flex-1 !tw-rounded-lg !tw-border-white/[0.08] !tw-bg-black/25 !tw-px-4 !tw-py-2.5 !tw-text-iron-100 !tw-shadow-none placeholder:!tw-text-iron-600 focus:!tw-border-primary-400/70 focus:!tw-bg-black/30 focus:!tw-text-iron-50 focus:!tw-ring-primary-400/20 disabled:!tw-bg-black/20"
+                ariaDescribedBy="wallet-checker-feedback"
+                value={props.walletInputValue}
+                onAddressChange={(address) =>
+                  props.onAddressChange(address.trim())
+                }
+                onValueChange={props.onValueChange}
+                onLoadingChange={props.onLoadingChange}
+                onError={props.onError}
+              />
+              <div className="tw-flex tw-flex-col-reverse tw-gap-3 sm:tw-flex-none sm:tw-flex-row sm:tw-items-center">
+                <SecondaryButton
+                  onClicked={props.onClear}
+                  disabled={!props.walletInputValue.trim()}
+                  className="tw-h-11 tw-w-full sm:tw-w-auto"
+                >
+                  Clear
+                </SecondaryButton>
+                <PrimaryButton
+                  loading={props.checking}
+                  disabled={props.formDisabled}
+                  onClicked={props.onSubmit}
+                  className="tw-h-11 tw-w-full !tw-bg-primary-500 !tw-text-white !tw-ring-primary-400 hover:!tw-bg-primary-600 hover:!tw-ring-primary-500 sm:tw-w-auto sm:tw-min-w-32"
+                >
+                  {props.checking ? "Checking..." : "Check Wallet"}
+                </PrimaryButton>
+              </div>
+            </div>
             <div
               id="wallet-checker-feedback"
-              className={`tw-mt-2 tw-min-h-5 tw-text-sm ${
+              className={`tw-mt-2 tw-min-h-5 tw-text-xs tw-font-normal tw-leading-5 ${
                 props.showAddressError
                   ? "tw-font-medium tw-text-error"
-                  : "tw-text-iron-400"
+                  : "tw-text-iron-500"
               }`}
               role={props.showAddressError ? "alert" : undefined}
               aria-live={props.showAddressError ? "assertive" : undefined}
             >
               {props.walletFeedback}
             </div>
-            <div className="tw-mt-6 tw-flex tw-flex-col-reverse tw-gap-3 sm:tw-flex-row sm:tw-justify-end">
-              <SecondaryButton
-                onClicked={props.onClear}
-                disabled={!props.walletInputValue.trim()}
-                className="tw-w-full sm:tw-w-auto"
-              >
-                Clear
-              </SecondaryButton>
-              <PrimaryButton
-                loading={props.checking}
-                disabled={props.formDisabled}
-                onClicked={props.onSubmit}
-                className="tw-w-full sm:tw-w-auto"
-              >
-                {props.checking ? "Checking..." : "Check Wallet"}
-              </PrimaryButton>
-            </div>
           </section>
         ) : (
-          <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-5 sm:tw-p-6">
-            <div className="tw-flex tw-flex-col tw-gap-5 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+          <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-[#111115] tw-p-5 sm:tw-p-6">
+            <div className="tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
               <div className="tw-min-w-0">
-                <p className="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
+                <p className="tw-mb-1.5 tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-widest tw-text-primary-300">
                   Viewing wallet
                 </p>
-                <p className="tw-mb-0 tw-break-all tw-text-lg tw-font-semibold tw-text-white">
+                <p className="tw-mb-0 tw-break-all tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100">
                   {props.checkedWalletDisplay}
                 </p>
                 {props.refreshing && (
-                  <output className="tw-mb-0 tw-mt-2 tw-block tw-text-sm tw-text-iron-300">
+                  <output className="tw-mb-0 tw-mt-2 tw-block tw-text-sm tw-font-normal tw-text-iron-400">
                     Refreshing delegation records...
                   </output>
                 )}
@@ -203,7 +205,7 @@ function WalletCheckerView(props: Readonly<WalletCheckerViewProps>) {
                 {props.resultsLoaded &&
                   !props.hasAnyRecords &&
                   !props.hasRequestError && (
-                    <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-300">
+                    <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-400">
                       No delegation, delegation manager, or consolidation
                       records found for this wallet.
                     </p>
@@ -220,7 +222,7 @@ function WalletCheckerView(props: Readonly<WalletCheckerViewProps>) {
                   loading={props.refreshing}
                   disabled={props.refreshing}
                   onClicked={props.onRefresh}
-                  className="tw-w-full sm:tw-w-auto"
+                  className="tw-w-full !tw-bg-primary-500 !tw-text-white !tw-ring-primary-400 hover:!tw-bg-primary-600 hover:!tw-ring-primary-500 sm:tw-w-auto"
                 >
                   {props.refreshing ? "Refreshing..." : "Refresh"}
                 </PrimaryButton>
