@@ -41,7 +41,8 @@ print_message "Reinstalling dependencies..."
 
 # Step 3: Rebuild the project
 print_message "Rebuilding the project..."
-./bin/6529 run build
+BASE_ENDPOINT=https://staging.6529.io \
+  ./bin/6529 run build
 
 # Step 4: Prepare private runtime configuration
 print_message "Preparing staging runtime configuration..."

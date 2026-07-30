@@ -87,6 +87,7 @@ const STATIC_PATHS = new Set<string>([
   "/llms.txt",
   "/glossary.json",
 ]);
+const STREAM_REVIEW_DATA_PREFIX = "/review-data/6529-stream/";
 const STATIC_PATH_SUFFIXES = [
   "favicon.ico",
   ".jpg",
@@ -321,6 +322,7 @@ export default async function proxy(req: NextRequest) {
 
     if (
       STATIC_PATHS.has(normalizedPathname) ||
+      normalizedPathname.startsWith(STREAM_REVIEW_DATA_PREFIX) ||
       STATIC_PATH_PREFIXES.some((prefix) =>
         normalizedPathname.startsWith(prefix)
       ) ||
