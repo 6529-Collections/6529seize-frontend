@@ -396,7 +396,7 @@ function RemoteMinting({ locale }: { readonly locale: SupportedLocale }) {
       <ul className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-grid-cols-1 tw-gap-3 tw-p-0 sm:tw-mt-5 md:tw-grid-cols-3 md:tw-gap-6">
         {REMOTE_MESSAGE_KEYS.map((messageKey) => (
           <li
-            className={`${SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS} tw-p-4 tw-text-base tw-leading-7 tw-text-iron-400 md:tw-p-6`}
+            className={`${SUBSCRIPTIONS_INTERACTIVE_PANEL_CLASS} tw-p-4 tw-text-base tw-leading-7 tw-text-iron-300 md:tw-p-6`}
             key={messageKey}
           >
             {m(locale, messageKey)}
