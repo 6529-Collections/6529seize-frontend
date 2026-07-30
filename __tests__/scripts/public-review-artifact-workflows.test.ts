@@ -89,28 +89,39 @@ describe("public-review artifact workflow contract", () => {
 
   it("keeps legacy staging aligned with the public-review bundle contract", () => {
     expect(legacyStaging).toContain(
-      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS }}"
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_PARAMETER: ${{ vars.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_PARAMETER"
     );
+    expect(legacyStaging).toContain("aws ssm get-parameter");
+    expect(legacyStaging).toContain("--with-decryption");
     expect(legacyStaging).toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE=$public_review_destinations_file"
+    );
+    expect(legacyStaging).not.toContain(
+      "secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS"
+    );
+    expect(legacyStaging).not.toContain(
       "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64"
     );
     expect(legacyStaging).toContain('(has("production") | not)');
     expect(stagingScript).toContain(
-      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64"
+      'public_review_destinations_source="${PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE:-}"'
     );
+    expect(stagingScript).toContain("command -v jq");
+    expect(stagingScript).toContain("stat -c '%U:%G'");
     expect(stagingScript).toContain("STANDALONE_ARTIFACT_PROFILE=staging");
     expect(stagingScript).toContain(
       "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE="
     );
-    expect(standaloneStart).toContain(
-      '"package-public-review-artifacts.cjs"'
-    );
+    expect(standaloneStart).toContain('"package-public-review-artifacts.cjs"');
     expect(standaloneStart).toContain('"prepare"');
     expect(standaloneStart).toContain(
       'process.env["STANDALONE_ARTIFACT_PROFILE"]'
     );
     expect(standaloneStart).toContain(
       'process.env["PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE"]'
+    );
+    expect(standaloneStart).toContain(
+      'delete packagingEnv["PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE"]'
     );
   });
 
