@@ -301,6 +301,57 @@ describe("useWaveDataFetching", () => {
     consoleSpy.mockRestore();
   });
 
+  it("does not let a cancelled request clear its in-flight replacement", async () => {
+    let rejectCancelledRequest: (reason: unknown) => void = () => {};
+    let resolveReplacementRequest: (drops: Array<{ id: string }>) => void =
+      () => {};
+    const cancelledRequest = new Promise<Array<{ id: string }>>((_, reject) => {
+      rejectCancelledRequest = reject;
+    });
+    const replacementRequest = new Promise<Array<{ id: string }>>(
+      (resolve) => {
+        resolveReplacementRequest = resolve;
+      }
+    );
+    fetchWaveMessages
+      .mockReturnValueOnce(cancelledRequest)
+      .mockReturnValueOnce(replacementRequest);
+    createEmptyWaveMessages.mockReturnValue({ key: "wave1", drops: [] });
+    formatWaveMessages.mockReturnValue({
+      key: "wave1",
+      drops: [{ id: "replacement" }],
+    });
+    const { result } = setup({ wave1: { drops: [] } });
+
+    act(() => {
+      result.current.registerWave("wave1");
+      result.current.cancelWaveDataFetch("wave1");
+      result.current.registerWave("wave1");
+    });
+
+    expect(fetchWaveMessages).toHaveBeenCalledTimes(2);
+    expect(clearLoadingState).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      rejectCancelledRequest(new DOMException("aborted", "AbortError"));
+      await Promise.resolve();
+    });
+
+    expect(clearLoadingState).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveReplacementRequest([{ id: "replacement" }]);
+      await replacementRequest;
+    });
+
+    expect(clearLoadingState).toHaveBeenCalledTimes(2);
+    expect(formatWaveMessages).toHaveBeenCalledWith(
+      "wave1",
+      [{ id: "replacement" }],
+      { isLoading: false }
+    );
+  });
+
   it("tracks non-abort initial feed failures as unavailable", async () => {
     const failureError = Object.assign(new Error("Service unavailable"), {
       status: 503,

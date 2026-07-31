@@ -236,6 +236,34 @@ describe("useDmWavesList", () => {
     expect(result.current.canTrustServerSnapshotUnreadState).toBe(false);
   });
 
+  it("trusts fresh loaded rows when unread DMs may remain on later pages", () => {
+    useUnreadDmDropsMock.mockReturnValue({
+      unreadDmDropsCount: 2,
+      dataUpdatedAt: 200,
+    });
+    useWavesV2Mock.mockReturnValue({
+      waves: [
+        {
+          id: "wave-1",
+          latestDropTimestamp: 200,
+          unreadDropsCount: 1,
+        },
+      ],
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: true,
+      fetchNextPage: jest.fn(),
+      status: "success",
+      refetch: jest.fn(),
+      queryKey: dmWavesQueryKey,
+      dataUpdatedAt: 100,
+    });
+
+    const { result } = renderHook(() => useDmWavesList());
+
+    expect(result.current.canTrustServerSnapshotUnreadState).toBe(true);
+  });
+
   it("does not trust a stale unread aggregate even when row totals agree", () => {
     useUnreadDmDropsMock.mockReturnValue({
       unreadDmDropsCount: 1,

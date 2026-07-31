@@ -103,14 +103,19 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       mainWaves.reduce(
         (total, wave) => total + Math.max(wave.unreadDropsCount, 0),
         0
-      ),
+    ),
     [mainWaves]
   );
+  // A paginated summary can include unread DMs outside the loaded rows. Once
+  // every page is loaded, require exact agreement before trusting the snapshot.
+  const unreadSummaryAccountsForLoadedRows =
+    hasNextPage === true ||
+    unreadDmDropsCount === listedUnreadDropsCount;
   const canTrustServerSnapshotUnreadState = Boolean(
     shouldFetchDmWaves &&
     dmWavesDataUpdatedAt > 0 &&
     unreadDmDropsDataUpdatedAt >= dmWavesDataUpdatedAt &&
-    unreadDmDropsCount === listedUnreadDropsCount
+    unreadSummaryAccountsForLoadedRows
   );
 
   useEffect(() => {
