@@ -80,12 +80,6 @@ describe("TheMemesMintPage", () => {
     expect(metadata).toMatchObject({
       title: "Mint | The Memes",
       description: "Collections | test.6529.io",
-      icons: {
-        icon: [
-          { url: "/favicon-alt.png", type: "image/png", sizes: "96x96" },
-          { url: "/favicon-alt.svg", type: "image/svg+xml", sizes: "any" },
-        ],
-      },
       other: { version: "test-version" },
       twitter: {
         card: "summary_large_image",
