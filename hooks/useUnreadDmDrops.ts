@@ -37,7 +37,7 @@ export function useUnreadDmDrops(
     handle && options.enabled !== false && hasUsableAuthJwt
   );
 
-  const { data, error, isError } = useQuery<ApiDmDropsUnreadCount>({
+  const query = useQuery<ApiDmDropsUnreadCount>({
     queryKey: [
       QueryKey.DM_DROPS_UNREAD,
       { identity: handle, auth: authFingerprint },
@@ -54,8 +54,8 @@ export function useUnreadDmDrops(
     refetchOnMount: true,
     refetchOnReconnect: true,
     refetchIntervalInBackground: !isCapacitor,
-    retry: (failureCount: number, error: unknown) => {
-      if (isUnauthorizedQueryError(error)) {
+    retry: (failureCount: number, retryError: unknown) => {
+      if (isUnauthorizedQueryError(retryError)) {
         return false;
       }
 
@@ -63,6 +63,7 @@ export function useUnreadDmDrops(
     },
     retryDelay: (failureCount: number) => failureCount * 1000,
   });
+  const { data, error, isError } = query;
 
   useEffect(() => {
     if (!isError || !error || isUnauthorizedQueryError(error)) {
@@ -79,5 +80,6 @@ export function useUnreadDmDrops(
     unreadDmDrops,
     unreadDmDropsCount,
     haveUnreadDmDrops: unreadDmDropsCount > 0,
+    dataUpdatedAt: isEnabled && !isError ? query.dataUpdatedAt : 0,
   };
 }

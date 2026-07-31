@@ -148,7 +148,11 @@ type IdleWindow = Window & {
 
 const createListData = (
   refetchAllWaves: jest.Mock,
-  waves: readonly { readonly id: string }[] = []
+  waves: readonly {
+    readonly id: string;
+    readonly isDirectMessage?: boolean;
+    readonly isPrivate?: boolean;
+  }[] = []
 ) => ({
   waves,
   isFetching: false,
@@ -213,6 +217,87 @@ describe("MyStreamProvider resume sync", () => {
     expect(mockSetKnownWaveScopes).toHaveBeenCalledWith({
       profileScopedWaveIds: new Set(["dm-wave"]),
       publicWaveIds: new Set(["public-wave"]),
+    });
+  });
+
+  it("registers private main-list waves as profile scoped", () => {
+    useWavesListMock.mockReturnValue(
+      createListData(mainRefetch, [
+        {
+          id: "private-wave",
+          isPrivate: true,
+          isDirectMessage: false,
+        },
+      ])
+    );
+
+    render(
+      <MyStreamProvider>
+        <div />
+      </MyStreamProvider>
+    );
+
+    expect(mockSetKnownWaveScopes).toHaveBeenCalledWith({
+      profileScopedWaveIds: new Set(["private-wave"]),
+      publicWaveIds: new Set(),
+    });
+  });
+
+  it("registers an active public wave when the main list is deferred", () => {
+    useCapacitorMock.mockReturnValue({ isCapacitor: true, isActive: true });
+    usePathnameMock.mockReturnValue("/waves/public-wave");
+    useActiveWaveManagerMock.mockReturnValue({
+      activeWaveId: "public-wave",
+      setActiveWave: mockSetActiveWave,
+    });
+    useWaveByIdMock.mockReturnValue({
+      wave: {
+        id: "public-wave",
+        chat: { scope: { group: null } },
+        visibility: { scope: { group: null } },
+      },
+      isLoading: false,
+      isFetching: false,
+    });
+
+    render(
+      <MyStreamProvider>
+        <div />
+      </MyStreamProvider>
+    );
+
+    expect(mockSetKnownWaveScopes).toHaveBeenCalledWith({
+      profileScopedWaveIds: new Set(),
+      publicWaveIds: new Set(["public-wave"]),
+    });
+  });
+
+  it("registers an active private wave as profile scoped", () => {
+    useCapacitorMock.mockReturnValue({ isCapacitor: true, isActive: true });
+    usePathnameMock.mockReturnValue("/waves/private-wave");
+    useActiveWaveManagerMock.mockReturnValue({
+      activeWaveId: "private-wave",
+      setActiveWave: mockSetActiveWave,
+    });
+    useWaveByIdMock.mockReturnValue({
+      wave: {
+        id: "private-wave",
+        chat: { scope: { group: { is_direct_message: false } } },
+        visibility: { scope: { group: { id: "private-group" } } },
+      },
+      isLoading: false,
+      isFetching: false,
+    });
+
+    render(
+      <MyStreamProvider>
+        <div />
+      </MyStreamProvider>
+    );
+
+    expect(mockSetKnownWaveScopes).toHaveBeenCalledWith({
+      profileScopedWaveIds: new Set(["private-wave"]),
+      publicWaveIds: new Set(),
     });
   });
 
