@@ -89,7 +89,7 @@
     },
     {
       "id": "public-reviews.stream",
-      "environments": ["local", "staging"],
+      "environments": ["local", "staging", "production"],
       "public_review_id": "6529-stream",
       "kind": "route",
       "title": "6529 Stream contract review",
@@ -113,7 +113,7 @@
         "not deployed"
       ],
       "facts": [
-        "The 6529 Stream public review lives at /reviews/6529-stream only when both its lifecycle and the current environment permit publication; the initial environment allow-list is local development and shared staging, not production.",
+        "The 6529 Stream public review is published at /reviews/6529-stream in local development, shared staging, and production while its lifecycle permits public routes.",
         "The review presents Stream as an attempt to build the most complete, artist-centered contract system for serious one-of-one digital art, while retaining support for editions where an artist chooses them.",
         "The overview explains which artistic and protocol guarantees each major mechanism protects and which responsibilities a superficially simpler design would abandon or move into websites, databases, custodians, marketplaces, or unwritten recovery processes.",
         "Stream is not deployed and is pre-audit; Current Implementation and Readiness is the authoritative page for connected paths, source-only foundations, accepted targets, proposals, evidence, known limitations, and release blockers.",
@@ -157,7 +157,7 @@
     },
     {
       "id": "public-reviews.stream.feedback-status",
-      "environments": ["local", "staging"],
+      "environments": ["local", "staging", "production"],
       "public_review_id": "6529-stream",
       "kind": "ui_affordance",
       "title": "Stream review feedback and public ledger",
@@ -184,14 +184,15 @@
         "If a reviewer edits the draft or changes its attached page, section, or source range while a post is in flight, a successful response preserves the newer work and the next post uses a fresh submission ID.",
         "A successful feedback post uses the standard app toast; Open discussion in the Wave remains the single route from the review back to the posted discussion.",
         "Every submission carries the immutable review version, page or section, category, suspected severity, and exact source provenance when code is selected.",
-        "Possible exploitable security vulnerabilities are intentionally submitted to the same public pre-deployment review because Stream is not deployed.",
+        "Possible exploitable security vulnerabilities are intentionally submitted to the same public review during Stream's predeployment lifecycle.",
         "The review records a source-confirmed limitation in which finalizing an unfrozen collection before any token is minted writes zero, which setCollectionData can later treat as uninitialized and replace with a nonzero cap; the candidate needs a monotonic finalization guard or equivalent before this promise is irreversible.",
         "Public vulnerability submission is available only during the PUBLIC_REVIEW lifecycle state; deployed reviews use their configured post-deployment disclosure policy.",
         "The public feedback ledger supports category, page, contract, severity, disposition, and text filters plus CSV and Markdown auditor exports.",
         "Ledger entries are identified and deduplicated by immutable Wave drop ID rather than the client-supplied submission UUID.",
         "Ledger metadata for a 50-drop page is hydrated in batches of no more than eight concurrent requests.",
         "A feedback section is accepted only when that exact section is explicitly allowed for the selected page; pages without a section allow-list accept no section IDs.",
-        "Immutable review-version routes have their own version-filtered feedback ledger and exact source-commit banner; review version 2026-07-26.1 is retained with feedback closed while 2026-07-27.1 is the active writing revision.",
+        "Immutable review-version routes have their own version-filtered feedback ledger and exact source-commit banner; review versions 2026-07-26.1 and 2026-07-27.1 are retained with feedback closed while 2026-07-30.1 is the active writing revision.",
+        "Every Stream editorial page includes a visible authorship note explaining that bots wrote the review under punk6529's mission and standards.",
         "Ledger code links open the immutable in-site versioned source and also provide the pinned GitHub source."
       ],
       "canonical_path": "/reviews/6529-stream/feedback",
@@ -200,6 +201,7 @@
         "/reviews/6529-stream/community-review",
         "/reviews/6529-stream/security-testing-and-known-limitations",
         "/reviews/6529-stream/reference",
+        "/reviews/6529-stream/versions/2026-07-30.1/feedback",
         "/reviews/6529-stream/versions/2026-07-27.1/feedback",
         "/reviews/6529-stream/versions/2026-07-26.1/feedback"
       ],

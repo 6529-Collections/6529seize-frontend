@@ -157,8 +157,14 @@ describe("release bus staging artifact transfer", () => {
       deployStep.run.indexOf('ln -sfn "$release_dir/app" "$current_link"')
     );
     expect(deployStep.run).toContain('(has("production") | not)');
-    expect(productionDeployWorkflowSource).not.toContain(
-      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS"
+    expect(productionDeployWorkflowSource).toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_PRODUCTION_DISCUSSION_DESTINATIONS }}"
+    );
+    expect(productionDeployWorkflowSource).toContain(
+      'keys == ["production"]'
+    );
+    expect(productionDeployWorkflowSource).toContain(
+      'OptionName:"PUBLIC_REVIEW_DISCUSSION_DESTINATIONS"'
     );
   });
 

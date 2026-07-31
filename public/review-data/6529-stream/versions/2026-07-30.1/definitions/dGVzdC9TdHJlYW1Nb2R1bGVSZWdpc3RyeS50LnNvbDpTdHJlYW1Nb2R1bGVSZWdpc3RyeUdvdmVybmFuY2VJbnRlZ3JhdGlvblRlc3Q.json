@@ -1,0 +1,1516 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0x0a9254e4",
+          "declaringDefinitionId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "setUp",
+          "outputs": [],
+          "selector": "0x0a9254e4",
+          "signature": "setUp()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0xe0487749",
+          "declaringDefinitionId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testAllRegistryWritersRejectMissingManifestTail",
+          "outputs": [],
+          "selector": "0xe0487749",
+          "signature": "testAllRegistryWritersRejectMissingManifestTail()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0xd6581907",
+          "declaringDefinitionId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testIncidentRevocationThroughImmediateTightening",
+          "outputs": [],
+          "selector": "0xd6581907",
+          "signature": "testIncidentRevocationThroughImmediateTightening()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0xae073687",
+          "declaringDefinitionId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRegistrationThroughDelayedLooseningAction",
+          "outputs": [],
+          "selector": "0xae073687",
+          "signature": "testRegistrationThroughDelayedLooseningAction()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0xb1c1ccdc",
+          "declaringDefinitionId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRegistryManifestUpdateThroughDelayedLooseningWithTail",
+          "outputs": [],
+          "selector": "0xb1c1ccdc",
+          "signature": "testRegistryManifestUpdateThroughDelayedLooseningWithTail()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0xc8c9b7aa",
+          "declaringDefinitionId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRegistryTailRulesPinAllWriterPairsAndMasks",
+          "outputs": [],
+          "selector": "0xc8c9b7aa",
+          "signature": "testRegistryTailRulesPinAllWriterPairsAndMasks()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0xf5b28e45",
+          "declaringDefinitionId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRegistryWriterRejectsDuplicateAndNonFinalManifestTails",
+          "outputs": [],
+          "selector": "0xf5b28e45",
+          "signature": "testRegistryWriterRejectsDuplicateAndNonFinalManifestTails()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0xb4f56a9c",
+          "declaringDefinitionId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testScheduledRegistrationRejectsInterveningCountAndChainDrift",
+          "outputs": [],
+          "selector": "0xb4f56a9c",
+          "signature": "testScheduledRegistrationRejectsInterveningCountAndChainDrift()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "setUp()",
+          "displaySignature": "setUp()",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0x0a9254e4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246MHgwYTkyNTRlNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setUp",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 519,
+            "byteStart": 67268,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L1740-L1751",
+            "lineEnd": 1751,
+            "lineStart": 1740,
+            "snippetSha256": "sha256:c74c7481ff71ec352805b05ea001752ab0db7c5d45cd0ece141c0b599d3c2606",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": "0x0a9254e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_scheduleExecutorCall(uint8,bytes,bytes32,bytes32,bytes32,uint64)",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:_scheduleExecutorCall(uint8,bytes,bytes32,bytes32,bytes32,uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "callScopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "callOldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "callNewValueHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "notBefore",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246X3NjaGVkdWxlRXhlY3V0b3JDYWxsKHVpbnQ4LGJ5dGVzLGJ5dGVzMzIsYnl0ZXMzMixieXRlczMyLHVpbnQ2NCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_scheduleExecutorCall",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "calls",
+              "storageLocation": "memory",
+              "type": "GovernanceCall[]"
+            },
+            {
+              "index": 2,
+              "name": "callDatas",
+              "storageLocation": "memory",
+              "type": "bytes[]"
+            }
+          ],
+          "range": {
+            "byteLength": 1525,
+            "byteStart": 67793,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L1753-L1791",
+            "lineEnd": 1791,
+            "lineStart": 1753,
+            "snippetSha256": "sha256:9c7cc41b3c7f5c0b9726fd407d9a0ceedd0e2b3cb53d0da9b142f64a58a2485e",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_registerRegistryTailRules()",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:_registerRegistryTailRules()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246X3JlZ2lzdGVyUmVnaXN0cnlUYWlsUnVsZXMoKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_registerRegistryTailRules",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 326,
+            "byteStart": 69324,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L1793-L1797",
+            "lineEnd": 1797,
+            "lineStart": 1793,
+            "snippetSha256": "sha256:9823ec5144b9ed0d7931bd508e54637878d1102ea67e2995a4c3a451416556a9",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_registerRegistryTailRule(bytes4,uint8)",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:_registerRegistryTailRule(bytes4,uint8)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "selector",
+              "type": "bytes4"
+            },
+            {
+              "index": 1,
+              "name": "expectedMask",
+              "type": "uint8"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246X3JlZ2lzdGVyUmVnaXN0cnlUYWlsUnVsZShieXRlczQsdWludDgp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_registerRegistryTailRule",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1422,
+            "byteStart": 69656,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L1799-L1825",
+            "lineEnd": 1825,
+            "lineStart": 1799,
+            "snippetSha256": "sha256:eb12fc29be6e98ef5c63d9b7d9e83419559b7336777381f6221bbc289e8643e6",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_tailTriggerTransition(address,bytes4,uint8)",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:_tailTriggerTransition(address,bytes4,uint8)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "selector",
+              "type": "bytes4"
+            },
+            {
+              "index": 2,
+              "name": "mask",
+              "type": "uint8"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246X3RhaWxUcmlnZ2VyVHJhbnNpdGlvbihhZGRyZXNzLGJ5dGVzNCx1aW50OCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_tailTriggerTransition",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 2494,
+            "byteStart": 71084,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L1827-L1897",
+            "lineEnd": 1897,
+            "lineStart": 1827,
+            "snippetSha256": "sha256:e9e1ca6b0ecb9625f598a4838de7ffec87c7ba332dba6c05f65ba7f7dee30ffb",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_aggregateHash(bytes32,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:_aggregateHash(bytes32,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "domain",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "callsHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "value",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246X2FnZ3JlZ2F0ZUhhc2goYnl0ZXMzMixieXRlczMyLGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_aggregateHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 284,
+            "byteStart": 73584,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L1899-L1907",
+            "lineEnd": 1907,
+            "lineStart": 1899,
+            "snippetSha256": "sha256:35afb5b996d6cee752a99b26255c6f12095bc9551e1e8d1b8ee63a7f972d790e",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_buildRegistryBatchWithTail(bytes,bytes32,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:_buildRegistryBatchWithTail(bytes,bytes32,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "registryData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 1,
+              "name": "registryScopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "registryOldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "registryNewValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246X2J1aWxkUmVnaXN0cnlCYXRjaFdpdGhUYWlsKGJ5dGVzLGJ5dGVzMzIsYnl0ZXMzMixieXRlczMyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_buildRegistryBatchWithTail",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "calls",
+              "storageLocation": "memory",
+              "type": "GovernanceCall[]"
+            },
+            {
+              "index": 1,
+              "name": "callDatas",
+              "storageLocation": "memory",
+              "type": "bytes[]"
+            },
+            {
+              "index": 2,
+              "name": "manifestHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 2712,
+            "byteStart": 73874,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L1909-L1972",
+            "lineEnd": 1972,
+            "lineStart": 1909,
+            "snippetSha256": "sha256:f1f263875cbf0375453d370b22115515d5107c0d2468faab82548634f5bd8de2",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_scheduleRegistryBatch(uint8,GovernanceCall[],bytes[],uint64,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:_scheduleRegistryBatch(uint8,GovernanceCall[],bytes[],uint64,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "calls",
+              "storageLocation": "memory",
+              "type": "GovernanceCall[]"
+            },
+            {
+              "index": 2,
+              "name": "callDatas",
+              "storageLocation": "memory",
+              "type": "bytes[]"
+            },
+            {
+              "index": 3,
+              "name": "notBefore",
+              "type": "uint64"
+            },
+            {
+              "index": 4,
+              "name": "manifestHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246X3NjaGVkdWxlUmVnaXN0cnlCYXRjaCh1aW50OCxHb3Zlcm5hbmNlQ2FsbFtdLGJ5dGVzW10sdWludDY0LGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_scheduleRegistryBatch",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 384,
+            "byteStart": 76592,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L1974-L1983",
+            "lineEnd": 1983,
+            "lineStart": 1974,
+            "snippetSha256": "sha256:79ec0bc19d28a3a2ed1340d138a76588708468c63ce6734b252e979b72b94951",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_schedulePublishedRegistryBatch(uint8,GovernanceCall[],uint64,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:_schedulePublishedRegistryBatch(uint8,GovernanceCall[],uint64,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "calls",
+              "storageLocation": "memory",
+              "type": "GovernanceCall[]"
+            },
+            {
+              "index": 2,
+              "name": "notBefore",
+              "type": "uint64"
+            },
+            {
+              "index": 3,
+              "name": "manifestHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246X3NjaGVkdWxlUHVibGlzaGVkUmVnaXN0cnlCYXRjaCh1aW50OCxHb3Zlcm5hbmNlQ2FsbFtdLHVpbnQ2NCxieXRlczMyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_schedulePublishedRegistryBatch",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 714,
+            "byteStart": 76982,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L1985-L2005",
+            "lineEnd": 2005,
+            "lineStart": 1985,
+            "snippetSha256": "sha256:86d794287fc2353d5c5a3552945abdec4d5b1ebb4c9b096ef9aedd88e6aaabda",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_scheduleRegistryCallWithTail(uint8,bytes,bytes32,bytes32,bytes32,uint64)",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:_scheduleRegistryCallWithTail(uint8,bytes,bytes32,bytes32,bytes32,uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "registryData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "registryScopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "registryOldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "registryNewValueHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "notBefore",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246X3NjaGVkdWxlUmVnaXN0cnlDYWxsV2l0aFRhaWwodWludDgsYnl0ZXMsYnl0ZXMzMixieXRlczMyLGJ5dGVzMzIsdWludDY0KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_scheduleRegistryCallWithTail",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "calls",
+              "storageLocation": "memory",
+              "type": "GovernanceCall[]"
+            },
+            {
+              "index": 2,
+              "name": "callDatas",
+              "storageLocation": "memory",
+              "type": "bytes[]"
+            }
+          ],
+          "range": {
+            "byteLength": 643,
+            "byteStart": 77702,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L2007-L2020",
+            "lineEnd": 2020,
+            "lineStart": 2007,
+            "snippetSha256": "sha256:3ea521b71fd26c243a9749f3b4cbdf0b2746a298c74f5f02fdab25b1335b5361",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_registryBatchTransitionHashes(GovernanceCall[])",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:_registryBatchTransitionHashes(GovernanceCall[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "calls",
+              "storageLocation": "memory",
+              "type": "GovernanceCall[]"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246X3JlZ2lzdHJ5QmF0Y2hUcmFuc2l0aW9uSGFzaGVzKEdvdmVybmFuY2VDYWxsW10p",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_registryBatchTransitionHashes",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 926,
+            "byteStart": 78351,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L2022-L2039",
+            "lineEnd": 2039,
+            "lineStart": 2022,
+            "snippetSha256": "sha256:74061e4a7729ee021716de01d6a2389ed7fc339c2048f30e4a00078e23c64619",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_registrationFor(address)",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:_registrationFor(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "moduleAddress",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246X3JlZ2lzdHJhdGlvbkZvcihhZGRyZXNzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_registrationFor",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "registration",
+              "storageLocation": "memory",
+              "type": "StreamModuleRegistration"
+            }
+          ],
+          "range": {
+            "byteLength": 706,
+            "byteStart": 79283,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L2041-L2055",
+            "lineEnd": 2055,
+            "lineStart": 2041,
+            "snippetSha256": "sha256:89dc19d9dc0d35859a5fc5c27956664efd29f0e244ed4810dba5e98a9a577d05",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_registrationTransition(StreamModuleRegistration)",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:_registrationTransition(StreamModuleRegistration)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "registration",
+              "storageLocation": "memory",
+              "type": "StreamModuleRegistration"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246X3JlZ2lzdHJhdGlvblRyYW5zaXRpb24oU3RyZWFtTW9kdWxlUmVnaXN0cmF0aW9uKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_registrationTransition",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 3083,
+            "byteStart": 79995,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L2057-L2148",
+            "lineEnd": 2148,
+            "lineStart": 2057,
+            "snippetSha256": "sha256:7d80c76525823096af1dd24784fdaef27284cc73f2c5318f796fe6629c334435",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_statusTransition(address,ModuleRegistryStatus)",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:_statusTransition(address,ModuleRegistryStatus)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "moduleAddress",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "newStatus",
+              "type": "ModuleRegistryStatus"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246X3N0YXR1c1RyYW5zaXRpb24oYWRkcmVzcyxNb2R1bGVSZWdpc3RyeVN0YXR1cyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_statusTransition",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 1374,
+            "byteStart": 83084,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L2150-L2187",
+            "lineEnd": 2187,
+            "lineStart": 2150,
+            "snippetSha256": "sha256:6305752a6501bd3976b08db1d629a6335cb14033dbe9eef142599228516e3cda",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_manifestTransition(bytes32,string)",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:_manifestTransition(bytes32,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "newManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "newManifestURI",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246X21hbmlmZXN0VHJhbnNpdGlvbihieXRlczMyLHN0cmluZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_manifestTransition",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 1144,
+            "byteStart": 84464,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L2189-L2221",
+            "lineEnd": 2221,
+            "lineStart": 2189,
+            "snippetSha256": "sha256:27dc6c910bcb2c1c46cd87d1d6ae846245b3a8ccd9677de73750587253e09312",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_recordFactsHash(StreamModuleRecord,ModuleRegistryStatus,uint64)",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:_recordFactsHash(StreamModuleRecord,ModuleRegistryStatus,uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "record",
+              "storageLocation": "memory",
+              "type": "StreamModuleRecord"
+            },
+            {
+              "index": 1,
+              "name": "status",
+              "type": "ModuleRegistryStatus"
+            },
+            {
+              "index": 2,
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246X3JlY29yZEZhY3RzSGFzaChTdHJlYW1Nb2R1bGVSZWNvcmQsTW9kdWxlUmVnaXN0cnlTdGF0dXMsdWludDY0KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_recordFactsHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 643,
+            "byteStart": 85614,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L2223-L2242",
+            "lineEnd": 2242,
+            "lineStart": 2223,
+            "snippetSha256": "sha256:d99ed75a730e826b96e9a1388e00af2cb0315c8c612fe8a42c3567bb0f7d8cc1",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertRegistryTailRule(bytes4,uint8)",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:_assertRegistryTailRule(bytes4,uint8)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "selector",
+              "type": "bytes4"
+            },
+            {
+              "index": 1,
+              "name": "expectedMask",
+              "type": "uint8"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246X2Fzc2VydFJlZ2lzdHJ5VGFpbFJ1bGUoYnl0ZXM0LHVpbnQ4KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertRegistryTailRule",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 893,
+            "byteStart": 86263,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L2244-L2259",
+            "lineEnd": 2259,
+            "lineStart": 2244,
+            "snippetSha256": "sha256:cf1229c0b80a6b5af6e8b688f790b93c44c0f30944e53aa4e3c8c24324606581",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_expectMissingManifestTail(uint8,bytes,bytes32,bytes32,bytes32,uint64)",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:_expectMissingManifestTail(uint8,bytes,bytes32,bytes32,bytes32,uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "registryData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "registryScopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "registryOldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "registryNewValueHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "notBefore",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246X2V4cGVjdE1pc3NpbmdNYW5pZmVzdFRhaWwodWludDgsYnl0ZXMsYnl0ZXMzMixieXRlczMyLGJ5dGVzMzIsdWludDY0KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_expectMissingManifestTail",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1043,
+            "byteStart": 87162,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L2261-L2285",
+            "lineEnd": 2285,
+            "lineStart": 2261,
+            "snippetSha256": "sha256:6a2c50ecc4fd1648ac08f74afd2d6a6296d964ab834537ff5c214a3f0086b5f8",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": "testRegistryTailRulesPinAllWriterPairsAndMasks()",
+          "displaySignature": "testRegistryTailRulesPinAllWriterPairsAndMasks()",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0xc8c9b7aa",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246MHhjOGM5YjdhYQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRegistryTailRulesPinAllWriterPairsAndMasks",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 344,
+            "byteStart": 88211,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L2287-L2291",
+            "lineEnd": 2291,
+            "lineStart": 2287,
+            "snippetSha256": "sha256:b994f11eeca7d76a8c989a5ab9dd6e9e5d663074cd744da49f27cda68c7e445f",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": "0xc8c9b7aa",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testAllRegistryWritersRejectMissingManifestTail()",
+          "displaySignature": "testAllRegistryWritersRejectMissingManifestTail()",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0xe0487749",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246MHhlMDQ4Nzc0OQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testAllRegistryWritersRejectMissingManifestTail",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2498,
+            "byteStart": 88561,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L2293-L2355",
+            "lineEnd": 2355,
+            "lineStart": 2293,
+            "snippetSha256": "sha256:68597a46fd72c0f3b05e10a717150fbfd23d6573e1a831d922fb0d9cb211dad3",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": "0xe0487749",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRegistryWriterRejectsDuplicateAndNonFinalManifestTails()",
+          "displaySignature": "testRegistryWriterRejectsDuplicateAndNonFinalManifestTails()",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0xf5b28e45",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246MHhmNWIyOGU0NQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRegistryWriterRejectsDuplicateAndNonFinalManifestTails",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2478,
+            "byteStart": 91065,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L2357-L2412",
+            "lineEnd": 2412,
+            "lineStart": 2357,
+            "snippetSha256": "sha256:995e122291b99ad7905e729c9a3aea10038a304621bffa2589c90eca868259b0",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": "0xf5b28e45",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRegistrationThroughDelayedLooseningAction()",
+          "displaySignature": "testRegistrationThroughDelayedLooseningAction()",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0xae073687",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246MHhhZTA3MzY4Nw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRegistrationThroughDelayedLooseningAction",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1281,
+            "byteStart": 93549,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L2414-L2439",
+            "lineEnd": 2439,
+            "lineStart": 2414,
+            "snippetSha256": "sha256:302f6343f160a4d93c5b29cd02d7197dbe3c5ba865b4a58bd0123ce870e636d2",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": "0xae073687",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testScheduledRegistrationRejectsInterveningCountAndChainDrift()",
+          "displaySignature": "testScheduledRegistrationRejectsInterveningCountAndChainDrift()",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0xb4f56a9c",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246MHhiNGY1NmE5Yw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testScheduledRegistrationRejectsInterveningCountAndChainDrift",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3068,
+            "byteStart": 94836,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L2441-L2502",
+            "lineEnd": 2502,
+            "lineStart": 2441,
+            "snippetSha256": "sha256:97fc88c684d0aa451ef78cee6d0bef684f7c7b329c88e1387c3170a2ea71d61c",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": "0xb4f56a9c",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRegistryManifestUpdateThroughDelayedLooseningWithTail()",
+          "displaySignature": "testRegistryManifestUpdateThroughDelayedLooseningWithTail()",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0xb1c1ccdc",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246MHhiMWMxY2NkYw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRegistryManifestUpdateThroughDelayedLooseningWithTail",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1496,
+            "byteStart": 97910,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L2504-L2534",
+            "lineEnd": 2534,
+            "lineStart": 2504,
+            "snippetSha256": "sha256:714858a4cc7f3730c96acf6d834d75efd935546a50c38fd3882ee5c42736f368",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": "0xb1c1ccdc",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testIncidentRevocationThroughImmediateTightening()",
+          "displaySignature": "testIncidentRevocationThroughImmediateTightening()",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0xd6581907",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3QjZnVuY3Rpb246MHhkNjU4MTkwNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testIncidentRevocationThroughImmediateTightening",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3005,
+            "byteStart": 99412,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L2536-L2606",
+            "lineEnd": 2606,
+            "lineStart": 2536,
+            "snippetSha256": "sha256:e2a86239262747210197f0181dca34f8eef0b9efa5d380eed735c12751d1accb",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": "0xd6581907",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "MODULE_INTERFACE_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 85,
+            "byteStart": 66886,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L1731",
+            "lineEnd": 1731,
+            "lineStart": 1731,
+            "snippetSha256": "sha256:cd9614760c9fa98e6478b8e36e523835563ef1ea4b9a60f923b3f42d13098b61",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "typeString": "bytes4",
+          "valueRange": {
+            "byteLength": 39,
+            "byteStart": 66932,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L1731",
+            "lineEnd": 1731,
+            "lineStart": 1731,
+            "snippetSha256": "sha256:4c9a38b7eaa875a3177ca1573a9c739f60a14b88227a0302fd2952090c84ab39",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "valueSource": "bytes4(keccak256(\"stream.test.module\"))",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "BASE_TIME",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 66977,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L1732",
+            "lineEnd": 1732,
+            "lineStart": 1732,
+            "snippetSha256": "sha256:0eabf62a1bedfc3c5ecf759be8a42584c06406f42076d429f55714d772365ef0",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "type": "uint64",
+          "typeString": "uint64",
+          "valueRange": {
+            "byteLength": 9,
+            "byteStart": 67013,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L1732",
+            "lineEnd": 1732,
+            "lineStart": 1732,
+            "snippetSha256": "sha256:1c99c6a271e54cb5c1dddfef6ce74067ed1f1ad5240a205931fbbdc6c5dd77b2",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "valueSource": "1_000_000",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "executor",
+          "natspec": "",
+          "range": {
+            "byteLength": 41,
+            "byteStart": 67029,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L1734",
+            "lineEnd": 1734,
+            "lineStart": 1734,
+            "snippetSha256": "sha256:94739fd46acc1815898d44ae7b2db9287fb6a4461c4a69276ac3f38ba3b8a7e8",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "type": "StreamGovernanceExecutor",
+          "typeString": "contract StreamGovernanceExecutor",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "registry",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 67076,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L1735",
+            "lineEnd": 1735,
+            "lineStart": 1735,
+            "snippetSha256": "sha256:722aa97f6e7d851860879c5767061c9dbcd7a8ab28c059c05c40811c87110da7",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "type": "StreamModuleRegistry",
+          "typeString": "contract StreamModuleRegistry",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "module",
+          "natspec": "",
+          "range": {
+            "byteLength": 33,
+            "byteStart": 67119,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L1736",
+            "lineEnd": 1736,
+            "lineStart": 1736,
+            "snippetSha256": "sha256:d11978b3ec7bc2e74f8b9729816f7f973f296802a0a1702e3c5ab9126e9923eb",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "type": "RegistryModuleMock",
+          "typeString": "contract RegistryModuleMock",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "systemManifest",
+          "natspec": "",
+          "range": {
+            "byteLength": 60,
+            "byteStart": 67158,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L1737",
+            "lineEnd": 1737,
+            "lineStart": 1737,
+            "snippetSha256": "sha256:2257b0332e862b8a37149c853a196fe62de427732cb1ddbdc95e9302bc27fe0b",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "type": "StreamGovernanceBootstrapManifestMock",
+          "typeString": "contract StreamGovernanceBootstrapManifestMock",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "systemManifestPayload",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 67224,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L1738",
+            "lineEnd": 1738,
+            "lineStart": 1738,
+            "snippetSha256": "sha256:17cc5cb3e1ec34ca4ca3458f54886d46cbe1b2132af66d016348b7ea298e5501",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapHarness",
+        "name": "StreamGovernanceBootstrapHarness"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpTdHJlYW1Nb2R1bGVSZWdpc3RyeUdvdmVybmFuY2VJbnRlZ3JhdGlvblRlc3Q",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest",
+      "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapHarness",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamModuleRegistryGovernanceIntegrationTest",
+    "natspec": "@notice End-to-end: registry lifecycle driven through the real staged\n         governance executor ([LTA-REGISTRY] requirement 5).",
+    "range": {
+      "byteLength": 35764,
+      "byteStart": 66655,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L1725-L2607",
+      "lineEnd": 2607,
+      "lineStart": 1725,
+      "snippetSha256": "sha256:8256568fb9b8e0aea2eb0a023974fcbba500a86ce2ad272a8cf8e2daf9a7f49c",
+      "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamModuleRegistry.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-30.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 8
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 8
+    },
+    "totalCount": 8
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0x0a9254e4",
+      "definitionId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0xae073687",
+      "definitionId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0xb1c1ccdc",
+      "definitionId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0xb4f56a9c",
+      "definitionId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0xc8c9b7aa",
+      "definitionId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0xd6581907",
+      "definitionId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0xe0487749",
+      "definitionId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest#function:0xf5b28e45",
+      "definitionId": "test/StreamModuleRegistry.t.sol:StreamModuleRegistryGovernanceIntegrationTest",
+      "severity": "advisory"
+    }
+  ]
+}

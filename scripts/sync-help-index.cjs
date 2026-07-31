@@ -34,7 +34,11 @@ const LEGACY_WORDPRESS_MARKERS = [
   "wp-json/wp/v2/",
   "wp-content/",
 ];
-const ALLOWED_PUBLICATION_ENVIRONMENTS = new Set(["local", "staging"]);
+const ALLOWED_PUBLICATION_ENVIRONMENTS = new Set([
+  "local",
+  "staging",
+  "production",
+]);
 const PUBLIC_REVIEW_ID_PATTERN = /^[a-z0-9][a-z0-9-]*$/;
 
 function fail(message) {
