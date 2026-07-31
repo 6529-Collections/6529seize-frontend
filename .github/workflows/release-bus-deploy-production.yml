@@ -312,11 +312,19 @@ jobs:
           done
           echo 'Elastic Beanstalk did not reach the expected healthy version.' >&2
           exit 1
+      - name: Check out deployment verifier
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          path: .release-bus-verifier
+          sparse-checkout: ops/scripts/verify-deployment-version.cjs
+          sparse-checkout-cone-mode: false
       - name: Verify exact production version
         id: version
         run: |
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
-          node ops/scripts/verify-deployment-version.cjs \
+          node .release-bus-verifier/ops/scripts/verify-deployment-version.cjs \
             --base-url https://6529.io \
             --expected-version "$EXPECTED_SHA" \
             --attempts 12 \
