@@ -343,9 +343,13 @@ export const useCreateDropSubmission = ({
   readonly handleDuplicateIdentitySubmissionError: (error: unknown) => void;
   readonly markIdentitySubmitAttempted: () => void;
   readonly disableIdentityPickerAutoOpen: () => void;
-  readonly getUpdatedDrop: () => CreateDropConfig;
+  readonly getUpdatedDrop: (
+    markdownOverride?: string | null
+  ) => CreateDropConfig;
   readonly createGifDrop: (gif: string) => CreateDropConfig;
-  readonly finalizeAndAddDropPart: () => CreateDropConfig;
+  readonly finalizeAndAddDropPart: (
+    markdownOverride: string | null
+  ) => CreateDropConfig;
   readonly refreshState: () => void;
   readonly setSubmitting: Dispatch<SetStateAction<boolean>>;
   readonly setUploadingFiles: Dispatch<SetStateAction<UploadingFile[]>>;
@@ -579,9 +583,7 @@ export const useCreateDropSubmission = ({
         isDropMode,
       });
 
-      const handleReplyTargetUnavailableError = (
-        error: unknown
-      ): boolean => {
+      const handleReplyTargetUnavailableError = (error: unknown): boolean => {
         if (
           dropRequest.reply_to === undefined ||
           !isReplyTargetUnavailableError(error)
@@ -692,7 +694,7 @@ export const useCreateDropSubmission = ({
     [files, isDropMode, metadata, wave.participation.required_media]
   );
 
-  const onDrop = async (): Promise<void> => {
+  const onDrop = async (markdownOverride?: string): Promise<void> => {
     if (submitting) {
       return;
     }
@@ -734,15 +736,16 @@ export const useCreateDropSubmission = ({
     }
 
     const hasPartsInDrop = (drop?.parts.length ?? 0) > 0;
+    const submissionMarkdown = markdownOverride ?? getMarkdown;
     const hasCurrentContent =
-      (getMarkdown?.trim().length ?? 0) > 0 || files.length > 0;
+      (submissionMarkdown?.trim().length ?? 0) > 0 || files.length > 0;
 
     if (hasPartsInDrop && hasCurrentContent) {
-      finalizeAndAddDropPart();
+      finalizeAndAddDropPart(submissionMarkdown);
       return;
     }
 
-    await prepareAndSubmitDrop(getUpdatedDrop());
+    await prepareAndSubmitDrop(getUpdatedDrop(submissionMarkdown));
   };
 
   const onGifDrop = async (gif: string): Promise<void> => {

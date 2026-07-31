@@ -1115,6 +1115,32 @@
       ]
     },
     {
+      "id": "profiles.quick-tags",
+      "kind": "ui_affordance",
+      "title": "Profile Quick Tags",
+      "aliases": [
+        "quick tags",
+        "quick tag settings",
+        "mention shortcuts",
+        "personal mention aliases"
+      ],
+      "keywords": ["profile", "quick tags", "mentions", "aliases", "shortcuts"],
+      "facts": [
+        "Quick Tags are managed from the compact owner-only section beneath Activity on the Profile Brain tab.",
+        "The section shows up to three tags in one row and uses a +N more chip when additional tags exist.",
+        "Manage, a visible Quick Tag, and +N more open the Quick Tags manager.",
+        "The section is hidden on other profiles and while acting through a proxy.",
+        "Quick Tags do not have a dedicated profile tab or route."
+      ],
+      "canonical_path": "/{user}/brain",
+      "related_paths": ["/{user}/brain", "/waves"],
+      "tags": ["profiles", "waves", "mentions", "glossary"],
+      "source_refs": [
+        "ops/docs/profiles/navigation/feature-tabs.md",
+        "ops/docs/waves/composer/feature-personal-mention-shortcuts.md"
+      ]
+    },
+    {
       "id": "network.tdh",
       "kind": "glossary",
       "title": "TDH",
@@ -4560,7 +4586,15 @@
         "@all",
         "mention all",
         "mentioned groups",
-        "mentioned waves"
+        "@contributors",
+        "@admins",
+        "@devs6529",
+        "mentioned waves",
+        "mention shortcut",
+        "personal mention alias",
+        "quick tag",
+        "quick tags",
+        "@frens"
       ],
       "keywords": [
         "waves",
@@ -4574,14 +4608,25 @@
       "facts": [
         "Wave-name mentions are typed with # plus at least 2 characters and submit as tracked mentioned_waves metadata.",
         "The special @all group mention can submit mentioned_groups metadata when the current wave/drop context allows mentioning all.",
+        "The case-insensitive @contributors mention targets profiles with Chat access, while @admins targets the Wave creator and profiles with Admin access.",
+        "When Wave Chat access is Anyone, Wave followers are the bounded @contributors audience because there is no finite Chat-access group; muted followers and the author are excluded.",
+        "The @devs6529 mention targets configured 6529 developer profiles that can view the Wave.",
+        "Any profile with Chat access can invoke @contributors, @admins, or @devs6529 by typing the complete token directly or selecting it from suggestions; the backend filters recipients by Wave access.",
+        "Global mention text inside links or inline and fenced code remains literal and does not notify a Wave audience.",
+        "Editing stored global-mention tokens does not resend permission-group notifications; mentioned_groups describes tokens in the current displayed content, not historical notification delivery.",
+        "Global mentions stay visible in posted content; personal Quick Tags expand into individual profile mentions before submission.",
+        "Profiles can create private Quick Tags from the owner-only section beneath Activity on their Profile Brain tab; a Quick Tag such as @frens expands inline into ordinary profile mentions.",
+        "Quick Tags are case-insensitive, cannot use reserved global mention names, and are not stored in the posted drop after expansion.",
         "Mention behavior depends on composer state, supported metadata, and the user's eligibility in the current wave.",
         "The @help6529 helper bot trigger also uses mention detection, but the bot runtime is implemented in the backend."
       ],
       "canonical_path": "/waves",
-      "related_paths": ["/waves"],
+      "related_paths": ["/waves", "/{user}/brain"],
       "tags": ["waves", "composer", "mentions"],
       "source_refs": [
         "ops/docs/waves/composer/feature-wave-mentions.md",
+        "ops/docs/waves/composer/feature-global-mentions.md",
+        "ops/docs/waves/composer/feature-personal-mention-shortcuts.md",
         "helpers/waves/drop-group-mentions.ts",
         "components/waves/CreateDropContent.tsx"
       ]

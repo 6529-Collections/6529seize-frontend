@@ -46,6 +46,7 @@ const PRODUCTION_HOSTNAMES = new Set(["6529.io", "www.6529.io"]);
 const FIRST_PARTY_READONLY_ROUTE_HANDLER_PATHS = new Set([
   "/api/alchemy/contracts",
   "/api/alchemy/token-metadata",
+  "/api/github-preview",
   "/api/open-graph",
   "/api/twitter/preview",
 ]);
