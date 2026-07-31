@@ -75,7 +75,7 @@ function reconcileRuntimeFavicons(
     head.querySelectorAll<HTMLLinkElement>(ICON_LINK_SELECTOR)
   );
   if (iconLinks.indexOf(pngLink) > iconLinks.indexOf(svgLink)) {
-    head.insertBefore(pngLink, svgLink);
+    svgLink.before(pngLink);
   }
 }
 
