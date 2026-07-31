@@ -98,9 +98,7 @@ export const useCreateDropDraftState = ({
   readonly shouldCollapseOptionsAfterMarkdownSyncRef: MutableCurrentRef<boolean>;
 }) => {
   const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>([]);
-  const [mentionedUsers, setMentionedUsers] = useState<
-    Omit<MentionedUser, "current_handle">[]
-  >([]);
+  const mentionedUsersRef = useRef<Omit<MentionedUser, "current_handle">[]>([]);
   const [mentionedWaves, setMentionedWaves] = useState<MentionedWave[]>([]);
   const [dropEditorRefreshKey, setDropEditorRefreshKey] = useState(0);
   const createDropInputRef = useRef<CreateDropInputHandles | null>(null);
@@ -117,9 +115,16 @@ export const useCreateDropDraftState = ({
 
   const onMentionedUser = useCallback(
     (newUser: Omit<MentionedUser, "current_handle">) => {
-      setMentionedUsers((curr) => {
-        return [...curr, newUser];
-      });
+      if (
+        mentionedUsersRef.current.some(
+          (mention) =>
+            mention.mentioned_profile_id === newUser.mentioned_profile_id
+        )
+      ) {
+        return;
+      }
+      const next = [...mentionedUsersRef.current, newUser];
+      mentionedUsersRef.current = next;
     },
     []
   );
@@ -140,12 +145,13 @@ export const useCreateDropDraftState = ({
       readonly mentionedWaves: NonNullable<CreateDropConfig["mentioned_waves"]>;
       readonly referencedNfts: CreateDropConfig["referenced_nfts"];
     }) => {
-      setMentionedUsers(
-        mentionedUsers.map(({ mentioned_profile_id, handle_in_content }) => ({
+      const restoredMentionedUsers = mentionedUsers.map(
+        ({ mentioned_profile_id, handle_in_content }) => ({
           mentioned_profile_id,
           handle_in_content,
-        }))
+        })
       );
+      mentionedUsersRef.current = restoredMentionedUsers;
       setMentionedWaves([...mentionedWaves]);
       setReferencedNfts([...referencedNfts]);
     },
@@ -168,9 +174,11 @@ export const useCreateDropDraftState = ({
     return pollRequest;
   };
 
-  const getInitialDrop = (): CreateDropConfig | null => {
+  const getInitialDrop = (
+    markdownOverride?: string | null
+  ): CreateDropConfig | null => {
     return buildInitialDrop({
-      markdown: getMarkdown,
+      markdown: markdownOverride ?? getMarkdown,
       filesLength: files.length,
       drop,
       activeDrop,
@@ -228,13 +236,15 @@ export const useCreateDropDraftState = ({
     });
   };
 
-  const getUpdatedDrop = (): CreateDropConfig => {
-    const initialDrop = getInitialDrop();
+  const getUpdatedDrop = (
+    markdownOverride?: string | null
+  ): CreateDropConfig => {
+    const initialDrop = getInitialDrop(markdownOverride);
     if (initialDrop) {
       return initialDrop;
     }
 
-    const markdown = getMarkdown;
+    const markdown = markdownOverride ?? getMarkdown;
     const existingMentions = drop?.mentioned_users ?? [];
     const existingNfts = drop?.referenced_nfts ?? [];
     const existingWaves = drop?.mentioned_waves ?? [];
@@ -244,7 +254,7 @@ export const useCreateDropDraftState = ({
         existingMentions,
         existingNfts,
         existingWaves,
-        mentionedUsers,
+        mentionedUsers: mentionedUsersRef.current,
         referencedNfts,
         mentionedWaves,
       });
@@ -266,9 +276,10 @@ export const useCreateDropDraftState = ({
   };
 
   const finalizeAndAddDropPart = (
+    markdownOverride?: string | null,
     replacePartIndex: number | null = null
   ): CreateDropConfig => {
-    const updatedDrop = getUpdatedDrop();
+    const updatedDrop = getUpdatedDrop(markdownOverride);
     if (replacePartIndex === null) {
       updateDropStateAndClearInput(updatedDrop);
       return updatedDrop;
@@ -302,7 +313,7 @@ export const useCreateDropDraftState = ({
     setEditorState(null);
     setMetadata(initialMetadata);
     setPollDraftState(null);
-    setMentionedUsers([]);
+    mentionedUsersRef.current = [];
     setMentionedWaves([]);
     setReferencedNfts([]);
     setDrop(null);
