@@ -241,7 +241,8 @@ export enum ReleaseBusV2CandidateRepositoryEnum {
 }
 export enum ReleaseBusV2CandidateStagingLiveStateEnum {
     NotLive = 'NOT_LIVE',
-    Live = 'LIVE'
+    Live = 'LIVE',
+    Detached = 'DETACHED'
 }
 export enum ReleaseBusV2CandidateStagingTransitionRequestEnum {
     Remove = 'REMOVE',

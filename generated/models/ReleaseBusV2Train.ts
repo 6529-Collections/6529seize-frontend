@@ -230,7 +230,8 @@ export enum ReleaseBusV2TrainStatusEnum {
 }
 export enum ReleaseBusV2TrainStagingPolicyEnum {
     CumulativeAdmittedSetV1 = 'CUMULATIVE_ADMITTED_SET_V1',
-    RestoreValidatedStagingV1 = 'RESTORE_VALIDATED_STAGING_V1'
+    RestoreValidatedStagingV1 = 'RESTORE_VALIDATED_STAGING_V1',
+    AdoptExactDeployedBaselineV1 = 'ADOPT_EXACT_DEPLOYED_BASELINE_V1'
 }
 export enum ReleaseBusV2TrainQualificationPolicyEnum {
     CandidateStagingEvidenceV1 = 'CANDIDATE_STAGING_EVIDENCE_V1',

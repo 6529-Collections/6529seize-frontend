@@ -134,6 +134,7 @@ export enum ReleaseBusV2StagingStateStatusEnum {
     Uninitialized = 'UNINITIALIZED',
     Live = 'LIVE',
     CleanMain = 'CLEAN_MAIN',
-    RollbackFailed = 'ROLLBACK_FAILED'
+    RollbackFailed = 'ROLLBACK_FAILED',
+    DetachedManualOwnership = 'DETACHED_MANUAL_OWNERSHIP'
 }
 
