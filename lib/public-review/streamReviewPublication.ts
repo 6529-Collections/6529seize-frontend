@@ -116,13 +116,16 @@ export function parseStreamReviewVersionIdentities(
 if (
   publication.schemaVersion !== STREAM_REVIEW_PUBLICATION_SCHEMA ||
   publication.reviewId !== STREAM_REVIEW_PUBLICATION_ID ||
-  !isPublicReviewLifecycleState(publication.lifecycleState)
+  !isPublicReviewLifecycleState(publication.lifecycleState) ||
+  typeof publication.productionEnabled !== "boolean"
 ) {
   throw new Error("The Stream public-review publication config is invalid.");
 }
 
 export const STREAM_REVIEW_LIFECYCLE_STATE: PublicReviewLifecycleState =
   publication.lifecycleState;
+export const STREAM_REVIEW_PRODUCTION_ENABLED: boolean =
+  publication.productionEnabled;
 
 export const STREAM_REVIEW_VERSION_IDENTITIES =
   parseStreamReviewVersionIdentities(publication.versions);

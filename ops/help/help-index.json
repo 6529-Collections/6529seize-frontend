@@ -113,7 +113,7 @@
         "not deployed"
       ],
       "facts": [
-        "The 6529 Stream public review lives at /reviews/6529-stream only when both its lifecycle and the current environment permit publication; the initial environment allow-list is local development and shared staging, not production.",
+        "The 6529 Stream public review is published at /reviews/6529-stream in local development, shared staging, and production while its lifecycle permits public routes.",
         "The review presents Stream as an attempt to build the most complete, artist-centered contract system for serious one-of-one digital art, while retaining support for editions where an artist chooses them.",
         "The overview explains which artistic and protocol guarantees each major mechanism protects and which responsibilities a superficially simpler design would abandon or move into websites, databases, custodians, marketplaces, or unwritten recovery processes.",
         "Stream is not deployed and is pre-audit; Current Implementation and Readiness is the authoritative page for connected paths, source-only foundations, accepted targets, proposals, evidence, known limitations, and release blockers.",
