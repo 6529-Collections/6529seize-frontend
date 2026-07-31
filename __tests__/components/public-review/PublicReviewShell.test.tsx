@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 
 import { PublicReviewShell } from "@/components/public-review/PublicReviewShell";
+import { StreamReviewBotAuthorshipNote } from "@/components/public-review/StreamReviewBotAuthorshipNote";
 import {
   STREAM_REVIEW_DEFINITION,
   STREAM_REVIEW_SOURCE_COMMIT,
@@ -28,6 +29,7 @@ describe("PublicReviewShell", () => {
         sections={[{ id: "the-short-answer", title: "The short answer" }]}
         displayedVersion={STREAM_REVIEW_DEFINITION.activeVersion}
         feedbackSlot={<div>Feedback form</div>}
+        introNotice={<StreamReviewBotAuthorshipNote />}
         source={ACTIVE_REVIEW_VERSION.source}
       />
     );
@@ -36,9 +38,14 @@ describe("PublicReviewShell", () => {
       screen.getByRole("heading", { level: 1, name: "Overview" })
     ).toBeInTheDocument();
     expect(screen.getByText("Public review")).toBeInTheDocument();
-    expect(screen.getByText("Not deployed")).toBeInTheDocument();
+    expect(screen.getByText("Predeployment")).toBeInTheDocument();
     expect(screen.getByText("Pre-audit")).toBeInTheDocument();
     expect(screen.getByText("Page 1 of 14")).toBeInTheDocument();
+    expect(
+      screen.getByRole("complementary", { name: "A small human disclosure" })
+    ).toHaveTextContent(
+      "punk6529 would like the record to show that bots wrote this"
+    );
     expect(
       screen.getByRole("heading", { name: "Choose a reading path" })
     ).toBeInTheDocument();

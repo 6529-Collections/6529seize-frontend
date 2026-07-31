@@ -8,6 +8,7 @@ const {
   createReleaseReport,
   evaluateReleaseReadiness,
   heartbeatManifest,
+  parseArgs,
   productionPreflight,
   recordPostDeployWatch,
   recordValidationCheck,
@@ -156,8 +157,14 @@ describe("release bus staging artifact transfer", () => {
       deployStep.run.indexOf('ln -sfn "$release_dir/app" "$current_link"')
     );
     expect(deployStep.run).toContain('(has("production") | not)');
-    expect(productionDeployWorkflowSource).not.toContain(
-      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS"
+    expect(productionDeployWorkflowSource).toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_PRODUCTION_DISCUSSION_DESTINATIONS }}"
+    );
+    expect(productionDeployWorkflowSource).toContain(
+      'keys == ["production"]'
+    );
+    expect(productionDeployWorkflowSource).toContain(
+      'OptionName:"PUBLIC_REVIEW_DISCUSSION_DESTINATIONS"'
     );
   });
 
@@ -828,6 +835,30 @@ describe("deployment bus manifest", () => {
   afterEach(() => {
     jest.restoreAllMocks();
     Reflect.deleteProperty(globalThis, "fetch");
+  });
+
+  it("preserves an explicit empty production candidate from manual workflow dispatch", () => {
+    const args = parseArgs([
+      "--environment",
+      "staging",
+      "--staging-deploy-sha",
+      STAGING_SHA,
+      "--production-candidate-sha",
+      "",
+      "--production-eligible",
+      "false",
+    ]);
+
+    expect(args["production-candidate-sha"]).toBe("");
+    const manifest = buildManifest({
+      environment: args.environment,
+      stagingDeploySha: args["staging-deploy-sha"],
+      productionCandidateSha: args["production-candidate-sha"],
+      productionEligible: args["production-eligible"],
+      now: "2026-06-18T12:00:00.000Z",
+    });
+    expect(manifest.shas.production_candidate_sha).toBeNull();
+    expect(manifest.production_eligible).toBe(false);
   });
 
   it("builds a valid standard staging manifest", () => {

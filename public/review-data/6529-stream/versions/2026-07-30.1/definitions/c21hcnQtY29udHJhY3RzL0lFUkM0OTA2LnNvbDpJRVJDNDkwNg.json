@@ -1,0 +1,177 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IERC4906.sol:IERC4906#event:BatchMetadataUpdate(uint256,uint256)",
+          "declaringDefinitionId": "smart-contracts/IERC4906.sol:IERC4906",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "_fromTokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "_toTokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "BatchMetadataUpdate",
+          "signature": "BatchMetadataUpdate(uint256,uint256)",
+          "topic0": "0x6bd5c950a8d8df17f772f5af37cb3655737899cbf903264b9795592da439661c"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IERC4906.sol:IERC4906#event:MetadataUpdate(uint256)",
+          "declaringDefinitionId": "smart-contracts/IERC4906.sol:IERC4906",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "_tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "MetadataUpdate",
+          "signature": "MetadataUpdate(uint256)",
+          "topic0": "0xf8e1a15aba9398e019f0b49df1a4fde98ee17ae345cb5f6b5e2c27f5033e8ce7"
+        }
+      ],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "published_interface",
+    "classificationReason": "Listed in release-artifacts/contracts.json interfaces.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 10033,
+          "canonicalSignature": "MetadataUpdate(uint256)",
+          "displaySignature": "MetadataUpdate(uint256)",
+          "id": "smart-contracts/IERC4906.sol:IERC4906#event:MetadataUpdate(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "_tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lFUkM0OTA2LnNvbDpJRVJDNDkwNiNldmVudDpNZXRhZGF0YVVwZGF0ZSh1aW50MjU2KQ",
+          "kind": "event",
+          "name": "MetadataUpdate",
+          "natspec": "",
+          "range": {
+            "byteLength": 39,
+            "byteStart": 134,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC4906.sol#L6",
+            "lineEnd": 6,
+            "lineStart": 6,
+            "snippetSha256": "sha256:f41d7a9a2a6a500efc842fabc7161db9d8d2fd587a22e7357de4066bd5e5fc5b",
+            "sourceSha256": "sha256:dbe1d386f0e401d9c98aaef98ad95e6edc9177041a25ea0958a47672a70d2569"
+          },
+          "topic0": "0xf8e1a15aba9398e019f0b49df1a4fde98ee17ae345cb5f6b5e2c27f5033e8ce7"
+        },
+        {
+          "anonymous": false,
+          "astId": 10039,
+          "canonicalSignature": "BatchMetadataUpdate(uint256,uint256)",
+          "displaySignature": "BatchMetadataUpdate(uint256,uint256)",
+          "id": "smart-contracts/IERC4906.sol:IERC4906#event:BatchMetadataUpdate(uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "_fromTokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "name": "_toTokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lFUkM0OTA2LnNvbDpJRVJDNDkwNiNldmVudDpCYXRjaE1ldGFkYXRhVXBkYXRlKHVpbnQyNTYsdWludDI1Nik",
+          "kind": "event",
+          "name": "BatchMetadataUpdate",
+          "natspec": "",
+          "range": {
+            "byteLength": 68,
+            "byteStart": 178,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC4906.sol#L7",
+            "lineEnd": 7,
+            "lineStart": 7,
+            "snippetSha256": "sha256:ebd14c6f6bba39c9ae5b2595eace6776eb7232e0c1ccd9df8ace955da0ad8d51",
+            "sourceSha256": "sha256:dbe1d386f0e401d9c98aaef98ad95e6edc9177041a25ea0958a47672a70d2569"
+          },
+          "topic0": "0x6bd5c950a8d8df17f772f5af37cb3655737899cbf903264b9795592da439661c"
+        }
+      ],
+      "functions": [],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IERC4906.sol:IERC4906",
+    "inheritance": [],
+    "interface": {
+      "abiSha256": "sha256:1a0ec850075a0dda86b33880a319e649251d516cbfcd35d60675a909eeb10006",
+      "interfaceId": "0x49064906",
+      "interfaceIdSource": "configured",
+      "published": true
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lFUkM0OTA2LnNvbDpJRVJDNDkwNg",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IERC4906.sol:IERC4906"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "published_interface"
+    },
+    "name": "IERC4906",
+    "natspec": "@dev ERC-4906 metadata update event interface.",
+    "range": {
+      "byteLength": 139,
+      "byteStart": 109,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC4906.sol#L5-L8",
+      "lineEnd": 8,
+      "lineStart": 5,
+      "snippetSha256": "sha256:64a4573845c4dc3625736718e2511d34d44dc811df4bbfacc3e11c039b9e9beb",
+      "sourceSha256": "sha256:dbe1d386f0e401d9c98aaef98ad95e6edc9177041a25ea0958a47672a70d2569"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IERC4906.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-30.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

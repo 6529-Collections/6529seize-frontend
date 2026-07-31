@@ -1,0 +1,112 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "fallback()",
+          "functionKind": "fallback",
+          "id": "test/StreamContractMetadata.t.sol:EmptyMarker#function:fallback()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db250cmFjdE1ldGFkYXRhLnQuc29sOkVtcHR5TWFya2VyI2Z1bmN0aW9uOmZhbGxiYWNrKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "fallback",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 23,
+            "byteStart": 13640,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamContractMetadata.t.sol#L300",
+            "lineEnd": 300,
+            "lineStart": 300,
+            "snippetSha256": "sha256:e7c0019a59adbdfd41cb6ebfe536113dbb3473e74dcf0cd08fe6fffae6923231",
+            "sourceSha256": "sha256:36e976a33ecf60231867159f36718a47d8803813dfae7e49b3e3c58a1ead2876"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamContractMetadata.t.sol:EmptyMarker",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Db250cmFjdE1ldGFkYXRhLnQuc29sOkVtcHR5TWFya2Vy",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamContractMetadata.t.sol:EmptyMarker"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "EmptyMarker",
+    "natspec": "",
+    "range": {
+      "byteLength": 52,
+      "byteStart": 13613,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamContractMetadata.t.sol#L299-L301",
+      "lineEnd": 301,
+      "lineStart": 299,
+      "snippetSha256": "sha256:5a68784a1760d49b6714f35ddd1fd558e689233dd0a14a4815bf71a74f22bafc",
+      "sourceSha256": "sha256:36e976a33ecf60231867159f36718a47d8803813dfae7e49b3e3c58a1ead2876"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamContractMetadata.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-30.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamContractMetadata.t.sol:EmptyMarker",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamContractMetadata.t.sol:EmptyMarker#function:fallback()",
+      "definitionId": "test/StreamContractMetadata.t.sol:EmptyMarker",
+      "severity": "advisory"
+    }
+  ]
+}
