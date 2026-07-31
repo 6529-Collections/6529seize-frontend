@@ -176,7 +176,8 @@ describe("sync-agent-files", () => {
       for (const requiredPath of REQUIRED_LLMS_PATHS) {
         expect(llms).toContain(requiredPath);
       }
-      expect(llms).toContain(`${glossary.term_count} term`);
+      expect(llms).toContain("Term definitions");
+      expect(llms).not.toContain(`${glossary.term_count} term`);
     });
 
     it("matches the committed public artifacts (run `6529 run agent-files:sync` after editing the corpus)", () => {
