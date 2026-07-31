@@ -207,7 +207,15 @@ jobs:
           status="$(jq -er .status "$result")"
           failure_class="$(jq -r '.failure_class // ""' "$result")"
           failure_phase="$(jq -r '.failure_phase // ""' "$result")"
-          retryable="$(jq -er .retryable "$result")"
+          retryable="$(
+            jq -er '
+              if (.retryable | type) == "boolean" then
+                (.retryable | tostring)
+              else
+                error("retryable must be a boolean")
+              end
+            ' "$result"
+          )"
           summary="$(jq -c .summary "$result")"
           payload="$(jq -n \
             --arg train_id "$TRAIN_ID" \
