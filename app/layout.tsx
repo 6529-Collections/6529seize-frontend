@@ -17,13 +17,16 @@ import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
 import MobileLaunchTimingReporter from "@/components/monitoring/MobileLaunchTimingReporter";
 import LayoutWrapper from "@/components/providers/LayoutWrapper";
 import Providers from "@/components/providers/Providers";
+import RuntimeFavicon from "@/components/providers/RuntimeFavicon";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { getProductionAppEnvironment } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";
 import type { Viewport } from "next";
 
 export const fetchCache = "force-no-store";
 
 export const metadata = getAppMetadata();
+const productionEnvironment = getProductionAppEnvironment();
 export const viewport: Viewport = {
   width: "device-width",
   viewportFit: "cover",
@@ -42,6 +45,20 @@ export default function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <head>
+        <link
+          data-runtime-favicon="png"
+          rel="icon"
+          href={productionEnvironment.faviconFallback}
+          type="image/png"
+          sizes="96x96"
+        />
+        <link
+          data-runtime-favicon="svg"
+          rel="icon"
+          href={productionEnvironment.favicon}
+          type="image/svg+xml"
+          sizes="any"
+        />
         <link rel="preconnect" href={publicEnv.API_ENDPOINT} crossOrigin="" />
         <link rel="preconnect" href="https://d3lqz0a4bldqgf.cloudfront.net" />
         <link rel="preconnect" href="https://media.artblocks.io" />
@@ -52,6 +69,7 @@ export default function RootLayout({
       </head>
       {/* The touch-first helper may restore data-fine-pointer before hydration. */}
       <body suppressHydrationWarning>
+        <RuntimeFavicon />
         <MobileLaunchTimingReporter />
         <AwsRumProvider>
           <Providers>
