@@ -1,5 +1,5 @@
 {
-  "activeVersion": "2026-07-28.2",
+  "activeVersion": "2026-07-30.1",
   "reviewId": "6529-stream",
   "schemaVersion": "public-review.solidity-reference-index.v1",
   "versions": [
@@ -30,6 +30,13 @@
       "commit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786",
       "tree": "b50ec53109f5f8d6b4f4b07f4cb6fd3c1d0e3100",
       "version": "2026-07-28.2"
+    },
+    {
+      "bundlePath": "/review-data/6529-stream/versions/2026-07-30.1/reference-manifest.json",
+      "bundleSha256": "sha256:aa18e1661925d22c9e8b9fc054b3ac3114ffeccf6d341995343e91bbf7f90b09",
+      "commit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786",
+      "tree": "b50ec53109f5f8d6b4f4b07f4cb6fd3c1d0e3100",
+      "version": "2026-07-30.1"
     }
   ]
 }

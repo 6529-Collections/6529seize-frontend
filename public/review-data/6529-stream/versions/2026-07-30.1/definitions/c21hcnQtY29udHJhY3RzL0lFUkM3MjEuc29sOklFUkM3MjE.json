@@ -1,0 +1,955 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#event:Approval(address,address,uint256)",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "approved",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "Approval",
+          "signature": "Approval(address,address,uint256)",
+          "topic0": "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#event:ApprovalForAll(address,address,bool)",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "internalType": "bool",
+              "name": "approved",
+              "type": "bool"
+            }
+          ],
+          "name": "ApprovalForAll",
+          "signature": "ApprovalForAll(address,address,bool)",
+          "topic0": "0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#event:Transfer(address,address,uint256)",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "Transfer",
+          "signature": "Transfer(address,address,uint256)",
+          "topic0": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#function:0x095ea7b3",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "approve",
+          "outputs": [],
+          "selector": "0x095ea7b3",
+          "signature": "approve(address,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#function:0x70a08231",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "name": "balanceOf",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "balance",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x70a08231",
+          "signature": "balanceOf(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#function:0x081812fc",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "getApproved",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            }
+          ],
+          "selector": "0x081812fc",
+          "signature": "getApproved(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#function:0xe985e9c5",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            }
+          ],
+          "name": "isApprovedForAll",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xe985e9c5",
+          "signature": "isApprovedForAll(address,address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#function:0x6352211e",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "ownerOf",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "selector": "0x6352211e",
+          "signature": "ownerOf(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#function:0x42842e0e",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "safeTransferFrom",
+          "outputs": [],
+          "selector": "0x42842e0e",
+          "signature": "safeTransferFrom(address,address,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#function:0xb88d4fde",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "name": "safeTransferFrom",
+          "outputs": [],
+          "selector": "0xb88d4fde",
+          "signature": "safeTransferFrom(address,address,uint256,bytes)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#function:0xa22cb465",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bool",
+              "name": "approved",
+              "type": "bool"
+            }
+          ],
+          "name": "setApprovalForAll",
+          "outputs": [],
+          "selector": "0xa22cb465",
+          "signature": "setApprovalForAll(address,bool)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IERC165.sol:IERC165#function:0x01ffc9a7",
+          "declaringDefinitionId": "smart-contracts/IERC165.sol:IERC165",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IERC721.sol:IERC721#function:0x23b872dd",
+          "declaringDefinitionId": "smart-contracts/IERC721.sol:IERC721",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "transferFrom",
+          "outputs": [],
+          "selector": "0x23b872dd",
+          "signature": "transferFrom(address,address,uint256)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "published_interface",
+    "classificationReason": "Listed in release-artifacts/contracts.json interfaces.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 10054,
+          "canonicalSignature": "Transfer(address,address,uint256)",
+          "displaySignature": "Transfer(address,address,uint256)",
+          "id": "smart-contracts/IERC721.sol:IERC721#event:Transfer(address,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lFUkM3MjEuc29sOklFUkM3MjEjZXZlbnQ6VHJhbnNmZXIoYWRkcmVzcyxhZGRyZXNzLHVpbnQyNTYp",
+          "kind": "event",
+          "name": "Transfer",
+          "natspec": "@dev Emitted when `tokenId` token is transferred from `from` to `to`.",
+          "range": {
+            "byteLength": 82,
+            "byteStart": 355,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC721.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:aee9bb2186768344ffadcce4b8d64758f078daef80fdf55040999126d737d21e",
+            "sourceSha256": "sha256:0ea9a40d2e483bbfb9fdf603e02fb525168973130aea4171f81f037a544b1e8e"
+          },
+          "topic0": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+        },
+        {
+          "anonymous": false,
+          "astId": 10063,
+          "canonicalSignature": "Approval(address,address,uint256)",
+          "displaySignature": "Approval(address,address,uint256)",
+          "id": "smart-contracts/IERC721.sol:IERC721#event:Approval(address,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "approved",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lFUkM3MjEuc29sOklFUkM3MjEjZXZlbnQ6QXBwcm92YWwoYWRkcmVzcyxhZGRyZXNzLHVpbnQyNTYp",
+          "kind": "event",
+          "name": "Approval",
+          "natspec": "@dev Emitted when `owner` enables `approved` to manage the `tokenId` token.",
+          "range": {
+            "byteLength": 89,
+            "byteStart": 542,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC721.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:c2ecd0cefd1dd88203ce576c502cd0caf4bce15eec79dae1c7efd305aced54be",
+            "sourceSha256": "sha256:0ea9a40d2e483bbfb9fdf603e02fb525168973130aea4171f81f037a544b1e8e"
+          },
+          "topic0": "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+        },
+        {
+          "anonymous": false,
+          "astId": 10072,
+          "canonicalSignature": "ApprovalForAll(address,address,bool)",
+          "displaySignature": "ApprovalForAll(address,address,bool)",
+          "id": "smart-contracts/IERC721.sol:IERC721#event:ApprovalForAll(address,address,bool)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "name": "approved",
+              "type": "bool"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lFUkM3MjEuc29sOklFUkM3MjEjZXZlbnQ6QXBwcm92YWxGb3JBbGwoYWRkcmVzcyxhZGRyZXNzLGJvb2wp",
+          "kind": "event",
+          "name": "ApprovalForAll",
+          "natspec": "@dev Emitted when `owner` enables or disables (`approved`) `operator` to manage all of its assets.",
+          "range": {
+            "byteLength": 85,
+            "byteStart": 759,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC721.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:09e20540f6d18fc8d47197830c73cd790ac5851d654dd59c66de9dc63f0c4e0e",
+            "sourceSha256": "sha256:0ea9a40d2e483bbfb9fdf603e02fb525168973130aea4171f81f037a544b1e8e"
+          },
+          "topic0": "0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "balanceOf(address)",
+          "displaySignature": "balanceOf(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IERC721.sol:IERC721#function:0x70a08231",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lFUkM3MjEuc29sOklFUkM3MjEjZnVuY3Rpb246MHg3MGEwODIzMQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "balanceOf",
+          "natspec": "@dev Returns the number of tokens in ``owner``'s account.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "balance",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 74,
+            "byteStart": 931,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC721.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:81086582a298e7b1ee9b4ae3ce3d0981c780c6bb00fea63752c04a9a83cfd78e",
+            "sourceSha256": "sha256:0ea9a40d2e483bbfb9fdf603e02fb525168973130aea4171f81f037a544b1e8e"
+          },
+          "selector": "0x70a08231",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "ownerOf(uint256)",
+          "displaySignature": "ownerOf(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IERC721.sol:IERC721#function:0x6352211e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lFUkM3MjEuc29sOklFUkM3MjEjZnVuY3Rpb246MHg2MzUyMjExZQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "ownerOf",
+          "natspec": "@dev Returns the owner of the `tokenId` token.\n Requirements:\n - `tokenId` must exist.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 72,
+            "byteStart": 1147,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC721.sol#L40",
+            "lineEnd": 40,
+            "lineStart": 40,
+            "snippetSha256": "sha256:c79eb7bb307c16d1bb6135eafc7fcee676eaa3e208d4223751ba59b4ef9c213f",
+            "sourceSha256": "sha256:0ea9a40d2e483bbfb9fdf603e02fb525168973130aea4171f81f037a544b1e8e"
+          },
+          "selector": "0x6352211e",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "safeTransferFrom(address,address,uint256,bytes)",
+          "displaySignature": "safeTransferFrom(address,address,uint256,bytes)",
+          "functionKind": "function",
+          "id": "smart-contracts/IERC721.sol:IERC721#function:0xb88d4fde",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "data",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lFUkM3MjEuc29sOklFUkM3MjEjZnVuY3Rpb246MHhiODhkNGZkZQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "safeTransferFrom",
+          "natspec": "@dev Safely transfers `tokenId` token from `from` to `to`.\n Requirements:\n - `from` cannot be the zero address.\n - `to` cannot be the zero address.\n - `tokenId` token must exist and be owned by `from`.\n - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}.\n - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.\n Emits a {Transfer} event.",
+          "outputs": [],
+          "range": {
+            "byteLength": 99,
+            "byteStart": 1786,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC721.sol#L55",
+            "lineEnd": 55,
+            "lineStart": 55,
+            "snippetSha256": "sha256:a0bdbb7d8ac567b86f1f5064d7fbb3d579d81f0f52cdfa254d1e9247fff95c16",
+            "sourceSha256": "sha256:0ea9a40d2e483bbfb9fdf603e02fb525168973130aea4171f81f037a544b1e8e"
+          },
+          "selector": "0xb88d4fde",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "safeTransferFrom(address,address,uint256)",
+          "displaySignature": "safeTransferFrom(address,address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IERC721.sol:IERC721#function:0x42842e0e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lFUkM3MjEuc29sOklFUkM3MjEjZnVuY3Rpb246MHg0Mjg0MmUwZQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "safeTransferFrom",
+          "natspec": "@dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients\n are aware of the ERC721 protocol to prevent tokens from being forever locked.\n Requirements:\n - `from` cannot be the zero address.\n - `to` cannot be the zero address.\n - `tokenId` token must exist and be owned by `from`.\n - If the caller is not `from`, it must have been allowed to move this token by either {approve} or {setApprovalForAll}.\n - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.\n Emits a {Transfer} event.",
+          "outputs": [],
+          "range": {
+            "byteLength": 78,
+            "byteStart": 2583,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC721.sol#L71",
+            "lineEnd": 71,
+            "lineStart": 71,
+            "snippetSha256": "sha256:d82b9c51d8e1f55fd40bc49e8dc31d0ba1e7eefa570112c332ac39620b6c2578",
+            "sourceSha256": "sha256:0ea9a40d2e483bbfb9fdf603e02fb525168973130aea4171f81f037a544b1e8e"
+          },
+          "selector": "0x42842e0e",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "transferFrom(address,address,uint256)",
+          "displaySignature": "transferFrom(address,address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IERC721.sol:IERC721#function:0x23b872dd",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lFUkM3MjEuc29sOklFUkM3MjEjZnVuY3Rpb246MHgyM2I4NzJkZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "transferFrom",
+          "natspec": "@dev Transfers `tokenId` token from `from` to `to`.\n WARNING: Note that the caller is responsible to confirm that the recipient is capable of receiving ERC721\n or else they may be permanently lost. Usage of {safeTransferFrom} prevents loss, though the caller must\n understand this adds an external call which potentially creates a reentrancy vulnerability.\n Requirements:\n - `from` cannot be the zero address.\n - `to` cannot be the zero address.\n - `tokenId` token must be owned by `from`.\n - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}.\n Emits a {Transfer} event.",
+          "outputs": [],
+          "range": {
+            "byteLength": 74,
+            "byteStart": 3404,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC721.sol#L89",
+            "lineEnd": 89,
+            "lineStart": 89,
+            "snippetSha256": "sha256:db3d51e148851a04f4d30ba062301dd1ceaa88926b6376d13c77e9617a0bcfa4",
+            "sourceSha256": "sha256:0ea9a40d2e483bbfb9fdf603e02fb525168973130aea4171f81f037a544b1e8e"
+          },
+          "selector": "0x23b872dd",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "approve(address,uint256)",
+          "displaySignature": "approve(address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IERC721.sol:IERC721#function:0x095ea7b3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lFUkM3MjEuc29sOklFUkM3MjEjZnVuY3Rpb246MHgwOTVlYTdiMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "approve",
+          "natspec": "@dev Gives permission to `to` to transfer `tokenId` token to another account.\n The approval is cleared when the token is transferred.\n Only a single account can be approved at a time, so approving the zero address clears previous approvals.\n Requirements:\n - The caller must own the token or be an approved operator.\n - `tokenId` must exist.\n Emits an {Approval} event.",
+          "outputs": [],
+          "range": {
+            "byteLength": 55,
+            "byteStart": 3941,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC721.sol#L104",
+            "lineEnd": 104,
+            "lineStart": 104,
+            "snippetSha256": "sha256:3034263b699b964950fd95a331caefcd51a018f22428dbaa0e9e1b566d7a57e6",
+            "sourceSha256": "sha256:0ea9a40d2e483bbfb9fdf603e02fb525168973130aea4171f81f037a544b1e8e"
+          },
+          "selector": "0x095ea7b3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setApprovalForAll(address,bool)",
+          "displaySignature": "setApprovalForAll(address,bool)",
+          "functionKind": "function",
+          "id": "smart-contracts/IERC721.sol:IERC721#function:0xa22cb465",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "approved",
+              "type": "bool"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lFUkM3MjEuc29sOklFUkM3MjEjZnVuY3Rpb246MHhhMjJjYjQ2NQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setApprovalForAll",
+          "natspec": "@dev Approve or remove `operator` as an operator for the caller.\n Operators can call {transferFrom} or {safeTransferFrom} for any token owned by the caller.\n Requirements:\n - The `operator` cannot be the caller.\n Emits an {ApprovalForAll} event.",
+          "outputs": [],
+          "range": {
+            "byteLength": 69,
+            "byteStart": 4316,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC721.sol#L116",
+            "lineEnd": 116,
+            "lineStart": 116,
+            "snippetSha256": "sha256:1b481c3dbc3a875e006622fad992cf2da48297acaae680770c9617ecaf140e36",
+            "sourceSha256": "sha256:0ea9a40d2e483bbfb9fdf603e02fb525168973130aea4171f81f037a544b1e8e"
+          },
+          "selector": "0xa22cb465",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "getApproved(uint256)",
+          "displaySignature": "getApproved(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IERC721.sol:IERC721#function:0x081812fc",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lFUkM3MjEuc29sOklFUkM3MjEjZnVuY3Rpb246MHgwODE4MTJmYw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "getApproved",
+          "natspec": "@dev Returns the account approved for `tokenId` token.\n Requirements:\n - `tokenId` must exist.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "operator",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 79,
+            "byteStart": 4535,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC721.sol#L125",
+            "lineEnd": 125,
+            "lineStart": 125,
+            "snippetSha256": "sha256:e136d4df9547a76ce8ee0b11365b9984c1ebdf106e6ba00c77cb3125d10a1da9",
+            "sourceSha256": "sha256:0ea9a40d2e483bbfb9fdf603e02fb525168973130aea4171f81f037a544b1e8e"
+          },
+          "selector": "0x081812fc",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isApprovedForAll(address,address)",
+          "displaySignature": "isApprovedForAll(address,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IERC721.sol:IERC721#function:0xe985e9c5",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "operator",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lFUkM3MjEuc29sOklFUkM3MjEjZnVuY3Rpb246MHhlOTg1ZTljNQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isApprovedForAll",
+          "natspec": "@dev Returns if the `operator` is allowed to manage all of the assets of `owner`.\n See {setApprovalForAll}",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 88,
+            "byteStart": 4763,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC721.sol#L132",
+            "lineEnd": 132,
+            "lineStart": 132,
+            "snippetSha256": "sha256:23b117693756ccb51351aa72251c26fd9010902ce5fb277fe03b76139109ba4d",
+            "sourceSha256": "sha256:0ea9a40d2e483bbfb9fdf603e02fb525168973130aea4171f81f037a544b1e8e"
+          },
+          "selector": "0xe985e9c5",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IERC721.sol:IERC721",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/IERC165.sol:IERC165",
+        "name": "IERC165"
+      }
+    ],
+    "interface": {
+      "abiSha256": "sha256:c6cb2310d6dc4368f45ae89b64a55369785d8196967a6146d663964661a97662",
+      "interfaceId": "0x80ac58cd",
+      "interfaceIdSource": "configured",
+      "published": true
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lFUkM3MjEuc29sOklFUkM3MjE",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IERC721.sol:IERC721",
+      "smart-contracts/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "published_interface"
+    },
+    "name": "IERC721",
+    "natspec": "",
+    "range": {
+      "byteLength": 4626,
+      "byteStart": 227,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IERC721.sol#L12-L133",
+      "lineEnd": 133,
+      "lineStart": 12,
+      "snippetSha256": "sha256:cf70bae8f72d87edd898a02bb54bd78a3f54634c2505c72b1557ac0dbb53d5c1",
+      "sourceSha256": "sha256:0ea9a40d2e483bbfb9fdf603e02fb525168973130aea4171f81f037a544b1e8e"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IERC721.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-30.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 1
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1
+    },
+    "totalCount": 1
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/IERC721.sol:IERC721",
+      "severity": "advisory"
+    }
+  ]
+}

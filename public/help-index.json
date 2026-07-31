@@ -88,6 +88,131 @@
       ]
     },
     {
+      "id": "public-reviews.stream",
+      "kind": "route",
+      "title": "6529 Stream contract review",
+      "aliases": [
+        "stream",
+        "stream review",
+        "stream contract",
+        "6529 stream",
+        "contract review",
+        "public contract review"
+      ],
+      "keywords": [
+        "stream",
+        "contract",
+        "review",
+        "solidity",
+        "artist",
+        "audit",
+        "security",
+        "pre-audit",
+        "not deployed"
+      ],
+      "facts": [
+        "The 6529 Stream public review is published at /reviews/6529-stream in local development, shared staging, and production while its lifecycle permits public routes.",
+        "The review presents Stream as an attempt to build the most complete, artist-centered contract system for serious one-of-one digital art, while retaining support for editions where an artist chooses them.",
+        "The overview explains which artistic and protocol guarantees each major mechanism protects and which responsibilities a superficially simpler design would abandon or move into websites, databases, custodians, marketplaces, or unwritten recovery processes.",
+        "Stream is not deployed and is pre-audit; Current Implementation and Readiness is the authoritative page for connected paths, source-only foundations, accepted targets, proposals, evidence, known limitations, and release blockers.",
+        "Fourteen editorial pages explain artwork lifecycle, artist controls, roles, curation and TDH authorization, minting, sales, revenue, randomness, metadata, freezing, governance, current implementation and readiness, and community review.",
+        "Every page shows the review version, exact source link, page navigation, on-page contents, and a collapsible feedback rail; detailed evidence and release status are centralized on Current Implementation and Readiness.",
+        "Review, Technical reference, and Public feedback are the three consistent top-level review areas shown below the status banner; page comments and sending feedback remain separate page actions.",
+        "Active and historical routes read immutable versioned editorial content and validate its manifest before rendering.",
+        "Each immutable version has its own lifecycle, deployment status, and audit status: superseded versions can remain readable as REVIEW_CLOSED, stop accepting submissions, link back to the current review, and avoid inheriting newer deployment or audit claims.",
+        "The generated technical reference exposes the exact versioned Solidity source, definitions, functions, events, errors, and other declarations.",
+        "The all-declarations explorer applies its text, kind, scope, and location filters on the server and returns at most 100 matches per page instead of sending the complete declaration inventory to the browser.",
+        "Every editorial page combines its version-scoped comments and structured feedback composer in a collapsible rail that docks beside wide documents and opens as a dismissible right-side overlay on narrower layouts.",
+        "The reusable lifecycle map supports draft, scheduled, public review, review closed, remediation, audit, final candidate, deployed, and archived states; only public review accepts new feedback.",
+        "While the lifecycle is DRAFT, navigation and all editorial, technical-reference, source, declaration-search, and feedback-ledger routes are unavailable, and raw generated evidence plus editorial content are omitted from staging packages.",
+        "When enabled, NFTs > 6529 Stream — Review appears after ReMemes and before NFT Activity."
+      ],
+      "canonical_path": "/reviews/6529-stream",
+      "related_paths": [
+        "/stream",
+        "/reviews/6529-stream/artwork-lifecycle",
+        "/reviews/6529-stream/for-artists",
+        "/reviews/6529-stream/roles-and-trust",
+        "/reviews/6529-stream/curation-and-tdh-authorization",
+        "/reviews/6529-stream/tokens-collections-and-minting",
+        "/reviews/6529-stream/fixed-price-sales-and-auctions",
+        "/reviews/6529-stream/revenue-splits-and-royalties",
+        "/reviews/6529-stream/randomness",
+        "/reviews/6529-stream/metadata-scripts-and-dependencies",
+        "/reviews/6529-stream/freezing-preservation-and-artwork-finality",
+        "/reviews/6529-stream/governance-pausing-and-successors",
+        "/reviews/6529-stream/security-testing-and-known-limitations",
+        "/reviews/6529-stream/community-review",
+        "/reviews/6529-stream/reference",
+        "/reviews/6529-stream/feedback"
+      ],
+      "tags": ["stream", "contract", "review", "security"],
+      "source_refs": [
+        "app/reviews/[review]/page.tsx",
+        "components/public-review/PublicReviewShell.tsx",
+        "ops/docs/public-reviews/README.md"
+      ]
+    },
+    {
+      "id": "public-reviews.stream.feedback-status",
+      "kind": "ui_affordance",
+      "title": "Stream review feedback and public ledger",
+      "aliases": [
+        "stream feedback",
+        "comment on stream",
+        "report stream issue",
+        "stream review wave"
+      ],
+      "keywords": [
+        "stream",
+        "feedback",
+        "comment",
+        "security",
+        "vulnerability",
+        "source"
+      ],
+      "facts": [
+        "Every Stream editorial and technical reference page has one structured feedback composer connected to the server-resolved Stream review Wave destination.",
+        "Editorial pages place the current page's loaded comments and composer in one collapsible rail; closing and reopening it preserves the current draft, and the browser remembers the open or closed preference.",
+        "The page-comments rail reads the most recent 50 Wave messages for the exact review version, shows entries attached to the current page, and can load older 50-message pages on request.",
+        "Editorial feedback can reference a stable page section; technical feedback can reference an exact Solidity file and line range.",
+        "A code-reference submission remains unavailable until the browser computes the exact selected snippet checksum; changing the selection invalidates any earlier preview but preserves the written draft.",
+        "If a reviewer edits the draft or changes its attached page, section, or source range while a post is in flight, a successful response preserves the newer work and the next post uses a fresh submission ID.",
+        "A successful feedback post uses the standard app toast; Open discussion in the Wave remains the single route from the review back to the posted discussion.",
+        "Every submission carries the immutable review version, page or section, category, suspected severity, and exact source provenance when code is selected.",
+        "Possible exploitable security vulnerabilities are intentionally submitted to the same public review during Stream's predeployment lifecycle.",
+        "The review records a source-confirmed limitation in which finalizing an unfrozen collection before any token is minted writes zero, which setCollectionData can later treat as uninitialized and replace with a nonzero cap; the candidate needs a monotonic finalization guard or equivalent before this promise is irreversible.",
+        "Public vulnerability submission is available only during the PUBLIC_REVIEW lifecycle state; deployed reviews use their configured post-deployment disclosure policy.",
+        "The public feedback ledger supports category, page, contract, severity, disposition, and text filters plus CSV and Markdown auditor exports.",
+        "Ledger entries are identified and deduplicated by immutable Wave drop ID rather than the client-supplied submission UUID.",
+        "Ledger metadata for a 50-drop page is hydrated in batches of no more than eight concurrent requests.",
+        "A feedback section is accepted only when that exact section is explicitly allowed for the selected page; pages without a section allow-list accept no section IDs.",
+        "Immutable review-version routes have their own version-filtered feedback ledger and exact source-commit banner; review versions 2026-07-26.1 and 2026-07-27.1 are retained with feedback closed while 2026-07-30.1 is the active writing revision.",
+        "Every Stream editorial page includes a visible authorship note explaining that bots wrote the review under punk6529's mission and standards.",
+        "Ledger code links open the immutable in-site versioned source and also provide the pinned GitHub source."
+      ],
+      "canonical_path": "/reviews/6529-stream/feedback",
+      "related_paths": [
+        "/reviews/6529-stream",
+        "/reviews/6529-stream/community-review",
+        "/reviews/6529-stream/security-testing-and-known-limitations",
+        "/reviews/6529-stream/reference",
+        "/reviews/6529-stream/versions/2026-07-30.1/feedback",
+        "/reviews/6529-stream/versions/2026-07-27.1/feedback",
+        "/reviews/6529-stream/versions/2026-07-26.1/feedback"
+      ],
+      "tags": ["stream", "review", "feedback", "security"],
+      "source_refs": [
+        "app/reviews/[review]/feedback/page.tsx",
+        "app/reviews/[review]/versions/[version]/feedback/page.tsx",
+        "components/public-review/PublicReviewFeedbackComposer.tsx",
+        "components/public-review/PublicReviewLedger.tsx",
+        "components/public-review/PublicReviewShell.tsx",
+        "lib/public-review/streamReviewFeedback.server.ts",
+        "ops/docs/public-reviews/README.md"
+      ]
+    },
+    {
       "id": "join.6529",
       "kind": "route",
       "title": "Join 6529",
@@ -5374,6 +5499,10 @@
       "facts": [
         "The Memes mint route lives at /the-memes/mint.",
         "Mint flow docs explain entry points, common scenarios, and recovery.",
+        "If a remembered profile's authorized wallet is disconnected, the mint page hides the duplicate Connect control; selecting SEIZE opens wallet connection and continues when the same wallet reconnects and transaction details are unchanged.",
+        "Selecting a different already-authenticated wallet switches the active profile and cancels the old pending mint so refreshed recipient, eligibility, price, and transaction details can be reviewed before selecting SEIZE again; an unauthenticated wallet must complete normal authentication first.",
+        "Wallet confirmation, submitted, successful, and on-chain error states appear in the shared transaction modal; local recipient and mint-count validation stays inline.",
+        "The shared transaction modal identifies the current card as Mint: The Memes #{id} when a valid token ID is available, and otherwise keeps the generic Mint The Memes title.",
         "Mint eligibility is separate from subscription mode and allowlist rules."
       ],
       "canonical_path": "/the-memes/mint",
@@ -5381,6 +5510,7 @@
       "tags": ["memes", "minting"],
       "source_refs": [
         "app/the-memes/mint/page.tsx",
+        "components/manifold-minting/ManifoldMintingWidget.tsx",
         "ops/docs/media/memes/feature-mint-flow.md"
       ]
     },
@@ -6122,6 +6252,7 @@
       "facts": [
         "Drop Forge launch claims live under /drop-forge/launch.",
         "Launch claim detail pages use /drop-forge/launch/{id}.",
+        "If the authorized wallet is disconnected, a launch on-chain action opens wallet connection and continues after connection succeeds when its transaction details are unchanged; refreshed details cancel the pending action so the user can review and retry.",
         "Launch claim pages can include mint stats and subscription airdrop sections when configured."
       ],
       "canonical_path": "/drop-forge/launch",
