@@ -14,7 +14,13 @@
 import { HttpFile } from '../http/http';
 
 export class ApiSessionNonceResponse {
+    /**
+    * Canonical ERC-4361 SIWE for web clients, or the 6529 structured version-2 session message for native and desktop clients.
+    */
     'signable_message': string;
+    /**
+    * Opaque server-signed challenge token.
+    */
     'server_signature': string;
 
     static readonly discriminator: string | undefined = undefined;

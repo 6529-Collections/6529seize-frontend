@@ -11,11 +11,13 @@
  * Do not edit the class manually.
  */
 
+import { ReleaseBusV2LaneState } from '../models/ReleaseBusV2LaneState';
 import { ReleaseBusV2Mode } from '../models/ReleaseBusV2Mode';
 import { HttpFile } from '../http/http';
 
 export class ReleaseBusV2ControlUpdateResponse {
     'controls': Array<{ [key: string]: any; }>;
+    'lanes': Array<ReleaseBusV2LaneState>;
     'mode': ReleaseBusV2Mode;
 
     static readonly discriminator: string | undefined = undefined;
@@ -27,6 +29,12 @@ export class ReleaseBusV2ControlUpdateResponse {
             "name": "controls",
             "baseName": "controls",
             "type": "Array<{ [key: string]: any; }>",
+            "format": ""
+        },
+        {
+            "name": "lanes",
+            "baseName": "lanes",
+            "type": "Array<ReleaseBusV2LaneState>",
             "format": ""
         },
         {
