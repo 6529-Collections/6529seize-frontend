@@ -217,9 +217,11 @@ describe("sync-agent-files", () => {
           .map(
             ({
               environments: _environments,
+              public_review_id: _publicReviewId,
               ...record
             }: {
               environments?: string[];
+              public_review_id?: string;
               [key: string]: unknown;
             }) => record
           ),
@@ -229,7 +231,7 @@ describe("sync-agent-files", () => {
         source.records.find(
           (record: { id: string }) => record.id === "public-reviews.stream"
         )?.environments
-      ).toEqual(["local", "staging"]);
+      ).toEqual(["local", "staging", "production"]);
       expect(published).toEqual(expectedProduction);
     });
   });

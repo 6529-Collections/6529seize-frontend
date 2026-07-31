@@ -266,6 +266,8 @@ function getPublicReviewPublicationConfigs(repoRoot) {
         config.schemaVersion === PUBLIC_REVIEW_PUBLICATION_SCHEMA &&
           SAFE_ID_PATTERN.test(config.reviewId) &&
           PUBLIC_REVIEW_LIFECYCLE_STATES.has(config.lifecycleState) &&
+          (config.productionEnabled === undefined ||
+            typeof config.productionEnabled === "boolean") &&
           Array.isArray(config.versions) &&
           config.versions.length > 0 &&
           config.versions.every(
@@ -408,11 +410,23 @@ function getPublicReviewPublicationPlans(repoRoot) {
           configPath: reference.configPath,
           indexActiveVersion,
           publication,
+          productionEnabled: publication.productionEnabled === true,
           publishedVersions,
           sourceIndex,
         },
       ];
     })
+  );
+}
+
+function getProfilePublicationPlans(publicationPlans, profile) {
+  if (profile !== "production") {
+    return publicationPlans;
+  }
+  return new Map(
+    [...publicationPlans.entries()].filter(
+      ([, plan]) => plan.productionEnabled === true
+    )
   );
 }
 
@@ -1011,11 +1025,13 @@ function assertEditorialEvidence({ bundleRoot, review }) {
   return directoryIdentity(editorialRoot);
 }
 
-function assertStagingEvidence(
+function assertPublishedEvidence(
   repoRoot,
   bundleRoot,
+  profile,
   publicationPlans = getPublicReviewPublicationPlans(repoRoot)
 ) {
+  const profileLabel = profile === "production" ? "Production" : "Staging";
   const sourcePublicReviewRoot = path.join(
     repoRoot,
     PUBLIC_REVIEW_DATA_DIRECTORY
@@ -1044,7 +1060,7 @@ function assertStagingEvidence(
           );
         },
       }),
-    "Staging public-review data does not exactly match the trusted source tree."
+    `${profileLabel} public-review data does not exactly match the trusted source tree.`
   );
   assertPublishedReviewIndexes(bundleRoot, publicationPlans);
 
@@ -1061,7 +1077,7 @@ function assertStagingEvidence(
       ignore: (relativePath) =>
         isUnpublishedEditorialPath(relativePath, publicationPlans),
     }) === directoryIdentity(bundleEditorialRoot),
-    "Staging editorial content does not exactly match the trusted source tree."
+    `${profileLabel} editorial content does not exactly match the trusted source tree.`
   );
 
   const reviews = [...publicationPlans.values()].flatMap((plan) =>
@@ -1081,18 +1097,18 @@ function assertStagingEvidence(
     invariant(
       !fs.existsSync(bundlePublicReviewRoot) &&
         !fs.existsSync(bundleEditorialRoot),
-      "Draft public-review evidence must be absent from staging."
+      `Draft public-review evidence must be absent from ${profile}.`
     );
   } else {
     assertExactChildDirectories(
       bundlePublicReviewRoot,
       reviewIds,
-      "Staging public-review data"
+      `${profileLabel} public-review data`
     );
     assertExactChildDirectories(
       bundleEditorialRoot,
       reviewIds,
-      "Staging editorial content"
+      `${profileLabel} editorial content`
     );
   }
 
@@ -1115,7 +1131,10 @@ function assertPublicCopyIdentity(
   const bundlePublic = path.join(bundleRoot, "public");
   const options = {
     ignore: (relativePath) => {
-      if (profile === "production") {
+      if (
+        profile === "production" &&
+        !hasPublishedReviewVersions(publicationPlans)
+      ) {
         return isReviewDataPath(relativePath);
       }
       return (
@@ -1173,14 +1192,30 @@ function assertProfileBundle({
 }) {
   invariant(PROFILES.has(profile), `Unsupported artifact profile: ${profile}`);
   invariant(fs.statSync(bundleRoot).isDirectory(), "Bundle root is missing.");
-  assertPublicCopyIdentity(repoRoot, bundleRoot, profile, publicationPlans);
+  const profilePublicationPlans = getProfilePublicationPlans(
+    publicationPlans,
+    profile
+  );
+  assertPublicCopyIdentity(
+    repoRoot,
+    bundleRoot,
+    profile,
+    profilePublicationPlans
+  );
 
   if (profile === "production") {
-    assertProductionAbsence(bundleRoot);
     assertProductionRuntimeConfig(bundleRoot);
-    return [];
+    if (!hasPublishedReviewVersions(profilePublicationPlans)) {
+      assertProductionAbsence(bundleRoot);
+      return [];
+    }
   }
-  return assertStagingEvidence(repoRoot, bundleRoot, publicationPlans);
+  return assertPublishedEvidence(
+    repoRoot,
+    bundleRoot,
+    profile,
+    profilePublicationPlans
+  );
 }
 
 function removeDirectoryIfPresent(directory) {
@@ -1228,35 +1263,37 @@ function prepareProfileBundle({ repoRoot, bundleRoot, profile }) {
   const sourceIdentity = captureSourceIdentity(repoRoot);
   const sourcePublic = path.join(repoRoot, "public");
   const bundlePublic = path.join(bundleRoot, "public");
-  const publicationPlans = getPublicReviewPublicationPlans(repoRoot);
+  const publicationPlans = getProfilePublicationPlans(
+    getPublicReviewPublicationPlans(repoRoot),
+    profile
+  );
   replaceDirectory(sourcePublic, bundlePublic, {
     ignore: (relativePath) =>
-      profile === "production"
+      profile === "production" &&
+      !hasPublishedReviewVersions(publicationPlans)
         ? isReviewDataPath(relativePath)
         : isUnpublishedReviewDataPath(relativePath, publicationPlans),
   });
-  if (profile === "staging") {
+  if (hasPublishedReviewVersions(publicationPlans)) {
     writePublishedReviewIndexes(bundleRoot, publicationPlans);
     copyPublishedKnowledgePacks(repoRoot, bundleRoot, publicationPlans);
   }
 
-  if (profile === "staging") {
-    const sourceEditorial = path.join(
-      repoRoot,
-      PUBLIC_REVIEW_EDITORIAL_DIRECTORY
-    );
-    const bundleEditorial = path.join(
-      bundleRoot,
-      PUBLIC_REVIEW_EDITORIAL_DIRECTORY
-    );
-    if (hasPublishedReviewVersions(publicationPlans)) {
-      replaceDirectory(sourceEditorial, bundleEditorial, {
-        ignore: (relativePath) =>
-          isUnpublishedEditorialPath(relativePath, publicationPlans),
-      });
-    } else {
-      removeDirectoryIfPresent(bundleEditorial);
-    }
+  const sourceEditorial = path.join(
+    repoRoot,
+    PUBLIC_REVIEW_EDITORIAL_DIRECTORY
+  );
+  const bundleEditorial = path.join(
+    bundleRoot,
+    PUBLIC_REVIEW_EDITORIAL_DIRECTORY
+  );
+  if (hasPublishedReviewVersions(publicationPlans)) {
+    replaceDirectory(sourceEditorial, bundleEditorial, {
+      ignore: (relativePath) =>
+        isUnpublishedEditorialPath(relativePath, publicationPlans),
+    });
+  } else if (profile === "staging") {
+    removeDirectoryIfPresent(bundleEditorial);
   }
 
   const reviews = assertProfileBundle({

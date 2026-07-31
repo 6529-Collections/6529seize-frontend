@@ -21,7 +21,7 @@ function getPublishedRecordIds(baseEndpoint: string): Set<string> {
 
 describe("sync-help-index publication policy", () => {
   const publicReviewRecord = {
-    environments: ["local", "staging"],
+    environments: ["local", "staging", "production"],
     public_review_id: "6529-stream",
   };
 
@@ -42,7 +42,7 @@ describe("sync-help-index publication policy", () => {
         "production",
         new Set(["6529-stream"])
       )
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it("leaves unrelated records governed only by their environment", () => {
@@ -68,11 +68,11 @@ describe("sync-help-index publication policy", () => {
     }
   });
 
-  it("generates a production-filtered help corpus without Stream summaries", () => {
+  it("generates the production help corpus with the published Stream summaries", () => {
     const publishedRecordIds = getPublishedRecordIds("https://6529.io");
 
     for (const recordId of STREAM_SUMMARY_RECORD_IDS) {
-      expect(publishedRecordIds.has(recordId)).toBe(false);
+      expect(publishedRecordIds.has(recordId)).toBe(true);
     }
   });
 });

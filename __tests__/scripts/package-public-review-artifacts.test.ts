@@ -343,6 +343,22 @@ function createFixture(lifecycleState = "PUBLIC_REVIEW"): {
   };
 }
 
+function setProductionReviewEnabled(
+  fixture: ReturnType<typeof createFixture>,
+  productionEnabled: unknown
+): void {
+  const publicationPath = path.join(
+    fixture.repoRoot,
+    `config/public-reviews/${REVIEW_ID}.publication.json`
+  );
+  const publication = JSON.parse(fs.readFileSync(publicationPath, "utf8"));
+  publication.productionEnabled = productionEnabled;
+  fs.writeFileSync(
+    publicationPath,
+    `${JSON.stringify(publication, null, 2)}\n`
+  );
+}
+
 function addHistoricalVersion({
   fixture,
   activeLifecycleState,
@@ -754,6 +770,65 @@ describe("profile-aware public-review artifact packaging", () => {
     ).toBe(false);
     expect(fs.readFileSync(fixture.sourceFile, "utf8")).toBe(
       "contract StreamCore {}\n"
+    );
+  });
+
+  it("packages exact published review evidence when production publication is enabled", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    setProductionReviewEnabled(fixture, true);
+
+    expect(
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "production",
+      })
+    ).toEqual([
+      expect.objectContaining({
+        reviewId: REVIEW_ID,
+        reviewVersion: REVIEW_VERSION,
+      }),
+    ]);
+    expect(
+      fs.existsSync(
+        path.join(
+          fixture.bundleRoot,
+          `public/review-data/${REVIEW_ID}/versions/${REVIEW_VERSION}/reference-manifest.json`
+        )
+      )
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(
+          fixture.bundleRoot,
+          `public/review-data/${REVIEW_ID}/versions/${REVIEW_VERSION}/knowledge/manifest.json`
+        )
+      )
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(
+          fixture.bundleRoot,
+          `content/public-reviews/${REVIEW_ID}/versions/${REVIEW_VERSION}/editorial/overview.md`
+        )
+      )
+    ).toBe(true);
+  });
+
+  it("rejects an invalid production publication flag", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    setProductionReviewEnabled(fixture, "yes");
+
+    expect(() =>
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "production",
+      })
+    ).toThrow(
+      `${REVIEW_ID}.publication.json is not a valid public-review publication config.`
     );
   });
 
