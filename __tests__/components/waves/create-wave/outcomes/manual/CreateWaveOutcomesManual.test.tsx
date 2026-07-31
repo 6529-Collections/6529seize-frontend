@@ -211,7 +211,9 @@ describe("CreateWaveOutcomesManual", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
-    expect(screen.getByText("Invalid position format")).toBeInTheDocument();
+    expect(
+      screen.getByText("Range 3-1 is backwards — put the lower position first")
+    ).toBeInTheDocument();
     expect(mockOnOutcome).not.toHaveBeenCalled();
   });
 
@@ -233,7 +235,7 @@ describe("CreateWaveOutcomesManual", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
-    expect(screen.getByText("Invalid position format")).toBeInTheDocument();
+    expect(screen.getByText("Positions start at 1")).toBeInTheDocument();
     expect(mockOnOutcome).not.toHaveBeenCalled();
   });
 
@@ -257,7 +259,9 @@ describe("CreateWaveOutcomesManual", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
-    expect(screen.getByText("Invalid position format")).toBeInTheDocument();
+    expect(
+      screen.getByText("Positions can't go above 10,000")
+    ).toBeInTheDocument();
     expect(mockOnOutcome).not.toHaveBeenCalled();
   });
 
@@ -279,7 +283,9 @@ describe("CreateWaveOutcomesManual", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
-    expect(screen.getByText("Invalid position format")).toBeInTheDocument();
+    expect(
+      screen.getByText("Positions can't go above 10,000")
+    ).toBeInTheDocument();
     expect(mockOnOutcome).not.toHaveBeenCalled();
   });
 
@@ -315,11 +321,11 @@ describe("CreateWaveOutcomesManual", () => {
     ).not.toBeInTheDocument();
   });
 
-  // Characterization, not endorsement: `parsePositions` filters rejected
-  // segments out instead of failing the whole input, so a list that mixes a
-  // valid position with an invalid one submits the valid part silently. Pinned
-  // here so any future change to that trade-off is a deliberate one.
-  describe("mixed valid and invalid segments (current behavior)", () => {
+  // A list that mixes a valid position with an invalid one used to submit the
+  // valid part silently, so someone who typed "1,0-2" got a first-place-only
+  // outcome with no indication the rest had been dropped. Any bad segment now
+  // rejects the whole input, matching how malformed input has always behaved.
+  describe("mixed valid and invalid segments", () => {
     const submitPositions = async (input: string) => {
       const mockOnOutcome = jest.fn();
       render(
@@ -340,36 +346,71 @@ describe("CreateWaveOutcomesManual", () => {
       return mockOnOutcome;
     };
 
-    it("keeps the valid position and drops a below-range segment without erroring", async () => {
+    it("rejects the whole list when a segment starts below the first position", async () => {
       const mockOnOutcome = await submitPositions("1,0-2");
 
+      expect(screen.getByText("Positions start at 1")).toBeInTheDocument();
+      expect(mockOnOutcome).not.toHaveBeenCalled();
+    });
+
+    it("rejects the whole list when a segment exceeds the maximum", async () => {
+      const mockOnOutcome = await submitPositions("1,1-5000000000");
+
       expect(
-        screen.queryByText("Invalid position format")
+        screen.getByText("Positions can't go above 10,000")
+      ).toBeInTheDocument();
+      expect(mockOnOutcome).not.toHaveBeenCalled();
+    });
+
+    it("rejects the whole list when a later segment is backwards", async () => {
+      const mockOnOutcome = await submitPositions("1-3,9-5");
+
+      expect(
+        screen.getByText("Range 9-5 is backwards — put the lower position first")
+      ).toBeInTheDocument();
+      expect(mockOnOutcome).not.toHaveBeenCalled();
+    });
+
+    it("reports the first offending segment when several are invalid", async () => {
+      const mockOnOutcome = await submitPositions("0-2,99999");
+
+      expect(screen.getByText("Positions start at 1")).toBeInTheDocument();
+      expect(
+        screen.queryByText("Positions can't go above 10,000")
       ).not.toBeInTheDocument();
+      expect(mockOnOutcome).not.toHaveBeenCalled();
+    });
+
+    it("still accepts a list where every segment is valid, deduped and sorted", async () => {
+      const mockOnOutcome = await submitPositions("3,1-2,2");
+
       expect(mockOnOutcome).toHaveBeenCalledWith(
         expect.objectContaining({
           winnersConfig: expect.objectContaining({
-            totalAmount: 1,
-            winners: [{ value: 1 }],
+            totalAmount: 3,
+            winners: [{ value: 1 }, { value: 1 }, { value: 1 }],
           }),
         })
       );
     });
 
-    it("keeps the valid position and drops an oversized range without erroring", async () => {
-      const mockOnOutcome = await submitPositions("1,1-5000000000");
+    it("accepts the maximum position itself", async () => {
+      const mockOnOutcome = await submitPositions("10000");
 
-      expect(
-        screen.queryByText("Invalid position format")
-      ).not.toBeInTheDocument();
       expect(mockOnOutcome).toHaveBeenCalledWith(
         expect.objectContaining({
-          winnersConfig: expect.objectContaining({
-            totalAmount: 1,
-            winners: [{ value: 1 }],
-          }),
+          winnersConfig: expect.objectContaining({ totalAmount: 1 }),
         })
       );
+    });
+
+    it("rejects one past the maximum position", async () => {
+      const mockOnOutcome = await submitPositions("10001");
+
+      expect(
+        screen.getByText("Positions can't go above 10,000")
+      ).toBeInTheDocument();
+      expect(mockOnOutcome).not.toHaveBeenCalled();
     });
   });
 
@@ -433,7 +474,9 @@ describe("CreateWaveOutcomesManual", () => {
 
       const alert = screen.getByRole("alert");
       expect(alert).toHaveAttribute("id", errorId);
-      expect(alert).toHaveTextContent("Invalid position format");
+      expect(alert).toHaveTextContent(
+        "Range 3-1 is backwards — put the lower position first"
+      );
     });
 
     it("clears the positions error state once the field is edited again", async () => {
