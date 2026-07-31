@@ -112,21 +112,30 @@ describe("release bus staging artifact transfer", () => {
       const verifyIndex = steps.findIndex(
         (step: { name?: string }) => step.name === verifyStepName
       );
-      const checkout = steps[checkoutIndex];
-      const verify = steps[verifyIndex];
 
       expect(checkoutIndex).toBeGreaterThanOrEqual(0);
+      expect(verifyIndex).toBeGreaterThanOrEqual(0);
       expect(checkoutIndex).toBeLessThan(verifyIndex);
+      const checkout = steps[checkoutIndex];
+      const verify = steps[verifyIndex];
       expect(checkout.uses).toMatch(/^actions\/checkout@/);
       expect(checkout.with).toMatchObject({
         ref: "${{ github.workflow_sha }}",
         "persist-credentials": false,
         path: ".release-bus-verifier",
-        "sparse-checkout": "ops/scripts/verify-deployment-version.cjs",
         "sparse-checkout-cone-mode": false,
       });
+      expect(checkout.with["sparse-checkout"]).toContain(
+        "ops/scripts/verify-deployment-version.cjs"
+      );
+      expect(checkout.with["sparse-checkout"]).toContain(
+        "ops/scripts/cli-args.cjs"
+      );
       expect(verify.run).toContain(
         "node .release-bus-verifier/ops/scripts/verify-deployment-version.cjs"
+      );
+      expect(verify.run).not.toContain(
+        "node ops/scripts/verify-deployment-version.cjs"
       );
     }
   });

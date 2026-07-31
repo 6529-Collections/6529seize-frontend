@@ -586,7 +586,9 @@ jobs:
           ref: ${{ github.workflow_sha }}
           persist-credentials: false
           path: .release-bus-verifier
-          sparse-checkout: ops/scripts/verify-deployment-version.cjs
+          sparse-checkout: |
+            ops/scripts/verify-deployment-version.cjs
+            ops/scripts/cli-args.cjs
           sparse-checkout-cone-mode: false
       - name: Verify exact staging version
         id: version
