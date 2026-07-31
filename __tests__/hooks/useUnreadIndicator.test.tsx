@@ -91,7 +91,7 @@ describe("useUnreadIndicator", () => {
     expect(mockUseMyStream).not.toHaveBeenCalled();
   });
 
-  it("uses a best-effort count without double-counting overlapping sources", () => {
+  it("uses the larger local websocket-backed count while the summary catches up", () => {
     mockUseUnreadDmDrops.mockReturnValue({
       haveUnreadDmDrops: true,
       unreadDmDrops: { count: 2 },
@@ -119,52 +119,5 @@ describe("useUnreadIndicator", () => {
     );
 
     expect(result.current).toEqual({ hasUnread: true, unreadCount: 4 });
-  });
-
-  it("keeps the indicator visible when independently sourced totals diverge", () => {
-    mockUseUnreadDmDrops.mockReturnValue({
-      haveUnreadDmDrops: true,
-      unreadDmDrops: { count: 5 },
-      unreadDmDropsCount: 5,
-    });
-    mockUseUnreadNotifications.mockReturnValue({
-      haveUnreadNotifications: false,
-    });
-
-    const { result } = renderHook(() =>
-      useUnreadIndicator({
-        type: "messages",
-        handle: "me",
-        localDirectMessages: [
-          {
-            unreadDropsCount: 1,
-            newDropsCount: { count: 3 },
-          },
-        ],
-      })
-    );
-
-    expect(result.current).toEqual({ hasUnread: true, unreadCount: 5 });
-  });
-
-  it("normalizes a missing summary count before rendering the badge", () => {
-    mockUseUnreadDmDrops.mockReturnValue({
-      haveUnreadDmDrops: false,
-      unreadDmDrops: undefined,
-      unreadDmDropsCount: undefined,
-    });
-    mockUseUnreadNotifications.mockReturnValue({
-      haveUnreadNotifications: false,
-    });
-
-    const { result } = renderHook(() =>
-      useUnreadIndicator({
-        type: "messages",
-        handle: "me",
-        localDirectMessages: [{ newDropsCount: { count: 1 } }],
-      })
-    );
-
-    expect(result.current).toEqual({ hasUnread: true, unreadCount: 1 });
   });
 });

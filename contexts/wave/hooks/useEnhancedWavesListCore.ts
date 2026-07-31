@@ -66,7 +66,6 @@ interface UseEnhancedWavesListCoreOptions {
   stateIdentityKey?: string | null | undefined;
   otherListWaveIds?: ReadonlySet<string> | undefined;
   unknownWaveRefetchCooldownMs?: number | undefined;
-  trustServerSnapshotUnreadState?: boolean | undefined;
   preserveBackendWaveOrder?: boolean | undefined;
   sortMutedLast?: boolean | undefined;
 }
@@ -101,7 +100,6 @@ function useEnhancedWavesListCore(
       stateIdentityKey: options.stateIdentityKey,
       otherListWaveIds: options.otherListWaveIds,
       unknownWaveRefetchCooldownMs: options.unknownWaveRefetchCooldownMs,
-      trustServerSnapshotUnreadState: options.trustServerSnapshotUnreadState,
     });
 
   const [unreadState, setUnreadState] = useState<{
@@ -118,8 +116,6 @@ function useEnhancedWavesListCore(
       unreadState.identityKey === options.stateIdentityKey
         ? unreadState
         : {
-            // useMemo keeps this empty identity snapshot stable until either
-            // the identity or committed unread state changes.
             identityKey: options.stateIdentityKey,
             clearedWaveIds: new Set<string>(),
             forcedCounts: {},
@@ -202,7 +198,12 @@ function useEnhancedWavesListCore(
       resetWaveUnreadCount(activeWaveId);
     }, UNREAD_CLEAR_DELAY_MS);
     return () => clearTimeout(timeout);
-  }, [activeWaveId, isEnabled, options.stateIdentityKey, resetWaveUnreadCount]);
+  }, [
+    activeWaveId,
+    isEnabled,
+    options.stateIdentityKey,
+    resetWaveUnreadCount,
+  ]);
 
   const mapWave = useCallback(
     (wave: EnhancedSidebarWave): MinimalWave => {
@@ -302,7 +303,12 @@ function useEnhancedWavesListCore(
           wave.followedSubwavesCount > 0,
       };
     },
-    [newDropsCounts, activeWaveId, currentUnreadState, options.supportsPinning]
+    [
+      newDropsCounts,
+      activeWaveId,
+      currentUnreadState,
+      options.supportsPinning,
+    ]
   );
 
   const minimal = useMemo(() => {

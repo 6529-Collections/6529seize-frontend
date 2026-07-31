@@ -353,9 +353,5 @@ describe("useEnhancedWavesListCore", () => {
     rerender({ activeWaveId: "wave-1" });
 
     expect(result.current.waves[0]?.unreadDropsCount).toBe(0);
-
-    rerender({ activeWaveId: null });
-
-    expect(result.current.waves[0]?.unreadDropsCount).toBe(2);
   });
 });

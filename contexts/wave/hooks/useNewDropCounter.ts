@@ -34,7 +34,6 @@ interface UseNewDropCounterOptions {
   readonly stateIdentityKey?: string | null | undefined;
   readonly otherListWaveIds?: ReadonlySet<string> | undefined;
   readonly unknownWaveRefetchCooldownMs?: number | undefined;
-  readonly trustServerSnapshotUnreadState?: boolean | undefined;
 }
 
 const DEFAULT_UNKNOWN_WAVE_REFETCH_COOLDOWN_MS = 3000;
@@ -136,20 +135,15 @@ const addUnreadDropCount = ({
 };
 
 const getServerSnapshotCoverageTimestamp = (
-  wave: SidebarWave,
-  trustServerSnapshotUnreadState: boolean
+  wave: SidebarWave
 ): number | null => {
+  const snapshotLatestDropTimestamp =
+    wave.serverSnapshotLatestDropTimestamp ?? null;
   const latestReadTimestamp =
     typeof wave.latestReadTimestamp === "number"
       ? wave.latestReadTimestamp
       : null;
 
-  if (!trustServerSnapshotUnreadState) {
-    return latestReadTimestamp;
-  }
-
-  const snapshotLatestDropTimestamp =
-    wave.serverSnapshotLatestDropTimestamp ?? null;
   if (snapshotLatestDropTimestamp === null) {
     return latestReadTimestamp;
   }
@@ -161,21 +155,16 @@ const getServerSnapshotCoverageTimestamp = (
 
 const reconcileNewDropsCounts = ({
   newDropsCounts,
-  trustServerSnapshotUnreadState,
   waves,
 }: {
   readonly newDropsCounts: NewDropsCounts;
-  readonly trustServerSnapshotUnreadState: boolean;
   readonly waves: readonly SidebarWave[];
 }): NewDropsCounts => {
   let next = newDropsCounts;
 
   waves.forEach((wave) => {
     const localCount = newDropsCounts[wave.id];
-    const serverCoverageTimestamp = getServerSnapshotCoverageTimestamp(
-      wave,
-      trustServerSnapshotUnreadState
-    );
+    const serverCoverageTimestamp = getServerSnapshotCoverageTimestamp(wave);
     if (
       !localCount ||
       localCount.count <= 0 ||
@@ -222,7 +211,6 @@ function useNewDropCounter(
     stateIdentityKey,
     otherListWaveIds = DEFAULT_OTHER_LIST_WAVE_IDS,
     unknownWaveRefetchCooldownMs = DEFAULT_UNKNOWN_WAVE_REFETCH_COOLDOWN_MS,
-    trustServerSnapshotUnreadState = false,
   } = options;
 
   // Keep track of new drop counts
@@ -281,10 +269,9 @@ function useNewDropCounter(
     () =>
       reconcileNewDropsCounts({
         newDropsCounts: rawNewDropsCounts,
-        trustServerSnapshotUnreadState,
         waves,
       }),
-    [rawNewDropsCounts, trustServerSnapshotUnreadState, waves]
+    [rawNewDropsCounts, waves]
   );
 
   const updateNewDropsCountsForMessage = useCallback(
@@ -296,7 +283,6 @@ function useNewDropCounter(
       setRawNewDropsCounts((previous) => {
         const current = reconcileNewDropsCounts({
           newDropsCounts: previous,
-          trustServerSnapshotUnreadState,
           waves: wavesRef.current,
         });
         const currentWave = current[waveId];
@@ -311,7 +297,7 @@ function useNewDropCounter(
         return update(current);
       });
     },
-    [setRawNewDropsCounts, trustServerSnapshotUnreadState]
+    [setRawNewDropsCounts]
   );
 
   // Reset counts for a specific wave
@@ -322,11 +308,8 @@ function useNewDropCounter(
       }
 
       setRawNewDropsCounts((prev) => {
-        // Every counter write first commits server-authoritative reconciliation
-        // for all tracked waves so covered sibling counts cannot reappear.
         const current = reconcileNewDropsCounts({
           newDropsCounts: prev,
-          trustServerSnapshotUnreadState,
           waves: wavesRef.current,
         });
         const previous = current[waveId];
@@ -354,7 +337,7 @@ function useNewDropCounter(
         };
       });
     },
-    [enabled, setRawNewDropsCounts, trustServerSnapshotUnreadState]
+    [enabled, setRawNewDropsCounts]
   );
 
   // Reset counts for all waves
@@ -366,7 +349,6 @@ function useNewDropCounter(
     setRawNewDropsCounts((prev) => {
       const current = reconcileNewDropsCounts({
         newDropsCounts: prev,
-        trustServerSnapshotUnreadState,
         waves: wavesRef.current,
       });
       const newCounts: Record<string, MinimalWaveNewDropsCount> = {};
@@ -402,7 +384,7 @@ function useNewDropCounter(
 
       return changed ? newCounts : current;
     });
-  }, [enabled, setRawNewDropsCounts, trustServerSnapshotUnreadState]);
+  }, [enabled, setRawNewDropsCounts]);
 
   // Handle visibility changes for active wave
   useEffect(() => {
@@ -443,10 +425,7 @@ function useNewDropCounter(
         const waveId = message.wave.id;
         const wave = waves.find((w) => w.id === waveId);
         const serverCoverageTimestamp = wave
-          ? getServerSnapshotCoverageTimestamp(
-              wave,
-              trustServerSnapshotUnreadState
-            )
+          ? getServerSnapshotCoverageTimestamp(wave)
           : null;
         if (
           serverCoverageTimestamp !== null &&
@@ -599,7 +578,6 @@ function useNewDropCounter(
         refetchWaves,
         otherListWaveIds,
         unknownWaveRefetchCooldownMs,
-        trustServerSnapshotUnreadState,
         updateNewDropsCountsForMessage,
       ]
     ) // Make sure to include activeWaveId as a dependency

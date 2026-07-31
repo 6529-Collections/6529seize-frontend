@@ -15,8 +15,6 @@ import { getAuthJwt, isAuthJwtUsable } from "@/services/auth/auth.utils";
 
 const noopWaveAction = () => {};
 const MAX_RECONCILIATION_ATTEMPTS_PER_VIEWER = 2;
-const RECONCILIATION_REARM_MIN_INTERVAL_MS =
-  SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS * 5;
 
 interface UseDmWavesListOptions {
   readonly enabled?: boolean | undefined;
@@ -88,34 +86,22 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
     refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
     refetchIntervalInBackground: false,
   });
-  const { unreadDmDropsCount, dataUpdatedAt: unreadDmDropsDataUpdatedAt } =
-    useUnreadDmDrops(connectedProfile?.handle ?? null, {
-      enabled: shouldFetchDmWaves,
-    });
+  const { unreadDmDropsCount } = useUnreadDmDrops(
+    connectedProfile?.handle ?? null,
+    { enabled: shouldFetchDmWaves }
+  );
   const reconciliationStateRef = useRef<{
     readonly viewerIdentityKey: string;
     readonly attempts: number;
     readonly lastDataUpdatedAt: number;
-    readonly attemptWindowStartedAt: number;
   } | null>(null);
   const listedUnreadDropsCount = useMemo(
     () =>
       mainWaves.reduce(
         (total, wave) => total + Math.max(wave.unreadDropsCount, 0),
         0
-    ),
+      ),
     [mainWaves]
-  );
-  // A paginated summary can include unread DMs outside the loaded rows. Once
-  // every page is loaded, require exact agreement before trusting the snapshot.
-  const unreadSummaryAccountsForLoadedRows =
-    hasNextPage === true ||
-    unreadDmDropsCount === listedUnreadDropsCount;
-  const canTrustServerSnapshotUnreadState = Boolean(
-    shouldFetchDmWaves &&
-    dmWavesDataUpdatedAt > 0 &&
-    unreadDmDropsDataUpdatedAt >= dmWavesDataUpdatedAt &&
-    unreadSummaryAccountsForLoadedRows
   );
 
   useEffect(() => {
@@ -132,26 +118,14 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       return;
     }
 
-    const previousViewerState =
+    const previousState =
       reconciliationStateRef.current?.viewerIdentityKey === viewerIdentityKey
         ? reconciliationStateRef.current
         : {
             viewerIdentityKey,
             attempts: 0,
             lastDataUpdatedAt: -1,
-            attemptWindowStartedAt: dmWavesDataUpdatedAt,
           };
-    const shouldRearm =
-      previousViewerState.attempts >= MAX_RECONCILIATION_ATTEMPTS_PER_VIEWER &&
-      dmWavesDataUpdatedAt - previousViewerState.attemptWindowStartedAt >=
-        RECONCILIATION_REARM_MIN_INTERVAL_MS;
-    const previousState = shouldRearm
-      ? {
-          ...previousViewerState,
-          attempts: 0,
-          attemptWindowStartedAt: dmWavesDataUpdatedAt,
-        }
-      : previousViewerState;
     const hasNewDmSnapshot =
       previousState.lastDataUpdatedAt !== dmWavesDataUpdatedAt;
     if (
@@ -165,10 +139,9 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       viewerIdentityKey,
       attempts: previousState.attempts + 1,
       lastDataUpdatedAt: dmWavesDataUpdatedAt,
-      attemptWindowStartedAt: previousState.attemptWindowStartedAt,
     };
-    // Use the successful overview snapshot timestamp as the only clock. This
-    // avoids a separate timer while capping each reconciliation burst.
+    // Retry only when a fresh DM snapshot is still behind, then let regular
+    // polling continue without creating an unbounded reconciliation loop.
     void queryClient.refetchQueries({
       queryKey: dmWavesQueryKey,
       exact: true,
@@ -232,7 +205,6 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       mainWavesRefetch: refetchStable,
       refetchAllWaves: refetchStable,
       viewerIdentityKey,
-      canTrustServerSnapshotUnreadState,
     }),
     [
       sorted,
@@ -245,7 +217,6 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       refetchStable,
       shouldFetchDmWaves,
       viewerIdentityKey,
-      canTrustServerSnapshotUnreadState,
     ]
   );
 };

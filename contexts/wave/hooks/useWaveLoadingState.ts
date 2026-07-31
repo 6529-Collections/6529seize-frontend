@@ -1,8 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useRef } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 import type { LoadingState } from "./types";
 
 export function useWaveLoadingState() {
@@ -61,20 +60,6 @@ export function useWaveLoadingState() {
       loadingStates.current[waveId].isLoading = false;
       loadingStates.current[waveId].promise = null;
     }
-  }, []);
-
-  useEffect(() => {
-    const clearAllLoadingStates = () => {
-      loadingStates.current = {};
-    };
-    globalThis.addEventListener(PROFILE_SWITCHED_EVENT, clearAllLoadingStates);
-
-    return () => {
-      globalThis.removeEventListener(
-        PROFILE_SWITCHED_EVENT,
-        clearAllLoadingStates
-      );
-    };
   }, []);
 
   return {
