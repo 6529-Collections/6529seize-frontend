@@ -1,24 +1,32 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
+import { hydrateRoot } from "react-dom/client";
+import { renderToString } from "react-dom/server";
+
+let mockBrowserOrigin = "https://6529.io";
+
+jest.mock("@/config/appEnvironment", () => {
+  const actual = jest.requireActual("@/config/appEnvironment");
+  return {
+    ...actual,
+    getBrowserOrigin: () => mockBrowserOrigin,
+  };
+});
+
 import EnvironmentBadge from "@/components/common/EnvironmentBadge";
-import { publicEnv } from "@/config/env";
 
 describe("EnvironmentBadge", () => {
-  const originalBaseEndpoint = publicEnv.BASE_ENDPOINT;
-
   afterEach(() => {
-    publicEnv.BASE_ENDPOINT = originalBaseEndpoint;
+    mockBrowserOrigin = "https://6529.io";
   });
 
   it("does not render in production", () => {
-    publicEnv.BASE_ENDPOINT = "https://6529.io";
-
     const { container } = render(<EnvironmentBadge />);
 
     expect(container).toBeEmptyDOMElement();
   });
 
   it("renders the derived personal staging badge", () => {
-    publicEnv.BASE_ENDPOINT = "https://alicestaging.6529.io";
+    mockBrowserOrigin = "https://alicestaging.6529.io";
 
     render(<EnvironmentBadge compact />);
 
@@ -34,7 +42,7 @@ describe("EnvironmentBadge", () => {
   });
 
   it("includes the local port", () => {
-    publicEnv.BASE_ENDPOINT = "http://localhost:3001";
+    mockBrowserOrigin = "http://localhost:3001";
 
     render(<EnvironmentBadge />);
 
@@ -47,5 +55,35 @@ describe("EnvironmentBadge", () => {
       "data-tooltip-content",
       "Environment: localhost:3001"
     );
+  });
+
+  it("hydrates from a production-safe empty badge before revealing the browser environment", async () => {
+    mockBrowserOrigin = "https://staging.6529.io";
+    const container = document.createElement("div");
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    container.innerHTML = renderToString(<EnvironmentBadge />);
+    document.body.appendChild(container);
+    expect(container).toBeEmptyDOMElement();
+
+    let root: ReturnType<typeof hydrateRoot> | undefined;
+    try {
+      await act(async () => {
+        root = hydrateRoot(container, <EnvironmentBadge />);
+      });
+
+      expect(
+        within(container).getByLabelText("Environment: STG (staging.6529.io)")
+      ).toHaveTextContent("STG");
+      expect(consoleError.mock.calls.flat().join(" ")).not.toMatch(
+        /hydration|did not match/i
+      );
+    } finally {
+      act(() => root?.unmount());
+      container.remove();
+      consoleError.mockRestore();
+    }
   });
 });
