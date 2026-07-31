@@ -93,6 +93,53 @@ describe("release bus staging artifact transfer", () => {
     ).toEqual([]);
   });
 
+  it("checks out each immutable deployment verifier before invoking it", () => {
+    for (const { workflow, verifyStepName } of [
+      {
+        workflow: deployWorkflow,
+        verifyStepName: "Verify exact staging version",
+      },
+      {
+        workflow: YAML.parse(productionDeployWorkflowSource),
+        verifyStepName: "Verify exact production version",
+      },
+    ]) {
+      const steps = workflow.jobs.deploy.steps;
+      const checkoutIndex = steps.findIndex(
+        (step: { name?: string }) =>
+          step.name === "Check out deployment verifier"
+      );
+      const verifyIndex = steps.findIndex(
+        (step: { name?: string }) => step.name === verifyStepName
+      );
+
+      expect(checkoutIndex).toBeGreaterThanOrEqual(0);
+      expect(verifyIndex).toBeGreaterThanOrEqual(0);
+      expect(checkoutIndex).toBeLessThan(verifyIndex);
+      const checkout = steps[checkoutIndex];
+      const verify = steps[verifyIndex];
+      expect(checkout.uses).toMatch(/^actions\/checkout@/);
+      expect(checkout.with).toMatchObject({
+        ref: "${{ github.workflow_sha }}",
+        "persist-credentials": false,
+        path: ".release-bus-verifier",
+        "sparse-checkout-cone-mode": false,
+      });
+      expect(checkout.with["sparse-checkout"]).toContain(
+        "ops/scripts/verify-deployment-version.cjs"
+      );
+      expect(checkout.with["sparse-checkout"]).toContain(
+        "ops/scripts/cli-args.cjs"
+      );
+      expect(verify.run).toContain(
+        "node .release-bus-verifier/ops/scripts/verify-deployment-version.cjs"
+      );
+      expect(verify.run).not.toContain(
+        "node ops/scripts/verify-deployment-version.cjs"
+      );
+    }
+  });
+
   it("uses the bucket region and rejects redirect bodies before activation", () => {
     const stageStep = deployWorkflow.jobs.deploy.steps.find(
       (step: { name?: string }) =>
