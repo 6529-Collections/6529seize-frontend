@@ -113,19 +113,19 @@ describe("sync-agent-files", () => {
   describe("renderLlmsTemplate", () => {
     const validTemplate = [
       "# Site",
-      "Revision {{GENERATED_AT}} with {{HELP_RECORD_COUNT}} records and {{GLOSSARY_TERM_COUNT}} terms.",
+      "Revision {{GENERATED_AT}} at {{BASE_URL}}.",
       ...REQUIRED_LLMS_PATHS.map((requiredPath: string) => `- ${requiredPath}`),
     ].join("\n");
     const replacements = {
       BASE_URL: "https://6529.io",
       GENERATED_AT: "2026-06-29T09:23:18.000Z",
-      HELP_RECORD_COUNT: 188,
-      GLOSSARY_TERM_COUNT: 30,
     };
 
     it("replaces tokens and terminates with a newline", () => {
       const rendered = renderLlmsTemplate(validTemplate, replacements);
-      expect(rendered).toContain("188 records and 30 terms");
+      expect(rendered).toContain(
+        "Revision 2026-06-29T09:23:18.000Z at https://6529.io."
+      );
       expect(rendered).not.toContain("{{");
       expect(rendered.endsWith("\n")).toBe(true);
     });
@@ -176,7 +176,8 @@ describe("sync-agent-files", () => {
       for (const requiredPath of REQUIRED_LLMS_PATHS) {
         expect(llms).toContain(requiredPath);
       }
-      expect(llms).toContain(`${glossary.term_count} term`);
+      expect(llms).toContain("Term definitions");
+      expect(llms).not.toContain(`${glossary.term_count} term`);
     });
 
     it("matches the committed public artifacts (run `6529 run agent-files:sync` after editing the corpus)", () => {
