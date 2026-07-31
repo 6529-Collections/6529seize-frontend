@@ -15,6 +15,7 @@ const {
   assertZipListingSafety,
   expectedBundleEntries,
   getPublishedReviewIds,
+  hasValidPublicationMetadata,
   parseCli,
   parseZipListing,
   prepareProfileBundle,
@@ -31,6 +32,7 @@ const {
   ): readonly ReviewEvidence[];
   expectedBundleEntries(bundleRoot: string): readonly string[];
   getPublishedReviewIds(repoRoot: string): ReadonlySet<string>;
+  hasValidPublicationMetadata(version: Record<string, unknown>): boolean;
   parseCli(argv: readonly string[]): {
     readonly command: "prepare" | "assert-listing" | "assert-zip";
     readonly profile: ArtifactProfile;
@@ -89,6 +91,32 @@ const SOURCE_REPOSITORY = "6529-Collections/6529Stream";
 const SOURCE_PATH = "smart-contracts/StreamCore.sol";
 const DEFINITION_ID = `${SOURCE_PATH}:StreamCore`;
 const DEFINITION_KEY = Buffer.from(DEFINITION_ID).toString("base64url");
+
+describe("public-review publication metadata", () => {
+  it("accepts a minimal hidden draft", () => {
+    expect(
+      hasValidPublicationMetadata({
+        lifecycleState: "DRAFT",
+      })
+    ).toBe(true);
+  });
+
+  it.each([
+    {
+      label: "published version without metadata",
+      version: { lifecycleState: "PUBLIC_REVIEW" },
+    },
+    {
+      label: "draft with partial metadata",
+      version: {
+        lifecycleState: "DRAFT",
+        deploymentStatus: "NOT_DEPLOYED",
+      },
+    },
+  ])("rejects a $label", ({ version }) => {
+    expect(hasValidPublicationMetadata(version)).toBe(false);
+  });
+});
 
 function sha256Urn(value: string | Buffer): string {
   return `sha256:${crypto.createHash("sha256").update(value).digest("hex")}`;
@@ -313,6 +341,22 @@ function createFixture(lifecycleState = "PUBLIC_REVIEW"): {
     editorialManifest,
     bundleFile,
   };
+}
+
+function setProductionReviewEnabled(
+  fixture: ReturnType<typeof createFixture>,
+  productionEnabled: unknown
+): void {
+  const publicationPath = path.join(
+    fixture.repoRoot,
+    `config/public-reviews/${REVIEW_ID}.publication.json`
+  );
+  const publication = JSON.parse(fs.readFileSync(publicationPath, "utf8"));
+  publication.productionEnabled = productionEnabled;
+  fs.writeFileSync(
+    publicationPath,
+    `${JSON.stringify(publication, null, 2)}\n`
+  );
 }
 
 function addHistoricalVersion({
@@ -726,6 +770,65 @@ describe("profile-aware public-review artifact packaging", () => {
     ).toBe(false);
     expect(fs.readFileSync(fixture.sourceFile, "utf8")).toBe(
       "contract StreamCore {}\n"
+    );
+  });
+
+  it("packages exact published review evidence when production publication is enabled", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    setProductionReviewEnabled(fixture, true);
+
+    expect(
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "production",
+      })
+    ).toEqual([
+      expect.objectContaining({
+        reviewId: REVIEW_ID,
+        reviewVersion: REVIEW_VERSION,
+      }),
+    ]);
+    expect(
+      fs.existsSync(
+        path.join(
+          fixture.bundleRoot,
+          `public/review-data/${REVIEW_ID}/versions/${REVIEW_VERSION}/reference-manifest.json`
+        )
+      )
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(
+          fixture.bundleRoot,
+          `public/review-data/${REVIEW_ID}/versions/${REVIEW_VERSION}/knowledge/manifest.json`
+        )
+      )
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(
+          fixture.bundleRoot,
+          `content/public-reviews/${REVIEW_ID}/versions/${REVIEW_VERSION}/editorial/overview.md`
+        )
+      )
+    ).toBe(true);
+  });
+
+  it("rejects an invalid production publication flag", () => {
+    const fixture = createFixture();
+    fixtureRoots.push(fixture.repoRoot);
+    setProductionReviewEnabled(fixture, "yes");
+
+    expect(() =>
+      prepareProfileBundle({
+        repoRoot: fixture.repoRoot,
+        bundleRoot: fixture.bundleRoot,
+        profile: "production",
+      })
+    ).toThrow(
+      `${REVIEW_ID}.publication.json is not a valid public-review publication config.`
     );
   });
 

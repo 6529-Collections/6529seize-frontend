@@ -16,6 +16,10 @@ import { ReleaseBusV2DeployPlan } from '../models/ReleaseBusV2DeployPlan';
 import { HttpFile } from '../http/http';
 
 export class ReleaseBusV2RegisterRequest {
+    /**
+    * Exact synthetic candidate id required only for the operator-only beta while global mode is OFF.
+    */
+    'candidate_id'?: string;
     'repository': ReleaseBusV2RegisterRequestRepositoryEnum;
     'pr_number': number;
     'branch_name': string;
@@ -28,6 +32,12 @@ export class ReleaseBusV2RegisterRequest {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "candidate_id",
+            "baseName": "candidate_id",
+            "type": "string",
+            "format": "uuid"
+        },
         {
             "name": "repository",
             "baseName": "repository",

@@ -21,7 +21,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.status.lifecycle.finalCandidate": "Final candidate",
   "publicReview.status.lifecycle.deployed": "Deployed",
   "publicReview.status.lifecycle.archived": "Archived",
-  "publicReview.status.deployment.notDeployed": "Not deployed",
+  "publicReview.status.deployment.notDeployed": "Predeployment",
   "publicReview.status.deployment.deployed": "Contract deployed",
   "publicReview.status.audit.preAudit": "Pre-audit",
   "publicReview.status.audit.inProgress": "Audit in progress",
@@ -32,11 +32,11 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.status.sourceAriaLabel":
     "Open the exact {contract} source commit {commit}",
   "publicReview.status.explanations.draft":
-    "This review is being prepared and its public routes are not available.",
+    "Preparation is underway. Public routes open when the review is published.",
   "publicReview.status.explanations.scheduled":
-    "This review is scheduled. Its materials are visible, but new feedback is not open.",
+    "This review is scheduled. Its materials are visible, and feedback opens at the scheduled start.",
   "publicReview.status.explanations.publicReview":
-    "This is code under active review. It is not a live contract and has not completed an external audit.",
+    "This predeployment code is under active review and awaits external audit.",
   "publicReview.status.explanations.reviewClosed":
     "The public feedback window is closed. The review record remains available.",
   "publicReview.status.explanations.remediation":
@@ -65,6 +65,9 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.audiences.auditors.description":
     "Use the editorial map alongside generated reference and retained evidence.",
   "publicReview.audiences.startPath": "Start the {audience} path",
+  "publicReview.authorship.label": "A small human disclosure",
+  "publicReview.authorship.body":
+    "punk6529 would like the record to show that bots wrote this. He supplied the mission, the standards, and a suspicious amount of side-eye.",
   "publicReview.navigation.label": "Contract review pages",
   "publicReview.navigation.contentsLabel": "All contract review pages",
   "publicReview.navigation.sequenceLabel":
@@ -149,13 +152,13 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.evidence.implemented":
     "Implemented: present in the pinned Solidity source.",
   "publicReview.evidence.tested":
-    "Tested: exercised by retained automated tests; not a security guarantee.",
+    "Tested: exercised by retained automated tests; wider review provides security assurance.",
   "publicReview.evidence.proposed":
-    "Proposed: described in a design or specification but not fully implemented.",
+    "Proposed: described in a design or specification and awaiting full implementation.",
   "publicReview.evidence.openForFeedback":
     "Open for feedback: an active decision the review should challenge.",
   "publicReview.evidence.auditPending":
-    "Audit pending: not covered by a completed external audit for this candidate.",
+    "Audit pending: the external audit for this candidate remains outstanding.",
   "publicReview.evidence.deferred":
     "Deferred: intentionally outside the current implementation target.",
   "publicReview.evidence.knownLimitation":
@@ -171,8 +174,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.reference.overviewDescription":
     "A deterministic inventory generated from the exact pinned Solidity source, compiler output, and retained release evidence.",
   "publicReview.reference.generatedLabel": "Generated from source",
-  "publicReview.reference.scrollSectionsLeft":
-    "Scroll reference sections left",
+  "publicReview.reference.scrollSectionsLeft": "Scroll reference sections left",
   "publicReview.reference.scrollSectionsRight":
     "Scroll reference sections right",
   "publicReview.reference.sourceCommit": "Pinned source commit",
@@ -197,10 +199,10 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.reference.releaseTracked": "Release evidence tracked",
   "publicReview.reference.releaseNotTracked": "No release artifact",
   "publicReview.reference.releaseEvidenceDescription":
-    "Checksums and counts below come from retained release artifacts. They describe this source snapshot; they are not an audit result.",
+    "Checksums and counts below come from retained release artifacts and describe this source snapshot. Audit results require an independent audit.",
   "publicReview.reference.auditorEvidence": "Auditor evidence",
   "publicReview.reference.auditorEvidenceDescription":
-    "These records are generated from the retained release manifest, readiness evidence, risk register, governed-parameter inventory, and NatSpec baseline at this exact source commit. They expose known gaps; they do not imply approval.",
+    "These records are generated from the retained release manifest, readiness evidence, risk register, governed-parameter inventory, and NatSpec baseline at this exact source commit. They expose known gaps and await approval.",
   "publicReview.reference.releaseStatus": "Release status",
   "publicReview.reference.publicBeta": "Public beta",
   "publicReview.reference.productionRelease": "Production release",
@@ -517,7 +519,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "Testing or evidence gap",
   "publicReview.feedback.categories.accessibilityOrLocalization":
     "Accessibility or localization",
-  "publicReview.feedback.severities.notAssessed": "Not assessed",
+  "publicReview.feedback.severities.notAssessed": "Pending assessment",
   "publicReview.feedback.severities.informational": "Informational",
   "publicReview.feedback.severities.low": "Low",
   "publicReview.feedback.severities.medium": "Medium",

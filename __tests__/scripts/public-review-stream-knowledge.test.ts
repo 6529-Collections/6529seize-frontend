@@ -13,8 +13,8 @@ const {
 
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
 const REVIEW_ID = "6529-stream";
-const ACTIVE_VERSION = "2026-07-27.1";
-const HISTORICAL_VERSION = "2026-07-26.1";
+const ACTIVE_VERSION = "2026-07-30.1";
+const HISTORICAL_VERSION = "2026-07-27.1";
 const PINNED_COMMIT = "513bd7e079eafe109df6ae1ae21bfbca6fec6786";
 const KNOWLEDGE_ROOT = path.join(
   REPO_ROOT,
@@ -58,6 +58,11 @@ type EvidenceRecord = SearchRecord & {
   provenance?: {
     reviewVersion?: string;
     sourceCommit?: string;
+    headingPath?: string[];
+    range?: {
+      lineStart: number;
+      lineEnd: number;
+    };
   };
   technical?: {
     declaration?: {
@@ -223,6 +228,15 @@ describe("Stream knowledge pack", () => {
       "editorial:sample:sale-modes",
       "editorial:sample:sale-modes:auctions",
     ]);
+    expect(chunks[1]?.provenance.headingPath).toEqual([
+      "Sample",
+      "Sale Modes",
+    ]);
+    expect(chunks[2]?.provenance.headingPath).toEqual([
+      "Sample",
+      "Sale Modes",
+      "Auctions",
+    ]);
   });
 
   it("extracts exact callable facts and bounded implementation evidence", () => {
@@ -255,6 +269,46 @@ describe("Stream knowledge pack", () => {
     expect(evidence?.sourceLink).toContain(
       `/reviews/${REVIEW_ID}/versions/${ACTIVE_VERSION}/reference/sources/smart-contracts/AuctionContract.sol#L`
     );
+  });
+
+  it("truncates source evidence only between complete source lines", () => {
+    const truncatedRecords = active.records.filter((record) =>
+      record.bodyExcerpt?.includes("\n…\n")
+    );
+
+    expect(truncatedRecords.length).toBeGreaterThan(0);
+    for (const record of truncatedRecords) {
+      const range = record.provenance?.range;
+      expect(record.sourcePath).toBeTruthy();
+      expect(range).toBeDefined();
+      if (!record.sourcePath || !range || !record.bodyExcerpt) {
+        continue;
+      }
+
+      const sourcePath = path.join(
+        REPO_ROOT,
+        "public",
+        "review-data",
+        REVIEW_ID,
+        "versions",
+        ACTIVE_VERSION,
+        "sources",
+        ...record.sourcePath.split("/")
+      );
+      const rangedSource = fs
+        .readFileSync(sourcePath, "utf8")
+        .replace(/\r\n?/g, "\n")
+        .split("\n")
+        .slice(range.lineStart - 1, range.lineEnd)
+        .join("\n")
+        .trim();
+      const [head, tail] = record.bodyExcerpt.split("\n…\n");
+
+      expect(head).toBeTruthy();
+      expect(tail).toBeTruthy();
+      expect(rangedSource.startsWith(`${head}\n`)).toBe(true);
+      expect(rangedSource.endsWith(`\n${tail}`)).toBe(true);
+    }
   });
 
   it("describes StreamSplitWallet observations for native and ERC-20 assets", () => {

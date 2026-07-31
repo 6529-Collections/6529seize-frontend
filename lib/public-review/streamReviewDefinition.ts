@@ -15,8 +15,9 @@ import {
   STREAM_REVIEW_LIFECYCLE_STATE,
 } from "@/lib/public-review/streamReviewPublication";
 
-export const STREAM_REVIEW_VERSION = "2026-07-27.1";
-export const STREAM_REVIEW_PREVIOUS_VERSION = "2026-07-26.1";
+export const STREAM_REVIEW_VERSION = "2026-07-30.1";
+export const STREAM_REVIEW_PREVIOUS_VERSION = "2026-07-27.1";
+export const STREAM_REVIEW_LEGACY_VERSION = "2026-07-26.1";
 export const STREAM_REVIEW_SLUG = "6529-stream";
 export const STREAM_REVIEW_SOURCE_COMMIT = getStreamReviewVersionSourceCommit(
   STREAM_REVIEW_VERSION
@@ -28,6 +29,8 @@ const STREAM_REVIEW_VERSION_PUBLICATION = getStreamReviewVersionPublication(
 );
 const STREAM_REVIEW_PREVIOUS_VERSION_PUBLICATION =
   getStreamReviewVersionPublication(STREAM_REVIEW_PREVIOUS_VERSION);
+const STREAM_REVIEW_LEGACY_VERSION_PUBLICATION =
+  getStreamReviewVersionPublication(STREAM_REVIEW_LEGACY_VERSION);
 
 if (STREAM_REVIEW_VERSION_LIFECYCLE_STATE !== STREAM_REVIEW_LIFECYCLE_STATE) {
   throw new Error(
@@ -349,6 +352,23 @@ export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
         repository: "6529-Collections/6529Stream",
         commit: getStreamReviewVersionSourceCommit(
           STREAM_REVIEW_PREVIOUS_VERSION
+        ),
+      },
+      pages: STREAM_REVIEW_PAGES,
+      audienceEntryPageIds: STREAM_REVIEW_AUDIENCE_ENTRY_PAGE_IDS,
+    },
+    {
+      version: STREAM_REVIEW_LEGACY_VERSION,
+      status: getStreamReviewVersionLifecycleState(
+        STREAM_REVIEW_LEGACY_VERSION
+      ),
+      deploymentStatus:
+        STREAM_REVIEW_LEGACY_VERSION_PUBLICATION.deploymentStatus,
+      auditStatus: STREAM_REVIEW_LEGACY_VERSION_PUBLICATION.auditStatus,
+      source: {
+        repository: "6529-Collections/6529Stream",
+        commit: getStreamReviewVersionSourceCommit(
+          STREAM_REVIEW_LEGACY_VERSION
         ),
       },
       pages: STREAM_REVIEW_2026_07_26_PAGES,

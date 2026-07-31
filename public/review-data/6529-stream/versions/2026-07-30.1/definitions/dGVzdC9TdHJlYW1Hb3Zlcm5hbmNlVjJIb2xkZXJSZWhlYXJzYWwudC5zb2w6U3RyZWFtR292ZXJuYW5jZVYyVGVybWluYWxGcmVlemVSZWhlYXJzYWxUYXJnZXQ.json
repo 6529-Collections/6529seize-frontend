@@ -1,0 +1,531 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget#function:0x054f7d9c",
+          "declaringDefinitionId": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget",
+          "inherited": false,
+          "inputs": [],
+          "name": "frozen",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x054f7d9c",
+          "signature": "frozen()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget#function:0x7cc96380",
+          "declaringDefinitionId": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget",
+          "inherited": false,
+          "inputs": [],
+          "name": "revision",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0x7cc96380",
+          "signature": "revision()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget#function:0x6a44f582",
+          "declaringDefinitionId": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget",
+          "inherited": false,
+          "inputs": [],
+          "name": "terminalFreeze",
+          "outputs": [],
+          "selector": "0x6a44f582",
+          "signature": "terminalFreeze()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget#function:0xd66cea8a",
+          "declaringDefinitionId": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget",
+          "inherited": false,
+          "inputs": [],
+          "name": "transitionHashes",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "oldStateHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "newStateHash",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xd66cea8a",
+          "signature": "transitionHashes()",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "frozen()",
+          "displaySignature": "frozen()",
+          "functionKind": "getter",
+          "id": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget#function:0x054f7d9c",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVjJIb2xkZXJSZWhlYXJzYWwudC5zb2w6U3RyZWFtR292ZXJuYW5jZVYyVGVybWluYWxGcmVlemVSZWhlYXJzYWxUYXJnZXQjZnVuY3Rpb246MHgwNTRmN2Q5Yw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "frozen",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 18,
+            "byteStart": 1324,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceV2HolderRehearsal.t.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:227bdc2bf297e960b4c15180fb179dfb6f0eba72b99ff923e776a056ca75c90a",
+            "sourceSha256": "sha256:94105d227c0be52c9e5c99b5959a40f558655d306dd84953ccc6b206855e61ae"
+          },
+          "selector": "0x054f7d9c",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "revision()",
+          "displaySignature": "revision()",
+          "functionKind": "getter",
+          "id": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget#function:0x7cc96380",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVjJIb2xkZXJSZWhlYXJzYWwudC5zb2w6U3RyZWFtR292ZXJuYW5jZVYyVGVybWluYWxGcmVlemVSZWhlYXJzYWxUYXJnZXQjZnVuY3Rpb246MHg3Y2M5NjM4MA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "revision",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 22,
+            "byteStart": 1348,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceV2HolderRehearsal.t.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:e2db55980de094a8d37681f158b6ec4024250fbdc6b4a0bb8b5f613d8e6a68f8",
+            "sourceSha256": "sha256:94105d227c0be52c9e5c99b5959a40f558655d306dd84953ccc6b206855e61ae"
+          },
+          "selector": "0x7cc96380",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(IStreamGovernanceExecutor)",
+          "functionKind": "constructor",
+          "id": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget#function:constructor(IStreamGovernanceExecutor)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "governanceAuthority_",
+              "type": "IStreamGovernanceExecutor"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVjJIb2xkZXJSZWhlYXJzYWwudC5zb2w6U3RyZWFtR292ZXJuYW5jZVYyVGVybWluYWxGcmVlemVSZWhlYXJzYWxUYXJnZXQjZnVuY3Rpb246Y29uc3RydWN0b3IoSVN0cmVhbUdvdmVybmFuY2VFeGVjdXRvcik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 120,
+            "byteStart": 1377,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceV2HolderRehearsal.t.sol#L31-L33",
+            "lineEnd": 33,
+            "lineStart": 31,
+            "snippetSha256": "sha256:b34e21d32de5a25fa23bcbafd874d8f0859c8cc2e08f5497b6e6e53da85ea3c6",
+            "sourceSha256": "sha256:94105d227c0be52c9e5c99b5959a40f558655d306dd84953ccc6b206855e61ae"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "terminalFreeze()",
+          "displaySignature": "terminalFreeze()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget#function:0x6a44f582",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVjJIb2xkZXJSZWhlYXJzYWwudC5zb2w6U3RyZWFtR292ZXJuYW5jZVYyVGVybWluYWxGcmVlemVSZWhlYXJzYWxUYXJnZXQjZnVuY3Rpb246MHg2YTQ0ZjU4Mg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "terminalFreeze",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 970,
+            "byteStart": 1503,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceV2HolderRehearsal.t.sol#L35-L55",
+            "lineEnd": 55,
+            "lineStart": 35,
+            "snippetSha256": "sha256:4cc90b5ca70cc8bfeba3118ea7a282c20c1b94e2d5719f946e8a709259575c6e",
+            "sourceSha256": "sha256:94105d227c0be52c9e5c99b5959a40f558655d306dd84953ccc6b206855e61ae"
+          },
+          "selector": "0x6a44f582",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "transitionHashes()",
+          "displaySignature": "transitionHashes()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget#function:0xd66cea8a",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVjJIb2xkZXJSZWhlYXJzYWwudC5zb2w6U3RyZWFtR292ZXJuYW5jZVYyVGVybWluYWxGcmVlemVSZWhlYXJzYWxUYXJnZXQjZnVuY3Rpb246MHhkNjZjZWE4YQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "transitionHashes",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "oldStateHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "newStateHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 417,
+            "byteStart": 2479,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceV2HolderRehearsal.t.sol#L57-L67",
+            "lineEnd": 67,
+            "lineStart": 57,
+            "snippetSha256": "sha256:fec4d42af51d47e16f2d0471c014c8ebd4fdfbbc2ea8c8e1e803285ff736c7df",
+            "sourceSha256": "sha256:94105d227c0be52c9e5c99b5959a40f558655d306dd84953ccc6b206855e61ae"
+          },
+          "selector": "0xd66cea8a",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_stateHash(bytes32,bool,uint64)",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget#function:_stateHash(bytes32,bool,uint64)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "frozen_",
+              "type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "revision_",
+              "type": "uint64"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVjJIb2xkZXJSZWhlYXJzYWwudC5zb2w6U3RyZWFtR292ZXJuYW5jZVYyVGVybWluYWxGcmVlemVSZWhlYXJzYWxUYXJnZXQjZnVuY3Rpb246X3N0YXRlSGFzaChieXRlczMyLGJvb2wsdWludDY0KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_stateHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 273,
+            "byteStart": 2902,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceV2HolderRehearsal.t.sol#L69-L77",
+            "lineEnd": 77,
+            "lineStart": 69,
+            "snippetSha256": "sha256:875367847968c26781c6f77731294c67c1a116636230766a22ef940eb8512768",
+            "sourceSha256": "sha256:94105d227c0be52c9e5c99b5959a40f558655d306dd84953ccc6b206855e61ae"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_SCOPE_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 107,
+            "byteStart": 1026,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceV2HolderRehearsal.t.sol#L21-L22",
+            "lineEnd": 22,
+            "lineStart": 21,
+            "snippetSha256": "sha256:ef2de16320eac0e81bb280deab68d934c1a9753344bbefd2304f13f0884be877",
+            "sourceSha256": "sha256:94105d227c0be52c9e5c99b5959a40f558655d306dd84953ccc6b206855e61ae"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 58,
+            "byteStart": 1075,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceV2HolderRehearsal.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:05f9f856f20f4b277190300e70baf54747358619d4ee0ec855004f0386167116",
+            "sourceSha256": "sha256:94105d227c0be52c9e5c99b5959a40f558655d306dd84953ccc6b206855e61ae"
+          },
+          "valueSource": "keccak256(\"6529STREAM_HOLDER_REHEARSAL_TERMINAL_SCOPE_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_STATE_DOMAIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 107,
+            "byteStart": 1139,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceV2HolderRehearsal.t.sol#L23-L24",
+            "lineEnd": 24,
+            "lineStart": 23,
+            "snippetSha256": "sha256:de8774ad5fe8ba65f15d25fcb10804d298565a638c8403755ca3c63d4848514c",
+            "sourceSha256": "sha256:94105d227c0be52c9e5c99b5959a40f558655d306dd84953ccc6b206855e61ae"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 58,
+            "byteStart": 1188,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceV2HolderRehearsal.t.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:866df9c101c26047903b6bd439d993cf7c958434bae5c3bfede8c3c367f612b1",
+            "sourceSha256": "sha256:94105d227c0be52c9e5c99b5959a40f558655d306dd84953ccc6b206855e61ae"
+          },
+          "valueSource": "keccak256(\"6529STREAM_HOLDER_REHEARSAL_TERMINAL_STATE_V1\")",
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "_governanceAuthority",
+          "natspec": "",
+          "range": {
+            "byteLength": 64,
+            "byteStart": 1253,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceV2HolderRehearsal.t.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:c3b3b2dab312578aa3690ef68bfd8c019430cb428ca88494da3b09c80bdf0fa7",
+            "sourceSha256": "sha256:94105d227c0be52c9e5c99b5959a40f558655d306dd84953ccc6b206855e61ae"
+          },
+          "selector": null,
+          "type": "IStreamGovernanceExecutor",
+          "typeString": "contract IStreamGovernanceExecutor",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget#function:0x054f7d9c",
+          "immutable": false,
+          "name": "frozen",
+          "natspec": "",
+          "range": {
+            "byteLength": 18,
+            "byteStart": 1324,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceV2HolderRehearsal.t.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:227bdc2bf297e960b4c15180fb179dfb6f0eba72b99ff923e776a056ca75c90a",
+            "sourceSha256": "sha256:94105d227c0be52c9e5c99b5959a40f558655d306dd84953ccc6b206855e61ae"
+          },
+          "selector": "0x054f7d9c",
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget#function:0x7cc96380",
+          "immutable": false,
+          "name": "revision",
+          "natspec": "",
+          "range": {
+            "byteLength": 22,
+            "byteStart": 1348,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceV2HolderRehearsal.t.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:e2db55980de094a8d37681f158b6ec4024250fbdc6b4a0bb8b5f613d8e6a68f8",
+            "sourceSha256": "sha256:94105d227c0be52c9e5c99b5959a40f558655d306dd84953ccc6b206855e61ae"
+          },
+          "selector": "0x7cc96380",
+          "type": "uint64",
+          "typeString": "uint64",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlVjJIb2xkZXJSZWhlYXJzYWwudC5zb2w6U3RyZWFtR292ZXJuYW5jZVYyVGVybWluYWxGcmVlemVSZWhlYXJzYWxUYXJnZXQ",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamGovernanceV2TerminalFreezeRehearsalTarget",
+    "natspec": "@dev Rehearsal-only terminal target. Its target-side context check proves\n      that the action vetoed below was executable as an exact class-2\n      transition rather than an inert descriptor assembled only for veto.",
+    "range": {
+      "byteLength": 2214,
+      "byteStart": 963,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceV2HolderRehearsal.t.sol#L20-L78",
+      "lineEnd": 78,
+      "lineStart": 20,
+      "snippetSha256": "sha256:493392d753107db4c34084caa749600b2579a474d0e8be99cae47cf13d52f9f8",
+      "sourceSha256": "sha256:94105d227c0be52c9e5c99b5959a40f558655d306dd84953ccc6b206855e61ae"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamGovernanceV2HolderRehearsal.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-30.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 5
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 5
+    },
+    "totalCount": 5
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget#function:0x054f7d9c",
+      "definitionId": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget#function:0x6a44f582",
+      "definitionId": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget#function:0x7cc96380",
+      "definitionId": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget#function:0xd66cea8a",
+      "definitionId": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget#function:constructor(IStreamGovernanceExecutor)",
+      "definitionId": "test/StreamGovernanceV2HolderRehearsal.t.sol:StreamGovernanceV2TerminalFreezeRehearsalTarget",
+      "severity": "advisory"
+    }
+  ]
+}

@@ -1,7 +1,9 @@
 const mockNotFound = jest.fn(() => {
   throw new Error("NEXT_NOT_FOUND");
 });
-const mockRedirect = jest.fn();
+const mockRedirect = jest.fn(() => {
+  throw new Error("NEXT_REDIRECT");
+});
 
 jest.mock("next/navigation", () => ({
   notFound: mockNotFound,
@@ -17,9 +19,9 @@ jest.mock("@/config/env", () => ({
 import StreamReviewRedirectPage from "@/app/stream/page";
 
 describe("/stream production gate", () => {
-  it("terminates with not found before attempting a redirect", () => {
-    expect(() => StreamReviewRedirectPage()).toThrow("NEXT_NOT_FOUND");
-    expect(mockNotFound).toHaveBeenCalledTimes(1);
-    expect(mockRedirect).not.toHaveBeenCalled();
+  it("redirects production traffic to the published Stream review", () => {
+    expect(() => StreamReviewRedirectPage()).toThrow("NEXT_REDIRECT");
+    expect(mockNotFound).not.toHaveBeenCalled();
+    expect(mockRedirect).toHaveBeenCalledWith("/reviews/6529-stream");
   });
 });

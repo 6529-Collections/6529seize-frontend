@@ -91,6 +91,19 @@ describe("public-review artifact workflow contract", () => {
     expect(legacyProduction).not.toMatch(/\bcp -r public\b/);
   });
 
+  it("injects a validated production-only public-review destination", () => {
+    expect(legacyProduction).toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_PRODUCTION_DISCUSSION_DESTINATIONS }}"
+    );
+    expect(legacyProduction).toContain('keys == ["production"]');
+    expect(legacyProduction).toContain(
+      'OptionName:"PUBLIC_REVIEW_DISCUSSION_DESTINATIONS"'
+    );
+    expect(legacyProduction).toContain(
+      '--option-settings "$option_settings"'
+    );
+  });
+
   it("keeps legacy staging aligned with the public-review bundle contract", () => {
     expect(legacyStaging).toContain(
       "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS }}"
