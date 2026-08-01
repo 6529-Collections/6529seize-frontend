@@ -1,0 +1,1975 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:0x4db3708e",
+          "declaringDefinitionId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testBurnedPaidFixedPricePendingArrngFulfillmentPreservesCreditsAndFreeze",
+          "outputs": [],
+          "selector": "0x4db3708e",
+          "signature": "testBurnedPaidFixedPricePendingArrngFulfillmentPreservesCreditsAndFreeze()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:0xa41614da",
+          "declaringDefinitionId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testDuplicateArrngRequestIdRejectsPaidFixedPriceDropWithoutConsumingOrCrediting",
+          "outputs": [],
+          "selector": "0xa41614da",
+          "signature": "testDuplicateArrngRequestIdRejectsPaidFixedPriceDropWithoutConsumingOrCrediting()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:0x6b15d2b1",
+          "declaringDefinitionId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFixedPriceCreditWithdrawalsBeforeFulfillmentPreserveRequestBinding",
+          "outputs": [],
+          "selector": "0x6b15d2b1",
+          "signature": "testFixedPriceCreditWithdrawalsBeforeFulfillmentPreserveRequestBinding()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:0xb703c2ec",
+          "declaringDefinitionId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFreezeRejectsLivePendingFixedPriceButAllowsBurnedPendingArrngTokens",
+          "outputs": [],
+          "selector": "0xb703c2ec",
+          "signature": "testFreezeRejectsLivePendingFixedPriceButAllowsBurnedPendingArrngTokens()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:0x0d26d264",
+          "declaringDefinitionId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPausedRandomnessRequestRejectsPaidFixedPriceDropWithoutConsumingOrCrediting",
+          "outputs": [],
+          "selector": "0x0d26d264",
+          "signature": "testPausedRandomnessRequestRejectsPaidFixedPriceDropWithoutConsumingOrCrediting()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:0x1bebc164",
+          "declaringDefinitionId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPostExecutionSignerLifecycleDoesNotDisturbCreditsOrPendingRequest",
+          "outputs": [],
+          "selector": "0x1bebc164",
+          "signature": "testPostExecutionSignerLifecycleDoesNotDisturbCreditsOrPendingRequest()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "testPausedRandomnessRequestRejectsPaidFixedPriceDropWithoutConsumingOrCrediting()",
+          "displaySignature": "testPausedRandomnessRequestRejectsPaidFixedPriceDropWithoutConsumingOrCrediting()",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:0x0d26d264",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOjB4MGQyNmQyNjQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPausedRandomnessRequestRejectsPaidFixedPriceDropWithoutConsumingOrCrediting",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1984,
+            "byteStart": 2544,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L62-L94",
+            "lineEnd": 94,
+            "lineStart": 62,
+            "snippetSha256": "sha256:a93e63f8e1e066ed67aec685d1728b9c3a0f6521e81d9b541b410ac567e48263",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": "0x0d26d264",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testPostExecutionSignerLifecycleDoesNotDisturbCreditsOrPendingRequest()",
+          "displaySignature": "testPostExecutionSignerLifecycleDoesNotDisturbCreditsOrPendingRequest()",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:0x1bebc164",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOjB4MWJlYmMxNjQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPostExecutionSignerLifecycleDoesNotDisturbCreditsOrPendingRequest",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2184,
+            "byteStart": 4534,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L96-L132",
+            "lineEnd": 132,
+            "lineStart": 96,
+            "snippetSha256": "sha256:5d56add2163d55a07a65e58020b83193162fa1d528dd1336965db1dc2d4469f6",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": "0x1bebc164",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testFixedPriceCreditWithdrawalsBeforeFulfillmentPreserveRequestBinding()",
+          "displaySignature": "testFixedPriceCreditWithdrawalsBeforeFulfillmentPreserveRequestBinding()",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:0x6b15d2b1",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOjB4NmIxNWQyYjE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFixedPriceCreditWithdrawalsBeforeFulfillmentPreserveRequestBinding",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1966,
+            "byteStart": 6724,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L134-L163",
+            "lineEnd": 163,
+            "lineStart": 134,
+            "snippetSha256": "sha256:030c89344db259028dd91a356d18925394d13e95d1f9738e0879bdd994ebe04e",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": "0x6b15d2b1",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testDuplicateArrngRequestIdRejectsPaidFixedPriceDropWithoutConsumingOrCrediting()",
+          "displaySignature": "testDuplicateArrngRequestIdRejectsPaidFixedPriceDropWithoutConsumingOrCrediting()",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:0xa41614da",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOjB4YTQxNjE0ZGE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testDuplicateArrngRequestIdRejectsPaidFixedPriceDropWithoutConsumingOrCrediting",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2747,
+            "byteStart": 8696,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L165-L209",
+            "lineEnd": 209,
+            "lineStart": 165,
+            "snippetSha256": "sha256:2dc4ab028bc052c6a594880b3536197839e841a02edef4be5c2d2489032896db",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": "0xa41614da",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testBurnedPaidFixedPricePendingArrngFulfillmentPreservesCreditsAndFreeze()",
+          "displaySignature": "testBurnedPaidFixedPricePendingArrngFulfillmentPreservesCreditsAndFreeze()",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:0x4db3708e",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOjB4NGRiMzcwOGU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testBurnedPaidFixedPricePendingArrngFulfillmentPreservesCreditsAndFreeze",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2450,
+            "byteStart": 11449,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L211-L250",
+            "lineEnd": 250,
+            "lineStart": 211,
+            "snippetSha256": "sha256:bc1c2e07bcc5ecec2480688cd54820eaed851fcf3963135884e0285254fe0d40",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": "0x4db3708e",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testFreezeRejectsLivePendingFixedPriceButAllowsBurnedPendingArrngTokens()",
+          "displaySignature": "testFreezeRejectsLivePendingFixedPriceButAllowsBurnedPendingArrngTokens()",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:0xb703c2ec",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOjB4YjcwM2MyZWM",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFreezeRejectsLivePendingFixedPriceButAllowsBurnedPendingArrngTokens",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2929,
+            "byteStart": 13905,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L252-L306",
+            "lineEnd": 306,
+            "lineStart": 252,
+            "snippetSha256": "sha256:c55221c9f73bce1c749ff59a7ecadc94bcd5bc3fb97ad34a55331ee01378c82b",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": "0xb703c2ec",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_deployComposition()",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:_deployComposition()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9kZXBsb3lDb21wb3NpdGlvbigp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_deployComposition",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            }
+          ],
+          "range": {
+            "byteLength": 483,
+            "byteStart": 16840,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L308-L315",
+            "lineEnd": 315,
+            "lineStart": 308,
+            "snippetSha256": "sha256:b53e88048d3d903368f7b9a147fa50949bf8066df5eb578704d4a41ffc484034",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_mintFixedPriceDropWithSignature(CompositionSetup,string,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:_mintFixedPriceDropWithSignature(CompositionSetup,string,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "name": "nonce",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9taW50Rml4ZWRQcmljZURyb3BXaXRoU2lnbmF0dXJlKENvbXBvc2l0aW9uU2V0dXAsc3RyaW5nLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_mintFixedPriceDropWithSignature",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            },
+            {
+              "index": 1,
+              "name": "signature",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 719,
+            "byteStart": 17329,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L317-L334",
+            "lineEnd": 334,
+            "lineStart": 317,
+            "snippetSha256": "sha256:c816dd23647c3719270a132f992b2d1d9299fe947f37b846f3b7f8ef33416ef2",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_buildSignedFixedPriceAuthorization(CompositionSetup,string,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:_buildSignedFixedPriceAuthorization(CompositionSetup,string,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 2,
+              "name": "nonce",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9idWlsZFNpZ25lZEZpeGVkUHJpY2VBdXRob3JpemF0aW9uKENvbXBvc2l0aW9uU2V0dXAsc3RyaW5nLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_buildSignedFixedPriceAuthorization",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 645,
+            "byteStart": 18054,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L336-L354",
+            "lineEnd": 354,
+            "lineStart": 336,
+            "snippetSha256": "sha256:e6be8e5082d0eb924f1c6dfe5a123dbf1efe26503a289047f2873acd9e758a60",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertSuccessfulFixedPriceMint(CompositionSetup,StreamDrops.DropAuthorization,uint256,string)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:_assertSuccessfulFixedPriceMint(CompositionSetup,StreamDrops.DropAuthorization,uint256,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "label",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9hc3NlcnRTdWNjZXNzZnVsRml4ZWRQcmljZU1pbnQoQ29tcG9zaXRpb25TZXR1cCxTdHJlYW1Ecm9wcy5Ecm9wQXV0aG9yaXphdGlvbix1aW50MjU2LHN0cmluZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertSuccessfulFixedPriceMint",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1413,
+            "byteStart": 18705,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L356-L376",
+            "lineEnd": 376,
+            "lineStart": 356,
+            "snippetSha256": "sha256:1ddee2e3fc17a64f50242bbf3931ce7533f2b6d50aa37be5e8742b085f1fab1c",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertNoFixedPriceAccounting(CompositionSetup,string)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:_assertNoFixedPriceAccounting(CompositionSetup,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "label",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9hc3NlcnROb0ZpeGVkUHJpY2VBY2NvdW50aW5nKENvbXBvc2l0aW9uU2V0dXAsc3RyaW5nKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertNoFixedPriceAccounting",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 759,
+            "byteStart": 20124,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L378-L390",
+            "lineEnd": 390,
+            "lineStart": 378,
+            "snippetSha256": "sha256:06e3b34b666b83d4f313a3f0a82069e0148786b9d90467f4734aa037341ce5fe",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_setPaused(CompositionSetup,bytes32,bool)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:_setPaused(CompositionSetup,bytes32,bool)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "domain",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "paused",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9zZXRQYXVzZWQoQ29tcG9zaXRpb25TZXR1cCxieXRlczMyLGJvb2wp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_setPaused",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 378,
+            "byteStart": 20889,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L392-L399",
+            "lineEnd": 399,
+            "lineStart": 392,
+            "snippetSha256": "sha256:5fd80036824f8b3b6e8a888b4f9fcb42ccd8b384b6cdd56ef3437bc3bc400730",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_snapshot(CompositionSetup,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:_snapshot(CompositionSetup,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9zbmFwc2hvdChDb21wb3NpdGlvblNldHVwLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_snapshot",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "snapshot",
+              "storageLocation": "memory",
+              "type": "FixedPriceSnapshot"
+            }
+          ],
+          "range": {
+            "byteLength": 1323,
+            "byteStart": 21273,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L401-L423",
+            "lineEnd": 423,
+            "lineStart": 401,
+            "snippetSha256": "sha256:da287bd00d120f0f03b23f376c67e847f6162a84b7a92bf1578a7d5ccab4d4f0",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertSnapshot(CompositionSetup,uint256,FixedPriceSnapshot,string)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:_assertSnapshot(CompositionSetup,uint256,FixedPriceSnapshot,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "beforeSnapshot",
+              "storageLocation": "memory",
+              "type": "FixedPriceSnapshot"
+            },
+            {
+              "index": 3,
+              "name": "label",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9hc3NlcnRTbmFwc2hvdChDb21wb3NpdGlvblNldHVwLHVpbnQyNTYsRml4ZWRQcmljZVNuYXBzaG90LHN0cmluZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertSnapshot",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 942,
+            "byteStart": 22602,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L425-L441",
+            "lineEnd": 441,
+            "lineStart": 425,
+            "snippetSha256": "sha256:e314c1af4c97635884b94e04bc964ec18b6bab464a321d22263b96fdb641bf7a",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertFixedPriceAccountingSnapshot(CompositionSetup,FixedPriceSnapshot,string)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:_assertFixedPriceAccountingSnapshot(CompositionSetup,FixedPriceSnapshot,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "snapshot",
+              "storageLocation": "memory",
+              "type": "FixedPriceSnapshot"
+            },
+            {
+              "index": 2,
+              "name": "label",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9hc3NlcnRGaXhlZFByaWNlQWNjb3VudGluZ1NuYXBzaG90KENvbXBvc2l0aW9uU2V0dXAsRml4ZWRQcmljZVNuYXBzaG90LHN0cmluZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertFixedPriceAccountingSnapshot",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1030,
+            "byteStart": 23550,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L443-L460",
+            "lineEnd": 460,
+            "lineStart": 443,
+            "snippetSha256": "sha256:95bc44a9996e6bab96ba0b42f5467ad53cea3f2ce11aa71b14a0e7e1e40c5abb",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_callMintDropWithValue(CompositionSetup,StreamDrops.DropAuthorization,string,bytes)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:_callMintDropWithValue(CompositionSetup,StreamDrops.DropAuthorization,string,bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            },
+            {
+              "index": 2,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 3,
+              "name": "signature",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9jYWxsTWludERyb3BXaXRoVmFsdWUoQ29tcG9zaXRpb25TZXR1cCxTdHJlYW1Ecm9wcy5Ecm9wQXV0aG9yaXphdGlvbixzdHJpbmcsYnl0ZXMp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_callMintDropWithValue",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "success",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 502,
+            "byteStart": 24586,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L462-L473",
+            "lineEnd": 473,
+            "lineStart": 462,
+            "snippetSha256": "sha256:242b33908db6f82a7500478987d2e6e3ec79bfecb876f481bfff13ff0fed8180",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_callCancelDrop(CompositionSetup,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:_callCancelDrop(CompositionSetup,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "dropId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9jYWxsQ2FuY2VsRHJvcChDb21wb3NpdGlvblNldHVwLGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_callCancelDrop",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "success",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 310,
+            "byteStart": 25094,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L475-L481",
+            "lineEnd": 481,
+            "lineStart": 475,
+            "snippetSha256": "sha256:3eab0aeefb203b3e96434bb20ebd6e8ff7759c61d22dbfaec9b27312ac759756",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_fulfillRandomnessAndAssertBinding(CompositionSetup,uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:_fulfillRandomnessAndAssertBinding(CompositionSetup,uint256,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "word",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9mdWxmaWxsUmFuZG9tbmVzc0FuZEFzc2VydEJpbmRpbmcoQ29tcG9zaXRpb25TZXR1cCx1aW50MjU2LHVpbnQyNTYsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_fulfillRandomnessAndAssertBinding",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "expectedSeed",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 1473,
+            "byteStart": 25410,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L483-L509",
+            "lineEnd": 509,
+            "lineStart": 483,
+            "snippetSha256": "sha256:9e171ed11003ab4ee09ca66a2e2c0009b7a524c2b18cab565297e6f2582a843e",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertBurnedAudit(CompositionSetup,uint256,address,bytes32,bytes32,bool)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:_assertBurnedAudit(CompositionSetup,uint256,address,bytes32,bytes32,bool)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "setup",
+              "storageLocation": "memory",
+              "type": "CompositionSetup"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "tokenHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "postBurnRandomnessHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "postBurnRecorded",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9hc3NlcnRCdXJuZWRBdWRpdChDb21wb3NpdGlvblNldHVwLHVpbnQyNTYsYWRkcmVzcyxieXRlczMyLGJ5dGVzMzIsYm9vbCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertBurnedAudit",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1813,
+            "byteStart": 26889,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L511-L555",
+            "lineEnd": 555,
+            "lineStart": 511,
+            "snippetSha256": "sha256:b281109989a293186fc331dbeb218fc752833a6565879bdbb6f77f4892c8019b",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_warpPastFinalSupplyWindow()",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:_warpPastFinalSupplyWindow()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl93YXJwUGFzdEZpbmFsU3VwcGx5V2luZG93KCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_warpPastFinalSupplyWindow",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 101,
+            "byteStart": 28708,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L557-L559",
+            "lineEnd": 559,
+            "lineStart": 557,
+            "snippetSha256": "sha256:82a6688bff813f04a0b4678165717eac2ee27e3657eac19a004bc225f1440737",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_countTopic(Vm.Log[],bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:_countTopic(Vm.Log[],bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "topic",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9jb3VudFRvcGljKFZtLkxvZ1tdLGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_countTopic",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "count",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 278,
+            "byteStart": 28815,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L561-L567",
+            "lineEnd": 567,
+            "lineStart": 561,
+            "snippetSha256": "sha256:04f769c4de94a6a1ec988fd10f94987b5a4ee4e0908c2270b5865d5d533bfb15",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertRevertedWithMessage(bool,bytes,string)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:_assertRevertedWithMessage(bool,bytes,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "success",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "expectedMessage",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9hc3NlcnRSZXZlcnRlZFdpdGhNZXNzYWdlKGJvb2wsYnl0ZXMsc3RyaW5nKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertRevertedWithMessage",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 792,
+            "byteStart": 29099,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L569-L583",
+            "lineEnd": 583,
+            "lineStart": 569,
+            "snippetSha256": "sha256:24bff8ddd6aa88028a2f25dfa3fc099f743b42a80225fb9efc3adecd714c5978",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_decodeErrorString(bytes)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:_decodeErrorString(bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "returnData",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9kZWNvZGVFcnJvclN0cmluZyhieXRlcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_decodeErrorString",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 398,
+            "byteStart": 29897,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L585-L592",
+            "lineEnd": 592,
+            "lineStart": 585,
+            "snippetSha256": "sha256:0bcfc2702b25ecc4ea143a39b1d6378a53235b1beee19148107f94fef585f090",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_words(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:_words(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "word",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl93b3Jkcyh1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_words",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "words",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "range": {
+            "byteLength": 142,
+            "byteStart": 30301,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L594-L597",
+            "lineEnd": 597,
+            "lineStart": 594,
+            "snippetSha256": "sha256:d6af2cee67be55b91c46afe15a3baa95954c87ee2bc75d3203858594f9faf5ad",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_expectedSeed(address,uint256,uint256,uint256,uint256[])",
+          "functionKind": "function",
+          "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:_expectedSeed(address,uint256,uint256,uint256,uint256[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "words",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0I2Z1bmN0aW9uOl9leHBlY3RlZFNlZWQoYWRkcmVzcyx1aW50MjU2LHVpbnQyNTYsdWludDI1Nix1aW50MjU2W10p",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_expectedSeed",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 514,
+            "byteStart": 30449,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L599-L617",
+            "lineEnd": 617,
+            "lineStart": 599,
+            "snippetSha256": "sha256:5673ecba73de6890f7aeed719cb92ff22ea5b40962e8202cbf20f5735960e310",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COLLECTION_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 683,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:cba8ff5a3b4148cc54bed7e4899604a5bc39c7815d1a23162a647a4813b0e087",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 724,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PRICE",
+          "natspec": "",
+          "range": {
+            "byteLength": 40,
+            "byteStart": 731,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:387e31689c05c7eec1f1eb30e8429bf14dfaf9606f0d7493366cc0648681a954",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 7,
+            "byteStart": 764,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:8ed26c817150283c6738520cd1cbcd9ab2444d660b342386f69edccb0a98e575",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "valueSource": "4 ether",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "POSTER",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 777,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:695a59e12d896c6e13bf8a41a7b87f2dbedaa0e769d3f48d88cfb58046e19145",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 811,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:0ab9e750f7c6ea7ca35cb67c84e1deac4cd43cc2a6a45b284817308c28bdf2a2",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "valueSource": "address(0x1001)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 52,
+            "byteStart": 832,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:3e651fdfebdcfe0dd0fdc57a7c7e95dcc88555bb618ed67eaaae88bb2f03bb11",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 869,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:1e80055498f115d09b966c83a4320475410b3488cc2e25d7bd51229b835b3e62",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "valueSource": "address(0x5005)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PAYOUT",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 890,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:d899e00d2b9ba56b581169c7f20b579dccbb4b324bfd90e911b8d4849dd60cee",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 924,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:8c262acd027cd04362ad0bf925e100df0730a67a3bc00162d96b74c991167c42",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "valueSource": "address(0x2001)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "CURATORS_POOL",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 945,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:508390a93da89fbc1eb146fadb02b85cd94580e212dfe68fb7f662405c500766",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 986,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:a41fc240d38b7cdcdce6a559175b4b6958a7128a899e99f41eca3bed02bf0f77",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "valueSource": "address(0x3001)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "WITHDRAW_RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 61,
+            "byteStart": 1007,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:51d103d2475427b1675778fe79267ad597d9c4cf91508ce49225a0ca54790714",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1053,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:410a0ba944aa1eb7e5fd3043721656e53b589d86c442604655354ee5daad37f7",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "valueSource": "address(0x6001)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PAUSE_REASON",
+          "natspec": "",
+          "range": {
+            "byteLength": 87,
+            "byteStart": 1074,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:70addb3d136d0d49a3fab6e33d324e1bd643b49880cdf717ad2c3cc5ff42398f",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 47,
+            "byteStart": 1114,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:5f0cbd8fb1aa2f097b123ab4db47cfb1c030d7941aef72269528bf00225aede3",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "valueSource": "keccak256(\"fixed-price-randomizer-composition\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RANDOMNESS_SEED_TYPEHASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 222,
+            "byteStart": 1167,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L28-L30",
+            "lineEnd": 30,
+            "lineStart": 28,
+            "snippetSha256": "sha256:4b8afb9e13e39343c91a17ac2d52a6c8cd68207384bfddc9f4a82ed25084df86",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 170,
+            "byteStart": 1219,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L28-L30",
+            "lineEnd": 30,
+            "lineStart": 28,
+            "snippetSha256": "sha256:66a4b794c26192e8ab011adf04443fc22cfc01ca8e9468b8313b0430f2c80cca",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "valueSource": "keccak256(\n        \"6529StreamRandomnessSeed(address provider,uint256 requestId,uint256 collectionId,uint256 tokenId,uint256 randomizerEpoch,bytes32 rawOutputHash)\"\n    )",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "METADATA_UPDATE_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 85,
+            "byteStart": 1395,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:bed32f9fe7984bc07db2c5f9ec8d9ba88c5fb3db95d8bd8e8aef91d02393de7e",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 36,
+            "byteStart": 1444,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L31",
+            "lineEnd": 31,
+            "lineStart": 31,
+            "snippetSha256": "sha256:2826f0dbf8eb545c8c9b7de48ad0ba4b2e55328e87a7f33b0b2c75ad9ccbd0ee",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "valueSource": "keccak256(\"MetadataUpdate(uint256)\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "BURNED_TOKEN_RANDOMNESS_RECORDED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 179,
+            "byteStart": 1486,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L32-L34",
+            "lineEnd": 34,
+            "lineStart": 32,
+            "snippetSha256": "sha256:c39370e2519a8c9c163ff821dc9f4d13ef525ad0b3ea2b20481a4d31ae69785c",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 113,
+            "byteStart": 1552,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L32-L34",
+            "lineEnd": 34,
+            "lineStart": 32,
+            "snippetSha256": "sha256:79d950919161235f7a2c6c3a6f996b11057b40acc39c944b20829343200c0f1b",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "valueSource": "keccak256(\n        \"BurnedTokenRandomnessRecorded(uint256,uint256,uint256,address,uint256,bytes32,bytes32)\"\n    )",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RANDOMNESS_FULFILLED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 151,
+            "byteStart": 1671,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L35-L36",
+            "lineEnd": 36,
+            "lineStart": 35,
+            "snippetSha256": "sha256:5df8556d4e8437be4633a9674c410b83b2f1cb1a5d70c0edc1d460ffe370cb3e",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 89,
+            "byteStart": 1733,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L36",
+            "lineEnd": 36,
+            "lineStart": 36,
+            "snippetSha256": "sha256:30bdab029d766f0a14552be6367ea7120c977e74fbbf73b35c9a2af0e5b21056",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "valueSource": "keccak256(\"RandomnessFulfilled(uint256,uint256,uint256,address,uint256,bytes32,bytes32)\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ERROR_STRING_SELECTOR",
+          "natspec": "",
+          "range": {
+            "byteLength": 82,
+            "byteStart": 1828,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L37",
+            "lineEnd": 37,
+            "lineStart": 37,
+            "snippetSha256": "sha256:6d360a41c9c4d9bb602417872810343b68000b7179c6999c974f9bf2a5664e9a",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "selector": null,
+          "type": "bytes4",
+          "typeString": "bytes4",
+          "valueRange": {
+            "byteLength": 34,
+            "byteStart": 1876,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L37",
+            "lineEnd": 37,
+            "lineStart": 37,
+            "snippetSha256": "sha256:ff066fd84e2e90cdc62fe611f91c42bb927893bba3429b6a76e7fe90e1709bd3",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          },
+          "valueSource": "bytes4(keccak256(\"Error(string)\"))",
+          "visibility": "private"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 1951,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L40",
+                "lineEnd": 40,
+                "lineStart": 40,
+                "snippetSha256": "sha256:67cd5d2d923d960771e4de7c95f232699d5ce27f40fe1105c89e6a57535a802e",
+                "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+              },
+              "type": "DeployedStream",
+              "typeString": "struct StreamFixture.DeployedStream"
+            },
+            {
+              "index": 1,
+              "name": "randomizer",
+              "natspec": "",
+              "range": {
+                "byteLength": 31,
+                "byteStart": 1984,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L41",
+                "lineEnd": 41,
+                "lineStart": 41,
+                "snippetSha256": "sha256:7810e1c4f33229fbfab23adea736baf407203b43a9468a4f10d6e18ff8cca974",
+                "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+              },
+              "type": "NextGenRandomizerRNG",
+              "typeString": "contract NextGenRandomizerRNG"
+            },
+            {
+              "index": 2,
+              "name": "controller",
+              "natspec": "",
+              "range": {
+                "byteLength": 36,
+                "byteStart": 2025,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L42",
+                "lineEnd": 42,
+                "lineStart": 42,
+                "snippetSha256": "sha256:3cb5d69f454f06254796ceb9f36bcc7d2c2cc970526744673bef66b465e1e2b7",
+                "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+              },
+              "type": "FixedPriceArrngController",
+              "typeString": "contract FixedPriceArrngController"
+            }
+          ],
+          "name": "CompositionSetup",
+          "natspec": "",
+          "range": {
+            "byteLength": 151,
+            "byteStart": 1917,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L39-L43",
+            "lineEnd": 43,
+            "lineStart": 39,
+            "snippetSha256": "sha256:aed51ef5e05e13781406bee58e1fbfaf58485924dd23f6b2b2164bcb5cf37f7b",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          }
+        },
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "owner",
+              "natspec": "",
+              "range": {
+                "byteLength": 13,
+                "byteStart": 2110,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L46",
+                "lineEnd": 46,
+                "lineStart": 46,
+                "snippetSha256": "sha256:8a244f16ba6f8d35d410e961effc10adbeb921976956c62be3d0e0b1efde76bb",
+                "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 1,
+              "name": "posterCredit",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 2133,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L47",
+                "lineEnd": 47,
+                "lineStart": 47,
+                "snippetSha256": "sha256:a20fd9584ef3d84f52012798896bb4f1d8d595fb573d96c061ff363337dc77f0",
+                "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "protocolCredit",
+              "natspec": "",
+              "range": {
+                "byteLength": 22,
+                "byteStart": 2163,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L48",
+                "lineEnd": 48,
+                "lineStart": 48,
+                "snippetSha256": "sha256:f3b49d5f863cf06dfec0e7e19359ef907605b2bb803de12ec125493d972e0cdb",
+                "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "curatorCredit",
+              "natspec": "",
+              "range": {
+                "byteLength": 21,
+                "byteStart": 2195,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L49",
+                "lineEnd": 49,
+                "lineStart": 49,
+                "snippetSha256": "sha256:a37f159cc50e2a2c0ced0d45ba31a7b1e43851c6862a9fc7e409dea50911d8a8",
+                "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "totalPosterOwed",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 2226,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L50",
+                "lineEnd": 50,
+                "lineStart": 50,
+                "snippetSha256": "sha256:6bfca5af65b185c13d377a73cf5cc86436352982e78c3284bd581ad1eb05313f",
+                "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "totalProtocolOwed",
+              "natspec": "",
+              "range": {
+                "byteLength": 25,
+                "byteStart": 2259,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L51",
+                "lineEnd": 51,
+                "lineStart": 51,
+                "snippetSha256": "sha256:ad0613dcbb7138904de9453a8fea0beac2d653f2449930cd8719de642bfef548",
+                "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 6,
+              "name": "totalCuratorOwed",
+              "natspec": "",
+              "range": {
+                "byteLength": 24,
+                "byteStart": 2294,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L52",
+                "lineEnd": 52,
+                "lineStart": 52,
+                "snippetSha256": "sha256:3f99909d0b93a047daf77033492143bbf054570ffc944c8ea513319dd3ce7b3b",
+                "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 7,
+              "name": "totalOwed",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 2328,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L53",
+                "lineEnd": 53,
+                "lineStart": 53,
+                "snippetSha256": "sha256:555146ae7deba284debcb5a2582367764509b11a57d1dba32541ae89740a1760",
+                "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 8,
+              "name": "balance",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 2355,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L54",
+                "lineEnd": 54,
+                "lineStart": 54,
+                "snippetSha256": "sha256:05b79612708198460920e1a79099cff33f47d24fd37cdcf16c6f11270f48c64f",
+                "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 9,
+              "name": "pendingRequests",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 2380,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L55",
+                "lineEnd": 55,
+                "lineStart": 55,
+                "snippetSha256": "sha256:61c70112ff83359814676954747c594f2afe000a023ea149c17bd4d5315bf5c7",
+                "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 10,
+              "name": "randomizerEpoch",
+              "natspec": "",
+              "range": {
+                "byteLength": 23,
+                "byteStart": 2413,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L56",
+                "lineEnd": 56,
+                "lineStart": 56,
+                "snippetSha256": "sha256:550552d2f417f7119e59fc932efdc40f17c847ec31e8b5a1cc1f0c4617540359",
+                "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 11,
+              "name": "collectionRandomizer",
+              "natspec": "",
+              "range": {
+                "byteLength": 28,
+                "byteStart": 2446,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L57",
+                "lineEnd": 57,
+                "lineStart": 57,
+                "snippetSha256": "sha256:047e9c0e94361378048d68db6fc1a523d33ec1fdad107ff8bd0ba5c0ffe1464d",
+                "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 12,
+              "name": "tokenRequest",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 2484,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L58",
+                "lineEnd": 58,
+                "lineStart": 58,
+                "snippetSha256": "sha256:322f2aea0213e290c642f9a3a733c31c8151a952ed611ce3caa31cf133362b94",
+                "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 13,
+              "name": "tokenHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 2514,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L59",
+                "lineEnd": 59,
+                "lineStart": 59,
+                "snippetSha256": "sha256:2801b40f49f19252ed74acdbbfe4eb3f1910c9632036c21d54695d7f5c02ed20",
+                "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            }
+          ],
+          "name": "FixedPriceSnapshot",
+          "natspec": "",
+          "range": {
+            "byteLength": 464,
+            "byteStart": 2074,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L45-L60",
+            "lineEnd": 60,
+            "lineStart": 45,
+            "snippetSha256": "sha256:79e9f533de2a5c8ceb35056a3d3ae46864ec77e9d1125518eafa2ed0c11e4423",
+            "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+        "name": "DropAuthTestHelper"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1GaXhlZFByaWNlUmFuZG9taXplckNvbXBvc2l0aW9uLnQuc29sOlN0cmVhbUZpeGVkUHJpY2VSYW5kb21pemVyQ29tcG9zaXRpb25UZXN0",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamFixedPriceRandomizerCompositionTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 30543,
+      "byteStart": 422,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamFixedPriceRandomizerComposition.t.sol#L13-L618",
+      "lineEnd": 618,
+      "lineStart": 13,
+      "snippetSha256": "sha256:66e7222cd28fe7df2a7e82079a3e0dd721acbbef14f7e624ae6bafdf07da9713",
+      "sourceSha256": "sha256:06efe7fcd5963f2a674c0f39d1b6908eac3bdb2f96db0b9615734330c3cccdc9"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamFixedPriceRandomizerComposition.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 7
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 6
+    },
+    "totalCount": 7
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:0x0d26d264",
+      "definitionId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:0x1bebc164",
+      "definitionId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:0x4db3708e",
+      "definitionId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:0x6b15d2b1",
+      "definitionId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:0xa41614da",
+      "definitionId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest#function:0xb703c2ec",
+      "definitionId": "test/StreamFixedPriceRandomizerComposition.t.sol:StreamFixedPriceRandomizerCompositionTest",
+      "severity": "advisory"
+    }
+  ]
+}

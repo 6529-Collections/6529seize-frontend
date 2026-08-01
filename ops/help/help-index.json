@@ -109,16 +109,16 @@
         "artist",
         "audit",
         "security",
-        "pre-audit",
-        "not deployed"
+        "audit planned",
+        "development status"
       ],
       "facts": [
         "The 6529 Stream public review is published at /reviews/6529-stream in local development, shared staging, and production while its lifecycle permits public routes.",
-        "The review presents Stream as an attempt to build the most complete, artist-centered contract system for serious one-of-one digital art, while retaining support for editions where an artist chooses them.",
-        "The overview explains which artistic and protocol guarantees each major mechanism protects and which responsibilities a superficially simpler design would abandon or move into websites, databases, custodians, marketplaces, or unwritten recovery processes.",
-        "Stream is not deployed and is pre-audit; Current Implementation and Readiness is the authoritative page for connected paths, source-only foundations, accepted targets, proposals, evidence, known limitations, and release blockers.",
-        "Fourteen editorial pages explain artwork lifecycle, artist controls, roles, curation and TDH authorization, minting, sales, revenue, randomness, metadata, freezing, governance, current implementation and readiness, and community review.",
-        "Every page shows the review version, exact source link, page navigation, on-page contents, and a collapsible feedback rail; detailed evidence and release status are centralized on Current Implementation and Readiness.",
+        "The review explains how Stream supports serious one-of-one digital art and artist-chosen editions.",
+        "The overview explains how each major mechanism protects artist consent, artwork identity, sales, preservation, and long-term operation.",
+        "The current Overview includes a separately dated, source-pinned development update covering recent work, work in progress, launch requirements, and the latest evidence counts. Daily figures come from that update.",
+        "Fourteen editorial pages explain artwork lifecycle, artist controls, responsibilities, curation and TDH authorization, minting, sales, revenue, randomness, metadata, freezing, contract changes, current development, and community review.",
+        "Every page shows the review version, exact source link, page navigation, on-page contents, and a collapsible feedback rail; snapshot evidence is collected on Where Development Stands.",
         "Review, Technical reference, and Public feedback are the three consistent top-level review areas shown below the status banner; page comments and sending feedback remain separate page actions.",
         "Active and historical routes read immutable versioned editorial content and validate its manifest before rendering.",
         "Each immutable version has its own lifecycle, deployment status, and audit status: superseded versions can remain readable as REVIEW_CLOSED, stop accepting submissions, link back to the current review, and avoid inheriting newer deployment or audit claims.",
@@ -152,6 +152,8 @@
       "source_refs": [
         "app/reviews/[review]/page.tsx",
         "components/public-review/PublicReviewShell.tsx",
+        "components/public-review/StreamReviewDevelopmentStatus.tsx",
+        "config/public-reviews/6529-stream.development-status.json",
         "ops/docs/public-reviews/README.md"
       ]
     },
@@ -191,7 +193,7 @@
         "Ledger entries are identified and deduplicated by immutable Wave drop ID rather than the client-supplied submission UUID.",
         "Ledger metadata for a 50-drop page is hydrated in batches of no more than eight concurrent requests.",
         "A feedback section is accepted only when that exact section is explicitly allowed for the selected page; pages without a section allow-list accept no section IDs.",
-        "Immutable review-version routes have their own version-filtered feedback ledger and exact source-commit banner; review versions 2026-07-26.1 and 2026-07-27.1 are retained with feedback closed while 2026-07-30.1 is the active writing revision.",
+        "Immutable review-version routes have their own version-filtered feedback ledger and exact source-commit banner; review versions 2026-07-26.1, 2026-07-27.1, and 2026-07-30.1 are retained with feedback closed while 2026-08-01.1 is the active writing revision.",
         "Every Stream editorial page includes a visible authorship note explaining that bots wrote the review under punk6529's mission and standards.",
         "Ledger code links open the immutable in-site versioned source and also provide the pinned GitHub source."
       ],
@@ -201,6 +203,7 @@
         "/reviews/6529-stream/community-review",
         "/reviews/6529-stream/security-testing-and-known-limitations",
         "/reviews/6529-stream/reference",
+        "/reviews/6529-stream/versions/2026-08-01.1/feedback",
         "/reviews/6529-stream/versions/2026-07-30.1/feedback",
         "/reviews/6529-stream/versions/2026-07-27.1/feedback",
         "/reviews/6529-stream/versions/2026-07-26.1/feedback"
