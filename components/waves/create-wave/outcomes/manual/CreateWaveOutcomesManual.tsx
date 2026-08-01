@@ -20,6 +20,87 @@ const MAX_WINNING_POSITION = 10_000;
 const OUTCOME_ERROR_ID = "outcome-manual-error";
 const POSITIONS_ERROR_ID = "outcome-positions-error";
 
+const POSITIONS_FORMAT_ERROR = "Invalid position format";
+const POSITIONS_MIN_ERROR = "Positions start at 1";
+const POSITIONS_MAX_ERROR = `Positions can't go above ${MAX_WINNING_POSITION.toLocaleString(
+  "en-US"
+)}`;
+const backwardsRangeError = (segment: string): string =>
+  `Range ${segment} is backwards — put the lower position first`;
+
+// Shape gates, applied per comma-separated segment. Two flat patterns rather
+// than one combined `(\d+(-\d+)?)(,\d+(-\d+)?)*`: nesting quantifiers inside
+// optional/repeated groups is what makes a pattern a backtracking risk, and
+// both of these keep their quantifiers as siblings.
+const SINGLE_POSITION = /^\d+$/;
+const POSITION_RANGE = /^\d+-\d+$/;
+
+type PositionsParseResult =
+  | { readonly ok: true; readonly positions: readonly number[] }
+  | { readonly ok: false; readonly error: string };
+
+const rejected = (error: string): PositionsParseResult => ({
+  ok: false,
+  error,
+});
+
+// The segment shape is validated before this runs, so every parseInt below is
+// guaranteed to see digits and cannot produce NaN.
+const parseSegment = (segment: string): PositionsParseResult => {
+  if (SINGLE_POSITION.test(segment)) {
+    const position = Number.parseInt(segment, 10);
+    if (position < 1) return rejected(POSITIONS_MIN_ERROR);
+    if (position > MAX_WINNING_POSITION) return rejected(POSITIONS_MAX_ERROR);
+    return { ok: true, positions: [position] };
+  }
+
+  if (!POSITION_RANGE.test(segment)) {
+    return rejected(POSITIONS_FORMAT_ERROR);
+  }
+
+  const [startText = "", endText = ""] = segment.split("-");
+  const start = Number.parseInt(startText, 10);
+  const end = Number.parseInt(endText, 10);
+  if (start < 1) return rejected(POSITIONS_MIN_ERROR);
+  if (end < start) return rejected(backwardsRangeError(segment));
+  if (end > MAX_WINNING_POSITION) return rejected(POSITIONS_MAX_ERROR);
+  return {
+    ok: true,
+    positions: Array.from({ length: end - start + 1 }, (_, i) => start + i),
+  };
+};
+
+/**
+ * Parses the winning-positions field.
+ *
+ * Any invalid segment rejects the WHOLE input. Previously an out-of-range
+ * segment was filtered out while shape errors failed the whole string, so
+ * "1,0-2" quietly saved position 1 alone and the user was never told that the
+ * rest of what they typed had been dropped.
+ */
+export const parseWinningPositions = (input: string): PositionsParseResult => {
+  const cleanInput = input.replace(/\s/g, "");
+  if (!cleanInput) {
+    return rejected(POSITIONS_FORMAT_ERROR);
+  }
+
+  const collected: number[] = [];
+  for (const segment of cleanInput.split(",")) {
+    const parsed = parseSegment(segment);
+    if (!parsed.ok) {
+      return parsed;
+    }
+    collected.push(...parsed.positions);
+  }
+
+  // Every segment is bounded by MAX_WINNING_POSITION, so the allocation in
+  // onSubmit stays small and nothing here can throw.
+  return {
+    ok: true,
+    positions: [...new Set(collected)].sort((a, b) => a - b),
+  };
+};
+
 export default function CreateWaveOutcomesManual({
   waveType,
   onOutcome,
@@ -45,52 +126,6 @@ export default function CreateWaveOutcomesManual({
     }
   };
 
-  const parseRange = (range: string): number[] | null => {
-    if (range.includes("-")) {
-      const [start, end] = range.split("-").map((num) => parseInt(num));
-      if (
-        start === undefined ||
-        end === undefined ||
-        Number.isNaN(start) ||
-        Number.isNaN(end) ||
-        start < 1 ||
-        end < start ||
-        end > MAX_WINNING_POSITION
-      ) {
-        return null;
-      }
-      return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-    }
-
-    const num = parseInt(range);
-    return Number.isNaN(num) || num < 1 || num > MAX_WINNING_POSITION
-      ? null
-      : [num];
-  };
-
-  const parsePositions = (input: string): number[] | null => {
-    const cleanInput = input.replace(/\s/g, "");
-    if (!cleanInput) return null;
-
-    if (!/^(\d+(-\d+)?)(,\d+(-\d+)?)*$/.test(cleanInput)) {
-      return null;
-    }
-
-    try {
-      const ranges = cleanInput.split(",");
-      const positions = ranges
-        .map(parseRange)
-        .filter((range): range is number[] => range !== null)
-        .flat();
-
-      return positions.length > 0
-        ? Array.from(new Set(positions)).sort((a, b) => a - b)
-        : null;
-    } catch {
-      return null;
-    }
-  };
-
   const [isInputEmptyError, setIsInputEmptyError] = useState<boolean>(false);
 
   useEffect(() => setIsInputEmptyError(false), [value]);
@@ -109,12 +144,13 @@ export default function CreateWaveOutcomesManual({
         return;
       }
 
-      const parsedPositions = parsePositions(positions);
-      if (!parsedPositions) {
-        setPositionsError("Invalid position format");
+      const parsed = parseWinningPositions(positions);
+      if (!parsed.ok) {
+        setPositionsError(parsed.error);
         return;
       }
 
+      const parsedPositions = parsed.positions;
       const maxPosition = Math.max(...parsedPositions);
       const winners: number[] = new Array(maxPosition).fill(0);
       parsedPositions.forEach((pos) => {
