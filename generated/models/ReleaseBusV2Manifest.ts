@@ -142,6 +142,7 @@ export enum ReleaseBusV2ManifestLaneEnum {
 export enum ReleaseBusV2ManifestStatusEnum {
     StagingDeployed = 'STAGING_DEPLOYED',
     StagingValidated = 'STAGING_VALIDATED',
+    ProductionCandidateEvidenceQualified = 'PRODUCTION_CANDIDATE_EVIDENCE_QUALIFIED',
     ProductionDeployed = 'PRODUCTION_DEPLOYED',
     Failed = 'FAILED'
 }

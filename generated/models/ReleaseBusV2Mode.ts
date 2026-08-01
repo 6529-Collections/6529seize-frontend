@@ -14,7 +14,7 @@
 import { HttpFile } from '../http/http';
 
 export enum ReleaseBusV2Mode {
-    False = 'false',
+    Off = 'OFF',
     Staging = 'STAGING',
     Production = 'PRODUCTION'
 }

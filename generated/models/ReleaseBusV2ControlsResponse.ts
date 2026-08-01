@@ -11,13 +11,17 @@
  * Do not edit the class manually.
  */
 
+import { ReleaseBusV2LaneState } from '../models/ReleaseBusV2LaneState';
 import { ReleaseBusV2Mode } from '../models/ReleaseBusV2Mode';
+import { ReleaseBusV2StagingState } from '../models/ReleaseBusV2StagingState';
 import { HttpFile } from '../http/http';
 
 export class ReleaseBusV2ControlsResponse {
     'controls': Array<{ [key: string]: any; }>;
+    'lanes': Array<ReleaseBusV2LaneState>;
     'locks': Array<{ [key: string]: any; }>;
     'mode': ReleaseBusV2Mode;
+    'staging_state': ReleaseBusV2StagingState;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -31,6 +35,12 @@ export class ReleaseBusV2ControlsResponse {
             "format": ""
         },
         {
+            "name": "lanes",
+            "baseName": "lanes",
+            "type": "Array<ReleaseBusV2LaneState>",
+            "format": ""
+        },
+        {
             "name": "locks",
             "baseName": "locks",
             "type": "Array<{ [key: string]: any; }>",
@@ -40,6 +50,12 @@ export class ReleaseBusV2ControlsResponse {
             "name": "mode",
             "baseName": "mode",
             "type": "ReleaseBusV2Mode",
+            "format": ""
+        },
+        {
+            "name": "staging_state",
+            "baseName": "staging_state",
+            "type": "ReleaseBusV2StagingState",
             "format": ""
         }    ];
 
