@@ -13,9 +13,10 @@ const {
 
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
 const REVIEW_ID = "6529-stream";
-const ACTIVE_VERSION = "2026-07-30.1";
-const HISTORICAL_VERSION = "2026-07-27.1";
+const ACTIVE_VERSION = "2026-08-01.1";
+const HISTORICAL_VERSION = "2026-07-30.1";
 const PINNED_COMMIT = "513bd7e079eafe109df6ae1ae21bfbca6fec6786";
+const DEVELOPMENT_COMMIT = "5021c8060950c3fef995271e674ed4b2007fee6d";
 const KNOWLEDGE_ROOT = path.join(
   REPO_ROOT,
   "ops",
@@ -100,6 +101,12 @@ type KnowledgeManifest = {
     pageCount: number;
     sectionCount: number;
   };
+  developmentStatus: {
+    checkedAt: string;
+    source: { repository: string; commit: string };
+    configPath: string;
+    configSha256: string;
+  };
   counts: {
     total: number;
     byKind: Record<string, number>;
@@ -153,6 +160,14 @@ describe("Stream knowledge pack", () => {
         lifecycleState: "PUBLIC_REVIEW",
         deploymentStatus: "NOT_DEPLOYED",
         auditStatus: "PRE_AUDIT",
+      },
+      developmentStatus: {
+        checkedAt: "2026-08-01T00:00:00.000Z",
+        source: {
+          repository: "6529-Collections/6529Stream",
+          commit: DEVELOPMENT_COMMIT,
+        },
+        configPath: "config/public-reviews/6529-stream.development-status.json",
       },
       searchIndex: {
         path: `/review-data/${REVIEW_ID}/versions/${ACTIVE_VERSION}/knowledge/search-index.json`,
@@ -228,10 +243,7 @@ describe("Stream knowledge pack", () => {
       "editorial:sample:sale-modes",
       "editorial:sample:sale-modes:auctions",
     ]);
-    expect(chunks[1]?.provenance.headingPath).toEqual([
-      "Sample",
-      "Sale Modes",
-    ]);
+    expect(chunks[1]?.provenance.headingPath).toEqual(["Sample", "Sale Modes"]);
     expect(chunks[2]?.provenance.headingPath).toEqual([
       "Sample",
       "Sale Modes",
@@ -461,6 +473,7 @@ describe("Stream knowledge pack", () => {
 
   it("retains explicit implementation, audit, readiness, risk, and deployment evidence", () => {
     expect(active.manifest.counts.byKind).toMatchObject({
+      development_status: 1,
       review_status: 1,
       readiness_requirement: 20,
       risk: 14,
@@ -473,6 +486,21 @@ describe("Stream knowledge pack", () => {
       lifecycleState: "PUBLIC_REVIEW",
       deploymentStatus: "NOT_DEPLOYED",
       auditStatus: "PRE_AUDIT",
+    });
+    expect(evidenceById.get("status:latest-development")).toMatchObject({
+      kind: "development_status",
+      canonicalPath: "/reviews/6529-stream#development-update",
+      provenance: {
+        sourceCommit: DEVELOPMENT_COMMIT,
+        sourcePath: "config/public-reviews/6529-stream.development-status.json",
+      },
+      structured: {
+        checkedAt: "2026-08-01T00:00:00.000Z",
+        evidenceSummary: {
+          requirements: { complete: 2, pending: 3, missing: 15 },
+          openReleaseBlockers: 10,
+        },
+      },
     });
   });
 

@@ -15,8 +15,9 @@ import {
   STREAM_REVIEW_LIFECYCLE_STATE,
 } from "@/lib/public-review/streamReviewPublication";
 
-export const STREAM_REVIEW_VERSION = "2026-07-30.1";
-export const STREAM_REVIEW_PREVIOUS_VERSION = "2026-07-27.1";
+export const STREAM_REVIEW_VERSION = "2026-08-01.1";
+export const STREAM_REVIEW_PREVIOUS_VERSION = "2026-07-30.1";
+export const STREAM_REVIEW_OLDER_VERSION = "2026-07-27.1";
 export const STREAM_REVIEW_LEGACY_VERSION = "2026-07-26.1";
 export const STREAM_REVIEW_SLUG = "6529-stream";
 export const STREAM_REVIEW_SOURCE_COMMIT = getStreamReviewVersionSourceCommit(
@@ -29,6 +30,8 @@ const STREAM_REVIEW_VERSION_PUBLICATION = getStreamReviewVersionPublication(
 );
 const STREAM_REVIEW_PREVIOUS_VERSION_PUBLICATION =
   getStreamReviewVersionPublication(STREAM_REVIEW_PREVIOUS_VERSION);
+const STREAM_REVIEW_OLDER_VERSION_PUBLICATION =
+  getStreamReviewVersionPublication(STREAM_REVIEW_OLDER_VERSION);
 const STREAM_REVIEW_LEGACY_VERSION_PUBLICATION =
   getStreamReviewVersionPublication(STREAM_REVIEW_LEGACY_VERSION);
 
@@ -44,6 +47,7 @@ type PageMessageStem =
   | "artworkLifecycle"
   | "forArtists"
   | "rolesAndTrust"
+  | "whoCanDoWhat"
   | "curationAndTdhAuthorization"
   | "tokensCollectionsAndMinting"
   | "fixedPriceSalesAndAuctions"
@@ -52,8 +56,10 @@ type PageMessageStem =
   | "metadataScriptsAndDependencies"
   | "freezingPreservationAndArtworkFinality"
   | "governancePausingAndSuccessors"
+  | "changesEmergenciesAndFutureContracts"
   | "securityTestingAndKnownLimitations"
   | "currentImplementationAndReadiness"
+  | "whereDevelopmentStands"
   | "communityReview";
 
 function definePage(
@@ -242,7 +248,7 @@ const STREAM_REVIEW_2026_07_26_PAGES = [
   ]),
 ] as const;
 
-export const STREAM_REVIEW_PAGES = [
+const STREAM_REVIEW_2026_07_30_PAGES = [
   definePage("overview", "overviewNarrative", ALL_AUDIENCES, []),
   definePage(
     "artwork-lifecycle",
@@ -312,6 +318,76 @@ export const STREAM_REVIEW_PAGES = [
   definePage("community-review", "communityReview", ALL_AUDIENCES, []),
 ] as const;
 
+export const STREAM_REVIEW_PAGES = [
+  definePage("overview", "overviewNarrative", ALL_AUDIENCES, []),
+  definePage(
+    "artwork-lifecycle",
+    "artworkLifecycle",
+    COMMUNITY_ARTIST_TECHNICAL,
+    []
+  ),
+  definePage("for-artists", "forArtists", ARTIST_COMMUNITY, []),
+  definePage("roles-and-trust", "whoCanDoWhat", ALL_AUDIENCES, []),
+  definePage(
+    "curation-and-tdh-authorization",
+    "curationAndTdhAuthorization",
+    ALL_AUDIENCES,
+    []
+  ),
+  definePage(
+    "tokens-collections-and-minting",
+    "tokensCollectionsAndMinting",
+    ALL_AUDIENCES,
+    []
+  ),
+  definePage(
+    "fixed-price-sales-and-auctions",
+    "fixedPriceSalesAndAuctions",
+    ALL_AUDIENCES,
+    []
+  ),
+  definePage(
+    "revenue-splits-and-royalties",
+    "revenueSplitsAndRoyalties",
+    ALL_AUDIENCES,
+    []
+  ),
+  definePage("randomness", "randomness", ARTIST_TECHNICAL_AUDITOR, []),
+  definePage(
+    "metadata-scripts-and-dependencies",
+    "metadataScriptsAndDependencies",
+    ALL_AUDIENCES,
+    []
+  ),
+  definePage(
+    "freezing-preservation-and-artwork-finality",
+    "freezingPreservationAndArtworkFinality",
+    ALL_AUDIENCES,
+    []
+  ),
+  definePage(
+    "governance-pausing-and-successors",
+    "changesEmergenciesAndFutureContracts",
+    ALL_AUDIENCES,
+    []
+  ),
+  definePage(
+    "security-testing-and-known-limitations",
+    "whereDevelopmentStands",
+    COMMUNITY_TECHNICAL_AUDITOR,
+    [
+      "IMPLEMENTED",
+      "TESTED",
+      "PROPOSED",
+      "OPEN_FOR_FEEDBACK",
+      "AUDIT_PENDING",
+      "DEFERRED",
+      "KNOWN_LIMITATION",
+    ]
+  ),
+  definePage("community-review", "communityReview", ALL_AUDIENCES, []),
+] as const;
+
 const STREAM_REVIEW_AUDIENCE_ENTRY_PAGE_IDS = {
   community: "community-review",
   artists: "for-artists",
@@ -354,7 +430,20 @@ export const STREAM_REVIEW_DEFINITION: PublicReviewDefinition = {
           STREAM_REVIEW_PREVIOUS_VERSION
         ),
       },
-      pages: STREAM_REVIEW_PAGES,
+      pages: STREAM_REVIEW_2026_07_30_PAGES,
+      audienceEntryPageIds: STREAM_REVIEW_AUDIENCE_ENTRY_PAGE_IDS,
+    },
+    {
+      version: STREAM_REVIEW_OLDER_VERSION,
+      status: getStreamReviewVersionLifecycleState(STREAM_REVIEW_OLDER_VERSION),
+      deploymentStatus:
+        STREAM_REVIEW_OLDER_VERSION_PUBLICATION.deploymentStatus,
+      auditStatus: STREAM_REVIEW_OLDER_VERSION_PUBLICATION.auditStatus,
+      source: {
+        repository: "6529-Collections/6529Stream",
+        commit: getStreamReviewVersionSourceCommit(STREAM_REVIEW_OLDER_VERSION),
+      },
+      pages: STREAM_REVIEW_2026_07_30_PAGES,
       audienceEntryPageIds: STREAM_REVIEW_AUDIENCE_ENTRY_PAGE_IDS,
     },
     {
