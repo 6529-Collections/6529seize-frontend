@@ -14,6 +14,7 @@ const {
 } = require("./public-reviews/solidity-reference.cjs");
 const {
   KNOWLEDGE_SOURCE_DIRECTORY,
+  loadDevelopmentStatusForVersion,
   validateKnowledgePack,
 } = require("./public-reviews/stream-knowledge.cjs");
 
@@ -932,6 +933,12 @@ function assertCanonicalReviewEvidence({
           (version) => version.version === entry.version
         ),
         referenceIndexEntryOverride: entry,
+        developmentStatusOverride: loadDevelopmentStatusForVersion({
+          repoRoot,
+          reviewId: config.reviewId,
+          reviewVersion: entry.version,
+          activeVersion: publicationPlan.indexActiveVersion,
+        }),
         knowledgeRootOverride: bundleKnowledgeRoot,
       });
       invariant(

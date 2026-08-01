@@ -1808,11 +1808,21 @@ function knowledgeContext(repoRoot, reviewId, reviewVersion) {
     referenceIndexEntry,
     `${reviewId}@${reviewVersion} reference index entry is missing.`
   );
+  const publicVersions = new Set(
+    publicationConfig.versions
+      ?.filter((candidate) => candidate.lifecycleState !== "DRAFT")
+      .map((candidate) => candidate.version) ?? []
+  );
+  const publicActiveVersion = publicVersions.has(referenceIndex.activeVersion)
+    ? referenceIndex.activeVersion
+    : [...(referenceIndex.versions ?? [])]
+        .reverse()
+        .find((candidate) => publicVersions.has(candidate.version))?.version;
   const developmentStatus = loadDevelopmentStatusForVersion({
     repoRoot,
     reviewId,
     reviewVersion,
-    activeVersion: referenceIndex.activeVersion,
+    activeVersion: publicActiveVersion,
   });
   return {
     publicationConfig,
@@ -1830,6 +1840,7 @@ function validateKnowledgePack({
   requireCurrentGenerator = false,
   publicationOverride,
   referenceIndexEntryOverride,
+  developmentStatusOverride,
   knowledgeRootOverride,
 }) {
   const context =
@@ -1837,6 +1848,7 @@ function validateKnowledgePack({
       ? {
           publication: publicationOverride,
           referenceIndexEntry: referenceIndexEntryOverride,
+          developmentStatus: developmentStatusOverride,
         }
       : knowledgeContext(repoRoot, reviewId, reviewVersion);
   const versionRoot = path.join(

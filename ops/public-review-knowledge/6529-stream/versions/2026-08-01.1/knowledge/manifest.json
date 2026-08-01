@@ -50,10 +50,10 @@
   },
   "generator": {
     "name": "6529-public-review-stream-knowledge",
-    "sourceSha256": "sha256:a126aecb42196d54bb3a9693e8b1231ded2f3ac541c76431b0f650ba5782bf73",
+    "sourceSha256": "sha256:f37e6fc4d9095086676c36ca270959eb4d2170dd43c95fb53906e92373d3aded",
     "version": "1"
   },
-  "knowledgeSha256": "sha256:6403535a99dfcdd2dad96a39ea284b6639fb7f323e7917dc79cd2fa69862468b",
+  "knowledgeSha256": "sha256:70a68d5bf4ce784ab80c0cbd6817fa5255dc2cc1e0c344fecdeeecbb18c247b8",
   "publication": {
     "auditStatus": "PRE_AUDIT",
     "deploymentStatus": "NOT_DEPLOYED",
