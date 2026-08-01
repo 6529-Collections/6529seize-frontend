@@ -1,0 +1,272 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IStreamFinalitySanctionReads.sol:IStreamFinalitySanctionReads#function:0x96f097aa",
+          "declaringDefinitionId": "smart-contracts/IStreamFinalitySanctionReads.sol:IStreamFinalitySanctionReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionSanctionComponentType",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x96f097aa",
+          "signature": "collectionSanctionComponentType(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamFinalitySanctionReads.sol:IStreamFinalitySanctionReads#function:0x14442f82",
+          "declaringDefinitionId": "smart-contracts/IStreamFinalitySanctionReads.sol:IStreamFinalitySanctionReads",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "scopeType",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "scopeId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "internalType": "bytes32",
+              "name": "sanctionSubjectHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "verifySanctionForSubject",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "valid",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "sanctionRecordHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "address",
+              "name": "signer",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "internalType": "uint8",
+              "name": "authorityClass",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x14442f82",
+          "signature": "verifySanctionForSubject(uint8,uint256,uint256,bytes32,bytes32)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "collectionSanctionComponentType(uint256)",
+          "displaySignature": "collectionSanctionComponentType(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamFinalitySanctionReads.sol:IStreamFinalitySanctionReads#function:0x96f097aa",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1GaW5hbGl0eVNhbmN0aW9uUmVhZHMuc29sOklTdHJlYW1GaW5hbGl0eVNhbmN0aW9uUmVhZHMjZnVuY3Rpb246MHg5NmYwOTdhYQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "collectionSanctionComponentType",
+          "natspec": "@notice Which of the two mutually exclusive finality component types applies:\n         keccak256(\"ARTIST_SANCTION\") for artist-bound collections,\n         keccak256(\"PLATFORM_WORKS_DECLARATION\") for artist-less collections\n         ([AA-SANCTION] requirement 7: exactly one applies to every collection).",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 95,
+            "byteStart": 932,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamFinalitySanctionReads.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:79c0831ff637e6a4b353693e1cca3d8e3c72f862371977805afd75a43862d832",
+            "sourceSha256": "sha256:2fe4b8959b187be02a2e154d1ee49662d09380c3b1416d661c19a1e083cd4f76"
+          },
+          "selector": "0x96f097aa",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "verifySanctionForSubject(uint8,uint256,uint256,bytes32,bytes32)",
+          "displaySignature": "verifySanctionForSubject(uint8,uint256,uint256,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamFinalitySanctionReads.sol:IStreamFinalitySanctionReads#function:0x14442f82",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scopeType",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "scopeId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "sanctionSubjectHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1GaW5hbGl0eVNhbmN0aW9uUmVhZHMuc29sOklTdHJlYW1GaW5hbGl0eVNhbmN0aW9uUmVhZHMjZnVuY3Rpb246MHgxNDQ0MmY4Mg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "verifySanctionForSubject",
+          "natspec": "@notice Permanent finality-facing sanction verification read ([AA-SANCTION]).\n @dev `sanctionSubjectHash` is the SANCTION_SUBJECT_DOMAIN preimage the finality\n      registry computes from the Core facts, the non-sanction component hash, and the\n      manifest reference; `sanctionRecordHash` doubles as the component `dataHash`.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "valid",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "sanctionRecordHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "signer",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "authorityClass",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 307,
+            "byteStart": 1391,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamFinalitySanctionReads.sol#L21-L30",
+            "lineEnd": 30,
+            "lineStart": 21,
+            "snippetSha256": "sha256:19bc7d33264d258c8faa2e8a9ef3992dffda19f6b6d56c59fcaebe4a1b972e57",
+            "sourceSha256": "sha256:2fe4b8959b187be02a2e154d1ee49662d09380c3b1416d661c19a1e083cd4f76"
+          },
+          "selector": "0x14442f82",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IStreamFinalitySanctionReads.sol:IStreamFinalitySanctionReads",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1GaW5hbGl0eVNhbmN0aW9uUmVhZHMuc29sOklTdHJlYW1GaW5hbGl0eVNhbmN0aW9uUmVhZHM",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IStreamFinalitySanctionReads.sol:IStreamFinalitySanctionReads"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "IStreamFinalitySanctionReads",
+    "natspec": "@notice Narrow consumer seam over the artist registry's sanction surfaces ([AA-SANCTION]).\n @dev The artist registry is built in a parallel worktree; this file pins only what finality\n      execution consumes. The registry also serves the ARTIST_SANCTION /\n      PLATFORM_WORKS_DECLARATION component reads (`finalityState`/`finalityStateForScope`,\n      [AA-SANCTION] requirements 3 and 7) through the generic component interface in\n      IStreamArtworkFinalityComponents.sol.",
+    "range": {
+      "byteLength": 1146,
+      "byteStart": 554,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamFinalitySanctionReads.sol#L10-L31",
+      "lineEnd": 31,
+      "lineStart": 10,
+      "snippetSha256": "sha256:e5ad7d30974047ed543062e798147143532c3d731b0940f053861a21316cb30d",
+      "sourceSha256": "sha256:2fe4b8959b187be02a2e154d1ee49662d09380c3b1416d661c19a1e083cd4f76"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IStreamFinalitySanctionReads.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}
