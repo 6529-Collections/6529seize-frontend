@@ -1,9 +1,12 @@
 const PRODUCTION_HOSTNAMES = new Set(["6529.io", "www.6529.io"]);
 // Only loopback hosts are treated as local; custom aliases remain visibly non-production.
 const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1"]);
+const SUPPORTED_PROTOCOLS = new Set(["http:", "https:"]);
 const STAGING_SUFFIX = "staging";
 
-interface AppEnvironment {
+export const PRODUCTION_APP_ORIGIN = "https://6529.io";
+
+export interface AppEnvironment {
   readonly hostname: string;
   readonly host: string;
   readonly isProduction: boolean;
@@ -22,6 +25,35 @@ const PRODUCTION_ENVIRONMENT: AppEnvironment = {
   favicon: "/favicon.svg",
   faviconFallback: "/favicon.png",
 };
+
+type BrowserOriginReader = () => unknown;
+
+const readBrowserOrigin = (): unknown =>
+  (
+    globalThis as {
+      readonly window?: {
+        readonly location?: {
+          readonly origin?: unknown;
+        };
+      };
+    }
+  ).window?.location?.origin;
+
+function parseEnvironmentUrl(value: unknown): URL | null {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    return null;
+  }
+
+  try {
+    const url = new URL(value);
+    if (!SUPPORTED_PROTOCOLS.has(url.protocol) || !url.hostname) {
+      return null;
+    }
+    return url;
+  } catch {
+    return null;
+  }
+}
 
 function getEnvironmentName(firstLabel: string): string {
   const normalizedLabel = firstLabel.toLowerCase();
@@ -71,10 +103,8 @@ function getFaviconBasename(hostname: string, isProduction: boolean): string {
 }
 
 export function getAppEnvironment(baseEndpoint: string): AppEnvironment {
-  let url: URL;
-  try {
-    url = new URL(baseEndpoint);
-  } catch {
+  const url = parseEnvironmentUrl(baseEndpoint);
+  if (url === null) {
     return PRODUCTION_ENVIRONMENT;
   }
 
@@ -103,4 +133,25 @@ export function getAppEnvironment(baseEndpoint: string): AppEnvironment {
     favicon: `${faviconBasename}.svg`,
     faviconFallback: `${faviconBasename}.png`,
   };
+}
+
+export function getBrowserOrigin(
+  browserOriginReader: BrowserOriginReader = readBrowserOrigin
+): string {
+  try {
+    const url = parseEnvironmentUrl(browserOriginReader());
+    return url?.origin ?? PRODUCTION_APP_ORIGIN;
+  } catch {
+    return PRODUCTION_APP_ORIGIN;
+  }
+}
+
+export function getBrowserAppEnvironment(
+  browserOriginReader?: BrowserOriginReader
+): AppEnvironment {
+  return getAppEnvironment(getBrowserOrigin(browserOriginReader));
+}
+
+export function getProductionAppEnvironment(): AppEnvironment {
+  return PRODUCTION_ENVIRONMENT;
 }

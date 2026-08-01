@@ -66,14 +66,9 @@ describe("Metadata functionality (migrated from _document.tsx)", () => {
       publicEnv.BASE_ENDPOINT = originalBaseEndpoint;
     });
 
-    it("includes favicon icon", () => {
+    it("leaves favicon ownership to the browser runtime controller", () => {
       const metadata = getAppMetadata();
-      expect(metadata.icons).toEqual({
-        icon: [
-          { url: "/favicon.png", type: "image/png", sizes: "96x96" },
-          { url: "/favicon.svg", type: "image/svg+xml", sizes: "any" },
-        ],
-      });
+      expect(metadata.icons).toBeUndefined();
     });
 
     it("includes open graph metadata with proper structure", () => {
@@ -105,32 +100,19 @@ describe("Metadata functionality (migrated from _document.tsx)", () => {
     });
 
     it.each([
-      ["https://staging.6529.io", "6529 Staging", "favicon-staging"],
-      ["https://prxtstaging.6529.io", "6529 PRXTStaging", "favicon-alt"],
-      ["http://localhost:3001", "6529 Localhost", "favicon-alt"],
+      ["https://staging.6529.io", "6529 Staging"],
+      ["https://prxtstaging.6529.io", "6529 PRXTStaging"],
+      ["http://localhost:3001", "6529 Localhost"],
     ])(
-      "derives metadata from %s",
-      (baseEndpoint, expectedTitle, expectedFaviconBasename) => {
+      "keeps server metadata derived from BASE_ENDPOINT %s",
+      (baseEndpoint, expectedTitle) => {
         publicEnv.BASE_ENDPOINT = baseEndpoint;
         const metadata = getAppMetadata({ description: "Environment test" });
         const hostname = new URL(baseEndpoint).hostname;
 
         expect(metadata.title).toBe(expectedTitle);
         expect(metadata.description).toBe(`Environment test | ${hostname}`);
-        expect(metadata.icons).toEqual({
-          icon: [
-            {
-              url: `/${expectedFaviconBasename}.png`,
-              type: "image/png",
-              sizes: "96x96",
-            },
-            {
-              url: `/${expectedFaviconBasename}.svg`,
-              type: "image/svg+xml",
-              sizes: "any",
-            },
-          ],
-        });
+        expect(metadata.icons).toBeUndefined();
         expect(metadata.openGraph?.description).toBe(
           `Environment test | ${hostname}`
         );

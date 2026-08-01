@@ -174,6 +174,7 @@ describe("Playwright read-only mutation guard", () => {
       "https://6529.io/api/twitter/preview",
       "https://6529.io/api/alchemy/contracts",
       "https://6529.io/api/alchemy/token-metadata",
+      "https://6529.io/api/github-preview",
     ]) {
       expect(
         decideReadonlyRequest({

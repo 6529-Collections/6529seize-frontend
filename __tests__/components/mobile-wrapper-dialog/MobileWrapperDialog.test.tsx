@@ -38,6 +38,22 @@ describe("MobileWrapperDialog", () => {
       expect(screen.getByText("Test Title")).toBeInTheDocument();
     });
 
+    it("renders title actions beside the title", () => {
+      render(
+        <MobileWrapperDialog
+          {...defaultProps}
+          isOpen={true}
+          title="Test Title"
+          titleActions={<button type="button">Title action</button>}
+        />
+      );
+
+      const title = screen.getByText("Test Title");
+      const action = screen.getByRole("button", { name: "Title action" });
+
+      expect(title.parentElement).toContainElement(action);
+    });
+
     it("renders close button when open", () => {
       render(<MobileWrapperDialog {...defaultProps} isOpen={true} />);
 
