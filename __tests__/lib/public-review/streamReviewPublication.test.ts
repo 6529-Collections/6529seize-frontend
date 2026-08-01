@@ -37,6 +37,11 @@ describe("Stream public-review version identities", () => {
       },
       {
         version: "2026-07-30.1",
+        lifecycleState: "REVIEW_CLOSED",
+        sourceCommit: SOURCE_COMMIT,
+      },
+      {
+        version: "2026-08-01.1",
         lifecycleState: "PUBLIC_REVIEW",
         sourceCommit: SOURCE_COMMIT,
       },
@@ -45,7 +50,7 @@ describe("Stream public-review version identities", () => {
 
   it("exposes immutable per-version publication records", () => {
     expect(
-      Object.isFrozen(getStreamReviewVersionPublication("2026-07-30.1"))
+      Object.isFrozen(getStreamReviewVersionPublication("2026-08-01.1"))
     ).toBe(true);
   });
 
