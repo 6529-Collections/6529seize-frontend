@@ -15,6 +15,10 @@ import { getMentionedGroupsFromParts } from "@/helpers/waves/drop-group-mentions
 import type { EditorState } from "lexical";
 import type { Dispatch, SetStateAction } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  mergeMentionedUsers,
+  type EditorMentionedUser,
+} from "@/components/drops/create/lexical/utils/userMentionDetection";
 import type { CreateDropInputHandles } from "../CreateDropInput";
 import type { CreateDropPollDraft } from "../CreateDropPoll";
 import {
@@ -48,6 +52,7 @@ export const useCreateDropDraftState = ({
   address,
   canMentionAll,
   currentPartMentionedGroups,
+  currentPartMentionedUsers,
   submitting,
   setDrop,
   setFiles,
@@ -78,6 +83,11 @@ export const useCreateDropDraftState = ({
   readonly address: string | null | undefined;
   readonly canMentionAll: boolean;
   readonly currentPartMentionedGroups: ApiDropGroupMention[];
+  /**
+   * Mentions read out of the editor itself. Authoritative over the session
+   * pick-registry, which does not survive a draft restore.
+   */
+  readonly currentPartMentionedUsers: EditorMentionedUser[];
   readonly submitting: boolean;
   readonly setDrop: Dispatch<SetStateAction<CreateDropConfig | null>>;
   readonly setFiles: Dispatch<SetStateAction<File[]>>;
@@ -254,7 +264,10 @@ export const useCreateDropDraftState = ({
         existingMentions,
         existingNfts,
         existingWaves,
-        mentionedUsers: mentionedUsersRef.current,
+        mentionedUsers: mergeMentionedUsers(
+          currentPartMentionedUsers,
+          mentionedUsersRef.current
+        ),
         referencedNfts,
         mentionedWaves,
       });

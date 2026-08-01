@@ -1,7 +1,9 @@
 import type { TextMatchTransformer } from "@lexical/markdown";
 import { EmojiNode } from "../nodes/EmojiNode";
 import { $applyNodeReplacement } from "lexical";
-import { EMOJI_MATCH_REGEX } from "../plugins/emoji/EmojiPlugin";
+// The non-global twin: `@lexical/markdown` reads `match.index`, which a global
+// regex does not provide. EMOJI_MATCH_REGEX keeps `g` for EmojiPlugin's matchAll.
+import { EMOJI_SINGLE_MATCH_REGEX } from "../plugins/emoji/EmojiPlugin";
 
 export const EMOJI_TRANSFORMER: TextMatchTransformer = {
   dependencies: [EmojiNode],
@@ -13,8 +15,8 @@ export const EMOJI_TRANSFORMER: TextMatchTransformer = {
     return null;
   },
 
-  importRegExp: EMOJI_MATCH_REGEX,
-  regExp: EMOJI_MATCH_REGEX,
+  importRegExp: EMOJI_SINGLE_MATCH_REGEX,
+  regExp: EMOJI_SINGLE_MATCH_REGEX,
 
   replace: (textNode, match) => {
     const [, emojiId] = match;

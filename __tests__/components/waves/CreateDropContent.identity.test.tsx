@@ -180,6 +180,21 @@ jest.mock(
     getMentionedGroupsFromEditorState: jest.fn(() => []),
   })
 );
+// This suite feeds a stub editor state, so the editor-derived mention reader is
+// stubbed alongside the group one. Its real behaviour is covered in
+// __tests__/components/drops/create/lexical/utils/userMentionDetection.test.ts.
+jest.mock(
+  "@/components/drops/create/lexical/utils/userMentionDetection",
+  () => ({
+    getMentionedUsersFromEditorState: jest.fn(() => []),
+    mergeMentionedUsers: jest.fn(
+      (editorMentions: unknown[], registryMentions: unknown[]) => [
+        ...registryMentions,
+        ...editorMentions,
+      ]
+    ),
+  })
+);
 jest.mock("@/components/waves/CreateDropContentRequirements", () => () => (
   <div data-testid="requirements" />
 ));

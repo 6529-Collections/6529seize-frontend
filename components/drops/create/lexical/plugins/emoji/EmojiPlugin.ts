@@ -16,6 +16,13 @@ import { useEmoji } from "@/contexts/EmojiContext";
 
 const EMOJI_TEST_REGEX = /:(\w+)/;
 export const EMOJI_MATCH_REGEX = /:(\w+):/g;
+/**
+ * Same pattern, without `g`, for `@lexical/markdown` text-match transformers:
+ * they match with `String.prototype.match` and read `match.index`, which is
+ * `undefined` for a global regex — the text node then splits at the wrong offset
+ * and only a token at position 0 converts. Keep the two patterns in step.
+ */
+export const EMOJI_SINGLE_MATCH_REGEX = /:(\w+):/;
 
 type EmojiMatch = {
   readonly matchText: string;

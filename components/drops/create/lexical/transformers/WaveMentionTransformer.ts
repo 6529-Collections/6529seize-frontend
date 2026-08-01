@@ -16,8 +16,11 @@ export const WAVE_MENTION_TRANSFORMER: TextMatchTransformer = {
     return `#[${textContent.substring(1)}]`;
   },
   // Allow spaces in wave names within bracketed format.
-  regExp: /#\[[^\]\n]+\]/g,
-  importRegExp: /#\[[^\]\n]+\]/g,
+  // NOT global — see MentionTransformer: a `g` flag makes `String.match` drop
+  // `match.index`, so `@lexical/markdown` splits the text node at the wrong
+  // offset and only a token at position 0 survives.
+  regExp: /#\[[^\]\n]+\]/,
+  importRegExp: /#\[[^\]\n]+\]/,
   replace: (textNode, match) => {
     const [fullMatch] = match;
     const fullText = textNode.getTextContent();
