@@ -5,6 +5,11 @@ import {
   HashtagNode,
 } from "../nodes/HashtagNode";
 
+// NOT global, and shared by both fields — see MentionTransformer: a `g` flag
+// makes `String.match` drop `match.index`, so `@lexical/markdown` splits the
+// text node at the wrong offset and only a token at position 0 survives.
+const NFT_REFERENCE_MATCH_REGEX = /\$\[\w+\]/;
+
 export const HASHTAG_TRANSFORMER: TextMatchTransformer = {
   dependencies: [HashtagNode],
   export: (node) => {
@@ -16,11 +21,8 @@ export const HASHTAG_TRANSFORMER: TextMatchTransformer = {
     return `$[${textContent.substring(1)}]`;
   },
   // Only process bracketed format to avoid conflicts
-  // NOT global — see MentionTransformer: a `g` flag makes `String.match` drop
-  // `match.index`, so `@lexical/markdown` splits the text node at the wrong
-  // offset and only a token at position 0 survives.
-  regExp: /\$\[\w+\]/,
-  importRegExp: /\$\[\w+\]/,
+  regExp: NFT_REFERENCE_MATCH_REGEX,
+  importRegExp: NFT_REFERENCE_MATCH_REGEX,
   replace: (textNode, match) => {
     const [fullMatch] = match;
     const fullText = textNode.getTextContent();
