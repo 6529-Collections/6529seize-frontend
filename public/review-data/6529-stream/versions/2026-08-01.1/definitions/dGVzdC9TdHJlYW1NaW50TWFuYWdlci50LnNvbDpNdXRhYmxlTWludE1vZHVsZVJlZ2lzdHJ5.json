@@ -1,0 +1,732 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/IStreamMintModuleRegistry.sol:IStreamMintModuleRegistry#error:0xcc59458b",
+          "declaringDefinitionId": "smart-contracts/IStreamMintModuleRegistry.sol:IStreamMintModuleRegistry",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "name": "InvalidMintModule",
+          "selector": "0xcc59458b",
+          "signature": "InvalidMintModule(address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintModuleRegistry.sol:IStreamMintModuleRegistry#error:0x713411c0",
+          "declaringDefinitionId": "smart-contracts/IStreamMintModuleRegistry.sol:IStreamMintModuleRegistry",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "name": "InvalidMintModuleInfo",
+          "selector": "0x713411c0",
+          "signature": "InvalidMintModuleInfo(address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintModuleRegistry.sol:IStreamMintModuleRegistry#error:0xcc46738f",
+          "declaringDefinitionId": "smart-contracts/IStreamMintModuleRegistry.sol:IStreamMintModuleRegistry",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "expected",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "actual",
+              "type": "bytes32"
+            }
+          ],
+          "name": "MintModuleCodehashMismatch",
+          "selector": "0xcc46738f",
+          "signature": "MintModuleCodehashMismatch(address,bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintModuleRegistry.sol:IStreamMintModuleRegistry#error:0xee60a789",
+          "declaringDefinitionId": "smart-contracts/IStreamMintModuleRegistry.sol:IStreamMintModuleRegistry",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "MintModuleInterfaceUnsupported",
+          "selector": "0xee60a789",
+          "signature": "MintModuleInterfaceUnsupported(address,bytes4)"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamMintModuleRegistry.sol:IStreamMintModuleRegistry#event:MintModuleMetadata(address,bytes32,string)",
+          "declaringDefinitionId": "smart-contracts/IStreamMintModuleRegistry.sol:IStreamMintModuleRegistry",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "metadataHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "internalType": "string",
+              "name": "metadataURI",
+              "type": "string"
+            }
+          ],
+          "name": "MintModuleMetadata",
+          "signature": "MintModuleMetadata(address,bytes32,string)",
+          "topic0": "0x9517d14f747fcf52d95f70fb98c5239d7619e4b3692ce32266b37740979f31f6"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamMintModuleRegistry.sol:IStreamMintModuleRegistry#event:MintModuleUpdated(address,uint8,bytes4,uint32,bytes32,bytes32,uint32,address)",
+          "declaringDefinitionId": "smart-contracts/IStreamMintModuleRegistry.sol:IStreamMintModuleRegistry",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "internalType": "enum IStreamMintModuleRegistry.ModuleStatus",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "uint32",
+              "name": "semanticVersion",
+              "type": "uint32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "codehash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "metadataHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "uint32",
+              "name": "gasLimit",
+              "type": "uint32"
+            },
+            {
+              "index": 7,
+              "indexed": true,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "name": "MintModuleUpdated",
+          "signature": "MintModuleUpdated(address,uint8,bytes4,uint32,bytes32,bytes32,uint32,address)",
+          "topic0": "0x09815eaeb5b539ac67baf5ddc43e22e8ab2d51e6798fc9716c8262ff12d0de41"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry#function:0x737f4b5f",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "isModuleActive",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x737f4b5f",
+          "signature": "isModuleActive(address,bytes4)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry#function:0x59cce87f",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry",
+          "inherited": false,
+          "inputs": [],
+          "name": "isStreamMintModuleRegistry",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x59cce87f",
+          "signature": "isStreamMintModuleRegistry()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry#function:0x56b97ec1",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "name": "moduleInfo",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamMintModuleRegistry.MintModuleInfo",
+              "name": "",
+              "type": "(uint8,bytes4,uint32,bytes32,bytes32,uint32)"
+            }
+          ],
+          "selector": "0x56b97ec1",
+          "signature": "moduleInfo(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry#function:0x2b016999",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "struct IStreamMintModuleRegistry.MintModuleInfo",
+              "name": "info",
+              "type": "(uint8,bytes4,uint32,bytes32,bytes32,uint32)"
+            }
+          ],
+          "name": "setInfo",
+          "outputs": [],
+          "selector": "0x2b016999",
+          "signature": "setInfo(address,(uint8,bytes4,uint32,bytes32,bytes32,uint32))",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry#function:0x334d0d07",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "struct IStreamMintModuleRegistry.MintModuleInfo",
+              "name": "info",
+              "type": "(uint8,bytes4,uint32,bytes32,bytes32,uint32)"
+            },
+            {
+              "index": 2,
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "name": "setModule",
+          "outputs": [],
+          "selector": "0x334d0d07",
+          "signature": "setModule(address,(uint8,bytes4,uint32,bytes32,bytes32,uint32),string)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry#function:0x01ffc9a7",
+          "declaringDefinitionId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "isStreamMintModuleRegistry()",
+          "displaySignature": "isStreamMintModuleRegistry()",
+          "functionKind": "function",
+          "id": "test/StreamMintManager.t.sol:MutableMintModuleRegistry#function:0x59cce87f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNdXRhYmxlTWludE1vZHVsZVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4NTljY2U4N2Y",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isStreamMintModuleRegistry",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 104,
+            "byteStart": 6829,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L199-L201",
+            "lineEnd": 201,
+            "lineStart": 199,
+            "snippetSha256": "sha256:b98a4ea67379a953431a341060c471d206ddcee17201417a5caacb90f465150c",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x59cce87f",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setInfo(address,(uint8,bytes4,uint32,bytes32,bytes32,uint32))",
+          "displaySignature": "setInfo(address,MintModuleInfo)",
+          "functionKind": "function",
+          "id": "test/StreamMintManager.t.sol:MutableMintModuleRegistry#function:0x2b016999",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "info",
+              "storageLocation": "memory",
+              "type": "MintModuleInfo"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNdXRhYmxlTWludE1vZHVsZVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4MmIwMTY5OTk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setInfo",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 113,
+            "byteStart": 6939,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L203-L205",
+            "lineEnd": 205,
+            "lineStart": 203,
+            "snippetSha256": "sha256:29740b5cc4b6fd4f81681d8588abe83c4ee445a87f9126e0ec172557920c0f1a",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x2b016999",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setModule(address,(uint8,bytes4,uint32,bytes32,bytes32,uint32),string)",
+          "displaySignature": "setModule(address,MintModuleInfo,string)",
+          "functionKind": "function",
+          "id": "test/StreamMintManager.t.sol:MutableMintModuleRegistry#function:0x334d0d07",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "info",
+              "storageLocation": "calldata",
+              "type": "MintModuleInfo"
+            },
+            {
+              "index": 2,
+              "name": "",
+              "storageLocation": "calldata",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNdXRhYmxlTWludE1vZHVsZVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4MzM0ZDBkMDc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setModule",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 163,
+            "byteStart": 7058,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L207-L212",
+            "lineEnd": 212,
+            "lineStart": 207,
+            "snippetSha256": "sha256:be776419234a441f893b1af178cc3a0b3a1a0db363f6eeaed92dffe527c5234a",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x334d0d07",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "moduleInfo(address)",
+          "displaySignature": "moduleInfo(address)",
+          "functionKind": "function",
+          "id": "test/StreamMintManager.t.sol:MutableMintModuleRegistry#function:0x56b97ec1",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNdXRhYmxlTWludE1vZHVsZVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4NTZiOTdlYzE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "moduleInfo",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "MintModuleInfo"
+            }
+          ],
+          "range": {
+            "byteLength": 134,
+            "byteStart": 7227,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L214-L216",
+            "lineEnd": 216,
+            "lineStart": 214,
+            "snippetSha256": "sha256:4a4b60499201203b01a981ab8c8b6b31b4ae1ca65d90f994812325bd8d759fca",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x56b97ec1",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isModuleActive(address,bytes4)",
+          "displaySignature": "isModuleActive(address,bytes4)",
+          "functionKind": "function",
+          "id": "test/StreamMintManager.t.sol:MutableMintModuleRegistry#function:0x737f4b5f",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNdXRhYmxlTWludE1vZHVsZVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4NzM3ZjRiNWY",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isModuleActive",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 333,
+            "byteStart": 7367,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L218-L227",
+            "lineEnd": 227,
+            "lineStart": 218,
+            "snippetSha256": "sha256:5b3e30c586508dc78664e6558a113e54324aea77fca06f87792c5ed2ddba6c02",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x737f4b5f",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "supportsInterface(bytes4)",
+          "displaySignature": "supportsInterface(bytes4)",
+          "functionKind": "function",
+          "id": "test/StreamMintManager.t.sol:MutableMintModuleRegistry#function:0x01ffc9a7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNdXRhYmxlTWludE1vZHVsZVJlZ2lzdHJ5I2Z1bmN0aW9uOjB4MDFmZmM5YTc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsInterface",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 270,
+            "byteStart": 7706,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L229-L237",
+            "lineEnd": 237,
+            "lineStart": 229,
+            "snippetSha256": "sha256:20277e3dda9f280b66b47feb46723ea016bf832037d450b152d819ae2337189f",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": "0x01ffc9a7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_moduleInfo",
+          "natspec": "",
+          "range": {
+            "byteLength": 54,
+            "byteStart": 6768,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L197",
+            "lineEnd": 197,
+            "lineStart": 197,
+            "snippetSha256": "sha256:66d31bf369cc7e489d735a9d8ff9f5f17a97c0f39c8987f6b106f621df49f168",
+            "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+          },
+          "selector": null,
+          "type": "mapping(address => MintModuleInfo)",
+          "typeString": "mapping(address => struct IStreamMintModuleRegistry.MintModuleInfo)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamMintManager.t.sol:MutableMintModuleRegistry",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/ERC165.sol:ERC165",
+        "name": "ERC165"
+      },
+      {
+        "definitionId": "smart-contracts/IStreamMintModuleRegistry.sol:IStreamMintModuleRegistry",
+        "name": "IStreamMintModuleRegistry"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlci50LnNvbDpNdXRhYmxlTWludE1vZHVsZVJlZ2lzdHJ5",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamMintManager.t.sol:MutableMintModuleRegistry",
+      "smart-contracts/IStreamMintModuleRegistry.sol:IStreamMintModuleRegistry",
+      "smart-contracts/ERC165.sol:ERC165",
+      "smart-contracts/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "MutableMintModuleRegistry",
+    "natspec": "",
+    "range": {
+      "byteLength": 1288,
+      "byteStart": 6690,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManager.t.sol#L196-L238",
+      "lineEnd": 238,
+      "lineStart": 196,
+      "snippetSha256": "sha256:fc244839d878976e3b21c5bf211e573ab474fa2832e6e902845ea9164dc1514d",
+      "sourceSha256": "sha256:a534bc2a722f9f215028948da12d45248ce38fd93b7309e12daa28b2be9a7701"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamMintManager.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 7
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 6
+    },
+    "totalCount": 7
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry#function:0x01ffc9a7",
+      "definitionId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry#function:0x2b016999",
+      "definitionId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry#function:0x334d0d07",
+      "definitionId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry#function:0x56b97ec1",
+      "definitionId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry#function:0x59cce87f",
+      "definitionId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry#function:0x737f4b5f",
+      "definitionId": "test/StreamMintManager.t.sol:MutableMintModuleRegistry",
+      "severity": "advisory"
+    }
+  ]
+}
