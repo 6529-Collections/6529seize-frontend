@@ -11,7 +11,7 @@ collector would understand a promise differently.
 
 The reviewed source is
 [`513bd7e079eafe109df6ae1ae21bfbca6fec6786`](https://github.com/6529-Collections/6529Stream/tree/513bd7e079eafe109df6ae1ae21bfbca6fec6786).
-The review version is `2026-07-30.1`. Check both values before commenting so
+The review version is `2026-08-01.1`. Check both values before commenting so
 the discussion remains attached to the code it examined.
 
 ## Who should comment

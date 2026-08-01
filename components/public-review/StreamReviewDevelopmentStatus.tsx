@@ -46,6 +46,11 @@ function DevelopmentList({
               href={getRepositoryUrl(item.evidencePath)}
               target="_blank"
               rel="noreferrer"
+              aria-label={t(
+                DEFAULT_LOCALE,
+                "publicReview.development.openEvidenceLabel",
+                { item: item.text }
+              )}
               className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1 tw-font-medium tw-text-primary-300 tw-underline tw-decoration-primary-400/45 tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
             >
               {t(DEFAULT_LOCALE, "publicReview.development.openEvidence")}
@@ -97,6 +102,10 @@ export function StreamReviewDevelopmentStatus({
               href={getRepositoryUrl()}
               target="_blank"
               rel="noreferrer"
+              aria-label={t(
+                DEFAULT_LOCALE,
+                "publicReview.development.sourceLabel"
+              )}
               className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1 tw-font-medium tw-text-iron-300 tw-underline tw-decoration-white/25 tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
             >
               {t(DEFAULT_LOCALE, "publicReview.development.source")}
@@ -192,6 +201,11 @@ export function StreamReviewDevelopmentStatus({
                 </p>
                 <Link
                   href={`${getStreamReviewPageHref({ page })}#${prompt.sectionId}`}
+                  aria-label={t(
+                    DEFAULT_LOCALE,
+                    "publicReview.development.readQuestionLabel",
+                    { title: prompt.title }
+                  )}
                   className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-justify-self-start tw-text-xs tw-font-semibold tw-text-primary-300 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-justify-self-end"
                 >
                   {t(DEFAULT_LOCALE, "publicReview.development.readQuestion")}

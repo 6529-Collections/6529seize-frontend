@@ -159,6 +159,8 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.development.evidenceSummary":
     "Evidence checklist: {complete} complete, {pending} under review, and {missing} remaining. {blockers} recorded issues currently prevent release.",
   "publicReview.development.openEvidence": "Open the supporting evidence",
+  "publicReview.development.openEvidenceLabel":
+    "Open supporting evidence for {item} (opens in a new tab)",
   "publicReview.development.snapshotNote":
     "The detailed review below is version {version}, pinned to contract source {commit}.",
   "publicReview.development.reviewQuestionsHeading":
@@ -166,6 +168,9 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.development.reviewQuestionsDescription":
     "Choose the question closest to your experience. Each one explains the issue in plain language and links to the relevant evidence.",
   "publicReview.development.readQuestion": "Open this question",
+  "publicReview.development.readQuestionLabel": "Open this question: {title}",
+  "publicReview.development.sourceLabel":
+    "Development source (opens in a new tab)",
   "publicReview.evidence.heading": "Evidence labels",
   "publicReview.evidence.summary": "How to read evidence labels",
   "publicReview.evidence.labels.implemented": "Implemented",

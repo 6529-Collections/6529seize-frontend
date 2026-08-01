@@ -30,19 +30,33 @@ describe("StreamReviewDevelopmentStatus", () => {
       screen.getByRole("heading", { name: "Where your input would help" })
     ).toBeInTheDocument();
     const questionLinks = screen.getAllByRole("link", {
-      name: "Open this question",
+      name: /^Open this question:/,
     });
     expect(questionLinks).toHaveLength(6);
+    expect(
+      screen.getByRole("link", {
+        name: "Open this question: Artist choices",
+      })
+    ).toBeInTheDocument();
     expect(questionLinks[0]).toHaveAttribute(
       "href",
       "/reviews/6529-stream/for-artists#questions-for-artists"
     );
     expect(
-      screen.getByRole("link", { name: /Development source/ })
+      screen.getByRole("link", {
+        name: "Development source (opens in a new tab)",
+      })
     ).toHaveAttribute(
       "href",
       "https://github.com/6529-Collections/6529Stream/commit/5021c8060950c3fef995271e674ed4b2007fee6d"
     );
+    const evidenceLinks = screen.getAllByRole("link", {
+      name: /Open supporting evidence for .*\(opens in a new tab\)/,
+    });
+    expect(evidenceLinks).toHaveLength(8);
+    expect(
+      new Set(evidenceLinks.map((link) => link.getAttribute("aria-label"))).size
+    ).toBe(evidenceLinks.length);
     expect(
       screen.getByText(/The detailed review below is version/)
     ).toHaveTextContent(

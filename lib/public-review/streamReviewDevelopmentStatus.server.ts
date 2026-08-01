@@ -111,14 +111,14 @@ function parseDevelopmentItems(
       const id = readText(candidate, "id", 64);
       const text = readText(candidate, "text", 240);
       const evidencePath = readText(candidate, "evidencePath", 180);
-      const segments = evidencePath.split("/");
+      const segments = new Set(evidencePath.split("/"));
       if (
         !isCanonicalId(id) ||
         seenIds.has(id) ||
         !EVIDENCE_PATH_PATTERN.test(evidencePath) ||
         evidencePath.includes("\\") ||
-        segments.includes(".") ||
-        segments.includes("..")
+        segments.has(".") ||
+        segments.has("..")
       ) {
         throw new Error(CONFIG_ERROR);
       }

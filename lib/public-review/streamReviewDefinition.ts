@@ -248,145 +248,97 @@ const STREAM_REVIEW_2026_07_26_PAGES = [
   ]),
 ] as const;
 
-const STREAM_REVIEW_2026_07_30_PAGES = [
-  definePage("overview", "overviewNarrative", ALL_AUDIENCES, []),
-  definePage(
-    "artwork-lifecycle",
-    "artworkLifecycle",
-    COMMUNITY_ARTIST_TECHNICAL,
-    []
-  ),
-  definePage("for-artists", "forArtists", ARTIST_COMMUNITY, []),
-  definePage("roles-and-trust", "rolesAndTrust", ALL_AUDIENCES, []),
-  definePage(
-    "curation-and-tdh-authorization",
-    "curationAndTdhAuthorization",
-    ALL_AUDIENCES,
-    []
-  ),
-  definePage(
-    "tokens-collections-and-minting",
-    "tokensCollectionsAndMinting",
-    ALL_AUDIENCES,
-    []
-  ),
-  definePage(
-    "fixed-price-sales-and-auctions",
-    "fixedPriceSalesAndAuctions",
-    ALL_AUDIENCES,
-    []
-  ),
-  definePage(
-    "revenue-splits-and-royalties",
-    "revenueSplitsAndRoyalties",
-    ALL_AUDIENCES,
-    []
-  ),
-  definePage("randomness", "randomness", ARTIST_TECHNICAL_AUDITOR, []),
-  definePage(
-    "metadata-scripts-and-dependencies",
-    "metadataScriptsAndDependencies",
-    ALL_AUDIENCES,
-    []
-  ),
-  definePage(
-    "freezing-preservation-and-artwork-finality",
-    "freezingPreservationAndArtworkFinality",
-    ALL_AUDIENCES,
-    []
-  ),
-  definePage(
-    "governance-pausing-and-successors",
-    "governancePausingAndSuccessors",
-    ALL_AUDIENCES,
-    []
-  ),
-  definePage(
-    "security-testing-and-known-limitations",
-    "currentImplementationAndReadiness",
-    COMMUNITY_TECHNICAL_AUDITOR,
-    [
-      "IMPLEMENTED",
-      "TESTED",
-      "PROPOSED",
-      "OPEN_FOR_FEEDBACK",
-      "AUDIT_PENDING",
-      "DEFERRED",
-      "KNOWN_LIMITATION",
-    ]
-  ),
-  definePage("community-review", "communityReview", ALL_AUDIENCES, []),
-] as const;
+function defineStreamReviewNarrativePages({
+  roles,
+  governance,
+  readiness,
+}: {
+  readonly roles: PageMessageStem;
+  readonly governance: PageMessageStem;
+  readonly readiness: PageMessageStem;
+}) {
+  return [
+    definePage("overview", "overviewNarrative", ALL_AUDIENCES, []),
+    definePage(
+      "artwork-lifecycle",
+      "artworkLifecycle",
+      COMMUNITY_ARTIST_TECHNICAL,
+      []
+    ),
+    definePage("for-artists", "forArtists", ARTIST_COMMUNITY, []),
+    definePage("roles-and-trust", roles, ALL_AUDIENCES, []),
+    definePage(
+      "curation-and-tdh-authorization",
+      "curationAndTdhAuthorization",
+      ALL_AUDIENCES,
+      []
+    ),
+    definePage(
+      "tokens-collections-and-minting",
+      "tokensCollectionsAndMinting",
+      ALL_AUDIENCES,
+      []
+    ),
+    definePage(
+      "fixed-price-sales-and-auctions",
+      "fixedPriceSalesAndAuctions",
+      ALL_AUDIENCES,
+      []
+    ),
+    definePage(
+      "revenue-splits-and-royalties",
+      "revenueSplitsAndRoyalties",
+      ALL_AUDIENCES,
+      []
+    ),
+    definePage("randomness", "randomness", ARTIST_TECHNICAL_AUDITOR, []),
+    definePage(
+      "metadata-scripts-and-dependencies",
+      "metadataScriptsAndDependencies",
+      ALL_AUDIENCES,
+      []
+    ),
+    definePage(
+      "freezing-preservation-and-artwork-finality",
+      "freezingPreservationAndArtworkFinality",
+      ALL_AUDIENCES,
+      []
+    ),
+    definePage(
+      "governance-pausing-and-successors",
+      governance,
+      ALL_AUDIENCES,
+      []
+    ),
+    definePage(
+      "security-testing-and-known-limitations",
+      readiness,
+      COMMUNITY_TECHNICAL_AUDITOR,
+      [
+        "IMPLEMENTED",
+        "TESTED",
+        "PROPOSED",
+        "OPEN_FOR_FEEDBACK",
+        "AUDIT_PENDING",
+        "DEFERRED",
+        "KNOWN_LIMITATION",
+      ]
+    ),
+    definePage("community-review", "communityReview", ALL_AUDIENCES, []),
+  ] as const;
+}
 
-export const STREAM_REVIEW_PAGES = [
-  definePage("overview", "overviewNarrative", ALL_AUDIENCES, []),
-  definePage(
-    "artwork-lifecycle",
-    "artworkLifecycle",
-    COMMUNITY_ARTIST_TECHNICAL,
-    []
-  ),
-  definePage("for-artists", "forArtists", ARTIST_COMMUNITY, []),
-  definePage("roles-and-trust", "whoCanDoWhat", ALL_AUDIENCES, []),
-  definePage(
-    "curation-and-tdh-authorization",
-    "curationAndTdhAuthorization",
-    ALL_AUDIENCES,
-    []
-  ),
-  definePage(
-    "tokens-collections-and-minting",
-    "tokensCollectionsAndMinting",
-    ALL_AUDIENCES,
-    []
-  ),
-  definePage(
-    "fixed-price-sales-and-auctions",
-    "fixedPriceSalesAndAuctions",
-    ALL_AUDIENCES,
-    []
-  ),
-  definePage(
-    "revenue-splits-and-royalties",
-    "revenueSplitsAndRoyalties",
-    ALL_AUDIENCES,
-    []
-  ),
-  definePage("randomness", "randomness", ARTIST_TECHNICAL_AUDITOR, []),
-  definePage(
-    "metadata-scripts-and-dependencies",
-    "metadataScriptsAndDependencies",
-    ALL_AUDIENCES,
-    []
-  ),
-  definePage(
-    "freezing-preservation-and-artwork-finality",
-    "freezingPreservationAndArtworkFinality",
-    ALL_AUDIENCES,
-    []
-  ),
-  definePage(
-    "governance-pausing-and-successors",
-    "changesEmergenciesAndFutureContracts",
-    ALL_AUDIENCES,
-    []
-  ),
-  definePage(
-    "security-testing-and-known-limitations",
-    "whereDevelopmentStands",
-    COMMUNITY_TECHNICAL_AUDITOR,
-    [
-      "IMPLEMENTED",
-      "TESTED",
-      "PROPOSED",
-      "OPEN_FOR_FEEDBACK",
-      "AUDIT_PENDING",
-      "DEFERRED",
-      "KNOWN_LIMITATION",
-    ]
-  ),
-  definePage("community-review", "communityReview", ALL_AUDIENCES, []),
-] as const;
+const STREAM_REVIEW_2026_07_30_PAGES = defineStreamReviewNarrativePages({
+  roles: "rolesAndTrust",
+  governance: "governancePausingAndSuccessors",
+  readiness: "currentImplementationAndReadiness",
+});
+
+export const STREAM_REVIEW_PAGES = defineStreamReviewNarrativePages({
+  roles: "whoCanDoWhat",
+  governance: "changesEmergenciesAndFutureContracts",
+  readiness: "whereDevelopmentStands",
+});
 
 const STREAM_REVIEW_AUDIENCE_ENTRY_PAGE_IDS = {
   community: "community-review",
