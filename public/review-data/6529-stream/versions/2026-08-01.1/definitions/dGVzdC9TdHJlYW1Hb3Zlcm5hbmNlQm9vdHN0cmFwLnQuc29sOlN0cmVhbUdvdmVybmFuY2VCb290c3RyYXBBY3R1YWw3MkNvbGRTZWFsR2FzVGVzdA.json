@@ -1,0 +1,242 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapColdSealGasTestBase#event:ColdBootstrapSealExecutionGas(bytes32,uint256,uint256)",
+          "declaringDefinitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapColdSealGasTestBase",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "profile",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "gasUsed",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "inventoryLeaves",
+              "type": "uint256"
+            }
+          ],
+          "name": "ColdBootstrapSealExecutionGas",
+          "signature": "ColdBootstrapSealExecutionGas(bytes32,uint256,uint256)",
+          "topic0": "0xe98bc6a408ba68fdf710ed4eaaab41327ef7474eb18a4fefb9b20b1ce9d3a527"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapTestBase#function:0x49bbca8f",
+          "declaringDefinitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapTestBase",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct StreamGovernanceBootstrapHarness.BootstrapArtifacts",
+              "name": "artifacts",
+              "type": "(address,address,address,address,address[],bytes32,bytes32,uint64,address,address,address,address,address,address,address,bytes32,bytes32,uint64,bytes32,uint256)"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "authority",
+              "type": "address"
+            }
+          ],
+          "name": "invokeSeal",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x49bbca8f",
+          "signature": "invokeSeal((address,address,address,address,address[],bytes32,bytes32,uint64,address,address,address,address,address,address,address,bytes32,bytes32,uint64,bytes32,uint256),address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapActual72ColdSealGasTest#function:0x0a9254e4",
+          "declaringDefinitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapActual72ColdSealGasTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "setUp",
+          "outputs": [],
+          "selector": "0x0a9254e4",
+          "signature": "setUp()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapActual72ColdSealGasTest#function:0xb0c47334",
+          "declaringDefinitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapActual72ColdSealGasTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testActual72LeafProfileMaximumTriggersPayloadAndURIsFitsColdSealEnvelope",
+          "outputs": [],
+          "selector": "0xb0c47334",
+          "signature": "testActual72LeafProfileMaximumTriggersPayloadAndURIsFitsColdSealEnvelope()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "setUp()",
+          "displaySignature": "setUp()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapActual72ColdSealGasTest#function:0x0a9254e4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VCb290c3RyYXBBY3R1YWw3MkNvbGRTZWFsR2FzVGVzdCNmdW5jdGlvbjoweDBhOTI1NGU0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setUp",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 242,
+            "byteStart": 97133,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L2332-L2337",
+            "lineEnd": 2337,
+            "lineStart": 2332,
+            "snippetSha256": "sha256:58f189a1bfa0a9bd0615f1d71a71323f85ead71fce852262345b085c7b40424b",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": "0x0a9254e4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testActual72LeafProfileMaximumTriggersPayloadAndURIsFitsColdSealEnvelope()",
+          "displaySignature": "testActual72LeafProfileMaximumTriggersPayloadAndURIsFitsColdSealEnvelope()",
+          "functionKind": "function",
+          "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapActual72ColdSealGasTest#function:0xb0c47334",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VCb290c3RyYXBBY3R1YWw3MkNvbGRTZWFsR2FzVGVzdCNmdW5jdGlvbjoweGIwYzQ3MzM0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testActual72LeafProfileMaximumTriggersPayloadAndURIsFitsColdSealEnvelope",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 135,
+            "byteStart": 97381,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L2339-L2341",
+            "lineEnd": 2341,
+            "lineStart": 2339,
+            "snippetSha256": "sha256:468eb582e42aab92632c713f17d1b5c84e327877bce0a255aef6ce720fda0858",
+            "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+          },
+          "selector": "0xb0c47334",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapActual72ColdSealGasTest",
+    "inheritance": [
+      {
+        "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapColdSealGasTestBase",
+        "name": "StreamGovernanceBootstrapColdSealGasTestBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Hb3Zlcm5hbmNlQm9vdHN0cmFwLnQuc29sOlN0cmVhbUdvdmVybmFuY2VCb290c3RyYXBBY3R1YWw3MkNvbGRTZWFsR2FzVGVzdA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapActual72ColdSealGasTest",
+      "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapColdSealGasTestBase",
+      "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapTestBase",
+      "test/helpers/StreamGovernanceBootstrapHarness.sol:StreamGovernanceBootstrapHarness",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamGovernanceBootstrapActual72ColdSealGasTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 501,
+      "byteStart": 97017,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamGovernanceBootstrap.t.sol#L2329-L2342",
+      "lineEnd": 2342,
+      "lineStart": 2329,
+      "snippetSha256": "sha256:52f7bb6ee0367c6ef167cb62a33b8c832368bb24d5da943ec7a2fe3fc5277e0a",
+      "sourceSha256": "sha256:2bcb6ec49db8344768207748fef620bc4c44243701580543c255843d0d7012d7"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamGovernanceBootstrap.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 3
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 2
+    },
+    "totalCount": 3
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapActual72ColdSealGasTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapActual72ColdSealGasTest#function:0x0a9254e4",
+      "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapActual72ColdSealGasTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapActual72ColdSealGasTest#function:0xb0c47334",
+      "definitionId": "test/StreamGovernanceBootstrap.t.sol:StreamGovernanceBootstrapActual72ColdSealGasTest",
+      "severity": "advisory"
+    }
+  ]
+}

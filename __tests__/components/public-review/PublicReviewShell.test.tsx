@@ -38,8 +38,8 @@ describe("PublicReviewShell", () => {
       screen.getByRole("heading", { level: 1, name: "Overview" })
     ).toBeInTheDocument();
     expect(screen.getByText("Public review")).toBeInTheDocument();
-    expect(screen.getByText("Predeployment")).toBeInTheDocument();
-    expect(screen.getByText("Pre-audit")).toBeInTheDocument();
+    expect(screen.getByText("Preparing for launch")).toBeInTheDocument();
+    expect(screen.getByText("Audit planned")).toBeInTheDocument();
     expect(screen.getByText("Page 1 of 14")).toBeInTheDocument();
     expect(
       screen.getByRole("complementary", { name: "A small human disclosure" })
