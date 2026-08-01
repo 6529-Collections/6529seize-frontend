@@ -29,6 +29,9 @@ const MAX_SCRIPT_SOURCE_EXCERPT_CHARACTERS = 700;
 const MAX_SEARCH_TEXT_CHARACTERS = 1_600;
 const SAFE_REVIEW_ID = /^[a-z0-9][a-z0-9-]*$/;
 const SAFE_VERSION = /^[0-9]{4}-[0-9]{2}-[0-9]{2}\.[0-9]+$/;
+const SAFE_SOURCE_COMMIT = /^[0-9a-f]{40}$/;
+const CANONICAL_UTC_TIMESTAMP =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 const SENSITIVE_SIGNING_KEY_NAME = /(?:private.*key|signer.*key)/i;
 const STREAM_SPLIT_WALLET_DEFINITION_ID =
   "smart-contracts/StreamSplitWallet.sol:StreamSplitWallet";
@@ -178,6 +181,38 @@ function publicPathToRelative(publicPath, prefix, label) {
 
 function generatorSourceSha256() {
   return fileSha256(__filename);
+}
+
+function loadDevelopmentStatusForVersion({
+  repoRoot,
+  reviewId,
+  reviewVersion,
+  activeVersion,
+}) {
+  if (reviewVersion !== activeVersion) {
+    return undefined;
+  }
+  const relativePath = `config/public-reviews/${reviewId}.development-status.json`;
+  const filePath = path.join(repoRoot, ...relativePath.split("/"));
+  const status = readJson(filePath, `${reviewId} development status`);
+  const checkedAt = new Date(status.checkedAt);
+  invariant(
+    status.schemaVersion === "public-review.development-status.v1" &&
+      status.reviewId === reviewId &&
+      status.locale === "en-US" &&
+      status.state === "PRE_AUDIT_DEVELOPMENT" &&
+      status.source?.repository === "6529-Collections/6529Stream" &&
+      SAFE_SOURCE_COMMIT.test(status.source?.commit ?? "") &&
+      CANONICAL_UTC_TIMESTAMP.test(status.checkedAt ?? "") &&
+      !Number.isNaN(checkedAt.getTime()) &&
+      checkedAt.toISOString() === status.checkedAt,
+    `${reviewId} development status is invalid.`
+  );
+  return {
+    status,
+    relativePath,
+    sha256: fileSha256(filePath),
+  };
 }
 
 function knowledgeSourceRoot(repoRoot, reviewId, reviewVersion) {
@@ -1139,6 +1174,7 @@ function createStatusRecords({
   sourceCommit,
   publication,
   reference,
+  developmentStatus,
 }) {
   const records = [];
   const readiness = reference.auditorEvidence?.readiness;
@@ -1161,6 +1197,45 @@ function createStatusRecords({
       ? `Public beta: ${readiness.status.public_beta}; production release: ${readiness.status.production_release}.`
       : "",
   ].filter(Boolean);
+  if (developmentStatus) {
+    const latest = developmentStatus.status;
+    const requirementCounts = latest.evidenceSummary.requirements;
+    const developmentFacts = [
+      latest.headline,
+      latest.summary,
+      `Checked ${latest.checkedAt}.`,
+      `Evidence checklist: ${requirementCounts.complete} complete, ${requirementCounts.pending} pending, ${requirementCounts.missing} missing.`,
+      `${latest.evidenceSummary.openReleaseBlockers} open release blockers.`,
+      ...latest.recentlyCompleted.map((item) => item.text),
+      ...latest.workingOn.map((item) => item.text),
+      ...latest.beforeLaunch.map((item) => item.text),
+    ];
+    records.push({
+      id: "status:latest-development",
+      category: "status",
+      kind: "development_status",
+      title: "Latest Stream development update",
+      name: "latest development status",
+      aliases: [
+        "stream development",
+        "stream progress",
+        "what is finished",
+        "what is being worked on",
+        "what remains before launch",
+      ],
+      exactKeys: ["status:latest-development", latest.source.commit],
+      canonicalPath: `/reviews/${reviewId}#development-update`,
+      summary: developmentFacts.join(" "),
+      structured: latest,
+      provenance: {
+        reviewVersion,
+        sourceCommit: latest.source.commit,
+        sourcePath: developmentStatus.relativePath,
+      },
+      relationships: { relatedEditorialIds: [] },
+      searchText: boundedSearchText(developmentFacts),
+    });
+  }
   records.push({
     id: `status:${reviewVersion}:review-state`,
     category: "status",
@@ -1432,6 +1507,7 @@ function buildKnowledgePack({
   reviewVersion,
   publication,
   referenceIndexEntry,
+  developmentStatus,
 }) {
   invariant(
     SAFE_REVIEW_ID.test(reviewId) && SAFE_VERSION.test(reviewVersion),
@@ -1478,6 +1554,7 @@ function buildKnowledgePack({
     sourceCommit: reference.source.commit,
     publication,
     reference,
+    developmentStatus,
   });
   const records = [
     ...editorial.records,
@@ -1584,6 +1661,16 @@ function buildKnowledgePack({
       deploymentStatus: publication.deploymentStatus,
       auditStatus: publication.auditStatus,
     },
+    ...(developmentStatus
+      ? {
+          developmentStatus: {
+            checkedAt: developmentStatus.status.checkedAt,
+            source: developmentStatus.status.source,
+            configPath: developmentStatus.relativePath,
+            configSha256: developmentStatus.sha256,
+          },
+        }
+      : {}),
     reference: {
       manifestPath: referenceIndexEntry.bundlePath,
       manifestSha256: fileSha256(referencePath),
@@ -1721,11 +1808,28 @@ function knowledgeContext(repoRoot, reviewId, reviewVersion) {
     referenceIndexEntry,
     `${reviewId}@${reviewVersion} reference index entry is missing.`
   );
+  const publicVersions = new Set(
+    publicationConfig.versions
+      ?.filter((candidate) => candidate.lifecycleState !== "DRAFT")
+      .map((candidate) => candidate.version) ?? []
+  );
+  const publicActiveVersion = publicVersions.has(referenceIndex.activeVersion)
+    ? referenceIndex.activeVersion
+    : [...(referenceIndex.versions ?? [])]
+        .reverse()
+        .find((candidate) => publicVersions.has(candidate.version))?.version;
+  const developmentStatus = loadDevelopmentStatusForVersion({
+    repoRoot,
+    reviewId,
+    reviewVersion,
+    activeVersion: publicActiveVersion,
+  });
   return {
     publicationConfig,
     publication,
     referenceIndex,
     referenceIndexEntry,
+    developmentStatus,
   };
 }
 
@@ -1736,6 +1840,7 @@ function validateKnowledgePack({
   requireCurrentGenerator = false,
   publicationOverride,
   referenceIndexEntryOverride,
+  developmentStatusOverride,
   knowledgeRootOverride,
 }) {
   const context =
@@ -1743,6 +1848,7 @@ function validateKnowledgePack({
       ? {
           publication: publicationOverride,
           referenceIndexEntry: referenceIndexEntryOverride,
+          developmentStatus: developmentStatusOverride,
         }
       : knowledgeContext(repoRoot, reviewId, reviewVersion);
   const versionRoot = path.join(
@@ -1792,6 +1898,21 @@ function validateKnowledgePack({
         context.publication.deploymentStatus &&
       manifest.publication?.auditStatus === context.publication.auditStatus,
     `${reviewId}@${reviewVersion} knowledge identity drifted.`
+  );
+  invariant(
+    context.developmentStatus
+      ? manifest.developmentStatus?.checkedAt ===
+          context.developmentStatus.status.checkedAt &&
+          manifest.developmentStatus?.source?.repository ===
+            context.developmentStatus.status.source.repository &&
+          manifest.developmentStatus?.source?.commit ===
+            context.developmentStatus.status.source.commit &&
+          manifest.developmentStatus?.configPath ===
+            context.developmentStatus.relativePath &&
+          manifest.developmentStatus?.configSha256 ===
+            context.developmentStatus.sha256
+      : manifest.developmentStatus === undefined,
+    `${reviewId}@${reviewVersion} development-status identity drifted.`
   );
   invariant(
     Array.isArray(manifest.recordShards),
@@ -1934,7 +2055,7 @@ function generateKnowledgePacks({
   );
   invariant(
     context.publicationConfig.schemaVersion ===
-      "public-review.publication.v2" &&
+      "public-review.publication.v3" &&
       context.publicationConfig.reviewId === reviewId &&
       context.publicationConfig.versions.length ===
         context.referenceIndex.versions.length,
@@ -1974,6 +2095,7 @@ function generateKnowledgePacks({
         reviewVersion: entry.version,
         publication,
         referenceIndexEntry: entry,
+        developmentStatus: active ? context.developmentStatus : undefined,
       });
       writePackAtomically(pack, knowledgeRoot);
     } else if ((active || refreshRetained) && !checkOnly) {
@@ -1983,6 +2105,7 @@ function generateKnowledgePacks({
         reviewVersion: entry.version,
         publication,
         referenceIndexEntry: entry,
+        developmentStatus: active ? context.developmentStatus : undefined,
       });
       try {
         assertFileMapEquals(
@@ -2010,6 +2133,7 @@ function generateKnowledgePacks({
         reviewVersion: entry.version,
         publication,
         referenceIndexEntry: entry,
+        developmentStatus: context.developmentStatus,
       });
       assertFileMapEquals(
         expectedFileMap(expectedPack, knowledgeRoot),
@@ -2069,6 +2193,7 @@ module.exports = {
   generatorSourceSha256,
   headingId,
   knowledgeSourceRoot,
+  loadDevelopmentStatusForVersion,
   splitEditorialPage,
   validateKnowledgePack,
 };

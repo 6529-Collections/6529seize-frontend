@@ -328,6 +328,35 @@ function createFixture(lifecycleState = "PUBLIC_REVIEW"): {
       pages: [{ id: "overview", title: "Overview", file: "overview.md" }],
     }
   );
+  writeJson(
+    repoRoot,
+    `config/public-reviews/${REVIEW_ID}.development-status.json`,
+    {
+      schemaVersion: "public-review.development-status.v1",
+      reviewId: REVIEW_ID,
+      locale: "en-US",
+      checkedAt: "2026-07-26T00:00:00.000Z",
+      source: {
+        repository: SOURCE_REPOSITORY,
+        commit: SOURCE_COMMIT,
+      },
+      state: "PRE_AUDIT_DEVELOPMENT",
+      headline: "Fixture development status.",
+      summary: "Fixture status for the active review version.",
+      recentlyCompleted: [],
+      workingOn: [],
+      beforeLaunch: [],
+      evidenceSummary: {
+        requirements: {
+          complete: 0,
+          pending: 0,
+          missing: 0,
+        },
+        openReleaseBlockers: 0,
+      },
+      reviewerPrompts: [],
+    }
+  );
   generateKnowledgePacks({
     repoRoot,
     writeOutput: () => undefined,

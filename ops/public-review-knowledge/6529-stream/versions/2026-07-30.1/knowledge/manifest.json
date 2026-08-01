@@ -40,14 +40,14 @@
   },
   "generator": {
     "name": "6529-public-review-stream-knowledge",
-    "sourceSha256": "sha256:8b7face3412b812ce599b19099eb1bf66f27d5c387d7d393bc49d1e5656ec611",
+    "sourceSha256": "sha256:a2a068f63dc6438acc7a6ab15e1da7994f1acd3edb703f259f48cb98c879d759",
     "version": "1"
   },
-  "knowledgeSha256": "sha256:43487ea65131e256033f77b25bc3d955388e4fe6c91fa70ef01a822c7ff7a8c8",
+  "knowledgeSha256": "sha256:ca884404a431bb83c547cefbdbce0c264c4255a399f672b6817afd07f491e2b2",
   "publication": {
     "auditStatus": "PRE_AUDIT",
     "deploymentStatus": "NOT_DEPLOYED",
-    "lifecycleState": "PUBLIC_REVIEW"
+    "lifecycleState": "REVIEW_CLOSED"
   },
   "recordShards": [
     {
@@ -318,7 +318,7 @@
     {
       "path": "/review-data/6529-stream/versions/2026-07-30.1/knowledge/records/053.json",
       "recordCount": 66,
-      "sha256": "sha256:dcb86bf5a43f4ee1ca1c2b7340e07f4400b54d0ba94aac2de6d4dea0a9281e85"
+      "sha256": "sha256:9afa27c6639ee66f0efdf157f1d5cac930d967cbaa5a7528d39b606584140213"
     }
   ],
   "reference": {
@@ -332,7 +332,7 @@
   "searchIndex": {
     "path": "/review-data/6529-stream/versions/2026-07-30.1/knowledge/search-index.json",
     "recordCount": 8546,
-    "sha256": "sha256:23198a302ca7d0c16250e03b57b98cd0f02cabb7e2e657cb4553ec6152e7af74"
+    "sha256": "sha256:1ac98a6c637b566a6bc07c591f0ea8740977d768b1a85f9691f439fe31571cfc"
   },
   "source": {
     "commit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786",
