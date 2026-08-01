@@ -83,7 +83,7 @@ describe("CreateWaveOutcomesRows", () => {
     const user = userEvent.setup();
     const { setOutcomes, outcomes } = setup();
     const buttons = screen.getAllByText("remove");
-    await user.click(buttons[0]);
+    await user.click(buttons[0]!);
     expect(setOutcomes).toHaveBeenCalledWith([outcomes[1]]);
   });
 });

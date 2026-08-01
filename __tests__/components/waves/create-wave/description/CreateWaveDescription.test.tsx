@@ -255,7 +255,7 @@ describe("CreateWaveDescription", () => {
   });
 
   it("displays proper styling classes", () => {
-    const { container } = render(<CreateWaveDescription {...defaultProps} />);
+    render(<CreateWaveDescription {...defaultProps} />);
 
     const title = screen.getByText("Description");
     expect(title).toHaveClass(

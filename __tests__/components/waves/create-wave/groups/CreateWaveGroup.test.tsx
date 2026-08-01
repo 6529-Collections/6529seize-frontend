@@ -1,4 +1,3 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateWaveGroup from "@/components/waves/create-wave/groups/CreateWaveGroup";
@@ -63,7 +62,7 @@ describe("CreateWaveGroup", () => {
       handle: "alpha",
       wallet: "0xalpha",
     },
-  } as ApiGroupFull;
+  } as unknown as ApiGroupFull;
 
   const defaultGroups: WaveGroupsConfig = {
     admin: null,

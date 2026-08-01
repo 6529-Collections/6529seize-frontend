@@ -1,4 +1,3 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateWaveDropsMetadata from "@/components/waves/create-wave/drops/metadata/CreateWaveDropsMetadata";
@@ -49,7 +48,7 @@ describe("CreateWaveDropsMetadata", () => {
       ...items,
       { key: "", type: ApiWaveMetadataType.String },
     ]);
-    await user.click(screen.getAllByText("rem")[0]);
+    await user.click(screen.getAllByText("rem")[0]!);
     expect(change).toHaveBeenCalled();
   });
 
