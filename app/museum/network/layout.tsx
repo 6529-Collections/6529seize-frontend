@@ -1,20 +1,33 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import type { ReactNode } from "react";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { MuseumShell } from "@/components/museum/MuseumShell";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { getMuseumView } from "@/lib/museum/normalize";
+import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
+import type { MuseumSourceState } from "@/lib/museum/types";
 
 export const metadata: Metadata = getAppMetadata({
   title: t(DEFAULT_LOCALE, "museum.network.title"),
   description: t(DEFAULT_LOCALE, "museum.network.description"),
 });
 
+function museumSourceState(
+  status: "current" | "stale" | "unavailable"
+): MuseumSourceState {
+  if (status === "current") {
+    return "fresh";
+  }
+  return status;
+}
+
 export default async function MuseumNetworkLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
-  const view = await getMuseumView();
+  await connection();
+  const publicationState = await getMuseumPublicationState();
+  const sourceState = museumSourceState(publicationState.status);
 
-  return <MuseumShell view={view}>{children}</MuseumShell>;
+  return <MuseumShell view={{ sourceState }}>{children}</MuseumShell>;
 }

@@ -4,20 +4,20 @@ import {
   MuseumObjectPage,
 } from "@/components/museum/MuseumObjectPage";
 
-interface MuseumObjectLegacyRouteProps {
+interface MuseumObjectRouteProps {
   readonly params: Promise<{ objectId: string }>;
 }
 
 export async function generateMetadata({
   params,
-}: MuseumObjectLegacyRouteProps): Promise<Metadata> {
+}: MuseumObjectRouteProps): Promise<Metadata> {
   const { objectId } = await params;
   return getMuseumObjectMetadata(objectId);
 }
 
-export default async function MuseumObjectLegacyRoute({
+export default async function MuseumCollectionObjectRoute({
   params,
-}: MuseumObjectLegacyRouteProps) {
+}: MuseumObjectRouteProps) {
   const { objectId } = await params;
   return <MuseumObjectPage objectId={objectId} />;
 }

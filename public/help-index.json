@@ -68,27 +68,35 @@
         "methodology"
       ],
       "facts": [
-        "The 6529 Network Museum is a first-class public reading room at /museum/network.",
-        "The Museum adapter reads the canonical 6529-Collections/6529networkmuseum main release manifest and renders only declared, verified public Markdown and JSON records.",
-        "Museum pages preserve the distinction between an approved collection pathway, a selected_unminted program outcome, a received donation, and an accession whose documentation is complete.",
-        "The route surface includes overview, approved collections, accession lots, program and selected-work records, governance, and methodology/provenance.",
+        "The 6529 Network Museum is an art-led public museum experience at /museum/network.",
+        "Collection means accessioned holdings: visitors can browse artworks at /museum/network/collection and open an artwork dossier at /museum/network/collection/[object-id].",
+        "Artist, project, and gift routes connect the art to onsite curatorial writing, provenance, rights, and collection care without making raw records the primary experience.",
+        "The Museum adapter resolves canonical 6529-Collections/6529networkmuseum main to one exact commit, validates the release inventory, and activates the complete public publication atomically.",
+        "Casey Reas: seven works is an accepted and accessioned gift; Keys and Gates remains a separate program whose selected_unminted works are not Museum holdings.",
+        "Official Art Blocks still and live URLs are labeled upstream presentation sources; the site does not claim retained Museum media or IIIF completion until governed assets are published.",
         "The public release is the source of truth for current status; the website does not infer accession, rights, ownership, or preservation completion from a transfer or selected outcome."
       ],
       "canonical_path": "/museum/network",
       "related_paths": [
-        "/museum/network/collections",
-        "/museum/network/accessions",
+        "/museum/network/collection",
+        "/museum/network/collection/6529NM.2026.001.01",
+        "/museum/network/artists",
+        "/museum/network/artists/casey-reas",
+        "/museum/network/projects/century",
+        "/museum/network/gifts/6529NM.2026.001",
         "/museum/network/programs",
-        "/museum/network/governance",
-        "/museum/network/methodology",
+        "/museum/network/stories",
+        "/museum/network/about",
         "/museum"
       ],
-      "tags": ["museum", "collections", "provenance", "navigation"],
+      "tags": ["museum", "art", "collection", "artists", "provenance"],
       "source_refs": [
         "app/museum/network/page.tsx",
-        "lib/museum/source.ts",
-        "lib/museum/normalize.ts",
-        "__tests__/lib/museum/source.test.ts"
+        "app/museum/network/collection/page.tsx",
+        "components/museum/MuseumArtworkViewer.tsx",
+        "components/museum/MuseumGiftPage.tsx",
+        "lib/museum/publication/runtime.ts",
+        "__tests__/lib/museum/publication/runtime.test.ts"
       ]
     },
     {
