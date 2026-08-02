@@ -38,10 +38,22 @@ interface PublicDocumentContract {
   readonly path: string;
   readonly kind: MuseumPublicDocumentKind;
   readonly artworkId: string | null;
-  readonly relation: "artist" | "gift" | "collection" | "object";
+  readonly relation:
+    | "institution"
+    | "artist"
+    | "gift"
+    | "collection"
+    | "object";
 }
 
 const CASEY_PUBLIC_DOCUMENTS: readonly PublicDocumentContract[] = [
+  {
+    id: "founding-and-operating-principles",
+    path: "policies/founding-and-operating-principles.md",
+    kind: "founding_principles",
+    artworkId: null,
+    relation: "institution",
+  },
   {
     id: "casey-reas-artist-practice",
     path: `records/accessions/${CASEY_ACCESSION_ID}/public/casey-reas-artist-practice.md`,
@@ -370,9 +382,12 @@ function parsePublicDocuments(
       markdown: source.text,
       sha256: source.sha256,
       sourcePath: contract.path,
-      artistIds: [CASEY_ARTIST_ID],
+      artistIds: contract.relation === "institution" ? [] : [CASEY_ARTIST_ID],
       projectIds,
-      giftIds: contract.relation === "artist" ? [] : [CASEY_ACCESSION_ID],
+      giftIds:
+        contract.relation === "artist" || contract.relation === "institution"
+          ? []
+          : [CASEY_ACCESSION_ID],
       artworkIds: contract.artworkId === null ? [] : [contract.artworkId],
     };
   });

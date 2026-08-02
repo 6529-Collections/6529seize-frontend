@@ -6,7 +6,6 @@ import { MuseumSectionHeading } from "@/components/museum/MuseumShell";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { getMuseumView } from "@/lib/museum/normalize";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 
 export const metadata: Metadata = getAppMetadata({
@@ -19,7 +18,9 @@ export default async function MuseumAboutPage() {
   if (publicationState.publication === null) {
     return <MuseumPublicationUnavailable />;
   }
-  const view = await getMuseumView();
+  const mission = publicationState.publication.documents.find(
+    (document) => document.kind === "founding_principles"
+  );
 
   return (
     <div>
@@ -29,9 +30,9 @@ export default async function MuseumAboutPage() {
         description={t(DEFAULT_LOCALE, "museum.network.about.description")}
       />
       <section className="tw-max-w-4xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8">
-        {view.mission ? (
-          <MuseumMarkdown sourcePath={view.mission.path}>
-            {view.mission.markdown}
+        {mission ? (
+          <MuseumMarkdown sourcePath={mission.sourcePath}>
+            {mission.markdown}
           </MuseumMarkdown>
         ) : (
           <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-yellow-100">

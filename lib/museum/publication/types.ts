@@ -53,6 +53,7 @@ export interface MuseumUpstreamMedia extends MuseumMediaBase {
 export type MuseumMedia = MuseumRetainedMedia | MuseumUpstreamMedia;
 
 export type MuseumPublicDocumentKind =
+  | "founding_principles"
   | "artist_practice"
   | "collection_essay"
   | "curatorial_accession_review"
