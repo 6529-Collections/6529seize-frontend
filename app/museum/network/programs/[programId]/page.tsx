@@ -15,6 +15,7 @@ import { buildMuseumRawUrl } from "@/lib/museum/source";
 import {
   displayMuseumStatus,
   museumSlug,
+  museumSlugMatches,
   statusTone,
 } from "@/lib/museum/presentation";
 
@@ -27,8 +28,8 @@ export async function generateMetadata({
 }: ProgramDetailProps): Promise<Metadata> {
   const { programId } = await params;
   const view = await getMuseumView();
-  const program = view.programs.find(
-    (item) => museumSlug(item.programId) === programId
+  const program = view.programs.find((item) =>
+    museumSlugMatches(item.programId, programId)
   );
   return getAppMetadata({
     title: program?.title ?? t(DEFAULT_LOCALE, "museum.network.programs.title"),
@@ -43,8 +44,8 @@ export default async function MuseumProgramDetailPage({
 }: ProgramDetailProps) {
   const { programId } = await params;
   const view = await getMuseumView();
-  const program = view.programs.find(
-    (item) => museumSlug(item.programId) === programId
+  const program = view.programs.find((item) =>
+    museumSlugMatches(item.programId, programId)
   );
   if (!program) notFound();
 

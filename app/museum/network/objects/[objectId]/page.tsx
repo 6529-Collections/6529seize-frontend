@@ -14,7 +14,7 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getMuseumView } from "@/lib/museum/normalize";
 import {
-  museumSlug,
+  museumSlugMatches,
   displayMuseumStatus,
   statusTone,
 } from "@/lib/museum/presentation";
@@ -29,8 +29,8 @@ export async function generateMetadata({
 }: MuseumObjectDetailProps): Promise<Metadata> {
   const { objectId } = await params;
   const view = await getMuseumView();
-  const object = view.objects.find(
-    (item) => museumSlug(item.objectId) === objectId
+  const object = view.objects.find((item) =>
+    museumSlugMatches(item.objectId, objectId)
   );
   return getAppMetadata({
     title: object?.title ?? t(DEFAULT_LOCALE, "museum.network.objects.title"),
@@ -44,8 +44,8 @@ export default async function MuseumObjectDetailPage({
 }: MuseumObjectDetailProps) {
   const { objectId } = await params;
   const view = await getMuseumView();
-  const object = view.objects.find(
-    (item) => museumSlug(item.objectId) === objectId
+  const object = view.objects.find((item) =>
+    museumSlugMatches(item.objectId, objectId)
   );
   if (!object) notFound();
   const record = object.record as {

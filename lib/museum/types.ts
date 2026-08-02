@@ -4,7 +4,12 @@ const MUSEUM_MANIFEST_PATH = "release-artifacts/latest/record-manifest.json";
 export const MUSEUM_MANIFEST_URL = `https://raw.githubusercontent.com/${MUSEUM_REPOSITORY}/${MUSEUM_BRANCH}/${MUSEUM_MANIFEST_PATH}`;
 export const MUSEUM_REPOSITORY_URL = `https://github.com/${MUSEUM_REPOSITORY}`;
 
-export type MuseumSourceState = "fresh" | "stale" | "unavailable" | "invalid";
+export type MuseumSourceState =
+  | "fresh"
+  | "partial"
+  | "stale"
+  | "unavailable"
+  | "invalid";
 
 export interface MuseumManifestEntry {
   readonly path: string;

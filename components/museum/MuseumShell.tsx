@@ -19,12 +19,15 @@ function sourceLabelKey(
   sourceState: MuseumSourceState
 ):
   | "museum.network.source.fresh"
+  | "museum.network.source.partial"
   | "museum.network.source.stale"
   | "museum.network.source.unavailable"
   | "museum.network.source.invalid" {
   switch (sourceState) {
     case "fresh":
       return "museum.network.source.fresh";
+    case "partial":
+      return "museum.network.source.partial";
     case "stale":
       return "museum.network.source.stale";
     case "unavailable":
@@ -38,6 +41,8 @@ function sourceTone(sourceState: MuseumSourceState): string {
   switch (sourceState) {
     case "fresh":
       return "tw-border-success/30 tw-bg-success/10 tw-text-green-100";
+    case "partial":
+      return "tw-border-yellow-400/30 tw-bg-yellow-400/10 tw-text-yellow-100";
     case "stale":
       return "tw-border-yellow-400/30 tw-bg-yellow-400/10 tw-text-yellow-100";
     case "invalid":
@@ -52,7 +57,10 @@ function MuseumSourceBanner({ view }: { readonly view: MuseumView }) {
   return (
     <aside
       className={`tw-mb-8 tw-rounded-xl tw-border tw-p-4 ${sourceTone(view.sourceState)}`}
-      aria-label="Museum source status"
+      aria-label={t(
+        DEFAULT_LOCALE,
+        "museum.network.accessibility.sourceStatus"
+      )}
     >
       <div className="tw-flex tw-flex-col tw-gap-3 md:tw-flex-row md:tw-items-start md:tw-justify-between">
         <div>
@@ -125,7 +133,10 @@ export function MuseumShell({
         </header>
 
         <nav
-          aria-label="Museum sections"
+          aria-label={t(
+            DEFAULT_LOCALE,
+            "museum.network.accessibility.sections"
+          )}
           className="tw-mb-8 tw-overflow-x-auto"
         >
           <ul className="tw-flex tw-min-w-max tw-list-none tw-gap-2 tw-p-0">

@@ -14,6 +14,7 @@ const STALE_TTL_MS = 24 * 60 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 8_000;
 const MAX_MANIFEST_BYTES = 2_000_000;
 const MAX_DOCUMENT_BYTES = 2_000_000;
+const DOCUMENT_FETCH_CONCURRENCY = 6;
 const PUBLIC_PREFIXES = ["policies/", "records/", "docs/"] as const;
 const SUPPORTED_EXTENSIONS = [".md", ".json"] as const;
 
@@ -29,6 +30,7 @@ interface CachedCorpus {
 }
 
 let cachedCorpus: CachedCorpus | undefined;
+let inFlightCorpus: Promise<MuseumCorpus> | undefined;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -275,12 +277,34 @@ class GitHubMuseumSourceAdapter implements MuseumSourceAdapter {
     const entries = release.entries.filter((entry) =>
       isPublicMuseumPath(entry.path)
     );
-    const documents = await Promise.all(
-      entries.map((entry) => this.getDocument(entry))
-    );
+    const documents: MuseumDocument[] = [];
+    let failedDocuments = 0;
+
+    for (
+      let offset = 0;
+      offset < entries.length;
+      offset += DOCUMENT_FETCH_CONCURRENCY
+    ) {
+      const batch = entries.slice(offset, offset + DOCUMENT_FETCH_CONCURRENCY);
+      const results = await Promise.allSettled(
+        batch.map((entry) => this.getDocument(entry))
+      );
+
+      for (const result of results) {
+        if (result.status === "fulfilled") {
+          documents.push(result.value);
+        } else {
+          failedDocuments += 1;
+        }
+      }
+    }
+
+    if (entries.length > 0 && documents.length === 0) {
+      throw new Error("document_all_failed");
+    }
 
     return {
-      sourceState: "fresh",
+      sourceState: failedDocuments > 0 ? "partial" : "fresh",
       release,
       documents: Object.fromEntries(
         documents.map((document) => [document.path, document])
@@ -307,30 +331,42 @@ export async function getMuseumCorpus(): Promise<MuseumCorpus> {
     return cachedCorpus.corpus;
   }
 
-  try {
-    const corpus = await githubMuseumSourceAdapter.getCorpus();
-    cachedCorpus = { storedAt: now, corpus };
-    return corpus;
-  } catch (error) {
-    if (
-      cachedCorpus !== undefined &&
-      now - cachedCorpus.storedAt <= STALE_TTL_MS
-    ) {
+  if (inFlightCorpus !== undefined) {
+    return inFlightCorpus;
+  }
+
+  const request = (async (): Promise<MuseumCorpus> => {
+    try {
+      const corpus = await githubMuseumSourceAdapter.getCorpus();
+      cachedCorpus = { storedAt: Date.now(), corpus };
+      return corpus;
+    } catch (error) {
+      const errorNow = Date.now();
+      if (
+        cachedCorpus !== undefined &&
+        errorNow - cachedCorpus.storedAt <= STALE_TTL_MS
+      ) {
+        return {
+          ...cachedCorpus.corpus,
+          sourceState: "stale",
+          errorCode: sourceErrorCode(error),
+        };
+      }
+
+      const errorCode = sourceErrorCode(error);
+      const invalid =
+        errorCode.startsWith("manifest_") || errorCode.includes("hash");
       return {
-        ...cachedCorpus.corpus,
-        sourceState: "stale",
-        errorCode: sourceErrorCode(error),
+        sourceState: invalid ? "invalid" : "unavailable",
+        release: null,
+        documents: {},
+        errorCode,
       };
     }
+  })().finally(() => {
+    inFlightCorpus = undefined;
+  });
+  inFlightCorpus = request;
 
-    const errorCode = sourceErrorCode(error);
-    const invalid =
-      errorCode.startsWith("manifest_") || errorCode.includes("hash");
-    return {
-      sourceState: invalid ? "invalid" : "unavailable",
-      release: null,
-      documents: {},
-      errorCode,
-    };
-  }
+  return request;
 }

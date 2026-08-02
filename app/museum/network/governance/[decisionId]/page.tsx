@@ -8,11 +8,14 @@ import {
   MuseumStatusBadge,
 } from "@/components/museum/MuseumShell";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { formatDate } from "@/i18n/format";
+import { formatDate, formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { getMuseumView } from "@/lib/museum/normalize";
 import { buildMuseumRawUrl } from "@/lib/museum/source";
-import { museumSlug } from "@/lib/museum/presentation";
+import {
+  isAdoptedGovernanceEffect,
+  museumSlugMatches,
+} from "@/lib/museum/presentation";
 
 interface GovernanceDetailProps {
   readonly params: Promise<{ decisionId: string }>;
@@ -23,8 +26,8 @@ export async function generateMetadata({
 }: GovernanceDetailProps): Promise<Metadata> {
   const { decisionId } = await params;
   const view = await getMuseumView();
-  const decision = view.governance.find(
-    (item) => museumSlug(item.decisionId) === decisionId
+  const decision = view.governance.find((item) =>
+    museumSlugMatches(item.decisionId, decisionId)
   );
   return getAppMetadata({
     title:
@@ -40,13 +43,11 @@ export default async function MuseumGovernanceDetailPage({
 }: GovernanceDetailProps) {
   const { decisionId } = await params;
   const view = await getMuseumView();
-  const decision = view.governance.find(
-    (item) => museumSlug(item.decisionId) === decisionId
+  const decision = view.governance.find((item) =>
+    museumSlugMatches(item.decisionId, decisionId)
   );
   if (!decision) notFound();
-  const adopted = decision.governanceEffect
-    .toLocaleLowerCase()
-    .includes("adopt");
+  const adopted = isAdoptedGovernanceEffect(decision.governanceEffect);
 
   return (
     <article>
@@ -108,7 +109,9 @@ export default async function MuseumGovernanceDetailPage({
           <dd className="tw-m-0 tw-mt-2 tw-text-sm tw-text-iron-200">
             {decision.rating ?? "—"}
             {decision.ratersCount !== null
-              ? ` · ${decision.ratersCount} raters`
+              ? ` · ${t(DEFAULT_LOCALE, "museum.network.governance.raters", {
+                  count: formatInteger(DEFAULT_LOCALE, decision.ratersCount),
+                })}`
               : ""}
           </dd>
         </div>

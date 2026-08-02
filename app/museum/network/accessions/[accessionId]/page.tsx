@@ -15,6 +15,7 @@ import { buildMuseumRawUrl } from "@/lib/museum/source";
 import {
   displayMuseumStatus,
   museumSlug,
+  museumSlugMatches,
   statusTone,
 } from "@/lib/museum/presentation";
 
@@ -27,8 +28,8 @@ export async function generateMetadata({
 }: AccessionDetailProps): Promise<Metadata> {
   const { accessionId } = await params;
   const view = await getMuseumView();
-  const lot = view.accessions.find(
-    (item) => museumSlug(item.accessionLotId) === accessionId
+  const lot = view.accessions.find((item) =>
+    museumSlugMatches(item.accessionLotId, accessionId)
   );
   return getAppMetadata({
     title:
@@ -43,8 +44,8 @@ export default async function MuseumAccessionDetailPage({
 }: AccessionDetailProps) {
   const { accessionId } = await params;
   const view = await getMuseumView();
-  const lot = view.accessions.find(
-    (item) => museumSlug(item.accessionLotId) === accessionId
+  const lot = view.accessions.find((item) =>
+    museumSlugMatches(item.accessionLotId, accessionId)
   );
   if (!lot) notFound();
   const objectRecords = view.objects.filter(

@@ -40,12 +40,35 @@ export default async function MuseumMethodologyPage() {
             {view.policies.map((document) => (
               <MuseumRecordCard
                 key={document.path}
-                href={`#${document.path.replace(/[^a-z0-9]+/giu, "-")}`}
+                href={`#policy-${document.path.replace(/[^a-z0-9]+/giu, "-")}`}
                 title={document.title}
                 description={document.excerpt}
                 meta={document.path}
               />
             ))}
+          </div>
+          <div className="tw-mt-6 tw-space-y-6">
+            {view.policies.map((document) => {
+              const id = `policy-${document.path.replace(/[^a-z0-9]+/giu, "-")}`;
+              return (
+                <article
+                  id={id}
+                  key={document.path}
+                  tabIndex={-1}
+                  className="tw-rounded-2xl tw-border tw-border-white/10 tw-bg-iron-900/60 tw-p-5 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-p-7"
+                >
+                  <h3 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white">
+                    {document.title}
+                  </h3>
+                  <p className="tw-m-0 tw-mt-2 tw-text-xs tw-text-iron-500">
+                    {document.path}
+                  </p>
+                  <div className="tw-mt-5">
+                    <MuseumMarkdown>{document.markdown}</MuseumMarkdown>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </section>
       )}
@@ -61,7 +84,8 @@ export default async function MuseumMethodologyPage() {
               <article
                 id={id}
                 key={document.path}
-                className="tw-rounded-2xl tw-border tw-border-white/10 tw-bg-iron-900/60 tw-p-5 sm:tw-p-7"
+                tabIndex={-1}
+                className="tw-rounded-2xl tw-border tw-border-white/10 tw-bg-iron-900/60 tw-p-5 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-p-7"
               >
                 <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white">
                   {document.title}

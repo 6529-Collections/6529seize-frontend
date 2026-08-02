@@ -13,7 +13,7 @@ import { getMuseumView } from "@/lib/museum/normalize";
 import { buildMuseumRawUrl } from "@/lib/museum/source";
 import {
   displayMuseumStatus,
-  museumSlug,
+  museumSlugMatches,
   statusTone,
 } from "@/lib/museum/presentation";
 
@@ -26,8 +26,8 @@ export async function generateMetadata({
 }: CollectionDetailProps): Promise<Metadata> {
   const { slug } = await params;
   const view = await getMuseumView();
-  const collection = view.approvedCollections.find(
-    (item) => museumSlug(item.approvalId) === slug
+  const collection = view.approvedCollections.find((item) =>
+    museumSlugMatches(item.approvalId, slug)
   );
   return getAppMetadata({
     title:
@@ -44,8 +44,8 @@ export default async function MuseumCollectionDetailPage({
 }: CollectionDetailProps) {
   const { slug } = await params;
   const view = await getMuseumView();
-  const collection = view.approvedCollections.find(
-    (item) => museumSlug(item.approvalId) === slug
+  const collection = view.approvedCollections.find((item) =>
+    museumSlugMatches(item.approvalId, slug)
   );
   if (!collection) notFound();
 

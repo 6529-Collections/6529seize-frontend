@@ -1,5 +1,6 @@
 import { compareLocalized } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { cache } from "react";
 import { getMuseumCorpus } from "./source";
 import type {
   MuseumAccessionLot,
@@ -338,9 +339,10 @@ function objectRecords(
 
       const recordType = stringValue(root.record_type).toLocaleLowerCase();
       const isObjectRecord =
-        recordType.includes("object") ||
+        recordType === "object" ||
+        recordType === "object_record" ||
         recordType === "program_outcome" ||
-        path.includes("/objects/");
+        /^records\/accessions\/[^/]+\/objects\/[^/]+\.json$/u.test(path);
       if (!isObjectRecord) {
         return [];
       }
@@ -408,6 +410,6 @@ export function normalizeMuseumCorpus(
   };
 }
 
-export async function getMuseumView(): Promise<MuseumView> {
+export const getMuseumView = cache(async (): Promise<MuseumView> => {
   return normalizeMuseumCorpus(await getMuseumCorpus());
-}
+});

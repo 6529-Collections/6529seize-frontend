@@ -9,16 +9,16 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { formatDate } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { getMuseumView } from "@/lib/museum/normalize";
-import { museumSlug, statusTone } from "@/lib/museum/presentation";
+import {
+  isAdoptedGovernanceEffect,
+  museumSlug,
+  statusTone,
+} from "@/lib/museum/presentation";
 
 export const metadata: Metadata = getAppMetadata({
   title: t(DEFAULT_LOCALE, "museum.network.governance.title"),
   description: t(DEFAULT_LOCALE, "museum.network.governance.description"),
 });
-
-function isAdopted(governanceEffect: string): boolean {
-  return governanceEffect.toLocaleLowerCase().includes("adopt");
-}
 
 export default async function MuseumGovernancePage() {
   const view = await getMuseumView();
@@ -37,7 +37,9 @@ export default async function MuseumGovernancePage() {
       ) : (
         <div className="tw-grid tw-gap-4 md:tw-grid-cols-2">
           {view.governance.map((decision) => {
-            const adopted = isAdopted(decision.governanceEffect);
+            const adopted = isAdoptedGovernanceEffect(
+              decision.governanceEffect
+            );
             return (
               <MuseumRecordCard
                 key={decision.decisionId}

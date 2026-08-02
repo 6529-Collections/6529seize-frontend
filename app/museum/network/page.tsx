@@ -6,6 +6,7 @@ import {
 } from "@/components/museum/MuseumShell";
 import { MuseumRecordCard } from "@/components/museum/MuseumRecordCard";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { getMuseumView } from "@/lib/museum/normalize";
 
@@ -68,19 +69,22 @@ export default async function MuseumNetworkPage() {
         </div>
         <div className="tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-4 lg:tw-grid-cols-2">
           <MuseumMetric
-            value={`${view.approvedCollections.length}`}
+            value={formatInteger(
+              DEFAULT_LOCALE,
+              view.approvedCollections.length
+            )}
             label={t(DEFAULT_LOCALE, "museum.network.stat.collections")}
           />
           <MuseumMetric
-            value={`${view.accessions.length}`}
+            value={formatInteger(DEFAULT_LOCALE, view.accessions.length)}
             label={t(DEFAULT_LOCALE, "museum.network.stat.accessions")}
           />
           <MuseumMetric
-            value={`${view.programs.length}`}
+            value={formatInteger(DEFAULT_LOCALE, view.programs.length)}
             label={t(DEFAULT_LOCALE, "museum.network.stat.programs")}
           />
           <MuseumMetric
-            value={`${view.governance.length}`}
+            value={formatInteger(DEFAULT_LOCALE, view.governance.length)}
             label={t(DEFAULT_LOCALE, "museum.network.stat.decisions")}
           />
         </div>
