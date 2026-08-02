@@ -68,6 +68,14 @@ interface JsonObject {
   readonly record_type?: unknown;
   readonly object_id?: unknown;
   readonly handle?: unknown;
+  readonly payload?: unknown;
+  readonly current_state?: unknown;
+  readonly record_status?: unknown;
+  readonly claims?: unknown;
+  readonly artist_statement?: unknown;
+  readonly museum_interpretation?: unknown;
+  readonly medium?: unknown;
+  readonly text?: unknown;
   readonly classification?: unknown;
   readonly record_scope?: unknown;
 }
@@ -83,6 +91,14 @@ function stringValue(value: unknown, fallback = ""): string {
 function nullableString(value: unknown): string | null {
   const result = stringValue(value).trim();
   return result.length > 0 ? result : null;
+}
+
+function textValue(value: unknown): string {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  return isObject(value) ? stringValue(value.text) : "";
 }
 
 function numberValue(value: unknown): number | null {
@@ -332,10 +348,12 @@ function objectRecords(
         path.endsWith(".json") && document.contentType === "json"
     )
     .flatMap(([path, document]) => {
-      const root = jsonObject(document);
-      if (root === null) {
+      const record = jsonObject(document);
+      if (record === null) {
         return [];
       }
+
+      const root = isObject(record.payload) ? record.payload : record;
 
       const recordType = stringValue(root.record_type).toLocaleLowerCase();
       const isObjectRecord =
@@ -349,8 +367,11 @@ function objectRecords(
 
       const artistValue = root.artist;
       const artist = isObject(artistValue)
-        ? stringValue(artistValue.handle)
+        ? (nullableString(artistValue.preferred_name) ??
+          nullableString(artistValue.handle) ??
+          "")
         : stringValue(artistValue);
+      const claims = isObject(root.claims) ? root.claims : {};
       const objectId = stringValue(root.object_id, stringValue(root.record_id));
       if (objectId.length === 0) {
         return [];
@@ -362,11 +383,26 @@ function objectRecords(
           accessionLotId: nullableString(root.accession_lot_id),
           title: stringValue(root.title, objectId),
           artist: artist || "Unknown artist",
-          classification: stringValue(root.classification),
-          status: stringValue(root.status, "unknown"),
-          scope: stringValue(root.record_scope),
+          artistStatement:
+            nullableString(textValue(root.artist_statement)) ??
+            nullableString(textValue(claims.artist_statement)),
+          classification: stringValue(
+            root.classification,
+            stringValue(root.medium)
+          ),
+          status: stringValue(
+            root.status,
+            stringValue(
+              root.current_state,
+              stringValue(root.record_status, "unknown")
+            )
+          ),
+          scope: stringValue(
+            root.record_scope,
+            stringValue(claims.museum_interpretation)
+          ),
           sourcePath: path,
-          record: root,
+          record,
         },
       ];
     });
