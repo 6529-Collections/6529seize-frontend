@@ -1,7 +1,6 @@
 export const MUSEUM_REPOSITORY = "6529-Collections/6529networkmuseum";
 export const MUSEUM_BRANCH = "main";
-export const MUSEUM_MANIFEST_PATH =
-  "release-artifacts/latest/record-manifest.json";
+const MUSEUM_MANIFEST_PATH = "release-artifacts/latest/record-manifest.json";
 export const MUSEUM_MANIFEST_URL = `https://raw.githubusercontent.com/${MUSEUM_REPOSITORY}/${MUSEUM_BRANCH}/${MUSEUM_MANIFEST_PATH}`;
 export const MUSEUM_REPOSITORY_URL = `https://github.com/${MUSEUM_REPOSITORY}`;
 

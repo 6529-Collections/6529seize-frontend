@@ -17,7 +17,7 @@ const MAX_DOCUMENT_BYTES = 2_000_000;
 const PUBLIC_PREFIXES = ["policies/", "records/", "docs/"] as const;
 const SUPPORTED_EXTENSIONS = [".md", ".json"] as const;
 
-export interface MuseumSourceAdapter {
+interface MuseumSourceAdapter {
   getRelease(): Promise<MuseumRelease>;
   getDocument(entry: MuseumManifestEntry): Promise<MuseumDocument>;
   getCorpus(): Promise<MuseumCorpus>;
@@ -289,7 +289,7 @@ class GitHubMuseumSourceAdapter implements MuseumSourceAdapter {
   }
 }
 
-export const githubMuseumSourceAdapter: MuseumSourceAdapter =
+const githubMuseumSourceAdapter: MuseumSourceAdapter =
   new GitHubMuseumSourceAdapter();
 
 function sourceErrorCode(error: unknown): string {
@@ -334,5 +334,3 @@ export async function getMuseumCorpus(): Promise<MuseumCorpus> {
     };
   }
 }
-
-export { CACHE_TTL_MS, STALE_TTL_MS };

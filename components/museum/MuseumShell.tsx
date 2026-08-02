@@ -47,7 +47,7 @@ function sourceTone(sourceState: MuseumSourceState): string {
   }
 }
 
-export function MuseumSourceBanner({ view }: { readonly view: MuseumView }) {
+function MuseumSourceBanner({ view }: { readonly view: MuseumView }) {
   const release = view.release;
   return (
     <aside
