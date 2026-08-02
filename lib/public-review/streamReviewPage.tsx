@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { PublicReviewEditorialFeedback } from "@/components/public-review/PublicReviewEditorialFeedback";
 import { PublicReviewShell } from "@/components/public-review/PublicReviewShell";
 import { StreamReviewBotAuthorshipNote } from "@/components/public-review/StreamReviewBotAuthorshipNote";
+import { StreamReviewDevelopmentStatus } from "@/components/public-review/StreamReviewDevelopmentStatus";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -96,7 +97,18 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
       sections={sections}
       routeVersion={route.version}
       displayedVersion={contentVersion}
-      introNotice={<StreamReviewBotAuthorshipNote />}
+      introNotice={
+        <>
+          <StreamReviewBotAuthorshipNote />
+          {route.page.id === "overview" && route.version === undefined ? (
+            <StreamReviewDevelopmentStatus
+              pages={reviewVersion.pages}
+              reviewSourceCommit={manifest.source.commit}
+              reviewVersion={contentVersion}
+            />
+          ) : null}
+        </>
+      }
       source={{
         repository: manifest.source.repository,
         commit: manifest.source.commit,

@@ -13,6 +13,7 @@ const {
 const {
   buildKnowledgePack,
   knowledgeSourceRoot,
+  loadDevelopmentStatusForVersion,
   validateKnowledgePack,
 } = require("./stream-knowledge.cjs");
 
@@ -182,6 +183,19 @@ function knowledgeContext(repoRoot, reviewId) {
   return { publicationConfig, referenceIndex };
 }
 
+function publicationIdentityDrifted(knowledgeRoot, publication) {
+  const manifestPath = path.join(knowledgeRoot, "manifest.json");
+  if (!fs.existsSync(manifestPath)) {
+    return false;
+  }
+  const manifest = readJson(manifestPath, "knowledge manifest");
+  return (
+    manifest.publication?.lifecycleState !== publication.lifecycleState ||
+    manifest.publication?.deploymentStatus !== publication.deploymentStatus ||
+    manifest.publication?.auditStatus !== publication.auditStatus
+  );
+}
+
 function generateKnowledgePacks({
   repoRoot = REPOSITORY_ROOT,
   reviewId = DEFAULT_REVIEW_ID,
@@ -228,6 +242,14 @@ function generateKnowledgePacks({
     : [...orderedVersions]
         .reverse()
         .find((version) => publicVersions.has(version));
+  const developmentStatus = publicActiveVersion
+    ? loadDevelopmentStatusForVersion({
+        repoRoot,
+        reviewId,
+        reviewVersion: publicActiveVersion,
+        activeVersion: publicActiveVersion,
+      })
+    : undefined;
 
   for (const entry of referenceIndex.versions) {
     const publication = publicationConfig.versions.find(
@@ -253,6 +275,7 @@ function generateKnowledgePacks({
         reviewVersion: entry.version,
         publication,
         referenceIndexEntry: entry,
+        developmentStatus: active ? developmentStatus : undefined,
       });
     if (!fs.existsSync(knowledgeRoot)) {
       invariant(
@@ -260,7 +283,12 @@ function generateKnowledgePacks({
         `${reviewId}@${entry.version} knowledge pack is missing; regenerate.`
       );
       writePackAtomically(buildPack(), knowledgeRoot);
-    } else if ((active || refreshRetained) && !checkOnly) {
+    } else if (
+      (active ||
+        refreshRetained ||
+        publicationIdentityDrifted(knowledgeRoot, publication)) &&
+      !checkOnly
+    ) {
       const pack = buildPack();
       try {
         assertFileMapEquals(

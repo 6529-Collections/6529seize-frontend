@@ -1,0 +1,112 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "receive()",
+          "functionKind": "receive",
+          "id": "test/mocks/MockRandomizer.sol:RejectETH#function:receive()",
+          "inputs": [],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrUmFuZG9taXplci5zb2w6UmVqZWN0RVRII2Z1bmN0aW9uOnJlY2VpdmUoKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "receive",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 64,
+            "byteStart": 920,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizer.sol#L35-L37",
+            "lineEnd": 37,
+            "lineStart": 35,
+            "snippetSha256": "sha256:5af2087cadb2eb80c43063d69d46c9a2d99fd9eeda0e031b2de64675411dad43",
+            "sourceSha256": "sha256:1e6dc49d7f8a13d072dab4452150fd1a2fe91fa763114eddb5677ce96f5e625f"
+          },
+          "selector": null,
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/mocks/MockRandomizer.sol:RejectETH",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9tb2Nrcy9Nb2NrUmFuZG9taXplci5zb2w6UmVqZWN0RVRI",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/mocks/MockRandomizer.sol:RejectETH"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "RejectETH",
+    "natspec": "",
+    "range": {
+      "byteLength": 91,
+      "byteStart": 895,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockRandomizer.sol#L34-L38",
+      "lineEnd": 38,
+      "lineStart": 34,
+      "snippetSha256": "sha256:97d028139980db578a49a49f02eb1bdd50b3a93a01e9f26ad43e98d0b6d02637",
+      "sourceSha256": "sha256:1e6dc49d7f8a13d072dab4452150fd1a2fe91fa763114eddb5677ce96f5e625f"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/mocks/MockRandomizer.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/mocks/MockRandomizer.sol:RejectETH",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockRandomizer.sol:RejectETH#function:receive()",
+      "definitionId": "test/mocks/MockRandomizer.sol:RejectETH",
+      "severity": "advisory"
+    }
+  ]
+}
