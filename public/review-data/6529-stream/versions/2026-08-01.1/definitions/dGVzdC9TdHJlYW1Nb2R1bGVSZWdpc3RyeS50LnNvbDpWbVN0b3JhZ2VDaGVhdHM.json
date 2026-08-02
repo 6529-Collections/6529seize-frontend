@@ -1,0 +1,241 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamModuleRegistry.t.sol:VmStorageCheats#function:0x667f9d70",
+          "declaringDefinitionId": "test/StreamModuleRegistry.t.sol:VmStorageCheats",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "slot",
+              "type": "bytes32"
+            }
+          ],
+          "name": "load",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "value",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x667f9d70",
+          "signature": "load(address,bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamModuleRegistry.t.sol:VmStorageCheats#function:0x70ca10bb",
+          "declaringDefinitionId": "test/StreamModuleRegistry.t.sol:VmStorageCheats",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "slot",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "value",
+              "type": "bytes32"
+            }
+          ],
+          "name": "store",
+          "outputs": [],
+          "selector": "0x70ca10bb",
+          "signature": "store(address,bytes32,bytes32)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "load(address,bytes32)",
+          "displaySignature": "load(address,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:VmStorageCheats#function:0x667f9d70",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "slot",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpWbVN0b3JhZ2VDaGVhdHMjZnVuY3Rpb246MHg2NjdmOWQ3MA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "load",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "value",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 82,
+            "byteStart": 591,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:5808c96135d38be41d99a819d8a68daef1ff2cadfdb0bbd9ac7bb12e9ca7d8f7",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": "0x667f9d70",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "store(address,bytes32,bytes32)",
+          "displaySignature": "store(address,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamModuleRegistry.t.sol:VmStorageCheats#function:0x70ca10bb",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "slot",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "value",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpWbVN0b3JhZ2VDaGVhdHMjZnVuY3Rpb246MHg3MGNhMTBiYg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "store",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 69,
+            "byteStart": 678,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:6700fedac7f3f26b65e29c4c798a27845f040e33d9c11508bb079de0b74629ba",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": "0x70ca10bb",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamModuleRegistry.t.sol:VmStorageCheats",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpWbVN0b3JhZ2VDaGVhdHM",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "test/StreamModuleRegistry.t.sol:VmStorageCheats"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "VmStorageCheats",
+    "natspec": "",
+    "range": {
+      "byteLength": 190,
+      "byteStart": 559,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L15-L18",
+      "lineEnd": 18,
+      "lineStart": 15,
+      "snippetSha256": "sha256:aaf329ecab11f296864af4e4f3eafe4a3044b5d36a06623ecb587e6d5f3ce948",
+      "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamModuleRegistry.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 3
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 2
+    },
+    "totalCount": 3
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamModuleRegistry.t.sol:VmStorageCheats",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleRegistry.t.sol:VmStorageCheats#function:0x667f9d70",
+      "definitionId": "test/StreamModuleRegistry.t.sol:VmStorageCheats",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleRegistry.t.sol:VmStorageCheats#function:0x70ca10bb",
+      "definitionId": "test/StreamModuleRegistry.t.sol:VmStorageCheats",
+      "severity": "advisory"
+    }
+  ]
+}

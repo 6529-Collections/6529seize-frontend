@@ -21,9 +21,9 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.status.lifecycle.finalCandidate": "Final candidate",
   "publicReview.status.lifecycle.deployed": "Deployed",
   "publicReview.status.lifecycle.archived": "Archived",
-  "publicReview.status.deployment.notDeployed": "Predeployment",
+  "publicReview.status.deployment.notDeployed": "Preparing for launch",
   "publicReview.status.deployment.deployed": "Contract deployed",
-  "publicReview.status.audit.preAudit": "Pre-audit",
+  "publicReview.status.audit.preAudit": "Audit planned",
   "publicReview.status.audit.inProgress": "Audit in progress",
   "publicReview.status.audit.complete": "Audit complete",
   "publicReview.status.version": "Review version {version}",
@@ -36,7 +36,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.status.explanations.scheduled":
     "This review is scheduled. Its materials are visible, and feedback opens at the scheduled start.",
   "publicReview.status.explanations.publicReview":
-    "This predeployment code is under active review and awaits external audit.",
+    "This contract candidate is open for public review. Independent audit and deployment remain ahead.",
   "publicReview.status.explanations.reviewClosed":
     "The public feedback window is closed. The review record remains available.",
   "publicReview.status.explanations.remediation":
@@ -88,7 +88,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "A map of the full protocol, its present review state, and the decisions the community is being asked to examine.",
   "publicReview.pages.overviewNarrative.title": "Overview",
   "publicReview.pages.overviewNarrative.summary":
-    "Why Stream exists, which guarantees its architecture protects, and what a superficially simpler design would leave elsewhere.",
+    "How Stream protects artist consent, artwork identity, sales, preservation, and long-term operation.",
   "publicReview.pages.artworkLifecycle.title": "Artwork Lifecycle",
   "publicReview.pages.artworkLifecycle.summary":
     "How an artwork moves from preparation through minting, preservation, and finality.",
@@ -98,6 +98,9 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.pages.rolesAndTrust.title": "Roles and Trust",
   "publicReview.pages.rolesAndTrust.summary":
     "Every role that can act, what it can change, and where trust remains.",
+  "publicReview.pages.whoCanDoWhat.title": "Who Can Do What",
+  "publicReview.pages.whoCanDoWhat.summary":
+    "Who can act, what each person or contract can change, and how those powers end.",
   "publicReview.pages.curationAndTdhAuthorization.title":
     "Curation and TDH Authorization",
   "publicReview.pages.curationAndTdhAuthorization.summary":
@@ -129,6 +132,10 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "Governance, Pausing, and Successors",
   "publicReview.pages.governancePausingAndSuccessors.summary":
     "How governance acts, emergencies are handled, and successor contracts are recognized.",
+  "publicReview.pages.changesEmergenciesAndFutureContracts.title":
+    "Changes, Emergencies, and Future Contracts",
+  "publicReview.pages.changesEmergenciesAndFutureContracts.summary":
+    "How Stream announces changes, stops problems, replaces service contracts, and ends powers permanently.",
   "publicReview.pages.securityTestingAndKnownLimitations.title":
     "Security, Testing, and Known Limitations",
   "publicReview.pages.securityTestingAndKnownLimitations.summary":
@@ -137,9 +144,33 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "Current Implementation and Readiness",
   "publicReview.pages.currentImplementationAndReadiness.summary":
     "The authoritative record of what is connected, implemented, proposed, tested, audited, and still required before release.",
+  "publicReview.pages.whereDevelopmentStands.title": "Where Development Stands",
+  "publicReview.pages.whereDevelopmentStands.summary":
+    "What worked in this review snapshot, what was being connected, and the evidence required before launch.",
   "publicReview.pages.communityReview.title": "Community Review",
   "publicReview.pages.communityReview.summary":
     "How to examine the proposal, frame actionable feedback, and follow the review record.",
+  "publicReview.development.heading": "Development update",
+  "publicReview.development.checkedAt": "Checked {date}",
+  "publicReview.development.source": "Development source",
+  "publicReview.development.finishedRecently": "Finished recently",
+  "publicReview.development.workingOn": "Working on now",
+  "publicReview.development.beforeLaunch": "Still needed before launch",
+  "publicReview.development.evidenceSummary":
+    "Evidence checklist: {complete} complete, {pending} under review, and {missing} remaining. {blockers} recorded issues currently prevent release.",
+  "publicReview.development.openEvidence": "Open the supporting evidence",
+  "publicReview.development.openEvidenceLabel":
+    "Open supporting evidence for {item} (opens in a new tab)",
+  "publicReview.development.snapshotNote":
+    "The detailed review below is version {version}, pinned to contract source {commit}.",
+  "publicReview.development.reviewQuestionsHeading":
+    "Where your input would help",
+  "publicReview.development.reviewQuestionsDescription":
+    "Choose the question closest to your experience. Each one explains the issue in plain language and links to the relevant evidence.",
+  "publicReview.development.readQuestion": "Open this question",
+  "publicReview.development.readQuestionLabel": "Open this question: {title}",
+  "publicReview.development.sourceLabel":
+    "Development source (opens in a new tab)",
   "publicReview.evidence.heading": "Evidence labels",
   "publicReview.evidence.summary": "How to read evidence labels",
   "publicReview.evidence.labels.implemented": "Implemented",

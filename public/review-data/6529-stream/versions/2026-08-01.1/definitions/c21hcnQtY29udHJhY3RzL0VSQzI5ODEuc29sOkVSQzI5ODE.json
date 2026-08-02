@@ -1,0 +1,714 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/ERC2981.sol:ERC2981#error:0x6f483d09",
+          "declaringDefinitionId": "smart-contracts/ERC2981.sol:ERC2981",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "numerator",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "denominator",
+              "type": "uint256"
+            }
+          ],
+          "name": "ERC2981InvalidDefaultRoyalty",
+          "selector": "0x6f483d09",
+          "signature": "ERC2981InvalidDefaultRoyalty(uint256,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/ERC2981.sol:ERC2981#error:0xb6d9900a",
+          "declaringDefinitionId": "smart-contracts/ERC2981.sol:ERC2981",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "receiver",
+              "type": "address"
+            }
+          ],
+          "name": "ERC2981InvalidDefaultRoyaltyReceiver",
+          "selector": "0xb6d9900a",
+          "signature": "ERC2981InvalidDefaultRoyaltyReceiver(address)"
+        },
+        {
+          "declarationId": "smart-contracts/ERC2981.sol:ERC2981#error:0xdfd1fc1b",
+          "declaringDefinitionId": "smart-contracts/ERC2981.sol:ERC2981",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "numerator",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "denominator",
+              "type": "uint256"
+            }
+          ],
+          "name": "ERC2981InvalidTokenRoyalty",
+          "selector": "0xdfd1fc1b",
+          "signature": "ERC2981InvalidTokenRoyalty(uint256,uint256,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/ERC2981.sol:ERC2981#error:0x969f0852",
+          "declaringDefinitionId": "smart-contracts/ERC2981.sol:ERC2981",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "receiver",
+              "type": "address"
+            }
+          ],
+          "name": "ERC2981InvalidTokenRoyaltyReceiver",
+          "selector": "0x969f0852",
+          "signature": "ERC2981InvalidTokenRoyaltyReceiver(uint256,address)"
+        }
+      ],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/ERC2981.sol:ERC2981#function:0x2a55205a",
+          "declaringDefinitionId": "smart-contracts/ERC2981.sol:ERC2981",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "salePrice",
+              "type": "uint256"
+            }
+          ],
+          "name": "royaltyInfo",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x2a55205a",
+          "signature": "royaltyInfo(uint256,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/ERC2981.sol:ERC2981#function:0x01ffc9a7",
+          "declaringDefinitionId": "smart-contracts/ERC2981.sol:ERC2981",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": true,
+    "classification": "vendored_dependency",
+    "classificationReason": "Source path is explicitly classified as vendored in the input manifest.",
+    "declarations": {
+      "enums": [],
+      "errors": [
+        {
+          "astId": 8304,
+          "canonicalSignature": "ERC2981InvalidDefaultRoyalty(uint256,uint256)",
+          "displaySignature": "ERC2981InvalidDefaultRoyalty(uint256,uint256)",
+          "id": "smart-contracts/ERC2981.sol:ERC2981#error:0x6f483d09",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "numerator",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "denominator",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzI5ODEuc29sOkVSQzI5ODEjZXJyb3I6MHg2ZjQ4M2QwOQ",
+          "kind": "error",
+          "name": "ERC2981InvalidDefaultRoyalty",
+          "natspec": "@dev The default royalty set is invalid (eg. (numerator / denominator) >= 1).",
+          "range": {
+            "byteLength": 75,
+            "byteStart": 1388,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC2981.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:195b15c11bb7ff9fe2a05e7cbbc72dbe6264fd152fff1dc140fe43f1ad8b37eb",
+            "sourceSha256": "sha256:443bc04eda1deccbb33779426acf313b6310eb2b0211ed84bb502dbe9a0eeb0a"
+          },
+          "selector": "0x6f483d09"
+        },
+        {
+          "astId": 8309,
+          "canonicalSignature": "ERC2981InvalidDefaultRoyaltyReceiver(address)",
+          "displaySignature": "ERC2981InvalidDefaultRoyaltyReceiver(address)",
+          "id": "smart-contracts/ERC2981.sol:ERC2981#error:0xb6d9900a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "receiver",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzI5ODEuc29sOkVSQzI5ODEjZXJyb3I6MHhiNmQ5OTAwYQ",
+          "kind": "error",
+          "name": "ERC2981InvalidDefaultRoyaltyReceiver",
+          "natspec": "@dev The default royalty receiver is invalid.",
+          "range": {
+            "byteLength": 61,
+            "byteStart": 1538,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC2981.sol#L39",
+            "lineEnd": 39,
+            "lineStart": 39,
+            "snippetSha256": "sha256:ff1ec5a296a94c1d72d55c7d770cdce0ae9f1dcc2f14e27290386507fd6e300c",
+            "sourceSha256": "sha256:443bc04eda1deccbb33779426acf313b6310eb2b0211ed84bb502dbe9a0eeb0a"
+          },
+          "selector": "0xb6d9900a"
+        },
+        {
+          "astId": 8318,
+          "canonicalSignature": "ERC2981InvalidTokenRoyalty(uint256,uint256,uint256)",
+          "displaySignature": "ERC2981InvalidTokenRoyalty(uint256,uint256,uint256)",
+          "id": "smart-contracts/ERC2981.sol:ERC2981#error:0xdfd1fc1b",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "numerator",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "denominator",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzI5ODEuc29sOkVSQzI5ODEjZXJyb3I6MHhkZmQxZmMxYg",
+          "kind": "error",
+          "name": "ERC2981InvalidTokenRoyalty",
+          "natspec": "@dev The royalty set for an specific `tokenId` is invalid (eg. (numerator / denominator) >= 1).",
+          "range": {
+            "byteLength": 90,
+            "byteStart": 1724,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC2981.sol#L44",
+            "lineEnd": 44,
+            "lineStart": 44,
+            "snippetSha256": "sha256:dc15f476f3427a3215dde1d3fe0ce7f45a229cad255b0ece81ba1ab53ed7eb82",
+            "sourceSha256": "sha256:443bc04eda1deccbb33779426acf313b6310eb2b0211ed84bb502dbe9a0eeb0a"
+          },
+          "selector": "0xdfd1fc1b"
+        },
+        {
+          "astId": 8325,
+          "canonicalSignature": "ERC2981InvalidTokenRoyaltyReceiver(uint256,address)",
+          "displaySignature": "ERC2981InvalidTokenRoyaltyReceiver(uint256,address)",
+          "id": "smart-contracts/ERC2981.sol:ERC2981#error:0x969f0852",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "receiver",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzI5ODEuc29sOkVSQzI5ODEjZXJyb3I6MHg5NjlmMDg1Mg",
+          "kind": "error",
+          "name": "ERC2981InvalidTokenRoyaltyReceiver",
+          "natspec": "@dev The royalty receiver for `tokenId` is invalid.",
+          "range": {
+            "byteLength": 76,
+            "byteStart": 1895,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC2981.sol#L49",
+            "lineEnd": 49,
+            "lineStart": 49,
+            "snippetSha256": "sha256:eddc5bb9972e95393d98f666d122aaca6b34977a2399ba15ca6fc7286bc006a9",
+            "sourceSha256": "sha256:443bc04eda1deccbb33779426acf313b6310eb2b0211ed84bb502dbe9a0eeb0a"
+          },
+          "selector": "0x969f0852"
+        }
+      ],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "supportsInterface(bytes4)",
+          "displaySignature": "supportsInterface(bytes4)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC2981.sol:ERC2981#function:0x01ffc9a7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzI5ODEuc29sOkVSQzI5ODEjZnVuY3Rpb246MHgwMWZmYzlhNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "supportsInterface",
+          "natspec": "@dev See {IERC165-supportsInterface}.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 213,
+            "byteStart": 2038,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC2981.sol#L54-L56",
+            "lineEnd": 56,
+            "lineStart": 54,
+            "snippetSha256": "sha256:eaeffb3bd4ba7cfa8cc95d80f776e5a791efd47b5b699ea3320202272bd6ef4d",
+            "sourceSha256": "sha256:443bc04eda1deccbb33779426acf313b6310eb2b0211ed84bb502dbe9a0eeb0a"
+          },
+          "selector": "0x01ffc9a7",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "royaltyInfo(uint256,uint256)",
+          "displaySignature": "royaltyInfo(uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC2981.sol:ERC2981#function:0x2a55205a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "salePrice",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzI5ODEuc29sOkVSQzI5ODEjZnVuY3Rpb246MHgyYTU1MjA1YQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "royaltyInfo",
+          "natspec": "@inheritdoc IERC2981",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 419,
+            "byteStart": 2301,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC2981.sol#L61-L71",
+            "lineEnd": 71,
+            "lineStart": 61,
+            "snippetSha256": "sha256:c5ae388f96d21e204890c2640234b5655c745887ad987f9995473efa44be7938",
+            "sourceSha256": "sha256:443bc04eda1deccbb33779426acf313b6310eb2b0211ed84bb502dbe9a0eeb0a"
+          },
+          "selector": "0x2a55205a",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_feeDenominator()",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC2981.sol:ERC2981#function:_feeDenominator()",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzI5ODEuc29sOkVSQzI5ODEjZnVuY3Rpb246X2ZlZURlbm9taW5hdG9yKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_feeDenominator",
+          "natspec": "@dev The denominator with which to interpret the fee set in {_setTokenRoyalty} and {_setDefaultRoyalty} as a\n fraction of the sale price. Defaults to 10000 so fees are expressed in basis points, but may be customized by an\n override.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint96"
+            }
+          ],
+          "range": {
+            "byteLength": 95,
+            "byteStart": 2995,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC2981.sol#L78-L80",
+            "lineEnd": 80,
+            "lineStart": 78,
+            "snippetSha256": "sha256:24d7771601dc8e06c229bc649ba3bcd9503fa2fc41fb17c504c884f5b2c16a30",
+            "sourceSha256": "sha256:443bc04eda1deccbb33779426acf313b6310eb2b0211ed84bb502dbe9a0eeb0a"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_setDefaultRoyalty(address,uint96)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC2981.sol:ERC2981#function:_setDefaultRoyalty(address,uint96)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "feeNumerator",
+              "type": "uint96"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzI5ODEuc29sOkVSQzI5ODEjZnVuY3Rpb246X3NldERlZmF1bHRSb3lhbHR5KGFkZHJlc3MsdWludDk2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_setDefaultRoyalty",
+          "natspec": "@dev Sets the royalty information that all ids in this contract will default to.\n Requirements:\n - `receiver` cannot be the zero address.\n - `feeNumerator` cannot be greater than the fee denominator.",
+          "outputs": [],
+          "range": {
+            "byteLength": 507,
+            "byteStart": 3351,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC2981.sol#L90-L101",
+            "lineEnd": 101,
+            "lineStart": 90,
+            "snippetSha256": "sha256:72df77943d35b3db49a5fb2f78aa35509736fffc2a5bc5b302a4aedc4d3bb26a",
+            "sourceSha256": "sha256:443bc04eda1deccbb33779426acf313b6310eb2b0211ed84bb502dbe9a0eeb0a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_deleteDefaultRoyalty()",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC2981.sol:ERC2981#function:_deleteDefaultRoyalty()",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzI5ODEuc29sOkVSQzI5ODEjZnVuY3Rpb246X2RlbGV0ZURlZmF1bHRSb3lhbHR5KCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_deleteDefaultRoyalty",
+          "natspec": "@dev Removes default royalty information.",
+          "outputs": [],
+          "range": {
+            "byteLength": 93,
+            "byteStart": 3929,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC2981.sol#L106-L108",
+            "lineEnd": 108,
+            "lineStart": 106,
+            "snippetSha256": "sha256:344d40f7c180b70b38b1b2b103c461cdc47a412cae220f0812535c6c256676bf",
+            "sourceSha256": "sha256:443bc04eda1deccbb33779426acf313b6310eb2b0211ed84bb502dbe9a0eeb0a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_setTokenRoyalty(uint256,address,uint96)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC2981.sol:ERC2981#function:_setTokenRoyalty(uint256,address,uint96)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "feeNumerator",
+              "type": "uint96"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzI5ODEuc29sOkVSQzI5ODEjZnVuY3Rpb246X3NldFRva2VuUm95YWx0eSh1aW50MjU2LGFkZHJlc3MsdWludDk2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_setTokenRoyalty",
+          "natspec": "@dev Sets the royalty information for a specific token id, overriding the global default.\n Requirements:\n - `receiver` cannot be the zero address.\n - `feeNumerator` cannot be greater than the fee denominator.",
+          "outputs": [],
+          "range": {
+            "byteLength": 543,
+            "byteStart": 4292,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC2981.sol#L118-L129",
+            "lineEnd": 129,
+            "lineStart": 118,
+            "snippetSha256": "sha256:bac2e80c1e509cdd397f2194192e2ae554b8a1edacb8236015b7068a47ba4780",
+            "sourceSha256": "sha256:443bc04eda1deccbb33779426acf313b6310eb2b0211ed84bb502dbe9a0eeb0a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_resetTokenRoyalty(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/ERC2981.sol:ERC2981#function:_resetTokenRoyalty(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0VSQzI5ODEuc29sOkVSQzI5ODEjZnVuY3Rpb246X3Jlc2V0VG9rZW5Sb3lhbHR5KHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_resetTokenRoyalty",
+          "natspec": "@dev Resets royalty information for the token id back to the global default.",
+          "outputs": [],
+          "range": {
+            "byteLength": 112,
+            "byteStart": 4941,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC2981.sol#L134-L136",
+            "lineEnd": 136,
+            "lineStart": 134,
+            "snippetSha256": "sha256:9731c30dbf12ecf9c891f4d1fe2893557bc225f96a1ff170ef14f590a372ab56",
+            "sourceSha256": "sha256:443bc04eda1deccbb33779426acf313b6310eb2b0211ed84bb502dbe9a0eeb0a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_defaultRoyaltyInfo",
+          "natspec": "",
+          "range": {
+            "byteLength": 39,
+            "byteStart": 1170,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC2981.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:7ddfad1d0175a24c84f37cb1a006e2ce84194214c958aa3339b2b83fc5f4f0cf",
+            "sourceSha256": "sha256:443bc04eda1deccbb33779426acf313b6310eb2b0211ed84bb502dbe9a0eeb0a"
+          },
+          "selector": null,
+          "type": "RoyaltyInfo",
+          "typeString": "struct ERC2981.RoyaltyInfo",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_tokenRoyaltyInfo",
+          "natspec": "",
+          "range": {
+            "byteLength": 65,
+            "byteStart": 1215,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC2981.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:66742aa979268a6698341ff881ec53d95ddf924037be63a2b3d3a0f4d97c33c1",
+            "sourceSha256": "sha256:443bc04eda1deccbb33779426acf313b6310eb2b0211ed84bb502dbe9a0eeb0a"
+          },
+          "selector": null,
+          "type": "mapping(uint256 => RoyaltyInfo)",
+          "typeString": "mapping(uint256 => struct ERC2981.RoyaltyInfo)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "receiver",
+              "natspec": "",
+              "range": {
+                "byteLength": 16,
+                "byteStart": 1109,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC2981.sol#L24",
+                "lineEnd": 24,
+                "lineStart": 24,
+                "snippetSha256": "sha256:97d9cd8c1facce736c2e844e3a4a3ae0cf2fbb3831975acd2aa299747fd5569f",
+                "sourceSha256": "sha256:443bc04eda1deccbb33779426acf313b6310eb2b0211ed84bb502dbe9a0eeb0a"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 1,
+              "name": "royaltyFraction",
+              "natspec": "",
+              "range": {
+                "byteLength": 22,
+                "byteStart": 1135,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC2981.sol#L25",
+                "lineEnd": 25,
+                "lineStart": 25,
+                "snippetSha256": "sha256:8a25712248884b9674f3762faf0dba08bdfd82febf0141d35a6b98ff61840682",
+                "sourceSha256": "sha256:443bc04eda1deccbb33779426acf313b6310eb2b0211ed84bb502dbe9a0eeb0a"
+              },
+              "type": "uint96",
+              "typeString": "uint96"
+            }
+          ],
+          "name": "RoyaltyInfo",
+          "natspec": "",
+          "range": {
+            "byteLength": 84,
+            "byteStart": 1080,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC2981.sol#L23-L26",
+            "lineEnd": 26,
+            "lineStart": 23,
+            "snippetSha256": "sha256:efd9db4ac6ded92724ef3b8aa8806cbba353856b7ba0ab63e012c1f3f1c6f32e",
+            "sourceSha256": "sha256:443bc04eda1deccbb33779426acf313b6310eb2b0211ed84bb502dbe9a0eeb0a"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/ERC2981.sol:ERC2981",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/IERC2981.sol:IERC2981",
+        "name": "IERC2981"
+      },
+      {
+        "definitionId": "smart-contracts/ERC165.sol:ERC165",
+        "name": "ERC165"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0VSQzI5ODEuc29sOkVSQzI5ODE",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "smart-contracts/ERC2981.sol:ERC2981",
+      "smart-contracts/ERC165.sol:ERC165",
+      "smart-contracts/IERC2981.sol:IERC2981",
+      "smart-contracts/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "ERC2981",
+    "natspec": "@dev Implementation of the NFT Royalty Standard, a standardized way to retrieve royalty payment information.\n Royalty information can be specified globally for all token ids via {_setDefaultRoyalty}, and/or individually for\n specific token ids via {_setTokenRoyalty}. The latter takes precedence over the first.\n Royalty is specified as a fraction of sale price. {_feeDenominator} is overridable but defaults to 10000, meaning the\n fee is specified in basis points by default.\n IMPORTANT: ERC-2981 only specifies a way to signal royalty information and does not enforce its payment. See\n https://eips.ethereum.org/EIPS/eip-2981#optional-royalty-payments[Rationale] in the EIP. Marketplaces are expected to\n voluntarily pay royalties together with sales, but note that this standard is not yet widely supported.",
+    "range": {
+      "byteLength": 4027,
+      "byteStart": 1028,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/ERC2981.sol#L22-L137",
+      "lineEnd": 137,
+      "lineStart": 22,
+      "snippetSha256": "sha256:12cf4def95864dffd3ba813f67f9b8731ba58955f4cc7faf4ce507709b01d35d",
+      "sourceSha256": "sha256:443bc04eda1deccbb33779426acf313b6310eb2b0211ed84bb502dbe9a0eeb0a"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/ERC2981.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

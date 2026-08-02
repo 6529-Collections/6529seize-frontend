@@ -1,0 +1,389 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamCuratorsPool.t.sol:ReentrantCuratorReward#function:0x172bd6de",
+          "declaringDefinitionId": "test/StreamCuratorsPool.t.sol:ReentrantCuratorReward",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "contract StreamCuratorsPool",
+              "name": "pool_",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32[]",
+              "name": "proof",
+              "type": "bytes32[]"
+            }
+          ],
+          "name": "claim",
+          "outputs": [],
+          "selector": "0x172bd6de",
+          "signature": "claim(address,uint256,uint256,bytes32[])",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCuratorsPool.t.sol:ReentrantCuratorReward#function:0x3f09775e",
+          "declaringDefinitionId": "test/StreamCuratorsPool.t.sol:ReentrantCuratorReward",
+          "inherited": false,
+          "inputs": [],
+          "name": "reentered",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x3f09775e",
+          "signature": "reentered()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamCuratorsPool.t.sol:ReentrantCuratorReward#function:0x3fea217f",
+          "declaringDefinitionId": "test/StreamCuratorsPool.t.sol:ReentrantCuratorReward",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "contract StreamCuratorsPool",
+              "name": "pool_",
+              "type": "address"
+            }
+          ],
+          "name": "withdrawToSelf",
+          "outputs": [],
+          "selector": "0x3fea217f",
+          "signature": "withdrawToSelf(address)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "reentered()",
+          "displaySignature": "reentered()",
+          "functionKind": "getter",
+          "id": "test/StreamCuratorsPool.t.sol:ReentrantCuratorReward#function:0x3f09775e",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1DdXJhdG9yc1Bvb2wudC5zb2w6UmVlbnRyYW50Q3VyYXRvclJld2FyZCNmdW5jdGlvbjoweDNmMDk3NzVl",
+          "kind": "function",
+          "modifiers": [],
+          "name": "reentered",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 21,
+            "byteStart": 21632,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCuratorsPool.t.sol#L506",
+            "lineEnd": 506,
+            "lineStart": 506,
+            "snippetSha256": "sha256:ea4a06bbe98b18186c836a056adbf275c2308f709949c2148cc123dfddddb7fb",
+            "sourceSha256": "sha256:82a4dc273db692ae85a7a719888cfa9cb6bfedf9a3b8336fd652ca069cbcaf4e"
+          },
+          "selector": "0x3f09775e",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "receive()",
+          "functionKind": "receive",
+          "id": "test/StreamCuratorsPool.t.sol:ReentrantCuratorReward#function:receive()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1DdXJhdG9yc1Bvb2wudC5zb2w6UmVlbnRyYW50Q3VyYXRvclJld2FyZCNmdW5jdGlvbjpyZWNlaXZlKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "receive",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 260,
+            "byteStart": 21688,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCuratorsPool.t.sol#L509-L516",
+            "lineEnd": 516,
+            "lineStart": 509,
+            "snippetSha256": "sha256:2a45ee370d99c5d1db0c3e690443e17b8747068a31ef62081c72746dfd207aec",
+            "sourceSha256": "sha256:82a4dc273db692ae85a7a719888cfa9cb6bfedf9a3b8336fd652ca069cbcaf4e"
+          },
+          "selector": null,
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "claim(address,uint256,uint256,bytes32[])",
+          "displaySignature": "claim(StreamCuratorsPool,uint256,uint256,bytes32[])",
+          "functionKind": "function",
+          "id": "test/StreamCuratorsPool.t.sol:ReentrantCuratorReward#function:0x172bd6de",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "pool_",
+              "type": "StreamCuratorsPool"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "proof",
+              "storageLocation": "calldata",
+              "type": "bytes32[]"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1DdXJhdG9yc1Bvb2wudC5zb2w6UmVlbnRyYW50Q3VyYXRvclJld2FyZCNmdW5jdGlvbjoweDE3MmJkNmRl",
+          "kind": "function",
+          "modifiers": [],
+          "name": "claim",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 228,
+            "byteStart": 21954,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCuratorsPool.t.sol#L518-L525",
+            "lineEnd": 525,
+            "lineStart": 518,
+            "snippetSha256": "sha256:5ad7bfad8091c12640cf31747fe2af2bf9a20eb3634ae1b57a7bd7cdb0f2508e",
+            "sourceSha256": "sha256:82a4dc273db692ae85a7a719888cfa9cb6bfedf9a3b8336fd652ca069cbcaf4e"
+          },
+          "selector": "0x172bd6de",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "withdrawToSelf(address)",
+          "displaySignature": "withdrawToSelf(StreamCuratorsPool)",
+          "functionKind": "function",
+          "id": "test/StreamCuratorsPool.t.sol:ReentrantCuratorReward#function:0x3fea217f",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "pool_",
+              "type": "StreamCuratorsPool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1DdXJhdG9yc1Bvb2wudC5zb2w6UmVlbnRyYW50Q3VyYXRvclJld2FyZCNmdW5jdGlvbjoweDNmZWEyMTdm",
+          "kind": "function",
+          "modifiers": [],
+          "name": "withdrawToSelf",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 180,
+            "byteStart": 22188,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCuratorsPool.t.sol#L527-L532",
+            "lineEnd": 532,
+            "lineStart": 527,
+            "snippetSha256": "sha256:5a3efea14cf0a5c1b46912c67c8aa251e3dade05514e43bd15c9f4aa6e963524",
+            "sourceSha256": "sha256:82a4dc273db692ae85a7a719888cfa9cb6bfedf9a3b8336fd652ca069cbcaf4e"
+          },
+          "selector": "0x3fea217f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "pool",
+          "natspec": "",
+          "range": {
+            "byteLength": 31,
+            "byteStart": 21595,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCuratorsPool.t.sol#L505",
+            "lineEnd": 505,
+            "lineStart": 505,
+            "snippetSha256": "sha256:da9ba13e1f42f946bc7e35e7a6e049a3d223972ad362a7a289cc9198745f01aa",
+            "sourceSha256": "sha256:82a4dc273db692ae85a7a719888cfa9cb6bfedf9a3b8336fd652ca069cbcaf4e"
+          },
+          "selector": null,
+          "type": "StreamCuratorsPool",
+          "typeString": "contract StreamCuratorsPool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamCuratorsPool.t.sol:ReentrantCuratorReward#function:0x3f09775e",
+          "immutable": false,
+          "name": "reentered",
+          "natspec": "",
+          "range": {
+            "byteLength": 21,
+            "byteStart": 21632,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCuratorsPool.t.sol#L506",
+            "lineEnd": 506,
+            "lineStart": 506,
+            "snippetSha256": "sha256:ea4a06bbe98b18186c836a056adbf275c2308f709949c2148cc123dfddddb7fb",
+            "sourceSha256": "sha256:82a4dc273db692ae85a7a719888cfa9cb6bfedf9a3b8336fd652ca069cbcaf4e"
+          },
+          "selector": "0x3f09775e",
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "attacking",
+          "natspec": "",
+          "range": {
+            "byteLength": 22,
+            "byteStart": 21659,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCuratorsPool.t.sol#L507",
+            "lineEnd": 507,
+            "lineStart": 507,
+            "snippetSha256": "sha256:98f3d8c9545dd9aba709d2540811c9b94b360afd8bcf0711d3e5ea5ab2941184",
+            "sourceSha256": "sha256:82a4dc273db692ae85a7a719888cfa9cb6bfedf9a3b8336fd652ca069cbcaf4e"
+          },
+          "selector": null,
+          "type": "bool",
+          "typeString": "bool",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamCuratorsPool.t.sol:ReentrantCuratorReward",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1DdXJhdG9yc1Bvb2wudC5zb2w6UmVlbnRyYW50Q3VyYXRvclJld2FyZA",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamCuratorsPool.t.sol:ReentrantCuratorReward"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "ReentrantCuratorReward",
+    "natspec": "",
+    "range": {
+      "byteLength": 813,
+      "byteStart": 21557,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCuratorsPool.t.sol#L504-L533",
+      "lineEnd": 533,
+      "lineStart": 504,
+      "snippetSha256": "sha256:d02b3e691d2c7c297c54199f7ab53136e213ef0599831e2be6601b196e0791ca",
+      "sourceSha256": "sha256:82a4dc273db692ae85a7a719888cfa9cb6bfedf9a3b8336fd652ca069cbcaf4e"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamCuratorsPool.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 5
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 4
+    },
+    "totalCount": 5
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamCuratorsPool.t.sol:ReentrantCuratorReward",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCuratorsPool.t.sol:ReentrantCuratorReward#function:0x172bd6de",
+      "definitionId": "test/StreamCuratorsPool.t.sol:ReentrantCuratorReward",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCuratorsPool.t.sol:ReentrantCuratorReward#function:0x3f09775e",
+      "definitionId": "test/StreamCuratorsPool.t.sol:ReentrantCuratorReward",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCuratorsPool.t.sol:ReentrantCuratorReward#function:0x3fea217f",
+      "definitionId": "test/StreamCuratorsPool.t.sol:ReentrantCuratorReward",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCuratorsPool.t.sol:ReentrantCuratorReward#function:receive()",
+      "definitionId": "test/StreamCuratorsPool.t.sol:ReentrantCuratorReward",
+      "severity": "advisory"
+    }
+  ]
+}
