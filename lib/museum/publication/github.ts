@@ -156,6 +156,10 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
   }
 
   private async resolveExactCommit(): Promise<string> {
+    if (isExactGitCommit(this.ref)) {
+      return this.ref;
+    }
+
     const url = buildGitHubCommitResolutionUrl(this.ref);
     const text = await this.fetchUtf8(
       url,
@@ -173,13 +177,17 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
       typeof parsed !== "object" ||
       parsed === null ||
       Array.isArray(parsed) ||
-      !("sha" in parsed) ||
-      typeof parsed.sha !== "string" ||
-      !isExactGitCommit(parsed.sha)
+      !("object" in parsed) ||
+      typeof parsed.object !== "object" ||
+      parsed.object === null ||
+      Array.isArray(parsed.object) ||
+      !("sha" in parsed.object) ||
+      typeof parsed.object.sha !== "string" ||
+      !isExactGitCommit(parsed.object.sha)
     ) {
       throw new Error("publication_commit_not_exact");
     }
-    return parsed.sha;
+    return parsed.object.sha;
   }
 
   private async fetchManifest(commit: string) {

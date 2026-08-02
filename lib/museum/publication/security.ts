@@ -64,7 +64,7 @@ export function buildGitHubCommitResolutionUrl(ref: string): string {
     throw new Error("publication_invalid_ref");
   }
 
-  return `${GITHUB_API_ORIGIN}/repos/${MUSEUM_REPOSITORY}/commits/${encodeURIComponent(ref)}`;
+  return `${GITHUB_API_ORIGIN}/repos/${MUSEUM_REPOSITORY}/git/ref/heads/${encodeURIComponent(ref)}`;
 }
 
 export function buildImmutableMuseumRawUrl(

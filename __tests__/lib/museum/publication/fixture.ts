@@ -215,7 +215,7 @@ export function createCaseyFixture(
     const url = typeof input === "string" ? input : input.toString();
     calls.push(url);
     if (url.startsWith("https://api.github.com/")) {
-      return mockResponse(JSON.stringify({ sha: commit }), 200);
+      return mockResponse(JSON.stringify({ object: { sha: commit } }), 200);
     }
     if (url.endsWith("/release-artifacts/latest/record-manifest.json")) {
       return mockResponse(manifest, 200);

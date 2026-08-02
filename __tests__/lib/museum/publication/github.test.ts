@@ -23,7 +23,7 @@ describe("GitHub Museum publication source", () => {
 
     expect(result.status).toBe("current");
     expect(fixture.calls[0]).toBe(
-      "https://api.github.com/repos/6529-Collections/6529networkmuseum/commits/main"
+      "https://api.github.com/repos/6529-Collections/6529networkmuseum/git/ref/heads/main"
     );
     expect(fixture.calls.slice(1)).not.toHaveLength(0);
     expect(
@@ -36,6 +36,23 @@ describe("GitHub Museum publication source", () => {
       expect(result.publication.identity.commit).toBe(EXACT_COMMIT);
       expect(result.publication.identity.requestedRef).toBe("main");
     }
+  });
+
+  it("uses an exact source commit without a mutable-ref API lookup", async () => {
+    const fixture = createCaseyFixture({ commit: EXACT_COMMIT });
+    const source = new GitHubMuseumPublicationSource({
+      ref: EXACT_COMMIT,
+      assembler: legacyCaseyPublicationAssembler,
+      fetch: fixture.fetch,
+    });
+
+    const result = await source.load();
+
+    expect(result.status).toBe("current");
+    expect(fixture.calls[0]).toContain(`/${EXACT_COMMIT}/`);
+    expect(
+      fixture.calls.some((url) => url.startsWith("https://api.github.com/"))
+    ).toBe(false);
   });
 
   it("rejects a required file omitted from the manifest inventory", async () => {
