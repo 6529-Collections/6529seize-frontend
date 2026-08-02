@@ -49,17 +49,6 @@ export default async function MuseumObjectDetailPage({
     museumSlugMatches(item.objectId, objectId)
   );
   if (!object) notFound();
-  const record = object.record as {
-    readonly artist_statement?: unknown;
-  };
-  const artistStatement =
-    typeof record.artist_statement === "object" &&
-    record.artist_statement !== null &&
-    !Array.isArray(record.artist_statement)
-      ? (record.artist_statement as { readonly text?: unknown })
-      : null;
-  const statementText =
-    typeof artistStatement?.text === "string" ? artistStatement.text : "";
 
   return (
     <article>
@@ -110,7 +99,7 @@ export default async function MuseumObjectDetailPage({
           {object.scope}
         </p>
       )}
-      {statementText && (
+      {object.artistStatement && (
         <section
           className="tw-mt-8 tw-max-w-3xl tw-rounded-2xl tw-border tw-border-white/10 tw-bg-iron-900/60 tw-p-5"
           aria-labelledby="object-statement-title"
@@ -122,7 +111,7 @@ export default async function MuseumObjectDetailPage({
             {t(DEFAULT_LOCALE, "museum.network.objects.statement")}
           </h2>
           <div className="tw-mt-5">
-            <MuseumMarkdown>{statementText}</MuseumMarkdown>
+            <MuseumMarkdown>{object.artistStatement}</MuseumMarkdown>
           </div>
         </section>
       )}

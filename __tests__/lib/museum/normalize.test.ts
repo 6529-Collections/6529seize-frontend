@@ -87,13 +87,22 @@ describe("Museum domain mapping", () => {
           jsonDocument(
             "records/accessions/6529NM.2026.001/objects/object-001.json",
             {
-              record_type: "OBJECT_RECORD",
-              object_id: "6529NM.2026.001.001",
-              accession_lot_id: "6529NM.2026.001",
-              status: "accessioned",
-              artist: "Casey REAS",
-              title: "Object record",
-              record_scope: "A declared accession object.",
+              envelope: {
+                event_type: "MUSEUM_RECORD_COMMITTED",
+              },
+              payload: {
+                record_type: "WORK_DESCRIPTION",
+                object_id: "6529NM.2026.001.001",
+                accession_lot_id: "6529NM.2026.001",
+                current_state: "accessioned",
+                artist: { preferred_name: "Casey REAS" },
+                title: "Object record",
+                medium: "On-chain generative software.",
+                claims: {
+                  artist_statement: "An artist statement.",
+                  museum_interpretation: "A declared accession object.",
+                },
+              },
             }
           ),
       },
@@ -112,6 +121,17 @@ describe("Museum domain mapping", () => {
         expect.objectContaining({
           objectId: "6529NM.2026.001.001",
           accessionLotId: "6529NM.2026.001",
+          title: "Object record",
+          artist: "Casey REAS",
+          artistStatement: "An artist statement.",
+          classification: "On-chain generative software.",
+          status: "accessioned",
+          scope: "A declared accession object.",
+          record: expect.objectContaining({
+            payload: expect.objectContaining({
+              record_type: "WORK_DESCRIPTION",
+            }),
+          }),
         }),
       ])
     );

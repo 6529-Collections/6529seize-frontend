@@ -122,6 +122,7 @@ export interface MuseumObjectRecord {
   readonly accessionLotId: string | null;
   readonly title: string;
   readonly artist: string;
+  readonly artistStatement: string | null;
   readonly classification: string;
   readonly status: string;
   readonly scope: string;
