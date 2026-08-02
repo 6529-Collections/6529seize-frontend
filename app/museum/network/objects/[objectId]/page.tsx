@@ -16,6 +16,7 @@ import { getMuseumView } from "@/lib/museum/normalize";
 import {
   museumSlugMatches,
   displayMuseumStatus,
+  museumSlug,
   statusTone,
 } from "@/lib/museum/presentation";
 import { buildMuseumRawUrl } from "@/lib/museum/source";
@@ -63,10 +64,19 @@ export default async function MuseumObjectDetailPage({
   return (
     <article>
       <Link
-        href="/museum/network/programs"
+        href={
+          object.accessionLotId
+            ? `/museum/network/accessions/${museumSlug(object.accessionLotId)}`
+            : "/museum/network/programs"
+        }
         className="hover:tw-text-primary-200 tw-text-sm tw-font-medium tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-rounded-sm focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
       >
-        {t(DEFAULT_LOCALE, "museum.network.objects.back")}
+        {t(
+          DEFAULT_LOCALE,
+          object.accessionLotId
+            ? "museum.network.objects.backToAccession"
+            : "museum.network.objects.back"
+        )}
       </Link>
       <div className="tw-mt-8">
         <MuseumSectionHeading

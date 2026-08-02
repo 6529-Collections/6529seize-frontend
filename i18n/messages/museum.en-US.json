@@ -89,6 +89,7 @@
   "museum.network.objects.title": "Museum object record",
   "museum.network.objects.description": "A public Museum record with its current status and technical evidence.",
   "museum.network.objects.back": "Back to programs",
+  "museum.network.objects.backToAccession": "Back to accession",
   "museum.network.objects.selectedNotAccessioned": "Selected; not an accession",
   "museum.network.objects.accessioned": "Accession object record",
   "museum.network.objects.statement": "Artist statement",

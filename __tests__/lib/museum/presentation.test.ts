@@ -18,5 +18,7 @@ describe("Museum presentation semantics", () => {
     expect(dotted).not.toBe(dashed);
     expect(museumSlugMatches("6529NM.2026.001.001", dotted)).toBe(true);
     expect(museumSlugMatches("6529NM.2026.001.001", dashed)).toBe(false);
+    expect(museumSlugMatches("object%01", "object%01")).toBe(true);
+    expect(museumSlugMatches("object%01", museumSlug("object%01"))).toBe(true);
   });
 });

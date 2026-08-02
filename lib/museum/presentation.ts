@@ -3,12 +3,19 @@ export function museumSlug(value: string): string {
 }
 
 export function museumSlugMatches(value: string, candidate: string): boolean {
+  if (value.trim() === candidate) {
+    return true;
+  }
+
   try {
+    const decodedCandidate = decodeURIComponent(candidate);
     return (
-      museumSlug(value) === encodeURIComponent(decodeURIComponent(candidate))
+      museumSlug(value) === candidate ||
+      museumSlug(value) === encodeURIComponent(decodedCandidate) ||
+      value.trim() === decodedCandidate
     );
   } catch {
-    return museumSlug(value) === candidate;
+    return museumSlug(value) === candidate || value.trim() === candidate;
   }
 }
 
