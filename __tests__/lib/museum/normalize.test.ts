@@ -80,6 +80,7 @@ describe("Museum domain mapping", () => {
             status: "selected_unminted",
             artist: { handle: "Artist" },
             title: "Selected work",
+            artist_statement: { text: "A legacy artist statement." },
             record_scope: "Not an accession statement.",
           }
         ),
@@ -95,7 +96,7 @@ describe("Museum domain mapping", () => {
                 object_id: "6529NM.2026.001.001",
                 accession_lot_id: "6529NM.2026.001",
                 current_state: "accessioned",
-                artist: { preferred_name: "Casey REAS" },
+                artist: { preferred_name: "", handle: "Casey REAS" },
                 title: "Object record",
                 medium: "On-chain generative software.",
                 claims: {
@@ -140,6 +141,7 @@ describe("Museum domain mapping", () => {
         expect.objectContaining({
           objectId: "6529NM-AP-01-OUT-001",
           accessionLotId: null,
+          artistStatement: "A legacy artist statement.",
         }),
       ])
     );

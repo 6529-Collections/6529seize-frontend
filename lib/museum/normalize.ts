@@ -367,10 +367,9 @@ function objectRecords(
 
       const artistValue = root.artist;
       const artist = isObject(artistValue)
-        ? stringValue(
-            artistValue.preferred_name,
-            stringValue(artistValue.handle)
-          )
+        ? (nullableString(artistValue.preferred_name) ??
+          nullableString(artistValue.handle) ??
+          "")
         : stringValue(artistValue);
       const claims = isObject(root.claims) ? root.claims : {};
       const objectId = stringValue(root.object_id, stringValue(root.record_id));
