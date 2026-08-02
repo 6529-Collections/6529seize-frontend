@@ -85,3 +85,17 @@
   PR merges, re-fetch, merge current main into current `1a-staging` without
   force, freeze that composition SHA, and record its embedded main SHA. If main
   moves after qualification, repeat per policy.
+
+## PR #3550 review and CI
+
+- Opened ready PR #3550 at exact head `f1dc31167f5b`.
+- Initial 6529bot security review reported no findings.
+- General, WCAG, and i18n lanes requested one focused robustness follow-up:
+  shared dossier anchors, ID-based artwork selection, malformed-route guards,
+  immediate live-frame failure, one-H1/static-live-region cleanup, and message
+  catalog coverage.
+- App PR CI failed only on newly unused exports/types reported by Knip.
+- Sonar localized its gate to two explicit deterministic-sort bugs and
+  duplication in `lib/museum/casey.ts` and
+  `lib/museum/publication/manifest.ts`; the follow-up is limited to those
+  reported blocks and associated high-confidence findings.

@@ -28,6 +28,17 @@ describe("legacy Casey publication projection", () => {
       }),
     ]);
     expect(publication.projects).toHaveLength(5);
+    expect(
+      publication.documents.find(
+        ({ id }) => id === "casey-reas-collection-essay"
+      )?.projectIds
+    ).toEqual([
+      "casey-reas-923-empty-rooms",
+      "casey-reas-century",
+      "casey-reas-ex-nihilo-cosmos",
+      "casey-reas-phototaxis",
+      "casey-reas-pre-process",
+    ]);
     expect(publication.gifts).toEqual([
       expect.objectContaining({
         id: "6529NM.2026.001",
@@ -99,5 +110,52 @@ describe("legacy Casey publication projection", () => {
     expect(selected.institutionalStatus).toBe("selected_unminted");
     expect(selected.accessionLotId).toBeNull();
     expect(selected.giftId).toBeNull();
+  });
+
+  it("reads the first level-one heading after bounded front matter", async () => {
+    const path =
+      "records/accessions/6529NM.2026.001/public/accession-certificate.md";
+    const fixture = createCaseyFixture({
+      documentOverrides: {
+        [path]:
+          "---\r\nstatus: public\r\n---\r\n# Reviewed certificate\r\n\r\nText.",
+      },
+    });
+    const result = await new GitHubMuseumPublicationSource({
+      ref: "main",
+      assembler: legacyCaseyPublicationAssembler,
+      fetch: fixture.fetch,
+      now: () => new Date("2026-08-02T12:00:00Z"),
+    }).load();
+
+    expect(result.status).toBe("current");
+    if (result.status !== "current") {
+      throw new Error("test_publication_missing");
+    }
+    expect(
+      result.publication.documents.find(({ sourcePath }) => sourcePath === path)
+        ?.title
+    ).toBe("Reviewed certificate");
+  });
+
+  it("fails closed when a public document has no level-one heading", async () => {
+    const path =
+      "records/accessions/6529NM.2026.001/public/accession-certificate.md";
+    const fixture = createCaseyFixture({
+      documentOverrides: {
+        [path]: "---\nstatus: public\n---\n## Not a level-one heading",
+      },
+    });
+    const result = await new GitHubMuseumPublicationSource({
+      ref: "main",
+      assembler: legacyCaseyPublicationAssembler,
+      fetch: fixture.fetch,
+      now: () => new Date("2026-08-02T12:00:00Z"),
+    }).load();
+
+    expect(result).toMatchObject({
+      status: "unavailable",
+      errorCode: "publication_markdown_heading_missing",
+    });
   });
 });

@@ -166,7 +166,7 @@ function requiredString(value: unknown, code: string): string {
 
 function requiredInteger(value: unknown, code: string): number {
   if (typeof value !== "number" || !Number.isSafeInteger(value)) {
-    throw new Error(code);
+    throw new TypeError(code);
   }
   return value;
 }
@@ -249,7 +249,7 @@ function parseCaseyObject(
     project["name"],
     "publication_project_name_missing"
   );
-  if (!(projectName in PROJECT_CONTRACTS)) {
+  if (!Object.hasOwn(PROJECT_CONTRACTS, projectName)) {
     throw new Error("publication_unknown_casey_project");
   }
 
@@ -285,23 +285,67 @@ function parseCaseyObject(
   };
 }
 
-function parseHeading(markdown: string): string {
-  const withoutFrontMatter = markdown.replace(
-    /^---\r?\n[\s\S]*?\r?\n---\r?\n/u,
-    ""
-  );
-  const title = withoutFrontMatter.match(/^#\s+(.+)$/mu)?.[1]?.trim();
-  if (title === undefined || title.length === 0) {
-    throw new Error("publication_markdown_heading_missing");
+function withoutFrontMatter(markdown: string): string {
+  let lineStart = -1;
+  if (markdown.startsWith("---\r\n")) {
+    lineStart = 5;
+  } else if (markdown.startsWith("---\n")) {
+    lineStart = 4;
   }
-  return title;
+  if (lineStart === -1) {
+    return markdown;
+  }
+
+  while (lineStart < markdown.length) {
+    const lineEnd = markdown.indexOf("\n", lineStart);
+    if (lineEnd === -1) {
+      return markdown;
+    }
+    const line = markdown.slice(lineStart, lineEnd);
+    if (line === "---" || line === "---\r") {
+      return markdown.slice(lineEnd + 1);
+    }
+    lineStart = lineEnd + 1;
+  }
+
+  return markdown;
+}
+
+function parseHeading(markdown: string): string {
+  for (const line of withoutFrontMatter(markdown).split("\n")) {
+    const heading = line.slice(1);
+    if (
+      line.startsWith("#") &&
+      heading.length > 0 &&
+      heading.trimStart() !== heading
+    ) {
+      const title = heading.trim();
+      if (title.length > 0) {
+        return title;
+      }
+    }
+  }
+
+  throw new Error("publication_markdown_heading_missing");
+}
+
+function compareIdentifiers(left: string, right: string): number {
+  if (left < right) {
+    return -1;
+  }
+  if (left > right) {
+    return 1;
+  }
+  return left.localeCompare(right);
 }
 
 function parsePublicDocuments(
   documents: ReadonlyMap<string, MuseumSourceDocument>,
   projectByArtwork: ReadonlyMap<string, string>
 ): MuseumPublicDocument[] {
-  const allProjectIds = [...new Set(projectByArtwork.values())].sort();
+  const allProjectIds = [...new Set(projectByArtwork.values())].sort(
+    compareIdentifiers
+  );
   return CASEY_PUBLIC_DOCUMENTS.map((contract): MuseumPublicDocument => {
     const source = requiredDocument(documents, contract.path, "text/markdown");
     const projectId =

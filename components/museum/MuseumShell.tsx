@@ -151,22 +151,3 @@ export function MuseumStatusBadge({
     </span>
   );
 }
-
-export function MuseumMetric({
-  value,
-  label,
-}: {
-  readonly value: string;
-  readonly label: string;
-}) {
-  return (
-    <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4">
-      <p className="tw-m-0 tw-text-xl tw-font-semibold tw-text-iron-50">
-        {value}
-      </p>
-      <p className="tw-m-0 tw-mt-1 tw-text-xs tw-leading-5 tw-text-iron-400">
-        {label}
-      </p>
-    </div>
-  );
-}

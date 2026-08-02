@@ -3,10 +3,7 @@ import { t } from "@/i18n/messages";
 
 export function MuseumPublicationUnavailable() {
   return (
-    <div
-      className="tw-max-w-3xl tw-border-l-2 tw-border-yellow-400 tw-pl-5"
-      role="alert"
-    >
+    <div className="tw-max-w-3xl tw-border-l-2 tw-border-yellow-400 tw-pl-5">
       <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50">
         {t(DEFAULT_LOCALE, "museum.network.publicationUnavailable.title")}
       </h1>

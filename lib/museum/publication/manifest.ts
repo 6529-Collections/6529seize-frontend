@@ -8,7 +8,7 @@ export interface MuseumPublicationManifestEntry {
   readonly size: number;
 }
 
-export interface MuseumPublicationManifest {
+interface MuseumPublicationManifest {
   readonly manifestType: string;
   readonly manifestVersion: string;
   readonly manifestSha256: MuseumSha256 | null;
@@ -26,34 +26,52 @@ function asSha256(value: unknown): MuseumSha256 | null {
     : null;
 }
 
+function compareCanonicalStrings(left: string, right: string): number {
+  if (left < right) {
+    return -1;
+  }
+  if (left > right) {
+    return 1;
+  }
+  return left.localeCompare(right);
+}
+
+function canonicalNumber(value: number): string {
+  if (!Number.isSafeInteger(value)) {
+    throw new TypeError("publication_manifest_canonicalization");
+  }
+  return Object.is(value, -0) ? "0" : String(value);
+}
+
+function canonicalRecord(value: Record<string, unknown>): string {
+  const properties = Object.keys(value)
+    .sort(compareCanonicalStrings)
+    .map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`);
+  return `{${properties.join(",")}}`;
+}
+
 function canonicalJson(value: unknown): string {
-  if (
-    value === null ||
-    typeof value === "boolean" ||
-    typeof value === "string"
-  ) {
-    return JSON.stringify(value);
+  if (value === null) {
+    return "null";
   }
 
-  if (typeof value === "number") {
-    if (!Number.isSafeInteger(value)) {
-      throw new Error("publication_manifest_canonicalization");
-    }
-    return Object.is(value, -0) ? "0" : String(value);
+  switch (typeof value) {
+    case "boolean":
+    case "string":
+      return JSON.stringify(value);
+    case "number":
+      return canonicalNumber(value);
+    case "object":
+      return Array.isArray(value)
+        ? `[${value.map(canonicalJson).join(",")}]`
+        : canonicalRecord(value as Record<string, unknown>);
+    case "bigint":
+    case "function":
+    case "symbol":
+    case "undefined":
+      throw new TypeError("publication_manifest_canonicalization");
   }
-
-  if (Array.isArray(value)) {
-    return `[${value.map(canonicalJson).join(",")}]`;
-  }
-
-  if (isRecord(value)) {
-    return `{${Object.keys(value)
-      .sort()
-      .map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`)
-      .join(",")}}`;
-  }
-
-  throw new Error("publication_manifest_canonicalization");
+  throw new TypeError("publication_manifest_canonicalization");
 }
 
 function digestUtf8(text: string): MuseumSha256 {
@@ -142,7 +160,7 @@ export function parseMuseumPublicationManifest(
     manifestSha256,
     manifestCommitment: typeof commitment === "string" ? commitment : null,
     entries: [...entries].sort((left, right) =>
-      left.path.localeCompare(right.path)
+      compareCanonicalStrings(left.path, right.path)
     ),
   };
 }

@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MuseumMarkdown } from "@/components/museum/MuseumMarkdown";
+import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
 import { MuseumSectionHeading } from "@/components/museum/MuseumShell";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getMuseumView } from "@/lib/museum/normalize";
+import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 
 export const metadata: Metadata = getAppMetadata({
   title: t(DEFAULT_LOCALE, "museum.network.about.title"),
@@ -13,6 +15,10 @@ export const metadata: Metadata = getAppMetadata({
 });
 
 export default async function MuseumAboutPage() {
+  const publicationState = await getMuseumPublicationState();
+  if (publicationState.publication === null) {
+    return <MuseumPublicationUnavailable />;
+  }
   const view = await getMuseumView();
 
   return (
@@ -28,10 +34,7 @@ export default async function MuseumAboutPage() {
             {view.mission.markdown}
           </MuseumMarkdown>
         ) : (
-          <p
-            className="tw-m-0 tw-text-sm tw-leading-6 tw-text-yellow-100"
-            role="status"
-          >
+          <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-yellow-100">
             {t(DEFAULT_LOCALE, "museum.network.mission.empty")}
           </p>
         )}

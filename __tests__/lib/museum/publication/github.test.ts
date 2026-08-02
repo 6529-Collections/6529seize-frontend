@@ -4,11 +4,14 @@ import {
 } from "@/lib/museum/publication";
 import { createCaseyFixture, EXACT_COMMIT, withObjectState } from "./fixture";
 
-function sourceFor(fixture: ReturnType<typeof createCaseyFixture>) {
+function sourceFor(
+  fixture: ReturnType<typeof createCaseyFixture>,
+  fetchImplementation: typeof fetch = fixture.fetch
+) {
   return new GitHubMuseumPublicationSource({
     ref: "main",
     assembler: legacyCaseyPublicationAssembler,
-    fetch: fixture.fetch,
+    fetch: fetchImplementation,
     now: () => new Date("2026-08-02T12:00:00Z"),
   });
 }
@@ -69,6 +72,45 @@ describe("GitHub Museum publication source", () => {
       status: "unavailable",
       publication: null,
       errorCode: "publication_document_hash_mismatch",
+    });
+  });
+
+  it("rejects a response whose declared content length exceeds the boundary", async () => {
+    const fixture = createCaseyFixture();
+    const oversizedFetch: typeof fetch = async (input, init) => {
+      const response = await fixture.fetch(input, init);
+      return {
+        ...response,
+        headers: {
+          get: (name: string) =>
+            name.toLowerCase() === "content-length"
+              ? "256001"
+              : response.headers.get(name),
+        },
+      } as Response;
+    };
+
+    await expect(
+      sourceFor(fixture, oversizedFetch).load()
+    ).resolves.toMatchObject({
+      status: "unavailable",
+      errorCode: "publication_response_too_large",
+    });
+  });
+
+  it("rejects a response URL that differs from the approved request URL", async () => {
+    const fixture = createCaseyFixture();
+    const redirectedFetch: typeof fetch = async (input, init) => {
+      const response = await fixture.fetch(input, init);
+      const requestUrl = typeof input === "string" ? input : input.toString();
+      return { ...response, url: `${requestUrl}?redirected=1` } as Response;
+    };
+
+    await expect(
+      sourceFor(fixture, redirectedFetch).load()
+    ).resolves.toMatchObject({
+      status: "unavailable",
+      errorCode: "publication_unexpected_response_url",
     });
   });
 

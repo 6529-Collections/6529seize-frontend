@@ -4,24 +4,26 @@ import { notFound } from "next/navigation";
 import { MuseumArtworkViewer } from "./MuseumArtworkViewer";
 import { MuseumJsonDisclosure, MuseumMarkdown } from "./MuseumMarkdown";
 import { MuseumPublicationUnavailable } from "./MuseumPublicationUnavailable";
+import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
   CASEY_ACCESSION_ID,
+  CASEY_ARTIST_NAME,
   CASEY_ARTIST_SLUG,
-  caseyArtworksFromPublication,
+  tryCaseyArtworksFromPublication,
   getCaseyArtwork,
 } from "@/lib/museum/casey";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 
 export function getMuseumObjectMetadata(objectId: string): Metadata {
-  const artwork = getCaseyArtwork(decodeURIComponent(objectId));
-  return {
+  const artwork = getCaseyArtwork(objectId);
+  return getAppMetadata({
     title: artwork?.title ?? t(DEFAULT_LOCALE, "museum.network.objects.title"),
     description:
       artwork?.visualDescription ??
       t(DEFAULT_LOCALE, "museum.network.objects.description"),
-  };
+  });
 }
 
 export async function MuseumObjectPage({
@@ -29,15 +31,16 @@ export async function MuseumObjectPage({
 }: {
   readonly objectId: string;
 }) {
-  const decodedObjectId = decodeURIComponent(objectId);
   const publicationState = await getMuseumPublicationState();
   if (publicationState.publication === null) {
     return <MuseumPublicationUnavailable />;
   }
   const publication = publicationState.publication;
-  const artwork = caseyArtworksFromPublication(publication).find(
-    (item) => item.objectId === decodedObjectId
-  );
+  const artworks = tryCaseyArtworksFromPublication(publication);
+  if (artworks === null) {
+    return <MuseumPublicationUnavailable />;
+  }
+  const artwork = artworks.find((item) => item.objectId === objectId);
   if (artwork === undefined) {
     notFound();
   }
@@ -67,7 +70,7 @@ export async function MuseumObjectPage({
               href={`/museum/network/artists/${CASEY_ARTIST_SLUG}`}
               className="hover:tw-text-primary-200 tw-text-inherit tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
             >
-              Casey Reas
+              {CASEY_ARTIST_NAME}
             </Link>
           </p>
           <h1 className="tw-m-0 tw-mt-2 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl">
@@ -104,17 +107,20 @@ export async function MuseumObjectPage({
               {objectDocument.markdown}
             </MuseumMarkdown>
           ) : (
-            <div
-              className="tw-mt-6 tw-border-l-2 tw-border-yellow-400 tw-pl-4 tw-text-sm tw-leading-6 tw-text-yellow-100"
-              role="status"
-            >
+            <div className="tw-mt-6 tw-border-l-2 tw-border-yellow-400 tw-pl-4 tw-text-sm tw-leading-6 tw-text-yellow-100">
               {t(DEFAULT_LOCALE, "museum.network.objects.readingUnavailable")}
             </div>
           )}
         </section>
 
-        <aside className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-6 lg:tw-border-l lg:tw-border-t-0 lg:tw-pl-6 lg:tw-pt-0">
-          <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
+        <aside
+          aria-labelledby="museum-object-details-title"
+          className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-6 lg:tw-border-l lg:tw-border-t-0 lg:tw-pl-6 lg:tw-pt-0"
+        >
+          <h2
+            id="museum-object-details-title"
+            className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100"
+          >
             {t(DEFAULT_LOCALE, "museum.network.objects.collectionDetails")}
           </h2>
           <dl className="tw-m-0 tw-mt-5 tw-space-y-5">

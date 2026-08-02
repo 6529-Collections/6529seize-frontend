@@ -26,7 +26,7 @@ const MAX_COMMIT_RESPONSE_BYTES = 256_000;
 const MAX_MANIFEST_BYTES = 2_000_000;
 const MAX_DOCUMENT_BYTES = 4_500_000;
 
-export interface GitHubMuseumPublicationSourceOptions {
+interface GitHubMuseumPublicationSourceOptions {
   readonly ref: string;
   readonly assembler: MuseumPublicationAssembler;
   readonly fetch?: typeof fetch;

@@ -71,7 +71,11 @@ describe("Museum publication runtime", () => {
     const { load, source } = mockedSource();
     const current = currentState(publication);
     load.mockResolvedValue(current);
-    const runtime = createMuseumPublicationRuntime(source, () => now);
+    const runtime = createMuseumPublicationRuntime(
+      source,
+      () => now,
+      () => 0
+    );
 
     await expect(runtime.load()).resolves.toBe(current);
     now += 10 * 60 * 1000;
@@ -127,7 +131,11 @@ describe("Museum publication runtime", () => {
         lastValidAcceptedAt: lastValid.acceptedAt,
       });
     });
-    const runtime = createMuseumPublicationRuntime(source, () => now);
+    const runtime = createMuseumPublicationRuntime(
+      source,
+      () => now,
+      () => 0
+    );
 
     await expect(runtime.load()).resolves.toBe(current);
     now += 10 * 60 * 1000 + 1;
@@ -153,7 +161,11 @@ describe("Museum publication runtime", () => {
     const { load, source } = mockedSource();
     const unavailable = unavailableState("publication_manifest_hash_mismatch");
     load.mockResolvedValue(unavailable);
-    const runtime = createMuseumPublicationRuntime(source, () => now);
+    const runtime = createMuseumPublicationRuntime(
+      source,
+      () => now,
+      () => 0
+    );
 
     await expect(runtime.load()).resolves.toEqual({
       status: "unavailable",
@@ -171,13 +183,49 @@ describe("Museum publication runtime", () => {
     expect(load).toHaveBeenCalledTimes(2);
   });
 
+  it("backs off consecutive source failures and resets after recovery", async () => {
+    let now = Date.parse("2026-08-02T12:00:00.000Z");
+    const { load, source } = mockedSource();
+    const unavailable = unavailableState("publication_github_http_403");
+    const current = currentState(publication);
+    load
+      .mockResolvedValueOnce(unavailable)
+      .mockResolvedValueOnce(unavailable)
+      .mockResolvedValueOnce(current)
+      .mockResolvedValueOnce(unavailable);
+    const runtime = createMuseumPublicationRuntime(
+      source,
+      () => now,
+      () => 0
+    );
+
+    await runtime.load();
+    now += 30 * 1000 + 1;
+    await runtime.load();
+    now += 60 * 1000;
+    await runtime.load();
+    expect(load).toHaveBeenCalledTimes(2);
+
+    now += 1;
+    await runtime.load();
+    expect(load).toHaveBeenCalledTimes(3);
+
+    now += 10 * 60 * 1000 + 1;
+    await runtime.load();
+    expect(load).toHaveBeenCalledTimes(4);
+  });
+
   it("expires last-valid eligibility after twenty-four hours", async () => {
     let now = Date.parse("2026-08-02T12:00:00.000Z");
     const { load, source } = mockedSource();
     const current = currentState(publication);
     const unavailable = unavailableState("publication_github_http_503");
     load.mockResolvedValueOnce(current).mockResolvedValueOnce(unavailable);
-    const runtime = createMuseumPublicationRuntime(source, () => now);
+    const runtime = createMuseumPublicationRuntime(
+      source,
+      () => now,
+      () => 0
+    );
 
     await runtime.load();
     now += 24 * 60 * 60 * 1000 + 1;
@@ -185,5 +233,40 @@ describe("Museum publication runtime", () => {
 
     expect(load).toHaveBeenCalledTimes(2);
     expect(load).toHaveBeenNthCalledWith(2, undefined);
+  });
+
+  it("keeps the last valid publication eligible at exactly twenty-four hours", async () => {
+    let now = Date.parse("2026-08-02T12:00:00.000Z");
+    const { load, source } = mockedSource();
+    const current = currentState(publication);
+    load.mockResolvedValueOnce(current).mockImplementationOnce((lastValid) =>
+      Promise.resolve(
+        lastValid === undefined
+          ? unavailableState("missing_last_valid")
+          : {
+              status: "stale",
+              publication: lastValid.publication,
+              errorCode: "publication_github_http_503",
+              failedAt: new Date(now).toISOString(),
+              lastValidAcceptedAt: lastValid.acceptedAt,
+            }
+      )
+    );
+    const runtime = createMuseumPublicationRuntime(
+      source,
+      () => now,
+      () => 0
+    );
+
+    await runtime.load();
+    now += 24 * 60 * 60 * 1000;
+    await expect(runtime.load()).resolves.toMatchObject({
+      status: "stale",
+      publication,
+    });
+    expect(load).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ publication })
+    );
   });
 });

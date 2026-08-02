@@ -1,7 +1,5 @@
 export type MuseumSha256 = `sha256:${string}`;
 
-export type MuseumInstitutionalStatus = "accessioned" | "selected_unminted";
-
 export interface MuseumPublicationIdentity {
   readonly repository: "6529-Collections/6529networkmuseum";
   readonly requestedRef: string;
@@ -20,8 +18,8 @@ export interface MuseumRightsCredit {
   readonly sourcePath: string;
 }
 
-export type MuseumMediaKind = "still" | "live" | "iiif";
-export type MuseumMediaRole = "source" | "fallback";
+type MuseumMediaKind = "still" | "live" | "iiif";
+type MuseumMediaRole = "source" | "fallback";
 
 interface MuseumMediaBase {
   readonly id: string;

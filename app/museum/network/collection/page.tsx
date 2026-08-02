@@ -5,7 +5,7 @@ import { MuseumSectionHeading } from "@/components/museum/MuseumShell";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { caseyArtworksFromPublication } from "@/lib/museum/casey";
+import { tryCaseyArtworksFromPublication } from "@/lib/museum/casey";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 
 export const metadata: Metadata = getAppMetadata({
@@ -18,7 +18,12 @@ export default async function MuseumCollectionPage() {
   if (publicationState.publication === null) {
     return <MuseumPublicationUnavailable />;
   }
-  const artworks = caseyArtworksFromPublication(publicationState.publication);
+  const artworks = tryCaseyArtworksFromPublication(
+    publicationState.publication
+  );
+  if (artworks === null) {
+    return <MuseumPublicationUnavailable />;
+  }
   return (
     <div>
       <MuseumSectionHeading

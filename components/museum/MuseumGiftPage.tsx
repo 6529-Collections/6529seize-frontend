@@ -2,37 +2,30 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MuseumArtworkFigure } from "./MuseumArtworkFigure";
+import { MuseumDossierDocument } from "./MuseumDossierDocument";
 import { MuseumMarkdown } from "./MuseumMarkdown";
 import { MuseumPublicationUnavailable } from "./MuseumPublicationUnavailable";
+import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
   CASEY_ACCESSION_ID,
   CASEY_DOSSIER,
-  caseyArtworksFromPublication,
+  getCaseyDossierAnchor,
+  tryCaseyArtworksFromPublication,
   getCaseyPublicationDocument,
   hasCompleteCaseyPublicationDossier,
 } from "@/lib/museum/casey";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 
-function documentAnchor(path: string): string {
-  return (
-    path
-      .split("/")
-      .at(-1)
-      ?.replace(/\.md$/u, "")
-      .replace(/[^a-zA-Z0-9.-]+/gu, "-") ?? "document"
-  );
-}
-
 export function getMuseumGiftMetadata(accessionId: string): Metadata {
-  return {
+  return getAppMetadata({
     title:
-      decodeURIComponent(accessionId) === CASEY_ACCESSION_ID
+      accessionId === CASEY_ACCESSION_ID
         ? t(DEFAULT_LOCALE, "museum.network.gift.caseyTitle")
         : t(DEFAULT_LOCALE, "museum.network.gift.title"),
     description: t(DEFAULT_LOCALE, "museum.network.gift.caseyDescription"),
-  };
+  });
 }
 
 export async function MuseumGiftPage({
@@ -40,7 +33,7 @@ export async function MuseumGiftPage({
 }: {
   readonly accessionId: string;
 }) {
-  if (decodeURIComponent(accessionId) !== CASEY_ACCESSION_ID) {
+  if (accessionId !== CASEY_ACCESSION_ID) {
     notFound();
   }
 
@@ -49,7 +42,14 @@ export async function MuseumGiftPage({
     return <MuseumPublicationUnavailable />;
   }
   const publication = publicationState.publication;
-  const artworks = caseyArtworksFromPublication(publication);
+  const artworks = tryCaseyArtworksFromPublication(publication);
+  if (artworks === null) {
+    return <MuseumPublicationUnavailable />;
+  }
+  const gift = publication.gifts.find((item) => item.id === CASEY_ACCESSION_ID);
+  if (gift === undefined) {
+    return <MuseumPublicationUnavailable />;
+  }
   const collectionEssayPath =
     "records/accessions/6529NM.2026.001/public/casey-reas-collection-essay.md";
   const collectionEssay = getCaseyPublicationDocument(
@@ -60,6 +60,13 @@ export async function MuseumGiftPage({
   const supplementaryDocuments = CASEY_DOSSIER.filter(
     ({ path }) => path !== collectionEssayPath
   );
+  const supplementaryDossier = supplementaryDocuments.flatMap((descriptor) => {
+    const anchor = getCaseyDossierAnchor(descriptor.path);
+    return anchor === null ? [] : [{ descriptor, anchor }];
+  });
+  if (supplementaryDossier.length !== supplementaryDocuments.length) {
+    return <MuseumPublicationUnavailable />;
+  }
 
   return (
     <article className="tw-min-w-0">
@@ -103,7 +110,7 @@ export async function MuseumGiftPage({
               {t(DEFAULT_LOCALE, "museum.network.gift.credit")}
             </dt>
             <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-200">
-              Gift of punk6529
+              {gift.donorPublicCredit}
             </dd>
           </div>
         </dl>
@@ -139,7 +146,8 @@ export async function MuseumGiftPage({
           id="gift-essay-title"
           className="tw-m-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50"
         >
-          The executable image: rule, behavior, room, cosmos
+          {collectionEssay?.title ??
+            t(DEFAULT_LOCALE, "museum.network.gift.collectionEssay")}
         </h2>
         {collectionEssay ? (
           <MuseumMarkdown
@@ -150,10 +158,7 @@ export async function MuseumGiftPage({
             {collectionEssay.markdown}
           </MuseumMarkdown>
         ) : (
-          <p
-            className="tw-m-0 tw-mt-5 tw-text-sm tw-leading-6 tw-text-yellow-100"
-            role="status"
-          >
+          <p className="tw-m-0 tw-mt-5 tw-text-sm tw-leading-6 tw-text-yellow-100">
             {t(DEFAULT_LOCALE, "museum.network.gift.essayUnavailable")}
           </p>
         )}
@@ -174,33 +179,30 @@ export async function MuseumGiftPage({
             {t(DEFAULT_LOCALE, "museum.network.gift.dossierDescription")}
           </p>
           {!dossierComplete && (
-            <p
-              className="tw-m-0 tw-mt-4 tw-border-l-2 tw-border-yellow-400 tw-pl-4 tw-text-sm tw-leading-6 tw-text-yellow-100"
-              role="status"
-            >
+            <p className="tw-m-0 tw-mt-4 tw-border-l-2 tw-border-yellow-400 tw-pl-4 tw-text-sm tw-leading-6 tw-text-yellow-100">
               {t(DEFAULT_LOCALE, "museum.network.gift.dossierUnavailable")}
             </p>
           )}
         </div>
         <div className="tw-mt-8 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800">
-          {supplementaryDocuments.map((descriptor) => {
+          {supplementaryDossier.map(({ descriptor, anchor }) => {
             const document = getCaseyPublicationDocument(
               publication,
               descriptor.path
             );
-            const anchor = documentAnchor(descriptor.path);
             return (
-              <details
+              <MuseumDossierDocument
                 key={descriptor.path}
-                id={anchor}
-                className="tw-group tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
+                anchor={anchor}
+                summary={
+                  <summary className="hover:tw-text-primary-200 tw-flex tw-min-h-16 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-py-4 tw-text-base tw-font-semibold tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400">
+                    <span>{descriptor.title}</span>
+                    <span className="tw-text-sm tw-font-normal tw-text-iron-500 group-open:tw-text-primary-300">
+                      {t(DEFAULT_LOCALE, "museum.network.gift.readDocument")}
+                    </span>
+                  </summary>
+                }
               >
-                <summary className="hover:tw-text-primary-200 tw-flex tw-min-h-16 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-py-4 tw-text-base tw-font-semibold tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400">
-                  <span>{descriptor.title}</span>
-                  <span className="tw-text-sm tw-font-normal tw-text-iron-500 group-open:tw-text-primary-300">
-                    {t(DEFAULT_LOCALE, "museum.network.gift.readDocument")}
-                  </span>
-                </summary>
                 <div className="tw-max-w-4xl tw-pb-10 tw-pt-2">
                   {document ? (
                     <MuseumMarkdown sourcePath={document.sourcePath}>
@@ -215,7 +217,7 @@ export async function MuseumGiftPage({
                     </p>
                   )}
                 </div>
-              </details>
+              </MuseumDossierDocument>
             );
           })}
         </div>

@@ -8,6 +8,27 @@ import {
 import { EXACT_COMMIT } from "./fixture";
 
 describe("Museum publication security boundary", () => {
+  it("accepts the governed Art Blocks still and live URL forms", () => {
+    const contract = "0x0000000000000000000000000000000000000000";
+    const still = `https://media-proxy.artblocks.io/1/${contract}/1.png`;
+    const live = `https://generator.artblocks.io/1/${contract}/1`;
+
+    expect(assertApprovedArtBlocksUrl(still, "still")).toBe(still);
+    expect(assertApprovedArtBlocksUrl(live, "live")).toBe(live);
+  });
+
+  it("rejects empty, overlong, and control-character repository paths", () => {
+    expect(() => assertSafeMuseumRepositoryPath("")).toThrow(
+      "publication_unsafe_path"
+    );
+    expect(() => assertSafeMuseumRepositoryPath("a".repeat(513))).toThrow(
+      "publication_unsafe_path"
+    );
+    expect(() =>
+      assertSafeMuseumRepositoryPath("records/control\u0000.json")
+    ).toThrow("publication_unsafe_path");
+  });
+
   it("rejects traversal, encoded traversal, and unsupported content", () => {
     expect(() =>
       assertGovernedMuseumPath("records/accessions/object.json")

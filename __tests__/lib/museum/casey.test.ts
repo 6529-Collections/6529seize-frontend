@@ -1,4 +1,8 @@
-import { caseyArtworksFromPublication } from "@/lib/museum/casey";
+import {
+  caseyArtworksFromPublication,
+  getCaseyDossierAnchor,
+  tryCaseyArtworksFromPublication,
+} from "@/lib/museum/casey";
 import {
   GitHubMuseumPublicationSource,
   legacyCaseyPublicationAssembler,
@@ -44,6 +48,18 @@ describe("Casey publication overlay", () => {
     }
   });
 
+  it("derives gift-page anchors from the governed Casey dossier", () => {
+    expect(
+      getCaseyDossierAnchor(
+        "records/accessions/6529NM.2026.001/public/accession-certificate.md"
+      )
+    ).toBe("accession-certificate");
+    expect(getCaseyDossierAnchor("6529NM.2026.001.01.md#object-title")).toBe(
+      "6529NM.2026.001.01"
+    );
+    expect(getCaseyDossierAnchor("not-a-dossier-document.md")).toBeNull();
+  });
+
   it("fails closed when governed publication identity diverges from the overlay", () => {
     const first = publication.artworks[0];
     if (first === undefined) {
@@ -60,5 +76,6 @@ describe("Casey publication overlay", () => {
     expect(() => caseyArtworksFromPublication(mismatched)).toThrow(
       "museum_casey_publication_mismatch"
     );
+    expect(tryCaseyArtworksFromPublication(mismatched)).toBeNull();
   });
 });

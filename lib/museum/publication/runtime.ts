@@ -7,34 +7,34 @@ import type {
 } from "./types";
 
 const CURRENT_TTL_MS = 10 * 60 * 1000;
-const FAILURE_TTL_MS = 30 * 1000;
+const FAILURE_BASE_TTL_MS = 30 * 1000;
+const FAILURE_MAX_TTL_MS = 10 * 60 * 1000;
 const STALE_TTL_MS = 24 * 60 * 60 * 1000;
 
 interface RuntimeCacheEntry {
   readonly loadedAt: number;
   readonly state: MuseumPublicationLoadState;
+  readonly ttlMs: number;
 }
 
-export interface MuseumPublicationRuntime {
+interface MuseumPublicationRuntime {
   load(): Promise<MuseumPublicationLoadState>;
 }
 
 export function createMuseumPublicationRuntime(
   source: MuseumPublicationSource,
-  now: () => number = Date.now
+  now: () => number = Date.now,
+  random: () => number = Math.random
 ): MuseumPublicationRuntime {
   let cache: RuntimeCacheEntry | undefined;
   let lastValid: MuseumLastValidPublication | undefined;
   let inFlight: Promise<MuseumPublicationLoadState> | undefined;
+  let consecutiveFailures = 0;
 
   const load = async (): Promise<MuseumPublicationLoadState> => {
     const currentTime = now();
-    if (cache !== undefined) {
-      const ttl =
-        cache.state.status === "current" ? CURRENT_TTL_MS : FAILURE_TTL_MS;
-      if (currentTime - cache.loadedAt <= ttl) {
-        return cache.state;
-      }
+    if (cache !== undefined && currentTime - cache.loadedAt <= cache.ttlMs) {
+      return cache.state;
     }
 
     if (inFlight !== undefined) {
@@ -52,12 +52,29 @@ export function createMuseumPublicationRuntime(
       .then((state): MuseumPublicationLoadState => {
         const loadedAt = now();
         if (state.status === "current") {
+          consecutiveFailures = 0;
           lastValid = {
             publication: state.publication,
             acceptedAt: new Date(loadedAt).toISOString(),
           };
+          cache = { loadedAt, state, ttlMs: CURRENT_TTL_MS };
+        } else {
+          consecutiveFailures += 1;
+          const exponent = Math.min(consecutiveFailures - 1, 10);
+          const exponentialTtl = Math.min(
+            FAILURE_BASE_TTL_MS * 2 ** exponent,
+            FAILURE_MAX_TTL_MS
+          );
+          const randomValue = Math.min(Math.max(random(), 0), 1);
+          const jitteredTtl = Math.round(
+            exponentialTtl * (1 + randomValue * 0.2)
+          );
+          cache = {
+            loadedAt,
+            state,
+            ttlMs: Math.min(jitteredTtl, FAILURE_MAX_TTL_MS),
+          };
         }
-        cache = { loadedAt, state };
         return state;
       })
       .finally(() => {

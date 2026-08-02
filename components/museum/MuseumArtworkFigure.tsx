@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type { CaseyArtwork } from "@/lib/museum/casey";
 
 export function MuseumArtworkFigure({
@@ -28,13 +30,15 @@ export function MuseumArtworkFigure({
   );
 
   return (
-    <figure className="tw-m-0 tw-min-w-0">
+    <figure className="tw-group tw-m-0 tw-min-w-0">
       {href ? (
-        <Link
-          href={href}
-          className="tw-group tw-block tw-text-iron-100 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-4 focus-visible:tw-ring-offset-black"
-        >
-          {image}
+        <>
+          <Link
+            href={href}
+            className="tw-block focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-4 focus-visible:tw-ring-offset-black"
+          >
+            {image}
+          </Link>
           <figcaption className="tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-4 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4">
             <span className="tw-min-w-0">
               <span className="tw-block tw-truncate tw-text-base tw-font-semibold tw-text-iron-50">
@@ -44,11 +48,14 @@ export function MuseumArtworkFigure({
                 {artwork.project}, {artwork.year}
               </span>
             </span>
-            <span className="group-hover:tw-text-primary-200 tw-shrink-0 tw-text-sm tw-font-medium tw-text-primary-300">
-              View work
-            </span>
+            <Link
+              href={href}
+              className="group-hover:tw-text-primary-200 tw-shrink-0 tw-text-sm tw-font-medium tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            >
+              {t(DEFAULT_LOCALE, "museum.network.artwork.viewWork")}
+            </Link>
           </figcaption>
-        </Link>
+        </>
       ) : (
         <>
           {image}

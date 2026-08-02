@@ -8,8 +8,8 @@ const ART_BLOCKS_HOSTS = {
   still: "media-proxy.artblocks.io",
 } as const;
 const ART_BLOCKS_PATH_PATTERNS = {
-  live: /^\/1\/0x[a-f0-9]{40}\/[0-9]+$/u,
-  still: /^\/1\/0x[a-f0-9]{40}\/[0-9]+\.png$/u,
+  live: /^\/1\/0x[a-f\d]{40}\/\d+$/u,
+  still: /^\/1\/0x[a-f\d]{40}\/\d+\.png$/u,
 } as const;
 
 export const MUSEUM_MANIFEST_PATH =

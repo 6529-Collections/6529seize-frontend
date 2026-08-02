@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import type { ReactNode } from "react";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { MuseumShell } from "@/components/museum/MuseumShell";
@@ -24,6 +25,7 @@ function museumSourceState(
 export default async function MuseumNetworkLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
+  await connection();
   const publicationState = await getMuseumPublicationState();
   const sourceState = museumSourceState(publicationState.status);
 

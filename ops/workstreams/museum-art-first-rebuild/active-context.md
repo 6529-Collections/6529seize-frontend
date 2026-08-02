@@ -18,8 +18,9 @@
   layout, live behavior, dossier completeness, rights, and native-design gates.
 - Fresh retained screenshots and full-content stitched captures are in
   `evidence/`; only visually verified release files are acceptance evidence.
-- Format, `lint:changed`, `typecheck:ci`, 19 new focused tests, and 80 existing
-  Museum regression tests are green. Production build is the current gate.
+- Format, `lint:changed`, `typecheck:ci`, 19 new focused tests, 80 existing
+  Museum regression tests, production build, Help sync, React Doctor, and
+  whitespace checks are green. PR #3550 is in exact-head bot/CI iteration.
 
 ## Decisions
 
@@ -60,13 +61,12 @@
 
 ## Immediate next actions
 
-1. Complete the production build and final whitespace/help consistency checks.
-2. Commit, push, and open the focused ready PR.
-3. Iterate exact-head review bots, CI, and actionable threads to green.
-4. Re-read Release Bus controls/locks and current refs; use the recorded,
+1. Resolve PR #3550 review-bot and CI findings in one focused signed follow-up.
+2. Repeat exact-head review bots, CI, and unresolved-thread audit to green.
+3. Re-read Release Bus controls/locks and current refs; use the recorded,
    owner-approved serialized manual fallback while lanes remain deliberately
    OFF and drain gates remain clear.
-5. Merge current main into current `1a-staging` without force, freeze the
+4. Merge current main into current `1a-staging` without force, freeze the
    staging composition SHA and embedded production-main SHA, deploy/E2E, then
    deploy that exact staging-qualified candidate to production and repeat E2E.
 
@@ -82,6 +82,18 @@
 - Local `seize-local-dev bootstrap` found all assigned ports 3101–3199 occupied.
   This does not affect code work. Before visual QA, use a verified free isolated
   port without disturbing other worktrees.
+
+## Internationalization fallback debt
+
+- Surface: `/museum/network/*` and the Museum visitor components.
+- Current behavior: UI strings use the Museum message catalog, with `en-US`
+  as the only authored Museum locale; governed titles, names, credits, and
+  manuscript text are publication content and are not translated.
+- User impact: visitors selecting another locale receive the `en-US`
+  fallback for Museum interface copy.
+- Owner: frontend internationalization workstream.
+- Remediation: thread the active locale through Museum routes and components,
+  then add reviewed locale dictionaries without translating governed records.
 
 ## Resume checklist
 

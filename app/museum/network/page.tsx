@@ -5,7 +5,8 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
   CASEY_ACCESSION_ID,
-  caseyArtworksFromPublication,
+  CASEY_ARTIST_NAME,
+  tryCaseyArtworksFromPublication,
 } from "@/lib/museum/casey";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 
@@ -14,9 +15,21 @@ export default async function MuseumNetworkPage() {
   if (publicationState.publication === null) {
     return <MuseumPublicationUnavailable />;
   }
-  const artworks = caseyArtworksFromPublication(publicationState.publication);
-  const featuredArtwork = artworks[0]!;
-  const supportingArtworks = artworks.slice(1);
+  const artworks = tryCaseyArtworksFromPublication(
+    publicationState.publication
+  );
+  if (artworks === null) {
+    return <MuseumPublicationUnavailable />;
+  }
+  const featuredArtwork = artworks.find(
+    (artwork) => artwork.objectId === "6529NM.2026.001.01"
+  );
+  if (featuredArtwork === undefined) {
+    return <MuseumPublicationUnavailable />;
+  }
+  const supportingArtworks = artworks.filter(
+    (artwork) => artwork.objectId !== featuredArtwork.objectId
+  );
   return (
     <div className="tw-min-w-0 tw-space-y-20 sm:tw-space-y-28">
       <section aria-labelledby="museum-home-title">
@@ -87,13 +100,16 @@ export default async function MuseumNetworkPage() {
         </div>
       </section>
 
-      <section className="tw-grid tw-gap-8 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10 lg:tw-grid-cols-2 lg:tw-gap-16">
-        <div>
+      <div className="tw-grid tw-gap-8 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10 lg:tw-grid-cols-2 lg:tw-gap-16">
+        <section aria-labelledby="museum-home-artist-title">
           <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
             {t(DEFAULT_LOCALE, "museum.network.nav.artists")}
           </p>
-          <h2 className="tw-m-0 tw-mt-3 tw-text-2xl tw-font-semibold tw-text-iron-50">
-            Casey Reas
+          <h2
+            id="museum-home-artist-title"
+            className="tw-m-0 tw-mt-3 tw-text-2xl tw-font-semibold tw-text-iron-50"
+          >
+            {CASEY_ARTIST_NAME}
           </h2>
           <p className="tw-m-0 tw-mt-3 tw-max-w-xl tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(DEFAULT_LOCALE, "museum.network.home.artistSummary")}
@@ -104,13 +120,16 @@ export default async function MuseumNetworkPage() {
           >
             {t(DEFAULT_LOCALE, "museum.network.home.readArtist")}
           </Link>
-        </div>
-        <div>
+        </section>
+        <section aria-labelledby="museum-home-program-title">
           <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
             {t(DEFAULT_LOCALE, "museum.network.nav.programsExhibitions")}
           </p>
-          <h2 className="tw-m-0 tw-mt-3 tw-text-2xl tw-font-semibold tw-text-iron-50">
-            Keys and Gates
+          <h2
+            id="museum-home-program-title"
+            className="tw-m-0 tw-mt-3 tw-text-2xl tw-font-semibold tw-text-iron-50"
+          >
+            {t(DEFAULT_LOCALE, "museum.network.programs.keysAndGates")}
           </h2>
           <p className="tw-m-0 tw-mt-3 tw-max-w-xl tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(DEFAULT_LOCALE, "museum.network.home.keysSummary")}
@@ -121,8 +140,8 @@ export default async function MuseumNetworkPage() {
           >
             {t(DEFAULT_LOCALE, "museum.network.home.readProgram")}
           </Link>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   );
 }
