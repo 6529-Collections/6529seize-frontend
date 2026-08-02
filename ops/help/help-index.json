@@ -48,6 +48,58 @@
       ]
     },
     {
+      "id": "museum.network",
+      "kind": "route",
+      "title": "6529 Network Museum",
+      "aliases": [
+        "museum",
+        "network museum",
+        "museum collection",
+        "Keys and Gates"
+      ],
+      "keywords": [
+        "museum",
+        "collection",
+        "accession",
+        "governance",
+        "Keys and Gates",
+        "Casey Reas",
+        "provenance",
+        "methodology"
+      ],
+      "facts": [
+        "The 6529 Network Museum is an art-led public museum experience at /museum/network.",
+        "Collection means accessioned holdings: visitors can browse artworks at /museum/network/collection and open an artwork dossier at /museum/network/collection/[object-id].",
+        "Artist, project, and gift routes connect the art to onsite curatorial writing, provenance, rights, and collection care without making raw records the primary experience.",
+        "The Museum adapter resolves canonical 6529-Collections/6529networkmuseum main to one exact commit, validates the release inventory, and activates the complete public publication atomically.",
+        "Casey Reas: seven works is an accepted and accessioned gift; Keys and Gates remains a separate program whose selected_unminted works are not Museum holdings.",
+        "Official Art Blocks still and live URLs are labeled upstream presentation sources; the site does not claim retained Museum media or IIIF completion until governed assets are published.",
+        "The public release is the source of truth for current status; the website does not infer accession, rights, ownership, or preservation completion from a transfer or selected outcome."
+      ],
+      "canonical_path": "/museum/network",
+      "related_paths": [
+        "/museum/network/collection",
+        "/museum/network/collection/6529NM.2026.001.01",
+        "/museum/network/artists",
+        "/museum/network/artists/casey-reas",
+        "/museum/network/projects/century",
+        "/museum/network/gifts/6529NM.2026.001",
+        "/museum/network/programs",
+        "/museum/network/stories",
+        "/museum/network/about",
+        "/museum"
+      ],
+      "tags": ["museum", "art", "collection", "artists", "provenance"],
+      "source_refs": [
+        "app/museum/network/page.tsx",
+        "app/museum/network/collection/page.tsx",
+        "components/museum/MuseumArtworkViewer.tsx",
+        "components/museum/MuseumGiftPage.tsx",
+        "lib/museum/publication/runtime.ts",
+        "__tests__/lib/museum/publication/runtime.test.ts"
+      ]
+    },
+    {
       "id": "navigation.sidebar",
       "kind": "ui_affordance",
       "title": "Sidebar navigation",
@@ -61,7 +113,8 @@
         "expand"
       ],
       "facts": [
-        "The primary navigation concepts are NFTs, Waves, DMs, Join 6529, and About.",
+        "The primary navigation concepts are NFTs, Waves, Museum, DMs, Join 6529, and About.",
+        "Museum is a standalone sidebar row linking to /museum/network; historical /museum gallery routes remain available from the Museum entry point.",
         "Home remains available through the 6529 logo link to /.",
         "The web sidebar Waves row opens /waves directly; Discover Waves remains secondary inside the Waves experience and searchable, while Network, Delegation, Tools, Open Data, and reference material live under About.",
         "Drop Forge appears as a standalone sidebar row after About only when the connected wallet can access /drop-forge.",
@@ -73,6 +126,7 @@
       "related_paths": [
         "/the-memes",
         "/waves",
+        "/museum/network",
         "/messages",
         "/join-6529",
         "/about",

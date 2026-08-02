@@ -2,12 +2,13 @@ import { renderHook } from "@testing-library/react";
 import { useSidebarSections } from "@/hooks/useSidebarSections";
 
 describe("useSidebarSections", () => {
-  it("returns the menu IA groups with NFT and Waves secondary links", () => {
+  it("returns the menu IA groups with the Museum reading room link", () => {
     const { result } = renderHook(() => useSidebarSections(false, false, "US"));
 
     expect(result.current.map((section) => section.key)).toEqual([
       "nfts",
       "waves",
+      "museum",
       "about",
     ]);
 
@@ -35,6 +36,17 @@ describe("useSidebarSections", () => {
         activePathPrefixes: ["/waves/"],
       },
       { name: "Discover Waves", href: "/discover" },
+    ]);
+
+    const museumSection = result.current.find(
+      (section) => section.key === "museum"
+    );
+    expect(museumSection?.items).toEqual([
+      {
+        name: "Museum",
+        href: "/museum/network",
+        activePathPrefixes: ["/museum/network/"],
+      },
     ]);
   });
 
