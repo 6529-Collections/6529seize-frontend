@@ -36,6 +36,17 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function compareCanonicalJsonKeys(left: string, right: string): number {
+  if (left < right) {
+    return -1;
+  }
+  if (left > right) {
+    return 1;
+  }
+
+  return left.localeCompare(right);
+}
+
 function canonicalJson(value: unknown): string {
   if (
     value === null ||
@@ -58,7 +69,7 @@ function canonicalJson(value: unknown): string {
 
   if (isRecord(value)) {
     return `{${Object.keys(value)
-      .sort()
+      .sort(compareCanonicalJsonKeys)
       .map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`)
       .join(",")}}`;
   }
