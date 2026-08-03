@@ -16,6 +16,7 @@ describe("instrumentation-client", () => {
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
   const dropReactionRequestFailedMessage = "Drop reaction request failed";
   const privateBareWaveId = "2c5e0761-6de2-4e1f-9c23-a8c93ff1158f";
+  const privateNonRfcUuid = "00000000-0000-0000-0000-000000000000";
   const privateRelativeDropId = "5651cd9a-1852-42fc-b213-5f8d871f96bf";
   const objectCapturedPromiseRejectionMessage =
     "Object captured as promise rejection with keys: code, message, stack";
@@ -362,6 +363,7 @@ describe("instrumentation-client", () => {
           arguments: [
             "Retrying reaction",
             `Retrying wave ${privateBareWaveId}`,
+            `Analytics id ${privateNonRfcUuid}`,
             {
               request: {
                 endpoint: `drops/${privateRelativeDropId}/reaction`,
@@ -2884,6 +2886,7 @@ describe("instrumentation-client", () => {
       "private-referrer-wave-id",
       "private-wave-id",
       privateBareWaveId,
+      privateNonRfcUuid,
       privateRelativeDropId,
     ]) {
       expect(serializedResult).not.toContain(privateValue);
@@ -2913,6 +2916,7 @@ describe("instrumentation-client", () => {
         data: expect.objectContaining({
           arguments: [
             "Retrying reaction",
+            "[Filtered]",
             "[Filtered]",
             {
               request: {

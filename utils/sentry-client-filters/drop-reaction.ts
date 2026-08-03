@@ -26,9 +26,9 @@ const dropReactionActions = new Set(["add", "remove", "replace"]);
 const dropReactionSources = new Set(["chip", "picker", "quick-react"]);
 const dropReactionRequestPath = /^\/api\/drops\/[^/]+\/reaction\/?$/;
 const redactedUrlValue = "[Filtered]";
-const breadcrumbUrlKeys = ["from", "to", "url"] as const;
-const uuidPattern =
-  /\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/i;
+const breadcrumbUrlKeys: readonly string[] = ["from", "to", "url"];
+const uuidShapePattern =
+  /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i;
 const walletAddressPattern = /\b0x[a-f0-9]{40}\b/i;
 const longHexIdentifierPattern = /\b[a-f0-9]{32,}\b/i;
 const relativeIdentifierPathPrefixes = [
@@ -153,6 +153,8 @@ function isDropReactionTransportFailure(
   const statusCode =
     getNumericValue(data?.["status_code"]) ??
     getNumericValue(data?.["http.response.status_code"]);
+  // Sentry fetch rejections use an error breadcrumb without a status. Fetches
+  // that receive an HTTP response include its status, including 4xx and 5xx.
   const isTransportFailure =
     statusCode === 0 || (statusCode === null && breadcrumb.level === "error");
   const method = getStringValue(data?.["method"])?.toUpperCase();
@@ -240,7 +242,11 @@ function consumeCompletedDropReactionRequest(
   requestKey: string
 ): number | null {
   const endIndexes = completedRequests.get(requestKey);
-  const endIndex = endIndexes?.pop();
+  if (!endIndexes) {
+    return null;
+  }
+
+  const endIndex = endIndexes.pop();
   if (endIndex === undefined) {
     return null;
   }
@@ -450,7 +456,7 @@ export function hasDropReactionFailure(event: SentryClientEvent): boolean {
 }
 
 function isBreadcrumbUrlKey(key: string): boolean {
-  return breadcrumbUrlKeys.some((urlKey) => urlKey === key);
+  return breadcrumbUrlKeys.includes(key);
 }
 
 function isPathPrefixBoundary(character: string | undefined): boolean {
@@ -484,7 +490,7 @@ function hasRelativeIdentifierPath(value: string): boolean {
 
 function hasIdentifierBearingBreadcrumbText(value: string): boolean {
   if (
-    uuidPattern.test(value) ||
+    uuidShapePattern.test(value) ||
     walletAddressPattern.test(value) ||
     longHexIdentifierPattern.test(value) ||
     hasRelativeIdentifierPath(value)

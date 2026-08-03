@@ -524,10 +524,7 @@ function hasMatchingFailedTransportBreadcrumb(
 }
 
 function isLowValueFirstPartyNetworkError(event: SentryClientEvent): boolean {
-  if (
-    event.tags?.["feature"] === "drop-reaction" &&
-    hasDropReactionFailure(event)
-  ) {
+  if (hasDropReactionFailure(event)) {
     return true;
   }
 
