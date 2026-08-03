@@ -56,6 +56,26 @@ function mapSectionToMenuItem(section: SidebarSection): SidebarMenu[number] {
   };
 }
 
+function mapSectionToDirectMenuItem(
+  section: SidebarSection | undefined
+): SidebarMenu[number] | undefined {
+  if (section === undefined) {
+    return undefined;
+  }
+
+  const primaryItem = section.items[0];
+
+  if (primaryItem === undefined) {
+    return undefined;
+  }
+
+  return {
+    label: section.name,
+    path: primaryItem.href,
+    icon: section.icon,
+  };
+}
+
 export default function AppSidebar({
   open,
   onClose,
@@ -86,6 +106,7 @@ export default function AppSidebar({
 
     return [
       sectionMap.get("nfts"),
+      mapSectionToDirectMenuItem(sectionMap.get("museum")),
       sectionMap.get("waves"),
       {
         label: t(DEFAULT_LOCALE, "navigation.primary.dms"),

@@ -42,6 +42,21 @@ jest.mock("@/hooks/useUnreadIndicator", () => ({
 
 const mockUsePathname = usePathname as jest.Mock;
 
+function expectDocumentOrder(elements: HTMLElement[]) {
+  for (let index = 0; index < elements.length - 1; index += 1) {
+    const current = elements[index];
+    const next = elements[index + 1];
+
+    if (current === undefined || next === undefined) {
+      throw new Error("Missing sidebar navigation item");
+    }
+
+    expect(
+      current.compareDocumentPosition(next) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  }
+}
+
 describe("WebSidebarNav", () => {
   beforeEach(() => {
     mockUsePathname.mockReturnValue("/waves");
@@ -57,6 +72,22 @@ describe("WebSidebarNav", () => {
     );
     expect(screen.queryByRole("button", { name: "Waves" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Discover Waves" })).toBeNull();
+  });
+
+  it("keeps art destinations together and Waves adjacent to DMs", () => {
+    mockCanAccessDropForge = true;
+
+    render(<WebSidebarNav isCollapsed={false} />);
+
+    expectDocumentOrder([
+      screen.getByRole("button", { name: "NFTs" }),
+      screen.getByRole("link", { name: "Museum" }),
+      screen.getByRole("link", { name: "Waves" }),
+      screen.getByRole("link", { name: "DMs" }),
+      screen.getByRole("link", { name: "Join 6529" }),
+      screen.getByRole("button", { name: "About" }),
+      screen.getByRole("link", { name: "Drop Forge" }),
+    ]);
   });
 
   it("keeps Waves active for nested wave routes", () => {
