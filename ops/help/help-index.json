@@ -183,7 +183,7 @@
         "The current Overview includes a separately dated, source-pinned development update covering recent work, work in progress, launch requirements, and the latest evidence counts. Daily figures come from that update.",
         "Fourteen editorial pages explain artwork lifecycle, artist controls, responsibilities, curation and TDH authorization, minting, sales, revenue, randomness, metadata, freezing, contract changes, current development, and community review.",
         "Every page shows the review version, exact source link, page navigation, on-page contents, and a collapsible feedback rail; snapshot evidence is collected on Where Development Stands.",
-        "Review, Technical reference, and Public feedback are the three consistent top-level review areas shown below the status banner; page comments and sending feedback remain separate page actions.",
+        "Review chapters stay in the review contents navigation. Technical reference and All public feedback are separate review-wide destinations; each standalone destination links back to the review contents and to the other destination. Page comments and sending feedback remain page-specific actions.",
         "Active and historical routes read immutable versioned editorial content and validate its manifest before rendering.",
         "Each immutable version has its own lifecycle, deployment status, and audit status: superseded versions can remain readable as REVIEW_CLOSED, stop accepting submissions, link back to the current review, and avoid inheriting newer deployment or audit claims.",
         "The generated technical reference exposes the exact versioned Solidity source, definitions, functions, events, errors, and other declarations.",

@@ -82,8 +82,19 @@ describe("PublicReviewShell", () => {
       "hidden"
     );
     expect(
-      screen.getByRole("navigation", { name: "Contract review areas" })
-    ).toBeInTheDocument();
+      screen.getAllByRole("navigation", {
+        name: "Review-wide destinations",
+      })
+    ).toHaveLength(2);
+    expect(
+      screen.getAllByRole("link", { name: "Technical reference" })
+    ).toHaveLength(2);
+    expect(
+      screen.getAllByRole("link", { name: "All public feedback" })
+    ).toHaveLength(2);
+    expect(
+      screen.queryByRole("link", { name: "Review" })
+    ).not.toBeInTheDocument();
     expect(
       screen.getAllByRole("link", { name: "The short answer" })
     ).toHaveLength(2);
@@ -172,11 +183,25 @@ describe("PublicReviewShell", () => {
       "href",
       `https://github.com/6529-Collections/6529Stream/tree/${historicalCommit}`
     );
-    expect(
-      screen.getByRole("link", { name: /Public feedback/ })
-    ).toHaveAttribute(
-      "href",
-      "/reviews/6529-stream/versions/2026-07-25.1/feedback"
+    const historicalFeedbackLinks = screen.getAllByRole("link", {
+      name: "All public feedback",
+    });
+    expect(historicalFeedbackLinks).toHaveLength(2);
+    historicalFeedbackLinks.forEach((link) =>
+      expect(link).toHaveAttribute(
+        "href",
+        "/reviews/6529-stream/versions/2026-07-25.1/feedback"
+      )
+    );
+    const historicalReferenceLinks = screen.getAllByRole("link", {
+      name: "Technical reference",
+    });
+    expect(historicalReferenceLinks).toHaveLength(2);
+    historicalReferenceLinks.forEach((link) =>
+      expect(link).toHaveAttribute(
+        "href",
+        "/reviews/6529-stream/versions/2026-07-25.1/reference"
+      )
     );
   });
 
@@ -212,11 +237,25 @@ describe("PublicReviewShell", () => {
       />
     );
 
-    expect(
-      screen.getByRole("link", { name: /Public feedback/ })
-    ).toHaveAttribute(
-      "href",
-      "/reviews/another-contract/versions/candidate-2/feedback"
+    const candidateFeedbackLinks = screen.getAllByRole("link", {
+      name: "All public feedback",
+    });
+    expect(candidateFeedbackLinks).toHaveLength(2);
+    candidateFeedbackLinks.forEach((link) =>
+      expect(link).toHaveAttribute(
+        "href",
+        "/reviews/another-contract/versions/candidate-2/feedback"
+      )
+    );
+    const candidateReferenceLinks = screen.getAllByRole("link", {
+      name: "Technical reference",
+    });
+    expect(candidateReferenceLinks).toHaveLength(2);
+    candidateReferenceLinks.forEach((link) =>
+      expect(link).toHaveAttribute(
+        "href",
+        "/reviews/another-contract/versions/candidate-2/reference"
+      )
     );
     expect(screen.getByText("Another Contract contract")).toBeInTheDocument();
     expect(
@@ -288,8 +327,8 @@ describe("PublicReviewShell", () => {
     );
 
     expect(
-      screen.getByRole("link", { name: /Public feedback/ })
-    ).toBeInTheDocument();
+      screen.getAllByRole("link", { name: "All public feedback" })
+    ).toHaveLength(2);
     expect(
       screen.queryByRole("link", { name: "Send feedback" })
     ).not.toBeInTheDocument();
