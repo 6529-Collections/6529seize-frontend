@@ -51,9 +51,12 @@ function expectDocumentOrder(elements: HTMLElement[]) {
       throw new Error("Missing sidebar navigation item");
     }
 
-    expect(
-      current.compareDocumentPosition(next) & Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeTruthy();
+    const currentRow = current.closest("li");
+    const nextRow = next.closest("li");
+
+    expect(currentRow).not.toBeNull();
+    expect(nextRow).not.toBeNull();
+    expect(currentRow?.nextElementSibling).toBe(nextRow);
   }
 }
 
