@@ -24,6 +24,7 @@ import {
 
 import { containsDisallowedLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
 import { getMentionedGroupsFromEditorState } from "@/components/drops/create/lexical/utils/groupMentionDetection";
+import { getReferencedNftsFromEditorState } from "@/components/drops/create/lexical/utils/nftReferenceDetection";
 import { getMentionedUsersFromEditorState } from "@/components/drops/create/lexical/utils/userMentionDetection";
 import { getMentionedWavesFromEditorState } from "@/components/drops/create/lexical/utils/waveMentionDetection";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
@@ -301,6 +302,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     () => (editorState ? getMentionedWavesFromEditorState(editorState) : []),
     [editorState]
   );
+  const currentPartReferencedNfts = useMemo(
+    () => (editorState ? getReferencedNftsFromEditorState(editorState) : []),
+    [editorState]
+  );
 
   const sendTyping = React.useCallback(() => {
     send(WsMessageType.USER_IS_TYPING, { wave_id: wave.id });
@@ -453,6 +458,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     currentPartMentionedGroups,
     currentPartMentionedUsers,
     currentPartMentionedWaves,
+    currentPartReferencedNfts,
     submitting,
     setDrop,
     setFiles,

@@ -20,6 +20,7 @@ import {
   type EditorMentionedUser,
 } from "@/components/drops/create/lexical/utils/userMentionDetection";
 import { mergeMentionedWaves } from "@/components/drops/create/lexical/utils/waveMentionDetection";
+import { mergeReferencedNfts } from "@/components/drops/create/lexical/utils/nftReferenceDetection";
 import type { CreateDropInputHandles } from "../CreateDropInput";
 import type { CreateDropPollDraft } from "../CreateDropPoll";
 import {
@@ -55,6 +56,7 @@ export const useCreateDropDraftState = ({
   currentPartMentionedGroups,
   currentPartMentionedUsers,
   currentPartMentionedWaves,
+  currentPartReferencedNfts,
   submitting,
   setDrop,
   setFiles,
@@ -92,6 +94,8 @@ export const useCreateDropDraftState = ({
   readonly currentPartMentionedUsers: EditorMentionedUser[];
   /** Wave mentions restored from the editor, including their persisted IDs. */
   readonly currentPartMentionedWaves: MentionedWave[];
+  /** NFT references restored from the editor, including contract and token. */
+  readonly currentPartReferencedNfts: ReferencedNft[];
   readonly submitting: boolean;
   readonly setDrop: Dispatch<SetStateAction<CreateDropConfig | null>>;
   readonly setFiles: Dispatch<SetStateAction<File[]>>;
@@ -272,7 +276,10 @@ export const useCreateDropDraftState = ({
           currentPartMentionedUsers,
           mentionedUsersRef.current
         ),
-        referencedNfts,
+        referencedNfts: mergeReferencedNfts(
+          currentPartReferencedNfts,
+          referencedNfts
+        ),
         mentionedWaves: mergeMentionedWaves(
           currentPartMentionedWaves,
           mentionedWaves
