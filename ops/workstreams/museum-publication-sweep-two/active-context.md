@@ -2,19 +2,24 @@
 
 ## Current state
 
-- Rescue PR #3550 is merged as
-  `bd0983475802c8a742a1f52416fe480285ab1960` and is live in production.
-- Production `/api/version` returned that exact commit with `stale=false`; the
-  deployment workflow's three-match HTTP-version check passed.
-- Production validation passed core smoke 14/14, WCAG/i18n 6/6, and the
-  Museum-specific desktop/mobile sweep 10/10 plus live and return-to-still.
-- The general surface matrix reproduced two pre-existing harness false
-  positives. The release owner accepted an explicit exception with raw evidence:
-  an init script wrote session storage in a sandboxed Arweave child frame, and
-  two `eth_getBlockByNumber` reads used safe JSON-RPC methods on hosts missing
-  from the test guard's public-RPC host set.
-- Sweep two is isolated on a clean branch from the exact released main commit.
-  It does not mutate the qualified production candidate.
+- Sweep-two PR #3551 is merged as
+  `5acf2f5f85531a0970cd6ba1fd8988f762923865` and is live in production.
+- Production `/api/version` and the announced-version endpoint returned that
+  exact commit with `stale=false`; the deployment workflow's three-match
+  HTTP-version check passed.
+- The release was staged as composition
+  `156e2d0c3134d96d78a14b110f5006b57873268d`, which contains exact production
+  main `5acf2f5f85531a0970cd6ba1fd8988f762923865`.
+- Production validation passed all 11 declared read-only packs (73 tests), core
+  smoke 14/14, surface matrix 26 passed with 22 intentional project skips,
+  WCAG/i18n 6/6, and the Museum-specific desktop/mobile sweep 14/14 plus live
+  recovery.
+- The required 30-minute post-deploy watch completed with 33 exact-version
+  samples and no mismatch. The final deployment manifest validates without
+  holds or warnings.
+- Canonical Museum source remains
+  `04856bc3d137cc2a74a8cf15f068e02d3d026038`; the live source route links to
+  that immutable commit.
 
 ## Canonical documents
 
@@ -55,10 +60,11 @@ The strict publication must add these exact manifest-declared files under
 
 ## Immediate work
 
-1. Push the signed review follow-up to ready PR #3551.
-2. Iterate exact-head bots and CI, and obtain owning task review before merge.
-3. Qualify the exact merged release through staging and production under the
-   repository deployment controls.
+1. No release action remains for sweep two.
+2. Keep future Museum publication changes atomic and source-manifest bound.
+3. Repair and re-enable Release Bus automation separately; both effective lanes
+   remain deliberately OFF/changeable under the recorded manual-fallback
+   control.
 
 ## Review disposition
 
@@ -99,6 +105,16 @@ The strict publication must add these exact manifest-declared files under
 - Debt Ratchet: passed.
 - React Doctor: 100/100, no issues.
 - `codex-diff-check`: passed.
+- Exact-head App PR CI and Debt Ratchet: passed on
+  `b42e30880aee2792f2b133635d42ed368a3cd997`.
+- Staging deploy run `30779714023`: passed; automatic staging E2E run
+  `30780357100`: passed all 12 packs.
+- Production deploy run `30780811939`: passed, including Elastic Beanstalk
+  health, deployed-version validation, three consecutive HTTP version matches,
+  announced version, and durable version evidence.
+- Production post-deploy: 11/11 declared packs and 73/73 tests passed; core
+  smoke 14/14; surface matrix 26 passed and 22 skipped; WCAG/i18n 6/6; Museum
+  desktop/mobile routes 14/14 plus live recovery.
 
 ## Internationalization fallback debt
 
