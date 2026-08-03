@@ -54,7 +54,7 @@
   lint and changed/test typechecks passed, React Doctor scored 100/100,
   whitespace/path scrubs passed, and the production build completed
   successfully. Final exact-head gates will be rerun after ledger freeze.
-- Final frozen validation passed 8 focused suites / 49 tests, 63 Museum suites /
+- Pre-owning-review frozen validation passed 8 focused suites / 49 tests, 63 Museum suites /
   124 tests, changed lint/typecheck, Jest and Playwright test typechecks, React
   Doctor 100/100, help sync, public-artifact path scrub and `codex-diff-check`.
   The first final build compiled but a force-stopped preview had left one
@@ -121,3 +121,12 @@
   path scrub and `codex-diff-check`. No runtime, JSX, CSS, copy, href or retained
   visual evidence changed, so the approved production-build pixels remain
   representative pending renewed exact-head approval.
+- Hosted exact-head run `30799318898` then passed authoritative Linux Knip,
+  related Jest, the optimized production build, exact merge-tree evidence and
+  both Playwright packs. Push Secret Scan attempt 1 was cancelled when checkout
+  timed out before the scanner ran; after the unrelated workflow actor drained,
+  attempt 2 completed the actual scan successfully. Final CodeRabbit review
+  requested two runtime-neutral clarifications: rename the earlier validation
+  entry as pre-owning-review and explicitly prove related immutable links are
+  absent for `invalid` and `partial` states. Both are included in the next
+  exact-head validation cycle.

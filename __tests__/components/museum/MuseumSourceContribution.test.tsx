@@ -148,6 +148,11 @@ describe("MuseumSourceContribution", () => {
         screen.queryByRole("link", { name: "Suggest an improvement" })
       ).not.toBeInTheDocument();
       expect(
+        screen.queryByRole("link", {
+          name: /Machine record: exact source.*objects\/6529NM\.2026\.001\.01\.json/u,
+        })
+      ).not.toBeInTheDocument();
+      expect(
         screen.getByRole("link", { name: "Contribution guide" })
       ).toBeInTheDocument();
     }
