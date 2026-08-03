@@ -195,6 +195,18 @@ jest.mock(
     ),
   })
 );
+jest.mock(
+  "@/components/drops/create/lexical/utils/waveMentionDetection",
+  () => ({
+    getMentionedWavesFromEditorState: jest.fn(() => []),
+    mergeMentionedWaves: jest.fn(
+      (editorMentions: unknown[], registryMentions: unknown[]) => [
+        ...registryMentions,
+        ...editorMentions,
+      ]
+    ),
+  })
+);
 jest.mock("@/components/waves/CreateDropContentRequirements", () => () => (
   <div data-testid="requirements" />
 ));

@@ -19,6 +19,7 @@ import {
   mergeMentionedUsers,
   type EditorMentionedUser,
 } from "@/components/drops/create/lexical/utils/userMentionDetection";
+import { mergeMentionedWaves } from "@/components/drops/create/lexical/utils/waveMentionDetection";
 import type { CreateDropInputHandles } from "../CreateDropInput";
 import type { CreateDropPollDraft } from "../CreateDropPoll";
 import {
@@ -53,6 +54,7 @@ export const useCreateDropDraftState = ({
   canMentionAll,
   currentPartMentionedGroups,
   currentPartMentionedUsers,
+  currentPartMentionedWaves,
   submitting,
   setDrop,
   setFiles,
@@ -88,6 +90,8 @@ export const useCreateDropDraftState = ({
    * pick-registry, which does not survive a draft restore.
    */
   readonly currentPartMentionedUsers: EditorMentionedUser[];
+  /** Wave mentions restored from the editor, including their persisted IDs. */
+  readonly currentPartMentionedWaves: MentionedWave[];
   readonly submitting: boolean;
   readonly setDrop: Dispatch<SetStateAction<CreateDropConfig | null>>;
   readonly setFiles: Dispatch<SetStateAction<File[]>>;
@@ -269,7 +273,10 @@ export const useCreateDropDraftState = ({
           mentionedUsersRef.current
         ),
         referencedNfts,
-        mentionedWaves,
+        mentionedWaves: mergeMentionedWaves(
+          currentPartMentionedWaves,
+          mentionedWaves
+        ),
       });
 
     return createCurrentDrop(

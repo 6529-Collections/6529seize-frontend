@@ -62,6 +62,7 @@ describe("mention alias submission", () => {
         // Alias expansion registers its members through onMentionedUser, so this
         // path exercises the session registry rather than editor-derived mentions.
         currentPartMentionedUsers: [],
+        currentPartMentionedWaves: [],
         submitting: false,
         setDrop,
         setFiles: jest.fn(),
