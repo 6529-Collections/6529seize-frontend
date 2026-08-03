@@ -1,0 +1,67 @@
+# Run log
+
+## 2026-08-03 - kickoff and audit
+
+- Fetched frontend `origin/main`, verified exact head
+  `472da902945bfeab51cde4439da6dbafa90ecb90`, and created clean branch
+  `codex/museum-open-source-foundation` before tracked edits.
+- Audited the shared Museum layout and shell, all visitor and legacy routes,
+  strict publication identity, immutable URL builder, i18n catalog, help corpus,
+  route tests and the prior visual-fidelity contract.
+- Confirmed one shared shell insertion covers the complete Museum route tree and
+  can reuse the already-loaded atomic publication identity.
+- Fetched canonical Museum main and verified exact source head
+  `92429032013b9dfdb626ff6860e272191a89dfc4`. Existing design sources are
+  `docs/onchain-design.md`, `docs/external-works-registry.md` and
+  `specs/onchain/contract-migration-v1.md`; no contributor guide or public Open
+  Museum/transition manuscript is present at that release.
+- Coordinated the missing source contract with the owning Museum task. It fixed
+  the governed paths as `CONTRIBUTING.md`, `docs/open-museum.md` and
+  `docs/onchain-transition.md`, all destined for the release manifest, with the
+  first two visitor manuscripts and preferably all three files required by the
+  atomic publication.
+- Recorded the approved Fall 2026 goal and the mandatory adjacent
+  not-deployed/not-activated qualifier. No backend, contract address,
+  deployment, activation, migration, audit or on-chain write is claimed.
+
+## 2026-08-03 - implementation and canonical activation
+
+- Bootstrapped the isolated frontend on port 3206 and installed frozen
+  dependencies. Read the repository's Next.js 16 documentation before changing
+  the async server layout and shared shell.
+- Added three strict governed publication paths and document kinds, atomic
+  assembler requirements, fixed-origin immutable/source-main GitHub link
+  builders, shared source/contribution strip, full About treatment and compact
+  Sources context. All interface copy is in Museum en-US i18n; governed
+  manuscripts remain exact sanitized source.
+- Updated the Museum help source and generated public help index. Added route,
+  component, security and fail-closed publication tests.
+- Candidate QA used source branch `codex/museum-open-record` only in an
+  uncommitted local preview. It rendered exact candidate head
+  `7fdba8312b1433c1e5466cf07c4154c42ba78049`; the override was removed before
+  canonical activation.
+- Museum PR #20 merged. A strict `main` probe resolved exact commit
+  `bd853b483f807aad6d737305a9f78b1273bb2356`, 213 entries, manifest SHA-256
+  `sha256:a403df4d775def50abf22e45829c4c47f8c239f98adb72a0375e589425f4c2cf`
+  and Keccak
+  `0x9e3eb6b11197c67ad4c92106213568e0af33018b8bd9fd312f2b5376c0d399c4`.
+  It assembled 26 public documents and verified all three required files.
+- Canonical-main browser QA passed at 1280x720 and 390x844: one H1, native 6529
+  shell, black/Montserrat/iron/primary-blue tokens, exact source links, canonical
+  contribution action and no horizontal overflow. The home strip renders once
+  and remains subordinate to artwork.
+- Focused tests passed 24/24, broad Museum regression passed 124/124, changed
+  lint and changed/test typechecks passed, React Doctor scored 100/100,
+  whitespace/path scrubs passed, and the production build completed
+  successfully. Final exact-head gates will be rerun after ledger freeze.
+- Final frozen validation passed 8 focused suites / 49 tests, 63 Museum suites /
+  124 tests, changed lint/typecheck, Jest and Playwright test typechecks, React
+  Doctor 100/100, help sync, public-artifact path scrub and `codex-diff-check`.
+  The first final build compiled but a force-stopped preview had left one
+  malformed ignored `.next/dev` validator comment; after repairing only that
+  generated cache line, a clean production build completed successfully in
+  405.7 seconds.
+- Retained production-build visual evidence under this workstream's `evidence/`
+  directory: About desktop/mobile, home source strip, object mobile and Sources
+  mobile. Desktop measured `1280/1265/1265` and mobile `390/375/375` for
+  inner/client/scroll width respectively, proving no horizontal overflow.

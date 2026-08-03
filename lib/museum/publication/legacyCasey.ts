@@ -1,6 +1,11 @@
 import { assertApprovedArtBlocksUrl } from "./security";
 import { parseHeading } from "./legacyCaseyMarkdown";
 import { PROJECT_PUBLIC_DOCUMENTS } from "./legacyCaseyProjectDocuments";
+import {
+  MUSEUM_CONTRIBUTOR_GUIDE_PATH,
+  MUSEUM_ONCHAIN_TRANSITION_PATH,
+  MUSEUM_OPEN_STATEMENT_PATH,
+} from "./openMuseum";
 import type {
   MuseumAccessionedArtwork,
   MuseumArtist,
@@ -65,6 +70,27 @@ const CASEY_PUBLIC_DOCUMENTS: readonly PublicDocumentContract[] = [
     id: "founding-and-operating-principles",
     path: "policies/founding-and-operating-principles.md",
     kind: "founding_principles",
+    artworkId: null,
+    relation: "institution",
+  },
+  {
+    id: "open-museum",
+    path: MUSEUM_OPEN_STATEMENT_PATH,
+    kind: "open_museum_statement",
+    artworkId: null,
+    relation: "institution",
+  },
+  {
+    id: "onchain-transition",
+    path: MUSEUM_ONCHAIN_TRANSITION_PATH,
+    kind: "onchain_transition",
+    artworkId: null,
+    relation: "institution",
+  },
+  {
+    id: "museum-contributor-guide",
+    path: MUSEUM_CONTRIBUTOR_GUIDE_PATH,
+    kind: "contributor_guide",
     artworkId: null,
     relation: "institution",
   },

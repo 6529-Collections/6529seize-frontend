@@ -54,6 +54,9 @@ export type MuseumMedia = MuseumRetainedMedia | MuseumUpstreamMedia;
 
 export type MuseumPublicDocumentKind =
   | "founding_principles"
+  | "open_museum_statement"
+  | "onchain_transition"
+  | "contributor_guide"
   | "artist_practice"
   | "collection_essay"
   | "curatorial_accession_review"

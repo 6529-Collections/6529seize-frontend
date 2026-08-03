@@ -29,5 +29,14 @@ export default async function MuseumNetworkLayout({
   const publicationState = await getMuseumPublicationState();
   const sourceState = museumSourceState(publicationState.status);
 
-  return <MuseumShell view={{ sourceState }}>{children}</MuseumShell>;
+  return (
+    <MuseumShell
+      view={{
+        sourceState,
+        publicationIdentity: publicationState.publication?.identity ?? null,
+      }}
+    >
+      {children}
+    </MuseumShell>
+  );
 }

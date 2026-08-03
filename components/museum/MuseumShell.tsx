@@ -1,7 +1,9 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { MuseumSourceContribution } from "@/components/museum/MuseumSourceContribution";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import type { MuseumPublicationIdentity } from "@/lib/museum/publication";
 import { MUSEUM_REPOSITORY_URL } from "@/lib/museum/types";
 import type { MuseumSourceState } from "@/lib/museum/types";
 
@@ -45,7 +47,10 @@ export function MuseumShell({
   view,
 }: {
   readonly children: ReactNode;
-  readonly view: { readonly sourceState: MuseumSourceState };
+  readonly view: {
+    readonly sourceState: MuseumSourceState;
+    readonly publicationIdentity: MuseumPublicationIdentity | null;
+  };
 }) {
   return (
     <main className="tailwind-scope tw-min-h-screen tw-min-w-0 tw-overflow-x-clip tw-bg-black tw-text-iron-100">
@@ -85,6 +90,11 @@ export function MuseumShell({
       <div className="tw-mx-auto tw-w-full tw-min-w-0 tw-max-w-[1324px] tw-px-4 tw-py-8 sm:tw-px-6 sm:tw-py-12 lg:tw-px-8 lg:tw-py-16">
         {children}
       </div>
+
+      <MuseumSourceContribution
+        identity={view.publicationIdentity}
+        sourceState={view.sourceState}
+      />
 
       <footer className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800">
         <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-[1324px] tw-flex-col tw-gap-3 tw-px-4 tw-py-8 tw-text-xs tw-leading-5 tw-text-iron-500 sm:tw-px-6 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between lg:tw-px-8">
