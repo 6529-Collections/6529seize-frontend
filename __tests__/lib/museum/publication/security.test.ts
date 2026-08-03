@@ -4,7 +4,10 @@ import {
   assertGovernedMuseumPath,
   assertSafeMuseumRepositoryPath,
   buildImmutableMuseumBlobUrl,
+  buildImmutableMuseumCommitUrl,
   buildImmutableMuseumRawUrl,
+  buildMuseumMainBlobUrl,
+  buildMuseumMainEditUrl,
 } from "@/lib/museum/publication";
 import { EXACT_COMMIT } from "./fixture";
 
@@ -81,6 +84,21 @@ describe("Museum publication security boundary", () => {
     expect(
       buildImmutableMuseumBlobUrl(EXACT_COMMIT, "records/../secret.json")
     ).toBeNull();
+  });
+
+  it("separates immutable release inspection from the maintained contributor guide", () => {
+    expect(buildImmutableMuseumCommitUrl(EXACT_COMMIT)).toBe(
+      `https://github.com/6529-Collections/6529networkmuseum/tree/${EXACT_COMMIT}`
+    );
+    expect(buildImmutableMuseumCommitUrl("main")).toBeNull();
+    expect(buildMuseumMainBlobUrl("CONTRIBUTING.md")).toBe(
+      "https://github.com/6529-Collections/6529networkmuseum/blob/main/CONTRIBUTING.md"
+    );
+    expect(buildMuseumMainBlobUrl("../CONTRIBUTING.md")).toBeNull();
+    expect(buildMuseumMainEditUrl("docs/open-museum.md")).toBe(
+      "https://github.com/6529-Collections/6529networkmuseum/edit/main/docs/open-museum.md"
+    );
+    expect(buildMuseumMainEditUrl("docs/../RIGHTS.md")).toBeNull();
   });
 
   it("rejects arbitrary GitHub and Art Blocks origins", () => {

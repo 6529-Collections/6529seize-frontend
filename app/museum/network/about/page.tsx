@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MuseumMarkdown } from "@/components/museum/MuseumMarkdown";
+import { MuseumOpenMuseumStatement } from "@/components/museum/MuseumOpenMuseumStatement";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
 import { MuseumSectionHeading } from "@/components/museum/MuseumShell";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -21,6 +22,15 @@ export default async function MuseumAboutPage() {
   const mission = publicationState.publication.documents.find(
     (document) => document.kind === "founding_principles"
   );
+  const openMuseum = publicationState.publication.documents.find(
+    (document) => document.kind === "open_museum_statement"
+  );
+  const transition = publicationState.publication.documents.find(
+    (document) => document.kind === "onchain_transition"
+  );
+  if (openMuseum === undefined || transition === undefined) {
+    return <MuseumPublicationUnavailable />;
+  }
 
   return (
     <div>
@@ -29,9 +39,24 @@ export default async function MuseumAboutPage() {
         title={t(DEFAULT_LOCALE, "museum.network.about.title")}
         description={t(DEFAULT_LOCALE, "museum.network.about.description")}
       />
-      <section className="tw-max-w-4xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8">
+      <MuseumOpenMuseumStatement
+        commit={publicationState.publication.identity.commit}
+        openMuseum={openMuseum}
+        transition={transition}
+      />
+      <section
+        className="tw-mt-16 tw-max-w-4xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8"
+        aria-labelledby="museum-mission-title"
+      >
+        <h2
+          id="museum-mission-title"
+          className="tw-m-0 tw-mb-6 tw-text-2xl tw-font-semibold tw-text-iron-50"
+        >
+          {t(DEFAULT_LOCALE, "museum.network.mission.title")}
+        </h2>
         {mission ? (
           <MuseumMarkdown
+            embeddedDocument
             sourceCommit={publicationState.publication.identity.commit}
             sourcePath={mission.sourcePath}
           >
@@ -44,7 +69,7 @@ export default async function MuseumAboutPage() {
         )}
       </section>
       <nav
-        className="tw-mt-14 tw-grid tw-gap-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8 sm:tw-grid-cols-2"
+        className="tw-mt-16 tw-grid tw-gap-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8 sm:tw-grid-cols-2"
         aria-label={t(DEFAULT_LOCALE, "museum.network.about.institutional")}
       >
         <Link

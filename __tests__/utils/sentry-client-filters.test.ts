@@ -6933,6 +6933,38 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters the current Poper Blocker rejection with an unsymbolicated fetch frame", () => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent({
+      frames: [
+        {
+          filename:
+            "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/dispatch/FetchHttpHandler.js",
+          function: "e.prototype.handle",
+          in_app: false,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          abs_path: "app:///injectScriptAdjust.js",
+          lineno: 1,
+          colno: 4520,
+          in_app: true,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          abs_path: "app:///injectScriptAdjust.js",
+          function: "VihJ",
+          lineno: 1,
+          colno: 3159,
+          in_app: true,
+        },
+      ],
+    });
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(true);
+  });
+
   it("filters the observed Poper Blocker rejection with the expanded AWS RUM stack", () => {
     const event = createPoperBlockerOrphanFetchRejectionEvent({
       frames: [
@@ -6977,6 +7009,7 @@ describe("sentry-client-filters", () => {
 
   it.each([
     ["similar filename", { filename: "app:///injectScriptAdjustment.js" }],
+    ["empty function", { function: "" }],
     ["changed function", { function: "window.fetchWrapper" }],
     ["changed line", { lineno: 2 }],
     ["changed column", { colno: 4519 }],
@@ -7021,6 +7054,72 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
+  it("keeps Poper Blocker-shaped rejections with an unsymbolicated second frame", () => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent({
+      frames: [
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "window.fetch",
+          lineno: 1,
+          colno: 4520,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          lineno: 1,
+          colno: 3159,
+        },
+      ],
+    });
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps a duplicated unsymbolicated fetch signature without the VihJ frame", () => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent({
+      frames: [
+        {
+          filename: "app:///injectScriptAdjust.js",
+          lineno: 1,
+          colno: 4520,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "window.fetch",
+          lineno: 1,
+          colno: 4520,
+        },
+      ],
+    });
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps missing-function frames from a nearby injected script", () => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent({
+      frames: [
+        {
+          filename: "app:///injectScriptAdjustment.js",
+          lineno: 1,
+          colno: 4520,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "VihJ",
+          lineno: 1,
+          colno: 3159,
+        },
+      ],
+    });
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(false);
+  });
+
   it("keeps Poper Blocker-shaped rejections with an extra injected frame", () => {
     const event = createPoperBlockerOrphanFetchRejectionEvent({
       frames: [
@@ -7052,6 +7151,12 @@ describe("sentry-client-filters", () => {
 
   it.each([
     ["unrelated error", { value: "Application request validation failed." }],
+    [
+      "AbortError",
+      { type: "AbortError", value: "The operation was aborted" },
+    ],
+    ["HTTP error", { value: "Request failed with status code 503" }],
+    ["timeout", { value: "Request timed out after 30000 ms" }],
     ["non-TypeError", { type: "Error" }],
     ["handled rejection", { handled: true }],
     ["missing handled flag", { includeHandled: false }],
