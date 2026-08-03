@@ -1708,6 +1708,40 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
+  it("drops the current Poper Blocker rejection with an omitted fetch function", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createPoperBlockerOrphanFetchRejectionEvent(
+      poperBlockerNetworkErrorMessage,
+      [
+        {
+          filename:
+            "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/dispatch/FetchHttpHandler.js",
+          function: "e.prototype.handle",
+          in_app: false,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          abs_path: "app:///injectScriptAdjust.js",
+          lineno: 1,
+          colno: 4520,
+          in_app: true,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          abs_path: "app:///injectScriptAdjust.js",
+          function: "VihJ",
+          lineno: 1,
+          colno: 3159,
+          in_app: true,
+        },
+      ]
+    );
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
   it("drops the latest raw Poper Blocker orphan fetch rejection", () => {
     const beforeSend = loadBeforeSend();
     const event = createPoperBlockerOrphanFetchRejectionEvent(
@@ -1785,6 +1819,33 @@ describe("instrumentation-client", () => {
                   in_app: true,
                 },
               ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps the handled frame-less tracking network failure", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      level: "warning",
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Network request failed. Please check your connection and try again. (/track/)",
+            mechanism: {
+              type: "generic",
+              handled: true,
+            },
+            stacktrace: {
+              frames: [],
             },
           },
         ],

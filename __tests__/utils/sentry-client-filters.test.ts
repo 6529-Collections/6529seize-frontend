@@ -6933,6 +6933,38 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters the current Poper Blocker rejection with an omitted fetch function", () => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent({
+      frames: [
+        {
+          filename:
+            "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/dispatch/FetchHttpHandler.js",
+          function: "e.prototype.handle",
+          in_app: false,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          abs_path: "app:///injectScriptAdjust.js",
+          lineno: 1,
+          colno: 4520,
+          in_app: true,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          abs_path: "app:///injectScriptAdjust.js",
+          function: "VihJ",
+          lineno: 1,
+          colno: 3159,
+          in_app: true,
+        },
+      ],
+    });
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(true);
+  });
+
   it("filters the observed Poper Blocker rejection with the expanded AWS RUM stack", () => {
     const event = createPoperBlockerOrphanFetchRejectionEvent({
       frames: [
@@ -6955,7 +6987,7 @@ describe("sentry-client-filters", () => {
         },
         {
           filename: "app:///injectScriptAdjust.js",
-          function: "window.fetch",
+          function: null,
           lineno: 1,
           colno: 4520,
           in_app: true,
@@ -6993,6 +7025,28 @@ describe("sentry-client-filters", () => {
         {
           filename: "app:///injectScriptAdjust.js",
           function: "VihJ",
+          lineno: 1,
+          colno: 3159,
+        },
+      ],
+    });
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps a Poper Blocker near-miss with an omitted VihJ function", () => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent({
+      frames: [
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "window.fetch",
+          lineno: 1,
+          colno: 4520,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
           lineno: 1,
           colno: 3159,
         },
