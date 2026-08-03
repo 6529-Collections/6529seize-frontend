@@ -1,8 +1,9 @@
 import React from "react";
-import { act, render } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import NewHashtagsPlugin, {
   HashtagsTypeaheadOption,
 } from "@/components/drops/create/lexical/plugins/hashtags/HashtagsPlugin";
+import HashtagsTypeaheadMenuItem from "@/components/drops/create/lexical/plugins/hashtags/HashtagsTypeaheadMenuItem";
 import { getPossibleQueryMatch } from "@/components/drops/create/lexical/plugins/hashtags/getPossibleQueryMatch";
 
 const mockEditor = {
@@ -37,9 +38,7 @@ jest.mock("@/hooks/useAlchemyNftQueries", () => ({
 const {
   $createHashtagNode,
 } = require("@/components/drops/create/lexical/nodes/HashtagNode");
-const {
-  useTokenMetadataQuery,
-} = require("@/hooks/useAlchemyNftQueries");
+const { useTokenMetadataQuery } = require("@/hooks/useAlchemyNftQueries");
 
 beforeEach(() => {
   capturedProps = null;
@@ -108,6 +107,7 @@ test("resolves a complete reference through the internal metadata query", () => 
       tokenId: "1",
       name: "The Memes #1",
       picture: "meme-1.png",
+      collectionName: "The Memes",
     })
   );
 });
@@ -118,12 +118,45 @@ test("HashtagsTypeaheadOption creates option correctly", () => {
     tokenId: "1",
     name: "Test NFT",
     picture: "test.jpg",
+    collectionName: "Test Collection",
   });
 
   expect(option.contract).toBe("0x1234567890123456789012345678901234567890");
   expect(option.tokenId).toBe("1");
   expect(option.name).toBe("Test NFT");
   expect(option.picture).toBe("test.jpg");
+  expect(option.collectionName).toBe("Test Collection");
+});
+
+test("keeps editor focus while selecting an NFT suggestion with the mouse", () => {
+  const onClick = jest.fn();
+
+  render(
+    <ul>
+      <HashtagsTypeaheadMenuItem
+        index={0}
+        isSelected
+        onClick={onClick}
+        onMouseEnter={jest.fn()}
+        name="Test NFT"
+        picture="https://example.com/nft.png"
+        collectionName="Test Collection"
+        tokenId="1"
+        setRefElement={jest.fn()}
+      />
+    </ul>
+  );
+
+  const button = screen.getByRole("button", { name: /Test NFT/i });
+  expect(screen.getByRole("img", { name: "NFT Test NFT" })).toHaveAttribute(
+    "src",
+    "https://example.com/nft.png"
+  );
+  expect(screen.getByText("Test Collection · #1")).toBeInTheDocument();
+  expect(button.closest("li")).not.toBeNull();
+  expect(fireEvent.mouseDown(button)).toBe(false);
+  fireEvent.click(button);
+  expect(onClick).toHaveBeenCalledTimes(1);
 });
 
 test("selection creates an editor node containing the NFT identity", () => {

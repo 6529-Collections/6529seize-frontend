@@ -74,9 +74,7 @@ function useHashtagLookupService(hashtagString: string | null) {
   );
   const tokens = useMemo(
     () =>
-      lookup
-        ? [{ contract: lookup.contract, tokenId: lookup.tokenId }]
-        : [],
+      lookup ? [{ contract: lookup.contract, tokenId: lookup.tokenId }] : [],
     [lookup]
   );
   const { data = [] } = useTokenMetadataQuery({
@@ -92,6 +90,7 @@ function useHashtagLookupService(hashtagString: string | null) {
             tokenId: token.tokenIdRaw || lookup.tokenId,
             name: getNftDisplayName(token, lookup),
             picture: token.imageUrl,
+            collectionName: token.collectionName,
           }))
         : [],
     [data, lookup]
@@ -103,29 +102,31 @@ export class HashtagsTypeaheadOption extends MenuOption {
   tokenId: string;
   name: string;
   picture: string | null;
+  collectionName: string | null;
 
   constructor({
     contract,
     tokenId,
     name,
     picture,
+    collectionName,
   }: {
     contract: string;
     tokenId: string;
     name: string;
     picture: string | null;
+    collectionName: string | null;
   }) {
     super(name);
     this.contract = contract;
     this.tokenId = tokenId;
     this.name = name;
     this.picture = picture;
+    this.collectionName = collectionName;
   }
 }
 
-const createNftReferenceNode = (
-  selectedOption: HashtagsTypeaheadOption
-) => {
+const createNftReferenceNode = (selectedOption: HashtagsTypeaheadOption) => {
   const referencedNft: ReferencedNft = {
     contract: selectedOption.contract,
     token: selectedOption.tokenId,
@@ -168,6 +169,7 @@ const NewHashtagsPlugin = forwardRef<
               tokenId: result.tokenId,
               name: result.name,
               picture: result.picture,
+              collectionName: result.collectionName,
             })
         )
         .slice(0, SUGGESTION_LIST_LENGTH_LIMIT),
