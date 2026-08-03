@@ -149,7 +149,7 @@ describe("Museum finished publication routes", () => {
     ).not.toBeInTheDocument();
     expect(
       screen.getByRole("link", {
-        name: "Read the complete canonical source manuscript on GitHub",
+        name: "Read the complete research manuscript",
       })
     ).toHaveAttribute(
       "href",
@@ -160,62 +160,65 @@ describe("Museum finished publication routes", () => {
     ).toHaveAttribute("tabindex", "0");
     expect(screen.getByRole("table")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", {
+      screen.queryByRole("heading", {
         level: 2,
         name: "Research with a public source",
       })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "The contract is being designed; it has not yet been deployed or activated."
-      )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "A commitment records identity, schema, hash, URI, authority, effective time, and lineage. Retrieving exact bytes does not establish availability or truth."
-      )
-    ).toBeInTheDocument();
+    ).not.toBeInTheDocument();
   });
 
-  it("renders the governed Open Museum statements without adding another H1", async () => {
+  it("presents the mission and public record as an edited Museum publication", async () => {
     render(await MuseumAboutPage());
 
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(
       screen.getByRole("heading", {
         level: 2,
-        name: "The Museum is built in public",
+        name: "A permanent collection, held in public",
       })
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "The public record can be inspected, forked, and improved through reviewed contributions."
+        "The Museum collects internet-native art for long-term stewardship, research, interpretation, and access. Accessioned works are held for the benefit of the 6529 Network and the public commons."
       )
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "Large writing and media remain content-addressed while commitments preserve institutional history."
-      )
+      screen.getByRole("heading", {
+        level: 3,
+        name: "The collection's obligations",
+      })
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "The contract is being designed; it has not yet been deployed or activated."
-      )
+      screen.getByRole("heading", { level: 4, name: "Permanence" })
     ).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "The contract records authorized decisions and claims; it does not make curatorial or governance decisions."
-      )
+      screen.getByRole("link", { name: "Read the founding record" })
+    ).toHaveAttribute(
+      "href",
+      expect.stringContaining(`/blob/${"a".repeat(40)}/policies/`)
+    );
+    expect(
+      screen.getByRole("heading", { level: 2, name: "A public catalogue" })
     ).toBeInTheDocument();
     expect(
-      screen.getAllByText(/Working public operating statement/u)
-    ).toHaveLength(1);
-    expect(screen.getAllByText(/Working migration statement/u)).toHaveLength(1);
+      screen.getByRole("heading", {
+        level: 2,
+        name: "A permanent record beyond the website",
+      })
+    ).toBeInTheDocument();
     expect(
-      screen.queryByText(/Status: working public operating statement/u)
+      screen.getByText(/The public repository is the bridge/u)
+    ).toBeInTheDocument();
+    expect(screen.getAllByText(/Public operating statement/u)).toHaveLength(1);
+    expect(screen.getAllByText(/Contract design in progress/u)).toHaveLength(1);
+    expect(screen.queryByText(/Source HTML observed/u)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/The public record can be inspected, forked/u)
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByText(/Status: working public migration statement/u)
+      screen.queryByRole("heading", {
+        name: "An open museum, built in public",
+      })
     ).not.toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "On-chain design" })

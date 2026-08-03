@@ -112,12 +112,9 @@ export function MuseumSourceContribution({
     >
       <div className="tw-mx-auto tw-grid tw-w-full tw-max-w-[1324px] tw-gap-6 tw-px-4 tw-py-8 sm:tw-px-6 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:tw-items-end lg:tw-gap-10 lg:tw-px-8">
         <div className="tw-max-w-3xl">
-          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-            {t(DEFAULT_LOCALE, "museum.network.openMuseum.eyebrow")}
-          </p>
           <h2
             id="museum-open-source-title"
-            className="tw-m-0 tw-mt-2 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100"
+            className="tw-m-0 tw-text-sm tw-font-semibold tw-leading-6 tw-text-iron-100"
           >
             {t(DEFAULT_LOCALE, "museum.network.openMuseum.strip.title")}
           </h2>
