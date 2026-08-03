@@ -31,7 +31,7 @@ const KEYS_AND_GATES_OUTCOME_IDS = Array.from(
   (_, index) => `6529NM-AP-01-OUT-${String(index + 1).padStart(3, "0")}`
 );
 
-export interface MuseumPageSourceProjection {
+interface MuseumPageSourceProjection {
   readonly primaryPath: string;
   readonly relatedSources: readonly MuseumRelatedPageSource[];
 }
@@ -49,7 +49,7 @@ export type MuseumRelatedPageSourceLabel =
   | "selectedWorks"
   | "supportingRecord";
 
-export interface MuseumRelatedPageSource {
+interface MuseumRelatedPageSource {
   readonly path: string;
   readonly label: MuseumRelatedPageSourceLabel;
 }

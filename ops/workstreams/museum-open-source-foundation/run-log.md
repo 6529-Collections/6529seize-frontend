@@ -107,3 +107,17 @@
   adversarial tests prove a changed title or added status caveat returns the
   governed manuscript untouched. The active context now records the completed
   canonical Museum validation workflow from its correct repository.
+- Exact-head App PR CI run `30798033364`, job `91637388328`, stopped at Knip on
+  three introduced dead API surfaces: one unused publication-path constant and
+  two interfaces exported despite being module-internal. The runtime-neutral
+  correction deletes the constant and makes both interfaces private while
+  retaining the catalog and label types imported by callers. Full Knip against
+  exact merge tree `35a0a8f6732b4d606762b472ad1cd20948e9791c` no longer reports
+  those symbols; the Windows run still reports the repository's unrelated
+  platform baseline (7 script files and 95 legacy exports), so the fresh hosted
+  Linux merge-tree run remains the authoritative zero-introduced-debt gate.
+- Follow-up validation passed 3 focused suites / 28 tests, changed lint,
+  changed typecheck, React Doctor 100/100, targeted Prettier, public-artifact
+  path scrub and `codex-diff-check`. No runtime, JSX, CSS, copy, href or retained
+  visual evidence changed, so the approved production-build pixels remain
+  representative pending renewed exact-head approval.
