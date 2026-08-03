@@ -82,6 +82,7 @@ interface SeizeVideoPlayerProps {
   readonly "data-mime"?: string | undefined;
   readonly "data-url"?: string | undefined;
   readonly "data-disable"?: string | undefined;
+  readonly "data-nft-media-renderer"?: string | undefined;
 }
 
 const CONTROL_HIDE_DELAY_MS = 1800;
@@ -123,6 +124,7 @@ export default function SeizeVideoPlayer({
   "data-mime": dataMime,
   "data-url": dataUrl,
   "data-disable": dataDisable,
+  "data-nft-media-renderer": dataNftMediaRenderer,
 }: SeizeVideoPlayerProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const internalVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -691,6 +693,7 @@ export default function SeizeVideoPlayer({
         captionsLang={captionsLang}
         captionsSrc={captionsSrc}
         dataDisable={dataDisable}
+        dataNftMediaRenderer={dataNftMediaRenderer}
         dataMime={dataMime}
         dataTestId={dataTestId}
         dataUrl={dataUrl}
