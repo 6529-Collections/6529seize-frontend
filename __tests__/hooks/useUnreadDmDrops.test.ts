@@ -83,6 +83,8 @@ describe("useUnreadDmDrops", () => {
       unreadDmDropsCount: 3,
       haveUnreadDmDrops: true,
       dataUpdatedAt: 123,
+      isFetching: false,
+      refetch: defaultQueryResult.refetch,
     });
     expect(capturedConfig.queryKey).toEqual([
       QueryKey.DM_DROPS_UNREAD,
@@ -114,6 +116,8 @@ describe("useUnreadDmDrops", () => {
       unreadDmDropsCount: 0,
       haveUnreadDmDrops: false,
       dataUpdatedAt: 0,
+      isFetching: false,
+      refetch: defaultQueryResult.refetch,
     });
   });
 

@@ -135,28 +135,33 @@ const addUnreadDropCount = ({
   };
 };
 
-const getServerSnapshotCoverageTimestamp = (
+const isDropCoveredByServer = (
   wave: SidebarWave,
+  dropTimestamp: number,
   trustServerSnapshotUnreadState: boolean
-): number | null => {
+): boolean => {
   const latestReadTimestamp =
     typeof wave.latestReadTimestamp === "number"
       ? wave.latestReadTimestamp
       : null;
+  if (latestReadTimestamp !== null && latestReadTimestamp >= dropTimestamp) {
+    return true;
+  }
 
   if (!trustServerSnapshotUnreadState) {
-    return latestReadTimestamp;
+    return false;
   }
 
   const snapshotLatestDropTimestamp =
     wave.serverSnapshotLatestDropTimestamp ?? null;
-  if (snapshotLatestDropTimestamp === null) {
-    return latestReadTimestamp;
-  }
-
-  return latestReadTimestamp === null
-    ? snapshotLatestDropTimestamp
-    : Math.max(snapshotLatestDropTimestamp, latestReadTimestamp);
+  // Timestamps are not unique. A websocket event at the exact snapshot
+  // timestamp can be a distinct higher-serial drop, so only a strictly newer
+  // snapshot proves that the event is already covered. Read timestamps are
+  // different: equality means the drop itself has been read.
+  return (
+    snapshotLatestDropTimestamp !== null &&
+    snapshotLatestDropTimestamp > dropTimestamp
+  );
 };
 
 const reconcileNewDropsCounts = ({
@@ -172,16 +177,16 @@ const reconcileNewDropsCounts = ({
 
   waves.forEach((wave) => {
     const localCount = newDropsCounts[wave.id];
-    const serverCoverageTimestamp = getServerSnapshotCoverageTimestamp(
+    const isCoveredByServer = isDropCoveredByServer(
       wave,
+      localCount?.latestDropTimestamp ?? 0,
       trustServerSnapshotUnreadState
     );
     if (
       !localCount ||
       localCount.count <= 0 ||
       localCount.latestDropTimestamp === null ||
-      serverCoverageTimestamp === null ||
-      serverCoverageTimestamp < localCount.latestDropTimestamp
+      !isCoveredByServer
     ) {
       return;
     }
@@ -303,7 +308,7 @@ function useNewDropCounter(
         if (
           currentWave?.count === 0 &&
           currentWave.latestDropTimestamp !== null &&
-          createdAt <= currentWave.latestDropTimestamp
+          createdAt < currentWave.latestDropTimestamp
         ) {
           return current;
         }
@@ -442,16 +447,14 @@ function useNewDropCounter(
 
         const waveId = message.wave.id;
         const wave = waves.find((w) => w.id === waveId);
-        const serverCoverageTimestamp = wave
-          ? getServerSnapshotCoverageTimestamp(
+        const isCoveredByServer = wave
+          ? isDropCoveredByServer(
               wave,
+              message.created_at,
               trustServerSnapshotUnreadState
             )
-          : null;
-        if (
-          serverCoverageTimestamp !== null &&
-          message.created_at <= serverCoverageTimestamp
-        ) {
+          : false;
+        if (isCoveredByServer) {
           // Reconcile retained websocket state without adding this covered drop.
           updateNewDropsCountsForMessage(
             waveId,

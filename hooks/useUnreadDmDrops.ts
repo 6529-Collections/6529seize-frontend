@@ -81,5 +81,7 @@ export function useUnreadDmDrops(
     unreadDmDropsCount,
     haveUnreadDmDrops: unreadDmDropsCount > 0,
     dataUpdatedAt: isEnabled && !isError ? query.dataUpdatedAt : 0,
+    isFetching: isEnabled ? query.isFetching : false,
+    refetch: query.refetch,
   };
 }

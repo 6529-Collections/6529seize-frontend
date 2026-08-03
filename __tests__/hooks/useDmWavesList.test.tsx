@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import useDmWavesList from "@/hooks/useDmWavesList";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS } from "@/components/react-query-wrapper/utils/query-utils";
@@ -48,6 +48,7 @@ describe("useDmWavesList", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    refetchQueries.mockResolvedValue(undefined);
     useQueryClientMock.mockReturnValue({ refetchQueries });
     getAuthJwtMock.mockReturnValue("valid-jwt");
     isAuthJwtUsableMock.mockReturnValue(true);
@@ -236,9 +237,70 @@ describe("useDmWavesList", () => {
     expect(result.current.canTrustServerSnapshotUnreadState).toBe(false);
   });
 
-  it("trusts fresh loaded rows when unread DMs may remain on later pages", () => {
+  it("trusts a persistent paginated mismatch only after bounded reconciliation", async () => {
+    let isFetching = false;
+    let dmDataUpdatedAt = 100;
+    let unreadDataUpdatedAt = 100;
+    let unreadDmDropsCount = 2;
+    useUnreadDmDropsMock.mockImplementation(() => ({
+      get unreadDmDropsCount() {
+        return unreadDmDropsCount;
+      },
+      get dataUpdatedAt() {
+        return unreadDataUpdatedAt;
+      },
+      isFetching: false,
+      refetch: jest.fn().mockResolvedValue(undefined),
+    }));
+    useWavesV2Mock.mockImplementation(() => ({
+      waves: [
+        {
+          id: "wave-1",
+          latestDropTimestamp: 200,
+          unreadDropsCount: 1,
+        },
+      ],
+      isFetching,
+      isFetchingNextPage: false,
+      hasNextPage: true,
+      fetchNextPage: jest.fn(),
+      status: "success",
+      refetch: jest.fn(),
+      queryKey: dmWavesQueryKey,
+      get dataUpdatedAt() {
+        return dmDataUpdatedAt;
+      },
+    }));
+
+    const { result, rerender } = renderHook(() => useDmWavesList());
+
+    expect(result.current.canTrustServerSnapshotUnreadState).toBe(false);
+    expect(refetchQueries).toHaveBeenCalledTimes(1);
+
+    isFetching = true;
+    rerender();
+    dmDataUpdatedAt = 200;
+    unreadDataUpdatedAt = 200;
+    isFetching = false;
+    rerender();
+
+    await waitFor(() => {
+      expect(refetchQueries).toHaveBeenCalledTimes(2);
+      expect(result.current.canTrustServerSnapshotUnreadState).toBe(true);
+    });
+
+    unreadDmDropsCount = 1;
+    rerender();
+    expect(result.current.canTrustServerSnapshotUnreadState).toBe(true);
+
+    unreadDmDropsCount = 2;
+    rerender();
+    expect(result.current.canTrustServerSnapshotUnreadState).toBe(false);
+  });
+
+  it("reconciles when a cross-device read puts the aggregate behind loaded rows", () => {
     useUnreadDmDropsMock.mockReturnValue({
-      unreadDmDropsCount: 2,
+      unreadDmDropsCount: 0,
       dataUpdatedAt: 200,
     });
     useWavesV2Mock.mockReturnValue({
@@ -251,7 +313,7 @@ describe("useDmWavesList", () => {
       ],
       isFetching: false,
       isFetchingNextPage: false,
-      hasNextPage: true,
+      hasNextPage: false,
       fetchNextPage: jest.fn(),
       status: "success",
       refetch: jest.fn(),
@@ -261,7 +323,8 @@ describe("useDmWavesList", () => {
 
     const { result } = renderHook(() => useDmWavesList());
 
-    expect(result.current.canTrustServerSnapshotUnreadState).toBe(true);
+    expect(result.current.canTrustServerSnapshotUnreadState).toBe(false);
+    expect(refetchQueries).toHaveBeenCalledTimes(1);
   });
 
   it("does not trust a stale unread aggregate even when row totals agree", () => {
