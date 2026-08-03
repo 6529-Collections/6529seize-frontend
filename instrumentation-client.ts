@@ -29,6 +29,7 @@ import {
   shouldFilterPoperBlockerOrphanFetchRejection,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
+  shouldFilterInjectedIosAutoplayNotAllowedError,
   shouldFilterInjectedProviderProxyStartsWithError,
   shouldFilterInjectedWalletCollision,
   shouldFilterReactDomInsertBeforeNotFoundError,
@@ -206,6 +207,10 @@ function shouldFilterEvent(
   // retaining only the sampled diagnostic subset would hide genuine app errors.
 
   if (shouldFilterAppleWebKitSortedTrackListTypeError(event)) {
+    return true;
+  }
+
+  if (shouldFilterInjectedIosAutoplayNotAllowedError(event)) {
     return true;
   }
 

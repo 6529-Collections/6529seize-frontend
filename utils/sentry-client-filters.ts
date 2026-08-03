@@ -28,6 +28,9 @@ export {
   shouldFilterTwitterConfigReferenceError,
 } from "./sentry-client-filters/errors";
 export {
+  shouldFilterInjectedIosAutoplayNotAllowedError,
+} from "./sentry-client-filters/media";
+export {
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
 } from "./sentry-client-filters/extension-messaging";
