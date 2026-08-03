@@ -5,6 +5,7 @@ import NFTMediaContainer from "@/components/nft-image/NFTMediaContainer";
 import styles from "@/components/nft-image/NFTImage.module.css";
 import type { BaseRendererProps } from "@/components/nft-image/types/renderer-props";
 import { withArweaveFallback } from "@/components/nft-image/utils/gateway-fallback";
+import { getNFTMediaRendererAttributes } from "@/components/nft-image/media-renderer-marker";
 import Image from "next/image";
 
 function getSrc(
@@ -48,6 +49,7 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
       className={`${imageWrapperClassName} ${props.heightStyle} ${props.bgStyle}`}
     >
       <Image
+        {...getNFTMediaRendererAttributes("image")}
         loading={shouldLazyLoad ? "lazy" : "eager"}
         priority={!shouldLazyLoad}
         width="0"

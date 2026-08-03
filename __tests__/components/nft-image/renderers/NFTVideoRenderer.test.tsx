@@ -80,6 +80,7 @@ describe("NFTVideoRenderer", () => {
       const video = container.querySelector("video");
       expect(video).toBeInTheDocument();
       expect(video).toHaveAttribute("src");
+      expect(video).toHaveAttribute("data-nft-media-renderer", "video");
     });
 
     it("applies correct CSS classes from props", () => {

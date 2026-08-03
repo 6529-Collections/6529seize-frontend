@@ -23,6 +23,7 @@ describe("NFTModel", () => {
     expect(el.getAttribute("src")).toBe("top-level.glb");
     expect(el.getAttribute("alt")).toBe("Cool");
     expect(el.getAttribute("poster")).toBe("scaled.png");
+    expect(el).toHaveAttribute("data-nft-media-renderer", "glb");
   });
 
   it("uses provided id and falls back to metadata.animation", () => {
