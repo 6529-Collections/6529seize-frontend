@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 
 import { PublicReviewReferenceShell } from "@/components/public-review/PublicReviewReferenceShell";
 import {
@@ -35,9 +35,24 @@ describe("PublicReviewReferenceShell", () => {
     expect(
       screen.getByRole("link", { name: "Send feedback" })
     ).toHaveAttribute("href", "#public-review-feedback");
+    const navigation = screen.getByRole("navigation", {
+      name: "Review-wide destinations",
+    });
+    expect(navigation).toHaveAttribute(
+      "aria-labelledby",
+      "public-review-surface-navigation-heading"
+    );
     expect(
-      screen.getByRole("link", { name: /Technical reference/ })
-    ).toHaveAttribute("aria-current", "page");
+      within(navigation).getByRole("link", {
+        name: "Back to review contents",
+      })
+    ).toHaveAttribute("href", "/reviews/6529-stream");
+    expect(
+      within(navigation).getByRole("link", { name: "All public feedback" })
+    ).toHaveAttribute("href", "/reviews/6529-stream/feedback");
+    expect(
+      within(navigation).queryByRole("link", { name: "Technical reference" })
+    ).not.toBeInTheDocument();
   });
 
   it("keeps the feedback ledger but removes the submit shortcut when closed", () => {
@@ -58,7 +73,7 @@ describe("PublicReviewReferenceShell", () => {
     );
 
     expect(
-      screen.getByRole("link", { name: /Public feedback/ })
+      screen.getByRole("link", { name: "All public feedback" })
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: "Send feedback" })
