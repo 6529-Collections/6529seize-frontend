@@ -31,7 +31,10 @@ export default async function MuseumAboutPage() {
       />
       <section className="tw-max-w-4xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8">
         {mission ? (
-          <MuseumMarkdown sourcePath={mission.sourcePath}>
+          <MuseumMarkdown
+            sourceCommit={publicationState.publication.identity.commit}
+            sourcePath={mission.sourcePath}
+          >
             {mission.markdown}
           </MuseumMarkdown>
         ) : (

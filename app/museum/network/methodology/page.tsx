@@ -64,7 +64,9 @@ export default async function MuseumMethodologyPage() {
                     {document.path}
                   </p>
                   <div className="tw-mt-5">
-                    <MuseumMarkdown>{document.markdown}</MuseumMarkdown>
+                    <MuseumMarkdown sourceCommit={null}>
+                      {document.markdown}
+                    </MuseumMarkdown>
                   </div>
                 </article>
               );
@@ -94,7 +96,9 @@ export default async function MuseumMethodologyPage() {
                   {document.path}
                 </p>
                 <div className="tw-mt-5">
-                  <MuseumMarkdown>{document.markdown}</MuseumMarkdown>
+                  <MuseumMarkdown sourceCommit={null}>
+                    {document.markdown}
+                  </MuseumMarkdown>
                 </div>
                 <div className="tw-mt-6">
                   <MuseumJsonDisclosure

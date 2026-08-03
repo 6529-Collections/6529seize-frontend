@@ -154,6 +154,7 @@ export default async function MuseumArtistPage({
           <MuseumMarkdown
             className="tw-mt-6"
             embeddedDocument
+            sourceCommit={publication.identity.commit}
             sourcePath={profile.sourcePath}
           >
             {profile.markdown}

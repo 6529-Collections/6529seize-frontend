@@ -3,10 +3,13 @@ import { MuseumMarkdown } from "@/components/museum/MuseumMarkdown";
 
 const SOURCE_PATH =
   "records/accessions/6529NM.2026.001/public/curatorial-accession-review.md";
+const SOURCE_COMMIT = "b".repeat(40);
 
-function renderMarkdown(markdown: string) {
+function renderMarkdown(markdown: string, sourcePath = SOURCE_PATH) {
   return render(
-    <MuseumMarkdown sourcePath={SOURCE_PATH}>{markdown}</MuseumMarkdown>
+    <MuseumMarkdown sourceCommit={SOURCE_COMMIT} sourcePath={sourcePath}>
+      {markdown}
+    </MuseumMarkdown>
   );
 }
 
@@ -25,7 +28,30 @@ describe("MuseumMarkdown public links", () => {
 
     expect(screen.getByRole("link", { name: "Gift essay" })).toHaveAttribute(
       "href",
-      "/museum/network/gifts/6529NM.2026.001#gift-essay-title"
+      "/museum/network/gifts/6529NM.2026.001#casey-reas-collection-essay"
+    );
+  });
+
+  it("routes finished gift, project, and source manuscripts onsite", () => {
+    renderMarkdown(
+      [
+        "[Gift](gift-into-public-trust.md)",
+        "[Project](projects/century.md)",
+        "[Matrix](source-and-chronology-matrix.md)",
+      ].join("\n\n")
+    );
+
+    expect(screen.getByRole("link", { name: "Gift" })).toHaveAttribute(
+      "href",
+      "/museum/network/gifts/6529NM.2026.001#gift-narrative-title"
+    );
+    expect(screen.getByRole("link", { name: "Project" })).toHaveAttribute(
+      "href",
+      "/museum/network/projects/century#project-essay-title"
+    );
+    expect(screen.getByRole("link", { name: "Matrix" })).toHaveAttribute(
+      "href",
+      "/museum/network/stories/source-and-chronology"
     );
   });
 
@@ -54,6 +80,42 @@ describe("MuseumMarkdown public links", () => {
     expect(
       screen.queryByRole("link", { name: "Traversal" })
     ).not.toBeInTheDocument();
+  });
+
+  it("keeps safe accession-relative citations on the immutable source commit", () => {
+    renderMarkdown("[Object record](../objects/6529NM.2026.001.01.json)");
+
+    expect(screen.getByRole("link", { name: "Object record" })).toHaveAttribute(
+      "href",
+      `https://github.com/6529-Collections/6529networkmuseum/blob/${SOURCE_COMMIT}/records/accessions/6529NM.2026.001/objects/6529NM.2026.001.01.json`
+    );
+  });
+
+  it("renders repository citations as inert text for an invalid source commit", () => {
+    render(
+      <MuseumMarkdown sourceCommit={null} sourcePath={SOURCE_PATH}>
+        [Object record](../objects/6529NM.2026.001.01.json)
+      </MuseumMarkdown>
+    );
+
+    expect(screen.getByText("Object record")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Object record" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("contains wide tables in a keyboard-focusable region", () => {
+    renderMarkdown("| Fact | Source |\n| --- | --- |\n| Date | Record |");
+
+    const region = screen.getByRole("region", {
+      name: "Scrollable research table",
+    });
+    expect(region).toHaveAttribute("tabindex", "0");
+    expect(screen.getByRole("table")).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Fact" })).toHaveAttribute(
+      "scope",
+      "col"
+    );
   });
 
   it("renders protocol-relative URLs as inert text", () => {

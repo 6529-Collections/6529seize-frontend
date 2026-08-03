@@ -3,10 +3,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MuseumArtworkFigure } from "@/components/museum/MuseumArtworkFigure";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
+import { MuseumMarkdown } from "@/components/museum/MuseumMarkdown";
+import { MuseumSourceMatrixLink } from "@/components/museum/MuseumSourceMatrixLink";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { tryCaseyArtworksFromPublication } from "@/lib/museum/casey";
+import {
+  CASEY_ARTIST_NAME,
+  tryCaseyArtworksFromPublication,
+} from "@/lib/museum/casey";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 
 interface MuseumProjectPageProps {
@@ -56,6 +61,19 @@ export default async function MuseumProjectPage({
   const artworks = caseyArtworks.filter((artwork) =>
     project.artworkIds.includes(artwork.objectId)
   );
+  const projectEssay = publicationState.publication.documents.find(
+    (document) =>
+      document.kind === "project_essay" &&
+      document.projectIds.includes(project.id)
+  );
+  const sourceMatrix = publicationState.publication.documents.find(
+    (document) => document.kind === "source_chronology_matrix"
+  );
+  if (projectEssay === undefined || sourceMatrix === undefined) {
+    return <MuseumPublicationUnavailable />;
+  }
+  const editorialArtistName =
+    artist.slug === "casey-reas" ? CASEY_ARTIST_NAME : artist.preferredName;
 
   return (
     <article>
@@ -64,7 +82,7 @@ export default async function MuseumProjectPage({
         className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-medium tw-text-iron-400 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
       >
         {t(DEFAULT_LOCALE, "museum.network.projects.backToArtist", {
-          artist: artist.preferredName,
+          artist: editorialArtistName,
         })}
       </Link>
       <header className="tw-mt-6 tw-max-w-4xl">
@@ -76,7 +94,7 @@ export default async function MuseumProjectPage({
         </h1>
         <p className="tw-m-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">
           {t(DEFAULT_LOCALE, "museum.network.projects.byline", {
-            artist: artist.preferredName,
+            artist: editorialArtistName,
           })}
         </p>
       </header>
@@ -90,6 +108,31 @@ export default async function MuseumProjectPage({
           />
         ))}
       </div>
+      <section
+        className="tw-mt-16 tw-max-w-4xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
+        aria-labelledby="project-essay-title"
+      >
+        <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
+          {t(DEFAULT_LOCALE, "museum.network.projects.essay")}
+        </p>
+        <h2
+          id="project-essay-title"
+          className="tw-m-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50"
+        >
+          {projectEssay.title}
+        </h2>
+        <MuseumMarkdown
+          className="tw-mt-6"
+          embeddedDocument
+          sourceCommit={publicationState.publication.identity.commit}
+          sourcePath={projectEssay.sourcePath}
+        >
+          {projectEssay.markdown}
+        </MuseumMarkdown>
+        <div className="tw-mt-8 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-5">
+          <MuseumSourceMatrixLink />
+        </div>
+      </section>
     </article>
   );
 }

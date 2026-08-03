@@ -146,7 +146,9 @@ function buildBaseDocuments(): Record<string, string> {
   for (const path of LEGACY_CASEY_REQUIRED_PATHS) {
     if (path.endsWith(".md")) {
       const stem = path.split("/").at(-1)?.replace(/\.md$/u, "") ?? "Museum";
-      documents[path] = `# ${stem}\n\nGoverned public writing.`;
+      const heading =
+        stem === "gift-into-public-trust" ? "Gift into Public Trust" : stem;
+      documents[path] = `# ${heading}\n\nGoverned public writing.`;
     }
   }
   return documents;

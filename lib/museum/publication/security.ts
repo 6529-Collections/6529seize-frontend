@@ -1,5 +1,6 @@
 const GITHUB_API_ORIGIN = "https://api.github.com";
 const GITHUB_RAW_ORIGIN = "https://raw.githubusercontent.com";
+const GITHUB_WEB_ORIGIN = "https://github.com";
 const MUSEUM_REPOSITORY = "6529-Collections/6529networkmuseum";
 const SUPPORTED_CONTENT_EXTENSIONS = [".json", ".md"] as const;
 
@@ -76,6 +77,24 @@ export function buildImmutableMuseumRawUrl(
   }
 
   return `${GITHUB_RAW_ORIGIN}/${MUSEUM_REPOSITORY}/${commit}/${encodeRepositoryPath(path)}`;
+}
+
+export function buildImmutableMuseumBlobUrl(
+  commit: string | null,
+  path: string,
+  hash = ""
+): string | null {
+  if (!commit || !isExactGitCommit(commit)) {
+    return null;
+  }
+  if (hash.length > 0 && !hash.startsWith("#")) {
+    return null;
+  }
+  try {
+    return `${GITHUB_WEB_ORIGIN}/${MUSEUM_REPOSITORY}/blob/${commit}/${encodeRepositoryPath(path)}${hash}`;
+  } catch {
+    return null;
+  }
 }
 
 export function assertApprovedGitHubUrl(url: string): void {

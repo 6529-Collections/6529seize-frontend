@@ -625,6 +625,8 @@ describe("Playwright read-only mutation guard", () => {
       "https://eth.llamarpc.com/",
       "https://cloudflare-eth.com/",
       "https://ethereum-rpc.publicnode.com/",
+      "https://eth.drpc.org/",
+      "https://rpc.flashbots.net/",
     ]) {
       expect(
         decideReadonlyRequest({
@@ -642,22 +644,24 @@ describe("Playwright read-only mutation guard", () => {
         reason: "read-only-ethereum-rpc",
       });
 
-      expect(
-        decideReadonlyRequest({
-          baseURL: "https://6529.io",
-          method: "POST",
-          postData: JSON.stringify({
-            id: 1,
-            jsonrpc: "2.0",
-            method: "eth_sendRawTransaction",
-          }),
-          readonly: true,
-          url,
-        })
-      ).toMatchObject({
-        action: "block",
-        reason: "unsafe-ethereum-rpc",
-      });
+      for (const method of ["eth_sendRawTransaction", "eth_sendTransaction"]) {
+        expect(
+          decideReadonlyRequest({
+            baseURL: "https://6529.io",
+            method: "POST",
+            postData: JSON.stringify({
+              id: 1,
+              jsonrpc: "2.0",
+              method,
+            }),
+            readonly: true,
+            url,
+          })
+        ).toMatchObject({
+          action: "block",
+          reason: "unsafe-ethereum-rpc",
+        });
+      }
     }
 
     expect(
