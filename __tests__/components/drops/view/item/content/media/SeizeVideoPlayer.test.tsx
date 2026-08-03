@@ -521,6 +521,41 @@ describe("SeizeVideoPlayer", () => {
     expect(screen.getByRole("slider", { name: "Seek video" })).toBeDisabled();
   });
 
+  it("uses media events for progress without scheduling animation frames", () => {
+    const requestAnimationFrame = jest.spyOn(
+      globalThis,
+      "requestAnimationFrame"
+    );
+    const { container } = render(
+      <SeizeVideoPlayer src="https://example.com/video.mp4" />
+    );
+    const video = container.querySelector("video");
+    if (!video) {
+      throw new Error("Expected video element to render");
+    }
+    Object.defineProperty(video, "duration", {
+      configurable: true,
+      value: 200,
+    });
+    video.currentTime = 50;
+
+    fireEvent.durationChange(video);
+
+    const seek = screen.getByRole("slider", { name: "Seek video" });
+    expect(seek).toHaveValue("25");
+
+    fireEvent.play(video);
+
+    expect(requestAnimationFrame).not.toHaveBeenCalled();
+
+    video.currentTime = 100;
+    fireEvent.timeUpdate(video);
+    fireEvent.timeUpdate(video);
+
+    expect(seek).toHaveValue("50");
+    expect(requestAnimationFrame).not.toHaveBeenCalled();
+  });
+
   it("seeks minimal videos from the footer timeline", () => {
     const { container } = render(
       <SeizeVideoPlayer src="https://example.com/video.mp4" />
