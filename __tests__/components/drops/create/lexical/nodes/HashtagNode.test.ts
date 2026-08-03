@@ -46,14 +46,27 @@ describe('HashtagNode', () => {
   });
 
   it('clones and imports from json', () => {
-    const node = $createHashtagNode('#foo');
+    const referencedNft = { contract: '0xabc', token: '42' };
+    const node = $createHashtagNode('$foo', referencedNft);
     const cloned = HashtagNode.clone(node);
     expect(cloned).not.toBe(node);
-    expect(cloned.getTextContent()).toBe('#foo');
+    expect(cloned.getTextContent()).toBe('$foo');
+    expect(cloned.getReferencedNft()).toEqual({
+      ...referencedNft,
+      name: 'foo',
+    });
+    expect(node.exportJSON()).toEqual(
+      expect.objectContaining({ nftContract: '0xabc', nftToken: '42' })
+    );
 
     const imported = HashtagNode.importJSON({
-      hashtagName:'#bar', text:'#bar', format:0, detail:0, mode:'segmented', style:'', type:'hashtag', version:1
+      hashtagName:'$bar', nftContract:'0xdef', nftToken:'7', text:'$bar', format:0, detail:0, mode:'segmented', style:'', type:'hashtag', version:1
     } as any);
-    expect(imported.getTextContent()).toBe('#bar');
+    expect(imported.getTextContent()).toBe('$bar');
+    expect(imported.getReferencedNft()).toEqual({
+      contract: '0xdef',
+      token: '7',
+      name: 'bar',
+    });
   });
 });

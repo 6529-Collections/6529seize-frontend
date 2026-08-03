@@ -63,6 +63,7 @@ describe("mention alias submission", () => {
         // path exercises the session registry rather than editor-derived mentions.
         currentPartMentionedUsers: [],
         currentPartMentionedWaves: [],
+        currentPartReferencedNfts: [],
         submitting: false,
         setDrop,
         setFiles: jest.fn(),

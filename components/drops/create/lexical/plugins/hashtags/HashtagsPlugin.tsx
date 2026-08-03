@@ -86,6 +86,20 @@ export class HashtagsTypeaheadOption extends MenuOption {
   }
 }
 
+export const createNftReferenceNode = (
+  selectedOption: HashtagsTypeaheadOption
+) => {
+  const referencedNft: ReferencedNft = {
+    contract: selectedOption.contract,
+    token: selectedOption.tokenId,
+    name: selectedOption.name,
+  };
+  return {
+    hashtagNode: $createHashtagNode(`$${selectedOption.name}`, referencedNft),
+    referencedNft,
+  };
+};
+
 export interface NewHastagsPluginHandles {
   readonly isHashtagsOpen: () => boolean;
 }
@@ -130,16 +144,13 @@ const NewHashtagsPlugin = forwardRef<
       closeMenu: () => void
     ) => {
       editor.update(() => {
-        const hashtagNode = $createHashtagNode(`$${selectedOption.name}`);
+        const { hashtagNode, referencedNft } =
+          createNftReferenceNode(selectedOption);
         if (nodeToReplace) {
           nodeToReplace.replace(hashtagNode);
         }
         hashtagNode.select();
-        onSelect({
-          contract: selectedOption.contract,
-          token: selectedOption.tokenId,
-          name: selectedOption.name,
-        });
+        onSelect(referencedNft);
         closeMenu();
       });
     },

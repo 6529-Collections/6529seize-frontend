@@ -2,8 +2,8 @@ import { renderHook } from "@testing-library/react";
 
 import { useCreateDropDraftState } from "@/components/waves/create-drop-content/useCreateDropDraftState";
 
-describe("restored wave mention submission", () => {
-  it("includes editor-derived wave metadata in the drop request", () => {
+describe("restored NFT reference submission", () => {
+  it("includes editor-derived NFT metadata in the drop request", () => {
     const { result } = renderHook(() =>
       useCreateDropDraftState({
         metadata: [],
@@ -13,7 +13,7 @@ describe("restored wave mention submission", () => {
         isDropMode: false,
         canCreatePoll: false,
         pollRequest: null,
-        getMarkdown: "check out #[test from desktop-web]",
+        getMarkdown: "look at $[Test NFT]",
         files: [],
         drop: null,
         activeDrop: null,
@@ -24,13 +24,14 @@ describe("restored wave mention submission", () => {
         canMentionAll: false,
         currentPartMentionedGroups: [],
         currentPartMentionedUsers: [],
-        currentPartMentionedWaves: [
+        currentPartMentionedWaves: [],
+        currentPartReferencedNfts: [
           {
-            wave_id: "wave-1",
-            wave_name_in_content: "test from desktop-web",
+            contract: "0x1234567890123456789012345678901234567890",
+            token: "42",
+            name: "Test NFT",
           },
         ],
-        currentPartReferencedNfts: [],
         submitting: false,
         setDrop: jest.fn(),
         setFiles: jest.fn(),
@@ -46,12 +47,11 @@ describe("restored wave mention submission", () => {
       })
     );
 
-    const drop = result.current.getUpdatedDrop();
-
-    expect(drop.mentioned_waves).toEqual([
+    expect(result.current.getUpdatedDrop().referenced_nfts).toEqual([
       {
-        wave_id: "wave-1",
-        wave_name_in_content: "test from desktop-web",
+        contract: "0x1234567890123456789012345678901234567890",
+        token: "42",
+        name: "Test NFT",
       },
     ]);
   });

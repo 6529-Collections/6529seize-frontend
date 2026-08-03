@@ -196,6 +196,18 @@ jest.mock(
   })
 );
 jest.mock(
+  "@/components/drops/create/lexical/utils/nftReferenceDetection",
+  () => ({
+    getReferencedNftsFromEditorState: jest.fn(() => []),
+    mergeReferencedNfts: jest.fn(
+      (editorReferences: unknown[], registryReferences: unknown[]) => [
+        ...registryReferences,
+        ...editorReferences,
+      ]
+    ),
+  })
+);
+jest.mock(
   "@/components/drops/create/lexical/utils/waveMentionDetection",
   () => ({
     getMentionedWavesFromEditorState: jest.fn(() => []),
