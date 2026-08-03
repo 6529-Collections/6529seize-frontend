@@ -198,6 +198,7 @@ describe("waves-v2-api", () => {
       id: "wave-1",
       creator: { id: "profile-1", handle: "creator" },
       serverSnapshotLatestDropTimestamp: 456,
+      serverSnapshotRequestStartedAt: expect.any(Number),
       waveRep,
       waveScore,
     });

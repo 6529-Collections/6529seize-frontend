@@ -208,6 +208,84 @@ describe("useNewDropCounter", () => {
     });
   });
 
+  it("clears equal-timestamp websocket unread after a later zero-unread snapshot", () => {
+    const nowMock = jest.spyOn(Date, "now").mockReturnValue(100);
+    const { result, rerender } = renderHook(
+      ({ serverSnapshotRequestStartedAt }) =>
+        useNewDropCounter(
+          null,
+          [
+            {
+              id: "wave2",
+              latestDropTimestamp: 30,
+              latestReadTimestamp: 0,
+              serverSnapshotLatestDropTimestamp: 30,
+              serverSnapshotRequestStartedAt,
+              unreadDropsCount: 0,
+            },
+          ] as any,
+          jest.fn(),
+          { trustServerSnapshotUnreadState: true }
+        ),
+      {
+        wrapper,
+        initialProps: { serverSnapshotRequestStartedAt: 90 },
+      }
+    );
+
+    emitDropUpdate({ createdAt: 30, serialNo: 5 });
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(1);
+
+    rerender({ serverSnapshotRequestStartedAt: 101 });
+
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 0,
+      latestDropTimestamp: 30,
+      firstUnreadSerialNo: null,
+    });
+    nowMock.mockRestore();
+  });
+
+  it("keeps an equal-timestamp websocket event received after the snapshot", () => {
+    const nowMock = jest.spyOn(Date, "now").mockReturnValue(100);
+    const { result, rerender } = renderHook(
+      ({ serverSnapshotRequestStartedAt }) =>
+        useNewDropCounter(
+          null,
+          [
+            {
+              id: "wave2",
+              latestDropTimestamp: 30,
+              latestReadTimestamp: 0,
+              serverSnapshotLatestDropTimestamp: 30,
+              serverSnapshotRequestStartedAt,
+              unreadDropsCount: 0,
+            },
+          ] as any,
+          jest.fn(),
+          { trustServerSnapshotUnreadState: true }
+        ),
+      {
+        wrapper,
+        initialProps: { serverSnapshotRequestStartedAt: 90 },
+      }
+    );
+
+    emitDropUpdate({ createdAt: 30, serialNo: 5 });
+    rerender({ serverSnapshotRequestStartedAt: 101 });
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(0);
+
+    nowMock.mockReturnValue(102);
+    emitDropUpdate({ createdAt: 30, serialNo: 6 });
+
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 1,
+      latestDropTimestamp: 30,
+      firstUnreadSerialNo: 6,
+    });
+    nowMock.mockRestore();
+  });
+
   it("commits reconciled state when resetting one wave", () => {
     const { result, rerender } = renderHook(
       ({ latestReadTimestamp }) =>

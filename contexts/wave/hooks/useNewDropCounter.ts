@@ -9,14 +9,7 @@ import {
 import { getWebSocketMessageReason } from "@/services/websocket/WebSocketTypes";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import type { SidebarWave } from "@/types/waves.types";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type SetStateAction,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 /**
  * Interface for tracking new drops count for a wave
@@ -138,7 +131,8 @@ const addUnreadDropCount = ({
 const isDropCoveredByServer = (
   wave: SidebarWave,
   dropTimestamp: number,
-  trustServerSnapshotUnreadState: boolean
+  trustServerSnapshotUnreadState: boolean,
+  websocketReceivedAt: number | undefined
 ): boolean => {
   const latestReadTimestamp =
     typeof wave.latestReadTimestamp === "number"
@@ -150,6 +144,20 @@ const isDropCoveredByServer = (
 
   if (!trustServerSnapshotUnreadState) {
     return false;
+  }
+
+  const snapshotRequestStartedAt = wave.serverSnapshotRequestStartedAt;
+  if (
+    wave.unreadDropsCount === 0 &&
+    websocketReceivedAt !== undefined &&
+    snapshotRequestStartedAt !== undefined &&
+    snapshotRequestStartedAt > websocketReceivedAt
+  ) {
+    // A zero-unread snapshot requested after the websocket event is
+    // authoritative even when the latest-drop timestamp is unchanged by a
+    // cross-device read. Requiring request ordering prevents an older response
+    // from erasing a distinct event that shares the snapshot timestamp.
+    return true;
   }
 
   const snapshotLatestDropTimestamp =
@@ -167,10 +175,12 @@ const isDropCoveredByServer = (
 const reconcileNewDropsCounts = ({
   newDropsCounts,
   trustServerSnapshotUnreadState,
+  websocketReceivedAtByWave,
   waves,
 }: {
   readonly newDropsCounts: NewDropsCounts;
   readonly trustServerSnapshotUnreadState: boolean;
+  readonly websocketReceivedAtByWave: Readonly<Record<string, number>>;
   readonly waves: readonly SidebarWave[];
 }): NewDropsCounts => {
   let next = newDropsCounts;
@@ -180,7 +190,8 @@ const reconcileNewDropsCounts = ({
     const isCoveredByServer = isDropCoveredByServer(
       wave,
       localCount?.latestDropTimestamp ?? 0,
-      trustServerSnapshotUnreadState
+      trustServerSnapshotUnreadState,
+      websocketReceivedAtByWave[wave.id]
     );
     if (
       !localCount ||
@@ -234,28 +245,52 @@ function useNewDropCounter(
   const [rawNewDropsState, setRawNewDropsState] = useState<{
     readonly identityKey: string | null | undefined;
     readonly counts: Record<string, MinimalWaveNewDropsCount>;
+    readonly websocketReceivedAtByWave: Record<string, number>;
   }>(() => ({
     identityKey: stateIdentityKey,
     counts: {},
+    websocketReceivedAtByWave: {},
   }));
-  const rawNewDropsCounts = useMemo(
+  const currentRawNewDropsState = useMemo(
     () =>
       rawNewDropsState.identityKey === stateIdentityKey
-        ? rawNewDropsState.counts
-        : {},
+        ? rawNewDropsState
+        : {
+            identityKey: stateIdentityKey,
+            counts: {},
+            websocketReceivedAtByWave: {},
+          },
     [rawNewDropsState, stateIdentityKey]
   );
+  const rawNewDropsCounts = currentRawNewDropsState.counts;
+  const websocketReceivedAtByWave =
+    currentRawNewDropsState.websocketReceivedAtByWave;
   const setRawNewDropsCounts = useCallback(
     (
-      update: SetStateAction<Record<string, MinimalWaveNewDropsCount>>
+      update:
+        | Record<string, MinimalWaveNewDropsCount>
+        | ((
+            current: Record<string, MinimalWaveNewDropsCount>,
+            websocketReceivedAtByWave: Readonly<Record<string, number>>
+          ) => Record<string, MinimalWaveNewDropsCount>)
     ): void => {
       setRawNewDropsState((previous) => {
         const current =
-          previous.identityKey === stateIdentityKey ? previous.counts : {};
-        const counts = typeof update === "function" ? update(current) : update;
+          previous.identityKey === stateIdentityKey
+            ? previous
+            : {
+                identityKey: stateIdentityKey,
+                counts: {},
+                websocketReceivedAtByWave: {},
+              };
+        const counts =
+          typeof update === "function"
+            ? update(current.counts, current.websocketReceivedAtByWave)
+            : update;
         return {
           identityKey: stateIdentityKey,
           counts,
+          websocketReceivedAtByWave: current.websocketReceivedAtByWave,
         };
       });
     },
@@ -268,7 +303,11 @@ function useNewDropCounter(
   if (previousEnabled !== enabled) {
     setPreviousEnabled(enabled);
     if (enabled) {
-      setRawNewDropsCounts({});
+      setRawNewDropsState({
+        identityKey: stateIdentityKey,
+        counts: {},
+        websocketReceivedAtByWave: {},
+      });
     }
   }
 
@@ -287,21 +326,37 @@ function useNewDropCounter(
       reconcileNewDropsCounts({
         newDropsCounts: rawNewDropsCounts,
         trustServerSnapshotUnreadState,
+        websocketReceivedAtByWave,
         waves,
       }),
-    [rawNewDropsCounts, trustServerSnapshotUnreadState, waves]
+    [
+      rawNewDropsCounts,
+      trustServerSnapshotUnreadState,
+      websocketReceivedAtByWave,
+      waves,
+    ]
   );
 
   const updateNewDropsCountsForMessage = useCallback(
     (
       waveId: string,
       createdAt: number,
-      update: (current: NewDropsCounts) => NewDropsCounts
+      update: (current: NewDropsCounts) => NewDropsCounts,
+      websocketReceivedAt?: number
     ) => {
-      setRawNewDropsCounts((previous) => {
+      setRawNewDropsState((previous) => {
+        const currentState =
+          previous.identityKey === stateIdentityKey
+            ? previous
+            : {
+                identityKey: stateIdentityKey,
+                counts: {},
+                websocketReceivedAtByWave: {},
+              };
         const current = reconcileNewDropsCounts({
-          newDropsCounts: previous,
+          newDropsCounts: currentState.counts,
           trustServerSnapshotUnreadState,
+          websocketReceivedAtByWave: currentState.websocketReceivedAtByWave,
           waves: wavesRef.current,
         });
         const currentWave = current[waveId];
@@ -310,13 +365,26 @@ function useNewDropCounter(
           currentWave.latestDropTimestamp !== null &&
           createdAt < currentWave.latestDropTimestamp
         ) {
-          return current;
+          return {
+            ...currentState,
+            counts: current,
+          };
         }
 
-        return update(current);
+        return {
+          identityKey: stateIdentityKey,
+          counts: update(current),
+          websocketReceivedAtByWave:
+            websocketReceivedAt === undefined
+              ? currentState.websocketReceivedAtByWave
+              : {
+                  ...currentState.websocketReceivedAtByWave,
+                  [waveId]: websocketReceivedAt,
+                },
+        };
       });
     },
-    [setRawNewDropsCounts, trustServerSnapshotUnreadState]
+    [stateIdentityKey, trustServerSnapshotUnreadState]
   );
 
   // Reset counts for a specific wave
@@ -326,12 +394,13 @@ function useNewDropCounter(
         return;
       }
 
-      setRawNewDropsCounts((prev) => {
+      setRawNewDropsCounts((prev, currentWebsocketReceivedAtByWave) => {
         // Every counter write first commits server-authoritative reconciliation
         // for all tracked waves so covered sibling counts cannot reappear.
         const current = reconcileNewDropsCounts({
           newDropsCounts: prev,
           trustServerSnapshotUnreadState,
+          websocketReceivedAtByWave: currentWebsocketReceivedAtByWave,
           waves: wavesRef.current,
         });
         const previous = current[waveId];
@@ -368,10 +437,11 @@ function useNewDropCounter(
       return;
     }
 
-    setRawNewDropsCounts((prev) => {
+    setRawNewDropsCounts((prev, currentWebsocketReceivedAtByWave) => {
       const current = reconcileNewDropsCounts({
         newDropsCounts: prev,
         trustServerSnapshotUnreadState,
+        websocketReceivedAtByWave: currentWebsocketReceivedAtByWave,
         waves: wavesRef.current,
       });
       const newCounts: Record<string, MinimalWaveNewDropsCount> = {};
@@ -446,12 +516,14 @@ function useNewDropCounter(
         if (isPollResponseDropUpdate(message)) return;
 
         const waveId = message.wave.id;
+        const websocketReceivedAt = Date.now();
         const wave = waves.find((w) => w.id === waveId);
         const isCoveredByServer = wave
           ? isDropCoveredByServer(
               wave,
               message.created_at,
-              trustServerSnapshotUnreadState
+              trustServerSnapshotUnreadState,
+              websocketReceivedAt
             )
           : false;
         if (isCoveredByServer) {
@@ -514,11 +586,12 @@ function useNewDropCounter(
                 serialNo: message.serial_no,
                 waveId,
               });
-            }
+            },
+            websocketReceivedAt
           );
 
           // Prevent refetch storms on bursts of unknown-wave websocket events.
-          const now = Date.now();
+          const now = websocketReceivedAt;
           if (
             lastUnknownWaveRefetchAtRef.current !== null &&
             now - lastUnknownWaveRefetchAtRef.current <
@@ -591,7 +664,8 @@ function useNewDropCounter(
               serialNo: message.serial_no,
               waveId,
             });
-          }
+          },
+          websocketReceivedAt
         );
       },
       [
