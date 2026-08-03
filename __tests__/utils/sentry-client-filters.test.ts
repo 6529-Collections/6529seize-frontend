@@ -7009,6 +7009,7 @@ describe("sentry-client-filters", () => {
 
   it.each([
     ["similar filename", { filename: "app:///injectScriptAdjustment.js" }],
+    ["empty function", { function: "" }],
     ["changed function", { function: "window.fetchWrapper" }],
     ["changed line", { lineno: 2 }],
     ["changed column", { colno: 4519 }],
@@ -7066,6 +7067,28 @@ describe("sentry-client-filters", () => {
           filename: "app:///injectScriptAdjust.js",
           lineno: 1,
           colno: 3159,
+        },
+      ],
+    });
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps a duplicated unsymbolicated fetch signature without the VihJ frame", () => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent({
+      frames: [
+        {
+          filename: "app:///injectScriptAdjust.js",
+          lineno: 1,
+          colno: 4520,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "window.fetch",
+          lineno: 1,
+          colno: 4520,
         },
       ],
     });
