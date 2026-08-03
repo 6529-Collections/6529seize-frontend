@@ -26,7 +26,21 @@ interface UseUnreadIndicatorProps {
 
 interface UseUnreadIndicatorReturn {
   readonly hasUnread: boolean;
+  /**
+   * Best-effort count used by the quick-DM badge. The aggregate summary and
+   * paged realtime list can overlap without per-wave summary attribution, so
+   * their totals must not be added together.
+   */
+  readonly unreadCount: number;
 }
+
+const normalizeUnreadCount = (value: unknown): number => {
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
+    return 0;
+  }
+
+  return Math.floor(value);
+};
 
 export function useUnreadIndicator({
   type,
@@ -38,24 +52,37 @@ export function useUnreadIndicator({
     type === "notifications" ? handle : null
   );
 
-  const { haveUnreadDmDrops } = useUnreadDmDrops(
+  const { unreadDmDropsCount } = useUnreadDmDrops(
     type === "messages" ? handle : null
   );
+  const normalizedUnreadDmDropsCount =
+    normalizeUnreadCount(unreadDmDropsCount);
 
   // Only show indicators if user is authenticated
   if (!handle) {
-    return { hasUnread: false };
+    return { hasUnread: false, unreadCount: 0 };
   }
 
   if (type === "notifications") {
-    return { hasUnread: haveUnreadNotifications };
+    return {
+      hasUnread: haveUnreadNotifications,
+      unreadCount: haveUnreadNotifications ? 1 : 0,
+    };
   }
 
-  const hasLocalUnreadMessages = (localDirectMessages ?? []).some((dm) => {
-    return (dm.unreadDropsCount ?? 0) > 0 || (dm.newDropsCount?.count ?? 0) > 0;
-  });
+  const localUnreadMessagesCount = (localDirectMessages ?? []).reduce(
+    (count, dm) =>
+      count + Math.max(dm.unreadDropsCount ?? 0, dm.newDropsCount?.count ?? 0),
+    0
+  );
+  const unreadMessagesCount = Math.max(
+    normalizedUnreadDmDropsCount,
+    localUnreadMessagesCount
+  );
 
-  const hasUnreadMessages = haveUnreadDmDrops || hasLocalUnreadMessages;
-
-  return { hasUnread: hasUnreadMessages };
+  return {
+    hasUnread:
+      normalizedUnreadDmDropsCount > 0 || localUnreadMessagesCount > 0,
+    unreadCount: unreadMessagesCount,
+  };
 }

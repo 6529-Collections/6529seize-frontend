@@ -63,8 +63,10 @@ interface WavesDataSource {
 interface UseEnhancedWavesListCoreOptions {
   supportsPinning: boolean;
   enabled?: boolean | undefined;
+  stateIdentityKey?: string | null | undefined;
   otherListWaveIds?: ReadonlySet<string> | undefined;
   unknownWaveRefetchCooldownMs?: number | undefined;
+  trustServerSnapshotUnreadState?: boolean | undefined;
   preserveBackendWaveOrder?: boolean | undefined;
   sortMutedLast?: boolean | undefined;
 }
@@ -96,17 +98,34 @@ function useEnhancedWavesListCore(
   const { newDropsCounts, resetAllWavesNewDropsCount, resetWaveNewDropsCount } =
     useNewDropCounter(activeWaveId, waves, refetchAllWavesFromData, {
       enabled: isEnabled,
+      stateIdentityKey: options.stateIdentityKey,
       otherListWaveIds: options.otherListWaveIds,
       unknownWaveRefetchCooldownMs: options.unknownWaveRefetchCooldownMs,
+      trustServerSnapshotUnreadState: options.trustServerSnapshotUnreadState,
     });
 
-  const [clearedUnreadWaveIds, setClearedUnreadWaveIds] = useState<Set<string>>(
-    new Set()
+  const [unreadState, setUnreadState] = useState<{
+    readonly identityKey: string | null | undefined;
+    readonly clearedWaveIds: Set<string>;
+    readonly forcedCounts: Record<string, number>;
+  }>(() => ({
+    identityKey: options.stateIdentityKey,
+    clearedWaveIds: new Set(),
+    forcedCounts: {},
+  }));
+  const currentUnreadState = useMemo(
+    () =>
+      unreadState.identityKey === options.stateIdentityKey
+        ? unreadState
+        : {
+            // useMemo keeps this empty identity snapshot stable until either
+            // the identity or committed unread state changes.
+            identityKey: options.stateIdentityKey,
+            clearedWaveIds: new Set<string>(),
+            forcedCounts: {},
+          },
+    [options.stateIdentityKey, unreadState]
   );
-
-  const [forcedUnreadCounts, setForcedUnreadCounts] = useState<
-    Record<string, number>
-  >({});
 
   const resetWaveUnreadCount = useCallback(
     (waveId: string) => {
@@ -114,18 +133,26 @@ function useEnhancedWavesListCore(
         return;
       }
 
-      setClearedUnreadWaveIds((prev) => {
-        const next = new Set(prev);
-        next.add(waveId);
-        return next;
-      });
-      setForcedUnreadCounts((prev) => {
-        if (!(waveId in prev)) return prev;
-        const { [waveId]: _, ...rest } = prev;
-        return rest;
+      setUnreadState((previous) => {
+        const current =
+          previous.identityKey === options.stateIdentityKey
+            ? previous
+            : {
+                identityKey: options.stateIdentityKey,
+                clearedWaveIds: new Set<string>(),
+                forcedCounts: {},
+              };
+        const clearedWaveIds = new Set(current.clearedWaveIds);
+        clearedWaveIds.add(waveId);
+        const { [waveId]: _, ...forcedCounts } = current.forcedCounts;
+        return {
+          identityKey: options.stateIdentityKey,
+          clearedWaveIds,
+          forcedCounts,
+        };
       });
     },
-    [isEnabled]
+    [isEnabled, options.stateIdentityKey]
   );
 
   const restoreWaveUnreadCount = useCallback(
@@ -134,20 +161,31 @@ function useEnhancedWavesListCore(
         return;
       }
 
-      setClearedUnreadWaveIds((prev) => {
-        if (!prev.has(waveId)) return prev;
-        const next = new Set(prev);
-        next.delete(waveId);
-        return next;
+      setUnreadState((previous) => {
+        const current =
+          previous.identityKey === options.stateIdentityKey
+            ? previous
+            : {
+                identityKey: options.stateIdentityKey,
+                clearedWaveIds: new Set<string>(),
+                forcedCounts: {},
+              };
+        const clearedWaveIds = new Set(current.clearedWaveIds);
+        clearedWaveIds.delete(waveId);
+        return {
+          identityKey: options.stateIdentityKey,
+          clearedWaveIds,
+          forcedCounts:
+            count === undefined
+              ? current.forcedCounts
+              : {
+                  ...current.forcedCounts,
+                  [waveId]: count,
+                },
+        };
       });
-      if (count !== undefined) {
-        setForcedUnreadCounts((prev) => ({
-          ...prev,
-          [waveId]: count,
-        }));
-      }
     },
-    [isEnabled]
+    [isEnabled, options.stateIdentityKey]
   );
 
   const markWaveRead = useCallback(
@@ -160,16 +198,11 @@ function useEnhancedWavesListCore(
 
   useEffect(() => {
     if (!isEnabled || !activeWaveId) return;
-    setForcedUnreadCounts((prev) => {
-      if (!(activeWaveId in prev)) return prev;
-      const { [activeWaveId]: _, ...rest } = prev;
-      return rest;
-    });
     const timeout = setTimeout(() => {
       resetWaveUnreadCount(activeWaveId);
     }, UNREAD_CLEAR_DELAY_MS);
     return () => clearTimeout(timeout);
-  }, [activeWaveId, isEnabled, resetWaveUnreadCount]);
+  }, [activeWaveId, isEnabled, options.stateIdentityKey, resetWaveUnreadCount]);
 
   const mapWave = useCallback(
     (wave: EnhancedSidebarWave): MinimalWave => {
@@ -195,11 +228,15 @@ function useEnhancedWavesListCore(
         wsData?.latestDropTimestamp !== undefined &&
         wave.latestDropTimestamp !== null &&
         wave.latestDropTimestamp >= wsData.latestDropTimestamp;
-      const isCleared = clearedUnreadWaveIds.has(wave.id) && !hasNewWsDrops;
-      const forcedCount = forcedUnreadCounts[wave.id];
+      const isCleared =
+        currentUnreadState.clearedWaveIds.has(wave.id) && !hasNewWsDrops;
+      const forcedCount =
+        wave.id === activeWaveId
+          ? undefined
+          : currentUnreadState.forcedCounts[wave.id];
       const apiFirstUnread = wave.firstUnreadDropSerialNo ?? null;
       const wsFirstUnread = wsData?.firstUnreadSerialNo ?? null;
-      const wasCleared = clearedUnreadWaveIds.has(wave.id);
+      const wasCleared = currentUnreadState.clearedWaveIds.has(wave.id);
       let firstUnreadDropSerialNo: number | null = null;
       if (!isCleared) {
         if (wasCleared && hasNewWsDrops) {
@@ -265,12 +302,7 @@ function useEnhancedWavesListCore(
           wave.followedSubwavesCount > 0,
       };
     },
-    [
-      newDropsCounts,
-      clearedUnreadWaveIds,
-      forcedUnreadCounts,
-      options.supportsPinning,
-    ]
+    [newDropsCounts, activeWaveId, currentUnreadState, options.supportsPinning]
   );
 
   const minimal = useMemo(() => {

@@ -180,6 +180,7 @@ const mapApiWaveOverviewToSidebarWave = (
       context?.hidden_followed_subwave_unread_drops ??
       0,
     latestReadTimestamp: 0,
+    serverSnapshotLatestDropTimestamp: wave.last_drop_time,
     pinned: context?.pinned ?? false,
     muted: context?.muted ?? false,
     subscribed: context?.subscribed ?? false,
@@ -235,6 +236,7 @@ export const mapApiWaveToSidebarWave = (wave: ApiWave): SidebarWave => {
     followedSubwavesCount: 0,
     unreadSubwaveDrops: 0,
     latestReadTimestamp: wave.metrics.your_latest_read_timestamp,
+    serverSnapshotLatestDropTimestamp: wave.metrics.latest_drop_timestamp,
     pinned: wave.pinned,
     muted: wave.metrics.muted,
     subscribed: wave.subscribed_actions.length > 0,

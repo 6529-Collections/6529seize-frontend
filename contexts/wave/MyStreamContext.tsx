@@ -4,6 +4,7 @@ import { useNotificationsContext } from "@/components/notifications/Notification
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropId } from "@/generated/models/ApiDropId";
 import type { Drop } from "@/helpers/waves/drop.helpers";
+import { isPublicNonDirectMessageWave } from "@/helpers/waves/wave.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDmWavesList from "@/hooks/useDmWavesList";
 import { useWaveById } from "@/hooks/useWaveById";
@@ -229,6 +230,30 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     () => new Set(dmWavesData.waves.map((wave) => wave.id)),
     [dmWavesData.waves]
   );
+  const profileScopedWaveIds = useMemo<ReadonlySet<string>>(() => {
+    const waveIds = new Set(dmWaveIds);
+    for (const wave of mainWavesData.waves) {
+      if (wave.isPrivate || wave.isDirectMessage) {
+        waveIds.add(wave.id);
+      }
+    }
+    if (activeWaveData && !isPublicNonDirectMessageWave(activeWaveData)) {
+      waveIds.add(activeWaveData.id);
+    }
+    return waveIds;
+  }, [activeWaveData, dmWaveIds, mainWavesData.waves]);
+  const publicWaveIds = useMemo<ReadonlySet<string>>(() => {
+    const waveIds = new Set<string>();
+    for (const wave of mainWavesData.waves) {
+      if (!wave.isPrivate && !wave.isDirectMessage) {
+        waveIds.add(wave.id);
+      }
+    }
+    if (activeWaveData && isPublicNonDirectMessageWave(activeWaveData)) {
+      waveIds.add(activeWaveData.id);
+    }
+    return waveIds;
+  }, [activeWaveData, mainWavesData.waves]);
   const wavesHookData = useEnhancedWavesListCore(activeWaveId, mainWavesData, {
     enabled: isMainWavesListEnabled,
     supportsPinning: true,
@@ -238,10 +263,20 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const dmWavesHookData = useEnhancedWavesListCore(activeWaveId, dmWavesData, {
     enabled: isDirectMessagesListEnabled,
     supportsPinning: false,
+    stateIdentityKey: dmWavesData.viewerIdentityKey,
     otherListWaveIds: mainWaveIds,
     sortMutedLast: false,
+    trustServerSnapshotUnreadState:
+      dmWavesData.canTrustServerSnapshotUnreadState,
   });
   const waveMessagesStore = useWaveMessagesStore();
+  const { setKnownWaveScopes } = waveMessagesStore;
+  useLayoutEffect(() => {
+    setKnownWaveScopes({
+      profileScopedWaveIds,
+      publicWaveIds,
+    });
+  }, [profileScopedWaveIds, publicWaveIds, setKnownWaveScopes]);
   const websocketStatus = useWebsocketStatus();
   const prevIsActiveRef = useRef(isActive);
   const lastBrowserResumeSyncAtRef = useRef(0);

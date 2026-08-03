@@ -1,22 +1,29 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useWavesV2 } from "./useWavesV2";
+import { useUnreadDmDrops } from "./useUnreadDmDrops";
 import {
   SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
   WAVE_FOLLOWING_WAVES_PARAMS,
 } from "@/components/react-query-wrapper/utils/query-utils";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
+import { getAuthJwt, isAuthJwtUsable } from "@/services/auth/auth.utils";
 
 const noopWaveAction = () => {};
+const MAX_RECONCILIATION_ATTEMPTS_PER_VIEWER = 2;
+const RECONCILIATION_REARM_MIN_INTERVAL_MS =
+  SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS * 5;
 
 interface UseDmWavesListOptions {
   readonly enabled?: boolean | undefined;
 }
 
 const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
+  const queryClient = useQueryClient();
   const { address, hasValidWalletAuth } = useSeizeConnectContext();
   const {
     activeProfileProxy,
@@ -24,10 +31,14 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
     fetchingProfile,
     isAuthenticated,
   } = useAuth();
+  const authJwt = getAuthJwt();
+  const connectedProfileId = connectedProfile?.id ?? null;
   const hasValidWalletAuthorization = hasValidWalletAuth !== false;
   const hasAuthenticatedProfile =
     hasValidWalletAuthorization &&
-    (isAuthenticated ?? !!connectedProfile?.handle);
+    (isAuthenticated ?? !!connectedProfile?.handle) &&
+    !!connectedProfileId &&
+    isAuthJwtUsable(authJwt);
   const isPendingAuthSwitch = Boolean(
     address && (!hasValidWalletAuthorization || fetchingProfile)
   );
@@ -39,13 +50,14 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
 
     const normalizedAddress = address.toLowerCase();
     if (activeProfileProxy?.id) {
-      return `${normalizedAddress}:proxy:${activeProfileProxy.id}`;
+      return `${normalizedAddress}:profile:${connectedProfileId}:proxy:${activeProfileProxy.id}`;
     }
 
-    return `${normalizedAddress}:primary`;
+    return `${normalizedAddress}:profile:${connectedProfileId}:primary`;
   }, [
     address,
     activeProfileProxy?.id,
+    connectedProfileId,
     hasAuthenticatedProfile,
     hasValidWalletAuthorization,
   ]);
@@ -65,6 +77,8 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
     fetchNextPage,
     status,
     refetch,
+    queryKey: dmWavesQueryKey,
+    dataUpdatedAt: dmWavesDataUpdatedAt,
   } = useWavesV2({
     overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
     pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
@@ -74,6 +88,102 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
     refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
     refetchIntervalInBackground: false,
   });
+  const { unreadDmDropsCount, dataUpdatedAt: unreadDmDropsDataUpdatedAt } =
+    useUnreadDmDrops(connectedProfile?.handle ?? null, {
+      enabled: shouldFetchDmWaves,
+    });
+  const reconciliationStateRef = useRef<{
+    readonly viewerIdentityKey: string;
+    readonly attempts: number;
+    readonly lastDataUpdatedAt: number;
+    readonly attemptWindowStartedAt: number;
+  } | null>(null);
+  const listedUnreadDropsCount = useMemo(
+    () =>
+      mainWaves.reduce(
+        (total, wave) => total + Math.max(wave.unreadDropsCount, 0),
+        0
+    ),
+    [mainWaves]
+  );
+  // A paginated summary can include unread DMs outside the loaded rows. Once
+  // every page is loaded, require exact agreement before trusting the snapshot.
+  const unreadSummaryAccountsForLoadedRows =
+    hasNextPage === true ||
+    unreadDmDropsCount === listedUnreadDropsCount;
+  const canTrustServerSnapshotUnreadState = Boolean(
+    shouldFetchDmWaves &&
+    dmWavesDataUpdatedAt > 0 &&
+    unreadDmDropsDataUpdatedAt >= dmWavesDataUpdatedAt &&
+    unreadSummaryAccountsForLoadedRows
+  );
+
+  useEffect(() => {
+    if (
+      !shouldFetchDmWaves ||
+      !viewerIdentityKey ||
+      unreadDmDropsCount <= listedUnreadDropsCount
+    ) {
+      reconciliationStateRef.current = null;
+      return;
+    }
+
+    if (isFetching) {
+      return;
+    }
+
+    const previousViewerState =
+      reconciliationStateRef.current?.viewerIdentityKey === viewerIdentityKey
+        ? reconciliationStateRef.current
+        : {
+            viewerIdentityKey,
+            attempts: 0,
+            lastDataUpdatedAt: -1,
+            attemptWindowStartedAt: dmWavesDataUpdatedAt,
+          };
+    const shouldRearm =
+      previousViewerState.attempts >= MAX_RECONCILIATION_ATTEMPTS_PER_VIEWER &&
+      dmWavesDataUpdatedAt - previousViewerState.attemptWindowStartedAt >=
+        RECONCILIATION_REARM_MIN_INTERVAL_MS;
+    const previousState = shouldRearm
+      ? {
+          ...previousViewerState,
+          attempts: 0,
+          attemptWindowStartedAt: dmWavesDataUpdatedAt,
+        }
+      : previousViewerState;
+    const hasNewDmSnapshot =
+      previousState.lastDataUpdatedAt !== dmWavesDataUpdatedAt;
+    if (
+      previousState.attempts >= MAX_RECONCILIATION_ATTEMPTS_PER_VIEWER ||
+      (previousState.attempts > 0 && !hasNewDmSnapshot)
+    ) {
+      return;
+    }
+
+    reconciliationStateRef.current = {
+      viewerIdentityKey,
+      attempts: previousState.attempts + 1,
+      lastDataUpdatedAt: dmWavesDataUpdatedAt,
+      attemptWindowStartedAt: previousState.attemptWindowStartedAt,
+    };
+    // Use the successful overview snapshot timestamp as the only clock. This
+    // avoids a separate timer while capping each reconciliation burst.
+    void queryClient.refetchQueries({
+      queryKey: dmWavesQueryKey,
+      exact: true,
+      type: "active",
+    });
+  }, [
+    dmWavesQueryKey,
+    dmWavesDataUpdatedAt,
+    isFetching,
+    listedUnreadDropsCount,
+    queryClient,
+    shouldFetchDmWaves,
+    unreadDmDropsCount,
+    viewerIdentityKey,
+  ]);
 
   // sort by latest drop
   const sorted = useMemo(() => {
@@ -121,6 +231,8 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       missingPinnedIds: [],
       mainWavesRefetch: refetchStable,
       refetchAllWaves: refetchStable,
+      viewerIdentityKey,
+      canTrustServerSnapshotUnreadState,
     }),
     [
       sorted,
@@ -132,6 +244,8 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       mainWaves,
       refetchStable,
       shouldFetchDmWaves,
+      viewerIdentityKey,
+      canTrustServerSnapshotUnreadState,
     ]
   );
 };

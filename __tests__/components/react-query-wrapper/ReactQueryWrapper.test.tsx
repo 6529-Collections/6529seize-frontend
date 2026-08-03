@@ -33,6 +33,7 @@ type ContextType = {
   onGroupChanged: (params: { groupId: string }) => void;
   onIdentityBulkRate: () => void;
   invalidateNotifications: () => void;
+  invalidateWaveReadState: () => void;
   invalidateAuthSensitiveQueries: () => void;
 };
 
@@ -177,6 +178,20 @@ describe("ReactQueryWrapper context", () => {
     });
     expect(client.invalidateQueries).not.toHaveBeenCalledWith({
       queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
+    });
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVES_V2],
+    });
+  });
+
+  it("invalidateWaveReadState refreshes the DM unread count", () => {
+    const { client, ctx } = createTestSetup();
+    act(() => ctx.invalidateWaveReadState());
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
+    });
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.DM_DROPS_UNREAD],
     });
     expect(client.invalidateQueries).toHaveBeenCalledWith({
       queryKey: [QueryKey.WAVES_V2],

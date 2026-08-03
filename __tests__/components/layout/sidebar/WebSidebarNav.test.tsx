@@ -29,6 +29,18 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
   default: () => ({ hasTouchScreen: false }),
 }));
 
+const mockDirectMessages = [
+  {
+    unreadDropsCount: 0,
+    newDropsCount: { count: 1 },
+  },
+];
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
+  useMyStreamOptional: () => ({
+    directMessages: { list: mockDirectMessages },
+  }),
+}));
+
 let mockCanAccessDropForge = false;
 jest.mock("@/hooks/useDropForgePermissions", () => ({
   useDropForgePermissions: () => ({
@@ -36,8 +48,12 @@ jest.mock("@/hooks/useDropForgePermissions", () => ({
   }),
 }));
 
+const mockUseUnreadIndicator = jest.fn((_props: unknown) => ({
+  hasUnread: false,
+  unreadCount: 0,
+}));
 jest.mock("@/hooks/useUnreadIndicator", () => ({
-  useUnreadIndicator: () => ({ hasUnread: false }),
+  useUnreadIndicator: (props: unknown) => mockUseUnreadIndicator(props),
 }));
 
 const mockUsePathname = usePathname as jest.Mock;
@@ -46,6 +62,17 @@ describe("WebSidebarNav", () => {
   beforeEach(() => {
     mockUsePathname.mockReturnValue("/waves");
     mockCanAccessDropForge = false;
+    mockUseUnreadIndicator.mockClear();
+  });
+
+  it("combines the websocket-backed DM list with the unread summary", () => {
+    render(<WebSidebarNav isCollapsed={false} />);
+
+    expect(mockUseUnreadIndicator).toHaveBeenCalledWith({
+      type: "messages",
+      handle: null,
+      localDirectMessages: mockDirectMessages,
+    });
   });
 
   it("renders Waves as a direct /waves link instead of an expandable trigger", () => {

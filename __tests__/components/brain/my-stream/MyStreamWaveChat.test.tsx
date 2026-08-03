@@ -4,10 +4,7 @@ import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/React
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { EditingDropProvider } from "@/contexts/EditingDropContext";
-import {
-  WsMessageType,
-  type WsDropDeleteMessage,
-} from "@/helpers/Types";
+import { WsMessageType, type WsDropDeleteMessage } from "@/helpers/Types";
 import { REPLY_TARGET_UNAVAILABLE_TOAST_ID } from "@/components/waves/create-drop-content/reply-target-unavailable";
 import {
   act,
@@ -288,7 +285,11 @@ describe("MyStreamWaveChat", () => {
   const wrapWithProvider = (component: React.ReactElement) => {
     return (
       <ReactQueryWrapperContext.Provider
-        value={{ invalidateNotifications: invalidateNotificationsMock } as any}
+        value={
+          {
+            invalidateWaveReadState: invalidateNotificationsMock,
+          } as any
+        }
       >
         <EditingDropProvider>{component}</EditingDropProvider>
       </ReactQueryWrapperContext.Provider>
@@ -788,7 +789,11 @@ describe("MyStreamWaveChat", () => {
 
     rerender(
       <ReactQueryWrapperContext.Provider
-        value={{ invalidateNotifications: invalidateNotificationsMock } as any}
+        value={
+          {
+            invalidateWaveReadState: invalidateNotificationsMock,
+          } as any
+        }
       >
         <EditingDropProvider>
           <MyStreamWaveChat

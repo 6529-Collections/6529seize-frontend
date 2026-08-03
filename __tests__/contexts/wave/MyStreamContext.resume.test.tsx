@@ -6,6 +6,7 @@ const mockRegisterWave = jest.fn();
 const mockSyncNewestMessages = jest.fn();
 const mockFetchNextPage = jest.fn();
 const mockFetchAroundSerialNo = jest.fn();
+const mockSetKnownWaveScopes = jest.fn();
 
 jest.mock("@/components/notifications/NotificationsContext", () => ({
   useNotificationsContext: jest.fn(() => ({
@@ -72,6 +73,7 @@ jest.mock("@/contexts/wave/hooks/useWaveMessagesStore", () => ({
     removeDrop: jest.fn(),
     subscribe: jest.fn(),
     unsubscribe: jest.fn(),
+    setKnownWaveScopes: mockSetKnownWaveScopes,
     optimisticUpdateDrop: jest.fn(),
     hasServerFeedSeed: jest.fn(() => false),
     registerPendingServerFeedSeed: jest.fn(),
@@ -144,8 +146,15 @@ type IdleWindow = Window & {
   cancelIdleCallback?: (handle: number) => void;
 };
 
-const createListData = (refetchAllWaves: jest.Mock) => ({
-  waves: [],
+const createListData = (
+  refetchAllWaves: jest.Mock,
+  waves: readonly {
+    readonly id: string;
+    readonly isDirectMessage?: boolean;
+    readonly isPrivate?: boolean;
+  }[] = []
+) => ({
+  waves,
   isFetching: false,
   isFetchingNextPage: false,
   hasNextPage: false,
@@ -189,6 +198,107 @@ describe("MyStreamProvider resume sync", () => {
     });
     useWavesListMock.mockReturnValue(createListData(mainRefetch));
     useDmWavesListMock.mockReturnValue(createListData(dmRefetch));
+  });
+
+  it("registers loaded public and DM wave scopes with the message store", () => {
+    useWavesListMock.mockReturnValue(
+      createListData(mainRefetch, [{ id: "public-wave" }])
+    );
+    useDmWavesListMock.mockReturnValue(
+      createListData(dmRefetch, [{ id: "dm-wave" }])
+    );
+
+    render(
+      <MyStreamProvider>
+        <div />
+      </MyStreamProvider>
+    );
+
+    expect(mockSetKnownWaveScopes).toHaveBeenCalledWith({
+      profileScopedWaveIds: new Set(["dm-wave"]),
+      publicWaveIds: new Set(["public-wave"]),
+    });
+  });
+
+  it("registers private main-list waves as profile scoped", () => {
+    useWavesListMock.mockReturnValue(
+      createListData(mainRefetch, [
+        {
+          id: "private-wave",
+          isPrivate: true,
+          isDirectMessage: false,
+        },
+      ])
+    );
+
+    render(
+      <MyStreamProvider>
+        <div />
+      </MyStreamProvider>
+    );
+
+    expect(mockSetKnownWaveScopes).toHaveBeenCalledWith({
+      profileScopedWaveIds: new Set(["private-wave"]),
+      publicWaveIds: new Set(),
+    });
+  });
+
+  it("registers an active public wave when the main list is deferred", () => {
+    useCapacitorMock.mockReturnValue({ isCapacitor: true, isActive: true });
+    usePathnameMock.mockReturnValue("/waves/public-wave");
+    useActiveWaveManagerMock.mockReturnValue({
+      activeWaveId: "public-wave",
+      setActiveWave: mockSetActiveWave,
+    });
+    useWaveByIdMock.mockReturnValue({
+      wave: {
+        id: "public-wave",
+        chat: { scope: { group: null } },
+        visibility: { scope: { group: null } },
+      },
+      isLoading: false,
+      isFetching: false,
+    });
+
+    render(
+      <MyStreamProvider>
+        <div />
+      </MyStreamProvider>
+    );
+
+    expect(mockSetKnownWaveScopes).toHaveBeenCalledWith({
+      profileScopedWaveIds: new Set(),
+      publicWaveIds: new Set(["public-wave"]),
+    });
+  });
+
+  it("registers an active private wave as profile scoped", () => {
+    useCapacitorMock.mockReturnValue({ isCapacitor: true, isActive: true });
+    usePathnameMock.mockReturnValue("/waves/private-wave");
+    useActiveWaveManagerMock.mockReturnValue({
+      activeWaveId: "private-wave",
+      setActiveWave: mockSetActiveWave,
+    });
+    useWaveByIdMock.mockReturnValue({
+      wave: {
+        id: "private-wave",
+        chat: { scope: { group: { is_direct_message: false } } },
+        visibility: { scope: { group: { id: "private-group" } } },
+      },
+      isLoading: false,
+      isFetching: false,
+    });
+
+    render(
+      <MyStreamProvider>
+        <div />
+      </MyStreamProvider>
+    );
+
+    expect(mockSetKnownWaveScopes).toHaveBeenCalledWith({
+      profileScopedWaveIds: new Set(["private-wave"]),
+      publicWaveIds: new Set(),
+    });
   });
 
   it("registers selected waves before delegating active wave navigation", () => {

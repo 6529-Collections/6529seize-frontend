@@ -1,6 +1,7 @@
 "use client";
 
 import * as Sentry from "@sentry/nextjs";
+import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 import { useCallback, useEffect, useRef } from "react";
 
 type WaveAbortOwner = "feed" | "pagination";
@@ -8,6 +9,7 @@ type WaveAbortOwner = "feed" | "pagination";
 export type WaveAbortTrigger =
   | "hook_unmounted"
   | "pagination_cancelled"
+  | "profile_switched"
   | "request_replaced"
   | "wave_deactivated";
 
@@ -109,15 +111,27 @@ export function useWaveAbortController(owner: WaveAbortOwner) {
   /**
    * Cancels all ongoing fetches
    */
-  const cancelAllFetches = useCallback(() => {
-    Object.keys(abortControllers.current).forEach((abortKey) => {
-      cancelFetch(abortKey, "hook_unmounted");
-    });
-  }, [cancelFetch]);
+  const cancelAllFetches = useCallback(
+    (trigger: WaveAbortTrigger = "hook_unmounted") => {
+      Object.keys(abortControllers.current).forEach((abortKey) => {
+        cancelFetch(abortKey, trigger);
+      });
+    },
+    [cancelFetch]
+  );
 
-  // Clean up all pending requests when the hook unmounts
+  // Authentication changes invalidate every in-flight private wave request.
   useEffect(() => {
-    return cancelAllFetches;
+    const handleProfileSwitch = () => cancelAllFetches("profile_switched");
+    globalThis.addEventListener(PROFILE_SWITCHED_EVENT, handleProfileSwitch);
+
+    return () => {
+      globalThis.removeEventListener(
+        PROFILE_SWITCHED_EVENT,
+        handleProfileSwitch
+      );
+      cancelAllFetches();
+    };
   }, [cancelAllFetches]);
 
   return {

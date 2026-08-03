@@ -197,6 +197,7 @@ describe("waves-v2-api", () => {
     expect(result.waves[0]).toMatchObject({
       id: "wave-1",
       creator: { id: "profile-1", handle: "creator" },
+      serverSnapshotLatestDropTimestamp: 456,
       waveRep,
       waveScore,
     });
@@ -291,6 +292,7 @@ describe("waves-v2-api", () => {
     expect(result[0]).toMatchObject({
       id: "legacy-wave",
       name: "Legacy Wave",
+      serverSnapshotLatestDropTimestamp: 200,
     });
   });
 

@@ -87,6 +87,257 @@ describe("useNewDropCounter", () => {
     expect(result.current.newDropsCounts["wave2"]?.count).toBe(0);
   });
 
+  it("keeps websocket unread state until a trusted server snapshot covers it", () => {
+    const refetch = jest.fn();
+    const { result, rerender } = renderHook(
+      ({
+        latestDropTimestamp,
+        latestReadTimestamp,
+        serverSnapshotLatestDropTimestamp,
+        trustServerSnapshotUnreadState,
+        unreadDropsCount,
+      }) =>
+        useNewDropCounter(
+          null,
+          [
+            {
+              id: "wave2",
+              latestDropTimestamp,
+              latestReadTimestamp,
+              serverSnapshotLatestDropTimestamp,
+              unreadDropsCount,
+            },
+          ] as any,
+          refetch,
+          { trustServerSnapshotUnreadState }
+        ),
+      {
+        wrapper,
+        initialProps: {
+          latestDropTimestamp: 20,
+          latestReadTimestamp: 20,
+          serverSnapshotLatestDropTimestamp: 20,
+          trustServerSnapshotUnreadState: false,
+          unreadDropsCount: 0,
+        },
+      }
+    );
+
+    emitDropUpdate({ createdAt: 30, serialNo: 5 });
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 1,
+      latestDropTimestamp: 30,
+      firstUnreadSerialNo: 5,
+    });
+
+    rerender({
+      latestDropTimestamp: 31,
+      latestReadTimestamp: 20,
+      serverSnapshotLatestDropTimestamp: 20,
+      trustServerSnapshotUnreadState: false,
+      unreadDropsCount: 0,
+    });
+
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 1,
+      latestDropTimestamp: 30,
+      firstUnreadSerialNo: 5,
+    });
+
+    rerender({
+      latestDropTimestamp: 31,
+      latestReadTimestamp: 20,
+      serverSnapshotLatestDropTimestamp: 31,
+      trustServerSnapshotUnreadState: false,
+      unreadDropsCount: 0,
+    });
+
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(1);
+
+    rerender({
+      latestDropTimestamp: 31,
+      latestReadTimestamp: 20,
+      serverSnapshotLatestDropTimestamp: 31,
+      trustServerSnapshotUnreadState: true,
+      unreadDropsCount: 0,
+    });
+
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 0,
+      latestDropTimestamp: 31,
+      firstUnreadSerialNo: null,
+    });
+
+    emitDropUpdate({ createdAt: 30, serialNo: 5 });
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(0);
+
+    emitDropUpdate({ createdAt: 32, serialNo: 6 });
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 1,
+      latestDropTimestamp: 32,
+      firstUnreadSerialNo: 6,
+    });
+  });
+
+  it("commits reconciled state when resetting one wave", () => {
+    const { result, rerender } = renderHook(
+      ({ latestReadTimestamp }) =>
+        useNewDropCounter(
+          null,
+          [
+            {
+              id: "wave2",
+              latestDropTimestamp: 31,
+              latestReadTimestamp,
+            },
+          ] as any,
+          jest.fn()
+        ),
+      {
+        wrapper,
+        initialProps: { latestReadTimestamp: 20 },
+      }
+    );
+
+    emitDropUpdate({ createdAt: 30, serialNo: 5 });
+    rerender({ latestReadTimestamp: 31 });
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(0);
+
+    act(() => {
+      result.current.resetWaveNewDropsCount("wave2");
+    });
+    rerender({ latestReadTimestamp: 20 });
+
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 0,
+      latestDropTimestamp: 31,
+      firstUnreadSerialNo: null,
+    });
+  });
+
+  it("commits covered sibling reconciliation during a wave reset", () => {
+    const { result, rerender } = renderHook(
+      ({ wave2SnapshotTimestamp }) =>
+        useNewDropCounter(
+          null,
+          [
+            {
+              id: "wave1",
+              latestDropTimestamp: 10,
+              latestReadTimestamp: 10,
+              serverSnapshotLatestDropTimestamp: 10,
+            },
+            {
+              id: "wave2",
+              latestDropTimestamp: wave2SnapshotTimestamp,
+              latestReadTimestamp: 20,
+              serverSnapshotLatestDropTimestamp: wave2SnapshotTimestamp,
+            },
+          ] as any,
+          jest.fn(),
+          { trustServerSnapshotUnreadState: true }
+        ),
+      {
+        wrapper,
+        initialProps: { wave2SnapshotTimestamp: 20 },
+      }
+    );
+
+    act(() => {
+      result.current.resetWaveNewDropsCount("wave1");
+    });
+    emitDropUpdate({ createdAt: 30, serialNo: 5, waveId: "wave2" });
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(1);
+
+    rerender({ wave2SnapshotTimestamp: 31 });
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(0);
+
+    act(() => {
+      result.current.resetWaveNewDropsCount("wave1");
+    });
+    rerender({ wave2SnapshotTimestamp: 20 });
+
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 0,
+      latestDropTimestamp: 31,
+      firstUnreadSerialNo: null,
+    });
+  });
+
+  it("commits reconciled state when resetting all waves", () => {
+    const { result, rerender } = renderHook(
+      ({ latestReadTimestamp }) =>
+        useNewDropCounter(
+          null,
+          [
+            {
+              id: "wave2",
+              latestDropTimestamp: 31,
+              latestReadTimestamp,
+            },
+          ] as any,
+          jest.fn()
+        ),
+      {
+        wrapper,
+        initialProps: { latestReadTimestamp: 20 },
+      }
+    );
+
+    emitDropUpdate({ createdAt: 30, serialNo: 5 });
+    rerender({ latestReadTimestamp: 31 });
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(0);
+
+    act(() => {
+      result.current.resetAllWavesNewDropsCount();
+    });
+    rerender({ latestReadTimestamp: 20 });
+
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 0,
+      latestDropTimestamp: 31,
+      firstUnreadSerialNo: null,
+    });
+  });
+
+  it("uses the current wave snapshot for resets and websocket updates", () => {
+    const { result, rerender } = renderHook(
+      ({ serverSnapshotLatestDropTimestamp }) =>
+        useNewDropCounter(
+          null,
+          [
+            {
+              id: "wave2",
+              latestDropTimestamp: serverSnapshotLatestDropTimestamp,
+              latestReadTimestamp: 20,
+              serverSnapshotLatestDropTimestamp,
+            },
+          ] as any,
+          jest.fn(),
+          { trustServerSnapshotUnreadState: true }
+        ),
+      {
+        wrapper,
+        initialProps: { serverSnapshotLatestDropTimestamp: 20 },
+      }
+    );
+
+    emitDropUpdate({ createdAt: 30, serialNo: 5 });
+    rerender({ serverSnapshotLatestDropTimestamp: 31 });
+
+    act(() => {
+      result.current.resetWaveNewDropsCount("wave2");
+    });
+    emitDropUpdate({ createdAt: 30, serialNo: 5 });
+    rerender({ serverSnapshotLatestDropTimestamp: 20 });
+
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 0,
+      latestDropTimestamp: 31,
+      firstUnreadSerialNo: null,
+    });
+  });
+
   it("does not increment counts for poll response updates", () => {
     const refetch = jest.fn();
     const { result } = renderHook(
@@ -115,6 +366,48 @@ describe("useNewDropCounter", () => {
 
     expect(result.current.newDropsCounts).toEqual({});
     expect(refetch).not.toHaveBeenCalled();
+  });
+
+  it("clears stored counts when re-enabled", () => {
+    const { result, rerender } = renderHook(
+      ({ enabled }) =>
+        useNewDropCounter(null, waves, jest.fn(), {
+          enabled,
+        }),
+      {
+        wrapper,
+        initialProps: { enabled: true },
+      }
+    );
+
+    emitDropUpdate();
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(1);
+
+    rerender({ enabled: false });
+    expect(result.current.newDropsCounts).toEqual({});
+
+    rerender({ enabled: true });
+    expect(result.current.newDropsCounts).toEqual({});
+  });
+
+  it("does not carry websocket counts into another viewer identity", () => {
+    const { result, rerender } = renderHook(
+      ({ identityKey }) =>
+        useNewDropCounter(null, waves, jest.fn(), {
+          stateIdentityKey: identityKey,
+        }),
+      {
+        wrapper,
+        initialProps: { identityKey: "profile-1" },
+      }
+    );
+
+    emitDropUpdate();
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(1);
+
+    rerender({ identityKey: "profile-2" });
+
+    expect(result.current.newDropsCounts).toEqual({});
   });
 
   it("updates muted wave timestamps without unread counts", () => {

@@ -39,7 +39,7 @@ describe("useUnreadIndicator", () => {
     const { result } = renderHook(() =>
       useUnreadIndicator({ type: "notifications", handle: null })
     );
-    expect(result.current.hasUnread).toBe(false);
+    expect(result.current).toEqual({ hasUnread: false, unreadCount: 0 });
   });
 
   it("handles notifications type", () => {
@@ -49,7 +49,7 @@ describe("useUnreadIndicator", () => {
     const { result } = renderHook(() =>
       useUnreadIndicator({ type: "notifications", handle: "me" })
     );
-    expect(result.current.hasUnread).toBe(true);
+    expect(result.current).toEqual({ hasUnread: true, unreadCount: 1 });
     expect(mockUseMyStream).not.toHaveBeenCalled();
   });
 
@@ -65,7 +65,7 @@ describe("useUnreadIndicator", () => {
     const { result } = renderHook(() =>
       useUnreadIndicator({ type: "messages", handle: "me" })
     );
-    expect(result.current.hasUnread).toBe(true);
+    expect(result.current).toEqual({ hasUnread: true, unreadCount: 2 });
     expect(mockUseMyStream).not.toHaveBeenCalled();
   });
 
@@ -87,7 +87,84 @@ describe("useUnreadIndicator", () => {
       })
     );
 
-    expect(result.current.hasUnread).toBe(true);
+    expect(result.current).toEqual({ hasUnread: true, unreadCount: 1 });
     expect(mockUseMyStream).not.toHaveBeenCalled();
+  });
+
+  it("uses a best-effort count without double-counting overlapping sources", () => {
+    mockUseUnreadDmDrops.mockReturnValue({
+      haveUnreadDmDrops: true,
+      unreadDmDrops: { count: 2 },
+      unreadDmDropsCount: 2,
+    });
+    mockUseUnreadNotifications.mockReturnValue({
+      haveUnreadNotifications: false,
+    });
+
+    const { result } = renderHook(() =>
+      useUnreadIndicator({
+        type: "messages",
+        handle: "me",
+        localDirectMessages: [
+          {
+            unreadDropsCount: 2,
+            newDropsCount: { count: 3 },
+          },
+          {
+            unreadDropsCount: 1,
+            newDropsCount: { count: 0 },
+          },
+        ],
+      })
+    );
+
+    expect(result.current).toEqual({ hasUnread: true, unreadCount: 4 });
+  });
+
+  it("keeps the indicator visible when independently sourced totals diverge", () => {
+    mockUseUnreadDmDrops.mockReturnValue({
+      haveUnreadDmDrops: true,
+      unreadDmDrops: { count: 5 },
+      unreadDmDropsCount: 5,
+    });
+    mockUseUnreadNotifications.mockReturnValue({
+      haveUnreadNotifications: false,
+    });
+
+    const { result } = renderHook(() =>
+      useUnreadIndicator({
+        type: "messages",
+        handle: "me",
+        localDirectMessages: [
+          {
+            unreadDropsCount: 1,
+            newDropsCount: { count: 3 },
+          },
+        ],
+      })
+    );
+
+    expect(result.current).toEqual({ hasUnread: true, unreadCount: 5 });
+  });
+
+  it("normalizes a missing summary count before rendering the badge", () => {
+    mockUseUnreadDmDrops.mockReturnValue({
+      haveUnreadDmDrops: false,
+      unreadDmDrops: undefined,
+      unreadDmDropsCount: undefined,
+    });
+    mockUseUnreadNotifications.mockReturnValue({
+      haveUnreadNotifications: false,
+    });
+
+    const { result } = renderHook(() =>
+      useUnreadIndicator({
+        type: "messages",
+        handle: "me",
+        localDirectMessages: [{ newDropsCount: { count: 1 } }],
+      })
+    );
+
+    expect(result.current).toEqual({ hasUnread: true, unreadCount: 1 });
   });
 });

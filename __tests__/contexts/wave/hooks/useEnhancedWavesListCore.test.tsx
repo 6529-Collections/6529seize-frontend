@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import useEnhancedWavesListCore from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import useNewDropCounter from "@/contexts/wave/hooks/useNewDropCounter";
 
@@ -304,5 +304,58 @@ describe("useEnhancedWavesListCore", () => {
 
     expect(result.current.waves[0]?.unreadDropsCount).toBe(3);
     expect(result.current.waves[0]?.firstUnreadDropSerialNo).toBe(10);
+  });
+
+  it("does not carry a cleared unread overlay into another viewer identity", () => {
+    const wavesData = createWavesData({
+      mainWavesRefetch: jest.fn(),
+      refetchAllWaves: jest.fn(),
+      waves: [createSidebarWave({ unreadDropsCount: 1 })],
+    });
+    const { result, rerender } = renderHook(
+      ({ identityKey }) =>
+        useEnhancedWavesListCore(null, wavesData, {
+          supportsPinning: false,
+          stateIdentityKey: identityKey,
+        }),
+      { initialProps: { identityKey: "profile-1" } }
+    );
+
+    act(() => {
+      result.current.markWaveRead("wave-1");
+    });
+    expect(result.current.waves[0]?.unreadDropsCount).toBe(0);
+
+    rerender({ identityKey: "profile-2" });
+
+    expect(result.current.waves[0]?.unreadDropsCount).toBe(1);
+  });
+
+  it("suppresses a forced unread count while its wave is active", () => {
+    const wavesData = createWavesData({
+      mainWavesRefetch: jest.fn(),
+      refetchAllWaves: jest.fn(),
+      waves: [createSidebarWave()],
+    });
+    const { result, rerender } = renderHook(
+      ({ activeWaveId }) =>
+        useEnhancedWavesListCore(activeWaveId, wavesData, {
+          supportsPinning: false,
+        }),
+      { initialProps: { activeWaveId: null as string | null } }
+    );
+
+    act(() => {
+      result.current.restoreWaveUnreadCount("wave-1", 2);
+    });
+    expect(result.current.waves[0]?.unreadDropsCount).toBe(2);
+
+    rerender({ activeWaveId: "wave-1" });
+
+    expect(result.current.waves[0]?.unreadDropsCount).toBe(0);
+
+    rerender({ activeWaveId: null });
+
+    expect(result.current.waves[0]?.unreadDropsCount).toBe(2);
   });
 });

@@ -94,6 +94,11 @@ Timestamp source and precedence:
 - Unknown-wave live-drop refetch is throttled (about every 3 seconds).
 - If websocket delivery pauses, current labels remain until live updates or a
   list refresh.
+- If the account-level DM unread summary is ahead of the per-conversation
+  overview, the Messages list requests an immediate reconciliation refresh;
+  periodic overview polling remains the fallback.
+- Switching connected profiles discards viewer-local unread and cleared-row
+  overlays before rendering the new profile's DM state.
 - Reconnect/refetch can refresh stale timestamps.
 - A subwave with no established read state has no historical unread baseline,
   so its older drops are not added to the parent badge.
