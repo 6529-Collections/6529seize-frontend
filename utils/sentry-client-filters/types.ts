@@ -1,7 +1,7 @@
 export type SentryStackFrame = {
   filename?: string | undefined;
   abs_path?: string | undefined;
-  function?: string | null | undefined;
+  function?: string | undefined;
   in_app?: boolean | undefined;
   lineno?: number | undefined;
   colno?: number | undefined;

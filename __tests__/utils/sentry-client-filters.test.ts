@@ -6933,7 +6933,7 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
-  it("filters the current Poper Blocker rejection with an omitted fetch function", () => {
+  it("filters the current Poper Blocker rejection with an unsymbolicated fetch frame", () => {
     const event = createPoperBlockerOrphanFetchRejectionEvent({
       frames: [
         {
@@ -6987,7 +6987,7 @@ describe("sentry-client-filters", () => {
         },
         {
           filename: "app:///injectScriptAdjust.js",
-          function: null,
+          function: "window.fetch",
           lineno: 1,
           colno: 4520,
           in_app: true,
@@ -7009,6 +7009,7 @@ describe("sentry-client-filters", () => {
 
   it.each([
     ["similar filename", { filename: "app:///injectScriptAdjustment.js" }],
+    ["empty function", { function: "" }],
     ["changed function", { function: "window.fetchWrapper" }],
     ["changed line", { lineno: 2 }],
     ["changed column", { colno: 4519 }],
@@ -7036,7 +7037,24 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
-  it("keeps a Poper Blocker near-miss with an omitted VihJ function", () => {
+  it("keeps Poper Blocker-shaped rejections with a missing signature frame", () => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent({
+      frames: [
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "window.fetch",
+          lineno: 1,
+          colno: 4520,
+        },
+      ],
+    });
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps Poper Blocker-shaped rejections with an unsymbolicated second frame", () => {
     const event = createPoperBlockerOrphanFetchRejectionEvent({
       frames: [
         {
@@ -7058,14 +7076,41 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
-  it("keeps Poper Blocker-shaped rejections with a missing signature frame", () => {
+  it("keeps a duplicated unsymbolicated fetch signature without the VihJ frame", () => {
     const event = createPoperBlockerOrphanFetchRejectionEvent({
       frames: [
+        {
+          filename: "app:///injectScriptAdjust.js",
+          lineno: 1,
+          colno: 4520,
+        },
         {
           filename: "app:///injectScriptAdjust.js",
           function: "window.fetch",
           lineno: 1,
           colno: 4520,
+        },
+      ],
+    });
+
+    const result = shouldFilterPoperBlockerOrphanFetchRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps missing-function frames from a nearby injected script", () => {
+    const event = createPoperBlockerOrphanFetchRejectionEvent({
+      frames: [
+        {
+          filename: "app:///injectScriptAdjustment.js",
+          lineno: 1,
+          colno: 4520,
+        },
+        {
+          filename: "app:///injectScriptAdjust.js",
+          function: "VihJ",
+          lineno: 1,
+          colno: 3159,
         },
       ],
     });
@@ -7106,6 +7151,12 @@ describe("sentry-client-filters", () => {
 
   it.each([
     ["unrelated error", { value: "Application request validation failed." }],
+    [
+      "AbortError",
+      { type: "AbortError", value: "The operation was aborted" },
+    ],
+    ["HTTP error", { value: "Request failed with status code 503" }],
+    ["timeout", { value: "Request timed out after 30000 ms" }],
     ["non-TypeError", { type: "Error" }],
     ["handled rejection", { handled: true }],
     ["missing handled flag", { includeHandled: false }],

@@ -94,6 +94,30 @@ describe("instrumentation-client", () => {
     },
     ...poperBlockerInjectedFetchFrames,
   ];
+  const poperBlockerCurrentProcessedFrames = [
+    {
+      filename:
+        "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/dispatch/FetchHttpHandler.js",
+      function: "e.prototype.handle",
+      in_app: false,
+    },
+    {
+      filename: "app:///injectScriptAdjust.js",
+      abs_path: "app:///injectScriptAdjust.js",
+      function: null,
+      lineno: 1,
+      colno: 4520,
+      in_app: true,
+    },
+    {
+      filename: "app:///injectScriptAdjust.js",
+      abs_path: "app:///injectScriptAdjust.js",
+      function: "VihJ",
+      lineno: 1,
+      colno: 3159,
+      in_app: true,
+    },
+  ];
   const poperBlockerLatestRawFrames = [
     {
       filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
@@ -1708,33 +1732,11 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
-  it("drops the current Poper Blocker rejection with an omitted fetch function", () => {
+  it("drops the current Poper Blocker rejection with an unsymbolicated fetch frame", () => {
     const beforeSend = loadBeforeSend();
     const event = createPoperBlockerOrphanFetchRejectionEvent(
       poperBlockerNetworkErrorMessage,
-      [
-        {
-          filename:
-            "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/dispatch/FetchHttpHandler.js",
-          function: "e.prototype.handle",
-          in_app: false,
-        },
-        {
-          filename: "app:///injectScriptAdjust.js",
-          abs_path: "app:///injectScriptAdjust.js",
-          lineno: 1,
-          colno: 4520,
-          in_app: true,
-        },
-        {
-          filename: "app:///injectScriptAdjust.js",
-          abs_path: "app:///injectScriptAdjust.js",
-          function: "VihJ",
-          lineno: 1,
-          colno: 3159,
-          in_app: true,
-        },
-      ]
+      poperBlockerCurrentProcessedFrames
     );
 
     const result = beforeSend(event);
@@ -1830,7 +1832,7 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
-  it("keeps the handled frame-less tracking network failure", () => {
+  it("keeps handled frame-less network failures grouped with Poper Blocker noise", () => {
     const beforeSend = loadBeforeSend();
     const event = {
       level: "warning",

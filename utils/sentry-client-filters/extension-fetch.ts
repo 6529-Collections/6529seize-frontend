@@ -32,13 +32,14 @@ function isExactPoperBlockerInjectedFetchFrame(
   signature: (typeof poperBlockerInjectedFetchFrameSignatures)[number]
 ): boolean {
   const framePaths = getFramePaths(frame);
-  const isFunctionMissing =
-    frame.function === null || frame.function === undefined;
-  const hasExpectedFunction =
-    frame.function === signature.functionName ||
-    (signature.allowMissingFunction && isFunctionMissing);
+  const functionName: unknown = frame.function;
+  const hasExpectedFunctionName =
+    functionName === signature.functionName ||
+    (signature.allowMissingFunction &&
+      (functionName === undefined || functionName === null));
+
   return (
-    hasExpectedFunction &&
+    hasExpectedFunctionName &&
     frame.lineno === signature.lineNumber &&
     frame.colno === signature.columnNumber &&
     framePaths.length > 0 &&
