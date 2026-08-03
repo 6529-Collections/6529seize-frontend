@@ -38,6 +38,10 @@ describe("PublicReviewReferenceShell", () => {
     const navigation = screen.getByRole("navigation", {
       name: "Review-wide destinations",
     });
+    expect(navigation).toHaveAttribute(
+      "aria-labelledby",
+      "public-review-surface-navigation-heading"
+    );
     expect(
       within(navigation).getByRole("link", {
         name: "Back to review contents",

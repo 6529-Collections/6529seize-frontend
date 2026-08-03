@@ -81,11 +81,20 @@ describe("PublicReviewShell", () => {
     expect(document.getElementById("public-review-feedback")).toHaveAttribute(
       "hidden"
     );
-    expect(
-      screen.getAllByRole("navigation", {
-        name: "Review-wide destinations",
-      })
-    ).toHaveLength(2);
+    const mobileReviewWideNavigation = screen.getByRole("navigation", {
+      name: "Review-wide destinations in mobile review navigation",
+    });
+    expect(mobileReviewWideNavigation).toHaveAttribute(
+      "aria-labelledby",
+      "public-review-wide-destinations-mobile"
+    );
+    const sidebarReviewWideNavigation = screen.getByRole("navigation", {
+      name: "Review-wide destinations in review sidebar",
+    });
+    expect(sidebarReviewWideNavigation).toHaveAttribute(
+      "aria-labelledby",
+      "public-review-wide-destinations-sidebar"
+    );
     expect(
       screen.getAllByRole("link", { name: "Technical reference" })
     ).toHaveLength(2);

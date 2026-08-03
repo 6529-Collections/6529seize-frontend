@@ -76,6 +76,9 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.navigation.contents": "Review contents",
   "publicReview.navigation.onThisPage": "On this page",
   "publicReview.surface.navigation": "Review-wide destinations",
+  "publicReview.surface.navigationMobileContext":
+    "in mobile review navigation",
+  "publicReview.surface.navigationSidebarContext": "in review sidebar",
   "publicReview.surface.backToReview": "Back to review contents",
   "publicReview.surface.reference": "Technical reference",
   "publicReview.surface.feedback": "All public feedback",

@@ -11,6 +11,9 @@ import { t } from "@/i18n/messages";
 
 type PublicReviewSurface = "reference" | "feedback";
 
+const SURFACE_NAVIGATION_HEADING_ID =
+  "public-review-surface-navigation-heading";
+
 export function PublicReviewSurfaceNavigation({
   action,
   activeSurface,
@@ -41,12 +44,13 @@ export function PublicReviewSurfaceNavigation({
   return (
     <div className="tw-mt-7 tw-flex tw-flex-wrap tw-items-end tw-justify-between tw-gap-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-5">
       <div className="tw-min-w-0">
-        <p className="tw-mb-2 tw-mt-0 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-500">
+        <p
+          className="tw-mb-2 tw-mt-0 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-500"
+          id={SURFACE_NAVIGATION_HEADING_ID}
+        >
           {t(DEFAULT_LOCALE, "publicReview.surface.navigation")}
         </p>
-        <nav
-          aria-label={t(DEFAULT_LOCALE, "publicReview.surface.navigation")}
-        >
+        <nav aria-labelledby={SURFACE_NAVIGATION_HEADING_ID}>
           <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-x-6 tw-gap-y-1 tw-p-0">
             <li>
               <Link

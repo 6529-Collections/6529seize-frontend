@@ -90,9 +90,13 @@ function ReviewSectionLinks({
 
 function ReviewWideDestinationNavigation({
   feedbackHref,
+  headingId,
+  landmarkContext,
   referenceHref,
 }: {
   readonly feedbackHref: string;
+  readonly headingId: string;
+  readonly landmarkContext: string;
   readonly referenceHref: string;
 }) {
   const destinations = [
@@ -109,11 +113,13 @@ function ReviewWideDestinationNavigation({
   ] as const;
 
   return (
-    <nav
-      aria-label={t(DEFAULT_LOCALE, "publicReview.surface.navigation")}
-    >
-      <p className="tw-mb-2 tw-mt-0 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-500">
+    <nav aria-labelledby={headingId}>
+      <p
+        className="tw-mb-2 tw-mt-0 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-500"
+        id={headingId}
+      >
         {t(DEFAULT_LOCALE, "publicReview.surface.navigation")}
+        <span className="tw-sr-only"> {landmarkContext}</span>
       </p>
       <ul className="tw-m-0 tw-list-none tw-space-y-0.5 tw-p-0">
         {destinations.map((destination) => {
@@ -168,6 +174,11 @@ export function PublicReviewNavigation({
         <div className="tw-mt-4">
           <ReviewWideDestinationNavigation
             feedbackHref={feedbackHref}
+            headingId="public-review-wide-destinations-mobile"
+            landmarkContext={t(
+              DEFAULT_LOCALE,
+              "publicReview.surface.navigationMobileContext"
+            )}
             referenceHref={referenceHref}
           />
         </div>
@@ -193,6 +204,11 @@ export function PublicReviewNavigation({
         <div className="tw-[scrollbar-gutter:stable] tw-sticky tw-top-0 tw-h-[100dvh] tw-overflow-y-auto tw-overscroll-contain tw-px-5 tw-pb-8 tw-pt-7 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
           <ReviewWideDestinationNavigation
             feedbackHref={feedbackHref}
+            headingId="public-review-wide-destinations-sidebar"
+            landmarkContext={t(
+              DEFAULT_LOCALE,
+              "publicReview.surface.navigationSidebarContext"
+            )}
             referenceHref={referenceHref}
           />
           <nav
