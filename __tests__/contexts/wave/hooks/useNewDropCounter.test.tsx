@@ -164,6 +164,35 @@ describe("useNewDropCounter", () => {
     });
   });
 
+  it("keeps a distinct higher-serial drop at the snapshot timestamp", () => {
+    const { result } = renderHook(
+      () =>
+        useNewDropCounter(
+          null,
+          [
+            {
+              id: "wave2",
+              latestDropTimestamp: 31,
+              latestReadTimestamp: 20,
+              serverSnapshotLatestDropTimestamp: 31,
+              unreadDropsCount: 0,
+            },
+          ] as any,
+          jest.fn(),
+          { trustServerSnapshotUnreadState: true }
+        ),
+      { wrapper }
+    );
+
+    emitDropUpdate({ createdAt: 31, serialNo: 6 });
+
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 1,
+      latestDropTimestamp: 31,
+      firstUnreadSerialNo: 6,
+    });
+  });
+
   it("commits reconciled state when resetting one wave", () => {
     const { result, rerender } = renderHook(
       ({ latestReadTimestamp }) =>

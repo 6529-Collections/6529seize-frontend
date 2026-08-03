@@ -1,3 +1,7 @@
+import {
+  ChatBubbleLeftRightIcon,
+  CodeBracketIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -84,15 +88,75 @@ function ReviewSectionLinks({
   );
 }
 
+function ReviewWideDestinationNavigation({
+  feedbackHref,
+  headingId,
+  landmarkContext,
+  referenceHref,
+}: {
+  readonly feedbackHref: string;
+  readonly headingId: string;
+  readonly landmarkContext: string;
+  readonly referenceHref: string;
+}) {
+  const destinations = [
+    {
+      href: referenceHref,
+      icon: CodeBracketIcon,
+      label: t(DEFAULT_LOCALE, "publicReview.surface.reference"),
+    },
+    {
+      href: feedbackHref,
+      icon: ChatBubbleLeftRightIcon,
+      label: t(DEFAULT_LOCALE, "publicReview.surface.feedback"),
+    },
+  ] as const;
+
+  return (
+    <nav aria-labelledby={headingId}>
+      <p
+        className="tw-mb-2 tw-mt-0 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-500"
+        id={headingId}
+      >
+        {t(DEFAULT_LOCALE, "publicReview.surface.navigation")}
+        <span className="tw-sr-only"> {landmarkContext}</span>
+      </p>
+      <ul className="tw-m-0 tw-list-none tw-space-y-0.5 tw-p-0">
+        {destinations.map((destination) => {
+          const DestinationIcon = destination.icon;
+          return (
+            <li key={destination.href}>
+              <Link
+                className="tw-group tw-flex tw-min-h-11 tw-items-center tw-gap-3 tw-px-3 tw-py-2.5 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors tw-duration-150 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
+                href={destination.href}
+              >
+                <DestinationIcon
+                  aria-hidden="true"
+                  className="tw-size-4 tw-flex-none tw-text-iron-500 tw-transition-colors group-hover:tw-text-primary-300"
+                />
+                <span>{destination.label}</span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+}
+
 export function PublicReviewNavigation({
   currentPage,
+  feedbackHref,
   pages,
+  referenceHref,
   routes,
   sections,
   version,
 }: {
   readonly currentPage: PublicReviewPageDefinition;
+  readonly feedbackHref: string;
   readonly pages: readonly PublicReviewPageDefinition[];
+  readonly referenceHref: string;
   readonly routes: PublicReviewRouteBuilder;
   readonly sections: readonly PublicReviewSectionDefinition[];
   readonly version?: string | undefined;
@@ -105,14 +169,25 @@ export function PublicReviewNavigation({
     <>
       <details className="tw-mx-4 tw-mt-4 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/10 tw-py-2 sm:tw-mx-7 lg:tw-hidden">
         <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-sm tw-font-semibold tw-text-white marker:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
-          {t(DEFAULT_LOCALE, "publicReview.navigation.contents")}
+          {t(DEFAULT_LOCALE, "publicReview.navigation.menu")}
         </summary>
+        <div className="tw-mt-4">
+          <ReviewWideDestinationNavigation
+            feedbackHref={feedbackHref}
+            headingId="public-review-wide-destinations-mobile"
+            landmarkContext={t(
+              DEFAULT_LOCALE,
+              "publicReview.surface.navigationMobileContext"
+            )}
+            referenceHref={referenceHref}
+          />
+        </div>
         <nav
           aria-label={t(
             DEFAULT_LOCALE,
             "publicReview.navigation.contentsLabel"
           )}
-          className="tw-mt-4"
+          className="tw-mt-5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-5"
         >
           <ReviewPageLinks
             currentPage={currentPage}
@@ -127,11 +202,21 @@ export function PublicReviewNavigation({
 
       <aside className="tw-hidden tw-min-w-0 tw-border-y-0 tw-border-b-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-white/[0.08] tw-bg-[#050506] lg:tw-block">
         <div className="tw-[scrollbar-gutter:stable] tw-sticky tw-top-0 tw-h-[100dvh] tw-overflow-y-auto tw-overscroll-contain tw-px-5 tw-pb-8 tw-pt-7 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
+          <ReviewWideDestinationNavigation
+            feedbackHref={feedbackHref}
+            headingId="public-review-wide-destinations-sidebar"
+            landmarkContext={t(
+              DEFAULT_LOCALE,
+              "publicReview.surface.navigationSidebarContext"
+            )}
+            referenceHref={referenceHref}
+          />
           <nav
             aria-label={t(
               DEFAULT_LOCALE,
               "publicReview.navigation.contentsLabel"
             )}
+            className="tw-mt-5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-5"
           >
             <p className="tw-mb-4 tw-mt-0 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-400">
               {t(DEFAULT_LOCALE, "publicReview.navigation.contents")}

@@ -34,6 +34,7 @@ interface UseNewDropCounterOptions {
   readonly stateIdentityKey?: string | null | undefined;
   readonly otherListWaveIds?: ReadonlySet<string> | undefined;
   readonly unknownWaveRefetchCooldownMs?: number | undefined;
+  readonly trustServerSnapshotUnreadState?: boolean | undefined;
 }
 
 const DEFAULT_UNKNOWN_WAVE_REFETCH_COOLDOWN_MS = 3000;
@@ -134,43 +135,58 @@ const addUnreadDropCount = ({
   };
 };
 
-const getServerSnapshotCoverageTimestamp = (
-  wave: SidebarWave
-): number | null => {
-  const snapshotLatestDropTimestamp =
-    wave.serverSnapshotLatestDropTimestamp ?? null;
+const isDropCoveredByServer = (
+  wave: SidebarWave,
+  dropTimestamp: number,
+  trustServerSnapshotUnreadState: boolean
+): boolean => {
   const latestReadTimestamp =
     typeof wave.latestReadTimestamp === "number"
       ? wave.latestReadTimestamp
       : null;
-
-  if (snapshotLatestDropTimestamp === null) {
-    return latestReadTimestamp;
+  if (latestReadTimestamp !== null && latestReadTimestamp >= dropTimestamp) {
+    return true;
   }
 
-  return latestReadTimestamp === null
-    ? snapshotLatestDropTimestamp
-    : Math.max(snapshotLatestDropTimestamp, latestReadTimestamp);
+  if (!trustServerSnapshotUnreadState) {
+    return false;
+  }
+
+  const snapshotLatestDropTimestamp =
+    wave.serverSnapshotLatestDropTimestamp ?? null;
+  // Timestamps are not unique. A websocket event at the exact snapshot
+  // timestamp can be a distinct higher-serial drop, so only a strictly newer
+  // snapshot proves that the event is already covered. Read timestamps are
+  // different: equality means the drop itself has been read.
+  return (
+    snapshotLatestDropTimestamp !== null &&
+    snapshotLatestDropTimestamp > dropTimestamp
+  );
 };
 
 const reconcileNewDropsCounts = ({
   newDropsCounts,
+  trustServerSnapshotUnreadState,
   waves,
 }: {
   readonly newDropsCounts: NewDropsCounts;
+  readonly trustServerSnapshotUnreadState: boolean;
   readonly waves: readonly SidebarWave[];
 }): NewDropsCounts => {
   let next = newDropsCounts;
 
   waves.forEach((wave) => {
     const localCount = newDropsCounts[wave.id];
-    const serverCoverageTimestamp = getServerSnapshotCoverageTimestamp(wave);
+    const isCoveredByServer = isDropCoveredByServer(
+      wave,
+      localCount?.latestDropTimestamp ?? 0,
+      trustServerSnapshotUnreadState
+    );
     if (
       !localCount ||
       localCount.count <= 0 ||
       localCount.latestDropTimestamp === null ||
-      serverCoverageTimestamp === null ||
-      serverCoverageTimestamp < localCount.latestDropTimestamp
+      !isCoveredByServer
     ) {
       return;
     }
@@ -211,6 +227,7 @@ function useNewDropCounter(
     stateIdentityKey,
     otherListWaveIds = DEFAULT_OTHER_LIST_WAVE_IDS,
     unknownWaveRefetchCooldownMs = DEFAULT_UNKNOWN_WAVE_REFETCH_COOLDOWN_MS,
+    trustServerSnapshotUnreadState = false,
   } = options;
 
   // Keep track of new drop counts
@@ -269,9 +286,10 @@ function useNewDropCounter(
     () =>
       reconcileNewDropsCounts({
         newDropsCounts: rawNewDropsCounts,
+        trustServerSnapshotUnreadState,
         waves,
       }),
-    [rawNewDropsCounts, waves]
+    [rawNewDropsCounts, trustServerSnapshotUnreadState, waves]
   );
 
   const updateNewDropsCountsForMessage = useCallback(
@@ -283,13 +301,14 @@ function useNewDropCounter(
       setRawNewDropsCounts((previous) => {
         const current = reconcileNewDropsCounts({
           newDropsCounts: previous,
+          trustServerSnapshotUnreadState,
           waves: wavesRef.current,
         });
         const currentWave = current[waveId];
         if (
           currentWave?.count === 0 &&
           currentWave.latestDropTimestamp !== null &&
-          createdAt <= currentWave.latestDropTimestamp
+          createdAt < currentWave.latestDropTimestamp
         ) {
           return current;
         }
@@ -297,7 +316,7 @@ function useNewDropCounter(
         return update(current);
       });
     },
-    [setRawNewDropsCounts]
+    [setRawNewDropsCounts, trustServerSnapshotUnreadState]
   );
 
   // Reset counts for a specific wave
@@ -308,8 +327,11 @@ function useNewDropCounter(
       }
 
       setRawNewDropsCounts((prev) => {
+        // Every counter write first commits server-authoritative reconciliation
+        // for all tracked waves so covered sibling counts cannot reappear.
         const current = reconcileNewDropsCounts({
           newDropsCounts: prev,
+          trustServerSnapshotUnreadState,
           waves: wavesRef.current,
         });
         const previous = current[waveId];
@@ -337,7 +359,7 @@ function useNewDropCounter(
         };
       });
     },
-    [enabled, setRawNewDropsCounts]
+    [enabled, setRawNewDropsCounts, trustServerSnapshotUnreadState]
   );
 
   // Reset counts for all waves
@@ -349,6 +371,7 @@ function useNewDropCounter(
     setRawNewDropsCounts((prev) => {
       const current = reconcileNewDropsCounts({
         newDropsCounts: prev,
+        trustServerSnapshotUnreadState,
         waves: wavesRef.current,
       });
       const newCounts: Record<string, MinimalWaveNewDropsCount> = {};
@@ -384,7 +407,7 @@ function useNewDropCounter(
 
       return changed ? newCounts : current;
     });
-  }, [enabled, setRawNewDropsCounts]);
+  }, [enabled, setRawNewDropsCounts, trustServerSnapshotUnreadState]);
 
   // Handle visibility changes for active wave
   useEffect(() => {
@@ -424,13 +447,14 @@ function useNewDropCounter(
 
         const waveId = message.wave.id;
         const wave = waves.find((w) => w.id === waveId);
-        const serverCoverageTimestamp = wave
-          ? getServerSnapshotCoverageTimestamp(wave)
-          : null;
-        if (
-          serverCoverageTimestamp !== null &&
-          message.created_at <= serverCoverageTimestamp
-        ) {
+        const isCoveredByServer = wave
+          ? isDropCoveredByServer(
+              wave,
+              message.created_at,
+              trustServerSnapshotUnreadState
+            )
+          : false;
+        if (isCoveredByServer) {
           // Reconcile retained websocket state without adding this covered drop.
           updateNewDropsCountsForMessage(
             waveId,
@@ -578,6 +602,7 @@ function useNewDropCounter(
         refetchWaves,
         otherListWaveIds,
         unknownWaveRefetchCooldownMs,
+        trustServerSnapshotUnreadState,
         updateNewDropsCountsForMessage,
       ]
     ) // Make sure to include activeWaveId as a dependency
