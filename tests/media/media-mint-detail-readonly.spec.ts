@@ -125,7 +125,9 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
       page.locator("main a[href^='/the-memes/']").first()
     ).toBeVisible({ timeout: 15000 });
     await expect(
-      page.locator("main img[id^='image-'][alt], main iframe").first()
+      page
+        .locator("main img[id^='image-'][alt], main video, main iframe")
+        .first()
     ).toBeVisible();
     await expect(
       page.getByRole("link", { name: "Distribution Plan" })
