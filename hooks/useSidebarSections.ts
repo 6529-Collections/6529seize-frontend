@@ -166,8 +166,8 @@ function buildSidebarSections(
 ): SidebarSection[] {
   return [
     getNftsSection(publicReviewsEnabled),
-    getWavesSection(),
     getMuseumSection(),
+    getWavesSection(),
     getAboutSection(appWalletsSupported, hideSubscriptions),
   ];
 }

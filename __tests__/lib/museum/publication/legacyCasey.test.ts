@@ -28,7 +28,22 @@ describe("legacy Casey publication projection", () => {
       }),
     ]);
     expect(publication.projects).toHaveLength(5);
-    expect(publication.documents).toHaveLength(23);
+    expect(publication.documents).toHaveLength(26);
+    expect(
+      publication.documents
+        .filter(({ kind }) =>
+          [
+            "open_museum_statement",
+            "onchain_transition",
+            "contributor_guide",
+          ].includes(kind)
+        )
+        .map(({ kind }) => kind)
+    ).toEqual([
+      "open_museum_statement",
+      "onchain_transition",
+      "contributor_guide",
+    ]);
     expect(
       publication.documents.find(
         ({ id }) => id === "casey-reas-collection-essay"
@@ -276,4 +291,27 @@ describe("legacy Casey publication projection", () => {
       errorCode: "publication_required_path_undeclared",
     });
   });
+
+  it.each([
+    ["contributor guide", "CONTRIBUTING.md"],
+    ["Open Museum statement", "docs/open-museum.md"],
+    ["on-chain transition statement", "docs/onchain-transition.md"],
+  ])(
+    "fails closed when the governed %s is undeclared",
+    async (_label, path) => {
+      const fixture = createCaseyFixture({ omittedManifestPath: path });
+      const result = await new GitHubMuseumPublicationSource({
+        ref: "main",
+        assembler: legacyCaseyPublicationAssembler,
+        fetch: fixture.fetch,
+        now: () => new Date("2026-08-03T08:00:00Z"),
+      }).load();
+
+      expect(result).toMatchObject({
+        status: "unavailable",
+        publication: null,
+        errorCode: "publication_required_path_undeclared",
+      });
+    }
+  );
 });

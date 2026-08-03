@@ -9,8 +9,18 @@ import { getFramePaths, isNetworkErrorMessage } from "./value-utils";
 
 const poperBlockerInjectedFetchPath = "app:///injectScriptAdjust.js";
 const poperBlockerInjectedFetchFrameSignatures = [
-  { functionName: "window.fetch", lineNumber: 1, columnNumber: 4520 },
-  { functionName: "VihJ", lineNumber: 1, columnNumber: 3159 },
+  {
+    functionName: "window.fetch",
+    allowMissingFunction: true,
+    lineNumber: 1,
+    columnNumber: 4520,
+  },
+  {
+    functionName: "VihJ",
+    allowMissingFunction: false,
+    lineNumber: 1,
+    columnNumber: 3159,
+  },
 ] as const;
 
 function isPoperBlockerInjectedFetchPath(path: string): boolean {
@@ -22,8 +32,14 @@ function isExactPoperBlockerInjectedFetchFrame(
   signature: (typeof poperBlockerInjectedFetchFrameSignatures)[number]
 ): boolean {
   const framePaths = getFramePaths(frame);
+  const functionName: unknown = frame.function;
+  const hasExpectedFunctionName =
+    functionName === signature.functionName ||
+    (signature.allowMissingFunction &&
+      (functionName === undefined || functionName === null));
+
   return (
-    frame.function === signature.functionName &&
+    hasExpectedFunctionName &&
     frame.lineno === signature.lineNumber &&
     frame.colno === signature.columnNumber &&
     framePaths.length > 0 &&

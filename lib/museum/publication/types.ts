@@ -54,6 +54,9 @@ export type MuseumMedia = MuseumRetainedMedia | MuseumUpstreamMedia;
 
 export type MuseumPublicDocumentKind =
   | "founding_principles"
+  | "open_museum_statement"
+  | "onchain_transition"
+  | "contributor_guide"
   | "artist_practice"
   | "collection_essay"
   | "curatorial_accession_review"
@@ -147,6 +150,7 @@ export type MuseumArtwork =
 
 export interface MuseumPublication {
   readonly identity: MuseumPublicationIdentity;
+  readonly declaredSourcePaths: readonly string[];
   readonly artists: readonly MuseumArtist[];
   readonly projects: readonly MuseumProject[];
   readonly gifts: readonly MuseumGift[];
@@ -163,6 +167,7 @@ export interface MuseumSourceDocument {
 
 export interface MuseumPublicationAssemblyContext {
   readonly identity: MuseumPublicationIdentity;
+  readonly declaredSourcePaths: readonly string[];
   readonly documents: ReadonlyMap<string, MuseumSourceDocument>;
 }
 
