@@ -15,7 +15,7 @@ import {
 } from "@/lib/museum/publication";
 import type { MuseumSourceState } from "@/lib/museum/types";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 
 interface MuseumSourceContributionProps {
   readonly identity: MuseumPublicationIdentity | null;
@@ -49,64 +49,28 @@ function sourceCopyKey(
 const LINK_CLASS =
   "tw-inline-flex tw-min-h-11 tw-min-w-0 tw-max-w-full tw-items-center tw-break-words tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
 
+const RELATED_SOURCE_LABEL_KEYS = {
+  accessionRecord:
+    "museum.network.openMuseum.strip.relatedLabels.accessionRecord",
+  accessionRegister:
+    "museum.network.openMuseum.strip.relatedLabels.accessionRegister",
+  collectionEssay:
+    "museum.network.openMuseum.strip.relatedLabels.collectionEssay",
+  foundingPrinciples:
+    "museum.network.openMuseum.strip.relatedLabels.foundingPrinciples",
+  giftNarrative: "museum.network.openMuseum.strip.relatedLabels.giftNarrative",
+  keysAndGates: "museum.network.openMuseum.strip.relatedLabels.keysAndGates",
+  machineRecord: "museum.network.openMuseum.strip.relatedLabels.machineRecord",
+  onchainTransition:
+    "museum.network.openMuseum.strip.relatedLabels.onchainTransition",
+  programRecord: "museum.network.openMuseum.strip.relatedLabels.programRecord",
+  selectedWorks: "museum.network.openMuseum.strip.relatedLabels.selectedWorks",
+  supportingRecord:
+    "museum.network.openMuseum.strip.relatedLabels.supportingRecord",
+} as const satisfies Record<MuseumRelatedPageSourceLabel, MessageKey>;
+
 function relatedSourceLabel(label: MuseumRelatedPageSourceLabel): string {
-  switch (label) {
-    case "accessionRecord":
-      return t(
-        DEFAULT_LOCALE,
-        "museum.network.openMuseum.strip.relatedLabels.accessionRecord"
-      );
-    case "accessionRegister":
-      return t(
-        DEFAULT_LOCALE,
-        "museum.network.openMuseum.strip.relatedLabels.accessionRegister"
-      );
-    case "collectionEssay":
-      return t(
-        DEFAULT_LOCALE,
-        "museum.network.openMuseum.strip.relatedLabels.collectionEssay"
-      );
-    case "foundingPrinciples":
-      return t(
-        DEFAULT_LOCALE,
-        "museum.network.openMuseum.strip.relatedLabels.foundingPrinciples"
-      );
-    case "giftNarrative":
-      return t(
-        DEFAULT_LOCALE,
-        "museum.network.openMuseum.strip.relatedLabels.giftNarrative"
-      );
-    case "keysAndGates":
-      return t(
-        DEFAULT_LOCALE,
-        "museum.network.openMuseum.strip.relatedLabels.keysAndGates"
-      );
-    case "machineRecord":
-      return t(
-        DEFAULT_LOCALE,
-        "museum.network.openMuseum.strip.relatedLabels.machineRecord"
-      );
-    case "onchainTransition":
-      return t(
-        DEFAULT_LOCALE,
-        "museum.network.openMuseum.strip.relatedLabels.onchainTransition"
-      );
-    case "programRecord":
-      return t(
-        DEFAULT_LOCALE,
-        "museum.network.openMuseum.strip.relatedLabels.programRecord"
-      );
-    case "selectedWorks":
-      return t(
-        DEFAULT_LOCALE,
-        "museum.network.openMuseum.strip.relatedLabels.selectedWorks"
-      );
-    case "supportingRecord":
-      return t(
-        DEFAULT_LOCALE,
-        "museum.network.openMuseum.strip.relatedLabels.supportingRecord"
-      );
-  }
+  return t(DEFAULT_LOCALE, RELATED_SOURCE_LABEL_KEYS[label]);
 }
 
 export function MuseumSourceContribution({

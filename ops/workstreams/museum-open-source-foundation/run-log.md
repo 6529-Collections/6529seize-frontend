@@ -93,3 +93,10 @@
 - Production-build browser QA passed at exact 1280 x 720 and genuine 390 x 844
   viewports. Both measured equal inner, client and scroll widths. Retained
   About and complete source-strip pixels are indexed in `evidence/README.md`.
+- Hosted Sonar analysis on the first correction head reported no issues but
+  failed its duplication threshold: 55 duplicated new lines, all inside the
+  related-source label switch in `MuseumSourceContribution`. Replaced that
+  switch with a closed typed label-to-message-key record and one translation
+  call. The refactor changes no element, copy, href or CSS; focused component
+  tests, changed lint/typecheck and whitespace checks passed, so the approved
+  production-build pixels remain representative.
