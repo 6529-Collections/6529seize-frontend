@@ -32,6 +32,8 @@ const CASEY_OBJECT_PATHS = CASEY_OBJECT_IDS.map(
 );
 const CASEY_VISUAL_OBSERVATION_PATH = `records/accessions/${CASEY_ACCESSION_ID}/visual-observation-record.json`;
 const CASEY_GIFT_AUTHORIZATION_PATH = `records/accessions/${CASEY_ACCESSION_ID}/gift-acceptance-authorization.json`;
+const CASEY_GIFT_NARRATIVE_PATH = `records/accessions/${CASEY_ACCESSION_ID}/public/gift-into-public-trust.md`;
+const CASEY_SOURCE_MATRIX_PATH = `records/accessions/${CASEY_ACCESSION_ID}/public/source-and-chronology-matrix.md`;
 
 interface PublicDocumentContract {
   readonly id: string;
@@ -43,7 +45,17 @@ interface PublicDocumentContract {
     | "artist"
     | "gift"
     | "collection"
-    | "object";
+    | "object"
+    | "research";
+}
+
+function artworkIdsForDocument(
+  contract: PublicDocumentContract
+): readonly string[] {
+  if (contract.relation === "research") {
+    return [...CASEY_OBJECT_IDS];
+  }
+  return contract.artworkId === null ? [] : [contract.artworkId];
 }
 
 const CASEY_PUBLIC_DOCUMENTS: readonly PublicDocumentContract[] = [
@@ -110,6 +122,20 @@ const CASEY_PUBLIC_DOCUMENTS: readonly PublicDocumentContract[] = [
     artworkId: null,
     relation: "gift",
   },
+  {
+    id: "casey-reas-gift-into-public-trust",
+    path: CASEY_GIFT_NARRATIVE_PATH,
+    kind: "gift_narrative",
+    artworkId: null,
+    relation: "gift",
+  },
+  {
+    id: "casey-reas-source-and-chronology-matrix",
+    path: CASEY_SOURCE_MATRIX_PATH,
+    kind: "source_chronology_matrix",
+    artworkId: null,
+    relation: "research",
+  },
   ...CASEY_OBJECT_IDS.map(
     (objectId): PublicDocumentContract => ({
       id: `${objectId}:public-entry`,
@@ -135,11 +161,46 @@ const PROJECT_CONTRACTS = {
   "Pre-Process": { id: "casey-reas-pre-process", slug: "pre-process" },
 } as const;
 
+interface ProjectDocumentContract {
+  readonly id: string;
+  readonly path: string;
+  readonly projectName: keyof typeof PROJECT_CONTRACTS;
+}
+
+const PROJECT_PUBLIC_DOCUMENTS: readonly ProjectDocumentContract[] = [
+  {
+    id: "casey-reas-century-essay",
+    path: `records/accessions/${CASEY_ACCESSION_ID}/public/projects/century.md`,
+    projectName: "CENTURY",
+  },
+  {
+    id: "casey-reas-pre-process-essay",
+    path: `records/accessions/${CASEY_ACCESSION_ID}/public/projects/process-and-pre-process.md`,
+    projectName: "Pre-Process",
+  },
+  {
+    id: "casey-reas-phototaxis-essay",
+    path: `records/accessions/${CASEY_ACCESSION_ID}/public/projects/microimage-and-phototaxis.md`,
+    projectName: "Phototaxis",
+  },
+  {
+    id: "casey-reas-923-empty-rooms-essay",
+    path: `records/accessions/${CASEY_ACCESSION_ID}/public/projects/atomism-and-923-empty-rooms.md`,
+    projectName: "923 EMPTY ROOMS",
+  },
+  {
+    id: "casey-reas-ex-nihilo-cosmos-essay",
+    path: `records/accessions/${CASEY_ACCESSION_ID}/public/projects/still-life-and-ex-nihilo.md`,
+    projectName: "Ex Nihilo (Cosmos)",
+  },
+];
+
 export const LEGACY_CASEY_REQUIRED_PATHS = [
   ...CASEY_OBJECT_PATHS,
   CASEY_VISUAL_OBSERVATION_PATH,
   CASEY_GIFT_AUTHORIZATION_PATH,
   ...CASEY_PUBLIC_DOCUMENTS.map((document) => document.path),
+  ...PROJECT_PUBLIC_DOCUMENTS.map((document) => document.path),
 ] as const;
 
 type JsonRecord = Record<string, unknown>;
@@ -331,7 +392,10 @@ function parseHeading(markdown: string): string {
       heading.length > 0 &&
       heading.trimStart() !== heading
     ) {
-      const title = heading.trim();
+      const title = [...heading.trim()]
+        .filter((character) => character !== "*" && character !== "`")
+        .join("")
+        .trim();
       if (title.length > 0) {
         return title;
       }
@@ -358,39 +422,81 @@ function parsePublicDocuments(
   const allProjectIds = [...new Set(projectByArtwork.values())].sort(
     compareIdentifiers
   );
-  return CASEY_PUBLIC_DOCUMENTS.map((contract): MuseumPublicDocument => {
-    const source = requiredDocument(documents, contract.path, "text/markdown");
-    const projectId =
-      contract.artworkId === null
-        ? null
-        : (projectByArtwork.get(contract.artworkId) ?? null);
-    if (contract.artworkId !== null && projectId === null) {
-      throw new Error("publication_document_relation_missing");
-    }
+  const sharedDocuments = CASEY_PUBLIC_DOCUMENTS.map(
+    (contract): MuseumPublicDocument => {
+      const source = requiredDocument(
+        documents,
+        contract.path,
+        "text/markdown"
+      );
+      const projectId =
+        contract.artworkId === null
+          ? null
+          : (projectByArtwork.get(contract.artworkId) ?? null);
+      if (contract.artworkId !== null && projectId === null) {
+        throw new Error("publication_document_relation_missing");
+      }
 
-    let projectIds: readonly string[] = [];
-    if (contract.relation === "collection") {
-      projectIds = allProjectIds;
-    } else if (projectId !== null) {
-      projectIds = [projectId];
-    }
+      let projectIds: readonly string[] = [];
+      if (
+        contract.relation === "collection" ||
+        contract.relation === "research"
+      ) {
+        projectIds = allProjectIds;
+      } else if (projectId !== null) {
+        projectIds = [projectId];
+      }
 
-    return {
-      id: contract.id,
-      kind: contract.kind,
-      title: parseHeading(source.text),
-      markdown: source.text,
-      sha256: source.sha256,
-      sourcePath: contract.path,
-      artistIds: contract.relation === "institution" ? [] : [CASEY_ARTIST_ID],
-      projectIds,
-      giftIds:
-        contract.relation === "artist" || contract.relation === "institution"
-          ? []
-          : [CASEY_ACCESSION_ID],
-      artworkIds: contract.artworkId === null ? [] : [contract.artworkId],
-    };
-  });
+      return {
+        id: contract.id,
+        kind: contract.kind,
+        title: parseHeading(source.text),
+        markdown: source.text,
+        sha256: source.sha256,
+        sourcePath: contract.path,
+        artistIds: contract.relation === "institution" ? [] : [CASEY_ARTIST_ID],
+        projectIds,
+        giftIds:
+          contract.relation === "artist" || contract.relation === "institution"
+            ? []
+            : [CASEY_ACCESSION_ID],
+        artworkIds: artworkIdsForDocument(contract),
+      };
+    }
+  );
+
+  const projectDocuments = PROJECT_PUBLIC_DOCUMENTS.map(
+    (contract): MuseumPublicDocument => {
+      const source = requiredDocument(
+        documents,
+        contract.path,
+        "text/markdown"
+      );
+      const projectId = PROJECT_CONTRACTS[contract.projectName].id;
+      const artworkIds = [...projectByArtwork.entries()]
+        .filter(([, artworkProjectId]) => artworkProjectId === projectId)
+        .map(([artworkId]) => artworkId)
+        .sort(compareIdentifiers);
+      if (artworkIds.length === 0) {
+        throw new Error("publication_project_document_relation_missing");
+      }
+
+      return {
+        id: contract.id,
+        kind: "project_essay",
+        title: parseHeading(source.text),
+        markdown: source.text,
+        sha256: source.sha256,
+        sourcePath: contract.path,
+        artistIds: [CASEY_ARTIST_ID],
+        projectIds: [projectId],
+        giftIds: [CASEY_ACCESSION_ID],
+        artworkIds,
+      };
+    }
+  );
+
+  return [...sharedDocuments, ...projectDocuments];
 }
 
 function mediaForArtwork(

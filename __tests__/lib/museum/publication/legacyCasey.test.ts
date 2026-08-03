@@ -28,6 +28,7 @@ describe("legacy Casey publication projection", () => {
       }),
     ]);
     expect(publication.projects).toHaveLength(5);
+    expect(publication.documents).toHaveLength(23);
     expect(
       publication.documents.find(
         ({ id }) => id === "casey-reas-collection-essay"
@@ -46,6 +47,55 @@ describe("legacy Casey publication projection", () => {
         donorPublicCredit: "punk6529",
       }),
     ]);
+    expect(
+      publication.documents.find(({ kind }) => kind === "gift_narrative")
+    ).toEqual(
+      expect.objectContaining({
+        title: "gift-into-public-trust",
+        giftIds: ["6529NM.2026.001"],
+      })
+    );
+    expect(
+      publication.documents.filter(({ kind }) => kind === "project_essay")
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          projectIds: ["casey-reas-century"],
+          artworkIds: [
+            "6529NM.2026.001.01",
+            "6529NM.2026.001.02",
+            "6529NM.2026.001.03",
+          ],
+        }),
+        expect.objectContaining({
+          projectIds: ["casey-reas-pre-process"],
+          artworkIds: ["6529NM.2026.001.04"],
+        }),
+      ])
+    );
+    expect(
+      publication.documents.find(
+        ({ kind }) => kind === "source_chronology_matrix"
+      )
+    ).toEqual(
+      expect.objectContaining({
+        artistIds: ["casey-reas"],
+        giftIds: ["6529NM.2026.001"],
+        projectIds: expect.arrayContaining([
+          "casey-reas-century",
+          "casey-reas-pre-process",
+        ]),
+        artworkIds: [
+          "6529NM.2026.001.01",
+          "6529NM.2026.001.02",
+          "6529NM.2026.001.03",
+          "6529NM.2026.001.04",
+          "6529NM.2026.001.05",
+          "6529NM.2026.001.06",
+          "6529NM.2026.001.07",
+        ],
+      })
+    );
     expect(publication.artworks.map((artwork) => artwork.id)).toEqual([
       "6529NM.2026.001.01",
       "6529NM.2026.001.02",
@@ -138,6 +188,31 @@ describe("legacy Casey publication projection", () => {
     ).toBe("Reviewed certificate");
   });
 
+  it("projects Markdown emphasis in a governed heading as visitor text", async () => {
+    const path =
+      "records/accessions/6529NM.2026.001/public/projects/microimage-and-phototaxis.md";
+    const fixture = createCaseyFixture({
+      documentOverrides: {
+        [path]: "# A line remembers: MicroImage and *Phototaxis*\n\nText.",
+      },
+    });
+    const result = await new GitHubMuseumPublicationSource({
+      ref: "main",
+      assembler: legacyCaseyPublicationAssembler,
+      fetch: fixture.fetch,
+    }).load();
+
+    expect(result.status).toBe("current");
+    if (result.status !== "current") {
+      throw new Error("test_publication_missing");
+    }
+    expect(
+      result.publication.documents.find(
+        (document) => document.sourcePath === path
+      )?.title
+    ).toBe("A line remembers: MicroImage and Phototaxis");
+  });
+
   it("fails closed when a public document has no level-one heading", async () => {
     const path =
       "records/accessions/6529NM.2026.001/public/accession-certificate.md";
@@ -156,6 +231,24 @@ describe("legacy Casey publication projection", () => {
     expect(result).toMatchObject({
       status: "unavailable",
       errorCode: "publication_markdown_heading_missing",
+    });
+  });
+
+  it("fails closed when a finished project manuscript is undeclared", async () => {
+    const path =
+      "records/accessions/6529NM.2026.001/public/projects/century.md";
+    const fixture = createCaseyFixture({ omittedManifestPath: path });
+    const result = await new GitHubMuseumPublicationSource({
+      ref: "main",
+      assembler: legacyCaseyPublicationAssembler,
+      fetch: fixture.fetch,
+      now: () => new Date("2026-08-02T12:00:00Z"),
+    }).load();
+
+    expect(result).toMatchObject({
+      status: "unavailable",
+      publication: null,
+      errorCode: "publication_required_path_undeclared",
     });
   });
 });

@@ -5,6 +5,7 @@ import { MuseumArtworkFigure } from "./MuseumArtworkFigure";
 import { MuseumDossierDocument } from "./MuseumDossierDocument";
 import { MuseumMarkdown } from "./MuseumMarkdown";
 import { MuseumPublicationUnavailable } from "./MuseumPublicationUnavailable";
+import { MuseumSourceMatrixLink } from "./MuseumSourceMatrixLink";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -50,16 +51,19 @@ export async function MuseumGiftPage({
   if (gift === undefined) {
     return <MuseumPublicationUnavailable />;
   }
-  const collectionEssayPath =
-    "records/accessions/6529NM.2026.001/public/casey-reas-collection-essay.md";
-  const collectionEssay = getCaseyPublicationDocument(
-    publication,
-    collectionEssayPath
+  const giftNarrative = publication.documents.find(
+    (document) =>
+      document.kind === "gift_narrative" &&
+      document.giftIds.includes(CASEY_ACCESSION_ID)
   );
+  const sourceMatrix = publication.documents.find(
+    (document) => document.kind === "source_chronology_matrix"
+  );
+  if (giftNarrative === undefined || sourceMatrix === undefined) {
+    return <MuseumPublicationUnavailable />;
+  }
   const dossierComplete = hasCompleteCaseyPublicationDossier(publication);
-  const supplementaryDocuments = CASEY_DOSSIER.filter(
-    ({ path }) => path !== collectionEssayPath
-  );
+  const supplementaryDocuments = CASEY_DOSSIER;
   const supplementaryDossier = supplementaryDocuments.flatMap((descriptor) => {
     const anchor = getCaseyDossierAnchor(descriptor.path);
     return anchor === null ? [] : [{ descriptor, anchor }];
@@ -82,11 +86,8 @@ export async function MuseumGiftPage({
             {t(DEFAULT_LOCALE, "museum.network.gift.eyebrow")}
           </p>
           <h1 className="tw-m-0 tw-mt-3 tw-text-4xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-5xl">
-            {t(DEFAULT_LOCALE, "museum.network.gift.caseyTitle")}
+            {giftNarrative.title}
           </h1>
-          <p className="tw-m-0 tw-mt-5 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-300">
-            {t(DEFAULT_LOCALE, "museum.network.gift.caseyDescription")}
-          </p>
         </div>
         <dl className="tw-m-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-5 lg:tw-border-l lg:tw-border-t-0 lg:tw-pl-6 lg:tw-pt-0">
           <div>
@@ -137,31 +138,28 @@ export async function MuseumGiftPage({
 
       <section
         className="tw-mt-16 tw-max-w-4xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
-        aria-labelledby="gift-essay-title"
+        aria-labelledby="gift-narrative-title"
       >
         <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-          {t(DEFAULT_LOCALE, "museum.network.gift.collectionEssay")}
+          {t(DEFAULT_LOCALE, "museum.network.gift.narrative")}
         </p>
         <h2
-          id="gift-essay-title"
+          id="gift-narrative-title"
           className="tw-m-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50"
         >
-          {collectionEssay?.title ??
-            t(DEFAULT_LOCALE, "museum.network.gift.collectionEssay")}
+          {t(DEFAULT_LOCALE, "museum.network.gift.narrativeHeading")}
         </h2>
-        {collectionEssay ? (
-          <MuseumMarkdown
-            className="tw-mt-6"
-            embeddedDocument
-            sourcePath={collectionEssay.sourcePath}
-          >
-            {collectionEssay.markdown}
-          </MuseumMarkdown>
-        ) : (
-          <p className="tw-m-0 tw-mt-5 tw-text-sm tw-leading-6 tw-text-yellow-100">
-            {t(DEFAULT_LOCALE, "museum.network.gift.essayUnavailable")}
-          </p>
-        )}
+        <MuseumMarkdown
+          className="tw-mt-6"
+          embeddedDocument
+          sourceCommit={publication.identity.commit}
+          sourcePath={giftNarrative.sourcePath}
+        >
+          {giftNarrative.markdown}
+        </MuseumMarkdown>
+        <div className="tw-mt-8 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-5">
+          <MuseumSourceMatrixLink />
+        </div>
       </section>
 
       <section
@@ -205,7 +203,10 @@ export async function MuseumGiftPage({
               >
                 <div className="tw-max-w-4xl tw-pb-10 tw-pt-2">
                   {document ? (
-                    <MuseumMarkdown sourcePath={document.sourcePath}>
+                    <MuseumMarkdown
+                      sourceCommit={publication.identity.commit}
+                      sourcePath={document.sourcePath}
+                    >
                       {document.markdown}
                     </MuseumMarkdown>
                   ) : (

@@ -8,6 +8,11 @@ import type { CaseyArtwork } from "@/lib/museum/casey";
 
 type ViewerMode = "still" | "live";
 type LoadState = "loading" | "ready" | "error";
+type LiveState = "active" | "error";
+interface LivePromptState {
+  readonly starting: boolean;
+  readonly recovery: boolean;
+}
 
 export function MuseumArtworkViewer({
   artwork,
@@ -16,7 +21,11 @@ export function MuseumArtworkViewer({
 }) {
   const [mode, setMode] = useState<ViewerMode>("still");
   const [stillState, setStillState] = useState<LoadState>("loading");
-  const [liveState, setLiveState] = useState<LoadState>("loading");
+  const [liveState, setLiveState] = useState<LiveState>("active");
+  const [livePrompt, setLivePrompt] = useState<LivePromptState>({
+    starting: false,
+    recovery: false,
+  });
   const liveFrameRef = useRef<HTMLIFrameElement>(null);
   const handleLiveError = useCallback(() => setLiveState("error"), []);
   const handleStillImageRef = useCallback((image: HTMLImageElement | null) => {
@@ -26,19 +35,28 @@ export function MuseumArtworkViewer({
   }, []);
 
   useEffect(() => {
-    if (mode !== "live" || liveState !== "loading") {
+    if (mode !== "live" || liveState === "error") {
       return;
     }
 
-    const timeout = window.setTimeout(() => setLiveState("error"), 12_000);
-    return () => window.clearTimeout(timeout);
+    const startingTimeout = window.setTimeout(
+      () => setLivePrompt((current) => ({ ...current, starting: false })),
+      1_500
+    );
+    const recoveryTimeout = window.setTimeout(
+      () => setLivePrompt((current) => ({ ...current, recovery: true })),
+      12_000
+    );
+    return () => {
+      window.clearTimeout(startingTimeout);
+      window.clearTimeout(recoveryTimeout);
+    };
   }, [liveState, mode]);
 
   useEffect(() => {
     if (mode !== "live") {
       return;
     }
-
     const frame = liveFrameRef.current;
     frame?.addEventListener("error", handleLiveError);
     return () => frame?.removeEventListener("error", handleLiveError);
@@ -46,8 +64,24 @@ export function MuseumArtworkViewer({
 
   const showStill = () => {
     setMode("still");
-    setLiveState("loading");
+    setLiveState("active");
+    setLivePrompt({ starting: false, recovery: false });
   };
+
+  const showLive = () => {
+    setLiveState("active");
+    setLivePrompt({ starting: true, recovery: false });
+    setMode("live");
+  };
+
+  const liveToggleLabelKey =
+    livePrompt.recovery && liveState !== "error"
+      ? "museum.network.artworkViewer.liveRecovery"
+      : "museum.network.artworkViewer.returnToStill";
+  const toggleLabelKey =
+    mode === "live"
+      ? liveToggleLabelKey
+      : "museum.network.artworkViewer.viewLive";
 
   return (
     <figure className="tw-m-0" aria-labelledby="museum-artwork-caption">
@@ -111,12 +145,11 @@ export function MuseumArtworkViewer({
             referrerPolicy="no-referrer"
             loading="eager"
             className="tw-absolute tw-inset-0 tw-h-full tw-w-full tw-border-0 tw-bg-black"
-            onLoad={() => setLiveState("ready")}
             onError={handleLiveError}
           />
         )}
 
-        {mode === "live" && liveState === "loading" && (
+        {mode === "live" && liveState !== "error" && livePrompt.starting && (
           <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-top-0 tw-bg-black/90 tw-p-3 tw-text-center tw-text-sm tw-text-iron-300">
             {t(DEFAULT_LOCALE, "museum.network.artworkViewer.startingLive")}
           </div>
@@ -171,16 +204,11 @@ export function MuseumArtworkViewer({
           <div className="tw-flex tw-shrink-0 tw-flex-wrap tw-gap-2">
             <button
               type="button"
-              onClick={() => (mode === "live" ? showStill() : setMode("live"))}
+              onClick={() => (mode === "live" ? showStill() : showLive())}
               aria-pressed={mode === "live"}
               className="tw-min-h-11 tw-rounded-md tw-border tw-border-solid tw-border-primary-400 tw-bg-primary-500 tw-px-4 tw-text-sm tw-font-semibold tw-text-white hover:tw-bg-primary-400 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
             >
-              {t(
-                DEFAULT_LOCALE,
-                mode === "live"
-                  ? "museum.network.artworkViewer.returnToStill"
-                  : "museum.network.artworkViewer.viewLive"
-              )}
+              {t(DEFAULT_LOCALE, toggleLabelKey)}
             </button>
             <a
               href={mode === "live" ? artwork.generatorUrl : artwork.imageUrl}
