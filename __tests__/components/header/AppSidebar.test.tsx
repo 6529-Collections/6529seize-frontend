@@ -119,6 +119,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
       render(<AppSidebar open={true} onClose={onClose} />);
       expect(getMenu().map((item) => item.label)).toEqual([
         "NFTs",
+        "Museum",
         "Waves",
         "DMs",
         "Join 6529",
@@ -128,11 +129,16 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         expect.arrayContaining([
           expect.objectContaining({ label: "DMs", path: "/messages" }),
           expect.objectContaining({
+            label: "Museum",
+            path: "/museum/network",
+          }),
+          expect.objectContaining({
             label: "Join 6529",
             path: "/join-6529",
           }),
         ])
       );
+      expect(getMenuItem("Museum").children).toBeUndefined();
       expect(getMenuChildren("NFTs")).toEqual([
         { label: "The Memes", path: "/the-memes" },
         { label: "6529 Gradient", path: "/6529-gradient" },
@@ -238,6 +244,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 
       expect(getMenu().map((item) => item.label)).toEqual([
         "NFTs",
+        "Museum",
         "Waves",
         "DMs",
         "Join 6529",
