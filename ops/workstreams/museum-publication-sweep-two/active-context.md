@@ -109,12 +109,18 @@ The strict publication must add these exact manifest-declared files under
   `b42e30880aee2792f2b133635d42ed368a3cd997`.
 - Staging deploy run `30779714023`: passed; automatic staging E2E run
   `30780357100`: passed all 12 packs.
+- The staging and production environments intentionally resolve different
+  manifest-declared post-deploy sets: staging resolved 12 packs, while
+  production resolved its complete 11-pack inventory (73 tests).
 - Production deploy run `30780811939`: passed, including Elastic Beanstalk
   health, deployed-version validation, three consecutive HTTP version matches,
   announced version, and durable version evidence.
 - Production post-deploy: 11/11 declared packs and 73/73 tests passed; core
   smoke 14/14; surface matrix 26 passed and 22 skipped; WCAG/i18n 6/6; Museum
   desktop/mobile routes 14/14 plus live recovery.
+- The surface matrix increased from the prior release's 24 passing cases to 26
+  because the two previously excepted harness cases now pass after the
+  top-frame session-storage and read-only RPC guard hardening.
 
 ## Internationalization fallback debt
 

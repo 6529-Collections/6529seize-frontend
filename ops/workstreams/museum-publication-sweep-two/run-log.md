@@ -88,6 +88,9 @@
   passed all 12 read-only packs. The retained Museum sweep passed 14/14
   desktop/mobile route checks, exact source binding, dossier coverage, artwork
   loading, 390px no-overflow, and forced-stall live recovery.
+- Staging and production intentionally resolve different manifest-declared
+  post-deploy sets: staging resolved 12 packs, while production resolved its
+  complete 11-pack inventory (73 tests).
 - Production deployment run
   `https://github.com/6529-Collections/6529seize-frontend/actions/runs/30780811939`
   passed on exact main. Elastic Beanstalk health/readiness, deployed-version
@@ -98,6 +101,9 @@
   WCAG/i18n 6/6, and the retained Museum sweep 14/14 plus live recovery. A
   fresh 390px browser check confirmed the native shell, exact source heading,
   no horizontal overflow, and no console errors.
+- The surface matrix moved from the prior release's 24 passing cases to 26
+  because the two previously excepted harness cases now pass after the
+  top-frame session-storage and read-only RPC guard hardening.
 - The required 30-minute post-deploy watch ran from
   `2026-08-03T03:26:15.408Z` through
   `2026-08-03T03:56:18.3927356Z`, recording 33 exact-version samples and no
