@@ -21,12 +21,41 @@ const BEARER_PATTERN = /\bBearer\s+([A-Za-z0-9._~+/=-]+)\b/g;
 const BASIC_PATTERN = /\bBasic\s+([A-Za-z0-9+/=]+)\b/g;
 const HTTP_METHOD_DESCRIPTION_PATTERN = /^([A-Za-z]+)\s+(.+)$/;
 const ROUTE_SPAN_OPERATION_PATTERN = /^(?:navigation|pageload)(?:\.|$)/;
-const STATIC_RESOURCE_PATH_PATTERN =
-  /^\/?(?:\.well-known|_next|api|assets|cdn-cgi|favicon\.ico|fonts|icons|images|manifest\.json|robots\.txt|sitemap\.xml|static)(?:\/|$)/i;
+const STATIC_RESOURCE_ROOT_SEGMENTS = new Set([
+  ".well-known",
+  "_next",
+  "api",
+  "assets",
+  "cdn-cgi",
+  "favicon.ico",
+  "fonts",
+  "icons",
+  "images",
+  "manifest.json",
+  "robots.txt",
+  "sitemap.xml",
+  "static",
+]);
 const NON_APP_FIRST_PARTY_SUBDOMAIN_PATTERN =
   /^(?:allowlist-api|api|cdn|media)\./i;
-const SENTRY_IDENTIFIER_PARENT_PATTERN =
-  /^(?:authors?|competitions?|entr(?:y|ies)|media|nfts?|outcomes?|packages?|profile-cms|uploads?)$/;
+const SENTRY_IDENTIFIER_PARENT_SEGMENTS = new Set([
+  "author",
+  "authors",
+  "competition",
+  "competitions",
+  "entries",
+  "entry",
+  "media",
+  "nft",
+  "nfts",
+  "outcome",
+  "outcomes",
+  "package",
+  "packages",
+  "profile-cms",
+  "upload",
+  "uploads",
+]);
 const SENTRY_IDENTIFIER_CONTAINER_PATTERN = /^(?:author|media)[_-]/;
 const SENTRY_ROUTE_PLACEHOLDER_PATTERN =
   /^(?::[a-z][a-z0-9_-]*|\[\[?(?:\.\.\.)?[a-z][a-z0-9_-]*\]?\])$/i;
@@ -41,6 +70,7 @@ const HOST_ATTRIBUTION_VALUES = new Set([
   "first-party-app",
   THIRD_PARTY,
 ]);
+const OMIT_SANITIZED_VALUE = Symbol("omit-sanitized-value");
 
 const SENSITIVE_KEY_FRAGMENT_PATTERN =
   /(auth|authorization|cookie|set-cookie|token|secret|password|passwd|session|api[_-]?key|private[_-]?key|signature|body|payload)/i;
@@ -98,7 +128,18 @@ function isFirstPartyAppHost(hostname: string): boolean {
 }
 
 function isStaticResourcePath(pathname: string): boolean {
-  return STATIC_RESOURCE_PATH_PATTERN.test(pathname);
+  const basePath = pathname.split(/[?#]/, 1)[0] ?? pathname;
+  const pathWithoutLeadingSlash = basePath.startsWith("/")
+    ? basePath.slice(1)
+    : basePath;
+  const slashIndex = pathWithoutLeadingSlash.indexOf("/");
+  const rootSegment = (
+    slashIndex === -1
+      ? pathWithoutLeadingSlash
+      : pathWithoutLeadingSlash.slice(0, slashIndex)
+  ).toLowerCase();
+
+  return STATIC_RESOURCE_ROOT_SEGMENTS.has(rootSegment);
 }
 
 function hasRoutePlaceholder(pathname: string): boolean {
@@ -139,7 +180,7 @@ function sanitizeSentryEndpointFamily(pathname: string): string {
     }
     if (
       previous !== undefined &&
-      (SENTRY_IDENTIFIER_PARENT_PATTERN.test(previous) ||
+      (SENTRY_IDENTIFIER_PARENT_SEGMENTS.has(previous) ||
         SENTRY_IDENTIFIER_CONTAINER_PATTERN.test(previous))
     ) {
       return ":id";
@@ -335,32 +376,37 @@ function getBreadcrumbUrlIsFirstPartyApi(
   }
 }
 
+function parseHostValue(value: string): URL | undefined {
+  try {
+    const hasAuthority = value.startsWith("//") || value.indexOf("://") > 0;
+    return new URL(hasAuthority ? value : `http://${value}`);
+  } catch {
+    return undefined;
+  }
+}
+
+function classifyHostAttribution(hostname: string): string {
+  if (isFirstPartyApiHost(hostname)) {
+    return "first-party-api";
+  }
+  if (isFirstPartyAppHost(hostname)) {
+    return "first-party-app";
+  }
+  return isFirstPartyHost(hostname) ? "first-party" : THIRD_PARTY;
+}
+
 function sanitizeHostAttribution(value: unknown): string {
-  if (typeof value !== "string" || value.trim() === "") {
+  if (typeof value !== "string") {
     return THIRD_PARTY;
   }
 
-  try {
-    const trimmed = value.trim();
-    const normalized = trimmed.toLowerCase();
-    if (HOST_ATTRIBUTION_VALUES.has(normalized)) {
-      return normalized;
-    }
-    const parsed = new URL(
-      /^[a-z][a-z\d+.-]*:\/\//i.test(trimmed) || trimmed.startsWith("//")
-        ? trimmed
-        : `http://${trimmed}`
-    );
-    if (isFirstPartyApiHost(parsed.hostname)) {
-      return "first-party-api";
-    }
-    if (isFirstPartyAppHost(parsed.hostname)) {
-      return "first-party-app";
-    }
-    return isFirstPartyHost(parsed.hostname) ? "first-party" : THIRD_PARTY;
-  } catch {
-    return THIRD_PARTY;
+  const normalized = value.trim().toLowerCase();
+  if (!normalized || HOST_ATTRIBUTION_VALUES.has(normalized)) {
+    return normalized || THIRD_PARTY;
   }
+
+  const parsed = parseHostValue(normalized);
+  return parsed ? classifyHostAttribution(parsed.hostname) : THIRD_PARTY;
 }
 
 function sanitizeString(value: string): string {
@@ -387,6 +433,47 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   );
 }
 
+function sanitizeObjectValue(
+  key: string,
+  value: unknown,
+  depth: number,
+  seen: WeakSet<object>
+): unknown {
+  if (URL_DETAIL_KEY_PATTERN.test(key)) {
+    return OMIT_SANITIZED_VALUE;
+  }
+  if (SENSITIVE_KEY_FRAGMENT_PATTERN.test(key)) {
+    return REDACTED;
+  }
+  if (HOST_VALUE_KEY_PATTERN.test(key)) {
+    return sanitizeHostAttribution(value);
+  }
+  if (URL_VALUE_KEY_PATTERN.test(key)) {
+    return sanitizeUrlString(value);
+  }
+  return sanitizeUnknown(value, depth + 1, seen);
+}
+
+function sanitizePlainObject(
+  value: Record<string, unknown>,
+  depth: number,
+  seen: WeakSet<object>
+): Record<string, unknown> | string {
+  if (seen.has(value)) {
+    return REDACTED;
+  }
+  seen.add(value);
+
+  const result: Record<string, unknown> = {};
+  for (const [key, nestedValue] of Object.entries(value)) {
+    const sanitizedValue = sanitizeObjectValue(key, nestedValue, depth, seen);
+    if (sanitizedValue !== OMIT_SANITIZED_VALUE) {
+      result[key] = sanitizedValue;
+    }
+  }
+  return result;
+}
+
 function sanitizeUnknown(
   value: unknown,
   depth: number,
@@ -403,33 +490,7 @@ function sanitizeUnknown(
   }
 
   if (isPlainObject(value)) {
-    if (seen.has(value)) return REDACTED;
-    seen.add(value);
-
-    const result: Record<string, unknown> = {};
-    for (const [key, val] of Object.entries(value)) {
-      if (URL_DETAIL_KEY_PATTERN.test(key)) {
-        continue;
-      }
-
-      if (SENSITIVE_KEY_FRAGMENT_PATTERN.test(key)) {
-        result[key] = REDACTED;
-        continue;
-      }
-
-      if (HOST_VALUE_KEY_PATTERN.test(key)) {
-        result[key] = sanitizeHostAttribution(val);
-        continue;
-      }
-
-      if (URL_VALUE_KEY_PATTERN.test(key)) {
-        result[key] = sanitizeUrlString(val);
-        continue;
-      }
-
-      result[key] = sanitizeUnknown(val, depth + 1, seen);
-    }
-    return result;
+    return sanitizePlainObject(value, depth, seen);
   }
 
   return value;

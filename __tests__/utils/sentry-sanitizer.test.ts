@@ -469,6 +469,32 @@ describe("sentry-sanitizer", () => {
     expect(payload).not.toContain("token=");
   });
 
+  it.each([
+    ["authors", SYNTHETIC_PROFILE],
+    ["entries", "synthetic-entry"],
+    ["profile-cms", "synthetic-page"],
+    ["uploads", SYNTHETIC_MEDIA_ID],
+  ])(
+    "normalizes identifiers after the exact %s endpoint segment",
+    (parent, identifier) => {
+      const sanitized = sanitizeUrlString(
+        `https://example.invalid/${parent}/${identifier}`
+      );
+
+      expect(sanitized).toBe(`/${parent}/:id`);
+      expect(JSON.stringify(sanitized)).not.toContain(identifier);
+    }
+  );
+
+  it.each(["authorship", "entries-list", "mediafiles", "uploads-state"])(
+    "does not treat the near-miss %s endpoint segment as an identifier parent",
+    (parent) => {
+      expect(
+        sanitizeUrlString(`https://example.invalid/${parent}/synthetic-action`)
+      ).toBe(`/${parent}/synthetic-action`);
+    }
+  );
+
   it("omits third-party hosts while retaining sanitized path families", () => {
     const breadcrumb = sanitizeSentryBreadcrumb({
       type: "http",
@@ -556,6 +582,25 @@ describe("sentry-sanitizer", () => {
     expect(payload).not.toContain("token=");
   });
 
+  it.each([
+    ["api.6529.io:443", "first-party-api"],
+    ["app.6529.io", "first-party-app"],
+    ["media.6529.io", "first-party"],
+    ["api.6529.io.example.invalid", "third-party"],
+    ["api.6529.io@synthetic.invalid", "third-party"],
+    ["FIRST-PARTY-API", "first-party-api"],
+  ])(
+    "classifies the span host value %s as %s idempotently",
+    (host, expected) => {
+      const once = sanitizeSentrySpan({
+        data: { "server.address": host },
+      });
+
+      expect(once.data?.["server.address"]).toBe(expected);
+      expect(sanitizeSentrySpan(once)).toEqual(once);
+    }
+  );
+
   it("keeps static resource spans as static endpoint families", () => {
     const span = sanitizeSentrySpan({
       op: "resource.script",
@@ -616,6 +661,19 @@ describe("sentry-sanitizer", () => {
     );
     expect(JSON.stringify(apiSpan)).not.toContain(SYNTHETIC_WAVE_ID);
   });
+
+  it.each(["apiary", "assets-v2", "images.example", "staticity"])(
+    "keeps the static-root near-miss %s in the application route family",
+    (root) => {
+      const sanitized = sanitizeUrlString(
+        `https://6529.io/${root}/${SYNTHETIC_PROFILE}?token=synthetic`
+      );
+
+      expect(sanitized).toBe("/[user]/[...cmsPath]");
+      expect(JSON.stringify(sanitized)).not.toContain(SYNTHETIC_PROFILE);
+      expect(JSON.stringify(sanitized)).not.toContain("token=");
+    }
+  );
 
   it("normalizes profile transactions and wallet endpoint requests in events", () => {
     const event = sanitizeSentryEvent({
