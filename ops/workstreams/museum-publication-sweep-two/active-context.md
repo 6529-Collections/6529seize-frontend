@@ -78,6 +78,9 @@ The strict publication must add these exact manifest-declared files under
   Invalid or absent commit identity fails closed instead of falling back to a
   mutable branch, and all Markdown callers state their commit trust explicitly.
   Research-table column headers expose `scope="col"`.
+- Source-matrix boundary matching ignores delimiter text inside Markdown fenced
+  code blocks, so examples cannot become public projection boundaries; focused
+  tests cover fenced-only and fenced-plus-canonical manuscripts.
 - The live-view recovery label wraps safely on narrow screens. Governed English
   manuscript fallback debt is recorded below.
 - Publication project-document contracts and heading parsing are split into
@@ -89,7 +92,7 @@ The strict publication must add these exact manifest-declared files under
 - Production build: passed before the review-only follow-up.
 - Museum regression: 13 suites / 85 tests passed before the review-only
   follow-up.
-- Review-focused tests: 10 suites / 72 tests passed after the follow-up,
+- Review-focused tests: 10 suites / 73 tests passed after the follow-up,
   including publication, route, Markdown, viewer, and read-only guard coverage.
 - `lint:changed`: passed.
 - `typecheck:changed`: passed for 1,232 changed TypeScript files.

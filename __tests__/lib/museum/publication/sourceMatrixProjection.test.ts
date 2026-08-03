@@ -52,4 +52,19 @@ describe("projectSourceMatrixForVisitors", () => {
   ])("fails closed when the exact boundaries are not unique", (markdown) => {
     expect(projectSourceMatrixForVisitors(markdown)).toBeNull();
   });
+
+  it("ignores exact boundary text inside fenced code blocks", () => {
+    const fencedBoundaries = [
+      "```markdown",
+      "## 2. Canonical accession facts",
+      "Not public research.",
+      "## 12. Notes style shared across lanes",
+      "```",
+    ].join("\n");
+
+    expect(projectSourceMatrixForVisitors(fencedBoundaries)).toBeNull();
+    expect(
+      projectSourceMatrixForVisitors(`${fencedBoundaries}\n${source}`)
+    ).toBe(projectSourceMatrixForVisitors(source));
+  });
 });
