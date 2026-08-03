@@ -19,6 +19,16 @@ import { WebSocketStatus } from "./WebSocketTypes";
 
 const INVALIDATION_COALESCE_MS = 150;
 
+const isDirectMessageWavesQuery = (queryKey: readonly unknown[]): boolean => {
+  const [key, params] = queryKey;
+  return (
+    key === QueryKey.WAVES_V2 &&
+    typeof params === "object" &&
+    params !== null &&
+    (params as { readonly direct_message?: unknown }).direct_message === true
+  );
+};
+
 interface NotificationIdentitiesSyncedData {
   readonly profile_ids: readonly string[];
 }
@@ -125,6 +135,16 @@ export function NotificationWebSocketSync() {
         queryClient
           .invalidateQueries({
             queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
+          })
+          .catch(() => undefined);
+        queryClient
+          .invalidateQueries({
+            queryKey: [QueryKey.DM_DROPS_UNREAD],
+          })
+          .catch(() => undefined);
+        queryClient
+          .invalidateQueries({
+            predicate: (query) => isDirectMessageWavesQuery(query.queryKey),
           })
           .catch(() => undefined);
       }

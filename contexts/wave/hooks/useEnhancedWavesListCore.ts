@@ -107,10 +107,12 @@ function useEnhancedWavesListCore(
   const [unreadState, setUnreadState] = useState<{
     readonly identityKey: string | null | undefined;
     readonly clearedWaveIds: Set<string>;
+    readonly clearedAtByWave: Record<string, number>;
     readonly forcedCounts: Record<string, number>;
   }>(() => ({
     identityKey: options.stateIdentityKey,
     clearedWaveIds: new Set(),
+    clearedAtByWave: {},
     forcedCounts: {},
   }));
   const currentUnreadState = useMemo(
@@ -122,6 +124,7 @@ function useEnhancedWavesListCore(
             // the identity or committed unread state changes.
             identityKey: options.stateIdentityKey,
             clearedWaveIds: new Set<string>(),
+            clearedAtByWave: {},
             forcedCounts: {},
           },
     [options.stateIdentityKey, unreadState]
@@ -140,6 +143,7 @@ function useEnhancedWavesListCore(
             : {
                 identityKey: options.stateIdentityKey,
                 clearedWaveIds: new Set<string>(),
+                clearedAtByWave: {},
                 forcedCounts: {},
               };
         const clearedWaveIds = new Set(current.clearedWaveIds);
@@ -148,6 +152,10 @@ function useEnhancedWavesListCore(
         return {
           identityKey: options.stateIdentityKey,
           clearedWaveIds,
+          clearedAtByWave: {
+            ...current.clearedAtByWave,
+            [waveId]: Date.now(),
+          },
           forcedCounts,
         };
       });
@@ -168,13 +176,16 @@ function useEnhancedWavesListCore(
             : {
                 identityKey: options.stateIdentityKey,
                 clearedWaveIds: new Set<string>(),
+                clearedAtByWave: {},
                 forcedCounts: {},
               };
         const clearedWaveIds = new Set(current.clearedWaveIds);
         clearedWaveIds.delete(waveId);
+        const { [waveId]: _, ...clearedAtByWave } = current.clearedAtByWave;
         return {
           identityKey: options.stateIdentityKey,
           clearedWaveIds,
+          clearedAtByWave,
           forcedCounts:
             count === undefined
               ? current.forcedCounts
@@ -228,15 +239,23 @@ function useEnhancedWavesListCore(
         wsData?.latestDropTimestamp !== undefined &&
         wave.latestDropTimestamp !== null &&
         wave.latestDropTimestamp >= wsData.latestDropTimestamp;
-      const isCleared =
-        currentUnreadState.clearedWaveIds.has(wave.id) && !hasNewWsDrops;
+      const clearedAt = currentUnreadState.clearedAtByWave[wave.id];
+      const hasFreshServerUnreadAfterClear = Boolean(
+        clearedAt !== undefined &&
+        wave.unreadDropsCount > 0 &&
+        wave.serverSnapshotRequestStartedAt !== undefined &&
+        wave.serverSnapshotRequestStartedAt > clearedAt
+      );
+      const wasCleared =
+        currentUnreadState.clearedWaveIds.has(wave.id) &&
+        !hasFreshServerUnreadAfterClear;
+      const isCleared = wasCleared && !hasNewWsDrops;
       const forcedCount =
         wave.id === activeWaveId
           ? undefined
           : currentUnreadState.forcedCounts[wave.id];
       const apiFirstUnread = wave.firstUnreadDropSerialNo ?? null;
       const wsFirstUnread = wsData?.firstUnreadSerialNo ?? null;
-      const wasCleared = currentUnreadState.clearedWaveIds.has(wave.id);
       let firstUnreadDropSerialNo: number | null = null;
       if (!isCleared) {
         if (wasCleared && hasNewWsDrops) {
