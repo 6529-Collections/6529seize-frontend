@@ -29,6 +29,9 @@ async function gotoReady(page: Page, path: string) {
 
 async function forceExpandedDesktopSidebar(page: Page) {
   await page.addInitScript(() => {
+    if (globalThis.self !== globalThis.top) {
+      return;
+    }
     globalThis.sessionStorage.setItem("sidebarCollapsed", "false");
   });
 }

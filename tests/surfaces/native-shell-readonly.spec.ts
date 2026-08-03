@@ -23,6 +23,9 @@ const COUNTRY_CHECK_PATTERN = "**/api/policies/country-check";
 
 async function forceExpandedDesktopSidebar(page: Page) {
   await page.addInitScript(() => {
+    if (globalThis.self !== globalThis.top) {
+      return;
+    }
     globalThis.sessionStorage.setItem("sidebarCollapsed", "false");
   });
 }

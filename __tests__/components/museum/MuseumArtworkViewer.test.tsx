@@ -55,9 +55,21 @@ const returnToStillLabel = t(
   DEFAULT_LOCALE,
   "museum.network.artworkViewer.returnToStill"
 );
+const liveRecoveryLabel = t(
+  DEFAULT_LOCALE,
+  "museum.network.artworkViewer.liveRecovery"
+);
 const liveErrorTitle = t(
   DEFAULT_LOCALE,
   "museum.network.artworkViewer.liveErrorTitle"
+);
+const startingLiveLabel = t(
+  DEFAULT_LOCALE,
+  "museum.network.artworkViewer.startingLive"
+);
+const openOfficialSourceLabel = t(
+  DEFAULT_LOCALE,
+  "museum.network.artworkViewer.openOfficialSource"
 );
 const liveFrameTitle = t(
   DEFAULT_LOCALE,
@@ -65,46 +77,100 @@ const liveFrameTitle = t(
   { title: artwork.title }
 );
 
+function enterLiveMode() {
+  const view = render(<MuseumArtworkViewer artwork={artwork} />);
+  fireEvent.load(screen.getByRole("img", { name: artwork.visualDescription }));
+  fireEvent.click(screen.getByRole("button", { name: viewLiveLabel }));
+
+  return {
+    ...view,
+    liveFrame: screen.getByTitle(liveFrameTitle),
+  };
+}
+
 describe("MuseumArtworkViewer", () => {
   beforeEach(() => {
     jest.useFakeTimers();
   });
 
   afterEach(() => {
+    jest.clearAllTimers();
     jest.useRealTimers();
   });
 
-  it("times out the single sandboxed live frame and returns to the still", () => {
-    const { container } = render(<MuseumArtworkViewer artwork={artwork} />);
-    const still = screen.getByRole("img", {
-      name: artwork.visualDescription,
-    });
-
-    fireEvent.load(still);
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: viewLiveLabel }));
-
+  it("keeps the live work visible and reveals recovery after 12 seconds", () => {
+    const { container, liveFrame } = enterLiveMode();
     const liveFrames = container.querySelectorAll("iframe");
     expect(liveFrames).toHaveLength(1);
     expect(liveFrames[0]).toHaveAttribute("sandbox", "allow-scripts");
     expect(liveFrames[0]).toHaveAttribute("src", artwork.generatorUrl);
     expect(liveFrames[0]).toHaveAttribute("title", liveFrameTitle);
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+
+    fireEvent.load(liveFrame);
+
+    expect(screen.getByText(startingLiveLabel)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: returnToStillLabel })
+    ).toBeVisible();
 
     act(() => {
-      jest.advanceTimersByTime(11_999);
+      jest.advanceTimersByTime(1_500);
+    });
+    expect(screen.queryByText(startingLiveLabel)).not.toBeInTheDocument();
+
+    act(() => {
+      jest.advanceTimersByTime(10_499);
     });
     expect(container.querySelectorAll("iframe")).toHaveLength(1);
     expect(screen.queryByText(liveErrorTitle)).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: returnToStillLabel })
+    ).toBeVisible();
 
     act(() => {
       jest.advanceTimersByTime(1);
     });
-    expect(container.querySelectorAll("iframe")).toHaveLength(0);
-    expect(screen.getByRole("alert")).toHaveTextContent(liveErrorTitle);
+    expect(container.querySelectorAll("iframe")).toHaveLength(1);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(
-      screen.getAllByRole("button", { name: returnToStillLabel })
-    ).toHaveLength(1);
+      screen.getByRole("button", { name: liveRecoveryLabel })
+    ).toBeVisible();
+    expect(
+      screen.getByRole("link", { name: openOfficialSourceLabel })
+    ).toHaveAttribute("href", artwork.generatorUrl);
+  });
+
+  it("does not infer cross-origin readiness from the iframe load event", () => {
+    const { container, liveFrame } = enterLiveMode();
+
+    fireEvent.load(liveFrame);
+    fireEvent.load(liveFrame);
+
+    act(() => {
+      jest.advanceTimersByTime(12_000);
+    });
+    expect(container.querySelectorAll("iframe")).toHaveLength(1);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: liveRecoveryLabel })
+    ).toBeVisible();
+  });
+
+  it("falls back immediately when the live frame emits an error", () => {
+    const { container, liveFrame } = enterLiveMode();
+
+    fireEvent.error(liveFrame);
+
+    expect(container.querySelector("iframe")).not.toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent(liveErrorTitle);
+    expect(jest.getTimerCount()).toBe(0);
+    expect(
+      screen.getByRole("link", { name: openOfficialSourceLabel })
+    ).toHaveAttribute("href", artwork.generatorUrl);
+  });
+
+  it("removes the live frame and restores the still on request", () => {
+    const { container } = enterLiveMode();
 
     fireEvent.click(screen.getByRole("button", { name: returnToStillLabel }));
 
@@ -117,37 +183,18 @@ describe("MuseumArtworkViewer", () => {
       "false"
     );
     expect(screen.queryByText(liveErrorTitle)).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: openOfficialSourceLabel })
+    ).toHaveAttribute("href", artwork.imageUrl);
   });
 
-  it("falls back immediately when the live frame emits an error", async () => {
-    const { container } = render(<MuseumArtworkViewer artwork={artwork} />);
-    fireEvent.load(
-      screen.getByRole("img", { name: artwork.visualDescription })
-    );
-    fireEvent.click(screen.getByRole("button", { name: viewLiveLabel }));
+  it("cleans up the pending live timeout when unmounted", () => {
+    const { unmount } = enterLiveMode();
 
-    const liveFrame = screen.getByTitle(liveFrameTitle);
-    await act(async () => {
-      fireEvent.error(liveFrame);
-    });
+    expect(jest.getTimerCount()).toBe(2);
+    unmount();
 
-    expect(container.querySelector("iframe")).not.toBeInTheDocument();
-    expect(screen.getByRole("alert")).toHaveTextContent(liveErrorTitle);
-    expect(
-      screen.getAllByRole("button", { name: returnToStillLabel })
-    ).toHaveLength(1);
-
-    act(() => {
-      jest.advanceTimersByTime(12_000);
-    });
-    expect(screen.getByRole("alert")).toHaveTextContent(liveErrorTitle);
-
-    fireEvent.click(screen.getByRole("button", { name: returnToStillLabel }));
-    expect(container.querySelector("iframe")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: viewLiveLabel })).toHaveAttribute(
-      "aria-pressed",
-      "false"
-    );
+    expect(jest.getTimerCount()).toBe(0);
   });
 
   it("renders the CC license exactly once as a license link", () => {

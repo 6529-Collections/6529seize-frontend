@@ -82,8 +82,10 @@ const YOUTUBE_TELEMETRY_HOSTS = new Set([
 const WALLETCONNECT_RPC_HOST = "rpc.walletconnect.org";
 const PUBLIC_ETHEREUM_RPC_HOSTS = new Set([
   "cloudflare-eth.com",
+  "eth.drpc.org",
   "eth.llamarpc.com",
   "ethereum-rpc.publicnode.com",
+  "rpc.flashbots.net",
 ]);
 const SAFE_ETHEREUM_RPC_METHODS = new Set([
   "eth_accounts",

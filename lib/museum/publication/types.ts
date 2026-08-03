@@ -62,7 +62,10 @@ export type MuseumPublicDocumentKind =
   | "technical_condition_review"
   | "title_rights_accession_review"
   | "custody_title_compliance_diligence"
-  | "object_entry";
+  | "object_entry"
+  | "gift_narrative"
+  | "project_essay"
+  | "source_chronology_matrix";
 
 export interface MuseumPublicDocument {
   readonly id: string;

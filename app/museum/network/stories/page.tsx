@@ -49,11 +49,15 @@ export default async function MuseumStoriesPage() {
       artist !== undefined &&
       document.artistIds.includes(artist.id)
   );
+  const sourceMatrix = publication.documents.find(
+    (document) => document.kind === "source_chronology_matrix"
+  );
   if (
     featuredArtwork === undefined ||
     artist === undefined ||
     collectionEssay === undefined ||
-    artistProfile === undefined
+    artistProfile === undefined ||
+    sourceMatrix === undefined
   ) {
     return <MuseumPublicationUnavailable />;
   }
@@ -68,7 +72,7 @@ export default async function MuseumStoriesPage() {
       <div className="tw-grid tw-gap-8 tw-border-x-0 tw-border-b tw-border-t tw-border-solid tw-border-iron-800 tw-py-8 lg:tw-grid-cols-[minmax(17rem,0.85fr)_minmax(0,1.15fr)] lg:tw-items-center">
         <MuseumArtworkFigure
           artwork={featuredArtwork}
-          href={`/museum/network/gifts/${CASEY_ACCESSION_ID}#gift-essay-title`}
+          href={`/museum/network/gifts/${CASEY_ACCESSION_ID}#casey-reas-collection-essay`}
           sizes="(min-width: 1024px) 45vw, 100vw"
         />
         <article>
@@ -82,13 +86,30 @@ export default async function MuseumStoriesPage() {
             {t(DEFAULT_LOCALE, "museum.network.stories.caseyEssaySummary")}
           </p>
           <Link
-            href={`/museum/network/gifts/${CASEY_ACCESSION_ID}#gift-essay-title`}
+            href={`/museum/network/gifts/${CASEY_ACCESSION_ID}#casey-reas-collection-essay`}
             className="hover:tw-text-primary-200 tw-mt-5 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           >
             {t(DEFAULT_LOCALE, "museum.network.stories.readEssay")}
           </Link>
         </article>
       </div>
+      <article className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-8">
+        <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
+          {t(DEFAULT_LOCALE, "museum.network.research.eyebrow")}
+        </p>
+        <h2 className="tw-m-0 tw-mt-3 tw-text-2xl tw-font-semibold tw-text-iron-50">
+          {sourceMatrix.title}
+        </h2>
+        <p className="tw-m-0 tw-mt-3 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">
+          {t(DEFAULT_LOCALE, "museum.network.research.description")}
+        </p>
+        <Link
+          href="/museum/network/stories/source-and-chronology"
+          className="hover:tw-text-primary-200 tw-mt-4 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+        >
+          {t(DEFAULT_LOCALE, "museum.network.research.readSourceMatrix")}
+        </Link>
+      </article>
       <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-8">
         <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
           {t(DEFAULT_LOCALE, "museum.network.stories.artistResearch")}
