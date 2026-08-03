@@ -1,6 +1,6 @@
 const CASEY_ACCESSION_ID = "6529NM.2026.001";
 
-export interface ProjectDocumentContract {
+interface ProjectDocumentContract {
   readonly id: string;
   readonly path: string;
   readonly projectName:
