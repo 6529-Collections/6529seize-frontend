@@ -3,6 +3,7 @@ import type { SyntheticEvent } from "react";
 import type { BaseNFT } from "@/entities/INFT";
 import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
 import { withArweaveFallback } from "@/components/nft-image/utils/gateway-fallback";
+import { getNFTMediaRendererAttributes } from "@/components/nft-image/media-renderer-marker";
 
 type ModelViewerElement = HTMLElement & {
   src: string;
@@ -53,6 +54,7 @@ export default function NFTModel(
   return (
     // @ts-ignore
     <model-viewer
+      {...getNFTMediaRendererAttributes("glb")}
       ref={modelRef}
       id={props.id ?? `iframe-${props.nft.id}`}
       src={getResolvedAnimationSrc(props.nft)}

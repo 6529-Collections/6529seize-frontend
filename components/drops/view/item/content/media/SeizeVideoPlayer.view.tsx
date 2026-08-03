@@ -288,6 +288,7 @@ export function SeizeVideoElement({
   captionsLang,
   captionsSrc,
   dataDisable,
+  dataNftMediaRenderer,
   dataMime,
   dataTestId,
   dataUrl,
@@ -326,6 +327,7 @@ export function SeizeVideoElement({
   readonly captionsLang: string;
   readonly captionsSrc?: string | undefined;
   readonly dataDisable?: string | undefined;
+  readonly dataNftMediaRenderer?: string | undefined;
   readonly dataMime?: string | undefined;
   readonly dataTestId?: string | undefined;
   readonly dataUrl?: string | undefined;
@@ -401,6 +403,7 @@ export function SeizeVideoElement({
       data-mime={dataMime}
       data-url={dataUrl}
       data-disable={dataDisable}
+      data-nft-media-renderer={dataNftMediaRenderer}
     >
       {captionsSrc && (
         <track
