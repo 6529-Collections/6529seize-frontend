@@ -125,6 +125,34 @@ describe("MuseumSourceContribution", () => {
     ).toBeInTheDocument();
   });
 
+  it.each(["invalid", "partial"] as const)(
+    "fails closed for the %s legacy source state even when an identity exists",
+    (sourceState) => {
+      render(
+        <MuseumSourceContribution
+          identity={identity}
+          pageSources={pageSources}
+          sourceState={sourceState}
+        />
+      );
+
+      expect(
+        screen.getByText(
+          /exact verified Museum source is temporarily unavailable/u
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "View primary source" })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "Suggest an improvement" })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "Contribution guide" })
+      ).toBeInTheDocument();
+    }
+  );
+
   it("fails closed when the current route has no admitted source mapping", () => {
     mockedPathname.mockReturnValue("/museum/network/not-a-public-route");
 

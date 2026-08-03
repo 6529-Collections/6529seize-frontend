@@ -100,3 +100,10 @@
   call. The refactor changes no element, copy, href or CSS; focused component
   tests, changed lint/typecheck and whitespace checks passed, so the approved
   production-build pixels remain representative.
+- Fresh review then identified three valid fail-closed/documentation gaps.
+  `invalid` and `partial` legacy source states now suppress immutable/edit
+  claims exactly like unavailable state; the client component imports only
+  client-safe publication modules instead of the server-capable barrel; and
+  adversarial tests prove a changed title or added status caveat returns the
+  governed manuscript untouched. The active context now records the completed
+  canonical Museum validation workflow from its correct repository.

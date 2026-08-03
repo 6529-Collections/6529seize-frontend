@@ -3,16 +3,16 @@
 import { usePathname } from "next/navigation";
 import type {
   MuseumPageSourceCatalog,
-  MuseumPublicationIdentity,
   MuseumRelatedPageSourceLabel,
-} from "@/lib/museum/publication";
+} from "@/lib/museum/publication/pageSources";
+import { resolveMuseumPageSource } from "@/lib/museum/publication/pageSources";
+import { MUSEUM_CONTRIBUTOR_GUIDE_PATH } from "@/lib/museum/publication/openMuseum";
 import {
   buildImmutableMuseumBlobUrl,
   buildMuseumMainBlobUrl,
   buildMuseumMainEditUrl,
-  MUSEUM_CONTRIBUTOR_GUIDE_PATH,
-  resolveMuseumPageSource,
-} from "@/lib/museum/publication";
+} from "@/lib/museum/publication/security";
+import type { MuseumPublicationIdentity } from "@/lib/museum/publication/types";
 import type { MuseumSourceState } from "@/lib/museum/types";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
@@ -21,6 +21,10 @@ interface MuseumSourceContributionProps {
   readonly identity: MuseumPublicationIdentity | null;
   readonly pageSources: MuseumPageSourceCatalog;
   readonly sourceState: MuseumSourceState;
+}
+
+function sourceMayBeInspected(sourceState: MuseumSourceState): boolean {
+  return sourceState === "fresh" || sourceState === "stale";
 }
 
 function sourceCopyKey(
@@ -33,7 +37,7 @@ function sourceCopyKey(
   | "museum.network.openMuseum.strip.stale"
   | "museum.network.openMuseum.strip.staleUnmapped"
   | "museum.network.openMuseum.strip.unavailable" {
-  if (identity === null || sourceState === "unavailable") {
+  if (identity === null || !sourceMayBeInspected(sourceState)) {
     return "museum.network.openMuseum.strip.unavailable";
   }
   if (sourceState === "stale") {
@@ -79,8 +83,12 @@ export function MuseumSourceContribution({
   sourceState,
 }: MuseumSourceContributionProps) {
   const pathname = usePathname();
-  const pageSource = resolveMuseumPageSource(pathname, pageSources);
-  const commit = identity?.commit ?? null;
+  const hasInspectableSource =
+    identity !== null && sourceMayBeInspected(sourceState);
+  const pageSource = hasInspectableSource
+    ? resolveMuseumPageSource(pathname, pageSources)
+    : null;
+  const commit = hasInspectableSource ? identity.commit : null;
   const exactSourceUrl =
     pageSource === null
       ? null

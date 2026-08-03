@@ -101,6 +101,13 @@ All interface copy belongs in `i18n/messages/museum.en-US.json`. Governed
 manuscripts, formal names, source paths and commitments remain exact authored
 content and are not translated or paraphrased by the component.
 
+The embedded Open Museum and transition views suppress only the exact leading
+H1 and exact status paragraph that the designed framing already renders. Both
+must match the closed source-path contract byte-for-text after line wrapping;
+an added caveat, changed title/status or unrecognized path returns the original
+Markdown untouched. No governed body text is rewritten, and the immutable
+source link remains visible beside the framed presentation.
+
 ### About and Sources
 
 Extend `MuseumPublicDocumentKind` with explicit Open Museum and on-chain

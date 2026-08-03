@@ -37,15 +37,17 @@
 
 ## Next work
 
-1. Freeze final formatting, focused/regression tests, changed lint/typecheck,
-   React Doctor, whitespace checks and production build evidence.
-2. Commit with DCO sign-off, push and open a ready focused PR.
-3. Resolve every actionable bot/review thread and require exact-head green CI.
-4. Merge and qualify the exact release through sanctioned staging and
+1. Resolve every actionable PR #3554 bot/review thread and require exact-head
+   green CI on the owner-approved head.
+2. Merge the unchanged approved head under the repository's review policy.
+3. Qualify the exact merged release through sanctioned staging and
    production with retained Museum desktop/mobile readback.
 
 ## External dependency
 
-Museum post-merge workflow run `30790167909` must finish successfully. The
-frontend source contract itself is no longer blocked: canonical main contains
-the required governed publication.
+Museum repository workflow [Museum validation run
+30790167909](https://github.com/6529-Collections/6529networkmuseum/actions/runs/30790167909)
+completed with status `completed` and conclusion `success` on exact source head
+`bd853b483f807aad6d737305a9f78b1273bb2356`. The frontend source contract is
+not externally blocked: canonical Museum main contains the required governed
+publication.
