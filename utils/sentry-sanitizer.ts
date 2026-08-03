@@ -21,41 +21,18 @@ const BEARER_PATTERN = /\bBearer\s+([A-Za-z0-9._~+/=-]+)\b/g;
 const BASIC_PATTERN = /\bBasic\s+([A-Za-z0-9+/=]+)\b/g;
 const HTTP_METHOD_DESCRIPTION_PATTERN = /^([A-Za-z]+)\s+(.+)$/;
 const ROUTE_SPAN_OPERATION_PATTERN = /^(?:navigation|pageload)(?:\.|$)/;
-const STATIC_RESOURCE_ROOT_SEGMENTS = new Set([
-  ".well-known",
-  "_next",
-  "api",
-  "assets",
-  "cdn-cgi",
-  "favicon.ico",
-  "fonts",
-  "icons",
-  "images",
-  "manifest.json",
-  "robots.txt",
-  "sitemap.xml",
-  "static",
-]);
+const STATIC_RESOURCE_ROOT_SEGMENTS = new Set(
+  ".well-known _next api assets cdn-cgi favicon.ico fonts icons images manifest.json robots.txt sitemap.xml static".split(
+    " "
+  )
+);
 const NON_APP_FIRST_PARTY_SUBDOMAIN_PATTERN =
   /^(?:allowlist-api|api|cdn|media)\./i;
-const SENTRY_IDENTIFIER_PARENT_SEGMENTS = new Set([
-  "author",
-  "authors",
-  "competition",
-  "competitions",
-  "entries",
-  "entry",
-  "media",
-  "nft",
-  "nfts",
-  "outcome",
-  "outcomes",
-  "package",
-  "packages",
-  "profile-cms",
-  "upload",
-  "uploads",
-]);
+const SENTRY_IDENTIFIER_PARENT_SEGMENTS = new Set(
+  "author authors competition competitions entries entry media nft nfts outcome outcomes package packages profile-cms upload uploads".split(
+    " "
+  )
+);
 const SENTRY_IDENTIFIER_CONTAINER_PATTERN = /^(?:author|media)[_-]/;
 const SENTRY_ROUTE_PLACEHOLDER_PATTERN =
   /^(?::[a-z][a-z0-9_-]*|\[\[?(?:\.\.\.)?[a-z][a-z0-9_-]*\]?\])$/i;
