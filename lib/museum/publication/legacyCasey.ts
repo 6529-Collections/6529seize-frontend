@@ -1,4 +1,6 @@
 import { assertApprovedArtBlocksUrl } from "./security";
+import { parseHeading } from "./legacyCaseyMarkdown";
+import { PROJECT_PUBLIC_DOCUMENTS } from "./legacyCaseyProjectDocuments";
 import type {
   MuseumAccessionedArtwork,
   MuseumArtist,
@@ -161,40 +163,6 @@ const PROJECT_CONTRACTS = {
   "Pre-Process": { id: "casey-reas-pre-process", slug: "pre-process" },
 } as const;
 
-interface ProjectDocumentContract {
-  readonly id: string;
-  readonly path: string;
-  readonly projectName: keyof typeof PROJECT_CONTRACTS;
-}
-
-const PROJECT_PUBLIC_DOCUMENTS: readonly ProjectDocumentContract[] = [
-  {
-    id: "casey-reas-century-essay",
-    path: `records/accessions/${CASEY_ACCESSION_ID}/public/projects/century.md`,
-    projectName: "CENTURY",
-  },
-  {
-    id: "casey-reas-pre-process-essay",
-    path: `records/accessions/${CASEY_ACCESSION_ID}/public/projects/process-and-pre-process.md`,
-    projectName: "Pre-Process",
-  },
-  {
-    id: "casey-reas-phototaxis-essay",
-    path: `records/accessions/${CASEY_ACCESSION_ID}/public/projects/microimage-and-phototaxis.md`,
-    projectName: "Phototaxis",
-  },
-  {
-    id: "casey-reas-923-empty-rooms-essay",
-    path: `records/accessions/${CASEY_ACCESSION_ID}/public/projects/atomism-and-923-empty-rooms.md`,
-    projectName: "923 EMPTY ROOMS",
-  },
-  {
-    id: "casey-reas-ex-nihilo-cosmos-essay",
-    path: `records/accessions/${CASEY_ACCESSION_ID}/public/projects/still-life-and-ex-nihilo.md`,
-    projectName: "Ex Nihilo (Cosmos)",
-  },
-];
-
 export const LEGACY_CASEY_REQUIRED_PATHS = [
   ...CASEY_OBJECT_PATHS,
   CASEY_VISUAL_OBSERVATION_PATH,
@@ -356,53 +324,6 @@ function parseCaseyObject(
     licenseLabel: typeof licenseValue === "string" ? licenseValue : null,
     sourcePath: path,
   };
-}
-
-function withoutFrontMatter(markdown: string): string {
-  let lineStart = -1;
-  if (markdown.startsWith("---\r\n")) {
-    lineStart = 5;
-  } else if (markdown.startsWith("---\n")) {
-    lineStart = 4;
-  }
-  if (lineStart === -1) {
-    return markdown;
-  }
-
-  while (lineStart < markdown.length) {
-    const lineEnd = markdown.indexOf("\n", lineStart);
-    if (lineEnd === -1) {
-      return markdown;
-    }
-    const line = markdown.slice(lineStart, lineEnd);
-    if (line === "---" || line === "---\r") {
-      return markdown.slice(lineEnd + 1);
-    }
-    lineStart = lineEnd + 1;
-  }
-
-  return markdown;
-}
-
-function parseHeading(markdown: string): string {
-  for (const line of withoutFrontMatter(markdown).split("\n")) {
-    const heading = line.slice(1);
-    if (
-      line.startsWith("#") &&
-      heading.length > 0 &&
-      heading.trimStart() !== heading
-    ) {
-      const title = [...heading.trim()]
-        .filter((character) => character !== "*" && character !== "`")
-        .join("")
-        .trim();
-      if (title.length > 0) {
-        return title;
-      }
-    }
-  }
-
-  throw new Error("publication_markdown_heading_missing");
 }
 
 function compareIdentifiers(left: string, right: string): number {

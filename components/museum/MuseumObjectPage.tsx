@@ -102,6 +102,7 @@ export async function MuseumObjectPage({
             <MuseumMarkdown
               className="tw-mt-6"
               embeddedDocument
+              sourceCommit={publication.identity.commit}
               sourcePath={objectDocument.sourcePath}
             >
               {objectDocument.markdown}

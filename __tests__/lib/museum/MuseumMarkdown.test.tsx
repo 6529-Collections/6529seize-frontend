@@ -91,6 +91,19 @@ describe("MuseumMarkdown public links", () => {
     );
   });
 
+  it("renders repository citations as inert text for an invalid source commit", () => {
+    render(
+      <MuseumMarkdown sourceCommit={null} sourcePath={SOURCE_PATH}>
+        [Object record](../objects/6529NM.2026.001.01.json)
+      </MuseumMarkdown>
+    );
+
+    expect(screen.getByText("Object record")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Object record" })
+    ).not.toBeInTheDocument();
+  });
+
   it("contains wide tables in a keyboard-focusable region", () => {
     renderMarkdown("| Fact | Source |\n| --- | --- |\n| Date | Record |");
 
@@ -99,6 +112,10 @@ describe("MuseumMarkdown public links", () => {
     });
     expect(region).toHaveAttribute("tabindex", "0");
     expect(screen.getByRole("table")).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Fact" })).toHaveAttribute(
+      "scope",
+      "col"
+    );
   });
 
   it("renders protocol-relative URLs as inert text", () => {

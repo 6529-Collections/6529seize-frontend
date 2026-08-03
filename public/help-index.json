@@ -73,7 +73,7 @@
         "Artist, project, and gift routes connect the art to onsite curatorial writing, provenance, rights, and collection care without making raw records the primary experience.",
         "The Museum adapter resolves canonical 6529-Collections/6529networkmuseum main to one exact commit, validates the release inventory, and activates the complete public publication atomically.",
         "The governed Gift into Public Trust narrative and all five Casey Reas project essays are readable onsite from the same atomic publication snapshot.",
-        "The shared Casey Reas source and chronology matrix is published at /museum/network/stories/source-and-chronology with source hierarchy, chronology, conflicts, and factual boundaries.",
+        "Casey Reas: Sources and chronology is published at /museum/network/stories/source-and-chronology as a public research record spanning canonical accession facts through the collection's required omissions; the complete canonical source manuscript remains linked on GitHub.",
         "Casey Reas: seven works is an accepted and accessioned gift; Keys and Gates remains a separate program whose selected_unminted works are not Museum holdings.",
         "Official Art Blocks still and live URLs are labeled upstream presentation sources; the site does not claim retained Museum media or IIIF completion until governed assets are published.",
         "The public release is the source of truth for current status; the website does not infer accession, rights, ownership, or preservation completion from a transfer or selected outcome."

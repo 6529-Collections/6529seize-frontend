@@ -125,10 +125,11 @@ export async function MuseumGiftPage({
           {t(DEFAULT_LOCALE, "museum.network.gift.sevenWorks")}
         </h2>
         <div className="tw-mt-6 tw-grid tw-min-w-0 tw-gap-x-6 tw-gap-y-10 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
-          {artworks.map((artwork) => (
+          {artworks.map((artwork, index) => (
             <MuseumArtworkFigure
               key={artwork.objectId}
               artwork={artwork}
+              eager={index < 3}
               href={`/museum/network/collection/${encodeURIComponent(artwork.objectId)}`}
               sizes="(min-width: 1280px) 30vw, (min-width: 640px) 50vw, 100vw"
             />

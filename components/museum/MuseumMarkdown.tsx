@@ -5,13 +5,13 @@ import remarkGfm from "remark-gfm";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { CASEY_ACCESSION_ID, getCaseyDossierAnchor } from "@/lib/museum/casey";
-import { MUSEUM_REPOSITORY_URL } from "@/lib/museum/types";
+import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
 
 interface MuseumMarkdownProps {
   readonly children: string;
   readonly className?: string | undefined;
   readonly embeddedDocument?: boolean | undefined;
-  readonly sourceCommit?: string | undefined;
+  readonly sourceCommit: string | null;
   readonly sourcePath?: string | undefined;
 }
 
@@ -118,21 +118,6 @@ function resolveRepositoryPath(url: string, sourcePath: string): string | null {
   }
 }
 
-function repositoryHref(
-  repositoryPath: string,
-  hash: string,
-  sourceCommit?: string
-): string {
-  const ref =
-    sourceCommit && /^[a-f0-9]{40}$/u.test(sourceCommit)
-      ? sourceCommit
-      : "main";
-  return `${MUSEUM_REPOSITORY_URL}/blob/${ref}/${repositoryPath
-    .split("/")
-    .map(encodeURIComponent)
-    .join("/")}${hash}`;
-}
-
 function externalUrlTransform(url: string): string | null {
   try {
     const parsed = new URL(url);
@@ -149,7 +134,7 @@ function externalUrlTransform(url: string): string | null {
 function repositoryRelativeUrlTransform(
   url: string,
   sourcePath?: string,
-  sourceCommit?: string
+  sourceCommit?: string | null
 ): string {
   if (!sourcePath) {
     return "";
@@ -164,7 +149,10 @@ function repositoryRelativeUrlTransform(
   }
   try {
     const hash = new URL(url, "https://museum-link.invalid/").hash;
-    return repositoryHref(repositoryPath, hash, sourceCommit);
+    return (
+      buildImmutableMuseumBlobUrl(sourceCommit ?? null, repositoryPath, hash) ??
+      ""
+    );
   } catch {
     return "";
   }
@@ -173,7 +161,7 @@ function repositoryRelativeUrlTransform(
 function safeUrlTransform(
   url: string,
   sourcePath?: string,
-  sourceCommit?: string
+  sourceCommit?: string | null
 ): string {
   if (url.startsWith("#")) {
     return url;
@@ -287,7 +275,7 @@ const baseComponents: Components = {
     <tbody className="tw-divide-y tw-divide-iron-800">{children}</tbody>
   ),
   th: ({ children }) => (
-    <th className="tw-px-3 tw-py-3 tw-align-top tw-font-semibold">
+    <th scope="col" className="tw-px-3 tw-py-3 tw-align-top tw-font-semibold">
       {children}
     </th>
   ),

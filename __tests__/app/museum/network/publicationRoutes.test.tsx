@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import MuseumProjectPage from "@/app/museum/network/projects/[slug]/page";
 import MuseumSourceAndChronologyPage from "@/app/museum/network/stories/source-and-chronology/page";
 import { MuseumGiftPage } from "@/components/museum/MuseumGiftPage";
+import type { CaseyArtwork } from "@/lib/museum/casey";
 import {
   GitHubMuseumPublicationSource,
   legacyCaseyPublicationAssembler,
@@ -16,6 +17,24 @@ jest.mock("@/lib/museum/publication/runtime", () => ({
 
 const mockedPublicationState = jest.mocked(getMuseumPublicationState);
 
+jest.mock("@/components/museum/MuseumArtworkFigure", () => ({
+  MuseumArtworkFigure: ({
+    artwork,
+    eager = false,
+  }: {
+    readonly artwork: CaseyArtwork;
+    readonly eager?: boolean;
+  }) => (
+    <div
+      data-eager={String(eager)}
+      data-object-id={artwork.objectId}
+      data-testid="museum-artwork-figure"
+    >
+      {artwork.title}
+    </div>
+  ),
+}));
+
 async function buildPublication(): Promise<MuseumPublication> {
   const fixture = createCaseyFixture({
     documentOverrides: {
@@ -24,7 +43,7 @@ async function buildPublication(): Promise<MuseumPublication> {
       "records/accessions/6529NM.2026.001/public/projects/century.md":
         "# CENTURY: The Cut That Keeps Happening\n\nThe cut is an operation, not a motif.",
       "records/accessions/6529NM.2026.001/public/source-and-chronology-matrix.md":
-        "# Casey Reas: shared source, chronology, and factual-boundary matrix\n\n| Fact | Source |\n| --- | --- |\n| Artist | Governed record |",
+        "# Casey Reas: shared source, chronology, and factual-boundary matrix\n\n- **Status:** internal metadata\n\n## 1. How all writing lanes should use this file\n\nInternal instruction.\n\n## 2. Canonical accession facts\n\n| Fact | Source |\n| --- | --- |\n| Artist | Governed record |\n\n## 11. Required omissions to acknowledge in the monograph and collection essay\n\nKnown limits.\n\n## 12. Notes style shared across lanes\n\nInternal style instruction.",
     },
   });
   const state = await new GitHubMuseumPublicationSource({
@@ -91,6 +110,17 @@ describe("Museum finished publication routes", () => {
     expect(
       screen.getByText("The gift enters a public obligation.")
     ).toBeInTheDocument();
+    expect(
+      document.getElementById("casey-reas-collection-essay")
+    ).toHaveProperty("tagName", "DETAILS");
+    const artworkFigures = screen.getAllByTestId("museum-artwork-figure");
+    expect(artworkFigures).toHaveLength(7);
+    for (const figure of artworkFigures.slice(0, 3)) {
+      expect(figure).toHaveAttribute("data-eager", "true");
+    }
+    for (const figure of artworkFigures.slice(3)) {
+      expect(figure).toHaveAttribute("data-eager", "false");
+    }
   });
 
   it("renders the source matrix onsite with an accessible table region", async () => {
@@ -99,9 +129,25 @@ describe("Museum finished publication routes", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: "Casey Reas: shared source, chronology, and factual-boundary matrix",
+        name: "Casey Reas: Sources and chronology",
       })
     ).toBeInTheDocument();
+    expect(screen.getByText("Known limits.")).toBeInTheDocument();
+    expect(screen.queryByText("internal metadata")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("How all writing lanes should use this file")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Internal style instruction.")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {
+        name: "Read the complete canonical source manuscript on GitHub",
+      })
+    ).toHaveAttribute(
+      "href",
+      expect.stringContaining(`/blob/${"a".repeat(40)}/`)
+    );
     expect(
       screen.getByRole("region", { name: "Scrollable research table" })
     ).toHaveAttribute("tabindex", "0");

@@ -3,6 +3,7 @@ import {
   assertApprovedGitHubUrl,
   assertGovernedMuseumPath,
   assertSafeMuseumRepositoryPath,
+  buildImmutableMuseumBlobUrl,
   buildImmutableMuseumRawUrl,
 } from "@/lib/museum/publication";
 import { EXACT_COMMIT } from "./fixture";
@@ -62,6 +63,24 @@ describe("Museum publication security boundary", () => {
     expect(() =>
       buildImmutableMuseumRawUrl("main", "records/accessions/object.json")
     ).toThrow("publication_invalid_commit");
+  });
+
+  it("builds web citations from an exact commit and governed path only", () => {
+    expect(
+      buildImmutableMuseumBlobUrl(
+        EXACT_COMMIT,
+        "records/accessions/object.json",
+        "#evidence"
+      )
+    ).toBe(
+      `https://github.com/6529-Collections/6529networkmuseum/blob/${EXACT_COMMIT}/records/accessions/object.json#evidence`
+    );
+    expect(
+      buildImmutableMuseumBlobUrl("main", "records/accessions/object.json")
+    ).toBeNull();
+    expect(
+      buildImmutableMuseumBlobUrl(EXACT_COMMIT, "records/../secret.json")
+    ).toBeNull();
   });
 
   it("rejects arbitrary GitHub and Art Blocks origins", () => {

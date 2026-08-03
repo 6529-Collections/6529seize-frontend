@@ -55,8 +55,64 @@ The strict publication must add these exact manifest-declared files under
 
 ## Immediate work
 
-1. Complete final build, React Doctor, whitespace, and public-path scrub gates.
-2. Create a signed commit, push, and open a ready pull request.
-3. Iterate exact-head bots and CI, and obtain owning task review before merge.
-4. Qualify the exact merged release through staging and production under the
+1. Push the signed review follow-up to ready PR #3551.
+2. Iterate exact-head bots and CI, and obtain owning task review before merge.
+3. Qualify the exact merged release through staging and production under the
    repository deployment controls.
+
+## Review disposition
+
+- The gift page eagerly loads only the first visible row of three governed Art
+  Blocks stills; the remaining four retain lazy loading and all retain the
+  unoptimized approved upstream URLs.
+- The onsite source route is titled `Casey Reas: Sources and chronology` and
+  presents itself as a public research record. A pure projection includes the
+  exact canonical span from section 2 through section 11, fails closed when
+  either boundary is absent or ambiguous, and suppresses internal process and
+  revision sections. The complete immutable manuscript remains linked on
+  GitHub.
+- Balanced Markdown heading delimiters are removed without corrupting literal
+  asterisks or backticks. The collection-essay dossier anchor is covered by a
+  route test and was already present in rendered output.
+- GitHub blob citations now share one exact-commit and governed-path builder.
+  Invalid or absent commit identity fails closed instead of falling back to a
+  mutable branch, and all Markdown callers state their commit trust explicitly.
+  Research-table column headers expose `scope="col"`.
+- The live-view recovery label wraps safely on narrow screens. Governed English
+  manuscript fallback debt is recorded below.
+- Publication project-document contracts and heading parsing are split into
+  focused modules so the repository Debt Ratchet remains green without a
+  suppression.
+
+## Current validation
+
+- Production build: passed before the review-only follow-up.
+- Museum regression: 13 suites / 85 tests passed before the review-only
+  follow-up.
+- Review-focused tests: 10 suites / 72 tests passed after the follow-up,
+  including publication, route, Markdown, viewer, and read-only guard coverage.
+- `lint:changed`: passed.
+- `typecheck:changed`: passed for 1,232 changed TypeScript files.
+- Debt Ratchet: passed.
+- React Doctor: 100/100, no issues.
+- `codex-diff-check`: passed.
+
+## Internationalization fallback debt
+
+- Routes/components: the gift page, project routes, and source/chronology route
+  render governed manuscript titles and Markdown bodies from the atomic Museum
+  publication.
+- Untranslated surface: authored manuscript titles, prose, notes,
+  bibliographies, revision histories, and research tables. Governed artist
+  names, artwork titles, credits, and record quotations also remain exact.
+- Fallback behavior: Museum interface chrome resolves through the `en-US`
+  catalog; governed publication content renders in its authored English in
+  every locale and is never machine-translated or inferred.
+- User impact: visitors using another locale receive localized/fallback chrome
+  around English curatorial and research writing.
+- Owner/follow-up: the frontend internationalization workstream and Museum
+  publication owner must define a reviewed translation publication model before
+  adding manuscript locales.
+- Remediation: add locale-identified governed manuscripts to the publication
+  contract, require them atomically per locale, and retain authored English as
+  the explicit fallback without altering canonical record fields.

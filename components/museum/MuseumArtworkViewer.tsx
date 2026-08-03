@@ -206,7 +206,7 @@ export function MuseumArtworkViewer({
               type="button"
               onClick={() => (mode === "live" ? showStill() : showLive())}
               aria-pressed={mode === "live"}
-              className="tw-min-h-11 tw-rounded-md tw-border tw-border-solid tw-border-primary-400 tw-bg-primary-500 tw-px-4 tw-text-sm tw-font-semibold tw-text-white hover:tw-bg-primary-400 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
+              className="tw-min-h-11 tw-max-w-full tw-whitespace-normal tw-rounded-md tw-border tw-border-solid tw-border-primary-400 tw-bg-primary-500 tw-px-4 tw-text-center tw-text-sm tw-font-semibold tw-text-white hover:tw-bg-primary-400 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
             >
               {t(DEFAULT_LOCALE, toggleLabelKey)}
             </button>

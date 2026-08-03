@@ -51,7 +51,7 @@ describe("legacy Casey publication projection", () => {
       publication.documents.find(({ kind }) => kind === "gift_narrative")
     ).toEqual(
       expect.objectContaining({
-        title: "gift-into-public-trust",
+        title: "Gift into Public Trust",
         giftIds: ["6529NM.2026.001"],
       })
     );
@@ -211,6 +211,31 @@ describe("legacy Casey publication projection", () => {
         (document) => document.sourcePath === path
       )?.title
     ).toBe("A line remembers: MicroImage and Phototaxis");
+  });
+
+  it("preserves unmatched literal heading markers", async () => {
+    const path =
+      "records/accessions/6529NM.2026.001/public/projects/atomism-and-923-empty-rooms.md";
+    const fixture = createCaseyFixture({
+      documentOverrides: {
+        [path]: "# 923 EMPTY ROOMS *and* the C* notation\n\nText.",
+      },
+    });
+    const result = await new GitHubMuseumPublicationSource({
+      ref: "main",
+      assembler: legacyCaseyPublicationAssembler,
+      fetch: fixture.fetch,
+    }).load();
+
+    expect(result.status).toBe("current");
+    if (result.status !== "current") {
+      throw new Error("test_publication_missing");
+    }
+    expect(
+      result.publication.documents.find(
+        (document) => document.sourcePath === path
+      )?.title
+    ).toBe("923 EMPTY ROOMS and the C* notation");
   });
 
   it("fails closed when a public document has no level-one heading", async () => {
