@@ -149,6 +149,7 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
         inventoryCount: manifest.entries.length,
         assembledAt,
       },
+      declaredSourcePaths: manifest.entries.map((entry) => entry.path),
       documents: new Map(
         documents.map((document) => [document.path, document] as const)
       ),
