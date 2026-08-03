@@ -12,14 +12,25 @@
 jest.unmock("lexical");
 
 import { $convertFromMarkdownString } from "@lexical/markdown";
-import { createEditor, $getRoot, type LexicalEditor } from "lexical";
+import {
+  createEditor,
+  $getRoot,
+  $nodesOfType,
+  type LexicalEditor,
+} from "lexical";
 
 import { MentionNode } from "@/components/drops/create/lexical/nodes/MentionNode";
 import { WaveMentionNode } from "@/components/drops/create/lexical/nodes/WaveMentionNode";
 import { HashtagNode } from "@/components/drops/create/lexical/nodes/HashtagNode";
+import { EmojiNode } from "@/components/drops/create/lexical/nodes/EmojiNode";
+import {
+  EMOJI_MATCH_REGEX,
+  EMOJI_SINGLE_MATCH_REGEX,
+} from "@/components/drops/create/lexical/plugins/emoji/EmojiPlugin";
 import { MENTION_TRANSFORMER } from "@/components/drops/create/lexical/transformers/MentionTransformer";
 import { WAVE_MENTION_TRANSFORMER } from "@/components/drops/create/lexical/transformers/WaveMentionTransformer";
 import { HASHTAG_TRANSFORMER } from "@/components/drops/create/lexical/transformers/HastagTransformer";
+import { EMOJI_TRANSFORMER } from "@/components/drops/create/lexical/transformers/EmojiTransformer";
 import type { Transformer } from "@lexical/markdown";
 import type { Klass, LexicalNode } from "lexical";
 
@@ -147,11 +158,43 @@ describe("markdown import splits tokens at the right offset", () => {
     });
   });
 
+  describe("emoji", () => {
+    // EmojiNode is a DecoratorNode, so it is not reachable via getAllTextNodes.
+    const countEmoji = (editor: LexicalEditor): number => {
+      let count = 0;
+      editor.getEditorState().read(() => {
+        count = $nodesOfType(EmojiNode).length;
+      });
+      return count;
+    };
+
+    it("converts an emoji that is not at the start of the text", () => {
+      const { editor } = importMarkdown(
+        "nice work :smile: everyone",
+        [EMOJI_TRANSFORMER],
+        [EmojiNode]
+      );
+
+      expect(countEmoji(editor)).toBe(1);
+    });
+
+    it("converts several emoji in one line", () => {
+      const { editor } = importMarkdown(
+        ":one: then :two: then :three:",
+        [EMOJI_TRANSFORMER],
+        [EmojiNode]
+      );
+
+      expect(countEmoji(editor)).toBe(3);
+    });
+  });
+
   describe("regex flags", () => {
     it.each([
       ["MENTION_TRANSFORMER", MENTION_TRANSFORMER],
       ["WAVE_MENTION_TRANSFORMER", WAVE_MENTION_TRANSFORMER],
       ["HASHTAG_TRANSFORMER", HASHTAG_TRANSFORMER],
+      ["EMOJI_TRANSFORMER", EMOJI_TRANSFORMER],
     ])(
       "%s keeps importRegExp non-global so match.index survives",
       (_name, transformer) => {
@@ -163,5 +206,14 @@ describe("markdown import splits tokens at the right offset", () => {
         expect(textMatch.regExp.global).toBe(false);
       }
     );
+
+    it("keeps the two emoji patterns identical apart from the global flag", () => {
+      // EMOJI_SINGLE_MATCH_REGEX is written out rather than derived from
+      // EMOJI_MATCH_REGEX (security/detect-non-literal-regexp forbids the
+      // computed form), so this guards against the two drifting apart.
+      expect(EMOJI_SINGLE_MATCH_REGEX.source).toBe(EMOJI_MATCH_REGEX.source);
+      expect(EMOJI_MATCH_REGEX.global).toBe(true);
+      expect(EMOJI_SINGLE_MATCH_REGEX.global).toBe(false);
+    });
   });
 });

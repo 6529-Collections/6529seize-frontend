@@ -22,6 +22,10 @@ export const EMOJI_MATCH_REGEX = /:(\w+):/g;
  * `undefined` for a global regex — the text node then splits at the wrong offset
  * and only a token at position 0 converts. Keep the two patterns in step.
  */
+// Spelled out rather than derived from EMOJI_MATCH_REGEX.source: the repo's
+// security/detect-non-literal-regexp rule rejects a computed RegExp, and
+// suppressing it is not worth it here. A test asserts the two sources stay
+// identical, so they cannot drift apart unnoticed.
 export const EMOJI_SINGLE_MATCH_REGEX = /:(\w+):/;
 
 type EmojiMatch = {

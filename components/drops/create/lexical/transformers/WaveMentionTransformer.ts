@@ -5,6 +5,11 @@ import {
   WaveMentionNode,
 } from "../nodes/WaveMentionNode";
 
+// NOT global, and shared by both fields — see MentionTransformer: a `g` flag
+// makes `String.match` drop `match.index`, so `@lexical/markdown` splits the
+// text node at the wrong offset and only a token at position 0 survives.
+const WAVE_MENTION_MATCH_REGEX = /#\[[^\]\n]+\]/;
+
 export const WAVE_MENTION_TRANSFORMER: TextMatchTransformer = {
   dependencies: [WaveMentionNode],
   export: (node) => {
@@ -16,11 +21,8 @@ export const WAVE_MENTION_TRANSFORMER: TextMatchTransformer = {
     return `#[${textContent.substring(1)}]`;
   },
   // Allow spaces in wave names within bracketed format.
-  // NOT global — see MentionTransformer: a `g` flag makes `String.match` drop
-  // `match.index`, so `@lexical/markdown` splits the text node at the wrong
-  // offset and only a token at position 0 survives.
-  regExp: /#\[[^\]\n]+\]/,
-  importRegExp: /#\[[^\]\n]+\]/,
+  regExp: WAVE_MENTION_MATCH_REGEX,
+  importRegExp: WAVE_MENTION_MATCH_REGEX,
   replace: (textNode, match) => {
     const [fullMatch] = match;
     const fullText = textNode.getTextContent();
