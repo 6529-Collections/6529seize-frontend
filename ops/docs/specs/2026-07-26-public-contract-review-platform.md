@@ -860,8 +860,12 @@ marketing microsite:
 - restrained borders and status treatments
 - compact sticky review status
 - readable long-form typography
-- persistent desktop table of contents
-- compact mobile page/section navigation
+- persistent desktop editorial table of contents with separately labeled
+  review-wide destinations
+- compact mobile page/section navigation with the same separation between
+  editorial chapters and review-wide destinations
+- standalone technical-reference and public-feedback pages with direct links
+  back to the review contents and to each other, without a page-tab treatment
 - clear editorial/generated labels
 - code blocks with line numbers and copy/open/comment actions
 - visible loading, empty, error, closed, and success states
