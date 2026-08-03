@@ -16,8 +16,40 @@ const initialInjectedSchedulingFrame = {
   column: 15,
   origin: "unknown",
 };
+const observedExternalSchedulingFrame = {
+  file: "external/js",
+  function: "anonymous",
+  line: 798,
+  column: 281,
+  origin: "third_party",
+};
 
-function createRawExecutionFrames(): SentryStackFrame[] {
+function createMixedOriginSchedulingFrames(
+  externalFrame: Record<string, unknown> = observedExternalSchedulingFrame
+): Record<string, unknown>[] {
+  return [
+    initialInjectedSchedulingFrame,
+    externalFrame,
+    {
+      file: "/_next/static/chunks/0synthetic-navigation.js",
+      function: "anonymous",
+      line: 51,
+      column: 8604,
+      origin: "first_party",
+    },
+    ...["sy", "li", "lr", "li", "lr"].map((functionName, index) => ({
+      file: "/_next/static/chunks/0synthetic-navigation.js",
+      function: functionName,
+      line: 21,
+      column: 200000 + index,
+      origin: "first_party",
+    })),
+  ];
+}
+
+function createRawExecutionFrames(
+  diagnosticFunction: "?" | null = "?"
+): SentryStackFrame[] {
   return [
     {
       filename: RAW_CHUNK,
@@ -30,6 +62,7 @@ function createRawExecutionFrames(): SentryStackFrame[] {
     {
       filename: RAW_CHUNK,
       abs_path: RAW_CHUNK,
+      ...(diagnosticFunction !== null && { function: diagnosticFunction }),
       lineno: 21,
       colno: 90001,
       in_app: true,
@@ -169,10 +202,44 @@ describe("MetaMask Mobile SPA navigation cyclic JSON filter", () => {
     }
   );
 
+  it.each([
+    ["the Sentry anonymous function sentinel", createRawExecutionFrames()],
+    ["an omitted function name", createRawExecutionFrames(null)],
+  ])("filters a raw diagnostic wrapper with %s", (_name, frames) => {
+    const event = createEvent({ frames });
+
+    expect(shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event)).toBe(
+      true
+    );
+  });
+
   it.each([0.103, 0.145, 0.295])(
     "filters the cohort-backed %.3f second navigation delay",
     (delaySeconds) => {
       const event = createEvent({ eventTimestamp: 1000 + delaySeconds });
+
+      expect(
+        shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event)
+      ).toBe(true);
+    }
+  );
+
+  it.each([790, 798])(
+    "filters the v2 mixed-origin navigation signature at external line %i",
+    (externalLine) => {
+      const event = createEvent({
+        diagnosticsOverrides: {
+          scheduleOrigin: "mixed",
+          schedulingFrames: createMixedOriginSchedulingFrames({
+            ...observedExternalSchedulingFrame,
+            line: externalLine,
+          }),
+        },
+        tags: {
+          cyclic_json_timer_diagnostics: "v2",
+          cyclic_json_timer_schedule_origin: "mixed",
+        },
+      });
 
       expect(
         shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event)
@@ -259,6 +326,48 @@ describe("MetaMask Mobile SPA navigation cyclic JSON filter", () => {
     ],
   ])("preserves diagnostics with %s", (_name, schedulingFrames) => {
     const event = createEvent({ diagnosticsOverrides: { schedulingFrames } });
+
+    expect(shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event)).toBe(
+      false
+    );
+  });
+
+  it.each([
+    [
+      "a different external script path",
+      createMixedOriginSchedulingFrames({
+        ...observedExternalSchedulingFrame,
+        file: "external/inpage.js",
+      }),
+    ],
+    [
+      "a changed external frame coordinate",
+      createMixedOriginSchedulingFrames({
+        ...observedExternalSchedulingFrame,
+        line: 799,
+      }),
+    ],
+    [
+      "a truncated scheduling stack",
+      createMixedOriginSchedulingFrames().slice(0, 7),
+    ],
+    [
+      "an additional third-party frame",
+      createMixedOriginSchedulingFrames().map((frame, index) =>
+        index === 2 ? observedExternalSchedulingFrame : frame
+      ),
+    ],
+  ])("preserves mixed-origin diagnostics with %s", (_name, schedulingFrames) => {
+    const event = createEvent({
+      diagnosticsOverrides: {
+        scheduleOrigin: "mixed",
+        schedulingFrames,
+      },
+      tags: {
+        cyclic_json_timer_diagnostics: "v2",
+        cyclic_json_timer_schedule_origin: "mixed",
+      },
+    });
 
     expect(shouldFilterMetaMaskMobileSpaNavigationCyclicJsonError(event)).toBe(
       false

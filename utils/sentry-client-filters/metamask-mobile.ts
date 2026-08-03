@@ -17,9 +17,21 @@ const rawNextChunkPathPattern =
 const sentryRawTimerWrapperLine = 7;
 const sentryRawTimerWrapperColumn = 4858;
 const maximumSchedulingFrames = 8;
+// Keep the mixed-origin branch tied to the two observed bridge bundles. Any
+// vendor coordinate or stack-shape drift must fail open and retain the event.
+const mixedOriginExternalFrameLines = new Set([790, 798]);
+const mixedOriginExternalFrameColumn = 281;
 
 function isFiniteTimestamp(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
+}
+
+function isAnonymousRawFrameFunction(value: string | undefined): boolean {
+  return value === undefined || value === "?";
+}
+
+function isUnknownArray(value: unknown): value is unknown[] {
+  return Array.isArray(value);
 }
 
 function isNativeStringifyFrame(frame: SentryStackFrame | undefined): boolean {
@@ -55,7 +67,7 @@ function isRawDiagnosticWrapperFrame(
   if (
     !frame ||
     !sentryWrapper ||
-    (typeof frame.function === "string" && frame.function.length > 0) ||
+    !isAnonymousRawFrameFunction(frame.function) ||
     !isValidFrameCoordinate(frame.lineno) ||
     !isValidFrameCoordinate(frame.colno)
   ) {
@@ -114,10 +126,51 @@ function isFirstPartyNavigationSchedulingFrame(value: unknown): boolean {
   );
 }
 
+function isObservedExternalNavigationFrame(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    value["file"] === "external/js" &&
+    value["function"] === "anonymous" &&
+    value["origin"] === "third_party" &&
+    typeof value["line"] === "number" &&
+    mixedOriginExternalFrameLines.has(value["line"]) &&
+    value["column"] === mixedOriginExternalFrameColumn
+  );
+}
+
+function hasCohortBackedSchedulingFrames(
+  schedulingFrames: unknown,
+  scheduleOrigin: "first_party" | "mixed"
+): boolean {
+  if (
+    !isUnknownArray(schedulingFrames) ||
+    schedulingFrames.length < 2 ||
+    schedulingFrames.length > maximumSchedulingFrames ||
+    !isInitialInjectedSchedulingFrame(schedulingFrames[0])
+  ) {
+    return false;
+  }
+
+  if (scheduleOrigin === "first_party") {
+    return schedulingFrames
+      .slice(1)
+      .every(isFirstPartyNavigationSchedulingFrame);
+  }
+
+  const [externalFrame, ...firstPartyFrames] = schedulingFrames.slice(1);
+  return (
+    schedulingFrames.length === maximumSchedulingFrames &&
+    isObservedExternalNavigationFrame(externalFrame) &&
+    firstPartyFrames.length > 0 &&
+    firstPartyFrames.every(isFirstPartyNavigationSchedulingFrame)
+  );
+}
+
 function hasExactV2MetaMaskDiagnostics(event: SentryClientEvent): boolean {
+  const scheduleOrigin = event.tags?.[scheduleOriginTag];
   if (
     event.tags?.[diagnosticsTag] !== diagnosticsVersion ||
-    event.tags[scheduleOriginTag] !== "first_party"
+    (scheduleOrigin !== "first_party" && scheduleOrigin !== "mixed")
   ) {
     return false;
   }
@@ -129,18 +182,14 @@ function hasExactV2MetaMaskDiagnostics(event: SentryClientEvent): boolean {
     diagnostics["timerSampleRate"] !== diagnosticSampleRate ||
     diagnostics["callbackName"] !== "anonymous" ||
     diagnostics["webViewFamily"] !== "metamask-mobile" ||
-    diagnostics["scheduleOrigin"] !== "first_party"
+    diagnostics["scheduleOrigin"] !== scheduleOrigin
   ) {
     return false;
   }
 
-  const schedulingFrames = diagnostics["schedulingFrames"];
-  return (
-    Array.isArray(schedulingFrames) &&
-    schedulingFrames.length >= 2 &&
-    schedulingFrames.length <= maximumSchedulingFrames &&
-    isInitialInjectedSchedulingFrame(schedulingFrames[0]) &&
-    schedulingFrames.slice(1).every(isFirstPartyNavigationSchedulingFrame)
+  return hasCohortBackedSchedulingFrames(
+    diagnostics["schedulingFrames"],
+    scheduleOrigin
   );
 }
 

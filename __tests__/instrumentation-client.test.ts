@@ -66,6 +66,20 @@ describe("instrumentation-client", () => {
   const genericIosWkWebViewUserAgent =
     "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148";
   const metaMaskMobileUserAgent = `${genericIosWkWebViewUserAgent} MetaMaskMobile/1.0`;
+  const firstPartyMetaMaskSchedulingStack = [
+    "anonymous@data:text/javascript,synthetic-navigation:286:15",
+    "pushState@https://6529.io/_next/static/chunks/0synthetic-navigation.js:2:47863",
+  ];
+  const mixedOriginMetaMaskSchedulingStack = [
+    "anonymous@data:text/javascript,synthetic-navigation:293:15",
+    "anonymous@https://wallet-bridge.invalid/js:798:281",
+    "anonymous@https://6529.io/_next/static/chunks/0synthetic-navigation.js:51:8604",
+    "sy@https://6529.io/_next/static/chunks/0synthetic-navigation.js:21:208988",
+    "li@https://6529.io/_next/static/chunks/0synthetic-navigation.js:21:224897",
+    "lr@https://6529.io/_next/static/chunks/0synthetic-navigation.js:21:224732",
+    "li@https://6529.io/_next/static/chunks/0synthetic-navigation.js:21:224858",
+    "lr@https://6529.io/_next/static/chunks/0synthetic-navigation.js:21:224732",
+  ];
   const browserUnhandledRejectionMechanismType =
     "auto.browser.global_handlers.onunhandledrejection";
   const poperBlockerNetworkErrorMessage =
@@ -281,7 +295,8 @@ describe("instrumentation-client", () => {
 
   const loadBeforeSendWithAssociatedCyclicJsonDiagnostics = (
     originalException: TypeError,
-    userAgent = metaMaskMobileUserAgent
+    userAgent = metaMaskMobileUserAgent,
+    schedulingStack: readonly string[] = firstPartyMetaMaskSchedulingStack
   ) => {
     let beforeSend:
       | ((
@@ -318,11 +333,7 @@ describe("instrumentation-client", () => {
           target,
           sampleRate: 1 / 16,
           random: () => 0,
-          stackFactory: () =>
-            [
-              "anonymous@data:text/javascript,synthetic-navigation:286:15",
-              "pushState@https://6529.io/_next/static/chunks/0synthetic-navigation.js:2:47863",
-            ].join("\n"),
+          stackFactory: () => schedulingStack.join("\n"),
         })
       ).toBe(true);
 
@@ -525,6 +536,7 @@ describe("instrumentation-client", () => {
         {
           filename: "app:///_next/static/chunks/0synthetic-monitoring.js",
           abs_path: "app:///_next/static/chunks/0synthetic-monitoring.js",
+          function: "?",
           lineno: 21,
           colno: 90001,
           in_app: true,
@@ -1569,6 +1581,47 @@ describe("instrumentation-client", () => {
       cyclic_json_timer_schedule_origin: "first_party",
     });
     expect(event.extra).toHaveProperty("cyclicJsonTimerDiagnostics");
+  });
+
+  it("filters the mixed-origin MetaMask navigation signature after enrichment", () => {
+    const originalException = new TypeError(sentryRouteParameterizationMessage);
+    const beforeSend = loadBeforeSendWithAssociatedCyclicJsonDiagnostics(
+      originalException,
+      metaMaskMobileUserAgent,
+      mixedOriginMetaMaskSchedulingStack
+    );
+    const event = createMetaMaskMobileSpaNavigationCyclicJsonEvent({
+      tags: {
+        browser: "Mobile Safari UI/WKWebView",
+        "browser.name": "Mobile Safari UI/WKWebView",
+      },
+      extra: {
+        arguments: ["synthetic-timer-argument"],
+      },
+    });
+
+    const result = beforeSend(event, { originalException });
+
+    expect(result).toBeNull();
+    expect(event.extra).not.toHaveProperty("arguments");
+    expect(event.tags).toMatchObject({
+      cyclic_json_timer_diagnostics: "v2",
+      cyclic_json_timer_schedule_origin: "mixed",
+    });
+    expect(event.extra).toMatchObject({
+      cyclicJsonTimerDiagnostics: {
+        scheduleOrigin: "mixed",
+        schedulingFrames: expect.arrayContaining([
+          expect.objectContaining({
+            file: "external/js",
+            function: "anonymous",
+            line: 798,
+            column: 281,
+            origin: "third_party",
+          }),
+        ]),
+      },
+    });
   });
 
   it("keeps a sampled v2 non-MetaMask timer error with sanitized diagnostics", () => {
