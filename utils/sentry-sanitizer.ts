@@ -5,6 +5,7 @@ import {
 } from "./monitoring/mobileLaunchTimingSanitizers";
 
 const REDACTED = "[Filtered]";
+const THIRD_PARTY = "third-party";
 const URL_IS_FIRST_PARTY_KEY = "url.is_first_party";
 const URL_IS_FIRST_PARTY_API_KEY = "url.is_first_party_api";
 const UNUSABLE_URL_TOKENS = new Set([
@@ -34,6 +35,12 @@ const URL_VALUE_KEY_PATTERN =
 const URL_DETAIL_KEY_PATTERN =
   /^(?:http\.(?:fragment|query)|url\.(?:fragment|query))$/i;
 const HOST_VALUE_KEY_PATTERN = /^(?:http\.host|server\.address|url\.domain)$/i;
+const HOST_ATTRIBUTION_VALUES = new Set([
+  "first-party",
+  "first-party-api",
+  "first-party-app",
+  THIRD_PARTY,
+]);
 
 const SENSITIVE_KEY_FRAGMENT_PATTERN =
   /(auth|authorization|cookie|set-cookie|token|secret|password|passwd|session|api[_-]?key|private[_-]?key|signature|body|payload)/i;
@@ -99,9 +106,9 @@ function hasRoutePlaceholder(pathname: string): boolean {
 }
 
 function sanitizeSentryEndpointFamily(pathname: string): string {
-  const rawSegments =
-    pathname.split(/[?#]/, 1)[0]?.split("/").filter(Boolean) ?? [];
-  const baselineSegments = sanitizeEndpointGroup(pathname)
+  const basePath = pathname.split(/[?#]/, 1)[0] ?? pathname;
+  const rawSegments = basePath.split("/").filter(Boolean);
+  const baselineSegments = sanitizeEndpointGroup(basePath)
     .split("/")
     .filter(Boolean);
   const sanitizedSegments = rawSegments.map((segment, index) => {
@@ -153,7 +160,8 @@ function sanitizeRoutePath(pathname: string): string {
 function shouldUseRouteFamily(
   parsed: URL,
   pathname: string,
-  kind: SentryPathKind
+  kind: SentryPathKind,
+  isRelativeInput = false
 ): boolean {
   if (kind === "route") {
     return true;
@@ -166,7 +174,7 @@ function shouldUseRouteFamily(
     return false;
   }
 
-  return isFirstPartyAppHost(parsed.hostname);
+  return isRelativeInput || isFirstPartyAppHost(parsed.hostname);
 }
 
 function sanitizeUrlLikeString(
@@ -190,7 +198,12 @@ function sanitizeUrlLikeString(
   try {
     const parsed = new URL(trimmed, "https://relative.invalid");
     const pathname = parsed.pathname || "/";
-    const useRouteFamily = shouldUseRouteFamily(parsed, pathname, kind);
+    const useRouteFamily = shouldUseRouteFamily(
+      parsed,
+      pathname,
+      kind,
+      !isAbsoluteUrlLike(trimmed)
+    );
     return useRouteFamily
       ? sanitizeRoutePath(pathname)
       : sanitizeSentryEndpointFamily(pathname);
@@ -324,11 +337,15 @@ function getBreadcrumbUrlIsFirstPartyApi(
 
 function sanitizeHostAttribution(value: unknown): string {
   if (typeof value !== "string" || value.trim() === "") {
-    return "third-party";
+    return THIRD_PARTY;
   }
 
   try {
     const trimmed = value.trim();
+    const normalized = trimmed.toLowerCase();
+    if (HOST_ATTRIBUTION_VALUES.has(normalized)) {
+      return normalized;
+    }
     const parsed = new URL(
       /^[a-z][a-z\d+.-]*:\/\//i.test(trimmed) || trimmed.startsWith("//")
         ? trimmed
@@ -340,9 +357,9 @@ function sanitizeHostAttribution(value: unknown): string {
     if (isFirstPartyAppHost(parsed.hostname)) {
       return "first-party-app";
     }
-    return isFirstPartyHost(parsed.hostname) ? "first-party" : "third-party";
+    return isFirstPartyHost(parsed.hostname) ? "first-party" : THIRD_PARTY;
   } catch {
-    return "third-party";
+    return THIRD_PARTY;
   }
 }
 
@@ -505,6 +522,7 @@ function sanitizeBreadcrumbData(
     ? withBreadcrumbUrlMetadata(data)
     : data;
 
+  let sanitizedTopLevelUrl: string | undefined;
   if (isPlainObject(dataWithMetadata)) {
     const url = dataWithMetadata["url"];
     if (typeof url === "string") {
@@ -521,14 +539,21 @@ function sanitizeBreadcrumbData(
       ) {
         kind = "route";
       }
-      dataWithMetadata["url"] = sanitizeUrlLikeString(url, kind);
+      sanitizedTopLevelUrl = sanitizeUrlLikeString(url, kind);
+      dataWithMetadata["url"] = sanitizedTopLevelUrl;
     }
   }
 
   const seen = new WeakSet<object>();
-  return sanitizeUnknown(dataWithMetadata, 0, seen) as NonNullable<
-    Breadcrumb["data"]
-  >;
+  const sanitizedData = sanitizeUnknown(
+    dataWithMetadata,
+    0,
+    seen
+  ) as NonNullable<Breadcrumb["data"]>;
+  if (sanitizedTopLevelUrl !== undefined && isPlainObject(sanitizedData)) {
+    sanitizedData["url"] = sanitizedTopLevelUrl;
+  }
+  return sanitizedData;
 }
 
 export function sanitizeSentryBreadcrumb(
@@ -573,13 +598,16 @@ function getSpanPathKind(span: SanitizableSentrySpan): SentryPathKind {
   if (isRouteUrl(url)) {
     return "route";
   }
-  if (
-    span.data?.["url.same_origin"] === true &&
-    typeof url === "string" &&
-    !url.startsWith("/api/") &&
-    !isStaticResourcePath(url)
-  ) {
-    return "route";
+  if (span.data?.["url.same_origin"] === true && typeof url === "string") {
+    let pathname = url.split(/[?#]/, 1)[0] ?? url;
+    try {
+      pathname = new URL(url, "https://relative.invalid").pathname || "/";
+    } catch {
+      // Keep the query-free path fallback for malformed URL-like values.
+    }
+    if (!pathname.startsWith("/api/") && !isStaticResourcePath(pathname)) {
+      return "route";
+    }
   }
 
   return "endpoint";
@@ -679,7 +707,7 @@ export function sanitizeSentryEvent<T extends Event>(event: T): T {
   }
 
   if (typeof next.transaction === "string") {
-    next.transaction = sanitizeRoutePath(next.transaction);
+    next.transaction = sanitizeSpanDescription(next.transaction, "auto");
   }
 
   if (next.exception?.values) {

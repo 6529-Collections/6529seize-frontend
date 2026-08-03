@@ -422,6 +422,30 @@ describe("sentry-sanitizer", () => {
     expect(payload).not.toContain("#private");
   });
 
+  it("keeps automatic span sanitization idempotent across SDK hooks", () => {
+    const once = sanitizeSentrySpan({
+      op: "http.client",
+      description: `GET https://api.6529.io/api/v2/waves/${SYNTHETIC_WAVE_ID}`,
+      data: {
+        "http.host": "api.6529.io:443",
+        "http.method": "GET",
+        "server.address": "api.6529.io",
+        url: `https://api.6529.io/api/v2/waves/${SYNTHETIC_WAVE_ID}`,
+        "url.domain": "6529.io",
+        "url.same_origin": false,
+      },
+    });
+
+    expect(sanitizeSentrySpan(once)).toEqual(once);
+    expect(once.data).toEqual(
+      expect.objectContaining({
+        "http.host": "first-party-api",
+        "server.address": "first-party-api",
+        "url.domain": "first-party-app",
+      })
+    );
+  });
+
   it("normalizes author and media identifiers in resource span paths", () => {
     const span = sanitizeSentrySpan({
       op: "resource.video",
@@ -554,6 +578,45 @@ describe("sentry-sanitizer", () => {
     );
   });
 
+  it("keeps absolute same-origin API and static URLs as endpoint families", () => {
+    const apiSpan = sanitizeSentrySpan({
+      op: "http.client",
+      description: `GET https://6529.io/api/v2/waves/${SYNTHETIC_WAVE_ID}`,
+      data: {
+        url: `https://6529.io/api/v2/waves/${SYNTHETIC_WAVE_ID}`,
+        "url.same_origin": true,
+      },
+    });
+    const staticSpan = sanitizeSentrySpan({
+      op: "resource.script",
+      description: "https://6529.io/_next/static/chunks/app.js",
+      data: {
+        url: "https://6529.io/_next/static/chunks/app.js",
+        "url.same_origin": true,
+      },
+    });
+
+    expect(apiSpan).toEqual(
+      expect.objectContaining({
+        description: "GET /api/v2/waves/:uuid",
+        data: expect.objectContaining({
+          url: "/api/v2/waves/:uuid",
+          "url.same_origin": true,
+        }),
+      })
+    );
+    expect(staticSpan).toEqual(
+      expect.objectContaining({
+        description: "/_next/static/chunks/app.js",
+        data: expect.objectContaining({
+          url: "/_next/static/chunks/app.js",
+          "url.same_origin": true,
+        }),
+      })
+    );
+    expect(JSON.stringify(apiSpan)).not.toContain(SYNTHETIC_WAVE_ID);
+  });
+
   it("normalizes profile transactions and wallet endpoint requests in events", () => {
     const event = sanitizeSentryEvent({
       transaction: `/${SYNTHETIC_PROFILE}/collected?access_token=synthetic`,
@@ -575,6 +638,30 @@ describe("sentry-sanitizer", () => {
     expect(payload).not.toContain(SYNTHETIC_WALLET);
     expect(payload).not.toContain("access_token");
     expect(payload).not.toContain("#private");
+  });
+
+  it("preserves useful non-path and method-prefixed transaction names", () => {
+    const componentEvent = sanitizeSentryEvent({
+      transaction: "SyntheticComponent",
+    });
+    const httpEvent = sanitizeSentryEvent({
+      transaction: `GET /api/v2/waves/${SYNTHETIC_WAVE_ID}?token=synthetic`,
+    });
+
+    expect(componentEvent.transaction).toBe("SyntheticComponent");
+    expect(httpEvent.transaction).toBe("GET /api/v2/waves/:uuid");
+    expect(JSON.stringify(httpEvent)).not.toContain(SYNTHETIC_WAVE_ID);
+    expect(JSON.stringify(httpEvent)).not.toContain("token=");
+  });
+
+  it("treats relative application URLs as route families", () => {
+    const sanitized = sanitizeUrlString(
+      `/${SYNTHETIC_PROFILE}/collected?token=synthetic#private`
+    );
+
+    expect(sanitized).toBe("/[user]/collected");
+    expect(JSON.stringify(sanitized)).not.toContain(SYNTHETIC_PROFILE);
+    expect(JSON.stringify(sanitized)).not.toContain("token=");
   });
 
   it.each([
@@ -599,8 +686,12 @@ describe("sentry-sanitizer", () => {
   it("is idempotent for already-normalized route and endpoint placeholders", () => {
     const endpoint = "/api/v2/waves/:uuid/drops/:uuid";
     const route = "/[user]/collected";
+    const mixedCaseRoute = "/[waveId]/drops";
 
     expect(sanitizeUrlString(sanitizeUrlString(endpoint))).toBe(endpoint);
     expect(sanitizeSentryEvent({ transaction: route }).transaction).toBe(route);
+    expect(sanitizeUrlString(sanitizeUrlString(mixedCaseRoute))).toBe(
+      "/[waveid]/drops"
+    );
   });
 });
