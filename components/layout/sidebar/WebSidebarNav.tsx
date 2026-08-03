@@ -423,9 +423,9 @@ const WebSidebarNav = React.forwardRef<
       <ul className="tw-m-0 tw-list-none tw-p-0">
         {nftsSection && renderExpandableSection(nftsSection)}
 
-        {wavesSection && renderDirectSectionLink(wavesSection)}
-
         {museumSection && renderDirectSectionLink(museumSection)}
+
+        {wavesSection && renderDirectSectionLink(wavesSection)}
 
         <li>
           <WebSidebarNavItem
