@@ -20,12 +20,15 @@ import {
 } from "lexical";
 import type { ReferencedNft } from "@/entities/IDrop";
 
-type NftReferenceIdentity = Pick<ReferencedNft, "contract" | "token">;
+type NftReferenceIdentity = Pick<ReferencedNft, "contract" | "token"> & {
+  readonly name?: string | undefined;
+};
 
 type SerializedHashtagNode = Spread<
   {
     hashtagName: string;
     nftContract?: string | null;
+    nftName?: string | null;
     nftToken?: string | null;
   },
   SerializedTextNode
@@ -38,10 +41,13 @@ function convertHashtagElement(
 
   if (textContent !== null) {
     const nftContract = domNode.dataset["mentionedNftContract"];
+    const nftName = domNode.dataset["mentionedNftName"];
     const nftToken = domNode.dataset["mentionedNftToken"];
     const node = $createHashtagNode(
       textContent,
-      nftContract && nftToken ? { contract: nftContract, token: nftToken } : null
+      nftContract && nftToken
+        ? { contract: nftContract, token: nftToken, name: nftName }
+        : null
     );
     return {
       node,
@@ -54,6 +60,7 @@ function convertHashtagElement(
 export class HashtagNode extends TextNode {
   __hashtag: string;
   __nftContract: string | null;
+  __nftName: string | null;
   __nftToken: string | null;
 
   static override getType(): string {
@@ -63,7 +70,11 @@ export class HashtagNode extends TextNode {
   static override clone(node: HashtagNode): HashtagNode {
     const referencedNft =
       node.__nftContract && node.__nftToken
-        ? { contract: node.__nftContract, token: node.__nftToken }
+        ? {
+            contract: node.__nftContract,
+            token: node.__nftToken,
+            name: node.__nftName ?? undefined,
+          }
         : null;
     return new HashtagNode(
       node.__hashtag,
@@ -80,6 +91,7 @@ export class HashtagNode extends TextNode {
         ? {
             contract: serializedNode.nftContract,
             token: serializedNode.nftToken,
+            name: serializedNode.nftName ?? undefined,
           }
         : null;
     const node = $createHashtagNode(serializedNode.hashtagName, referencedNft);
@@ -100,6 +112,9 @@ export class HashtagNode extends TextNode {
     super(text ?? hashtagName, key);
     this.__hashtag = hashtagName;
     this.__nftContract = referencedNft?.contract ?? null;
+    this.__nftName = referencedNft
+      ? (referencedNft.name ?? hashtagName.replace(/^\$/, ""))
+      : null;
     this.__nftToken = referencedNft?.token ?? null;
   }
 
@@ -108,6 +123,7 @@ export class HashtagNode extends TextNode {
       ...super.exportJSON(),
       hashtagName: this.__hashtag,
       nftContract: this.__nftContract,
+      nftName: this.__nftName,
       nftToken: this.__nftToken,
       type: "hashtag",
       version: 1,
@@ -126,6 +142,9 @@ export class HashtagNode extends TextNode {
     element.setAttribute("data-lexical-hashtag", "true");
     if (this.__nftContract && this.__nftToken) {
       element.dataset["mentionedNftContract"] = this.__nftContract;
+      if (this.__nftName) {
+        element.dataset["mentionedNftName"] = this.__nftName;
+      }
       element.dataset["mentionedNftToken"] = this.__nftToken;
     }
 
@@ -164,14 +183,13 @@ export class HashtagNode extends TextNode {
     if (!this.__nftContract || !this.__nftToken) {
       return null;
     }
-    const name = this.getTextContent().replace(/^\$/, "");
-    if (!name) {
+    if (!this.__nftName) {
       return null;
     }
     return {
       contract: this.__nftContract,
       token: this.__nftToken,
-      name,
+      name: this.__nftName,
     };
   }
 }

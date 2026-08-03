@@ -1,10 +1,16 @@
 import { $getRoot, type EditorState } from "lexical";
+import { getAddress, isAddress } from "viem";
 
 import { $isHashtagNode } from "@/components/drops/create/lexical/nodes/HashtagNode";
 import type { ReferencedNft } from "@/entities/IDrop";
 
-const getNftKey = (nft: ReferencedNft): string =>
-  `${nft.contract.toLowerCase()}:${nft.token}`;
+const getNftKey = (nft: ReferencedNft): string | null => {
+  const normalizedContract = nft.contract.toLowerCase();
+  if (!isAddress(normalizedContract)) {
+    return null;
+  }
+  return `${getAddress(normalizedContract)}:${nft.token}`;
+};
 
 /** Reads NFT identities that were persisted with their editor nodes. */
 export const getReferencedNftsFromEditorState = (
@@ -22,6 +28,9 @@ export const getReferencedNftsFromEditorState = (
         continue;
       }
       const key = getNftKey(referencedNft);
+      if (!key) {
+        continue;
+      }
       if (!byNft.has(key)) {
         byNft.set(key, referencedNft);
       }
@@ -37,11 +46,11 @@ export const mergeReferencedNfts = (
   registryReferences: readonly ReferencedNft[]
 ): ReferencedNft[] => {
   const byNft = new Map<string, ReferencedNft>();
-  for (const referencedNft of [
-    ...registryReferences,
-    ...editorReferences,
-  ]) {
-    byNft.set(getNftKey(referencedNft), referencedNft);
+  for (const referencedNft of [...registryReferences, ...editorReferences]) {
+    const key = getNftKey(referencedNft);
+    if (key) {
+      byNft.set(key, referencedNft);
+    }
   }
   return [...byNft.values()];
 };

@@ -1,72 +1,136 @@
-jest.mock('lexical', () => ({
+jest.mock("lexical", () => ({
   TextNode: class {
-    __text: string; format:any; detail:any; mode:string = 'segmented'; style:any; constructor(text = '') { this.__text = text; }
-    setMode(m:string) { this.mode = m; return this; }
-    toggleDirectionless() { return this; }
-    getTextContent() { return this.__text; }
-    getMode() { return this.mode; }
-    isDirectionless() { return true; }
-    setTextContent(t:string){ this.__text = t; return this; }
-    setFormat(f:any){ this.format = f; return this; }
-    setDetail(d:any){ this.detail = d; return this; }
-    setStyle(s:any){ this.style = s; return this; }
-    exportJSON(){ return { text:this.__text, format:this.format, detail:this.detail, mode:this.mode, style:this.style }; }
-    exportDOM(){ const el=document.createElement('span'); el.setAttribute('data-lexical-hashtag','true'); el.textContent=this.__text; return { element: el }; }
+    __text: string;
+    format: any;
+    detail: any;
+    mode: string = "segmented";
+    style: any;
+    constructor(text = "") {
+      this.__text = text;
+    }
+    setMode(m: string) {
+      this.mode = m;
+      return this;
+    }
+    toggleDirectionless() {
+      return this;
+    }
+    getTextContent() {
+      return this.__text;
+    }
+    getMode() {
+      return this.mode;
+    }
+    isDirectionless() {
+      return true;
+    }
+    setTextContent(t: string) {
+      this.__text = t;
+      return this;
+    }
+    setFormat(f: any) {
+      this.format = f;
+      return this;
+    }
+    setDetail(d: any) {
+      this.detail = d;
+      return this;
+    }
+    setStyle(s: any) {
+      this.style = s;
+      return this;
+    }
+    exportJSON() {
+      return {
+        text: this.__text,
+        format: this.format,
+        detail: this.detail,
+        mode: this.mode,
+        style: this.style,
+      };
+    }
+    exportDOM() {
+      const el = document.createElement("span");
+      el.setAttribute("data-lexical-hashtag", "true");
+      el.textContent = this.__text;
+      return { element: el };
+    }
   },
   $applyNodeReplacement: (n: any) => n,
 }));
 
-import { $createHashtagNode, $isHashtagNode, HashtagNode } from '@/components/drops/create/lexical/nodes/HashtagNode';
+import {
+  $createHashtagNode,
+  $isHashtagNode,
+  HashtagNode,
+} from "@/components/drops/create/lexical/nodes/HashtagNode";
 
-describe('HashtagNode', () => {
-  it('creates hashtag node with correct properties', () => {
-    const node = $createHashtagNode('#test');
+describe("HashtagNode", () => {
+  it("creates hashtag node with correct properties", () => {
+    const node = $createHashtagNode("#test");
     expect($isHashtagNode(node)).toBe(true);
-    expect(node.getTextContent()).toBe('#test');
-    expect(node.getMode()).toBe('segmented');
+    expect(node.getTextContent()).toBe("#test");
+    expect(node.getMode()).toBe("segmented");
     expect(node.isDirectionless()).toBe(true);
   });
 
-  it('exports and imports DOM correctly', () => {
-    const node = $createHashtagNode('#foo');
+  it("exports and imports DOM correctly", () => {
+    const node = $createHashtagNode("#foo");
     const { element } = node.exportDOM();
-    expect(element.getAttribute('data-lexical-hashtag')).toBe('true');
+    expect(element.getAttribute("data-lexical-hashtag")).toBe("true");
 
     const map = HashtagNode.importDOM()!;
     const entry = map["span"]!(element);
     expect(entry).not.toBeNull();
     const result = entry!.conversion(element);
     expect($isHashtagNode(result!.node)).toBe(true);
-    expect(result!.node.getTextContent()).toBe('#foo');
+    expect(result!.node.getTextContent()).toBe("#foo");
   });
 
-  it('identifies non hashtag node', () => {
+  it("identifies non hashtag node", () => {
     expect($isHashtagNode(null)).toBe(false);
     expect($isHashtagNode({} as any)).toBe(false);
   });
 
-  it('clones and imports from json', () => {
-    const referencedNft = { contract: '0xabc', token: '42' };
-    const node = $createHashtagNode('$foo', referencedNft);
+  it("clones and imports from json", () => {
+    const referencedNft = {
+      contract: "0xabc",
+      token: "42",
+      name: "Canonical Name",
+    };
+    const node = $createHashtagNode("$foo", referencedNft);
     const cloned = HashtagNode.clone(node);
     expect(cloned).not.toBe(node);
-    expect(cloned.getTextContent()).toBe('$foo');
+    expect(cloned.getTextContent()).toBe("$foo");
     expect(cloned.getReferencedNft()).toEqual({
       ...referencedNft,
-      name: 'foo',
     });
     expect(node.exportJSON()).toEqual(
-      expect.objectContaining({ nftContract: '0xabc', nftToken: '42' })
+      expect.objectContaining({
+        nftContract: "0xabc",
+        nftName: "Canonical Name",
+        nftToken: "42",
+      })
     );
 
     const imported = HashtagNode.importJSON({
-      hashtagName:'$bar', nftContract:'0xdef', nftToken:'7', text:'$bar', format:0, detail:0, mode:'segmented', style:'', type:'hashtag', version:1
-    } as any);
-    expect(imported.getTextContent()).toBe('$bar');
+      hashtagName: "$bar",
+      nftContract: "0xdef",
+      nftName: "Persisted Name",
+      nftToken: "7",
+      text: "$visible-name",
+      format: 0,
+      detail: 0,
+      mode: "segmented",
+      style: "",
+      type: "hashtag",
+      version: 1,
+    });
+    expect(imported.getTextContent()).toBe("$visible-name");
     expect(imported.getReferencedNft()).toEqual({
-      contract: '0xdef',
-      token: '7',
-      name: 'bar',
+      contract: "0xdef",
+      token: "7",
+      name: "Persisted Name",
     });
   });
 });

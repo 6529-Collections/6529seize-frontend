@@ -17,6 +17,10 @@ import {
   mergeReferencedNfts,
 } from "@/components/drops/create/lexical/utils/nftReferenceDetection";
 
+const NFT_CONTRACT = "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd";
+const NFT_CONTRACT_UPPER = "0xABCDEFABCDEFABCDEFABCDEFABCDEFABCDEFABCD";
+const OTHER_NFT_CONTRACT = "0x0000000000000000000000000000000000000001";
+
 const makeEditor = (): LexicalEditor =>
   createEditor({
     nodes: [HashtagNode],
@@ -64,7 +68,7 @@ describe("getReferencedNftsFromEditorState", () => {
       { text: "look at " },
       {
         name: "Test NFT",
-        contract: "0x1234567890123456789012345678901234567890",
+        contract: NFT_CONTRACT,
         token: "42",
       },
     ]);
@@ -72,13 +76,15 @@ describe("getReferencedNftsFromEditorState", () => {
     const restored = makeEditor();
     restored.setEditorState(restored.parseEditorState(persisted));
 
-    expect(getReferencedNftsFromEditorState(restored.getEditorState())).toEqual([
-      {
-        contract: "0x1234567890123456789012345678901234567890",
-        token: "42",
-        name: "Test NFT",
-      },
-    ]);
+    expect(getReferencedNftsFromEditorState(restored.getEditorState())).toEqual(
+      [
+        {
+          contract: NFT_CONTRACT,
+          token: "42",
+          name: "Test NFT",
+        },
+      ]
+    );
   });
 
   it("skips imported or legacy NFT nodes without an identity", () => {
@@ -93,14 +99,24 @@ describe("getReferencedNftsFromEditorState", () => {
 
   it("de-duplicates the same contract and token", () => {
     const editor = withNftReferences([
-      { name: "First Name", contract: "0xABC", token: "1" },
+      { name: "First Name", contract: NFT_CONTRACT_UPPER, token: "1" },
       { text: " and " },
-      { name: "Second Name", contract: "0xabc", token: "1" },
+      { name: "Second Name", contract: NFT_CONTRACT, token: "1" },
     ]);
 
     expect(getReferencedNftsFromEditorState(editor.getEditorState())).toEqual([
-      { name: "First Name", contract: "0xABC", token: "1" },
+      { name: "First Name", contract: NFT_CONTRACT_UPPER, token: "1" },
     ]);
+  });
+
+  it("skips malformed NFT contracts restored from draft JSON", () => {
+    const editor = withNftReferences([
+      { name: "Invalid", contract: "not-an-address", token: "1" },
+    ]);
+
+    expect(getReferencedNftsFromEditorState(editor.getEditorState())).toEqual(
+      []
+    );
   });
 });
 
@@ -108,15 +124,16 @@ describe("mergeReferencedNfts", () => {
   it("keeps registry-only NFTs and prefers restored editor metadata", () => {
     expect(
       mergeReferencedNfts(
-        [{ contract: "0xABC", token: "1", name: "Current Name" }],
+        [{ contract: NFT_CONTRACT_UPPER, token: "1", name: "Current Name" }],
         [
-          { contract: "0xabc", token: "1", name: "Old Name" },
-          { contract: "0xdef", token: "2", name: "Registry Only" },
+          { contract: NFT_CONTRACT, token: "1", name: "Old Name" },
+          { contract: OTHER_NFT_CONTRACT, token: "2", name: "Registry Only" },
+          { contract: "invalid", token: "3", name: "Invalid" },
         ]
       )
     ).toEqual([
-      { contract: "0xABC", token: "1", name: "Current Name" },
-      { contract: "0xdef", token: "2", name: "Registry Only" },
+      { contract: NFT_CONTRACT_UPPER, token: "1", name: "Current Name" },
+      { contract: OTHER_NFT_CONTRACT, token: "2", name: "Registry Only" },
     ]);
   });
 });
