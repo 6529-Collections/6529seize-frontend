@@ -25,6 +25,7 @@ import {
 import { containsDisallowedLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
 import { getMentionedGroupsFromEditorState } from "@/components/drops/create/lexical/utils/groupMentionDetection";
 import { getMentionedUsersFromEditorState } from "@/components/drops/create/lexical/utils/userMentionDetection";
+import { getMentionedWavesFromEditorState } from "@/components/drops/create/lexical/utils/waveMentionDetection";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import { WsMessageType } from "@/helpers/Types";
@@ -296,6 +297,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     () => (editorState ? getMentionedUsersFromEditorState(editorState) : []),
     [editorState]
   );
+  const currentPartMentionedWaves = useMemo(
+    () => (editorState ? getMentionedWavesFromEditorState(editorState) : []),
+    [editorState]
+  );
 
   const sendTyping = React.useCallback(() => {
     send(WsMessageType.USER_IS_TYPING, { wave_id: wave.id });
@@ -447,6 +452,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     canMentionAll,
     currentPartMentionedGroups,
     currentPartMentionedUsers,
+    currentPartMentionedWaves,
     submitting,
     setDrop,
     setFiles,
