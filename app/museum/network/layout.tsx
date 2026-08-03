@@ -6,6 +6,7 @@ import { MuseumShell } from "@/components/museum/MuseumShell";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
+import { buildMuseumPageSourceCatalog } from "@/lib/museum/publication/pageSources";
 import type { MuseumSourceState } from "@/lib/museum/types";
 
 export const metadata: Metadata = getAppMetadata({
@@ -34,6 +35,10 @@ export default async function MuseumNetworkLayout({
       view={{
         sourceState,
         publicationIdentity: publicationState.publication?.identity ?? null,
+        pageSources:
+          publicationState.publication === null
+            ? []
+            : buildMuseumPageSourceCatalog(publicationState.publication),
       }}
     >
       {children}

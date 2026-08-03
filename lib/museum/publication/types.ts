@@ -150,6 +150,7 @@ export type MuseumArtwork =
 
 export interface MuseumPublication {
   readonly identity: MuseumPublicationIdentity;
+  readonly declaredSourcePaths: readonly string[];
   readonly artists: readonly MuseumArtist[];
   readonly projects: readonly MuseumProject[];
   readonly gifts: readonly MuseumGift[];
@@ -166,6 +167,7 @@ export interface MuseumSourceDocument {
 
 export interface MuseumPublicationAssemblyContext {
   readonly identity: MuseumPublicationIdentity;
+  readonly declaredSourcePaths: readonly string[];
   readonly documents: ReadonlyMap<string, MuseumSourceDocument>;
 }
 

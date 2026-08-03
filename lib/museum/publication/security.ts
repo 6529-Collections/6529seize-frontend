@@ -118,6 +118,14 @@ export function buildMuseumMainBlobUrl(path: string, hash = ""): string | null {
   return buildMuseumBlobUrl("main", path, hash);
 }
 
+export function buildMuseumMainEditUrl(path: string): string | null {
+  try {
+    return `${GITHUB_WEB_ORIGIN}/${MUSEUM_REPOSITORY}/edit/main/${encodeRepositoryPath(path)}`;
+  } catch {
+    return null;
+  }
+}
+
 export function assertApprovedGitHubUrl(url: string): void {
   let parsed: URL;
   try {

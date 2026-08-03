@@ -756,6 +756,7 @@ function assembleLegacyCaseyPublication(
 
   return {
     identity: context.identity,
+    declaredSourcePaths: context.declaredSourcePaths,
     artists: [artist],
     projects,
     gifts: [gift],

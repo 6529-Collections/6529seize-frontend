@@ -65,6 +65,12 @@ rendered exactly once by `components/museum/MuseumShell.tsx`. This covers:
 - stories/research and the Casey source/chronology record
 - About, governance, methodology and approved-collection legacy routes
 
+The server builds a closed 57-route source catalog from the active
+publication's manifest-admitted paths. Rendered non-redirect routes resolve to
+an honest primary source. The legacy `/collections` route family redirects on
+the server and is intentionally unmapped so its destination owns the source
+claim. Unknown or unsafe route text fails closed.
+
 The richer Open Museum treatment belongs on `/museum/network/about`. The
 Sources and chronology route should connect its exact Casey research manuscript
 to the same public-source model without displacing the visitor research record.
@@ -73,18 +79,23 @@ to the same public-source model without displacing the visitor research record.
 
 ### Shared source/contribution strip
 
-Add a server-rendered `MuseumSourceContribution` component at the bottom of the
-Museum content area, before the existing institutional footer.
+Add `MuseumSourceContribution` at the bottom of the Museum content area, before
+the existing institutional footer. The server passes a small source catalog
+built from the same atomic publication; the client pathname may only select an
+entry from that catalog.
 
-- Input: `MuseumPublicationIdentity | null` and current/stale/unavailable state.
-- Exact source: a fixed-origin URL to the resolved 40-hex source commit.
-- Exact guide: the same commit's governed `CONTRIBUTING.md`.
-- Action: the fixed canonical-main `CONTRIBUTING.md`, so visitors receive the
-  current maintained instructions rather than obsolete workflow copy.
-- Copy: public record, exact source and contribution—not release metrics.
-- Failure: if there is no verified identity, omit immutable claims and retain
-  only the canonical repository/contributor action with explicit unavailable
-  wording.
+- Input: `MuseumPublicationIdentity | null`, current/stale/unavailable state,
+  and the manifest-admitted route source catalog.
+- Primary source: a fixed-origin `blob/<exact commit>/<path>` URL for the honest
+  primary record behind the route. Mixed-content routes use "View primary
+  source" and never claim one file is the entire page source.
+- Improvement: the same admitted path on the maintained `main` edit surface.
+- Help: canonical-main `CONTRIBUTING.md` is a separate contributor-guide action.
+- Related sources: up to two exact-commit links with closed visitor labels and
+  the exact governed path retained in accessible context.
+- Failure: an unmapped route omits primary and edit actions; a missing verified
+  identity omits every immutable claim. The maintained guide remains available
+  with explicit unavailable wording.
 
 All interface copy belongs in `i18n/messages/museum.en-US.json`. Governed
 manuscripts, formal names, source paths and commitments remain exact authored
@@ -111,9 +122,10 @@ content remains inert Markdown/JSON processed by the existing sanitizer. No
 repository HTML or scripts execute, no arbitrary URL is followed, and no page
 performs an additional source fetch outside the atomic publication facade.
 
-Exact-source links identify the bytes the visitor is reading. The contribution
-action intentionally points to canonical main because workflow instructions
-can evolve. The distinction must be visible in copy and tests.
+Primary and related source links identify exact admitted bytes used by the
+route. Improvement links intentionally target the same path on canonical main;
+the contributor guide remains separate because workflow instructions can
+evolve. The distinction must be visible in copy and tests.
 
 ## Native visual-fidelity matrix
 
@@ -135,9 +147,10 @@ About differentiates through pacing and source-backed prose, not new tokens.
    fail closed when missing, undeclared, malformed or hash-invalid.
 2. URL/security tests prove exact commits, fixed repository and path allowlist;
    arbitrary refs, traversal, credentials, ports and foreign origins fail.
-3. Route/component tests prove one H1, one shared strip, exact-commit links,
-   canonical-main contribution action, stale/unavailable behavior and onsite
-   manuscript rendering.
+3. Route/component tests prove one H1, one shared strip, complete rendered-route
+   mapping, intentional redirect non-mapping, exact-commit primary/related
+   links, same-path canonical-main edits, separate contributor help,
+   stale/unavailable behavior and onsite manuscript rendering.
 4. Update `ops/help/help-index.json`, sync `public/help-index.json`, and record
    the repository phase plus the not-deployed on-chain boundary.
 5. Run focused Museum suites, changed lint/typecheck, React Doctor, whitespace

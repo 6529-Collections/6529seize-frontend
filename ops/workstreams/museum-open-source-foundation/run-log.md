@@ -65,3 +65,31 @@
   directory: About desktop/mobile, home source strip, object mobile and Sources
   mobile. Desktop measured `1280/1265/1265` and mobile `390/375/375` for
   inner/client/scroll width respectively, proving no horizontal overflow.
+
+## 2026-08-03 - owning-review correction
+
+- Responded to two release blockers on PR #3554: the shared strip no longer
+  links to a repository tree or claims one file is the exact source of a
+  mixed-content page, and embedded Open Museum/transition manuscripts no longer
+  repeat their recognized leading title/status front matter.
+- Added a closed route-source projection from the active publication's 213
+  manifest-admitted paths. It maps all 57 currently rendered Museum routes,
+  rejects unknown/unsafe paths, and intentionally leaves the server-only
+  `/collections` redirect family unmapped so the destination owns the claim.
+- Each mapped route now exposes `View primary source` at
+  `blob/<exact commit>/<primary path>`, `Suggest an improvement` at the same
+  path on `edit/main`, and a separate maintained contributor guide. Related
+  records use exact immutable hrefs with closed visitor labels and exact paths
+  in accessible context.
+- The About source readback used canonical source commit
+  `bd853b483f807aad6d737305a9f78b1273bb2356`: primary
+  `docs/open-museum.md`, related `docs/onchain-transition.md` and
+  `policies/founding-and-operating-principles.md`. The page contained one H1,
+  one designed operating-status label and zero raw duplicated status labels.
+- Focused validation passed 5 suites / 50 tests; the complete Museum regression
+  passed 64 suites / 144 tests; changed lint and changed typecheck passed;
+  React Doctor scored 100/100. A clean optimized production build completed in
+  434 seconds.
+- Production-build browser QA passed at exact 1280 x 720 and genuine 390 x 844
+  viewports. Both measured equal inner, client and scroll widths. Retained
+  About and complete source-strip pixels are indexed in `evidence/README.md`.

@@ -3,7 +3,10 @@ import type { ReactNode } from "react";
 import { MuseumSourceContribution } from "@/components/museum/MuseumSourceContribution";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import type { MuseumPublicationIdentity } from "@/lib/museum/publication";
+import type {
+  MuseumPageSourceCatalog,
+  MuseumPublicationIdentity,
+} from "@/lib/museum/publication";
 import { MUSEUM_REPOSITORY_URL } from "@/lib/museum/types";
 import type { MuseumSourceState } from "@/lib/museum/types";
 
@@ -50,6 +53,7 @@ export function MuseumShell({
   readonly view: {
     readonly sourceState: MuseumSourceState;
     readonly publicationIdentity: MuseumPublicationIdentity | null;
+    readonly pageSources: MuseumPageSourceCatalog;
   };
 }) {
   return (
@@ -93,6 +97,7 @@ export function MuseumShell({
 
       <MuseumSourceContribution
         identity={view.publicationIdentity}
+        pageSources={view.pageSources}
         sourceState={view.sourceState}
       />
 

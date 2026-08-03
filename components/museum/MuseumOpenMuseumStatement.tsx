@@ -9,6 +9,7 @@ import {
   MUSEUM_CONTRIBUTOR_GUIDE_PATH,
   MUSEUM_RIGHTS_GUIDE_PATH,
   MUSEUM_TECHNICAL_DESIGN_PATHS,
+  withoutEmbeddedStatementFrontMatter,
 } from "@/lib/museum/publication";
 
 const EXTERNAL_LINK_CLASS =
@@ -105,7 +106,7 @@ export function MuseumOpenMuseumStatement({
           sourceCommit={commit}
           sourcePath={openMuseum.sourcePath}
         >
-          {openMuseum.markdown}
+          {withoutEmbeddedStatementFrontMatter(openMuseum)}
         </MuseumMarkdown>
       </div>
 
@@ -152,7 +153,7 @@ export function MuseumOpenMuseumStatement({
           sourceCommit={commit}
           sourcePath={transition.sourcePath}
         >
-          {transition.markdown}
+          {withoutEmbeddedStatementFrontMatter(transition)}
         </MuseumMarkdown>
       </div>
 
