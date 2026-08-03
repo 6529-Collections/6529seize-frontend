@@ -130,3 +130,10 @@
   entry as pre-owning-review and explicitly prove related immutable links are
   absent for `invalid` and `partial` states. Both are included in the next
   exact-head validation cycle.
+- Public Review Snapshot Trust run `30802027690` failed closed because its PR
+  event base was `e7076c7ddfcae3856e6a078d8ba41a8b7c7862b9` while live frontend
+  `main` had advanced to `1255fa477c0ecb79af30c56c5275bd08a75c8b98`.
+  Replaying the trusted verifier with those exact identifiers reproduced the
+  base-advance invariant; no snapshot or product finding was reported. The
+  feature branch therefore incorporates exact live `origin/main` before its
+  next signed head, approval and full merge-tree validation cycle.
