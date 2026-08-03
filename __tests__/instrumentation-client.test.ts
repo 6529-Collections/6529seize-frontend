@@ -1,5 +1,6 @@
 import noiseFilterFixtures from "@/__tests__/fixtures/sentry-noise-filter-hardening.json";
 import {
+  createLatestReactDomRawFrames,
   createObservedReactDomRawInsertBeforeFrames,
 } from "@/__tests__/fixtures/reactDomRawInsertBeforeFixtures";
 
@@ -649,9 +650,22 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
-  it.each(["sN", "sR"] as const)(
-    "drops the production-shaped raw React DOM stack ending in %s",
-    (terminalFunction) => {
+  it.each([
+    {
+      name: "ending in sN",
+      getFrames: () => createObservedReactDomRawInsertBeforeFrames("sN"),
+    },
+    {
+      name: "ending in sR",
+      getFrames: () => createObservedReactDomRawInsertBeforeFrames("sR"),
+    },
+    {
+      name: "with repeated sN placement frames",
+      getFrames: createLatestReactDomRawFrames,
+    },
+  ])(
+    "drops the production-shaped raw React DOM stack $name",
+    ({ getFrames }) => {
       const beforeSend = loadBeforeSend();
       const event = {
         event_id: "raw-react-dom-insert-before-event",
@@ -662,8 +676,7 @@ describe("instrumentation-client", () => {
               type: "NotFoundError",
               value: reactDomInsertBeforeMessage,
               stacktrace: {
-                frames:
-                  createObservedReactDomRawInsertBeforeFrames(terminalFunction),
+                frames: getFrames(),
               },
             },
           ],

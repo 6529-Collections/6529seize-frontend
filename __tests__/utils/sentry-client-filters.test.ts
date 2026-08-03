@@ -1,4 +1,5 @@
 import {
+  createLatestReactDomRawFrames,
   createObservedReactDomRawInsertBeforeFrames,
 } from "@/__tests__/fixtures/reactDomRawInsertBeforeFixtures";
 import {
@@ -1770,8 +1771,7 @@ describe("sentry-client-filters", () => {
           value: options.exceptionValue ?? reactDomInsertBeforeMessage,
           stacktrace: {
             frames:
-              options.frames ??
-              createObservedReactDomRawInsertBeforeFrames(),
+              options.frames ?? createLatestReactDomRawFrames(),
           },
         },
         ...(options.includeAdditionalException
@@ -2005,6 +2005,14 @@ describe("sentry-client-filters", () => {
       expect(result).toBe(true);
     }
   );
+
+  it("filters the latest observed 50-frame raw stack with repeated sN placement frames", () => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomRawInsertBeforeEvent()
+    );
+
+    expect(result).toBe(true);
+  });
 
   it.each([
     {
