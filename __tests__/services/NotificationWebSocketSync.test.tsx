@@ -126,6 +126,43 @@ describe("NotificationWebSocketSync", () => {
     unmount();
   });
 
+  it("refreshes active DM summary and conversation rows on notification changes", () => {
+    const { unmount } = render(<Subject />);
+    invalidateQueriesMock.mockClear();
+
+    act(() => {
+      messageCallbacks.get(WsMessageType.IDENTITY_NOTIFICATIONS_CHANGED)?.({
+        profile_id: "profile-1",
+      });
+      jest.advanceTimersByTime(150);
+    });
+
+    expect(invalidateQueriesMock).toHaveBeenCalledTimes(3);
+    expect(invalidateQueriesMock).toHaveBeenCalledWith({
+      queryKey: ["IDENTITY_NOTIFICATIONS"],
+    });
+    expect(invalidateQueriesMock).toHaveBeenCalledWith({
+      queryKey: ["DM_DROPS_UNREAD"],
+    });
+    const predicateCall = invalidateQueriesMock.mock.calls.find(
+      ([options]) => typeof options.predicate === "function"
+    );
+    const predicate = predicateCall?.[0].predicate as
+      | ((query: { readonly queryKey: readonly unknown[] }) => boolean)
+      | undefined;
+    expect(
+      predicate?.({
+        queryKey: ["WAVES_V2", { direct_message: true }],
+      })
+    ).toBe(true);
+    expect(
+      predicate?.({
+        queryKey: ["WAVES_V2", { direct_message: false }],
+      })
+    ).toBe(false);
+    unmount();
+  });
+
   it("preserves acknowledged coverage during token resync and resets it on reconnect", () => {
     const { rerender, unmount } = render(<Subject />);
 
@@ -187,12 +224,15 @@ describe("NotificationWebSocketSync", () => {
       });
     });
 
-    expect(invalidateQueriesMock).toHaveBeenCalledTimes(2);
+    expect(invalidateQueriesMock).toHaveBeenCalledTimes(4);
     expect(invalidateQueriesMock).toHaveBeenCalledWith({
       queryKey: ["IDENTITY_NOTIFICATIONS"],
     });
     expect(invalidateQueriesMock).toHaveBeenCalledWith({
       queryKey: ["CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS"],
+    });
+    expect(invalidateQueriesMock).toHaveBeenCalledWith({
+      queryKey: ["DM_DROPS_UNREAD"],
     });
     expect(screen.getByTestId("realtime-state")).toHaveTextContent(
       "true:profile-2"
@@ -221,12 +261,15 @@ describe("NotificationWebSocketSync", () => {
       });
     });
 
-    expect(invalidateQueriesMock).toHaveBeenCalledTimes(2);
+    expect(invalidateQueriesMock).toHaveBeenCalledTimes(4);
     expect(invalidateQueriesMock).toHaveBeenCalledWith({
       queryKey: ["IDENTITY_NOTIFICATIONS"],
     });
     expect(invalidateQueriesMock).toHaveBeenCalledWith({
       queryKey: ["CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS"],
+    });
+    expect(invalidateQueriesMock).toHaveBeenCalledWith({
+      queryKey: ["DM_DROPS_UNREAD"],
     });
     unmount();
   });

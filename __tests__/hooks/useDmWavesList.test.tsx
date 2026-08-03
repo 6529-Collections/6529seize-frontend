@@ -65,6 +65,8 @@ describe("useDmWavesList", () => {
     useUnreadDmDropsMock.mockReturnValue({
       unreadDmDropsCount: 0,
       dataUpdatedAt: 100,
+      isFetching: false,
+      refetch: jest.fn().mockResolvedValue(undefined),
     });
     useWavesV2Mock.mockReturnValue({
       waves: [
@@ -328,9 +330,15 @@ describe("useDmWavesList", () => {
   });
 
   it("does not trust a stale unread aggregate even when row totals agree", () => {
+    let unreadDataUpdatedAt = 99;
+    const refetchUnreadDmDrops = jest.fn().mockResolvedValue(undefined);
     useUnreadDmDropsMock.mockReturnValue({
       unreadDmDropsCount: 1,
-      dataUpdatedAt: 99,
+      get dataUpdatedAt() {
+        return unreadDataUpdatedAt;
+      },
+      isFetching: false,
+      refetch: refetchUnreadDmDrops,
     });
     useWavesV2Mock.mockReturnValue({
       waves: [
@@ -350,9 +358,16 @@ describe("useDmWavesList", () => {
       dataUpdatedAt: 100,
     });
 
-    const { result } = renderHook(() => useDmWavesList());
+    const { result, rerender } = renderHook(() => useDmWavesList());
 
     expect(result.current.canTrustServerSnapshotUnreadState).toBe(false);
+    expect(refetchUnreadDmDrops).toHaveBeenCalledTimes(1);
+
+    unreadDataUpdatedAt = 101;
+    rerender();
+
+    expect(result.current.canTrustServerSnapshotUnreadState).toBe(true);
+    expect(refetchUnreadDmDrops).toHaveBeenCalledTimes(1);
   });
 
   it("disables the DM query while the auth JWT is unusable", () => {

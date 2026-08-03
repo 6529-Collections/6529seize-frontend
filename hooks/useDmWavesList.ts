@@ -148,6 +148,48 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
     unreadDmDropsDataUpdatedAt >= dmWavesDataUpdatedAt &&
     unreadSummaryAccountsForLoadedRows
   );
+  const lastMatchingSummaryRefreshRef = useRef<{
+    readonly viewerIdentityKey: string;
+    readonly dmWavesDataUpdatedAt: number;
+  } | null>(null);
+
+  useEffect(() => {
+    if (
+      !shouldFetchDmWaves ||
+      !viewerIdentityKey ||
+      !unreadCountsMatch ||
+      isReconcilingUnreadState ||
+      dmWavesDataUpdatedAt <= 0 ||
+      unreadDmDropsDataUpdatedAt >= dmWavesDataUpdatedAt
+    ) {
+      return;
+    }
+
+    const previous = lastMatchingSummaryRefreshRef.current;
+    if (
+      previous?.viewerIdentityKey === viewerIdentityKey &&
+      previous.dmWavesDataUpdatedAt === dmWavesDataUpdatedAt
+    ) {
+      return;
+    }
+
+    lastMatchingSummaryRefreshRef.current = {
+      viewerIdentityKey,
+      dmWavesDataUpdatedAt,
+    };
+    // The row overview and unread aggregate poll independently. When their
+    // counts agree but the aggregate completed first, refresh it once after
+    // this exact overview snapshot so reconciliation can trust their ordering.
+    void refetchUnreadDmDrops().catch(() => undefined);
+  }, [
+    dmWavesDataUpdatedAt,
+    isReconcilingUnreadState,
+    refetchUnreadDmDrops,
+    shouldFetchDmWaves,
+    unreadCountsMatch,
+    unreadDmDropsDataUpdatedAt,
+    viewerIdentityKey,
+  ]);
 
   useEffect(() => {
     if (!shouldFetchDmWaves || !viewerIdentityKey || unreadCountsMatch) {

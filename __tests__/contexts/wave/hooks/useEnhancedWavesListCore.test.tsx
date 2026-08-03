@@ -331,6 +331,41 @@ describe("useEnhancedWavesListCore", () => {
     expect(result.current.waves[0]?.unreadDropsCount).toBe(1);
   });
 
+  it("restores unread from an overview requested after the local clear", () => {
+    const nowMock = jest.spyOn(Date, "now").mockReturnValue(100);
+    const { result, rerender } = renderHook(
+      ({ serverSnapshotRequestStartedAt }) =>
+        useEnhancedWavesListCore(
+          null,
+          createWavesData({
+            mainWavesRefetch: jest.fn(),
+            refetchAllWaves: jest.fn(),
+            waves: [
+              createSidebarWave({
+                unreadDropsCount: 1,
+                serverSnapshotRequestStartedAt,
+              }),
+            ],
+          }),
+          {
+            supportsPinning: false,
+            stateIdentityKey: "profile-1",
+          }
+        ),
+      { initialProps: { serverSnapshotRequestStartedAt: 90 } }
+    );
+
+    act(() => {
+      result.current.markWaveRead("wave-1");
+    });
+    expect(result.current.waves[0]?.unreadDropsCount).toBe(0);
+
+    rerender({ serverSnapshotRequestStartedAt: 101 });
+
+    expect(result.current.waves[0]?.unreadDropsCount).toBe(1);
+    nowMock.mockRestore();
+  });
+
   it("suppresses a forced unread count while its wave is active", () => {
     const wavesData = createWavesData({
       mainWavesRefetch: jest.fn(),
