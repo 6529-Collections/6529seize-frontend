@@ -17,9 +17,9 @@ context-aware `Back`).
 
 ## Entry Points
 
-- Web sidebar primary concepts (`NFTs`, `Waves`, `DMs`, `Join 6529`, `About`)
-  plus gated `Drop Forge` when available and connected utility rows such as
-  `Notifications`.
+- Web sidebar primary concepts (`NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529`,
+  `About`) plus gated `Drop Forge` when available and connected utility rows
+  such as `Notifications`.
 - Small-screen header menu button (opens the sidebar in overlay mode).
 - App bottom navigation tabs (`Discovery`, `Waves`, `Messages`, `Home`,
   `Network`, `Collections`, `Notifications`).
@@ -64,6 +64,8 @@ context-aware `Back`).
 - Small-screen web: open overlay menu, pick a route, and continue after
   auto-close on navigation.
 - Join 6529 jump: use the primary `Join 6529` row to open `/join-6529`.
+- Museum jump: use the direct `Museum` row after `NFTs` to open
+  `/museum/network` in web and app sidebars.
 - Desktop web share: while disconnected use the standalone lower `Share` row;
   while connected open the user menu and choose `Share`.
 - App secondary route jump: open app drawer and choose grouped `About` routes
@@ -82,6 +84,8 @@ context-aware `Back`).
 - `Waves` is one-click from the web sidebar. `Discover Waves` is secondary in
   the Waves experience and searchable, while the app bottom bar keeps a
   dedicated `Discovery` tab for `/discover`.
+- `Museum` is one-click from both sidebar variants and has no dedicated app
+  bottom-navigation tab.
 - The app-drawer profile avatar is connected-only and resolves handle-first
   profile routing with wallet fallback.
 - In the app drawer header, only the connected profile avatar is a profile
