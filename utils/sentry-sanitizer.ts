@@ -105,7 +105,7 @@ function sanitizeSentryEndpointFamily(pathname: string): string {
     .split("/")
     .filter(Boolean);
   const sanitizedSegments = rawSegments.map((segment, index) => {
-    let decoded = segment;
+    let decoded: string;
     try {
       decoded = decodeURIComponent(segment);
     } catch {
