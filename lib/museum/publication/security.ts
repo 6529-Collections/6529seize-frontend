@@ -87,11 +87,40 @@ export function buildImmutableMuseumBlobUrl(
   if (!commit || !isExactGitCommit(commit)) {
     return null;
   }
+  return buildMuseumBlobUrl(commit, path, hash);
+}
+
+function buildMuseumBlobUrl(
+  ref: string,
+  path: string,
+  hash: string
+): string | null {
   if (hash.length > 0 && !hash.startsWith("#")) {
     return null;
   }
   try {
-    return `${GITHUB_WEB_ORIGIN}/${MUSEUM_REPOSITORY}/blob/${commit}/${encodeRepositoryPath(path)}${hash}`;
+    return `${GITHUB_WEB_ORIGIN}/${MUSEUM_REPOSITORY}/blob/${ref}/${encodeRepositoryPath(path)}${hash}`;
+  } catch {
+    return null;
+  }
+}
+
+export function buildImmutableMuseumCommitUrl(
+  commit: string | null
+): string | null {
+  if (!commit || !isExactGitCommit(commit)) {
+    return null;
+  }
+  return `${GITHUB_WEB_ORIGIN}/${MUSEUM_REPOSITORY}/tree/${commit}`;
+}
+
+export function buildMuseumMainBlobUrl(path: string, hash = ""): string | null {
+  return buildMuseumBlobUrl("main", path, hash);
+}
+
+export function buildMuseumMainEditUrl(path: string): string | null {
+  try {
+    return `${GITHUB_WEB_ORIGIN}/${MUSEUM_REPOSITORY}/edit/main/${encodeRepositoryPath(path)}`;
   } catch {
     return null;
   }
