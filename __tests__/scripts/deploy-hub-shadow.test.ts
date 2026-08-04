@@ -4,11 +4,15 @@ const YAML = require("yaml");
 
 const {
   EXPECTED_REPOSITORY,
+  createFailureSummary,
+  createGithubClient,
+  createSummary,
   executeShadow,
   normalizeManifest,
   partitionCohorts,
   statusContext,
   statusPlan,
+  validateOperation,
 } = require("../../ops/scripts/deploy-hub-shadow.cjs");
 
 const SHA_A = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
@@ -151,6 +155,22 @@ describe("Deploy Hub FE shadow manifest", () => {
       )
     ).toThrow();
   });
+
+  it.each([
+    ["operation ID", { operationId: "bad operation" }],
+    ["delay", { delaySeconds: 1 }],
+    ["run URL", { runUrl: "https://example.com/actions/runs/12345" }],
+  ])("rejects an invalid %s", (_name, override) => {
+    expect(() =>
+      validateOperation({
+        operationId: "operation-1",
+        scenario: "success",
+        delaySeconds: 0,
+        runUrl: RUN_URL,
+        ...override,
+      })
+    ).toThrow();
+  });
 });
 
 describe("Deploy Hub FE shadow execution", () => {
@@ -225,6 +245,81 @@ describe("Deploy Hub FE shadow execution", () => {
   });
 
   it.each([
+    [
+      "closed",
+      { state: "closed", base: { ref: "main" }, head: { sha: SHA_A } },
+    ],
+    [
+      "wrong base",
+      { state: "open", base: { ref: "develop" }, head: { sha: SHA_A } },
+    ],
+  ])("fails closed when the PR is %s", async (_name, pull) => {
+    const statuses: Array<{ sha: string; status: Record<string, string> }> = [];
+    const github = {
+      async getPullRequest() {
+        return pull;
+      },
+      async createCommitStatus(sha: string, status: Record<string, string>) {
+        statuses.push({ sha, status });
+        return {};
+      },
+    };
+    const result = await executeShadow({
+      operationId: "operation-stale-pr",
+      manifestJson: JSON.stringify([request(1, SHA_A, "staging")]),
+      scenario: "success",
+      delaySeconds: 0,
+      repository: EXPECTED_REPOSITORY,
+      actor: ACTOR,
+      runUrl: RUN_URL,
+      github,
+    });
+
+    expect(result).toMatchObject({ scenario: "stale", conclusion: "failure" });
+    expect(statuses.at(-1)?.status).toMatchObject({ state: "error" });
+  });
+
+  it("best-effort terminates pending projections after an API interruption", async () => {
+    const github = githubForHeads({ 1: SHA_A, 2: SHA_B });
+    const originalCreateStatus = github.createCommitStatus.bind(github);
+    let calls = 0;
+    github.createCommitStatus = async (sha, status) => {
+      calls += 1;
+      if (calls === 3) {
+        throw new Error("simulated API interruption");
+      }
+      return originalCreateStatus(sha, status);
+    };
+
+    await expect(
+      executeShadow({
+        operationId: "operation-interrupted",
+        manifestJson: JSON.stringify([
+          request(1, SHA_A, "staging"),
+          request(2, SHA_B, "staging"),
+        ]),
+        scenario: "success",
+        delaySeconds: 0,
+        repository: EXPECTED_REPOSITORY,
+        actor: ACTOR,
+        runUrl: RUN_URL,
+        github,
+      })
+    ).rejects.toThrow("simulated API interruption");
+
+    expect(github.statuses.slice(-2)).toEqual([
+      expect.objectContaining({
+        sha: SHA_A,
+        status: expect.objectContaining({ state: "error" }),
+      }),
+      expect.objectContaining({
+        sha: SHA_B,
+        status: expect.objectContaining({ state: "error" }),
+      }),
+    ]);
+  });
+
+  it.each([
     ["product-failure", "failure", "product-failure"],
     ["infrastructure-failure", "error", "infrastructure-failure"],
     ["cancelled", "error", "cancelled"],
@@ -248,6 +343,65 @@ describe("Deploy Hub FE shadow execution", () => {
     );
     expect(statusContext("production")).toBe(
       "Deploy Hub Shadow — Target: Production"
+    );
+  });
+
+  it("creates unambiguous success and pre-execution failure summaries", () => {
+    const summary = createSummary(
+      {
+        operationId: "operation-summary",
+        scenario: "success",
+        conclusion: "success",
+        requests: [request(1, SHA_A, "staging")],
+        cohorts: [
+          { target: "staging", requests: [request(1, SHA_A, "staging")] },
+        ],
+      },
+      RUN_URL
+    );
+    expect(summary).toContain("SHADOW ONLY");
+    expect(summary).toContain(RUN_URL);
+    expect(createFailureSummary("Manifest must be valid JSON.")).toContain(
+      "Manifest must be valid JSON."
+    );
+  });
+});
+
+describe("Deploy Hub FE shadow GitHub client", () => {
+  it("uses the exact repository API and never exposes an error response body", async () => {
+    const fetchImpl = jest
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ state: "open" }),
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        json: async () => ({ secret: "must-not-escape" }),
+      });
+    const client = createGithubClient({
+      apiUrl: "https://api.github.com",
+      repository: EXPECTED_REPOSITORY,
+      token: "token-canary",
+      fetchImpl,
+    });
+
+    await expect(client.getPullRequest(1)).resolves.toEqual({ state: "open" });
+    await expect(
+      client.createCommitStatus(SHA_A, {
+        state: "pending",
+        target_url: RUN_URL,
+        description: "SHADOW: queued",
+        context: "Deploy Hub Shadow",
+      })
+    ).rejects.toThrow("GitHub request failed with HTTP 503.");
+    expect(fetchImpl.mock.calls[0][0]).toBe(
+      `https://api.github.com/repos/${EXPECTED_REPOSITORY}/pulls/1`
+    );
+    expect(JSON.stringify(fetchImpl.mock.calls)).not.toContain(
+      "must-not-escape"
     );
   });
 });

@@ -22,6 +22,14 @@ function assert(condition, message) {
 }
 
 function normalizeManifest(manifestJson, actor, repository) {
+  assert(repository === EXPECTED_REPOSITORY, "Repository is not supported.");
+  assert(
+    REQUESTER_PATTERN.test(actor) &&
+      !actor.startsWith("-") &&
+      !actor.endsWith("-"),
+    "Dispatching GitHub actor has an invalid format."
+  );
+
   let parsed;
   try {
     parsed = JSON.parse(manifestJson);
@@ -44,7 +52,7 @@ function normalizeManifest(manifestJson, actor, repository) {
       `${label} must be an object.`
     );
     assert(
-      request.repository === repository && repository === EXPECTED_REPOSITORY,
+      request.repository === repository,
       `${label} has an invalid repository.`
     );
     assert(
@@ -267,13 +275,28 @@ async function publishCohorts({
 }) {
   for (const cohort of cohorts) {
     const plan = statusPlan(cohort.target, scenario);
-    for (const phase of plan) {
+    for (const [phaseIndex, phase] of plan.entries()) {
       for (const request of cohort.requests) {
         await writeStatus(github, request, runUrl, phase);
       }
-      if (delaySeconds > 0 && phase !== plan.at(-1)) {
+      if (delaySeconds > 0 && phaseIndex < plan.length - 1) {
         await sleep(delaySeconds * 1000);
       }
+    }
+  }
+}
+
+async function publishTerminalProjectionError(github, requests, runUrl) {
+  for (const request of requests) {
+    try {
+      await writeStatus(github, request, runUrl, {
+        state: "error",
+        description: "SHADOW: status projection interrupted; no deployment",
+      });
+    } catch {
+      // The original GitHub API failure remains authoritative when even the
+      // best-effort terminal status cannot be published.
+      console.error("Deploy Hub shadow could not publish a terminal status.");
     }
   }
 }
@@ -286,7 +309,7 @@ function validateOperation({ operationId, scenario, delaySeconds, runUrl }) {
   assert(SCENARIOS.has(scenario), "Scenario is not supported.");
   assert(DELAYS.has(delaySeconds), "Phase delay is not supported.");
   assert(
-    /^https:\/\/github\.com\/6529-Collections\/6529seize-frontend\/actions\/runs\/[1-9][0-9]*$/.test(
+    /^https:\/\/github\.com\/6529-Collections\/6529seize-frontend\/actions\/runs\/[1-9]\d*$/.test(
       runUrl
     ),
     "Run URL has an invalid format."
@@ -312,13 +335,18 @@ async function executeShadow({
   const forceStale = scenario === "stale";
 
   if (forceStale || staleRequests.size > 0) {
-    await publishStaleResult({
-      github,
-      requests,
-      runUrl,
-      forceStale,
-      staleRequests,
-    });
+    try {
+      await publishStaleResult({
+        github,
+        requests,
+        runUrl,
+        forceStale,
+        staleRequests,
+      });
+    } catch (error) {
+      await publishTerminalProjectionError(github, requests, runUrl);
+      throw error;
+    }
     return {
       operationId,
       scenario: "stale",
@@ -328,14 +356,19 @@ async function executeShadow({
     };
   }
 
-  await publishCohorts({
-    github,
-    cohorts,
-    runUrl,
-    scenario,
-    delaySeconds,
-    sleep,
-  });
+  try {
+    await publishCohorts({
+      github,
+      cohorts,
+      runUrl,
+      scenario,
+      delaySeconds,
+      sleep,
+    });
+  } catch (error) {
+    await publishTerminalProjectionError(github, requests, runUrl);
+    throw error;
+  }
 
   return {
     operationId,
@@ -379,6 +412,18 @@ function createSummary(result, runUrl) {
   return `${lines.join("\n")}\n`;
 }
 
+function createFailureSummary(reason) {
+  return [
+    "# Deploy Hub FE Shadow",
+    "",
+    "> SHADOW ONLY — no branch or environment was changed.",
+    "",
+    "- Conclusion: `failure`",
+    `- Reason: ${reason}`,
+    "",
+  ].join("\n");
+}
+
 async function main() {
   const repository = process.env.DEPLOY_HUB_REPOSITORY ?? "";
   const token = process.env.GITHUB_TOKEN ?? "";
@@ -410,7 +455,10 @@ if (require.main === module) {
     try {
       await main();
     } catch (error) {
-      console.error(`Deploy Hub shadow failed: ${error.message}`);
+      const reason =
+        error instanceof Error ? error.message : "Unexpected shadow failure.";
+      process.stdout.write(createFailureSummary(reason));
+      console.error(`Deploy Hub shadow failed: ${reason}`);
       process.exitCode = 1;
     }
   })();
@@ -418,6 +466,7 @@ if (require.main === module) {
 
 module.exports = {
   EXPECTED_REPOSITORY,
+  createFailureSummary,
   createSummary,
   createGithubClient,
   executeShadow,
