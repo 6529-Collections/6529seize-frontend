@@ -151,7 +151,7 @@ export default function WaveHeaderFollow({
     }
     return (
       <svg
-        className={`${SVG_CLASSES[size]} tw-flex-shrink-0`}
+        className={`${SVG_CLASSES[size]} -tw-ml-0.5 tw-flex-shrink-0`}
         viewBox="0 0 24 24"
         fill="none"
         aria-hidden="true"

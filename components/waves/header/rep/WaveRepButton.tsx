@@ -49,10 +49,10 @@ export default function WaveRepButton({
         data-tooltip-content={tooltipContent}
         onClick={() => setIsModalOpen(true)}
         variant="tertiary"
-        size={variant === "compact" ? "xs" : "sm"}
+        size={variant === "compact" ? null : "sm"}
         className={
           variant === "compact"
-            ? "!tw-h-7 !tw-rounded-md !tw-border-white/[0.08] !tw-bg-white/[0.05] !tw-px-2 !tw-text-[11px] !tw-font-medium !tw-text-iron-300 !tw-shadow-none desktop-hover:hover:!tw-border-white/[0.12] desktop-hover:hover:!tw-bg-white/[0.08] desktop-hover:hover:!tw-text-iron-100 active:!tw-bg-white/[0.1]"
+            ? "tw-h-7 tw-rounded-md tw-px-2 tw-text-[11px] tw-leading-4"
             : undefined
         }
       >

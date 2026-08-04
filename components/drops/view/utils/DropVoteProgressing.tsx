@@ -12,6 +12,7 @@ interface DropVoteProgressingProps {
   readonly compact?: boolean | undefined;
   readonly tooltipLabel?: string | undefined;
   readonly numberFont?: "mono" | "sans" | undefined;
+  readonly numberWeight?: "bold" | "semibold" | undefined;
 }
 
 export default function DropVoteProgressing({
@@ -22,6 +23,7 @@ export default function DropVoteProgressing({
   compact = false,
   tooltipLabel = "Projected vote count at decision time",
   numberFont = "mono",
+  numberWeight = "bold",
 }: DropVoteProgressingProps): ReactElement | null {
   if (typeof current !== "number" || typeof projected !== "number") {
     return null;
@@ -46,25 +48,27 @@ export default function DropVoteProgressing({
       : "tw-text-iron-600";
     arrowColor = "tw-text-iron-600";
     wrapperClasses = "tw-flex tw-items-center tw-gap-2";
-    valueClasses = "tw-text-sm tw-font-bold tw-tracking-tight";
+    valueClasses = "tw-text-sm tw-tracking-tight";
   } else if (compact) {
     color = isPositiveProgressing
       ? "tw-text-emerald-400 tw-bg-emerald-500/10 tw-px-1.5 tw-py-0.5 tw-rounded-md tw-border tw-border-solid tw-border-emerald-500/15"
       : "tw-text-rose-400 tw-bg-rose-500/10 tw-px-1.5 tw-py-0.5 tw-rounded-md tw-border tw-border-solid tw-border-rose-500/15";
     arrowColor = "tw-text-iron-500";
     wrapperClasses = "tw-ml-0.5 tw-flex tw-items-center tw-gap-1.5";
-    valueClasses = "tw-text-sm tw-font-bold tw-leading-5";
+    valueClasses = "tw-text-sm tw-leading-5";
   } else {
     color = isPositiveProgressing
       ? "tw-text-emerald-500 tw-bg-emerald-500/10 tw-px-2 tw-py-0.5 tw-rounded tw-border tw-border-solid tw-border-emerald-500/20"
       : "tw-text-rose-500 tw-bg-rose-500/10 tw-px-2 tw-py-0.5 tw-rounded tw-border tw-border-solid tw-border-rose-500/20";
     arrowColor = "tw-text-iron-600";
     wrapperClasses = "tw-ml-0.5 tw-flex tw-items-center tw-gap-2";
-    valueClasses = "tw-text-sm tw-font-bold tw-tracking-tight";
+    valueClasses = "tw-text-sm tw-tracking-tight";
   }
 
   const numberTypographyClass =
     compact || numberFont === "sans" ? "tw-tabular-nums" : "tw-font-mono";
+  const numberWeightClass =
+    numberWeight === "semibold" ? "tw-font-semibold" : "tw-font-bold";
 
   return (
     <>
@@ -80,7 +84,7 @@ export default function DropVoteProgressing({
           className={`tw-flex-shrink-0 ${compact ? "tw-size-2" : "tw-size-2.5"} ${arrowColor}`}
         />
         <span
-          className={`${valueClasses} ${color} ${numberTypographyClass}`}
+          className={`${valueClasses} ${color} ${numberTypographyClass} ${numberWeightClass}`}
         >
           {projectedLabel ?? formatNumberWithCommas(projected)}
         </span>

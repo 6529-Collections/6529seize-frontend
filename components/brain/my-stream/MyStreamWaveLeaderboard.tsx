@@ -500,10 +500,10 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       style={leaderboardViewStyle}
     >
       <div
-        className={`tw-flex tw-min-w-0 tw-flex-grow tw-flex-col ${
+        className={`tw-flex tw-min-w-0 tw-flex-grow ${
           isMemesWave
-            ? "@[48rem]/leaderboard:tw-grid @[48rem]/leaderboard:tw-grid-cols-[minmax(20rem,1fr)_auto] @[48rem]/leaderboard:tw-items-start @[48rem]/leaderboard:tw-gap-x-4"
-            : ""
+            ? "tw-flex-row tw-flex-wrap tw-items-start tw-gap-x-3"
+            : "tw-flex-col"
         }`}
       >
         {isApproveWave ? (
@@ -517,7 +517,14 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
             wave={wave}
           />
         ) : (
-          <WaveLeaderboardTime wave={wave} />
+          <WaveLeaderboardTime
+            wave={wave}
+            className={
+              isMemesWave
+                ? "tw-min-w-0 tw-flex-[3_1_17rem]"
+                : undefined
+            }
+          />
         )}
 
         {/* Sticky tabs/filters section */}
@@ -533,7 +540,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
             isSticky
             className={
               isMemesWave
-                ? "@[48rem]/leaderboard:tw-w-[27rem] @[48rem]/leaderboard:tw-max-w-full @[48rem]/leaderboard:tw-justify-self-end"
+                ? "tw-min-w-0 tw-flex-[1_1_18rem] lg:tw-flex-[0_1_27rem]"
                 : undefined
             }
           >
@@ -544,7 +551,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
         {/* Content section */}
         <div
           className={`tw-min-w-0 tw-pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)] ${
-            isMemesWave ? "@[48rem]/leaderboard:tw-col-span-2" : ""
+            isMemesWave ? "tw-w-full tw-flex-none tw-basis-full" : ""
           }`}
         >
           <AnimatePresence>

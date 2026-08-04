@@ -30,25 +30,23 @@ export const CompactTimeCountdown: React.FC<CompactTimeCountdownProps> = ({
 
   return (
     <div
-      className="tw-hidden tw-flex-shrink-0 tw-items-baseline tw-gap-1.5 tw-text-[11px] tw-leading-none @[24rem]/timeline:tw-inline-flex"
+      className="tw-inline-flex tw-flex-shrink-0 tw-items-baseline tw-gap-1 tw-text-[11px] tw-leading-none"
       aria-label={`Next winner in ${accessibleCountdown}`}
     >
       <span
-        className="tw-whitespace-nowrap tw-font-medium tw-text-iron-500"
+        className="tw-hidden tw-whitespace-nowrap tw-font-medium tw-text-iron-500 @[25rem]/timeline:tw-inline"
         aria-hidden="true"
       >
         Next winner
       </span>
       <div
-        className="tw-flex tw-items-baseline tw-gap-x-1 tw-font-medium tw-text-iron-300"
+        className="tw-flex tw-items-baseline tw-gap-x-0.5 tw-font-medium tw-text-iron-300"
         aria-hidden="true"
       >
         {days > 0 && <TimeUnitDisplay value={days} label="d" />}
         <TimeUnitDisplay value={hours} label="h" />
         <TimeUnitDisplay value={minutes} label="m" />
-        <span className="tw-hidden @[28rem]/timeline:tw-inline-flex">
-          <TimeUnitDisplay value={seconds} label="s" />
-        </span>
+        <TimeUnitDisplay value={seconds} label="s" />
       </div>
     </div>
   );

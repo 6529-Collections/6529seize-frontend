@@ -13,9 +13,9 @@ export const TimeUnitDisplay: React.FC<TimeUnitDisplayProps> = ({
   label,
 }) => {
   return (
-    <span className="tw-inline-flex tw-items-baseline tw-gap-px">
-      <span className="tw-font-medium tw-text-iron-300">{value}</span>
-      <span className="tw-font-normal tw-text-iron-500">{label}</span>
+    <span className="tw-inline-flex tw-items-baseline tw-font-medium tw-text-iron-300">
+      <span>{value}</span>
+      <span>{label}</span>
     </span>
   );
 };

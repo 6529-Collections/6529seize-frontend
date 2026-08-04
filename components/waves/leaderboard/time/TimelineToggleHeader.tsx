@@ -61,13 +61,13 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
 
     if (hasNextDecision) {
       return (
-        <div className="tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-justify-end tw-gap-2">
+        <div className="tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-justify-end tw-gap-1">
           <CompactTimeCountdown timeLeft={timeLeft} />
           <span
-            className="tw-hidden tw-h-3 tw-w-px tw-flex-shrink-0 tw-bg-white/[0.12] @[24rem]/timeline:tw-block"
+            className="tw-hidden tw-h-3 tw-w-px tw-flex-shrink-0 tw-bg-white/[0.12] @[30rem]/timeline:tw-block"
             aria-hidden="true"
           />
-          <span className="tw-flex-shrink-0 tw-whitespace-nowrap tw-text-[11px] tw-font-medium tw-leading-none tw-text-iron-500">
+          <span className="tw-hidden tw-flex-shrink-0 tw-whitespace-nowrap tw-text-[11px] tw-font-medium tw-leading-none tw-text-iron-500 @[30rem]/timeline:tw-inline">
             {formattedNextDecisionDate}
           </span>
         </div>
@@ -81,7 +81,7 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
 
   return (
     <div
-      className="tw-group tw-cursor-pointer tw-bg-iron-950 tw-px-3 tw-py-2 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-900/70"
+      className="tw-group tw-cursor-pointer tw-bg-iron-950 tw-px-2.5 tw-py-2 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-900/70"
       onClick={() => setIsOpen(!isOpen)}
     >
       <div className="tw-flex tw-w-full tw-items-center tw-gap-2">
