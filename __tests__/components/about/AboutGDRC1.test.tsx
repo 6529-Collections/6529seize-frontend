@@ -29,6 +29,25 @@ describe("AboutGDRC1", () => {
     expect(await screen.findByText("Charter Content")).toBeInTheDocument();
   });
 
+  it("removes the duplicated source header without removing charter content", async () => {
+    (fetchAboutSectionFile as jest.Mock).mockResolvedValue(
+      "<div><h2>The Global Digital Rights Charter</h2><div>Version 1.0 - March 2023</div></div><div><h3>Preamble</h3><p>Charter Content</p></div>"
+    );
+
+    render(<AboutGDRC1 />);
+
+    expect(await screen.findByText("Charter Content")).toBeInTheDocument();
+    expect(
+      screen.getAllByRole("heading", {
+        name: "The Global Digital Rights Charter",
+      })
+    ).toHaveLength(1);
+    expect(screen.getAllByText("Version 1.0 - March 2023")).toHaveLength(1);
+    expect(
+      screen.getByRole("heading", { name: "Preamble" })
+    ).toBeInTheDocument();
+  });
+
   it("sanitizes fetched html", async () => {
     (fetchAboutSectionFile as jest.Mock).mockResolvedValue(
       '<div onclick="alert(1)"><p>Safe content</p><script>alert(1)</script><a href="javascript:alert(1)">Unsafe link</a></div>'

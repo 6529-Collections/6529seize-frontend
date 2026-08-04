@@ -29,7 +29,32 @@ const GDRC_ALLOWED_TAG_NAMES = new Set([
 
 const m = (locale: SupportedLocale, key: GdrcMessageKey) => t(locale, key);
 
-function sanitizeGdrcHtml(value: string): string {
+function isDuplicateGdrcHeader(
+  element: Element,
+  title: string,
+  version: string
+): boolean {
+  const children = Array.from(element.children);
+  const containsOnlyExpectedElements = Array.from(element.childNodes).every(
+    (node) => node.nodeType === Node.ELEMENT_NODE || !node.textContent?.trim()
+  );
+
+  return (
+    element.tagName === "DIV" &&
+    children.length === 2 &&
+    children[0]?.tagName === "H2" &&
+    children[0].textContent.trim() === title &&
+    children[1]?.tagName === "DIV" &&
+    children[1].textContent.trim() === version &&
+    containsOnlyExpectedElements
+  );
+}
+
+function sanitizeGdrcHtml(
+  value: string,
+  title: string,
+  version: string
+): string {
   const document = new DOMParser().parseFromString(value, "text/html");
 
   for (const element of Array.from(document.body.querySelectorAll("*"))) {
@@ -43,22 +68,29 @@ function sanitizeGdrcHtml(value: string): string {
     }
   }
 
+  const firstElement = document.body.firstElementChild;
+  if (firstElement && isDuplicateGdrcHeader(firstElement, title, version)) {
+    firstElement.remove();
+  }
+
   return document.body.innerHTML;
 }
 
 export default function AboutGDRC1() {
   const locale = useBrowserLocale();
   const [html, setHtml] = useState<string>("");
+  const title = m(locale, "about.gdrc.title");
+  const version = m(locale, "about.gdrc.version");
 
   useEffect(() => {
     void fetchAboutSectionFile("gdrc1")
       .then((content) => {
-        setHtml(sanitizeGdrcHtml(content));
+        setHtml(sanitizeGdrcHtml(content, title, version));
       })
       .catch(() => {
         setHtml("");
       });
-  }, []);
+  }, [title, version]);
 
   return (
     <article
@@ -66,10 +98,10 @@ export default function AboutGDRC1() {
     >
       <header className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-1 tw-pb-10 tw-pt-4 sm:tw-px-0 sm:tw-pb-12 sm:tw-pt-8 lg:tw-px-2">
         <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
-          {m(locale, "about.gdrc.title")}
+          {title}
         </h1>
         <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-500">
-          {m(locale, "about.gdrc.version")}
+          {version}
         </p>
       </header>
 

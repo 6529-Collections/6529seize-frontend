@@ -56,10 +56,6 @@
 }
 
 .gdrcContent > div:first-child {
-  display: none;
-}
-
-.gdrcContent > div:nth-child(2) {
   padding-top: 0;
 }
 
