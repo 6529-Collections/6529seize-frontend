@@ -1,9 +1,6 @@
 name: Staging E2E
 
 on:
-  workflow_run:
-    workflows: ["Web Deploy - STAGING"]
-    types: [completed]
   workflow_dispatch:
     inputs:
       pack:
@@ -58,11 +55,15 @@ on:
       backend_sha: { type: string, required: false }
       frontend_artifact_digest: { type: string, required: false }
       backend_artifact_digest: { type: string, required: false }
+      automatic_deploy_run_id:
+        description: Internal successful Web Deploy - STAGING run id
+        type: string
+        required: false
 
 permissions:
   contents: read
 
-run-name: Staging E2E [${{ inputs.operation_key || 'automatic' }}]
+run-name: Staging E2E [${{ inputs.operation_key || (inputs.automatic_deploy_run_id && 'automatic') || 'manual' }}]
 
 concurrency:
   group: staging-e2e
@@ -74,19 +75,73 @@ concurrency:
 jobs:
   baseline-adoption-decision:
     name: Resolve pending baseline adoption
-    if: >-
-      github.event_name == 'workflow_run' &&
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_repository.full_name == github.repository &&
-      github.event.workflow_run.head_branch == '1a-staging'
+    if: inputs.automatic_deploy_run_id != ''
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
+      actions: read
       contents: read
     outputs:
       decision: ${{ steps.decision.outputs.decision }}
+      deployed_ref: ${{ steps.deploy-run.outputs.deployed_ref }}
+      deployed_sha: ${{ steps.deploy-run.outputs.deployed_sha }}
+      deploy_workflow_run_id: ${{ steps.deploy-run.outputs.deploy_workflow_run_id }}
       manifest_ready: ${{ steps.decision.outputs.manifest_ready }}
     steps:
+      - name: Reject mixed automatic dispatch identity
+        env:
+          AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
+          BACKEND_ARTIFACT_DIGEST: ${{ inputs.backend_artifact_digest }}
+          BACKEND_SHA: ${{ inputs.backend_sha }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          FRONTEND_ARTIFACT_DIGEST: ${{ inputs.frontend_artifact_digest }}
+          FRONTEND_SHA: ${{ inputs.frontend_sha }}
+          MANIFEST_ID: ${{ inputs.release_manifest_id }}
+          MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          PACK: ${{ inputs.pack }}
+          SOURCE_REF: ${{ inputs.source_ref }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+          TRAIN_REVISION: ${{ inputs.release_train_revision }}
+        run: |
+          set -euo pipefail
+          [[ "$AUTOMATIC_DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
+          test "$PACK" = all
+          identity_values="$TRAIN_ID$TRAIN_REVISION$OPERATION_KEY$SOURCE_REF$EXPECTED_SHA$MANIFEST_ID$MANIFEST_IDENTITY$FRONTEND_SHA$BACKEND_SHA$FRONTEND_ARTIFACT_DIGEST$BACKEND_ARTIFACT_DIGEST"
+          test -z "$identity_values"
+
+      - name: Resolve successful automatic deploy
+        id: deploy-run
+        env:
+          AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          [[ "$AUTOMATIC_DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
+          response_file="$(mktemp)"
+          trap 'rm -f "$response_file"' EXIT
+          gh api \
+            "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}" \
+            > "$response_file"
+          jq -e \
+            --arg repository "$GITHUB_REPOSITORY" \
+            --argjson run_id "$AUTOMATIC_DEPLOY_RUN_ID" '
+              .id == $run_id and
+              .name == "Web Deploy - STAGING" and
+              .path == ".github/workflows/deploy-staging.yml" and
+              (.event == "push" or .event == "workflow_dispatch") and
+              .status == "completed" and
+              .conclusion == "success" and
+              .head_branch == "1a-staging" and
+              .repository.full_name == $repository and
+              (.head_sha | test("^[a-f0-9]{40}$"))
+            ' "$response_file" >/dev/null
+          {
+            printf 'deployed_ref=%s\n' "$(jq -r '.head_branch' "$response_file")"
+            printf 'deployed_sha=%s\n' "$(jq -r '.head_sha' "$response_file")"
+            printf 'deploy_workflow_run_id=%s\n' "$AUTOMATIC_DEPLOY_RUN_ID"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Check out trusted decision client
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
@@ -111,9 +166,9 @@ jobs:
       - name: Resolve exact automatic E2E decision
         id: decision
         env:
-          DEPLOYED_REF: ${{ github.event.workflow_run.head_branch }}
-          DEPLOYED_SHA: ${{ github.event.workflow_run.head_sha }}
-          DEPLOY_WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id }}
+          DEPLOYED_REF: ${{ steps.deploy-run.outputs.deployed_ref }}
+          DEPLOYED_SHA: ${{ steps.deploy-run.outputs.deployed_sha }}
+          DEPLOY_WORKFLOW_RUN_ID: ${{ steps.deploy-run.outputs.deploy_workflow_run_id }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
         run: |
@@ -141,21 +196,15 @@ jobs:
   staging-packs:
     name: Staging E2E packs
     needs: baseline-adoption-decision
-    # Trust gate: this job holds a secret and executes checked-out code, so
-    # workflow_run triggers must come from this repository's own 1a-staging
-    # branch (staging deploys are push-triggered; forks cannot push there).
-    # The explicit head_repository/head_branch conditions keep that invariant
-    # enforced even if the upstream deploy workflow's triggers ever change.
+    # Automatic runs must resolve to a successful same-repository staging
+    # deployment. Manual and Release Bus dispatches retain their own guards.
     if: >-
       always() &&
       (
-        github.event_name == 'workflow_dispatch' ||
+        inputs.automatic_deploy_run_id == '' ||
         (
           needs.baseline-adoption-decision.result == 'success' &&
-          needs.baseline-adoption-decision.outputs.decision == 'LEGACY' &&
-          github.event.workflow_run.conclusion == 'success' &&
-          github.event.workflow_run.head_repository.full_name == github.repository &&
-          github.event.workflow_run.head_branch == '1a-staging'
+          needs.baseline-adoption-decision.outputs.decision == 'LEGACY'
         )
       )
     runs-on: ubuntu-latest
@@ -165,7 +214,6 @@ jobs:
       SELECTED_PACK: ${{ github.event.inputs.pack || 'all' }}
     steps:
       - name: Reject partial Release Bus identity
-        if: github.event_name == 'workflow_dispatch'
         env:
           BACKEND_ARTIFACT_DIGEST: ${{ inputs.backend_artifact_digest }}
           BACKEND_SHA: ${{ inputs.backend_sha }}
@@ -234,14 +282,14 @@ jobs:
             --data "$payload" \
             "$RELEASE_BUS_API_URL/deploy/release-bus-v2/authorize"
 
-      # workflow_run: the exact SHA the staging deploy shipped. Manual
-      # dispatch falls back to the branch tip, which may differ from what is
-      # currently deployed to staging — fine for ad-hoc reruns, but prefer
-      # letting the deploy trigger this workflow for deployed-SHA fidelity.
+      # Automatic dispatch resolves the exact SHA the successful staging deploy
+      # shipped. Manual dispatch falls back to the selected ref, which may
+      # differ from staging; prefer the deploy-triggered path for SHA fidelity.
       - name: Check out the deployed ref
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          ref: ${{ inputs.expected_sha || github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ inputs.expected_sha || needs.baseline-adoption-decision.outputs.deployed_sha || github.sha }}
+          fetch-depth: 2
           persist-credentials: false
 
       - name: Verify Release Bus immutable source
@@ -250,20 +298,34 @@ jobs:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
 
+      - name: Check out immutable Release Bus tooling
+        timeout-minutes: 2
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.sha }}
+          path: .release-bus-control
+          filter: blob:none
+          fetch-depth: 1
+          persist-credentials: false
+          sparse-checkout: |
+            scripts/release-bus-install-dependencies.cjs
+          sparse-checkout-cone-mode: false
+
       - name: Stage immutable Release Bus E2E tooling
         env:
           WORKFLOW_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
           [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
-          git cat-file -e "$WORKFLOW_SHA^{commit}" 2>/dev/null || \
-            git fetch --no-tags origin "$WORKFLOW_SHA"
+          control_root="$GITHUB_WORKSPACE/.release-bus-control"
+          test "$(git -C "$control_root" rev-parse HEAD)" = "$WORKFLOW_SHA"
           tooling="$RUNNER_TEMP/release-bus-tooling/scripts"
           mkdir -p "$tooling" "$RUNNER_TEMP/release-bus-evidence"
           for file in \
             scripts/release-bus-install-dependencies.cjs
           do
-            git show "$WORKFLOW_SHA:$file" > "$RUNNER_TEMP/release-bus-tooling/$file"
+            test -f "$control_root/$file"
+            install -m 0644 "$control_root/$file" "$RUNNER_TEMP/release-bus-tooling/$file"
           done
           {
             echo "RELEASE_BUS_INSTALL_TOOL=$tooling/release-bus-install-dependencies.cjs"
@@ -280,6 +342,48 @@ jobs:
           corepack enable pnpm
           corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
           pnpm --version
+
+      - name: Select Museum pack for the deployed change set
+        id: museum-selection
+        env:
+          DEPLOYED_SHA: ${{ inputs.expected_sha || needs.baseline-adoption-decision.outputs.deployed_sha }}
+          SELECTED_PACK: ${{ github.event.inputs.pack || 'all' }}
+        run: |
+          set -euo pipefail
+          museum_required=true
+          if [ "$SELECTED_PACK" = all ] && [ -n "$DEPLOYED_SHA" ]; then
+            changed_files="$(mktemp)"
+            trap 'rm -f "$changed_files"' EXIT
+            if base_sha="$(git rev-parse "${DEPLOYED_SHA}^1" 2>/dev/null)" &&
+              git diff --no-renames --name-only -z \
+                "$base_sha" "$DEPLOYED_SHA" -- > "$changed_files"
+            then
+              museum_required=false
+              while IFS= read -r -d '' file; do
+                case "$file" in
+                  app/museum/network/*|components/museum/*|lib/museum/*|config/museumPublicationEnv.server.ts|i18n/messages/museum.en-US.json|tests/museum/*)
+                    museum_required=true
+                    break
+                    ;;
+                esac
+              done < "$changed_files"
+            else
+              echo "::warning::Unable to prove the deployed change range; retaining the Museum E2E pack."
+            fi
+          fi
+          echo "required=$museum_required" >> "$GITHUB_OUTPUT"
+          echo "Museum E2E required: $museum_required"
+
+      - name: Restore pnpm store
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-node22-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node22-pnpm-
+
+      - name: Use cached pnpm store
+        run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
 
       - name: Install Socket Firewall
         id: socket-firewall
@@ -299,17 +403,33 @@ jobs:
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
         run: node "$RELEASE_BUS_INSTALL_TOOL"
 
+      - name: Restore Playwright browser
+        if: steps.dependencies.outcome == 'success'
+        id: playwright-cache
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
+
       - name: Install Playwright browser
         if: steps.dependencies.outcome == 'success'
         id: playwright
         continue-on-error: true
-        run: ./bin/6529 exec playwright install --with-deps chromium
+        env:
+          PLAYWRIGHT_CACHE_HIT: ${{ steps.playwright-cache.outputs.cache-hit }}
+        run: |
+          if [ "$PLAYWRIGHT_CACHE_HIT" = true ]; then
+            ./bin/6529 exec playwright install-deps chromium
+          else
+            ./bin/6529 exec playwright install --with-deps chromium
+          fi
 
       - name: Run staging packs against staging.6529.io
         if: steps.dependencies.outcome == 'success' && steps.playwright.outcome == 'success'
         id: e2e
         continue-on-error: true
         env:
+          MUSEUM_E2E_REQUIRED: ${{ steps.museum-selection.outputs.required }}
           RELEASE_BUS_E2E_MANIFEST_ID: ${{ inputs.release_manifest_id }}
           RELEASE_BUS_E2E_MANIFEST_IDENTITY_SHA256: ${{ inputs.release_manifest_identity_sha256 }}
           RELEASE_BUS_E2E_SOURCE_SHA: ${{ inputs.expected_sha }}
@@ -320,6 +440,7 @@ jobs:
             --trigger post-deploy
             --artifact-root staging-e2e-artifacts
           )
+          pack_exclusion_supported=false
           if runner_capabilities="$(./bin/6529 exec node scripts/e2e-packs.cjs --capabilities 2>/dev/null)" &&
             jq -e '
               .contract == "release-bus-e2e-runner-capabilities.v1" and
@@ -331,9 +452,25 @@ jobs:
           then
             args+=(--parallel 3)
           fi
+          if [ -n "${runner_capabilities:-}" ] &&
+            jq -e '
+              .contract == "release-bus-e2e-runner-capabilities.v1" and
+              .features.pack_exclusion == { version: 1 }
+            ' <<< "$runner_capabilities" >/dev/null
+          then
+            pack_exclusion_supported=true
+          fi
           if [ "${SELECTED_PACK:-all}" != all ]; then
             args+=(--pack "$SELECTED_PACK")
+          elif [ "$MUSEUM_E2E_REQUIRED" = false ]; then
+            if [ "$pack_exclusion_supported" = true ]; then
+              args+=(--exclude-pack museum-institutional-practice)
+            else
+              echo "::warning::Deployed E2E runner cannot exclude packs; retaining the Museum E2E pack."
+              MUSEUM_E2E_REQUIRED=true
+            fi
           fi
+          echo "MUSEUM_E2E_REQUIRED=$MUSEUM_E2E_REQUIRED" >> "$GITHUB_ENV"
           ./bin/6529 run e2e:packs -- "${args[@]}"
 
       - name: Validate exact manifest-bound E2E evidence
@@ -351,9 +488,11 @@ jobs:
           expected_inventory="$(./bin/6529 exec node - <<'NODE'
           const { PACKS } = require("./tests/packs.manifest.cjs");
           const selected = process.env.SELECTED_PACK || "all";
+          const museumRequired = process.env.MUSEUM_E2E_REQUIRED !== "false";
           const keys = PACKS.filter((pack) =>
             pack.environments.includes("staging") &&
             pack.triggers.includes("post-deploy") &&
+            (museumRequired || pack.alias !== "museum-institutional-practice") &&
             (selected === "all" || pack.scriptKey === selected || pack.alias === selected)
           ).map((pack) => pack.scriptKey);
           process.stdout.write(JSON.stringify(keys));

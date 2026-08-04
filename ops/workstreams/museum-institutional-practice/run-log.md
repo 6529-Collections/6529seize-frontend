@@ -376,3 +376,19 @@
   `66c9eb9fa8c1512ca9450108151d2d7a037c4f31`; 69 focused unit and workflow
   cases, lint, changed typechecking, workflow security, secret scanning,
   formatting, and the portable diff check also pass.
+- Frontend PR #3588 merged as `aa77ddf8`; the staging-contract correction PR
+  #3591 produced exact release/runtime
+  `11c91ab0576dd69ee3bc4dec671702dbc0d0bf69`.
+- Production deploy run `30948172792` completed at 20:52:44 UTC. Three exact
+  version probes agreed and reported `stale:false`.
+- Retained production qualification passed the Museum inventory 70/70, core
+  smoke 16/16, the 28 applicable surface cases, and WCAG/i18n 6/6. The one
+  broader aggregate failure was a stale Meme Calendar test contract, recorded
+  and corrected in the CI acceleration follow-up.
+- The second automatic staging run `30946407128` never reached a browser pack
+  because its immutable-tooling fetch consumed 1,069 seconds and the run was
+  cancelled. The exact caveat is retained; it is not relabelled as a passed
+  hosted staging run.
+- This institutional-practice release is complete. Pipeline remediation and
+  measured before/after evidence continue in
+  `ops/workstreams/ci-release-acceleration/`.

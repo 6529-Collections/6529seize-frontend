@@ -33,6 +33,9 @@ const runner = require("../../scripts/e2e-packs.cjs") as {
         version: number;
         max_parallel: number;
       };
+      pack_exclusion: {
+        version: number;
+      };
     };
   };
   assertParallelSafe: (packs: Pack[], parallel: number) => void;
@@ -50,6 +53,7 @@ const runner = require("../../scripts/e2e-packs.cjs") as {
     env: string | null;
     trigger: string | null;
     pack: string | null;
+    excludePacks: string[];
     artifactRoot: string | null;
     parallel: number;
     capabilities: boolean;
@@ -59,7 +63,12 @@ const runner = require("../../scripts/e2e-packs.cjs") as {
   resolveArtifactRoot: (artifactRoot: string | null) => string | null;
   resolvePacks: (
     packs: Pack[],
-    filters: { env: string | null; trigger: string | null; pack: string | null }
+    filters: {
+      env: string | null;
+      trigger: string | null;
+      pack: string | null;
+      excludePacks?: string[];
+    }
   ) => Pack[];
   outputPathsForPack: (pack: Pack) => {
     root: string;
@@ -142,6 +151,8 @@ describe("manifest-driven E2E runner", () => {
         "post-deploy",
         "--pack",
         "smoke",
+        "--exclude-pack",
+        "museum-institutional-practice",
         "--artifact-root",
         "artifacts/e2e",
         "--parallel",
@@ -154,6 +165,7 @@ describe("manifest-driven E2E runner", () => {
       env: "staging",
       trigger: "post-deploy",
       pack: "smoke",
+      excludePacks: ["museum-institutional-practice"],
       artifactRoot: "artifacts/e2e",
       parallel: 3,
       capabilities: false,
@@ -181,6 +193,9 @@ describe("manifest-driven E2E runner", () => {
         readonly_pack_parallelism: {
           version: 1,
           max_parallel: 4,
+        },
+        pack_exclusion: {
+          version: 1,
         },
       },
     });
@@ -224,6 +239,7 @@ describe("manifest-driven E2E runner", () => {
         env: "staging",
         trigger: "post-deploy",
         pack: "smoke",
+        excludePacks: [],
       })
     ).toEqual([samplePacks[0]]);
     expect(
@@ -231,6 +247,18 @@ describe("manifest-driven E2E runner", () => {
         env: "production",
         trigger: "cron",
         pack: "all",
+        excludePacks: [],
+      })
+    ).toEqual([samplePacks[1]]);
+  });
+
+  it("excludes a changed-scoped pack by alias without disturbing order", () => {
+    expect(
+      runner.resolvePacks(samplePacks, {
+        env: null,
+        trigger: null,
+        pack: "all",
+        excludePacks: ["smoke"],
       })
     ).toEqual([samplePacks[1]]);
   });
@@ -545,28 +573,38 @@ describe("manifest-driven E2E runner", () => {
 
   it("times out and terminates the complete POSIX process group", async () => {
     const startedAt = Date.now();
+    const pidFile = path.join(
+      os.tmpdir(),
+      `e2e-pack-grandchild-${process.pid}-${Date.now()}.pid`
+    );
+    const stubbornChild =
+      'process.on("SIGTERM",()=>{});setInterval(()=>{},1000);';
+    const parentCode = [
+      'const {spawn}=require("node:child_process");',
+      'const fs=require("node:fs");',
+      `const child=spawn(process.execPath,["-e",${JSON.stringify(
+        stubbornChild
+      )}],{stdio:"ignore"});`,
+      "fs.writeFileSync(process.argv[1],String(child.pid));",
+      "setInterval(()=>{},1000);",
+    ].join("");
     const result = await runner.runProcessGroup(
       process.execPath,
-      [
-        "-e",
-        [
-          'const {spawn}=require("node:child_process");',
-          'const child=spawn(process.execPath,["-e","process.on(\\"SIGTERM\\",()=>{});setInterval(()=>{},1000)"],{stdio:"ignore"});',
-          "console.log(child.pid);",
-          "setInterval(()=>{},1000);",
-        ].join(""),
-      ],
+      ["-e", parentCode, pidFile],
       {
         cwd: ROOT,
         env: process.env,
         maxBuffer: 1024 * 1024,
-        timeout: 100,
+        // Leave enough time for the parent to publish the grandchild PID on
+        // slower local/CI process startup before exercising group teardown.
+        timeout: 500,
       }
     );
 
     expect(result.error?.code).toBe("ETIMEDOUT");
-    expect(Date.now() - startedAt).toBeGreaterThanOrEqual(900);
-    const grandchildPid = Number(result.stdout.trim());
+    expect(Date.now() - startedAt).toBeGreaterThanOrEqual(1400);
+    const grandchildPid = Number(fs.readFileSync(pidFile, "utf8"));
+    fs.rmSync(pidFile, { force: true });
     expect(grandchildPid).toBeGreaterThan(0);
     await new Promise((resolve) => setTimeout(resolve, 100));
     expect(() => process.kill(grandchildPid, 0)).toThrow();
@@ -724,7 +762,7 @@ describe("E2E runner CLI resolution", () => {
         .slice(0, 3)
         .every((pack) => pack.projects?.includes("web-mobile-chromium"))
     ).toBe(true);
-    expect(museumPacks[0]?.triggers).toEqual(["pr-ci", "manual"]);
+    expect(museumPacks[0]?.triggers).toEqual(["manual"]);
     expect(museumPacks[1]?.triggers).toEqual(["post-deploy", "manual"]);
     expect(museumPacks[2]?.triggers).toEqual(["post-deploy", "manual"]);
   });

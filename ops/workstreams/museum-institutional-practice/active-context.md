@@ -16,9 +16,9 @@
   `0xcdab557dacba52ab6752096436c01bba3b6c0c0afcd0c7e94a904ba1d492b5e3`.
   Post-merge source run `30922946613` passed the full Museum validator and the
   deterministic Ubuntu and Windows suites.
-- Frontend branch: `codex/museum-institutional-practice-v2-fe`, merged cleanly
-  onto exact frontend main `330aecff5ecae731b147d69b7ed5340cc15c6b4f`.
-  Ready frontend PR #3588 is open and under exact-head review.
+- Frontend PR #3588 merged as `aa77ddf8`; the staging-contract correction PR
+  #3591 produced exact release/runtime
+  `11c91ab0576dd69ee3bc4dec671702dbc0d0bf69`.
 - Publication boundary: one comparative overview, twenty-seven profiles, one
   adjacent-practice study, the public scholarship and editorial standard, and
   one source register—thirty-one manuscripts from one exact source release.
@@ -61,8 +61,23 @@
   unauthenticated GitHub moving-ref lookup could not verify the source release.
   The Museum browser gate now resolves one exact source commit before starting
   its read-only server; the failed desktop/mobile case passes against canonical
-  commit `66c9eb9fa8c1512ca9450108151d2d7a037c4f31`. Fresh exact-head review,
-  staging, and production qualification remain pending.
+  commit `66c9eb9fa8c1512ca9450108151d2d7a037c4f31`.
+- Staging qualification: the first deploy run `30941026460` exposed two stale
+  Waves assertions in automatic E2E run `30942280799`. PR #3591 corrected the
+  test contract; exact release `11c91ab0576...` reached staging in run
+  `30945380394`. The next automatic run `30946407128` was cancelled before any
+  pack executed when an immutable-tooling Git fetch stalled; no successful
+  hosted staging qualification is claimed for that second run.
+- Production deployment: run `30948172792` completed successfully at
+  20:52:44 UTC. Three consecutive `/api/version` probes served and announced
+  exact `11c91ab0576dd69ee3bc4dec671702dbc0d0bf69` with `stale:false`.
+- Retained production qualification: the Museum pack passed 70/70; core smoke
+  passed 16/16; all 28 applicable surface cases passed with 22 intentional
+  native-project skips; and WCAG/i18n passed 6/6. The broad aggregate was
+  107/108 because its Meme Calendar test still named replaced timezone
+  buttons; a direct controlled replay confirmed the current tab interface.
+- Status: complete. The release-duration and pipeline follow-up is tracked in
+  `ops/workstreams/ci-release-acceleration/`.
 
 ## Previous qualified release
 
