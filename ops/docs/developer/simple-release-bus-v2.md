@@ -189,9 +189,15 @@ reconfirms fallback readiness, and sends only the digest-bound bundle to EC2.
 The instance verifies, activates, and version-checks those bytes with rollback;
 it no longer reinstalls dependencies, lints, or rebuilds the app.
 
-The normal frontend `Web Deploy - STAGING` success still triggers
-`staging-e2e.yml`. For that `workflow_run`, the trusted decision client makes
-one authenticated lookup:
+The small `staging-e2e-dispatch.yml` post-completion listener has no concurrency
+group and dispatches `staging-e2e.yml` only when `Web Deploy - STAGING`
+concludes successfully on the repository's `1a-staging` branch. GitHub still
+records an unavoidable skipped dispatcher wrapper for other conclusions, but
+failed, cancelled, timed-out and skipped deployments create no Staging E2E run
+and never enter the shared staging E2E concurrency lane. The automatic dispatch
+carries the deploy run ID; the E2E workflow resolves that run through GitHub,
+requires the exact completed-success same-repository workflow/ref contract,
+then the trusted decision client makes one authenticated lookup:
 
 - `LEGACY` means there is no active intent, and the existing expensive
   automatic E2E runs unchanged;

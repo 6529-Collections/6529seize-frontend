@@ -263,6 +263,7 @@ describe("pr-ci-policy-bundle-v1", () => {
         ".github/workflows/release-bus-v2-preflight.yml",
         ".github/workflows/release-bus-deploy-staging.yml",
         ".github/workflows/release-bus-deploy-production.yml",
+        ".github/workflows/staging-e2e-dispatch.yml",
         ".github/workflows/staging-e2e.yml",
         ".github/workflows/production-e2e.yml",
         "__tests__/scripts/deploy-staging-artifact.test.ts",

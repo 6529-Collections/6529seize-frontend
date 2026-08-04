@@ -28,6 +28,7 @@ const FILE_PATHS = Object.freeze([
   ".github/workflows/release-bus-v2-advance-staging-ref.yml",
   ".github/workflows/release-bus-v2-compose.yml",
   ".github/workflows/release-bus-v2-preflight.yml",
+  ".github/workflows/staging-e2e-dispatch.yml",
   ".github/workflows/staging-e2e.yml",
   "__tests__/scripts/dependency-risk-gate.test.ts",
   "__tests__/scripts/deploy-staging-artifact.test.ts",
