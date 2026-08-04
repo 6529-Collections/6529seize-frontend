@@ -194,7 +194,7 @@ const PACKS = [
       SMOKE_SPECS,
       { grep: "@smoke", projects: [DESKTOP] }
     ),
-    triggers: ["pr-ci", "manual"],
+    triggers: ["manual"],
   },
   {
     ...localPack(
@@ -203,7 +203,7 @@ const PACKS = [
       ["tests/critical-shell"],
       { projects: [DESKTOP] }
     ),
-    triggers: ["pr-ci", "manual"],
+    triggers: ["manual"],
   },
 
   localReadonlyPack(
@@ -277,11 +277,11 @@ const PACKS = [
   {
     ...localReadonlyPack(
       "test:e2e:museum-institutional-practice",
-      "Network Museum institutional-practice study route sweep.",
+      "Network Museum institutional-practice deployed route smoke.",
       READONLY_SPECS.museumInstitutionalPractice,
       { timeoutMinutes: 30 }
     ),
-    triggers: ["pr-ci", "manual"],
+    triggers: ["manual"],
   },
 
   sandboxPack(
@@ -394,6 +394,7 @@ const PACKS = [
   ),
   stagingPack("core", "", "Staging core surfaces on both web shells.", [
     "tests/surfaces",
+    "tests/critical-shell",
     ...SMOKE_SPECS,
   ]),
   stagingPack(
@@ -466,9 +467,9 @@ const PACKS = [
   stagingPack(
     "museum-institutional-practice",
     "museum-institutional-practice",
-    "Staging Network Museum institutional-practice route sweep.",
+    "Staging Network Museum institutional-practice deployed route smoke.",
     READONLY_SPECS.museumInstitutionalPractice,
-    { timeoutMinutes: 30 }
+    { timeoutMinutes: 15 }
   ),
 
   productionPack(
@@ -529,7 +530,7 @@ const PACKS = [
   ),
   productionPack(
     "museum-institutional-practice",
-    "Production Network Museum institutional-practice route sweep.",
+    "Production Network Museum institutional-practice deployed route smoke.",
     READONLY_SPECS.museumInstitutionalPractice,
     ["post-deploy", "manual"],
     30,

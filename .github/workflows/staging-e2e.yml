@@ -281,6 +281,17 @@ jobs:
           corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
           pnpm --version
 
+      - name: Restore pnpm store
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-node22-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node22-pnpm-
+
+      - name: Use cached pnpm store
+        run: pnpm config set store-dir ~/.pnpm-store
+
       - name: Install Socket Firewall
         id: socket-firewall
         continue-on-error: true
@@ -299,11 +310,26 @@ jobs:
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
         run: node "$RELEASE_BUS_INSTALL_TOOL"
 
+      - name: Restore Playwright browser
+        if: steps.dependencies.outcome == 'success'
+        id: playwright-cache
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
+
       - name: Install Playwright browser
         if: steps.dependencies.outcome == 'success'
         id: playwright
         continue-on-error: true
-        run: ./bin/6529 exec playwright install --with-deps chromium
+        env:
+          PLAYWRIGHT_CACHE_HIT: ${{ steps.playwright-cache.outputs.cache-hit }}
+        run: |
+          if [ "$PLAYWRIGHT_CACHE_HIT" = true ]; then
+            ./bin/6529 exec playwright install-deps chromium
+          else
+            ./bin/6529 exec playwright install --with-deps chromium
+          fi
 
       - name: Run staging packs against staging.6529.io
         if: steps.dependencies.outcome == 'success' && steps.playwright.outcome == 'success'
@@ -329,7 +355,7 @@ jobs:
               }
             ' <<< "$runner_capabilities" >/dev/null
           then
-            args+=(--parallel 3)
+            args+=(--parallel 4)
           fi
           if [ "${SELECTED_PACK:-all}" != all ]; then
             args+=(--pack "$SELECTED_PACK")
@@ -363,7 +389,7 @@ jobs:
             .schema_version == "release-bus-e2e-packs.v1" and
             .environment == "staging" and
             .trigger == "post-deploy" and
-            (.worker_count | type == "number" and . >= 1 and . <= 3) and
+            (.worker_count | type == "number" and . >= 1 and . <= 4) and
             .pack_count == ($expected | length) and
             (.results | map(.script_key)) == $expected and
             (.results | map(.script_key) | unique | length) == .pack_count and

@@ -98,9 +98,10 @@ register backend first and declare it as the frontend prerequisite.
    artifact bytes are freshly built for the exact staging composition. Backend
    preparation installs dependencies once and builds/packages only selected
    deploy units. Frontend builds only the staging profile and records one
-   immutable environment-bound manifest/digest. Repository-wide lint,
-   typecheck, test inventory, and full test matrices remain PR CI gates and do
-   not run in a normal train. For an affected repository, the staging release
+   immutable environment-bound manifest/digest. Focused lint, typecheck, Jest,
+   policy, and build checks remain PR CI gates and do not rerun in a normal
+   train. The complete read-only browser inventory runs once against the exact
+   deployed staging SHA. For an affected repository, the staging release
    commit has the recorded current `1a-staging` SHA as its first parent. When
    the dependency-closed composition adds commits beyond that parent, it is the
    second parent; a fully current empty-cumulative composition intentionally
@@ -181,6 +182,13 @@ unchanged. Only the exact API event can advance an intent; a different service
 during the held freeze fails that intent closed. Its additive callback step is
 non-blocking for the ordinary deploy job: unavailable evidence prevents
 adoption freeze without failing an unrelated manual deploy.
+
+The guarded manual frontend fallback builds one exact-SHA staging artifact on
+GitHub without deployment credentials,
+reconfirms fallback readiness, and sends only the digest-bound bundle to EC2.
+The instance verifies, activates, and version-checks those bytes with rollback;
+it no longer reinstalls dependencies, lints, or rebuilds the app.
+
 The normal frontend `Web Deploy - STAGING` success still triggers
 `staging-e2e.yml`. For that `workflow_run`, the trusted decision client makes
 one authenticated lookup:

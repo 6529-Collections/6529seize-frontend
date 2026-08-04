@@ -229,6 +229,15 @@ const AGENT_FILES_SYNC_FILES = new Set([
   "__tests__/scripts/sync-agent-files.test.ts",
 ]);
 const AGENT_FILES_CORPUS_PREFIX = "ops/help/";
+const RELEASE_BUS_CONTRACT_PATTERNS = Object.freeze([
+  /^\.github\/workflows\//,
+  /^ops\/deployment-bus\//,
+  /^ops\/scripts\/(deployment-bus|deploy-staging-artifact|release-bus-status|verify-deployment-version)\./,
+  /^scripts\/(e2e-packs|pr-ci-policy-bundle|release-bus-|sync-e2e-manifest)/,
+  /^tests\/packs\.manifest\.cjs$/,
+  /^__tests__\/scripts\/(deployment-bus|e2e-packs|manual-deploy-routing-guard|pr-ci-policy-bundle|release-bus-|sync-e2e-manifest)/,
+  /^(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml)$/,
+]);
 const SOURCE_CODE_EXTENSIONS = new Set([
   ".js",
   ".jsx",
@@ -577,10 +586,6 @@ function isSourceCodeFile(filePath) {
   return SOURCE_CODE_EXTENSIONS.has(fileExtension(filePath));
 }
 
-function isStyleFile(filePath) {
-  return STYLE_EXTENSIONS.has(fileExtension(filePath));
-}
-
 function isLintableFile(filePath) {
   return isSourceCodeFile(filePath);
 }
@@ -630,6 +635,13 @@ function isAgentFilesSyncFile(filePath) {
   );
 }
 
+function isReleaseBusContractFile(filePath) {
+  const normalized = normalizePath(filePath);
+  return RELEASE_BUS_CONTRACT_PATTERNS.some((pattern) =>
+    pattern.test(normalized)
+  );
+}
+
 function isBuildSensitiveFile(filePath) {
   const normalized = normalizePath(filePath);
   return (
@@ -671,7 +683,6 @@ function createCiPlan(files, options = {}) {
   const risk = classifyChangedFiles(normalizedFiles);
   const riskFloor = risk.computed_floor;
   const hasSourceCode = normalizedFiles.some(isSourceCodeFile);
-  const hasStyle = normalizedFiles.some(isStyleFile);
   const hasLintable = normalizedFiles.some(isLintableFile);
   const hasPackageGovernance = normalizedFiles.some(isPackageGovernanceFile);
   const hasWorkflow = normalizedFiles.some(isWorkflowFile);
@@ -680,6 +691,7 @@ function createCiPlan(files, options = {}) {
   );
   const hasReviewbotContract = normalizedFiles.some(isReviewbotContractFile);
   const hasAgentFilesSync = normalizedFiles.some(isAgentFilesSyncFile);
+  const hasReleaseBusContract = normalizedFiles.some(isReleaseBusContractFile);
   const hasBuildSensitive = normalizedFiles.some(isBuildSensitiveFile);
   const hasDeletedRuntimeSource = normalizedFiles.some(
     (file) =>
@@ -687,17 +699,30 @@ function createCiPlan(files, options = {}) {
       !isTestOrTestSupportFile(file) &&
       !changedFileExists(file, options.cwd)
   );
-  const hasRuntimeEvidenceNeed =
-    riskFloor >= 2 || risk.route_impacts.length > 0 || hasStyle;
-  const hasCriticalShellEvidenceNeed =
-    riskFloor >= 3 || hasBuildSensitive || hasDeletedRuntimeSource;
+  const hasDeadcodeNeed =
+    hasPackageGovernance ||
+    hasDeletedRuntimeSource ||
+    normalizedFiles.includes("knip.jsonc");
+  const hasTestTypecheckNeed =
+    hasPlaywrightOrTests ||
+    hasPackageGovernance ||
+    normalizedFiles.some((file) =>
+      [
+        "jest.config.js",
+        "tsconfig.jest.json",
+        "tsconfig.playwright.json",
+      ].includes(file)
+    );
   const needsInstall =
     hasLintable ||
     hasPackageGovernance ||
     hasPlaywrightOrTests ||
-    hasRuntimeEvidenceNeed ||
     hasBuildSensitive ||
-    hasAgentFilesSync;
+    hasAgentFilesSync ||
+    hasDeadcodeNeed ||
+    hasTestTypecheckNeed ||
+    hasReleaseBusContract ||
+    hasReviewbotContract;
 
   return {
     schema_version: CI_PLAN_SCHEMA_VERSION,
@@ -725,6 +750,18 @@ function createCiPlan(files, options = {}) {
         hasPackageGovernance
           ? "Package manager or dependency policy files changed."
           : "No package governance files changed."
+      ),
+      deadcode: check(
+        hasDeadcodeNeed,
+        hasDeadcodeNeed
+          ? "Dependency policy, Knip configuration, or deleted runtime source needs dead-code analysis."
+          : "No dependency policy, Knip configuration, or deleted runtime source changed."
+      ),
+      release_bus_contract: check(
+        hasReleaseBusContract,
+        hasReleaseBusContract
+          ? "Release, deployment, workflow, or E2E policy files changed and need the Release Bus contract suite."
+          : "No Release Bus or deployment policy files changed."
       ),
       reviewbot_contract: check(
         hasReviewbotContract,
@@ -757,10 +794,10 @@ function createCiPlan(files, options = {}) {
           : "No source files changed."
       ),
       test_typecheck: check(
-        needsInstall,
-        needsInstall
-          ? "Installed PR CI runs the Jest diagnostic ratchet plus Playwright/helper typechecking."
-          : "No installed test typecheck needed for docs-only changes."
+        hasTestTypecheckNeed,
+        hasTestTypecheckNeed
+          ? "Changed test code, test configuration, or dependency policy needs the Jest diagnostic ratchet plus Playwright/helper typechecking."
+          : "No test code, test configuration, or dependency policy changed."
       ),
       jest_changed: check(
         hasPlaywrightOrTests || riskFloor >= 2,
@@ -773,18 +810,6 @@ function createCiPlan(files, options = {}) {
         riskFloor >= 3 || hasBuildSensitive || hasDeletedRuntimeSource
           ? "Guarded, build-sensitive, or deleted runtime source changes need a production build."
           : "Build is deferred for fast or ordinary non-build-sensitive changes."
-      ),
-      playwright_smoke: check(
-        hasRuntimeEvidenceNeed,
-        hasRuntimeEvidenceNeed
-          ? "Standard-risk UI, route, or style changes need a small browser smoke pack."
-          : "No route, runtime UI, or style smoke needed."
-      ),
-      playwright_critical_shell: check(
-        hasCriticalShellEvidenceNeed,
-        hasCriticalShellEvidenceNeed
-          ? "Guarded, build-sensitive, or deleted runtime source changes need critical route-shell browser evidence."
-          : "No guarded or build-sensitive route-shell browser evidence needed."
       ),
     },
     security: {
@@ -928,10 +953,7 @@ function workflowSecurityFindingsForText(text, filePath) {
     text.replace(/\r\n?|\n/g, "\n").trimEnd() ===
       TRUSTED_PUBLIC_REVIEW_WORKFLOW;
 
-  if (
-    hasPullRequestTargetTrigger &&
-    !isExactTrustedPublicReviewWorkflow
-  ) {
+  if (hasPullRequestTargetTrigger && !isExactTrustedPublicReviewWorkflow) {
     findings.push({
       file: displayPath(filePath),
       pattern: "pull_request_target",

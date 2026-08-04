@@ -30,6 +30,7 @@ const FILE_PATHS = Object.freeze([
   ".github/workflows/release-bus-v2-preflight.yml",
   ".github/workflows/staging-e2e.yml",
   "__tests__/scripts/dependency-risk-gate.test.ts",
+  "__tests__/scripts/deploy-staging-artifact.test.ts",
   "__tests__/scripts/deployment-bus.test.ts",
   "__tests__/scripts/e2e-packs.test.ts",
   "__tests__/scripts/lint-package-json.test.ts",
@@ -60,6 +61,7 @@ const FILE_PATHS = Object.freeze([
   "next.config.ts",
   "ops/deployment-bus/manifest.v1.schema.json",
   "ops/deployment-bus/release-bus-performance-contract.v1.json",
+  "ops/scripts/deploy-staging-artifact.sh",
   "ops/scripts/deployment-bus.cjs",
   "ops/scripts/release-bus-status.mjs",
   "ops/scripts/release-bus-status.test.ts",
@@ -100,6 +102,7 @@ const PACKAGE_SCRIPT_KEYS = Object.freeze([
   "agent-files:sync",
   "base-build",
   "build",
+  "build:ci",
   "build:env-schema",
   "deadcode:knip",
   "dependency:risk-gate",
@@ -186,6 +189,7 @@ const PACKAGE_FIELD_KEYS = Object.freeze([
 const RUNTIME_PINS = Object.freeze({ node: "22.17.1" });
 const NODE_PIN_WORKFLOWS = Object.freeze([
   ".github/workflows/app-pr-ci.yml",
+  ".github/workflows/deploy-staging.yml",
   ".github/workflows/production-e2e.yml",
   ".github/workflows/release-bus-v2-preflight.yml",
   ".github/workflows/staging-e2e.yml",

@@ -297,9 +297,10 @@ describe("frontend manual deployment routing guards", () => {
     expect(staging.on.workflow_dispatch).toBeDefined();
     expect(production.on.push).toBeUndefined();
     expect(production.on.workflow_dispatch).toBeDefined();
-    expect(workflowJob(staging, "deploy-staging").needs).toBe(
-      "manual-deployment-guard"
-    );
+    expect(workflowJob(staging, "deploy-staging").needs).toEqual([
+      "manual-deployment-guard",
+      "build-staging-artifact",
+    ]);
   });
 
   it("pins manual staging deployment to the SHA authorized by its guard", () => {

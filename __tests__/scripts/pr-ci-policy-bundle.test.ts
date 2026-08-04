@@ -265,6 +265,7 @@ describe("pr-ci-policy-bundle-v1", () => {
         ".github/workflows/release-bus-deploy-production.yml",
         ".github/workflows/staging-e2e.yml",
         ".github/workflows/production-e2e.yml",
+        "__tests__/scripts/deploy-staging-artifact.test.ts",
         "__tests__/scripts/manual-deploy-routing-guard.test.ts",
         "__tests__/scripts/release-bus-v2-advance-staging-ref-workflow.test.ts",
         "bin/6529",
@@ -273,6 +274,7 @@ describe("pr-ci-policy-bundle-v1", () => {
         "eslint.config.single.mjs",
         "eslint.config.tight.mjs",
         "ops/scripts/testing-strategy.cjs",
+        "ops/scripts/deploy-staging-artifact.sh",
         "ops/scripts/verify-deployment-version.cjs",
         "scripts/e2e-packs.cjs",
         "scripts/notify-ci-wave.mjs",
@@ -289,6 +291,7 @@ describe("pr-ci-policy-bundle-v1", () => {
     expect(PACKAGE_SCRIPT_KEYS).toEqual(
       expect.arrayContaining([
         "build",
+        "build:ci",
         "lint:changed",
         "typecheck:changed",
         "typecheck:tests",
