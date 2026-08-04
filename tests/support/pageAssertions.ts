@@ -6,6 +6,7 @@ import {
 } from "./artifactRedaction";
 export {
   assertNoConsoleErrors,
+  assertNoFailedResponses,
   assertNoPageErrors,
   type PageDiagnostics,
 } from "./consoleDiagnostics";

@@ -168,3 +168,8 @@
   tests; changed lint and typecheck (1,264 files); the portable diff check; and
   an exact optimized production build in 425.2 seconds. No manuscript, source
   identity, visible copy, layout, or styling changed.
+- Follow-up review correctly observed that collected 5xx responses were only
+  appended to a console-error failure. The Museum acceptance pack now fails on
+  every captured 5xx even when the browser emits no console message. All four
+  internal routes on Stories & Research also opt out of speculative prefetch,
+  and route-level tests preserve the boundary beyond the shared-shell test.

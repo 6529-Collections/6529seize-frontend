@@ -37,7 +37,8 @@
   Final desktop and mobile captures cover the study, long-name profile, source
   register, and the mobile Stories & Research directory at their layout
   extremes.
-- Staging qualification: composition `6d3ceba25b2d`, deploy run `30883469768`,
+- Staging qualification: composition
+  `6d3ceba25b2dccf258f62adcff511516e0b37fea`, deploy run `30883469768`,
   automatic E2E run `30884413504`, and independent Museum 32/32 all passed.
 - Production deployment: run `30885146909`; runtime and announced version both
   read exact `655b5408b68b` with `stale:false`; rendered desktop/mobile review

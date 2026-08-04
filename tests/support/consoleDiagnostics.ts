@@ -45,6 +45,17 @@ export function assertNoPageErrors(diagnostics: PageDiagnostics) {
   );
 }
 
+export function assertNoFailedResponses(diagnostics: PageDiagnostics) {
+  const failedResponses = diagnostics.failedResponses ?? [];
+  if (failedResponses.length === 0) {
+    return;
+  }
+
+  throw new Error(
+    `Unexpected browser 5xx response(s):\n${failedResponses.join("\n")}`
+  );
+}
+
 export function assertNoConsoleErrors(
   diagnostics: PageDiagnostics,
   options: ConsoleErrorOptions = {}

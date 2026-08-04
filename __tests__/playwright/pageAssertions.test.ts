@@ -1,5 +1,6 @@
 import {
   assertNoConsoleErrors,
+  assertNoFailedResponses,
   type PageDiagnostics,
 } from "../../tests/support/consoleDiagnostics";
 
@@ -58,6 +59,18 @@ describe("Playwright page assertions", () => {
 
     expect(() => assertNoConsoleErrors(result)).toThrow(
       "502 GET https://telemetry.example/metrics"
+    );
+  });
+
+  it("fails on a silent 5xx response", () => {
+    const result: PageDiagnostics = {
+      consoleErrors: [],
+      failedResponses: ["502 GET https://6529.io/museum/network/collection"],
+      pageErrors: [],
+    };
+
+    expect(() => assertNoFailedResponses(result)).toThrow(
+      "502 GET https://6529.io/museum/network/collection"
     );
   });
 
