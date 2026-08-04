@@ -174,7 +174,7 @@ describe("useNativeKeyboard", () => {
     }
   });
 
-  it("keeps the native iOS inset authoritative after did-show", async () => {
+  it("keeps native iOS geometry authoritative through the hide lifecycle", async () => {
     const originalInnerHeight = globalThis.innerHeight;
     const originalVisualViewport = globalThis.visualViewport;
     const originalRequestAnimationFrame = window.requestAnimationFrame;
@@ -239,6 +239,25 @@ describe("useNativeKeyboard", () => {
           "--native-keyboard-inset-bottom"
         )
       ).toBe("336px");
+
+      act(() => {
+        listeners["keyboardWillHide"]?.();
+      });
+
+      visualViewportHeight = 500;
+
+      act(() => {
+        visualViewport.dispatchEvent(new Event("resize"));
+      });
+
+      expect(result.current.isVisible).toBe(false);
+      expect(result.current.phase).toBe("hiding");
+      expect(result.current.keyboardHeight).toBe(0);
+      expect(
+        document.documentElement.style.getPropertyValue(
+          "--native-keyboard-inset-bottom"
+        )
+      ).toBe("0px");
     } finally {
       Object.defineProperty(globalThis, "innerHeight", {
         configurable: true,
@@ -253,7 +272,7 @@ describe("useNativeKeyboard", () => {
     }
   });
 
-  it("updates immediately on iOS keyboard will-hide and reconciles on did-hide", async () => {
+  it("publishes the complete closed layout on will-hide", async () => {
     const { result } = await renderNativeKeyboardHook();
 
     act(() => {
@@ -266,7 +285,7 @@ describe("useNativeKeyboard", () => {
       listeners["keyboardWillHide"]?.();
     });
 
-    expect(result.current.isVisible).toBe(true);
+    expect(result.current.isVisible).toBe(false);
     expect(result.current.keyboardHeight).toBe(0);
     expect(result.current.phase).toBe("hiding");
     expect(
@@ -274,7 +293,9 @@ describe("useNativeKeyboard", () => {
         "--native-keyboard-inset-bottom"
       )
     ).toBe("0px");
-    expect(document.documentElement.dataset.nativeKeyboardVisible).toBe("true");
+    expect(document.documentElement.dataset.nativeKeyboardVisible).toBe(
+      undefined
+    );
 
     act(() => {
       listeners["keyboardDidHide"]?.();
@@ -286,6 +307,116 @@ describe("useNativeKeyboard", () => {
     expect(document.documentElement.dataset.nativeKeyboardVisible).toBe(
       undefined
     );
+  });
+
+  it("disables keyboard layout transitions for reduced motion", async () => {
+    const originalMatchMedia = globalThis.matchMedia;
+    Object.defineProperty(globalThis, "matchMedia", {
+      configurable: true,
+      value: jest.fn().mockReturnValue({ matches: true }),
+    });
+
+    try {
+      await renderNativeKeyboardHook();
+
+      act(() => {
+        listeners["keyboardWillShow"]?.({ keyboardHeight: 320 });
+      });
+
+      expect(
+        document.documentElement.style.getPropertyValue(
+          "--native-keyboard-layout-transition-duration"
+        )
+      ).toBe("0ms");
+
+      act(() => {
+        listeners["keyboardWillHide"]?.();
+      });
+
+      expect(
+        document.documentElement.style.getPropertyValue(
+          "--native-keyboard-layout-transition-duration"
+        )
+      ).toBe("0ms");
+    } finally {
+      Object.defineProperty(globalThis, "matchMedia", {
+        configurable: true,
+        value: originalMatchMedia,
+      });
+    }
+  });
+
+  it("finishes hiding from the focus fallback when did-hide is missing", async () => {
+    const { result } = await renderNativeKeyboardHook();
+    jest.useFakeTimers();
+
+    try {
+      act(() => {
+        listeners["keyboardWillShow"]?.({ keyboardHeight: 320 });
+        listeners["keyboardWillHide"]?.();
+        document.dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
+      });
+
+      expect(result.current.phase).toBe("hiding");
+
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+
+      expect(result.current.isVisible).toBe(false);
+      expect(result.current.keyboardHeight).toBe(0);
+      expect(result.current.phase).toBe("hidden");
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("finishes hiding from the native fallback when later hide events are missing", async () => {
+    const { result } = await renderNativeKeyboardHook();
+    jest.useFakeTimers();
+
+    try {
+      act(() => {
+        listeners["keyboardWillShow"]?.({ keyboardHeight: 320 });
+        listeners["keyboardWillHide"]?.();
+      });
+
+      expect(result.current.phase).toBe("hiding");
+
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+
+      expect(result.current.isVisible).toBe(false);
+      expect(result.current.keyboardHeight).toBe(0);
+      expect(result.current.phase).toBe("hidden");
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("keeps a rapid reopen visible after a pending hide fallback", async () => {
+    const { result } = await renderNativeKeyboardHook();
+    jest.useFakeTimers();
+
+    try {
+      act(() => {
+        listeners["keyboardWillShow"]?.({ keyboardHeight: 320 });
+        listeners["keyboardWillHide"]?.();
+        document.dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
+        listeners["keyboardWillShow"]?.({ keyboardHeight: 300 });
+      });
+
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+
+      expect(result.current.isVisible).toBe(true);
+      expect(result.current.keyboardHeight).toBe(300);
+      expect(result.current.phase).toBe("showing");
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("supports Android without iOS accessory bar calls", async () => {
