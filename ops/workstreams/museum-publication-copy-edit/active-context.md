@@ -27,8 +27,18 @@
 - The Museum frontend rebased cleanly onto that head. Seventy-five bounded
   Museum suites, the live exact-source probe, changed lint/typecheck, debt
   ratchet, formatting, help sync, diff integrity, and React Doctor 100/100 are
-  green. The complete optimized production build is also green. Frontend
-  review and release remain active.
+  green. The complete optimized production build is also green.
+- Frontend PR #3567 merged as
+  `7132db738d4235b49b5c52512e78529b2bfd2519`. Staging deployment run
+  `30866516284`, automatic staging E2E run `30867368339`, and production
+  deployment run `30867768961` all passed.
+- Production serves and announces exact frontend SHA
+  `7132db738d4235b49b5c52512e78529b2bfd2519` with `stale:false`.
+- The completed production release manifest is `ready`, with no holds or
+  warnings. It is retained at
+  `s3://6529reviewbot-prod-artifacts/frontend-deployment/fe-production-20260804T010754Z-7132db738d42/release-closeout/20260804T020200Z/deployment-bus-manifest.json`
+  with SHA-256
+  `dfc3ce89cb592ce682074d52ef56b3d5046bff2e1ed022ca7b50b272a2fa5c95`.
 
 ## Decisions
 
@@ -47,6 +57,5 @@
 
 ## Next work
 
-1. Complete frontend PR review and merge.
-2. Qualify the exact merge on staging, release it to production, and complete a
-   live copy-desk sweep.
+- This workstream is complete. The institutional benchmark and scholarship
+  research requested after release belongs in a separate Museum workstream.
