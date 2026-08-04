@@ -874,7 +874,6 @@
     "__tests__/services/websocket/useWebSocketHealth.test.ts": 21,
     "__tests__/services/websocket/WebSocketProvider.test.tsx": 39,
     "__tests__/standalone/StandaloneTheMemesMintPageClient.test.tsx": 1,
-    "__tests__/useWaveRealtimeUpdater.test.ts": 1,
     "__tests__/utils/appkit-initialization.utils.test.ts": 1,
     "__tests__/utils/editDropTestUtils.tsx": 1,
     "__tests__/utils/sentry-client-filters.test.ts": 1,

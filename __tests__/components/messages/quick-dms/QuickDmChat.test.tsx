@@ -51,7 +51,7 @@ const createChat = () => (
   <QuickDmChat
     hasUnreadOutsideCurrentChat={false}
     listWave={{ id: "wave-1" } as any}
-    locale="en"
+    locale="en-US"
     onBack={jest.fn()}
     onClose={jest.fn()}
     onOpenAll={jest.fn()}

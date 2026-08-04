@@ -167,7 +167,7 @@ describe("useWaveRealtimeUpdater", () => {
     );
     await flushPromises();
 
-    const insertedDrop = props.updateData.mock.calls[0][0].drops[0];
+    const insertedDrop = props.updateData.mock.calls[0]![0].drops[0]!;
     expect(insertedDrop.serial_no).toBe(6831);
     expect(typeof insertedDrop.serial_no).toBe("number");
   });
@@ -665,7 +665,7 @@ describe("useWaveRealtimeUpdater", () => {
         wave: { id: "wave1" },
         author: {},
         context_profile_context: null,
-      });
+      } as ApiDrop);
     });
     await act(async () => processing);
 
