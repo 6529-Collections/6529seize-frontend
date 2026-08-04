@@ -10,7 +10,10 @@ import {
   tryCaseyArtworksFromPublication,
 } from "@/lib/museum/casey";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
-import { MUSEUM_REPOSITORY_URL } from "@/lib/museum/types";
+import {
+  MUSEUM_REPOSITORY_URL,
+  MUSEUM_SAFE_ETHERSCAN_URL,
+} from "@/lib/museum/types";
 
 const PRIMARY_LINK_CLASS =
   "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-600 tw-px-4 tw-text-sm tw-font-semibold tw-text-white tw-no-underline hover:tw-border-primary-400 hover:tw-bg-primary-500 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black";
@@ -61,7 +64,7 @@ function MuseumHomeHero({ artwork }: { readonly artwork: CaseyArtwork }) {
           <p className="tw-m-0 tw-mt-5 tw-text-[18px] tw-leading-[1.52] tw-text-[#c8c8c8]">
             {t(DEFAULT_LOCALE, "museum.network.home.intro")}
           </p>
-          <p className="tw-m-0 tw-mt-4 tw-text-[17px] tw-leading-[1.55] tw-text-[#8f8f8f]">
+          <p className="tw-m-0 tw-mt-4 tw-text-[17px] tw-leading-[1.55] tw-text-iron-400">
             {t(DEFAULT_LOCALE, "museum.network.home.principle")}
           </p>
           <div className="tw-mt-7 tw-flex tw-flex-wrap tw-gap-3">
@@ -319,18 +322,18 @@ function MuseumInstitution() {
 function MuseumPublicRecord() {
   return (
     <section aria-labelledby="museum-public-record-title">
-      <p
+      <h2
         id="museum-public-record-title"
         className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-iron-500"
       >
         {t(DEFAULT_LOCALE, "museum.network.home.publicRecord")}
-      </p>
+      </h2>
       <nav
-        aria-label={t(DEFAULT_LOCALE, "museum.network.home.publicRecord")}
+        aria-labelledby="museum-public-record-title"
         className="tw-mt-3 tw-flex tw-flex-wrap tw-gap-x-6 tw-gap-y-1"
       >
         <a
-          href="https://etherscan.io/address/0xbECfa2bA5a782D11E1a0e821E8F2e30b6684178c"
+          href={MUSEUM_SAFE_ETHERSCAN_URL}
           target="_blank"
           rel="noopener noreferrer"
           className={TEXT_LINK_CLASS}

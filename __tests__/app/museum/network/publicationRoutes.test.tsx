@@ -11,6 +11,7 @@ import {
   type MuseumPublication,
 } from "@/lib/museum/publication";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
+import { MUSEUM_SAFE_ETHERSCAN_URL } from "@/lib/museum/types";
 import { createCaseyFixture } from "../../../lib/museum/publication/fixture";
 
 jest.mock("@/lib/museum/publication/runtime", () => ({
@@ -141,7 +142,7 @@ describe("Museum finished publication routes", () => {
     ).toHaveAttribute("href", "/museum/network/about");
     expect(screen.getByRole("link", { name: "Museum Safe" })).toHaveAttribute(
       "href",
-      "https://etherscan.io/address/0xbECfa2bA5a782D11E1a0e821E8F2e30b6684178c"
+      MUSEUM_SAFE_ETHERSCAN_URL
     );
     expect(screen.getAllByTestId("museum-artwork-figure")).toHaveLength(7);
   });
@@ -251,6 +252,12 @@ describe("Museum finished publication routes", () => {
     ).toHaveAttribute(
       "href",
       expect.stringContaining(`/blob/${"a".repeat(40)}/policies/`)
+    );
+    expect(
+      screen.getByRole("link", { name: "Open Museum statement" })
+    ).toHaveAttribute(
+      "href",
+      expect.stringContaining(`/blob/${"a".repeat(40)}/docs/`)
     );
     expect(
       screen.getByRole("link", { name: "On-chain transition" })

@@ -26,7 +26,10 @@ export function MuseumArtworkFigure({
           artist: artistName,
           year: artwork.year,
         })
-      : `${artwork.project}, ${artwork.year}`;
+      : t(DEFAULT_LOCALE, "museum.network.artwork.projectYear", {
+          project: artwork.project,
+          year: artwork.year,
+        });
   const image = (
     <div className="tw-relative tw-aspect-square tw-w-full tw-overflow-hidden tw-bg-black">
       <Image

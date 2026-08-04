@@ -226,6 +226,7 @@
   "museum.network.home.exploreCollection": "Explore the collection",
   "museum.network.home.howItWorks": "How the Network Museum works",
   "museum.network.artwork.artistYear": "{artist}, {year}",
+  "museum.network.artwork.projectYear": "{project}, {year}",
   "museum.network.home.institutionalFacts": "How the Museum is held and governed",
   "museum.network.home.fact.held": "Held by the 6529 Network",
   "museum.network.home.fact.governed": "Governed through TDH",

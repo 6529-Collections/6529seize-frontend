@@ -3,7 +3,10 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { MuseumPublicDocument } from "@/lib/museum/publication";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication";
-import { MUSEUM_REPOSITORY_URL } from "@/lib/museum/types";
+import {
+  MUSEUM_REPOSITORY_URL,
+  MUSEUM_SAFE_ETHERSCAN_URL,
+} from "@/lib/museum/types";
 
 const TEXT_LINK_CLASS =
   "tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
@@ -359,14 +362,14 @@ export function MuseumNetworkProposition({
 
       <nav
         className="tw-mt-16 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8"
-        aria-label={t(
-          DEFAULT_LOCALE,
-          "museum.network.proposition.sources.title"
-        )}
+        aria-labelledby="museum-proposition-sources-title"
       >
-        <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-iron-500">
+        <h2
+          id="museum-proposition-sources-title"
+          className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-iron-500"
+        >
           {t(DEFAULT_LOCALE, "museum.network.proposition.sources.title")}
-        </p>
+        </h2>
         <div className="tw-mt-3 tw-flex tw-flex-wrap tw-gap-x-6 tw-gap-y-1">
           <a
             href={missionSourceUrl}
@@ -383,7 +386,7 @@ export function MuseumNetworkProposition({
             {t(DEFAULT_LOCALE, "museum.network.proposition.sources.transition")}
           </ExactDocumentLink>
           <a
-            href="https://etherscan.io/address/0xbECfa2bA5a782D11E1a0e821E8F2e30b6684178c"
+            href={MUSEUM_SAFE_ETHERSCAN_URL}
             target="_blank"
             rel="noopener noreferrer"
             className={TEXT_LINK_CLASS}
