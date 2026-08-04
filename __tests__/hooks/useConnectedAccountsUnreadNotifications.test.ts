@@ -258,6 +258,59 @@ describe("useConnectedAccountsUnreadNotifications", () => {
     );
   });
 
+  it("preserves per-account counts when the shared query signal aborts", async () => {
+    const previousCounts = {
+      "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": 4,
+      "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": 2,
+    };
+    getQueryDataMock.mockReturnValue(previousCounts);
+    commonApiFetchMock.mockImplementation(
+      ({ signal }: { readonly signal: AbortSignal }) =>
+        new Promise((_, reject) => {
+          const rejectWithAbort = () => {
+            reject(new DOMException("The operation was aborted", "AbortError"));
+          };
+          if (signal.aborted) {
+            rejectWithAbort();
+            return;
+          }
+          signal.addEventListener("abort", rejectWithAbort, { once: true });
+        })
+    );
+    useQueryMock.mockReturnValue({ data: {} });
+    const abortController = new AbortController();
+
+    renderHook(() =>
+      useConnectedAccountsUnreadNotifications([
+        {
+          address: "0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+          refreshToken: "refresh-token-a",
+          role: null,
+          jwt: "jwt-a",
+          profileId: "profile-1",
+          profileHandle: "alice",
+        },
+        {
+          address: "0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+          refreshToken: "refresh-token-b",
+          role: null,
+          jwt: "jwt-b",
+          profileId: "profile-2",
+          profileHandle: "bob",
+        },
+      ])
+    );
+
+    const queryOptions = useQueryMock.mock.calls[0]?.[0];
+    const queryPromise = queryOptions.queryFn(
+      createQueryContext(abortController.signal)
+    );
+    abortController.abort();
+
+    await expect(queryPromise).resolves.toEqual(previousCounts);
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it("blocks only the failed account until that account gets a new token", async () => {
     const accounts = [
       {
