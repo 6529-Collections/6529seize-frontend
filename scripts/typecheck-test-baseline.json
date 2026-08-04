@@ -711,7 +711,7 @@
     "__tests__/components/waves/leaderboard/time/CompactVotingPhaseCard.test.tsx": 1,
     "__tests__/components/waves/leaderboard/time/ExpandedTimelineContent.test.tsx": 1,
     "__tests__/components/waves/leaderboard/time/HorizontalTimeline.test.tsx": 1,
-    "__tests__/components/waves/leaderboard/time/TimelineToggleHeader.test.tsx": 4,
+    "__tests__/components/waves/leaderboard/time/TimelineToggleHeader.test.tsx": 3,
     "__tests__/components/waves/leaderboard/WaveleaderboardDropRaters.test.tsx": 1,
     "__tests__/components/waves/leaderboard/WaveLeaderboardEmptyState.test.tsx": 2,
     "__tests__/components/waves/leaderboard/WaveLeaderboardTime.test.tsx": 1,
