@@ -8,18 +8,16 @@ import { hasAppOwnedSourceEvidence } from "./app-frame-utils";
 import { getFramePaths, isNetworkErrorMessage } from "./value-utils";
 
 const poperBlockerInjectedFetchPath = "app:///injectScriptAdjust.js";
-// Sentry Browser uses this sentinel for anonymous functions before ingestion.
-const sentryUnknownFunctionName = "?";
 const poperBlockerInjectedFetchFrameSignatures = [
   {
     functionName: "window.fetch",
-    allowUnknownFunction: true,
+    allowMissingFunction: true,
     lineNumber: 1,
     columnNumber: 4520,
   },
   {
     functionName: "VihJ",
-    allowUnknownFunction: false,
+    allowMissingFunction: false,
     lineNumber: 1,
     columnNumber: 3159,
   },
@@ -37,10 +35,8 @@ function isExactPoperBlockerInjectedFetchFrame(
   const functionName: unknown = frame.function;
   const hasExpectedFunctionName =
     functionName === signature.functionName ||
-    (signature.allowUnknownFunction &&
-      (functionName === sentryUnknownFunctionName ||
-        functionName === undefined ||
-        functionName === null));
+    (signature.allowMissingFunction &&
+      (functionName === undefined || functionName === null));
 
   return (
     hasExpectedFunctionName &&
@@ -49,6 +45,16 @@ function isExactPoperBlockerInjectedFetchFrame(
     framePaths.length > 0 &&
     framePaths.every(isPoperBlockerInjectedFetchPath)
   );
+}
+
+function normalizeSentryUnknownPoperBlockerFunction(
+  frame: SentryStackFrame,
+  signature: (typeof poperBlockerInjectedFetchFrameSignatures)[number]
+): SentryStackFrame {
+  if (signature.allowMissingFunction && frame.function === "?") {
+    return { ...frame, function: undefined };
+  }
+  return frame;
 }
 
 function hasExactPoperBlockerInjectedFetchFramePair(
@@ -66,7 +72,10 @@ function hasExactPoperBlockerInjectedFetchFramePair(
       poperBlockerInjectedFetchFrameSignatures.length &&
     poperBlockerInjectedFetchFrameSignatures.every((signature) =>
       injectedFetchFrames.some((frame) =>
-        isExactPoperBlockerInjectedFetchFrame(frame, signature)
+        isExactPoperBlockerInjectedFetchFrame(
+          normalizeSentryUnknownPoperBlockerFunction(frame, signature),
+          signature
+        )
       )
     )
   );
