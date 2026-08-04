@@ -30,7 +30,7 @@ id "$RUN_AS" >/dev/null 2>&1 || {
   echo "Run-as user '$RUN_AS' does not exist." >&2
   exit 1
 }
-test -d "$REPO_DIR/.git" || {
+[[ -d "$REPO_DIR/.git" ]] || {
   echo "Repo directory '$REPO_DIR' is not a git checkout." >&2
   exit 1
 }
@@ -254,7 +254,7 @@ http_status="$(curl --silent --show-error --proto '=https' \
 echo "$EXPECTED_DIGEST  $artifact_tmp" | sha256sum -c -
 staging_app="$(mktemp -d "$release_dir/app.XXXXXX")"
 unzip -q "$artifact_tmp" -d "$staging_app"
-test -f "$staging_app/server.js"
+[[ -f "$staging_app/server.js" ]]
 chown -R "$RUN_AS:$RUN_AS" "$staging_app"
 rm -rf -- "$release_app"
 mv "$staging_app" "$release_app"

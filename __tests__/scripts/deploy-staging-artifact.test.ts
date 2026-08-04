@@ -31,7 +31,7 @@ describe("manual staging immutable artifact deployment", () => {
       'echo "$EXPECTED_DIGEST  $artifact_tmp" | sha256sum -c -'
     );
     expect(script).toContain('release_id="$EXPECTED_SHA-$EXPECTED_DIGEST"');
-    expect(script).toContain('test -f "$staging_app/server.js"');
+    expect(script).toContain('[[ -f "$staging_app/server.js" ]]');
     expect(script).toContain('grep -qxF "package_sha256=$EXPECTED_DIGEST"');
     expect(script).toContain(
       "Refusing to replace the active staging release after its identity check failed"
