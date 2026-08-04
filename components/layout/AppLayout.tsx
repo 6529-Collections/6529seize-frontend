@@ -218,7 +218,12 @@ function AppLayoutContent({ children }: Props) {
         </div>
       </div>
       {shouldRenderBottomNav && (
-        <BottomNavigation hidden={shouldHideBottomNav} />
+        <BottomNavigation
+          hidden={shouldHideBottomNav}
+          preserveMeasurementWhileHidden={
+            isLayoutKeyboardVisible && !shouldHideBottomNavForRoute
+          }
+        />
       )}
     </>
   );
