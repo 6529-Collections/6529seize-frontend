@@ -107,7 +107,7 @@ const LeaderboardControlsFrame: React.FC<LeaderboardControlsFrameProps> = ({
       // Cover the full scroll viewport while the controls share a flex row.
       <span
         aria-hidden="true"
-        className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-0 tw-bg-black tw-shadow-[0_0_0_100vmax_#000] tw-[clip-path:inset(0_-100vmax)]"
+        className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-z-0 tw-w-[100cqw] tw-bg-black"
       />
     )}
     <div className="tw-relative tw-z-10">{children}</div>
@@ -509,7 +509,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       <div
         className={`tw-flex tw-min-w-0 tw-flex-grow ${
           isMemesWave
-            ? "tw-flex-row tw-flex-wrap tw-items-start tw-gap-x-3"
+            ? "tw-flex-row tw-flex-wrap tw-items-start tw-gap-x-3 tw-@container/leaderboard-toolbar"
             : "tw-flex-col"
         }`}
       >
