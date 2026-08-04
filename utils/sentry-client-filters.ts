@@ -21,12 +21,14 @@ export {
   shouldFilterByFilenameExceptions,
   shouldFilterGifPickerTenorCategoriesError,
   shouldFilterInjectedWasmCspUnsafeEval,
-  shouldFilterReactDomInsertBeforeNotFoundError,
-  shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterSentryRouteParameterizationError,
   shouldFilterTwitterCurrentInsetReferenceError,
   shouldFilterTwitterConfigReferenceError,
 } from "./sentry-client-filters/errors";
+export {
+  shouldFilterReactDomInsertBeforeNotFoundError,
+  shouldFilterReactDomRemoveChildNotFoundError,
+} from "./sentry-client-filters/react-dom";
 export {
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
