@@ -131,3 +131,80 @@
   manuscript syntax.
 - Parser follow-up validation passed 33/33 route and publication tests,
   changed lint and typecheck (1,264 files), and the portable diff check.
+
+## 2026-08-04 frontend release and production hardening
+
+- Frontend PR #3569 reached exact head
+  `d14c248df11a6873940c188dac2ffffbd99587ff` with every configured quality,
+  security, DCO, review-bot, build, and 32-route browser check green. It
+  squash-merged as `655b5408b68bbdac79249f4531c196349eff7d52`.
+- Staging composition `6d3ceba25b2dccf258f62adcff511516e0b37fea`
+  preserved the existing shared staging head and added exact production main
+  as its second parent. Staging deploy run `30883469768` passed, automatic
+  staging E2E run `30884413504` passed, and the independent institutional-
+  practice pack passed all 32 desktop/mobile routes in 255.3 seconds.
+- Owning staging pixel review covered the study, Serpentine Arts Technologies,
+  the source register, and Stories & Research at 1,440 by 1,000 and exact 390
+  by 844 viewports. Source commit, headings, native shell, and page widths were
+  correct; no visual or editorial hold remained.
+- Production deploy run `30885146909` passed on exact main. Three independent
+  `/api/version` readbacks returned the same runtime and announced SHA with
+  `stale:false`. The public study and profile repeated the staging pixel,
+  source, heading, and width checks.
+- The first production pack exposed two distinct background-network failures.
+  The browser blocked Coinbase's nonessential analytics transport at
+  `cca-lite.coinbase.com`; its exact SDK diagnostic is now classified as
+  benign while every other host remains actionable. Subsequent failures were
+  first-party 502 responses from speculative Next.js RSC prefetches for Museum
+  shell routes such as Collection, Artists, and Programs. Shared assets also
+  returned isolated 502 responses during the early post-deploy interval.
+- The gate was not weakened for first-party failures. Diagnostics now retain
+  exact 5xx method and URL evidence. A 20-repeat mobile profile stress run
+  passed 20/20 and a five-endpoint watch passed 50/50, but a later full sweep
+  still caught a background Collection RSC 502. The product follow-up disables
+  speculative prefetch on the Museum shell and institutional-study links,
+  reducing needless server work while preserving ordinary navigation.
+- Follow-up local validation passed 19 focused shell, route, and diagnostic
+  tests; changed lint and typecheck (1,264 files); the portable diff check; and
+  an exact optimized production build in 425.2 seconds. No manuscript, source
+  identity, visible copy, layout, or styling changed.
+- Follow-up review correctly observed that collected 5xx responses were only
+  appended to a console-error failure. The Museum acceptance pack now fails on
+  every captured 5xx even when the browser emits no console message. All four
+  internal routes on Stories & Research also opt out of speculative prefetch,
+  and route-level tests preserve the boundary beyond the shared-shell test.
+
+## 2026-08-04 hardening release closeout
+
+- Follow-up PR #3573 reached exact signed head
+  `0118980be8829a55dd082f32b9fb707af5e13f68` on then-current main. All 13
+  configured checks passed, including the optimized production build, the
+  strict 32-route Museum browser pack, CodeQL, Snyk, Sonar, secret scan, DCO,
+  debt ratchet, public-review trust, and review bots. The sole review thread
+  was resolved. It squash-merged as
+  `88a4f19885f9ff70a1632bda7255b8091263ee86`.
+- Staging composition `bc9f46cd52e2437595a3d1131371525f9cb28b3c`
+  retained prior staging head `6d3ceba25b2dccf258f62adcff511516e0b37fea`
+  as first parent and exact merged main as second parent. One unrelated
+  notification-test conflict combined staging's DM invalidations with main's
+  no-cancel refresh behavior; its focused suite passed 6/6 before the signed
+  composition was pushed.
+- Staging deploy run `30894880378` passed. Automatic staging E2E run
+  `30896314276` passed. The independent institutional-practice pack passed
+  32/32 desktop/mobile cases with silent first-party 5xx responses treated as
+  failures. Retained 1,440-pixel study and 390-pixel Serpentine profile
+  readbacks showed the exact source SHA, native shell, expected copy, and no
+  horizontal overflow.
+- Production deploy run `30897509037` passed on exact main. Three consecutive
+  `/api/version` reads returned runtime and announced version
+  `88a4f19885f9ff70a1632bda7255b8091263ee86` with `stale:false`.
+- Live production qualification passed: the strict Museum pack 32/32; the full
+  read-only inventory 89/89; the surface matrix 28/28 applicable cases with 22
+  intentional native-project skips; and WCAG/i18n 3/3. Desktop study and mobile
+  profile pixel readbacks repeated the exact source and width checks. A final
+  five-endpoint watch passed 50/50 route reads and 10/10 exact version reads
+  over ten intervals.
+- The manual-fallback production workflow does not create a sanctioned
+  Production E2E workflow run; none is claimed. The read-only production packs
+  above are the explicit qualification evidence. No manuscript, source
+  identity, visible copy, layout, or styling changed in the hardening release.

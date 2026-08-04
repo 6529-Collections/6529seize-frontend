@@ -74,6 +74,7 @@ export default async function MuseumInstitutionProfilePage({
     <article className="tw-min-w-0">
       <Link
         href="/museum/network/stories/a-field-of-practice"
+        prefetch={false}
         className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-medium tw-text-iron-400 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
       >
         {t(DEFAULT_LOCALE, "museum.network.institutionalPractice.backToStudy")}
@@ -108,6 +109,7 @@ export default async function MuseumInstitutionProfilePage({
       >
         <Link
           href="/museum/network/stories/a-field-of-practice/sources"
+          prefetch={false}
           className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         >
           {t(
@@ -129,6 +131,7 @@ export default async function MuseumInstitutionProfilePage({
         ) : (
           <Link
             href={`/museum/network/stories/a-field-of-practice/${previousProfile.slug}`}
+            prefetch={false}
             className="tw-group tw-min-w-0 tw-py-2 tw-text-left tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           >
             <span className="tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">
@@ -145,6 +148,7 @@ export default async function MuseumInstitutionProfilePage({
         {nextProfile === undefined ? null : (
           <Link
             href={`/museum/network/stories/a-field-of-practice/${nextProfile.slug}`}
+            prefetch={false}
             className="tw-group tw-min-w-0 tw-py-2 tw-text-left tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-text-right"
           >
             <span className="tw-block tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-500">

@@ -324,6 +324,7 @@ export function InstitutionalPracticeDirectory({
         >
           <Link
             href={`${STUDY_ROUTE}/${profile.slug}`}
+            prefetch={false}
             className="hover:tw-text-primary-200 tw-grid tw-min-h-20 tw-grid-cols-[2.25rem_minmax(0,1fr)] tw-gap-x-4 tw-gap-y-1 tw-py-5 tw-text-iron-100 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-grid-cols-[3rem_minmax(16rem,0.8fr)_minmax(18rem,1.2fr)] sm:tw-items-baseline sm:tw-gap-x-6"
           >
             <span className="tw-font-mono tw-text-xs tw-text-iron-500">
