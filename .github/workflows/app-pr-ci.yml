@@ -38,6 +38,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
+          # Preserve complete history for the risk plan without transferring
+          # blobs that are reachable only from unrelated refs.
+          filter: blob:none
           fetch-depth: 0
           persist-credentials: false
 
@@ -194,6 +197,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
+          # The reviewed tree is materialized during checkout; historical
+          # blobs from unrelated refs are not needed by the installed gates.
+          filter: blob:none
           fetch-depth: 0
           persist-credentials: false
 

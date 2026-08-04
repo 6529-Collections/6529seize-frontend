@@ -17,8 +17,8 @@
   Post-merge source run `30922946613` passed the full Museum validator and the
   deterministic Ubuntu and Windows suites.
 - Frontend branch: `codex/museum-institutional-practice-v2-fe`, merged cleanly
-  onto exact frontend main `9b9e3df3be80a6f987bce9d1f31b1b2846db3424`.
-  No frontend PR has been opened for this expansion yet.
+  onto exact frontend main `d608bf6b606ded9021d1a74e873bc8c6cc129ba4`.
+  Ready frontend PR #3588 is open and under exact-head review.
 - Publication boundary: one comparative overview, twenty-seven profiles, one
   adjacent-practice study, the public scholarship and editorial standard, and
   one source register—thirty-one manuscripts from one exact source release.
@@ -43,10 +43,15 @@
   optimized production build passed in 463 seconds. The strict sequential
   desktop/mobile acceptance replay passed 70/70 routes, including all 27
   institutional profiles and all 16 Keys and Gates selected-work images.
-  Retained 1,440 x 1,000 and 390 x 844 evidence resolves exact source
+  The post-merge exact-head production build passed in 442.8 seconds. Retained
+  1,440 x 1,000 and 390 x 844 evidence resolves exact source
   `66c9eb9fa8c1...`, has no console errors or horizontal overflow, and was
-  reviewed at the top of each route. PR/bot review, staging, and production
-  qualification remain pending.
+  reviewed at the top of each route. GitHub's full-history checkout attempted
+  to transfer blobs from every ref and exhausted the ten-minute secret-scan
+  job before the scanner ran. PR #3588 now keeps complete history while using
+  `blob:none` for its three security/installed-gate checkouts; a regression
+  test and workflow-security validator preserve that boundary. PR/bot review,
+  staging, and production qualification remain pending.
 
 ## Previous qualified release
 

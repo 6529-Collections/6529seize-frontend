@@ -331,3 +331,18 @@
   no browser error. Superseded local captures were removed before staging.
 - PR review, staging qualification, and production qualification remain the
   open release actions.
+- Ready frontend PR #3588 opened at exact initial head
+  `6b33bafdf2c07840afa1d0415c7f61ad8272d5c3` on current frontend main
+  `d608bf6b606ded9021d1a74e873bc8c6cc129ba4`. The exact pushed-head optimized
+  build passed in 442.8 seconds.
+- The first Push Secret Scan did not reach the scanner: `actions/checkout`
+  transferred full history and blobs from every ref until the job's ten-minute
+  timeout canceled Git. Its report was absent and the log contained no secret
+  finding. The unchanged rerun and Installed Apps job reproduced the same
+  checkout stall.
+- The focused CI repair preserves `fetch-depth: 0` while adding the Git
+  `blob:none` partial-clone filter to the App PR plan, Installed Apps, and push
+  secret-scan checkouts. The complete reviewed tree still materializes, exact
+  history remains available, and blobs reachable only through unrelated refs
+  are no longer transferred. The 58-case testing-strategy suite, explicit
+  workflow-security validator, formatter, ESLint, and portable diff check pass.
