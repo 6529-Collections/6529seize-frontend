@@ -42,3 +42,14 @@
   merged conflict-free. The exact combined signed tree passed 200 focused
   tests, lint, application/test typechecking, both ratchets, manifest and
   whitespace checks, then a fresh optimized production build in 371.1 seconds.
+- PR #3593 first exact-head App run `30955954466` selected quality, build,
+  smoke, and critical-shell lanes concurrently and omitted Museum. The quality
+  lane failed in 95 seconds on two stale public-review tests that still looked
+  for production packaging inside the now promotion-only deploy workflow;
+  fail-fast cancelled the three siblings before expensive work.
+- Corrected those assertions to bind the dedicated production prebuild. Review
+  hardening extends the staging presign to 5,400 seconds, unsets the decoded
+  destination input in the exit trap, removes an incomplete destination file,
+  and explicitly proves E2E packs/manifests run after the exact deployed-SHA
+  checkout. Ruleset `18018081` confirms branch protection requires the stable
+  `Installed app checks` aggregate.

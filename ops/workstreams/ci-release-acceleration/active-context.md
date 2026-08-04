@@ -28,3 +28,15 @@
   deploy/E2E, production prebuild readback, production promotion, automatic
   production E2E, retained endpoint/version sweep, and measured before/after
   update.
+- Ready PR #3593 opened at exact signed/signed-off head `9481d5e3...`. Its
+  first hosted plan selected four parallel lanes and correctly omitted the
+  Museum lane. The quality lane exposed two stale public-review artifact
+  assertions that still expected production packaging inside the deploy
+  workflow; sibling lanes were cancelled by fail-fast before long work. The
+  assertions now follow the dedicated production prebuild. Review hardening
+  also gives the staging presigned URL a 90-minute lifetime over the bounded
+  40-minute SSM wait, clears the decoded destination input on every exit,
+  removes an incomplete destination file, and records that all pack code and
+  manifests execute from the exact deployed-SHA checkout. Repository ruleset
+  `18018081` already requires the stable aggregate `Installed app checks`, not
+  a matrix child name.

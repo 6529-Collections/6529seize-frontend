@@ -299,6 +299,9 @@ jobs:
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
 
       - name: Check out immutable Release Bus tooling
+        # This sparse helper is trusted orchestration from the dispatch ref.
+        # The application, tests, pack manifest, and dependency lock remain in
+        # the workspace checkout above at the exact deployed SHA.
         timeout-minutes: 2
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:

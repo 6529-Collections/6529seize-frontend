@@ -488,7 +488,7 @@ jobs:
             --metadata "sha256=${PACKAGE_DIGEST},source-sha=${EXPECTED_SHA}"
           url="$(aws s3 presign "s3://${ARTIFACT_BUCKET}/${object_key}" \
             --region "$ARTIFACT_BUCKET_REGION" \
-            --expires-in 2400)"
+            --expires-in 5400)"
           echo "object-key=$object_key" >> "$GITHUB_OUTPUT"
           echo "url=$url" >> "$GITHUB_OUTPUT"
 

@@ -81,6 +81,8 @@ function applyEffectiveAppPrCiPlan(plan, { cwd = process.cwd() } = {}) {
   const packageGovernance = files.some((file) =>
     PACKAGE_GOVERNANCE_FILES.has(file)
   );
+  // The caller runs this planner from the exact PR merge-tree checkout;
+  // absence therefore identifies a deleted runtime source, not a sparse tree.
   const deletedRuntimeSource = files.some(
     (file) =>
       SOURCE_EXTENSION.test(file) &&

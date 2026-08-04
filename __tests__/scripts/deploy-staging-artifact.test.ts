@@ -47,6 +47,15 @@ describe("manual staging immutable artifact deployment", () => {
     expect(script).toContain(
       'install -m 600 -o "$RUN_AS" -g "$RUN_AS" /dev/null "$destinations_file"'
     );
+    expect(script).toContain(
+      "unset review_destinations PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64"
+    );
+    expect(script).toContain(
+      '[[ "$retain_destinations_file" != true && -n "$destinations_file" ]]'
+    );
+    expect(script.indexOf("retain_destinations_file=true")).toBeGreaterThan(
+      script.indexOf('chown "$RUN_AS:$RUN_AS" "$destinations_file"')
+    );
     expect(script).toContain('wait_for_local_version "$EXPECTED_SHA"');
     expect(script.match(/if ! rollback_process; then/g)).toHaveLength(3);
     expect(script).toContain("legacy) restore_legacy_process");
@@ -92,7 +101,7 @@ describe("manual staging immutable artifact deployment", () => {
     );
     expect(sendStep.run).not.toContain("install:frozen");
     expect(sendStep.run).not.toContain("./bin/6529 run build");
-    expect(workflowSource).toContain("--expires-in 2400");
+    expect(workflowSource).toContain("--expires-in 5400");
     expect(workflowSource).toContain("Staging artifact cleanup warning");
     expect(workflowSource).toContain("public/help-index.json");
   });

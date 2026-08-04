@@ -122,6 +122,10 @@ jobs:
             --data "$payload" \
             "$RELEASE_BUS_API_URL/deploy/release-bus-v2/authorize"
       - name: Check out exact production SHA
+        # workflow_dispatch itself is trusted orchestration from the selected
+        # default-branch ref. All pack code, the pack manifest, dependencies,
+        # and evidence below come from this independently read-back deployed
+        # SHA, so a later main advance cannot change the tested inventory.
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: ${{ inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha }}

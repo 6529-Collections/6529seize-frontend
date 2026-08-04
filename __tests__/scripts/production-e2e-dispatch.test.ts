@@ -46,6 +46,14 @@ describe("automatic production E2E dispatch", () => {
       (step: { name?: string }) =>
         step.name === "Validate exact production E2E evidence"
     );
+    const checkoutIndex = job.steps.findIndex(
+      (step: { name?: string }) =>
+        step.name === "Check out exact production SHA"
+    );
+    const packsIndex = job.steps.findIndex(
+      (step: { name?: string }) =>
+        step.name === "Run production-safe read-only packs"
+    );
 
     expect(
       e2e.on.workflow_dispatch.inputs.automatic_deploy_run_id.required
@@ -59,6 +67,10 @@ describe("automatic production E2E dispatch", () => {
     expect(e2eSource).toContain(
       "inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha"
     );
+    expect(job.steps[checkoutIndex].with.ref).toBe(
+      "${{ inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha }}"
+    );
+    expect(packsIndex).toBeGreaterThan(checkoutIndex);
     expect(evidence.run).toContain(".release_binding == null");
     expect(e2eSource).toContain("args+=(--parallel 3)");
     expect(e2eSource).toContain("Restore Playwright browser");
