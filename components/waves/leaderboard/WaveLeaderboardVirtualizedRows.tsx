@@ -47,9 +47,6 @@ const getEstimatedRowHeight = (layout: LeaderboardVirtualLayout): number => {
   return 520;
 };
 
-const getRowGapClassName = (layout: LeaderboardVirtualLayout): string =>
-  layout === "gallery" ? "tw-pb-8" : "tw-pb-4";
-
 const getGridColumnsClassName = (columns: LeaderboardColumnCount): string => {
   if (columns === 3) {
     return "tw-grid-cols-3";
@@ -458,7 +455,6 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
   ]);
 
   const ariaSetSize = hasNextPage || hasPreviousPage ? -1 : items.length;
-  const rowGapClassName = getRowGapClassName(layout);
   const gridColumnsClassName = getGridColumnsClassName(columns);
 
   return (
@@ -500,9 +496,12 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
               key={virtualRow.key}
               ref={hasLoadedItem ? virtualizer.measureElement : undefined}
               data-index={virtualRow.index}
-              className={`tw-absolute tw-left-0 tw-top-0 tw-grid tw-w-full tw-min-w-0 tw-gap-4 ${gridColumnsClassName} ${rowGapClassName}`}
+              className={`tw-absolute tw-left-0 tw-top-0 tw-grid tw-w-full tw-min-w-0 tw-gap-4 tw-pb-4 ${gridColumnsClassName}`}
               style={{
-                minHeight: virtualRow.size,
+                minHeight:
+                  layout === "gallery" && hasLoadedItem
+                    ? undefined
+                    : virtualRow.size,
                 transform: `translateY(${virtualRow.start - scrollMargin}px)`,
               }}
             >
