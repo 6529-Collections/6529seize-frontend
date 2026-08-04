@@ -11,6 +11,7 @@ const {
   executeProduction,
   executeRemoveFromStaging,
   executeStaging,
+  mergeProductionRequests,
   statusContext,
   stopContext,
   waitForWorkflow,
@@ -23,6 +24,9 @@ const {
   queuedRequestDescription,
   stopRequested,
 } = require("../../ops/scripts/deploy-hub-operation-workflows.cjs");
+const {
+  assertProductionPreflight,
+} = require("../../ops/scripts/deploy-hub-operation-contracts.cjs");
 const {
   addRequests,
   commitMessage,
@@ -145,6 +149,21 @@ describe("Deploy Hub live workflow contracts", () => {
       expect(steps[0].run).toContain("manual-deployment-readiness");
     }
   );
+
+  it("keeps the canonical production deploy pinned while main advances", () => {
+    const production = workflow("build-upload-deploy-prod.yml");
+    expect(production.on.workflow_dispatch.inputs.allow_rollback).toEqual(
+      expect.objectContaining({ default: false, type: "boolean" })
+    );
+    const preflight = production.jobs["build-upload-deploy"].steps.find(
+      ({ name }: { name?: string }) =>
+        name === "Confirm frozen production candidate remains safe"
+    );
+    expect(preflight.run).toContain("--current-production-sha");
+    expect(preflight.run).toContain("--allow-rollback");
+    expect(preflight.run).toContain("git ls-remote");
+    expect(preflight.run).not.toContain("git fetch");
+  });
 
   it("keeps automatic staging E2E out of correlated Deploy Hub deploys", () => {
     const staging = workflow("staging-e2e.yml");
@@ -397,6 +416,95 @@ describe("Deploy Hub operation clients", () => {
     const result = await github.getCombinedStatus(SHA_A);
     expect(result.statuses).toHaveLength(101);
     expect(String(fetchImpl.mock.calls[1][0])).toContain("page=2");
+  });
+});
+
+describe("Deploy Hub production gates", () => {
+  it("requires the installed App PR CI check, not merely any green evidence", async () => {
+    const github = {
+      async getRef() {
+        return { object: { sha: SHA_C } };
+      },
+      async getPullRequest() {
+        return {
+          state: "open",
+          base: { ref: "main", sha: SHA_C },
+          head: { sha: SHA_A },
+          mergeable: true,
+          mergeable_state: "clean",
+        };
+      },
+      async getCheckRuns() {
+        return {
+          check_runs: [
+            {
+              name: "SonarCloud Code Analysis",
+              status: "completed",
+              conclusion: "success",
+            },
+          ],
+        };
+      },
+      async getCombinedStatus() {
+        return { statuses: [{ context: "DCO", state: "success" }] };
+      },
+    };
+
+    await expect(
+      assertProductionPreflight(github, [request("production")], "main")
+    ).rejects.toThrow(
+      "PR #123 is missing required check Installed app checks."
+    );
+  });
+
+  it("rechecks every PR against the main produced by the previous merge", async () => {
+    let mainSha = SHA_C;
+    const getPullRequest = jest.fn(async (pr: number) => ({
+      state: "open",
+      base: { ref: "main", sha: mainSha },
+      head: { sha: pr === 123 ? SHA_A : SHA_B },
+      mergeable: true,
+      mergeable_state: "clean",
+    }));
+    const getCheckRuns = jest.fn(async () => ({
+      check_runs: [
+        {
+          name: "Installed app checks",
+          status: "completed",
+          conclusion: "success",
+        },
+      ],
+    }));
+    const github = {
+      async getRef() {
+        return { object: { sha: mainSha } };
+      },
+      getPullRequest,
+      getCheckRuns,
+      async getCombinedStatus() {
+        return { statuses: [{ context: "DCO", state: "success" }] };
+      },
+      async mergePullRequest(pr: number) {
+        mainSha = pr === 123 ? SHA_D : SHA_E;
+        return { merged: true, sha: mainSha };
+      },
+    };
+
+    await expect(
+      mergeProductionRequests({
+        github,
+        requests: [
+          request("production", 123, SHA_A),
+          request("production", 124, SHA_B),
+        ],
+        operationId: "operation-1",
+        baseRef: "main",
+        runUrl: RUN_URL,
+        expectedMainSha: SHA_C,
+      })
+    ).resolves.toEqual({ conclusion: "success", mainSha: SHA_E });
+    expect(getPullRequest).toHaveBeenCalledTimes(2);
+    expect(getCheckRuns).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -936,7 +1044,11 @@ describe("Deploy Hub stop boundaries", () => {
       async getCheckRuns() {
         return {
           check_runs: [
-            { name: "App PR CI", status: "completed", conclusion: "success" },
+            {
+              name: "Installed app checks",
+              status: "completed",
+              conclusion: "success",
+            },
           ],
         };
       },
@@ -1008,7 +1120,7 @@ describe("Deploy Hub stop boundaries", () => {
         return {
           check_runs: [
             {
-              name: "App PR CI",
+              name: "Installed app checks",
               status: "completed",
               conclusion: "failure",
             },
@@ -1047,14 +1159,14 @@ describe("Deploy Hub stop boundaries", () => {
         runUrl: RUN_URL,
         github,
       })
-    ).rejects.toThrow("PR #123 check App PR CI is not successful.");
+    ).rejects.toThrow("PR #123 check Installed app checks is not successful.");
     expect(mergePullRequest).not.toHaveBeenCalled();
   });
 
   it("settles an issued production flow before honoring Stop", async () => {
     const statuses: Array<Record<string, unknown>> = [];
     let stop = false;
-    let refReads = 0;
+    let currentMainSha = SHA_B;
     const correlation = "dh-67890r1-c1-production-a1";
     const github = {
       async getWorkflowRun() {
@@ -1093,7 +1205,11 @@ describe("Deploy Hub stop boundaries", () => {
       async getCheckRuns() {
         return {
           check_runs: [
-            { name: "App PR CI", status: "completed", conclusion: "success" },
+            {
+              name: "Installed app checks",
+              status: "completed",
+              conclusion: "success",
+            },
           ],
         };
       },
@@ -1110,13 +1226,11 @@ describe("Deploy Hub stop boundaries", () => {
         };
       },
       async getRef() {
-        refReads += 1;
-        return {
-          object: { sha: refReads <= 3 ? SHA_B : "c".repeat(40) },
-        };
+        return { object: { sha: currentMainSha } };
       },
       async mergePullRequest() {
-        return { merged: true, sha: "c".repeat(40) };
+        currentMainSha = "c".repeat(40);
+        return { merged: true, sha: currentMainSha };
       },
       async dispatchWorkflow() {},
       async listWorkflowRuns(workflowName: string) {

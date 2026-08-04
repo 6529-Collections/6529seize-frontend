@@ -48,7 +48,9 @@ async function discoverQueuedRequests(github, repository, baseRef) {
     const match = QUEUED_REQUEST_PATTERN.exec(status?.description ?? "");
     const requestIndex = Number(match?.[1]);
     const requestCount = Number(match?.[2]);
-    const requestedAt = Date.parse(match?.[5] ?? "");
+    const operationId = match?.[4] ?? "";
+    const requestedAtIso = match?.[5] ?? "";
+    const requestedAt = Date.parse(requestedAtIso);
     const statusCreatedAt = Date.parse(status?.created_at ?? "");
     const requester = status?.creator?.login ?? "";
     if (
@@ -58,13 +60,13 @@ async function discoverQueuedRequests(github, repository, baseRef) {
       requestIndex > requestCount ||
       !Number.isFinite(requestedAt) ||
       !Number.isFinite(statusCreatedAt) ||
-      new Date(requestedAt).toISOString() !== match[5] ||
+      new Date(requestedAt).toISOString() !== requestedAtIso ||
       !/^[A-Za-z0-9-]{1,39}$/.test(requester)
     ) {
       continue;
     }
     queued.push({
-      operationId: match[4],
+      operationId,
       requestIndex,
       statusCreatedAt,
       request: {
@@ -73,20 +75,19 @@ async function discoverQueuedRequests(github, repository, baseRef) {
         sha,
         target: match[3].toLowerCase(),
         requester,
-        requested_at: match[5],
-        source_operation_id: match[4],
+        requested_at: requestedAtIso,
+        source_operation_id: operationId,
       },
     });
   }
-  return queued
-    .sort(
-      (left, right) =>
-        left.request.requested_at.localeCompare(right.request.requested_at) ||
-        left.statusCreatedAt - right.statusCreatedAt ||
-        left.operationId.localeCompare(right.operationId) ||
-        left.requestIndex - right.requestIndex
-    )
-    .map(({ request }) => request);
+  queued.sort(
+    (left, right) =>
+      left.request.requested_at.localeCompare(right.request.requested_at) ||
+      left.statusCreatedAt - right.statusCreatedAt ||
+      left.operationId.localeCompare(right.operationId) ||
+      left.requestIndex - right.requestIndex
+  );
+  return queued.map(({ request }) => request);
 }
 
 function mergeQueuedRequests(submitted, queued) {

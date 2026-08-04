@@ -6,6 +6,7 @@ const RUN_URL_PATTERN =
 const WRITE_PERMISSIONS = new Set(["admin", "maintain", "write"]);
 const PRODUCTION_PERMISSIONS = new Set(["admin", "maintain"]);
 const SUCCESSFUL_CHECK_CONCLUSIONS = new Set(["neutral", "skipped", "success"]);
+const REQUIRED_PRODUCTION_CHECKS = ["Installed app checks"];
 const SHA_PATTERN = /^[a-f0-9]{40}$/;
 
 function assert(condition, message) {
@@ -90,6 +91,12 @@ async function assertSuccessfulChecks(github, request) {
     checkRuns.length + statuses.length > 0,
     `PR #${request.pr} has no current check evidence.`
   );
+  for (const requiredName of REQUIRED_PRODUCTION_CHECKS) {
+    assert(
+      checkRuns.some(({ name }) => name === requiredName),
+      `PR #${request.pr} is missing required check ${requiredName}.`
+    );
+  }
   for (const check of checkRuns) {
     assert(
       check.status === "completed" &&
@@ -105,22 +112,35 @@ async function assertSuccessfulChecks(github, request) {
   }
 }
 
+async function assertProductionRequestPreflight(
+  github,
+  request,
+  baseRef,
+  expectedMainSha
+) {
+  const mainSha = (await github.getRef(baseRef)).object?.sha;
+  assert(mainSha === expectedMainSha, "Main moved before production merge.");
+  const [pull] = await assertExactPulls(github, [request], baseRef);
+  assert(
+    pull.base?.sha === mainSha,
+    `PR #${request.pr} was not checked against current main.`
+  );
+  assert(pull.draft !== true, `PR #${request.pr} is still a draft.`);
+  assert(
+    pull.mergeable === true && pull.mergeable_state === "clean",
+    `PR #${request.pr} is not currently ready to merge.`
+  );
+  await assertSuccessfulChecks(github, request);
+  const observedMain = (await github.getRef(baseRef)).object?.sha;
+  assert(observedMain === mainSha, "Main moved during production preflight.");
+  return mainSha;
+}
+
 async function assertProductionPreflight(github, requests, baseRef) {
   const mainSha = (await github.getRef(baseRef)).object?.sha;
   assert(SHA_PATTERN.test(mainSha ?? ""), "Current main SHA is unavailable.");
-  const pulls = await assertExactPulls(github, requests, baseRef);
-  for (const [index, request] of requests.entries()) {
-    const pull = pulls[index];
-    assert(
-      pull.base?.sha === mainSha,
-      `PR #${request.pr} was not checked against current main.`
-    );
-    assert(pull.draft !== true, `PR #${request.pr} is still a draft.`);
-    assert(
-      pull.mergeable === true && pull.mergeable_state === "clean",
-      `PR #${request.pr} is not currently ready to merge.`
-    );
-    await assertSuccessfulChecks(github, request);
+  for (const request of requests) {
+    await assertProductionRequestPreflight(github, request, baseRef, mainSha);
   }
   const observedMain = (await github.getRef(baseRef)).object?.sha;
   assert(observedMain === mainSha, "Main moved during production preflight.");
@@ -132,6 +152,7 @@ module.exports = {
   assertAuthority,
   assertExactPulls,
   assertProductionPreflight,
+  assertProductionRequestPreflight,
   assertRequestAuthorities,
   validateRuntime,
 };

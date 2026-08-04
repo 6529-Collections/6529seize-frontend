@@ -8,6 +8,11 @@ on:
         type: string
         required: false
         default: ""
+      allow_rollback:
+        description: Explicitly allow deploying behind the current production SHA
+        type: boolean
+        required: false
+        default: false
 
 run-name: ${{ inputs.deploy_hub_operation_id != '' && format('Deploy Hub {0} — production', inputs.deploy_hub_operation_id) || 'Manual production deploy' }}
 
@@ -335,15 +340,24 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Confirm main did not advance before production mutation
+      - name: Confirm frozen production candidate remains safe
+        env:
+          ALLOW_ROLLBACK: ${{ inputs.allow_rollback }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
 
-          git fetch --no-tags origin main
-          latest_main_sha="$(git rev-parse origin/main)"
+          latest_main_sha="$(git ls-remote --exit-code origin refs/heads/main | awk 'NR == 1 { print $1 }')"
+          current_production_sha="$(aws elasticbeanstalk describe-environments \
+            --application-name "${BEANSTALK_APP_NAME}" \
+            --environment-names "${BEANSTALK_ENV_NAME}" \
+            --query 'Environments[0].VersionLabel' \
+            --output text)"
           node ops/scripts/deployment-bus.cjs production-preflight \
             --file deployment-bus-manifest.json \
             --current-main-sha "$latest_main_sha" \
+            --current-production-sha "$current_production_sha" \
+            --allow-rollback "${ALLOW_ROLLBACK:-false}" \
             --remote origin \
             --branch main
 

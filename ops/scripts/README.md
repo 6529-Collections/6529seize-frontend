@@ -24,6 +24,13 @@ wrapper expects that location.
   requests survive controller concurrency through one fixed commit-status
   context, and production rechecks current GitHub merge/check truth immediately
   before mutation. No separate state service is required.
+
+The fixed `Deploy Hub Request` status is the authenticated request boundary:
+its status creator is treated as the requester and their current repository
+permission is rechecked before work begins. A queued request's
+`source_operation_id` can only preserve a Stop signal after another controller
+claims it; it grants no mutation authority and can only stop work.
+
 - `native-surface-evidence.cjs`: executable native-surface evidence
   classifier. It reports whether current Capacitor/Electron coverage is only
   browser simulation or whether package prerequisites are present.

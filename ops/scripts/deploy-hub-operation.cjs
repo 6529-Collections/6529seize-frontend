@@ -11,6 +11,7 @@ const {
 const {
   assert,
   assertProductionPreflight,
+  assertProductionRequestPreflight,
   assertRequestAuthorities,
   validateRuntime,
 } = require("./deploy-hub-operation-contracts.cjs");
@@ -75,6 +76,7 @@ async function mergeProductionRequests({
   let mainSha = (await github.getRef(baseRef)).object?.sha;
   assert(mainSha === expectedMainSha, "Main moved after production preflight.");
   for (const request of requests) {
+    await assertProductionRequestPreflight(github, request, baseRef, mainSha);
     const merged = await github.mergePullRequest(
       request.pr,
       request.sha,
@@ -409,6 +411,7 @@ module.exports = {
   executeProduction,
   executeRemoveFromStaging,
   executeStaging,
+  mergeProductionRequests,
   statusContext,
   stopContext,
   validateRuntime,

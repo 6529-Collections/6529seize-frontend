@@ -7,6 +7,7 @@ const {
   createGithubDeploymentStatus,
   createReleaseReport,
   evaluateReleaseReadiness,
+  githubCommitIsAncestor,
   heartbeatManifest,
   parseArgs,
   productionPreflight,
@@ -2088,7 +2089,7 @@ describe("deployment bus manifest", () => {
     expect(new Set(schema.properties.status.enum)).toEqual(VALID_STATUSES);
   });
 
-  it("passes production preflight when the staged candidate is still current main", () => {
+  it("passes production preflight when main advanced beyond the frozen candidate", () => {
     const manifest = buildManifest({
       environment: "production",
       productionCandidateSha: MAIN_SHA,
@@ -2096,18 +2097,23 @@ describe("deployment bus manifest", () => {
       now: "2026-06-18T12:00:00.000Z",
     });
 
+    const newerMainSha = "cccccccccccccccccccccccccccccccccccccccc";
     const result = productionPreflight(manifest, {
-      currentMainSha: MAIN_SHA,
+      currentMainSha: newerMainSha,
+      currentProductionSha: STAGING_SHA,
+      candidateInMain: true,
+      candidateAtOrAheadOfProduction: true,
       remote: "origin",
       branch: "main",
     });
 
     expect(result.ok).toBe(true);
     expect(result.errors).toEqual([]);
-    expect(result.mainSha).toBe(MAIN_SHA);
+    expect(result.mainSha).toBe(newerMainSha);
+    expect(result.productionSha).toBe(STAGING_SHA);
   });
 
-  it("fails production preflight when main advanced during a long deploy", () => {
+  it("fails production preflight when the candidate left main history", () => {
     const manifest = buildManifest({
       environment: "production",
       productionCandidateSha: MAIN_SHA,
@@ -2118,14 +2124,59 @@ describe("deployment bus manifest", () => {
 
     const result = productionPreflight(manifest, {
       currentMainSha: newerMainSha,
+      currentProductionSha: STAGING_SHA,
+      candidateInMain: false,
+      candidateAtOrAheadOfProduction: true,
       remote: "origin",
       branch: "main",
     });
 
     expect(result.ok).toBe(false);
     expect(result.errors).toContain(
-      `production candidate ${MAIN_SHA} does not match origin/main ${newerMainSha}`
+      `production candidate ${MAIN_SHA} is not in origin/main history at ${newerMainSha}`
     );
+  });
+
+  it("blocks a candidate behind current production without rollback authorization", () => {
+    const manifest = buildManifest({
+      environment: "production",
+      productionCandidateSha: MAIN_SHA,
+      productionEligible: "true",
+      now: "2026-06-18T12:00:00.000Z",
+    });
+    const currentProductionSha = "cccccccccccccccccccccccccccccccccccccccc";
+
+    const result = productionPreflight(manifest, {
+      currentMainSha: currentProductionSha,
+      currentProductionSha,
+      candidateInMain: true,
+      candidateAtOrAheadOfProduction: false,
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContain(
+      `production candidate ${MAIN_SHA} would move production backward from ${currentProductionSha}; explicit rollback authorization is required`
+    );
+  });
+
+  it("allows an explicit rollback while still requiring candidate main history", () => {
+    const manifest = buildManifest({
+      environment: "production",
+      productionCandidateSha: MAIN_SHA,
+      productionEligible: "true",
+      now: "2026-06-18T12:00:00.000Z",
+    });
+
+    const result = productionPreflight(manifest, {
+      currentMainSha: "cccccccccccccccccccccccccccccccccccccccc",
+      currentProductionSha: STAGING_SHA,
+      candidateInMain: true,
+      candidateAtOrAheadOfProduction: false,
+      allowRollback: true,
+    });
+
+    expect(result.ok).toBe(true);
+    expect(result.allowRollback).toBe(true);
   });
 
   it("requires production preflight to receive an explicit current main SHA", () => {
@@ -2137,6 +2188,8 @@ describe("deployment bus manifest", () => {
     });
 
     const result = productionPreflight(manifest, {
+      currentProductionSha: STAGING_SHA,
+      candidateAtOrAheadOfProduction: true,
       remote: "origin",
       branch: "main",
     });
@@ -2144,6 +2197,28 @@ describe("deployment bus manifest", () => {
     expect(result.ok).toBe(false);
     expect(result.errors).toContain(
       "origin/main: current main SHA is required"
+    );
+  });
+
+  it("checks commit ancestry through GitHub without fetching repository history", async () => {
+    const descendantSha = "cccccccccccccccccccccccccccccccccccccccc";
+    const fetchMock = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      text: async () =>
+        JSON.stringify({ merge_base_commit: { sha: MAIN_SHA } }),
+    }));
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+    await expect(
+      githubCommitIsAncestor(MAIN_SHA, descendantSha, {
+        GITHUB_REPOSITORY: "6529-Collections/6529seize-frontend",
+        GITHUB_TOKEN: "test-token",
+        GITHUB_API_URL: "https://api.github.test",
+      })
+    ).resolves.toBe(true);
+    expect(String(fetchMock.mock.calls[0][0])).toContain(
+      `/compare/${MAIN_SHA}...${descendantSha}`
     );
   });
 

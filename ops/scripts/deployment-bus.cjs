@@ -2383,7 +2383,9 @@ function productionPreflight(manifest, options = {}) {
   const branch = options.branch || "main";
   const remote = options.remote || "origin";
   const mainSha = options.currentMainSha;
+  const productionSha = options.currentProductionSha;
   const candidateSha = manifest.shas?.production_candidate_sha;
+  const allowRollback = parseBoolean(options.allowRollback, false);
   const validation = validateManifest(manifest);
   const errors = [...validation.errors];
 
@@ -2398,9 +2400,30 @@ function productionPreflight(manifest, options = {}) {
   } else if (!SHA_RE.test(mainSha)) {
     errors.push(`${remote}/${branch}: must be a 40-character git SHA`);
   }
-  if (mainSha && (!candidateSha || candidateSha !== mainSha)) {
+  if (!productionSha) {
+    errors.push("current production SHA is required");
+  } else if (!SHA_RE.test(productionSha)) {
+    errors.push("current production SHA must be a 40-character git SHA");
+  }
+  if (
+    mainSha &&
+    SHA_RE.test(mainSha) &&
+    candidateSha &&
+    options.candidateInMain !== true
+  ) {
     errors.push(
-      `production candidate ${candidateSha || "none"} does not match ${remote}/${branch} ${mainSha}`
+      `production candidate ${candidateSha} is not in ${remote}/${branch} history at ${mainSha}`
+    );
+  }
+  if (
+    productionSha &&
+    SHA_RE.test(productionSha) &&
+    candidateSha &&
+    !allowRollback &&
+    options.candidateAtOrAheadOfProduction !== true
+  ) {
+    errors.push(
+      `production candidate ${candidateSha} would move production backward from ${productionSha}; explicit rollback authorization is required`
     );
   }
 
@@ -2409,8 +2432,35 @@ function productionPreflight(manifest, options = {}) {
     errors,
     warnings: validation.warnings,
     mainSha,
+    productionSha,
     candidateSha,
+    allowRollback,
   };
+}
+
+async function githubCommitIsAncestor(
+  ancestorSha,
+  descendantSha,
+  env = process.env
+) {
+  if (!SHA_RE.test(ancestorSha || "")) {
+    throw new Error("Ancestor must be a 40-character git SHA");
+  }
+  if (!SHA_RE.test(descendantSha || "")) {
+    throw new Error("Descendant must be a 40-character git SHA");
+  }
+  if (ancestorSha.toLowerCase() === descendantSha.toLowerCase()) return true;
+
+  const comparison = await githubRequest(
+    "GET",
+    `/compare/${ancestorSha}...${descendantSha}`,
+    null,
+    env
+  );
+  return (
+    comparison?.merge_base_commit?.sha?.toLowerCase() ===
+    ancestorSha.toLowerCase()
+  );
 }
 
 function githubContext(env = process.env) {
@@ -2636,7 +2686,7 @@ function usage() {
   node ops/scripts/deployment-bus.cjs release-report --file <file> --output <markdown-file>
   node ops/scripts/deployment-bus.cjs heartbeat-manifest --file <file> --message <text> [--status deploying] [--phase build]
   node ops/scripts/deployment-bus.cjs record-post-deploy-watch --file <file> --status passed --observed-duration-minutes 30 --checkpoint version-match --evidence https://github.com/.../actions/runs/...
-  node ops/scripts/deployment-bus.cjs production-preflight --file <file> --current-main-sha <sha> [--remote origin] [--branch main]
+  node ops/scripts/deployment-bus.cjs production-preflight --file <file> --current-main-sha <sha> --current-production-sha <sha> [--allow-rollback true] [--remote origin] [--branch main]
   node ops/scripts/deployment-bus.cjs github-create-deployment --file <file> --ref <sha> --environment <name>
   node ops/scripts/deployment-bus.cjs github-create-status --deployment-id <id> --state in_progress
 `;
@@ -2858,10 +2908,31 @@ async function main(argv = process.argv.slice(2), env = process.env) {
         break;
       }
       case "production-preflight": {
-        const result = productionPreflight(readJson(args.file), {
+        const manifest = readJson(args.file);
+        const candidateSha = manifest.shas?.production_candidate_sha;
+        const currentMainSha = args["current-main-sha"];
+        const currentProductionSha = args["current-production-sha"];
+        const allowRollback = parseBoolean(args["allow-rollback"], false);
+        const candidateInMain = await githubCommitIsAncestor(
+          candidateSha,
+          currentMainSha,
+          env
+        );
+        const candidateAtOrAheadOfProduction = allowRollback
+          ? false
+          : await githubCommitIsAncestor(
+              currentProductionSha,
+              candidateSha,
+              env
+            );
+        const result = productionPreflight(manifest, {
           remote: args.remote,
           branch: args.branch,
-          currentMainSha: args["current-main-sha"],
+          currentMainSha,
+          currentProductionSha,
+          candidateInMain,
+          candidateAtOrAheadOfProduction,
+          allowRollback,
         });
         printValidation(result);
         if (!result.ok) {
@@ -2869,7 +2940,7 @@ async function main(argv = process.argv.slice(2), env = process.env) {
           return;
         }
         writeStdout(
-          `Production preflight passed: ${result.candidateSha} matches ${args.remote || "origin"}/${args.branch || "main"}.`
+          `Production preflight passed: ${result.candidateSha} remains in ${args.remote || "origin"}/${args.branch || "main"} history and current production is ${result.productionSha}${result.allowRollback ? " (explicit rollback authorized)" : ""}.`
         );
         break;
       }
@@ -2927,6 +2998,7 @@ module.exports = {
   createGithubDeploymentStatus,
   createReleaseReport,
   evaluateReleaseReadiness,
+  githubCommitIsAncestor,
   heartbeatManifest,
   parseArgs,
   productionPreflight,
