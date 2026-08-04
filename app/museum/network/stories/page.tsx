@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MuseumArtworkFigure } from "@/components/museum/MuseumArtworkFigure";
+import {
+  InstitutionalPracticeDirectory,
+  institutionalPracticePublicationIsComplete,
+} from "@/components/museum/InstitutionalPracticeReadingRoom";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
 import { MuseumSectionHeading } from "@/components/museum/MuseumShell";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -25,6 +29,9 @@ export default async function MuseumStoriesPage() {
     return <MuseumPublicationUnavailable />;
   }
   const publication = publicationState.publication;
+  if (!institutionalPracticePublicationIsComplete(publication)) {
+    return <MuseumPublicationUnavailable />;
+  }
   const artworks = tryCaseyArtworksFromPublication(publication);
   if (artworks === null) {
     return <MuseumPublicationUnavailable />;
@@ -93,6 +100,40 @@ export default async function MuseumStoriesPage() {
           </Link>
         </article>
       </div>
+      <section
+        className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-10"
+        aria-labelledby="institutional-practice-directory-title"
+      >
+        <div className="tw-max-w-4xl">
+          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
+            {t(DEFAULT_LOCALE, "museum.network.institutionalPractice.eyebrow")}
+          </p>
+          <h2
+            id="institutional-practice-directory-title"
+            className="tw-m-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50"
+          >
+            {publication.institutionalPractice.introduction.title}
+          </h2>
+          <p className="tw-m-0 tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-300">
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.institutionalPractice.description"
+            )}
+          </p>
+          <Link
+            href="/museum/network/stories/a-field-of-practice"
+            className="hover:tw-text-primary-200 tw-mt-5 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          >
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.institutionalPractice.readStudy"
+            )}
+          </Link>
+        </div>
+        <InstitutionalPracticeDirectory
+          practice={publication.institutionalPractice}
+        />
+      </section>
       <article className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-8">
         <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
           {t(DEFAULT_LOCALE, "museum.network.research.eyebrow")}
