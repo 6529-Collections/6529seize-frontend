@@ -5,6 +5,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import type { ApiWaveDecisionPause } from "@/generated/models/ApiWaveDecisionPause";
 import type { TimeLeft } from "@/helpers/waves/time.utils";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { CompactTimeCountdown } from "./CompactTimeCountdown";
 
 interface TimelineToggleHeaderProps {
@@ -27,6 +29,7 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
   isPaused = false,
   currentPause,
 }) => {
+  const locale = useBrowserLocale();
   const hasNextDecision = typeof nextDecisionTime === "number";
   const formattedNextDecisionDate = hasNextDecision
     ? new Date(nextDecisionTime).toLocaleDateString(undefined, {
@@ -85,6 +88,7 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
       className="tw-group tw-w-full tw-cursor-pointer tw-border-0 tw-bg-iron-950 tw-px-2.5 tw-py-2 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400/70 desktop-hover:hover:tw-bg-iron-900/70"
       onClick={() => setIsOpen(!isOpen)}
       aria-expanded={isOpen}
+      aria-label={t(locale, "waves.leaderboard.timeline.toggle")}
     >
       <span className="tw-flex tw-w-full tw-items-center tw-gap-2">
         <span

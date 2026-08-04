@@ -475,6 +475,7 @@ const WAVE_LEADERBOARD_MESSAGES = objectMessages("waves.leaderboard", {
   retryMore: "Retry loading more drops",
   loadMore: "Load more drops",
   loadingMoreButton: "Loading more…",
+  "timeline.toggle": "Toggle decision timeline",
 } as const);
 
 const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {

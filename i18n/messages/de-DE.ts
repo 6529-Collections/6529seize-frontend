@@ -451,6 +451,8 @@ export const DE_DE_MESSAGES = {
   "waves.leaderboard.retryMore": "Weitere Drops erneut laden",
   "waves.leaderboard.loadMore": "Weitere Drops laden",
   "waves.leaderboard.loadingMoreButton": "Wird geladen…",
+  "waves.leaderboard.timeline.toggle":
+    "Entscheidungszeitplan ein- oder ausblenden",
   "waves.poll.actions.viewResults": "Ergebnisse anzeigen",
   "waves.poll.actions.vote": "Abstimmen",
   "waves.poll.actions.changeVote": "Stimme ändern",

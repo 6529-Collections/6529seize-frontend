@@ -460,6 +460,8 @@ export const FR_FR_MESSAGES = {
   "waves.leaderboard.retryMore": "Réessayer de charger d’autres drops",
   "waves.leaderboard.loadMore": "Charger plus de drops",
   "waves.leaderboard.loadingMoreButton": "Chargement…",
+  "waves.leaderboard.timeline.toggle":
+    "Afficher ou masquer la chronologie des décisions",
   "waves.poll.actions.viewResults": "Voir les résultats",
   "waves.poll.actions.vote": "Voter",
   "waves.poll.actions.changeVote": "Modifier le vote",

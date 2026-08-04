@@ -46,10 +46,9 @@ describe("TimelineToggleHeader", () => {
       </SeizeSettingsProvider>
     );
     expect(screen.getByText("Decision Timeline")).toBeInTheDocument();
-    const toggle = screen.getByText(/Decision Timeline/).closest("div");
-    if (!toggle) {
-      throw new Error("Toggle container not found");
-    }
+    const toggle = screen.getByRole("button", {
+      name: "Toggle decision timeline",
+    });
     fireEvent.click(toggle);
     expect(setIsOpen).toHaveBeenCalledWith(true);
   });
