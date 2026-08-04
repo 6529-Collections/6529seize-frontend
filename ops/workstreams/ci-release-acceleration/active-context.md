@@ -40,3 +40,10 @@
   manifests execute from the exact deployed-SHA checkout. Repository ruleset
   `18018081` already requires the stable aggregate `Installed app checks`, not
   a matrix child name.
+- Hosted observation also found the separate dependency-governance workflow
+  repeating a full application typecheck and production build after required
+  App CI had already accepted both responsibilities. It now retains the
+  dependency risk classifier, Socket Firewall, frozen install, package pin
+  lint, unit tests, and label policy while using blobless history and the pnpm
+  cache. Required App CI remains the single owner of complete application
+  typechecking and production build evidence.

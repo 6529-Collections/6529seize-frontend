@@ -53,3 +53,8 @@
   and explicitly proves E2E packs/manifests run after the exact deployed-SHA
   checkout. Ruleset `18018081` confirms branch protection requires the stable
   `Installed app checks` aggregate.
+- The exact-head dependency-governance run independently repeated a full
+  typecheck and production build and spent 1m43s in full-history checkout. The
+  workflow now uses `blob:none` plus the shared pnpm cache and remains focused
+  on dependency provenance/install/pin/test policy. Required App CI owns the
+  duplicate application gates, with an explicit workflow contract test.
