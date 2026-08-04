@@ -15,6 +15,7 @@ import {
 import {
   sanitizeSentryBreadcrumb,
   sanitizeSentryEvent,
+  sanitizeSentrySpan,
   sanitizeUrlString,
 } from "@/utils/sentry-sanitizer";
 import {
@@ -464,6 +465,10 @@ Sentry.init({
 
   beforeBreadcrumb(breadcrumb) {
     return sanitizeSentryBreadcrumb(breadcrumb);
+  },
+
+  beforeSendSpan(span) {
+    return sanitizeSentrySpan(span);
   },
 
   beforeSend(event, hint) {
