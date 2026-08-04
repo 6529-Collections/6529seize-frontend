@@ -95,6 +95,7 @@ const items: NavItemData[] = [
 
 interface BottomNavigationProps {
   readonly hidden?: boolean | undefined;
+  readonly preserveMeasurementWhileHidden?: boolean | undefined;
 }
 
 const COMPACT_SCROLL_DELTA_PX = 10;
@@ -403,7 +404,12 @@ interface BottomNavigationResolvedContentProps extends BottomNavigationProps {
 
 const BottomNavigationResolvedContent: React.FC<
   BottomNavigationResolvedContentProps
-> = ({ hidden = false, pathname, routeStateKey }) => {
+> = ({
+  hidden = false,
+  preserveMeasurementWhileHidden = false,
+  pathname,
+  routeStateKey,
+}) => {
   const { registerRef } = useLayout();
   const { isApp } = useDeviceInfo();
   const { connectedProfile } = useAuth();
@@ -436,12 +442,17 @@ const BottomNavigationResolvedContent: React.FC<
   }, []);
 
   useEffect(() => {
-    registerRef("mobileNav", hidden ? null : mobileNavRef.current);
+    registerRef(
+      "mobileNav",
+      hidden && !preserveMeasurementWhileHidden ? null : mobileNavRef.current
+    );
+  }, [hidden, preserveMeasurementWhileHidden, registerRef]);
 
+  useEffect(() => {
     return () => {
       registerRef("mobileNav", null);
     };
-  }, [hidden, registerRef]);
+  }, [registerRef]);
 
   const navItems = useMemo(
     () =>
@@ -523,6 +534,7 @@ const BottomNavigationResolvedContent: React.FC<
 
 const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
   hidden = false,
+  preserveMeasurementWhileHidden = false,
 }) => {
   const pathname = usePathname();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
@@ -533,6 +545,7 @@ const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
   return (
     <BottomNavigationResolvedContent
       hidden={hidden}
+      preserveMeasurementWhileHidden={preserveMeasurementWhileHidden}
       pathname={pathname}
       routeStateKey={routeStateKey}
     />
@@ -541,13 +554,17 @@ const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
 
 const BottomNavigation: React.FC<BottomNavigationProps> = ({
   hidden = false,
+  preserveMeasurementWhileHidden = false,
 }) => (
   <div
     {...{ [MOBILE_BOTTOM_NAV_ROOT_ATTRIBUTE]: "true" }}
     className="tw-contents"
   >
     <Suspense fallback={<BottomNavigationFallback hidden={hidden} />}>
-      <BottomNavigationContent hidden={hidden} />
+      <BottomNavigationContent
+        hidden={hidden}
+        preserveMeasurementWhileHidden={preserveMeasurementWhileHidden}
+      />
     </Suspense>
   </div>
 );
