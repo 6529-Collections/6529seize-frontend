@@ -6,6 +6,7 @@ import {
   legacyCaseyPublicationAssembler,
   type MuseumPublication,
 } from "@/lib/museum/publication";
+import { parseInstitutionalPracticeHeading } from "@/lib/museum/publication/institutionalPracticeMarkdown";
 import { createCaseyFixture } from "./fixture";
 
 async function loadPublication(
@@ -73,6 +74,11 @@ describe("institutional-practice publication aggregate", () => {
           document.sourcePath === "docs/curatorial-publication-standard.md"
       )
     ).toBe(false);
+    for (const document of documents) {
+      expect(parseInstitutionalPracticeHeading(document.markdown)).toBe(
+        document.title
+      );
+    }
   });
 
   it("keeps every profile id, slug, and source path unique", () => {

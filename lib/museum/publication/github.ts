@@ -146,22 +146,30 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
       throw new Error("publication_required_documents_too_large");
     }
 
-    const documents: MuseumSourceDocument[] = [];
-    for (
-      let offset = 0;
-      offset < requiredEntries.length;
-      offset += MAX_DOCUMENT_FETCH_CONCURRENCY
-    ) {
-      const batch = requiredEntries.slice(
-        offset,
-        offset + MAX_DOCUMENT_FETCH_CONCURRENCY
-      );
-      documents.push(
-        ...(await Promise.all(
-          batch.map((entry) => this.fetchDocument(commit, entry))
-        ))
-      );
-    }
+    const documents = new Array<MuseumSourceDocument>(requiredEntries.length);
+    let nextDocumentIndex = 0;
+    const fetchNextDocument = async (): Promise<void> => {
+      while (nextDocumentIndex < requiredEntries.length) {
+        const index = nextDocumentIndex;
+        nextDocumentIndex += 1;
+        const entry = requiredEntries[index];
+        if (entry === undefined) {
+          throw new Error("publication_required_document_missing");
+        }
+        documents[index] = await this.fetchDocument(commit, entry);
+      }
+    };
+    await Promise.all(
+      Array.from(
+        {
+          length: Math.min(
+            MAX_DOCUMENT_FETCH_CONCURRENCY,
+            requiredEntries.length
+          ),
+        },
+        fetchNextDocument
+      )
+    );
     const assembledAt = this.now().toISOString();
     return this.assembler.assemble({
       identity: {

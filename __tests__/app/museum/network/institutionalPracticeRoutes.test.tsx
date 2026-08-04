@@ -384,4 +384,25 @@ describe("Museum institutional-practice reading room", () => {
 
     expect(projectInstitutionalPracticeManuscript(ambiguous)).toBeNull();
   });
+
+  it("rejects a manuscript with no research date", () => {
+    const undated = profileMarkdown("Tate").replace(
+      "- **Research cutoff:** 2026-08-04\n",
+      ""
+    );
+
+    expect(projectInstitutionalPracticeManuscript(undated)).toBeNull();
+  });
+
+  it.each(["2026-13-40", "2026-02-30"])(
+    "rejects the calendar-invalid publication date %s",
+    (date) => {
+      const invalid = profileMarkdown("Tate").replace(
+        "- **Publication date:** 2026-08-04",
+        `- **Publication date:** ${date}`
+      );
+
+      expect(projectInstitutionalPracticeManuscript(invalid)).toBeNull();
+    }
+  );
 });

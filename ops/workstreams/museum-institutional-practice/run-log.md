@@ -9,7 +9,7 @@
 - Opened Museum source PR #22 at signed head `84175969cdfb`; source CI began on
   the 230-entry candidate manifest.
 - First source review found a valid source-register reconciliation gap. The
-  correction adds the verified Centre Pompidou *Icône* record, reconciles every
+  correction adds the verified Centre Pompidou _Icône_ record, reconciles every
   public manuscript, and tightens the source-count invariant before a new
   signed source head is pushed.
 
@@ -81,3 +81,18 @@
   declarations exposed from their files. Their `export` modifiers were removed;
   the declarations, runtime graph, publication contract, copy, and pixels are
   unchanged. Fresh exact-head Knip is authoritative.
+- The general and i18n reviews identified three valid fail-closed boundaries:
+  the assembler and renderer used separate title parsers, shaped ISO dates were
+  not checked against the calendar, and display formatting bypassed the shared
+  locale helper. One exact heading parser now serves both layers; invalid dates
+  fail projection; both-absent and invalid-date cases are covered; and the
+  shared formatter renders validated dates. The document loader also uses a
+  bounded worker pool instead of windowed batches.
+- Sonar's 98 duplicated new lines were all repeated profile-contract literals
+  in `institutionalPractice.ts`. A typed local constructor now states each
+  institution once while preserving the same closed ids, paths, titles, order,
+  and runtime records.
+- Review-follow-up validation passed: 68 Museum suites / 195 tests, focused
+  publication and route validation 43/43, changed lint and typecheck (1,264
+  files), Knip with no findings, React Doctor 100/100, and the portable diff
+  check. No visitor-facing copy, layout, link, or styling changed in this pass.

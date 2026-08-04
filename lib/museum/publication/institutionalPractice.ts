@@ -7,6 +7,7 @@ import type {
   MuseumPublicDocumentKind,
   MuseumSourceDocument,
 } from "./types";
+import { parseInstitutionalPracticeHeading } from "./institutionalPracticeMarkdown";
 
 interface InstitutionalPracticeDocumentContract {
   readonly id: string;
@@ -21,6 +22,20 @@ interface InstitutionProfileContract extends InstitutionalPracticeDocumentContra
   readonly kind: "institution_profile";
 }
 
+function profileContract(
+  slug: MuseumInstitutionProfileSlug,
+  title: string
+): InstitutionProfileContract {
+  const id: InstitutionProfileContract["id"] = `institutional-practice:${slug}`;
+  return {
+    id,
+    slug,
+    path: `records/institutional-practice/profiles/${slug}.md`,
+    title,
+    kind: "institution_profile",
+  };
+}
+
 const INSTITUTIONAL_PRACTICE_OVERVIEW_CONTRACT = {
   id: "institutional-practice:a-field-of-practice",
   path: "records/institutional-practice/a-field-of-practice.md",
@@ -29,104 +44,23 @@ const INSTITUTIONAL_PRACTICE_OVERVIEW_CONTRACT = {
 } as const satisfies InstitutionalPracticeDocumentContract;
 
 export const INSTITUTIONAL_PRACTICE_PROFILE_CONTRACTS = [
-  {
-    id: "institutional-practice:met",
-    slug: "met",
-    path: "records/institutional-practice/profiles/met.md",
-    title: "The Metropolitan Museum of Art",
-    kind: "institution_profile",
-  },
-  {
-    id: "institutional-practice:getty",
-    slug: "getty",
-    path: "records/institutional-practice/profiles/getty.md",
-    title: "Getty",
-    kind: "institution_profile",
-  },
-  {
-    id: "institutional-practice:moma",
-    slug: "moma",
-    path: "records/institutional-practice/profiles/moma.md",
-    title: "The Museum of Modern Art",
-    kind: "institution_profile",
-  },
-  {
-    id: "institutional-practice:whitney",
-    slug: "whitney",
-    path: "records/institutional-practice/profiles/whitney.md",
-    title: "Whitney Museum of American Art",
-    kind: "institution_profile",
-  },
-  {
-    id: "institutional-practice:tate",
-    slug: "tate",
-    path: "records/institutional-practice/profiles/tate.md",
-    title: "Tate",
-    kind: "institution_profile",
-  },
-  {
-    id: "institutional-practice:centre-pompidou",
-    slug: "centre-pompidou",
-    path: "records/institutional-practice/profiles/centre-pompidou.md",
-    title: "Centre Pompidou",
-    kind: "institution_profile",
-  },
-  {
-    id: "institutional-practice:sfmoma",
-    slug: "sfmoma",
-    path: "records/institutional-practice/profiles/sfmoma.md",
-    title: "San Francisco Museum of Modern Art",
-    kind: "institution_profile",
-  },
-  {
-    id: "institutional-practice:guggenheim",
-    slug: "guggenheim",
-    path: "records/institutional-practice/profiles/guggenheim.md",
-    title: "Solomon R. Guggenheim Museum",
-    kind: "institution_profile",
-  },
-  {
-    id: "institutional-practice:zkm",
-    slug: "zkm",
-    path: "records/institutional-practice/profiles/zkm.md",
-    title: "ZKM | Center for Art and Media",
-    kind: "institution_profile",
-  },
-  {
-    id: "institutional-practice:ars-electronica",
-    slug: "ars-electronica",
-    path: "records/institutional-practice/profiles/ars-electronica.md",
-    title: "Ars Electronica",
-    kind: "institution_profile",
-  },
-  {
-    id: "institutional-practice:rhizome-new-museum",
-    slug: "rhizome-new-museum",
-    path: "records/institutional-practice/profiles/rhizome-new-museum.md",
-    title: "Rhizome and the New Museum",
-    kind: "institution_profile",
-  },
-  {
-    id: "institutional-practice:serpentine-arts-technologies",
-    slug: "serpentine-arts-technologies",
-    path: "records/institutional-practice/profiles/serpentine-arts-technologies.md",
-    title: "Serpentine Arts Technologies",
-    kind: "institution_profile",
-  },
-  {
-    id: "institutional-practice:v-and-a",
-    slug: "v-and-a",
-    path: "records/institutional-practice/profiles/v-and-a.md",
-    title: "Victoria and Albert Museum",
-    kind: "institution_profile",
-  },
-  {
-    id: "institutional-practice:lacma",
-    slug: "lacma",
-    path: "records/institutional-practice/profiles/lacma.md",
-    title: "Los Angeles County Museum of Art",
-    kind: "institution_profile",
-  },
+  profileContract("met", "The Metropolitan Museum of Art"),
+  profileContract("getty", "Getty"),
+  profileContract("moma", "The Museum of Modern Art"),
+  profileContract("whitney", "Whitney Museum of American Art"),
+  profileContract("tate", "Tate"),
+  profileContract("centre-pompidou", "Centre Pompidou"),
+  profileContract("sfmoma", "San Francisco Museum of Modern Art"),
+  profileContract("guggenheim", "Solomon R. Guggenheim Museum"),
+  profileContract("zkm", "ZKM | Center for Art and Media"),
+  profileContract("ars-electronica", "Ars Electronica"),
+  profileContract("rhizome-new-museum", "Rhizome and the New Museum"),
+  profileContract(
+    "serpentine-arts-technologies",
+    "Serpentine Arts Technologies"
+  ),
+  profileContract("v-and-a", "Victoria and Albert Museum"),
+  profileContract("lacma", "Los Angeles County Museum of Art"),
 ] as const satisfies readonly InstitutionProfileContract[];
 
 const INSTITUTIONAL_PRACTICE_SOURCE_REGISTER_CONTRACT = {
@@ -181,9 +115,9 @@ function requiredMarkdownDocument(
     throw new Error("publication_required_document_missing");
   }
 
-  const title = parseHeading(source.text);
-  const firstLine = source.text.split(/\r?\n/u, 1)[0];
-  if (title !== contract.title || firstLine !== `# ${contract.title}`) {
+  const parsedHeading = parseHeading(source.text);
+  const title = parseInstitutionalPracticeHeading(source.text);
+  if (parsedHeading !== contract.title || title !== contract.title) {
     throw new Error("publication_institutional_practice_title_mismatch");
   }
 

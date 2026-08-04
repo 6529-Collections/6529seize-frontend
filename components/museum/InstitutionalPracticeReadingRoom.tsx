@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatDate } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import type {
@@ -6,6 +7,7 @@ import type {
   MuseumInstitutionalPractice,
   MuseumPublication,
 } from "@/lib/museum/publication/types";
+import { parseInstitutionalPracticeHeading } from "@/lib/museum/publication/institutionalPracticeMarkdown";
 import { MuseumMarkdown } from "./MuseumMarkdown";
 
 const STUDY_ROUTE = "/museum/network/stories/a-field-of-practice";
@@ -53,6 +55,12 @@ const PROFILE_FOCUS_KEYS = {
 
 const METADATA_LINE = /^-\s+\*\*([^*]+):\*\*\s+(.+)$/u;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/u;
+const PUBLICATION_DATE_FORMAT = {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+} satisfies Intl.DateTimeFormatOptions;
 
 interface InstitutionalPracticeManuscriptProjection {
   readonly title: string;
@@ -139,9 +147,9 @@ export function institutionalPracticePublicationIsComplete(
 export function projectInstitutionalPracticeManuscript(
   markdown: string
 ): InstitutionalPracticeManuscriptProjection | null {
-  const lines = markdown.replace(/^\uFEFF/u, "").split(/\r?\n/u);
-  const heading = /^#\s+(.+?)\s*$/u.exec(lines[0] ?? "");
-  if (heading?.[1] === undefined) {
+  const lines = markdown.split(/\r?\n/u);
+  const title = parseInstitutionalPracticeHeading(markdown);
+  if (title === null) {
     return null;
   }
 
@@ -182,17 +190,17 @@ export function projectInstitutionalPracticeManuscript(
     version === undefined ||
     version.length === 0 ||
     publicationDate === undefined ||
-    !ISO_DATE.test(publicationDate) ||
+    !isCalendarDate(publicationDate) ||
     (researchCutoff === undefined) === (accessDate === undefined) ||
-    (researchCutoff !== undefined && !ISO_DATE.test(researchCutoff)) ||
-    (accessDate !== undefined && !ISO_DATE.test(accessDate)) ||
+    (researchCutoff !== undefined && !isCalendarDate(researchCutoff)) ||
+    (accessDate !== undefined && !isCalendarDate(accessDate)) ||
     body.length === 0
   ) {
     return null;
   }
 
   return {
-    title: heading[1].trim(),
+    title,
     subtitle: subtitle === undefined || subtitle.length === 0 ? null : subtitle,
     author,
     version,
@@ -203,13 +211,22 @@ export function projectInstitutionalPracticeManuscript(
   };
 }
 
+function isCalendarDate(value: string): boolean {
+  if (!ISO_DATE.test(value)) {
+    return false;
+  }
+  const date = new Date(`${value}T00:00:00Z`);
+  return (
+    !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
+  );
+}
+
 function formatPublicationDate(value: string): string {
-  return new Intl.DateTimeFormat(DEFAULT_LOCALE, {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(`${value}T00:00:00Z`));
+  return formatDate(
+    DEFAULT_LOCALE,
+    `${value}T00:00:00Z`,
+    PUBLICATION_DATE_FORMAT
+  );
 }
 
 export function InstitutionalPracticePublicationLine({
