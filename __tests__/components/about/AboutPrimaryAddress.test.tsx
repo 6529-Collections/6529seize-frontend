@@ -3,38 +3,15 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
-jest.mock("csv-parser", () => {
-  return () => {
-    const handlers: Record<string, Array<(value?: unknown) => void>> = {};
-    const parser = {
-      on(event: string, cb: (value?: unknown) => void) {
-        handlers[event] = handlers[event] || [];
-        handlers[event].push(cb);
-        return parser;
-      },
-      write(data: string) {
-        const lines = data.split(/\r?\n/).filter(Boolean);
-        for (const line of lines) {
-          const values = line.split(",");
-          const row: Record<string, string> = {};
-          values.forEach((v, i) => {
-            row[String(i)] = v;
-          });
-          handlers["data"]?.forEach((fn) => fn(row));
-        }
-        return parser;
-      },
-      end() {
-        handlers["end"]?.forEach((fn) => fn());
-        return parser;
-      },
-    };
-    return parser;
-  };
-});
-
 describe("AboutPrimaryAddress", () => {
-  const csv = "2,beta,bcur,bnew\n1,alpha,acur,anew";
+  const currentAlpha = "0x1111111111111111111111111111111111111111";
+  const changedAlpha = "0x2222222222222222222222222222222222222222";
+  const currentBeta = "0x3333333333333333333333333333333333333333";
+  const changedBeta = "0x4444444444444444444444444444444444444444";
+  const csv = [
+    `2,beta,${currentBeta},${changedBeta}`,
+    `1,alpha,${currentAlpha},${changedAlpha}`,
+  ].join("\n");
   const originalFetch = globalThis.fetch;
   let queryClient: QueryClient;
 
@@ -117,7 +94,7 @@ describe("AboutPrimaryAddress", () => {
     expect(headers[2]).toHaveTextContent("Primary Address Changed to");
     expect(screen.getByRole("link", { name: "alpha" })).toHaveAttribute(
       "href",
-      "/acur"
+      `/${currentAlpha}`
     );
   });
 
@@ -134,20 +111,20 @@ describe("AboutPrimaryAddress", () => {
   });
 
   it("renders a single record without changing its profile target", async () => {
-    mockFetchWithCsv("1,solo,0xcurrent,0xchanged");
+    mockFetchWithCsv(`1,solo,${currentAlpha},${changedAlpha}`);
     renderWithQueryClient();
 
     const link = await screen.findByRole("link", { name: "solo" });
-    expect(link).toHaveAttribute("href", "/0xcurrent");
+    expect(link).toHaveAttribute("href", `/${currentAlpha}`);
     expect(screen.getAllByRole("row")).toHaveLength(2);
   });
 
   it("preserves lexical ordering for handles that start with numbers", async () => {
     mockFetchWithCsv(
       [
-        "3,4lteredBeast,0x4,0xchanged4",
-        "2,2601,0x2,0xchanged2",
-        "1,100series,0x1,0xchanged1",
+        `3,4lteredBeast,${currentAlpha},${changedAlpha}`,
+        `2,2601,${currentAlpha},${changedAlpha}`,
+        `1,100series,${currentAlpha},${changedAlpha}`,
       ].join("\n")
     );
     renderWithQueryClient();
@@ -159,29 +136,33 @@ describe("AboutPrimaryAddress", () => {
     expect(rows[3]).toHaveTextContent("4lteredBeast");
   });
 
-  it("ignores header, incomplete, and duplicate profile records", async () => {
+  it("ignores header, invalid, incomplete, and duplicate profile records", async () => {
     mockFetchWithCsv(
       [
         "profile_id,handle,current_primary,new_primary",
-        ",missing-id,0xcurrent,0xchanged",
-        "1,valid,0xcurrent,0xchanged",
-        "1,duplicate,0xduplicate,0xduplicate-changed",
-        "2,second,0xsecond,0xsecond-changed",
-        "3,missing-new,0xcurrent,",
+        `,missing-id,${currentAlpha},${changedAlpha}`,
+        `1,"valid, quoted",${currentAlpha},${changedAlpha}`,
+        `1,duplicate,${currentBeta},${changedBeta}`,
+        `2,second,${currentBeta},${changedBeta}`,
+        `3,missing-new,${currentAlpha},`,
+        `4,invalid-address,not-an-address,${changedAlpha}`,
+        `5,extra-column,${currentAlpha},${changedAlpha},unexpected`,
       ].join("\n")
     );
     renderWithQueryClient();
 
-    await screen.findByRole("link", { name: "valid" });
+    await screen.findByRole("link", { name: "valid, quoted" });
     expect(screen.getAllByRole("row")).toHaveLength(3);
     expect(screen.getByRole("link", { name: "second" })).toHaveAttribute(
       "href",
-      "/0xsecond"
+      `/${currentBeta}`
     );
     expect(screen.queryByRole("link", { name: "handle" })).toBeNull();
     expect(screen.queryByRole("link", { name: "duplicate" })).toBeNull();
     expect(screen.queryByRole("link", { name: "missing-id" })).toBeNull();
     expect(screen.queryByRole("link", { name: "missing-new" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "invalid-address" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "extra-column" })).toBeNull();
   });
 
   it("keeps the table structure when the data set is empty", async () => {

@@ -59,7 +59,8 @@ unexpected row links.
 
 - There is no in-page retry button.
 - There are no in-page filters or search controls.
-- CSV header rows, incomplete rows, and repeated profile IDs are ignored.
+- CSV header rows, rows with the wrong column count, invalid addresses,
+  incomplete rows, and repeated profile IDs are ignored.
 
 ## Related Pages
 

@@ -69,7 +69,8 @@ No wallet connection is required.
 ## Edge Cases
 
 - Row links always use `current_primary`, not the handle value.
-- CSV header rows, incomplete rows, and repeated profile IDs are ignored.
+- CSV header rows, rows with the wrong column count, invalid addresses,
+  incomplete rows, and repeated profile IDs are ignored.
 - Long handles and wallet addresses wrap within the available row width.
 - The page keeps static dated copy: `Monday 29th April 2024`.
 
