@@ -413,6 +413,33 @@ describe("Deploy Hub remove from staging", () => {
     });
   });
 
+  it("refuses to restore over a concurrent staging change", async () => {
+    const harness = removalHarness("product");
+    harness.git.remoteSha
+      .mockReset()
+      .mockReturnValueOnce(SHA_B)
+      .mockReturnValueOnce(SHA_D);
+    await expect(
+      executeRemoveFromStaging({
+        operationId: "remove-123",
+        manifestJson: JSON.stringify([request()]),
+        repository: EXPECTED_REPOSITORY,
+        baseRef: "main",
+        actor: ACTOR,
+        runId: "12345",
+        runUrl: RUN_URL,
+        confirmation: "REMOVE",
+        github: harness.github,
+        git: harness.git,
+        sleep: jest.fn().mockResolvedValue(undefined),
+        now: () => 0,
+      })
+    ).rejects.toThrow(
+      "Staging changed after removal; refusing to overwrite concurrent changes."
+    );
+    expect(harness.forwardContent).toHaveBeenCalledTimes(1);
+  });
+
   it("stops before removal without touching staging", async () => {
     const statuses: Array<Record<string, unknown>> = [];
     let statusReads = 0;

@@ -28,6 +28,7 @@ async function restoreFailedRemoval(options) {
     request,
     requests,
     removal,
+    removalSha,
     knownGoodSha,
     knownGoodComposition,
     operationId,
@@ -37,9 +38,13 @@ async function restoreFailedRemoval(options) {
     now,
   } = options;
   const observed = git.remoteSha(STAGING_REF);
+  assert(
+    observed === removalSha,
+    "Staging changed after removal; refusing to overwrite concurrent changes."
+  );
   const restoredSha = await publishContent({
     git,
-    expectedOldSha: observed,
+    expectedOldSha: removalSha,
     contentSha: knownGoodSha,
     message: stagingMessage(
       `Deploy Hub ${operationId}: restore staging after failed removal`,
@@ -196,6 +201,7 @@ async function executeRemoveFromStaging(options) {
       request,
       requests,
       removal,
+      removalSha,
       knownGoodSha,
       knownGoodComposition,
       operationId,
