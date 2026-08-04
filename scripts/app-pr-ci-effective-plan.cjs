@@ -15,6 +15,18 @@ const TEST_TYPECHECK_CONFIG_FILES = new Set([
   "tsconfig.jest.json",
   "tsconfig.playwright.json",
 ]);
+const REQUIRED_BASE_CHECKS = [
+  "install",
+  "lint_changed",
+  "typecheck_changed",
+  "jest_changed",
+  "build",
+  "playwright_smoke",
+  "playwright_critical_shell",
+  "dependency_governance",
+  "reviewbot_contract",
+  "agent_files_sync",
+];
 const SOURCE_EXTENSION = /\.(?:cjs|js|jsx|mjs|ts|tsx)$/u;
 const RELEASE_BUS_CONTRACT_PATTERNS = [
   /^\.github\/workflows\//u,
@@ -40,7 +52,18 @@ function isTestFile(file) {
 }
 
 function applyEffectiveAppPrCiPlan(plan, { cwd = process.cwd() } = {}) {
-  if (!Array.isArray(plan?.changed_files) || typeof plan?.checks !== "object") {
+  const baseChecks = plan?.checks;
+  const hasValidBaseChecks =
+    baseChecks !== null &&
+    typeof baseChecks === "object" &&
+    !Array.isArray(baseChecks) &&
+    REQUIRED_BASE_CHECKS.every(
+      (name) =>
+        Object.hasOwn(baseChecks, name) &&
+        typeof baseChecks[name]?.required === "boolean"
+    );
+
+  if (!Array.isArray(plan?.changed_files) || !hasValidBaseChecks) {
     throw new Error("App PR CI plan is malformed.");
   }
 

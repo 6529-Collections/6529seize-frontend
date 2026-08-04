@@ -18,18 +18,25 @@ function plan(changedFiles: string[]) {
     changed_files: changedFiles,
     checks: {
       install: { required: true, reason: "existing" },
+      lint_changed: { required: true, reason: "existing" },
+      typecheck_changed: { required: true, reason: "existing" },
+      jest_changed: { required: true, reason: "existing" },
+      build: { required: true, reason: "existing" },
       playwright_smoke: { required: true, reason: "superseded" },
       playwright_critical_shell: { required: true, reason: "superseded" },
+      dependency_governance: { required: false, reason: "existing" },
+      reviewbot_contract: { required: false, reason: "existing" },
+      agent_files_sync: { required: false, reason: "existing" },
       test_typecheck: { required: true, reason: "superseded" },
     },
   };
 }
 
-function executePlan(changedFiles: string[]): EffectivePlan {
+function executeRawPlan(rawPlan: unknown): EffectivePlan {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "app-pr-ci-plan-"));
   const planPath = path.join(tempDir, "ci-plan.json");
   try {
-    fs.writeFileSync(planPath, JSON.stringify(plan(changedFiles)));
+    fs.writeFileSync(planPath, JSON.stringify(rawPlan));
     execFileSync(
       process.execPath,
       [
@@ -43,6 +50,10 @@ function executePlan(changedFiles: string[]): EffectivePlan {
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
+}
+
+function executePlan(changedFiles: string[]): EffectivePlan {
+  return executeRawPlan(plan(changedFiles));
 }
 
 describe("effective App PR CI plan", () => {
@@ -77,5 +88,31 @@ describe("effective App PR CI plan", () => {
     expect(
       executePlan(["lib/removed-runtime-source.ts"]).checks.deadcode.required
     ).toBe(true);
+  });
+
+  it.each([
+    ["null checks", { changed_files: [], checks: null }],
+    ["array checks", { changed_files: [], checks: [] }],
+    ["empty checks", { changed_files: [], checks: {} }],
+    [
+      "missing baseline check",
+      (() => {
+        const malformed = plan([]);
+        const { install: _install, ...checks } = malformed.checks;
+        return { ...malformed, checks };
+      })(),
+    ],
+    [
+      "non-boolean required value",
+      {
+        ...plan([]),
+        checks: {
+          ...plan([]).checks,
+          install: { required: "true", reason: "malformed" },
+        },
+      },
+    ],
+  ])("rejects a malformed plan with %s", (_description, malformedPlan) => {
+    expect(() => executeRawPlan(malformedPlan)).toThrow();
   });
 });
