@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MuseumMarkdown } from "@/components/museum/MuseumMarkdown";
-import { MuseumOpenSourceResearchContext } from "@/components/museum/MuseumOpenMuseumStatement";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -71,7 +70,6 @@ export default async function MuseumSourceAndChronologyPage() {
           </a>
         </p>
       </header>
-      <MuseumOpenSourceResearchContext commit={publication.identity.commit} />
       <section
         className="tw-mt-12 tw-max-w-5xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
         aria-labelledby="museum-research-record-title"

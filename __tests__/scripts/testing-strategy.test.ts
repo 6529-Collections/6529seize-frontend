@@ -292,9 +292,7 @@ describe("testing strategy risk floor", () => {
 
 describe("testing strategy CI plan", () => {
   it("keeps docs-only PRs in the no-install fast lane", () => {
-    const plan = createCiPlan([
-      "ops/workstreams/README.md",
-    ]);
+    const plan = createCiPlan(["ops/workstreams/README.md"]);
 
     expect(plan.schema_version).toBe(CI_PLAN_SCHEMA_VERSION);
     expect(plan.risk.computed_floor).toBe(0);
@@ -428,6 +426,41 @@ describe("testing strategy CI plan", () => {
 
     expect(plan.checks.agent_files_sync.required).toBe(false);
     expect(plan.checks.install.required).toBe(false);
+  });
+
+  it("routes every Museum publication surface through the dedicated Playwright gate", () => {
+    const workflow = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),
+      "utf8"
+    );
+
+    expect(workflow).toContain(
+      "playwright_museum_required: ${{ steps.plan_outputs.outputs.playwright_museum_required }}"
+    );
+    for (const pathPattern of [
+      "^app\\/museum\\/network\\/",
+      "^components\\/museum\\/",
+      "^lib\\/museum\\/",
+      "^tests\\/museum\\/",
+      "^i18n\\/messages\\/museum\\.en-US\\.json$",
+      "^ops\\/docs\\/museum\\/",
+      "^ops\\/help\\/help-index\\.json$",
+    ]) {
+      expect(workflow).toContain(pathPattern);
+    }
+    expect(workflow).toContain(
+      "needs.plan.outputs.playwright_museum_required == 'true'"
+    );
+    expect(workflow).toContain(
+      "./bin/6529 run test:e2e:museum-institutional-practice"
+    );
+
+    const parsed = YAML.parse(workflow) as {
+      jobs: Record<string, { if?: string }>;
+    };
+    expect(parsed.jobs["installed-checks"]?.if).toBe(
+      "needs.plan.outputs.install_required == 'true' || needs.plan.outputs.playwright_museum_required == 'true'"
+    );
   });
 });
 
