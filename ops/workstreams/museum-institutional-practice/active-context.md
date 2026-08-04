@@ -4,7 +4,7 @@
 
 - Goal: expand the same living institutional-practice study to twenty-seven
   profiles; publish adjacent digital-art and chain-native research; publish
-  *Writing the 6529 Network Museum* as a public scholarship and editorial
+  _Writing the 6529 Network Museum_ as a public scholarship and editorial
   standard; apply that standard across the complete public Museum corpus; and
   qualify one atomic source/frontend release through staging and production.
 - Museum source PRs: expansion PR #23, rendered-copy correction PR #24, and
@@ -35,7 +35,7 @@
   public documents, 27 institutional profiles, all 31 institutional-practice
   manuscripts, and the canonical commitments above. Visible production labels
   are absent from the Casey artist and collection manuscripts, and the public
-  source title is *Casey Reas: Sources and chronology*.
+  source title is _Casey Reas: Sources and chronology_.
 - Final rendered-product correction: Keys and Gates now uses the governed
   submission images, links every selected work to a complete object page, and
   presents artist statement, selection evidence, rights status, and source
@@ -50,8 +50,14 @@
   to transfer blobs from every ref and exhausted the ten-minute secret-scan
   job before the scanner ran. PR #3588 now keeps complete history while using
   `blob:none` for its three security/installed-gate checkouts; a regression
-  test and workflow-security validator preserve that boundary. PR/bot review,
-  staging, and production qualification remain pending.
+  test and workflow-security validator preserve that boundary. Exact-head bot
+  review then identified that the grouped institutional directory had no
+  public render site and that one record-card transition omitted the configured
+  Tailwind prefix. The corrected study renders the four-group directory after
+  its essay; all 27 links are asserted. Knip, 72 focused cases, lint,
+  typechecking, and the exact optimized build pass. Desktop and mobile captures
+  show the directory without overflow. Fresh PR review, staging, and production
+  qualification remain pending.
 
 ## Previous qualified release
 

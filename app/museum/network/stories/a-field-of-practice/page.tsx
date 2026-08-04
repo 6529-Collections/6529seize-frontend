@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
+  InstitutionalPracticeDirectory,
   InstitutionalPracticeManuscript,
   InstitutionalPracticePublicationLine,
   institutionalPracticePublicationIsComplete,
@@ -67,6 +68,32 @@ export default async function MuseumInstitutionalPracticePage() {
           sourcePath={document.sourcePath}
         />
       </div>
+
+      <section
+        className="tw-mt-14 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
+        aria-labelledby="institutional-practice-directory-title"
+      >
+        <div className="tw-max-w-4xl">
+          <h2
+            id="institutional-practice-directory-title"
+            className="tw-m-0 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50"
+          >
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.institutionalPractice.directoryTitle"
+            )}
+          </h2>
+          <p className="tw-m-0 tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-300">
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.institutionalPractice.directoryDescription"
+            )}
+          </p>
+        </div>
+        <InstitutionalPracticeDirectory
+          practice={publication.institutionalPractice}
+        />
+      </section>
 
       <nav
         aria-label={t(

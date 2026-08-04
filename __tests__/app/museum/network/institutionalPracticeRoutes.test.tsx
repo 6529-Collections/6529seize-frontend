@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { notFound } from "next/navigation";
 import type { AnchorHTMLAttributes, ReactNode } from "react";
 import MuseumInstitutionProfilePage, {
@@ -361,12 +361,17 @@ describe("Museum institutional-practice reading room", () => {
       screen.getByText("Institutions the 6529 Network Museum studies")
     ).toBeInTheDocument();
     expect(screen.getByText("Published August 4, 2026")).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "The Metropolitan Museum of Art" })
-    ).toHaveAttribute(
-      "href",
-      "/museum/network/stories/a-field-of-practice/met"
-    );
+    const directory = screen.getByRole("region", {
+      name: "Museums and practices we study",
+    });
+    for (const profile of publication.institutionalPractice.profiles) {
+      expect(
+        within(directory).getByRole("link", { name: profile.document.title })
+      ).toHaveAttribute(
+        "href",
+        `/museum/network/stories/a-field-of-practice/${profile.slug}`
+      );
+    }
     expect(
       screen.getByRole("link", { name: "curatorial publication standard" })
     ).toHaveAttribute(

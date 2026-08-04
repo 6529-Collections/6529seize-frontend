@@ -349,6 +349,17 @@
 - On repaired exact head `80b2f7669cdcdfd045a4e496b2e0c264856e966c`,
   Push Secret Scan completed successfully in 1 minute 19 seconds and both App
   checkouts completed in under 15 seconds. Installed Apps then identified one
-  ordinary Knip finding: `InstitutionalPracticeDirectory` was an unused legacy
-  duplicate. The follow-up removes that component and its private presentation
-  constants; it does not change active runtime behavior, copy, links, or pixels.
+  ordinary Knip finding: `InstitutionalPracticeDirectory` was not rendered.
+  CodeRabbit independently identified the visitor-facing consequence: direct
+  profile routes existed, and the study manuscript linked them, but its grouped
+  directory had no public render site. The follow-up places that directory on
+  the comparative-study page, keeps it below the complete essay, and asserts
+  that each of the twenty-seven profile links is present. A separate valid
+  review finding restores the repository's Tailwind prefix to the record-card
+  color transition.
+- The review follow-up passes Knip, 72 focused route and testing-strategy cases,
+  changed-file lint and typechecking, formatting, and the portable diff check.
+  Its clean optimized production build completed in 440.2 seconds. Retained
+  desktop and mobile captures show the four-group directory at 1,440 x 1,000
+  and 390 x 844; all 27 links resolve, the exact canonical source is present,
+  and mobile remains within its 375-pixel document width.

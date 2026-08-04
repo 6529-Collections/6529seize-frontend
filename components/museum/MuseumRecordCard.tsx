@@ -24,7 +24,7 @@ export function MuseumRecordCard({
   children,
 }: MuseumRecordCardProps) {
   return (
-    <article className="transition-colors tw-flex tw-h-full tw-flex-col tw-rounded-2xl tw-border tw-border-white/10 tw-bg-iron-900/60 tw-p-5 hover:tw-border-primary-400/40">
+    <article className="tw-flex tw-h-full tw-flex-col tw-rounded-2xl tw-border tw-border-white/10 tw-bg-iron-900/60 tw-p-5 tw-transition-colors hover:tw-border-primary-400/40">
       {imageUrl && imageAlt && (
         <Link
           href={href}
