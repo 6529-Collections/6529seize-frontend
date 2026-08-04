@@ -545,28 +545,38 @@ describe("manifest-driven E2E runner", () => {
 
   it("times out and terminates the complete POSIX process group", async () => {
     const startedAt = Date.now();
+    const pidFile = path.join(
+      os.tmpdir(),
+      `e2e-pack-grandchild-${process.pid}-${Date.now()}.pid`
+    );
+    const stubbornChild =
+      'process.on("SIGTERM",()=>{});setInterval(()=>{},1000);';
+    const parentCode = [
+      'const {spawn}=require("node:child_process");',
+      'const fs=require("node:fs");',
+      `const child=spawn(process.execPath,["-e",${JSON.stringify(
+        stubbornChild
+      )}],{stdio:"ignore"});`,
+      "fs.writeFileSync(process.argv[1],String(child.pid));",
+      "setInterval(()=>{},1000);",
+    ].join("");
     const result = await runner.runProcessGroup(
       process.execPath,
-      [
-        "-e",
-        [
-          'const {spawn}=require("node:child_process");',
-          'const child=spawn(process.execPath,["-e","process.on(\\"SIGTERM\\",()=>{});setInterval(()=>{},1000)"],{stdio:"ignore"});',
-          "console.log(child.pid);",
-          "setInterval(()=>{},1000);",
-        ].join(""),
-      ],
+      ["-e", parentCode, pidFile],
       {
         cwd: ROOT,
         env: process.env,
         maxBuffer: 1024 * 1024,
-        timeout: 100,
+        // Leave enough time for the parent to publish the grandchild PID on
+        // slower local/CI process startup before exercising group teardown.
+        timeout: 500,
       }
     );
 
     expect(result.error?.code).toBe("ETIMEDOUT");
-    expect(Date.now() - startedAt).toBeGreaterThanOrEqual(900);
-    const grandchildPid = Number(result.stdout.trim());
+    expect(Date.now() - startedAt).toBeGreaterThanOrEqual(1400);
+    const grandchildPid = Number(fs.readFileSync(pidFile, "utf8"));
+    fs.rmSync(pidFile, { force: true });
     expect(grandchildPid).toBeGreaterThan(0);
     await new Promise((resolve) => setTimeout(resolve, 100));
     expect(() => process.kill(grandchildPid, 0)).toThrow();
@@ -724,7 +734,7 @@ describe("E2E runner CLI resolution", () => {
         .slice(0, 3)
         .every((pack) => pack.projects?.includes("web-mobile-chromium"))
     ).toBe(true);
-    expect(museumPacks[0]?.triggers).toEqual(["pr-ci", "manual"]);
+    expect(museumPacks[0]?.triggers).toEqual(["manual"]);
     expect(museumPacks[1]?.triggers).toEqual(["post-deploy", "manual"]);
     expect(museumPacks[2]?.triggers).toEqual(["post-deploy", "manual"]);
   });

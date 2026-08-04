@@ -67,7 +67,6 @@ jobs:
           [[ "$SOURCE_REF" =~ ^[A-Za-z0-9._/-]{1,255}$ ]]
           [[ "$ARTIFACT_ENVIRONMENT" =~ ^(staging|production)$ ]]
           [[ "$ARTIFACT_CONTRACT_VERSION" =~ ^(legacy-v2|environment-bound-v3)$ ]]
-          [[ "$CANDIDATE_EVIDENCE_MODE" =~ ^(legacy-whole-train|strict-single|strict-aggregate)$ ]]
           jq -e 'type == "array" and length == 0' <<< "$DEPLOY_UNITS"
 
           validate_reuse_artifact_syntax() {
@@ -95,6 +94,10 @@ jobs:
               test -z "$REUSE_ARTIFACT_NAME"
               test -z "$REUSE_ARTIFACT_DIGEST"
               [[ "$AGGREGATE_CANDIDATE_EVIDENCE_DIGEST" =~ ^[a-f0-9]{64}$ ]]
+              ;;
+            *)
+              echo "Invalid candidate evidence mode." >&2
+              exit 1
               ;;
           esac
       - name: Authorize exact v2 operation
@@ -218,14 +221,13 @@ jobs:
             classify_gh_failure "$download_output"
             exit 1
           fi
-          mapfile -t evidence_files < <(
+          evidence_files="$(
             find "$evidence_root" -maxdepth 1 -type f -exec basename {} \; |
-              LC_ALL=C sort
-          )
-          test "${evidence_files[*]}" = "SHA256SUMS manifest.json policy-bundle.txt"
+              LC_ALL=C sort | paste -sd ' ' -
+          )"
+          test "$evidence_files" = "SHA256SUMS manifest.json policy-bundle.txt"
           test -z "$(find "$evidence_root" -mindepth 1 -maxdepth 1 -type d -print -quit)"
-          mapfile -t checksum_lines < "$evidence_root/SHA256SUMS"
-          test "${#checksum_lines[@]}" -eq 2
+          test "$(wc -l < "$evidence_root/SHA256SUMS" | tr -d '[:space:]')" -eq 2
           expected_checksums="$(
             cd "$evidence_root"
             sha256sum ./manifest.json ./policy-bundle.txt
@@ -243,15 +245,18 @@ jobs:
             .policy_bundle_contract == "pr-ci-policy-bundle-v1" and
             (.policy_bundle_digest | test("^[a-f0-9]{64}$")) and
             (.policy_bundle_line_count | type == "number" and . >= 1 and . <= 1000 and floor == .) and
+            (.dependency_analysis_required | type == "boolean") and
+            (.release_bus_contract_required | type == "boolean") and
+            (.test_typecheck_required | type == "boolean") and
             .required_gates == [
               "package-manager-discipline",
-              "dependency-analysis",
+              "dependency-analysis-or-plan-not-required",
               "reviewbot-contract",
               "generated-agent-files",
-              "release-bus-workflow-contract",
+              "release-bus-workflow-contract-or-plan-not-required",
               "changed-lint",
               "changed-typecheck",
-              "test-typecheck",
+              "test-typecheck-or-plan-not-required",
               "related-jest-selection",
               "production-build-or-plan-not-required",
               "pr-ci-policy-bundle"

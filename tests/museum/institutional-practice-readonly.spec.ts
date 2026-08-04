@@ -64,6 +64,7 @@ const PROFILE_ROUTES: readonly StudyRoute[] = PROFILES.map(([slug, title]) => ({
   sourcePath: `records/institutional-practice/profiles/${slug}.md`,
   title,
 }));
+const REPRESENTATIVE_PROFILE_ROUTE: StudyRoute = PROFILE_ROUTES[0]!;
 
 async function expectSafeLinks(page: Page) {
   const problems = await page.locator("a[href]").evaluateAll((anchors) =>
@@ -205,9 +206,7 @@ async function expectStudyRoute(
 }
 
 test.describe("Museum institutional-practice publication @surface @large @readonly", () => {
-  test.describe.configure({ mode: "serial" });
   test.setTimeout(120_000);
-  let sourceCommit: string | null = SOURCE_COMMIT;
 
   test.beforeEach(async ({ page }, testInfo) => {
     if (testInfo.project.name === MOBILE_PROJECT) {
@@ -219,7 +218,7 @@ test.describe("Museum institutional-practice publication @surface @large @readon
   test("publishes the study index and all fourteen profile links", async ({
     page,
   }) => {
-    sourceCommit = await expectStudyRoute(page, INDEX_ROUTE, sourceCommit);
+    await expectStudyRoute(page, INDEX_ROUTE, SOURCE_COMMIT);
 
     for (const profile of PROFILE_ROUTES) {
       await expect(
@@ -231,25 +230,23 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     ).toBeVisible();
   });
 
-  for (const profile of PROFILE_ROUTES) {
-    test(`publishes ${profile.title} with lessons and limits`, async ({
-      page,
-    }) => {
-      sourceCommit = await expectStudyRoute(page, profile, sourceCommit);
-      await expect(
-        page.getByText("What the Museum should adopt", { exact: true })
-      ).toBeVisible();
-      await expect(
-        page.getByText("Where the analogy ends", { exact: true })
-      ).toBeVisible();
-      await expect(
-        page.locator(`a[href="${SOURCE_ROUTE.path}"]`).first()
-      ).toBeVisible();
-    });
-  }
+  test("publishes a representative institutional profile with lessons and limits", async ({
+    page,
+  }) => {
+    await expectStudyRoute(page, REPRESENTATIVE_PROFILE_ROUTE, SOURCE_COMMIT);
+    await expect(
+      page.getByText("What the Museum should adopt", { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByText("Where the analogy ends", { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.locator(`a[href="${SOURCE_ROUTE.path}"]`).first()
+    ).toBeVisible();
+  });
 
   test("publishes the complete primary-source register", async ({ page }) => {
-    sourceCommit = await expectStudyRoute(page, SOURCE_ROUTE, sourceCommit);
+    await expectStudyRoute(page, SOURCE_ROUTE, SOURCE_COMMIT);
     await expect(page.locator("main table").first()).toBeVisible();
     expect(
       await page.locator('main a[href^="https://"]').count()

@@ -45,7 +45,7 @@
     "consumes_preflight_artifact": true
   },
   "e2e": {
-    "staging_parallelism": 3,
+    "staging_parallelism": 4,
     "production_parallelism": 3,
     "parallel_safety": "readonly",
     "post_deploy_packs": {

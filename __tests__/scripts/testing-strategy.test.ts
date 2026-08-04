@@ -299,8 +299,8 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.risk_floor.required).toBe(true);
     expect(plan.checks.secret_scan.required).toBe(true);
     expect(plan.checks.install.required).toBe(false);
-    expect(plan.checks.playwright_smoke.required).toBe(false);
-    expect(plan.checks.playwright_critical_shell.required).toBe(false);
+    expect(plan.checks["playwright_smoke"]!.required).toBe(false);
+    expect(plan.checks["playwright_critical_shell"]!.required).toBe(false);
     expect(plan.security).toMatchObject({
       secrets_allowed: false,
       token_permissions: "contents:read",
@@ -317,13 +317,13 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.install.required).toBe(true);
     expect(plan.checks.lint_changed.required).toBe(true);
     expect(plan.checks.typecheck_changed.required).toBe(true);
-    expect(plan.checks.test_typecheck.required).toBe(true);
+    expect(plan.checks["test_typecheck"]!.required).toBe(true);
     expect(plan.checks["test_typecheck"]?.reason).toContain(
       "Jest diagnostic ratchet"
     );
     expect(plan.checks.jest_changed.required).toBe(true);
-    expect(plan.checks.playwright_smoke.required).toBe(true);
-    expect(plan.checks.playwright_critical_shell.required).toBe(false);
+    expect(plan.checks["playwright_smoke"]!.required).toBe(true);
+    expect(plan.checks["playwright_critical_shell"]!.required).toBe(false);
     expect(plan.checks.build.required).toBe(false);
   });
 
@@ -337,7 +337,7 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.workflow_security_review.required).toBe(true);
     expect(plan.checks.dependency_governance.required).toBe(true);
     expect(plan.checks.build.required).toBe(true);
-    expect(plan.checks.playwright_critical_shell.required).toBe(true);
+    expect(plan.checks["playwright_critical_shell"]!.required).toBe(true);
   });
 
   it.each([
@@ -357,7 +357,7 @@ describe("testing strategy CI plan", () => {
 
     expect(plan.risk.computed_floor).toBe(2);
     expect(plan.checks.build.required).toBe(true);
-    expect(plan.checks.playwright_critical_shell.required).toBe(true);
+    expect(plan.checks["playwright_critical_shell"]!.required).toBe(true);
     expect(plan.checks.build.reason).toContain("deleted runtime source");
   });
 
@@ -428,38 +428,43 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.install.required).toBe(false);
   });
 
-  it("routes every Museum publication surface through the dedicated Playwright gate", () => {
+  it("keeps Museum browser coverage out of PR CI and in post-deploy staging", () => {
     const workflow = fs.readFileSync(
       path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),
       "utf8"
     );
+    const stagingWorkflow = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/staging-e2e.yml"),
+      "utf8"
+    );
 
-    expect(workflow).toContain(
-      "playwright_museum_required: ${{ steps.plan_outputs.outputs.playwright_museum_required }}"
-    );
-    for (const pathPattern of [
-      "^app\\/museum\\/network\\/",
-      "^components\\/museum\\/",
-      "^lib\\/museum\\/",
-      "^tests\\/museum\\/",
-      "^i18n\\/messages\\/museum\\.en-US\\.json$",
-      "^ops\\/docs\\/museum\\/",
-      "^ops\\/help\\/help-index\\.json$",
-    ]) {
-      expect(workflow).toContain(pathPattern);
-    }
-    expect(workflow).toContain(
-      "needs.plan.outputs.playwright_museum_required == 'true'"
-    );
-    expect(workflow).toContain(
-      "./bin/6529 run test:e2e:museum-institutional-practice"
-    );
+    expect(workflow).not.toContain("playwright install");
+    expect(workflow).not.toContain("test:e2e:museum-institutional-practice");
+    expect(workflow).not.toContain("PLAYWRIGHT_WEB_SERVER_COMMAND");
+    expect(stagingWorkflow).toContain("--trigger post-deploy");
+    expect(stagingWorkflow).toContain("SELECTED_PACK");
+    expect(
+      fs.existsSync(
+        path.join(
+          process.cwd(),
+          "__tests__/lib/museum/publication/institutionalPractice.test.ts"
+        )
+      )
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(
+          process.cwd(),
+          "__tests__/lib/museum/publication/pageSources.test.ts"
+        )
+      )
+    ).toBe(true);
 
     const parsed = YAML.parse(workflow) as {
       jobs: Record<string, { if?: string }>;
     };
     expect(parsed.jobs["installed-checks"]?.if).toBe(
-      "needs.plan.outputs.install_required == 'true' || needs.plan.outputs.playwright_museum_required == 'true'"
+      "needs.plan.outputs.install_required == 'true'"
     );
   });
 });

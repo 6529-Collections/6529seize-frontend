@@ -1,4 +1,6 @@
+import childProcess from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 
 const {
@@ -29,6 +31,114 @@ function response(body: unknown, status = 200) {
     status,
     json: async () => body,
   };
+}
+
+function runAutomaticDeployResolver(conclusion: string) {
+  const workflow = YAML.parse(
+    fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/staging-e2e.yml"),
+      "utf8"
+    )
+  );
+  const resolver = workflow.jobs["baseline-adoption-decision"].steps.find(
+    ({ name }: { name?: string }) =>
+      name === "Resolve successful automatic deploy"
+  );
+  const tempDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), "staging-e2e-deploy-resolver-")
+  );
+  try {
+    const ghPath = path.join(tempDir, "gh");
+    const outputPath = path.join(tempDir, "github-output");
+    fs.writeFileSync(
+      ghPath,
+      `#!/usr/bin/env bash
+set -euo pipefail
+printf '%s' "$FAKE_GH_RESPONSE"
+`
+    );
+    fs.chmodSync(ghPath, 0o755);
+    const result = childProcess.spawnSync("bash", ["-c", resolver.run], {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        AUTOMATIC_DEPLOY_RUN_ID: "67890",
+        FAKE_GH_RESPONSE: JSON.stringify({
+          id: 67890,
+          name: "Web Deploy - STAGING",
+          path: ".github/workflows/deploy-staging.yml",
+          event: "push",
+          status: "completed",
+          conclusion,
+          head_branch: "1a-staging",
+          head_sha: SHA,
+          repository: {
+            full_name: "6529-Collections/6529seize-frontend",
+          },
+        }),
+        GH_TOKEN: "test-token",
+        GITHUB_OUTPUT: outputPath,
+        GITHUB_REPOSITORY: "6529-Collections/6529seize-frontend",
+        PATH: `${tempDir}:${process.env["PATH"] ?? ""}`,
+      },
+    });
+    return {
+      ...result,
+      output: fs.existsSync(outputPath)
+        ? fs.readFileSync(outputPath, "utf8")
+        : "",
+    };
+  } finally {
+    fs.rmSync(tempDir, { force: true, recursive: true });
+  }
+}
+
+function runSuccessfulDeployDispatcher(conclusion: string) {
+  const workflow = YAML.parse(
+    fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/staging-e2e-dispatch.yml"),
+      "utf8"
+    )
+  );
+  const dispatcher = workflow.jobs["dispatch-successful-deploy"].steps[0].run;
+  const tempDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), "staging-e2e-dispatch-")
+  );
+  try {
+    const ghPath = path.join(tempDir, "gh");
+    const payloadPath = path.join(tempDir, "payload.json");
+    fs.writeFileSync(
+      ghPath,
+      `#!/usr/bin/env bash
+set -euo pipefail
+cat > "$FAKE_PAYLOAD_PATH"
+`
+    );
+    fs.chmodSync(ghPath, 0o755);
+    const result = childProcess.spawnSync("bash", ["-c", dispatcher], {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        DEFAULT_BRANCH: "main",
+        DEPLOY_CONCLUSION: conclusion,
+        DEPLOY_HEAD_BRANCH: "1a-staging",
+        DEPLOY_HEAD_REPOSITORY: "6529-Collections/6529seize-frontend",
+        DEPLOY_WORKFLOW_RUN_ID: "67890",
+        FAKE_PAYLOAD_PATH: payloadPath,
+        GH_TOKEN: "test-token",
+        GITHUB_REPOSITORY: "6529-Collections/6529seize-frontend",
+        PATH: `${tempDir}:${process.env["PATH"] ?? ""}`,
+      },
+    });
+    return {
+      ...result,
+      payload: fs.existsSync(payloadPath)
+        ? JSON.parse(fs.readFileSync(payloadPath, "utf8"))
+        : null,
+    };
+  } finally {
+    fs.rmSync(tempDir, { force: true, recursive: true });
+  }
 }
 
 describe("baseline-adoption automatic E2E decision client", () => {
@@ -192,9 +302,13 @@ describe("baseline-adoption automatic E2E decision client", () => {
     expect(formatDecisionToken(decision)).toBe(expected);
   });
 
-  it("gates the expensive staging suite on LEGACY while bound dispatch remains unchanged", () => {
+  it("dispatches automatic E2E only from a successful exact staging deploy", () => {
     const workflow = fs.readFileSync(
       path.join(process.cwd(), ".github/workflows/staging-e2e.yml"),
+      "utf8"
+    );
+    const dispatchWorkflow = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/staging-e2e-dispatch.yml"),
       "utf8"
     );
     expect(workflow).toContain("baseline-adoption-decision:");
@@ -212,8 +326,17 @@ describe("baseline-adoption automatic E2E decision client", () => {
     expect(workflow).toContain(
       "needs.baseline-adoption-decision.outputs.decision == 'LEGACY'"
     );
-    expect(workflow).toContain("github.event_name == 'workflow_dispatch'");
+    expect(workflow).toContain("automatic_deploy_run_id:");
     expect(workflow).toContain("cancel-in-progress: false");
+    expect(workflow).not.toContain("workflow_run:");
+    expect(workflow).not.toContain("github.event.workflow_run");
+    expect(dispatchWorkflow).toContain("actions: write");
+    expect(dispatchWorkflow).toContain(
+      "github.event.workflow_run.conclusion == 'success'"
+    );
+    expect(dispatchWorkflow).toContain(
+      "actions/workflows/staging-e2e.yml/dispatches"
+    );
     expect(
       workflow.match(/name: Run staging packs against staging\.6529\.io/g)
     ).toHaveLength(1);
@@ -222,6 +345,17 @@ describe("baseline-adoption automatic E2E decision client", () => {
     );
 
     const parsed = YAML.parse(workflow);
+    const parsedDispatcher = YAML.parse(dispatchWorkflow);
+    expect(parsed.on).toEqual({
+      workflow_dispatch: expect.objectContaining({
+        inputs: expect.objectContaining({
+          automatic_deploy_run_id: expect.objectContaining({
+            required: false,
+            type: "string",
+          }),
+        }),
+      }),
+    });
     expect(Object.keys(parsed.jobs)).toEqual([
       "baseline-adoption-decision",
       "staging-packs",
@@ -233,27 +367,107 @@ describe("baseline-adoption automatic E2E decision client", () => {
       "needs.baseline-adoption-decision.outputs.decision == 'LEGACY'"
     );
     expect(parsed.jobs["staging-packs"].if).not.toContain("DEFERRED");
-    expect(parsed.jobs["baseline-adoption-decision"].steps).toHaveLength(4);
+    expect(parsed.jobs["baseline-adoption-decision"].if).toBe(
+      "inputs.automatic_deploy_run_id != ''"
+    );
+    expect(parsed.jobs["baseline-adoption-decision"].permissions).toEqual({
+      actions: "read",
+      contents: "read",
+    });
+    expect(parsed.jobs["baseline-adoption-decision"].steps).toHaveLength(6);
+    expect(parsed.jobs["baseline-adoption-decision"].steps[0].run).toContain(
+      'test "$PACK" = all'
+    );
+    expect(parsed.jobs["baseline-adoption-decision"].steps[0].run).toContain(
+      'test -z "$identity_values"'
+    );
+    expect(parsed.jobs["baseline-adoption-decision"].steps[1].run).toContain(
+      '.conclusion == "success"'
+    );
+    expect(parsed.jobs["baseline-adoption-decision"].steps[1].run).toContain(
+      '.path == ".github/workflows/deploy-staging.yml"'
+    );
+    expect(parsed.jobs["baseline-adoption-decision"].steps[1].run).toContain(
+      '.head_branch == "1a-staging"'
+    );
     expect(
-      parsed.jobs["baseline-adoption-decision"].steps[0].with
+      parsed.jobs["baseline-adoption-decision"].steps[2].with
     ).toMatchObject({
       ref: "${{ github.workflow_sha }}",
       "persist-credentials": false,
     });
-    expect(parsed.jobs["baseline-adoption-decision"].steps[1]).toMatchObject({
+    expect(parsed.jobs["baseline-adoption-decision"].steps[3]).toMatchObject({
       uses: "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
       with: { "node-version": "22.17.1" },
     });
-    expect(parsed.jobs["baseline-adoption-decision"].steps[2].run).toContain(
+    expect(parsed.jobs["baseline-adoption-decision"].steps[4].run).toContain(
       "corepack prepare"
     );
     expect(
-      parsed.jobs["baseline-adoption-decision"].steps[3].env
+      parsed.jobs["baseline-adoption-decision"].steps[5].env
     ).toMatchObject({
-      DEPLOYED_REF: "${{ github.event.workflow_run.head_branch }}",
-      DEPLOYED_SHA: "${{ github.event.workflow_run.head_sha }}",
-      DEPLOY_WORKFLOW_RUN_ID: "${{ github.event.workflow_run.id }}",
+      DEPLOYED_REF: "${{ steps.deploy-run.outputs.deployed_ref }}",
+      DEPLOYED_SHA: "${{ steps.deploy-run.outputs.deployed_sha }}",
+      DEPLOY_WORKFLOW_RUN_ID:
+        "${{ steps.deploy-run.outputs.deploy_workflow_run_id }}",
     });
+    expect(parsedDispatcher.concurrency).toBeUndefined();
+    expect(parsedDispatcher.on.workflow_run).toEqual({
+      workflows: ["Web Deploy - STAGING"],
+      types: ["completed"],
+      branches: ["1a-staging"],
+    });
+    expect(parsedDispatcher.jobs["dispatch-successful-deploy"].if).toContain(
+      "github.event.workflow_run.conclusion == 'success'"
+    );
+    expect(
+      parsedDispatcher.jobs["dispatch-successful-deploy"].permissions
+    ).toEqual({ actions: "write" });
+    expect(
+      parsedDispatcher.jobs["dispatch-successful-deploy"].steps
+    ).toHaveLength(1);
     expect(workflow).not.toMatch(/\b(?:sleep|setInterval|setTimeout)\b/);
   });
+
+  it("dispatches the exact successful deploy run outside the E2E lane", () => {
+    const result = runSuccessfulDeployDispatcher("success");
+
+    expect(result.status).toBe(0);
+    expect(result.payload).toEqual({
+      ref: "main",
+      inputs: {
+        automatic_deploy_run_id: "67890",
+        pack: "all",
+      },
+    });
+  });
+
+  it.each(["failure", "cancelled", "timed_out", "skipped"])(
+    "does not dispatch staging E2E for a %s deploy",
+    (conclusion) => {
+      const result = runSuccessfulDeployDispatcher(conclusion);
+
+      expect(result.status).not.toBe(0);
+      expect(result.payload).toBeNull();
+    }
+  );
+
+  it("resolves the exact successful staging deployment identity", () => {
+    const result = runAutomaticDeployResolver("success");
+
+    expect(result.status).toBe(0);
+    expect(result.output).toBe(
+      `deployed_ref=1a-staging\ndeployed_sha=${SHA}\ndeploy_workflow_run_id=67890\n`
+    );
+  });
+
+  it.each(["failure", "cancelled", "timed_out", "skipped"])(
+    "rejects an automatic E2E dispatch for a %s deployment",
+    (conclusion) => {
+      const result = runAutomaticDeployResolver(conclusion);
+
+      expect(result.status).not.toBe(0);
+      expect(result.output).toBe("");
+    }
+  );
 });
