@@ -50,3 +50,9 @@
   exposed the legacy workflow's PR-write permission in 28 seconds; label
   recommendations now go to the job summary and the PR workflow is strictly
   read-only.
+- PR #3593 merged as `eaae62f8986a8a0f3f5d219008041b4c1f5f88d2`.
+  Production prebuild run `30959015710` succeeded in 12m08s. Staging run
+  `30959063209` built exact bytes in 11m05s, then failed before activation when
+  root-owned SSM Git commands encountered the `ubuntu`-owned checkout. The
+  active hotfix preserves Git's ownership check and executes repository
+  operations as the configured checkout owner.
