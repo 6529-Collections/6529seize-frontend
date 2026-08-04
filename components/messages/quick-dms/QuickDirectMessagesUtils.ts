@@ -52,7 +52,7 @@ const QUICK_DM_RELATIVE_TIME_ALWAYS_OPTIONS = {
   style: "short",
 } satisfies Intl.RelativeTimeFormatOptions;
 
-export const isQuickDmState = (value: unknown): value is QuickDmState => {
+const isQuickDmState = (value: unknown): value is QuickDmState => {
   if (value === null || typeof value !== "object" || Array.isArray(value)) {
     return false;
   }

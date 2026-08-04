@@ -88,6 +88,65 @@ const useIsQuickDmDesktop = (): boolean => {
   return !isApp && !isMobileDevice && isDesktopViewport;
 };
 
+const useQuickDmState = (
+  identityKey: string | null,
+  isVisible: boolean
+): {
+  readonly state: QuickDmState;
+  readonly setAndStoreState: (nextState: QuickDmState) => void;
+} => {
+  const [storedState, setStoredState] = useState<{
+    readonly identityKey: string | null;
+    readonly state: QuickDmState;
+  }>(() => ({
+    identityKey,
+    state: readStoredState(identityKey),
+  }));
+  if (storedState.identityKey !== identityKey) {
+    // React permits a conditional state adjustment during render. This keeps
+    // the newly selected identity from rendering even one frame of the old
+    // profile's selected conversation, without an effect-driven extra render.
+    setStoredState({ identityKey, state: readStoredState(identityKey) });
+  }
+
+  const state =
+    storedState.identityKey === identityKey ? storedState.state : CLOSED_STATE;
+  const setAndStoreState = useCallback(
+    (nextState: QuickDmState) => {
+      setStoredState({ identityKey, state: nextState });
+      storeState(nextState, identityKey);
+    },
+    [identityKey]
+  );
+
+  useEffect(() => {
+    if (!isVisible || typeof globalThis.window === "undefined") {
+      return;
+    }
+
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== QUICK_DM_STORAGE_KEY) {
+        return;
+      }
+
+      const nextState = parseStoredState(event.newValue, identityKey);
+      if (nextState === null) {
+        // Another connected identity can legitimately use the same storage
+        // key in a different tab. Its update must not close this profile's UI.
+        return;
+      }
+
+      setStoredState({ identityKey, state: nextState });
+    };
+
+    globalThis.window.addEventListener("storage", handleStorage);
+    return () =>
+      globalThis.window.removeEventListener("storage", handleStorage);
+  }, [identityKey, isVisible]);
+
+  return { state, setAndStoreState };
+};
+
 export default function QuickDirectMessages() {
   const { connectedProfile, showWaves } = useAuth();
   const isDesktop = useIsQuickDmDesktop();
@@ -97,27 +156,11 @@ export default function QuickDirectMessages() {
   const shouldLiftLauncher = useWaveDropsScrollControlsVisible();
   const dockedComposers = useWaveComposerDockElements();
   const [isLauncherZoneCovered, setIsLauncherZoneCovered] = useState(false);
-  const quickDmIdentityKey = directMessages.identityKey;
-  const [storedState, setStoredState] = useState<{
-    readonly identityKey: string | null;
-    readonly state: QuickDmState;
-  }>(() => ({
-    identityKey: quickDmIdentityKey,
-    state: readStoredState(quickDmIdentityKey),
-  }));
-  if (storedState.identityKey !== quickDmIdentityKey) {
-    // React permits a conditional state adjustment during render. This keeps
-    // the newly selected identity from rendering even one frame of the old
-    // profile's selected conversation, without an effect-driven extra render.
-    setStoredState({
-      identityKey: quickDmIdentityKey,
-      state: readStoredState(quickDmIdentityKey),
-    });
-  }
-  const state =
-    storedState.identityKey === quickDmIdentityKey
-      ? storedState.state
-      : CLOSED_STATE;
+  const isVisible = Boolean(isDesktop && connectedProfile?.handle && showWaves);
+  const { state, setAndStoreState } = useQuickDmState(
+    directMessages.identityKey,
+    isVisible
+  );
   const [isCreateDirectMessageOpen, setIsCreateDirectMessageOpen] =
     useState(false);
   const launcherButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -125,7 +168,6 @@ export default function QuickDirectMessages() {
   const restoreFocusElementRef = useRef<HTMLElement | null>(null);
 
   const waves = directMessages.list;
-  const isVisible = Boolean(isDesktop && connectedProfile?.handle && showWaves);
   const selectedWave = useMemo(
     () => waves.find((wave) => wave.id === state.waveId) ?? null,
     [state.waveId, waves]
@@ -204,14 +246,6 @@ export default function QuickDirectMessages() {
     debouncedMeasureLauncherZone,
   ]);
 
-  const setAndStoreState = useCallback(
-    (nextState: QuickDmState) => {
-      setStoredState({ identityKey: quickDmIdentityKey, state: nextState });
-      storeState(nextState, quickDmIdentityKey);
-    },
-    [quickDmIdentityKey]
-  );
-
   const restoreLauncherFocus = useCallback(() => {
     if (typeof globalThis.window === "undefined") {
       return;
@@ -271,34 +305,6 @@ export default function QuickDirectMessages() {
     setAndStoreState(CLOSED_STATE);
     restoreLauncherFocus();
   }, [restoreLauncherFocus, setAndStoreState]);
-
-  useEffect(() => {
-    if (!isVisible || typeof globalThis.window === "undefined") {
-      return;
-    }
-
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key !== QUICK_DM_STORAGE_KEY) {
-        return;
-      }
-
-      const nextState = parseStoredState(event.newValue, quickDmIdentityKey);
-      if (nextState === null) {
-        // Another connected identity can legitimately use the same storage
-        // key in a different tab. Its update must not close this profile's UI.
-        return;
-      }
-
-      setStoredState({
-        identityKey: quickDmIdentityKey,
-        state: nextState,
-      });
-    };
-
-    globalThis.window.addEventListener("storage", handleStorage);
-    return () =>
-      globalThis.window.removeEventListener("storage", handleStorage);
-  }, [isVisible, quickDmIdentityKey]);
 
   useEffect(() => {
     if (!isVisible || state.view === "closed") {
