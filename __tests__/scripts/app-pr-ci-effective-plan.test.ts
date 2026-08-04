@@ -1,12 +1,11 @@
-const { applyEffectiveAppPrCiPlan } =
-  require("../../scripts/app-pr-ci-effective-plan.cjs") as {
-    applyEffectiveAppPrCiPlan: (
-      plan: Record<string, unknown>,
-      options?: { cwd?: string }
-    ) => {
-      checks: Record<string, { required: boolean }>;
-    };
-  };
+import { execFileSync } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+
+type EffectivePlan = {
+  checks: Record<string, { required: boolean }>;
+};
 
 function plan(changedFiles: string[]) {
   return {
@@ -20,11 +19,29 @@ function plan(changedFiles: string[]) {
   };
 }
 
+function executePlan(changedFiles: string[]): EffectivePlan {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "app-pr-ci-plan-"));
+  const planPath = path.join(tempDir, "ci-plan.json");
+  try {
+    fs.writeFileSync(planPath, JSON.stringify(plan(changedFiles)));
+    execFileSync(
+      process.execPath,
+      [
+        path.join(process.cwd(), "scripts/app-pr-ci-effective-plan.cjs"),
+        "--plan",
+        planPath,
+      ],
+      { cwd: process.cwd(), stdio: "pipe" }
+    );
+    return JSON.parse(fs.readFileSync(planPath, "utf8")) as EffectivePlan;
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
 describe("effective App PR CI plan", () => {
   it("keeps ordinary runtime changes on focused static checks", () => {
-    const effective = applyEffectiveAppPrCiPlan(
-      plan(["components/header/AppHeader.tsx"])
-    );
+    const effective = executePlan(["components/header/AppHeader.tsx"]);
 
     expect(effective.checks.deadcode.required).toBe(false);
     expect(effective.checks.release_bus_contract.required).toBe(false);
@@ -38,9 +55,7 @@ describe("effective App PR CI plan", () => {
     "__tests__/scripts/e2e-packs.test.ts",
     "tsconfig.playwright.json",
   ])("requires test typechecking for %s", (file) => {
-    expect(
-      applyEffectiveAppPrCiPlan(plan([file])).checks.test_typecheck.required
-    ).toBe(true);
+    expect(executePlan([file]).checks.test_typecheck.required).toBe(true);
   });
 
   it.each([
@@ -48,20 +63,13 @@ describe("effective App PR CI plan", () => {
     "ops/scripts/deploy-staging-artifact.sh",
     "tests/packs.manifest.cjs",
   ])("requires Release Bus contracts for %s", (file) => {
-    expect(
-      applyEffectiveAppPrCiPlan(plan([file])).checks.release_bus_contract
-        .required
-    ).toBe(true);
+    expect(executePlan([file]).checks.release_bus_contract.required).toBe(true);
   });
 
   it("requires dead-code analysis for dependency changes or deleted runtime source", () => {
+    expect(executePlan(["package.json"]).checks.deadcode.required).toBe(true);
     expect(
-      applyEffectiveAppPrCiPlan(plan(["package.json"])).checks.deadcode.required
-    ).toBe(true);
-    expect(
-      applyEffectiveAppPrCiPlan(plan(["lib/removed-runtime-source.ts"]), {
-        cwd: "/path-that-does-not-exist",
-      }).checks.deadcode.required
+      executePlan(["lib/removed-runtime-source.ts"]).checks.deadcode.required
     ).toBe(true);
   });
 });
