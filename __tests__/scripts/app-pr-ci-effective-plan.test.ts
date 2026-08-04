@@ -4,7 +4,13 @@ import os from "node:os";
 import path from "node:path";
 
 type EffectivePlan = {
-  checks: Record<string, { required: boolean }>;
+  checks: {
+    deadcode: { required: boolean };
+    release_bus_contract: { required: boolean };
+    test_typecheck: { required: boolean };
+    playwright_smoke?: { required: boolean };
+    playwright_critical_shell?: { required: boolean };
+  };
 };
 
 function plan(changedFiles: string[]) {

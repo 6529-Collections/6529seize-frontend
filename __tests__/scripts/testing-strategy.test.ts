@@ -299,8 +299,8 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.risk_floor.required).toBe(true);
     expect(plan.checks.secret_scan.required).toBe(true);
     expect(plan.checks.install.required).toBe(false);
-    expect(plan.checks.playwright_smoke.required).toBe(false);
-    expect(plan.checks.playwright_critical_shell.required).toBe(false);
+    expect(plan.checks["playwright_smoke"]!.required).toBe(false);
+    expect(plan.checks["playwright_critical_shell"]!.required).toBe(false);
     expect(plan.security).toMatchObject({
       secrets_allowed: false,
       token_permissions: "contents:read",
@@ -317,13 +317,13 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.install.required).toBe(true);
     expect(plan.checks.lint_changed.required).toBe(true);
     expect(plan.checks.typecheck_changed.required).toBe(true);
-    expect(plan.checks.test_typecheck.required).toBe(true);
+    expect(plan.checks["test_typecheck"]!.required).toBe(true);
     expect(plan.checks["test_typecheck"]?.reason).toContain(
       "Jest diagnostic ratchet"
     );
     expect(plan.checks.jest_changed.required).toBe(true);
-    expect(plan.checks.playwright_smoke.required).toBe(true);
-    expect(plan.checks.playwright_critical_shell.required).toBe(false);
+    expect(plan.checks["playwright_smoke"]!.required).toBe(true);
+    expect(plan.checks["playwright_critical_shell"]!.required).toBe(false);
     expect(plan.checks.build.required).toBe(false);
   });
 
@@ -337,7 +337,7 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.workflow_security_review.required).toBe(true);
     expect(plan.checks.dependency_governance.required).toBe(true);
     expect(plan.checks.build.required).toBe(true);
-    expect(plan.checks.playwright_critical_shell.required).toBe(true);
+    expect(plan.checks["playwright_critical_shell"]!.required).toBe(true);
   });
 
   it.each([
@@ -357,7 +357,7 @@ describe("testing strategy CI plan", () => {
 
     expect(plan.risk.computed_floor).toBe(2);
     expect(plan.checks.build.required).toBe(true);
-    expect(plan.checks.playwright_critical_shell.required).toBe(true);
+    expect(plan.checks["playwright_critical_shell"]!.required).toBe(true);
     expect(plan.checks.build.reason).toContain("deleted runtime source");
   });
 
