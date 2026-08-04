@@ -26,6 +26,13 @@
   practice manuscripts atomically from one exact source commit. Partial,
   malformed, or mixed-source states suppress the study and all exact-source
   claims.
+- The exact moving-main publication probe resolved canonical source
+  `5afd128cd3ec157479e1ced904fb982c3de1cc60`, 247 manifest entries, 57 public
+  documents, twenty-seven profiles, and the expected overview, adjacent-
+  practice study, and writing standard. No candidate SHA or mixed release was
+  admitted.
+- The frontend candidate merged cleanly onto exact frontend main
+  `456e7a7f3519eaffb8e8d4981436290e467a1412` before final qualification.
 
 ## 2026-08-04 living-study expansion and whole-corpus editorial pass
 

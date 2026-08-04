@@ -13,10 +13,9 @@
   `sha256:40065c69a864377d92ed48106c48c2abfd72e2ffd3d1b02f9097a4e08a87393f`;
   Keccak-256
   `0x63a97f876a08a18fa8062df8e60798bde45598962a483318d9289a71eb9e011c`.
-- Frontend branch: `codex/museum-institutional-practice-v2-fe`. The current
-  release base is being advanced to exact frontend main
-  `456e7a7f3519eaffb8e8d4981436290e467a1412`; no frontend PR has been opened
-  for this expansion yet.
+- Frontend branch: `codex/museum-institutional-practice-v2-fe`, merged cleanly
+  onto exact frontend main `456e7a7f3519eaffb8e8d4981436290e467a1412`.
+  No frontend PR has been opened for this expansion yet.
 - Publication boundary: one comparative overview, twenty-seven profiles, one
   adjacent-practice study, the public scholarship and editorial standard, and
   one source register—thirty-one manuscripts from one exact source release.
@@ -29,10 +28,11 @@
 - Local frontend validation: 69 Museum suites / 218 tests and the 104 focused
   publication/route tests pass; changed lint, changed typecheck, Playwright
   typecheck, help-index sync (202 records), and React Doctor 100/100 pass.
-  The exact candidate-source probe passed with 57 public documents, 27
-  institutional profiles, and all 31 institutional-practice manuscripts.
-  Exact canonical-main probing, optimized build, retained browser evidence,
-  PR/bot review, staging, and production qualification remain pending.
+  The exact canonical-main probe resolves source commit `5afd128cd3ec...`, 57
+  public documents, 27 institutional profiles, all 31 institutional-practice
+  manuscripts, and the canonical commitments above. Optimized build, retained
+  browser evidence, PR/bot review, staging, and production qualification remain
+  pending.
 
 ## Previous qualified release
 
