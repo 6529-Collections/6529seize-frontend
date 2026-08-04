@@ -6,7 +6,7 @@ import {
 } from "@/lib/security/urlGuard";
 import { OG_IMAGE_PROXY_MAX_BYTES } from "@/app/api/og-metadata/_lib/imageProxyPolicy";
 import { NextResponse, type NextRequest } from "next/server";
-import sharp from "sharp";
+import sharp, { type Sharp } from "sharp";
 
 export const runtime = "nodejs";
 export const revalidate = 604800;
@@ -315,7 +315,7 @@ const normalizeImageToPng = async ({
     .toBuffer();
 };
 
-const createGifPreviewImage = async (buffer: Buffer): Promise<sharp.Sharp> => {
+const createGifPreviewImage = async (buffer: Buffer): Promise<Sharp> => {
   await sharp(buffer, {
     animated: true,
     limitInputPixels: false,
