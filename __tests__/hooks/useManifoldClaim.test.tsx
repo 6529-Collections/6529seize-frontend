@@ -59,6 +59,48 @@ test("builds claim from contract data", async () => {
   expect(result.current.claim?.remaining).toBe(1);
 });
 
+test("updates fetch status without replacing the claim", async () => {
+  const data = [
+    BigInt(3),
+    {
+      total: BigInt(1),
+      totalMax: BigInt(2),
+      cost: BigInt(0),
+      startDate: BigInt(0),
+      endDate: BigInt(9999999999),
+      merkleRoot: NULL_MERKLE,
+    },
+  ];
+  let isFetching = false;
+
+  mockRead.mockImplementation(() => ({
+    data,
+    isFetching,
+    error: null,
+    refetch: jest.fn(),
+  }));
+
+  const { result, rerender } = renderHook(() =>
+    useManifoldClaim({
+      chainId: 1,
+      contract: "0x1",
+      proxy: "0x2",
+      abi: [],
+      identifier: 1,
+    })
+  );
+
+  await waitFor(() => expect(result.current.claim).toBeDefined());
+  const initialClaim = result.current.claim;
+
+  isFetching = true;
+  rerender();
+
+  expect(result.current.isFetching).toBe(true);
+  expect(result.current.claim).toBe(initialClaim);
+  expect(result.current.claim).not.toHaveProperty("isFetching");
+});
+
 test("builds claim from getClaim tuple shape", async () => {
   mockRead.mockReturnValue({
     data: {
