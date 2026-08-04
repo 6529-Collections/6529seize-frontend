@@ -575,6 +575,37 @@ describe("useNewDropCounter", () => {
     expect(refetch).not.toHaveBeenCalled();
   });
 
+  it("prunes an unknown event after the opposite list classifies its wave", () => {
+    const refetch = jest.fn();
+    const { result, rerender } = renderHook(
+      ({ otherListWaveIds }) =>
+        useNewDropCounter(null, waves, refetch, { otherListWaveIds }),
+      {
+        wrapper,
+        initialProps: { otherListWaveIds: new Set<string>() },
+      }
+    );
+
+    emitDropUpdate({ serialNo: 7, waveId: "initially-unknown-wave" });
+
+    expect(result.current.newDropsCounts["initially-unknown-wave"]?.count).toBe(
+      1
+    );
+    expect(refetch).toHaveBeenCalledTimes(1);
+
+    rerender({
+      otherListWaveIds: new Set<string>(["initially-unknown-wave"]),
+    });
+    expect(result.current.newDropsCounts["initially-unknown-wave"]).toBe(
+      undefined
+    );
+
+    rerender({ otherListWaveIds: new Set<string>() });
+    expect(result.current.newDropsCounts["initially-unknown-wave"]).toBe(
+      undefined
+    );
+  });
+
   it("tracks own unknown-wave timestamps without refetching the list", () => {
     const refetch = jest.fn();
     const { result } = renderHook(

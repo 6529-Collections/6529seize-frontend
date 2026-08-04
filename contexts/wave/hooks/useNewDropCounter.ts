@@ -34,6 +34,32 @@ const DEFAULT_UNKNOWN_WAVE_REFETCH_COOLDOWN_MS = 3000;
 const DEFAULT_OTHER_LIST_WAVE_IDS: ReadonlySet<string> = new Set<string>();
 const EMPTY_NEW_DROPS_COUNTS: Record<string, MinimalWaveNewDropsCount> = {};
 
+const removeWaveCounts = (
+  newDropsCounts: NewDropsCounts,
+  waveIds: ReadonlySet<string>
+): NewDropsCounts => {
+  let next = newDropsCounts;
+
+  waveIds.forEach((waveId) => {
+    if (!(waveId in next)) {
+      return;
+    }
+
+    if (next === newDropsCounts) {
+      next = { ...newDropsCounts };
+    }
+    delete next[waveId];
+  });
+
+  return next;
+};
+
+const haveSameWaveIds = (
+  left: ReadonlySet<string>,
+  right: ReadonlySet<string>
+): boolean =>
+  left.size === right.size && [...left].every((waveId) => right.has(waveId));
+
 export function getNewestTimestamp(
   cached: number | null | undefined = null,
   server: number | null | undefined = null
@@ -297,6 +323,8 @@ function useNewDropCounter(
     [stateIdentityKey]
   );
   const [previousEnabled, setPreviousEnabled] = useState(enabled);
+  const [previousOtherListWaveIds, setPreviousOtherListWaveIds] =
+    useState(otherListWaveIds);
   const wavesRef = useRef(waves);
   const lastUnknownWaveRefetchAtRef = useRef<number | null>(null);
 
@@ -311,6 +339,18 @@ function useNewDropCounter(
     }
   }
 
+  if (!haveSameWaveIds(previousOtherListWaveIds, otherListWaveIds)) {
+    setPreviousOtherListWaveIds(otherListWaveIds);
+    setRawNewDropsState((previous) => {
+      if (previous.identityKey !== stateIdentityKey) {
+        return previous;
+      }
+
+      const counts = removeWaveCounts(previous.counts, otherListWaveIds);
+      return counts === previous.counts ? previous : { ...previous, counts };
+    });
+  }
+
   useEffect(() => {
     if (!enabled) {
       wavesRef.current = [];
@@ -322,14 +362,22 @@ function useNewDropCounter(
   }, [enabled, waves]);
 
   const reconciledNewDropsCounts = useMemo(
-    () =>
-      reconcileNewDropsCounts({
+    () => {
+      const reconciled = reconcileNewDropsCounts({
         newDropsCounts: rawNewDropsCounts,
         trustServerSnapshotUnreadState,
         websocketReceivedAtByWave,
         waves,
-      }),
+      });
+
+      // A wave can be unknown when its event arrives and classified by the
+      // opposite list only after the resulting refetch. Exclude it immediately
+      // so the wrong list cannot flash or retain a phantom unread count while
+      // the guarded state adjustment above permanently prunes the raw event.
+      return removeWaveCounts(reconciled, otherListWaveIds);
+    },
     [
+      otherListWaveIds,
       rawNewDropsCounts,
       trustServerSnapshotUnreadState,
       websocketReceivedAtByWave,

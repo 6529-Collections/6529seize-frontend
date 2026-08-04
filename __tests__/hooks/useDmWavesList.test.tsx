@@ -181,6 +181,54 @@ describe("useDmWavesList", () => {
     expect(refetchQueries).toHaveBeenCalledTimes(5);
   });
 
+  it("re-arms a new mismatch after a newer DM snapshot", () => {
+    let dataUpdatedAt = 100;
+    let unreadDmDropsCount = 1;
+    useUnreadDmDropsMock.mockImplementation(() => ({
+      get unreadDmDropsCount() {
+        return unreadDmDropsCount;
+      },
+      dataUpdatedAt: 100,
+      isFetching: false,
+      refetch: jest.fn().mockResolvedValue(undefined),
+    }));
+    useWavesV2Mock.mockImplementation(() => ({
+      waves: [
+        {
+          id: "wave-1",
+          latestDropTimestamp: 200,
+          unreadDropsCount: 0,
+        },
+      ],
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      status: "success",
+      refetch: jest.fn(),
+      queryKey: dmWavesQueryKey,
+      get dataUpdatedAt() {
+        return dataUpdatedAt;
+      },
+    }));
+
+    const { rerender } = renderHook(() => useDmWavesList());
+
+    expect(refetchQueries).toHaveBeenCalledTimes(1);
+
+    dataUpdatedAt = 200;
+    rerender();
+    expect(refetchQueries).toHaveBeenCalledTimes(2);
+
+    unreadDmDropsCount = 2;
+    rerender();
+    expect(refetchQueries).toHaveBeenCalledTimes(2);
+
+    dataUpdatedAt = 300;
+    rerender();
+    expect(refetchQueries).toHaveBeenCalledTimes(3);
+  });
+
   it("does not refetch when the DM rows account for the unread summary", () => {
     const refetch = jest.fn();
     useUnreadDmDropsMock.mockReturnValue({
