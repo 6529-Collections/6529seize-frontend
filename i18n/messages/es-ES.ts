@@ -455,6 +455,30 @@ export const ES_ES_MESSAGES = {
   "waves.leaderboard.loadingMoreButton": "Cargando…",
   "waves.leaderboard.timeline.toggle":
     "Mostrar u ocultar la cronología de decisiones",
+  "waves.leaderboard.timeline.decisionTimeline":
+    "Cronología de decisiones",
+  "waves.leaderboard.timeline.announcementHistory":
+    "Historial de anuncios",
+  "waves.leaderboard.timeline.paused": "En pausa",
+  "waves.leaderboard.timeline.nextDecisionAfter":
+    "Próxima decisión después del {date}",
+  "waves.leaderboard.timeline.noDecisionScheduled":
+    "No hay ninguna decisión programada",
+  "waves.leaderboard.timeline.noUpcomingEvents": "No hay próximos eventos",
+  "waves.leaderboard.timeline.nextWinner": "Próximo ganador",
+  "waves.leaderboard.timeline.nextWinnerIn":
+    "Próximo ganador en {countdown}",
+  "waves.leaderboard.timeline.unit.day.one": "{count} día",
+  "waves.leaderboard.timeline.unit.day.other": "{count} días",
+  "waves.leaderboard.timeline.unit.hour.one": "{count} hora",
+  "waves.leaderboard.timeline.unit.hour.other": "{count} horas",
+  "waves.leaderboard.timeline.unit.minute.one": "{count} minuto",
+  "waves.leaderboard.timeline.unit.minute.other": "{count} minutos",
+  "waves.leaderboard.timeline.unit.second.one": "{count} segundo",
+  "waves.leaderboard.timeline.unit.second.other": "{count} segundos",
+  "waves.leaderboard.timeline.status.next": "Siguiente",
+  "waves.leaderboard.timeline.status.done": "Hecho",
+  "waves.leaderboard.timeline.status.completed": "Completado",
   "waves.poll.actions.viewResults": "Ver resultados",
   "waves.poll.actions.vote": "Votar",
   "waves.poll.actions.changeVote": "Cambiar voto",

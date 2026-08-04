@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import type { DecisionPoint } from "@/helpers/waves/time.types";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { HorizontalTimelineItem } from "./HorizontalTimelineItem";
 
 interface HorizontalTimelineProps {
@@ -22,6 +23,7 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
   focus = null,
   onFocusHandled,
 }) => {
+  const locale = useBrowserLocale();
   // Calculate whether we should use flex-grow or fixed width
   // If we have few items (less than would cause scrolling), we want them to spread out
   const shouldSpread = decisions.length <= 5; // Adjust this number as needed
@@ -195,6 +197,7 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
                     decision={decision}
                     isNext={isNext}
                     flexGrow={shouldSpread}
+                    locale={locale}
                   />
                 </div>
               );
