@@ -83,7 +83,7 @@ function PrimaryAddressTable({
   return (
     <section
       aria-label={scrollRegionLabel}
-      className="tw-[scrollbar-gutter:stable] tw-max-h-[75vh] tw-min-w-0 tw-overflow-y-auto tw-overflow-x-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/40 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-scrollbar-thumb-iron-500"
+      className="tw-[scrollbar-gutter:stable] tw-max-h-[75vh] tw-min-w-0 tw-overflow-y-auto tw-overflow-x-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/70 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-scrollbar-thumb-iron-500 lg:tw-bg-iron-950/40"
       {...scrollRegionProps}
     >
       <table className="tw-block tw-w-full tw-table-fixed tw-border-collapse lg:tw-table">
@@ -128,17 +128,17 @@ function PrimaryAddressRow({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <tr className="tw-block tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-2 before:tw-hidden after:tw-hidden last:tw-border-b-0 lg:tw-table-row lg:tw-border-0 lg:tw-p-0">
+    <tr className="tw-mb-2 tw-block tw-bg-iron-950 tw-px-4 tw-py-3 before:tw-hidden after:tw-hidden last:tw-mb-0 lg:tw-mb-0 lg:tw-table-row lg:tw-bg-transparent lg:tw-p-0">
       <td className={TABLE_CELL_CLASS}>
         <Link
-          className="tw-flex tw-min-h-11 tw-min-w-0 tw-items-center tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-2 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100 tw-underline tw-decoration-iron-600 tw-underline-offset-4 tw-transition-colors focus:tw-outline-none focus-visible:tw-rounded-md focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-primary-300 lg:tw-border-0 lg:tw-py-0"
+          className="tw-flex tw-min-h-11 tw-min-w-0 tw-items-center tw-py-1 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100 tw-underline tw-decoration-iron-600 tw-underline-offset-4 tw-transition-colors focus:tw-outline-none focus-visible:tw-rounded-md focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-primary-300 lg:tw-py-0"
           href={`/${item.current_primary}`}
         >
           <span className="tw-min-w-0 tw-break-words">{item.handle}</span>
         </Link>
       </td>
       <td className={TABLE_CELL_CLASS}>
-        <div className="tw-flex tw-min-h-11 tw-min-w-0 tw-flex-col tw-justify-center tw-py-3 lg:tw-py-0">
+        <div className="tw-flex tw-min-h-11 tw-min-w-0 tw-flex-col tw-justify-center tw-py-2 lg:tw-py-0">
           <span
             aria-hidden="true"
             className="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500 lg:tw-hidden"
@@ -151,7 +151,7 @@ function PrimaryAddressRow({
         </div>
       </td>
       <td className={TABLE_CELL_CLASS}>
-        <div className="tw-flex tw-min-h-11 tw-min-w-0 tw-flex-col tw-justify-center tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-py-3 lg:tw-border-0 lg:tw-py-0">
+        <div className="tw-flex tw-min-h-11 tw-min-w-0 tw-flex-col tw-justify-center tw-py-2 lg:tw-py-0">
           <span
             aria-hidden="true"
             className="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500 lg:tw-hidden"
