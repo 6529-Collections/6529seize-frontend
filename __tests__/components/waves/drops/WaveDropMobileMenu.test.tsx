@@ -1,8 +1,12 @@
 import { AuthContext } from "@/components/auth/Auth";
 import WaveDropMobileMenu from "@/components/waves/drops/WaveDropMobileMenu";
 import { WaveDropLayerProvider } from "@/components/waves/drops/WaveDropLayerContext";
+import { ProfileConnectedStatus } from "@/entities/IProfile";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useCapacitor from "@/hooks/useCapacitor";
 import { render, screen } from "@testing-library/react";
@@ -97,6 +101,101 @@ beforeAll(() => {
 const mockedUseDropInteractionRules = jest.mocked(useDropInteractionRules);
 const mockedUseCapacitor = jest.mocked(useCapacitor);
 type AuthProviderValue = ComponentProps<typeof AuthContext.Provider>["value"];
+
+const unauthenticatedAuth: AuthProviderValue = {
+  connectedProfile: null,
+  isAuthenticated: false,
+  fetchingProfile: false,
+  connectionStatus: ProfileConnectedStatus.NOT_CONNECTED,
+  receivedProfileProxies: [],
+  activeProfileProxy: null,
+  showWaves: false,
+  sessionUpgradeRequired: false,
+  requestAuth: jest.fn(async () => ({ success: false })),
+  requestSessionUpgrade: jest.fn(async () => ({ success: false })),
+  ensureActiveSessionV2WebSession: jest.fn(async () => false),
+  setToast: jest.fn(),
+  setActiveProfileProxy: jest.fn(async () => {}),
+};
+
+const dropFixture = {
+  id: "1",
+  serial_no: 1,
+  drop_type: ApiDropType.Chat,
+  rank: null,
+  wave: {
+    id: "w",
+    name: "Test wave",
+    picture: null,
+    description_drop_id: "description-drop",
+    last_drop_time: 0,
+    submission_type: null,
+    authenticated_user_eligible_to_vote: true,
+    authenticated_user_eligible_to_participate: true,
+    authenticated_user_eligible_to_chat: true,
+    authenticated_user_admin: false,
+    visibility_group_id: null,
+    participation_group_id: null,
+    chat_group_id: null,
+    voting_group_id: null,
+    admin_group_id: null,
+    voting_period_start: null,
+    voting_period_end: null,
+    voting_credit_type: ApiWaveCreditType.Tdh,
+    voting_credit_scope: ApiWaveCreditScope.Wave,
+    voting_credit_nfts: null,
+    admin_drop_deletion_enabled: false,
+    forbid_negative_votes: false,
+    pinned: false,
+    identity_wave: false,
+  },
+  author: {
+    id: "author-1",
+    handle: "alice",
+    pfp: null,
+    banner1_color: null,
+    banner2_color: null,
+    cic: 0,
+    rep: 0,
+    tdh: 0,
+    tdh_rate: 0,
+    xtdh: 0,
+    xtdh_rate: 0,
+    level: 1,
+    classification: ApiProfileClassification.Pseudonym,
+    sub_classification: null,
+    primary_address: "0x0000000000000000000000000000000000000000",
+    subscribed_actions: [],
+    archived: false,
+    active_main_stage_submission_ids: [],
+    winner_main_stage_drop_ids: [],
+    artist_of_prevote_cards: [],
+    profile_wave_id: null,
+    is_wave_creator: false,
+  },
+  created_at: 0,
+  updated_at: null,
+  title: null,
+  parts: [],
+  parts_count: 0,
+  referenced_nfts: [],
+  mentioned_users: [],
+  mentioned_groups: [],
+  mentioned_waves: [],
+  metadata: [],
+  rating: 0,
+  realtime_rating: 0,
+  rating_prediction: 0,
+  top_raters: [],
+  raters_count: 0,
+  context_profile_context: null,
+  subscribed_actions: [],
+  is_signed: false,
+  reactions: [],
+  boosts: 0,
+  is_additional_action_promised: false,
+  hide_link_preview: false,
+} satisfies ApiDrop;
 
 beforeEach(() => {
   writeText.mockClear();
@@ -387,25 +486,10 @@ test("does not hide the native drop action sheet when desktop hover CSS is activ
     typeof useCapacitor
   >);
 
-  const drop = {
-    id: "1",
-    serial_no: 1,
-    wave: { id: "w" },
-    drop_type: ApiDropType.Chat,
-    author: { handle: "alice" },
-  } as any;
-
   render(
-    <AuthContext.Provider
-      value={
-        {
-          connectedProfile: null,
-          activeProfileProxy: null,
-        } as any
-      }
-    >
+    <AuthContext.Provider value={unauthenticatedAuth}>
       <WaveDropMobileMenu
-        drop={drop}
+        drop={dropFixture}
         isOpen
         showReplyAndQuote
         longPressTriggered={false}
@@ -422,25 +506,10 @@ test("does not hide the native drop action sheet when desktop hover CSS is activ
 });
 
 test("preserves desktop-hover hiding outside the native app", () => {
-  const drop = {
-    id: "1",
-    serial_no: 1,
-    wave: { id: "w" },
-    drop_type: ApiDropType.Chat,
-    author: { handle: "alice" },
-  } as any;
-
   render(
-    <AuthContext.Provider
-      value={
-        {
-          connectedProfile: null,
-          activeProfileProxy: null,
-        } as any
-      }
-    >
+    <AuthContext.Provider value={unauthenticatedAuth}>
       <WaveDropMobileMenu
-        drop={drop}
+        drop={dropFixture}
         isOpen
         showReplyAndQuote
         longPressTriggered={false}
