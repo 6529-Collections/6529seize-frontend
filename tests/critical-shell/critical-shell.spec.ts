@@ -148,20 +148,32 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
     await waitForRouteReady(page, { readySelector: "#waves-content" });
 
     await expect(page.locator("#waves-content")).toBeVisible();
-    await expect(
-      page.getByRole("heading", {
-        level: 1,
-        name: "Latest From Profile Waves",
-      })
-    ).toBeVisible();
-    await expect(
-      page.getByText(
-        "Drops 6529 users are featuring from their own profile waves."
-      )
-    ).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: "Profile Waves Feed" })
-    ).toHaveAttribute("href", "/waves");
+    const viewport = page.viewportSize();
+    if (viewport && viewport.width < 768) {
+      await expect(
+        page.locator("main").getByText("Waves").first()
+      ).toBeVisible();
+      await expect(
+        page.getByRole("region", {
+          name: /All recent waves list|Regular waves list/,
+        })
+      ).toBeVisible();
+    } else {
+      await expect(
+        page.getByRole("heading", {
+          level: 1,
+          name: "Latest From Profile Waves",
+        })
+      ).toBeVisible();
+      await expect(
+        page.getByText(
+          "Drops 6529 users are featuring from their own profile waves."
+        )
+      ).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: "Profile Waves Feed" })
+      ).toHaveAttribute("href", "/waves");
+    }
     await expectRouteShellHealthy(page, diagnostics, {
       // Local feed API health gets separate coverage; keep this allowance
       // route-scoped because Chromium reports the resource 500 without a URL.
