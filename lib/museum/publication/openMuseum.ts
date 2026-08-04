@@ -21,7 +21,7 @@ const EMBEDDED_STATEMENT_FRONT_MATTER = {
   [MUSEUM_ONCHAIN_TRANSITION_PATH]: {
     title: "From public repository to on-chain Museum record",
     status:
-      "Status: working public migration statement; not deployment or activation evidence",
+      "Status: working public migration statement. Contract design is in progress; audit, deployment, activation, and record migration remain pending.",
   },
 } as const;
 

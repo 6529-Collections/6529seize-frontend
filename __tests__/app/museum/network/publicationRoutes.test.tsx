@@ -44,7 +44,7 @@ async function buildPublication(): Promise<MuseumPublication> {
       "records/accessions/6529NM.2026.001/public/projects/century.md":
         "# CENTURY: The Cut That Keeps Happening\n\nThe cut is an operation, not a motif.",
       "records/accessions/6529NM.2026.001/public/source-and-chronology-matrix.md":
-        "# Casey Reas: shared source, chronology, and factual-boundary matrix\n\n- **Status:** internal metadata\n\n## 1. How all writing lanes should use this file\n\nInternal instruction.\n\n## 2. Canonical accession facts\n\n| Fact | Source |\n| --- | --- |\n| Artist | Governed record |\n\n## 11. Required omissions to acknowledge in the monograph and collection essay\n\nKnown limits.\n\n## 12. Notes style shared across lanes\n\nInternal style instruction.",
+        "# Casey Reas: Sources and chronology\n\n- **Status:** internal metadata\n\n## 1. How all writing lanes should use this file\n\nInternal instruction.\n\n## 2. Canonical accession facts\n\n| Fact | Source |\n| --- | --- |\n| Artist | Governed record |\n\n## 11. Required omissions to acknowledge in the monograph and collection essay\n\nKnown limits.\n\n## 12. Notes style shared across lanes\n\nInternal style instruction.",
       "docs/open-museum.md":
         "# The record outlives the interface\n\nStatus: working public operating statement; not an adopted governance policy\n\n## An open museum, built in public\n\nThe public record can be inspected, forked, and improved through reviewed contributions.",
       "docs/onchain-transition.md":
@@ -209,7 +209,7 @@ describe("Museum finished publication routes", () => {
     expect(
       screen.getByText(/The public repository is the bridge/u)
     ).toBeInTheDocument();
-    expect(screen.getAllByText(/Public operating statement/u)).toHaveLength(1);
+    expect(screen.getAllByText(/Working public statement/u)).toHaveLength(1);
     expect(screen.getAllByText(/Contract design in progress/u)).toHaveLength(1);
     expect(screen.queryByText(/Source HTML observed/u)).not.toBeInTheDocument();
     expect(

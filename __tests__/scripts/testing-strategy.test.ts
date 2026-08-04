@@ -459,13 +459,28 @@ describe("testing strategy CI plan", () => {
         )
       )
     ).toBe(true);
-
     const parsed = YAML.parse(workflow) as {
       jobs: Record<string, { if?: string }>;
     };
     expect(parsed.jobs["installed-checks"]?.if).toBe(
       "needs.plan.outputs.install_required == 'true'"
     );
+  });
+
+  it("keeps full-history CI checkouts blobless", () => {
+    const appPrCi = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),
+      "utf8"
+    );
+    const pushSecretScan = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/push-secret-scan.yml"),
+      "utf8"
+    );
+
+    expect(appPrCi.match(/filter: blob:none/gu)).toHaveLength(2);
+    expect(appPrCi.match(/fetch-depth: 0/gu)).toHaveLength(2);
+    expect(pushSecretScan).toContain("filter: blob:none");
+    expect(pushSecretScan).toContain("fetch-depth: 0");
   });
 });
 

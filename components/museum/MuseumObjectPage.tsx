@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { MuseumArtworkViewer } from "./MuseumArtworkViewer";
 import { MuseumJsonDisclosure, MuseumMarkdown } from "./MuseumMarkdown";
 import { MuseumPublicationUnavailable } from "./MuseumPublicationUnavailable";
+import { MuseumProgramOutcomePage } from "./MuseumProgramOutcomePage";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -15,14 +16,31 @@ import {
   getCaseyArtwork,
 } from "@/lib/museum/casey";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
+import { getMuseumView } from "@/lib/museum/normalize";
+import { museumSlugMatches } from "@/lib/museum/presentation";
 
-export function getMuseumObjectMetadata(objectId: string): Metadata {
+export async function getMuseumObjectMetadata(
+  objectId: string
+): Promise<Metadata> {
   const artwork = getCaseyArtwork(objectId);
+  if (artwork !== null) {
+    return getAppMetadata({
+      title: artwork.title,
+      description: artwork.visualDescription,
+    });
+  }
+
+  const view = await getMuseumView();
+  const outcome = view.objects.find((item) =>
+    museumSlugMatches(item.objectId, objectId)
+  );
+  const description =
+    outcome === undefined || outcome.scope.trim().length === 0
+      ? t(DEFAULT_LOCALE, "museum.network.objects.description")
+      : outcome.scope;
   return getAppMetadata({
-    title: artwork?.title ?? t(DEFAULT_LOCALE, "museum.network.objects.title"),
-    description:
-      artwork?.visualDescription ??
-      t(DEFAULT_LOCALE, "museum.network.objects.description"),
+    title: outcome?.title ?? t(DEFAULT_LOCALE, "museum.network.objects.title"),
+    description,
   });
 }
 
@@ -40,9 +58,23 @@ export async function MuseumObjectPage({
   if (artworks === null) {
     return <MuseumPublicationUnavailable />;
   }
-  const artwork = artworks.find((item) => item.objectId === objectId);
+  const artwork = artworks.find((item) =>
+    museumSlugMatches(item.objectId, objectId)
+  );
   if (artwork === undefined) {
-    notFound();
+    const view = await getMuseumView();
+    const outcome = view.objects.find((item) =>
+      museumSlugMatches(item.objectId, objectId)
+    );
+    if (outcome?.programId === null || outcome?.programId === undefined) {
+      notFound();
+    }
+    return (
+      <MuseumProgramOutcomePage
+        outcome={outcome}
+        sourceCommit={publication.identity.commit}
+      />
+    );
   }
 
   const objectDocument = publication.documents.find(

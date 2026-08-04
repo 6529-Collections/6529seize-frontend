@@ -131,7 +131,10 @@ describe("MuseumMarkdown public links", () => {
     renderMarkdown(
       [
         "[Met](profiles/met.md)",
+        "[HEK](profiles/hek-basel.md)",
+        "[Adjacent](adjacent-chain-native-practice.md)",
         "[Sources](source-register.md)",
+        "[Inventory](../../docs/institutional-source-inventory.json)",
         "[Standard](../../docs/curatorial-publication-standard.md)",
       ].join("\n\n"),
       "records/institutional-practice/a-field-of-practice.md"
@@ -145,9 +148,37 @@ describe("MuseumMarkdown public links", () => {
       "href",
       "/museum/network/stories/a-field-of-practice/sources"
     );
+    expect(screen.getByRole("link", { name: "HEK" })).toHaveAttribute(
+      "href",
+      "/museum/network/stories/a-field-of-practice/hek-basel"
+    );
+    expect(screen.getByRole("link", { name: "Adjacent" })).toHaveAttribute(
+      "href",
+      "/museum/network/stories/a-field-of-practice/adjacent-practice"
+    );
     expect(screen.getByRole("link", { name: "Standard" })).toHaveAttribute(
       "href",
-      `https://github.com/6529-Collections/6529networkmuseum/blob/${SOURCE_COMMIT}/docs/curatorial-publication-standard.md`
+      "/museum/network/stories/scholarship-and-writing"
+    );
+    expect(screen.getByRole("link", { name: "Inventory" })).toHaveAttribute(
+      "href",
+      `https://github.com/6529-Collections/6529networkmuseum/blob/${SOURCE_COMMIT}/docs/institutional-source-inventory.json`
+    );
+  });
+
+  it("keeps the public editorial standard connected to its study and contribution source", () => {
+    renderMarkdown(
+      "[Study](../records/institutional-practice/a-field-of-practice.md)\n\n[Contribute](../CONTRIBUTING.md)",
+      "docs/curatorial-publication-standard.md"
+    );
+
+    expect(screen.getByRole("link", { name: "Study" })).toHaveAttribute(
+      "href",
+      "/museum/network/stories/a-field-of-practice"
+    );
+    expect(screen.getByRole("link", { name: "Contribute" })).toHaveAttribute(
+      "href",
+      `https://github.com/6529-Collections/6529networkmuseum/blob/${SOURCE_COMMIT}/CONTRIBUTING.md`
     );
   });
 

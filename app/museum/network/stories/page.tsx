@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MuseumArtworkFigure } from "@/components/museum/MuseumArtworkFigure";
-import {
-  InstitutionalPracticeDirectory,
-  institutionalPracticePublicationIsComplete,
-} from "@/components/museum/InstitutionalPracticeReadingRoom";
+import { institutionalPracticePublicationIsComplete } from "@/components/museum/InstitutionalPracticeReadingRoom";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
 import { MuseumSectionHeading } from "@/components/museum/MuseumShell";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -113,28 +110,86 @@ export default async function MuseumStoriesPage() {
             id="institutional-practice-directory-title"
             className="tw-m-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50"
           >
-            {publication.institutionalPractice.introduction.title}
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.institutionalPractice.directoryTitle"
+            )}
           </h2>
           <p className="tw-m-0 tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-300">
             {t(
               DEFAULT_LOCALE,
-              "museum.network.institutionalPractice.description"
+              "museum.network.institutionalPractice.directoryDescription"
             )}
           </p>
-          <Link
-            href="/museum/network/stories/a-field-of-practice"
-            prefetch={false}
-            className="hover:tw-text-primary-200 tw-mt-5 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-          >
-            {t(
-              DEFAULT_LOCALE,
-              "museum.network.institutionalPractice.readStudy"
-            )}
-          </Link>
         </div>
-        <InstitutionalPracticeDirectory
-          practice={publication.institutionalPractice}
-        />
+        <div className="tw-mt-8 tw-grid tw-gap-5 md:tw-grid-cols-3">
+          <article className="tw-border tw-border-solid tw-border-iron-800 tw-p-5">
+            <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-7 tw-text-iron-100">
+              {publication.institutionalPractice.introduction.title}
+            </h3>
+            <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.institutionalPractice.description"
+              )}
+            </p>
+            <Link
+              href="/museum/network/stories/a-field-of-practice"
+              prefetch={false}
+              className="hover:tw-text-primary-200 tw-mt-4 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            >
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.institutionalPractice.readStudy"
+              )}
+            </Link>
+          </article>
+          <article className="tw-border tw-border-solid tw-border-iron-800 tw-p-5">
+            <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-7 tw-text-iron-100">
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.institutionalPractice.adjacentTitle"
+              )}
+            </h3>
+            <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.institutionalPractice.adjacentDescription"
+              )}
+            </p>
+            <Link
+              href="/museum/network/stories/a-field-of-practice/adjacent-practice"
+              prefetch={false}
+              className="hover:tw-text-primary-200 tw-mt-4 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            >
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.institutionalPractice.readAdjacentPractice"
+              )}
+            </Link>
+          </article>
+          <article className="tw-border tw-border-solid tw-border-iron-800 tw-p-5">
+            <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-7 tw-text-iron-100">
+              {publication.institutionalPractice.editorialStandard.title}
+            </h3>
+            <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.institutionalPractice.editorialDescription"
+              )}
+            </p>
+            <Link
+              href="/museum/network/stories/scholarship-and-writing"
+              prefetch={false}
+              className="hover:tw-text-primary-200 tw-mt-4 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            >
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.institutionalPractice.readEditorialStandard"
+              )}
+            </Link>
+          </article>
+        </div>
       </section>
       <article className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-8">
         <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">

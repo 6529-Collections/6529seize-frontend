@@ -78,6 +78,16 @@ interface JsonObject {
   readonly text?: unknown;
   readonly classification?: unknown;
   readonly record_scope?: unknown;
+  readonly media?: unknown;
+  readonly mime_type?: unknown;
+  readonly url?: unknown;
+  readonly retrieval_status?: unknown;
+  readonly selection_evidence?: unknown;
+  readonly rights_and_consent?: unknown;
+  readonly as_of?: unknown;
+  readonly decision_at?: unknown;
+  readonly wave_url?: unknown;
+  readonly rights_effective_status?: unknown;
 }
 
 function isObject(value: unknown): value is JsonObject {
@@ -91,6 +101,66 @@ function stringValue(value: unknown, fallback = ""): string {
 function nullableString(value: unknown): string | null {
   const result = stringValue(value).trim();
   return result.length > 0 ? result : null;
+}
+
+const PROGRAM_MEDIA_HOSTS = new Set(["d3lqz0a4bldqgf.cloudfront.net"]);
+
+function approvedProgramMediaUrl(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(value);
+    if (
+      parsed.protocol !== "https:" ||
+      !PROGRAM_MEDIA_HOSTS.has(parsed.hostname) ||
+      parsed.username.length > 0 ||
+      parsed.password.length > 0 ||
+      parsed.port.length > 0 ||
+      parsed.pathname === "/"
+    ) {
+      return null;
+    }
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
+
+function approvedProgramWaveUrl(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(value);
+    if (
+      parsed.protocol !== "https:" ||
+      parsed.hostname !== "6529.io" ||
+      parsed.username.length > 0 ||
+      parsed.password.length > 0 ||
+      parsed.port.length > 0 ||
+      !parsed.pathname.startsWith("/waves/")
+    ) {
+      return null;
+    }
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
+
+function resolveProgramOutcomePath(
+  programDirectory: string,
+  outcomeReference: string | null
+): string | null {
+  if (outcomeReference === null) {
+    return null;
+  }
+  return outcomeReference.startsWith("records/")
+    ? outcomeReference
+    : `${programDirectory}/${outcomeReference}`;
 }
 
 function textValue(value: unknown): string {
@@ -225,20 +295,36 @@ function selectedWorks(
 ): MuseumSelectedWork[] {
   const root = jsonObject(documents[path]);
   const works = root?.works;
+  const programDirectory = path.slice(0, path.lastIndexOf("/"));
 
   return (Array.isArray(works) ? works : [])
     .filter(isObject)
-    .map((work) => ({
-      recordId: stringValue(work.record_id),
-      outcomePath: nullableString(work.outcome_record),
-      status: stringValue(work.status, "unknown"),
-      artist: stringValue(work.artist, "Unknown artist"),
-      title: stringValue(work.title, "Untitled work"),
-      submissionDropId: nullableString(work.submission_drop_id),
-      winnerPlace: numberValue(work.winner_place),
-      voteTotal: numberValue(work.vote_total),
-      voterCount: numberValue(work.voter_count),
-    }))
+    .map((work) => {
+      const outcomeReference = nullableString(work.outcome_record);
+      const outcomePath = resolveProgramOutcomePath(
+        programDirectory,
+        outcomeReference
+      );
+      const outcome =
+        outcomePath === null ? null : jsonObject(documents[outcomePath]);
+      const media = Array.isArray(outcome?.media)
+        ? outcome.media.find(isObject)
+        : undefined;
+
+      return {
+        recordId: stringValue(work.record_id),
+        outcomePath,
+        status: stringValue(work.status, "unknown"),
+        artist: stringValue(work.artist, "Unknown artist"),
+        title: stringValue(work.title, "Untitled work"),
+        submissionDropId: nullableString(work.submission_drop_id),
+        winnerPlace: numberValue(work.winner_place),
+        voteTotal: numberValue(work.vote_total),
+        voterCount: numberValue(work.voter_count),
+        imageUrl: approvedProgramMediaUrl(media?.url),
+        imageMimeType: nullableString(media?.mime_type),
+      };
+    })
     .filter((work) => work.recordId.length > 0);
 }
 
@@ -279,9 +365,7 @@ function programs(
         "selected-works.json"
       );
       const frame = isObject(root.curatorial_frame)
-        ? Object.values(root.curatorial_frame)
-            .filter((value): value is string => typeof value === "string")
-            .join(" ")
+        ? stringValue(root.curatorial_frame["premise"])
         : "";
 
       return [
@@ -372,6 +456,15 @@ function objectRecords(
           "")
         : stringValue(artistValue);
       const claims = isObject(root.claims) ? root.claims : {};
+      const media = Array.isArray(root.media)
+        ? root.media.find(isObject)
+        : undefined;
+      const selectionEvidence = isObject(root.selection_evidence)
+        ? root.selection_evidence
+        : {};
+      const rightsAndConsent = isObject(root.rights_and_consent)
+        ? root.rights_and_consent
+        : {};
       const objectId = stringValue(root.object_id, stringValue(root.record_id));
       if (objectId.length === 0) {
         return [];
@@ -396,6 +489,19 @@ function objectRecords(
               root.current_state,
               stringValue(root.record_status, "unknown")
             )
+          ),
+          statusAsOf: nullableString(root.as_of),
+          programId: nullableString(root.program_id),
+          imageUrl: approvedProgramMediaUrl(media?.url),
+          imageMimeType: nullableString(media?.mime_type),
+          imageRetrievalStatus: nullableString(media?.retrieval_status),
+          selectionPlace: numberValue(selectionEvidence.winner_place),
+          selectionDate: nullableString(selectionEvidence.decision_at),
+          selectionSourceUrl: approvedProgramWaveUrl(
+            selectionEvidence.wave_url
+          ),
+          rightsStatus: nullableString(
+            rightsAndConsent.rights_effective_status
           ),
           scope: stringValue(
             root.record_scope,

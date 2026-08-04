@@ -4,12 +4,12 @@
 
 The 6529 Network Museum presents accessioned art, collection scholarship, and
 institutional records at `/museum/network`. Its public pages are assembled from
-one verified edition of the
+one verified release of the
 [`6529networkmuseum`](https://github.com/6529-Collections/6529networkmuseum)
-repository. Each page identifies its source edition and offers a route for
+repository. Each page identifies its source release and offers a route for
 proposing corrections or additions.
 
-The institutional-practice study, _A field of practice_, examines how fourteen
+The institutional-practice study, _A field of practice_, examines how twenty-seven
 museums and digital-art organizations publish collections, conserve technical
 works, build research infrastructure, and acknowledge the limits of their
 records.
@@ -17,8 +17,8 @@ records.
 ## Features
 
 - [Institutional practice](feature-institutional-practice.md): the comparative
-  essay, fourteen profiles, lessons for the Network Museum, analytical limits,
-  and primary-source register.
+  essay, twenty-seven profiles, an adjacent-practice study, the Museum's public
+  scholarship and editorial standard, and the primary-source register.
 
 ## Flows
 
