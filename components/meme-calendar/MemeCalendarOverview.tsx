@@ -619,7 +619,7 @@ function MemeCalendarOverviewUpcomingMints({
         </div>
       </div>
 
-      <div className="tw-max-h-96 tw-flex-1 tw-overflow-x-auto tw-overflow-y-auto tw-pr-3 tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+      <div className="tw-max-h-96 tw-flex-1 tw-overflow-x-auto tw-overflow-y-auto tw-pr-1 tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300 sm:tw-pr-3">
         <table className="tw-w-full tw-min-w-0 tw-border-collapse tw-text-sm tw-leading-5 sm:tw-min-w-[22rem]">
           <caption className="tw-sr-only">{upcomingHeading}</caption>
           <thead className="tw-sr-only">
@@ -643,42 +643,57 @@ function MemeCalendarOverviewUpcomingMints({
                 </td>
               </tr>
             ) : (
-              filteredRows.map(({ utcDay, instantUtc, meme }) => (
-                <tr
-                  key={ymd(utcDay)}
-                  className="tw-h-12 tw-border-0 tw-border-b tw-border-solid tw-border-iron-800/80 last:tw-border-b-0"
-                >
-                  <td className="tw-py-3 tw-font-medium tw-text-primary-300">
-                    #{formatInteger(locale, meme)}
-                  </td>
-                  <td className="tw-py-3 tw-pr-4 tw-text-iron-300">
-                    {formatFullDateTime(instantUtc, displayTz, locale)}
-                  </td>
-                  <td
-                    className="tw-flex tw-items-center tw-justify-end tw-py-1.5 tw-pr-1"
-                    dangerouslySetInnerHTML={{
-                      __html: printCalendarInvites(
-                        instantUtc,
-                        meme,
-                        "currentColor",
-                        CALENDAR_INVITE_ICON_SIZE,
-                        {
-                          addToCalendar: t(
-                            locale,
-                            "memeCalendar.invites.addToCalendar"
-                          ),
-                          addToGoogleCalendar: t(
-                            locale,
-                            "memeCalendar.invites.addToGoogleCalendar"
-                          ),
-                          tooltipId: calendarInviteTooltipId,
-                        },
-                        locale
-                      ),
-                    }}
-                  ></td>
-                </tr>
-              ))
+              filteredRows.map(({ utcDay, instantUtc, meme }) => {
+                const mintTime = formatFullDateTime(
+                  instantUtc,
+                  displayTz,
+                  locale
+                );
+                return (
+                  <tr
+                    key={ymd(utcDay)}
+                    className="tw-h-12 tw-border-0 tw-border-b tw-border-solid tw-border-iron-800/80 last:tw-border-b-0"
+                  >
+                    <td className="tw-py-3 tw-pr-3 sm:tw-hidden" colSpan={2}>
+                      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
+                        <span className="tw-font-medium tw-text-primary-300">
+                          #{formatInteger(locale, meme)}
+                        </span>
+                        <span className="tw-text-iron-300">{mintTime}</span>
+                      </div>
+                    </td>
+                    <td className="tw-hidden tw-py-3 tw-font-medium tw-text-primary-300 sm:tw-table-cell">
+                      #{formatInteger(locale, meme)}
+                    </td>
+                    <td className="tw-hidden tw-py-3 tw-pr-4 tw-text-iron-300 sm:tw-table-cell">
+                      {mintTime}
+                    </td>
+                    <td
+                      className="tw-flex tw-items-center tw-justify-end tw-py-1.5 tw-pr-1"
+                      dangerouslySetInnerHTML={{
+                        __html: printCalendarInvites(
+                          instantUtc,
+                          meme,
+                          "currentColor",
+                          CALENDAR_INVITE_ICON_SIZE,
+                          {
+                            addToCalendar: t(
+                              locale,
+                              "memeCalendar.invites.addToCalendar"
+                            ),
+                            addToGoogleCalendar: t(
+                              locale,
+                              "memeCalendar.invites.addToGoogleCalendar"
+                            ),
+                            tooltipId: calendarInviteTooltipId,
+                          },
+                          locale
+                        ),
+                      }}
+                    ></td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
