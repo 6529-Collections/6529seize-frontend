@@ -1,11 +1,13 @@
 "use client";
 
 import clsx from "clsx";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { SortDirection } from "@/entities/ISort";
 import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
 import type { CommonSelectItemProps } from "../CommonSelect";
+
+export type CommonTabsActiveTone = "neutral" | "primary";
 
 export default function CommonTabsTab<T, U = unknown>(
   props: Readonly<
@@ -15,11 +17,11 @@ export default function CommonTabsTab<T, U = unknown>(
       ) => void | undefined;
       readonly buttonRef?:
         | ((element: HTMLButtonElement | null) => void)
-        | undefined
         | undefined;
       readonly disabled?: boolean | undefined;
       readonly fill?: boolean | undefined;
       readonly size?: "sm" | "md" | "tabs" | undefined;
+      readonly activeTone?: CommonTabsActiveTone | undefined;
     }
   >
 ) {
@@ -33,31 +35,18 @@ export default function CommonTabsTab<T, U = unknown>(
     disabled = false,
     fill = true,
     size = "md",
+    activeTone = "neutral",
   } = props;
 
-  const getIsActive = (): boolean => item.value === activeItem;
-  const [isActive, setIsActive] = useState<boolean>(getIsActive());
-
-  useEffect(() => {
-    setIsActive(getIsActive());
-  }, [activeItem]);
-
-  const getDynamicClasses = (): string => {
-    let response = "";
-    if (isActive) {
-      response += "tw-bg-iron-800 tw-text-iron-100";
-    } else {
-      response +=
-        " tw-bg-iron-950 hover:tw-bg-iron-900 tw-text-iron-500 hover:tw-text-iron-100";
-    }
-    return response;
-  };
-
-  const [dynamicClasses, setDynamicClasses] =
-    useState<string>(getDynamicClasses());
-  useEffect(() => {
-    setDynamicClasses(getDynamicClasses());
-  }, [isActive]);
+  const isActive = item.value === activeItem;
+  let dynamicClasses =
+    "tw-bg-iron-950 tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-text-iron-100";
+  if (isActive) {
+    dynamicClasses =
+      activeTone === "primary"
+        ? "tw-bg-primary-500 tw-text-white"
+        : "tw-bg-iron-800 tw-text-iron-100";
+  }
 
   const [shouldRotate, setShouldRotate] = useState<boolean>(false);
 
@@ -78,8 +67,7 @@ export default function CommonTabsTab<T, U = unknown>(
     <div
       className={clsx(
         "tw-flex tw-rounded-lg tw-p-[1px]",
-        fill ? "tw-flex-1" : undefined,
-        undefined
+        fill ? "tw-flex-1" : undefined
       )}
     >
       <button
@@ -104,12 +92,12 @@ export default function CommonTabsTab<T, U = unknown>(
       >
         {item.icon}
         {item.label}
-        {!!item.badge && item.badge > 0 && (
+        {item.badge !== undefined && item.badge > 0 && (
           <span className="tw-flex tw-h-[18px] tw-min-w-[18px] tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500 tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-bold tw-text-white">
             {item.badge}
           </span>
         )}
-        {sortDirection && (
+        {sortDirection !== undefined && (
           <span className="tw-flex tw-items-center">
             <CommonTableSortIcon
               direction={isActive ? sortDirection : SortDirection.DESC}
