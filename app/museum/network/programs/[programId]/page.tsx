@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAppMetadata } from "@/components/providers/metadata";
-import { MuseumJsonDisclosure } from "@/components/museum/MuseumMarkdown";
+import {
+  MuseumJsonDisclosure,
+  MuseumMarkdown,
+} from "@/components/museum/MuseumMarkdown";
 import { MuseumRecordCard } from "@/components/museum/MuseumRecordCard";
 import {
   MuseumSectionHeading,
@@ -11,6 +14,8 @@ import {
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getMuseumView } from "@/lib/museum/normalize";
+import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
+import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
 import { buildMuseumRawUrl } from "@/lib/museum/source";
 import {
   displayMuseumStatus,
@@ -43,11 +48,23 @@ export default async function MuseumProgramDetailPage({
   params,
 }: ProgramDetailProps) {
   const { programId } = await params;
-  const view = await getMuseumView();
+  const [view, publicationState] = await Promise.all([
+    getMuseumView(),
+    getMuseumPublicationState(),
+  ]);
   const program = view.programs.find((item) =>
     museumSlugMatches(item.programId, programId)
   );
   if (!program) notFound();
+  const programEssay = view.methodology.find(
+    (document) => document.path === "docs/programs/keys-and-gates.md"
+  );
+  const sourceCommit = publicationState.publication?.identity.commit ?? null;
+  const programSourceHref =
+    sourceCommit === null
+      ? buildMuseumRawUrl(program.sourcePath)
+      : (buildImmutableMuseumBlobUrl(sourceCommit, program.sourcePath) ??
+        buildMuseumRawUrl(program.sourcePath));
 
   return (
     <article>
@@ -96,7 +113,17 @@ export default async function MuseumProgramDetailPage({
               eyebrow={work.recordId}
               title={work.title}
               description={work.artist}
-              meta={work.outcomePath ?? undefined}
+              imageUrl={work.imageUrl ?? undefined}
+              imageAlt={`${work.title} by ${work.artist}`}
+              meta={
+                work.winnerPlace === null
+                  ? undefined
+                  : t(
+                      DEFAULT_LOCALE,
+                      "museum.network.programs.detail.selectionPlace",
+                      { place: work.winnerPlace }
+                    )
+              }
             >
               <MuseumStatusBadge
                 label={displayMuseumStatus(work.status)}
@@ -106,32 +133,27 @@ export default async function MuseumProgramDetailPage({
           ))}
         </div>
       </section>
-      <div className="tw-mt-8 tw-grid tw-gap-4 lg:tw-grid-cols-2">
-        {program.rules.length > 0 && (
-          <section className="tw-rounded-2xl tw-border tw-border-white/10 tw-bg-iron-900/60 tw-p-5">
-            <h2 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-white">
-              {t(DEFAULT_LOCALE, "museum.network.programs.rules")}
-            </h2>
-            <ul className="tw-m-4 tw-mb-0 tw-list-disc tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300">
-              {program.rules.map((rule) => (
-                <li key={rule}>{rule}</li>
-              ))}
-            </ul>
-          </section>
-        )}
-        {program.nonClaims.length > 0 && (
-          <section className="tw-rounded-2xl tw-border tw-border-white/10 tw-bg-iron-900/60 tw-p-5">
-            <h2 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-white">
-              {t(DEFAULT_LOCALE, "museum.network.programs.nonClaims")}
-            </h2>
-            <ul className="tw-m-4 tw-mb-0 tw-list-disc tw-space-y-2 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300">
-              {program.nonClaims.map((claim) => (
-                <li key={claim}>{claim}</li>
-              ))}
-            </ul>
-          </section>
-        )}
-      </div>
+      {programEssay && (
+        <section
+          className="tw-mt-14 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
+          aria-labelledby="program-essay-title"
+        >
+          <h2
+            id="program-essay-title"
+            className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50"
+          >
+            {t(DEFAULT_LOCALE, "museum.network.programs.detail.programEssay")}
+          </h2>
+          <MuseumMarkdown
+            className="tw-mt-6"
+            embeddedDocument
+            sourceCommit={sourceCommit}
+            sourcePath={programEssay.path}
+          >
+            {programEssay.markdown}
+          </MuseumMarkdown>
+        </section>
+      )}
       <div className="tw-mt-6">
         <MuseumJsonDisclosure
           label={t(DEFAULT_LOCALE, "museum.network.detail.technicalEvidence")}
@@ -140,7 +162,7 @@ export default async function MuseumProgramDetailPage({
       </div>
       <p className="tw-mt-4 tw-text-xs tw-text-iron-500">
         <a
-          href={buildMuseumRawUrl(program.sourcePath)}
+          href={programSourceHref}
           target="_blank"
           rel="noopener noreferrer"
           className="tw-underline tw-underline-offset-4 hover:tw-text-iron-300"

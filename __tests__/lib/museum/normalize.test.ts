@@ -54,7 +54,11 @@ describe("Museum domain mapping", () => {
             program_id: "6529NM-AP-01",
             title: "Keys and Gates",
             status: "selection_complete_acquisition_and_accession_unverified",
-            curatorial_frame: { premise: "A program." },
+            curatorial_frame: {
+              premise: "A program.",
+              outcome_interpretation:
+                "A registrarial status statement that does not belong in the curatorial frame.",
+            },
             non_claims: ["Selection is not accession."],
           }
         ),
@@ -81,6 +85,24 @@ describe("Museum domain mapping", () => {
             artist: { handle: "Artist" },
             title: "Selected work",
             artist_statement: { text: "A legacy artist statement." },
+            as_of: "2026-08-01T15:03:35Z",
+            program_id: "6529NM-AP-01",
+            media: [
+              {
+                url: "https://d3lqz0a4bldqgf.cloudfront.net/drops/work.jpg",
+                mime_type: "image/jpeg",
+                retrieval_status: "source URL observed",
+              },
+            ],
+            selection_evidence: {
+              winner_place: 1,
+              decision_at: "2026-07-09T12:00:00Z",
+              wave_url:
+                "https://6529.io/waves/4ff022b3-aa17-4a0a-ba78-58f64ff1d427",
+            },
+            rights_and_consent: {
+              rights_effective_status: "unverified until acquisition",
+            },
             record_scope: "Not an accession statement.",
           }
         ),
@@ -117,6 +139,14 @@ describe("Museum domain mapping", () => {
     expect(view.programs[0]?.selectedWorks[0]?.status).toBe(
       "selected_unminted"
     );
+    expect(view.programs[0]?.curatorialFrame).toBe("A program.");
+    expect(view.programs[0]?.selectedWorks[0]).toEqual(
+      expect.objectContaining({
+        imageUrl:
+          "https://d3lqz0a4bldqgf.cloudfront.net/drops/work.jpg",
+        imageMimeType: "image/jpeg",
+      })
+    );
     expect(view.objects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -142,6 +172,14 @@ describe("Museum domain mapping", () => {
           objectId: "6529NM-AP-01-OUT-001",
           accessionLotId: null,
           artistStatement: "A legacy artist statement.",
+          programId: "6529NM-AP-01",
+          imageUrl:
+            "https://d3lqz0a4bldqgf.cloudfront.net/drops/work.jpg",
+          selectionPlace: 1,
+          selectionDate: "2026-07-09T12:00:00Z",
+          selectionSourceUrl:
+            "https://6529.io/waves/4ff022b3-aa17-4a0a-ba78-58f64ff1d427",
+          rightsStatus: "unverified until acquisition",
         }),
       ])
     );

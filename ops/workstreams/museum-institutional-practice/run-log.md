@@ -1,5 +1,31 @@
 # Run log
 
+## 2026-08-04 rendered copy desk and source correction
+
+- Source PR #24 merged reviewed head
+  `331cc012bc5a189548af1e8c39155a1a2ef97bca` as canonical Museum main
+  `72bf603ad63d60cfc00d6d875c6d191d83a6fdf5`. All exact-head source checks
+  passed; both CodeRabbit ledger findings were implemented and resolved before
+  the controlled maintainer merge.
+- The corrected canonical manifest retains 247 entries and commits to
+  `sha256:b4e810f45576d0c3b03733b5d399dc8ff1323281460bbfdf040eb185bb3bb90a`
+  and Keccak-256
+  `0x9f6706921e1bb20e20c608e2d80a00db9845c3afb6113563c94bc7709ddc21f2`.
+- The rendered copy desk removed production labels from the Casey artist,
+  collection, gift, and project manuscripts; retitled the public research
+  record; kept the artist-profile opening in the curatorial register; and
+  removed release narration from *A field of practice*. Registrarial and
+  technical distinctions remain intact.
+- The exact frontend adapter admitted only the corrected source commit and
+  verified all 57 public documents and twenty-seven profiles. It found no
+  remaining `Standfirst` marker in the artist or collection manuscripts.
+- Rendered review also exposed a separate product defect in Keys and Gates:
+  governed source images were omitted and all sixteen selected-work links
+  ended at Casey-only object handling. The frontend candidate now projects the
+  allowlisted submission media, renders an art-led program grid, opens complete
+  selected-work pages, and preserves the selected/unminted, rights, custody,
+  preservation, and accession boundaries.
+
 ## 2026-08-04 canonical source and editorial register
 
 - Museum source PR #23 merged exact reviewed head

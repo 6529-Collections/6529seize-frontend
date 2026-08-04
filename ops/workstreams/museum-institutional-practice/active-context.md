@@ -7,12 +7,13 @@
   *Writing the 6529 Network Museum* as a public scholarship and editorial
   standard; apply that standard across the complete public Museum corpus; and
   qualify one atomic source/frontend release through staging and production.
-- Museum source PR: `6529-Collections/6529networkmuseum#23`, merged as exact
-  canonical main `5afd128cd3ec157479e1ced904fb982c3de1cc60`.
+- Museum source PRs: expansion PR #23 and rendered-copy correction PR #24 are
+  merged. Exact canonical main is
+  `72bf603ad63d60cfc00d6d875c6d191d83a6fdf5`.
 - Canonical source release: 247 manifest entries;
-  `sha256:40065c69a864377d92ed48106c48c2abfd72e2ffd3d1b02f9097a4e08a87393f`;
+  `sha256:b4e810f45576d0c3b03733b5d399dc8ff1323281460bbfdf040eb185bb3bb90a`;
   Keccak-256
-  `0x63a97f876a08a18fa8062df8e60798bde45598962a483318d9289a71eb9e011c`.
+  `0x9f6706921e1bb20e20c608e2d80a00db9845c3afb6113563c94bc7709ddc21f2`.
 - Frontend branch: `codex/museum-institutional-practice-v2-fe`, merged cleanly
   onto exact frontend main `456e7a7f3519eaffb8e8d4981436290e467a1412`.
   No frontend PR has been opened for this expansion yet.
@@ -28,11 +29,17 @@
 - Local frontend validation: 69 Museum suites / 218 tests and the 104 focused
   publication/route tests pass; changed lint, changed typecheck, Playwright
   typecheck, help-index sync (202 records), and React Doctor 100/100 pass.
-  The exact canonical-main probe resolves source commit `5afd128cd3ec...`, 57
+  The exact canonical-main probe resolves source commit `72bf603ad63d...`, 57
   public documents, 27 institutional profiles, all 31 institutional-practice
-  manuscripts, and the canonical commitments above. Optimized build, retained
-  browser evidence, PR/bot review, staging, and production qualification remain
-  pending.
+  manuscripts, and the canonical commitments above. Visible production labels
+  are absent from the Casey artist and collection manuscripts, and the public
+  source title is *Casey Reas: Sources and chronology*.
+- Final rendered-product correction: Keys and Gates now uses the governed
+  submission images, links every selected work to a working object page, and
+  presents artist statement, selection evidence, rights status, and source
+  media without implying mint, acquisition, custody, or accession. Optimized
+  build, retained final browser evidence, PR/bot review, staging, and production
+  qualification remain pending.
 
 ## Previous qualified release
 

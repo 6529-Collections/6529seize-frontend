@@ -1,7 +1,9 @@
 import {
+  displayMuseumStatus,
   isAdoptedGovernanceEffect,
   museumSlug,
   museumSlugMatches,
+  statusTone,
 } from "@/lib/museum/presentation";
 
 describe("Museum presentation semantics", () => {
@@ -20,5 +22,18 @@ describe("Museum presentation semantics", () => {
     expect(museumSlugMatches("6529NM.2026.001.001", dashed)).toBe(false);
     expect(museumSlugMatches("object%01", "object%01")).toBe(true);
     expect(museumSlugMatches("object%01", museumSlug("object%01"))).toBe(true);
+  });
+
+  it("presents an unverified program selection as pending Museum work", () => {
+    const status =
+      "selection_complete_acquisition_and_accession_unverified";
+
+    expect(displayMuseumStatus(status)).toBe(
+      "Selection complete; acquisition and accession unverified"
+    );
+    expect(statusTone(status)).toBe("warning");
+    expect(displayMuseumStatus("selected_unminted")).toBe(
+      "Selected; unminted"
+    );
   });
 });
