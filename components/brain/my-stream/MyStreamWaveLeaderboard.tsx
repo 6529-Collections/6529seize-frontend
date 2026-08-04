@@ -547,7 +547,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
             isSticky
             className={
               isMemesWave
-                ? "tw-min-w-0 tw-flex-[1_1_18rem] !tw-pb-0 lg:tw-flex-[1_1_27rem]"
+                ? "tw-min-w-0 tw-flex-[1_1_18rem] !tw-pb-2 lg:tw-flex-[1_1_27rem]"
                 : undefined
             }
           >

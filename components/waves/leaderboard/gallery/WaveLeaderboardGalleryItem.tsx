@@ -101,6 +101,9 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
       () => getDropPreviewImageUrl(drop.metadata),
       [drop.metadata]
     );
+    const hasStaticMediaPreview =
+      primaryMedia?.mime_type.includes("image") === true ||
+      Boolean(previewImageUrl);
 
     const isFirstRenderRef = useRef(true);
     const previousSortRef = useRef(activeSort);
@@ -184,34 +187,45 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
       isHighlighting && !hasTouchScreen ? "tw-animate-gallery-reveal" : "";
 
     const baseImageClasses =
-      "tw-aspect-square tw-relative tw-flex-shrink-0 tw-cursor-pointer tw-touch-pan-y tw-overflow-hidden tw-bg-iron-900 tw-group/image";
+      "tw-aspect-square tw-relative tw-flex-shrink-0 tw-touch-pan-y tw-overflow-hidden tw-bg-iron-900 tw-group/image";
 
     const imageScaleClasses = hasTouchScreen
       ? ""
       : `tw-transform tw-duration-700 tw-ease-out group-hover/image:tw-scale-105 ${highlightAnimation}`;
 
     const imageContainerClass = baseImageClasses;
+    const mediaContent = (
+      <div
+        className={`tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center ${imageScaleClasses}`}
+      >
+        <MediaDisplay
+          media_mime_type={primaryMedia?.mime_type ?? "image/jpeg"}
+          media_url={primaryMedia?.url ?? ""}
+          disableMediaInteraction={true}
+          fillVideoContainer={true}
+          imageScale={mediaImageScale}
+          previewImageUrl={previewImageUrl}
+        />
+      </div>
+    );
 
     return (
       <div className={containerClass}>
-        <button
-          className={`${imageContainerClass} tw-m-0 tw-w-full tw-overflow-hidden tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-text-left`}
-          onClick={handleImageClick}
-          type="button"
-        >
-          <div
-            className={`tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center ${imageScaleClasses}`}
+        {hasStaticMediaPreview ? (
+          <button
+            className={`${imageContainerClass} tw-m-0 tw-w-full tw-cursor-pointer tw-overflow-hidden tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-text-left`}
+            onClick={handleImageClick}
+            type="button"
           >
-            <MediaDisplay
-              media_mime_type={primaryMedia?.mime_type ?? "image/jpeg"}
-              media_url={primaryMedia?.url ?? ""}
-              disableMediaInteraction={true}
-              fillVideoContainer={true}
-              imageScale={mediaImageScale}
-              previewImageUrl={previewImageUrl}
-            />
+            {mediaContent}
+          </button>
+        ) : (
+          <div
+            className={`${imageContainerClass} tw-m-0 tw-w-full tw-overflow-hidden tw-rounded-lg`}
+          >
+            {mediaContent}
           </div>
-        </button>
+        )}
         <div className="tw-flex tw-flex-1 tw-flex-col tw-rounded-b-lg tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-3">
           <div className="tw-mb-3 tw-min-w-0">
             <div className="tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-2">

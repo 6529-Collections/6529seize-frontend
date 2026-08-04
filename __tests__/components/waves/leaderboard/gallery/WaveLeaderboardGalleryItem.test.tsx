@@ -206,8 +206,8 @@ describe("WaveLeaderboardGalleryItem", () => {
 
     expect(trigger).toHaveTextContent(/3\s*voters/);
     expect(trigger).toHaveClass(
-      "tw-border-iron-700",
-      "tw-bg-iron-900/40",
+      "tw-border-white/[0.06]",
+      "tw-bg-white/[0.05]",
       "tw-box-border",
       "tw-h-8",
       "tw-px-2.5",
@@ -407,5 +407,19 @@ describe("WaveLeaderboardGalleryItem", () => {
       "data-preview-image-url",
       "https://example.com/preview.jpg"
     );
+  });
+
+  it("does not wrap interactive video media in a button", () => {
+    render(
+      <WaveLeaderboardGalleryItem
+        drop={{
+          ...drop,
+          parts: [{ media: [{ url: "video.mp4", mime_type: "video/mp4" }] }],
+        }}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("media").closest("button")).toBeNull();
   });
 });
