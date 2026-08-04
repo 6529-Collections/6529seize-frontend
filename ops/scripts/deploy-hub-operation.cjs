@@ -73,10 +73,18 @@ async function mergeProductionRequests({
   runUrl,
   expectedMainSha,
 }) {
-  let mainSha = (await github.getRef(baseRef)).object?.sha;
-  assert(mainSha === expectedMainSha, "Main moved after production preflight.");
+  let expectedCurrentMainSha = (await github.getRef(baseRef)).object?.sha;
+  assert(
+    expectedCurrentMainSha === expectedMainSha,
+    "Main moved after production preflight."
+  );
   for (const request of requests) {
-    await assertProductionRequestPreflight(github, request, baseRef, mainSha);
+    await assertProductionRequestPreflight(
+      github,
+      request,
+      baseRef,
+      expectedCurrentMainSha
+    );
     const merged = await github.mergePullRequest(
       request.pr,
       request.sha,
@@ -88,18 +96,18 @@ async function mergeProductionRequests({
         requests,
         runUrl,
         "error",
-        `Production stopped; main is ${mainSha.slice(0, 12)}`
+        `Production stopped; main is ${expectedCurrentMainSha.slice(0, 12)}`
       );
-      return { conclusion: "failure", mainSha };
+      return { conclusion: "failure", mainSha: expectedCurrentMainSha };
     }
-    mainSha = merged.sha;
+    expectedCurrentMainSha = merged.sha;
   }
   const observedMain = (await github.getRef(baseRef)).object?.sha;
   assert(
-    observedMain === mainSha,
+    observedMain === expectedCurrentMainSha,
     "Main moved after the exact production merges."
   );
-  return { conclusion: "success", mainSha };
+  return { conclusion: "success", mainSha: expectedCurrentMainSha };
 }
 
 async function validateProductionDeployment({
@@ -279,6 +287,16 @@ async function executeProduction(options) {
     sleep,
     now,
   });
+  if (finalResult.conclusion === "stopped") {
+    await publishStatus(
+      github,
+      requests,
+      finalResult.runUrl,
+      "error",
+      `Stopped before production dispatch at ${mainSha.slice(0, 12)}`
+    );
+    return { conclusion: "stopped", requests, mainSha };
+  }
   if (await stopRequested(github, requests, operationId)) {
     await publishStatus(
       github,

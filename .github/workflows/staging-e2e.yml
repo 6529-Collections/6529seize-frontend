@@ -168,6 +168,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     permissions:
+      actions: read
       contents: read
       statuses: write
     env:
@@ -180,10 +181,12 @@ jobs:
           BACKEND_ARTIFACT_DIGEST: ${{ inputs.backend_artifact_digest }}
           BACKEND_SHA: ${{ inputs.backend_sha }}
           DEPLOY_HUB_OPERATION_ID: ${{ inputs.deploy_hub_operation_id }}
+          DEPLOY_HUB_BASE_REF: ${{ github.event.repository.default_branch }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
           FRONTEND_ARTIFACT_DIGEST: ${{ inputs.frontend_artifact_digest }}
           FRONTEND_SHA: ${{ inputs.frontend_sha }}
           GITHUB_ACTOR: ${{ github.actor }}
+          GH_TOKEN: ${{ github.token }}
           MANIFEST_ID: ${{ inputs.release_manifest_id }}
           MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
           OPERATION_KEY: ${{ inputs.operation_key }}
@@ -195,8 +198,16 @@ jobs:
           identity_values="$TRAIN_ID$TRAIN_REVISION$OPERATION_KEY$SOURCE_REF$EXPECTED_SHA$MANIFEST_ID$MANIFEST_IDENTITY$FRONTEND_SHA$BACKEND_SHA$FRONTEND_ARTIFACT_DIGEST$BACKEND_ARTIFACT_DIGEST"
           release_bus_values="$TRAIN_ID$TRAIN_REVISION$OPERATION_KEY$MANIFEST_ID$MANIFEST_IDENTITY$FRONTEND_SHA$BACKEND_SHA$FRONTEND_ARTIFACT_DIGEST$BACKEND_ARTIFACT_DIGEST"
           if [ -n "${DEPLOY_HUB_OPERATION_ID:-}" ]; then
-            [[ "$DEPLOY_HUB_OPERATION_ID" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$ ]]
+            [[ "$DEPLOY_HUB_OPERATION_ID" =~ ^dh-([1-9][0-9]{0,19})r[1-9][0-9]{0,8}-c[1-9][0-9]*-staging-a[12]$ ]]
             test "$GITHUB_ACTOR" = "github-actions[bot]"
+            controller_run_id="${BASH_REMATCH[1]}"
+            controller_run="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$controller_run_id")"
+            jq -e \
+              --arg branch "$DEPLOY_HUB_BASE_REF" \
+              --arg repository "$GITHUB_REPOSITORY" \
+              --arg workflow ".github/workflows/deploy-hub.yml" \
+              '.path == $workflow and .event == "workflow_dispatch" and .head_branch == $branch and .head_repository.full_name == $repository' \
+              <<< "$controller_run" >/dev/null
             [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
             test "$SOURCE_REF" = 1a-staging
             test -z "$release_bus_values"

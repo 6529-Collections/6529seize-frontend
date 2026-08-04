@@ -47,12 +47,15 @@ jobs:
     name: Authorize manual production fallback
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    permissions: {}
+    permissions:
+      actions: read
 
     steps:
       - name: Require authoritative production fallback readiness
         env:
+          DEPLOY_HUB_BASE_REF: ${{ github.event.repository.default_branch }}
           DEPLOY_HUB_OPERATION_ID: ${{ inputs.deploy_hub_operation_id }}
+          GH_TOKEN: ${{ github.token }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
           TARGET_ENVIRONMENT: prod
@@ -62,7 +65,15 @@ jobs:
 
           if [ -n "${DEPLOY_HUB_OPERATION_ID:-}" ]; then
             test "$GITHUB_ACTOR" = "github-actions[bot]"
-            [[ "$DEPLOY_HUB_OPERATION_ID" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$ ]]
+            [[ "$DEPLOY_HUB_OPERATION_ID" =~ ^dh-([1-9][0-9]{0,19})r[1-9][0-9]{0,8}-c[1-9][0-9]*-production-a[12]$ ]]
+            controller_run_id="${BASH_REMATCH[1]}"
+            controller_run="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$controller_run_id")"
+            jq -e \
+              --arg branch "$DEPLOY_HUB_BASE_REF" \
+              --arg repository "$GITHUB_REPOSITORY" \
+              --arg workflow ".github/workflows/deploy-hub-production.yml" \
+              '.path == $workflow and .event == "workflow_dispatch" and .head_branch == $branch and .head_repository.full_name == $repository' \
+              <<< "$controller_run" >/dev/null
             exit 0
           fi
 

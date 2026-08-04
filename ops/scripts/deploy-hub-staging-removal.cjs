@@ -10,6 +10,7 @@ const {
   compositionAt,
   publishContent,
   publishStagingPresence,
+  STAGING_REF,
   stagingMessage,
 } = require("./deploy-hub-staging-content.cjs");
 const {
@@ -18,8 +19,6 @@ const {
   stopRequested,
   validateWithRetry,
 } = require("./deploy-hub-operation-workflows.cjs");
-
-const STAGING_REF = "1a-staging";
 
 async function restoreFailedRemoval(options) {
   const {
@@ -164,10 +163,7 @@ async function executeRemoveFromStaging(options) {
     "pending",
     "Removing from staging"
   );
-  const candidateComposition = removeRequest(
-    knownGoodComposition,
-    request.pr
-  );
+  const candidateComposition = removeRequest(knownGoodComposition, request.pr);
   const contentSha = composeContent(
     git,
     candidateComposition,

@@ -208,9 +208,7 @@ describe("release bus staging artifact transfer", () => {
     expect(productionDeployWorkflowSource).toContain(
       "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_PRODUCTION_DISCUSSION_DESTINATIONS }}"
     );
-    expect(productionDeployWorkflowSource).toContain(
-      'keys == ["production"]'
-    );
+    expect(productionDeployWorkflowSource).toContain('keys == ["production"]');
     expect(productionDeployWorkflowSource).toContain(
       'OptionName:"PUBLIC_REVIEW_DISCUSSION_DESTINATIONS"'
     );
@@ -2202,12 +2200,14 @@ describe("deployment bus manifest", () => {
 
   it("checks commit ancestry through GitHub without fetching repository history", async () => {
     const descendantSha = "cccccccccccccccccccccccccccccccccccccccc";
-    const fetchMock = jest.fn(async () => ({
-      ok: true,
-      status: 200,
-      text: async () =>
-        JSON.stringify({ merge_base_commit: { sha: MAIN_SHA } }),
-    }));
+    const fetchMock = jest.fn(
+      async (_url: string | URL | Request, _init?: RequestInit) => ({
+        ok: true,
+        status: 200,
+        text: async () =>
+          JSON.stringify({ merge_base_commit: { sha: MAIN_SHA } }),
+      })
+    );
     globalThis.fetch = fetchMock as unknown as typeof fetch;
 
     await expect(
@@ -2217,7 +2217,7 @@ describe("deployment bus manifest", () => {
         GITHUB_API_URL: "https://api.github.test",
       })
     ).resolves.toBe(true);
-    expect(String(fetchMock.mock.calls[0][0])).toContain(
+    expect(String(fetchMock.mock.calls[0]?.[0] ?? "")).toContain(
       `/compare/${MAIN_SHA}...${descendantSha}`
     );
   });

@@ -1,9 +1,14 @@
+const {
+  assert,
+  OPERATION_ID_PATTERN,
+} = require("./deploy-hub-operation-contracts.cjs");
+
 const STAGING_REF = "1a-staging";
 const POLL_MILLISECONDS = 10_000;
 const WORKFLOW_TIMEOUT_MILLISECONDS = 110 * 60 * 1000;
 const QUEUED_REQUEST_CONTEXT = "Deploy Hub Request";
 const QUEUED_REQUEST_PATTERN =
-  /^Queued ([1-9]\d?)\/([1-9]\d?) for (Staging|Production) · ([A-Za-z0-9][A-Za-z0-9._-]{0,79}) · (\S+)$/;
+  /^Queued ([1-9]\d?)\/([1-9]\d?) for (Staging|Production) · ([A-Za-z0-9._-]+) · (\S+)$/;
 const MAX_PENDING_REQUESTS = 100;
 
 function targetLabel(target) {
@@ -26,6 +31,15 @@ function e2eContext(correlation) {
   return `Deploy Hub E2E — ${correlation}`;
 }
 
+function latestMatchingStatus(statuses, predicate) {
+  return [...(statuses ?? [])]
+    .filter(predicate)
+    .sort(
+      (left, right) =>
+        Date.parse(right.created_at ?? "") - Date.parse(left.created_at ?? "")
+    )[0];
+}
+
 function queuedRequestDescription(
   target,
   operationId,
@@ -33,7 +47,10 @@ function queuedRequestDescription(
   requestCount,
   requestedAt
 ) {
-  return `Queued ${requestIndex}/${requestCount} for ${targetLabel(target)} · ${operationId} · ${requestedAt}`;
+  assert(OPERATION_ID_PATTERN.test(operationId), "Operation ID is invalid.");
+  const description = `Queued ${requestIndex}/${requestCount} for ${targetLabel(target)} · ${operationId} · ${requestedAt}`;
+  assert(description.length <= 140, "Queued request description is too long.");
+  return description;
 }
 
 async function discoverQueuedRequests(github, repository, baseRef) {
@@ -42,7 +59,8 @@ async function discoverQueuedRequests(github, repository, baseRef) {
   for (const pull of pulls) {
     const sha = pull.head?.sha ?? "";
     const combined = await github.getCombinedStatus(sha);
-    const status = combined.statuses?.find(
+    const status = latestMatchingStatus(
+      combined.statuses,
       (candidate) => candidate.context === QUEUED_REQUEST_CONTEXT
     );
     const match = QUEUED_REQUEST_PATTERN.exec(status?.description ?? "");
@@ -56,6 +74,7 @@ async function discoverQueuedRequests(github, repository, baseRef) {
     if (
       status?.state !== "pending" ||
       !match ||
+      !OPERATION_ID_PATTERN.test(operationId) ||
       !Number.isInteger(pull.number) ||
       requestIndex > requestCount ||
       !Number.isFinite(requestedAt) ||
@@ -149,15 +168,14 @@ async function stopRequested(
     if (includeSourceOperations && request.source_operation_id) {
       operationIds.add(request.source_operation_id);
     }
-    const latest = combined.statuses?.find(
-      (status) =>
-        operationIds.has(
-          status.context?.startsWith("Deploy Hub Stop — ")
-            ? status.context.slice("Deploy Hub Stop — ".length)
-            : ""
-        ) && status.state === "pending"
+    const latest = latestMatchingStatus(combined.statuses, (status) =>
+      operationIds.has(
+        status.context?.startsWith("Deploy Hub Stop — ")
+          ? status.context.slice("Deploy Hub Stop — ".length)
+          : ""
+      )
     );
-    if (latest) return true;
+    if (latest?.state === "pending") return true;
   }
   return false;
 }
@@ -174,7 +192,7 @@ async function waitForWorkflow({
 }) {
   const deadline = now() + WORKFLOW_TIMEOUT_MILLISECONDS;
   let run;
-  while (now() < deadline) {
+  while (true) {
     const listing = await github.listWorkflowRuns(workflow, branch);
     run = listing.workflow_runs?.find(
       (candidate) =>
@@ -183,6 +201,7 @@ async function waitForWorkflow({
         Date.parse(candidate.created_at ?? "") >= notBefore
     );
     if (run?.status === "completed") return run;
+    if (now() >= deadline) break;
     await sleep(POLL_MILLISECONDS);
   }
   throw new Error(`Timed out waiting for ${displayTitle}.`);
@@ -213,7 +232,8 @@ async function dispatchAndWait({
 }
 
 function classifyE2eStatus(combined, correlation) {
-  const status = combined.statuses?.find(
+  const status = latestMatchingStatus(
+    combined.statuses,
     (candidate) => candidate.context === e2eContext(correlation)
   );
   if (status?.state === "success") return "success";

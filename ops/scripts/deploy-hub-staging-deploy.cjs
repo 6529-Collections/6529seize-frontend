@@ -14,6 +14,7 @@ const {
   compositionAt,
   publishContent,
   publishStagingPresence,
+  STAGING_REF,
   stagingMessage,
 } = require("./deploy-hub-staging-content.cjs");
 const {
@@ -26,8 +27,6 @@ const {
   validateWithRetry,
 } = require("./deploy-hub-operation-workflows.cjs");
 
-const STAGING_REF = "1a-staging";
-
 async function reconcileProductFailure(options) {
   const {
     github,
@@ -35,6 +34,7 @@ async function reconcileProductFailure(options) {
     cohort,
     knownGoodSha,
     knownGoodComposition,
+    stagingSha,
     operationId,
     runId,
     runAttempt,
@@ -47,18 +47,24 @@ async function reconcileProductFailure(options) {
   let safeCorrelation;
   const accepted = [];
   const rejected = [];
+  let lastPublishedSha = stagingSha;
 
   async function restoreSafeContent(phase) {
     const stagingHead = git.remoteSha(STAGING_REF);
+    assert(
+      stagingHead === lastPublishedSha,
+      "Staging changed during reconciliation; refusing to overwrite concurrent changes."
+    );
     const restoredSha = await publishContent({
       git,
-      expectedOldSha: stagingHead,
+      expectedOldSha: lastPublishedSha,
       contentSha: safeSha,
       message: stagingMessage(
         `Deploy Hub ${operationId}: restore verified staging content`,
         safeComposition
       ),
     });
+    lastPublishedSha = restoredSha;
     const restored = await validateWithRetry({
       github,
       sha: restoredSha,
@@ -87,15 +93,20 @@ async function reconcileProductFailure(options) {
       "replay"
     );
     const stagingHead = git.remoteSha(STAGING_REF);
+    assert(
+      stagingHead === lastPublishedSha,
+      "Staging changed during reconciliation; refusing to overwrite concurrent changes."
+    );
     const replaySha = await publishContent({
       git,
-      expectedOldSha: stagingHead,
+      expectedOldSha: lastPublishedSha,
       contentSha,
       message: stagingMessage(
         `Deploy Hub ${operationId}: replay frontend PR #${request.pr}`,
         candidateComposition
       ),
     });
+    lastPublishedSha = replaySha;
     const replay = await validateWithRetry({
       github,
       sha: replaySha,
@@ -136,8 +147,9 @@ async function dispatchProduction({
   stagingSha,
   stagingCorrelation,
   parentRunId,
+  baseRef,
 }) {
-  await github.dispatchWorkflow("deploy-hub-production.yml", "main", {
+  await github.dispatchWorkflow("deploy-hub-production.yml", baseRef, {
     operation_id: operationId,
     manifest: JSON.stringify(requests),
     staging_sha: stagingSha,
@@ -155,6 +167,7 @@ async function finishCohort(options) {
     runUrl,
     safeSha,
     stagingCorrelation,
+    baseRef,
   } = options;
   if (await stopRequested(github, accepted, operationId)) {
     await publishStatus(
@@ -211,6 +224,7 @@ async function finishCohort(options) {
     stagingSha: safeSha,
     stagingCorrelation,
     parentRunId: runId,
+    baseRef,
   });
   return "success";
 }
@@ -333,6 +347,7 @@ async function processStagingCohort(options) {
       cohort: activeCohort,
       knownGoodSha,
       knownGoodComposition,
+      stagingSha,
     });
     accepted = reconciliation.accepted;
     safeSha = reconciliation.safeSha;
@@ -433,7 +448,7 @@ async function executeStaging(options) {
         runUrl,
         "error",
         "Operation failed before every request reached a terminal result"
-      );
+      ).catch(() => {});
       throw error;
     }
     if (conclusion !== "success") {

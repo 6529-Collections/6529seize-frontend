@@ -1,6 +1,7 @@
 const { EXPECTED_REPOSITORY } = require("./deploy-hub-shadow.cjs");
 
-const OPERATION_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$/;
+const OPERATION_ID_SOURCE = "[A-Za-z0-9][A-Za-z0-9._-]{0,79}";
+const OPERATION_ID_PATTERN = new RegExp(`^${OPERATION_ID_SOURCE}$`);
 const RUN_URL_PATTERN =
   /^https:\/\/github\.com\/6529-Collections\/6529seize-frontend\/actions\/runs\/[1-9]\d*$/;
 const WRITE_PERMISSIONS = new Set(["admin", "maintain", "write"]);
@@ -28,7 +29,7 @@ function validateRuntime({ operationId, repository, runUrl, baseRef }) {
 
 async function assertAuthority(github, actor, requests) {
   const result = await github.getCollaboratorPermission(actor);
-  const permission = result.permission ?? result.user?.permissions;
+  const permission = result.role_name ?? result.permission;
   assert(
     WRITE_PERMISSIONS.has(permission),
     "Requester does not have frontend write authority."
@@ -73,7 +74,13 @@ function latestExternalStatuses(statuses) {
   const latest = new Map();
   for (const status of statuses) {
     const context = status.context ?? "";
-    if (!latest.has(context) && !context.startsWith("Deploy Hub")) {
+    const current = latest.get(context);
+    if (
+      !context.startsWith("Deploy Hub") &&
+      (!current ||
+        Date.parse(status.created_at ?? "") >
+          Date.parse(current.created_at ?? ""))
+    ) {
       latest.set(context, status);
     }
   }
@@ -116,15 +123,20 @@ async function assertProductionRequestPreflight(
   github,
   request,
   baseRef,
-  expectedMainSha
+  expectedMainSha,
+  {
+    sleep = (milliseconds) =>
+      new Promise((resolve) => setTimeout(resolve, milliseconds)),
+  } = {}
 ) {
   const mainSha = (await github.getRef(baseRef)).object?.sha;
   assert(mainSha === expectedMainSha, "Main moved before production merge.");
-  const [pull] = await assertExactPulls(github, [request], baseRef);
-  assert(
-    pull.base?.sha === mainSha,
-    `PR #${request.pr} was not checked against current main.`
-  );
+  let pull;
+  for (let attempt = 1; attempt <= 5; attempt += 1) {
+    [pull] = await assertExactPulls(github, [request], baseRef);
+    if (pull.mergeable !== null && pull.mergeable_state !== "unknown") break;
+    if (attempt < 5) await sleep(1_000);
+  }
   assert(pull.draft !== true, `PR #${request.pr} is still a draft.`);
   assert(
     pull.mergeable === true && pull.mergeable_state === "clean",
@@ -151,6 +163,8 @@ module.exports = {
   assert,
   assertAuthority,
   assertExactPulls,
+  OPERATION_ID_PATTERN,
+  OPERATION_ID_SOURCE,
   assertProductionPreflight,
   assertProductionRequestPreflight,
   assertRequestAuthorities,

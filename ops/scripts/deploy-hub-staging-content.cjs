@@ -7,7 +7,9 @@ const {
   stagingPresenceContext,
 } = require("./deploy-hub-operation-workflows.cjs");
 
-async function publishContent({ git, expectedOldSha, contentSha, message }) {
+const STAGING_REF = "1a-staging";
+
+function publishContent({ git, expectedOldSha, contentSha, message }) {
   const nextSha = git.forwardContent(expectedOldSha, contentSha, message);
   git.pushStaging(expectedOldSha, nextSha);
   return nextSha;
@@ -58,5 +60,6 @@ module.exports = {
   compositionAt,
   publishContent,
   publishStagingPresence,
+  STAGING_REF,
   stagingMessage,
 };

@@ -1,10 +1,14 @@
 const { execFileSync } = require("node:child_process");
+const {
+  OPERATION_ID_PATTERN,
+} = require("./deploy-hub-operation-contracts.cjs");
 
 const SHA_PATTERN = /^[a-f0-9]{40}$/;
 const STAGING_REF = "1a-staging";
 const REF_PATTERN = /^[A-Za-z0-9._/-]{1,255}$/;
 const ACTOR_PATTERN = /^[A-Za-z0-9-]{1,39}$/;
-const OPERATION_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$/;
+const GIT_TIMEOUT_MILLISECONDS = 60_000;
+const GIT_MAX_BUFFER_BYTES = 10 * 1024 * 1024;
 const WORKFLOWS = new Set([
   "build-upload-deploy-prod.yml",
   "deploy-hub-production.yml",
@@ -17,7 +21,81 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-function createGithubClient({ apiUrl, repository, token, fetchImpl = fetch }) {
+function createRequestUrl(apiUrl, repository, segments, query) {
+  const url = new URL(
+    ["repos", ...repository.split("/"), ...segments]
+      .map(encodeURIComponent)
+      .join("/"),
+    `${apiUrl}/`
+  );
+  for (const [key, value] of Object.entries(query ?? {})) {
+    url.searchParams.set(key, value);
+  }
+  return url;
+}
+
+function retryableResponse(response) {
+  return (
+    response.status === 429 ||
+    response.status >= 500 ||
+    (response.status === 403 &&
+      (response.headers?.get?.("retry-after") ||
+        response.headers?.get?.("x-ratelimit-remaining") === "0"))
+  );
+}
+
+function responsePayload(response) {
+  return response.status === 204 ? null : response.json();
+}
+
+async function githubRequest({
+  apiUrl,
+  repository,
+  token,
+  fetchImpl,
+  sleepImpl,
+  segments,
+  options = {},
+}) {
+  const url = createRequestUrl(apiUrl, repository, segments, options.query);
+  const method = options.method ?? "GET";
+  const attempts = method === "GET" ? 3 : 1;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    let response;
+    try {
+      response = await fetchImpl(url, {
+        method,
+        headers: {
+          Accept: "application/vnd.github+json",
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+        body: options.body ? JSON.stringify(options.body) : undefined,
+        signal: AbortSignal.timeout(30_000),
+      });
+    } catch (error) {
+      if (method !== "GET" || attempt === attempts) throw error;
+      await sleepImpl(attempt * 1_000);
+      continue;
+    }
+    if (response.ok) return responsePayload(response);
+    if (!retryableResponse(response) || attempt === attempts) {
+      throw new Error(`GitHub request failed with HTTP ${response.status}.`);
+    }
+    await sleepImpl(attempt * 1_000);
+  }
+  throw new Error("GitHub request retry budget was exhausted.");
+}
+
+function createGithubClient({
+  apiUrl,
+  repository,
+  token,
+  fetchImpl = fetch,
+  sleepImpl = (milliseconds) =>
+    new Promise((resolve) => setTimeout(resolve, milliseconds)),
+}) {
   assert(apiUrl === "https://api.github.com", "GitHub API URL is invalid.");
   assert(
     repository === "6529-Collections/6529seize-frontend",
@@ -25,30 +103,15 @@ function createGithubClient({ apiUrl, repository, token, fetchImpl = fetch }) {
   );
 
   async function request(segments, options = {}) {
-    const url = new URL(
-      ["repos", ...repository.split("/"), ...segments]
-        .map(encodeURIComponent)
-        .join("/"),
-      `${apiUrl}/`
-    );
-    for (const [key, value] of Object.entries(options.query ?? {})) {
-      url.searchParams.set(key, value);
-    }
-    const response = await fetchImpl(url, {
-      method: options.method ?? "GET",
-      headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
-      body: options.body ? JSON.stringify(options.body) : undefined,
+    return githubRequest({
+      apiUrl,
+      repository,
+      token,
+      fetchImpl,
+      sleepImpl,
+      segments,
+      options,
     });
-    if (!response.ok) {
-      throw new Error(`GitHub request failed with HTTP ${response.status}.`);
-    }
-    if (response.status === 204) return null;
-    return response.json();
   }
 
   function validSha(sha) {
@@ -84,7 +147,14 @@ function createGithubClient({ apiUrl, repository, token, fetchImpl = fetch }) {
       });
       assert(Array.isArray(batch), "GitHub statuses response is invalid.");
       statuses.push(...batch);
-      if (batch.length < 100) return { statuses };
+      if (batch.length < 100) {
+        statuses.sort(
+          (left, right) =>
+            Date.parse(right.created_at ?? "") -
+            Date.parse(left.created_at ?? "")
+        );
+        return { statuses };
+      }
     }
     throw new Error("GitHub statuses exceeded the safe pagination limit.");
   }
@@ -140,7 +210,8 @@ function createGithubClient({ apiUrl, repository, token, fetchImpl = fetch }) {
     getCheckRuns,
     getCombinedStatus,
     getPullRequest: (pr) => request(["pulls", validPr(pr)]),
-    getRef: (ref) => request(["git", "ref", "heads", validRef(ref)]),
+    getRef: (ref) =>
+      request(["git", "ref", "heads", ...validRef(ref).split("/")]),
     getWorkflowRun(runId) {
       assert(/^[1-9]\d*$/.test(String(runId)), "GitHub run ID is invalid.");
       return request(["actions", "runs", String(runId)]);
@@ -181,6 +252,8 @@ function createGitClient({ exec = execFileSync } = {}) {
       encoding: "utf8",
       stdio: [options.input === undefined ? "ignore" : "pipe", "pipe", "pipe"],
       input: options.input,
+      maxBuffer: GIT_MAX_BUFFER_BYTES,
+      timeout: GIT_TIMEOUT_MILLISECONDS,
     }).trim();
   }
 
@@ -206,8 +279,16 @@ function createGitClient({ exec = execFileSync } = {}) {
         let tree;
         try {
           tree = run(["merge-tree", "--write-tree", current, requestSha]);
-        } catch {
-          throw new Error(`Frontend PR #${request.pr} conflicts with staging.`);
+        } catch (error) {
+          if (error?.status === 1) {
+            throw new Error(
+              `Frontend PR #${request.pr} conflicts with staging.`
+            );
+          }
+          throw new Error(
+            "git merge-tree --write-tree is unavailable or failed unexpectedly.",
+            { cause: error }
+          );
         }
         assert(SHA_PATTERN.test(tree), "Merged staging tree is invalid.");
         current = run(["commit-tree", tree, "-p", current, "-p", requestSha], {
@@ -237,10 +318,6 @@ function createGitClient({ exec = execFileSync } = {}) {
         `Staging moved from ${expected} to ${observed}; refusing mutation.`
       );
       run(["push", "origin", `${next}:refs/heads/${STAGING_REF}`]);
-      assert(
-        remoteSha(STAGING_REF) === next,
-        "Staging ref did not resolve to the published SHA."
-      );
     },
     readCommitMessage(sha) {
       return run(["show", "-s", "--format=%B", validGitSha(sha)]);
