@@ -30,10 +30,32 @@ describe("manual staging immutable artifact deployment", () => {
     expect(script).toContain(
       'echo "$EXPECTED_DIGEST  $artifact_tmp" | sha256sum -c -'
     );
-    expect(script).toContain('test -f "$release_dir/app/server.js"');
+    expect(script).toContain('release_id="$EXPECTED_SHA-$EXPECTED_DIGEST"');
+    expect(script).toContain('test -f "$staging_app/server.js"');
+    expect(script).toContain('grep -qxF "package_sha256=$EXPECTED_DIGEST"');
+    expect(script).toContain(
+      "Refusing to replace the active staging release after its identity check failed"
+    );
+    expect(script).toContain(
+      '(.pm_exec_path == "/usr/bin/bash" or .pm_exec_path == "/bin/bash")'
+    );
+    expect(script).toContain(
+      'sudo -H -u "$RUN_AS" pm2 --version >/dev/null 2>&1'
+    );
+    expect(script).toContain("--connect-timeout 30");
+    expect(script).toContain("--max-time 900");
+    expect(script).toContain(
+      'install -m 600 -o "$RUN_AS" -g "$RUN_AS" /dev/null "$destinations_file"'
+    );
     expect(script).toContain('wait_for_local_version "$EXPECTED_SHA"');
-    expect(script).toContain("rollback_process");
+    expect(script.match(/if ! rollback_process; then/g)).toHaveLength(3);
+    expect(script).toContain("legacy) restore_legacy_process");
+    expect(script).toContain("managed) rollback_managed_process");
+    expect(script).toContain("absent) rollback_absent_process");
     expect(script).toContain("deployment is idempotent");
+    expect(
+      script.indexOf('unzip -q "$artifact_tmp" -d "$staging_app"')
+    ).toBeLessThan(script.indexOf('rm -rf -- "$release_app"'));
     expect(script).not.toContain("curl -k");
     expect(script).not.toMatch(/\beval\b/u);
   });
@@ -70,6 +92,9 @@ describe("manual staging immutable artifact deployment", () => {
     );
     expect(sendStep.run).not.toContain("install:frozen");
     expect(sendStep.run).not.toContain("./bin/6529 run build");
+    expect(workflowSource).toContain("--expires-in 2400");
+    expect(workflowSource).toContain("Staging artifact cleanup warning");
+    expect(workflowSource).toContain("public/help-index.json");
   });
 
   it("rechecks manual readiness after the build and before cloud mutation", () => {

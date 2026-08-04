@@ -10,7 +10,7 @@ function workflow(name: string): string {
 
 const appPrCi = workflow("app-pr-ci.yml");
 const releaseBusPreflight = workflow("release-bus-v2-preflight.yml");
-const legacyStaging = workflow("deploy-staging.yml");
+const stagingWorkflow = workflow("deploy-staging.yml");
 const legacyProduction = workflow("build-upload-deploy-prod.yml");
 const stagingArtifactDeployScript = fs.readFileSync(
   path.join(process.cwd(), "ops", "scripts", "deploy-staging-artifact.sh"),
@@ -103,25 +103,25 @@ describe("public-review artifact workflow contract", () => {
   });
 
   it("builds and deploys one exact manual staging artifact", () => {
-    expect(legacyStaging).toContain(
+    expect(stagingWorkflow).toContain(
       "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS }}"
     );
-    expect(legacyStaging).toContain('artifact_contract:"manual-staging-v1"');
-    expect(legacyStaging).toContain(`${helper} prepare`);
-    expect(legacyStaging).toContain(`${helper} assert-listing`);
-    expect(legacyStaging).toContain(`${helper} assert-zip`);
-    expect(legacyStaging).toContain("./bin/6529 run base-build");
-    expect(legacyStaging).toContain(
+    expect(stagingWorkflow).toContain('artifact_contract:"manual-staging-v1"');
+    expect(stagingWorkflow).toContain(`${helper} prepare`);
+    expect(stagingWorkflow).toContain(`${helper} assert-listing`);
+    expect(stagingWorkflow).toContain(`${helper} assert-zip`);
+    expect(stagingWorkflow).toContain("./bin/6529 run base-build");
+    expect(stagingWorkflow).toContain(
       "bash ops/scripts/deploy-staging-artifact.sh"
     );
-    expect(legacyStaging).toContain(
+    expect(stagingWorkflow).toContain(
       "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64"
     );
-    expect(legacyStaging).not.toContain(
+    expect(stagingWorkflow).not.toContain(
       "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_PARAMETER"
     );
-    expect(legacyStaging).not.toContain("aws ssm get-parameter");
-    expect(legacyStaging).toContain('(has("production") | not)');
+    expect(stagingWorkflow).not.toContain("aws ssm get-parameter");
+    expect(stagingWorkflow).toContain('(has("production") | not)');
     expect(stagingArtifactDeployScript).toContain(
       "printf '%s' \"$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64\" | base64 -d"
     );
@@ -197,8 +197,8 @@ describe("public-review artifact workflow contract", () => {
       "isPublicStreamReviewDataPath(req, pathname)"
     );
     expect(proxySource).toContain("rawPathname === pathname");
-    expect(legacyStaging).toContain(`${helper} prepare`);
-    expect(legacyStaging).toContain("--profile staging");
+    expect(stagingWorkflow).toContain(`${helper} prepare`);
+    expect(stagingWorkflow).toContain("--profile staging");
     expect(releaseBusPreflight).toContain(
       'build_profile "$ARTIFACT_ENVIRONMENT" release-bus-artifact'
     );

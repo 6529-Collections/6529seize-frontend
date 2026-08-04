@@ -185,9 +185,13 @@ adoption freeze without failing an unrelated manual deploy.
 
 The guarded manual frontend fallback builds one exact-SHA staging artifact on
 GitHub without deployment credentials,
-reconfirms fallback readiness, and sends only the digest-bound bundle to EC2.
-The instance verifies, activates, and version-checks those bytes with rollback;
-it no longer reinstalls dependencies, lints, or rebuilds the app.
+reconfirms fallback readiness, and uploads the digest-bound bundle temporarily
+to `s3://<artifact-bucket>/manual-staging/<run-id>/<sha>.zip`. EC2 receives a
+40-minute presigned URL through SSM. The workflow always attempts to remove the
+object afterward and emits a job-summary warning if cleanup fails so an
+operator can remove the leftover object. The instance verifies, activates, and
+version-checks those bytes with rollback; it no longer reinstalls dependencies,
+lints, or rebuilds the app.
 
 The small `staging-e2e-dispatch.yml` post-completion listener has no concurrency
 group and dispatches `staging-e2e.yml` only when `Web Deploy - STAGING`

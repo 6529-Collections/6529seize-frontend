@@ -40,6 +40,8 @@ jobs:
           test "$DEPLOY_CONCLUSION" = success
           test "$DEPLOY_HEAD_BRANCH" = 1a-staging
           test "$DEPLOY_HEAD_REPOSITORY" = "$GITHUB_REPOSITORY"
+          # Run trusted orchestration from the default branch. staging-e2e.yml
+          # independently resolves and checks out the deployed SHA for packs.
           dispatch_payload="$(jq -cn \
             --arg ref "$DEFAULT_BRANCH" \
             --arg deploy_run_id "$DEPLOY_WORKFLOW_RUN_ID" \

@@ -140,7 +140,9 @@ App PR CI:
   their owning paths change.
 - PR CI does not start a local web server or duplicate Playwright packs. The
   complete read-only browser inventory runs once against the exact deployed
-  staging SHA after a successful staging deployment.
+  staging SHA after a successful deployment when automatic baseline adoption
+  resolves `LEGACY`; `DEFERRED` hands validation to the matching Release Bus
+  intent instead of starting a duplicate automatic pack run.
 - Museum publication correctness remains exhaustive in fast Jest contracts:
   all manuscripts, profiles, admitted source mappings, and fail-closed rules
   are checked statically. Its deployed Playwright pack is a representative

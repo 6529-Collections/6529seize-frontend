@@ -35,15 +35,21 @@ test -d "$REPO_DIR/.git" || {
   exit 1
 }
 
-for command in base64 curl flock jq pm2 sha256sum sudo unzip; do
+for command in base64 curl flock grep jq sha256sum sudo unzip; do
   command -v "$command" >/dev/null 2>&1 || {
     echo "Required staging command '$command' is unavailable." >&2
     exit 1
   }
 done
+sudo -H -u "$RUN_AS" pm2 --version >/dev/null 2>&1 || {
+  echo "Required staging command 'pm2' is unavailable for $RUN_AS." >&2
+  exit 1
+}
 
 release_root="$REPO_DIR/.release-bus"
-release_dir="$release_root/releases/$EXPECTED_SHA"
+release_id="$EXPECTED_SHA-$EXPECTED_DIGEST"
+release_dir="$release_root/releases/$release_id"
+release_app="$release_dir/app"
 current_link="$release_root/current"
 install -d -o "$RUN_AS" -g "$RUN_AS" "$release_root/releases"
 if [[ -e "$current_link" && ! -L "$current_link" ]]; then
@@ -73,7 +79,7 @@ elif [[ "$process_count" -eq 1 ]]; then
   }' <<<"$pm2_json")"
   if jq -e --arg repo_dir "$REPO_DIR" '
     .exec_mode == "fork_mode" and
-    .pm_exec_path == "/usr/bin/bash" and
+    (.pm_exec_path == "/usr/bin/bash" or .pm_exec_path == "/bin/bash") and
     .pm_cwd == $repo_dir and
     .args == ["-lc", ("cd \"" + $repo_dir + "\" && ./bin/6529 run start:standalone")]
   ' <<<"$process_shape" >/dev/null; then
@@ -146,17 +152,23 @@ if [[ "$process_kind" != absent ]]; then
 fi
 
 if [[ "$process_kind" == managed && \
-  "$previous_target" == "$release_dir/app" && \
-  "$previous_local_version" == "$EXPECTED_SHA" ]]; then
-  echo "Exact staging SHA $EXPECTED_SHA is already healthy; deployment is idempotent."
+  "$previous_target" == "$release_app" && \
+  "$previous_local_version" == "$EXPECTED_SHA" ]] && \
+  grep -qxF "package_sha256=$EXPECTED_DIGEST" \
+    "$release_dir/artifact.env" 2>/dev/null; then
+  echo "Exact staging artifact $release_id is already healthy; deployment is idempotent."
   exit 0
+fi
+if [[ "$previous_target" == "$release_app" ]]; then
+  echo "Refusing to replace the active staging release after its identity check failed." >&2
+  exit 1
 fi
 
 prune_release_cache() {
   local current_release=""
   local retained_rollback=0
-  local cached_release cached_sha
-  if [[ "$previous_target" =~ ^${release_root}/releases/[a-f0-9]{40}/app$ ]]; then
+  local cached_release cached_release_id
+  if [[ "$previous_target" =~ ^${release_root}/releases/[a-f0-9]{40}(-[a-f0-9]{64})?/app$ ]]; then
     current_release="${previous_target%/app}"
   fi
   if [[ "$process_kind" == managed && -z "$current_release" ]]; then
@@ -173,14 +185,14 @@ prune_release_cache() {
       retained_rollback=1
       continue
     fi
-    cached_sha="${cached_release##*/}"
-    if [[ ! "$cached_sha" =~ ^[a-f0-9]{40}$ || \
-      "$cached_release" != "$release_root/releases/$cached_sha" ]]; then
-      echo "Preserving unrecognized staging release cache entry $cached_sha"
+    cached_release_id="${cached_release##*/}"
+    if [[ ! "$cached_release_id" =~ ^[a-f0-9]{40}(-[a-f0-9]{64})?$ || \
+      "$cached_release" != "$release_root/releases/$cached_release_id" ]]; then
+      echo "Preserving unrecognized staging release cache entry $cached_release_id"
       continue
     fi
     rm -rf -- "$cached_release"
-    echo "Pruned rebuildable staging release cache $cached_sha"
+    echo "Pruned rebuildable staging release cache $cached_release_id"
   done < <(
     find "$release_root/releases" -mindepth 1 -maxdepth 1 \
       -type d -printf '%T@ %p\n' 2>/dev/null | sort -nr | cut -d' ' -f2-
@@ -224,20 +236,29 @@ prune_release_cache
 
 install -d -o "$RUN_AS" -g "$RUN_AS" "$release_dir"
 artifact_tmp="$(mktemp "$release_dir/package.XXXXXX.zip")"
+staging_app=""
 cleanup() {
   rm -f "$artifact_tmp"
+  if [[ -n "$staging_app" && -d "$staging_app" ]]; then
+    rm -rf -- "$staging_app"
+  fi
 }
 trap cleanup EXIT HUP INT TERM
 http_status="$(curl --silent --show-error --proto '=https' \
+  --connect-timeout 30 \
+  --max-time 900 \
   --output "$artifact_tmp" \
   --write-out '%{http_code}' \
   "$ARTIFACT_URL")"
 [[ "$http_status" == 200 ]]
 echo "$EXPECTED_DIGEST  $artifact_tmp" | sha256sum -c -
-rm -rf "$release_dir/app"
-install -d -o "$RUN_AS" -g "$RUN_AS" "$release_dir/app"
-unzip -q "$artifact_tmp" -d "$release_dir/app"
-test -f "$release_dir/app/server.js"
+staging_app="$(mktemp -d "$release_dir/app.XXXXXX")"
+unzip -q "$artifact_tmp" -d "$staging_app"
+test -f "$staging_app/server.js"
+chown -R "$RUN_AS:$RUN_AS" "$staging_app"
+rm -rf -- "$release_app"
+mv "$staging_app" "$release_app"
+staging_app=""
 rm -f "$artifact_tmp"
 printf 'source_sha=%s\npackage_sha256=%s\n' \
   "$EXPECTED_SHA" "$EXPECTED_DIGEST" > "$release_dir/artifact.env"
@@ -253,14 +274,14 @@ jq -e '
   (.staging["stream-review"] | type == "string" and test("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")) and
   (has("production") | not)
 ' <<<"$review_destinations" >/dev/null
+destinations_file="$release_dir/public-review-discussion-destinations.json"
+install -m 600 -o "$RUN_AS" -g "$RUN_AS" /dev/null "$destinations_file"
 printf '%s\n' "$review_destinations" \
-  > "$release_dir/public-review-discussion-destinations.json"
-chown "$RUN_AS:$RUN_AS" \
-  "$release_dir/public-review-discussion-destinations.json"
-chmod 600 "$release_dir/public-review-discussion-destinations.json"
+  > "$destinations_file"
+chown "$RUN_AS:$RUN_AS" "$destinations_file"
 unset review_destinations PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64
 
-ln -sfn "$release_dir/app" "$current_link"
+ln -sfn "$release_app" "$current_link"
 cat > "$release_root/ecosystem.config.cjs" <<'PM2_CONFIG'
 const fs = require('node:fs');
 const path = require('node:path');

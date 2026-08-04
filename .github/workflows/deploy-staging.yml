@@ -174,7 +174,7 @@ jobs:
             ${{ runner.os }}-node22-pnpm-
 
       - name: Use cached pnpm store
-        run: pnpm config set store-dir ~/.pnpm-store
+        run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
 
       - name: Install Socket Firewall
         id: socket-firewall
@@ -248,6 +248,7 @@ jobs:
             '{schema_version:1,artifact_contract:"manual-staging-v1",repository:"frontend",source_sha:$source_sha,environment:"staging",package_sha256:$package_digest}' \
             > staging-artifact/manifest.json
           (cd staging-artifact && sha256sum manifest.json package.zip > SHA256SUMS)
+          test -z "$(git status --porcelain=v1 --untracked-files=all -- public/help-index.json public/glossary.json public/llms.txt)"
           test -z "$(git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews)"
 
       - name: Save Next.js build cache
@@ -487,7 +488,7 @@ jobs:
             --metadata "sha256=${PACKAGE_DIGEST},source-sha=${EXPECTED_SHA}"
           url="$(aws s3 presign "s3://${ARTIFACT_BUCKET}/${object_key}" \
             --region "$ARTIFACT_BUCKET_REGION" \
-            --expires-in 7200)"
+            --expires-in 2400)"
           echo "object-key=$object_key" >> "$GITHUB_OUTPUT"
           echo "url=$url" >> "$GITHUB_OUTPUT"
 
@@ -710,12 +711,18 @@ jobs:
 
       - name: Remove transient managed-instance artifact
         if: always() && steps.staged-artifact.outputs.object-key != ''
-        continue-on-error: true
         env:
           OBJECT_KEY: ${{ steps.staged-artifact.outputs.object-key }}
         run: |
-          aws s3 rm "s3://${ARTIFACT_BUCKET}/${OBJECT_KEY}" \
-            --region "$ARTIFACT_BUCKET_REGION"
+          if ! aws s3 rm "s3://${ARTIFACT_BUCKET}/${OBJECT_KEY}" \
+            --region "$ARTIFACT_BUCKET_REGION"; then
+            echo "::warning::Failed to remove transient staging artifact s3://${ARTIFACT_BUCKET}/${OBJECT_KEY}"
+            {
+              echo "### Staging artifact cleanup warning"
+              echo
+              echo "The transient object \`s3://${ARTIFACT_BUCKET}/${OBJECT_KEY}\` could not be removed and may require operator cleanup."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Verify staging HTTP version
         env:

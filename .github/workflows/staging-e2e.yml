@@ -337,7 +337,7 @@ jobs:
             ${{ runner.os }}-node22-pnpm-
 
       - name: Use cached pnpm store
-        run: pnpm config set store-dir ~/.pnpm-store
+        run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
 
       - name: Install Socket Firewall
         id: socket-firewall
