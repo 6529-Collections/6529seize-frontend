@@ -1,5 +1,32 @@
 # Run log
 
+## 2026-08-04 canonical source and editorial register
+
+- Museum source PR #23 merged exact reviewed head
+  `068dd3491c7137970977d59cbac0769e055302b8` as canonical main
+  `5afd128cd3ec157479e1ced904fb982c3de1cc60` under a recorded maintainer
+  disposition after all three deterministic validation jobs passed and the
+  unresolved review-thread count reached zero.
+- The canonical release contains 247 manifest entries and commits to
+  `sha256:40065c69a864377d92ed48106c48c2abfd72e2ffd3d1b02f9097a4e08a87393f`
+  and Keccak-256
+  `0x63a97f876a08a18fa8062df8e60798bde45598962a483318d9289a71eb9e011c`.
+- The source release remains one living institutional-practice study. It now
+  contains twenty-seven profiles, an adjacent-practice study, the public
+  scholarship and writing standard, and a primary-source register. The same
+  editorial standard was applied to the Museum's public institutional,
+  curatorial, registrarial, accession, program, object, collection, and
+  technical-methodology prose.
+- Technical distinctions were preserved where they carry evidentiary or legal
+  meaning. Public curatorial pages lead with works and interpretation;
+  registrarial pages use restrained documentary precision; technical material
+  is presented as stewardship methodology rather than interface or governance
+  copy.
+- The frontend publication contract requires all thirty-one institutional-
+  practice manuscripts atomically from one exact source commit. Partial,
+  malformed, or mixed-source states suppress the study and all exact-source
+  claims.
+
 ## 2026-08-04 living-study expansion and whole-corpus editorial pass
 
 - Started from exact frontend main

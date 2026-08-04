@@ -7,11 +7,15 @@
   *Writing the 6529 Network Museum* as a public scholarship and editorial
   standard; apply that standard across the complete public Museum corpus; and
   qualify one atomic source/frontend release through staging and production.
-- Museum source PR: `6529-Collections/6529networkmuseum#23`, in review and not
-  yet canonical. The final source commit and manifest commitments remain
-  pending.
-- Frontend branch: `codex/museum-institutional-practice-v2-fe`, based on exact
-  main `1e712d69a35980dab885057cc4c10ae6a8a7f0e2`. No frontend PR has been opened
+- Museum source PR: `6529-Collections/6529networkmuseum#23`, merged as exact
+  canonical main `5afd128cd3ec157479e1ced904fb982c3de1cc60`.
+- Canonical source release: 247 manifest entries;
+  `sha256:40065c69a864377d92ed48106c48c2abfd72e2ffd3d1b02f9097a4e08a87393f`;
+  Keccak-256
+  `0x63a97f876a08a18fa8062df8e60798bde45598962a483318d9289a71eb9e011c`.
+- Frontend branch: `codex/museum-institutional-practice-v2-fe`. The current
+  release base is being advanced to exact frontend main
+  `456e7a7f3519eaffb8e8d4981436290e467a1412`; no frontend PR has been opened
   for this expansion yet.
 - Publication boundary: one comparative overview, twenty-seven profiles, one
   adjacent-practice study, the public scholarship and editorial standard, and
@@ -25,7 +29,9 @@
 - Local frontend validation: 69 Museum suites / 218 tests and the 104 focused
   publication/route tests pass; changed lint, changed typecheck, Playwright
   typecheck, help-index sync (202 records), and React Doctor 100/100 pass.
-  Exact canonical source probing, optimized build, retained browser evidence,
+  The exact candidate-source probe passed with 57 public documents, 27
+  institutional profiles, and all 31 institutional-practice manuscripts.
+  Exact canonical-main probing, optimized build, retained browser evidence,
   PR/bot review, staging, and production qualification remain pending.
 
 ## Previous qualified release
