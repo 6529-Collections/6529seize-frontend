@@ -122,6 +122,7 @@ export default async function MuseumStoriesPage() {
           </p>
           <Link
             href="/museum/network/stories/a-field-of-practice"
+            prefetch={false}
             className="hover:tw-text-primary-200 tw-mt-5 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           >
             {t(

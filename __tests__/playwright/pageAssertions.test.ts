@@ -21,10 +21,44 @@ describe("Playwright page assertions", () => {
     ).not.toThrow();
   });
 
+  it("ignores blocked Coinbase analytics transport diagnostics", () => {
+    expect(() =>
+      assertNoConsoleErrors(
+        diagnostics([
+          "Analytics SDK: TypeError: Failed to fetch (cca-lite.coinbase.com)\n    at fetch",
+        ])
+      )
+    ).not.toThrow();
+  });
+
+  it("does not suppress analytics failures without the known host", () => {
+    expect(() =>
+      assertNoConsoleErrors(
+        diagnostics([
+          "Analytics SDK: TypeError: Failed to fetch (museum.example)\n    at fetch",
+        ])
+      )
+    ).toThrow("museum.example");
+  });
+
   it("still fails on actionable console errors", () => {
     expect(() =>
       assertNoConsoleErrors(diagnostics(["Uncaught TypeError: boom"]))
     ).toThrow("Unexpected browser console error");
+  });
+
+  it("includes failed-response evidence with an actionable console error", () => {
+    const result: PageDiagnostics = {
+      consoleErrors: [
+        "Failed to load resource: the server responded with a status of 502 ()",
+      ],
+      failedResponses: ["502 GET https://telemetry.example/metrics"],
+      pageErrors: [],
+    };
+
+    expect(() => assertNoConsoleErrors(result)).toThrow(
+      "502 GET https://telemetry.example/metrics"
+    );
   });
 
   it("keeps explicit allowances scoped to matching messages", () => {

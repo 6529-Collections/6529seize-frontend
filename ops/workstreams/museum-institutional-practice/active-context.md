@@ -2,8 +2,9 @@
 
 - Goal: publish the Museum's institutional-practice study on 6529.io and carry
   it through source and frontend review, staging, production, and retained E2E.
-- Frontend branch: `codex/museum-institutional-practice`.
-- Frontend base: `33f057f5003ed62269f2c6cca03dd1fdd40278e1`.
+- Frontend release PR: `6529-Collections/6529seize-frontend#3569`, merged.
+- Released frontend main: `655b5408b68bbdac79249f4531c196349eff7d52`.
+- Follow-up branch: `codex/museum-institutional-practice-closeout`.
 - Museum source PR: `6529-Collections/6529networkmuseum#22`, merged.
 - Canonical Museum source commit:
   `f5080e1873a3b86280c5a92e1fbe6cbd7fea38a4`.
@@ -36,6 +37,15 @@
   Final desktop and mobile captures cover the study, long-name profile, source
   register, and the mobile Stories & Research directory at their layout
   extremes.
-- Immediate next actions: commit the exact candidate; open and iterate the
-  frontend PR; then qualify staging and production with retained browser
-  evidence and exact runtime-version readback.
+- Staging qualification: composition `6d3ceba25b2d`, deploy run `30883469768`,
+  automatic E2E run `30884413504`, and independent Museum 32/32 all passed.
+- Production deployment: run `30885146909`; runtime and announced version both
+  read exact `655b5408b68b` with `stale:false`; rendered desktop/mobile review
+  passed.
+- Production hardening finding: speculative Museum link prefetches can produce
+  unrelated first-party RSC 502 console failures. The follow-up disables those
+  prefetches, records exact failed-response URLs, and narrowly classifies only
+  the known blocked Coinbase analytics transport as benign.
+- Immediate next actions: publish the tested follow-up PR, iterate exact-head
+  bots and CI, merge, redeploy staging and production, and require a strict
+  green 32-route production pass with first-party 5xx handling unchanged.

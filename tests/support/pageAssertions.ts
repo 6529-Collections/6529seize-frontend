@@ -14,6 +14,7 @@ import type { PageDiagnostics } from "./consoleDiagnostics";
 export function attachPageDiagnostics(page: Page): PageDiagnostics {
   const diagnostics: PageDiagnostics = {
     consoleErrors: [],
+    failedResponses: [],
     pageErrors: [],
   };
 
@@ -28,6 +29,15 @@ export function attachPageDiagnostics(page: Page): PageDiagnostics {
     diagnostics.pageErrors.push(error.stack || error.message);
   });
 
+  page.on("response", (response) => {
+    if (response.status() < 500) {
+      return;
+    }
+    diagnostics.failedResponses?.push(
+      `${response.status()} ${response.request().method()} ${response.url()}`
+    );
+  });
+
   return diagnostics;
 }
 
@@ -37,6 +47,7 @@ export async function attachPageDiagnosticsArtifact(
 ) {
   if (
     diagnostics.consoleErrors.length === 0 &&
+    (diagnostics.failedResponses?.length ?? 0) === 0 &&
     diagnostics.pageErrors.length === 0
   ) {
     return;
@@ -51,6 +62,9 @@ export async function attachPageDiagnosticsArtifact(
       "",
       "Console errors:",
       ...diagnostics.consoleErrors,
+      "",
+      "Failed responses:",
+      ...(diagnostics.failedResponses ?? []),
     ].join("\n")
   );
 }
