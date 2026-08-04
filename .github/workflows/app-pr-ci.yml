@@ -34,6 +34,7 @@ jobs:
       dependency_governance_required: ${{ steps.plan_outputs.outputs.dependency_governance_required }}
       reviewbot_contract_required: ${{ steps.plan_outputs.outputs.reviewbot_contract_required }}
       agent_files_sync_required: ${{ steps.plan_outputs.outputs.agent_files_sync_required }}
+      app_check_matrix: ${{ steps.plan_outputs.outputs.app_check_matrix }}
 
     steps:
       - name: Checkout code
@@ -94,6 +95,22 @@ jobs:
           for (const [name, check] of Object.entries(plan.checks)) {
             write(`${name}_required`, String(Boolean(check.required)));
           }
+          const appCheckLanes = [
+            { lane: "quality", label: "Quality and contracts" },
+          ];
+          if (plan.checks.build.required) {
+            appCheckLanes.push({ lane: "build", label: "Production build" });
+          }
+          if (plan.checks.playwright_smoke.required) {
+            appCheckLanes.push({ lane: "playwright-smoke", label: "Playwright smoke" });
+          }
+          if (plan.checks.playwright_critical_shell.required) {
+            appCheckLanes.push({
+              lane: "playwright-critical-shell",
+              label: "Playwright critical shell",
+            });
+          }
+          write("app_check_matrix", JSON.stringify({ include: appCheckLanes }));
           NODE
 
       - name: Summarize CI plan
@@ -151,14 +168,17 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-  installed-checks:
-    name: Installed app checks
+  app-checks:
+    name: App check / ${{ matrix.label }}
     needs: plan
     if: needs.plan.outputs.install_required == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
       contents: read
+    strategy:
+      fail-fast: true
+      matrix: ${{ fromJSON(needs.plan.outputs.app_check_matrix) }}
 
     env:
       API_ENDPOINT: "https://api.6529.io"
@@ -184,6 +204,7 @@ jobs:
           persist-credentials: false
 
       - name: Fetch base ref
+        if: matrix.lane == 'quality'
         env:
           BASE_REF: ${{ github.base_ref }}
         run: |
@@ -228,32 +249,32 @@ jobs:
         run: ./bin/6529 install:frozen
 
       - name: Run Knip dead-code check
-        if: needs.plan.outputs.deadcode_required == 'true'
+        if: matrix.lane == 'quality' && needs.plan.outputs.deadcode_required == 'true'
         run: ./bin/6529 run deadcode:knip
 
       - name: Lint package.json versions
-        if: needs.plan.outputs.dependency_governance_required == 'true'
+        if: matrix.lane == 'quality' && needs.plan.outputs.dependency_governance_required == 'true'
         run: ./bin/6529 lint:package-json
 
       - name: Classify dependency risk
-        if: needs.plan.outputs.dependency_governance_required == 'true'
+        if: matrix.lane == 'quality' && needs.plan.outputs.dependency_governance_required == 'true'
         env:
           DEPENDENCY_RISK_BASE_REF: origin/${{ github.base_ref }}
         run: ./bin/6529 run dependency:risk-gate
 
       - name: Verify reviewbot contract
-        if: needs.plan.outputs.reviewbot_contract_required == 'true'
+        if: matrix.lane == 'quality' && needs.plan.outputs.reviewbot_contract_required == 'true'
         run: ./bin/6529 run test:no-coverage -- __tests__/scripts/testing-strategy.test.ts
 
       # jest --findRelatedTests follows the module import graph, so it cannot
       # see this suite's fs reads of the help corpus and committed artifacts.
       # The plan requests it by path whenever those files change.
       - name: Verify agent files sync
-        if: needs.plan.outputs.agent_files_sync_required == 'true'
+        if: matrix.lane == 'quality' && needs.plan.outputs.agent_files_sync_required == 'true'
         run: ./bin/6529 run test:no-coverage -- __tests__/scripts/sync-agent-files.test.ts
 
       - name: Verify Release Bus v2 workflow contract
-        if: needs.plan.outputs.release_bus_contract_required == 'true'
+        if: matrix.lane == 'quality' && needs.plan.outputs.release_bus_contract_required == 'true'
         run: |
           set -euo pipefail
           ./bin/6529 run test:no-coverage --runInBand --runTestsByPath \
@@ -274,19 +295,19 @@ jobs:
             ops/scripts/release-bus-status.test.ts
 
       - name: Lint changed source
-        if: needs.plan.outputs.lint_changed_required == 'true'
+        if: matrix.lane == 'quality' && needs.plan.outputs.lint_changed_required == 'true'
         run: ./bin/6529 run lint:changed
 
       - name: Typecheck changed source
-        if: needs.plan.outputs.typecheck_changed_required == 'true'
+        if: matrix.lane == 'quality' && needs.plan.outputs.typecheck_changed_required == 'true'
         run: ./bin/6529 run typecheck:changed
 
       - name: Typecheck Jest, Playwright, and test helpers
-        if: needs.plan.outputs.test_typecheck_required == 'true'
+        if: matrix.lane == 'quality' && needs.plan.outputs.test_typecheck_required == 'true'
         run: ./bin/6529 run typecheck:tests
 
       - name: Run related Jest tests
-        if: needs.plan.outputs.jest_changed_required == 'true'
+        if: matrix.lane == 'quality' && needs.plan.outputs.jest_changed_required == 'true'
         env:
           BASE_REF: ${{ github.base_ref }}
         run: |
@@ -405,7 +426,7 @@ jobs:
 
       - name: Restore Next.js build cache
         id: nextjs_build_cache
-        if: needs.plan.outputs.build_required == 'true'
+        if: matrix.lane == 'build'
         uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: ${{ github.workspace }}/.next/cache
@@ -415,7 +436,7 @@ jobs:
             ${{ runner.os }}-node22-nextjs-
 
       - name: Build production profile
-        if: needs.plan.outputs.build_required == 'true'
+        if: matrix.lane == 'build'
         env:
           NODE_ENV: "production"
           BASE_ENDPOINT: "https://6529.io"
@@ -426,6 +447,7 @@ jobs:
           ./bin/6529 run build:ci
 
       - name: Create exact PR merge-tree CI evidence
+        if: matrix.lane == 'quality'
         env:
           EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           EXPECTED_MERGE_SHA: ${{ github.sha }}
@@ -496,6 +518,7 @@ jobs:
             sha256sum ./manifest.json ./policy-bundle.txt > SHA256SUMS)
 
       - name: Upload exact PR merge-tree CI evidence
+        if: matrix.lane == 'quality'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: release-bus-v2-pr-${{ github.sha }}
@@ -504,25 +527,25 @@ jobs:
           retention-days: 30
 
       - name: Save Next.js build cache
-        if: needs.plan.outputs.build_required == 'true' && steps.nextjs_build_cache.outputs.cache-hit != 'true'
+        if: matrix.lane == 'build' && steps.nextjs_build_cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: ${{ github.workspace }}/.next/cache
           key: ${{ steps.nextjs_build_cache.outputs.cache-primary-key }}
 
       - name: Install Playwright browser
-        if: needs.plan.outputs.playwright_smoke_required == 'true' || needs.plan.outputs.playwright_critical_shell_required == 'true'
+        if: startsWith(matrix.lane, 'playwright-')
         run: ./bin/6529 exec playwright install --with-deps chromium
 
       - name: Run small Playwright smoke pack
-        if: needs.plan.outputs.playwright_smoke_required == 'true'
+        if: matrix.lane == 'playwright-smoke'
         env:
           NEXT_DEV_DIST_DIR: ".next-playwright-smoke"
           PLAYWRIGHT_READONLY: "1"
         run: ./bin/6529 run test:e2e:smoke
 
       - name: Run critical route-shell Playwright pack
-        if: needs.plan.outputs.playwright_critical_shell_required == 'true'
+        if: matrix.lane == 'playwright-critical-shell'
         env:
           NEXT_DEV_DIST_DIR: ".next-playwright-critical-shell"
           PLAYWRIGHT_READONLY: "1"
@@ -532,9 +555,26 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: app-pr-ci-results-${{ github.event.pull_request.number || github.run_id }}
+          name: app-pr-ci-results-${{ matrix.lane }}-${{ github.event.pull_request.number || github.run_id }}
           path: |
             test-results/**
             playwright-report/**
           if-no-files-found: ignore
           retention-days: 14
+
+  installed-checks:
+    name: Installed app checks
+    needs:
+      - plan
+      - app-checks
+    if: always() && needs.plan.result == 'success' && needs.plan.outputs.install_required == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+
+    steps:
+      - name: Require successful parallel app checks
+        env:
+          APP_CHECKS_RESULT: ${{ needs.app-checks.result }}
+        run: test "$APP_CHECKS_RESULT" = "success"

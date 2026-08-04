@@ -139,6 +139,10 @@ App PR CI:
   production build when the risk plan requires it. Repository-wide Knip,
   test-helper typechecking, and release-workflow contract suites run only when
   their owning paths change.
+- Selected quality/contracts, production-build, smoke-Playwright, and
+  critical-shell-Playwright lanes run in parallel. The lightweight final
+  `Installed app checks` job preserves the required branch-protection gate and
+  succeeds only when every selected lane succeeds.
 - PR CI retains the risk-selected small smoke and critical route-shell
   Playwright packs. It does not run the dedicated Museum sweep; that pack needs
   deployed staging evidence rather than another local content crawl.

@@ -489,10 +489,46 @@ describe("testing strategy CI plan", () => {
     ).toBe(true);
 
     const parsed = YAML.parse(workflow) as {
-      jobs: Record<string, { if?: string }>;
+      jobs: Record<
+        string,
+        {
+          if?: string;
+          name?: string;
+          needs?: string | string[];
+          strategy?: { matrix?: string };
+          steps?: Array<{ name?: string; if?: string }>;
+        }
+      >;
     };
-    expect(parsed.jobs["installed-checks"]?.if).toBe(
-      "needs.plan.outputs.install_required == 'true'"
+    expect(parsed.jobs["app-checks"]).toMatchObject({
+      if: "needs.plan.outputs.install_required == 'true'",
+      strategy: {
+        matrix: "${{ fromJSON(needs.plan.outputs.app_check_matrix) }}",
+      },
+    });
+    expect(parsed.jobs["app-checks"]?.steps).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "Build production profile",
+          if: "matrix.lane == 'build'",
+        }),
+        expect.objectContaining({
+          name: "Run small Playwright smoke pack",
+          if: "matrix.lane == 'playwright-smoke'",
+        }),
+        expect.objectContaining({
+          name: "Run critical route-shell Playwright pack",
+          if: "matrix.lane == 'playwright-critical-shell'",
+        }),
+      ])
+    );
+    expect(parsed.jobs["installed-checks"]).toMatchObject({
+      name: "Installed app checks",
+      needs: ["plan", "app-checks"],
+      if: "always() && needs.plan.result == 'success' && needs.plan.outputs.install_required == 'true'",
+    });
+    expect(workflow).toContain(
+      'write("app_check_matrix", JSON.stringify({ include: appCheckLanes }))'
     );
   });
 });
