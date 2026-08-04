@@ -68,6 +68,12 @@ describe("ClientCommunityNerdPage", () => {
     expect(capturedProps.focus).toBe(LeaderboardFocus.TDH);
   });
 
+  it("keeps the initial focus while the pathname is unavailable", () => {
+    usePathnameMock.mockReturnValue(null);
+    renderPage(LeaderboardFocus.INTERACTIONS);
+    expect(capturedProps.focus).toBe(LeaderboardFocus.INTERACTIONS);
+  });
+
   it("updates path when focus changes", () => {
     renderPage(LeaderboardFocus.TDH);
     act(() => capturedProps.setFocus(LeaderboardFocus.INTERACTIONS));
