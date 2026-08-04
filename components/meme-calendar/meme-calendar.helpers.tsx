@@ -71,9 +71,9 @@ const HISTORIC_MINT_PHASES: Array<{ startUtcDay: Date; endUtcDay: Date }> = [
 
 // Helper: does this UTC day fall in a mintable phase?
 function isInHistoricPhase(utcDay: Date): boolean {
-  const t = +startOfUtcDay(utcDay);
+  const timestamp = +startOfUtcDay(utcDay);
   for (const p of HISTORIC_MINT_PHASES) {
-    if (t >= +p.startUtcDay && t <= +p.endUtcDay) return true;
+    if (timestamp >= +p.startUtcDay && timestamp <= +p.endUtcDay) return true;
   }
   return false;
 }
@@ -94,7 +94,7 @@ export function isMintEligibleUtcDay(utcDay: Date): boolean {
 const FIRST_MINT_DATE: Date = (() => {
   // find first Mon/Wed/Fri on/after 2023-01-01 that is inside the first phase
   const phase = HISTORIC_MINT_PHASES[0];
-  let d = startOfUtcDay(phase?.startUtcDay!);
+  const d = startOfUtcDay(phase?.startUtcDay!);
   while (+d <= +phase?.endUtcDay!) {
     if (isMintEligibleUtcDay(d)) return d;
     d.setUTCDate(d.getUTCDate() + 1);
@@ -158,7 +158,7 @@ export function nextMintDateOnOrAfter(d: Date = new Date()): Date {
 }
 
 function prevMintDateOnOrBefore(d: Date): Date {
-  let x = startOfUtcDay(d);
+  const x = startOfUtcDay(d);
   // if we go before the first historic mint, just return the first historic mint day
   if (+x < +FIRST_MINT_DATE) return new Date(FIRST_MINT_DATE);
   for (let i = 0; i < 4000; i++) {
@@ -715,7 +715,7 @@ export function formatToFullDivision(
   const eonDates = getRangeDatesByZoom("eon", idx);
 
   return (
-    <table className="tw-inline-table tw-w-auto tw-table-auto tw-border-collapse">
+    <table className="tw-w-full tw-border-collapse">
       <tbody>
         {printDivision(
           "SZN",
@@ -755,18 +755,22 @@ function printDivision(
   locale: SupportedLocale
 ) {
   return (
-    <tr>
-      <td className="tw-whitespace-nowrap tw-py-1 tw-pr-4 tw-font-semibold">
+    <tr className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800/80 last:tw-border-b-0">
+      <td className="tw-w-24 tw-whitespace-nowrap tw-py-2 tw-pr-4 tw-align-top tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
         {label} {formatInteger(locale, number)}
       </td>
-      <td className="tw-whitespace-nowrap tw-py-1">
-        <span className="tw-text-gray-400">{range}</span>
+      <td className="tw-min-w-0 tw-py-2 tw-text-right tw-align-top">
+        <span className="tw-break-words tw-text-sm tw-leading-5 tw-text-iron-300">
+          {range}
+        </span>
       </td>
     </tr>
   );
 }
 
+// eslint-disable-next-line import/no-cycle -- Keep the established helper barrel API while the invite module consumes date helpers from this file.
 export { printCalendarInvites } from "./meme-calendar.invites";
+// eslint-disable-next-line import/no-cycle -- Keep the established helper barrel API while the upcoming module consumes schedule helpers from this file.
 export {
   getCanonicalNextMintNumber,
   getUpcomingMintsAcrossSeasons,
