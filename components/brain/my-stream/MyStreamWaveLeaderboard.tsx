@@ -509,7 +509,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       <div
         className={`tw-flex tw-min-w-0 tw-flex-grow ${
           isMemesWave
-            ? "tw-flex-row tw-flex-wrap tw-items-start tw-gap-x-3 tw-@container/leaderboard-toolbar"
+            ? "tw-flex-row-reverse tw-flex-wrap tw-items-start tw-gap-x-3 tw-@container/leaderboard-toolbar"
             : "tw-flex-col"
         }`}
       >
@@ -528,7 +528,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
             wave={wave}
             className={
               isMemesWave
-                ? "tw-relative tw-z-40 tw-order-2 tw-min-w-0 tw-flex-[3_1_17rem]"
+                ? "tw-relative tw-z-40 tw-min-w-0 tw-flex-[3_1_17rem]"
                 : undefined
             }
           />
@@ -547,7 +547,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
             isSticky
             className={
               isMemesWave
-                ? "tw-order-1 tw-min-w-0 tw-flex-[1_1_18rem] !tw-pb-0 lg:tw-flex-[1_1_27rem]"
+                ? "tw-min-w-0 tw-flex-[1_1_18rem] !tw-pb-0 lg:tw-flex-[1_1_27rem]"
                 : undefined
             }
           >
@@ -559,7 +559,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
         <div
           className={`tw-min-w-0 tw-pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)] ${
             isMemesWave
-              ? "tw-order-3 tw-w-full tw-flex-none tw-basis-full tw-pt-4"
+              ? "tw-w-full tw-flex-none tw-basis-full tw-pt-4"
               : ""
           }`}
         >
