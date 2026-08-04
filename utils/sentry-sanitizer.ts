@@ -8,18 +8,13 @@ const REDACTED = "[Filtered]";
 const THIRD_PARTY = "third-party";
 const URL_IS_FIRST_PARTY_KEY = "url.is_first_party";
 const URL_IS_FIRST_PARTY_API_KEY = "url.is_first_party_api";
-const UNUSABLE_URL_TOKENS = new Set([
-  "[filtered]",
-  "[redacted]",
-  "filtered",
-  "unknown",
-]);
-
+const UNUSABLE_URL_TOKENS = new Set(
+  "[filtered] [redacted] filtered unknown".split(" ")
+);
 const JWT_PATTERN = /eyJ[A-Za-z0-9-_]+\.eyJ[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+/g;
 const STRIPE_KEY_PATTERN = /\b(sk|pk)_[a-zA-Z0-9]{16,}\b/g;
 const BEARER_PATTERN = /\bBearer\s+([A-Za-z0-9._~+/=-]+)\b/g;
 const BASIC_PATTERN = /\bBasic\s+([A-Za-z0-9+/=]+)\b/g;
-const HTTP_METHOD_DESCRIPTION_PATTERN = /^([A-Za-z]+)\s+(.+)$/;
 const ROUTE_SPAN_OPERATION_PATTERN = /^(?:navigation|pageload)(?:\.|$)/;
 const STATIC_RESOURCE_ROOT_SEGMENTS = new Set(
   ".well-known _next api assets cdn-cgi favicon.ico fonts icons images manifest.json robots.txt sitemap.xml static".split(
@@ -41,12 +36,9 @@ const URL_VALUE_KEY_PATTERN =
 const URL_DETAIL_KEY_PATTERN =
   /^(?:http\.(?:fragment|query)|url\.(?:fragment|query))$/i;
 const HOST_VALUE_KEY_PATTERN = /^(?:http\.host|server\.address|url\.domain)$/i;
-const HOST_ATTRIBUTION_VALUES = new Set([
-  "first-party",
-  "first-party-api",
-  "first-party-app",
-  THIRD_PARTY,
-]);
+const HOST_ATTRIBUTION_VALUES = new Set(
+  `first-party first-party-api first-party-app ${THIRD_PARTY}`.split(" ")
+);
 const OMIT_SANITIZED_VALUE = Symbol("omit-sanitized-value");
 
 const SENSITIVE_KEY_FRAGMENT_PATTERN =
@@ -655,9 +647,9 @@ function sanitizeSpanDescription(
   description: string,
   kind: SentryPathKind
 ): string {
-  const methodMatch = HTTP_METHOD_DESCRIPTION_PATTERN.exec(description);
-  const method = methodMatch?.[1];
-  const target = methodMatch?.[2];
+  const methodTarget = parseHttpMethodDescription(description);
+  const method = methodTarget?.[0];
+  const target = methodTarget?.[1];
   if (
     method &&
     target &&
@@ -670,6 +662,24 @@ function sanitizeSpanDescription(
   }
 
   return sanitizeString(description);
+}
+
+function isAsciiLetterAt(value: string, index: number): boolean {
+  const code = value.charCodeAt(index);
+  return (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+}
+
+function parseHttpMethodDescription(
+  value: string
+): [method: string, target: string] | undefined {
+  let methodEnd = 0;
+  while (isAsciiLetterAt(value, methodEnd)) methodEnd += 1;
+  let targetStart = methodEnd;
+  while (value[targetStart]?.trim() === "") targetStart += 1;
+  if (!methodEnd || targetStart === methodEnd || targetStart === value.length) {
+    return undefined;
+  }
+  return [value.slice(0, methodEnd), value.slice(targetStart)];
 }
 
 function sanitizeSpanData(

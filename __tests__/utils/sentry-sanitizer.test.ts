@@ -705,11 +705,23 @@ describe("sentry-sanitizer", () => {
     const httpEvent = sanitizeSentryEvent({
       transaction: `GET /api/v2/waves/${SYNTHETIC_WAVE_ID}?token=synthetic`,
     });
+    const whitespaceEvent = sanitizeSentryEvent({
+      transaction: `GET\t/api/v2/waves/${SYNTHETIC_WAVE_ID}?token=synthetic`,
+    });
+    const newlineEvent = sanitizeSentryEvent({
+      transaction: `GET\n/api/v2/waves/${SYNTHETIC_WAVE_ID}?token=synthetic`,
+    });
+    const nearMissEvent = sanitizeSentryEvent({ transaction: "GET" });
 
     expect(componentEvent.transaction).toBe("SyntheticComponent");
     expect(httpEvent.transaction).toBe("GET /api/v2/waves/:uuid");
+    expect(whitespaceEvent.transaction).toBe("GET /api/v2/waves/:uuid");
+    expect(newlineEvent.transaction).toBe("GET /api/v2/waves/:uuid");
+    expect(nearMissEvent.transaction).toBe("GET");
     expect(JSON.stringify(httpEvent)).not.toContain(SYNTHETIC_WAVE_ID);
     expect(JSON.stringify(httpEvent)).not.toContain("token=");
+    expect(JSON.stringify(whitespaceEvent)).not.toContain(SYNTHETIC_WAVE_ID);
+    expect(JSON.stringify(newlineEvent)).not.toContain(SYNTHETIC_WAVE_ID);
   });
 
   it("treats relative application URLs as route families", () => {
