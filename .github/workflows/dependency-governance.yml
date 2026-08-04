@@ -14,8 +14,6 @@ on:
 
 permissions:
   contents: read
-  issues: write
-  pull-requests: write
 
 jobs:
   dependency-governance:
@@ -92,12 +90,9 @@ jobs:
         continue-on-error: true
         run: ./bin/6529 run test:no-coverage -- __tests__/scripts/dependency-risk-gate.test.ts
 
-      - name: Sync dependency labels
-        # Dependabot PRs are same-repo; fork PRs intentionally skip label writes because GITHUB_TOKEN cannot safely mutate them.
-        if: always() && github.event.pull_request.head.repo.full_name == github.repository
+      - name: Summarize dependency policy
+        if: always()
         env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
           RISK_LABELS: ${{ steps.risk.outputs.labels }}
           RISK_OUTCOME: ${{ steps.risk.outcome }}
           SOCKET_OUTCOME: ${{ steps.socket_firewall.outcome }}
@@ -108,74 +103,22 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Keep fallback labels in sync with MANAGED_LABELS in scripts/dependency-risk-gate.cjs.
-          labels="${RISK_LABELS:-risk:high,deps:mixed,auto-merge:blocked}"
-          checks_failed="0"
-          for outcome in \
-            "$RISK_OUTCOME" \
-            "$SOCKET_OUTCOME" \
-            "$GUARD_OUTCOME" \
-            "$INSTALL_OUTCOME" \
-            "$LINT_PACKAGE_JSON_OUTCOME" \
-            "$TESTS_OUTCOME"; do
-            if [[ "$outcome" != "success" ]]; then
-              checks_failed="1"
-            fi
-          done
-
-          if [[ "$checks_failed" == "1" ]]; then
-            labels="${labels//auto-merge:candidate/auto-merge:blocked}"
-            if [[ "$labels" != *"auto-merge:blocked"* ]]; then
-              labels="${labels},auto-merge:blocked"
-            fi
-          fi
-
-          create_label() {
-            gh label create "$1" --color "$2" --description "$3" --force
-          }
-
-          create_label "risk:low" "0E8A16" "Dependency update is low risk under the dependency governance policy."
-          create_label "risk:medium" "FBCA04" "Dependency update needs human review before merge."
-          create_label "risk:high" "D93F0B" "Dependency update touches high-risk packages or behaviors."
-          create_label "deps:dev-only" "C5DEF5" "Only development dependencies changed."
-          create_label "deps:runtime" "B60205" "Runtime dependencies changed."
-          create_label "deps:patch" "BFE5BF" "Dependency update contains patch-level changes."
-          create_label "deps:minor" "F9D0C4" "Dependency update contains minor-level changes."
-          create_label "deps:major" "D4C5F9" "Dependency update contains major-level changes."
-          create_label "deps:mixed" "EDEDED" "Dependency update contains mixed or nonstandard changes."
-          create_label "deps:new-package" "FEF2C0" "Dependency update adds a direct or transitive package."
-          create_label "deps:install-script" "D93F0B" "Dependency update exposes install or build scripts."
-          create_label "auto-merge:candidate" "0E8A16" "Report-only candidate for future restricted auto-merge."
-          create_label "auto-merge:blocked" "B60205" "Dependency update is not eligible for auto-merge."
-
-          remove_issue_label() {
-            local encoded
-            encoded="$(jq -rn --arg label "$1" '$label|@uri')"
-            gh api --method DELETE "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/labels/${encoded}" >/dev/null || true
-          }
-
-          add_issue_label() {
-            local payload
-            payload="$(jq -cn --arg label "$1" '{labels: [$label]}')"
-            gh api --method POST "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/labels" --input - <<< "$payload" >/dev/null
-          }
-
-          mapfile -t existing_labels < <(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/labels" --jq '.[].name')
-          for label in "${existing_labels[@]}"; do
-            case "$label" in
-              risk:*|deps:*|auto-merge:*)
-                remove_issue_label "$label"
-                ;;
-            esac
-          done
-
-          IFS=',' read -r -a label_array <<< "$labels"
-          for label in "${label_array[@]}"; do
-            trimmed="$(echo "$label" | xargs)"
-            if [[ -n "$trimmed" ]]; then
-              add_issue_label "$trimmed"
-            fi
-          done
+          {
+            echo "## Dependency governance"
+            echo
+            echo "Suggested labels: \`${RISK_LABELS:-risk:high,deps:mixed,auto-merge:blocked}\`"
+            echo
+            echo "| Check | Outcome |"
+            echo "| --- | --- |"
+            echo "| Risk classification | ${RISK_OUTCOME} |"
+            echo "| Socket Firewall | ${SOCKET_OUTCOME} |"
+            echo "| Lockfile guard | ${GUARD_OUTCOME} |"
+            echo "| Frozen install | ${INSTALL_OUTCOME} |"
+            echo "| Version pin policy | ${LINT_PACKAGE_JSON_OUTCOME} |"
+            echo "| Governance tests | ${TESTS_OUTCOME} |"
+            echo
+            echo "This pull-request workflow is deliberately read-only."
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Fail when dependency checks fail
         if: always()

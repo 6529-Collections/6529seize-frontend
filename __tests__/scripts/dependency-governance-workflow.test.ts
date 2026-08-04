@@ -33,10 +33,17 @@ describe("dependency governance workflow", () => {
     );
     expect(stepNames).not.toContain("Typecheck");
     expect(stepNames).not.toContain("Build app");
+    expect(stepNames).not.toContain("Sync dependency labels");
+    expect(stepNames).toContain("Summarize dependency policy");
+    expect(workflow.permissions).toEqual({ contents: "read" });
     expect(source).toContain(
       "Required App PR CI owns the complete application typecheck"
     );
     expect(source).not.toContain("TYPECHECK_OUTCOME");
     expect(source).not.toContain("BUILD_OUTCOME");
+    expect(source).toContain(
+      "This pull-request workflow is deliberately read-only."
+    );
+    expect(source).not.toContain("gh api --method");
   });
 });

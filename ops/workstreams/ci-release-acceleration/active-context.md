@@ -44,6 +44,9 @@
   repeating a full application typecheck and production build after required
   App CI had already accepted both responsibilities. It now retains the
   dependency risk classifier, Socket Firewall, frozen install, package pin
-  lint, unit tests, and label policy while using blobless history and the pnpm
-  cache. Required App CI remains the single owner of complete application
-  typechecking and production build evidence.
+  lint, unit tests, and risk-label recommendations while using blobless history
+  and the pnpm cache. Required App CI remains the single owner of complete
+  application typechecking and production build evidence. Hosted validation
+  exposed the legacy workflow's PR-write permission in 28 seconds; label
+  recommendations now go to the job summary and the PR workflow is strictly
+  read-only.

@@ -58,3 +58,8 @@
   workflow now uses `blob:none` plus the shared pnpm cache and remains focused
   on dependency provenance/install/pin/test policy. Required App CI owns the
   duplicate application gates, with an explicit workflow contract test.
+- The optimized dependency workflow completed in 54 seconds. Its first
+  exact-head planner replay then failed closed in 28 seconds because the legacy
+  label-sync step retained PR-write permissions. Label recommendations now
+  appear in the job summary and the untrusted PR workflow is strictly
+  read-only; mutation is no longer mixed with dependency evaluation.
