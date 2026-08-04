@@ -97,6 +97,18 @@ The same Playwright spec can be `@medium` locally and `@large` when
 `resolvePlaywrightTestSize(baseURL)` when a helper needs to record the current
 size at runtime.
 
+Choosing the test layer:
+
+- Use Playwright for browser-specific behavior such as rendering, hydration,
+  navigation, responsive layout, accessibility, and runtime integrations.
+- Do not repeat the same browser assertions across content-equivalent static
+  routes. Cover one representative route per distinct template and required
+  viewport, then test the complete route/content inventory with fast static or
+  Jest contracts.
+- Add per-route E2E coverage only when a route has materially different browser
+  behavior or risk. The Museum pack follows this model: exhaustive static
+  publication contracts with representative desktop/mobile browser smoke.
+
 Remote read-only defaults:
 
 - `PLAYWRIGHT_ENV=staging|production` may be used to declare the target.
