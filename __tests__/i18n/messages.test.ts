@@ -117,6 +117,17 @@ describe("frontend i18n helpers", () => {
     expect(t("de-DE", "media.video.unsupported")).toBe(
       "Ihr Browser unterstuetzt das Video-Tag nicht."
     );
+    expect(t("fr-FR", "waves.leaderboard.timeline.nextWinner")).toBe(
+      "Prochain gagnant"
+    );
+    expect(t("es-ES", "waves.leaderboard.timeline.status.completed")).toBe(
+      "Completado"
+    );
+    expect(
+      t("de-DE", "waves.leaderboard.timeline.unit.second.other", {
+        count: 3,
+      })
+    ).toBe("3 Sekunden");
     for (const messages of NEW_VERSION_TOAST_LOCALE_MESSAGES) {
       expect(t(messages.locale, "newVersionToast.refreshAction")).toBe(
         messages.refreshAction
