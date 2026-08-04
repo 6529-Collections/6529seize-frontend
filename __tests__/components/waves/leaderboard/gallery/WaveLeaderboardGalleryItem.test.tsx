@@ -409,17 +409,24 @@ describe("WaveLeaderboardGalleryItem", () => {
     );
   });
 
-  it("does not wrap interactive video media in a button", () => {
+  it("keeps video controls outside the keyboard-operable drop trigger", async () => {
+    const onDropClick = jest.fn();
     render(
       <WaveLeaderboardGalleryItem
         drop={{
           ...drop,
           parts: [{ media: [{ url: "video.mp4", mime_type: "video/mp4" }] }],
         }}
-        onDropClick={jest.fn()}
+        onDropClick={onDropClick}
       />
     );
 
     expect(screen.getByTestId("media").closest("button")).toBeNull();
+    const openDropButton = screen.getByRole("button", {
+      name: "Open drop media",
+    });
+    openDropButton.focus();
+    await userEvent.keyboard("{Enter}");
+    expect(onDropClick).toHaveBeenCalledTimes(1);
   });
 });
