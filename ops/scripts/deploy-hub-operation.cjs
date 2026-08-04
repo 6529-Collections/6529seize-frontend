@@ -2,7 +2,7 @@
 
 const {
   EXPECTED_REPOSITORY,
-  normalizeManifest,
+  normalizeTrustedManifest,
 } = require("./deploy-hub-shadow.cjs");
 const {
   createGitClient,
@@ -10,8 +10,8 @@ const {
 } = require("./deploy-hub-operation-clients.cjs");
 const {
   assert,
-  assertAuthority,
-  assertExactPulls,
+  assertProductionPreflight,
+  assertRequestAuthorities,
   validateRuntime,
 } = require("./deploy-hub-operation-contracts.cjs");
 const {
@@ -25,9 +25,7 @@ const {
   stopRequested,
   waitForWorkflow,
 } = require("./deploy-hub-operation-workflows.cjs");
-const {
-  executeStaging,
-} = require("./deploy-hub-staging-deploy.cjs");
+const { executeStaging } = require("./deploy-hub-staging-deploy.cjs");
 const {
   executeRemoveFromStaging,
 } = require("./deploy-hub-staging-removal.cjs");
@@ -72,9 +70,10 @@ async function mergeProductionRequests({
   operationId,
   baseRef,
   runUrl,
+  expectedMainSha,
 }) {
   let mainSha = (await github.getRef(baseRef)).object?.sha;
-  assert(SHA_PATTERN.test(mainSha ?? ""), "Current main SHA is unavailable.");
+  assert(mainSha === expectedMainSha, "Main moved after production preflight.");
   for (const request of requests) {
     const merged = await github.mergePullRequest(
       request.pr,
@@ -195,7 +194,6 @@ async function executeProduction(options) {
     manifestJson,
     repository,
     baseRef,
-    requester,
     runId,
     runAttempt = "1",
     runUrl,
@@ -209,7 +207,7 @@ async function executeProduction(options) {
     options.actor === "github-actions[bot]",
     "Production dispatch is not trusted."
   );
-  const requests = normalizeManifest(manifestJson, requester, repository);
+  const requests = normalizeTrustedManifest(manifestJson, repository);
   assert(
     requests.every(({ target }) => target === "production"),
     "Production continuation contains a staging-only request."
@@ -221,8 +219,12 @@ async function executeProduction(options) {
     stagingCorrelation: options.stagingCorrelation,
     baseRef,
   });
-  await assertAuthority(github, requester, requests);
-  await assertExactPulls(github, requests, baseRef);
+  await assertRequestAuthorities(github, requests);
+  const expectedMainSha = await assertProductionPreflight(
+    github,
+    requests,
+    baseRef
+  );
   if (await stopRequested(github, requests, operationId)) {
     await publishStatus(
       github,
@@ -247,6 +249,7 @@ async function executeProduction(options) {
     operationId,
     baseRef,
     runUrl,
+    expectedMainSha,
   });
   const { mainSha } = merge;
   if (merge.conclusion !== "success") {
@@ -355,7 +358,6 @@ async function main() {
   if (mode === "production") {
     result = await executeProduction({
       ...common,
-      requester: process.env.DEPLOY_HUB_REQUESTER ?? "",
       parentRunId: process.env.DEPLOY_HUB_PARENT_RUN_ID ?? "",
       stagingSha: process.env.DEPLOY_HUB_STAGING_SHA ?? "",
       stagingCorrelation: process.env.DEPLOY_HUB_STAGING_CORRELATION ?? "",

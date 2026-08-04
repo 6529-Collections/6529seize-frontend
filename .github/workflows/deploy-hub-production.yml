@@ -13,12 +13,6 @@ on:
           required: true,
           type: string,
         }
-      requester:
-        {
-          description: Original authenticated requester,
-          required: true,
-          type: string,
-        }
       staging_sha:
         {
           description: Exact staging-validated SHA,
@@ -40,6 +34,7 @@ on:
 
 permissions:
   actions: write
+  checks: read
   contents: write
   pull-requests: write
   statuses: write
@@ -55,6 +50,7 @@ jobs:
     timeout-minutes: 355
     permissions:
       actions: write
+      checks: read
       contents: write
       pull-requests: write
       statuses: write
@@ -85,7 +81,6 @@ jobs:
           DEPLOY_HUB_OPERATION_ID: ${{ inputs.operation_id }}
           DEPLOY_HUB_PARENT_RUN_ID: ${{ inputs.parent_run_id }}
           DEPLOY_HUB_REPOSITORY: ${{ github.repository }}
-          DEPLOY_HUB_REQUESTER: ${{ inputs.requester }}
           DEPLOY_HUB_RUN_ATTEMPT: ${{ github.run_attempt }}
           DEPLOY_HUB_RUN_ID: ${{ github.run_id }}
           DEPLOY_HUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

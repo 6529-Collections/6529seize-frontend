@@ -22,14 +22,16 @@ function assert(condition, message) {
   }
 }
 
-function normalizeManifest(manifestJson, actor, repository) {
+function normalizeManifestRequests(manifestJson, actor, repository) {
   assert(repository === EXPECTED_REPOSITORY, "Repository is not supported.");
-  assert(
-    REQUESTER_PATTERN.test(actor) &&
-      !actor.startsWith("-") &&
-      !actor.endsWith("-"),
-    "Dispatching GitHub actor has an invalid format."
-  );
+  if (actor !== null) {
+    assert(
+      REQUESTER_PATTERN.test(actor) &&
+        !actor.startsWith("-") &&
+        !actor.endsWith("-"),
+      "Dispatching GitHub actor has an invalid format."
+    );
+  }
 
   let parsed;
   try {
@@ -71,8 +73,11 @@ function normalizeManifest(manifestJson, actor, repository) {
       typeof request.requester === "string" &&
         REQUESTER_PATTERN.test(request.requester) &&
         !request.requester.startsWith("-") &&
-        !request.requester.endsWith("-") &&
-        request.requester.toLowerCase() === actor.toLowerCase(),
+        !request.requester.endsWith("-"),
+      `${label} has an invalid requester.`
+    );
+    assert(
+      actor === null || request.requester.toLowerCase() === actor.toLowerCase(),
       `${label} requester must match the dispatching GitHub actor.`
     );
     assert(
@@ -91,6 +96,14 @@ function normalizeManifest(manifestJson, actor, repository) {
       requested_at: request.requested_at,
     });
   });
+}
+
+function normalizeManifest(manifestJson, actor, repository) {
+  return normalizeManifestRequests(manifestJson, actor, repository);
+}
+
+function normalizeTrustedManifest(manifestJson, repository) {
+  return normalizeManifestRequests(manifestJson, null, repository);
 }
 
 function partitionCohorts(requests) {
@@ -490,6 +503,7 @@ module.exports = {
   createGithubClient,
   executeShadow,
   normalizeManifest,
+  normalizeTrustedManifest,
   partitionCohorts,
   statusContext,
   statusPlan,

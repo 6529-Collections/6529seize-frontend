@@ -20,8 +20,10 @@ wrapper expects that location.
 - `deploy-hub-operation.cjs`: runs the finite frontend-only Deploy Hub control
   flow, including forward-only staging removal, while canonical workflows
   retain deployment and E2E ownership. Staging composition is carried in each
-  Deploy Hub staging commit by `deploy-hub-staging-composition.cjs`; no separate
-  state service is required.
+  Deploy Hub staging commit by `deploy-hub-staging-composition.cjs`; pending
+  requests survive controller concurrency through one fixed commit-status
+  context, and production rechecks current GitHub merge/check truth immediately
+  before mutation. No separate state service is required.
 - `native-surface-evidence.cjs`: executable native-surface evidence
   classifier. It reports whether current Capacitor/Electron coverage is only
   browser simulation or whether package prerequisites are present.

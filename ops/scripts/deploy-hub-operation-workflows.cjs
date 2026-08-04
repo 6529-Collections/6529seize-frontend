@@ -1,6 +1,10 @@
 const STAGING_REF = "1a-staging";
 const POLL_MILLISECONDS = 10_000;
 const WORKFLOW_TIMEOUT_MILLISECONDS = 110 * 60 * 1000;
+const QUEUED_REQUEST_CONTEXT = "Deploy Hub Request";
+const QUEUED_REQUEST_PATTERN =
+  /^Queued ([1-9]\d?)\/([1-9]\d?) for (Staging|Production) · ([A-Za-z0-9][A-Za-z0-9._-]{0,79}) · (\S+)$/;
+const MAX_PENDING_REQUESTS = 100;
 
 function targetLabel(target) {
   return target === "production" ? "Production" : "Staging";
@@ -20,6 +24,100 @@ function stopContext(operationId) {
 
 function e2eContext(correlation) {
   return `Deploy Hub E2E — ${correlation}`;
+}
+
+function queuedRequestDescription(
+  target,
+  operationId,
+  requestIndex,
+  requestCount,
+  requestedAt
+) {
+  return `Queued ${requestIndex}/${requestCount} for ${targetLabel(target)} · ${operationId} · ${requestedAt}`;
+}
+
+async function discoverQueuedRequests(github, repository, baseRef) {
+  const queued = [];
+  const pulls = await github.listOpenPullRequests(baseRef);
+  for (const pull of pulls) {
+    const sha = pull.head?.sha ?? "";
+    const combined = await github.getCombinedStatus(sha);
+    const status = combined.statuses?.find(
+      (candidate) => candidate.context === QUEUED_REQUEST_CONTEXT
+    );
+    const match = QUEUED_REQUEST_PATTERN.exec(status?.description ?? "");
+    const requestIndex = Number(match?.[1]);
+    const requestCount = Number(match?.[2]);
+    const requestedAt = Date.parse(match?.[5] ?? "");
+    const statusCreatedAt = Date.parse(status?.created_at ?? "");
+    const requester = status?.creator?.login ?? "";
+    if (
+      status?.state !== "pending" ||
+      !match ||
+      !Number.isInteger(pull.number) ||
+      requestIndex > requestCount ||
+      !Number.isFinite(requestedAt) ||
+      !Number.isFinite(statusCreatedAt) ||
+      new Date(requestedAt).toISOString() !== match[5] ||
+      !/^[A-Za-z0-9-]{1,39}$/.test(requester)
+    ) {
+      continue;
+    }
+    queued.push({
+      operationId: match[4],
+      requestIndex,
+      statusCreatedAt,
+      request: {
+        repository,
+        pr: pull.number,
+        sha,
+        target: match[3].toLowerCase(),
+        requester,
+        requested_at: match[5],
+      },
+    });
+  }
+  return queued
+    .sort(
+      (left, right) =>
+        left.request.requested_at.localeCompare(right.request.requested_at) ||
+        left.statusCreatedAt - right.statusCreatedAt ||
+        left.operationId.localeCompare(right.operationId) ||
+        left.requestIndex - right.requestIndex
+    )
+    .map(({ request }) => request);
+}
+
+function mergeQueuedRequests(submitted, queued) {
+  const ordered = [...submitted, ...queued]
+    .map((request, index) => ({ index, request }))
+    .sort(
+      (left, right) =>
+        left.request.requested_at.localeCompare(right.request.requested_at) ||
+        left.index - right.index
+    )
+    .map(({ request }) => request);
+  const byPull = new Map();
+  for (const request of ordered) {
+    byPull.delete(request.pr);
+    byPull.set(request.pr, request);
+  }
+  const requests = [...byPull.values()];
+  if (requests.length > MAX_PENDING_REQUESTS) {
+    throw new Error("Deploy Hub has too many pending frontend requests.");
+  }
+  return requests;
+}
+
+async function claimQueuedRequests(github, requests, runUrl, runId) {
+  for (const request of requests) {
+    await github.createCommitStatus(request.sha, {
+      state: "success",
+      target_url: runUrl,
+      description: `Claimed by Deploy Hub run ${runId}`,
+      context: QUEUED_REQUEST_CONTEXT,
+    });
+  }
 }
 
 function correlationId(_operationId, runIdentity, cohortIndex, phase, attempt) {
@@ -174,11 +272,16 @@ async function validateWithRetry(options) {
 }
 
 module.exports = {
+  claimQueuedRequests,
   classifyE2eStatus,
   correlationId,
+  discoverQueuedRequests,
   dispatchAndWait,
   e2eContext,
+  mergeQueuedRequests,
   publishStatus,
+  QUEUED_REQUEST_CONTEXT,
+  queuedRequestDescription,
   statusContext,
   stagingPresenceContext,
   stopContext,

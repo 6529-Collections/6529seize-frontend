@@ -16,6 +16,13 @@ const {
   waitForWorkflow,
 } = require("../../ops/scripts/deploy-hub-operation.cjs");
 const {
+  claimQueuedRequests,
+  discoverQueuedRequests,
+  mergeQueuedRequests,
+  QUEUED_REQUEST_CONTEXT,
+  queuedRequestDescription,
+} = require("../../ops/scripts/deploy-hub-operation-workflows.cjs");
+const {
   addRequests,
   commitMessage,
   parseComposition,
@@ -40,14 +47,19 @@ function workflow(file: string) {
   );
 }
 
-function request(target: "staging" | "production" = "staging") {
+function request(
+  target: "staging" | "production" = "staging",
+  pr = 123,
+  sha = SHA_A,
+  requestedAt = "2026-08-04T12:00:00.000Z"
+) {
   return {
     repository: EXPECTED_REPOSITORY,
-    pr: 123,
-    sha: SHA_A,
+    pr,
+    sha,
     target,
     requester: ACTOR,
-    requested_at: "2026-08-04T12:00:00.000Z",
+    requested_at: requestedAt,
   };
 }
 
@@ -72,6 +84,10 @@ describe("Deploy Hub live workflow contracts", () => {
       "pull-requests": "read",
       statuses: "write",
     });
+    expect(live.concurrency).toEqual({
+      group: "deploy-hub-frontend-controller",
+      "cancel-in-progress": false,
+    });
     const source = fs.readFileSync(
       path.join(process.cwd(), ".github/workflows/deploy-hub.yml"),
       "utf8"
@@ -92,6 +108,7 @@ describe("Deploy Hub live workflow contracts", () => {
     const production = workflow("deploy-hub-production.yml");
     expect(production.permissions).toEqual({
       actions: "write",
+      checks: "read",
       contents: "write",
       "pull-requests": "write",
       statuses: "write",
@@ -198,6 +215,79 @@ describe("Deploy Hub operation state", () => {
     });
     expect(run.conclusion).toBe("success");
     expect(sleep).toHaveBeenCalledTimes(1);
+  });
+
+  it("discovers durable queued requests in accepted status order", async () => {
+    const requestedAt = "2026-08-04T12:00:00.000Z";
+    const pulls = [
+      {
+        number: 124,
+        head: { sha: SHA_B },
+      },
+      {
+        number: 123,
+        head: { sha: SHA_A },
+      },
+    ];
+    const github = {
+      async listOpenPullRequests() {
+        return pulls;
+      },
+      async getCombinedStatus(sha: string) {
+        const production = sha === SHA_A;
+        return {
+          statuses: [
+            {
+              context: QUEUED_REQUEST_CONTEXT,
+              state: "pending",
+              description: queuedRequestDescription(
+                production ? "production" : "staging",
+                "ui-batch",
+                production ? 1 : 2,
+                2,
+                requestedAt
+              ),
+              created_at: requestedAt,
+              creator: { login: ACTOR },
+            },
+          ],
+        };
+      },
+    };
+
+    await expect(
+      discoverQueuedRequests(github, EXPECTED_REPOSITORY, "main")
+    ).resolves.toEqual([
+      request("production", 123, SHA_A, requestedAt),
+      request("staging", 124, SHA_B, requestedAt),
+    ]);
+  });
+
+  it("lets the newest explicit status replace an older request for one PR", () => {
+    const submitted = [request("staging")];
+    const queued = [
+      request("production", 123, SHA_A, "2026-08-04T12:05:00.000Z"),
+    ];
+    expect(mergeQueuedRequests(submitted, queued)).toEqual(queued);
+  });
+
+  it("claims discovered request statuses before staging execution", async () => {
+    const createCommitStatus = jest.fn().mockResolvedValue({});
+    await claimQueuedRequests(
+      { createCommitStatus },
+      [request("staging")],
+      RUN_URL,
+      "12345"
+    );
+    expect(createCommitStatus).toHaveBeenCalledWith(
+      SHA_A,
+      expect.objectContaining({
+        context: QUEUED_REQUEST_CONTEXT,
+        state: "success",
+        target_url: RUN_URL,
+        description: "Claimed by Deploy Hub run 12345",
+      })
+    );
   });
 });
 
@@ -504,6 +594,9 @@ describe("Deploy Hub tracked staging deploy", () => {
     const statuses: Array<Record<string, unknown>> = [];
     let correlation = "";
     const github = {
+      async listOpenPullRequests() {
+        return [];
+      },
       async getCollaboratorPermission() {
         return { permission: "write" };
       },
@@ -589,6 +682,9 @@ describe("Deploy Hub stop boundaries", () => {
   it("stops before staging without touching the staging ref", async () => {
     const statuses: Array<Record<string, unknown>> = [];
     const github = {
+      async listOpenPullRequests() {
+        return [];
+      },
       async getCollaboratorPermission() {
         return { permission: "admin" };
       },
@@ -636,6 +732,148 @@ describe("Deploy Hub stop boundaries", () => {
     });
   });
 
+  it("terminalizes later cohorts when an earlier cohort stops", async () => {
+    const statuses: Array<Record<string, unknown>> = [];
+    const requests = [
+      request("staging", 123, SHA_A),
+      request("production", 124, SHA_B, "2026-08-04T12:05:00.000Z"),
+    ];
+    const github = {
+      async listOpenPullRequests() {
+        return [];
+      },
+      async getCollaboratorPermission() {
+        return { permission: "admin" };
+      },
+      async getPullRequest(pr: number) {
+        return {
+          state: "open",
+          base: { ref: "main" },
+          head: { sha: pr === 123 ? SHA_A : SHA_B },
+          mergeable: true,
+        };
+      },
+      async getCombinedStatus() {
+        return {
+          statuses: [{ context: stopContext("operation-1"), state: "pending" }],
+        };
+      },
+      async createCommitStatus(sha: string, status: Record<string, unknown>) {
+        statuses.push({ sha, ...status });
+      },
+    };
+    const git = {
+      remoteSha: jest.fn(),
+      fetchExact: jest.fn(),
+      mergeContent: jest.fn(),
+      forwardContent: jest.fn(),
+      pushStaging: jest.fn(),
+    };
+
+    const result = await executeStaging({
+      operationId: "operation-1",
+      manifestJson: JSON.stringify(requests),
+      repository: EXPECTED_REPOSITORY,
+      baseRef: "main",
+      actor: ACTOR,
+      runId: "12345",
+      runUrl: RUN_URL,
+      confirmation: "DEPLOY",
+      github,
+      git,
+    });
+
+    expect(result.conclusion).toBe("stopped");
+    expect(git.remoteSha).not.toHaveBeenCalled();
+    expect(statuses.at(-1)).toMatchObject({
+      sha: SHA_B,
+      state: "error",
+      description: "Not started because an earlier cohort stopped",
+    });
+  });
+
+  it("terminalizes later cohorts when an earlier cohort fails", async () => {
+    const statuses: Array<Record<string, unknown>> = [];
+    let correlation = "";
+    const requests = [
+      request("staging", 123, SHA_A),
+      request("production", 124, SHA_B, "2026-08-04T12:05:00.000Z"),
+    ];
+    const github = {
+      async listOpenPullRequests() {
+        return [];
+      },
+      async getCollaboratorPermission() {
+        return { permission: "admin" };
+      },
+      async getPullRequest(pr: number) {
+        return {
+          state: "open",
+          base: { ref: "main" },
+          head: { sha: pr === 123 ? SHA_A : SHA_B },
+          mergeable: true,
+        };
+      },
+      async getCombinedStatus() {
+        return { statuses: [] };
+      },
+      async createCommitStatus(sha: string, status: Record<string, unknown>) {
+        statuses.push({ sha, ...status });
+      },
+      async dispatchWorkflow(
+        _workflow: string,
+        _ref: string,
+        inputs: Record<string, string>
+      ) {
+        correlation = inputs["deploy_hub_operation_id"] ?? "";
+      },
+      async listWorkflowRuns() {
+        return {
+          workflow_runs: [
+            {
+              display_title: `Deploy Hub ${correlation} — staging`,
+              head_sha: SHA_C,
+              created_at: "1970-01-01T00:00:00.000Z",
+              status: "completed",
+              conclusion: "failure",
+              html_url: RUN_URL,
+            },
+          ],
+        };
+      },
+    };
+    const git = {
+      remoteSha: jest.fn().mockReturnValue(SHA_D),
+      fetchExact: jest.fn(),
+      readCommitMessage: jest.fn().mockReturnValue("Manual staging commit"),
+      mergeContent: jest.fn().mockReturnValue(SHA_E),
+      forwardContent: jest.fn().mockReturnValue(SHA_C),
+      pushStaging: jest.fn(),
+    };
+
+    const result = await executeStaging({
+      operationId: "operation-1",
+      manifestJson: JSON.stringify(requests),
+      repository: EXPECTED_REPOSITORY,
+      baseRef: "main",
+      actor: ACTOR,
+      runId: "12345",
+      runUrl: RUN_URL,
+      confirmation: "DEPLOY",
+      github,
+      git,
+      sleep: jest.fn().mockResolvedValue(undefined),
+      now: () => 0,
+    });
+
+    expect(result.conclusion).toBe("failure");
+    expect(statuses.at(-1)).toMatchObject({
+      sha: SHA_B,
+      state: "error",
+      description: "Not started because an earlier staging cohort failed",
+    });
+  });
+
   it("requires exact staging proof before a bot continuation can touch main", async () => {
     const statuses: Array<Record<string, unknown>> = [];
     const github = {
@@ -659,7 +897,17 @@ describe("Deploy Hub stop boundaries", () => {
           };
         }
         return {
-          statuses: [{ context: stopContext("operation-1"), state: "pending" }],
+          statuses: [
+            { context: "DCO", state: "success" },
+            { context: stopContext("operation-1"), state: "pending" },
+          ],
+        };
+      },
+      async getCheckRuns() {
+        return {
+          check_runs: [
+            { name: "App PR CI", status: "completed", conclusion: "success" },
+          ],
         };
       },
       async getCollaboratorPermission() {
@@ -668,10 +916,14 @@ describe("Deploy Hub stop boundaries", () => {
       async getPullRequest() {
         return {
           state: "open",
-          base: { ref: "main" },
+          base: { ref: "main", sha: SHA_C },
           head: { sha: SHA_A },
           mergeable: true,
+          mergeable_state: "clean",
         };
+      },
+      async getRef() {
+        return { object: { sha: SHA_C } };
       },
       async createCommitStatus(sha: string, status: Record<string, unknown>) {
         statuses.push({ sha, ...status });
@@ -684,7 +936,6 @@ describe("Deploy Hub stop boundaries", () => {
       repository: EXPECTED_REPOSITORY,
       baseRef: "main",
       actor: "github-actions[bot]",
-      requester: ACTOR,
       parentRunId: "12345",
       stagingSha: SHA_B,
       stagingCorrelation: "dh-12345r1-c1-staging-a1",
@@ -697,6 +948,77 @@ describe("Deploy Hub stop boundaries", () => {
     expect(statuses.at(-1)).toMatchObject({
       description: "Stopped before main mutation",
     });
+  });
+
+  it("rejects a production cohort with a failing current PR check", async () => {
+    const mergePullRequest = jest.fn();
+    const github = {
+      async getWorkflowRun() {
+        return {
+          path: ".github/workflows/deploy-hub.yml",
+          event: "workflow_dispatch",
+          head_branch: "main",
+          head_repository: { full_name: EXPECTED_REPOSITORY },
+        };
+      },
+      async getCombinedStatus(sha: string) {
+        if (sha === SHA_B) {
+          return {
+            statuses: [
+              {
+                context: e2eContext("dh-12345r1-c1-staging-a1"),
+                state: "success",
+              },
+            ],
+          };
+        }
+        return { statuses: [{ context: "DCO", state: "success" }] };
+      },
+      async getCheckRuns() {
+        return {
+          check_runs: [
+            {
+              name: "App PR CI",
+              status: "completed",
+              conclusion: "failure",
+            },
+          ],
+        };
+      },
+      async getCollaboratorPermission() {
+        return { permission: "admin" };
+      },
+      async getPullRequest() {
+        return {
+          state: "open",
+          base: { ref: "main", sha: SHA_C },
+          head: { sha: SHA_A },
+          mergeable: true,
+          mergeable_state: "clean",
+        };
+      },
+      async getRef() {
+        return { object: { sha: SHA_C } };
+      },
+      mergePullRequest,
+    };
+
+    await expect(
+      executeProduction({
+        operationId: "operation-1",
+        manifestJson: JSON.stringify([request("production")]),
+        repository: EXPECTED_REPOSITORY,
+        baseRef: "main",
+        actor: "github-actions[bot]",
+        parentRunId: "12345",
+        stagingSha: SHA_B,
+        stagingCorrelation: "dh-12345r1-c1-staging-a1",
+        runId: "67890",
+        runUrl: RUN_URL,
+        github,
+      })
+    ).rejects.toThrow("PR #123 check App PR CI is not successful.");
+    expect(mergePullRequest).not.toHaveBeenCalled();
   });
 
   it("settles an issued production flow before honoring Stop", async () => {
@@ -730,9 +1052,19 @@ describe("Deploy Hub stop boundaries", () => {
           };
         }
         return {
-          statuses: stop
-            ? [{ context: stopContext("operation-1"), state: "pending" }]
-            : [],
+          statuses: [
+            { context: "DCO", state: "success" },
+            ...(stop
+              ? [{ context: stopContext("operation-1"), state: "pending" }]
+              : []),
+          ],
+        };
+      },
+      async getCheckRuns() {
+        return {
+          check_runs: [
+            { name: "App PR CI", status: "completed", conclusion: "success" },
+          ],
         };
       },
       async getCollaboratorPermission() {
@@ -741,14 +1073,17 @@ describe("Deploy Hub stop boundaries", () => {
       async getPullRequest() {
         return {
           state: "open",
-          base: { ref: "main" },
+          base: { ref: "main", sha: SHA_B },
           head: { sha: SHA_A },
           mergeable: true,
+          mergeable_state: "clean",
         };
       },
       async getRef() {
         refReads += 1;
-        return { object: { sha: refReads === 1 ? SHA_B : "c".repeat(40) } };
+        return {
+          object: { sha: refReads <= 3 ? SHA_B : "c".repeat(40) },
+        };
       },
       async mergePullRequest() {
         return { merged: true, sha: "c".repeat(40) };
@@ -792,7 +1127,6 @@ describe("Deploy Hub stop boundaries", () => {
       repository: EXPECTED_REPOSITORY,
       baseRef: "main",
       actor: "github-actions[bot]",
-      requester: ACTOR,
       parentRunId: "12345",
       stagingSha: SHA_B,
       stagingCorrelation: "dh-12345r1-c1-staging-a1",

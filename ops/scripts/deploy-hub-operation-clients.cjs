@@ -89,6 +89,44 @@ function createGithubClient({ apiUrl, repository, token, fetchImpl = fetch }) {
     throw new Error("GitHub statuses exceeded the safe pagination limit.");
   }
 
+  async function getCheckRuns(sha) {
+    const checkRuns = [];
+    for (let page = 1; page <= 100; page += 1) {
+      const result = await request(["commits", validSha(sha), "check-runs"], {
+        query: { filter: "latest", per_page: "100", page: String(page) },
+      });
+      assert(
+        Array.isArray(result?.check_runs),
+        "GitHub check-runs response is invalid."
+      );
+      checkRuns.push(...result.check_runs);
+      if (result.check_runs.length < 100) {
+        return { check_runs: checkRuns, total_count: checkRuns.length };
+      }
+    }
+    throw new Error("GitHub check runs exceeded the safe pagination limit.");
+  }
+
+  async function listOpenPullRequests(baseRef) {
+    const pulls = [];
+    for (let page = 1; page <= 100; page += 1) {
+      const batch = await request(["pulls"], {
+        query: {
+          base: validRef(baseRef),
+          direction: "asc",
+          page: String(page),
+          per_page: "100",
+          sort: "created",
+          state: "open",
+        },
+      });
+      assert(Array.isArray(batch), "GitHub pull requests response is invalid.");
+      pulls.push(...batch);
+      if (batch.length < 100) return pulls;
+    }
+    throw new Error("GitHub pull requests exceeded the safe pagination limit.");
+  }
+
   return {
     createCommitStatus: (sha, status) =>
       request(["statuses", validSha(sha)], { method: "POST", body: status }),
@@ -99,6 +137,7 @@ function createGithubClient({ apiUrl, repository, token, fetchImpl = fetch }) {
       }),
     getCollaboratorPermission: (actor) =>
       request(["collaborators", validActor(actor), "permission"]),
+    getCheckRuns,
     getCombinedStatus,
     getPullRequest: (pr) => request(["pulls", validPr(pr)]),
     getRef: (ref) => request(["git", "ref", "heads", validRef(ref)]),
@@ -107,14 +146,18 @@ function createGithubClient({ apiUrl, repository, token, fetchImpl = fetch }) {
       return request(["actions", "runs", String(runId)]);
     },
     listWorkflowRuns(workflow, branch) {
-      return request(["actions", "workflows", validWorkflow(workflow), "runs"], {
-        query: {
-          event: "workflow_dispatch",
-          branch: validRef(branch),
-          per_page: "50",
-        },
-      });
+      return request(
+        ["actions", "workflows", validWorkflow(workflow), "runs"],
+        {
+          query: {
+            event: "workflow_dispatch",
+            branch: validRef(branch),
+            per_page: "50",
+          },
+        }
+      );
     },
+    listOpenPullRequests,
     mergePullRequest: (pr, sha, operationId) => {
       assert(
         OPERATION_ID_PATTERN.test(operationId),

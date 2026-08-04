@@ -5,8 +5,8 @@ const {
 const { addRequests } = require("./deploy-hub-staging-composition.cjs");
 const {
   assert,
-  assertAuthority,
   assertExactPulls,
+  assertRequestAuthorities,
   validateRuntime,
 } = require("./deploy-hub-operation-contracts.cjs");
 const {
@@ -17,6 +17,9 @@ const {
   stagingMessage,
 } = require("./deploy-hub-staging-content.cjs");
 const {
+  claimQueuedRequests,
+  discoverQueuedRequests,
+  mergeQueuedRequests,
   publishStatus,
   stopRequested,
   targetLabel,
@@ -130,7 +133,6 @@ async function dispatchProduction({
   github,
   operationId,
   requests,
-  requester,
   stagingSha,
   stagingCorrelation,
   parentRunId,
@@ -138,7 +140,6 @@ async function dispatchProduction({
   await github.dispatchWorkflow("deploy-hub-production.yml", "main", {
     operation_id: operationId,
     manifest: JSON.stringify(requests),
-    requester,
     staging_sha: stagingSha,
     staging_correlation: stagingCorrelation,
     parent_run_id: String(parentRunId),
@@ -151,7 +152,6 @@ async function finishCohort(options) {
     requests,
     accepted,
     operationId,
-    actor,
     runId,
     runUrl,
     safeSha,
@@ -209,7 +209,6 @@ async function finishCohort(options) {
     github,
     operationId,
     requests: production,
-    requester: actor,
     stagingSha: safeSha,
     stagingCorrelation,
     parentRunId: runId,
@@ -360,10 +359,18 @@ async function executeStaging(options) {
     options.confirmation === "DEPLOY",
     "Live deployment was not confirmed."
   );
-  const requests = normalizeManifest(manifestJson, actor, repository);
-  await assertAuthority(github, actor, requests);
+  const submittedRequests = normalizeManifest(manifestJson, actor, repository);
+  const queuedRequests = await discoverQueuedRequests(
+    github,
+    repository,
+    baseRef
+  );
+  const requests = mergeQueuedRequests(submittedRequests, queuedRequests);
+  await assertRequestAuthorities(github, requests);
   await assertExactPulls(github, requests, baseRef);
   const cohorts = partitionCohorts(requests);
+
+  await claimQueuedRequests(github, queuedRequests, runUrl, runId);
 
   for (const request of requests) {
     await publishStatus(
@@ -375,22 +382,49 @@ async function executeStaging(options) {
     );
   }
   for (const [cohortIndex, cohort] of cohorts.entries()) {
-    const conclusion = await processStagingCohort({
-      github,
-      git,
-      cohort,
-      requests,
-      operationId,
-      actor,
-      runId,
-      runAttempt,
-      runUrl,
-      baseRef,
-      cohortIndex,
-      sleep,
-      now,
-    });
+    let conclusion;
+    try {
+      conclusion = await processStagingCohort({
+        github,
+        git,
+        cohort,
+        requests,
+        operationId,
+        actor,
+        runId,
+        runAttempt,
+        runUrl,
+        baseRef,
+        cohortIndex,
+        sleep,
+        now,
+      });
+    } catch (error) {
+      const unfinished = cohorts
+        .slice(cohortIndex)
+        .flatMap(({ requests: pending }) => pending);
+      await publishStatus(
+        github,
+        unfinished,
+        runUrl,
+        "error",
+        "Operation failed before every request reached a terminal result"
+      );
+      throw error;
+    }
     if (conclusion !== "success") {
+      const waiting = cohorts
+        .slice(cohortIndex + 1)
+        .flatMap(({ requests: pending }) => pending);
+      await publishStatus(
+        github,
+        waiting,
+        runUrl,
+        "error",
+        conclusion === "stopped"
+          ? "Not started because an earlier cohort stopped"
+          : "Not started because an earlier staging cohort failed"
+      );
       return { conclusion, requests, cohorts };
     }
   }
