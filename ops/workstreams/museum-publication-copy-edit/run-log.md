@@ -101,3 +101,53 @@
 - The complete optimized production build passed again after the rendered
   copy-desk correction in 416 seconds, including generation, full lint, Next
   compilation, TypeScript, route generation, sitemap generation, and postbuild.
+
+## 2026-08-04 — staged and production release
+
+- Frontend PR #3567 passed exact merge-tree App PR CI, the optimized production
+  build, security and quality checks, configured review bots, and zero
+  unresolved review threads. It squash-merged as
+  `7132db738d4235b49b5c52512e78529b2bfd2519`.
+- Staging composition
+  `2b7189ad070a32503a1b5fa3602a378a169f40ae` contains that exact main.
+  Staging deployment run `30866516284` passed, followed by automatic staging
+  E2E run `30867368339`.
+- Production deployment run `30867768961` passed on exact main. Elastic
+  Beanstalk health, deployed-version validation, three consecutive HTTP
+  version matches, announced version, and durable workflow evidence all
+  passed. Three independent post-workflow reads also returned exact runtime and
+  announced SHA with `stale:false`.
+- The manual fallback lane correctly created no manifest-bound Production E2E
+  workflow, because there was no Release Bus v2 train or manifest identity to
+  supply. No identity was invented. The complete 11-pack production-safe
+  inventory ran read-only against `https://6529.io` and passed 73/73 tests.
+- The independent desktop/mobile core smoke matrix passed 16/16. The full
+  public surface matrix passed 28 tests, skipped 22 intentional project cases,
+  and failed none. The WCAG/i18n matrix passed 6/6.
+- The retained Museum production audit passed eight representative routes at
+  390 by 844 pixels. It verified abbreviated source SHA `4534f0e03648`, final copy,
+  visible media, zero horizontal overflow, absence of raw archival metadata,
+  and no actionable browser console or page errors. Owning desktop and mobile
+  pixel review covered the Museum home, About, Methods, gift, artist, CENTURY
+  project, CENTURY #31 object, and sources-and-chronology routes.
+
+## 2026-08-04 — production closeout
+
+- The required 30-minute post-deploy watch ran from
+  `2026-08-04T01:30:46.276Z` through `2026-08-04T02:00:54.149Z`. Twenty-three
+  exact-version observations, including the workflow's original three-match
+  evidence, recorded no mismatch. The final watch readback passed all eight
+  representative Museum routes at HTTP 200 with the expected publication copy
+  and source SHA.
+- Required core-smoke, surface-matrix, and WCAG/i18n reports; the optional
+  11-pack production-readonly evidence; the Museum mobile report; and the
+  post-deploy watch were uploaded under the release's approved durable artifact
+  prefix with verified-redacted metadata.
+- The completed release report is `ready`: no auto-hold criterion fired and no
+  warning remains. The final manifest is retained at
+  `s3://6529reviewbot-prod-artifacts/frontend-deployment/fe-production-20260804T010754Z-7132db738d42/release-closeout/20260804T020200Z/deployment-bus-manifest.json`
+  with SHA-256
+  `dfc3ce89cb592ce682074d52ef56b3d5046bff2e1ed022ca7b50b272a2fa5c95`.
+  The companion report is retained beside it as
+  `deployment-release-report.md` with SHA-256
+  `74abe758a13d8047970f994e3065ec7298da95c03cb75ac221217fce85200ad1`.
