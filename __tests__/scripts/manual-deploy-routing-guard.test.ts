@@ -6,14 +6,17 @@ import YAML from "yaml";
 
 type WorkflowStep = {
   readonly name?: string;
+  readonly if?: string;
   readonly uses?: string;
   readonly run?: string;
   readonly env?: Readonly<Record<string, string>>;
   readonly with?: Readonly<Record<string, unknown>>;
+  readonly "continue-on-error"?: boolean;
 };
 
 type WorkflowJob = {
   readonly needs?: string | readonly string[];
+  readonly if?: string;
   readonly permissions?: Readonly<Record<string, unknown>>;
   readonly steps: readonly WorkflowStep[];
 };
@@ -313,6 +316,140 @@ describe("frontend manual deployment routing guards", () => {
 
     expect(checkout?.with?.["ref"]).toBe("${{ github.sha }}");
     expect(checkout?.with?.["ref"]).not.toBe("${{ env.STAGING_BRANCH }}");
+  });
+
+  it("notifies once when the staging guard fails without duplicating deployment-job alerts", () => {
+    const parsed = workflow("deploy-staging.yml");
+    const notification = workflowJob(parsed, "notify-prerequisite-failure");
+    const deploy = workflowJob(parsed, "deploy-staging");
+    const checkout = notification.steps.find(
+      ({ name }) => name === "Check out CI wave notifier"
+    );
+    const failureNotifications = notification.steps.filter(
+      ({ name }) => name === "Notify CI wave about failure"
+    );
+
+    expect(notification.needs).toEqual([
+      "manual-deployment-guard",
+      "deploy-staging",
+    ]);
+    expect(notification.if).toBe(
+      "always() && needs.manual-deployment-guard.result == 'failure'"
+    );
+    expect(notification.if).not.toContain("needs.deploy-staging.result");
+    expect(checkout?.with).toMatchObject({
+      ref: "${{ github.workflow_sha }}",
+      path: ".ci-wave-notifier",
+      "persist-credentials": false,
+      "sparse-checkout": "scripts/notify-ci-wave.mjs",
+      "sparse-checkout-cone-mode": false,
+    });
+    expect(failureNotifications).toHaveLength(1);
+    expect(failureNotifications[0]).toMatchObject({
+      if: "hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''",
+      "continue-on-error": true,
+      run: "node .ci-wave-notifier/scripts/notify-ci-wave.mjs",
+      env: {
+        CI_PIPELINES_TARGET_ENV: "staging",
+        CI_PIPELINES_STATUS: "failure",
+        CI_PIPELINES_TITLE:
+          "Seize STAGING WEB DEPLOY: CI pipeline is broken!!!",
+        CI_PIPELINES_ENVIRONMENT: "staging",
+        CI_PIPELINES_SERVICE: "web",
+        CI_PIPELINES_SHA: "${{ github.sha }}",
+      },
+    });
+    expect(
+      deploy.steps.filter(
+        ({ name, if: condition }) =>
+          name === "Notify CI wave about failure" && condition === "failure()"
+      )
+    ).toHaveLength(1);
+    expect(
+      deploy.steps.filter(
+        ({ name, if: condition }) =>
+          name === "Notify CI wave about success" && condition === "success()"
+      )
+    ).toHaveLength(1);
+  });
+
+  it("notifies once for either production prerequisite failure without duplicating deployment-job alerts", () => {
+    const parsed = workflow("build-upload-deploy-prod.yml");
+    const notification = workflowJob(parsed, "notify-prerequisite-failure");
+    const deploy = workflowJob(parsed, "build-upload-deploy");
+    const checkout = notification.steps.find(
+      ({ name }) => name === "Check out CI wave notifier"
+    );
+    const discordNotifications = notification.steps.filter(
+      ({ name }) => name === "Notify about failure"
+    );
+    const failureNotifications = notification.steps.filter(
+      ({ name }) => name === "Notify CI wave about failure"
+    );
+
+    expect(notification.needs).toEqual([
+      "manual-deployment-guard",
+      "assert-main-ref",
+      "build-upload-deploy",
+    ]);
+    expect(notification.if).toBe(
+      "always() && (needs.manual-deployment-guard.result == 'failure' || needs.assert-main-ref.result == 'failure')"
+    );
+    expect(notification.if).not.toContain("needs.build-upload-deploy.result");
+    expect(checkout?.with).toMatchObject({
+      ref: "${{ github.workflow_sha }}",
+      path: ".ci-wave-notifier",
+      "persist-credentials": false,
+      "sparse-checkout": "scripts/notify-ci-wave.mjs",
+      "sparse-checkout-cone-mode": false,
+    });
+    expect(discordNotifications).toHaveLength(1);
+    expect(discordNotifications[0]).toMatchObject({
+      uses: "sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708",
+      "continue-on-error": true,
+      env: {
+        DISCORD_WEBHOOK: "${{ secrets.DISCORD_WEBHOOK }}",
+      },
+      with: {
+        title: "Seize PROD WEB DEPLOY: CI pipeline is broken!!!",
+        description:
+          "${{ github.sha }} - Manual production deployment prerequisite failed",
+        content: "<@&1162355330798325861>",
+        color: 0xff0000,
+      },
+    });
+    expect(failureNotifications).toHaveLength(1);
+    expect(failureNotifications[0]).toMatchObject({
+      if: "hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''",
+      "continue-on-error": true,
+      run: "node .ci-wave-notifier/scripts/notify-ci-wave.mjs",
+      env: {
+        CI_PIPELINES_TARGET_ENV: "production",
+        CI_PIPELINES_STATUS: "failure",
+        CI_PIPELINES_TITLE: "Seize PROD WEB DEPLOY: CI pipeline is broken!!!",
+        CI_PIPELINES_ENVIRONMENT: "production",
+        CI_PIPELINES_SERVICE: "web",
+        CI_PIPELINES_SHA: "${{ github.sha }}",
+      },
+    });
+    expect(
+      deploy.steps.filter(
+        ({ name, if: condition }) =>
+          name === "Notify CI wave about failure" && condition === "failure()"
+      )
+    ).toHaveLength(1);
+    expect(
+      deploy.steps.filter(
+        ({ name, if: condition }) =>
+          name === "Notify CI wave about success" && condition === "success()"
+      )
+    ).toHaveLength(1);
+    expect(
+      deploy.steps.filter(
+        ({ name, if: condition }) =>
+          name === "Notify about failure" && condition === "failure()"
+      )
+    ).toHaveLength(1);
   });
 
   it.each([

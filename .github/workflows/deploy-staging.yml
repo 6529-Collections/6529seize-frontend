@@ -723,3 +723,44 @@ jobs:
           CI_PIPELINES_ENVIRONMENT: staging
           CI_PIPELINES_SERVICE: web
         run: node scripts/notify-ci-wave.mjs
+
+  notify-prerequisite-failure:
+    name: Notify about staging prerequisite failure
+    needs: [manual-deployment-guard, deploy-staging]
+    if: always() && needs.manual-deployment-guard.result == 'failure'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out CI wave notifier
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          path: .ci-wave-notifier
+          sparse-checkout: scripts/notify-ci-wave.mjs
+          sparse-checkout-cone-mode: false
+
+      - name: Verify CI wave notifier checkout
+        run: |
+          test -f .ci-wave-notifier/scripts/notify-ci-wave.mjs || {
+            echo 'CI wave notifier checkout is unavailable.' >&2
+            exit 1
+          }
+
+      - name: Notify CI wave about failure
+        if: hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
+        continue-on-error: true
+        env:
+          CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
+          CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
+          CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
+          CI_PIPELINES_TARGET_ENV: staging
+          CI_PIPELINES_STATUS: failure
+          CI_PIPELINES_TITLE: "Seize STAGING WEB DEPLOY: CI pipeline is broken!!!"
+          CI_PIPELINES_ENVIRONMENT: staging
+          CI_PIPELINES_SERVICE: web
+          CI_PIPELINES_SHA: ${{ github.sha }}
+        run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs
