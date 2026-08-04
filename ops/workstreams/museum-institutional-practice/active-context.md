@@ -52,6 +52,8 @@
   output, and only the exact known blocked Coinbase analytics transport is
   classified as benign. The original first-party prefetch failure did not
   recur in staging or production qualification.
+- Manual-fallback Production E2E: no sanctioned workflow run exists; none is
+  claimed.
 - Status: complete. Future scholarship, source, or presentation changes begin
   as new governed source and frontend revisions; this workstream has no open
   release action.
