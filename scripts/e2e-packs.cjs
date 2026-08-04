@@ -28,6 +28,9 @@ const RUNNER_CAPABILITIES = Object.freeze({
       version: 1,
       max_parallel: MAX_PARALLEL_PACKS,
     }),
+    pack_exclusion: Object.freeze({
+      version: 1,
+    }),
   }),
 });
 

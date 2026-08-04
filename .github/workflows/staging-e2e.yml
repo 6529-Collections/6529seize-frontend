@@ -426,6 +426,7 @@ jobs:
             --trigger post-deploy
             --artifact-root staging-e2e-artifacts
           )
+          pack_exclusion_supported=false
           if runner_capabilities="$(./bin/6529 exec node scripts/e2e-packs.cjs --capabilities 2>/dev/null)" &&
             jq -e '
               .contract == "release-bus-e2e-runner-capabilities.v1" and
@@ -437,11 +438,25 @@ jobs:
           then
             args+=(--parallel 4)
           fi
+          if [ -n "${runner_capabilities:-}" ] &&
+            jq -e '
+              .contract == "release-bus-e2e-runner-capabilities.v1" and
+              .features.pack_exclusion == { version: 1 }
+            ' <<< "$runner_capabilities" >/dev/null
+          then
+            pack_exclusion_supported=true
+          fi
           if [ "${SELECTED_PACK:-all}" != all ]; then
             args+=(--pack "$SELECTED_PACK")
           elif [ "$MUSEUM_E2E_REQUIRED" = false ]; then
-            args+=(--exclude-pack museum-institutional-practice)
+            if [ "$pack_exclusion_supported" = true ]; then
+              args+=(--exclude-pack museum-institutional-practice)
+            else
+              echo "::warning::Deployed E2E runner cannot exclude packs; retaining the Museum E2E pack."
+              MUSEUM_E2E_REQUIRED=true
+            fi
           fi
+          echo "MUSEUM_E2E_REQUIRED=$MUSEUM_E2E_REQUIRED" >> "$GITHUB_ENV"
           ./bin/6529 run e2e:packs -- "${args[@]}"
 
       - name: Validate exact manifest-bound E2E evidence
@@ -452,7 +467,6 @@ jobs:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
           MANIFEST_ID: ${{ inputs.release_manifest_id }}
           MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
-          MUSEUM_E2E_REQUIRED: ${{ steps.museum-selection.outputs.required }}
           OPERATION_KEY: ${{ inputs.operation_key }}
         run: |
           set -euo pipefail

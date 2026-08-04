@@ -72,7 +72,9 @@ describe("Release Bus frontend performance contract", () => {
     expect(appPrCi).toContain("./bin/6529 run typecheck:changed");
     expect(appPrCi).toContain("Run related Jest tests");
     expect(appPrCi).toContain("./bin/6529 run build:ci");
-    expect(appPrCi).not.toContain("playwright install");
+    expect(appPrCi).toContain("playwright install --with-deps chromium");
+    expect(appPrCi).toContain("test:e2e:smoke");
+    expect(appPrCi).toContain("test:e2e:critical-shell");
     expect(appPrCi).not.toContain("test:e2e:museum-institutional-practice");
     if (appPrCi.includes("exact-merge-tree-pr-ci-v1")) {
       expect(appPrCi).toContain(

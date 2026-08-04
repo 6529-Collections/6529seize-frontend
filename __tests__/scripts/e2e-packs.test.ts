@@ -33,6 +33,9 @@ const runner = require("../../scripts/e2e-packs.cjs") as {
         version: number;
         max_parallel: number;
       };
+      pack_exclusion: {
+        version: number;
+      };
     };
   };
   assertParallelSafe: (packs: Pack[], parallel: number) => void;
@@ -190,6 +193,9 @@ describe("manifest-driven E2E runner", () => {
         readonly_pack_parallelism: {
           version: 1,
           max_parallel: 4,
+        },
+        pack_exclusion: {
+          version: 1,
         },
       },
     });

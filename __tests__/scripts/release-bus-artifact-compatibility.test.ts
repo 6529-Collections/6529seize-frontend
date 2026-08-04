@@ -343,7 +343,7 @@ set -euo pipefail
 if [ "$*" = "exec node scripts/e2e-packs.cjs --capabilities" ]; then
   case "\${MOCK_RUNNER_CAPABILITY:-old}" in
     current)
-      printf '%s\\n' '{"contract":"release-bus-e2e-runner-capabilities.v1","features":{"readonly_pack_parallelism":{"version":1,"max_parallel":4}}}'
+      printf '%s\\n' '{"contract":"release-bus-e2e-runner-capabilities.v1","features":{"readonly_pack_parallelism":{"version":1,"max_parallel":4},"pack_exclusion":{"version":1}}}'
       exit 0
       ;;
     incompatible)
@@ -739,8 +739,11 @@ describe("Release Bus artifact rollout compatibility", () => {
       try {
         createMock6529(root);
         const invocation = path.join(root, "runner-args");
+        const githubEnv = path.join(root, "github-env");
         const baseEnv = {
+          GITHUB_ENV: githubEnv,
           MOCK_6529_ARGS: invocation,
+          MUSEUM_E2E_REQUIRED: "false",
           SELECTED_PACK: "all",
         };
 
@@ -760,6 +763,14 @@ describe("Release Bus artifact rollout compatibility", () => {
         expect(currentArgs).toEqual(
           expect.arrayContaining(["--trigger", "post-deploy"])
         );
+        if (environment === "staging") {
+          expect(currentArgs).toEqual(
+            expect.arrayContaining([
+              "--exclude-pack",
+              "museum-institutional-practice",
+            ])
+          );
+        }
 
         expect(
           runShell(step.run!, {
@@ -770,6 +781,7 @@ describe("Release Bus artifact rollout compatibility", () => {
         const oldArgs = fs.readFileSync(invocation, "utf8").split("\n");
         expect(oldArgs).not.toContain("--parallel");
         expect(oldArgs).not.toContain("--pack");
+        expect(oldArgs).not.toContain("--exclude-pack");
         expect(oldArgs).toEqual(
           expect.arrayContaining(["--trigger", "post-deploy"])
         );
@@ -785,6 +797,7 @@ describe("Release Bus artifact rollout compatibility", () => {
           .split("\n");
         expect(incompatibleArgs).not.toContain("--parallel");
         expect(incompatibleArgs).not.toContain("--pack");
+        expect(incompatibleArgs).not.toContain("--exclude-pack");
         expect(incompatibleArgs).toEqual(
           expect.arrayContaining(["--trigger", "post-deploy"])
         );
