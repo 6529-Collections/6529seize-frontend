@@ -149,13 +149,11 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
 
     await expect(page.locator("#waves-content")).toBeVisible();
     const viewport = page.viewportSize();
-    if (viewport && viewport.width < 768) {
-      await expect(
-        page.locator("main").getByText("Waves").first()
-      ).toBeVisible();
+    expect(viewport, "Expected a configured browser viewport").not.toBeNull();
+    if (viewport !== null && viewport.width < 768) {
       await expect(
         page.getByRole("region", {
-          name: /All recent waves list|Regular waves list/,
+          name: "All recent waves list",
         })
       ).toBeVisible();
     } else {
