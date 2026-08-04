@@ -67,6 +67,8 @@ jobs:
             --changed-from "origin/${BASE_REF}" \
             --untrusted-pr="${UNTRUSTED_PR}" \
             --output test-results/app-pr-ci/ci-plan.json
+          ./bin/6529 exec node scripts/app-pr-ci-effective-plan.cjs \
+            --plan test-results/app-pr-ci/ci-plan.json
           ./bin/6529 run testing-strategy -- scan-changed-secrets \
             --changed-from "origin/${BASE_REF}" \
             --output test-results/app-pr-ci/secret-scan.json
@@ -250,6 +252,7 @@ jobs:
         run: |
           set -euo pipefail
           ./bin/6529 run test:no-coverage --runInBand --runTestsByPath \
+            __tests__/scripts/app-pr-ci-effective-plan.test.ts \
             __tests__/scripts/pr-ci-policy-bundle.test.ts \
             __tests__/scripts/deploy-staging-artifact.test.ts \
             __tests__/scripts/deployment-bus.test.ts \

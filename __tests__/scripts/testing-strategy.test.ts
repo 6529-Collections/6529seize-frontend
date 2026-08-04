@@ -299,13 +299,15 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.risk_floor.required).toBe(true);
     expect(plan.checks.secret_scan.required).toBe(true);
     expect(plan.checks.install.required).toBe(false);
+    expect(plan.checks.playwright_smoke.required).toBe(false);
+    expect(plan.checks.playwright_critical_shell.required).toBe(false);
     expect(plan.security).toMatchObject({
       secrets_allowed: false,
       token_permissions: "contents:read",
     });
   });
 
-  it("routes ordinary UI changes through focused static checks", () => {
+  it("routes ordinary UI changes through changed checks and smoke", () => {
     const plan = createCiPlan(["components/header/AppHeader.tsx"], {
       untrustedPr: true,
     });
@@ -315,8 +317,13 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.install.required).toBe(true);
     expect(plan.checks.lint_changed.required).toBe(true);
     expect(plan.checks.typecheck_changed.required).toBe(true);
-    expect(plan.checks["test_typecheck"]!.required).toBe(false);
+    expect(plan.checks.test_typecheck.required).toBe(true);
+    expect(plan.checks["test_typecheck"]?.reason).toContain(
+      "Jest diagnostic ratchet"
+    );
     expect(plan.checks.jest_changed.required).toBe(true);
+    expect(plan.checks.playwright_smoke.required).toBe(true);
+    expect(plan.checks.playwright_critical_shell.required).toBe(false);
     expect(plan.checks.build.required).toBe(false);
   });
 
@@ -329,33 +336,9 @@ describe("testing strategy CI plan", () => {
     expect(plan.risk.computed_floor).toBe(4);
     expect(plan.checks.workflow_security_review.required).toBe(true);
     expect(plan.checks.dependency_governance.required).toBe(true);
-    expect(plan.checks["deadcode"]!.required).toBe(true);
-    expect(plan.checks["release_bus_contract"]!.required).toBe(true);
-    expect(plan.checks["test_typecheck"]!.required).toBe(true);
     expect(plan.checks.build.required).toBe(true);
+    expect(plan.checks.playwright_critical_shell.required).toBe(true);
   });
-
-  it("does not run repository-wide dead-code and test typechecks for ordinary runtime code", () => {
-    const plan = createCiPlan(["lib/museum/publication/pageSources.ts"]);
-
-    expect(plan.checks["deadcode"]!.required).toBe(false);
-    expect(plan.checks["test_typecheck"]!.required).toBe(false);
-    expect(plan.checks["jest_changed"]!.required).toBe(true);
-  });
-
-  it.each([
-    ".github/workflows/deploy-staging.yml",
-    "ops/scripts/deploy-staging-artifact.sh",
-    "tests/packs.manifest.cjs",
-  ])(
-    "runs the Release Bus contract only for relevant policy path %s",
-    (file) => {
-      const plan = createCiPlan([file]);
-
-      expect(plan.checks["release_bus_contract"]!.required).toBe(true);
-      expect(plan.checks["install"]!.required).toBe(true);
-    }
-  );
 
   it.each([
     "config/public-reviews/6529-stream.reference.json",
@@ -365,6 +348,7 @@ describe("testing strategy CI plan", () => {
     const plan = createCiPlan([file]);
 
     expect(plan.checks["build"]!.required).toBe(true);
+    expect(plan.checks["playwright_critical_shell"]!.required).toBe(true);
     expect(plan.checks["build"]!.reason).toContain("build-sensitive");
   });
 
@@ -373,7 +357,7 @@ describe("testing strategy CI plan", () => {
 
     expect(plan.risk.computed_floor).toBe(2);
     expect(plan.checks.build.required).toBe(true);
-    expect(plan.checks["deadcode"]!.required).toBe(true);
+    expect(plan.checks.playwright_critical_shell.required).toBe(true);
     expect(plan.checks.build.reason).toContain("deleted runtime source");
   });
 
