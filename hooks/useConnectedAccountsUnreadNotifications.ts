@@ -102,7 +102,8 @@ const clampUnreadCount = (count: number | null | undefined): number => {
 };
 
 const fetchUnreadCountForAccount = async (
-  account: ConnectedWalletAccount
+  account: ConnectedWalletAccount,
+  signal: AbortSignal
 ): Promise<number> => {
   if (!account.jwt) {
     return 0;
@@ -126,6 +127,7 @@ const fetchUnreadCountForAccount = async (
       },
       cache: "no-store",
       errorMode: "structured",
+      signal,
     });
     return clampUnreadCount(notifications.unread_count);
   } catch (error) {
@@ -179,7 +181,7 @@ export function useConnectedAccountsUnreadNotifications(
 
   const { data } = useQuery<ConnectedAccountUnreadCounts>({
     queryKey,
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       if (pollableAccounts.length === 0) {
         return {};
       }
@@ -187,7 +189,9 @@ export function useConnectedAccountsUnreadNotifications(
       const previousCounts =
         queryClient.getQueryData<ConnectedAccountUnreadCounts>(queryKey) ?? {};
       const results = await Promise.allSettled(
-        pollableAccounts.map((account) => fetchUnreadCountForAccount(account))
+        pollableAccounts.map((account) =>
+          fetchUnreadCountForAccount(account, signal)
+        )
       );
       const nextCounts: Record<string, number> = {};
       const terminalAuthFailures: {
