@@ -14,7 +14,7 @@
 - The rendered copy desk removed production labels from the Casey artist,
   collection, gift, and project manuscripts; retitled the public research
   record; kept the artist-profile opening in the curatorial register; and
-  removed release narration from *A field of practice*. Registrarial and
+  removed release narration from _A field of practice_. Registrarial and
   technical distinctions remain intact.
 - The exact frontend adapter admitted only the corrected source commit and
   verified all 57 public documents and twenty-seven profiles. It found no
@@ -67,7 +67,7 @@
   `codex/museum-institutional-practice-v2-fe`.
 - The governed source lane expands the same living study from fourteen to
   twenty-seven institutional profiles, adds a classified adjacent-practice
-  study, publishes *Writing the 6529 Network Museum* as the Museum's public
+  study, publishes _Writing the 6529 Network Museum_ as the Museum's public
   scholarship and editorial standard, and applies that standard across every
   visitor-facing Museum manuscript while preserving adopted and historical
   policy transcriptions.
@@ -294,7 +294,7 @@
 
 - Museum source PRs #23 and #24 expanded the same living comparative study to
   twenty-seven institutional profiles, added adjacent digital-art practice,
-  published *Writing the 6529 Network Museum*, and applied its editorial
+  published _Writing the 6529 Network Museum_, and applied its editorial
   standard across the complete public Museum corpus.
 - Final source PR #25 replaced the last residual use of `edition` for the
   living study with `study`. It merged as exact canonical commit
@@ -346,3 +346,9 @@
   history remains available, and blobs reachable only through unrelated refs
   are no longer transferred. The 58-case testing-strategy suite, explicit
   workflow-security validator, formatter, ESLint, and portable diff check pass.
+- On repaired exact head `80b2f7669cdcdfd045a4e496b2e0c264856e966c`,
+  Push Secret Scan completed successfully in 1 minute 19 seconds and both App
+  checkouts completed in under 15 seconds. Installed Apps then identified one
+  ordinary Knip finding: `InstitutionalPracticeDirectory` was an unused legacy
+  duplicate. The follow-up removes that component and its private presentation
+  constants; it does not change active runtime behavior, copy, links, or pixels.

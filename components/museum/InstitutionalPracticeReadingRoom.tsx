@@ -1,7 +1,6 @@
-import Link from "next/link";
 import { formatDate } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t, type MessageKey } from "@/i18n/messages";
+import { t } from "@/i18n/messages";
 import type {
   MuseumInstitutionProfileSlug,
   MuseumInstitutionalPractice,
@@ -10,7 +9,6 @@ import type {
 import { parseInstitutionalPracticeHeading } from "@/lib/museum/publication/institutionalPracticeMarkdown";
 import { MuseumMarkdown } from "./MuseumMarkdown";
 
-const STUDY_ROUTE = "/museum/network/stories/a-field-of-practice";
 const STUDY_PATH = "records/institutional-practice/a-field-of-practice.md";
 const ADJACENT_PRACTICE_PATH =
   "records/institutional-practice/adjacent-chain-native-practice.md";
@@ -47,106 +45,6 @@ const PROFILE_SLUGS = [
   "walker-art-center",
   "mca-chicago",
 ] as const satisfies readonly MuseumInstitutionProfileSlug[];
-
-const PROFILE_FOCUS_KEYS = {
-  met: "museum.network.institutionalPractice.focus.met",
-  getty: "museum.network.institutionalPractice.focus.getty",
-  moma: "museum.network.institutionalPractice.focus.moma",
-  whitney: "museum.network.institutionalPractice.focus.whitney",
-  tate: "museum.network.institutionalPractice.focus.tate",
-  "centre-pompidou":
-    "museum.network.institutionalPractice.focus.centrePompidou",
-  sfmoma: "museum.network.institutionalPractice.focus.sfmoma",
-  guggenheim: "museum.network.institutionalPractice.focus.guggenheim",
-  zkm: "museum.network.institutionalPractice.focus.zkm",
-  "ars-electronica":
-    "museum.network.institutionalPractice.focus.arsElectronica",
-  "rhizome-new-museum":
-    "museum.network.institutionalPractice.focus.rhizomeNewMuseum",
-  "serpentine-arts-technologies":
-    "museum.network.institutionalPractice.focus.serpentine",
-  "v-and-a": "museum.network.institutionalPractice.focus.vAndA",
-  lacma: "museum.network.institutionalPractice.focus.lacma",
-  "hek-basel": "museum.network.institutionalPractice.focus.hekBasel",
-  "li-ma": "museum.network.institutionalPractice.focus.liMa",
-  v2: "museum.network.institutionalPractice.focus.v2",
-  transmediale: "museum.network.institutionalPractice.focus.transmediale",
-  acmi: "museum.network.institutionalPractice.focus.acmi",
-  "m-plus": "museum.network.institutionalPractice.focus.mPlus",
-  "nam-june-paik-art-center":
-    "museum.network.institutionalPractice.focus.namJunePaikArtCenter",
-  "ntt-icc": "museum.network.institutionalPractice.focus.nttIcc",
-  "centro-multimedia":
-    "museum.network.institutionalPractice.focus.centroMultimedia",
-  "laboratorio-arte-alameda":
-    "museum.network.institutionalPractice.focus.laboratorioArteAlameda",
-  dia: "museum.network.institutionalPractice.focus.dia",
-  "walker-art-center":
-    "museum.network.institutionalPractice.focus.walkerArtCenter",
-  "mca-chicago": "museum.network.institutionalPractice.focus.mcaChicago",
-} as const satisfies Record<MuseumInstitutionProfileSlug, MessageKey>;
-
-const PRACTICE_GROUPS = [
-  {
-    titleKey: "museum.network.institutionalPractice.group.digital.title",
-    descriptionKey:
-      "museum.network.institutionalPractice.group.digital.description",
-    slugs: [
-      "zkm",
-      "ars-electronica",
-      "rhizome-new-museum",
-      "serpentine-arts-technologies",
-      "hek-basel",
-      "li-ma",
-      "v2",
-      "transmediale",
-    ],
-  },
-  {
-    titleKey: "museum.network.institutionalPractice.group.media.title",
-    descriptionKey:
-      "museum.network.institutionalPractice.group.media.description",
-    slugs: [
-      "acmi",
-      "m-plus",
-      "nam-june-paik-art-center",
-      "ntt-icc",
-      "centro-multimedia",
-      "laboratorio-arte-alameda",
-    ],
-  },
-  {
-    titleKey: "museum.network.institutionalPractice.group.collection.title",
-    descriptionKey:
-      "museum.network.institutionalPractice.group.collection.description",
-    slugs: [
-      "moma",
-      "whitney",
-      "tate",
-      "centre-pompidou",
-      "sfmoma",
-      "guggenheim",
-    ],
-  },
-  {
-    titleKey: "museum.network.institutionalPractice.group.scholarship.title",
-    descriptionKey:
-      "museum.network.institutionalPractice.group.scholarship.description",
-    slugs: [
-      "met",
-      "getty",
-      "v-and-a",
-      "lacma",
-      "dia",
-      "walker-art-center",
-      "mca-chicago",
-    ],
-  },
-] as const satisfies readonly {
-  readonly titleKey: MessageKey;
-  readonly descriptionKey: MessageKey;
-  readonly slugs: readonly MuseumInstitutionProfileSlug[];
-}[];
 
 const METADATA_PREFIX = "- **";
 const METADATA_SEPARATOR = ":** ";
@@ -418,57 +316,5 @@ export function InstitutionalPracticeManuscript({
     >
       {projection.body}
     </MuseumMarkdown>
-  );
-}
-
-export function InstitutionalPracticeDirectory({
-  practice,
-}: {
-  readonly practice: MuseumInstitutionalPractice;
-}) {
-  const profileBySlug = new Map(
-    practice.profiles.map((profile) => [profile.slug, profile])
-  );
-
-  return (
-    <div className="tw-mt-8 tw-grid tw-gap-x-10 tw-gap-y-12 lg:tw-grid-cols-2">
-      {PRACTICE_GROUPS.map((group) => (
-        <section key={group.titleKey}>
-          <h3 className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-7 tw-text-iron-100">
-            {t(DEFAULT_LOCALE, group.titleKey)}
-          </h3>
-          <p className="tw-m-0 tw-mt-2 tw-max-w-xl tw-text-sm tw-leading-6 tw-text-iron-400">
-            {t(DEFAULT_LOCALE, group.descriptionKey)}
-          </p>
-          <ul className="tw-m-0 tw-mt-5 tw-list-none tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-p-0">
-            {group.slugs.map((slug) => {
-              const profile = profileBySlug.get(slug);
-              if (profile === undefined) {
-                return null;
-              }
-              return (
-                <li
-                  key={profile.id}
-                  className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
-                >
-                  <Link
-                    href={`${STUDY_ROUTE}/${profile.slug}`}
-                    prefetch={false}
-                    className="hover:tw-text-primary-200 tw-block tw-py-5 tw-text-iron-100 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-                  >
-                    <span className="tw-block tw-text-base tw-font-semibold tw-leading-6">
-                      {profile.document.title}
-                    </span>
-                    <span className="tw-mt-1 tw-block tw-text-sm tw-leading-6 tw-text-iron-400">
-                      {t(DEFAULT_LOCALE, PROFILE_FOCUS_KEYS[profile.slug])}
-                    </span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      ))}
-    </div>
   );
 }
