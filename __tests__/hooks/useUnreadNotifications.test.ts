@@ -8,6 +8,9 @@ const useQueryMock = jest.fn();
 const commonApiFetchMock = jest.fn();
 const getAuthJwtMock = jest.fn();
 const isAuthJwtUsableMock = jest.fn();
+const createQueryContext = (signal = new AbortController().signal) => ({
+  signal,
+});
 jest.mock("@tanstack/react-query", () => ({
   useQuery: (...args: any[]) => useQueryMock(...args),
 }));
@@ -148,17 +151,18 @@ describe("useUnreadNotifications", () => {
     );
   });
 
-  it("bypasses browser caching when fetching the unread count", async () => {
+  it("bypasses browser caching and forwards the query AbortSignal", async () => {
     commonApiFetchMock.mockResolvedValue({ unread_count: 0 });
     useQueryMock.mockReturnValue({ data: undefined });
+    const signal = new AbortController().signal;
 
     renderHook(() => useUnreadNotifications("bob", { profileId: "profile-1" }));
 
     const queryOptions = useQueryMock.mock.calls[0]?.[0];
-    await queryOptions.queryFn();
+    await queryOptions.queryFn(createQueryContext(signal));
 
     expect(commonApiFetchMock).toHaveBeenCalledWith(
-      expect.objectContaining({ cache: "no-store" })
+      expect.objectContaining({ cache: "no-store", signal })
     );
   });
 
@@ -189,10 +193,14 @@ describe("useUnreadNotifications", () => {
     renderHook(() => useUnreadNotifications("bob"));
 
     const queryOptions = useQueryMock.mock.calls[0]?.[0];
-    await expect(queryOptions.queryFn()).rejects.toMatchObject({ status: 403 });
+    await expect(
+      queryOptions.queryFn(createQueryContext())
+    ).rejects.toMatchObject({ status: 403 });
 
     commonApiFetchMock.mockRejectedValueOnce({ status: 503 });
-    await expect(queryOptions.queryFn()).rejects.toMatchObject({ status: 503 });
+    await expect(
+      queryOptions.queryFn(createQueryContext())
+    ).rejects.toMatchObject({ status: 503 });
   });
 
   it("blocks polling before fetch when the token expires between renders", async () => {
@@ -202,7 +210,9 @@ describe("useUnreadNotifications", () => {
     renderHook(() => useUnreadNotifications("bob"));
 
     const queryOptions = useQueryMock.mock.calls[0]?.[0];
-    await expect(queryOptions.queryFn()).rejects.toMatchObject({ status: 401 });
+    await expect(
+      queryOptions.queryFn(createQueryContext())
+    ).rejects.toMatchObject({ status: 401 });
     expect(commonApiFetchMock).not.toHaveBeenCalled();
   });
 
