@@ -392,9 +392,11 @@ describe("frontend manual deployment routing guards", () => {
         "continue-on-error": true,
         env: {
           CI_PIPELINES_ENVIRONMENT: environment,
+          CI_PIPELINES_SERVICE: "web",
           CI_PIPELINES_SHA: "${{ github.sha }}",
           CI_PIPELINES_STATUS: "failure",
           CI_PIPELINES_TARGET_ENV: environment,
+          CI_PIPELINES_TITLE: `Seize ${environment === "staging" ? "STAGING" : "PROD"} WEB DEPLOY: CI pipeline is broken!!!`,
         },
       });
       for (const job of [deployJob, terminalJob]) {
@@ -405,7 +407,9 @@ describe("frontend manual deployment routing guards", () => {
           with: {
             ref: "${{ github.workflow_sha }}",
             path: ".ci-wave-notifier",
+            "persist-credentials": false,
             "sparse-checkout": "scripts/notify-ci-wave.mjs",
+            "sparse-checkout-cone-mode": false,
           },
         });
       }
