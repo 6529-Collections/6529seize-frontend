@@ -125,7 +125,7 @@
   public surface matrix passed 28 tests, skipped 22 intentional project cases,
   and failed none. The WCAG/i18n matrix passed 6/6.
 - The retained Museum production audit passed eight representative routes at
-  390 by 844 pixels. It verified exact source SHA `4534f0e03648`, final copy,
+  390 by 844 pixels. It verified abbreviated source SHA `4534f0e03648`, final copy,
   visible media, zero horizontal overflow, absence of raw archival metadata,
   and no actionable browser console or page errors. Owning desktop and mobile
   pixel review covered the Museum home, About, Methods, gift, artist, CENTURY
