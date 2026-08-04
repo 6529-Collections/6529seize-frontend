@@ -53,7 +53,8 @@ const PROFILE_FOCUS_KEYS = {
   lacma: "museum.network.institutionalPractice.focus.lacma",
 } as const satisfies Record<MuseumInstitutionProfileSlug, MessageKey>;
 
-const METADATA_LINE = /^-\s+\*\*([^*]+):\*\*\s+(.+)$/u;
+const METADATA_PREFIX = "- **";
+const METADATA_SEPARATOR = ":** ";
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/u;
 const PUBLICATION_DATE_FORMAT = {
   day: "numeric",
@@ -75,6 +76,25 @@ interface InstitutionalPracticeManuscriptProjection {
 
 function profileSourcePath(slug: MuseumInstitutionProfileSlug): string {
   return `records/institutional-practice/profiles/${slug}.md`;
+}
+
+function parseMetadataLine(line: string): readonly [string, string] | null {
+  if (!line.startsWith(METADATA_PREFIX)) {
+    return null;
+  }
+  const separatorIndex = line.indexOf(
+    METADATA_SEPARATOR,
+    METADATA_PREFIX.length
+  );
+  if (separatorIndex === -1) {
+    return null;
+  }
+  const label = line.slice(METADATA_PREFIX.length, separatorIndex).trim();
+  const value = line.slice(separatorIndex + METADATA_SEPARATOR.length).trim();
+  if (label.length === 0 || label.includes("*") || value.length === 0) {
+    return null;
+  }
+  return [label, value];
 }
 
 function documentIsPublishedInAggregate(
@@ -160,15 +180,15 @@ export function projectInstitutionalPracticeManuscript(
 
   const metadata = new Map<string, string>();
   while (lineIndex < lines.length) {
-    const match = METADATA_LINE.exec(lines[lineIndex] ?? "");
-    if (match?.[1] === undefined || match[2] === undefined) {
+    const metadataLine = parseMetadataLine(lines[lineIndex] ?? "");
+    if (metadataLine === null) {
       break;
     }
-    const label = match[1].trim();
+    const [label, value] = metadataLine;
     if (metadata.has(label)) {
       return null;
     }
-    metadata.set(label, match[2].trim());
+    metadata.set(label, value);
     lineIndex += 1;
   }
 

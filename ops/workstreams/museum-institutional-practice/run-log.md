@@ -124,3 +124,10 @@
   contract suites; those same suites had passed in the preceding hosted Linux
   job. Fresh hosted Linux validation is authoritative for the two-file
   contract-only follow-up.
+- Sonar passed its quality gate at 0.0% duplication but still reported one
+  open complexity issue: the metadata-line regular expression admitted a
+  theoretical super-linear backtracking path. It is replaced by a strict
+  fixed-prefix and separator parser for the canonical `- **Label:** value`
+  manuscript syntax.
+- Parser follow-up validation passed 33/33 route and publication tests,
+  changed lint and typecheck (1,264 files), and the portable diff check.
