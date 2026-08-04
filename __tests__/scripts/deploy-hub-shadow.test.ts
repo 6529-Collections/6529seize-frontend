@@ -85,6 +85,9 @@ describe("Deploy Hub FE shadow workflow", () => {
       statuses: "write",
     });
     expect(workflow.jobs.shadow.permissions).toEqual(workflow.permissions);
+    expect(workflow.jobs.shadow.steps[2].env.DEPLOY_HUB_BASE_REF).toBe(
+      "${{ github.event.repository.default_branch }}"
+    );
     expect(source).not.toContain("secrets.");
     expect(source).not.toContain("contents: write");
     expect(source).not.toContain("actions: write");
@@ -146,6 +149,10 @@ describe("Deploy Hub FE shadow manifest", () => {
       "an unknown target",
       { ...request(1, SHA_A, "staging"), target: "preview" },
     ],
+    [
+      "an invalid request time",
+      { ...request(1, SHA_A, "staging"), requested_at: "not-a-date" },
+    ],
   ])("rejects %s", (_name, invalidRequest) => {
     expect(() =>
       normalizeManifest(
@@ -187,6 +194,7 @@ describe("Deploy Hub FE shadow execution", () => {
       scenario: "success",
       delaySeconds: 0,
       repository: EXPECTED_REPOSITORY,
+      baseRef: "main",
       actor: ACTOR,
       runUrl: RUN_URL,
       github,
@@ -219,6 +227,7 @@ describe("Deploy Hub FE shadow execution", () => {
       scenario: "success",
       delaySeconds: 0,
       repository: EXPECTED_REPOSITORY,
+      baseRef: "main",
       actor: ACTOR,
       runUrl: RUN_URL,
       github,
@@ -270,6 +279,7 @@ describe("Deploy Hub FE shadow execution", () => {
       scenario: "success",
       delaySeconds: 0,
       repository: EXPECTED_REPOSITORY,
+      baseRef: "main",
       actor: ACTOR,
       runUrl: RUN_URL,
       github,
@@ -301,6 +311,7 @@ describe("Deploy Hub FE shadow execution", () => {
         scenario: "success",
         delaySeconds: 0,
         repository: EXPECTED_REPOSITORY,
+        baseRef: "main",
         actor: ACTOR,
         runUrl: RUN_URL,
         github,
@@ -317,6 +328,38 @@ describe("Deploy Hub FE shadow execution", () => {
         status: expect.objectContaining({ state: "error" }),
       }),
     ]);
+  });
+
+  it("uses the repository default branch instead of assuming main", async () => {
+    const statuses: Array<{ sha: string; status: Record<string, string> }> = [];
+    const github = {
+      async getPullRequest() {
+        return {
+          state: "open",
+          base: { ref: "develop" },
+          head: { sha: SHA_A },
+        };
+      },
+      async createCommitStatus(sha: string, status: Record<string, string>) {
+        statuses.push({ sha, status });
+        return {};
+      },
+    };
+
+    const result = await executeShadow({
+      operationId: "operation-default-branch",
+      manifestJson: JSON.stringify([request(1, SHA_A, "staging")]),
+      scenario: "success",
+      delaySeconds: 0,
+      repository: EXPECTED_REPOSITORY,
+      baseRef: "develop",
+      actor: ACTOR,
+      runUrl: RUN_URL,
+      github,
+    });
+
+    expect(result.conclusion).toBe("success");
+    expect(statuses.at(-1)?.status).toMatchObject({ state: "success" });
   });
 
   it.each([

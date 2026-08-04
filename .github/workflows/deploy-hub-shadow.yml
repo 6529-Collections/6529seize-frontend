@@ -68,6 +68,7 @@ jobs:
         env:
           DEPLOY_HUB_ACTOR: ${{ github.actor }}
           DEPLOY_HUB_API_URL: ${{ github.api_url }}
+          DEPLOY_HUB_BASE_REF: ${{ github.event.repository.default_branch }}
           DEPLOY_HUB_MANIFEST: ${{ inputs.manifest }}
           DEPLOY_HUB_OPERATION_ID: ${{ inputs.operation_id }}
           DEPLOY_HUB_PHASE_DELAY_SECONDS: ${{ inputs.phase_delay_seconds }}

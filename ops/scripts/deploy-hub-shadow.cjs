@@ -76,6 +76,7 @@ function normalizeManifest(manifestJson, actor, repository) {
     );
     assert(
       typeof request.requested_at === "string" &&
+        Number.isFinite(Date.parse(request.requested_at)) &&
         new Date(request.requested_at).toISOString() === request.requested_at,
       `${label} has an invalid request time.`
     );
@@ -230,13 +231,13 @@ async function writeStatus(github, request, runUrl, phase) {
   });
 }
 
-async function resolveStaleRequests(github, requests) {
+async function resolveStaleRequests(github, requests, baseRef) {
   const stale = new Set();
   for (const request of requests) {
     const pull = await github.getPullRequest(request.pr);
     if (
       pull.state !== "open" ||
-      pull.base?.ref !== "main" ||
+      pull.base?.ref !== baseRef ||
       pull.head?.sha !== request.sha
     ) {
       stale.add(request.pr);
@@ -322,6 +323,7 @@ async function executeShadow({
   scenario,
   delaySeconds,
   repository,
+  baseRef,
   actor,
   runUrl,
   github,
@@ -329,9 +331,13 @@ async function executeShadow({
     new Promise((resolve) => setTimeout(resolve, milliseconds)),
 }) {
   validateOperation({ operationId, scenario, delaySeconds, runUrl });
+  assert(
+    typeof baseRef === "string" && baseRef.length > 0 && baseRef.length <= 255,
+    "Base ref has an invalid format."
+  );
   const requests = normalizeManifest(manifestJson, actor, repository);
   const cohorts = partitionCohorts(requests);
-  const staleRequests = await resolveStaleRequests(github, requests);
+  const staleRequests = await resolveStaleRequests(github, requests, baseRef);
   const forceStale = scenario === "stale";
 
   if (forceStale || staleRequests.size > 0) {
@@ -435,6 +441,7 @@ async function main() {
     scenario: process.env.DEPLOY_HUB_SCENARIO ?? "",
     delaySeconds: Number(process.env.DEPLOY_HUB_PHASE_DELAY_SECONDS),
     repository,
+    baseRef: process.env.DEPLOY_HUB_BASE_REF ?? "",
     actor: process.env.DEPLOY_HUB_ACTOR ?? "",
     runUrl: process.env.DEPLOY_HUB_RUN_URL ?? "",
     github: createGithubClient({
