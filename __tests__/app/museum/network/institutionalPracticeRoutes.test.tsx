@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { notFound } from "next/navigation";
+import type { AnchorHTMLAttributes, ReactNode } from "react";
 import MuseumInstitutionProfilePage, {
   generateMetadata,
 } from "@/app/museum/network/stories/a-field-of-practice/[slug]/page";
@@ -22,6 +23,22 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
+jest.mock("next/link", () => ({
+  __esModule: true,
+  default: ({
+    children,
+    prefetch,
+    ...props
+  }: AnchorHTMLAttributes<HTMLAnchorElement> & {
+    readonly children: ReactNode;
+    readonly prefetch?: boolean;
+  }) => (
+    <a {...props} data-prefetch={String(prefetch)}>
+      {children}
+    </a>
+  ),
+}));
+
 jest.mock("@/lib/museum/publication/runtime", () => ({
   getMuseumPublicationState: jest.fn(),
 }));
@@ -36,6 +53,17 @@ jest.mock("@/components/museum/MuseumArtworkFigure", () => ({
 
 const mockedPublicationState = jest.mocked(getMuseumPublicationState);
 const mockedNotFound = jest.mocked(notFound);
+
+function expectNextLinkWithoutPrefetch(href: string) {
+  const link = screen
+    .getAllByRole("link")
+    .find(
+      (candidate) =>
+        candidate.getAttribute("href") === href &&
+        candidate.getAttribute("data-prefetch") === "false"
+    );
+  expect(link).toBeDefined();
+}
 
 function studyMarkdown(): string {
   return `# A field of practice
@@ -219,6 +247,13 @@ describe("Museum institutional-practice reading room", () => {
     expect(profileLinks).toHaveLength(14);
     expect(profileLinks[0]).toHaveTextContent("01");
     expect(profileLinks[13]).toHaveTextContent("14");
+    for (const link of screen
+      .getAllByRole("link")
+      .filter((candidate) =>
+        candidate.getAttribute("href")?.startsWith("/museum/network")
+      )) {
+      expect(link).toHaveAttribute("data-prefetch", "false");
+    }
   });
 
   it("renders the comparative study as one governed document hierarchy", async () => {
@@ -246,6 +281,10 @@ describe("Museum institutional-practice reading room", () => {
     ).toHaveAttribute(
       "href",
       `https://github.com/6529-Collections/6529networkmuseum/blob/${"a".repeat(40)}/docs/curatorial-publication-standard.md`
+    );
+    expectNextLinkWithoutPrefetch("/museum/network/stories");
+    expectNextLinkWithoutPrefetch(
+      "/museum/network/stories/a-field-of-practice/sources"
     );
   });
 
@@ -290,6 +329,15 @@ describe("Museum institutional-practice reading room", () => {
       "href",
       "/museum/network/stories/a-field-of-practice/getty"
     );
+    expectNextLinkWithoutPrefetch(
+      "/museum/network/stories/a-field-of-practice"
+    );
+    expectNextLinkWithoutPrefetch(
+      "/museum/network/stories/a-field-of-practice/sources"
+    );
+    expectNextLinkWithoutPrefetch(
+      "/museum/network/stories/a-field-of-practice/getty"
+    );
   });
 
   it("uses the governed profile title in page metadata", async () => {
@@ -316,6 +364,9 @@ describe("Museum institutional-practice reading room", () => {
     expect(screen.getByRole("link", { name: "Open Access" })).toHaveAttribute(
       "target",
       "_blank"
+    );
+    expectNextLinkWithoutPrefetch(
+      "/museum/network/stories/a-field-of-practice"
     );
   });
 
