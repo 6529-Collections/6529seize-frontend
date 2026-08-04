@@ -91,6 +91,7 @@ test("updates fetch status without replacing the claim", async () => {
   );
 
   await waitFor(() => expect(result.current.claim).toBeDefined());
+  expect(result.current.isFetching).toBe(false);
   const initialClaim = result.current.claim;
 
   isFetching = true;
