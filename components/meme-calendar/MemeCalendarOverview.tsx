@@ -28,9 +28,7 @@ import {
   formatFullDateTime,
   formatToFullDivision,
   getCanonicalNextMintNumber,
-  getMintNumberForMintDate,
   getMintTimelineDetails,
-  getNextMintStart,
   getUpcomingMintsForCurrentOrNextSeason,
   getUpcomingMintsForSeasonIndex,
   printCalendarInvites,
@@ -212,19 +210,10 @@ export function MemeCalendarOverviewNextMint({
     "meme-overview-screenshot-status"
   );
   const [now, setNow] = useState(new Date());
-  const [isManualSelection, setIsManualSelection] = useState(false);
-  const [selectedMintNumber, setSelectedMintNumber] = useState(() => {
-    if (id !== undefined) return id;
-    const upcomingInstant = getNextMintStart(new Date());
-    const upcomingUtcDay = new Date(
-      Date.UTC(
-        upcomingInstant.getUTCFullYear(),
-        upcomingInstant.getUTCMonth(),
-        upcomingInstant.getUTCDate()
-      )
-    );
-    return getMintNumberForMintDate(upcomingUtcDay);
-  });
+  const [manualSelection, setManualSelection] = useState<{
+    readonly mintNumber: number;
+    readonly canonicalMintNumberAtSelection: number;
+  } | null>(null);
   const [mintInputValue, setMintInputValue] = useState("");
   const [mintInputError, setMintInputError] = useState("");
   const [isCapturing, setIsCapturing] = useState(false);
@@ -238,11 +227,27 @@ export function MemeCalendarOverviewNextMint({
     () => getCanonicalNextMintNumber(now),
     [now]
   );
+  const manualSelectionExpired =
+    manualSelection !== null &&
+    manualSelection.mintNumber >
+      manualSelection.canonicalMintNumberAtSelection &&
+    canonicalNextMintNumber >= manualSelection.mintNumber;
+  const activeManualMintNumber = manualSelectionExpired
+    ? undefined
+    : manualSelection?.mintNumber;
+  const selectedMintNumber =
+    id ?? activeManualMintNumber ?? canonicalNextMintNumber;
 
   const handleMintSelection = useCallback(
     (mintNumber: number) => {
-      setSelectedMintNumber(mintNumber);
-      setIsManualSelection(mintNumber !== canonicalNextMintNumber);
+      setManualSelection(
+        mintNumber === canonicalNextMintNumber
+          ? null
+          : {
+              mintNumber,
+              canonicalMintNumberAtSelection: canonicalNextMintNumber,
+            }
+      );
       setMintInputError("");
     },
     [canonicalNextMintNumber]
@@ -276,35 +281,6 @@ export function MemeCalendarOverviewNextMint({
     const tick = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(tick);
   }, []);
-
-  /* eslint-disable react-hooks/set-state-in-effect, react-you-might-not-need-an-effect/no-adjust-state-on-prop-change, react-you-might-not-need-an-effect/no-chain-state-updates, react-you-might-not-need-an-effect/no-derived-state, react-you-might-not-need-an-effect/no-event-handler, react-you-might-not-need-an-effect/no-pass-data-to-parent, react-you-might-not-need-an-effect/no-pass-live-state-to-parent -- Preserve the existing synchronization between the optional controlled mint, manual selection, and the live canonical mint rollover. */
-  useEffect(() => {
-    if (id !== undefined) {
-      setSelectedMintNumber(id);
-      setIsManualSelection(true);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    if (
-      id === undefined &&
-      !isManualSelection &&
-      selectedMintNumber !== canonicalNextMintNumber
-    ) {
-      setSelectedMintNumber(canonicalNextMintNumber);
-    }
-  }, [id, canonicalNextMintNumber, isManualSelection, selectedMintNumber]);
-
-  useEffect(() => {
-    if (
-      id === undefined &&
-      isManualSelection &&
-      selectedMintNumber === canonicalNextMintNumber
-    ) {
-      setIsManualSelection(false);
-    }
-  }, [id, canonicalNextMintNumber, isManualSelection, selectedMintNumber]);
-  /* eslint-enable react-hooks/set-state-in-effect, react-you-might-not-need-an-effect/no-adjust-state-on-prop-change, react-you-might-not-need-an-effect/no-chain-state-updates, react-you-might-not-need-an-effect/no-derived-state, react-you-might-not-need-an-effect/no-event-handler, react-you-might-not-need-an-effect/no-pass-data-to-parent, react-you-might-not-need-an-effect/no-pass-live-state-to-parent */
 
   const mintDetails = useMemo(
     () => getMintTimelineDetails(selectedMintNumber),

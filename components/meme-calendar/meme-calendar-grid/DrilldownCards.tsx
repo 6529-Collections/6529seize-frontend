@@ -32,8 +32,8 @@ export function DrilldownCard({
       aria-label={getDrilldownCardAriaLabel(locale, title, range, mints)}
       className={`${DRILLDOWN_CARD_CLASS} ${
         isCurrent
-          ? "tw-border-emerald-400/60 tw-ring-1 tw-ring-inset tw-ring-emerald-400/20"
-          : "tw-border-iron-800"
+          ? "tw-border-emerald-400/60 tw-ring-inset tw-ring-emerald-400/20"
+          : "tw-border-iron-800 tw-ring-iron-800 desktop-hover:hover:tw-border-iron-700"
       }`}
       onClick={onClick}
     >

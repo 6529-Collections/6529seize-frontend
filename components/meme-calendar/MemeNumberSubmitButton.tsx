@@ -27,7 +27,7 @@ export default function MemeNumberSubmitButton({
         aria-label={label}
         data-tooltip-id={tooltipId}
         data-tooltip-content={label}
-        className="!tw-h-full !tw-w-9 !tw-rounded-none !tw-border-0 !tw-bg-iron-800 !tw-p-0 !tw-shadow-none focus-visible:!tw-outline-none active:!tw-bg-iron-900 desktop-hover:hover:!tw-bg-iron-700"
+        className="!tw-h-full !tw-w-9 !tw-rounded-none !tw-border-0 !tw-bg-iron-800 !tw-p-0 !tw-shadow-none focus-visible:!tw-bg-iron-700 focus-visible:!tw-outline-none focus-visible:!tw-ring-1 focus-visible:!tw-ring-inset focus-visible:!tw-ring-primary-400 active:!tw-bg-iron-900 desktop-hover:hover:!tw-bg-iron-700"
       >
         <ArrowRightIcon aria-hidden="true" className="tw-size-4" />
       </Button>

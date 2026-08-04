@@ -476,7 +476,6 @@ export default function MemeCalendar({
               onSubmit={handleDateJumpSubmit}
             >
               <label
-                htmlFor="meme-calendar-date-input"
                 className={`${CONTROL_GROUP_CLASS} tw-group/date tw-relative tw-cursor-pointer tw-pr-2`}
               >
                 <span className="tw-shrink-0 tw-select-none tw-pr-2">
@@ -493,7 +492,7 @@ export default function MemeCalendar({
                     setJumpValue(value);
                     jumpToMonthValue(value);
                   }}
-                  className={`${CONTROL_INPUT_CLASS} tw-[color-scheme:dark] tw-cursor-pointer tw-pr-7 [&::-webkit-calendar-picker-indicator]:tw-opacity-0`}
+                  className={`${CONTROL_INPUT_CLASS} tw-cursor-pointer tw-pr-7 [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:tw-opacity-0`}
                 />
                 <CalendarDaysIcon
                   aria-hidden="true"
