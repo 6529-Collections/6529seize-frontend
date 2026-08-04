@@ -454,6 +454,13 @@ describe("testing strategy CI plan", () => {
     expect(workflow).toContain(
       "./bin/6529 run test:e2e:museum-institutional-practice"
     );
+
+    const parsed = YAML.parse(workflow) as {
+      jobs: Record<string, { if?: string }>;
+    };
+    expect(parsed.jobs["installed-checks"]?.if).toBe(
+      "needs.plan.outputs.install_required == 'true' || needs.plan.outputs.playwright_museum_required == 'true'"
+    );
   });
 });
 

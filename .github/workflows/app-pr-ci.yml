@@ -168,7 +168,7 @@ jobs:
   installed-checks:
     name: Installed app checks
     needs: plan
-    if: needs.plan.outputs.install_required == 'true'
+    if: needs.plan.outputs.install_required == 'true' || needs.plan.outputs.playwright_museum_required == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:

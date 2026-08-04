@@ -15,6 +15,7 @@ import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
 
 const STUDY_PATH = "/museum/network/stories/a-field-of-practice";
 const SOURCE_REPOSITORY = "6529-Collections/6529networkmuseum";
+const SOURCE_COMMIT = "f5080e1873a3b86280c5a92e1fbe6cbd7fea38a4";
 const EXACT_COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
 const MOBILE_PROJECT = "web-mobile-chromium";
 const MOBILE_VIEWPORT = { width: 390, height: 844 } as const;
@@ -204,7 +205,7 @@ async function expectStudyRoute(
 test.describe("Museum institutional-practice publication @surface @large @readonly", () => {
   test.describe.configure({ mode: "serial" });
   test.setTimeout(120_000);
-  let sourceCommit: string | null = null;
+  let sourceCommit: string | null = SOURCE_COMMIT;
 
   test.beforeEach(async ({ page }, testInfo) => {
     if (testInfo.project.name === MOBILE_PROJECT) {

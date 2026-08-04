@@ -181,4 +181,21 @@ describe("MuseumMarkdown public links", () => {
       screen.getByRole("heading", { level: 3, name: "Object records" })
     ).toBeInTheDocument();
   });
+
+  it("demotes a manuscript body level-one heading", () => {
+    render(
+      <MuseumMarkdown
+        documentHeadings
+        sourceCommit={SOURCE_COMMIT}
+        sourcePath="records/institutional-practice/profiles/met.md"
+      >
+        {"# Body title"}
+      </MuseumMarkdown>
+    );
+
+    expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Body title" })
+    ).toBeInTheDocument();
+  });
 });

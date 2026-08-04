@@ -96,3 +96,17 @@
   publication and route validation 43/43, changed lint and typecheck (1,264
   files), Knip with no findings, React Doctor 100/100, and the portable diff
   check. No visitor-facing copy, layout, link, or styling changed in this pass.
+- A second review audit found two valid release-test gaps beneath threads that
+  had been auto-resolved: Museum-docs-only changes did not start the installed
+  checks, and the first browser route accepted any exact-looking source SHA.
+  The workflow now starts for the Museum gate independently of the ordinary
+  install plan, and the release sweep pins canonical source `f5080e1873a3`.
+  The Markdown suite also explicitly proves that manuscript-body level-one
+  headings are demoted beneath the route heading.
+- Dispositions: both help indexes parse as JSON. The review bot's remaining
+  locale-formatting, title-parser, and windowed-batch notes were based on a
+  truncated excerpt; exact head imports `i18n/format`, shares
+  `parseInstitutionalPracticeHeading`, and uses the bounded worker pool.
+- Second-follow-up validation passed: 94 focused workflow, E2E-pack, and
+  Markdown tests; changed lint and typecheck (1,264 files); Playwright
+  typecheck; and the portable diff check.
