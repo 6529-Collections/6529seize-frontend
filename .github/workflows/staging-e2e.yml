@@ -26,6 +26,11 @@ on:
           - media-readonly
           - network-open-data-readonly
           - museum-institutional-practice
+      deploy_hub_operation_id:
+        description: Deploy Hub correlation id
+        type: string
+        required: false
+        default: ""
       release_train_id:
         description: Release Bus train id
         type: string
@@ -62,7 +67,7 @@ on:
 permissions:
   contents: read
 
-run-name: Staging E2E [${{ inputs.operation_key || 'automatic' }}]
+run-name: Staging E2E [${{ inputs.deploy_hub_operation_id || inputs.operation_key || 'automatic' }}]
 
 concurrency:
   group: staging-e2e
@@ -78,7 +83,8 @@ jobs:
       github.event_name == 'workflow_run' &&
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_repository.full_name == github.repository &&
-      github.event.workflow_run.head_branch == '1a-staging'
+      github.event.workflow_run.head_branch == '1a-staging' &&
+      !startsWith(github.event.workflow_run.display_title, 'Deploy Hub ')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -155,11 +161,15 @@ jobs:
           needs.baseline-adoption-decision.outputs.decision == 'LEGACY' &&
           github.event.workflow_run.conclusion == 'success' &&
           github.event.workflow_run.head_repository.full_name == github.repository &&
-          github.event.workflow_run.head_branch == '1a-staging'
+          github.event.workflow_run.head_branch == '1a-staging' &&
+          !startsWith(github.event.workflow_run.display_title, 'Deploy Hub ')
         )
       )
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    permissions:
+      contents: read
+      statuses: write
     env:
       PLAYWRIGHT_STAGING_ACCESS_CODE: ${{ secrets.PLAYWRIGHT_STAGING_ACCESS_CODE }}
       SELECTED_PACK: ${{ github.event.inputs.pack || 'all' }}
@@ -169,6 +179,7 @@ jobs:
         env:
           BACKEND_ARTIFACT_DIGEST: ${{ inputs.backend_artifact_digest }}
           BACKEND_SHA: ${{ inputs.backend_sha }}
+          DEPLOY_HUB_OPERATION_ID: ${{ inputs.deploy_hub_operation_id }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
           FRONTEND_ARTIFACT_DIGEST: ${{ inputs.frontend_artifact_digest }}
           FRONTEND_SHA: ${{ inputs.frontend_sha }}
@@ -181,7 +192,13 @@ jobs:
         run: |
           set -euo pipefail
           identity_values="$TRAIN_ID$TRAIN_REVISION$OPERATION_KEY$SOURCE_REF$EXPECTED_SHA$MANIFEST_ID$MANIFEST_IDENTITY$FRONTEND_SHA$BACKEND_SHA$FRONTEND_ARTIFACT_DIGEST$BACKEND_ARTIFACT_DIGEST"
-          if [ -z "$OPERATION_KEY" ]; then
+          release_bus_values="$TRAIN_ID$TRAIN_REVISION$OPERATION_KEY$MANIFEST_ID$MANIFEST_IDENTITY$FRONTEND_SHA$BACKEND_SHA$FRONTEND_ARTIFACT_DIGEST$BACKEND_ARTIFACT_DIGEST"
+          if [ -n "${DEPLOY_HUB_OPERATION_ID:-}" ]; then
+            [[ "$DEPLOY_HUB_OPERATION_ID" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$ ]]
+            [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+            test "$SOURCE_REF" = 1a-staging
+            test -z "$release_bus_values"
+          elif [ -z "$OPERATION_KEY" ]; then
             test -z "$identity_values"
           else
             test -n "$TRAIN_ID"
@@ -244,8 +261,8 @@ jobs:
           ref: ${{ inputs.expected_sha || github.event.workflow_run.head_sha || github.sha }}
           persist-credentials: false
 
-      - name: Verify Release Bus immutable source
-        if: github.event_name == 'workflow_dispatch' && inputs.operation_key != ''
+      - name: Verify immutable dispatched source
+        if: github.event_name == 'workflow_dispatch' && inputs.expected_sha != ''
         env:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
@@ -394,7 +411,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: staging-e2e-artifacts-${{ inputs.release_train_id || github.run_id }}
+          name: staging-e2e-artifacts-${{ inputs.deploy_hub_operation_id || inputs.release_train_id || github.run_id }}
           path: staging-e2e-artifacts/
           retention-days: 30
           if-no-files-found: ignore
@@ -449,6 +466,51 @@ jobs:
             -H 'Content-Type: application/json' \
             --data "$payload" \
             "$RELEASE_BUS_API_URL/deploy/release-bus-v2/report-progress"
+
+      - name: Publish Deploy Hub E2E result
+        if: always() && inputs.deploy_hub_operation_id != ''
+        env:
+          API_URL: ${{ github.api_url }}
+          DEPENDENCIES_OUTCOME: ${{ steps.dependencies.outcome }}
+          DEPLOY_HUB_OPERATION_ID: ${{ inputs.deploy_hub_operation_id }}
+          E2E_OUTCOME: ${{ steps.e2e.outcome }}
+          EVIDENCE_OUTCOME: ${{ steps.evidence.outcome }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          GITHUB_TOKEN: ${{ github.token }}
+          PLAYWRIGHT_OUTCOME: ${{ steps.playwright.outcome }}
+          SOCKET_OUTCOME: ${{ steps.socket-firewall.outcome }}
+        run: |
+          set -euo pipefail
+          state=success
+          description="Staging E2E passed"
+          if [ "$SOCKET_OUTCOME" != success ] || [ "$DEPENDENCIES_OUTCOME" != success ] || [ "$PLAYWRIGHT_OUTCOME" != success ]; then
+            state=error
+            description="Staging E2E infrastructure failure"
+          elif [ "$EVIDENCE_OUTCOME" != success ]; then
+            state=error
+            description="Staging E2E evidence failure"
+          elif [ "$E2E_OUTCOME" != success ]; then
+            if [ -f staging-e2e-artifacts/evidence.json ] && [ "$(jq -r '.infrastructure_failure_count // 0' staging-e2e-artifacts/evidence.json)" -gt 0 ]; then
+              state=error
+              description="Staging E2E infrastructure failure"
+            else
+              state=failure
+              description="Staging E2E product failure"
+            fi
+          fi
+          payload="$(jq -n \
+            --arg state "$state" \
+            --arg target_url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --arg description "$description" \
+            --arg context "Deploy Hub E2E — $DEPLOY_HUB_OPERATION_ID" \
+            '{state:$state,target_url:$target_url,description:$description,context:$context}')"
+          curl --fail-with-body --silent --show-error \
+            -X POST \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$API_URL/repos/$GITHUB_REPOSITORY/statuses/$EXPECTED_SHA"
 
       - name: Return staging E2E result
         if: always()

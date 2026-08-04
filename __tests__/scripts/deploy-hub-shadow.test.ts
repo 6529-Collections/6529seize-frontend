@@ -72,7 +72,8 @@ describe("Deploy Hub FE shadow workflow", () => {
               "success",
               "product-failure",
               "infrastructure-failure",
-              "cancelled",
+              "pre-mutation-stop",
+              "post-mutation-stop",
               "stale",
             ],
           }),
@@ -365,7 +366,8 @@ describe("Deploy Hub FE shadow execution", () => {
   it.each([
     ["product-failure", "failure", "product-failure"],
     ["infrastructure-failure", "error", "infrastructure-failure"],
-    ["cancelled", "error", "cancelled"],
+    ["pre-mutation-stop", "error", "stopped-before-mutation"],
+    ["post-mutation-stop", "error", "safe-stop"],
     ["stale", "error", "stale"],
   ])(
     "projects the %s terminal outcome without deployment evidence",
@@ -379,6 +381,21 @@ describe("Deploy Hub FE shadow execution", () => {
       expect(plan.at(-1).description).toMatch(/deployment|deployed/);
     }
   );
+
+  it("distinguishes immediate cancellation from post-mutation safe stop", () => {
+    expect(statusPlan("staging", "pre-mutation-stop")).toEqual([
+      expect.objectContaining({ phase: "queued", state: "pending" }),
+      expect.objectContaining({
+        phase: "stopped-before-mutation",
+        state: "error",
+      }),
+    ]);
+    expect(statusPlan("staging", "post-mutation-stop")).toEqual([
+      expect.objectContaining({ phase: "queued", state: "pending" }),
+      expect.objectContaining({ phase: "running", state: "pending" }),
+      expect.objectContaining({ phase: "safe-stop", state: "error" }),
+    ]);
+  });
 
   it("uses target-specific shadow contexts", () => {
     expect(statusContext("staging")).toBe(

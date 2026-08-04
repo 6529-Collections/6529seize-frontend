@@ -10,7 +10,8 @@ const SCENARIOS = new Set([
   "success",
   "product-failure",
   "infrastructure-failure",
-  "cancelled",
+  "pre-mutation-stop",
+  "post-mutation-stop",
   "stale",
 ]);
 const DELAYS = new Set([0, 5]);
@@ -134,13 +135,24 @@ function statusPlan(target, scenario) {
       },
     ];
   }
-  if (scenario === "cancelled") {
+  if (scenario === "pre-mutation-stop") {
     return [
       queued,
       {
-        phase: "cancelled",
+        phase: "stopped-before-mutation",
         state: "error",
-        description: "SHADOW: simulated cancellation; no deployment",
+        description: "SHADOW: stopped before mutation; no deployment",
+      },
+    ];
+  }
+  if (scenario === "post-mutation-stop") {
+    return [
+      queued,
+      staging,
+      {
+        phase: "safe-stop",
+        state: "error",
+        description: "SHADOW: mutation settled, then stopped; no deployment",
       },
     ];
   }

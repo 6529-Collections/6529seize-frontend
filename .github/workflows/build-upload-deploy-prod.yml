@@ -2,6 +2,14 @@ name: Web Deploy - PROD
 
 on:
   workflow_dispatch:
+    inputs:
+      deploy_hub_operation_id:
+        description: Deploy Hub correlation id; leave empty for manual fallback
+        type: string
+        required: false
+        default: ""
+
+run-name: ${{ inputs.deploy_hub_operation_id != '' && format('Deploy Hub {0} — production', inputs.deploy_hub_operation_id) || 'Manual production deploy' }}
 
 permissions:
   contents: read
@@ -39,12 +47,19 @@ jobs:
     steps:
       - name: Require authoritative production fallback readiness
         env:
+          DEPLOY_HUB_OPERATION_ID: ${{ inputs.deploy_hub_operation_id }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
           TARGET_ENVIRONMENT: prod
           TARGET_LANE: PRODUCTION
         run: |
           set -euo pipefail
+
+          if [ -n "${DEPLOY_HUB_OPERATION_ID:-}" ]; then
+            test "$GITHUB_ACTOR" = "github-actions[bot]"
+            [[ "$DEPLOY_HUB_OPERATION_ID" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$ ]]
+            exit 0
+          fi
 
           test -n "$RELEASE_BUS_API_URL" || {
             echo "::error::Release Bus API URL is unavailable; refusing manual production deployment."

@@ -17,6 +17,8 @@ wrapper expects that location.
 - `deploy-hub-shadow.cjs`: validates exact frontend PR manifests, partitions
   adjacent target cohorts, and publishes clearly labelled, non-deploying shadow
   status phases for the Deploy Hub pilot.
+- `deploy-hub-operation.cjs`: runs the finite frontend-only Deploy Hub control
+  flow while canonical workflows retain deployment and E2E ownership.
 - `native-surface-evidence.cjs`: executable native-surface evidence
   classifier. It reports whether current Capacitor/Electron coverage is only
   browser simulation or whether package prerequisites are present.

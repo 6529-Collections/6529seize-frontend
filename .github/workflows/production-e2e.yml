@@ -3,13 +3,15 @@ name: Production E2E
 on:
   workflow_dispatch:
     inputs:
-      release_train_id: { type: string, required: true }
-      release_train_revision: { type: string, required: true }
-      operation_key: { type: string, required: true }
+      deploy_hub_operation_id: { type: string, required: false, default: "" }
+      release_train_id: { type: string, required: false, default: "" }
+      release_train_revision: { type: string, required: false, default: "" }
+      operation_key: { type: string, required: false, default: "" }
       source_ref: { type: string, required: true }
       expected_sha: { type: string, required: true }
-      release_manifest_id: { type: string, required: true }
-      release_manifest_identity_sha256: { type: string, required: true }
+      release_manifest_id: { type: string, required: false, default: "" }
+      release_manifest_identity_sha256:
+        { type: string, required: false, default: "" }
       frontend_sha: { type: string, required: false, default: "" }
       backend_sha: { type: string, required: false, default: "" }
       frontend_artifact_digest: { type: string, required: false, default: "" }
@@ -18,7 +20,7 @@ on:
 permissions:
   contents: read
 
-run-name: Production E2E ${{ inputs.release_train_id }} [${{ inputs.operation_key }}]
+run-name: Production E2E [${{ inputs.deploy_hub_operation_id || inputs.operation_key }}]
 
 concurrency:
   group: production-e2e
@@ -30,9 +32,13 @@ jobs:
   readonly:
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    permissions:
+      contents: read
+      statuses: write
     steps:
       - name: Validate and authorize immutable inputs
         env:
+          DEPLOY_HUB_OPERATION_ID: ${{ inputs.deploy_hub_operation_id }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
           FRONTEND_ARTIFACT_DIGEST: ${{ inputs.frontend_artifact_digest }}
           FRONTEND_SHA: ${{ inputs.frontend_sha }}
@@ -49,6 +55,12 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          if [ -n "${DEPLOY_HUB_OPERATION_ID:-}" ]; then
+            [[ "$DEPLOY_HUB_OPERATION_ID" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$ ]]
+            test "$SOURCE_REF" = main
+            test -z "$TRAIN_ID$TRAIN_REVISION$OPERATION_KEY$MANIFEST_ID$MANIFEST_IDENTITY$FRONTEND_SHA$BACKEND_SHA$FRONTEND_ARTIFACT_DIGEST$BACKEND_ARTIFACT_DIGEST"
+            exit 0
+          fi
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
           [[ "$TRAIN_REVISION" =~ ^([1-9][0-9]{0,8}|rollback-[1-9][0-9]{0,8})$ ]]
           [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
@@ -130,6 +142,7 @@ jobs:
         id: evidence
         if: always() && steps.dependencies.outcome == 'success' && steps.playwright.outcome == 'success'
         env:
+          DEPLOY_HUB_OPERATION_ID: ${{ inputs.deploy_hub_operation_id }}
           E2E_OUTCOME: ${{ steps.e2e.outcome }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
           MANIFEST_ID: ${{ inputs.release_manifest_id }}
@@ -146,7 +159,7 @@ jobs:
           process.stdout.write(JSON.stringify(keys));
           NODE
           )"
-          jq -e --argjson expected "$expected_inventory" --arg manifest_id "$MANIFEST_ID" --arg identity "$MANIFEST_IDENTITY" --arg source_sha "$EXPECTED_SHA" '
+          jq -e --argjson expected "$expected_inventory" '
             .schema_version == "release-bus-e2e-packs.v1" and
             .environment == "production" and
             .trigger == "post-deploy" and
@@ -156,13 +169,19 @@ jobs:
             (.results | map(.script_key) | unique | length) == .pack_count and
             (.results | all(.safety == "readonly")) and
             .failed_count == ([.results[] | select(.status == "failed")] | length) and
-            .infrastructure_failure_count == ([.results[] | select(.failure_class == "infrastructure")] | length) and
-            .release_binding == {
-              manifest_id:$manifest_id,
-              manifest_identity_sha256:$identity,
-              source_sha:$source_sha
-            }
+            .infrastructure_failure_count == ([.results[] | select(.failure_class == "infrastructure")] | length)
           ' production-e2e-artifacts/evidence.json >/dev/null
+          if [ -n "$DEPLOY_HUB_OPERATION_ID" ]; then
+            jq -e '.release_binding == null' production-e2e-artifacts/evidence.json >/dev/null
+          else
+            jq -e --arg manifest_id "$MANIFEST_ID" --arg identity "$MANIFEST_IDENTITY" --arg source_sha "$EXPECTED_SHA" '
+              .release_binding == {
+                manifest_id:$manifest_id,
+                manifest_identity_sha256:$identity,
+                source_sha:$source_sha
+              }
+            ' production-e2e-artifacts/evidence.json >/dev/null
+          fi
           if [ "$E2E_OUTCOME" = success ]; then
             jq -e '
               .failed_count == 0 and
@@ -174,12 +193,12 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: production-e2e-artifacts-${{ inputs.release_train_id }}
+          name: production-e2e-artifacts-${{ inputs.deploy_hub_operation_id || inputs.release_train_id }}
           path: production-e2e-artifacts/
           retention-days: 30
           if-no-files-found: ignore
       - name: Report structured Release Bus E2E result
-        if: always()
+        if: always() && inputs.deploy_hub_operation_id == ''
         env:
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
@@ -228,6 +247,50 @@ jobs:
             -H 'Content-Type: application/json' \
             --data "$payload" \
             "$RELEASE_BUS_API_URL/deploy/release-bus-v2/report-progress"
+      - name: Publish Deploy Hub E2E result
+        if: always() && inputs.deploy_hub_operation_id != ''
+        env:
+          API_URL: ${{ github.api_url }}
+          DEPENDENCIES_OUTCOME: ${{ steps.dependencies.outcome }}
+          DEPLOY_HUB_OPERATION_ID: ${{ inputs.deploy_hub_operation_id }}
+          E2E_OUTCOME: ${{ steps.e2e.outcome }}
+          EVIDENCE_OUTCOME: ${{ steps.evidence.outcome }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          GITHUB_TOKEN: ${{ github.token }}
+          PLAYWRIGHT_OUTCOME: ${{ steps.playwright.outcome }}
+          SOCKET_OUTCOME: ${{ steps.socket-firewall.outcome }}
+        run: |
+          set -euo pipefail
+          state=success
+          description="Production E2E passed"
+          if [ "$SOCKET_OUTCOME" != success ] || [ "$DEPENDENCIES_OUTCOME" != success ] || [ "$PLAYWRIGHT_OUTCOME" != success ]; then
+            state=error
+            description="Production E2E infrastructure failure"
+          elif [ "$EVIDENCE_OUTCOME" != success ]; then
+            state=error
+            description="Production E2E evidence failure"
+          elif [ "$E2E_OUTCOME" != success ]; then
+            if [ -f production-e2e-artifacts/evidence.json ] && [ "$(jq -r '.infrastructure_failure_count // 0' production-e2e-artifacts/evidence.json)" -gt 0 ]; then
+              state=error
+              description="Production E2E infrastructure failure"
+            else
+              state=failure
+              description="Production E2E product failure"
+            fi
+          fi
+          payload="$(jq -n \
+            --arg state "$state" \
+            --arg target_url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --arg description "$description" \
+            --arg context "Deploy Hub E2E — $DEPLOY_HUB_OPERATION_ID" \
+            '{state:$state,target_url:$target_url,description:$description,context:$context}')"
+          curl --fail-with-body --silent --show-error \
+            -X POST \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H 'Accept: application/vnd.github+json' \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$API_URL/repos/$GITHUB_REPOSITORY/statuses/$EXPECTED_SHA"
       - name: Return production E2E result
         if: always()
         env:
