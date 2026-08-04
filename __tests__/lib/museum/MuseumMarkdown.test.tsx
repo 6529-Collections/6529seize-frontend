@@ -126,4 +126,59 @@ describe("MuseumMarkdown public links", () => {
       screen.queryByRole("link", { name: "Protocol relative" })
     ).not.toBeInTheDocument();
   });
+
+  it("routes the closed institutional-practice package onsite", () => {
+    renderMarkdown(
+      [
+        "[Met](profiles/met.md)",
+        "[Sources](source-register.md)",
+        "[Standard](../../docs/curatorial-publication-standard.md)",
+      ].join("\n\n"),
+      "records/institutional-practice/a-field-of-practice.md"
+    );
+
+    expect(screen.getByRole("link", { name: "Met" })).toHaveAttribute(
+      "href",
+      "/museum/network/stories/a-field-of-practice/met"
+    );
+    expect(screen.getByRole("link", { name: "Sources" })).toHaveAttribute(
+      "href",
+      "/museum/network/stories/a-field-of-practice/sources"
+    );
+    expect(screen.getByRole("link", { name: "Standard" })).toHaveAttribute(
+      "href",
+      `https://github.com/6529-Collections/6529networkmuseum/blob/${SOURCE_COMMIT}/docs/curatorial-publication-standard.md`
+    );
+  });
+
+  it("does not route an institutional filename collision onsite", () => {
+    renderMarkdown(
+      "[Collision](profiles/archive/century.md)",
+      "records/institutional-practice/a-field-of-practice.md"
+    );
+
+    expect(screen.getByRole("link", { name: "Collision" })).toHaveAttribute(
+      "href",
+      `https://github.com/6529-Collections/6529networkmuseum/blob/${SOURCE_COMMIT}/records/institutional-practice/profiles/archive/century.md`
+    );
+  });
+
+  it("retains source heading levels for a standalone manuscript", () => {
+    render(
+      <MuseumMarkdown
+        documentHeadings
+        sourceCommit={SOURCE_COMMIT}
+        sourcePath="records/institutional-practice/profiles/met.md"
+      >
+        {"## Demonstrated practices\n\n### Object records"}
+      </MuseumMarkdown>
+    );
+
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Demonstrated practices" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 3, name: "Object records" })
+    ).toBeInTheDocument();
+  });
 });

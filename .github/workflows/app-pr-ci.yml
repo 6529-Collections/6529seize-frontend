@@ -29,6 +29,7 @@ jobs:
       build_required: ${{ steps.plan_outputs.outputs.build_required }}
       playwright_smoke_required: ${{ steps.plan_outputs.outputs.playwright_smoke_required }}
       playwright_critical_shell_required: ${{ steps.plan_outputs.outputs.playwright_critical_shell_required }}
+      playwright_museum_required: ${{ steps.plan_outputs.outputs.playwright_museum_required }}
       dependency_governance_required: ${{ steps.plan_outputs.outputs.dependency_governance_required }}
       reviewbot_contract_required: ${{ steps.plan_outputs.outputs.reviewbot_contract_required }}
       agent_files_sync_required: ${{ steps.plan_outputs.outputs.agent_files_sync_required }}
@@ -90,6 +91,23 @@ jobs:
           for (const [name, check] of Object.entries(plan.checks)) {
             write(`${name}_required`, String(Boolean(check.required)));
           }
+          const museumPlaywrightPaths = [
+            /^app\/museum\/network\//,
+            /^components\/museum\//,
+            /^lib\/museum\//,
+            /^tests\/museum\//,
+            /^i18n\/messages\/museum\.en-US\.json$/,
+            /^ops\/docs\/museum\//,
+            /^ops\/help\/help-index\.json$/,
+          ];
+          write(
+            "playwright_museum_required",
+            String(
+              plan.changed_files.some((file) =>
+                museumPlaywrightPaths.some((pattern) => pattern.test(file))
+              )
+            )
+          );
           NODE
 
       - name: Summarize CI plan
@@ -478,7 +496,7 @@ jobs:
           key: ${{ steps.nextjs_build_cache.outputs.cache-primary-key }}
 
       - name: Install Playwright browser
-        if: needs.plan.outputs.playwright_smoke_required == 'true' || needs.plan.outputs.playwright_critical_shell_required == 'true'
+        if: needs.plan.outputs.playwright_smoke_required == 'true' || needs.plan.outputs.playwright_critical_shell_required == 'true' || needs.plan.outputs.playwright_museum_required == 'true'
         run: ./bin/6529 exec playwright install --with-deps chromium
 
       - name: Run small Playwright smoke pack
@@ -496,6 +514,13 @@ jobs:
           NEXT_DEV_DIST_DIR: ".next-playwright-critical-shell"
           PLAYWRIGHT_READONLY: "1"
         run: ./bin/6529 run test:e2e:critical-shell
+
+      - name: Run Network Museum institutional-practice Playwright pack
+        if: needs.plan.outputs.playwright_museum_required == 'true'
+        env:
+          NEXT_DEV_DIST_DIR: ".next-playwright-museum"
+          PLAYWRIGHT_READONLY: "1"
+        run: ./bin/6529 run test:e2e:museum-institutional-practice
 
       - name: Upload app check artifacts
         if: always()

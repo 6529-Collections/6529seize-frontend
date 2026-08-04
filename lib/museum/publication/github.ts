@@ -25,6 +25,8 @@ const DEFAULT_REQUEST_TIMEOUT_MS = 8_000;
 const MAX_COMMIT_RESPONSE_BYTES = 256_000;
 const MAX_MANIFEST_BYTES = 2_000_000;
 const MAX_DOCUMENT_BYTES = 4_500_000;
+const MAX_REQUIRED_DOCUMENT_BYTES = 16_000_000;
+const MAX_DOCUMENT_FETCH_CONCURRENCY = 8;
 
 interface GitHubMuseumPublicationSourceOptions {
   readonly ref: string;
@@ -133,10 +135,33 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
       }
       return entry;
     });
-
-    const documents = await Promise.all(
-      requiredEntries.map((entry) => this.fetchDocument(commit, entry))
+    const requiredDocumentBytes = requiredEntries.reduce(
+      (total, entry) => total + entry.size,
+      0
     );
+    if (
+      !Number.isSafeInteger(requiredDocumentBytes) ||
+      requiredDocumentBytes > MAX_REQUIRED_DOCUMENT_BYTES
+    ) {
+      throw new Error("publication_required_documents_too_large");
+    }
+
+    const documents: MuseumSourceDocument[] = [];
+    for (
+      let offset = 0;
+      offset < requiredEntries.length;
+      offset += MAX_DOCUMENT_FETCH_CONCURRENCY
+    ) {
+      const batch = requiredEntries.slice(
+        offset,
+        offset + MAX_DOCUMENT_FETCH_CONCURRENCY
+      );
+      documents.push(
+        ...(await Promise.all(
+          batch.map((entry) => this.fetchDocument(commit, entry))
+        ))
+      );
+    }
     const assembledAt = this.now().toISOString();
     return this.assembler.assemble({
       identity: {

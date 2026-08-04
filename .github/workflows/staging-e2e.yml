@@ -25,6 +25,7 @@ on:
           - search-waves-readonly
           - media-readonly
           - network-open-data-readonly
+          - museum-institutional-practice
       release_train_id:
         description: Release Bus train id
         type: string

@@ -12,6 +12,7 @@ type Pack = {
   environments: string[];
   triggers: string[];
   specs?: string[];
+  projects?: string[];
   timeoutMinutes: number;
 };
 
@@ -655,9 +656,9 @@ describe("E2E runner CLI resolution", () => {
   });
 
   it.each([
-    ["staging", "post-deploy", 12],
+    ["staging", "post-deploy", 13],
     ["production", "cron", 10],
-    ["production", "post-deploy", 11],
+    ["production", "post-deploy", 12],
   ])(
     "lists %s/%s as a non-empty deterministic pack set",
     (env, trigger, count) => {
@@ -695,5 +696,36 @@ describe("E2E runner CLI resolution", () => {
     expect([...postDeploySpecs].sort()).toEqual(
       [...(aggregate?.specs ?? [])].sort()
     );
+  });
+
+  it("keeps the Museum institutional-practice sweep read-only across every release environment", () => {
+    const museumPacks = PACKS.filter((pack) =>
+      pack.specs?.includes(
+        "tests/museum/institutional-practice-readonly.spec.ts"
+      )
+    );
+
+    expect(museumPacks.map((pack) => pack.environments[0])).toEqual([
+      "local",
+      "staging",
+      "production",
+      "production",
+    ]);
+    expect(
+      museumPacks.slice(0, 3).every((pack) => pack.safety === "readonly")
+    ).toBe(true);
+    expect(
+      museumPacks
+        .slice(0, 3)
+        .every((pack) => pack.projects?.includes("web-desktop-chromium"))
+    ).toBe(true);
+    expect(
+      museumPacks
+        .slice(0, 3)
+        .every((pack) => pack.projects?.includes("web-mobile-chromium"))
+    ).toBe(true);
+    expect(museumPacks[0]?.triggers).toEqual(["pr-ci", "manual"]);
+    expect(museumPacks[1]?.triggers).toEqual(["post-deploy", "manual"]);
+    expect(museumPacks[2]?.triggers).toEqual(["post-deploy", "manual"]);
   });
 });

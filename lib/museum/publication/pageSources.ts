@@ -14,6 +14,29 @@ const KEYS_AND_GATES_PROGRAM_PATH =
 const KEYS_AND_GATES_SELECTION_PATH =
   "records/programs/6529NM-AP-01/selected-works.json";
 const DONATION_POLICY_PATH = "policies/donation-acceptance.md";
+const INSTITUTIONAL_PRACTICE_ROUTE = `${MUSEUM_ROOT}/stories/a-field-of-practice`;
+const INSTITUTIONAL_PRACTICE_STUDY_PATH =
+  "records/institutional-practice/a-field-of-practice.md";
+const INSTITUTIONAL_PRACTICE_SOURCE_REGISTER_PATH =
+  "records/institutional-practice/source-register.md";
+const CURATORIAL_PUBLICATION_STANDARD_PATH =
+  "docs/curatorial-publication-standard.md";
+const INSTITUTIONAL_PRACTICE_PROFILE_SLUGS = [
+  "met",
+  "getty",
+  "moma",
+  "whitney",
+  "tate",
+  "centre-pompidou",
+  "sfmoma",
+  "guggenheim",
+  "zkm",
+  "ars-electronica",
+  "rhizome-new-museum",
+  "serpentine-arts-technologies",
+  "v-and-a",
+  "lacma",
+] as const;
 
 const GOVERNANCE_DECISION_IDS = [
   "6529NM-GOV-1052148",
@@ -44,8 +67,11 @@ export type MuseumRelatedPageSourceLabel =
   | "giftNarrative"
   | "keysAndGates"
   | "machineRecord"
+  | "institutionalStudy"
   | "onchainTransition"
+  | "primarySourceRegister"
   | "programRecord"
+  | "scholarshipStandard"
   | "selectedWorks"
   | "supportingRecord";
 
@@ -190,6 +216,69 @@ export function buildMuseumPageSourceCatalog(
     { path: giftNarrative?.sourcePath, label: "giftNarrative" },
   ]);
   add(`${MUSEUM_ROOT}/stories/source-and-chronology`, sourceMatrix?.sourcePath);
+  const institutionalPractice = (publication as Partial<MuseumPublication>)
+    .institutionalPractice;
+  if (
+    institutionalPractice?.introduction.sourcePath ===
+      INSTITUTIONAL_PRACTICE_STUDY_PATH &&
+    institutionalPractice.sourceRegister.sourcePath ===
+      INSTITUTIONAL_PRACTICE_SOURCE_REGISTER_PATH &&
+    institutionalPractice.profiles.length ===
+      INSTITUTIONAL_PRACTICE_PROFILE_SLUGS.length &&
+    institutionalPractice.profiles.every(
+      (profile, index) =>
+        profile.slug === INSTITUTIONAL_PRACTICE_PROFILE_SLUGS[index] &&
+        profile.id === `institutional-practice:${profile.slug}` &&
+        profile.document.id === profile.id &&
+        profile.document.sourcePath ===
+          `records/institutional-practice/profiles/${profile.slug}.md`
+    )
+  ) {
+    add(
+      INSTITUTIONAL_PRACTICE_ROUTE,
+      institutionalPractice.introduction.sourcePath,
+      [
+        {
+          path: institutionalPractice.sourceRegister.sourcePath,
+          label: "primarySourceRegister",
+        },
+        {
+          path: CURATORIAL_PUBLICATION_STANDARD_PATH,
+          label: "scholarshipStandard",
+        },
+      ]
+    );
+    add(
+      `${INSTITUTIONAL_PRACTICE_ROUTE}/sources`,
+      institutionalPractice.sourceRegister.sourcePath,
+      [
+        {
+          path: institutionalPractice.introduction.sourcePath,
+          label: "institutionalStudy",
+        },
+        {
+          path: CURATORIAL_PUBLICATION_STANDARD_PATH,
+          label: "scholarshipStandard",
+        },
+      ]
+    );
+    for (const profile of institutionalPractice.profiles) {
+      add(
+        `${INSTITUTIONAL_PRACTICE_ROUTE}/${profile.slug}`,
+        profile.document.sourcePath,
+        [
+          {
+            path: institutionalPractice.introduction.sourcePath,
+            label: "institutionalStudy",
+          },
+          {
+            path: institutionalPractice.sourceRegister.sourcePath,
+            label: "primarySourceRegister",
+          },
+        ]
+      );
+    }
+  }
   add(`${MUSEUM_ROOT}/about`, openMuseum?.sourcePath, [
     { path: transition?.sourcePath, label: "onchainTransition" },
     { path: founding?.sourcePath, label: "foundingPrinciples" },
