@@ -1,7 +1,7 @@
 "use client";
 
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import type { SupportedLocale } from "@/i18n/locales";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t, tRich, type MessageKey } from "@/i18n/messages";
 import clsx from "clsx";
 import Link from "next/link";
@@ -28,6 +28,8 @@ const GDRC_ALLOWED_TAG_NAMES = new Set([
 ]);
 
 const m = (locale: SupportedLocale, key: GdrcMessageKey) => t(locale, key);
+const GDRC_SOURCE_TITLE = m(DEFAULT_LOCALE, "about.gdrc.title");
+const GDRC_SOURCE_VERSION = m(DEFAULT_LOCALE, "about.gdrc.version");
 
 function isDuplicateGdrcHeader(
   element: Element,
@@ -50,11 +52,7 @@ function isDuplicateGdrcHeader(
   );
 }
 
-function sanitizeGdrcHtml(
-  value: string,
-  title: string,
-  version: string
-): string {
+function sanitizeGdrcHtml(value: string): string {
   const document = new DOMParser().parseFromString(value, "text/html");
 
   for (const element of Array.from(document.body.querySelectorAll("*"))) {
@@ -69,7 +67,14 @@ function sanitizeGdrcHtml(
   }
 
   const firstElement = document.body.firstElementChild;
-  if (firstElement && isDuplicateGdrcHeader(firstElement, title, version)) {
+  if (
+    firstElement &&
+    isDuplicateGdrcHeader(
+      firstElement,
+      GDRC_SOURCE_TITLE,
+      GDRC_SOURCE_VERSION
+    )
+  ) {
     firstElement.remove();
   }
 
@@ -85,12 +90,12 @@ export default function AboutGDRC1() {
   useEffect(() => {
     void fetchAboutSectionFile("gdrc1")
       .then((content) => {
-        setHtml(sanitizeGdrcHtml(content, title, version));
+        setHtml(sanitizeGdrcHtml(content));
       })
       .catch(() => {
         setHtml("");
       });
-  }, [title, version]);
+  }, []);
 
   return (
     <article
