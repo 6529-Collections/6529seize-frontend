@@ -24,8 +24,7 @@ describe("instrumentation-client", () => {
     "Backpack was unable to override window.ethereum. If you're having issues connecting to a dapp, disable any other wallets and try again.";
   const readOnlyEthereumProxyBreadcrumbMessage =
     "[2026-08-04T04:00:10.853Z] [[WagmiSetup] Skipping safe ethereum proxy install for read-only window.ethereum] Error: Signature request failed. Please try again.";
-  const indexedDBUserDeleteMessage =
-    "Database deleted by request of the user";
+  const indexedDBUserDeleteMessage = "Database deleted by request of the user";
   const talismanOnboardingMessage =
     "Talisman extension has not been configured yet. Please continue with onboarding.";
   const disconnectedProviderStack =
