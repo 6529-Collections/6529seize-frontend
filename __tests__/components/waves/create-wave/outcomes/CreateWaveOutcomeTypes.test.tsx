@@ -16,7 +16,7 @@ describe('CreateWaveOutcomeTypes', () => {
     );
     const items = screen.getAllByTestId('item');
     expect(items).toHaveLength(Object.values(CreateWaveOutcomeType).length);
-    await user.click(items[0]!);
+    await user.click(items[0]);
     expect(setOutcomeType).toHaveBeenCalledWith(Object.values(CreateWaveOutcomeType)[0]);
   });
 });

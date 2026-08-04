@@ -76,7 +76,6 @@ function renderWithProfile({
         connectionStatus: ProfileConnectedStatus.HAVE_PROFILE,
         receivedProfileProxies: [],
         activeProfileProxy: null,
-        sessionUpgradeRequired: false,
         showWaves: false,
         requestAuth: jest.fn().mockResolvedValue({ success: false }),
         setToast: jest.fn(),

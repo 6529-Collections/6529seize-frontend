@@ -218,17 +218,6 @@ export interface SidebarWave {
   readonly followedSubwavesCount: number;
   readonly unreadSubwaveDrops: number;
   readonly latestReadTimestamp: number;
-  /**
-   * Latest drop timestamp from the last API response. Unlike
-   * latestDropTimestamp, websocket cache updates do not advance this value.
-   */
-  readonly serverSnapshotLatestDropTimestamp?: number | null | undefined;
-  /**
-   * Client timestamp captured immediately before the overview request that
-   * produced this row. This lets realtime reconciliation prove that a zero-
-   * unread snapshot was requested after a websocket event.
-   */
-  readonly serverSnapshotRequestStartedAt?: number | undefined;
   readonly pinned: boolean;
   readonly muted: boolean;
   readonly subscribed: boolean;

@@ -113,10 +113,7 @@ describe("NavItem notifications", () => {
     (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
     (usePathname as jest.Mock).mockReturnValue("/");
     (isNavItemActive as jest.Mock).mockReturnValue(false);
-    (useUnreadIndicator as jest.Mock).mockReturnValue({
-      hasUnread: false,
-      unreadCount: 0,
-    });
+    (useUnreadIndicator as jest.Mock).mockReturnValue({ hasUnread: false });
     (useNotificationsContext as jest.Mock).mockReturnValue({
       removeAllDeliveredNotifications,
     });

@@ -285,8 +285,8 @@ describe("create-wave.helpers", () => {
         { name: "m", type: ApiWaveMetadataType.String },
       ]);
       expect(res.voting.credit_scope).toBe(ApiWaveCreditScope.Wave);
-      expect(res.participation.period?.max).toBeNull();
-      expect(res.voting.period?.max).toBeNull();
+      expect(res.participation.period.max).toBeNull();
+      expect(res.voting.period.max).toBeNull();
       expect(res.voting.forbid_negative_votes).toBe(false);
       expect(res.wave.admin_drop_deletion_enabled).toBe(true);
       expect(res.wave.max_votes_per_identity_to_drop).toBeNull();
@@ -427,8 +427,8 @@ describe("create-wave.helpers", () => {
       });
 
       expect(res.wave.decisions_strategy).toBeNull();
-      expect(res.voting.period?.max).toBeNull();
-      expect(res.participation.period?.max).toBeNull();
+      expect(res.voting.period.max).toBeNull();
+      expect(res.participation.period.max).toBeNull();
       expect(res.outcomes).toEqual([]);
       // Time-weighted voting is disabled in the base config, so no time lock.
       expect(res.wave.time_lock_ms).toBeNull();
@@ -527,8 +527,8 @@ describe("create-wave.helpers", () => {
         config,
       });
 
-      expect(res.voting.period?.max).toBe(999);
-      expect(res.participation.period?.max).toBe(999);
+      expect(res.voting.period.max).toBe(999);
+      expect(res.participation.period.max).toBe(999);
       expect(res.outcomes).not.toEqual([]);
     });
 
@@ -550,7 +550,7 @@ describe("create-wave.helpers", () => {
         subsequent_decisions: [3],
         is_rolling: true,
       });
-      expect(res.voting.period?.max).toBeNull();
+      expect(res.voting.period.max).toBeNull();
     });
 
     it("includes identity submission strategy when configured", () => {
@@ -662,8 +662,8 @@ describe("create-wave.helpers", () => {
         metadata: [],
       } as any;
       const res = getCreateNewWaveBody({ drop, picture: "pic", config });
-      expect(res.participation.period?.max).toBe(999);
-      expect(res.voting.period?.max).toBe(999);
+      expect(res.participation.period.max).toBe(999);
+      expect(res.voting.period.max).toBe(999);
       expect(res.wave.decisions_strategy).toBeNull();
     });
 
@@ -677,8 +677,8 @@ describe("create-wave.helpers", () => {
         config,
       });
 
-      expect(res.participation.period?.max).toBeNull();
-      expect(res.voting.period?.max).toBeNull();
+      expect(res.participation.period.max).toBeNull();
+      expect(res.voting.period.max).toBeNull();
       expect(res.wave.max_winners).toBeNull();
     });
 

@@ -103,7 +103,6 @@ export type ReactQueryWrapperContextType = {
   invalidateAll: () => void;
   invalidateAuthSensitiveQueries: () => void;
   invalidateNotifications: () => void;
-  invalidateWaveReadState: () => void;
   invalidateIdentityTdhStats: (params: { identity: string }) => void;
 };
 
@@ -135,6 +134,5 @@ export const ReactQueryWrapperContext =
     invalidateAll: () => {},
     invalidateAuthSensitiveQueries: () => {},
     invalidateNotifications: () => {},
-    invalidateWaveReadState: () => {},
     invalidateIdentityTdhStats: () => {},
   });

@@ -256,7 +256,7 @@ describe("CreateWaveGroupSearchField", () => {
   });
 
   it("renders the selected group as the initial input value", () => {
-    renderSearchField({ selectedGroup: groups[0]! });
+    renderSearchField({ selectedGroup: groups[0] });
 
     expect(
       screen.getByRole("combobox", { name: "Search groups..." })
@@ -286,12 +286,12 @@ describe("CreateWaveGroupSearchField", () => {
       </QueryClientProvider>
     );
 
-    const { rerender } = render(renderField(groups[0]!));
+    const { rerender } = render(renderField(groups[0]));
     const input = screen.getByRole("combobox", { name: "Search groups..." });
 
     expect(input).toHaveValue("Alpha Group");
 
-    rerender(renderField(groups[1]!));
+    rerender(renderField(groups[1]));
 
     expect(input).toHaveValue("Beta Group");
     expect(screen.getByText("Current group: Beta Group")).toBeInTheDocument();
@@ -319,7 +319,7 @@ describe("CreateWaveGroupSearchField", () => {
 
   it("keeps the current group while preserving typed search text", async () => {
     const { onSelect } = renderStatefulSearchField({
-      selectedGroup: groups[0]!,
+      selectedGroup: groups[0],
     });
 
     const input = screen.getByRole("combobox", { name: "Search groups..." });
@@ -334,7 +334,7 @@ describe("CreateWaveGroupSearchField", () => {
   it("restores selected group text when Escape dismisses an unselected query", async () => {
     const user = userEvent.setup();
     const { onSelect } = renderStatefulSearchField({
-      selectedGroup: groups[0]!,
+      selectedGroup: groups[0],
     });
 
     const input = screen.getByRole("combobox", { name: "Search groups..." });
@@ -354,7 +354,7 @@ describe("CreateWaveGroupSearchField", () => {
   it("restores selected group text when outside click dismisses an unselected query", async () => {
     const user = userEvent.setup();
     const { onSelect } = renderStatefulSearchField({
-      selectedGroup: groups[0]!,
+      selectedGroup: groups[0],
     });
 
     const input = screen.getByRole("combobox", { name: "Search groups..." });
@@ -399,7 +399,7 @@ describe("CreateWaveGroupSearchField", () => {
 
   it("only clears the selected group when clearing is allowed", async () => {
     const user = userEvent.setup();
-    const { onSelect } = renderSearchField({ selectedGroup: groups[0]! });
+    const { onSelect } = renderSearchField({ selectedGroup: groups[0] });
 
     await user.click(
       screen.getByRole("button", { name: "Clear selected group" })
@@ -409,7 +409,7 @@ describe("CreateWaveGroupSearchField", () => {
   });
 
   it("hides clear action when clearing is disabled", () => {
-    renderSearchField({ selectedGroup: groups[0]!, allowClear: false });
+    renderSearchField({ selectedGroup: groups[0], allowClear: false });
 
     expect(
       screen.queryByRole("button", { name: "Clear selected group" })

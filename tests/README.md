@@ -20,67 +20,67 @@ Their artifacts can be preserved per pack with `--artifact-root <path>`.
 Generated from `tests/packs.manifest.cjs` by
 `seize run e2e-manifest:sync`. Edit the manifest, not this table.
 
-| Pack                                                | Alias                         | Safety   | Environment | Triggers                  | Timeout | Description                                                            |
-| --------------------------------------------------- | ----------------------------- | -------- | ----------- | ------------------------- | ------- | ---------------------------------------------------------------------- |
-| `test:e2e`                                          | —                             | local    | local       | manual                    | 60m     | Full local suite on the desktop web shell.                             |
-| `test:e2e:all-projects`                             | —                             | local    | local       | manual                    | 90m     | Full local suite across every configured project.                      |
-| `test:e2e:ui`                                       | —                             | local    | local       | manual                    | 90m     | Playwright UI mode for local debugging.                                |
-| `test:e2e:smoke`                                    | —                             | local    | local       | manual                    | 15m     | Fast @smoke subset of home, about, and The Memes.                      |
-| `test:e2e:critical-shell`                           | —                             | local    | local       | manual                    | 15m     | Boot and guarded route-shell resilience pack.                          |
-| `test:e2e:social-readonly`                          | —                             | readonly | local       | manual                    | 15m     | Waves and profile read-only journeys.                                  |
-| `test:e2e:input-detection-readonly`                 | —                             | readonly | local       | manual                    | 15m     | Windows touch-input detection read-only contract.                      |
-| `test:e2e:media-readonly`                           | —                             | readonly | local       | manual                    | 15m     | Media and mint detail read-only coverage.                              |
-| `test:e2e:delegation-readonly`                      | —                             | readonly | local       | manual                    | 15m     | Delegation surfaces read-only coverage.                                |
-| `test:e2e:network-open-data-readonly`               | —                             | readonly | local       | manual                    | 15m     | Network and open-data read-only coverage.                              |
-| `test:e2e:collections-readonly`                     | —                             | readonly | local       | manual                    | 15m     | NextGen and collection read-only coverage.                             |
-| `test:e2e:public-groups-tools-readonly`             | —                             | readonly | local       | manual                    | 15m     | Public groups and tools read-only coverage.                            |
-| `test:e2e:admin-guards-readonly`                    | —                             | readonly | local       | manual                    | 15m     | Admin destructive-action fail-closed guards.                           |
-| `test:e2e:public-content-readonly`                  | —                             | readonly | local       | manual                    | 15m     | Public content pages read-only coverage.                               |
-| `test:e2e:authenticated-shells-readonly`            | —                             | readonly | local       | manual                    | 15m     | Authenticated route shells with read-only dev auth.                    |
-| `test:e2e:notifications-mutation-guard`             | —                             | readonly | local       | manual                    | 15m     | Negative contract: notifications must not mutate.                      |
-| `test:e2e:profile-deep-links-readonly`              | —                             | readonly | local       | manual                    | 15m     | Profile deep-link redirect coverage.                                   |
-| `test:e2e:search-waves-readonly`                    | —                             | readonly | local       | manual                    | 15m     | Global and wave-local search coverage.                                 |
-| `test:e2e:museum-institutional-practice`            | —                             | readonly | local       | manual                    | 30m     | Network Museum institutional-practice deployed route smoke.            |
-| `test:e2e:composer-sandbox`                         | —                             | sandbox  | local       | manual                    | 15m     | Waves composer sandbox against the local mock API.                     |
-| `test:e2e:public-review-sandbox`                    | —                             | sandbox  | local       | manual                    | 15m     | Stream review feedback sandbox against the local mock API.             |
-| `test:e2e:reaction-sandbox`                         | —                             | sandbox  | local       | manual                    | 15m     | Drop reaction sandbox against the local mock API.                      |
-| `test:e2e:edit-drop-sandbox`                        | —                             | sandbox  | local       | manual                    | 15m     | Drop edit sandbox against the local mock API.                          |
-| `test:e2e:signature-sandbox`                        | —                             | sandbox  | local       | manual                    | 15m     | Signed participation sandbox that fails closed unsigned.               |
-| `test:e2e:auth-sandbox`                             | —                             | sandbox  | local       | manual                    | 15m     | Aggregate authenticated sandbox pack.                                  |
-| `test:e2e:smoke:surface-matrix`                     | —                             | local    | local       | manual                    | 15m     | @smoke subset on desktop and mobile web shells.                        |
-| `test:e2e:surface-matrix`                           | —                             | local    | local       | manual                    | 15m     | Core surfaces on desktop and mobile web shells.                        |
-| `test:e2e:browser-diversity`                        | —                             | local    | local       | manual                    | 15m     | Engine-diversity pass on Firefox and WebKit.                           |
-| `test:e2e:native-sim`                               | —                             | local    | local       | manual                    | 15m     | Capacitor and Electron browser-simulation surface pass.                |
-| `test:e2e:native-shell-readonly`                    | —                             | readonly | local       | manual                    | 15m     | Native-shell browser-simulation read-only contracts.                   |
-| `test:e2e:wcag-i18n`                                | —                             | local    | local       | manual                    | 15m     | WCAG and i18n public-route evidence pack.                              |
-| `test:e2e:wcag-i18n:surface-matrix`                 | —                             | local    | local       | manual                    | 15m     | WCAG and i18n evidence on desktop and mobile web.                      |
-| `test:e2e:staging:smoke`                            | smoke                         | readonly | staging     | manual                    | 15m     | Staging @smoke subset on both web shells.                              |
-| `test:e2e:staging`                                  | core                          | readonly | staging     | post-deploy, manual       | 15m     | Staging core surfaces on both web shells.                              |
-| `test:e2e:staging:social-readonly`                  | social-readonly               | readonly | staging     | post-deploy, manual       | 15m     | Staging waves and profile read-only pack.                              |
-| `test:e2e:staging:input-detection-readonly`         | input-detection-readonly      | readonly | staging     | post-deploy, manual       | 15m     | Staging Windows touch-input detection contract.                        |
-| `test:e2e:staging:public-groups-tools-readonly`     | public-groups-tools-readonly  | readonly | staging     | post-deploy, manual       | 15m     | Staging public groups and tools read-only pack.                        |
-| `test:e2e:staging:delegation-readonly`              | delegation-readonly           | readonly | staging     | post-deploy, manual       | 15m     | Staging delegation read-only pack.                                     |
-| `test:e2e:staging:collections-readonly`             | collections-readonly          | readonly | staging     | post-deploy, manual       | 15m     | Staging collection read-only pack.                                     |
-| `test:e2e:staging:admin-guards-readonly`            | admin-guards-readonly         | readonly | staging     | post-deploy, manual       | 15m     | Staging admin fail-closed guard pack.                                  |
-| `test:e2e:staging:public-content-readonly`          | public-content-readonly       | readonly | staging     | post-deploy, manual       | 15m     | Staging public-content read-only pack.                                 |
-| `test:e2e:staging:profile-deep-links-readonly`      | profile-deep-links-readonly   | readonly | staging     | post-deploy, manual       | 15m     | Staging profile deep-link pack.                                        |
-| `test:e2e:staging:search-waves-readonly`            | search-waves-readonly         | readonly | staging     | post-deploy, manual       | 15m     | Staging search pack.                                                   |
-| `test:e2e:staging:media-readonly`                   | media-readonly                | readonly | staging     | post-deploy, manual       | 15m     | Staging media and mint detail read-only pack.                          |
-| `test:e2e:staging:network-open-data-readonly`       | network-open-data-readonly    | readonly | staging     | post-deploy, manual       | 15m     | Staging network and open-data read-only pack.                          |
-| `test:e2e:staging:museum-institutional-practice`    | museum-institutional-practice | readonly | staging     | post-deploy, manual       | 15m     | Staging Network Museum institutional-practice deployed route smoke.    |
-| `test:e2e:production:home-readonly`                 | home-readonly                 | readonly | production  | post-deploy, manual       | 15m     | Production home-page read-only canary.                                 |
-| `test:e2e:production:social-readonly`               | social-readonly               | readonly | production  | cron, manual, post-deploy | 15m     | Production waves and profile read-only canary.                         |
-| `test:e2e:production:media-readonly`                | media-readonly                | readonly | production  | cron, manual, post-deploy | 15m     | Production media and mint detail read-only canary.                     |
-| `test:e2e:production:delegation-readonly`           | delegation-readonly           | readonly | production  | cron, manual, post-deploy | 15m     | Production delegation read-only canary.                                |
-| `test:e2e:production:network-open-data-readonly`    | network-open-data-readonly    | readonly | production  | cron, manual, post-deploy | 15m     | Production network and open-data read-only canary.                     |
-| `test:e2e:production:collections-readonly`          | collections-readonly          | readonly | production  | cron, manual, post-deploy | 15m     | Production collection read-only canary.                                |
-| `test:e2e:production:public-groups-tools-readonly`  | public-groups-tools-readonly  | readonly | production  | cron, manual, post-deploy | 15m     | Production public groups and tools read-only canary.                   |
-| `test:e2e:production:admin-guards-readonly`         | admin-guards-readonly         | readonly | production  | cron, manual, post-deploy | 15m     | Production admin fail-closed guard canary.                             |
-| `test:e2e:production:public-content-readonly`       | public-content-readonly       | readonly | production  | cron, manual, post-deploy | 15m     | Production public-content read-only canary.                            |
-| `test:e2e:production:profile-deep-links-readonly`   | profile-deep-links-readonly   | readonly | production  | cron, manual, post-deploy | 15m     | Production profile deep-link canary.                                   |
-| `test:e2e:production:search-waves-readonly`         | search-waves-readonly         | readonly | production  | cron, manual, post-deploy | 15m     | Production search canary.                                              |
-| `test:e2e:production:museum-institutional-practice` | museum-institutional-practice | readonly | production  | post-deploy, manual       | 30m     | Production Network Museum institutional-practice deployed route smoke. |
-| `test:e2e:production:readonly`                      | readonly                      | readonly | production  | manual                    | 60m     | Combined production-safe release validation.                           |
+| Pack                                                | Alias                         | Safety   | Environment | Triggers                  | Timeout | Description                                                   |
+| --------------------------------------------------- | ----------------------------- | -------- | ----------- | ------------------------- | ------- | ------------------------------------------------------------- |
+| `test:e2e`                                          | —                             | local    | local       | manual                    | 60m     | Full local suite on the desktop web shell.                    |
+| `test:e2e:all-projects`                             | —                             | local    | local       | manual                    | 90m     | Full local suite across every configured project.             |
+| `test:e2e:ui`                                       | —                             | local    | local       | manual                    | 90m     | Playwright UI mode for local debugging.                       |
+| `test:e2e:smoke`                                    | —                             | local    | local       | pr-ci, manual             | 15m     | Fast @smoke subset of home, about, and The Memes.             |
+| `test:e2e:critical-shell`                           | —                             | local    | local       | pr-ci, manual             | 15m     | Boot and guarded route-shell resilience pack.                 |
+| `test:e2e:social-readonly`                          | —                             | readonly | local       | manual                    | 15m     | Waves and profile read-only journeys.                         |
+| `test:e2e:input-detection-readonly`                 | —                             | readonly | local       | manual                    | 15m     | Windows touch-input detection read-only contract.             |
+| `test:e2e:media-readonly`                           | —                             | readonly | local       | manual                    | 15m     | Media and mint detail read-only coverage.                     |
+| `test:e2e:delegation-readonly`                      | —                             | readonly | local       | manual                    | 15m     | Delegation surfaces read-only coverage.                       |
+| `test:e2e:network-open-data-readonly`               | —                             | readonly | local       | manual                    | 15m     | Network and open-data read-only coverage.                     |
+| `test:e2e:collections-readonly`                     | —                             | readonly | local       | manual                    | 15m     | NextGen and collection read-only coverage.                    |
+| `test:e2e:public-groups-tools-readonly`             | —                             | readonly | local       | manual                    | 15m     | Public groups and tools read-only coverage.                   |
+| `test:e2e:admin-guards-readonly`                    | —                             | readonly | local       | manual                    | 15m     | Admin destructive-action fail-closed guards.                  |
+| `test:e2e:public-content-readonly`                  | —                             | readonly | local       | manual                    | 15m     | Public content pages read-only coverage.                      |
+| `test:e2e:authenticated-shells-readonly`            | —                             | readonly | local       | manual                    | 15m     | Authenticated route shells with read-only dev auth.           |
+| `test:e2e:notifications-mutation-guard`             | —                             | readonly | local       | manual                    | 15m     | Negative contract: notifications must not mutate.             |
+| `test:e2e:profile-deep-links-readonly`              | —                             | readonly | local       | manual                    | 15m     | Profile deep-link redirect coverage.                          |
+| `test:e2e:search-waves-readonly`                    | —                             | readonly | local       | manual                    | 15m     | Global and wave-local search coverage.                        |
+| `test:e2e:museum-institutional-practice`            | —                             | readonly | local       | pr-ci, manual             | 30m     | Network Museum institutional-practice study route sweep.      |
+| `test:e2e:composer-sandbox`                         | —                             | sandbox  | local       | manual                    | 15m     | Waves composer sandbox against the local mock API.            |
+| `test:e2e:public-review-sandbox`                    | —                             | sandbox  | local       | manual                    | 15m     | Stream review feedback sandbox against the local mock API.    |
+| `test:e2e:reaction-sandbox`                         | —                             | sandbox  | local       | manual                    | 15m     | Drop reaction sandbox against the local mock API.             |
+| `test:e2e:edit-drop-sandbox`                        | —                             | sandbox  | local       | manual                    | 15m     | Drop edit sandbox against the local mock API.                 |
+| `test:e2e:signature-sandbox`                        | —                             | sandbox  | local       | manual                    | 15m     | Signed participation sandbox that fails closed unsigned.      |
+| `test:e2e:auth-sandbox`                             | —                             | sandbox  | local       | manual                    | 15m     | Aggregate authenticated sandbox pack.                         |
+| `test:e2e:smoke:surface-matrix`                     | —                             | local    | local       | manual                    | 15m     | @smoke subset on desktop and mobile web shells.               |
+| `test:e2e:surface-matrix`                           | —                             | local    | local       | manual                    | 15m     | Core surfaces on desktop and mobile web shells.               |
+| `test:e2e:browser-diversity`                        | —                             | local    | local       | manual                    | 15m     | Engine-diversity pass on Firefox and WebKit.                  |
+| `test:e2e:native-sim`                               | —                             | local    | local       | manual                    | 15m     | Capacitor and Electron browser-simulation surface pass.       |
+| `test:e2e:native-shell-readonly`                    | —                             | readonly | local       | manual                    | 15m     | Native-shell browser-simulation read-only contracts.          |
+| `test:e2e:wcag-i18n`                                | —                             | local    | local       | manual                    | 15m     | WCAG and i18n public-route evidence pack.                     |
+| `test:e2e:wcag-i18n:surface-matrix`                 | —                             | local    | local       | manual                    | 15m     | WCAG and i18n evidence on desktop and mobile web.             |
+| `test:e2e:staging:smoke`                            | smoke                         | readonly | staging     | manual                    | 15m     | Staging @smoke subset on both web shells.                     |
+| `test:e2e:staging`                                  | core                          | readonly | staging     | post-deploy, manual       | 15m     | Staging core surfaces on both web shells.                     |
+| `test:e2e:staging:social-readonly`                  | social-readonly               | readonly | staging     | post-deploy, manual       | 15m     | Staging waves and profile read-only pack.                     |
+| `test:e2e:staging:input-detection-readonly`         | input-detection-readonly      | readonly | staging     | post-deploy, manual       | 15m     | Staging Windows touch-input detection contract.               |
+| `test:e2e:staging:public-groups-tools-readonly`     | public-groups-tools-readonly  | readonly | staging     | post-deploy, manual       | 15m     | Staging public groups and tools read-only pack.               |
+| `test:e2e:staging:delegation-readonly`              | delegation-readonly           | readonly | staging     | post-deploy, manual       | 15m     | Staging delegation read-only pack.                            |
+| `test:e2e:staging:collections-readonly`             | collections-readonly          | readonly | staging     | post-deploy, manual       | 15m     | Staging collection read-only pack.                            |
+| `test:e2e:staging:admin-guards-readonly`            | admin-guards-readonly         | readonly | staging     | post-deploy, manual       | 15m     | Staging admin fail-closed guard pack.                         |
+| `test:e2e:staging:public-content-readonly`          | public-content-readonly       | readonly | staging     | post-deploy, manual       | 15m     | Staging public-content read-only pack.                        |
+| `test:e2e:staging:profile-deep-links-readonly`      | profile-deep-links-readonly   | readonly | staging     | post-deploy, manual       | 15m     | Staging profile deep-link pack.                               |
+| `test:e2e:staging:search-waves-readonly`            | search-waves-readonly         | readonly | staging     | post-deploy, manual       | 15m     | Staging search pack.                                          |
+| `test:e2e:staging:media-readonly`                   | media-readonly                | readonly | staging     | post-deploy, manual       | 15m     | Staging media and mint detail read-only pack.                 |
+| `test:e2e:staging:network-open-data-readonly`       | network-open-data-readonly    | readonly | staging     | post-deploy, manual       | 15m     | Staging network and open-data read-only pack.                 |
+| `test:e2e:staging:museum-institutional-practice`    | museum-institutional-practice | readonly | staging     | post-deploy, manual       | 30m     | Staging Network Museum institutional-practice route sweep.    |
+| `test:e2e:production:home-readonly`                 | home-readonly                 | readonly | production  | post-deploy, manual       | 15m     | Production home-page read-only canary.                        |
+| `test:e2e:production:social-readonly`               | social-readonly               | readonly | production  | cron, manual, post-deploy | 15m     | Production waves and profile read-only canary.                |
+| `test:e2e:production:media-readonly`                | media-readonly                | readonly | production  | cron, manual, post-deploy | 15m     | Production media and mint detail read-only canary.            |
+| `test:e2e:production:delegation-readonly`           | delegation-readonly           | readonly | production  | cron, manual, post-deploy | 15m     | Production delegation read-only canary.                       |
+| `test:e2e:production:network-open-data-readonly`    | network-open-data-readonly    | readonly | production  | cron, manual, post-deploy | 15m     | Production network and open-data read-only canary.            |
+| `test:e2e:production:collections-readonly`          | collections-readonly          | readonly | production  | cron, manual, post-deploy | 15m     | Production collection read-only canary.                       |
+| `test:e2e:production:public-groups-tools-readonly`  | public-groups-tools-readonly  | readonly | production  | cron, manual, post-deploy | 15m     | Production public groups and tools read-only canary.          |
+| `test:e2e:production:admin-guards-readonly`         | admin-guards-readonly         | readonly | production  | cron, manual, post-deploy | 15m     | Production admin fail-closed guard canary.                    |
+| `test:e2e:production:public-content-readonly`       | public-content-readonly       | readonly | production  | cron, manual, post-deploy | 15m     | Production public-content read-only canary.                   |
+| `test:e2e:production:profile-deep-links-readonly`   | profile-deep-links-readonly   | readonly | production  | cron, manual, post-deploy | 15m     | Production profile deep-link canary.                          |
+| `test:e2e:production:search-waves-readonly`         | search-waves-readonly         | readonly | production  | cron, manual, post-deploy | 15m     | Production search canary.                                     |
+| `test:e2e:production:museum-institutional-practice` | museum-institutional-practice | readonly | production  | post-deploy, manual       | 30m     | Production Network Museum institutional-practice route sweep. |
+| `test:e2e:production:readonly`                      | readonly                      | readonly | production  | manual                    | 60m     | Combined production-safe release validation.                  |
 
 <!-- END GENERATED: e2e-pack-table -->
 
@@ -96,18 +96,6 @@ The same Playwright spec can be `@medium` locally and `@large` when
 `PLAYWRIGHT_BASE_URL` targets staging or production. Use
 `resolvePlaywrightTestSize(baseURL)` when a helper needs to record the current
 size at runtime.
-
-Choosing the test layer:
-
-- Use Playwright for browser-specific behavior such as rendering, hydration,
-  navigation, responsive layout, accessibility, and runtime integrations.
-- Do not repeat the same browser assertions across content-equivalent static
-  routes. Cover one representative route per distinct template and required
-  viewport, then test the complete route/content inventory with fast static or
-  Jest contracts.
-- Add per-route E2E coverage only when a route has materially different browser
-  behavior or risk. The Museum pack follows this model: exhaustive static
-  publication contracts with representative desktop/mobile browser smoke.
 
 Remote read-only defaults:
 
@@ -134,19 +122,12 @@ App PR CI:
 - Pull-request CI is read-only and secret-free. It must not receive staging
   credentials, deployment credentials, external-model API keys, or durable
   artifact-store write credentials.
-- PR CI uses changed-file lint, typechecking, related Jest contracts, and a
-  production build when the risk plan requires it. Repository-wide Knip,
-  test-helper typechecking, and release-workflow contract suites run only when
-  their owning paths change.
-- PR CI does not start a local web server or duplicate Playwright packs. The
-  complete read-only browser inventory runs once against the exact deployed
-  staging SHA after a successful deployment when automatic baseline adoption
-  resolves `LEGACY`; `DEFERRED` hands validation to the matching Release Bus
-  intent instead of starting a duplicate automatic pack run.
-- Museum publication correctness remains exhaustive in fast Jest contracts:
-  all manuscripts, profiles, admitted source mappings, and fail-closed rules
-  are checked statically. Its deployed Playwright pack is a representative
-  desktop/mobile route smoke rather than a duplicate 32-page content sweep.
+- The workflow runs `test:e2e:smoke` only when the CI plan sees route, runtime
+  UI, style, or higher-risk changes that need browser evidence.
+- The workflow runs `test:e2e:critical-shell` when the CI plan sees guarded,
+  build-sensitive, or deleted runtime source changes. This pack is read-only and
+  covers high-value route shells and auth/operator gates without signing,
+  posting, admin mutations, or wallet writes.
 - Uploaded PR CI artifacts are short-term debugging evidence. Durable
   deployment-train evidence still belongs on approved 6529-controlled artifact
   storage, not Git LFS.

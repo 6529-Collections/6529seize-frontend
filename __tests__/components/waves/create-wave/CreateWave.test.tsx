@@ -9,12 +9,9 @@ import { useRouter } from "next/navigation";
 import { useNativeKeyboard } from "@/hooks/useNativeKeyboard";
 import React from "react";
 import { AuthContext } from "@/components/auth/Auth";
-import type { AuthContextType } from "@/components/auth/authTypes";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { ReactQueryWrapperContextType } from "@/components/react-query-wrapper/ReactQueryWrapperContext";
 import CreateWave from "@/components/waves/create-wave/CreateWave";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { CreateWaveStep } from "@/types/waves.types";
@@ -167,19 +164,20 @@ describe("CreateWave", () => {
     push: jest.fn(),
   };
 
-  const mockProfile = {
+  const mockProfile: ApiIdentity = {
     id: "test-profile-id",
     handle: "testuser",
     normalised_handle: "testuser",
     primary_wallet: "0x123",
     pfp: null,
-    cic: 100,
-    rep: 200,
+    cic: { rating: 100, contributor_count: 5 },
+    rep: { rating: 200, contributor_count: 10 },
     tdh: 1000,
     level: 5,
-    classification: ApiProfileClassification.Pseudonym,
+    classification: "HUMAN",
     sub_classification: null,
-  } as ApiIdentity;
+    created_at: Date.now(),
+  };
 
   const mockAuthContext = {
     requestAuth: jest.fn(),
@@ -338,10 +336,8 @@ describe("CreateWave", () => {
   const createWaveElement = ({
     parentWaveId,
   }: RenderCreateWaveOptions = {}) => (
-    <AuthContext.Provider value={mockAuthContext as unknown as AuthContextType}>
-      <ReactQueryWrapperContext.Provider
-        value={mockQueryContext as unknown as ReactQueryWrapperContextType}
-      >
+    <AuthContext.Provider value={mockAuthContext}>
+      <ReactQueryWrapperContext.Provider value={mockQueryContext}>
         <CreateWave
           profile={mockProfile}
           onBack={onBack}
@@ -810,8 +806,8 @@ describe("CreateWave", () => {
           data_value: "Selected",
         },
       });
-      expect(mockedCreateWaveMetadata.mock.invocationCallOrder[0]!).toBeLessThan(
-        mockRouter.push.mock.invocationCallOrder[0]!
+      expect(mockedCreateWaveMetadata.mock.invocationCallOrder[0]).toBeLessThan(
+        mockRouter.push.mock.invocationCallOrder[0]
       );
     });
 

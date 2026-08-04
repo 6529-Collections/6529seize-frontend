@@ -135,7 +135,6 @@ const PROFILE_ROUTES: readonly StudyRoute[] = PROFILES.map(([slug, title]) => ({
   sourcePath: `records/institutional-practice/profiles/${slug}.md`,
   title,
 }));
-const REPRESENTATIVE_PROFILE_ROUTE: StudyRoute = PROFILE_ROUTES[0]!;
 
 async function expectSafeLinks(page: Page) {
   const problems = await page.locator("a[href]").evaluateAll((anchors) =>
@@ -297,6 +296,7 @@ async function expectStudyRoute(
 }
 
 test.describe("Museum institutional-practice publication @surface @large @readonly", () => {
+  test.describe.configure({ mode: "serial" });
   test.setTimeout(120_000);
   let sourceCommit: string | null = null;
 
@@ -331,24 +331,22 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     );
   });
 
-  test("publishes a representative institutional profile with lessons and limits", async ({
-    page,
-  }) => {
-    sourceCommit = await expectStudyRoute(
+  for (const profile of PROFILE_ROUTES) {
+    test(`publishes ${profile.title} with lessons and limits`, async ({
       page,
-      REPRESENTATIVE_PROFILE_ROUTE,
-      sourceCommit
-    );
-    await expect(
-      page.getByText("What the Museum should adopt", { exact: true })
-    ).toBeVisible();
-    await expect(
-      page.getByText("Where the analogy ends", { exact: true })
-    ).toBeVisible();
-    await expect(
-      page.locator(`a[href="${SOURCE_ROUTE.path}"]`).first()
-    ).toBeVisible();
-  });
+    }) => {
+      sourceCommit = await expectStudyRoute(page, profile, sourceCommit);
+      await expect(
+        page.getByText("What the Museum should adopt", { exact: true })
+      ).toBeVisible();
+      await expect(
+        page.getByText("Where the analogy ends", { exact: true })
+      ).toBeVisible();
+      await expect(
+        page.locator(`a[href="${SOURCE_ROUTE.path}"]`).first()
+      ).toBeVisible();
+    });
+  }
 
   test("publishes the adjacent digital-art and chain-native study", async ({
     page,

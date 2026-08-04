@@ -24,10 +24,10 @@ function setup(props: Partial<{winners: CreateWaveOutcomeConfigWinner[]}> = {}) 
 describe('CreateWaveOutcomesWinnersRows', () => {
   it('updates winner value on input change', async () => {
     const user = userEvent.setup();
-    const { setWinners } = setup();
+    const { setWinners, winners } = setup();
     const inputs = screen.getAllByRole('textbox');
-    await user.clear(inputs[0]!);
-    await user.type(inputs[0]!, '5');
+    await user.clear(inputs[0]);
+    await user.type(inputs[0], '5');
     expect(setWinners).toHaveBeenCalled();
   });
 
@@ -35,7 +35,7 @@ describe('CreateWaveOutcomesWinnersRows', () => {
     const user = userEvent.setup();
     const { setWinners } = setup();
     const removeButtons = screen.getAllByRole('button', { name: /remove/i });
-    await user.click(removeButtons[0]!);
+    await user.click(removeButtons[0]);
     expect(setWinners).toHaveBeenCalledWith([{ value: 2 }]);
   });
 });

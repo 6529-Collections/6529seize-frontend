@@ -72,7 +72,6 @@ describe("useUnreadDmDrops", () => {
       return {
         ...defaultQueryResult,
         data: { count: 3 },
-        dataUpdatedAt: 123,
       };
     });
 
@@ -82,9 +81,6 @@ describe("useUnreadDmDrops", () => {
       unreadDmDrops: { count: 3 },
       unreadDmDropsCount: 3,
       haveUnreadDmDrops: true,
-      dataUpdatedAt: 123,
-      isFetching: false,
-      refetch: defaultQueryResult.refetch,
     });
     expect(capturedConfig.queryKey).toEqual([
       QueryKey.DM_DROPS_UNREAD,
@@ -115,9 +111,6 @@ describe("useUnreadDmDrops", () => {
       unreadDmDrops: undefined,
       unreadDmDropsCount: 0,
       haveUnreadDmDrops: false,
-      dataUpdatedAt: 0,
-      isFetching: false,
-      refetch: defaultQueryResult.refetch,
     });
   });
 
@@ -141,14 +134,13 @@ describe("useUnreadDmDrops", () => {
     mockUseQuery.mockReturnValue({
       ...defaultQueryResult,
       data: undefined,
-      dataUpdatedAt: 123,
       error,
       isError: true,
       isSuccess: false,
       status: "error" as const,
     });
 
-    const { result } = renderHook(() => useUnreadDmDrops("alice"));
+    renderHook(() => useUnreadDmDrops("alice"));
 
     await waitFor(() => {
       expect(consoleError).toHaveBeenCalledWith(
@@ -156,7 +148,6 @@ describe("useUnreadDmDrops", () => {
         error
       );
     });
-    expect(result.current.dataUpdatedAt).toBe(0);
 
     consoleError.mockRestore();
   });

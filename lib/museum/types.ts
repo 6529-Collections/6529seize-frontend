@@ -3,6 +3,10 @@ export const MUSEUM_BRANCH = "main";
 const MUSEUM_MANIFEST_PATH = "release-artifacts/latest/record-manifest.json";
 export const MUSEUM_MANIFEST_URL = `https://raw.githubusercontent.com/${MUSEUM_REPOSITORY}/${MUSEUM_BRANCH}/${MUSEUM_MANIFEST_PATH}`;
 export const MUSEUM_REPOSITORY_URL = `https://github.com/${MUSEUM_REPOSITORY}`;
+const MUSEUM_SAFE_ADDRESS =
+  "0xbECfa2bA5a782D11E1a0e821E8F2e30b6684178c" as const;
+export const MUSEUM_SAFE_ETHERSCAN_URL =
+  `https://etherscan.io/address/${MUSEUM_SAFE_ADDRESS}` as const;
 
 export type MuseumSourceState =
   | "fresh"

@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import DecisionPointDropdown from '@/components/waves/create-wave/dates/DecisionPointDropdown';
 import { Period } from '@/helpers/Types';

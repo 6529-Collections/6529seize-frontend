@@ -71,9 +71,7 @@ describe("Release Bus frontend performance contract", () => {
     expect(appPrCi).toContain("./bin/6529 run lint:changed");
     expect(appPrCi).toContain("./bin/6529 run typecheck:changed");
     expect(appPrCi).toContain("Run related Jest tests");
-    expect(appPrCi).toContain("./bin/6529 run build:ci");
-    expect(appPrCi).not.toContain("playwright install");
-    expect(appPrCi).not.toContain("test:e2e:museum-institutional-practice");
+    expect(appPrCi).toContain("./bin/6529 run build");
     if (appPrCi.includes("exact-merge-tree-pr-ci-v1")) {
       expect(appPrCi).toContain(
         "sha256sum ./manifest.json ./policy-bundle.txt > SHA256SUMS"
@@ -155,13 +153,13 @@ describe("Release Bus frontend performance contract", () => {
       '.policy_bundle_contract == "pr-ci-policy-bundle-v1"'
     );
     expect(preflightSource).toContain(
-      'test "$evidence_files" = "SHA256SUMS manifest.json policy-bundle.txt"'
+      'test "${evidence_files[*]}" = "SHA256SUMS manifest.json policy-bundle.txt"'
     );
     expect(preflightSource).toContain(
       '[[ "$AGGREGATE_CANDIDATE_EVIDENCE_DIGEST" =~ ^[a-f0-9]{64}$ ]]'
     );
     expect(preflightSource).toContain(
-      'echo "Invalid candidate evidence mode." >&2'
+      '[[ "$CANDIDATE_EVIDENCE_MODE" =~ ^(legacy-whole-train|strict-single|strict-aggregate)$ ]]'
     );
     expect(preflightSource).toContain(
       'test "$(jq -r .path <<< "$run")" = .github/workflows/app-pr-ci.yml'
@@ -448,9 +446,7 @@ describe("Release Bus frontend performance contract", () => {
 
     const stagingSource = read(".github/workflows/staging-e2e.yml");
     const productionSource = read(".github/workflows/production-e2e.yml");
-    expect(stagingSource).toContain(
-      `args+=(--parallel ${contract.e2e.staging_parallelism})`
-    );
+    expect(stagingSource).toContain("args+=(--parallel 3)");
     expect(productionSource).toContain("args+=(--parallel 3)");
     expect(stagingSource).toContain(
       "exec node scripts/e2e-packs.cjs --capabilities"

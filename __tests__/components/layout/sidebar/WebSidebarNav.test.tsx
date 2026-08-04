@@ -36,12 +36,8 @@ jest.mock("@/hooks/useDropForgePermissions", () => ({
   }),
 }));
 
-const mockUseUnreadIndicator = jest.fn((_props: unknown) => ({
-  hasUnread: false,
-  unreadCount: 0,
-}));
 jest.mock("@/hooks/useUnreadIndicator", () => ({
-  useUnreadIndicator: (props: unknown) => mockUseUnreadIndicator(props),
+  useUnreadIndicator: () => ({ hasUnread: false }),
 }));
 
 const mockUsePathname = usePathname as jest.Mock;
@@ -68,16 +64,6 @@ describe("WebSidebarNav", () => {
   beforeEach(() => {
     mockUsePathname.mockReturnValue("/waves");
     mockCanAccessDropForge = false;
-    mockUseUnreadIndicator.mockClear();
-  });
-
-  it("requests the shared messages unread indicator", () => {
-    render(<WebSidebarNav isCollapsed={false} />);
-
-    expect(mockUseUnreadIndicator).toHaveBeenCalledWith({
-      type: "messages",
-      handle: null,
-    });
   });
 
   it("renders Waves as a direct /waves link instead of an expandable trigger", () => {

@@ -27,8 +27,9 @@ jobs:
       test_typecheck_required: ${{ steps.plan_outputs.outputs.test_typecheck_required }}
       jest_changed_required: ${{ steps.plan_outputs.outputs.jest_changed_required }}
       build_required: ${{ steps.plan_outputs.outputs.build_required }}
-      deadcode_required: ${{ steps.plan_outputs.outputs.deadcode_required }}
-      release_bus_contract_required: ${{ steps.plan_outputs.outputs.release_bus_contract_required }}
+      playwright_smoke_required: ${{ steps.plan_outputs.outputs.playwright_smoke_required }}
+      playwright_critical_shell_required: ${{ steps.plan_outputs.outputs.playwright_critical_shell_required }}
+      playwright_museum_required: ${{ steps.plan_outputs.outputs.playwright_museum_required }}
       dependency_governance_required: ${{ steps.plan_outputs.outputs.dependency_governance_required }}
       reviewbot_contract_required: ${{ steps.plan_outputs.outputs.reviewbot_contract_required }}
       agent_files_sync_required: ${{ steps.plan_outputs.outputs.agent_files_sync_required }}
@@ -70,8 +71,6 @@ jobs:
             --changed-from "origin/${BASE_REF}" \
             --untrusted-pr="${UNTRUSTED_PR}" \
             --output test-results/app-pr-ci/ci-plan.json
-          ./bin/6529 exec node scripts/app-pr-ci-effective-plan.cjs \
-            --plan test-results/app-pr-ci/ci-plan.json
           ./bin/6529 run testing-strategy -- scan-changed-secrets \
             --changed-from "origin/${BASE_REF}" \
             --output test-results/app-pr-ci/secret-scan.json
@@ -95,6 +94,23 @@ jobs:
           for (const [name, check] of Object.entries(plan.checks)) {
             write(`${name}_required`, String(Boolean(check.required)));
           }
+          const museumPlaywrightPaths = [
+            /^app\/museum\/network\//,
+            /^components\/museum\//,
+            /^lib\/museum\//,
+            /^tests\/museum\//,
+            /^i18n\/messages\/museum\.en-US\.json$/,
+            /^ops\/docs\/museum\//,
+            /^ops\/help\/help-index\.json$/,
+          ];
+          write(
+            "playwright_museum_required",
+            String(
+              plan.changed_files.some((file) =>
+                museumPlaywrightPaths.some((pattern) => pattern.test(file))
+              )
+            )
+          );
           NODE
 
       - name: Summarize CI plan
@@ -155,7 +171,7 @@ jobs:
   installed-checks:
     name: Installed app checks
     needs: plan
-    if: needs.plan.outputs.install_required == 'true'
+    if: needs.plan.outputs.install_required == 'true' || needs.plan.outputs.playwright_museum_required == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
@@ -166,6 +182,9 @@ jobs:
       WS_ENDPOINT: "wss://ws.6529.io"
       ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io"
       BASE_ENDPOINT: "http://localhost:3001"
+      PLAYWRIGHT_BASE_URL: "http://localhost:3001"
+      PLAYWRIGHT_WEB_SERVER_COMMAND: "./bin/6529 run dev"
+      PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3001"
       NEXTGEN_CHAIN_ID: "1"
       MOBILE_APP_SCHEME: "mobile6529"
       CORE_SCHEME: "core6529"
@@ -203,17 +222,6 @@ jobs:
           corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
           pnpm --version
 
-      - name: Restore pnpm store
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-node22-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node22-pnpm-
-
-      - name: Use cached pnpm store
-        run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
-
       - name: Install Socket Firewall
         id: socket_firewall
         uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
@@ -229,7 +237,6 @@ jobs:
         run: ./bin/6529 install:frozen
 
       - name: Run Knip dead-code check
-        if: needs.plan.outputs.deadcode_required == 'true'
         run: ./bin/6529 run deadcode:knip
 
       - name: Lint package.json versions
@@ -254,22 +261,18 @@ jobs:
         run: ./bin/6529 run test:no-coverage -- __tests__/scripts/sync-agent-files.test.ts
 
       - name: Verify Release Bus v2 workflow contract
-        if: needs.plan.outputs.release_bus_contract_required == 'true'
         run: |
           set -euo pipefail
           ./bin/6529 run test:no-coverage --runInBand --runTestsByPath \
-            __tests__/scripts/app-pr-ci-effective-plan.test.ts \
             __tests__/scripts/pr-ci-policy-bundle.test.ts \
-            __tests__/scripts/deploy-staging-artifact.test.ts \
             __tests__/scripts/deployment-bus.test.ts \
-            __tests__/scripts/e2e-packs.test.ts \
-            __tests__/scripts/manual-deploy-routing-guard.test.ts \
-            __tests__/scripts/package-public-review-artifacts.test.ts \
-            __tests__/scripts/public-review-artifact-workflows.test.ts \
-            __tests__/scripts/release-bus-artifact-compatibility.test.ts \
-            __tests__/scripts/release-bus-performance-contract.test.ts \
-            __tests__/scripts/release-bus-v2-advance-staging-ref-workflow.test.ts \
-            __tests__/scripts/release-bus-v2-compose-workflow.test.ts \
+                __tests__/scripts/e2e-packs.test.ts \
+                __tests__/scripts/package-public-review-artifacts.test.ts \
+                __tests__/scripts/public-review-artifact-workflows.test.ts \
+                __tests__/scripts/release-bus-artifact-compatibility.test.ts \
+                __tests__/scripts/release-bus-performance-contract.test.ts \
+                __tests__/scripts/release-bus-v2-advance-staging-ref-workflow.test.ts \
+                __tests__/scripts/release-bus-v2-compose-workflow.test.ts \
             __tests__/scripts/sync-e2e-manifest.test.ts \
             __tests__/scripts/release-bus-install-dependencies.test.ts \
             ops/scripts/release-bus-status.test.ts
@@ -420,28 +423,21 @@ jobs:
         env:
           NODE_ENV: "production"
           BASE_ENDPOINT: "https://6529.io"
-        # The CI build runs the generators explicitly without repeating the
-        # full-repository lint already covered by changed-file lint.
+        # `build` runs prebuild, which regenerates both public agent artifacts.
         run: |
           set -euo pipefail
-          ./bin/6529 run build:ci
+          ./bin/6529 run build
 
       - name: Create exact PR merge-tree CI evidence
         env:
           EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           EXPECTED_MERGE_SHA: ${{ github.sha }}
           BUILD_REQUIRED: ${{ needs.plan.outputs.build_required }}
-          DEADCODE_REQUIRED: ${{ needs.plan.outputs.deadcode_required }}
-          RELEASE_BUS_CONTRACT_REQUIRED: ${{ needs.plan.outputs.release_bus_contract_required }}
-          TEST_TYPECHECK_REQUIRED: ${{ needs.plan.outputs.test_typecheck_required }}
         run: |
           set -euo pipefail
           [[ "$EXPECTED_MERGE_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$EXPECTED_HEAD_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$BUILD_REQUIRED" =~ ^(true|false)$ ]]
-          [[ "$DEADCODE_REQUIRED" =~ ^(true|false)$ ]]
-          [[ "$RELEASE_BUS_CONTRACT_REQUIRED" =~ ^(true|false)$ ]]
-          [[ "$TEST_TYPECHECK_REQUIRED" =~ ^(true|false)$ ]]
           test "$(git rev-parse HEAD)" = "$EXPECTED_MERGE_SHA"
           rm -rf release-bus-v2-pr-evidence
           mkdir -p release-bus-v2-pr-evidence
@@ -461,9 +457,6 @@ jobs:
             --arg policy_bundle_digest "$policy_bundle_digest" \
             --argjson policy_bundle_line_count "$policy_bundle_line_count" \
             --argjson build_required "$BUILD_REQUIRED" \
-            --argjson deadcode_required "$DEADCODE_REQUIRED" \
-            --argjson release_bus_contract_required "$RELEASE_BUS_CONTRACT_REQUIRED" \
-            --argjson test_typecheck_required "$TEST_TYPECHECK_REQUIRED" \
             '{
               schema_version:1,
               evidence_contract:"exact-merge-tree-pr-ci-v1",
@@ -473,21 +466,18 @@ jobs:
               merge_sha:$merge_sha,
               head_sha:$head_sha,
               production_build_required:$build_required,
-              dependency_analysis_required:$deadcode_required,
-              release_bus_contract_required:$release_bus_contract_required,
-              test_typecheck_required:$test_typecheck_required,
               policy_bundle_contract:$policy_bundle_contract,
               policy_bundle_digest:$policy_bundle_digest,
               policy_bundle_line_count:$policy_bundle_line_count,
               required_gates:[
                 "package-manager-discipline",
-                "dependency-analysis-or-plan-not-required",
+                "dependency-analysis",
                 "reviewbot-contract",
                 "generated-agent-files",
-                "release-bus-workflow-contract-or-plan-not-required",
+                "release-bus-workflow-contract",
                 "changed-lint",
                 "changed-typecheck",
-                "test-typecheck-or-plan-not-required",
+                "test-typecheck",
                 "related-jest-selection",
                 "production-build-or-plan-not-required",
                 "pr-ci-policy-bundle"
@@ -510,6 +500,52 @@ jobs:
         with:
           path: ${{ github.workspace }}/.next/cache
           key: ${{ steps.nextjs_build_cache.outputs.cache-primary-key }}
+
+      - name: Install Playwright browser
+        if: needs.plan.outputs.playwright_smoke_required == 'true' || needs.plan.outputs.playwright_critical_shell_required == 'true' || needs.plan.outputs.playwright_museum_required == 'true'
+        run: ./bin/6529 exec playwright install --with-deps chromium
+
+      - name: Resolve exact Museum publication for Playwright
+        id: museum_publication
+        if: needs.plan.outputs.playwright_museum_required == 'true'
+        run: |
+          set -euo pipefail
+          mapfile -t museum_refs < <(
+            git ls-remote --refs \
+              https://github.com/6529-Collections/6529networkmuseum.git \
+              refs/heads/main
+          )
+          test "${#museum_refs[@]}" -eq 1
+          read -r museum_commit museum_ref extra <<< "${museum_refs[0]}"
+          test -z "${extra:-}"
+          test "$museum_ref" = "refs/heads/main"
+          [[ "$museum_commit" =~ ^[a-f0-9]{40}$ ]]
+          echo "commit=$museum_commit" >> "$GITHUB_OUTPUT"
+          echo "Museum Playwright source: $museum_commit"
+
+      - name: Run small Playwright smoke pack
+        if: needs.plan.outputs.playwright_smoke_required == 'true'
+        env:
+          # Do not reuse the production build output or another Playwright
+          # server's Turbopack route state.
+          NEXT_DEV_DIST_DIR: ".next-playwright-smoke"
+          PLAYWRIGHT_READONLY: "1"
+        run: ./bin/6529 run test:e2e:smoke
+
+      - name: Run critical route-shell Playwright pack
+        if: needs.plan.outputs.playwright_critical_shell_required == 'true'
+        env:
+          NEXT_DEV_DIST_DIR: ".next-playwright-critical-shell"
+          PLAYWRIGHT_READONLY: "1"
+        run: ./bin/6529 run test:e2e:critical-shell
+
+      - name: Run Network Museum institutional-practice Playwright pack
+        if: needs.plan.outputs.playwright_museum_required == 'true'
+        env:
+          NEXT_DEV_DIST_DIR: ".next-playwright-museum"
+          PLAYWRIGHT_READONLY: "1"
+          MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.commit }}
+        run: ./bin/6529 run test:e2e:museum-institutional-practice
 
       - name: Upload app check artifacts
         if: always()

@@ -43,7 +43,7 @@ export const useWaveReadCacheRefs = ({
   identityKey,
   temporaryProxyRoleIdentity,
   verifiedIdentity,
-  invalidateWaveReadState,
+  invalidateNotifications,
 }: {
   readonly addressEpoch: WaveReadAddressEpoch;
   readonly identityKey: string;
@@ -51,9 +51,9 @@ export const useWaveReadCacheRefs = ({
     | WaveReadTemporaryProxyRoleIdentity
     | undefined;
   readonly verifiedIdentity: WaveReadVerifiedIdentity | undefined;
-  readonly invalidateWaveReadState: () => void;
+  readonly invalidateNotifications: () => void;
 }): WaveReadCacheRefs => {
-  const invalidateNotificationsRef = useRef(invalidateWaveReadState);
+  const invalidateNotificationsRef = useRef(invalidateNotifications);
   const latestAddressEpochRef = useRef<WaveReadAddressEpoch>(addressEpoch);
   const authByIdentityRef = useRef<Map<string, WaveReadVerifiedIdentity>>(
     new Map<string, WaveReadVerifiedIdentity>(
@@ -82,8 +82,8 @@ export const useWaveReadCacheRefs = ({
   const clearedIdentityKeysRef = useRef<Set<string>>(new Set<string>());
 
   useLayoutEffect(() => {
-    invalidateNotificationsRef.current = invalidateWaveReadState;
-  }, [invalidateWaveReadState]);
+    invalidateNotificationsRef.current = invalidateNotifications;
+  }, [invalidateNotifications]);
 
   useLayoutEffect(() => {
     latestAddressEpochRef.current = addressEpoch;

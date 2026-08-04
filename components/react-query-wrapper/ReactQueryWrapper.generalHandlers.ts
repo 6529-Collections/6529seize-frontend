@@ -52,12 +52,6 @@ export const createGeneralQueryHandlers = (
       .catch(() => undefined);
     invalidateWavesV2();
   };
-  const invalidateWaveReadState = () => {
-    invalidateNotifications();
-    queryClient
-      .invalidateQueries({ queryKey: [QueryKey.DM_DROPS_UNREAD] })
-      .catch(() => undefined);
-  };
   const invalidateIdentityTdhStats = ({ identity }: { identity: string }) => {
     queryClient.invalidateQueries({
       queryKey: [QueryKey.IDENTITY_TDH_STATS, identity.toLowerCase()],
@@ -68,6 +62,5 @@ export const createGeneralQueryHandlers = (
     invalidateAuthSensitiveQueries,
     invalidateIdentityTdhStats,
     invalidateNotifications,
-    invalidateWaveReadState,
   };
 };

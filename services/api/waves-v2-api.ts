@@ -141,8 +141,7 @@ const getWaveOverviewContext = (wave: ApiWaveOverview) =>
   wave.context_profile_context;
 
 const mapApiWaveOverviewToSidebarWave = (
-  wave: ApiWaveOverview,
-  serverSnapshotRequestStartedAt?: number
+  wave: ApiWaveOverview
 ): SidebarWave => {
   const context = getWaveOverviewContext(wave);
 
@@ -181,8 +180,6 @@ const mapApiWaveOverviewToSidebarWave = (
       context?.hidden_followed_subwave_unread_drops ??
       0,
     latestReadTimestamp: 0,
-    serverSnapshotLatestDropTimestamp: wave.last_drop_time,
-    serverSnapshotRequestStartedAt,
     pinned: context?.pinned ?? false,
     muted: context?.muted ?? false,
     subscribed: context?.subscribed ?? false,
@@ -238,7 +235,6 @@ export const mapApiWaveToSidebarWave = (wave: ApiWave): SidebarWave => {
     followedSubwavesCount: 0,
     unreadSubwaveDrops: 0,
     latestReadTimestamp: wave.metrics.your_latest_read_timestamp,
-    serverSnapshotLatestDropTimestamp: wave.metrics.latest_drop_timestamp,
     pinned: wave.pinned,
     muted: wave.metrics.muted,
     subscribed: wave.subscribed_actions.length > 0,
@@ -336,7 +332,6 @@ export async function fetchWavesV2Page({
     params["group_id"] = groupId;
   }
 
-  const serverSnapshotRequestStartedAt = Date.now();
   const response = await commonApiFetch<ApiWaveOverviewPage>({
     endpoint: "v2/waves",
     params,
@@ -344,9 +339,7 @@ export async function fetchWavesV2Page({
   });
 
   return {
-    waves: response.data.map((wave) =>
-      mapApiWaveOverviewToSidebarWave(wave, serverSnapshotRequestStartedAt)
-    ),
+    waves: response.data.map(mapApiWaveOverviewToSidebarWave),
     page: response.page,
     next: response.next,
   };
@@ -453,7 +446,6 @@ export async function fetchWaveSubwavesPage({
   pageSize = 100,
   sort = ApiSubwavesSort.CreatedAt,
 }: FetchWaveSubwavesPageProps): Promise<SidebarWavesPage> {
-  const serverSnapshotRequestStartedAt = Date.now();
   const response = await commonApiFetch<ApiWaveOverviewPage>({
     endpoint: `waves/${parentWaveId}/subwaves`,
     params: {
@@ -465,7 +457,7 @@ export async function fetchWaveSubwavesPage({
 
   return {
     waves: response.data.map((wave) => ({
-      ...mapApiWaveOverviewToSidebarWave(wave, serverSnapshotRequestStartedAt),
+      ...mapApiWaveOverviewToSidebarWave(wave),
       parentWaveId,
       hasSubwaves: false,
     })),
@@ -475,14 +467,11 @@ export async function fetchWaveSubwavesPage({
 }
 
 export async function fetchOfficialWaves(): Promise<SidebarWave[]> {
-  const serverSnapshotRequestStartedAt = Date.now();
   const response = await commonApiFetch<ApiWaveOverview[]>({
     endpoint: "v2/official-waves",
   });
 
-  return response.map((wave) =>
-    mapApiWaveOverviewToSidebarWave(wave, serverSnapshotRequestStartedAt)
-  );
+  return response.map(mapApiWaveOverviewToSidebarWave);
 }
 
 export async function fetchWaveMetadata({

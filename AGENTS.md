@@ -272,21 +272,6 @@ is available, use it; otherwise read the relevant files in
 - Operational scripts belong under `ops/scripts/`; app build/runtime scripts
   stay under top-level `scripts/` when existing tooling expects them there.
 
-## Test Layer Selection
-
-- Reserve Playwright for behavior that can fail only, or materially
-  differently, in a real browser: rendering, hydration, navigation,
-  responsive layout, accessibility, and browser/runtime integration.
-- Do not enumerate content-equivalent static routes in Playwright. Exercise
-  one representative route for each distinct rendering template and required
-  viewport; add another route only when it introduces a distinct browser risk.
-- Keep exhaustive route inventories, static content, metadata, source mapping,
-  link, and fail-closed invariants in fast Jest or other static contract tests.
-  The Museum suite is the reference pattern: exhaustive publication contracts
-  plus representative desktop/mobile browser smoke tests.
-- Before adding or expanding an E2E pack, identify the browser-specific failure
-  it catches and check that a lower test layer does not already cover it.
-
 ## Validation Matrix
 
 Prefer focused checks first. Escalate based on blast radius.

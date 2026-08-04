@@ -39,7 +39,6 @@ export default function CreateWaveModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          data-testid="create-wave-modal-backdrop"
           className="tw-fixed tw-inset-0 tw-z-[9999] tw-flex tw-items-start tw-justify-center tw-bg-gray-600 tw-bg-opacity-50 tw-px-4 tw-pb-4 tw-pt-[calc(env(safe-area-inset-top,0px)+1rem)] tw-backdrop-blur-[1px] lg:tw-items-center"
           onClick={onClose}
         >

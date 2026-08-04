@@ -1,20 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import CreateWaveOutcomesRowManual from '@/components/waves/create-wave/outcomes/winners/rows/manual/CreateWaveOutcomesRowManual';
 import { ApiWaveType } from '@/generated/models/ApiWaveType';
-import {
-  CreateWaveOutcomeType,
-  type CreateWaveOutcomeConfig,
-} from '@/types/waves.types';
+import type { CreateWaveOutcomeConfig } from '@/types/waves.types';
 
 jest.mock('@/components/waves/create-wave/outcomes/winners/rows/manual/CreateWaveOutcomesRowManualApprove', () => 
-  function MockApprove(props: {
-    readonly outcome: CreateWaveOutcomeConfig;
-    readonly removeOutcome: () => void;
-  }) {
+  function MockApprove(props: any) {
     return (
       <div 
         data-testid="manual-approve" 
-        data-outcome-type={props.outcome.type}
+        data-outcome-id={props.outcome.id}
       >
         Approve Component
         <button onClick={props.removeOutcome} data-testid="remove-approve">
@@ -26,14 +20,11 @@ jest.mock('@/components/waves/create-wave/outcomes/winners/rows/manual/CreateWav
 );
 
 jest.mock('@/components/waves/create-wave/outcomes/winners/rows/manual/CreateWaveOutcomesRowManualRank', () => 
-  function MockRank(props: {
-    readonly outcome: CreateWaveOutcomeConfig;
-    readonly removeOutcome: () => void;
-  }) {
+  function MockRank(props: any) {
     return (
       <div 
         data-testid="manual-rank" 
-        data-outcome-type={props.outcome.type}
+        data-outcome-id={props.outcome.id}
       >
         Rank Component
         <button onClick={props.removeOutcome} data-testid="remove-rank">
@@ -46,12 +37,9 @@ jest.mock('@/components/waves/create-wave/outcomes/winners/rows/manual/CreateWav
 
 describe('CreateWaveOutcomesRowManual', () => {
   const mockOutcome: CreateWaveOutcomeConfig = {
-    type: CreateWaveOutcomeType.MANUAL,
-    title: 'Outcome 1',
-    credit: null,
-    category: null,
-    winnersConfig: null,
-  };
+    id: 'outcome-1',
+    type: 'manual',
+  } as CreateWaveOutcomeConfig;
 
   const mockRemoveOutcome = jest.fn();
 
@@ -111,7 +99,7 @@ describe('CreateWaveOutcomesRowManual', () => {
     );
 
     const approveComponent = screen.getByTestId('manual-approve');
-    expect(approveComponent).toHaveAttribute('data-outcome-type', 'MANUAL');
+    expect(approveComponent).toHaveAttribute('data-outcome-id', 'outcome-1');
   });
 
   it('passes correct props to rank component', () => {
@@ -124,7 +112,7 @@ describe('CreateWaveOutcomesRowManual', () => {
     );
 
     const rankComponent = screen.getByTestId('manual-rank');
-    expect(rankComponent).toHaveAttribute('data-outcome-type', 'MANUAL');
+    expect(rankComponent).toHaveAttribute('data-outcome-id', 'outcome-1');
   });
 
   it('passes removeOutcome function to approve component', () => {
@@ -159,12 +147,10 @@ describe('CreateWaveOutcomesRowManual', () => {
 
   it('handles different outcome configurations', () => {
     const customOutcome: CreateWaveOutcomeConfig = {
-      type: CreateWaveOutcomeType.REP,
-      title: 'Custom outcome',
-      credit: 100,
-      category: 'custom',
-      winnersConfig: null,
-    };
+      id: 'custom-outcome',
+      type: 'custom',
+      description: 'Custom outcome',
+    } as CreateWaveOutcomeConfig;
 
     render(
       <CreateWaveOutcomesRowManual
@@ -175,7 +161,7 @@ describe('CreateWaveOutcomesRowManual', () => {
     );
 
     const approveComponent = screen.getByTestId('manual-approve');
-    expect(approveComponent).toHaveAttribute('data-outcome-type', 'REP');
+    expect(approveComponent).toHaveAttribute('data-outcome-id', 'custom-outcome');
   });
 
   it('maintains component mapping integrity', () => {

@@ -178,7 +178,7 @@ describe("CreateWaveOutcomesRow", () => {
         />
       );
 
-      expect(screen.getByTestId(expectedTestIds[index]!)).toBeInTheDocument();
+      expect(screen.getByTestId(expectedTestIds[index])).toBeInTheDocument();
 
       // Clean up for next iteration
       container.remove();

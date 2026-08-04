@@ -10,10 +10,10 @@ function workflow(name: string): string {
 
 const appPrCi = workflow("app-pr-ci.yml");
 const releaseBusPreflight = workflow("release-bus-v2-preflight.yml");
-const stagingWorkflow = workflow("deploy-staging.yml");
+const legacyStaging = workflow("deploy-staging.yml");
 const legacyProduction = workflow("build-upload-deploy-prod.yml");
-const stagingArtifactDeployScript = fs.readFileSync(
-  path.join(process.cwd(), "ops", "scripts", "deploy-staging-artifact.sh"),
+const stagingScript = fs.readFileSync(
+  path.join(process.cwd(), "scripts", "staging.sh"),
   "utf8"
 );
 const proxySource = fs.readFileSync(
@@ -99,38 +99,39 @@ describe("public-review artifact workflow contract", () => {
     expect(legacyProduction).toContain(
       'OptionName:"PUBLIC_REVIEW_DISCUSSION_DESTINATIONS"'
     );
-    expect(legacyProduction).toContain('--option-settings "$option_settings"');
+    expect(legacyProduction).toContain(
+      '--option-settings "$option_settings"'
+    );
   });
 
-  it("builds and deploys one exact manual staging artifact", () => {
-    expect(stagingWorkflow).toContain(
+  it("keeps legacy staging aligned with the public-review bundle contract", () => {
+    expect(legacyStaging).toContain(
       "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS }}"
     );
-    expect(stagingWorkflow).toContain('artifact_contract:"manual-staging-v1"');
-    expect(stagingWorkflow).toContain(`${helper} prepare`);
-    expect(stagingWorkflow).toContain(`${helper} assert-listing`);
-    expect(stagingWorkflow).toContain(`${helper} assert-zip`);
-    expect(stagingWorkflow).toContain("./bin/6529 run base-build");
-    expect(stagingWorkflow).toContain(
-      "bash ops/scripts/deploy-staging-artifact.sh"
-    );
-    expect(stagingWorkflow).toContain(
+    expect(legacyStaging).toContain(
       "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64"
     );
-    expect(stagingWorkflow).not.toContain(
+    expect(legacyStaging).toContain("base64 -d");
+    expect(legacyStaging).not.toContain(
       "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_PARAMETER"
     );
-    expect(stagingWorkflow).not.toContain("aws ssm get-parameter");
-    expect(stagingWorkflow).toContain('(has("production") | not)');
-    expect(stagingArtifactDeployScript).toContain(
-      "printf '%s' \"$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64\" | base64 -d"
+    expect(legacyStaging).not.toContain("aws ssm get-parameter");
+    expect(legacyStaging).toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE=$public_review_destinations_file"
     );
-    expect(stagingArtifactDeployScript).toContain(
-      "public-review-discussion-destinations.json"
+    expect(legacyStaging).toContain('(has("production") | not)');
+    expect(stagingScript).toContain(
+      'public_review_destinations_source="${PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE:-}"'
     );
-    expect(stagingArtifactDeployScript).toContain("pm2 startOrReload");
-    expect(stagingArtifactDeployScript).toContain(
-      'wait_for_local_version "$EXPECTED_SHA"'
+    expect(stagingScript).toContain(
+      "scripts/public-review-discussion-destinations.cjs"
+    );
+    expect(stagingScript).toContain("STANDALONE_ARTIFACT_PROFILE=staging");
+    expect(stagingScript).toContain(
+      "BASE_ENDPOINT=https://staging.6529.io \\\n  ./bin/6529 run build"
+    );
+    expect(stagingScript).toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_FILE="
     );
     expect(standaloneStart).toContain('"package-public-review-artifacts.cjs"');
     expect(standaloneStart).toContain('"prepare"');
@@ -197,8 +198,8 @@ describe("public-review artifact workflow contract", () => {
       "isPublicStreamReviewDataPath(req, pathname)"
     );
     expect(proxySource).toContain("rawPathname === pathname");
-    expect(stagingWorkflow).toContain(`${helper} prepare`);
-    expect(stagingWorkflow).toContain("--profile staging");
+    expect(stagingScript).toContain("./bin/6529 run build");
+    expect(stagingScript).toContain("./bin/6529 run start:standalone");
     expect(releaseBusPreflight).toContain(
       'build_profile "$ARTIFACT_ENVIRONMENT" release-bus-artifact'
     );

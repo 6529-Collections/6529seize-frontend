@@ -1,6 +1,9 @@
 name: Staging E2E
 
 on:
+  workflow_run:
+    workflows: ["Web Deploy - STAGING"]
+    types: [completed]
   workflow_dispatch:
     inputs:
       pack:
@@ -55,15 +58,11 @@ on:
       backend_sha: { type: string, required: false }
       frontend_artifact_digest: { type: string, required: false }
       backend_artifact_digest: { type: string, required: false }
-      automatic_deploy_run_id:
-        description: Internal successful Web Deploy - STAGING run id
-        type: string
-        required: false
 
 permissions:
   contents: read
 
-run-name: Staging E2E [${{ inputs.operation_key || (inputs.automatic_deploy_run_id && 'automatic') || 'manual' }}]
+run-name: Staging E2E [${{ inputs.operation_key || 'automatic' }}]
 
 concurrency:
   group: staging-e2e
@@ -75,73 +74,19 @@ concurrency:
 jobs:
   baseline-adoption-decision:
     name: Resolve pending baseline adoption
-    if: inputs.automatic_deploy_run_id != ''
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.head_branch == '1a-staging'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
-      actions: read
       contents: read
     outputs:
       decision: ${{ steps.decision.outputs.decision }}
-      deployed_ref: ${{ steps.deploy-run.outputs.deployed_ref }}
-      deployed_sha: ${{ steps.deploy-run.outputs.deployed_sha }}
-      deploy_workflow_run_id: ${{ steps.deploy-run.outputs.deploy_workflow_run_id }}
       manifest_ready: ${{ steps.decision.outputs.manifest_ready }}
     steps:
-      - name: Reject mixed automatic dispatch identity
-        env:
-          AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
-          BACKEND_ARTIFACT_DIGEST: ${{ inputs.backend_artifact_digest }}
-          BACKEND_SHA: ${{ inputs.backend_sha }}
-          EXPECTED_SHA: ${{ inputs.expected_sha }}
-          FRONTEND_ARTIFACT_DIGEST: ${{ inputs.frontend_artifact_digest }}
-          FRONTEND_SHA: ${{ inputs.frontend_sha }}
-          MANIFEST_ID: ${{ inputs.release_manifest_id }}
-          MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
-          OPERATION_KEY: ${{ inputs.operation_key }}
-          PACK: ${{ inputs.pack }}
-          SOURCE_REF: ${{ inputs.source_ref }}
-          TRAIN_ID: ${{ inputs.release_train_id }}
-          TRAIN_REVISION: ${{ inputs.release_train_revision }}
-        run: |
-          set -euo pipefail
-          [[ "$AUTOMATIC_DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
-          test "$PACK" = all
-          identity_values="$TRAIN_ID$TRAIN_REVISION$OPERATION_KEY$SOURCE_REF$EXPECTED_SHA$MANIFEST_ID$MANIFEST_IDENTITY$FRONTEND_SHA$BACKEND_SHA$FRONTEND_ARTIFACT_DIGEST$BACKEND_ARTIFACT_DIGEST"
-          test -z "$identity_values"
-
-      - name: Resolve successful automatic deploy
-        id: deploy-run
-        env:
-          AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          [[ "$AUTOMATIC_DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
-          response_file="$(mktemp)"
-          trap 'rm -f "$response_file"' EXIT
-          gh api \
-            "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}" \
-            > "$response_file"
-          jq -e \
-            --arg repository "$GITHUB_REPOSITORY" \
-            --argjson run_id "$AUTOMATIC_DEPLOY_RUN_ID" '
-              .id == $run_id and
-              .name == "Web Deploy - STAGING" and
-              .path == ".github/workflows/deploy-staging.yml" and
-              (.event == "push" or .event == "workflow_dispatch") and
-              .status == "completed" and
-              .conclusion == "success" and
-              .head_branch == "1a-staging" and
-              .repository.full_name == $repository and
-              (.head_sha | test("^[a-f0-9]{40}$"))
-            ' "$response_file" >/dev/null
-          {
-            printf 'deployed_ref=%s\n' "$(jq -r '.head_branch' "$response_file")"
-            printf 'deployed_sha=%s\n' "$(jq -r '.head_sha' "$response_file")"
-            printf 'deploy_workflow_run_id=%s\n' "$AUTOMATIC_DEPLOY_RUN_ID"
-          } >> "$GITHUB_OUTPUT"
-
       - name: Check out trusted decision client
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
@@ -166,9 +111,9 @@ jobs:
       - name: Resolve exact automatic E2E decision
         id: decision
         env:
-          DEPLOYED_REF: ${{ steps.deploy-run.outputs.deployed_ref }}
-          DEPLOYED_SHA: ${{ steps.deploy-run.outputs.deployed_sha }}
-          DEPLOY_WORKFLOW_RUN_ID: ${{ steps.deploy-run.outputs.deploy_workflow_run_id }}
+          DEPLOYED_REF: ${{ github.event.workflow_run.head_branch }}
+          DEPLOYED_SHA: ${{ github.event.workflow_run.head_sha }}
+          DEPLOY_WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
         run: |
@@ -196,15 +141,21 @@ jobs:
   staging-packs:
     name: Staging E2E packs
     needs: baseline-adoption-decision
-    # Automatic runs must resolve to a successful same-repository staging
-    # deployment. Manual and Release Bus dispatches retain their own guards.
+    # Trust gate: this job holds a secret and executes checked-out code, so
+    # workflow_run triggers must come from this repository's own 1a-staging
+    # branch (staging deploys are push-triggered; forks cannot push there).
+    # The explicit head_repository/head_branch conditions keep that invariant
+    # enforced even if the upstream deploy workflow's triggers ever change.
     if: >-
       always() &&
       (
-        inputs.automatic_deploy_run_id == '' ||
+        github.event_name == 'workflow_dispatch' ||
         (
           needs.baseline-adoption-decision.result == 'success' &&
-          needs.baseline-adoption-decision.outputs.decision == 'LEGACY'
+          needs.baseline-adoption-decision.outputs.decision == 'LEGACY' &&
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.head_repository.full_name == github.repository &&
+          github.event.workflow_run.head_branch == '1a-staging'
         )
       )
     runs-on: ubuntu-latest
@@ -214,6 +165,7 @@ jobs:
       SELECTED_PACK: ${{ github.event.inputs.pack || 'all' }}
     steps:
       - name: Reject partial Release Bus identity
+        if: github.event_name == 'workflow_dispatch'
         env:
           BACKEND_ARTIFACT_DIGEST: ${{ inputs.backend_artifact_digest }}
           BACKEND_SHA: ${{ inputs.backend_sha }}
@@ -282,13 +234,14 @@ jobs:
             --data "$payload" \
             "$RELEASE_BUS_API_URL/deploy/release-bus-v2/authorize"
 
-      # Automatic dispatch resolves the exact SHA the successful staging deploy
-      # shipped. Manual dispatch falls back to the selected ref, which may
-      # differ from staging; prefer the deploy-triggered path for SHA fidelity.
+      # workflow_run: the exact SHA the staging deploy shipped. Manual
+      # dispatch falls back to the branch tip, which may differ from what is
+      # currently deployed to staging — fine for ad-hoc reruns, but prefer
+      # letting the deploy trigger this workflow for deployed-SHA fidelity.
       - name: Check out the deployed ref
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          ref: ${{ inputs.expected_sha || needs.baseline-adoption-decision.outputs.deployed_sha || github.sha }}
+          ref: ${{ inputs.expected_sha || github.event.workflow_run.head_sha || github.sha }}
           persist-credentials: false
 
       - name: Verify Release Bus immutable source
@@ -328,17 +281,6 @@ jobs:
           corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
           pnpm --version
 
-      - name: Restore pnpm store
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-node22-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node22-pnpm-
-
-      - name: Use cached pnpm store
-        run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
-
       - name: Install Socket Firewall
         id: socket-firewall
         continue-on-error: true
@@ -357,26 +299,11 @@ jobs:
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
         run: node "$RELEASE_BUS_INSTALL_TOOL"
 
-      - name: Restore Playwright browser
-        if: steps.dependencies.outcome == 'success'
-        id: playwright-cache
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
-
       - name: Install Playwright browser
         if: steps.dependencies.outcome == 'success'
         id: playwright
         continue-on-error: true
-        env:
-          PLAYWRIGHT_CACHE_HIT: ${{ steps.playwright-cache.outputs.cache-hit }}
-        run: |
-          if [ "$PLAYWRIGHT_CACHE_HIT" = true ]; then
-            ./bin/6529 exec playwright install-deps chromium
-          else
-            ./bin/6529 exec playwright install --with-deps chromium
-          fi
+        run: ./bin/6529 exec playwright install --with-deps chromium
 
       - name: Run staging packs against staging.6529.io
         if: steps.dependencies.outcome == 'success' && steps.playwright.outcome == 'success'
@@ -402,7 +329,7 @@ jobs:
               }
             ' <<< "$runner_capabilities" >/dev/null
           then
-            args+=(--parallel 4)
+            args+=(--parallel 3)
           fi
           if [ "${SELECTED_PACK:-all}" != all ]; then
             args+=(--pack "$SELECTED_PACK")
@@ -436,7 +363,7 @@ jobs:
             .schema_version == "release-bus-e2e-packs.v1" and
             .environment == "staging" and
             .trigger == "post-deploy" and
-            (.worker_count | type == "number" and . >= 1 and . <= 4) and
+            (.worker_count | type == "number" and . >= 1 and . <= 3) and
             .pack_count == ($expected | length) and
             (.results | map(.script_key)) == $expected and
             (.results | map(.script_key) | unique | length) == .pack_count and

@@ -2,9 +2,13 @@
 
 ## Overview
 
-The 6529 Network Museum presents accessioned art, collection scholarship, and
-institutional records at `/museum/network`. Its public pages are assembled from
-one verified release of the
+The 6529 Network Museum is the public art museum of the 6529 Network. Its
+homepage at `/museum/network` presents the institution as a public museum for a
+network state, then moves directly into accessioned art, collection pathways,
+programs, scholarship, and the public record. The complete institutional
+proposition is available at `/museum/network/about`.
+
+Public pages are assembled from one verified edition of the
 [`6529networkmuseum`](https://github.com/6529-Collections/6529networkmuseum)
 repository. Each page identifies its source release and offers a route for
 proposing corrections or additions.
@@ -16,12 +20,19 @@ records.
 
 ## Features
 
+- [Public Museum proposition](feature-public-museum-proposition.md): the
+  homepage hierarchy, Network ownership and TDH governance, present operating
+  boundaries, on-chain direction, permanence objective, and public-record
+  links.
 - [Institutional practice](feature-institutional-practice.md): the comparative
   essay, twenty-seven profiles, an adjacent-practice study, the Museum's public
   scholarship and editorial standard, and the primary-source register.
 
 ## Flows
 
+- The [public Museum guide](feature-public-museum-proposition.md#user-journey)
+  follows the route from the homepage proposition and featured artwork to the
+  complete institutional page and public record.
 - The [institutional-practice guide](feature-institutional-practice.md#user-journey)
   follows the route from the study index to a profile, its citations, the
   source register, and the public contribution links.
