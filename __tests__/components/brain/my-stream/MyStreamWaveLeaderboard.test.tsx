@@ -470,6 +470,12 @@ describe("MyStreamWaveLeaderboard", () => {
     renderLeaderboard();
 
     expect(headerProps.viewMode).toBe("grid");
+    expect(screen.getByTestId("header")).toBeInTheDocument();
+    expect(getLeaderboardControlsFrame()).toHaveClass(
+      "tw-max-w-full",
+      "!tw-flex-[1_0_15rem]",
+      "lg:!tw-flex-[1_0_27rem]"
+    );
     expect(galleryProps.isVotingClosed).toBe(false);
     expect(galleryProps.isVotingControlsLocked).toBe(false);
     await user.click(screen.getByTestId("header"));
