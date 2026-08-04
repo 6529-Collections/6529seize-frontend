@@ -110,3 +110,17 @@
 - Second-follow-up validation passed: 94 focused workflow, E2E-pack, and
   Markdown tests; changed lint and typecheck (1,264 files); Playwright
   typecheck; and the portable diff check.
+- Exact-head optimized production build passed in 414 seconds. Hosted Sonar
+  also passed after the profile-contract refactor removed the 98 duplicated
+  new lines.
+- Hosted installed-app validation then found a deterministic Release Bus
+  performance-contract drift: the new read-only Museum pack raised the
+  post-deploy inventory from 12 to 13 packs in staging and from 11 to 12 in
+  production. The declared counts now match the manifest; the no-duplicate-spec
+  and read-only invariants remain unchanged.
+- The corrected performance contract and pack manifest pass 29/29 focused
+  tests. A wider Windows replay also showed the repository's platform-specific
+  `O_NOFOLLOW`, stripped-`gh` PATH, and shell-fixture limitations in unrelated
+  contract suites; those same suites had passed in the preceding hosted Linux
+  job. Fresh hosted Linux validation is authoritative for the two-file
+  contract-only follow-up.
