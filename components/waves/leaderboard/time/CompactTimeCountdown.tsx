@@ -34,7 +34,7 @@ export const CompactTimeCountdown: React.FC<CompactTimeCountdownProps> = ({
         Next winner in {accessibleCountdown}
       </span>
       <span
-        className="tw-whitespace-nowrap tw-font-medium tw-text-iron-500"
+        className="tw-hidden tw-whitespace-nowrap tw-font-medium tw-text-iron-500 @[20rem]/timeline:tw-inline"
         aria-hidden="true"
       >
         Next winner
