@@ -726,7 +726,7 @@ jobs:
 
   notify-prerequisite-failure:
     name: Notify about staging prerequisite failure
-    needs: [manual-deployment-guard, deploy-staging]
+    needs: [manual-deployment-guard]
     if: always() && needs.manual-deployment-guard.result == 'failure'
     runs-on: ubuntu-latest
     timeout-minutes: 5

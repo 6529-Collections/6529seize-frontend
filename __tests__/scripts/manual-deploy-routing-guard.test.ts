@@ -325,14 +325,14 @@ describe("frontend manual deployment routing guards", () => {
     const checkout = notification.steps.find(
       ({ name }) => name === "Check out CI wave notifier"
     );
+    const verification = notification.steps.find(
+      ({ name }) => name === "Verify CI wave notifier checkout"
+    );
     const failureNotifications = notification.steps.filter(
       ({ name }) => name === "Notify CI wave about failure"
     );
 
-    expect(notification.needs).toEqual([
-      "manual-deployment-guard",
-      "deploy-staging",
-    ]);
+    expect(notification.needs).toEqual(["manual-deployment-guard"]);
     expect(notification.if).toBe(
       "always() && needs.manual-deployment-guard.result == 'failure'"
     );
@@ -344,6 +344,12 @@ describe("frontend manual deployment routing guards", () => {
       "sparse-checkout": "scripts/notify-ci-wave.mjs",
       "sparse-checkout-cone-mode": false,
     });
+    expect(verification).toMatchObject({
+      run: expect.stringContaining(
+        "test -f .ci-wave-notifier/scripts/notify-ci-wave.mjs"
+      ),
+    });
+    expect(verification?.["continue-on-error"]).toBeUndefined();
     expect(failureNotifications).toHaveLength(1);
     expect(failureNotifications[0]).toMatchObject({
       if: "hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''",
@@ -380,6 +386,9 @@ describe("frontend manual deployment routing guards", () => {
     const checkout = notification.steps.find(
       ({ name }) => name === "Check out CI wave notifier"
     );
+    const verification = notification.steps.find(
+      ({ name }) => name === "Verify CI wave notifier checkout"
+    );
     const discordNotifications = notification.steps.filter(
       ({ name }) => name === "Notify about failure"
     );
@@ -390,7 +399,6 @@ describe("frontend manual deployment routing guards", () => {
     expect(notification.needs).toEqual([
       "manual-deployment-guard",
       "assert-main-ref",
-      "build-upload-deploy",
     ]);
     expect(notification.if).toBe(
       "always() && (needs.manual-deployment-guard.result == 'failure' || needs.assert-main-ref.result == 'failure')"
@@ -403,6 +411,12 @@ describe("frontend manual deployment routing guards", () => {
       "sparse-checkout": "scripts/notify-ci-wave.mjs",
       "sparse-checkout-cone-mode": false,
     });
+    expect(verification).toMatchObject({
+      run: expect.stringContaining(
+        "test -f .ci-wave-notifier/scripts/notify-ci-wave.mjs"
+      ),
+    });
+    expect(verification?.["continue-on-error"]).toBeUndefined();
     expect(discordNotifications).toHaveLength(1);
     expect(discordNotifications[0]).toMatchObject({
       uses: "sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708",

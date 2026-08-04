@@ -721,7 +721,7 @@ jobs:
 
   notify-prerequisite-failure:
     name: Notify about production prerequisite failure
-    needs: [manual-deployment-guard, assert-main-ref, build-upload-deploy]
+    needs: [manual-deployment-guard, assert-main-ref]
     if: >-
       always() &&
       (needs.manual-deployment-guard.result == 'failure' ||
