@@ -247,7 +247,7 @@ function MonthDayCell({
     <>
       <span
         className={`tw-inline-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full max-[429px]:tw-hidden ${
-          isToday ? "tw-bg-emerald-500" : ""
+          isToday ? "tw-bg-emerald-400 tw-ring-2 tw-ring-emerald-400/20" : ""
         }`}
       >
         {day}
@@ -255,7 +255,7 @@ function MonthDayCell({
       <span
         className={`tw-hidden tw-max-w-full tw-truncate max-[429px]:tw-inline-flex ${
           isToday
-            ? "tw-items-center tw-justify-center tw-rounded-full tw-bg-emerald-500 tw-px-2.5 tw-py-1"
+            ? "tw-items-center tw-justify-center tw-rounded-full tw-bg-emerald-400 tw-px-2.5 tw-py-1 tw-ring-2 tw-ring-emerald-400/20"
             : ""
         }`}
       >
@@ -289,7 +289,7 @@ function MonthDayCell({
     <button
       type="button"
       id={`meme-cell-${ymd(cellDateUtcDay)}`}
-      className="tw-grid tw-min-h-11 tw-w-full tw-cursor-pointer tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/60 tw-px-3 tw-py-1.5 tw-text-left tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900 min-[430px]:tw-flex min-[430px]:tw-min-h-12 min-[430px]:tw-flex-col min-[430px]:tw-justify-start min-[430px]:tw-gap-0 min-[430px]:tw-rounded-md min-[430px]:tw-px-0"
+      className="tw-grid tw-min-h-11 tw-w-full tw-cursor-pointer tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/30 tw-px-3 tw-py-1.5 tw-text-left tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-iron-700/70 desktop-hover:hover:tw-bg-iron-900/60 min-[430px]:tw-flex min-[430px]:tw-min-h-12 min-[430px]:tw-flex-col min-[430px]:tw-justify-start min-[430px]:tw-gap-0 min-[430px]:tw-rounded-md min-[430px]:tw-px-0"
       data-tooltip-id="meme-tooltip"
       data-tooltip-html={tooltip.html}
       data-tooltip-class-name={tooltip.className}
