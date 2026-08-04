@@ -56,35 +56,37 @@ describe("MuseumSourceContribution", () => {
       />
     );
 
-    expect(screen.getByText(/source commit aaaaaaaaaaaa/u)).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "View primary source" })
+      screen.getByText(/public record at commit aaaaaaaaaaaa/u)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Read the source" })
     ).toHaveAttribute(
       "href",
       `https://github.com/6529-Collections/6529networkmuseum/blob/${COMMIT}/records/accessions/6529NM.2026.001/public/6529NM.2026.001.01.md`
     );
     expect(
-      screen.getByRole("link", { name: "Suggest an improvement" })
+      screen.getByRole("link", { name: "Propose an edit" })
     ).toHaveAttribute(
       "href",
       "https://github.com/6529-Collections/6529networkmuseum/edit/main/records/accessions/6529NM.2026.001/public/6529NM.2026.001.01.md"
     );
     expect(
-      screen.getByRole("link", { name: "Contribution guide" })
+      screen.getByRole("link", { name: "Contributor guide" })
     ).toHaveAttribute(
       "href",
       "https://github.com/6529-Collections/6529networkmuseum/blob/main/CONTRIBUTING.md"
     );
     expect(
       screen.getByRole("link", {
-        name: /Machine record: exact source.*objects\/6529NM\.2026\.001\.01\.json/u,
+        name: /Structured record: exact source.*objects\/6529NM\.2026\.001\.01\.json/u,
       })
     ).toHaveAttribute(
       "href",
       `https://github.com/6529-Collections/6529networkmuseum/blob/${COMMIT}/records/accessions/6529NM.2026.001/objects/6529NM.2026.001.01.json`
     );
-    expect(screen.getByText("Related sources")).toBeInTheDocument();
-    expect(screen.getByText("Machine record")).toHaveAttribute(
+    expect(screen.getByText("Related records")).toBeInTheDocument();
+    expect(screen.getByText("Structured record")).toHaveAttribute(
       "title",
       "records/accessions/6529NM.2026.001/objects/6529NM.2026.001.01.json"
     );
@@ -100,8 +102,10 @@ describe("MuseumSourceContribution", () => {
     );
 
     expect(
-      screen.getByText(/last verified public Museum source/u)
-    ).toHaveTextContent("aaaaaaaaaaaa");
+      screen.getByText(/latest verified release available here/u)
+    ).toHaveTextContent(
+      "aaaaaaaaaaaa, the latest verified release available here. A source refresh is in progress."
+    );
   });
 
   it("does not make an immutable claim without a verified publication", () => {
@@ -115,13 +119,13 @@ describe("MuseumSourceContribution", () => {
 
     expect(screen.queryByText(/commit/u)).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: "View primary source" })
+      screen.queryByRole("link", { name: "Read the source" })
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: "Suggest an improvement" })
+      screen.queryByRole("link", { name: "Propose an edit" })
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Contribution guide" })
+      screen.getByRole("link", { name: "Contributor guide" })
     ).toBeInTheDocument();
   });
 
@@ -137,23 +141,21 @@ describe("MuseumSourceContribution", () => {
       );
 
       expect(
-        screen.getByText(
-          /exact verified Museum source is temporarily unavailable/u
-        )
+        screen.getByText(/verified Museum source is temporarily unavailable/u)
       ).toBeInTheDocument();
       expect(
-        screen.queryByRole("link", { name: "View primary source" })
+        screen.queryByRole("link", { name: "Read the source" })
       ).not.toBeInTheDocument();
       expect(
-        screen.queryByRole("link", { name: "Suggest an improvement" })
+        screen.queryByRole("link", { name: "Propose an edit" })
       ).not.toBeInTheDocument();
       expect(
         screen.queryByRole("link", {
-          name: /Machine record: exact source.*objects\/6529NM\.2026\.001\.01\.json/u,
+          name: /Structured record: exact source.*objects\/6529NM\.2026\.001\.01\.json/u,
         })
       ).not.toBeInTheDocument();
       expect(
-        screen.getByRole("link", { name: "Contribution guide" })
+        screen.getByRole("link", { name: "Contributor guide" })
       ).toBeInTheDocument();
     }
   );
@@ -170,16 +172,16 @@ describe("MuseumSourceContribution", () => {
     );
 
     expect(
-      screen.getByText(/no exact page-source mapping/u)
+      screen.getByText(/Page-level source: unassigned/u)
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: "View primary source" })
+      screen.queryByRole("link", { name: "Read the source" })
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: "Suggest an improvement" })
+      screen.queryByRole("link", { name: "Propose an edit" })
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Contribution guide" })
+      screen.getByRole("link", { name: "Contributor guide" })
     ).toBeInTheDocument();
   });
 });
