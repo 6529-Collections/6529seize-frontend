@@ -84,7 +84,7 @@ async function dispatchAndWait({
   sleep,
   now,
 }) {
-  const notBefore = Math.floor(now() / 1000) * 1000;
+  const notBefore = Math.floor(now() / 1000) * 1000 - 1000;
   await github.dispatchWorkflow(workflow, ref, inputs);
   return waitForWorkflow({
     github,

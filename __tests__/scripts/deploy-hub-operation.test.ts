@@ -313,7 +313,7 @@ describe("Deploy Hub remove from staging", () => {
         _ref: string,
         inputs: Record<string, string>
       ) {
-        correlation = inputs.deploy_hub_operation_id;
+        correlation = inputs["deploy_hub_operation_id"] ?? "";
       },
       async listWorkflowRuns(workflowName: string) {
         const restoring = correlation.includes("remove-restore");
@@ -403,9 +403,71 @@ describe("Deploy Hub remove from staging", () => {
     });
     expect(result).toMatchObject({ conclusion: "failure", stagingSha: SHA_E });
     expect(harness.forwardContent).toHaveBeenCalledTimes(2);
+    expect(parseComposition(harness.forwardContent.mock.calls[1][2])).toEqual({
+      baseSha: SHA_D,
+      requests: [{ pr: 123, sha: SHA_A }],
+    });
     expect(harness.statuses.at(-1)).toMatchObject({
       state: "success",
       description: "Still in staging at eeeeeeeeeeee",
+    });
+  });
+
+  it("stops before removal without touching staging", async () => {
+    const statuses: Array<Record<string, unknown>> = [];
+    let statusReads = 0;
+    const github = {
+      async getCollaboratorPermission() {
+        return { permission: "write" };
+      },
+      async getPullRequest() {
+        return {
+          state: "open",
+          merged: false,
+          merged_at: null,
+          base: { ref: "main" },
+          head: { sha: SHA_A },
+        };
+      },
+      async getCombinedStatus() {
+        statusReads += 1;
+        return {
+          statuses:
+            statusReads === 2
+              ? [{ context: stopContext("remove-123"), state: "pending" }]
+              : [],
+        };
+      },
+      async createCommitStatus(sha: string, status: Record<string, unknown>) {
+        statuses.push({ sha, ...status });
+      },
+    };
+    const git = {
+      remoteSha: jest.fn(),
+      fetchExact: jest.fn(),
+      readCommitMessage: jest.fn(),
+      mergeContent: jest.fn(),
+      forwardContent: jest.fn(),
+      pushStaging: jest.fn(),
+    };
+    const result = await executeRemoveFromStaging({
+      operationId: "remove-123",
+      manifestJson: JSON.stringify([request()]),
+      repository: EXPECTED_REPOSITORY,
+      baseRef: "main",
+      actor: ACTOR,
+      runId: "12345",
+      runUrl: RUN_URL,
+      confirmation: "REMOVE",
+      github,
+      git,
+    });
+    expect(result.conclusion).toBe("stopped");
+    expect(git.remoteSha).not.toHaveBeenCalled();
+    expect(statuses.at(-1)).toMatchObject({
+      target_url: RUN_URL,
+      state: "error",
+      description: "Stopped before staging removal",
     });
   });
 });
@@ -440,7 +502,7 @@ describe("Deploy Hub tracked staging deploy", () => {
         _ref: string,
         inputs: Record<string, string>
       ) {
-        correlation = inputs.deploy_hub_operation_id;
+        correlation = inputs["deploy_hub_operation_id"] ?? "";
       },
       async listWorkflowRuns(workflowName: string) {
         return {

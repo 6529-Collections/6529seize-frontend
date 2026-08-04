@@ -124,6 +124,7 @@ async function executeRemoveFromStaging(options) {
     await publishStatus(
       github,
       requests,
+      runUrl,
       "error",
       "Stopped before staging removal"
     );
