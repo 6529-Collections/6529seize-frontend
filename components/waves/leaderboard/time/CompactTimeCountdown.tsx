@@ -29,12 +29,12 @@ export const CompactTimeCountdown: React.FC<CompactTimeCountdownProps> = ({
     .join(", ");
 
   return (
-    <span className="tw-inline-flex tw-flex-shrink-0 tw-items-baseline tw-gap-1 tw-text-[11px] tw-leading-none">
+    <span className="tw-inline-flex tw-flex-shrink-0 tw-items-baseline tw-gap-1 tw-text-xs tw-leading-none">
       <span className="tw-sr-only">
         Next winner in {accessibleCountdown}
       </span>
       <span
-        className="tw-hidden tw-whitespace-nowrap tw-font-medium tw-text-iron-500 @[25rem]/timeline:tw-inline"
+        className="tw-whitespace-nowrap tw-font-medium tw-text-iron-500"
         aria-hidden="true"
       >
         Next winner

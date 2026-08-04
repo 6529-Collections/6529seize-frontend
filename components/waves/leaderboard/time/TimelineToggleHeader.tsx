@@ -31,14 +31,6 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
 }) => {
   const locale = useBrowserLocale();
   const hasNextDecision = typeof nextDecisionTime === "number";
-  const formattedNextDecisionDate = hasNextDecision
-    ? new Date(nextDecisionTime).toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : null;
 
   // Extract the status display logic
   const getStatusDisplay = () => {
@@ -63,18 +55,7 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
     }
 
     if (hasNextDecision) {
-      return (
-        <span className="tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-justify-end tw-gap-1">
-          <CompactTimeCountdown timeLeft={timeLeft} />
-          <span
-            className="tw-hidden tw-h-3 tw-w-px tw-flex-shrink-0 tw-bg-white/[0.12] @[30rem]/timeline:tw-block"
-            aria-hidden="true"
-          />
-          <span className="tw-hidden tw-flex-shrink-0 tw-whitespace-nowrap tw-text-[11px] tw-font-medium tw-leading-none tw-text-iron-500 @[30rem]/timeline:tw-inline">
-            {formattedNextDecisionDate}
-          </span>
-        </span>
-      );
+      return <CompactTimeCountdown timeLeft={timeLeft} />;
     }
 
     return (

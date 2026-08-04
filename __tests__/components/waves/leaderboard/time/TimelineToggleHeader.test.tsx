@@ -46,6 +46,10 @@ describe("TimelineToggleHeader", () => {
       </SeizeSettingsProvider>
     );
     expect(screen.getByText("Decision Timeline")).toBeInTheDocument();
+    expect(screen.getByText("Next winner")).toBeInTheDocument();
+    expect(screen.getByText("Next winner").parentElement).toHaveClass(
+      "tw-text-xs"
+    );
     const toggle = screen.getByRole("button", {
       name: "Toggle decision timeline",
     });
