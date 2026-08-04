@@ -54,7 +54,7 @@ const PROFILE_FOCUS_KEYS = {
 const METADATA_LINE = /^-\s+\*\*([^*]+):\*\*\s+(.+)$/u;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/u;
 
-export interface InstitutionalPracticeManuscriptProjection {
+interface InstitutionalPracticeManuscriptProjection {
   readonly title: string;
   readonly subtitle: string | null;
   readonly author: string;

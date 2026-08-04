@@ -77,3 +77,7 @@
   omitted the repository's DCO trailer. This is a commit-metadata defect, not a
   product, content, or validation finding. The head is being replaced with an
   otherwise identical signed and signed-off commit before substantive review.
+- The superseded head's installed-app job identified three module-internal
+  declarations exposed from their files. Their `export` modifiers were removed;
+  the declarations, runtime graph, publication contract, copy, and pixels are
+  unchanged. Fresh exact-head Knip is authoritative.

@@ -21,7 +21,7 @@ interface InstitutionProfileContract extends InstitutionalPracticeDocumentContra
   readonly kind: "institution_profile";
 }
 
-export const INSTITUTIONAL_PRACTICE_OVERVIEW_CONTRACT = {
+const INSTITUTIONAL_PRACTICE_OVERVIEW_CONTRACT = {
   id: "institutional-practice:a-field-of-practice",
   path: "records/institutional-practice/a-field-of-practice.md",
   title: "A field of practice",
@@ -129,7 +129,7 @@ export const INSTITUTIONAL_PRACTICE_PROFILE_CONTRACTS = [
   },
 ] as const satisfies readonly InstitutionProfileContract[];
 
-export const INSTITUTIONAL_PRACTICE_SOURCE_REGISTER_CONTRACT = {
+const INSTITUTIONAL_PRACTICE_SOURCE_REGISTER_CONTRACT = {
   id: "institutional-practice:source-register",
   path: "records/institutional-practice/source-register.md",
   title: "Source register: A field of practice",
