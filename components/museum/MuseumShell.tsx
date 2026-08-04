@@ -62,6 +62,7 @@ export function MuseumShell({
         <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-[1324px] tw-flex-col tw-gap-4 tw-px-4 tw-py-5 sm:tw-px-6 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between lg:tw-px-8">
           <Link
             href="/museum/network"
+            prefetch={false}
             className="tw-flex tw-min-h-11 tw-items-center tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           >
             6529 Network Museum
@@ -78,6 +79,7 @@ export function MuseumShell({
                 <li key={href}>
                   <Link
                     href={href}
+                    prefetch={false}
                     className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-medium tw-text-iron-300 tw-no-underline tw-transition-colors tw-duration-150 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
                   >
                     {t(DEFAULT_LOCALE, labelKey)}
