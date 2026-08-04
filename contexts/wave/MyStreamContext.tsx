@@ -37,10 +37,12 @@ import useWaveMessagesStore from "./hooks/useWaveMessagesStore";
 import type { NextPageProps } from "./hooks/useWavePagination";
 import type { ProcessIncomingDropType } from "./hooks/useWaveRealtimeUpdater";
 import { useWaveRealtimeUpdater } from "./hooks/useWaveRealtimeUpdater";
+import { DmUnreadCountProvider } from "./DmUnreadCountContext";
 
 // Define nested structures for context data
 interface WavesContextData {
   readonly list: MinimalWave[];
+  readonly unreadCount: number;
   readonly isFetching: boolean;
   readonly isFetchingNextPage: boolean;
   readonly hasNextPage: boolean;
@@ -195,10 +197,6 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const pathname = usePathname() as string | null;
   const { activeWaveId, hasActiveWaveDropTarget, setActiveWave } =
     useActiveWaveManager();
-  const [
-    directMessagesListActivationCount,
-    setDirectMessagesListActivationCount,
-  ] = useState(0);
   const isDirectMessagesRoute = pathname?.startsWith("/messages") ?? false;
   const isWaveDetailRoute = pathname?.startsWith("/waves/") ?? false;
   const isDirectMessageDetailRoute =
@@ -211,17 +209,16 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const hasMainWavesListBeenRequestedRef = useRef(false);
   const isMainWavesListEnabled =
     !shouldDeferMainWavesList || hasMainWavesListBeenRequested;
-  const isDirectMessagesListEnabled =
-    isDirectMessagesRoute || directMessagesListActivationCount > 0;
   const { wave: activeWaveData } = useWaveById(activeWaveId, {
     enabled: Boolean(activeWaveId),
   });
   const mainWavesData = useWavesList({
     enabled: isMainWavesListEnabled,
   });
-  const dmWavesData = useDmWavesList({
-    enabled: isDirectMessagesListEnabled,
-  });
+  // DM unread state is global navigation state. Keep its first page and
+  // websocket counter active on every authenticated route so desktop, mobile,
+  // quick chat, and conversation rows all consume the same live source.
+  const dmWavesData = useDmWavesList();
   const mainWaveIds = useMemo<ReadonlySet<string>>(
     () => new Set(mainWavesData.waves.map((wave) => wave.id)),
     [mainWavesData.waves]
@@ -261,22 +258,24 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     preserveBackendWaveOrder: true,
   });
   const dmWavesHookData = useEnhancedWavesListCore(activeWaveId, dmWavesData, {
-    enabled: isDirectMessagesListEnabled,
     supportsPinning: false,
     stateIdentityKey: dmWavesData.viewerIdentityKey,
     otherListWaveIds: mainWaveIds,
     sortMutedLast: false,
+    serverUnreadCount: dmWavesData.serverUnreadCountForIndicators,
     trustServerSnapshotUnreadState:
       dmWavesData.canTrustServerSnapshotUnreadState,
   });
   const waveMessagesStore = useWaveMessagesStore();
-  const { setKnownWaveScopes } = waveMessagesStore;
+  const { replaceKnownWaveScopes } = waveMessagesStore;
   useLayoutEffect(() => {
-    setKnownWaveScopes({
+    // This synchronizes imperative cache classification refs; it does not
+    // derive React state from props.
+    replaceKnownWaveScopes({
       profileScopedWaveIds,
       publicWaveIds,
     });
-  }, [profileScopedWaveIds, publicWaveIds, setKnownWaveScopes]);
+  }, [profileScopedWaveIds, publicWaveIds, replaceKnownWaveScopes]);
   const websocketStatus = useWebsocketStatus();
   const prevIsActiveRef = useRef(isActive);
   const lastBrowserResumeSyncAtRef = useRef(0);
@@ -318,19 +317,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     return () => {};
   }, [enableMainWavesList]);
 
-  const requestDirectMessagesList = useCallback(() => {
-    let didRelease = false;
-    setDirectMessagesListActivationCount((count) => count + 1);
-
-    return () => {
-      if (didRelease) {
-        return;
-      }
-
-      didRelease = true;
-      setDirectMessagesListActivationCount((count) => Math.max(0, count - 1));
-    };
-  }, []);
+  const requestDirectMessagesList = useCallback(() => () => {}, []);
 
   useEffect(() => {
     if (!shouldDeferMainWavesList || isMainWavesListEnabled) {
@@ -395,9 +382,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       });
     }
     refetchAllMainWaves();
-    if (isDirectMessagesListEnabled) {
-      refetchAllDmWaves();
-    }
+    refetchAllDmWaves();
   });
 
   const runBrowserResumeSync = useEffectEvent(() => {
@@ -421,18 +406,14 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
 
     if (isCapacitor) {
       resetAllMainWavesNewDropsCount();
-      if (isDirectMessagesListEnabled) {
-        resetAllDmWavesNewDropsCount();
-      }
+      resetAllDmWavesNewDropsCount();
     }
   });
 
   const handleCapacitorResume = useEffectEvent(() => {
     syncActiveWaveAndRefetch();
     resetAllMainWavesNewDropsCount();
-    if (isDirectMessagesListEnabled) {
-      resetAllDmWavesNewDropsCount();
-    }
+    resetAllDmWavesNewDropsCount();
   });
 
   useEffect(() => {
@@ -518,6 +499,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
 
     const waves: WavesContextData = {
       list: wavesHookData.waves,
+      unreadCount: wavesHookData.unreadCount,
       isFetching: wavesHookData.isFetching,
       isFetchingNextPage: wavesHookData.isFetchingNextPage,
       hasNextPage: wavesHookData.hasNextPage,
@@ -533,6 +515,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
 
     const directMessages: WavesContextData = {
       list: dmWavesHookData.waves,
+      unreadCount: dmWavesHookData.unreadCount,
       isFetching: dmWavesHookData.isFetching,
       isFetchingNextPage: dmWavesHookData.isFetchingNextPage,
       hasNextPage: dmWavesHookData.hasNextPage,
@@ -584,6 +567,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     };
   }, [
     wavesHookData.waves,
+    wavesHookData.unreadCount,
     wavesHookData.isFetching,
     wavesHookData.isFetchingNextPage,
     wavesHookData.hasNextPage,
@@ -596,6 +580,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     wavesHookData.markWaveRead,
     wavesHookData.restoreWaveUnreadCount,
     dmWavesHookData.waves,
+    dmWavesHookData.unreadCount,
     dmWavesHookData.isFetching,
     dmWavesHookData.isFetchingNextPage,
     dmWavesHookData.hasNextPage,
@@ -630,9 +615,11 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   ]);
 
   return (
-    <MyStreamContext.Provider value={contextValue}>
-      {children}
-    </MyStreamContext.Provider>
+    <DmUnreadCountProvider unreadCount={dmWavesHookData.unreadCount}>
+      <MyStreamContext.Provider value={contextValue}>
+        {children}
+      </MyStreamContext.Provider>
+    </DmUnreadCountProvider>
   );
 };
 

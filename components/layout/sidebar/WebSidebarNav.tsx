@@ -11,7 +11,6 @@ import {
   DROP_FORGE_TITLE,
 } from "@/components/drop-forge/drop-forge.constants";
 import type { SidebarSection } from "@/components/navigation/navTypes";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useSectionMap, useSidebarSections } from "@/hooks/useSidebarSections";
@@ -59,11 +58,9 @@ const WebSidebarNav = React.forwardRef<
   const { connectedProfile } = useAuth();
   const { appWalletsSupported } = useAppWallets();
   const { canAccessLanding: showDropForge } = useDropForgePermissions();
-  const myStream = useMyStreamOptional();
   const { hasUnread: hasUnreadMessages } = useUnreadIndicator({
     type: "messages",
     handle: connectedProfile?.handle ?? null,
-    localDirectMessages: myStream?.directMessages.list,
   });
 
   const [manualExpandedKeys, setManualExpandedKeys] = useState<string[]>([]);

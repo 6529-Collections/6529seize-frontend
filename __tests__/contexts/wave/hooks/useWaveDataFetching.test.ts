@@ -272,6 +272,40 @@ describe("useWaveDataFetching", () => {
     });
   });
 
+  it("does not commit a response that resolves after its profile request was aborted", async () => {
+    const controller = new AbortController();
+    createController.mockReturnValueOnce(controller);
+    type DeferredDrop = { readonly id: string; readonly serial_no: number };
+    let resolveFetch: ((drops: DeferredDrop[]) => void) | null = null;
+    fetchWaveMessages.mockImplementationOnce(
+      () =>
+        new Promise<DeferredDrop[]>((resolve) => {
+          resolveFetch = resolve;
+        })
+    );
+    formatWaveMessages.mockReturnValue({
+      key: "wave1",
+      drops: [{ id: "old-profile-drop" }],
+    });
+    createEmptyWaveMessages.mockReturnValue({ key: "wave1", drops: [] });
+    const { result, updateData } = setup({ wave1: { drops: [] } });
+
+    act(() => {
+      result.current.registerWave("wave1");
+    });
+
+    controller.abort();
+    await act(async () => {
+      resolveFetch?.([{ id: "old-profile-drop", serial_no: 1 }]);
+      await Promise.resolve();
+    });
+
+    expect(formatWaveMessages).not.toHaveBeenCalled();
+    expect(updateData).not.toHaveBeenCalledWith(
+      expect.objectContaining({ drops: [{ id: "old-profile-drop" }] })
+    );
+  });
+
   it("ignores abort errors without clearing a replacement request", async () => {
     const abortError = new DOMException("aborted", "AbortError");
     fetchWaveMessages.mockRejectedValue(abortError);
@@ -303,16 +337,15 @@ describe("useWaveDataFetching", () => {
 
   it("does not let a cancelled request clear its in-flight replacement", async () => {
     let rejectCancelledRequest: (reason: unknown) => void = () => {};
-    let resolveReplacementRequest: (drops: Array<{ id: string }>) => void =
-      () => {};
+    let resolveReplacementRequest: (
+      drops: Array<{ id: string }>
+    ) => void = () => {};
     const cancelledRequest = new Promise<Array<{ id: string }>>((_, reject) => {
       rejectCancelledRequest = reject;
     });
-    const replacementRequest = new Promise<Array<{ id: string }>>(
-      (resolve) => {
-        resolveReplacementRequest = resolve;
-      }
-    );
+    const replacementRequest = new Promise<Array<{ id: string }>>((resolve) => {
+      resolveReplacementRequest = resolve;
+    });
     fetchWaveMessages
       .mockReturnValueOnce(cancelledRequest)
       .mockReturnValueOnce(replacementRequest);

@@ -14,6 +14,12 @@ interface FetchWaveMessagesOptions {
   readonly onFailure?: ((error: unknown) => void) | undefined;
 }
 
+const throwIfRequestAborted = (signal?: AbortSignal): void => {
+  if (signal?.aborted === true) {
+    throw new DOMException("The operation was aborted.", "AbortError");
+  }
+};
+
 type WaveDropsFeedWave = Awaited<
   ReturnType<typeof fetchWaveDropsFeedV2>
 >["wave"];
@@ -81,6 +87,8 @@ export async function fetchWaveMessages(
       signal,
     });
 
+    throwIfRequestAborted(signal);
+
     updateWaveEligibilityFromFeed(waveId, data.wave, updateEligibility);
 
     return data.drops as ApiDrop[];
@@ -120,6 +128,8 @@ export async function fetchAroundSerialNoWaveMessages(
       signal,
       withRetry: true,
     });
+
+    throwIfRequestAborted(signal);
 
     return data.drops as ApiDrop[];
   } catch (error) {
@@ -162,6 +172,8 @@ export async function fetchLightWaveMessages(
       findDropIdsBySerialNoWithPagination(targetSerialNo, params, signal),
       fetchAroundSerialNoWaveMessages(waveId, targetSerialNo, signal),
     ]);
+
+    throwIfRequestAborted(signal);
 
     const combined: (ApiDropId | ApiDrop)[] = [];
 
@@ -375,6 +387,8 @@ export async function fetchNewestWaveMessages(
       withRetry: true,
     });
 
+    throwIfRequestAborted(signal);
+
     updateWaveEligibilityFromFeed(waveId, data.wave, updateEligibility);
 
     const fetchedDrops = data.drops as ApiDrop[];
@@ -545,9 +559,7 @@ async function findDropIdsBySerialNoWithPagination(
       },
     });
 
-    if (signal?.aborted === true) {
-      throw new Error("Request aborted by signal.");
-    }
+    throwIfRequestAborted(signal);
 
     if (currentBatch.length === 0) {
       const maxSerialLabel = currentMaxSerialForNextCall ?? "newest";

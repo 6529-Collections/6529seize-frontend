@@ -40,7 +40,7 @@ describe("useWaveMessagesStore", () => {
     const listener = jest.fn();
 
     act(() => {
-      result.current.setKnownWaveScopes({
+      result.current.replaceKnownWaveScopes({
         profileScopedWaveIds: new Set(["wave1"]),
         publicWaveIds: new Set(),
       });
@@ -71,7 +71,7 @@ describe("useWaveMessagesStore", () => {
 
     act(() => {
       result.current.updateData({ key: "wave1", drops: [baseDrop] } as any);
-      result.current.setKnownWaveScopes({
+      result.current.replaceKnownWaveScopes({
         profileScopedWaveIds: new Set(["wave2"]),
         publicWaveIds: new Set(),
       });
@@ -90,7 +90,7 @@ describe("useWaveMessagesStore", () => {
     const listener = jest.fn();
 
     act(() => {
-      result.current.setKnownWaveScopes({
+      result.current.replaceKnownWaveScopes({
         profileScopedWaveIds: new Set(["wave1"]),
         publicWaveIds: new Set(),
       });
@@ -99,7 +99,7 @@ describe("useWaveMessagesStore", () => {
     listener.mockClear();
 
     act(() => {
-      result.current.setKnownWaveScopes({
+      result.current.replaceKnownWaveScopes({
         profileScopedWaveIds: new Set(["wave2"]),
         publicWaveIds: new Set(),
       });
@@ -113,7 +113,7 @@ describe("useWaveMessagesStore", () => {
     const { result } = renderHook(() => useWaveMessagesStore());
 
     act(() => {
-      result.current.setKnownWaveScopes({
+      result.current.replaceKnownWaveScopes({
         profileScopedWaveIds: new Set(),
         publicWaveIds: new Set(["wave1"]),
       });
@@ -533,7 +533,7 @@ describe("useWaveMessagesStore", () => {
     };
 
     act(() => {
-      result.current.setKnownWaveScopes({
+      result.current.replaceKnownWaveScopes({
         profileScopedWaveIds: new Set(),
         publicWaveIds: new Set(["sentinel-wave"]),
       });
@@ -566,7 +566,7 @@ describe("useWaveMessagesStore", () => {
     const listener = jest.fn();
 
     act(() => {
-      result.current.setKnownWaveScopes({
+      result.current.replaceKnownWaveScopes({
         profileScopedWaveIds: new Set(["wave1"]),
         publicWaveIds: new Set(),
       });
@@ -598,12 +598,12 @@ describe("useWaveMessagesStore", () => {
 
     act(() => {
       result.current.updateData({ key: "queue-blocker", drops: [] } as any);
-      result.current.setKnownWaveScopes({
+      result.current.replaceKnownWaveScopes({
         profileScopedWaveIds: new Set(["wave1"]),
         publicWaveIds: new Set(),
       });
       result.current.updateData({ key: "wave1", drops: [baseDrop] } as any);
-      result.current.setKnownWaveScopes({
+      result.current.replaceKnownWaveScopes({
         profileScopedWaveIds: new Set(),
         publicWaveIds: new Set(["wave1"]),
       });

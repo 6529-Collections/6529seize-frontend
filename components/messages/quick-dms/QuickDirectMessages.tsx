@@ -117,7 +117,6 @@ export default function QuickDirectMessages() {
   const { hasUnread, unreadCount: totalUnreadCount } = useUnreadIndicator({
     type: "messages",
     handle: connectedProfile?.handle ?? null,
-    localDirectMessages: waves,
   });
   const displayUnreadCount =
     totalUnreadCount > 99 ? "99+" : `${totalUnreadCount}`;

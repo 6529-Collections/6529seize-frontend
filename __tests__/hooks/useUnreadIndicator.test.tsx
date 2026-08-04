@@ -12,19 +12,17 @@ jest.mock("@/hooks/useUnreadDmDrops", () => ({
   useUnreadDmDrops: (handle: string | null) => mockUseUnreadDmDrops(handle),
 }));
 
-const mockUseMyStream = jest.fn();
-jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: () => mockUseMyStream(),
+const mockUseDmUnreadCountOptional = jest.fn();
+jest.mock("@/contexts/wave/DmUnreadCountContext", () => ({
+  useDmUnreadCountOptional: () => mockUseDmUnreadCountOptional(),
 }));
 
 describe("useUnreadIndicator", () => {
   beforeEach(() => {
     mockUseUnreadNotifications.mockReset();
     mockUseUnreadDmDrops.mockReset();
-    mockUseMyStream.mockReset();
-    mockUseMyStream.mockImplementation(() => {
-      throw new Error("useUnreadIndicator should not subscribe to MyStream");
-    });
+    mockUseDmUnreadCountOptional.mockReset();
+    mockUseDmUnreadCountOptional.mockReturnValue(null);
     mockUseUnreadDmDrops.mockReturnValue({
       haveUnreadDmDrops: false,
       unreadDmDrops: undefined,
@@ -50,10 +48,10 @@ describe("useUnreadIndicator", () => {
       useUnreadIndicator({ type: "notifications", handle: "me" })
     );
     expect(result.current).toEqual({ hasUnread: true, unreadCount: 1 });
-    expect(mockUseMyStream).not.toHaveBeenCalled();
+    expect(mockUseDmUnreadCountOptional).toHaveBeenCalledTimes(1);
   });
 
-  it("handles messages type from the unread summary without MyStream", () => {
+  it("handles messages type from the unread summary without a stream provider", () => {
     mockUseUnreadDmDrops.mockReturnValue({
       haveUnreadDmDrops: true,
       unreadDmDrops: { count: 2 },
@@ -66,10 +64,10 @@ describe("useUnreadIndicator", () => {
       useUnreadIndicator({ type: "messages", handle: "me" })
     );
     expect(result.current).toEqual({ hasUnread: true, unreadCount: 2 });
-    expect(mockUseMyStream).not.toHaveBeenCalled();
+    expect(mockUseDmUnreadCountOptional).toHaveBeenCalledTimes(1);
   });
 
-  it("can merge already-mounted local message unread state when provided", () => {
+  it("merges the continuously mounted realtime DM unread state", () => {
     mockUseUnreadDmDrops.mockReturnValue({
       haveUnreadDmDrops: false,
       unreadDmDrops: { count: 0 },
@@ -79,16 +77,13 @@ describe("useUnreadIndicator", () => {
       haveUnreadNotifications: false,
     });
 
+    mockUseDmUnreadCountOptional.mockReturnValue(1);
+
     const { result } = renderHook(() =>
-      useUnreadIndicator({
-        type: "messages",
-        handle: "me",
-        localDirectMessages: [{ unreadDropsCount: 1 }],
-      })
+      useUnreadIndicator({ type: "messages", handle: "me" })
     );
 
     expect(result.current).toEqual({ hasUnread: true, unreadCount: 1 });
-    expect(mockUseMyStream).not.toHaveBeenCalled();
   });
 
   it("uses a best-effort count without double-counting overlapping sources", () => {
@@ -101,27 +96,16 @@ describe("useUnreadIndicator", () => {
       haveUnreadNotifications: false,
     });
 
+    mockUseDmUnreadCountOptional.mockReturnValue(4);
+
     const { result } = renderHook(() =>
-      useUnreadIndicator({
-        type: "messages",
-        handle: "me",
-        localDirectMessages: [
-          {
-            unreadDropsCount: 2,
-            newDropsCount: { count: 3 },
-          },
-          {
-            unreadDropsCount: 1,
-            newDropsCount: { count: 0 },
-          },
-        ],
-      })
+      useUnreadIndicator({ type: "messages", handle: "me" })
     );
 
     expect(result.current).toEqual({ hasUnread: true, unreadCount: 4 });
   });
 
-  it("keeps the indicator visible when independently sourced totals diverge", () => {
+  it("uses the coordinated realtime count when a mounted summary diverges", () => {
     mockUseUnreadDmDrops.mockReturnValue({
       haveUnreadDmDrops: true,
       unreadDmDrops: { count: 5 },
@@ -131,20 +115,31 @@ describe("useUnreadIndicator", () => {
       haveUnreadNotifications: false,
     });
 
+    mockUseDmUnreadCountOptional.mockReturnValue(3);
+
     const { result } = renderHook(() =>
-      useUnreadIndicator({
-        type: "messages",
-        handle: "me",
-        localDirectMessages: [
-          {
-            unreadDropsCount: 1,
-            newDropsCount: { count: 3 },
-          },
-        ],
-      })
+      useUnreadIndicator({ type: "messages", handle: "me" })
     );
 
-    expect(result.current).toEqual({ hasUnread: true, unreadCount: 5 });
+    expect(result.current).toEqual({ hasUnread: true, unreadCount: 3 });
+  });
+
+  it("does not let a stale aggregate reopen a locally cleared indicator", () => {
+    mockUseUnreadDmDrops.mockReturnValue({
+      haveUnreadDmDrops: true,
+      unreadDmDrops: { count: 1 },
+      unreadDmDropsCount: 1,
+    });
+    mockUseUnreadNotifications.mockReturnValue({
+      haveUnreadNotifications: false,
+    });
+    mockUseDmUnreadCountOptional.mockReturnValue(0);
+
+    const { result } = renderHook(() =>
+      useUnreadIndicator({ type: "messages", handle: "me" })
+    );
+
+    expect(result.current).toEqual({ hasUnread: false, unreadCount: 0 });
   });
 
   it("normalizes a missing summary count before rendering the badge", () => {
@@ -157,12 +152,10 @@ describe("useUnreadIndicator", () => {
       haveUnreadNotifications: false,
     });
 
+    mockUseDmUnreadCountOptional.mockReturnValue(1);
+
     const { result } = renderHook(() =>
-      useUnreadIndicator({
-        type: "messages",
-        handle: "me",
-        localDirectMessages: [{ newDropsCount: { count: 1 } }],
-      })
+      useUnreadIndicator({ type: "messages", handle: "me" })
     );
 
     expect(result.current).toEqual({ hasUnread: true, unreadCount: 1 });

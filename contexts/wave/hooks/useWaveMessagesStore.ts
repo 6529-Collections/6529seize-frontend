@@ -278,7 +278,7 @@ function useWaveMessagesStore() {
     };
   }, []);
 
-  const setKnownWaveScopes = useCallback(
+  const replaceKnownWaveScopes = useCallback(
     ({ profileScopedWaveIds, publicWaveIds }: KnownWaveScopes): void => {
       const nextProfileScopedWaveIds = new Set(profileScopedWaveIds);
       const nextPublicWaveIds = new Set(publicWaveIds);
@@ -682,7 +682,7 @@ function useWaveMessagesStore() {
     getData,
     subscribe,
     unsubscribe,
-    setKnownWaveScopes,
+    replaceKnownWaveScopes,
     updateData,
     registerPendingServerFeedSeed,
     clearPendingServerFeedSeed,

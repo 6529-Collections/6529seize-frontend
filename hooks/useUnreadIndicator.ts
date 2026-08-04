@@ -1,27 +1,14 @@
 "use client";
 
+import { useDmUnreadCountOptional } from "@/contexts/wave/DmUnreadCountContext";
 import { useUnreadNotifications } from "./useUnreadNotifications";
 import { useUnreadDmDrops } from "./useUnreadDmDrops";
 
 type UnreadIndicatorType = "notifications" | "messages";
 
-interface LocalUnreadDirectMessage {
-  readonly unreadDropsCount?: number | null | undefined;
-  readonly newDropsCount?:
-    | {
-        readonly count?: number | null | undefined;
-      }
-    | null
-    | undefined;
-}
-
 interface UseUnreadIndicatorProps {
   readonly type: UnreadIndicatorType;
   readonly handle: string | null;
-  readonly localDirectMessages?:
-    | readonly LocalUnreadDirectMessage[]
-    | null
-    | undefined;
 }
 
 interface UseUnreadIndicatorReturn {
@@ -45,8 +32,8 @@ const normalizeUnreadCount = (value: unknown): number => {
 export function useUnreadIndicator({
   type,
   handle,
-  localDirectMessages,
 }: UseUnreadIndicatorProps): UseUnreadIndicatorReturn {
+  const localDmUnreadCount = useDmUnreadCountOptional();
   // Use existing notifications hook for notifications
   const { haveUnreadNotifications } = useUnreadNotifications(
     type === "notifications" ? handle : null
@@ -55,8 +42,7 @@ export function useUnreadIndicator({
   const { unreadDmDropsCount } = useUnreadDmDrops(
     type === "messages" ? handle : null
   );
-  const normalizedUnreadDmDropsCount =
-    normalizeUnreadCount(unreadDmDropsCount);
+  const normalizedUnreadDmDropsCount = normalizeUnreadCount(unreadDmDropsCount);
 
   // Only show indicators if user is authenticated
   if (!handle) {
@@ -70,19 +56,14 @@ export function useUnreadIndicator({
     };
   }
 
-  const localUnreadMessagesCount = (localDirectMessages ?? []).reduce(
-    (count, dm) =>
-      count + Math.max(dm.unreadDropsCount ?? 0, dm.newDropsCount?.count ?? 0),
-    0
-  );
-  const unreadMessagesCount = Math.max(
-    normalizedUnreadDmDropsCount,
-    localUnreadMessagesCount
-  );
+  const hasLocalDmState = localDmUnreadCount !== null;
+  const localUnreadMessagesCount = normalizeUnreadCount(localDmUnreadCount);
+  const unreadMessagesCount = hasLocalDmState
+    ? localUnreadMessagesCount
+    : normalizedUnreadDmDropsCount;
 
   return {
-    hasUnread:
-      normalizedUnreadDmDropsCount > 0 || localUnreadMessagesCount > 0,
+    hasUnread: unreadMessagesCount > 0,
     unreadCount: unreadMessagesCount,
   };
 }

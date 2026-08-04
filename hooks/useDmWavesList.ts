@@ -148,6 +148,23 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
     unreadDmDropsDataUpdatedAt >= dmWavesDataUpdatedAt &&
     unreadSummaryAccountsForLoadedRows
   );
+  const isUnreadSummaryAtLeastAsFreshAsRows =
+    dmWavesDataUpdatedAt === 0 ||
+    unreadDmDropsDataUpdatedAt >= dmWavesDataUpdatedAt;
+  const serverUnreadCountForIndicators = (() => {
+    if (!shouldFetchDmWaves) {
+      return 0;
+    }
+
+    if (dmWavesDataUpdatedAt > 0 && hasNextPage === false) {
+      // A complete row snapshot can attribute every unread DM. Keep the
+      // global badges on that same snapshot instead of letting an independently
+      // polled aggregate temporarily disagree with the conversation rows.
+      return listedUnreadDropsCount;
+    }
+
+    return isUnreadSummaryAtLeastAsFreshAsRows ? unreadDmDropsCount : 0;
+  })();
   const lastMatchingSummaryRefreshRef = useRef<{
     readonly viewerIdentityKey: string;
     readonly dmWavesDataUpdatedAt: number;
@@ -325,6 +342,8 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       refetchAllWaves: refetchStable,
       viewerIdentityKey,
       canTrustServerSnapshotUnreadState,
+      unreadDmDropsCount,
+      serverUnreadCountForIndicators,
     }),
     [
       sorted,
@@ -338,6 +357,8 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       shouldFetchDmWaves,
       viewerIdentityKey,
       canTrustServerSnapshotUnreadState,
+      unreadDmDropsCount,
+      serverUnreadCountForIndicators,
     ]
   );
 };
