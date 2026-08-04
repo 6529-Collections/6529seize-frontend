@@ -83,7 +83,7 @@ function localPack(scriptKey, description, specs, tweaks = {}) {
     description,
     safety: "local",
     environments: ["local"],
-    triggers: ["manual"],
+    triggers: ["pr-ci", "manual"],
     ...(specs ? { specs } : {}),
     ...tweaks,
     projects: tweaks.projects ?? [DESKTOP, MOBILE],
@@ -281,7 +281,7 @@ const PACKS = [
       READONLY_SPECS.museumInstitutionalPractice,
       { timeoutMinutes: 30 }
     ),
-    triggers: ["pr-ci", "manual"],
+    triggers: ["manual"],
   },
 
   sandboxPack(
@@ -394,6 +394,7 @@ const PACKS = [
   ),
   stagingPack("core", "", "Staging core surfaces on both web shells.", [
     "tests/surfaces",
+    "tests/critical-shell",
     ...SMOKE_SPECS,
   ]),
   stagingPack(
@@ -466,9 +467,8 @@ const PACKS = [
   stagingPack(
     "museum-institutional-practice",
     "museum-institutional-practice",
-    "Staging Network Museum institutional-practice route sweep.",
-    READONLY_SPECS.museumInstitutionalPractice,
-    { timeoutMinutes: 30 }
+    "Staging Network Museum institutional-practice deployed route smoke.",
+    READONLY_SPECS.museumInstitutionalPractice
   ),
 
   productionPack(
@@ -529,7 +529,7 @@ const PACKS = [
   ),
   productionPack(
     "museum-institutional-practice",
-    "Production Network Museum institutional-practice route sweep.",
+    "Production Network Museum institutional-practice deployed route smoke.",
     READONLY_SPECS.museumInstitutionalPractice,
     ["post-deploy", "manual"],
     30,

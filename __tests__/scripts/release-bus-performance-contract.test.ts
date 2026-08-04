@@ -71,7 +71,13 @@ describe("Release Bus frontend performance contract", () => {
     expect(appPrCi).toContain("./bin/6529 run lint:changed");
     expect(appPrCi).toContain("./bin/6529 run typecheck:changed");
     expect(appPrCi).toContain("Run related Jest tests");
-    expect(appPrCi).toContain("./bin/6529 run build");
+    expect(appPrCi).toContain("./bin/6529 run build:ci");
+    expect(appPrCi).toContain("playwright install --with-deps chromium");
+    expect(appPrCi).toContain("test:e2e:smoke");
+    expect(appPrCi).toContain("test:e2e:critical-shell");
+    expect(appPrCi).toContain("test:e2e:museum-institutional-practice");
+    expect(appPrCi).toContain("matrix.lane == 'playwright-museum'");
+    expect(appPrCi).toContain("Restore Playwright browser");
     if (appPrCi.includes("exact-merge-tree-pr-ci-v1")) {
       expect(appPrCi).toContain(
         "sha256sum ./manifest.json ./policy-bundle.txt > SHA256SUMS"
@@ -107,6 +113,7 @@ describe("Release Bus frontend performance contract", () => {
       ".github/workflows/release-bus-v2-preflight.yml",
       ".github/workflows/staging-e2e.yml",
       ".github/workflows/production-e2e.yml",
+      ".github/workflows/production-build-artifact.yml",
     ]) {
       const source = read(workflowPath);
       expect(source).toContain('node-version: "22.17.1"');
@@ -153,13 +160,13 @@ describe("Release Bus frontend performance contract", () => {
       '.policy_bundle_contract == "pr-ci-policy-bundle-v1"'
     );
     expect(preflightSource).toContain(
-      'test "${evidence_files[*]}" = "SHA256SUMS manifest.json policy-bundle.txt"'
+      'test "$evidence_files" = "SHA256SUMS manifest.json policy-bundle.txt"'
     );
     expect(preflightSource).toContain(
       '[[ "$AGGREGATE_CANDIDATE_EVIDENCE_DIGEST" =~ ^[a-f0-9]{64}$ ]]'
     );
     expect(preflightSource).toContain(
-      '[[ "$CANDIDATE_EVIDENCE_MODE" =~ ^(legacy-whole-train|strict-single|strict-aggregate)$ ]]'
+      'echo "Invalid candidate evidence mode." >&2'
     );
     expect(preflightSource).toContain(
       'test "$(jq -r .path <<< "$run")" = .github/workflows/app-pr-ci.yml'
@@ -446,7 +453,9 @@ describe("Release Bus frontend performance contract", () => {
 
     const stagingSource = read(".github/workflows/staging-e2e.yml");
     const productionSource = read(".github/workflows/production-e2e.yml");
-    expect(stagingSource).toContain("args+=(--parallel 3)");
+    expect(stagingSource).toContain(
+      `args+=(--parallel ${contract.e2e.staging_parallelism})`
+    );
     expect(productionSource).toContain("args+=(--parallel 3)");
     expect(stagingSource).toContain(
       "exec node scripts/e2e-packs.cjs --capabilities"
@@ -481,8 +490,13 @@ describe("Release Bus frontend performance contract", () => {
       expect(packs).toHaveLength(contract.e2e.post_deploy_packs[environment]);
     }
     expect(contract.e2e.post_deploy_packs.duplicate_spec_entries).toBe(0);
+    expect(stagingSource).toContain(
+      "Validate exact manifest-bound E2E evidence"
+    );
+    expect(productionSource).toContain(
+      "Validate exact production E2E evidence"
+    );
     for (const source of [stagingSource, productionSource]) {
-      expect(source).toContain("Validate exact manifest-bound E2E evidence");
       expect(source).toContain('.schema_version == "release-bus-e2e-packs.v1"');
       expect(source).toContain(
         "(.results | map(.script_key) | unique | length) == .pack_count"

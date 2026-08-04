@@ -245,13 +245,22 @@ test.describe("Public groups, tools, and calendar read-only coverage @surface @m
       })
     ).toBeVisible();
 
-    const localButton = page.getByRole("button", { name: "Show local time" });
-    const utcButton = page.getByRole("button", { name: "Show UTC" });
-    await expect(localButton).toHaveAttribute("aria-pressed", "true");
-    await expect(utcButton).toHaveAttribute("aria-pressed", "false");
-    await utcButton.click();
-    await expect(utcButton).toHaveAttribute("aria-pressed", "true");
-    await expect(localButton).toHaveAttribute("aria-pressed", "false");
+    const timezoneTabs = page.getByRole("tablist", {
+      name: "Calendar timezone",
+    });
+    const localTab = timezoneTabs.getByRole("tab", {
+      name: "Local",
+      exact: true,
+    });
+    const utcTab = timezoneTabs.getByRole("tab", {
+      name: "UTC",
+      exact: true,
+    });
+    await expect(localTab).toHaveAttribute("aria-selected", "true");
+    await expect(utcTab).toHaveAttribute("aria-selected", "false");
+    await utcTab.click();
+    await expect(utcTab).toHaveAttribute("aria-selected", "true");
+    await expect(localTab).toHaveAttribute("aria-selected", "false");
 
     await expect(page.getByRole("button", { name: "Next Mint" })).toBeVisible();
     await expect(page.locator("#meme-overview-mint-input")).toBeVisible();
