@@ -1,170 +1,110 @@
 "use client";
 
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t, type MessageKey } from "@/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
-import csvParser from "csv-parser";
-import Link from "next/link";
+import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
+import PrimaryAddressRecords from "./AboutPrimaryAddressTable";
 import {
-  AboutCol as Col,
-  AboutContainer as Container,
-  AboutRow as Row,
-} from "./AboutLayout";
+  fetchPrimaryAddressData,
+  PRIMARY_ADDRESS_QUERY_KEY,
+  type PrimaryAddressData,
+} from "./aboutPrimaryAddress.helpers";
 
-interface PrimaryAddressData {
-  profile_id: string;
-  handle: string;
-  current_primary: string;
-  new_primary: string;
-}
+type PrimaryAddressMessageKey = Extract<
+  MessageKey,
+  `about.primaryAddress.${string}`
+>;
+
+const m = (locale: SupportedLocale, key: PrimaryAddressMessageKey) =>
+  t(locale, key);
 
 export default function AboutPrimaryAddress() {
-  const tdStyle = {
-    border: "1px solid white",
-    padding: "15px",
-    verticalAlign: "middle",
-  };
-
+  const locale = useBrowserLocale();
   const {
     data: primaryAddressData = [],
     isLoading,
     error,
   } = useQuery<PrimaryAddressData[], Error>({
-    queryKey: ["primaryAddressData"],
+    queryKey: PRIMARY_ADDRESS_QUERY_KEY,
     queryFn: fetchPrimaryAddressData,
   });
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error.message}</div>;
-  }
-
   return (
-    <Container>
-      <Row>
-        <Col>
-          <h1>
-            On-Chain Primary Address
-          </h1>
-        </Col>
-      </Row>
-      <Row className="tw-pt-4">
-        <Col className="tw-text-lg tw-font-bold">Overview</Col>
-      </Row>
-      <Row className="tw-pt-4">
-        <Col>
-          <span className="tw-font-bold">Single Address</span>
-          <ul>
-            <li className="tw-pt-2">
-              Primary address is the wallet address (no other addresses
-              involved)
-            </li>
-          </ul>
-        </Col>
-      </Row>
-      <Row className="tw-pt-2">
-        <Col>
-          <span className="tw-font-bold">Consolidations</span>
-          <ul>
-            <li className="tw-pt-2">
-              By default, the primary address in a consolidation is the one with
-              the highest individual TDH
-            </li>
-            <li className="tw-pt-2">
-              If any of the addresses in the consolidation has registered a
-              delegation for &quot;Primary Address&quot; use case (997) to an
-              address in the same consolidation, then this delegated address
-              becomes the Primary address of the consolidation
-            </li>
-          </ul>
-        </Col>
-      </Row>
-      <Row className="tw-pt-4">
-        <Col xs={12}>
-          The following table shows the profiles which have selected a Primary
-          Address other than the default Primary Address in their consolidation,
-          and will be updated back to the default Primary Address on{" "}
-          <u>Monday 29th April 2024</u>.
-        </Col>
-        <Col
-          xs={12}
-          className="tw-pt-3"
-          style={{
-            overflowX: "auto",
-          }}>
-          <table className="tw-mb-4 tw-w-full tw-align-top">
-            <thead>
-              <tr>
-                <th style={tdStyle}>Profile Handle</th>
-                <th style={tdStyle}>Current Selected Primary Address</th>
-                <th style={tdStyle}>Primary Address Changed to</th>
-              </tr>
-            </thead>
-            <tbody>
-              {primaryAddressData.map((item) => (
-                <tr key={item.handle}>
-                  <td style={tdStyle}>
-                    <Link
-                      href={`/${item.current_primary}`}
-                      className="tw-no-underline hover:tw-underline">
-                      {item.handle}
-                    </Link>
-                  </td>
-                  <td style={tdStyle} className="tw-text-sm">
-                    {item.current_primary}
-                  </td>
-                  <td style={tdStyle} className="tw-text-sm">
-                    {item.new_primary}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Col>
-      </Row>
-    </Container>
+    <article
+      className={`tw-w-full tw-pb-12 tw-text-iron-100 ${ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS}`}
+    >
+      <PrimaryAddressHeader locale={locale} />
+      <PrimaryAddressOverview locale={locale} />
+      <PrimaryAddressRecords
+        data={primaryAddressData}
+        error={error}
+        isLoading={isLoading}
+        locale={locale}
+      />
+    </article>
   );
 }
 
-async function fetchPrimaryAddressData(): Promise<PrimaryAddressData[]> {
-  const response = await fetch("/primary_address.csv");
-  if (!response.ok) {
-    throw new Error(`Failed to fetch primary address data (${response.status})`);
-  }
-
-  const csvContent = await response.text();
-  return parsePrimaryAddressCsv(csvContent);
+function PrimaryAddressHeader({
+  locale,
+}: {
+  readonly locale: SupportedLocale;
+}) {
+  return (
+    <header className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-1 tw-pb-10 tw-pt-4 sm:tw-px-0 sm:tw-pb-12 sm:tw-pt-8 lg:tw-px-2">
+      <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
+        {m(locale, "about.primaryAddress.title")}
+      </h1>
+    </header>
+  );
 }
 
-function parsePrimaryAddressCsv(csvContent: string): Promise<PrimaryAddressData[]> {
-  return new Promise((resolve, reject) => {
-    const results: PrimaryAddressData[] = [];
+function PrimaryAddressOverview({
+  locale,
+}: {
+  readonly locale: SupportedLocale;
+}) {
+  return (
+    <section
+      aria-labelledby="primary-address-overview-title"
+      className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-1 tw-py-10 sm:tw-px-0 sm:tw-py-12 lg:tw-px-2"
+    >
+      <h2
+        className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-2xl"
+        id="primary-address-overview-title"
+      >
+        {m(locale, "about.primaryAddress.overview.title")}
+      </h2>
 
-    const parser = csvParser({ headers: false })
-      .on("data", (row: Record<string, string>) => {
-        results.push({
-          profile_id: row["0"]!,
-          handle: row["1"]!,
-          current_primary: row["2"]!,
-          new_primary: row["3"]!,
-        });
-      })
-      .on("end", () => {
-        results.sort((a, b) => a.handle.localeCompare(b.handle));
-        resolve(results);
-      })
-      .on("error", (err: Error) => {
-        console.error(err);
-        reject(new Error("Failed to parse primary address data"));
-      });
-
-    try {
-      parser.write(csvContent);
-      parser.end();
-    } catch (err) {
-      console.error(err);
-      reject(new Error("Failed to parse primary address data"));
-    }
-  });
+      <div className="tw-mt-8 tw-max-w-4xl tw-space-y-8">
+        <section aria-labelledby="single-address-title">
+          <h3
+            className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50"
+            id="single-address-title"
+          >
+            {m(locale, "about.primaryAddress.single.title")}
+          </h3>
+          <ul className="tw-m-0 tw-mt-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-iron-600">
+            <li>{m(locale, "about.primaryAddress.single.body")}</li>
+          </ul>
+        </section>
+        <section aria-labelledby="consolidations-title">
+          <h3
+            className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50"
+            id="consolidations-title"
+          >
+            {m(locale, "about.primaryAddress.consolidations.title")}
+          </h3>
+          <ul className="tw-m-0 tw-mt-2 tw-space-y-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-iron-600">
+            <li>{m(locale, "about.primaryAddress.consolidations.default")}</li>
+            <li>
+              {m(locale, "about.primaryAddress.consolidations.delegation")}
+            </li>
+          </ul>
+        </section>
+      </div>
+    </section>
+  );
 }

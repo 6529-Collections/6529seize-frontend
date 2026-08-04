@@ -249,6 +249,7 @@ const ABOUT_FEATURE_SECTIONS = new Set<AboutSection>([
   AboutSection.MEME_LAB,
   AboutSection.GRADIENTS,
   AboutSection.MINTING,
+  AboutSection.PRIMARY_ADDRESS,
 ]);
 
 export function isAboutFeatureSection(section: AboutSection): boolean {
