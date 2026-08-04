@@ -4,8 +4,18 @@ import userEvent from "@testing-library/user-event";
 
 jest.mock("@/components/meme-calendar/MemeCalendarOverview", () => ({
   __esModule: true,
-  default: ({ displayTz, locale }: { displayTz: string; locale: string }) => (
-    <div data-locale={locale} data-testid="overview" data-tz={displayTz} />
+  default: ({
+    displayTz,
+    locale,
+    headerAction,
+  }: {
+    displayTz: string;
+    locale: string;
+    headerAction: React.ReactNode;
+  }) => (
+    <div data-locale={locale} data-testid="overview" data-tz={displayTz}>
+      {headerAction}
+    </div>
   ),
 }));
 

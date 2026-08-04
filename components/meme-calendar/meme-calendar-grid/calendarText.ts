@@ -232,4 +232,4 @@ export function getCalendarInviteLabels(locale: SupportedLocale) {
 }
 
 export const DRILLDOWN_CARD_CLASS =
-  "tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-bg-[#eee] hover:tw-text-black focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+  "tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-border-transparent tw-bg-iron-950 tw-p-4 tw-text-left tw-text-iron-100 tw-shadow-lg tw-ring-1 tw-ring-white/[0.04] tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900";

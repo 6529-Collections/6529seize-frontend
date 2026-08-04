@@ -715,7 +715,7 @@ export function formatToFullDivision(
   const eonDates = getRangeDatesByZoom("eon", idx);
 
   return (
-    <table className="tw-inline-table tw-w-auto tw-table-auto tw-border-collapse">
+    <table className="tw-w-full tw-border-collapse">
       <tbody>
         {printDivision(
           "SZN",
@@ -755,12 +755,14 @@ function printDivision(
   locale: SupportedLocale
 ) {
   return (
-    <tr>
-      <td className="tw-whitespace-nowrap tw-py-1 tw-pr-4 tw-font-semibold">
+    <tr className="tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.05] last:tw-border-b-0">
+      <td className="tw-w-24 tw-whitespace-nowrap tw-py-2 tw-pr-4 tw-align-top tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-500">
         {label} {formatInteger(locale, number)}
       </td>
-      <td className="tw-whitespace-nowrap tw-py-1">
-        <span className="tw-text-gray-400">{range}</span>
+      <td className="tw-min-w-0 tw-py-2 tw-text-right tw-align-top">
+        <span className="tw-break-words tw-text-xs tw-leading-5 tw-text-iron-300">
+          {range}
+        </span>
       </td>
     </tr>
   );
