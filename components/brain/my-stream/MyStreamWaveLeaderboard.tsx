@@ -103,7 +103,14 @@ const LeaderboardControlsFrame: React.FC<LeaderboardControlsFrameProps> = ({
         : staticLeaderboardControlsClassName
     } ${className ?? ""}`}
   >
-    {children}
+    {isSticky && (
+      // Cover the full scroll viewport while the controls share a flex row.
+      <span
+        aria-hidden="true"
+        className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-0 tw-bg-black tw-shadow-[0_0_0_100vmax_#000] tw-[clip-path:inset(0_-100vmax)]"
+      />
+    )}
+    <div className="tw-relative tw-z-10">{children}</div>
   </div>
 );
 
@@ -521,7 +528,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
             wave={wave}
             className={
               isMemesWave
-                ? "tw-min-w-0 tw-flex-[3_1_17rem]"
+                ? "tw-relative tw-z-40 tw-order-2 tw-min-w-0 tw-flex-[3_1_17rem]"
                 : undefined
             }
           />
@@ -540,7 +547,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
             isSticky
             className={
               isMemesWave
-                ? "tw-min-w-0 tw-flex-[1_1_18rem] lg:tw-flex-[0_1_27rem]"
+                ? "tw-order-1 tw-min-w-0 tw-flex-[1_1_18rem] !tw-pb-0 lg:tw-flex-[1_1_27rem]"
                 : undefined
             }
           >
@@ -551,7 +558,9 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
         {/* Content section */}
         <div
           className={`tw-min-w-0 tw-pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)] ${
-            isMemesWave ? "tw-w-full tw-flex-none tw-basis-full" : ""
+            isMemesWave
+              ? "tw-order-3 tw-w-full tw-flex-none tw-basis-full tw-pt-4"
+              : ""
           }`}
         >
           <AnimatePresence>

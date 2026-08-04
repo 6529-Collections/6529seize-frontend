@@ -61,7 +61,7 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
 
     if (hasNextDecision) {
       return (
-        <div className="tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-justify-end tw-gap-1">
+        <span className="tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-justify-end tw-gap-1">
           <CompactTimeCountdown timeLeft={timeLeft} />
           <span
             className="tw-hidden tw-h-3 tw-w-px tw-flex-shrink-0 tw-bg-white/[0.12] @[30rem]/timeline:tw-block"
@@ -70,7 +70,7 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
           <span className="tw-hidden tw-flex-shrink-0 tw-whitespace-nowrap tw-text-[11px] tw-font-medium tw-leading-none tw-text-iron-500 @[30rem]/timeline:tw-inline">
             {formattedNextDecisionDate}
           </span>
-        </div>
+        </span>
       );
     }
 
@@ -80,11 +80,13 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
   };
 
   return (
-    <div
-      className="tw-group tw-cursor-pointer tw-bg-iron-950 tw-px-2.5 tw-py-2 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-900/70"
+    <button
+      type="button"
+      className="tw-group tw-w-full tw-cursor-pointer tw-border-0 tw-bg-iron-950 tw-px-2.5 tw-py-2 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400/70 desktop-hover:hover:tw-bg-iron-900/70"
       onClick={() => setIsOpen(!isOpen)}
+      aria-expanded={isOpen}
     >
-      <div className="tw-flex tw-w-full tw-items-center tw-gap-2">
+      <span className="tw-flex tw-w-full tw-items-center tw-gap-2">
         <span
           className={`tw-flex-shrink-0 tw-whitespace-nowrap tw-text-xs tw-font-medium ${
             hasNextDecision ? "tw-text-iron-200" : "tw-text-iron-500"
@@ -93,15 +95,13 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
           {hasNextDecision ? "Decision Timeline" : "Announcement history"}
         </span>
 
-        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-end tw-text-xs tw-font-medium">
+        <span className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-end tw-text-xs tw-font-medium">
           {getStatusDisplay()}
-        </div>
+        </span>
 
-        <button
-          type="button"
-          className="tw-flex tw-h-6 tw-w-6 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-white/[0.04] tw-p-0 tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400/70 desktop-hover:hover:tw-bg-white/[0.07]"
-          aria-label={isOpen ? "Collapse" : "Expand"}
-          aria-expanded={isOpen}
+        <span
+          aria-hidden="true"
+          className="tw-flex tw-h-6 tw-w-6 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-white/[0.04] tw-p-0 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-white/[0.07]"
         >
           <FontAwesomeIcon
             icon={faChevronDown}
@@ -109,8 +109,8 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
               isOpen ? "tw-rotate-180" : ""
             } tw-transition-transform tw-duration-200 tw-ease-out`}
           />
-        </button>
-      </div>
-    </div>
+        </span>
+      </span>
+    </button>
   );
 };

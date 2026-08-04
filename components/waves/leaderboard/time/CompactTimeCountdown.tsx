@@ -29,17 +29,17 @@ export const CompactTimeCountdown: React.FC<CompactTimeCountdownProps> = ({
     .join(", ");
 
   return (
-    <div
-      className="tw-inline-flex tw-flex-shrink-0 tw-items-baseline tw-gap-1 tw-text-[11px] tw-leading-none"
-      aria-label={`Next winner in ${accessibleCountdown}`}
-    >
+    <span className="tw-inline-flex tw-flex-shrink-0 tw-items-baseline tw-gap-1 tw-text-[11px] tw-leading-none">
+      <span className="tw-sr-only">
+        Next winner in {accessibleCountdown}
+      </span>
       <span
         className="tw-hidden tw-whitespace-nowrap tw-font-medium tw-text-iron-500 @[25rem]/timeline:tw-inline"
         aria-hidden="true"
       >
         Next winner
       </span>
-      <div
+      <span
         className="tw-flex tw-items-baseline tw-gap-x-0.5 tw-font-medium tw-text-iron-300"
         aria-hidden="true"
       >
@@ -47,7 +47,7 @@ export const CompactTimeCountdown: React.FC<CompactTimeCountdownProps> = ({
         <TimeUnitDisplay value={hours} label="h" />
         <TimeUnitDisplay value={minutes} label="m" />
         <TimeUnitDisplay value={seconds} label="s" />
-      </div>
-    </div>
+      </span>
+    </span>
   );
 };
