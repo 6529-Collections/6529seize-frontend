@@ -171,9 +171,9 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   }, []);
 
   return (
-    <div>
+    <div className={isDecisionDetailsOpen ? "tw-mb-3" : undefined}>
       {multiDecision ? (
-        <div className="tw-mt-2 tw-overflow-hidden tw-rounded-lg tw-bg-iron-950 md:tw-mt-4">
+        <div className="tw-mt-2 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/70 tw-@container/timeline md:tw-mt-4">
           {(() => {
             const currentPause = showPause(nextDecisionTime);
 

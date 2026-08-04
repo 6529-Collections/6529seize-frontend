@@ -41,12 +41,11 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
   const getStatusDisplay = () => {
     if (isPaused && currentPause) {
       return (
-        <span className="tw-inline-flex tw-items-center tw-gap-x-2 tw-rounded-md tw-border tw-border-solid tw-border-iron-600/40 tw-bg-gradient-to-r tw-from-iron-800/90 tw-to-iron-700/70 tw-px-3 tw-py-1.5 tw-text-xs tw-shadow-sm tw-transition-all tw-duration-300 tw-ease-out group-hover:tw-border-iron-600/30 group-hover:tw-from-iron-700/60 group-hover:tw-to-iron-600/40 group-hover:tw-shadow-none sm:tw-gap-x-2.5">
-          <span className="tw-whitespace-nowrap tw-bg-gradient-to-r tw-from-amber-200 tw-via-amber-100 tw-to-amber-200/90 tw-bg-clip-text tw-font-bold tw-text-transparent">
-            Decisions paused
+        <span className="tw-inline-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-[11px]">
+          <span className="tw-flex-shrink-0 tw-whitespace-nowrap tw-rounded-full tw-bg-amber-400/10 tw-px-2 tw-py-1 tw-font-semibold tw-leading-none tw-text-amber-300">
+            Paused
           </span>
-          <span className="tw-text-iron-500">•</span>
-          <span className="tw-whitespace-nowrap tw-font-medium tw-text-iron-300">
+          <span className="tw-truncate tw-font-medium tw-text-iron-400">
             {hasNextDecision
               ? `Next decision after ${new Date(
                   nextDecisionTime
@@ -62,9 +61,13 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
 
     if (hasNextDecision) {
       return (
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-x-4 tw-gap-y-1">
+        <div className="tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-justify-end tw-gap-2">
           <CompactTimeCountdown timeLeft={timeLeft} />
-          <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-300">
+          <span
+            className="tw-hidden tw-h-3 tw-w-px tw-flex-shrink-0 tw-bg-white/[0.12] @[24rem]/timeline:tw-block"
+            aria-hidden="true"
+          />
+          <span className="tw-flex-shrink-0 tw-whitespace-nowrap tw-text-[11px] tw-font-medium tw-leading-none tw-text-iron-500">
             {formattedNextDecisionDate}
           </span>
         </div>
@@ -78,13 +81,13 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
 
   return (
     <div
-      className="tw-group tw-cursor-pointer tw-rounded-t-lg tw-border tw-border-solid tw-border-iron-700/50 tw-bg-iron-800/95 tw-px-3 tw-py-1.5 tw-shadow-sm tw-transition-all tw-duration-300 tw-ease-out tw-@container desktop-hover:hover:tw-bg-iron-700/80"
+      className="tw-group tw-cursor-pointer tw-bg-iron-950 tw-px-3 tw-py-2 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-900/70"
       onClick={() => setIsOpen(!isOpen)}
     >
       <div className="tw-flex tw-w-full tw-items-center tw-gap-2">
         <span
-          className={`tw-flex-shrink-0 tw-whitespace-nowrap tw-text-xs tw-font-semibold ${
-            hasNextDecision ? "tw-text-iron-100" : "tw-text-iron-400"
+          className={`tw-flex-shrink-0 tw-whitespace-nowrap tw-text-xs tw-font-medium ${
+            hasNextDecision ? "tw-text-iron-200" : "tw-text-iron-500"
           }`}
         >
           {hasNextDecision ? "Decision Timeline" : "Announcement history"}
@@ -95,14 +98,16 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
         </div>
 
         <button
-          className="tw-flex tw-h-6 tw-w-6 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-600/40 tw-bg-iron-700/50 tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-iron-500/50 desktop-hover:hover:tw-bg-iron-600/60"
+          type="button"
+          className="tw-flex tw-h-6 tw-w-6 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-white/[0.04] tw-p-0 tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400/70 desktop-hover:hover:tw-bg-white/[0.07]"
           aria-label={isOpen ? "Collapse" : "Expand"}
+          aria-expanded={isOpen}
         >
           <FontAwesomeIcon
             icon={faChevronDown}
-            className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-200 desktop-hover:group-hover:tw-text-iron-100 ${
+            className={`tw-h-3 tw-w-3 tw-flex-shrink-0 tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-200 ${
               isOpen ? "tw-rotate-180" : ""
-            } tw-transition-all tw-duration-300 tw-ease-in-out`}
+            } tw-transition-transform tw-duration-200 tw-ease-out`}
           />
         </button>
       </div>

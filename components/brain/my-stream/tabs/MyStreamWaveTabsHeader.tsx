@@ -184,49 +184,59 @@ function MyStreamWaveHeaderIdentity({
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
         {showDescriptionPreview ? (
           <>
-            <WaveDescriptionPopover
-              wave={wave}
-              align="left"
-              ariaLabel="Show wave description"
-              triggerClassName={`tw-group tw-flex tw-min-w-0 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-left ${
+            <div
+              className={
                 isCompact
-                  ? "tw-items-center"
-                  : "tw-w-full tw-flex-col tw-items-start"
-              }`}
+                  ? "tw-min-w-0"
+                  : "tw-flex tw-min-w-0 tw-items-end tw-gap-x-3"
+              }
             >
-              {isCompact ? (
-                <h1 className="tw-m-0 tw-flex tw-min-w-0 tw-items-center tw-gap-x-1.5 tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95">
-                  <span className="tw-min-w-0 tw-truncate">{wave.name}</span>
-                  <ChevronDownIcon
-                    aria-hidden="true"
-                    className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-300 tw-transition-colors group-hover:tw-text-white"
-                  />
-                </h1>
-              ) : (
-                <>
-                  <h1 className="tw-m-0 tw-w-full tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
-                    {wave.name}
+              <WaveDescriptionPopover
+                wave={wave}
+                align="left"
+                ariaLabel="Show wave description"
+                triggerClassName={`tw-group tw-flex tw-min-w-0 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-left ${
+                  isCompact
+                    ? "tw-items-center"
+                    : "tw-flex-1 tw-flex-col tw-items-start"
+                }`}
+              >
+                {isCompact ? (
+                  <h1 className="tw-m-0 tw-flex tw-min-w-0 tw-items-center tw-gap-x-1.5 tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95">
+                    <span className="tw-min-w-0 tw-truncate">{wave.name}</span>
+                    <ChevronDownIcon
+                      aria-hidden="true"
+                      className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-300 tw-transition-colors group-hover:tw-text-white"
+                    />
                   </h1>
-                  <span className="tw-mt-0.5 tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-x-1.5">
-                    <span
-                      ref={descriptionPreviewRef}
-                      className="tw-min-w-0 tw-truncate tw-text-xs tw-font-normal tw-text-iron-400 tw-transition-colors tw-duration-300 group-hover:tw-text-iron-300"
-                    >
-                      {previewText}
+                ) : (
+                  <>
+                    <h1 className="tw-m-0 tw-w-full tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
+                      {wave.name}
+                    </h1>
+                    <span className="tw-mt-0.5 tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-x-1.5">
+                      <span
+                        ref={descriptionPreviewRef}
+                        className="tw-min-w-0 tw-truncate tw-text-xs tw-font-normal tw-text-iron-400 tw-transition-colors tw-duration-300 group-hover:tw-text-iron-300"
+                      >
+                        {previewText}
+                      </span>
+                      {isDescriptionPreviewTruncated && (
+                        <ChevronDownIcon
+                          aria-hidden="true"
+                          className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-300 tw-transition-colors group-hover:tw-text-white"
+                        />
+                      )}
                     </span>
-                    {isDescriptionPreviewTruncated && (
-                      <ChevronDownIcon
-                        aria-hidden="true"
-                        className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-300 tw-transition-colors group-hover:tw-text-white"
-                      />
-                    )}
-                  </span>
-                </>
+                  </>
+                )}
+              </WaveDescriptionPopover>
+              {!isCompact && (
+                <span className="tw-mb-px tw-flex tw-flex-shrink-0 tw-items-center tw-border-0 tw-border-l tw-border-solid tw-border-iron-800 tw-pl-3">
+                  {scoreActions}
+                </span>
               )}
-            </WaveDescriptionPopover>
-            {!isCompact && (
-              <span className="tw-self-start">{scoreActions}</span>
-            )}
+            </div>
             {isCompact && scoreActions}
           </>
         ) : (

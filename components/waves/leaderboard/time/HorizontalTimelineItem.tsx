@@ -22,37 +22,36 @@ export const HorizontalTimelineItem: React.FC<HorizontalTimelineItemProps> = ({
   return (
     <div
       className={`tw-relative tw-flex tw-flex-col tw-items-center tw-z-10 ${
-        flexGrow ? "tw-flex-1" : "tw-flex-shrink-0 tw-w-[80px]"
+        flexGrow
+          ? "tw-flex-1"
+          : "tw-w-[60px] tw-flex-shrink-0 @[24rem]/timeline:tw-w-[80px]"
       }`}
     >
-      {/* Dot indicator ABOVE the line */}
-      <div className="tw-mb-3 tw-z-10">
+      <div className="tw-z-10 tw-mb-2">
         <HorizontalTimelineDot isNext={isNext} isPast={isPast} />
       </div>
 
-      {/* Information BELOW the line */}
-      <div className="tw-mt-2 tw-z-10 tw-text-center">
-        {/* Status badge - only for next or past */}
-        {isNext && (
-          <span className="tw-flex tw-justify-center tw-mb-1">
-            <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-primary-500/20 tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-medium tw-text-primary-400">
+      <div className="tw-z-10 tw-mt-1 tw-text-center">
+        <div className="tw-mb-1 tw-flex tw-h-3 tw-items-center tw-justify-center">
+          {isNext && (
+            <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-primary-500/15 tw-px-1.5 tw-py-0.5 tw-text-[9px] tw-font-semibold tw-leading-none tw-text-primary-300">
               Next
             </span>
-          </span>
-        )}
-        {isPast && (
-          <span className="tw-flex tw-justify-center tw-mb-1">
-            <span className="tw-inline-flex tw-items-center tw-rounded-full tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-medium tw-text-iron-500">
-              Completed
+          )}
+          {isPast && (
+            <span className="tw-text-[9px] tw-font-medium tw-uppercase tw-leading-none tw-tracking-wide tw-text-iron-600">
+              <span className="@[24rem]/timeline:tw-hidden">Done</span>
+              <span className="tw-hidden @[24rem]/timeline:tw-inline">
+                Completed
+              </span>
             </span>
-          </span>
-        )}
+          )}
+        </div>
 
-        {/* Date text */}
         <div
-          className={`tw-text-xs ${
-            isNext ? "tw-text-iron-100" : "tw-text-iron-400"
-          } tw-font-medium`}
+          className={`tw-text-[11px] tw-font-medium ${
+            isNext ? "tw-text-iron-200" : "tw-text-iron-400"
+          }`}
         >
           {new Date(decision.timestamp).toLocaleDateString(undefined, {
             month: "short",
@@ -60,8 +59,7 @@ export const HorizontalTimelineItem: React.FC<HorizontalTimelineItemProps> = ({
           })}
         </div>
 
-        {/* Time text */}
-        <div className="tw-text-xs tw-text-iron-500 tw-mt-0.5 tw-font-mono">
+        <div className="tw-mt-0.5 tw-font-mono tw-text-[10px] tw-text-iron-600">
           {new Date(decision.timestamp).toLocaleTimeString(undefined, {
             hour: "2-digit",
             minute: "2-digit",

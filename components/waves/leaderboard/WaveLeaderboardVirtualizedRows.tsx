@@ -502,7 +502,10 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
               data-index={virtualRow.index}
               className={`tw-absolute tw-left-0 tw-top-0 tw-grid tw-w-full tw-min-w-0 tw-gap-4 ${gridColumnsClassName} ${rowGapClassName}`}
               style={{
-                minHeight: virtualRow.size,
+                minHeight:
+                  layout === "gallery" && columns === 1 && hasLoadedItem
+                    ? undefined
+                    : virtualRow.size,
                 transform: `translateY(${virtualRow.start - scrollMargin}px)`,
               }}
             >

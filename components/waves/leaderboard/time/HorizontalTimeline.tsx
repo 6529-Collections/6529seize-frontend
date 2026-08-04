@@ -176,8 +176,8 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
           className="tw-overflow-x-auto tw-pb-2 tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
         >
           <div
-            className={`tw-flex tw-gap-4 ${
-              shouldSpread ? "tw-w-full" : "tw-max-w-20"
+            className={`tw-relative tw-flex tw-gap-2 @[24rem]/timeline:tw-gap-3 ${
+              shouldSpread ? "tw-w-full" : "tw-w-max tw-min-w-full"
             }`}
           >
             {decisions.map((decision) => {
@@ -199,7 +199,7 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
                 </div>
               );
             })}
-            <div className="tw-absolute tw-h-0.5 tw-bg-iron-800 tw-left-0 tw-right-0 tw-top-[20px]"></div>
+            <div className="tw-absolute tw-left-0 tw-right-0 tw-top-1 tw-h-px tw-bg-white/[0.06]"></div>
           </div>
         </div>
       </div>

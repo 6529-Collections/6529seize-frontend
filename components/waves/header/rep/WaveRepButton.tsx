@@ -50,8 +50,18 @@ export default function WaveRepButton({
         onClick={() => setIsModalOpen(true)}
         variant="tertiary"
         size={variant === "compact" ? "xs" : "sm"}
+        className={
+          variant === "compact"
+            ? "!tw-h-7 !tw-rounded-md !tw-border-white/[0.08] !tw-bg-white/[0.05] !tw-px-2 !tw-text-[11px] !tw-font-medium !tw-text-iron-300 !tw-shadow-none desktop-hover:hover:!tw-border-white/[0.12] desktop-hover:hover:!tw-bg-white/[0.08] desktop-hover:hover:!tw-text-iron-100 active:!tw-bg-white/[0.1]"
+            : undefined
+        }
       >
-        <ScaleIcon className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
+        <ScaleIcon
+          className={`${
+            variant === "compact" ? "tw-size-3.5" : "tw-size-4"
+          } tw-flex-shrink-0`}
+          aria-hidden="true"
+        />
         <span>{actionText}</span>
       </Button>
       <MyStreamActionTooltip id={tooltipId} />
