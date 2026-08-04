@@ -124,6 +124,7 @@ interface TopControlsProps {
   readonly onScreenshot: () => void;
   readonly isCapturing: boolean;
   readonly screenshotStatus: ScreenshotStatus;
+  readonly screenshotStatusId: string;
   readonly locale: SupportedLocale;
 }
 
@@ -141,10 +142,10 @@ const TopControls = memo((props: TopControlsProps) => {
     onScreenshot,
     isCapturing,
     screenshotStatus,
+    screenshotStatusId,
     locale,
   } = props;
   const mintInputId = "meme-overview-mint-input";
-  const screenshotStatusId = "meme-overview-screenshot-status";
 
   return (
     <div
@@ -201,9 +202,14 @@ export function MemeCalendarOverviewNextMint({
   id,
   locale = DEFAULT_LOCALE,
 }: MemeCalendarOverviewNextMintProps) {
+  const overviewInstanceId = useId();
   const calendarInviteTooltipId = buildTooltipId(
-    useId(),
+    overviewInstanceId,
     "meme-calendar-next-mint-invites"
+  );
+  const screenshotStatusId = buildTooltipId(
+    overviewInstanceId,
+    "meme-overview-screenshot-status"
   );
   const [now, setNow] = useState(new Date());
   const [isManualSelection, setIsManualSelection] = useState(false);
@@ -462,6 +468,7 @@ export function MemeCalendarOverviewNextMint({
               onScreenshot={handleScreenshot}
               isCapturing={isCapturing}
               screenshotStatus={screenshotStatus}
+              screenshotStatusId={screenshotStatusId}
               locale={locale}
             />
           )}
@@ -474,9 +481,7 @@ export function MemeCalendarOverviewNextMint({
                 onScreenshot={handleScreenshot}
                 isCapturing={isCapturing}
                 statusId={
-                  screenshotStatus === "idle"
-                    ? undefined
-                    : "meme-overview-screenshot-status"
+                  screenshotStatus === "idle" ? undefined : screenshotStatusId
                 }
                 locale={locale}
               />
@@ -504,7 +509,11 @@ export function MemeCalendarOverviewNextMint({
           <div className="tw-mt-5 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-2 tw-text-sm tw-leading-5 tw-text-iron-300">
             {formatToFullDivision(mintDetails.instantUtc, locale)}
           </div>
-          <ScreenshotFeedback locale={locale} status={screenshotStatus} />
+          <ScreenshotFeedback
+            locale={locale}
+            statusId={screenshotStatusId}
+            status={screenshotStatus}
+          />
         </div>
 
         <div

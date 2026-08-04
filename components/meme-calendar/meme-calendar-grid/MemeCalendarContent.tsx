@@ -508,11 +508,8 @@ export default function MemeCalendar({
       <section
         id="meme-calendar-info"
         aria-label={t(locale, "memeCalendar.grid.info.panelLabel")}
-        className={
-          "tw-rounded-2xl tw-bg-iron-950 tw-text-sm tw-leading-5 tw-text-iron-300 tw-shadow-lg tw-ring-1 tw-ring-iron-800 " +
-          (showInfo ? "tw-mb-5 tw-p-5 sm:tw-p-6" : "tw-hidden")
-        }
-        aria-hidden={!showInfo}
+        className="tw-mb-5 tw-rounded-2xl tw-bg-iron-950 tw-p-5 tw-text-sm tw-leading-5 tw-text-iron-300 tw-shadow-lg tw-ring-1 tw-ring-iron-800 sm:tw-p-6"
+        hidden={!showInfo}
       >
         <dl className="tw-m-0 tw-flex tw-flex-col">
           {GRID_INFO_ITEMS.map(({ label, text, note }) => (

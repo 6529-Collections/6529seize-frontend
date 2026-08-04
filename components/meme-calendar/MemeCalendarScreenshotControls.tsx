@@ -59,9 +59,11 @@ export function ScreenshotCard({
 
 export function ScreenshotFeedback({
   locale,
+  statusId,
   status,
 }: {
   readonly locale: SupportedLocale;
+  readonly statusId: string;
   readonly status: ScreenshotStatus;
 }) {
   if (status === "idle") {
@@ -107,7 +109,7 @@ export function ScreenshotFeedback({
 
   return (
     <p
-      id="meme-overview-screenshot-status"
+      id={statusId}
       className={`tw-mb-0 tw-mt-2 tw-flex tw-items-start tw-gap-2 tw-text-sm tw-leading-5 ${
         isError ? "tw-text-error" : "tw-text-iron-300"
       }`}
