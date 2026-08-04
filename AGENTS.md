@@ -277,13 +277,16 @@ is available, use it; otherwise read the relevant files in
 - Reserve Playwright for behavior that can fail only, or materially
   differently, in a real browser: rendering, hydration, navigation,
   responsive layout, accessibility, and browser/runtime integration.
-- Do not enumerate content-equivalent static routes in Playwright. Exercise
-  one representative route for each distinct rendering template and required
-  viewport; add another route only when it introduces a distinct browser risk.
+- Do not add content-equivalent static-route enumeration to ordinary PR
+  Playwright. Exercise one representative route for each distinct rendering
+  template and required viewport; add another route only when it introduces a
+  distinct browser risk.
 - Keep exhaustive route inventories, static content, metadata, source mapping,
   link, and fail-closed invariants in fast Jest or other static contract tests.
-  The Museum suite is the reference pattern: exhaustive publication contracts
-  plus representative desktop/mobile browser smoke tests.
+  The existing Museum institutional-practice sweep is a release-scoped
+  exception: retain its complete desktop/mobile deployed-route coverage, but
+  run it automatically only when the exact staging change set touches
+  Museum-owned app, component, library, locale, public-asset, or E2E paths.
 - Before adding or expanding an E2E pack, identify the browser-specific failure
   it catches and check that a lower test layer does not already cover it.
 

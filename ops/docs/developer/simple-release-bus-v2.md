@@ -100,8 +100,11 @@ register backend first and declare it as the frontend prerequisite.
    deploy units. Frontend builds only the staging profile and records one
    immutable environment-bound manifest/digest. Focused lint, typecheck, Jest,
    policy, and build checks remain PR CI gates and do not rerun in a normal
-   train. The complete read-only browser inventory runs once against the exact
-   deployed staging SHA. For an affected repository, the staging release
+   train. The baseline read-only browser inventory runs once against the exact
+   deployed staging SHA. The complete Museum institutional-practice pack joins
+   that inventory only when the release commit's first-parent diff touches a
+   Museum-owned path; an unknown diff fails safe by retaining the pack. For an
+   affected repository, the staging release
    commit has the recorded current `1a-staging` SHA as its first parent. When
    the dependency-closed composition adds commits beyond that parent, it is the
    second parent; a fully current empty-cumulative composition intentionally

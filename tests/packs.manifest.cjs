@@ -194,7 +194,7 @@ const PACKS = [
       SMOKE_SPECS,
       { grep: "@smoke", projects: [DESKTOP] }
     ),
-    triggers: ["manual"],
+    triggers: ["pr-ci", "manual"],
   },
   {
     ...localPack(
@@ -203,7 +203,7 @@ const PACKS = [
       ["tests/critical-shell"],
       { projects: [DESKTOP] }
     ),
-    triggers: ["manual"],
+    triggers: ["pr-ci", "manual"],
   },
 
   localReadonlyPack(
@@ -277,7 +277,7 @@ const PACKS = [
   {
     ...localReadonlyPack(
       "test:e2e:museum-institutional-practice",
-      "Network Museum institutional-practice deployed route smoke.",
+      "Network Museum institutional-practice study route sweep.",
       READONLY_SPECS.museumInstitutionalPractice,
       { timeoutMinutes: 30 }
     ),

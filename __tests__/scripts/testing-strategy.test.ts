@@ -428,7 +428,7 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.install.required).toBe(false);
   });
 
-  it("keeps Museum browser coverage out of PR CI and in post-deploy staging", () => {
+  it("keeps Museum browser coverage out of PR CI and scopes it after deployment", () => {
     const workflow = fs.readFileSync(
       path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),
       "utf8"
@@ -437,12 +437,40 @@ describe("testing strategy CI plan", () => {
       path.join(process.cwd(), ".github/workflows/staging-e2e.yml"),
       "utf8"
     );
+    const museumSpec = fs.readFileSync(
+      path.join(
+        process.cwd(),
+        "tests/museum/institutional-practice-readonly.spec.ts"
+      ),
+      "utf8"
+    );
 
-    expect(workflow).not.toContain("playwright install");
+    expect(workflow).toContain("playwright install --with-deps chromium");
+    expect(workflow).toContain("test:e2e:smoke");
+    expect(workflow).toContain("test:e2e:critical-shell");
     expect(workflow).not.toContain("test:e2e:museum-institutional-practice");
-    expect(workflow).not.toContain("PLAYWRIGHT_WEB_SERVER_COMMAND");
+    expect(workflow).toContain("PLAYWRIGHT_WEB_SERVER_COMMAND");
     expect(stagingWorkflow).toContain("--trigger post-deploy");
     expect(stagingWorkflow).toContain("SELECTED_PACK");
+    expect(stagingWorkflow).toContain(
+      "--exclude-pack museum-institutional-practice"
+    );
+    expect(stagingWorkflow).toContain("git diff --no-renames --name-only -z");
+    for (const ownedPath of [
+      "app/museum/*",
+      "components/museum/*",
+      "lib/museum/*",
+      "i18n/messages/museum.*",
+      "public/museum*",
+      "tests/museum/*",
+    ]) {
+      expect(stagingWorkflow).toContain(ownedPath);
+    }
+    expect(stagingWorkflow).toContain(
+      "Unable to prove the deployed change range; retaining the Museum E2E pack."
+    );
+    expect(museumSpec).toContain('test.describe.configure({ mode: "serial" })');
+    expect(museumSpec).toContain("for (const profile of PROFILE_ROUTES)");
     expect(
       fs.existsSync(
         path.join(

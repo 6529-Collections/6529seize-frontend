@@ -289,6 +289,7 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           ref: ${{ inputs.expected_sha || needs.baseline-adoption-decision.outputs.deployed_sha || github.sha }}
+          fetch-depth: 2
           persist-credentials: false
 
       - name: Verify Release Bus immutable source
@@ -327,6 +328,37 @@ jobs:
           corepack enable pnpm
           corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
           pnpm --version
+
+      - name: Select Museum pack for the deployed change set
+        id: museum-selection
+        env:
+          DEPLOYED_SHA: ${{ inputs.expected_sha || needs.baseline-adoption-decision.outputs.deployed_sha }}
+          SELECTED_PACK: ${{ github.event.inputs.pack || 'all' }}
+        run: |
+          set -euo pipefail
+          museum_required=true
+          if [ "$SELECTED_PACK" = all ] && [ -n "$DEPLOYED_SHA" ]; then
+            changed_files="$(mktemp)"
+            trap 'rm -f "$changed_files"' EXIT
+            if base_sha="$(git rev-parse "${DEPLOYED_SHA}^1" 2>/dev/null)" &&
+              git diff --no-renames --name-only -z \
+                "$base_sha" "$DEPLOYED_SHA" -- > "$changed_files"
+            then
+              museum_required=false
+              while IFS= read -r -d '' file; do
+                case "$file" in
+                  app/museum/*|components/museum/*|lib/museum/*|i18n/messages/museum.*|public/museum*|tests/museum/*)
+                    museum_required=true
+                    break
+                    ;;
+                esac
+              done < "$changed_files"
+            else
+              echo "::warning::Unable to prove the deployed change range; retaining the Museum E2E pack."
+            fi
+          fi
+          echo "required=$museum_required" >> "$GITHUB_OUTPUT"
+          echo "Museum E2E required: $museum_required"
 
       - name: Restore pnpm store
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
@@ -383,6 +415,7 @@ jobs:
         id: e2e
         continue-on-error: true
         env:
+          MUSEUM_E2E_REQUIRED: ${{ steps.museum-selection.outputs.required }}
           RELEASE_BUS_E2E_MANIFEST_ID: ${{ inputs.release_manifest_id }}
           RELEASE_BUS_E2E_MANIFEST_IDENTITY_SHA256: ${{ inputs.release_manifest_identity_sha256 }}
           RELEASE_BUS_E2E_SOURCE_SHA: ${{ inputs.expected_sha }}
@@ -406,6 +439,8 @@ jobs:
           fi
           if [ "${SELECTED_PACK:-all}" != all ]; then
             args+=(--pack "$SELECTED_PACK")
+          elif [ "$MUSEUM_E2E_REQUIRED" = false ]; then
+            args+=(--exclude-pack museum-institutional-practice)
           fi
           ./bin/6529 run e2e:packs -- "${args[@]}"
 
@@ -417,6 +452,7 @@ jobs:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
           MANIFEST_ID: ${{ inputs.release_manifest_id }}
           MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
+          MUSEUM_E2E_REQUIRED: ${{ steps.museum-selection.outputs.required }}
           OPERATION_KEY: ${{ inputs.operation_key }}
         run: |
           set -euo pipefail
@@ -424,9 +460,11 @@ jobs:
           expected_inventory="$(./bin/6529 exec node - <<'NODE'
           const { PACKS } = require("./tests/packs.manifest.cjs");
           const selected = process.env.SELECTED_PACK || "all";
+          const museumRequired = process.env.MUSEUM_E2E_REQUIRED !== "false";
           const keys = PACKS.filter((pack) =>
             pack.environments.includes("staging") &&
             pack.triggers.includes("post-deploy") &&
+            (museumRequired || pack.alias !== "museum-institutional-practice") &&
             (selected === "all" || pack.scriptKey === selected || pack.alias === selected)
           ).map((pack) => pack.scriptKey);
           process.stdout.write(JSON.stringify(keys));

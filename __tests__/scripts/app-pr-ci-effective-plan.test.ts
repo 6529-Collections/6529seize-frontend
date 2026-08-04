@@ -46,14 +46,14 @@ function executePlan(changedFiles: string[]): EffectivePlan {
 }
 
 describe("effective App PR CI plan", () => {
-  it("keeps ordinary runtime changes on focused static checks", () => {
+  it("preserves risk-selected browser checks for ordinary runtime changes", () => {
     const effective = executePlan(["components/header/AppHeader.tsx"]);
 
     expect(effective.checks.deadcode.required).toBe(false);
     expect(effective.checks.release_bus_contract.required).toBe(false);
     expect(effective.checks.test_typecheck.required).toBe(false);
-    expect(effective.checks.playwright_smoke).toBeUndefined();
-    expect(effective.checks.playwright_critical_shell).toBeUndefined();
+    expect(effective.checks.playwright_smoke?.required).toBe(true);
+    expect(effective.checks.playwright_critical_shell?.required).toBe(true);
   });
 
   it.each([

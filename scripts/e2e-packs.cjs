@@ -36,6 +36,7 @@ function parseArgs(argv) {
     env: null,
     trigger: null,
     pack: null,
+    excludePacks: [],
     artifactRoot: null,
     parallel: 1,
     capabilities: false,
@@ -49,6 +50,7 @@ function parseArgs(argv) {
       arg === "--env" ||
       arg === "--trigger" ||
       arg === "--pack" ||
+      arg === "--exclude-pack" ||
       arg === "--artifact-root" ||
       arg === "--parallel"
     ) {
@@ -63,6 +65,8 @@ function parseArgs(argv) {
           );
         }
         options.parallel = Number(value);
+      } else if (arg === "--exclude-pack") {
+        options.excludePacks.push(value);
       } else {
         const key =
           arg === "--artifact-root" ? "artifactRoot" : arg.replace(/^--/, "");
@@ -110,7 +114,7 @@ function isValidShard(value) {
   return Boolean(match && Number(match[1]) <= Number(match[2]));
 }
 
-function resolvePacks(packs, { env, trigger, pack }) {
+function resolvePacks(packs, { env, trigger, pack, excludePacks = [] }) {
   const requestedPack = pack === "all" ? null : pack;
   return packs.filter((candidate) => {
     if (env && !candidate.environments.includes(env)) {
@@ -123,6 +127,12 @@ function resolvePacks(packs, { env, trigger, pack }) {
       requestedPack &&
       candidate.scriptKey !== requestedPack &&
       candidate.alias !== requestedPack
+    ) {
+      return false;
+    }
+    if (
+      excludePacks.includes(candidate.scriptKey) ||
+      (candidate.alias && excludePacks.includes(candidate.alias))
     ) {
       return false;
     }
@@ -650,7 +660,8 @@ function printUsage() {
   console.error(
     "usage: e2e:packs -- --env <local|staging|production> " +
       "[--trigger <manual|pr-ci|post-deploy|cron>] " +
-      "[--pack <scriptKey|alias|all>] [--artifact-root <path>] " +
+      "[--pack <scriptKey|alias|all>] [--exclude-pack <scriptKey|alias>] " +
+      "[--artifact-root <path>] " +
       `[--parallel <1-${MAX_PARALLEL_PACKS}>] [--shard i/N] [--list] ` +
       "[--capabilities]"
   );

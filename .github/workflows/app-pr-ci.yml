@@ -27,6 +27,8 @@ jobs:
       test_typecheck_required: ${{ steps.plan_outputs.outputs.test_typecheck_required }}
       jest_changed_required: ${{ steps.plan_outputs.outputs.jest_changed_required }}
       build_required: ${{ steps.plan_outputs.outputs.build_required }}
+      playwright_smoke_required: ${{ steps.plan_outputs.outputs.playwright_smoke_required }}
+      playwright_critical_shell_required: ${{ steps.plan_outputs.outputs.playwright_critical_shell_required }}
       deadcode_required: ${{ steps.plan_outputs.outputs.deadcode_required }}
       release_bus_contract_required: ${{ steps.plan_outputs.outputs.release_bus_contract_required }}
       dependency_governance_required: ${{ steps.plan_outputs.outputs.dependency_governance_required }}
@@ -163,6 +165,9 @@ jobs:
       WS_ENDPOINT: "wss://ws.6529.io"
       ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io"
       BASE_ENDPOINT: "http://localhost:3001"
+      PLAYWRIGHT_BASE_URL: "http://localhost:3001"
+      PLAYWRIGHT_WEB_SERVER_COMMAND: "./bin/6529 run dev"
+      PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3001"
       NEXTGEN_CHAIN_ID: "1"
       MOBILE_APP_SCHEME: "mobile6529"
       CORE_SCHEME: "core6529"
@@ -504,6 +509,24 @@ jobs:
         with:
           path: ${{ github.workspace }}/.next/cache
           key: ${{ steps.nextjs_build_cache.outputs.cache-primary-key }}
+
+      - name: Install Playwright browser
+        if: needs.plan.outputs.playwright_smoke_required == 'true' || needs.plan.outputs.playwright_critical_shell_required == 'true'
+        run: ./bin/6529 exec playwright install --with-deps chromium
+
+      - name: Run small Playwright smoke pack
+        if: needs.plan.outputs.playwright_smoke_required == 'true'
+        env:
+          NEXT_DEV_DIST_DIR: ".next-playwright-smoke"
+          PLAYWRIGHT_READONLY: "1"
+        run: ./bin/6529 run test:e2e:smoke
+
+      - name: Run critical route-shell Playwright pack
+        if: needs.plan.outputs.playwright_critical_shell_required == 'true'
+        env:
+          NEXT_DEV_DIST_DIR: ".next-playwright-critical-shell"
+          PLAYWRIGHT_READONLY: "1"
+        run: ./bin/6529 run test:e2e:critical-shell
 
       - name: Upload app check artifacts
         if: always()

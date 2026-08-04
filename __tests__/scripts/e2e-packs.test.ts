@@ -50,6 +50,7 @@ const runner = require("../../scripts/e2e-packs.cjs") as {
     env: string | null;
     trigger: string | null;
     pack: string | null;
+    excludePacks: string[];
     artifactRoot: string | null;
     parallel: number;
     capabilities: boolean;
@@ -59,7 +60,12 @@ const runner = require("../../scripts/e2e-packs.cjs") as {
   resolveArtifactRoot: (artifactRoot: string | null) => string | null;
   resolvePacks: (
     packs: Pack[],
-    filters: { env: string | null; trigger: string | null; pack: string | null }
+    filters: {
+      env: string | null;
+      trigger: string | null;
+      pack: string | null;
+      excludePacks?: string[];
+    }
   ) => Pack[];
   outputPathsForPack: (pack: Pack) => {
     root: string;
@@ -142,6 +148,8 @@ describe("manifest-driven E2E runner", () => {
         "post-deploy",
         "--pack",
         "smoke",
+        "--exclude-pack",
+        "museum-institutional-practice",
         "--artifact-root",
         "artifacts/e2e",
         "--parallel",
@@ -154,6 +162,7 @@ describe("manifest-driven E2E runner", () => {
       env: "staging",
       trigger: "post-deploy",
       pack: "smoke",
+      excludePacks: ["museum-institutional-practice"],
       artifactRoot: "artifacts/e2e",
       parallel: 3,
       capabilities: false,
@@ -224,6 +233,7 @@ describe("manifest-driven E2E runner", () => {
         env: "staging",
         trigger: "post-deploy",
         pack: "smoke",
+        excludePacks: [],
       })
     ).toEqual([samplePacks[0]]);
     expect(
@@ -231,6 +241,18 @@ describe("manifest-driven E2E runner", () => {
         env: "production",
         trigger: "cron",
         pack: "all",
+        excludePacks: [],
+      })
+    ).toEqual([samplePacks[1]]);
+  });
+
+  it("excludes a changed-scoped pack by alias without disturbing order", () => {
+    expect(
+      runner.resolvePacks(samplePacks, {
+        env: null,
+        trigger: null,
+        pack: "all",
+        excludePacks: ["smoke"],
       })
     ).toEqual([samplePacks[1]]);
   });

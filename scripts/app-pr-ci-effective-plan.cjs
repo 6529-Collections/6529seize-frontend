@@ -88,9 +88,6 @@ function applyEffectiveAppPrCiPlan(plan, { cwd = process.cwd() } = {}) {
         : "No test code, test configuration, or dependency policy changed."
     ),
   };
-  delete checks.playwright_smoke;
-  delete checks.playwright_critical_shell;
-
   return { ...plan, checks };
 }
 

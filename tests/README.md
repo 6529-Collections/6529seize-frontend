@@ -25,8 +25,8 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e`                                          | —                             | local    | local       | manual                    | 60m     | Full local suite on the desktop web shell.                             |
 | `test:e2e:all-projects`                             | —                             | local    | local       | manual                    | 90m     | Full local suite across every configured project.                      |
 | `test:e2e:ui`                                       | —                             | local    | local       | manual                    | 90m     | Playwright UI mode for local debugging.                                |
-| `test:e2e:smoke`                                    | —                             | local    | local       | manual                    | 15m     | Fast @smoke subset of home, about, and The Memes.                      |
-| `test:e2e:critical-shell`                           | —                             | local    | local       | manual                    | 15m     | Boot and guarded route-shell resilience pack.                          |
+| `test:e2e:smoke`                                    | —                             | local    | local       | pr-ci, manual             | 15m     | Fast @smoke subset of home, about, and The Memes.                      |
+| `test:e2e:critical-shell`                           | —                             | local    | local       | pr-ci, manual             | 15m     | Boot and guarded route-shell resilience pack.                          |
 | `test:e2e:social-readonly`                          | —                             | readonly | local       | manual                    | 15m     | Waves and profile read-only journeys.                                  |
 | `test:e2e:input-detection-readonly`                 | —                             | readonly | local       | manual                    | 15m     | Windows touch-input detection read-only contract.                      |
 | `test:e2e:media-readonly`                           | —                             | readonly | local       | manual                    | 15m     | Media and mint detail read-only coverage.                              |
@@ -40,7 +40,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:notifications-mutation-guard`             | —                             | readonly | local       | manual                    | 15m     | Negative contract: notifications must not mutate.                      |
 | `test:e2e:profile-deep-links-readonly`              | —                             | readonly | local       | manual                    | 15m     | Profile deep-link redirect coverage.                                   |
 | `test:e2e:search-waves-readonly`                    | —                             | readonly | local       | manual                    | 15m     | Global and wave-local search coverage.                                 |
-| `test:e2e:museum-institutional-practice`            | —                             | readonly | local       | manual                    | 30m     | Network Museum institutional-practice deployed route smoke.            |
+| `test:e2e:museum-institutional-practice`            | —                             | readonly | local       | manual                    | 30m     | Network Museum institutional-practice study route sweep.               |
 | `test:e2e:composer-sandbox`                         | —                             | sandbox  | local       | manual                    | 15m     | Waves composer sandbox against the local mock API.                     |
 | `test:e2e:public-review-sandbox`                    | —                             | sandbox  | local       | manual                    | 15m     | Stream review feedback sandbox against the local mock API.             |
 | `test:e2e:reaction-sandbox`                         | —                             | sandbox  | local       | manual                    | 15m     | Drop reaction sandbox against the local mock API.                      |
@@ -101,13 +101,14 @@ Choosing the test layer:
 
 - Use Playwright for browser-specific behavior such as rendering, hydration,
   navigation, responsive layout, accessibility, and runtime integrations.
-- Do not repeat the same browser assertions across content-equivalent static
-  routes. Cover one representative route per distinct template and required
-  viewport, then test the complete route/content inventory with fast static or
-  Jest contracts.
+- Do not add repeated browser assertions across content-equivalent static
+  routes to ordinary PR checks. Cover one representative route per distinct
+  template and required viewport, then test the complete route/content
+  inventory with fast static or Jest contracts.
 - Add per-route E2E coverage only when a route has materially different browser
-  behavior or risk. The Museum pack follows this model: exhaustive static
-  publication contracts with representative desktop/mobile browser smoke.
+  behavior or risk. The retained Museum institutional-practice sweep is a
+  release-scoped exception: its exhaustive desktop/mobile route coverage runs
+  automatically only for Museum-owned staging changes.
 
 Remote read-only defaults:
 
@@ -138,15 +139,15 @@ App PR CI:
   production build when the risk plan requires it. Repository-wide Knip,
   test-helper typechecking, and release-workflow contract suites run only when
   their owning paths change.
-- PR CI does not start a local web server or duplicate Playwright packs. The
-  complete read-only browser inventory runs once against the exact deployed
-  staging SHA after a successful deployment when automatic baseline adoption
-  resolves `LEGACY`; `DEFERRED` hands validation to the matching Release Bus
-  intent instead of starting a duplicate automatic pack run.
+- PR CI retains the risk-selected small smoke and critical route-shell
+  Playwright packs. It does not run the dedicated Museum sweep; that pack needs
+  deployed staging evidence rather than another local content crawl.
 - Museum publication correctness remains exhaustive in fast Jest contracts:
   all manuscripts, profiles, admitted source mappings, and fail-closed rules
-  are checked statically. Its deployed Playwright pack is a representative
-  desktop/mobile route smoke rather than a duplicate 32-page content sweep.
+  are checked statically. After deployment, the complete 32-check desktop/mobile
+  Museum route sweep runs only when the exact staging commit differs from its
+  first parent in a Museum-owned path. Unrelated staging releases exclude that
+  pack; explicit manual Museum selection always remains available.
 - Uploaded PR CI artifacts are short-term debugging evidence. Durable
   deployment-train evidence still belongs on approved 6529-controlled artifact
   storage, not Git LFS.
@@ -396,6 +397,11 @@ Large-pack ownership:
   education, museum, OM, news, capital, blog, author, legacy content rendering,
   image/link rendering, route canonicalizing, or read-only mutation guard
   behavior.
+- `test:e2e:museum-institutional-practice` is the complete deployed-route sweep
+  owned by changes under `app/museum/`, `components/museum/`, `lib/museum/`,
+  `tests/museum/`, Museum locale messages, or Museum public assets. Automatic
+  staging selection compares the deployed commit with its first parent; manual
+  operators may select the pack directly for a focused rerun.
 - `test:e2e:authenticated-shells-readonly` is owned by PR or train owners
   changing auth restoration, wallet/profile gating, direct messages,
   subscriptions, profile proxy, profile tab visibility, or the read-only
