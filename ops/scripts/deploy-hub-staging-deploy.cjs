@@ -149,7 +149,6 @@ async function dispatchProduction({
 async function finishCohort(options) {
   const {
     github,
-    requests,
     accepted,
     operationId,
     runId,
@@ -157,7 +156,7 @@ async function finishCohort(options) {
     safeSha,
     stagingCorrelation,
   } = options;
-  if (await stopRequested(github, requests, operationId)) {
+  if (await stopRequested(github, accepted, operationId)) {
     await publishStatus(
       github,
       accepted,
@@ -195,7 +194,7 @@ async function finishCohort(options) {
     "pending",
     `Staging passed at ${safeSha.slice(0, 12)}; production queued`
   );
-  if (await stopRequested(github, requests, operationId)) {
+  if (await stopRequested(github, accepted, operationId)) {
     await publishStatus(
       github,
       production,
@@ -232,7 +231,11 @@ async function processStagingCohort(options) {
     now,
   } = options;
   await assertExactPulls(github, cohort.requests, baseRef);
-  if (await stopRequested(github, requests, operationId)) {
+  if (
+    await stopRequested(github, requests, operationId, {
+      includeSourceOperations: false,
+    })
+  ) {
     await publishStatus(
       github,
       cohort.requests,
@@ -243,12 +246,32 @@ async function processStagingCohort(options) {
     return "stopped";
   }
 
+  const activeRequests = [];
+  for (const request of cohort.requests) {
+    const stoppedBeforeClaim =
+      request.source_operation_id &&
+      (await stopRequested(github, [request], request.source_operation_id));
+    if (stoppedBeforeClaim) {
+      await publishStatus(
+        github,
+        [request],
+        runUrl,
+        "error",
+        "Stopped before staging mutation"
+      );
+    } else {
+      activeRequests.push(request);
+    }
+  }
+  if (activeRequests.length === 0) return "success";
+  const activeCohort = { ...cohort, requests: activeRequests };
+
   const knownGoodSha = git.remoteSha(STAGING_REF);
   git.fetchExact([knownGoodSha]);
   const knownGoodComposition = compositionAt(git, knownGoodSha);
   const candidateComposition = addRequests(
     knownGoodComposition,
-    cohort.requests
+    activeCohort.requests
   );
   const contentSha = composeContent(
     git,
@@ -267,7 +290,7 @@ async function processStagingCohort(options) {
   });
   await publishStatus(
     github,
-    cohort.requests,
+    activeCohort.requests,
     runUrl,
     "pending",
     `Deploying staging SHA ${stagingSha.slice(0, 12)}`
@@ -286,7 +309,7 @@ async function processStagingCohort(options) {
   if (validation.conclusion === "infrastructure") {
     await publishStatus(
       github,
-      cohort.requests,
+      activeCohort.requests,
       validation.runUrl,
       "error",
       "Staging infrastructure retries exhausted; exact SHA retained"
@@ -294,19 +317,20 @@ async function processStagingCohort(options) {
     return "failure";
   }
 
-  let accepted = cohort.requests;
+  let accepted = activeCohort.requests;
   let safeSha = stagingSha;
   let stagingCorrelation = validation.correlation;
   if (validation.conclusion === "product") {
     await publishStatus(
       github,
-      cohort.requests,
+      activeCohort.requests,
       validation.runUrl,
       "pending",
       "Staging E2E failed; reconciling exact requests"
     );
     const reconciliation = await reconcileProductFailure({
       ...options,
+      cohort: activeCohort,
       knownGoodSha,
       knownGoodComposition,
     });

@@ -21,6 +21,7 @@ const {
   mergeQueuedRequests,
   QUEUED_REQUEST_CONTEXT,
   queuedRequestDescription,
+  stopRequested,
 } = require("../../ops/scripts/deploy-hub-operation-workflows.cjs");
 const {
   addRequests,
@@ -258,8 +259,14 @@ describe("Deploy Hub operation state", () => {
     await expect(
       discoverQueuedRequests(github, EXPECTED_REPOSITORY, "main")
     ).resolves.toEqual([
-      request("production", 123, SHA_A, requestedAt),
-      request("staging", 124, SHA_B, requestedAt),
+      {
+        ...request("production", 123, SHA_A, requestedAt),
+        source_operation_id: "ui-batch",
+      },
+      {
+        ...request("staging", 124, SHA_B, requestedAt),
+        source_operation_id: "ui-batch",
+      },
     ]);
   });
 
@@ -288,6 +295,29 @@ describe("Deploy Hub operation state", () => {
         description: "Claimed by Deploy Hub run 12345",
       })
     );
+  });
+
+  it("retains the original Stop identity when a later controller claims a request", async () => {
+    const github = {
+      async getCombinedStatus() {
+        return {
+          statuses: [{ context: stopContext("ui-original"), state: "pending" }],
+        };
+      },
+    };
+    const queued = {
+      ...request("staging"),
+      source_operation_id: "ui-original",
+    };
+
+    await expect(stopRequested(github, [queued], "ui-surviving")).resolves.toBe(
+      true
+    );
+    await expect(
+      stopRequested(github, [queued], "ui-surviving", {
+        includeSourceOperations: false,
+      })
+    ).resolves.toBe(false);
   });
 });
 

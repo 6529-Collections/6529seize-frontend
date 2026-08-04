@@ -74,6 +74,7 @@ async function discoverQueuedRequests(github, repository, baseRef) {
         target: match[3].toLowerCase(),
         requester,
         requested_at: match[5],
+        source_operation_id: match[4],
       },
     });
   }
@@ -135,13 +136,27 @@ async function publishStatus(github, requests, runUrl, state, description) {
   }
 }
 
-async function stopRequested(github, requests, operationId) {
+async function stopRequested(
+  github,
+  requests,
+  operationId,
+  { includeSourceOperations = true } = {}
+) {
   for (const request of requests) {
     const combined = await github.getCombinedStatus(request.sha);
+    const operationIds = new Set([operationId]);
+    if (includeSourceOperations && request.source_operation_id) {
+      operationIds.add(request.source_operation_id);
+    }
     const latest = combined.statuses?.find(
-      (status) => status.context === stopContext(operationId)
+      (status) =>
+        operationIds.has(
+          status.context?.startsWith("Deploy Hub Stop — ")
+            ? status.context.slice("Deploy Hub Stop — ".length)
+            : ""
+        ) && status.state === "pending"
     );
-    if (latest?.state === "pending") return true;
+    if (latest) return true;
   }
   return false;
 }
