@@ -10,13 +10,18 @@ type WorkflowStep = {
   readonly run?: string;
   readonly env?: Readonly<Record<string, string>>;
   readonly with?: Readonly<Record<string, unknown>>;
+  readonly if?: string;
+  readonly "continue-on-error"?: boolean;
 };
 
 type WorkflowJob = {
   readonly needs?: string | readonly string[];
+  readonly if?: string;
   readonly permissions?: Readonly<Record<string, unknown>>;
   readonly steps: readonly WorkflowStep[];
 };
+
+type JobResult = "success" | "failure" | "skipped";
 
 type Workflow = {
   readonly on: {
@@ -150,6 +155,70 @@ printf '%s' "$FAKE_HTTP_STATUS"
 
 function commandOutput(result: childProcess.SpawnSyncReturns<string>): string {
   return `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
+}
+
+function normalizeExpression(expression: string | undefined): string {
+  return expression?.replace(/\s+/gu, " ").trim() ?? "";
+}
+
+function notificationSteps(
+  job: WorkflowJob,
+  status: "failure" | "success"
+): readonly WorkflowStep[] {
+  return job.steps.filter(
+    (step) =>
+      step.run?.endsWith("scripts/notify-ci-wave.mjs") &&
+      step.env?.["CI_PIPELINES_STATUS"] === status
+  );
+}
+
+function prerequisiteNotificationRuns(
+  file: string,
+  results: Readonly<Record<string, JobResult>>
+): boolean {
+  if (file === "deploy-staging.yml") {
+    return (
+      results["manual-deployment-guard"] === "failure" &&
+      results["deploy-staging"] === "skipped"
+    );
+  }
+  return (
+    results["build-upload-deploy"] === "skipped" &&
+    (results["manual-deployment-guard"] === "failure" ||
+      results["assert-main-ref"] === "failure")
+  );
+}
+
+function notificationCounts(
+  file: string,
+  results: Readonly<Record<string, JobResult>>
+): Readonly<{ failure: number; success: number }> {
+  const parsed = workflow(file);
+  const config = MANUAL_WORKFLOWS.find((item) => item.file === file);
+  if (!config) {
+    throw new Error(`Unknown manual workflow: ${file}`);
+  }
+  const deploy = workflowJob(parsed, config.deployJob);
+  const terminalJobName =
+    file === "deploy-staging.yml"
+      ? "notify-staging-prerequisite-failure"
+      : "notify-production-prerequisite-failure";
+  const terminal = workflowJob(parsed, terminalJobName);
+  const deployResult = results[config.deployJob];
+
+  return {
+    failure:
+      (deployResult === "failure"
+        ? notificationSteps(deploy, "failure").length
+        : 0) +
+      (prerequisiteNotificationRuns(file, results)
+        ? notificationSteps(terminal, "failure").length
+        : 0),
+    success:
+      deployResult === "success"
+        ? notificationSteps(deploy, "success").length
+        : 0,
+  };
 }
 
 describe("frontend manual deployment routing guards", () => {
@@ -314,6 +383,199 @@ describe("frontend manual deployment routing guards", () => {
     expect(checkout?.with?.["ref"]).toBe("${{ github.sha }}");
     expect(checkout?.with?.["ref"]).not.toBe("${{ env.STAGING_BRANCH }}");
   });
+
+  it.each([
+    {
+      file: "deploy-staging.yml",
+      job: "notify-staging-prerequisite-failure",
+      needs: ["manual-deployment-guard", "deploy-staging"],
+      condition:
+        "${{ always() && needs.manual-deployment-guard.result == 'failure' && needs.deploy-staging.result == 'skipped' }}",
+      environment: "staging",
+      title: "Seize STAGING WEB DEPLOY: CI pipeline is broken!!!",
+    },
+    {
+      file: "build-upload-deploy-prod.yml",
+      job: "notify-production-prerequisite-failure",
+      needs: [
+        "manual-deployment-guard",
+        "assert-main-ref",
+        "build-upload-deploy",
+      ],
+      condition:
+        "${{ always() && needs.build-upload-deploy.result == 'skipped' && ( needs.manual-deployment-guard.result == 'failure' || needs.assert-main-ref.result == 'failure' ) }}",
+      environment: "production",
+      title: "Seize PROD WEB DEPLOY: CI pipeline is broken!!!",
+    },
+  ])(
+    "routes $file prerequisite failures through one terminal notification job",
+    ({ condition, environment, file, job, needs, title }) => {
+      const terminal = workflowJob(workflow(file), job);
+      const ciWaveFailure = notificationSteps(terminal, "failure");
+
+      expect(terminal.needs).toEqual(needs);
+      expect(normalizeExpression(terminal.if)).toBe(condition);
+      expect(ciWaveFailure).toHaveLength(1);
+      expect(ciWaveFailure[0]).toMatchObject({
+        if: "always() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''",
+        "continue-on-error": true,
+        env: {
+          CI_PIPELINES_ENVIRONMENT: environment,
+          CI_PIPELINES_SERVICE: "web",
+          CI_PIPELINES_SHA: "${{ github.sha }}",
+          CI_PIPELINES_STATUS: "failure",
+          CI_PIPELINES_TARGET_ENV: environment,
+          CI_PIPELINES_TITLE: title,
+        },
+        run: "node .ci-wave-notifier/scripts/notify-ci-wave.mjs",
+      });
+    }
+  );
+
+  it.each(MANUAL_WORKFLOWS)(
+    "checks out every $environment notifier from the exact workflow SHA",
+    ({ deployJob, file }) => {
+      const parsed = workflow(file);
+      const terminalJobName =
+        file === "deploy-staging.yml"
+          ? "notify-staging-prerequisite-failure"
+          : "notify-production-prerequisite-failure";
+
+      for (const jobName of [deployJob, terminalJobName]) {
+        const job = workflowJob(parsed, jobName);
+        const checkout = job.steps.find(
+          ({ name }) => name === "Check out CI wave notifier"
+        );
+        const verify = job.steps.find(
+          ({ name }) => name === "Verify CI wave notifier checkout"
+        );
+
+        expect(checkout).toMatchObject({
+          "continue-on-error": true,
+          with: {
+            ref: "${{ github.workflow_sha }}",
+            "persist-credentials": false,
+            path: ".ci-wave-notifier",
+            "sparse-checkout": "scripts/notify-ci-wave.mjs",
+            "sparse-checkout-cone-mode": false,
+          },
+        });
+        expect(verify).toMatchObject({
+          "continue-on-error": true,
+          run: expect.stringContaining(
+            "test -f .ci-wave-notifier/scripts/notify-ci-wave.mjs"
+          ),
+        });
+      }
+    }
+  );
+
+  it("keeps production Discord prerequisite alerts non-blocking and singular", () => {
+    const production = workflow("build-upload-deploy-prod.yml");
+    const deploy = workflowJob(production, "build-upload-deploy");
+    const terminal = workflowJob(
+      production,
+      "notify-production-prerequisite-failure"
+    );
+    const discordSteps = [...deploy.steps, ...terminal.steps].filter(
+      ({ uses }) => uses?.startsWith("sarisia/actions-status-discord@")
+    );
+
+    expect(discordSteps).toHaveLength(3);
+    for (const step of discordSteps) {
+      expect(step["continue-on-error"]).toBe(true);
+    }
+    expect(
+      terminal.steps.filter(({ uses }) =>
+        uses?.startsWith("sarisia/actions-status-discord@")
+      )
+    ).toHaveLength(1);
+  });
+
+  it.each([
+    {
+      path: "staging guard failure",
+      file: "deploy-staging.yml",
+      results: {
+        "manual-deployment-guard": "failure",
+        "deploy-staging": "skipped",
+      },
+      expected: { failure: 1, success: 0 },
+    },
+    {
+      path: "production guard failure",
+      file: "build-upload-deploy-prod.yml",
+      results: {
+        "manual-deployment-guard": "failure",
+        "assert-main-ref": "success",
+        "build-upload-deploy": "skipped",
+      },
+      expected: { failure: 1, success: 0 },
+    },
+    {
+      path: "production main-ref failure",
+      file: "build-upload-deploy-prod.yml",
+      results: {
+        "manual-deployment-guard": "success",
+        "assert-main-ref": "failure",
+        "build-upload-deploy": "skipped",
+      },
+      expected: { failure: 1, success: 0 },
+    },
+    {
+      path: "both production prerequisites failing",
+      file: "build-upload-deploy-prod.yml",
+      results: {
+        "manual-deployment-guard": "failure",
+        "assert-main-ref": "failure",
+        "build-upload-deploy": "skipped",
+      },
+      expected: { failure: 1, success: 0 },
+    },
+    {
+      path: "ordinary staging deployment failure",
+      file: "deploy-staging.yml",
+      results: {
+        "manual-deployment-guard": "success",
+        "deploy-staging": "failure",
+      },
+      expected: { failure: 1, success: 0 },
+    },
+    {
+      path: "ordinary production deployment failure",
+      file: "build-upload-deploy-prod.yml",
+      results: {
+        "manual-deployment-guard": "success",
+        "assert-main-ref": "success",
+        "build-upload-deploy": "failure",
+      },
+      expected: { failure: 1, success: 0 },
+    },
+    {
+      path: "staging success",
+      file: "deploy-staging.yml",
+      results: {
+        "manual-deployment-guard": "success",
+        "deploy-staging": "success",
+      },
+      expected: { failure: 0, success: 1 },
+    },
+    {
+      path: "production success",
+      file: "build-upload-deploy-prod.yml",
+      results: {
+        "manual-deployment-guard": "success",
+        "assert-main-ref": "success",
+        "build-upload-deploy": "success",
+      },
+      expected: { failure: 0, success: 1 },
+    },
+  ] as const)(
+    "emits the expected CI-wave notifications for $path",
+    ({ expected, file, results }) => {
+      expect(notificationCounts(file, results)).toEqual(expected);
+    }
+  );
 
   it.each([
     ["staging", "release-bus-deploy-staging.yml"],
