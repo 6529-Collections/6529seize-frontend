@@ -500,7 +500,7 @@ export function MemeCalendarOverviewNextMint({
               <div className="tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.16em] tw-text-iron-500">
                 {countdownTitle}
               </div>
-              <div className="tw-mt-1 tw-break-words tw-text-2xl tw-font-semibold tw-leading-8 tw-tracking-tight tw-text-iron-100 sm:tw-whitespace-nowrap">
+              <div className="tw-mt-1 tw-break-words tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-100 sm:tw-whitespace-nowrap sm:tw-text-2xl sm:tw-leading-8">
                 {finalCountdown}
               </div>
             </div>
