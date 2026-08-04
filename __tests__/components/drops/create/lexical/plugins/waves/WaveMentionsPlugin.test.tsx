@@ -107,7 +107,10 @@ describe("WaveMentionsPlugin", () => {
       );
     });
 
-    expect($createWaveMentionNode).toHaveBeenCalledWith("#Bracket Wave");
+    expect($createWaveMentionNode).toHaveBeenCalledWith(
+      "#Bracket Wave",
+      "wave-1"
+    );
     expect(nodeToReplace.replace).toHaveBeenCalledWith(mentionNode);
     expect(mentionNode.select).toHaveBeenCalled();
     expect(onSelect).toHaveBeenCalledWith({

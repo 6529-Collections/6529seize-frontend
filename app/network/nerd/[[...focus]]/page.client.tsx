@@ -28,14 +28,14 @@ function getFocusPath(focus: LeaderboardFocus): string {
 }
 
 function getFocusFromPathname(
-  pathname: string,
+  pathname: string | null,
   fallback: LeaderboardFocus
 ): LeaderboardFocus {
-  if (pathname.includes("/interactions")) {
+  if (pathname?.includes("/interactions")) {
     return LeaderboardFocus.INTERACTIONS;
   }
 
-  if (pathname.startsWith("/network/nerd")) {
+  if (pathname?.startsWith("/network/nerd")) {
     return LeaderboardFocus.TDH;
   }
 
