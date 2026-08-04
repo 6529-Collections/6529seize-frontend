@@ -4333,7 +4333,8 @@
       ],
       "facts": [
         "/about/primary-address is a public, read-only primary-address reference table.",
-        "The table shows Profile Handle, Current Selected Primary Address, and Primary Address Changed To columns loaded from /primary_address.csv.",
+        "The full-width table shows Profile Handle, Current Selected Primary Address, and Primary Address Changed to columns loaded from /primary_address.csv; it scrolls vertically and stacks the same fields on smaller screens.",
+        "Each profile handle links to /{current_primary}.",
         "Non-primary consolidated wallet rows on profile identity statements can expose Set Primary when the connected wallet owns the profile and no proxy profile is active."
       ],
       "canonical_path": "/about/primary-address",
