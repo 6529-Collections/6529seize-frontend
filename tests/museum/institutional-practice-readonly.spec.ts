@@ -416,9 +416,24 @@ test.describe("Museum institutional-practice publication @surface @large @readon
       KEYS_AND_GATES_ROUTE,
       sourceCommit
     );
-    const programImages = page.locator('main img[alt*=" by "]');
+    await expect(
+      page.getByRole("heading", {
+        level: 2,
+        name: "16 winning photographs",
+      })
+    ).toBeVisible();
+    await expect(
+      page.getByText("Waiting for contract finalization")
+    ).toBeVisible();
+    const programImages = page.locator(
+      'main a[href^="/museum/network/objects/"] img'
+    );
     await expect(programImages).toHaveCount(16);
     await expectImagesLoaded(programImages);
+    await expect(programImages.first()).toHaveAttribute(
+      "srcset",
+      /\/museum\/programs\/6529NM-AP-01\/.+640\.webp 640w.+1280\.webp 1280w.+2400\.webp 2400w/u
+    );
     await expect(
       page.getByRole("heading", {
         level: 2,
@@ -437,14 +452,25 @@ test.describe("Museum institutional-practice publication @surface @large @readon
       sourceCommit
     );
     await expect(
-      page.getByRole("img", { name: "Take the Key! by GulYildiz" })
+      page.getByRole("img", {
+        name: "A lone figure stands before a tall blue patterned gate as sunlight casts long geometric shadows across a stone hall.",
+      })
     ).toBeVisible();
     await expect(page.getByText("Selected; unminted")).toBeVisible();
+    await expect(page.getByText("A Keys and Gates winner")).toBeVisible();
+    await expect(
+      page.getByRole("link", {
+        name: "Open submitted high-resolution image",
+      })
+    ).toHaveAttribute(
+      "href",
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_61b48317-f46c-45b3-beed-cfd9054326d8/2a39fe28-4040-4a80-92a6-306384a4e735/DSCF2374-copy-2.jpg"
+    );
     await expect(
       page.getByRole("heading", { level: 2, name: "Artist statement" })
     ).toBeVisible();
     await expect(page.locator("body")).toContainText(
-      "a Museum preservation copy has not yet been recorded"
+      "It is not a Museum preservation master"
     );
   });
 });

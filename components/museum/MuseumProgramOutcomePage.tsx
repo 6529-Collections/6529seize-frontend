@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { MuseumJsonDisclosure } from "./MuseumMarkdown";
+import { MuseumProgramImage } from "./MuseumProgramImage";
 import { MuseumStatusBadge } from "./MuseumShell";
 import { formatDate } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -48,21 +48,43 @@ export function MuseumProgramOutcomePage({
         </div>
       </header>
 
-      {outcome.imageUrl && (
+      <section
+        aria-label={t(
+          DEFAULT_LOCALE,
+          "museum.network.objects.winnerStatusLabel"
+        )}
+        className="tw-mb-8 tw-rounded-xl tw-border tw-border-primary-400/30 tw-bg-primary-400/10 tw-p-5"
+      >
+        <p className="tw-text-primary-200 tw-m-0 tw-text-sm tw-font-semibold">
+          {t(DEFAULT_LOCALE, "museum.network.objects.winnerStatusTitle")}
+        </p>
+        <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-200">
+          {t(DEFAULT_LOCALE, "museum.network.objects.winnerStatusDescription")}
+        </p>
+      </section>
+
+      {outcome.media && (
         <figure className="tw-m-0 tw-min-w-0">
-          <div className="tw-relative tw-aspect-[4/3] tw-w-full tw-overflow-hidden tw-bg-black">
-            <Image
-              src={outcome.imageUrl}
-              alt={`${outcome.title} by ${outcome.artist}`}
-              fill
-              priority
+          <div className="tw-relative tw-h-[min(80vh,60rem)] tw-min-h-96 tw-w-full tw-overflow-hidden tw-bg-black">
+            <MuseumProgramImage
+              media={outcome.media}
+              eager
               sizes="(min-width: 1280px) 70vw, 100vw"
-              className="tw-object-contain"
-              unoptimized
+              className="tw-absolute tw-inset-0 tw-h-full tw-w-full tw-object-contain"
             />
           </div>
-          <figcaption className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4 tw-text-sm tw-leading-6 tw-text-iron-400">
-            {t(DEFAULT_LOCALE, "museum.network.objects.programMediaCaption")}
+          <figcaption className="tw-flex tw-flex-col tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4 tw-text-sm tw-leading-6 tw-text-iron-400 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
+            <span>
+              {t(DEFAULT_LOCALE, "museum.network.objects.programMediaCaption")}
+            </span>
+            <a
+              href={outcome.media.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-flex-none tw-items-center tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            >
+              {t(DEFAULT_LOCALE, "museum.network.objects.openHighResolution")}
+            </a>
           </figcaption>
         </figure>
       )}
