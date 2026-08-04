@@ -237,6 +237,7 @@ describe("useDmWavesList", () => {
     const { result } = renderHook(() => useDmWavesList());
 
     expect(result.current.canTrustServerSnapshotUnreadState).toBe(false);
+    expect(result.current.serverUnreadCountForIndicators).toBe(0);
   });
 
   it("trusts a persistent paginated mismatch only after bounded reconciliation", async () => {
@@ -326,6 +327,7 @@ describe("useDmWavesList", () => {
     const { result } = renderHook(() => useDmWavesList());
 
     expect(result.current.canTrustServerSnapshotUnreadState).toBe(false);
+    expect(result.current.serverUnreadCountForIndicators).toBe(1);
     expect(refetchQueries).toHaveBeenCalledTimes(1);
   });
 
@@ -361,6 +363,7 @@ describe("useDmWavesList", () => {
     const { result, rerender } = renderHook(() => useDmWavesList());
 
     expect(result.current.canTrustServerSnapshotUnreadState).toBe(false);
+    expect(result.current.serverUnreadCountForIndicators).toBe(1);
     expect(refetchUnreadDmDrops).toHaveBeenCalledTimes(1);
 
     unreadDataUpdatedAt = 101;

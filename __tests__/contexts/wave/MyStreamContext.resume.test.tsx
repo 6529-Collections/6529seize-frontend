@@ -73,7 +73,7 @@ jest.mock("@/contexts/wave/hooks/useWaveMessagesStore", () => ({
     removeDrop: jest.fn(),
     subscribe: jest.fn(),
     unsubscribe: jest.fn(),
-    setKnownWaveScopes: mockSetKnownWaveScopes,
+    replaceKnownWaveScopes: mockSetKnownWaveScopes,
     optimisticUpdateDrop: jest.fn(),
     hasServerFeedSeed: jest.fn(() => false),
     registerPendingServerFeedSeed: jest.fn(),
@@ -96,6 +96,7 @@ jest.mock("@/contexts/wave/hooks/useEnhancedWavesListCore", () => ({
   __esModule: true,
   default: jest.fn((_activeWaveId: string | null, wavesData: any) => ({
     waves: wavesData.waves,
+    unreadCount: 0,
     isFetching: false,
     isFetchingNextPage: false,
     hasNextPage: false,
@@ -148,7 +149,11 @@ type IdleWindow = Window & {
 
 const createListData = (
   refetchAllWaves: jest.Mock,
-  waves: readonly { readonly id: string }[] = []
+  waves: readonly {
+    readonly id: string;
+    readonly isDirectMessage?: boolean;
+    readonly isPrivate?: boolean;
+  }[] = []
 ) => ({
   waves,
   isFetching: false,
@@ -216,6 +221,87 @@ describe("MyStreamProvider resume sync", () => {
     });
   });
 
+  it("registers private main-list waves as profile scoped", () => {
+    useWavesListMock.mockReturnValue(
+      createListData(mainRefetch, [
+        {
+          id: "private-wave",
+          isPrivate: true,
+          isDirectMessage: false,
+        },
+      ])
+    );
+
+    render(
+      <MyStreamProvider>
+        <div />
+      </MyStreamProvider>
+    );
+
+    expect(mockSetKnownWaveScopes).toHaveBeenCalledWith({
+      profileScopedWaveIds: new Set(["private-wave"]),
+      publicWaveIds: new Set(),
+    });
+  });
+
+  it("registers an active public wave when the main list is deferred", () => {
+    useCapacitorMock.mockReturnValue({ isCapacitor: true, isActive: true });
+    usePathnameMock.mockReturnValue("/waves/public-wave");
+    useActiveWaveManagerMock.mockReturnValue({
+      activeWaveId: "public-wave",
+      setActiveWave: mockSetActiveWave,
+    });
+    useWaveByIdMock.mockReturnValue({
+      wave: {
+        id: "public-wave",
+        chat: { scope: { group: null } },
+        visibility: { scope: { group: null } },
+      },
+      isLoading: false,
+      isFetching: false,
+    });
+
+    render(
+      <MyStreamProvider>
+        <div />
+      </MyStreamProvider>
+    );
+
+    expect(mockSetKnownWaveScopes).toHaveBeenCalledWith({
+      profileScopedWaveIds: new Set(),
+      publicWaveIds: new Set(["public-wave"]),
+    });
+  });
+
+  it("registers an active private wave as profile scoped", () => {
+    useCapacitorMock.mockReturnValue({ isCapacitor: true, isActive: true });
+    usePathnameMock.mockReturnValue("/waves/private-wave");
+    useActiveWaveManagerMock.mockReturnValue({
+      activeWaveId: "private-wave",
+      setActiveWave: mockSetActiveWave,
+    });
+    useWaveByIdMock.mockReturnValue({
+      wave: {
+        id: "private-wave",
+        chat: { scope: { group: { is_direct_message: false } } },
+        visibility: { scope: { group: { id: "private-group" } } },
+      },
+      isLoading: false,
+      isFetching: false,
+    });
+
+    render(
+      <MyStreamProvider>
+        <div />
+      </MyStreamProvider>
+    );
+
+    expect(mockSetKnownWaveScopes).toHaveBeenCalledWith({
+      profileScopedWaveIds: new Set(["private-wave"]),
+      publicWaveIds: new Set(),
+    });
+  });
+
   it("registers selected waves before delegating active wave navigation", () => {
     let context: ReturnType<typeof useMyStream> | null = null;
 
@@ -276,7 +362,7 @@ describe("MyStreamProvider resume sync", () => {
     });
   });
 
-  it("does not refetch DMs when the browser comes online and no DM list is active", () => {
+  it("refetches the globally active DM state when the browser comes online", () => {
     render(
       <MyStreamProvider>
         <div />
@@ -288,8 +374,8 @@ describe("MyStreamProvider resume sync", () => {
     });
 
     expect(mainRefetch).toHaveBeenCalledTimes(1);
-    expect(dmRefetch).not.toHaveBeenCalled();
-    expect(useDmWavesListMock).toHaveBeenLastCalledWith({ enabled: false });
+    expect(dmRefetch).toHaveBeenCalledTimes(1);
+    expect(useDmWavesListMock).toHaveBeenLastCalledWith();
     expect(useWavesListMock).toHaveBeenLastCalledWith({ enabled: true });
   });
 
@@ -473,8 +559,8 @@ describe("MyStreamProvider resume sync", () => {
     });
 
     expect(mainRefetch).toHaveBeenCalledTimes(1);
-    expect(dmRefetch).not.toHaveBeenCalled();
-    expect(useDmWavesListMock).toHaveBeenLastCalledWith({ enabled: false });
+    expect(dmRefetch).toHaveBeenCalledTimes(1);
+    expect(useDmWavesListMock).toHaveBeenLastCalledWith();
   });
 
   it("refetches DMs on browser resume for messages routes", () => {
@@ -492,10 +578,10 @@ describe("MyStreamProvider resume sync", () => {
 
     expect(mainRefetch).toHaveBeenCalledTimes(1);
     expect(dmRefetch).toHaveBeenCalledTimes(1);
-    expect(useDmWavesListMock).toHaveBeenLastCalledWith({ enabled: true });
+    expect(useDmWavesListMock).toHaveBeenLastCalledWith();
   });
 
-  it("refetches DMs while a DM surface activation is mounted", () => {
+  it("keeps DM synchronization active independently of mounted DM surfaces", () => {
     let context: ReturnType<typeof useMyStream> | null = null;
 
     render(
@@ -508,15 +594,13 @@ describe("MyStreamProvider resume sync", () => {
       </MyStreamProvider>
     );
 
-    expect(useDmWavesListMock).toHaveBeenLastCalledWith({ enabled: false });
+    expect(useDmWavesListMock).toHaveBeenLastCalledWith();
     expect(context).not.toBeNull();
 
     let releaseDirectMessagesList: (() => void) | null = null;
     act(() => {
       releaseDirectMessagesList = context!.requestDirectMessagesList();
     });
-
-    expect(useDmWavesListMock).toHaveBeenLastCalledWith({ enabled: true });
 
     act(() => {
       window.dispatchEvent(new Event("online"));
@@ -529,7 +613,7 @@ describe("MyStreamProvider resume sync", () => {
       releaseDirectMessagesList?.();
     });
 
-    expect(useDmWavesListMock).toHaveBeenLastCalledWith({ enabled: false });
+    expect(useDmWavesListMock).toHaveBeenLastCalledWith();
   });
 
   it("does not refetch on online while the document is hidden", () => {

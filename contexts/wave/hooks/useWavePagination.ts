@@ -42,6 +42,12 @@ interface AroundSerialNoState {
   lastFetchedMaxSerialNo: number | null;
 }
 
+const throwIfPaginationRequestAborted = (signal: AbortSignal): void => {
+  if (signal.aborted) {
+    throw new DOMException("The operation was aborted.", "AbortError");
+  }
+};
+
 export function useWavePagination({
   updateData,
   getData,
@@ -304,7 +310,10 @@ export function useWavePagination({
             );
 
       const handledPromise = rawPromise
-        .then((drops) => updateWithPaginatedData(props.waveId, drops))
+        .then((drops) => {
+          throwIfPaginationRequestAborted(controller.signal);
+          return updateWithPaginatedData(props.waveId, drops);
+        })
         .catch((error) => {
           handlePaginationError(props.waveId, error);
           return null;
@@ -390,6 +399,7 @@ export function useWavePagination({
           serialToFetch,
           controller.signal
         );
+        throwIfPaginationRequestAborted(controller.signal);
 
         if (result) {
           updateData({

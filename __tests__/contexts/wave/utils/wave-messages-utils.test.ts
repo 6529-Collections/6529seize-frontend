@@ -237,6 +237,30 @@ describe("fetchNewestWaveMessages", () => {
 
     expect(result).toEqual({ drops: null, highestSerialNo: null });
   });
+
+  it("rejects a response resolved after cancellation before updating profile state", async () => {
+    const controller = new AbortController();
+    const updateEligibility = jest.fn();
+    const consoleSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+    (commonApiFetchWithRetry as jest.Mock).mockResolvedValue({
+      drops: [sampleV2Drop],
+      wave: sampleWaveOverview,
+    });
+    controller.abort();
+
+    await expect(
+      fetchNewestWaveMessages(
+        "wave-1",
+        null,
+        10,
+        controller.signal,
+        updateEligibility
+      )
+    ).rejects.toMatchObject({ name: "AbortError" });
+
+    expect(updateEligibility).not.toHaveBeenCalled();
+    consoleSpy.mockRestore();
+  });
 });
 
 describe("maxOrNull", () => {

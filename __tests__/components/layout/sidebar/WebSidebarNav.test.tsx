@@ -29,18 +29,6 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
   default: () => ({ hasTouchScreen: false }),
 }));
 
-const mockDirectMessages = [
-  {
-    unreadDropsCount: 0,
-    newDropsCount: { count: 1 },
-  },
-];
-jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStreamOptional: () => ({
-    directMessages: { list: mockDirectMessages },
-  }),
-}));
-
 let mockCanAccessDropForge = false;
 jest.mock("@/hooks/useDropForgePermissions", () => ({
   useDropForgePermissions: () => ({
@@ -83,13 +71,12 @@ describe("WebSidebarNav", () => {
     mockUseUnreadIndicator.mockClear();
   });
 
-  it("combines the websocket-backed DM list with the unread summary", () => {
+  it("requests the shared messages unread indicator", () => {
     render(<WebSidebarNav isCollapsed={false} />);
 
     expect(mockUseUnreadIndicator).toHaveBeenCalledWith({
       type: "messages",
       handle: null,
-      localDirectMessages: mockDirectMessages,
     });
   });
 

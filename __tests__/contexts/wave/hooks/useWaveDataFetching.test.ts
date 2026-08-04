@@ -139,7 +139,11 @@ describe("useWaveDataFetching", () => {
   it("keeps the initial guard until a queued seed commits, then syncs newer drops", async () => {
     jest.useFakeTimers();
     formatWaveMessages.mockImplementation(
-      (waveId: string, drops: any[], options: Record<string, unknown> = {}) => ({
+      (
+        waveId: string,
+        drops: any[],
+        options: Record<string, unknown> = {}
+      ) => ({
         key: waveId,
         drops,
         ...options,
@@ -268,7 +272,41 @@ describe("useWaveDataFetching", () => {
     });
   });
 
-  it("ignores abort errors", async () => {
+  it("does not commit a response that resolves after its profile request was aborted", async () => {
+    const controller = new AbortController();
+    createController.mockReturnValueOnce(controller);
+    type DeferredDrop = { readonly id: string; readonly serial_no: number };
+    let resolveFetch: ((drops: DeferredDrop[]) => void) | null = null;
+    fetchWaveMessages.mockImplementationOnce(
+      () =>
+        new Promise<DeferredDrop[]>((resolve) => {
+          resolveFetch = resolve;
+        })
+    );
+    formatWaveMessages.mockReturnValue({
+      key: "wave1",
+      drops: [{ id: "old-profile-drop" }],
+    });
+    createEmptyWaveMessages.mockReturnValue({ key: "wave1", drops: [] });
+    const { result, updateData } = setup({ wave1: { drops: [] } });
+
+    act(() => {
+      result.current.registerWave("wave1");
+    });
+
+    controller.abort();
+    await act(async () => {
+      resolveFetch?.([{ id: "old-profile-drop", serial_no: 1 }]);
+      await Promise.resolve();
+    });
+
+    expect(formatWaveMessages).not.toHaveBeenCalled();
+    expect(updateData).not.toHaveBeenCalledWith(
+      expect.objectContaining({ drops: [{ id: "old-profile-drop" }] })
+    );
+  });
+
+  it("ignores abort errors without clearing a replacement request", async () => {
     const abortError = new DOMException("aborted", "AbortError");
     fetchWaveMessages.mockRejectedValue(abortError);
     createEmptyWaveMessages.mockReturnValue({ key: "wave1", drops: [] });
@@ -283,6 +321,7 @@ describe("useWaveDataFetching", () => {
     });
 
     expect(updateData).toHaveBeenCalledTimes(1); // only initial empty state
+    expect(clearLoadingState).not.toHaveBeenCalled();
     expect(consoleSpy).not.toHaveBeenCalled();
     expect(mockTrackWaveFeedLoadCancelled).toHaveBeenCalledWith({
       durationMs: 0,
@@ -294,6 +333,56 @@ describe("useWaveDataFetching", () => {
     });
     expect(mockTrackWaveFeedLoadFailed).not.toHaveBeenCalled();
     consoleSpy.mockRestore();
+  });
+
+  it("does not let a cancelled request clear its in-flight replacement", async () => {
+    let rejectCancelledRequest: (reason: unknown) => void = () => {};
+    let resolveReplacementRequest: (
+      drops: Array<{ id: string }>
+    ) => void = () => {};
+    const cancelledRequest = new Promise<Array<{ id: string }>>((_, reject) => {
+      rejectCancelledRequest = reject;
+    });
+    const replacementRequest = new Promise<Array<{ id: string }>>((resolve) => {
+      resolveReplacementRequest = resolve;
+    });
+    fetchWaveMessages
+      .mockReturnValueOnce(cancelledRequest)
+      .mockReturnValueOnce(replacementRequest);
+    createEmptyWaveMessages.mockReturnValue({ key: "wave1", drops: [] });
+    formatWaveMessages.mockReturnValue({
+      key: "wave1",
+      drops: [{ id: "replacement" }],
+    });
+    const { result } = setup({ wave1: { drops: [] } });
+
+    act(() => {
+      result.current.registerWave("wave1");
+      result.current.cancelWaveDataFetch("wave1");
+      result.current.registerWave("wave1");
+    });
+
+    expect(fetchWaveMessages).toHaveBeenCalledTimes(2);
+    expect(clearLoadingState).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      rejectCancelledRequest(new DOMException("aborted", "AbortError"));
+      await Promise.resolve();
+    });
+
+    expect(clearLoadingState).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveReplacementRequest([{ id: "replacement" }]);
+      await replacementRequest;
+    });
+
+    expect(clearLoadingState).toHaveBeenCalledTimes(2);
+    expect(formatWaveMessages).toHaveBeenCalledWith(
+      "wave1",
+      [{ id: "replacement" }],
+      { isLoading: false }
+    );
   });
 
   it("tracks non-abort initial feed failures as unavailable", async () => {
@@ -715,6 +804,7 @@ describe("useWaveDataFetching", () => {
       "wave1-newest-sync",
       "wave_deactivated"
     );
+    expect(clearLoadingState).toHaveBeenCalledWith("wave1");
   });
 
   it("does not schedule native initial backfill for targeted serial restores", async () => {
