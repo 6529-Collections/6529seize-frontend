@@ -31,8 +31,9 @@ blank space.
 4. Layout height recalculates without the normal `85px` bottom-nav reserve
    space.
 5. User types with composer/input controls kept in the visible area.
-6. User closes keyboard; bottom navigation and normal spacing return unless
-   another hide condition is active.
+6. User closes keyboard; the final safe-area padding, bottom-navigation
+   measurement, and normal spacing are targeted together when native dismissal
+   starts, unless another hide condition is active.
 
 ## Common Scenarios
 
@@ -47,6 +48,12 @@ blank space.
 ## Edge Cases
 
 - Android keyboard show/hide updates are debounced to reduce rapid flicker.
+- On iOS, closed-state spacing returns as keyboard dismissal starts, while the
+  native animation remains authoritative until the keyboard is fully closed.
+  This prevents the composer from briefly touching the physical bottom before
+  safe-area and navigation spacing return.
+- When reduced motion is enabled, keyboard-driven layout changes use no added
+  transition duration.
 - If keyboard listeners are unavailable or fail, layout stays in non-keyboard
   state.
 - This behavior does not apply to desktop web or small-screen web sidebar layout.
