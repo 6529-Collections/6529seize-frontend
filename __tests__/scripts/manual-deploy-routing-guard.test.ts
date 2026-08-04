@@ -184,6 +184,10 @@ function terminalNotificationRuns(
   );
 }
 
+function deploymentFailureNotificationRuns(result: JobResult): boolean {
+  return result === "failure";
+}
+
 describe("frontend manual deployment routing guards", () => {
   it.each(MANUAL_WORKFLOWS)(
     "allows $environment fallback only with exact authoritative OFF readiness evidence",
@@ -464,6 +468,10 @@ describe("frontend manual deployment routing guards", () => {
       ).toBe(expected);
     }
   );
+
+  it("suppresses the deployment-job notifier when the job is skipped", () => {
+    expect(deploymentFailureNotificationRuns("skipped")).toBe(false);
+  });
 
   it("keeps the production prerequisite Discord alert singular and non-blocking", () => {
     const terminal = workflowJob(
