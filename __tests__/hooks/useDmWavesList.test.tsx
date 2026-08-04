@@ -288,6 +288,30 @@ describe("useDmWavesList", () => {
     expect(result.current.serverUnreadCountForIndicators).toBe(0);
   });
 
+  it("does not expose an aggregate-only unread count before DM rows load", () => {
+    useUnreadDmDropsMock.mockReturnValue({
+      unreadDmDropsCount: 1,
+      dataUpdatedAt: 100,
+      isFetching: false,
+      refetch: jest.fn().mockResolvedValue(undefined),
+    });
+    useWavesV2Mock.mockReturnValue({
+      waves: [],
+      isFetching: true,
+      isFetchingNextPage: false,
+      hasNextPage: undefined,
+      fetchNextPage: jest.fn(),
+      status: "pending",
+      refetch: jest.fn(),
+      queryKey: dmWavesQueryKey,
+      dataUpdatedAt: 0,
+    });
+
+    const { result } = renderHook(() => useDmWavesList());
+
+    expect(result.current.serverUnreadCountForIndicators).toBe(0);
+  });
+
   it("trusts a persistent paginated mismatch only after bounded reconciliation", async () => {
     let isFetching = false;
     let dmDataUpdatedAt = 100;

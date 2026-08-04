@@ -46,7 +46,14 @@ type EnhancedSidebarWave = SidebarWave & {
 interface WaveUnreadClearWatermark {
   readonly firstUnreadSerialNo: number | null;
   readonly latestDropTimestamp: number | null;
+  readonly serverSnapshotRequestStartedAt: number | null;
+  readonly unreadCount: number;
   readonly serverUnreadDataUpdatedAt: number | null;
+}
+
+interface ForcedUnreadCount {
+  readonly count: number;
+  readonly serverSnapshotRequestStartedAt: number | null;
 }
 
 interface WaveUnreadState {
@@ -54,7 +61,7 @@ interface WaveUnreadState {
   readonly clearedWaveIds: Set<string>;
   readonly clearedUnreadCountsByWave: Record<string, number>;
   readonly clearedWatermarksByWave: Record<string, WaveUnreadClearWatermark>;
-  readonly forcedCounts: Record<string, number>;
+  readonly forcedCounts: Record<string, ForcedUnreadCount>;
 }
 
 const createWaveUnreadState = (
@@ -85,9 +92,36 @@ const hasServerUnreadAdvancedPastClear = (
     clearWatermark.firstUnreadSerialNo !== null &&
     wave.firstUnreadDropSerialNo !== null &&
     wave.firstUnreadDropSerialNo > clearWatermark.firstUnreadSerialNo;
+  const hasNewerServerSnapshot =
+    wave.serverSnapshotRequestStartedAt !== undefined &&
+    (clearWatermark.serverSnapshotRequestStartedAt === null ||
+      wave.serverSnapshotRequestStartedAt >
+        clearWatermark.serverSnapshotRequestStartedAt);
+  const hasFirstUnreadAppeared =
+    clearWatermark.firstUnreadSerialNo === null &&
+    wave.firstUnreadDropSerialNo !== null &&
+    hasNewerServerSnapshot;
+  const hasUnreadCountIncreased =
+    hasNewerServerSnapshot &&
+    wave.unreadDropsCount > clearWatermark.unreadCount;
 
-  return hasNewerDropTimestamp || hasAdvancedFirstUnreadSerial;
+  return (
+    hasNewerDropTimestamp ||
+    hasAdvancedFirstUnreadSerial ||
+    hasFirstUnreadAppeared ||
+    hasUnreadCountIncreased
+  );
 };
+
+const hasServerSnapshotAdvancedPastForce = (
+  wave: EnhancedSidebarWave,
+  forcedUnread: ForcedUnreadCount | undefined
+): boolean =>
+  forcedUnread !== undefined &&
+  wave.serverSnapshotRequestStartedAt !== undefined &&
+  (forcedUnread.serverSnapshotRequestStartedAt === null ||
+    wave.serverSnapshotRequestStartedAt >
+      forcedUnread.serverSnapshotRequestStartedAt);
 
 interface WavesDataSource {
   waves: EnhancedSidebarWave[];
@@ -190,12 +224,17 @@ function useEnhancedWavesListCore(
         const clearedWaveIds = new Set(current.clearedWaveIds);
         clearedWaveIds.add(waveId);
         const { [waveId]: _, ...forcedCounts } = current.forcedCounts;
+        const clearedUnreadCount = Math.max(
+          wave?.unreadDropsCount ?? 0,
+          unreadCount,
+          0
+        );
         return {
           identityKey: options.stateIdentityKey,
           clearedWaveIds,
           clearedUnreadCountsByWave: {
             ...current.clearedUnreadCountsByWave,
-            [waveId]: Math.max(wave?.unreadDropsCount ?? unreadCount, 0),
+            [waveId]: clearedUnreadCount,
           },
           clearedWatermarksByWave: {
             ...current.clearedWatermarksByWave,
@@ -208,6 +247,9 @@ function useEnhancedWavesListCore(
                 wave?.latestDropTimestamp,
                 realtimeUnread?.latestDropTimestamp
               ),
+              serverSnapshotRequestStartedAt:
+                wave?.serverSnapshotRequestStartedAt ?? null,
+              unreadCount: clearedUnreadCount,
               serverUnreadDataUpdatedAt:
                 options.serverUnreadDataUpdatedAt ?? null,
             },
@@ -232,6 +274,7 @@ function useEnhancedWavesListCore(
       }
 
       setUnreadState((previous) => {
+        const wave = waves.find((candidate) => candidate.id === waveId);
         const current =
           previous.identityKey === options.stateIdentityKey
             ? previous
@@ -252,12 +295,23 @@ function useEnhancedWavesListCore(
               ? current.forcedCounts
               : {
                   ...current.forcedCounts,
-                  [waveId]: count,
+                  [waveId]: {
+                    count: Math.max(
+                      current.forcedCounts[waveId]?.count ?? 0,
+                      count,
+                      0
+                    ),
+                    serverSnapshotRequestStartedAt:
+                      wave?.serverSnapshotRequestStartedAt ??
+                      current.forcedCounts[waveId]
+                        ?.serverSnapshotRequestStartedAt ??
+                      null,
+                  },
                 },
         };
       });
     },
-    [isEnabled, options.stateIdentityKey]
+    [isEnabled, options.stateIdentityKey, waves]
   );
 
   const mapWave = useCallback(
@@ -294,10 +348,12 @@ function useEnhancedWavesListCore(
         currentUnreadState.clearedWaveIds.has(wave.id) &&
         !hasFreshServerUnreadAfterClear;
       const isCleared = wasCleared && !hasNewWsDrops;
+      const forcedUnread = currentUnreadState.forcedCounts[wave.id];
       const forcedCount =
-        wave.id === activeWaveId
+        wave.id === activeWaveId ||
+        hasServerSnapshotAdvancedPastForce(wave, forcedUnread)
           ? undefined
-          : currentUnreadState.forcedCounts[wave.id];
+          : forcedUnread?.count;
       const apiFirstUnread = wave.firstUnreadDropSerialNo ?? null;
       const wsFirstUnread = wsData?.firstUnreadSerialNo ?? null;
       let firstUnreadDropSerialNo: number | null = null;
@@ -415,7 +471,11 @@ function useEnhancedWavesListCore(
       }
 
       return (
-        total + (currentUnreadState.clearedUnreadCountsByWave[wave.id] ?? 0)
+        total +
+        Math.max(
+          wave.unreadDropsCount,
+          currentUnreadState.clearedUnreadCountsByWave[wave.id] ?? 0
+        )
       );
     }, 0);
     const adjustedServerUnreadCount = Math.max(

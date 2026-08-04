@@ -41,6 +41,7 @@ import { DmUnreadCountProvider } from "./DmUnreadCountContext";
 
 // Define nested structures for context data
 interface WavesContextData {
+  readonly identityKey: string | null;
   readonly list: MinimalWave[];
   readonly unreadCount: number;
   readonly isFetching: boolean;
@@ -500,6 +501,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
         : null;
 
     const waves: WavesContextData = {
+      identityKey: dmWavesData.viewerIdentityKey,
       list: wavesHookData.waves,
       unreadCount: wavesHookData.unreadCount,
       isFetching: wavesHookData.isFetching,
@@ -516,6 +518,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     };
 
     const directMessages: WavesContextData = {
+      identityKey: dmWavesData.viewerIdentityKey,
       list: dmWavesHookData.waves,
       unreadCount: dmWavesHookData.unreadCount,
       isFetching: dmWavesHookData.isFetching,

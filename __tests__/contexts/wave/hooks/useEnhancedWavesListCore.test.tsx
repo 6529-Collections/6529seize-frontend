@@ -445,6 +445,141 @@ describe("useEnhancedWavesListCore", () => {
     expect(result.current.waves[0]?.unreadDropsCount).toBe(1);
   });
 
+  it("restores unread when a first unread appears in a newer same-timestamp snapshot", () => {
+    const { result, rerender } = renderHook(
+      ({
+        firstUnreadDropSerialNo,
+        serverSnapshotRequestStartedAt,
+        unreadDropsCount,
+      }) =>
+        useEnhancedWavesListCore(
+          null,
+          createWavesData({
+            mainWavesRefetch: jest.fn(),
+            refetchAllWaves: jest.fn(),
+            waves: [
+              createSidebarWave({
+                firstUnreadDropSerialNo,
+                latestDropTimestamp: 100,
+                serverSnapshotLatestDropTimestamp: 100,
+                serverSnapshotRequestStartedAt,
+                unreadDropsCount,
+              }),
+            ],
+          }),
+          {
+            serverUnreadCount: unreadDropsCount,
+            supportsPinning: false,
+            stateIdentityKey: "profile-1",
+          }
+        ),
+      {
+        initialProps: {
+          firstUnreadDropSerialNo: null as number | null,
+          serverSnapshotRequestStartedAt: 90,
+          unreadDropsCount: 0,
+        },
+      }
+    );
+
+    act(() => {
+      result.current.markWaveRead("wave-1");
+    });
+
+    rerender({
+      firstUnreadDropSerialNo: 11,
+      serverSnapshotRequestStartedAt: 101,
+      unreadDropsCount: 1,
+    });
+
+    expect(result.current.waves[0]?.unreadDropsCount).toBe(1);
+    expect(result.current.unreadCount).toBe(1);
+  });
+
+  it("keeps a same-timestamp unread suppressed when its snapshot predates the clear", () => {
+    const { result, rerender } = renderHook(
+      ({ firstUnreadDropSerialNo, unreadDropsCount }) =>
+        useEnhancedWavesListCore(
+          null,
+          createWavesData({
+            mainWavesRefetch: jest.fn(),
+            refetchAllWaves: jest.fn(),
+            waves: [
+              createSidebarWave({
+                firstUnreadDropSerialNo,
+                latestDropTimestamp: 100,
+                serverSnapshotLatestDropTimestamp: 100,
+                serverSnapshotRequestStartedAt: 90,
+                unreadDropsCount,
+              }),
+            ],
+          }),
+          {
+            serverUnreadCount: unreadDropsCount,
+            supportsPinning: false,
+            stateIdentityKey: "profile-1",
+          }
+        ),
+      {
+        initialProps: {
+          firstUnreadDropSerialNo: null as number | null,
+          unreadDropsCount: 0,
+        },
+      }
+    );
+
+    act(() => {
+      result.current.markWaveRead("wave-1");
+    });
+
+    rerender({ firstUnreadDropSerialNo: 11, unreadDropsCount: 1 });
+
+    expect(result.current.waves[0]?.unreadDropsCount).toBe(0);
+    expect(result.current.unreadCount).toBe(0);
+  });
+
+  it("restores unread when a newer snapshot increases the count at the same timestamp and serial", () => {
+    const { result, rerender } = renderHook(
+      ({ serverSnapshotRequestStartedAt, unreadDropsCount }) =>
+        useEnhancedWavesListCore(
+          null,
+          createWavesData({
+            mainWavesRefetch: jest.fn(),
+            refetchAllWaves: jest.fn(),
+            waves: [
+              createSidebarWave({
+                firstUnreadDropSerialNo: 10,
+                latestDropTimestamp: 100,
+                serverSnapshotLatestDropTimestamp: 100,
+                serverSnapshotRequestStartedAt,
+                unreadDropsCount,
+              }),
+            ],
+          }),
+          {
+            serverUnreadCount: unreadDropsCount,
+            supportsPinning: false,
+            stateIdentityKey: "profile-1",
+          }
+        ),
+      {
+        initialProps: {
+          serverSnapshotRequestStartedAt: 90,
+          unreadDropsCount: 1,
+        },
+      }
+    );
+
+    act(() => {
+      result.current.markWaveRead("wave-1");
+    });
+
+    rerender({ serverSnapshotRequestStartedAt: 101, unreadDropsCount: 2 });
+
+    expect(result.current.waves[0]?.unreadDropsCount).toBe(2);
+    expect(result.current.unreadCount).toBe(2);
+  });
+
   it("does not expose an unread count until an unknown wave is classified", () => {
     mockedUseNewDropCounter.mockReturnValue({
       newDropsCounts: {
@@ -598,5 +733,62 @@ describe("useEnhancedWavesListCore", () => {
     rerender({ activeWaveId: null });
 
     expect(result.current.waves[0]?.unreadDropsCount).toBe(2);
+  });
+
+  it("retires a restored unread count after a newer server snapshot", () => {
+    const { result, rerender } = renderHook(
+      ({ serverSnapshotRequestStartedAt, unreadDropsCount }) =>
+        useEnhancedWavesListCore(
+          null,
+          createWavesData({
+            mainWavesRefetch: jest.fn(),
+            refetchAllWaves: jest.fn(),
+            waves: [
+              createSidebarWave({
+                serverSnapshotRequestStartedAt,
+                unreadDropsCount,
+              }),
+            ],
+          }),
+          { supportsPinning: false, stateIdentityKey: "profile-1" }
+        ),
+      {
+        initialProps: {
+          serverSnapshotRequestStartedAt: 90,
+          unreadDropsCount: 4,
+        },
+      }
+    );
+
+    act(() => {
+      const unreadCount = result.current.markWaveRead("wave-1");
+      result.current.restoreWaveUnreadCount("wave-1", unreadCount);
+    });
+    expect(result.current.waves[0]?.unreadDropsCount).toBe(4);
+
+    rerender({ serverSnapshotRequestStartedAt: 101, unreadDropsCount: 0 });
+
+    expect(result.current.waves[0]?.unreadDropsCount).toBe(0);
+  });
+
+  it("does not let a later zero rollback erase a restored unread count", () => {
+    const wavesData = createWavesData({
+      mainWavesRefetch: jest.fn(),
+      refetchAllWaves: jest.fn(),
+      waves: [createSidebarWave({ serverSnapshotRequestStartedAt: 90 })],
+    });
+    const { result } = renderHook(() =>
+      useEnhancedWavesListCore(null, wavesData, {
+        supportsPinning: false,
+        stateIdentityKey: "profile-1",
+      })
+    );
+
+    act(() => {
+      result.current.restoreWaveUnreadCount("wave-1", 4);
+      result.current.restoreWaveUnreadCount("wave-1", 0);
+    });
+
+    expect(result.current.waves[0]?.unreadDropsCount).toBe(4);
   });
 });

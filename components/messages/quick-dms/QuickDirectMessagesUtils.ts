@@ -22,6 +22,12 @@ export interface QuickDmState {
   readonly waveId: string | null;
 }
 
+interface StoredQuickDmState {
+  readonly identityKey: string;
+  readonly state: QuickDmState;
+  readonly version: 1;
+}
+
 export interface QuickDmAvatarSource {
   readonly name: string;
   readonly picture: string | null;
@@ -60,7 +66,38 @@ export const isQuickDmState = (value: unknown): value is QuickDmState => {
   );
 };
 
-export const readStoredState = (): QuickDmState => {
+const isStoredQuickDmState = (value: unknown): value is StoredQuickDmState => {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    return false;
+  }
+
+  const candidate = value as Partial<StoredQuickDmState>;
+  return (
+    candidate.version === 1 &&
+    typeof candidate.identityKey === "string" &&
+    isQuickDmState(candidate.state)
+  );
+};
+
+export const parseStoredState = (
+  raw: string | null,
+  identityKey: string | null
+): QuickDmState | null => {
+  if (!raw || !identityKey) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    return isStoredQuickDmState(parsed) && parsed.identityKey === identityKey
+      ? parsed.state
+      : null;
+  } catch {
+    return null;
+  }
+};
+
+export const readStoredState = (identityKey: string | null): QuickDmState => {
   const browserWindow = getBrowserWindow();
   if (browserWindow === undefined) {
     return CLOSED_STATE;
@@ -68,27 +105,31 @@ export const readStoredState = (): QuickDmState => {
 
   try {
     const raw = browserWindow.localStorage.getItem(QUICK_DM_STORAGE_KEY);
-    if (!raw) {
-      return CLOSED_STATE;
-    }
-
-    const parsed = JSON.parse(raw) as unknown;
-    return isQuickDmState(parsed) ? parsed : CLOSED_STATE;
+    return parseStoredState(raw, identityKey) ?? CLOSED_STATE;
   } catch {
     return CLOSED_STATE;
   }
 };
 
-export const storeState = (state: QuickDmState) => {
+export const storeState = (state: QuickDmState, identityKey: string | null) => {
   const browserWindow = getBrowserWindow();
   if (browserWindow === undefined) {
     return;
   }
 
   try {
+    if (!identityKey) {
+      browserWindow.localStorage.removeItem(QUICK_DM_STORAGE_KEY);
+      return;
+    }
+
     browserWindow.localStorage.setItem(
       QUICK_DM_STORAGE_KEY,
-      JSON.stringify(state)
+      JSON.stringify({
+        identityKey,
+        state,
+        version: 1,
+      } satisfies StoredQuickDmState)
     );
   } catch {
     // Ignore storage failures; in-memory state still works.

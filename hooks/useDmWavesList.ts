@@ -152,11 +152,14 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
     dmWavesDataUpdatedAt === 0 ||
     unreadDmDropsDataUpdatedAt >= dmWavesDataUpdatedAt;
   const serverUnreadCountForIndicators = (() => {
-    if (!shouldFetchDmWaves) {
+    if (!shouldFetchDmWaves || dmWavesDataUpdatedAt <= 0) {
+      // Do not expose an aggregate-only unread state before conversation rows
+      // exist. Otherwise the badge can appear from the faster aggregate query
+      // and disappear again when the first (possibly stale) row page arrives.
       return 0;
     }
 
-    if (dmWavesDataUpdatedAt > 0 && hasNextPage === false) {
+    if (hasNextPage === false) {
       // A complete row snapshot can attribute every unread DM. Keep the
       // global badges on that same snapshot instead of letting an independently
       // polled aggregate temporarily disagree with the conversation rows.
