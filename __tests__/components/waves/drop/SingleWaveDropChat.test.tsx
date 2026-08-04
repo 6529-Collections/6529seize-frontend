@@ -1,5 +1,6 @@
 import { SingleWaveDropChat } from "@/components/waves/drop/SingleWaveDropChat";
 import { REPLY_TARGET_UNAVAILABLE_TOAST_ID } from "@/components/waves/create-drop-content/reply-target-unavailable";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { WsMessageType, type WsDropDeleteMessage } from "@/helpers/Types";
 import { act, fireEvent, render } from "@testing-library/react";
@@ -84,6 +85,8 @@ Object.defineProperty(globalThis, "matchMedia", {
 });
 
 describe("SingleWaveDropChat", () => {
+  const createDrop = (id = "d1"): ApiDrop => ({ id }) as ApiDrop;
+
   const createWave = (overrides: Record<string, unknown> = {}) => {
     const waveDefaults = {
       type: ApiWaveType.Rank,
@@ -249,7 +252,7 @@ describe("SingleWaveDropChat", () => {
     mockKeyboardPhase = "hiding";
 
     const wave = createWave();
-    const drop: any = { id: "d1" };
+    const drop = createDrop();
     render(<SingleWaveDropChat wave={wave} drop={drop} />);
 
     const wrapper = document.querySelector(

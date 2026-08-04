@@ -380,8 +380,10 @@ function syncKeyboardVisibilityFromViewport(): void {
   }
 }
 
-function scheduleFocusoutKeyboardHideFallback(): void {
+function scheduleKeyboardHideFallback(): void {
   clearHiddenFallbackTimeout();
+  const nativeHideIsPending =
+    nativeKeyboardLifecycleActive && currentState.phase === "hiding";
   const fallbackDelay = nativeKeyboardLifecycleActive
     ? NATIVE_KEYBOARD_HIDE_FALLBACK_MS
     : FOCUSOUT_KEYBOARD_HIDE_FALLBACK_MS;
@@ -390,7 +392,7 @@ function scheduleFocusoutKeyboardHideFallback(): void {
     hiddenFallbackTimeout = null;
     if (
       (!currentState.isVisible && currentState.phase === "hidden") ||
-      hasEditableFocus()
+      (!nativeHideIsPending && hasEditableFocus())
     ) {
       return;
     }
@@ -421,7 +423,7 @@ function setupBrowserKeyboardFallbackListeners(): void {
     }
   };
   const handleFocusOut = () => {
-    scheduleFocusoutKeyboardHideFallback();
+    scheduleKeyboardHideFallback();
   };
   const handleViewportChange = () => {
     if (viewportAnimationFrame !== null) {
@@ -596,8 +598,12 @@ function ensureKeyboardListeners(): void {
             },
             { transitionMs: getKeyboardEventLayoutTransitionMs() }
           );
+          if (wasKeyboardActive) {
+            scheduleKeyboardHideFallback();
+          }
         }),
         Keyboard.addListener("keyboardDidHide", () => {
+          clearHiddenFallbackTimeout();
           nativeKeyboardLifecycleActive = false;
           setKeyboardState({
             isVisible: false,

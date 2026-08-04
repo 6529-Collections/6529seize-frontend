@@ -371,6 +371,30 @@ describe("useNativeKeyboard", () => {
     }
   });
 
+  it("finishes hiding from the native fallback when later hide events are missing", async () => {
+    const { result } = await renderNativeKeyboardHook();
+    jest.useFakeTimers();
+
+    try {
+      act(() => {
+        listeners["keyboardWillShow"]?.({ keyboardHeight: 320 });
+        listeners["keyboardWillHide"]?.();
+      });
+
+      expect(result.current.phase).toBe("hiding");
+
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+
+      expect(result.current.isVisible).toBe(false);
+      expect(result.current.keyboardHeight).toBe(0);
+      expect(result.current.phase).toBe("hidden");
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it("keeps a rapid reopen visible after a pending hide fallback", async () => {
     const { result } = await renderNativeKeyboardHook();
     jest.useFakeTimers();
