@@ -37,7 +37,7 @@ jest.mock("@/lib/public-review/streamSolidityReference", () => ({
   }),
 }));
 
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 
 import { renderStreamReviewFeedbackPage } from "@/lib/public-review/streamReviewFeedbackPage";
 
@@ -52,6 +52,22 @@ describe("renderStreamReviewFeedbackPage", () => {
     expect(screen.getByTestId("source-base")).toHaveTextContent(
       "/reviews/6529-stream"
     );
+    const navigation = screen.getByRole("navigation", {
+      name: "Review-wide destinations",
+    });
+    expect(
+      within(navigation).getByRole("link", {
+        name: "Back to review contents",
+      })
+    ).toHaveAttribute("href", "/reviews/6529-stream");
+    expect(
+      within(navigation).getByRole("link", { name: "Technical reference" })
+    ).toHaveAttribute("href", "/reviews/6529-stream/reference");
+    expect(
+      within(navigation).queryByRole("link", {
+        name: "All public feedback",
+      })
+    ).not.toBeInTheDocument();
   });
 
   it("lets the ledger build immutable source links from the review root", async () => {
@@ -65,5 +81,27 @@ describe("renderStreamReviewFeedbackPage", () => {
     expect(screen.getByTestId("source-base")).toHaveTextContent(
       "/reviews/6529-stream"
     );
+    const navigation = screen.getByRole("navigation", {
+      name: "Review-wide destinations",
+    });
+    expect(
+      within(navigation).getByRole("link", {
+        name: "Back to review contents",
+      })
+    ).toHaveAttribute(
+      "href",
+      "/reviews/6529-stream/versions/2026-07-26.1"
+    );
+    expect(
+      within(navigation).getByRole("link", { name: "Technical reference" })
+    ).toHaveAttribute(
+      "href",
+      "/reviews/6529-stream/versions/2026-07-26.1/reference"
+    );
+    expect(
+      within(navigation).queryByRole("link", {
+        name: "All public feedback",
+      })
+    ).not.toBeInTheDocument();
   });
 });

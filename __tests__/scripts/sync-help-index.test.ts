@@ -1,11 +1,27 @@
 const {
   getPublicationEnvironment,
+  getPublishedHelpRecords,
   isHelpRecordPublished,
 } = require("../../scripts/help-index-publication.cjs");
+const helpIndex = require("../../ops/help/help-index.json");
+
+const STREAM_SUMMARY_RECORD_IDS = [
+  "public-reviews.stream",
+  "public-reviews.stream.feedback-status",
+] as const;
+
+function getPublishedRecordIds(baseEndpoint: string): Set<string> {
+  const records = getPublishedHelpRecords({
+    records: helpIndex.records,
+    publicationEnvironment: getPublicationEnvironment(baseEndpoint),
+    repoRoot: process.cwd(),
+  });
+  return new Set(records.map((record: { id: string }) => record.id));
+}
 
 describe("sync-help-index publication policy", () => {
   const publicReviewRecord = {
-    environments: ["local", "staging"],
+    environments: ["local", "staging", "production"],
     public_review_id: "6529-stream",
   };
 
@@ -26,7 +42,7 @@ describe("sync-help-index publication policy", () => {
         "production",
         new Set(["6529-stream"])
       )
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it("leaves unrelated records governed only by their environment", () => {
@@ -42,5 +58,21 @@ describe("sync-help-index publication policy", () => {
     );
     expect(getPublicationEnvironment("http://localhost:3202")).toBe("local");
     expect(getPublicationEnvironment("invalid")).toBe("production");
+  });
+
+  it("generates the staging help corpus with the published Stream summaries", () => {
+    const publishedRecordIds = getPublishedRecordIds("https://staging.6529.io");
+
+    for (const recordId of STREAM_SUMMARY_RECORD_IDS) {
+      expect(publishedRecordIds.has(recordId)).toBe(true);
+    }
+  });
+
+  it("generates the production help corpus with the published Stream summaries", () => {
+    const publishedRecordIds = getPublishedRecordIds("https://6529.io");
+
+    for (const recordId of STREAM_SUMMARY_RECORD_IDS) {
+      expect(publishedRecordIds.has(recordId)).toBe(true);
+    }
   });
 });

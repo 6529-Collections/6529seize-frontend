@@ -131,11 +131,12 @@ export function WaveTrustSignals({
       mode,
       getVisibilityToneClasses(variant, waveScore?.visibility_score)
     );
-    const summaryButtonResetClasses = isInlineHeaderVariant(variant)
-      ? "tw-bg-transparent"
-      : isInlineSidebarVariant(variant)
-        ? "tw-bg-transparent tw-p-0"
-        : "";
+    const summaryButtonResetClasses = isInlineSidebarVariant(variant)
+      ? "tw-bg-transparent tw-p-0"
+      : "";
+    const summaryButtonBorderClasses = isInlineHeaderVariant(variant)
+      ? ""
+      : "tw-border-0";
     const summaryButtonAffordanceClasses = isInlineSidebarVariant(variant)
       ? "tw-rounded-sm desktop-hover:hover:tw-bg-white/[0.04]"
       : "";
@@ -175,7 +176,7 @@ export function WaveTrustSignals({
             >
               <button
                 type="button"
-                className={`${summaryChipClasses} tw-border-0 tw-font-[inherit] tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${summaryButtonResetClasses} ${summaryButtonAffordanceClasses}`}
+                className={`${summaryChipClasses} ${summaryButtonBorderClasses} tw-font-[inherit] tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${summaryButtonResetClasses} ${summaryButtonAffordanceClasses}`}
                 aria-label={summaryLabel}
               >
                 {summaryChipContent}

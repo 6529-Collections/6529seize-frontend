@@ -29,6 +29,7 @@ import {
 import type { Paginated } from "@/components/pagination/Pagination";
 import Pagination from "@/components/pagination/Pagination";
 import ShowMoreButton from "@/components/show-more-button/ShowMoreButton";
+import Button from "@/components/utils/button/Button";
 import type { RedeemedSubscriptionCounts } from "@/generated/models/RedeemedSubscriptionCounts";
 import type { SubscriptionCounts } from "@/generated/models/SubscriptionCounts";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -659,37 +660,17 @@ export default function SubscriptionsReportComponent() {
                       />
                     </div>
                   )}
-                  <button
+                  <Button
                     type="button"
                     onClick={onDownloadCsv}
-                    disabled={isDownloadingCsv}
-                    className="tw-flex tw-h-11 tw-min-w-[190px] tw-items-center tw-justify-center tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-5 tw-text-sm tw-font-semibold tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-bg-primary-600 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black disabled:tw-cursor-not-allowed disabled:tw-opacity-60 sm:tw-w-52"
+                    loading={isDownloadingCsv}
+                    variant="action"
+                    size="lg"
+                    fullWidth
+                    className="tw-min-w-[190px] sm:tw-w-52"
                   >
                     {isDownloadingCsv ? (
-                      <>
-                        <svg
-                          className="tw-h-4 tw-w-4 tw-animate-spin"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          aria-hidden="true"
-                        >
-                          <circle
-                            className="tw-opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          />
-                          <path
-                            className="tw-opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                          />
-                        </svg>
-                        Downloading
-                      </>
+                      "Downloading"
                     ) : (
                       <>
                         <ArrowDownTrayIcon
@@ -699,7 +680,7 @@ export default function SubscriptionsReportComponent() {
                         Download
                       </>
                     )}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>

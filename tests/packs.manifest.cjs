@@ -72,6 +72,9 @@ const READONLY_SPECS = {
   publicContent: ["tests/content/public-content-readonly.spec.ts"],
   profileDeepLinks: ["tests/social/profile-deep-links-readonly.spec.ts"],
   searchWaves: ["tests/social/search-waves-readonly.spec.ts"],
+  museumInstitutionalPractice: [
+    "tests/museum/institutional-practice-readonly.spec.ts",
+  ],
 };
 
 function localPack(scriptKey, description, specs, tweaks = {}) {
@@ -137,8 +140,9 @@ function productionPack(
   suffix,
   description,
   specs,
-  triggers = ["cron", "manual"],
-  timeoutMinutes = 15
+  triggers = ["cron", "manual", "post-deploy"],
+  timeoutMinutes = 15,
+  projects = [DESKTOP]
 ) {
   return {
     scriptKey: `test:e2e:production:${suffix}`,
@@ -149,7 +153,7 @@ function productionPack(
     triggers,
     env: PRODUCTION_READONLY_ENV,
     specs,
-    projects: [DESKTOP],
+    projects,
     workers: 1,
     timeoutMinutes,
   };
@@ -270,6 +274,15 @@ const PACKS = [
     "Global and wave-local search coverage.",
     READONLY_SPECS.searchWaves
   ),
+  {
+    ...localReadonlyPack(
+      "test:e2e:museum-institutional-practice",
+      "Network Museum institutional-practice study route sweep.",
+      READONLY_SPECS.museumInstitutionalPractice,
+      { timeoutMinutes: 30 }
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
 
   sandboxPack(
     "test:e2e:composer-sandbox",
@@ -371,7 +384,13 @@ const PACKS = [
     "smoke",
     "Staging @smoke subset on both web shells.",
     SMOKE_SPECS,
-    { grep: "@smoke" }
+    {
+      grep: "@smoke",
+      // The complete staging pack already contains the same smoke specs.
+      // Keep this focused pack for manual diagnosis without duplicating
+      // manifest-bound post-deploy coverage.
+      triggers: ["manual"],
+    }
   ),
   stagingPack("core", "", "Staging core surfaces on both web shells.", [
     "tests/surfaces",
@@ -444,7 +463,20 @@ const PACKS = [
     "Staging network and open-data read-only pack.",
     READONLY_SPECS.networkOpenData
   ),
+  stagingPack(
+    "museum-institutional-practice",
+    "museum-institutional-practice",
+    "Staging Network Museum institutional-practice route sweep.",
+    READONLY_SPECS.museumInstitutionalPractice,
+    { timeoutMinutes: 30 }
+  ),
 
+  productionPack(
+    "home-readonly",
+    "Production home-page read-only canary.",
+    ["tests/home/home.spec.ts"],
+    ["post-deploy", "manual"]
+  ),
   productionPack(
     "social-readonly",
     "Production waves and profile read-only canary.",
@@ -496,6 +528,14 @@ const PACKS = [
     READONLY_SPECS.searchWaves
   ),
   productionPack(
+    "museum-institutional-practice",
+    "Production Network Museum institutional-practice route sweep.",
+    READONLY_SPECS.museumInstitutionalPractice,
+    ["post-deploy", "manual"],
+    30,
+    [DESKTOP, MOBILE]
+  ),
+  productionPack(
     "readonly",
     "Combined production-safe release validation.",
     [
@@ -510,8 +550,11 @@ const PACKS = [
       ...READONLY_SPECS.publicContent,
       ...READONLY_SPECS.profileDeepLinks,
       ...READONLY_SPECS.searchWaves,
+      ...READONLY_SPECS.museumInstitutionalPractice,
     ],
-    ["post-deploy", "manual"],
+    // The disjoint post-deploy packs above cover this exact spec union and may
+    // run concurrently. Retain the aggregate only as an operator diagnostic.
+    ["manual"],
     60
   ),
 ];

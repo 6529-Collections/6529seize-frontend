@@ -16,6 +16,10 @@ import { HttpFile } from '../http/http';
 export class ReleaseBusV2DeployPlan {
     'units': Array<string>;
     'edges': Array<Array<string>>;
+    /**
+    * Set false only for internal operational candidates that must not create an autonomous release note.
+    */
+    'publish_release_notes'?: boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -32,6 +36,12 @@ export class ReleaseBusV2DeployPlan {
             "name": "edges",
             "baseName": "edges",
             "type": "Array<Array<string>>",
+            "format": ""
+        },
+        {
+            "name": "publish_release_notes",
+            "baseName": "publish_release_notes",
+            "type": "boolean",
             "format": ""
         }    ];
 

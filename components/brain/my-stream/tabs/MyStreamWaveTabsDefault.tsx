@@ -9,7 +9,7 @@ import type { CompactMenuItem } from "@/components/compact-menu";
 import { createBreakpoint } from "react-use";
 import { useContentTab } from "@/components/brain/ContentTabContext";
 import { getBoostedDropsDisplayPreferenceMenuItems } from "@/components/waves/boosted-drops/BoostedDropsDisplayPreference";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useBoostedDropsDisplayPreference } from "@/hooks/useBoostedDropsDisplayPreference";
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
@@ -98,21 +98,19 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
             data-tooltip-id={tooltipId}
             data-tooltip-content={chatSubmitDropTooltip}
           >
-            <PrimaryButton
-              loading={false}
-              disabled={false}
-              onClicked={action.onOpen}
-              size="sm"
-              padding="tw-p-0 sm:tw-px-2.5 sm:tw-py-2"
+            <Button
+              onClick={action.onOpen}
+              variant="primary"
+              size="xs"
               title={chatSubmitDropTitle}
-              ariaLabel={action.label}
-              className="tw-h-8 tw-w-8 tw-min-w-8 sm:tw-w-auto sm:tw-min-w-0 sm:tw-max-w-[10rem]"
+              aria-label={action.label}
+              className="tw-w-8 tw-min-w-8 tw-px-0 sm:tw-w-auto sm:tw-min-w-0 sm:tw-max-w-[10rem] sm:tw-px-2.5"
             >
               <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 sm:-tw-ml-1" />
               <span className="tw-sr-only sm:tw-not-sr-only sm:tw-inline">
                 {action.compactLabel}
               </span>
-            </PrimaryButton>
+            </Button>
           </span>
         )}
         {!headerIsCompact && showGalleryToggle && !activeCurationId && (

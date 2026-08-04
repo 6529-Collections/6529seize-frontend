@@ -30,6 +30,103 @@ env:
   ANNOUNCED_VERSION_ENDPOINT: "https://dnclu2fna0b2b.cloudfront.net/web_build/current-production-version.json"
 
 jobs:
+  manual-deployment-guard:
+    name: Authorize manual production fallback
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+
+    steps:
+      - name: Require authoritative production fallback readiness
+        env:
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          TARGET_ENVIRONMENT: prod
+          TARGET_LANE: PRODUCTION
+        run: |
+          set -euo pipefail
+
+          test -n "$RELEASE_BUS_API_URL" || {
+            echo "::error::Release Bus API URL is unavailable; refusing manual production deployment."
+            exit 1
+          }
+          test -n "$RELEASE_BUS_WORKFLOW_AUTH_TOKEN" || {
+            echo "::error::Release Bus workflow credential is unavailable; refusing manual production deployment."
+            exit 1
+          }
+          [[ "$GITHUB_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]] || {
+            echo "::error::GitHub run identity is malformed; refusing manual production deployment."
+            exit 1
+          }
+          [[ "$GITHUB_RUN_ATTEMPT" =~ ^[1-9][0-9]{0,8}$ ]] || {
+            echo "::error::GitHub run attempt is malformed; refusing manual production deployment."
+            exit 1
+          }
+          [[ "$GITHUB_REF_NAME" =~ ^[A-Za-z0-9._/-]{1,255}$ ]] || {
+            echo "::error::GitHub source ref is malformed; refusing manual production deployment."
+            exit 1
+          }
+          [[ "$GITHUB_SHA" =~ ^[a-f0-9]{40}$ ]] || {
+            echo "::error::GitHub source SHA is malformed; refusing manual production deployment."
+            exit 1
+          }
+
+          payload="$(
+            jq -n \
+              --arg repository frontend \
+              --arg environment "$TARGET_ENVIRONMENT" \
+              --arg service frontend \
+              --arg workflow_run_id "$GITHUB_RUN_ID" \
+              --argjson workflow_run_attempt "$GITHUB_RUN_ATTEMPT" \
+              --arg source_ref "$GITHUB_REF_NAME" \
+              --arg source_sha "$GITHUB_SHA" \
+              '{repository:$repository,environment:$environment,service:$service,workflow_run_id:$workflow_run_id,workflow_run_attempt:$workflow_run_attempt,source_ref:$source_ref,source_sha:$source_sha}'
+          )"
+          response_file="$(mktemp)"
+          trap 'rm -f "$response_file"' EXIT
+          if ! http_status="$(
+            curl --silent --show-error \
+              --connect-timeout 10 \
+              --max-time 30 \
+              --output "$response_file" \
+              --write-out '%{http_code}' \
+              -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+              -H 'Content-Type: application/json' \
+              --data "$payload" \
+              "$RELEASE_BUS_API_URL/deploy/release-bus-v2/manual-deployment-readiness"
+          )"; then
+            echo "::error::Release Bus readiness is unavailable; refusing manual production deployment."
+            exit 1
+          fi
+          if [ "$http_status" != 200 ]; then
+            echo "::error::Manual production fallback readiness was rejected with HTTP $http_status."
+            exit 1
+          fi
+          if ! jq -e \
+            --arg repository frontend \
+            --arg environment "$TARGET_ENVIRONMENT" \
+            --arg service frontend \
+            --arg workflow_run_id "$GITHUB_RUN_ID" \
+            --arg workflow_run_attempt "$GITHUB_RUN_ATTEMPT" \
+            --arg source_ref "$GITHUB_REF_NAME" \
+            --arg source_sha "$GITHUB_SHA" \
+            --arg lane "$TARGET_LANE" \
+            'type == "object" and
+             .ready == true and
+             .mode == "manual" and
+             .lane == $lane and
+             .repository == $repository and
+             .environment == $environment and
+             .service == $service and
+             (.workflow_run_id | tostring) == $workflow_run_id and
+             (.workflow_run_attempt | tostring) == $workflow_run_attempt and
+             .source_ref == $source_ref and
+             .source_sha == $source_sha' \
+            "$response_file" >/dev/null; then
+            echo "::error::Release Bus returned malformed or mismatched readiness evidence; refusing manual production deployment."
+            exit 1
+          fi
+
   assert-main-ref:
     name: Assert main ref
     runs-on: ubuntu-latest
@@ -44,7 +141,7 @@ jobs:
           fi
 
   build-upload-deploy:
-    needs: assert-main-ref
+    needs: [assert-main-ref, manual-deployment-guard]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -102,7 +199,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
-          node-version: "22"
+          node-version: "22.17.1"
 
       - name: Activate pinned pnpm
         run: |
@@ -302,17 +399,39 @@ jobs:
           SSR_CLIENT_SECRET: ${{ secrets.SSR_CLIENT_SECRET }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           GITHUB_LINK_STATUS_PREVIEW_TOKEN: ${{ secrets.LINK_STATUS_PREVIEW_GITHUB_TOKEN }}
+          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_PRODUCTION_DISCUSSION_DESTINATIONS }}
         run: |
+          set -euo pipefail
+
+          jq -e '
+            type == "object" and
+            keys == ["production"] and
+            (.production | type == "object") and
+            (.production["stream-review"] | type == "string" and test("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"))
+          ' <<<"$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" >/dev/null
+
+          option_settings="$(
+            jq -cn \
+              --arg ssr_client_id "$SSR_CLIENT_ID" \
+              --arg ssr_client_secret "$SSR_CLIENT_SECRET" \
+              --arg alchemy_api_key "$ALCHEMY_API_KEY" \
+              --arg github_link_status_preview_token "$GITHUB_LINK_STATUS_PREVIEW_TOKEN" \
+              --arg public_review_discussion_destinations "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" \
+              '[
+                {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"SSR_CLIENT_ID",Value:$ssr_client_id},
+                {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"SSR_CLIENT_SECRET",Value:$ssr_client_secret},
+                {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"ALCHEMY_API_KEY",Value:$alchemy_api_key},
+                {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"GITHUB_LINK_STATUS_PREVIEW_TOKEN",Value:$github_link_status_preview_token},
+                {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"PUBLIC_REVIEW_DISCUSSION_DESTINATIONS",Value:$public_review_discussion_destinations},
+                {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"SENTRY_SERVER_INSTRUMENTATION",Value:"false"}
+              ]'
+          )"
+
           aws elasticbeanstalk update-environment \
             --application-name "${{ env.BEANSTALK_APP_NAME }}" \
             --environment-name "${{ env.BEANSTALK_ENV_NAME }}" \
             --version-label "${{ env.COMMIT_SHA }}" \
-            --option-settings \
-              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=SSR_CLIENT_ID,Value=${SSR_CLIENT_ID}" \
-              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=SSR_CLIENT_SECRET,Value=${SSR_CLIENT_SECRET}" \
-              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=ALCHEMY_API_KEY,Value=${ALCHEMY_API_KEY}" \
-              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=GITHUB_LINK_STATUS_PREVIEW_TOKEN,Value=${GITHUB_LINK_STATUS_PREVIEW_TOKEN}" \
-              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=SENTRY_SERVER_INSTRUMENTATION,Value=false"
+            --option-settings "$option_settings"
 
       - name: Check Elastic Beanstalk health and readiness (120s warmup then 20 retries with 60s delay)
         env:
@@ -544,15 +663,21 @@ jobs:
           if-no-files-found: ignore
           retention-days: 90
 
-      - name: Checkout notification script
+      - name: Check out CI wave notifier
         if: always()
+        continue-on-error: true
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          ref: ${{ github.workflow_sha }}
           persist-credentials: false
+          path: .ci-wave-notifier
+          sparse-checkout: scripts/notify-ci-wave.mjs
+          sparse-checkout-cone-mode: false
 
       - name: Notify about failure
-        uses: sarisia/actions-status-discord@v1
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1
         if: failure()
+        continue-on-error: true
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
@@ -562,7 +687,7 @@ jobs:
           color: 0xff0000
 
       - name: Notify CI wave about failure
-        if: failure()
+        if: failure() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
         continue-on-error: true
         env:
           CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
@@ -573,11 +698,13 @@ jobs:
           CI_PIPELINES_TITLE: "Seize PROD WEB DEPLOY: CI pipeline is broken!!!"
           CI_PIPELINES_ENVIRONMENT: production
           CI_PIPELINES_SERVICE: web
-        run: node scripts/notify-ci-wave.mjs
+          CI_PIPELINES_SHA: ${{ github.sha }}
+        run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs
 
       - name: Notify about success
-        uses: sarisia/actions-status-discord@v1
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1
         if: success()
+        continue-on-error: true
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
@@ -586,7 +713,7 @@ jobs:
           color: 0x00ff00
 
       - name: Notify CI wave about success
-        if: success()
+        if: success() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
         continue-on-error: true
         env:
           CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
@@ -597,5 +724,59 @@ jobs:
           CI_PIPELINES_TITLE: "Seize PROD WEB DEPLOY: CI pipeline complete"
           CI_PIPELINES_ENVIRONMENT: production
           CI_PIPELINES_SERVICE: web
+          CI_PIPELINES_SHA: ${{ github.sha }}
           CI_RELEASE_NOTES_PROMPT_PATH: ops/release-notes/release-notes.prompt.md
-        run: node scripts/notify-ci-wave.mjs
+        run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs
+
+  notify-production-prerequisite-failure:
+    name: Notify about production prerequisite failure
+    needs: [manual-deployment-guard, assert-main-ref, build-upload-deploy]
+    if: >-
+      ${{
+        always() &&
+        needs.build-upload-deploy.result == 'skipped' &&
+        (
+          needs.manual-deployment-guard.result == 'failure' ||
+          needs.assert-main-ref.result == 'failure'
+        )
+      }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Notify about prerequisite failure
+        continue-on-error: true
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          title: "Seize PROD WEB DEPLOY: CI pipeline is broken!!!"
+          description: ${{ github.sha }} - A production deployment prerequisite failed before build/upload/deploy.
+          content: "<@&1162355330798325861>"
+          color: 0xff0000
+
+      - name: Check out CI wave notifier
+        continue-on-error: true
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          path: .ci-wave-notifier
+          sparse-checkout: scripts/notify-ci-wave.mjs
+          sparse-checkout-cone-mode: false
+
+      - name: Notify CI wave about prerequisite failure
+        if: always() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
+        continue-on-error: true
+        env:
+          CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
+          CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
+          CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
+          CI_PIPELINES_TARGET_ENV: production
+          CI_PIPELINES_STATUS: failure
+          CI_PIPELINES_TITLE: "Seize PROD WEB DEPLOY: CI pipeline is broken!!!"
+          CI_PIPELINES_ENVIRONMENT: production
+          CI_PIPELINES_SERVICE: web
+          CI_PIPELINES_SHA: ${{ github.sha }}
+        run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs

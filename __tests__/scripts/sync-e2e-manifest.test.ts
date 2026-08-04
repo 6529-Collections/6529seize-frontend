@@ -43,7 +43,7 @@ describe("E2E pack manifest", () => {
 
   it("defines every package pack once and satisfies the safety contract", () => {
     expect(manifestTools.validateManifest(packs, { root: ROOT })).toEqual([]);
-    expect(packs).toHaveLength(55);
+    expect(packs).toHaveLength(59);
 
     const rendered = manifestTools.renderPackageJsonScripts(packs);
     const packageScripts = JSON.parse(
@@ -63,13 +63,24 @@ describe("E2E pack manifest", () => {
       (pack) => pack.environments[0] === "production"
     );
 
-    expect(staging).toHaveLength(13);
+    expect(staging).toHaveLength(14);
+    expect(
+      staging.filter((pack) => pack.triggers.includes("post-deploy"))
+    ).toHaveLength(13);
+    expect(production).toHaveLength(13);
     expect(
       production.filter((pack) => pack.triggers.includes("cron"))
     ).toHaveLength(10);
     expect(
       production.filter((pack) => pack.triggers.includes("post-deploy"))
-    ).toHaveLength(1);
+    ).toHaveLength(12);
+
+    for (const environmentPacks of [staging, production]) {
+      const specs = environmentPacks
+        .filter((pack) => pack.triggers.includes("post-deploy"))
+        .flatMap((pack) => pack.specs ?? []);
+      expect(new Set(specs).size).toBe(specs.length);
+    }
 
     for (const pack of [...staging, ...production]) {
       expect(pack.safety).toBe("readonly");
@@ -78,6 +89,22 @@ describe("E2E pack manifest", () => {
         PLAYWRIGHT_ENV: pack.environments[0],
         PLAYWRIGHT_READONLY: "1",
         PLAYWRIGHT_SKIP_WEB_SERVER: "1",
+      });
+    }
+
+    for (const environment of ["local", "staging", "production"]) {
+      const museumPack = packs.find(
+        (pack) =>
+          pack.environments[0] === environment &&
+          pack.specs?.includes(
+            "tests/museum/institutional-practice-readonly.spec.ts"
+          ) &&
+          pack.scriptKey !== "test:e2e:production:readonly"
+      );
+      expect(museumPack).toMatchObject({
+        safety: "readonly",
+        projects: ["web-desktop-chromium", "web-mobile-chromium"],
+        workers: 1,
       });
     }
   });

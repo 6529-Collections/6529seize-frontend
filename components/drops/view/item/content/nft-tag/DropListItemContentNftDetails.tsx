@@ -1,15 +1,15 @@
 import type { ReferencedNft } from "@/entities/IDrop";
-import type { ReservoirTokensResponseTokenElement } from "@/entities/IReservoir";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import type { TokenMetadata } from "@/types/nft";
 
 export default function DropListItemContentNftDetails({
   referencedNft: { name: tokenName },
   nft,
 }: {
   readonly referencedNft: ReferencedNft;
-  readonly nft: ReservoirTokensResponseTokenElement | null;
+  readonly nft: TokenMetadata | null;
 }) {
-  const image = nft?.token.collection.image;
+  const image = nft?.imageUrl;
   return (
     <div className="tw-gap-x-2 tw-flex tw-items-center">
       {image && (

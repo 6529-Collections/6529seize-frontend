@@ -16,6 +16,7 @@ import {
 import aboutMessages from "@/i18n/messages/about.en-US.json";
 import homeNewcomerMessages from "@/i18n/messages/homeNewcomer.en-US.json";
 import join6529Messages from "@/i18n/messages/join6529.en-US.json";
+import museumMessages from "@/i18n/messages/museum.en-US.json";
 import networkMetricsMessages from "@/i18n/messages/networkMetrics.en-US.json";
 import networkTdhMessages from "@/i18n/messages/networkTdh.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
@@ -474,6 +475,26 @@ const WAVE_LEADERBOARD_MESSAGES = objectMessages("waves.leaderboard", {
   retryMore: "Retry loading more drops",
   loadMore: "Load more drops",
   loadingMoreButton: "Loading more…",
+  "timeline.toggle": "Toggle decision timeline",
+  "timeline.decisionTimeline": "Decision Timeline",
+  "timeline.announcementHistory": "Announcement history",
+  "timeline.paused": "Paused",
+  "timeline.nextDecisionAfter": "Next decision after {date}",
+  "timeline.noDecisionScheduled": "No decision scheduled",
+  "timeline.noUpcomingEvents": "No upcoming events",
+  "timeline.nextWinner": "Next winner",
+  "timeline.nextWinnerIn": "Next winner in {countdown}",
+  "timeline.unit.day.one": "{count} day",
+  "timeline.unit.day.other": "{count} days",
+  "timeline.unit.hour.one": "{count} hour",
+  "timeline.unit.hour.other": "{count} hours",
+  "timeline.unit.minute.one": "{count} minute",
+  "timeline.unit.minute.other": "{count} minutes",
+  "timeline.unit.second.one": "{count} second",
+  "timeline.unit.second.other": "{count} seconds",
+  "timeline.status.next": "Next",
+  "timeline.status.done": "Done",
+  "timeline.status.completed": "Completed",
 } as const);
 
 const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
@@ -658,6 +679,76 @@ const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
   proxy: "Proxy",
   "badges.beta": "Beta",
 } as const);
+
+const MENTION_SHORTCUT_COMPOSER_MESSAGES = objectMessages(
+  "waves.composer.mentionShortcuts",
+  {
+    optionOne: "Quick tag · 1 profile",
+    optionMany: "Quick tag · {count} profiles",
+    loadErrorTitle: "Quick Tags couldn't be loaded.",
+    loadErrorMessage: "Try again before sending this message.",
+  } as const
+);
+
+const GROUP_MENTION_COMPOSER_MESSAGES = objectMessages(
+  "waves.composer.groupMentions",
+  {
+    all: "All Wave followers",
+    contributors: "Can post in this Wave",
+    admins: "Wave creator and admins",
+    devs6529: "6529 developers",
+  } as const
+);
+
+const MENTION_SHORTCUT_SETTINGS_MESSAGES = objectMessages(
+  "user.mentionShortcuts",
+  {
+    title: "Quick Tags",
+    description:
+      "Create private tags such as @frens. In a Wave composer, each Quick Tag expands into the profile handles you choose.",
+    summaryDescription: "Mention several profiles with one shortcut.",
+    manage: "Manage",
+    more: "+{count} more",
+    memberCount: "{count} member",
+    memberCountMany: "{count} members",
+    new: "New Quick Tag",
+    newShort: "+ New",
+    create: "Create Quick Tag",
+    edit: "Edit Quick Tag",
+    editorDescription:
+      "It expands into ordinary profile mentions before your message is sent.",
+    cancel: "Cancel",
+    name: "Quick Tag name",
+    nameError: "Use 3–15 letters, numbers, or underscores.",
+    reservedError:
+      "That tag name is reserved. Try something a little more creative.",
+    addProfiles: "Add profiles ({count}/{max})",
+    searchLabel: "Search profiles by handle",
+    searchPlaceholder: "Search by handle",
+    searchPrompt: "Enter at least 3 characters to search profiles.",
+    searchResults: "{count} profiles available.",
+    searchResult: "1 profile available.",
+    removeProfile: "Remove @{handle}",
+    save: "Save Quick Tag",
+    saving: "Saving…",
+    created: "Quick Tag created.",
+    updated: "Quick Tag updated.",
+    saveErrorTitle: "Couldn't save Quick Tag.",
+    saveErrorDetails: "Unable to save Quick Tag",
+    deleteTitle: "Delete @{alias}?",
+    deleteWarning: "This cannot be undone.",
+    delete: "Delete Quick Tag",
+    deleting: "Deleting Quick Tag.",
+    deleted: "Quick Tag deleted.",
+    deleteErrorTitle: "Couldn't delete Quick Tag.",
+    deleteErrorDetails: "Unable to delete Quick Tag",
+    loading: "Loading…",
+    loadError: "Quick Tags could not be loaded.",
+    empty: "You have no Quick Tags yet.",
+    editAction: "Edit",
+    deleteAction: "Delete",
+  } as const
+);
 
 const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "name.edit": "Edit {name}'s profile name",
@@ -871,6 +962,14 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
     "Add identities one by one to build this access group.",
   "inlineIdentities.creatorExcludedWarning":
     "Warning: You are not included in this group. If it controls who can view the wave, you may not be able to access the wave after creating it.",
+} as const);
+
+const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
+  cancel: "Cancel",
+  complete: "Complete",
+  next: "Next",
+  previous: "Previous",
+  save: "Save",
 } as const);
 
 const WAVE_CREATE_RANK_MODE_MESSAGES = objectMessages(
@@ -1834,6 +1933,13 @@ export const EN_US_MESSAGES = {
   "theMemes.loading.fetching": "Fetching",
   "theMemes.empty.title": "No memes found",
   "theMemes.empty.description": "Try a different season or sort option.",
+  "theMemes.mint.transaction.title": "Mint The Memes",
+  "theMemes.mint.transaction.titleWithTokenId": "Mint: The Memes #{tokenId}",
+  "theMemes.mint.transaction.confirmWallet": "Confirm in your wallet",
+  "theMemes.mint.transaction.submitted": "Transaction Submitted - SEIZING",
+  "theMemes.mint.transaction.success": "SEIZED!",
+  "theMemes.mint.transaction.error": "Transaction failed",
+  "theMemes.mint.transaction.errorDetails": "{message}",
   "theMemes.card.linkAriaLabel": "View {name}, card #{tokenId}",
   "theMemes.card.metric.unavailable": "-",
   "theMemes.card.metric.editionSize": "Edition Size: {value}",
@@ -2326,6 +2432,9 @@ export const EN_US_MESSAGES = {
   "drops.additionalActionBadge.tooltip":
     "The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable.",
   ...USER_PROFILE_TABS_MESSAGES,
+  ...MENTION_SHORTCUT_COMPOSER_MESSAGES,
+  ...GROUP_MENTION_COMPOSER_MESSAGES,
+  ...MENTION_SHORTCUT_SETTINGS_MESSAGES,
   ...USER_PROFILE_HEADER_MESSAGES,
   ...USER_CIC_TYPE_MESSAGES,
   ...FOLLOWERS_MESSAGES,
@@ -2343,6 +2452,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_GIF_PICKER_MESSAGES,
   ...WAVE_HEADER_MESSAGES,
   ...WAVE_NOTIFICATION_SETTINGS_MESSAGES,
+  ...WAVE_CREATE_ACTIONS_MESSAGES,
   ...WAVE_CREATE_GROUPS_MESSAGES,
   ...WAVE_CREATE_RANK_MODE_MESSAGES,
   ...WAVE_CREATE_DROPS_MESSAGES,
@@ -2361,6 +2471,7 @@ export const EN_US_MESSAGES = {
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
   ...USER_RATE_MESSAGES,
   ...aboutMessages,
+  ...museumMessages,
   ...networkMetricsMessages,
   ...networkTdhMessages,
   ...toolsMessages,

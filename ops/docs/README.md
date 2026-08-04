@@ -82,6 +82,8 @@ March 19, 2026.
 - [Open Data](open-data/README.md): `/open-data`, `/open-data/6529bot`,
   `/open-data/meme-subscriptions`, `/open-data/network-metrics`,
   `/open-data/rememes`, `/open-data/royalties`, `/open-data/team`
+- [Network Museum](museum/README.md): `/museum/network` and
+  `/museum/network/{param*}`
 - [Navigation](navigation/README.md): app shell controls, `/open-mobile`, and
   `/about/6529-apps`
 - [Shared](shared/README.md): behavior reused by multiple areas
@@ -144,12 +146,17 @@ Route patterns use normalized placeholders: `{param}` for one segment,
 - Shared app-shell behavior:
   [Navigation](navigation/README.md) and [Shared](shared/README.md),
   including `/open-mobile` and `/about/6529-apps`
+- Network Museum:
+  `/museum/network`, including collection, artist, project, gift, program,
+  about, and Stories & Research routes. The institutional-practice study is at
+  `/museum/network/stories/a-field-of-practice/{param*}`.
 
 ### Out of Scope
 
 - Content, editorial, and legal routes:
   `/about/*` (except `/about/primary-address` and `/about/6529-apps`),
-  `/museum`, `/museum/*`,
+  legacy gallery routes under `/museum` and `/museum/*` outside
+  `/museum/network`,
   `/blog/*`, `/news/*`, `/city/*`, `/om`, `/om/*`, `/education`,
   `/education/*`, `/capital`, `/capital/*`, `/author/*`, `/category/*`,
   `/buidl`, `/casabatllo`
@@ -179,6 +186,7 @@ Route patterns use normalized placeholders: `{param}` for one segment,
 - Media: [Memes](media/memes/README.md),
   [Collections](media/collections/README.md), [NFT](media/nft/README.md),
   [Rendering](media/rendering/README.md)
+- Network Museum: [Museum documentation](museum/README.md)
 
 ## Troubleshooting Entry Point
 

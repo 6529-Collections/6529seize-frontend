@@ -97,6 +97,17 @@ describe("frontend i18n helpers", () => {
       })
     ).toBe("Voir Meme, carte n° 1");
     expect(t("de-DE", "theMemes.documentTitle")).toBe("The Memes | Sammlungen");
+    expect(t("en-US", "theMemes.mint.transaction.confirmWallet")).toBe(
+      "Confirm in your wallet"
+    );
+    expect(t("fr-FR", "theMemes.mint.transaction.submitted")).toBe(
+      "Transaction Submitted - SEIZING"
+    );
+    expect(
+      t("de-DE", "theMemes.mint.transaction.errorDetails", {
+        message: "Wallet rejected",
+      })
+    ).toBe("Wallet rejected");
     expect(t("en-US", "media.video.playPreview")).toBe("Play video preview");
     expect(t("en-US", "media.video.player")).toBe("Video player");
     expect(t("en-US", "media.video.seek")).toBe("Seek video");
@@ -106,6 +117,17 @@ describe("frontend i18n helpers", () => {
     expect(t("de-DE", "media.video.unsupported")).toBe(
       "Ihr Browser unterstuetzt das Video-Tag nicht."
     );
+    expect(t("fr-FR", "waves.leaderboard.timeline.nextWinner")).toBe(
+      "Prochain gagnant"
+    );
+    expect(t("es-ES", "waves.leaderboard.timeline.status.completed")).toBe(
+      "Completado"
+    );
+    expect(
+      t("de-DE", "waves.leaderboard.timeline.unit.second.other", {
+        count: 3,
+      })
+    ).toBe("3 Sekunden");
     for (const messages of NEW_VERSION_TOAST_LOCALE_MESSAGES) {
       expect(t(messages.locale, "newVersionToast.refreshAction")).toBe(
         messages.refreshAction

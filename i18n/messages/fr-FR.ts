@@ -427,6 +427,11 @@ export const FR_FR_MESSAGES = {
   "waves.gifPicker.unavailable.hint":
     "Vous pouvez televerser un fichier GIF a la place.",
   "common.close": "Fermer",
+  "waves.create.actions.cancel": "Annuler",
+  "waves.create.actions.complete": "Terminer",
+  "waves.create.actions.next": "Suivant",
+  "waves.create.actions.previous": "Précédent",
+  "waves.create.actions.save": "Enregistrer",
   ...FR_FR_PAGINATION_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} restant ce tour",
   "memes.quickVote.unrated": "{count} non notés",
@@ -455,6 +460,32 @@ export const FR_FR_MESSAGES = {
   "waves.leaderboard.retryMore": "Réessayer de charger d’autres drops",
   "waves.leaderboard.loadMore": "Charger plus de drops",
   "waves.leaderboard.loadingMoreButton": "Chargement…",
+  "waves.leaderboard.timeline.toggle":
+    "Afficher ou masquer la chronologie des décisions",
+  "waves.leaderboard.timeline.decisionTimeline":
+    "Chronologie des décisions",
+  "waves.leaderboard.timeline.announcementHistory":
+    "Historique des annonces",
+  "waves.leaderboard.timeline.paused": "En pause",
+  "waves.leaderboard.timeline.nextDecisionAfter":
+    "Prochaine décision après le {date}",
+  "waves.leaderboard.timeline.noDecisionScheduled":
+    "Aucune décision planifiée",
+  "waves.leaderboard.timeline.noUpcomingEvents": "Aucun événement à venir",
+  "waves.leaderboard.timeline.nextWinner": "Prochain gagnant",
+  "waves.leaderboard.timeline.nextWinnerIn":
+    "Prochain gagnant dans {countdown}",
+  "waves.leaderboard.timeline.unit.day.one": "{count} jour",
+  "waves.leaderboard.timeline.unit.day.other": "{count} jours",
+  "waves.leaderboard.timeline.unit.hour.one": "{count} heure",
+  "waves.leaderboard.timeline.unit.hour.other": "{count} heures",
+  "waves.leaderboard.timeline.unit.minute.one": "{count} minute",
+  "waves.leaderboard.timeline.unit.minute.other": "{count} minutes",
+  "waves.leaderboard.timeline.unit.second.one": "{count} seconde",
+  "waves.leaderboard.timeline.unit.second.other": "{count} secondes",
+  "waves.leaderboard.timeline.status.next": "Suivant",
+  "waves.leaderboard.timeline.status.done": "Fait",
+  "waves.leaderboard.timeline.status.completed": "Terminé",
   "waves.poll.actions.viewResults": "Voir les résultats",
   "waves.poll.actions.vote": "Voter",
   "waves.poll.actions.changeVote": "Modifier le vote",

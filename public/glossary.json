@@ -4,7 +4,7 @@
   "base_url": "https://6529.io",
   "description": "Glossary of 6529 terms projected from the site's curated help corpus. Each term links back to its help-index.json record via id.",
   "source": "/help-index.json",
-  "term_count": 27,
+  "term_count": 28,
   "terms": [
     {
       "id": "about.license",
@@ -305,6 +305,7 @@
       ],
       "facts": [
         "Network definitions explain Cards Collected, Unique Memes, Meme Sets, TDH variants, purchases, sales, transfers, and related Network metrics.",
+        "The glossary groups terms into Collection metrics, Activity metrics, and TDH metrics.",
         "Genesis Sets are complete sets of the first three Meme NFTs.",
         "Use the definitions page when users ask what a Network metric means.",
         "For a single TDH explanation, point users to the TDH page."
@@ -471,6 +472,34 @@
       "tags": [
         "profiles",
         "proxy",
+        "glossary"
+      ]
+    },
+    {
+      "id": "profiles.quick-tags",
+      "term": "Profile Quick Tags",
+      "aliases": [
+        "quick tags",
+        "quick tag settings",
+        "mention shortcuts",
+        "personal mention aliases"
+      ],
+      "facts": [
+        "Quick Tags are managed from the compact owner-only section beneath Activity on the Profile Brain tab.",
+        "The section shows up to three tags in one row and uses a +N more chip when additional tags exist.",
+        "Manage, a visible Quick Tag, and +N more open the Quick Tags manager.",
+        "The section is hidden on other profiles and while acting through a proxy.",
+        "Quick Tags do not have a dedicated profile tab or route."
+      ],
+      "canonical_path": "/{user}/brain",
+      "related_paths": [
+        "/{user}/brain",
+        "/waves"
+      ],
+      "tags": [
+        "profiles",
+        "waves",
+        "mentions",
         "glossary"
       ]
     },

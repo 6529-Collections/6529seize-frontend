@@ -9,14 +9,14 @@ const CASES = [
     status: "REVIEW_CLOSED",
     deploymentStatus: "NOT_DEPLOYED",
     auditStatus: "PRE_AUDIT",
-    labels: ["Review closed", "Not deployed", "Pre-audit"],
+    labels: ["Review closed", "Preparing for launch", "Audit planned"],
     explanation: "The public feedback window is closed.",
   },
   {
     status: "AUDIT",
     deploymentStatus: "NOT_DEPLOYED",
     auditStatus: "AUDIT_IN_PROGRESS",
-    labels: ["Audit", "Not deployed", "Audit in progress"],
+    labels: ["Audit", "Preparing for launch", "Audit in progress"],
     explanation: "The contract is in formal audit.",
   },
   {
@@ -97,8 +97,8 @@ describe("PublicReviewStatusBanner", () => {
     expect(
       screen.getByRole("link", { name: "View current review" })
     ).toHaveAttribute("href", "/reviews/6529-stream");
-    expect(screen.getByText("Not deployed")).toBeInTheDocument();
-    expect(screen.getByText("Pre-audit")).toBeInTheDocument();
+    expect(screen.getByText("Preparing for launch")).toBeInTheDocument();
+    expect(screen.getByText("Audit planned")).toBeInTheDocument();
     expect(screen.queryByText("Deployed")).not.toBeInTheDocument();
     expect(screen.queryByText("Audit complete")).not.toBeInTheDocument();
   });

@@ -1,0 +1,111 @@
+{
+  "schemaVersion": "public-review.development-status.v1",
+  "reviewId": "6529-stream",
+  "locale": "en-US",
+  "checkedAt": "2026-08-01T00:00:00.000Z",
+  "source": {
+    "repository": "6529-Collections/6529Stream",
+    "commit": "5021c8060950c3fef995271e674ed4b2007fee6d"
+  },
+  "state": "PRE_AUDIT_DEVELOPMENT",
+  "headline": "The permanent Core now meets its size target. Stream is being prepared for external audit and launch evidence.",
+  "summary": "Development has continued since the contract snapshot reviewed on these pages. This update follows the latest checked Stream commit while keeping the review record exact.",
+  "recentlyCompleted": [
+    {
+      "id": "permanent-core-size",
+      "text": "The permanent Core fits within Ethereum's contract-size limit with 5,579 bytes of headroom.",
+      "evidencePath": "release-artifacts/latest/bytecode-release-proof.json"
+    },
+    {
+      "id": "external-flow-checks",
+      "text": "Retained fork checks cover artwork metadata in browsers and marketplace and indexer behavior.",
+      "evidencePath": "release-artifacts/latest/public-beta-evidence.json"
+    }
+  ],
+  "workingOn": [
+    {
+      "id": "launch-configuration",
+      "text": "Confirming the exact contract set, permissions, settings, and connections for launch.",
+      "evidencePath": "docs/release-readiness.md"
+    },
+    {
+      "id": "rehearsal-refresh",
+      "text": "Refreshing the fork deployment, operating ceremony, and randomizer rehearsals after the latest Core changes.",
+      "evidencePath": "release-artifacts/latest/public-beta-evidence.json"
+    },
+    {
+      "id": "safety-work",
+      "text": "Strengthening metadata writers, payment settlement, and controlled contract changes.",
+      "evidencePath": "release-artifacts/latest/risk-register.json"
+    }
+  ],
+  "beforeLaunch": [
+    {
+      "id": "public-testnet-rehearsal",
+      "text": "Run the public testnet rehearsal and publish the verified addresses and source.",
+      "evidencePath": "release-artifacts/latest/public-beta-evidence.json"
+    },
+    {
+      "id": "external-audit",
+      "text": "Complete an independent external audit and retest every accepted fix.",
+      "evidencePath": "docs/audit-package.md"
+    },
+    {
+      "id": "launch-records",
+      "text": "Approve the final settings, deployment records, and operating rehearsals.",
+      "evidencePath": "docs/release-readiness.md"
+    }
+  ],
+  "evidenceSummary": {
+    "requirements": {
+      "complete": 2,
+      "pending": 3,
+      "missing": 15
+    },
+    "openReleaseBlockers": 10
+  },
+  "reviewerPrompts": [
+    {
+      "id": "artist-choices",
+      "title": "Artist choices",
+      "question": "Are the artist's choices, approvals, and permanent decisions clear?",
+      "pageId": "for-artists",
+      "sectionId": "questions-for-artists"
+    },
+    {
+      "id": "curation-sales",
+      "title": "Curation and sales",
+      "question": "Does the path from curation decision to signed sale approval feel understandable and fair?",
+      "pageId": "curation-and-tdh-authorization",
+      "sectionId": "questions-for-reviewers"
+    },
+    {
+      "id": "minting-supply",
+      "title": "Minting and supply",
+      "question": "Are collection limits, token numbering, and mint controls easy to follow?",
+      "pageId": "tokens-collections-and-minting",
+      "sectionId": "questions-for-reviewers"
+    },
+    {
+      "id": "payments",
+      "title": "Payments",
+      "question": "Can artists and collectors tell where sale proceeds and royalties go?",
+      "pageId": "revenue-splits-and-royalties",
+      "sectionId": "questions-for-reviewers"
+    },
+    {
+      "id": "randomness",
+      "title": "Randomness",
+      "question": "Does the randomness process provide the right mix of fairness, recovery, and explanation?",
+      "pageId": "randomness",
+      "sectionId": "questions-for-reviewers"
+    },
+    {
+      "id": "preservation",
+      "title": "Preservation",
+      "question": "Do the freezing and preservation steps match how artists expect a finished work to become permanent?",
+      "pageId": "freezing-preservation-and-artwork-finality",
+      "sectionId": "questions-for-reviewers"
+    }
+  ]
+}

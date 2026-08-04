@@ -6,8 +6,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useKey } from "react-use";
 
-import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import WaveDropsSearchModal from "@/components/waves/drops/search/WaveDropsSearchModal";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -103,17 +101,9 @@ export default function HeaderSearchButton({ wave }: HeaderSearchButtonProps) {
         />
       )}
 
-      <CommonAnimationWrapper mode="sync" initial>
-        {openSearch === "site" && (
-          <CommonAnimationOpacity
-            key="site-search-modal"
-            elementClasses="tw-absolute tw-z-10"
-            onClicked={(event) => event.stopPropagation()}
-          >
-            <HeaderSearchModal onClose={closeSearch} wave={null} />
-          </CommonAnimationOpacity>
-        )}
-      </CommonAnimationWrapper>
+      {openSearch === "site" && (
+        <HeaderSearchModal onClose={closeSearch} wave={null} />
+      )}
     </div>
   );
 }

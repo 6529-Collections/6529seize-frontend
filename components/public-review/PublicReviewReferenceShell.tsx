@@ -1,8 +1,8 @@
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
+import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
 
 import { PublicReviewStatusBanner } from "@/components/public-review/PublicReviewStatusBanner";
+import { PublicReviewSurfaceNavigation } from "@/components/public-review/PublicReviewSurfaceNavigation";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getPublicReviewLifecycleCapabilities } from "@/lib/public-review/publicReviewLifecycle";
@@ -51,41 +51,28 @@ export function PublicReviewReferenceShell({
           displayedVersion={displayedVersion}
           source={source}
         />
-        <nav
-          aria-label={t(DEFAULT_LOCALE, "publicReview.navigation.label")}
-          className="tw-mt-8 tw-flex tw-flex-wrap tw-items-center tw-gap-x-7 tw-gap-y-1 tw-text-base"
-        >
-          <Link
-            className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-text-base tw-font-medium tw-text-iron-400 tw-no-underline hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-            href={editorialHref}
-          >
-            <ArrowLeftIcon
-              aria-hidden="true"
-              className="tw-size-3.5 tw-flex-none"
-            />
-            {t(DEFAULT_LOCALE, "publicReview.reference.backToReview")}
-          </Link>
-          <Link
-            className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-base tw-font-medium tw-text-white tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-            href={referenceHref}
-          >
-            {t(DEFAULT_LOCALE, "publicReview.reference.openReference")}
-          </Link>
-          <Link
-            className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-base tw-font-medium tw-text-iron-400 tw-no-underline hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-            href={feedbackHref}
-          >
-            {t(DEFAULT_LOCALE, "publicReview.ledger.navigation")}
-          </Link>
-          {feedbackSubmissionsAvailable ? (
-            <a
-              className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-base tw-font-medium tw-text-amber-300 tw-no-underline hover:tw-text-amber-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-              href="#public-review-feedback"
-            >
-              {t(DEFAULT_LOCALE, "publicReview.feedback.jump")}
-            </a>
-          ) : null}
-        </nav>
+        <PublicReviewSurfaceNavigation
+          action={
+            feedbackSubmissionsAvailable ? (
+              <a
+                className="tw-group/feedback-link tw-inline-flex tw-min-h-10 tw-items-center tw-gap-2 tw-bg-transparent tw-px-0 tw-text-xs tw-font-semibold tw-text-iron-400 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-white"
+                href="#public-review-feedback"
+              >
+                <ChatBubbleLeftRightIcon
+                  aria-hidden="true"
+                  className="tw-size-4 tw-flex-none tw-transition-colors group-hover/feedback-link:tw-text-primary-300"
+                />
+                <span className="tw-transition-colors group-hover/feedback-link:tw-text-primary-300">
+                  {t(DEFAULT_LOCALE, "publicReview.feedback.title")}
+                </span>
+              </a>
+            ) : null
+          }
+          activeSurface="reference"
+          feedbackHref={feedbackHref}
+          referenceHref={referenceHref}
+          reviewHref={editorialHref}
+        />
 
         <header className="tw-mt-14 tw-max-w-[52rem]">
           <p className="tw-m-0 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-sky-300">

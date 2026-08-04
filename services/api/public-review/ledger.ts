@@ -17,6 +17,8 @@ import type {
   PublicReviewLedgerFilters,
   PublicReviewLedgerPage,
   PublicReviewLedgerWarning,
+  PublicReviewPageContext,
+  PublicReviewReferenceSelection,
 } from "./types";
 
 export const PUBLIC_REVIEW_LEDGER_PAGE_SIZE = 50;
@@ -125,43 +127,48 @@ function projectFeedbackRecord({
   readonly destination: PublicReviewDiscussionDestination;
   readonly drop: ApiDropV2;
   readonly metadata: readonly ApiDropMetadataV2[];
-}): PublicReviewFeedbackRecord | null {
+}):
+  | { readonly ok: true; readonly record: PublicReviewFeedbackRecord }
+  | { readonly ok: false; readonly reason: string } {
   const decoded = decodePublicReviewFeedbackMetadata({ config, metadata });
   if (!decoded.ok) {
-    return null;
+    return decoded;
   }
 
   return {
-    feedbackId: decoded.value.context.submissionId,
-    dropId: drop.id,
-    serialNo: drop.serial_no,
-    destination,
-    reviewId: config.reviewId,
-    reviewVersion: config.reviewVersion,
-    category: decoded.value.category,
-    severity: decoded.value.severity,
-    pageId: decoded.value.context.pageId,
-    ...(decoded.value.context.sectionId
-      ? { sectionId: decoded.value.context.sectionId }
-      : {}),
-    ...(decoded.value.context.reference
-      ? { reference: decoded.value.context.reference }
-      : {}),
-    author: {
-      id: drop.author.id,
-      handle: drop.author.handle ?? null,
-      pfp: drop.author.pfp ?? null,
-    },
-    createdAt: drop.created_at,
-    body: drop.content ?? "",
-    reactionsCount: getReactionCount(drop),
-    disposition: "NEW",
-    discussionPath: getWaveRoute({
-      waveId: destination.waveId,
+    ok: true,
+    record: {
+      feedbackId: decoded.value.context.submissionId,
+      dropId: drop.id,
       serialNo: drop.serial_no,
-      isDirectMessage: false,
-      isApp: false,
-    }),
+      destination,
+      reviewId: config.reviewId,
+      reviewVersion: config.reviewVersion,
+      category: decoded.value.category,
+      severity: decoded.value.severity,
+      pageId: decoded.value.context.pageId,
+      ...(decoded.value.context.sectionId
+        ? { sectionId: decoded.value.context.sectionId }
+        : {}),
+      ...(decoded.value.context.reference
+        ? { reference: decoded.value.context.reference }
+        : {}),
+      author: {
+        id: drop.author.id,
+        handle: drop.author.handle ?? null,
+        pfp: drop.author.pfp ?? null,
+      },
+      createdAt: drop.created_at,
+      body: drop.content ?? "",
+      reactionsCount: getReactionCount(drop),
+      disposition: "NEW",
+      discussionPath: getWaveRoute({
+        waveId: destination.waveId,
+        serialNo: drop.serial_no,
+        isDirectMessage: false,
+        isApp: false,
+      }),
+    },
   };
 }
 
@@ -180,7 +187,7 @@ async function hydrateLedgerDrop({
 }): Promise<
   | {
       readonly kind: "record";
-      readonly record: PublicReviewFeedbackRecord | null;
+      readonly projection: ReturnType<typeof projectFeedbackRecord>;
       readonly metadata: readonly ApiDropMetadataV2[];
     }
   | { readonly kind: "failure" }
@@ -190,7 +197,7 @@ async function hydrateLedgerDrop({
     return {
       kind: "record",
       metadata,
-      record: projectFeedbackRecord({
+      projection: projectFeedbackRecord({
         config,
         destination,
         drop,
@@ -300,15 +307,20 @@ export async function fetchPublicReviewLedgerPage({
       warnings.push({
         code: "METADATA_HYDRATION_FAILED",
         dropId: drop.id,
+        reason: "Feedback metadata could not be loaded.",
       });
       return;
     }
-    if (result.record) {
-      records.push(result.record);
+    if (result.projection.ok) {
+      records.push(result.projection.record);
       return;
     }
     if (hasPublicReviewMetadata(result.metadata)) {
-      warnings.push({ code: "INVALID_REVIEW_METADATA", dropId: drop.id });
+      warnings.push({
+        code: "INVALID_REVIEW_METADATA",
+        dropId: drop.id,
+        reason: result.projection.reason,
+      });
     }
   });
 
@@ -380,4 +392,40 @@ export function dedupePublicReviewLedgerRecords(
     seen.add(record.dropId);
     return true;
   });
+}
+
+export function isPublicReviewRecordForPage({
+  page,
+  record,
+  referenceSelection,
+}: {
+  readonly page: PublicReviewPageContext;
+  readonly record: PublicReviewFeedbackRecord;
+  readonly referenceSelection?: PublicReviewReferenceSelection | undefined;
+}): boolean {
+  if (record.pageId !== page.pageId) {
+    return false;
+  }
+  if (referenceSelection?.kind !== "code") {
+    return true;
+  }
+  if (record.reference?.kind !== "code") {
+    return false;
+  }
+  if (
+    record.reference.path !== referenceSelection.path ||
+    record.reference.sourceSha256 !== referenceSelection.sourceSha256
+  ) {
+    return false;
+  }
+  if (
+    referenceSelection.contract !== undefined &&
+    record.reference.contract !== referenceSelection.contract
+  ) {
+    return false;
+  }
+  return (
+    referenceSelection.declaration === undefined ||
+    record.reference.declaration === referenceSelection.declaration
+  );
 }

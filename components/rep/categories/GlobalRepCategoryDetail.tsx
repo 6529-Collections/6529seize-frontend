@@ -3,6 +3,8 @@
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import Button from "@/components/utils/button/Button";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
@@ -58,9 +60,6 @@ const TABS: ReadonlyArray<{
 type RepCategoryScope = "profile" | "wave";
 
 const REP_CATEGORY_LOCALE = DEFAULT_LOCALE;
-
-const CATEGORY_ACTION_LINK_CLASSNAME =
-  "tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-2.5 tw-text-xs tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-iron-700 hover:tw-bg-iron-900 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60";
 
 const SCOPES: ReadonlyArray<CommonSelectItem<RepCategoryScope>> = [
   { key: "profile", label: "Profile REP", value: "profile" },
@@ -565,14 +564,14 @@ function PaginatedTable({
             isLoading={pageQuery.isFetchingNextPage}
             onLoadMore={loadNextPage}
           />
-          <button
-            type="button"
-            disabled={pageQuery.isFetchingNextPage}
+          <Button
+            variant="tertiary"
+            loading={pageQuery.isFetchingNextPage}
             onClick={loadNextPage}
-            className="rep-category-load-more tw-self-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/[0.07] disabled:tw-cursor-default disabled:tw-opacity-70"
+            className="rep-category-load-more tw-self-center"
           >
             {pageQuery.isFetchingNextPage ? "Loading..." : "Load more"}
-          </button>
+          </Button>
         </>
       )}
     </div>
@@ -618,16 +617,17 @@ export default function GlobalRepCategoryDetail({
           </div>
           {showSearchLink && (
             <div className="rep-category-header-actions tw-flex tw-flex-wrap tw-gap-2">
-              <Link
+              <ButtonLink
                 href="/rep/categories"
-                className={CATEGORY_ACTION_LINK_CLASSNAME}
+                variant="tertiary"
+                size="sm"
               >
                 <ArrowLeftIcon
                   aria-hidden="true"
                   className="tw-size-3.5 tw-flex-shrink-0"
                 />
                 Back to category search
-              </Link>
+              </ButtonLink>
             </div>
           )}
         </div>
@@ -644,16 +644,17 @@ export default function GlobalRepCategoryDetail({
             />
           </div>
           {showFullPageLink && (
-            <Link
+            <ButtonLink
               href={getRepCategoryPath(category)}
-              className={CATEGORY_ACTION_LINK_CLASSNAME}
+              variant="tertiary"
+              size="sm"
             >
               Open full page
               <ArrowUpRightIcon
                 aria-hidden="true"
                 className="tw-size-3.5 tw-flex-shrink-0"
               />
-            </Link>
+            </ButtonLink>
           )}
         </div>
 

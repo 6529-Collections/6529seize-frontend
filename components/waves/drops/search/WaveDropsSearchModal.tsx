@@ -18,6 +18,7 @@ import { FocusTrap } from "focus-trap-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
+import Button from "@/components/utils/button/Button";
 
 const MIN_QUERY_LENGTH = 2;
 const DIALOG_TITLE_ID = "wave-drops-search-title";
@@ -274,13 +275,13 @@ export default function WaveDropsSearchModal({
                 </div>
 
                 {onSearchAll && (
-                  <button
-                    type="button"
+                  <Button
                     onClick={onSearchAll}
-                    className="tw-flex-shrink-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-medium tw-text-iron-200 tw-transition hover:tw-border-iron-600 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 sm:tw-px-3"
+                    variant="tertiary"
+                    size="xs"
                   >
                     {t(locale, "waves.drops.searchModal.searchAll")}
-                  </button>
+                  </Button>
                 )}
 
                 <button
@@ -368,18 +369,19 @@ export default function WaveDropsSearchModal({
                         "waves.drops.searchModal.error.description"
                       )}
                     />
-                    <button
-                      type="button"
+                    <Button
                       onClick={() => {
                         refetch().catch(() => undefined);
                       }}
-                      disabled={isFetching}
-                      className="tw-text-primary-100 -tw-mt-8 tw-mb-10 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/15 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold hover:tw-bg-primary-500/25 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+                      loading={isFetching}
+                      variant="tertiary"
+                      size="sm"
+                      className="-tw-mt-8 tw-mb-10"
                     >
                       {isFetching
                         ? t(locale, "waves.drops.searchModal.error.retrying")
                         : t(locale, "waves.drops.searchModal.error.retry")}
-                    </button>
+                    </Button>
                   </div>
                 )}
 
@@ -527,18 +529,18 @@ export default function WaveDropsSearchModal({
                       </div>
                       {hasNextPage && (
                         <div className="tw-flex tw-justify-center tw-pt-2">
-                          <button
-                            type="button"
+                          <Button
                             onClick={() => {
                               fetchNextPage().catch(() => undefined);
                             }}
-                            disabled={isFetchingNextPage}
-                            className="tw-inline-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-600 hover:tw-bg-iron-800 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+                            loading={isFetchingNextPage}
+                            variant="tertiary"
+                            size="sm"
                           >
                             {isFetchingNextPage
                               ? t(locale, "waves.drops.searchModal.loadingMore")
                               : t(locale, "waves.drops.searchModal.loadMore")}
-                          </button>
+                          </Button>
                         </div>
                       )}
                     </div>

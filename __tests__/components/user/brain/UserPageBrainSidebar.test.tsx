@@ -36,7 +36,6 @@ jest.mock("@/components/waves/drops/WaveCreatorPreviewModal", () => ({
       />
     ) : null,
 }));
-
 const mockedUseWaves = useWaves as jest.MockedFunction<typeof useWaves>;
 const mockedUseFavouriteWavesOfIdentity =
   useFavouriteWavesOfIdentity as jest.MockedFunction<

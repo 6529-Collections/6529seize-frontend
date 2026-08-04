@@ -19,6 +19,13 @@ on:
           default: production,
           options: [staging, production],
         }
+      artifact_contract_version:
+        {
+          type: choice,
+          required: false,
+          default: legacy-v2,
+          options: [legacy-v2, environment-bound-v3],
+        }
 
 permissions:
   actions: read
@@ -46,6 +53,7 @@ jobs:
     env:
       ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
       ARTIFACT_TRAIN_ID: ${{ inputs.artifact_train_id || inputs.release_train_id }}
+      ARTIFACT_CONTRACT_VERSION: ${{ inputs.artifact_contract_version }}
       ARTIFACT_ENVIRONMENT: ${{ inputs.artifact_environment }}
       EXPECTED_ARTIFACT_DIGEST: ${{ inputs.artifact_digest }}
       EXPECTED_SHA: ${{ inputs.expected_sha }}
@@ -59,6 +67,7 @@ jobs:
         env:
           ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
           ARTIFACT_TRAIN_ID: ${{ inputs.artifact_train_id || inputs.release_train_id }}
+          ARTIFACT_CONTRACT_VERSION: ${{ inputs.artifact_contract_version }}
           ARTIFACT_ENVIRONMENT: ${{ inputs.artifact_environment }}
           EXPECTED_ARTIFACT_DIGEST: ${{ inputs.artifact_digest }}
           EXPECTED_SHA: ${{ inputs.expected_sha }}
@@ -73,9 +82,13 @@ jobs:
           [[ "$ARTIFACT_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
           [[ "$ARTIFACT_TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
           [[ "$EXPECTED_ARTIFACT_DIGEST" =~ ^[a-f0-9]{64}$ ]]
+          [[ "$ARTIFACT_CONTRACT_VERSION" =~ ^(legacy-v2|environment-bound-v3)$ ]]
           test "$ARTIFACT_ENVIRONMENT" = production
+          if [ "$ARTIFACT_CONTRACT_VERSION" = legacy-v2 ]; then
+            test "$ARTIFACT_TRAIN_ID" = "$TRAIN_ID"
+          fi
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
-          [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
+          [[ "$TRAIN_REVISION" =~ ^([1-9][0-9]{0,8}|rollback-[1-9][0-9]{0,8})$ ]]
           [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
           # Semantic GitHub-login validation is centralized in notify-ci-wave.mjs.
           jq -e 'type == "array" and length <= 100 and all(.[]; type == "string" and length >= 1 and length <= 39)' <<< "$RELEASE_CONTRIBUTORS" > /dev/null
@@ -92,20 +105,58 @@ jobs:
             -H 'Content-Type: application/json' \
             --data "$payload" \
             "$RELEASE_BUS_API_URL/deploy/release-bus-v2/authorize"
-      - name: Check out exact merged train SHA
+      - name: Confirm immutable production ref without checkout
         id: source
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-        with:
-          ref: ${{ inputs.expected_sha }}
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Confirm immutable source is current main
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
-          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
-          git fetch --no-tags origin main
-          test "$(git rev-parse origin/main)" = "$EXPECTED_SHA"
+          if ! commit_json="$(gh api "repos/$GITHUB_REPOSITORY/git/commits/$EXPECTED_SHA")"; then
+            echo "failure_kind=api" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          commit_sha="$(jq -r '.sha' <<< "$commit_json")"
+          if [ "$commit_sha" != "$EXPECTED_SHA" ]; then
+            echo "failure_kind=api" >> "$GITHUB_OUTPUT"
+            echo "GitHub did not resolve the authorized production commit exactly." >&2
+            exit 1
+          fi
+          if ! ref_json="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main")"; then
+            echo "failure_kind=api" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          observed_type="$(jq -r '.object.type' <<< "$ref_json")"
+          observed_sha="$(jq -r '.object.sha' <<< "$ref_json")"
+          if [ "$observed_type" != commit ] || ! [[ "$observed_sha" =~ ^[a-f0-9]{40}$ ]]; then
+            echo "failure_kind=api" >> "$GITHUB_OUTPUT"
+            echo "GitHub returned an invalid main ref." >&2
+            exit 1
+          fi
+          if [[ "$TRAIN_REVISION" != rollback-* ]] && [ "$observed_sha" != "$EXPECTED_SHA" ]; then
+            echo "failure_kind=ref-moved" >> "$GITHUB_OUTPUT"
+            echo "observed_sha=$observed_sha" >> "$GITHUB_OUTPUT"
+            echo "main moved from expected $EXPECTED_SHA to $observed_sha." >&2
+            exit 1
+          fi
+          if [[ "$TRAIN_REVISION" == rollback-* ]] && [ "$observed_sha" != "$EXPECTED_SHA" ]; then
+            if ! compare_json="$(gh api "repos/$GITHUB_REPOSITORY/compare/$EXPECTED_SHA...$observed_sha")"; then
+              echo "failure_kind=api" >> "$GITHUB_OUTPUT"
+              exit 1
+            fi
+            compare_status="$(jq -r '.status' <<< "$compare_json")"
+            compare_base_sha="$(jq -r '.base_commit.sha' <<< "$compare_json")"
+            merge_base_sha="$(jq -r '.merge_base_commit.sha' <<< "$compare_json")"
+            if [ "$compare_base_sha" != "$EXPECTED_SHA" ] ||
+              [ "$merge_base_sha" != "$EXPECTED_SHA" ] ||
+              [[ ! "$compare_status" =~ ^(ahead|identical)$ ]]; then
+              echo "failure_kind=rollback-not-reachable" >> "$GITHUB_OUTPUT"
+              echo "observed_sha=$observed_sha" >> "$GITHUB_OUTPUT"
+              echo "Authorized production rollback $EXPECTED_SHA is not reachable from current main $observed_sha." >&2
+              exit 1
+            fi
+          fi
+          echo "failure_kind=" >> "$GITHUB_OUTPUT"
       - name: Download immutable preflight artifact
         id: artifact-download
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
@@ -123,18 +174,51 @@ jobs:
           [[ "$ARTIFACT_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
           [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
-          jq -e \
-            --arg train_id "$ARTIFACT_TRAIN_ID" \
-            --arg source_sha "$EXPECTED_SHA" \
-            '.train_id == $train_id and .source_sha == $source_sha and .environment == "dual" and (.profiles.production.package_sha256 | test("^[a-f0-9]{64}$"))' \
-            manifest.json >/dev/null
           sha256sum -c SHA256SUMS
           artifact_digest="$(sha256sum SHA256SUMS | cut -d' ' -f1)"
           test "$artifact_digest" = "$EXPECTED_ARTIFACT_DIGEST"
-          package_digest="$(sha256sum profiles/production/target/package.zip | cut -d' ' -f1)"
-          test "$package_digest" = "$(jq -r '.profiles.production.package_sha256' manifest.json)"
+          schema_version="$(jq -r '.schema_version' manifest.json)"
+          if [ "$ARTIFACT_CONTRACT_VERSION" = environment-bound-v3 ] && [ "$schema_version" = 3 ]; then
+            jq -e \
+              --arg train_id "$ARTIFACT_TRAIN_ID" \
+              --arg source_sha "$EXPECTED_SHA" '
+                .artifact_contract == "environment-bound-v1" and
+                .artifact_contract_version == "environment-bound-v3" and
+                .repository == "frontend" and
+                .train_id == $train_id and
+                .source_sha == $source_sha and
+                .environment == "production" and
+                .source_evidence_reused == true and
+                .artifact_bytes_reused == false and
+                (.package_sha256 | test("^[a-f0-9]{64}$"))
+              ' manifest.json >/dev/null
+            package_root=target
+            artifact_contract=environment-bound-v1
+            package_digest="$(sha256sum "$package_root/package.zip" | cut -d' ' -f1)"
+            test "$package_digest" = "$(jq -r '.package_sha256' manifest.json)"
+          elif [ "$ARTIFACT_CONTRACT_VERSION" = legacy-v2 ] && [ "$schema_version" = 2 ]; then
+            jq -e \
+              --arg train_id "$ARTIFACT_TRAIN_ID" \
+              --arg source_sha "$EXPECTED_SHA" '
+                .repository == "frontend" and
+                .train_id == $train_id and
+                .source_sha == $source_sha and
+                .environment == "dual" and
+                (.profiles.production.package_sha256 | test("^[a-f0-9]{64}$"))
+              ' manifest.json >/dev/null
+            package_root=profiles/production/target
+            artifact_contract=legacy-v2
+            package_digest="$(sha256sum "$package_root/package.zip" | cut -d' ' -f1)"
+            test "$package_digest" = "$(jq -r '.profiles.production.package_sha256' manifest.json)"
+          else
+            echo "Artifact schema is incompatible with $ARTIFACT_CONTRACT_VERSION." >&2
+            exit 1
+          fi
           echo "artifact_digest=$artifact_digest" >> "$GITHUB_OUTPUT"
+          echo "artifact_contract=$artifact_contract" >> "$GITHUB_OUTPUT"
           echo "package_digest=$package_digest" >> "$GITHUB_OUTPUT"
+          echo "package_root=$package_root" >> "$GITHUB_OUTPUT"
+          echo "schema_version=$schema_version" >> "$GITHUB_OUTPUT"
       - name: Configure AWS credentials
         id: aws-credentials
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
@@ -143,13 +227,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
       - name: Upload immutable application assets
-        run: aws s3 sync release-bus-artifact/profiles/production/target "s3://${AWS_BUCKET}/web_build/${EXPECTED_SHA}/"
+        env:
+          PACKAGE_ROOT: ${{ steps.artifact.outputs.package_root }}
+        run: aws s3 sync "release-bus-artifact/${PACKAGE_ROOT}" "s3://${AWS_BUCKET}/web_build/${EXPECTED_SHA}/"
       - name: Ensure Elastic Beanstalk application version
         run: |
           set -euo pipefail
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
-          [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
+          [[ "$TRAIN_REVISION" =~ ^([1-9][0-9]{0,8}|rollback-[1-9][0-9]{0,8})$ ]]
           source_key="web_build/${EXPECTED_SHA}/package.zip"
           version_json="$(aws elasticbeanstalk describe-application-versions \
             --application-name "$BEANSTALK_APP_NAME" \
@@ -175,18 +261,40 @@ jobs:
           SSR_CLIENT_SECRET: ${{ secrets.SSR_CLIENT_SECRET }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           GITHUB_LINK_STATUS_PREVIEW_TOKEN: ${{ secrets.LINK_STATUS_PREVIEW_GITHUB_TOKEN }}
+          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_PRODUCTION_DISCUSSION_DESTINATIONS }}
         run: |
+          set -euo pipefail
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+
+          jq -e '
+            type == "object" and
+            keys == ["production"] and
+            (.production | type == "object") and
+            (.production["stream-review"] | type == "string" and test("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"))
+          ' <<<"$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" >/dev/null
+
+          option_settings="$(
+            jq -cn \
+              --arg ssr_client_id "$SSR_CLIENT_ID" \
+              --arg ssr_client_secret "$SSR_CLIENT_SECRET" \
+              --arg alchemy_api_key "$ALCHEMY_API_KEY" \
+              --arg github_link_status_preview_token "$GITHUB_LINK_STATUS_PREVIEW_TOKEN" \
+              --arg public_review_discussion_destinations "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" \
+              '[
+                {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"SSR_CLIENT_ID",Value:$ssr_client_id},
+                {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"SSR_CLIENT_SECRET",Value:$ssr_client_secret},
+                {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"ALCHEMY_API_KEY",Value:$alchemy_api_key},
+                {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"GITHUB_LINK_STATUS_PREVIEW_TOKEN",Value:$github_link_status_preview_token},
+                {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"PUBLIC_REVIEW_DISCUSSION_DESTINATIONS",Value:$public_review_discussion_destinations},
+                {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"SENTRY_SERVER_INSTRUMENTATION",Value:"false"}
+              ]'
+          )"
+
           aws elasticbeanstalk update-environment \
             --application-name "$BEANSTALK_APP_NAME" \
             --environment-name "$BEANSTALK_ENV_NAME" \
             --version-label "$EXPECTED_SHA" \
-            --option-settings \
-              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=SSR_CLIENT_ID,Value=${SSR_CLIENT_ID}" \
-              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=SSR_CLIENT_SECRET,Value=${SSR_CLIENT_SECRET}" \
-              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=ALCHEMY_API_KEY,Value=${ALCHEMY_API_KEY}" \
-              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=GITHUB_LINK_STATUS_PREVIEW_TOKEN,Value=${GITHUB_LINK_STATUS_PREVIEW_TOKEN}" \
-              'Namespace=aws:elasticbeanstalk:application:environment,OptionName=SENTRY_SERVER_INSTRUMENTATION,Value=false'
+            --option-settings "$option_settings"
       - name: Wait for healthy exact version
         run: |
           set -euo pipefail
@@ -204,11 +312,21 @@ jobs:
           done
           echo 'Elastic Beanstalk did not reach the expected healthy version.' >&2
           exit 1
+      - name: Check out deployment verifier
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          path: .release-bus-verifier
+          sparse-checkout: |
+            ops/scripts/verify-deployment-version.cjs
+            ops/scripts/cli-args.cjs
+          sparse-checkout-cone-mode: false
       - name: Verify exact production version
         id: version
         run: |
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
-          node ops/scripts/verify-deployment-version.cjs \
+          node .release-bus-verifier/ops/scripts/verify-deployment-version.cjs \
             --base-url https://6529.io \
             --expected-version "$EXPECTED_SHA" \
             --attempts 12 \
@@ -253,10 +371,20 @@ jobs:
       - name: Report structured Release Bus deployment result
         if: always()
         env:
+          ARTIFACT_CONTRACT: ${{ steps.artifact.outputs.artifact_contract }}
+          ARTIFACT_CONTRACT_VERSION: ${{ inputs.artifact_contract_version }}
+          ARTIFACT_DIGEST: ${{ steps.artifact.outputs.artifact_digest }}
+          ARTIFACT_ENVIRONMENT: ${{ inputs.artifact_environment }}
+          ARTIFACT_RUN_ID: ${{ inputs.artifact_run_id }}
+          ARTIFACT_TRAIN_ID: ${{ inputs.artifact_train_id || inputs.release_train_id }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          PACKAGE_DIGEST: ${{ steps.artifact.outputs.package_digest }}
+          SCHEMA_VERSION: ${{ steps.artifact.outputs.schema_version }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
           JOB_STATUS: ${{ job.status }}
           SOURCE_OUTCOME: ${{ steps.source.outcome }}
+          SOURCE_FAILURE_KIND: ${{ steps.source.outputs.failure_kind }}
           DOWNLOAD_OUTCOME: ${{ steps.artifact-download.outcome }}
           ARTIFACT_OUTCOME: ${{ steps.artifact.outcome }}
           AWS_OUTCOME: ${{ steps.aws-credentials.outcome }}
@@ -281,7 +409,47 @@ jobs:
               failure_phase=deployment_identity_or_credentials
             fi
           fi
-          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg status "$status" --arg failure_class "$failure_class" --arg failure_phase "$failure_phase" --argjson retryable "$retryable" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"complete",status:$status,failure_class:(if $failure_class == "null" then null else $failure_class end),failure_phase:(if $failure_phase == "null" then null else $failure_phase end),retryable:$retryable,summary:null,stages:[],jest:null,backend_evidence:null}')"
+          if [ "$SOURCE_OUTCOME" = failure ] && [ "$SOURCE_FAILURE_KIND" = ref-moved ]; then
+            failure_class=INTERACTION
+            failure_phase=source_ref_moved
+            retryable=false
+          elif [ "$SOURCE_OUTCOME" = failure ] && [ "$SOURCE_FAILURE_KIND" = rollback-not-reachable ]; then
+            failure_class=INTERACTION
+            failure_phase=rollback_source_not_reachable
+            retryable=false
+          fi
+          consumed_preflight_artifact=false
+          if [ "$ARTIFACT_OUTCOME" = success ]; then
+            consumed_preflight_artifact=true
+          fi
+          deployment_environment="$ARTIFACT_ENVIRONMENT"
+          summary_environment="$ARTIFACT_ENVIRONMENT"
+          if [ "$ARTIFACT_CONTRACT_VERSION" = legacy-v2 ]; then
+            summary_environment=portable
+          fi
+          payload="$(jq -n \
+            --arg train_id "$TRAIN_ID" \
+            --arg operation_key "$OPERATION_KEY" \
+            --arg workflow_run_id "$GITHUB_RUN_ID" \
+            --arg status "$status" \
+            --arg failure_class "$failure_class" \
+            --arg failure_phase "$failure_phase" \
+            --argjson retryable "$retryable" \
+            --argjson consumed_preflight_artifact "$consumed_preflight_artifact" \
+            --arg schema_version "$SCHEMA_VERSION" \
+            --arg artifact_contract "$ARTIFACT_CONTRACT" \
+            --arg artifact_contract_version "$ARTIFACT_CONTRACT_VERSION" \
+            --arg repository frontend \
+            --arg source_sha "$EXPECTED_SHA" \
+            --arg environment "$summary_environment" \
+            --arg deployment_environment "$deployment_environment" \
+            --arg artifact_run_id "$ARTIFACT_RUN_ID" \
+            --arg artifact_train_id "$ARTIFACT_TRAIN_ID" \
+            --arg artifact_digest "$ARTIFACT_DIGEST" \
+            --arg package_digest "$PACKAGE_DIGEST" \
+            --argjson source_evidence_reused "$([ "$ARTIFACT_CONTRACT" = environment-bound-v1 ] && printf true || printf false)" \
+            --argjson artifact_bytes_reused false \
+            '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"complete",status:$status,failure_class:(if $failure_class == "null" then null else $failure_class end),failure_phase:(if $failure_phase == "null" then null else $failure_phase end),retryable:$retryable,summary:{schema_version:(if $schema_version == "" then null else ($schema_version | tonumber) end),artifact_contract:(if $artifact_contract == "" then null else $artifact_contract end),artifact_contract_version:$artifact_contract_version,repository:$repository,source_sha:$source_sha,environment:$environment,deployment_environment:$deployment_environment,service:null,artifact_run_id:$artifact_run_id,artifact_train_id:$artifact_train_id,artifact_digest:(if $artifact_digest == "" then null else $artifact_digest end),package_digest:(if $package_digest == "" then null else $package_digest end),consumed_preflight_artifact:$consumed_preflight_artifact,rebuilt:false,source_evidence_reused:$source_evidence_reused,artifact_bytes_reused:$artifact_bytes_reused},stages:[],jest:null,backend_evidence:null}')"
           curl --fail-with-body --silent --show-error \
             -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
             -H 'Content-Type: application/json' \

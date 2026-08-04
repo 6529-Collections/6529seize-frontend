@@ -145,6 +145,19 @@ describe("Solidity reference source-index validation", () => {
     );
   });
 
+  it("rejects a retained draft whose trusted source identity is missing", () => {
+    const sourceCommits = { ...IDENTITY.sourceCommits };
+    delete sourceCommits[DRAFT_VERSION];
+    const identity = {
+      ...IDENTITY,
+      sourceCommits,
+    };
+
+    expect(() => assertSolidityReferenceIndex(sourceIndex(), identity)).toThrow(
+      "Invalid Solidity reference version entry"
+    );
+  });
+
   it("rejects commit drift in the published projection", () => {
     const index = publishedIndex();
     index.versions[1]!.commit = "e".repeat(40);

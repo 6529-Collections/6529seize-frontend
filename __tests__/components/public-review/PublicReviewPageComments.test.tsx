@@ -77,7 +77,13 @@ describe("PublicReviewPageComments", () => {
           {
             destination,
             records: [record],
-            warnings: [],
+            warnings: [
+              {
+                code: "INVALID_REVIEW_METADATA",
+                dropId: "drop-from-another-page",
+                reason: "Feedback metadata is not canonical.",
+              },
+            ],
             nextCursor: null,
             rawDropCount: 1,
           },
@@ -113,5 +119,111 @@ describe("PublicReviewPageComments", () => {
     expect(
       screen.getByText("How does the permanent Core constrain successors?")
     ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/Wave messages could not be included/)
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows only feedback matching the exact technical page reference", () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+    });
+    const sourceSha256 = `sha256:${"a".repeat(64)}`;
+    const makeTechnicalRecord = (
+      dropId: string,
+      declaration: string,
+      referenceOverrides: Partial<
+        Extract<
+          PublicReviewFeedbackRecord["reference"],
+          { readonly kind: "code" }
+        >
+      > = {}
+    ): PublicReviewFeedbackRecord => ({
+      ...record,
+      feedbackId: `feedback-${dropId}`,
+      dropId,
+      body: `Comment for ${declaration}`,
+      pageId: "reference-function",
+      sectionId: undefined,
+      reference: {
+        kind: "code",
+        repository: "6529-Collections/6529Stream",
+        commit: "b".repeat(40),
+        path: "src/Stream.sol",
+        sourceSha256,
+        lineStart: 10,
+        lineEnd: 12,
+        contract: "Stream",
+        declaration,
+        ...referenceOverrides,
+      },
+    });
+    const recordWithoutReference: PublicReviewFeedbackRecord = {
+      ...record,
+      feedbackId: "feedback-drop-no-reference",
+      dropId: "drop-no-reference",
+      body: "Comment without a code reference",
+      pageId: "reference-function",
+      sectionId: undefined,
+    };
+    queryClient.setQueryData(
+      getPublicReviewLedgerQueryKey({ config, destination, pageSize: 50 }),
+      {
+        pages: [
+          {
+            destination,
+            records: [
+              makeTechnicalRecord("drop-a", "mint()"),
+              makeTechnicalRecord("drop-b", "withdraw()"),
+              makeTechnicalRecord("drop-c", "mint()", {
+                sourceSha256: `sha256:${"b".repeat(64)}`,
+              }),
+              makeTechnicalRecord("drop-d", "mint()", {
+                contract: "OtherContract",
+              }),
+              recordWithoutReference,
+            ],
+            warnings: [],
+            nextCursor: null,
+            rawDropCount: 2,
+          },
+        ],
+        pageParams: [null],
+      }
+    );
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <PublicReviewPageComments
+          config={config}
+          destination={destination}
+          locale="en-US"
+          page={{
+            pageId: "reference-function",
+            pageTitle: "mint()",
+            canonicalPath: "/reviews/6529-stream/reference/functions/mint",
+          }}
+          referenceSelection={{
+            kind: "code",
+            path: "src/Stream.sol",
+            sourceSha256,
+            lineStart: 10,
+            lineEnd: 12,
+            contract: "Stream",
+            declaration: "mint()",
+          }}
+          sections={[]}
+        />
+      </QueryClientProvider>
+    );
+
+    expect(screen.getByText("Comment for mint()")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Comment for withdraw()")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Comment without a code reference")
+    ).not.toBeInTheDocument();
+    expect(screen.getAllByText("Comment for mint()")).toHaveLength(1);
   });
 });

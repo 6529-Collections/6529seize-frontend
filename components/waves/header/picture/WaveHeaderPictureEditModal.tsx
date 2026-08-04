@@ -13,6 +13,7 @@ import { convertWaveToUpdateWave } from "@/helpers/waves/waves.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { multiPartUpload } from "../../create-wave/services/multiPartUpload";
 import CreateWaveImageInput from "../../create-wave/overview/CreateWaveImageInput";
+import Button from "@/components/utils/button/Button";
 
 export default function WaveHeaderPictureEditModal({
   wave,
@@ -137,21 +138,22 @@ export default function WaveHeaderPictureEditModal({
               />
 
               <div className="tw-flex tw-justify-end tw-gap-x-3">
-                <button
-                  type="button"
+                <Button
                   onClick={onClose}
-                  className="tw-inline-flex tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition tw-duration-200 tw-ease-out hover:tw-bg-iron-800 sm:tw-w-auto"
+                  variant="secondary"
+                  size="lg"
+                  fullWidth
+                  className="sm:tw-w-auto"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   disabled={isDisabled}
                   type="submit"
-                  className={`tw-relative tw-flex tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-transition tw-duration-300 tw-ease-out sm:tw-w-auto ${
-                    isDisabled
-                      ? "tw-cursor-not-allowed tw-border-iron-800 tw-bg-iron-800 tw-text-iron-500"
-                      : "tw-cursor-pointer tw-border-primary-500 tw-bg-primary-500 tw-text-white hover:tw-border-primary-600 hover:tw-bg-primary-600"
-                  }`}
+                  variant="action"
+                  size="lg"
+                  fullWidth
+                  className="tw-relative sm:tw-w-auto"
                 >
                   <div style={{ visibility: mutating ? "hidden" : "visible" }}>
                     Save
@@ -179,7 +181,7 @@ export default function WaveHeaderPictureEditModal({
                       </svg>
                     </>
                   )}
-                </button>
+                </Button>
               </div>
             </form>
           </div>

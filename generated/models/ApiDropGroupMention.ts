@@ -14,5 +14,8 @@
 import { HttpFile } from '../http/http';
 
 export enum ApiDropGroupMention {
-    All = 'ALL'
+    All = 'ALL',
+    Contributors = 'CONTRIBUTORS',
+    Admins = 'ADMINS',
+    Devs6529 = 'DEVS_6529'
 }

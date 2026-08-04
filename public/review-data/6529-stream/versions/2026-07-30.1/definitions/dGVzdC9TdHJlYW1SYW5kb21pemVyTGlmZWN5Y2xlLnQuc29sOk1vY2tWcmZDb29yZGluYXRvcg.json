@@ -1,0 +1,365 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:MockVrfCoordinator#function:0x55c7bfb1",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:MockVrfCoordinator",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "contract NextGenRandomizerVRF",
+              "name": "randomizer",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256[]",
+              "name": "words",
+              "type": "uint256[]"
+            }
+          ],
+          "name": "fulfill",
+          "outputs": [],
+          "selector": "0x55c7bfb1",
+          "signature": "fulfill(address,uint256,uint256[])",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:MockVrfCoordinator#function:0x6a84a985",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:MockVrfCoordinator",
+          "inherited": false,
+          "inputs": [],
+          "name": "nextRequestId",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x6a84a985",
+          "signature": "nextRequestId()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:MockVrfCoordinator#function:0x5d3b1d30",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:MockVrfCoordinator",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            },
+            {
+              "index": 3,
+              "internalType": "uint32",
+              "name": "",
+              "type": "uint32"
+            },
+            {
+              "index": 4,
+              "internalType": "uint32",
+              "name": "",
+              "type": "uint32"
+            }
+          ],
+          "name": "requestRandomWords",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x5d3b1d30",
+          "signature": "requestRandomWords(bytes32,uint64,uint16,uint32,uint32)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "nextRequestId()",
+          "displaySignature": "nextRequestId()",
+          "functionKind": "getter",
+          "id": "test/StreamRandomizerLifecycle.t.sol:MockVrfCoordinator#function:0x6a84a985",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOk1vY2tWcmZDb29yZGluYXRvciNmdW5jdGlvbjoweDZhODRhOTg1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "nextRequestId",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 32,
+            "byteStart": 41887,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerLifecycle.t.sol#L973",
+            "lineEnd": 973,
+            "lineStart": 973,
+            "snippetSha256": "sha256:c7015688cea9d50a6e063a7567b715d0c68802cb091f77014a5213efc709c785",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0x6a84a985",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "requestRandomWords(bytes32,uint64,uint16,uint32,uint32)",
+          "displaySignature": "requestRandomWords(bytes32,uint64,uint16,uint32,uint32)",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:MockVrfCoordinator#function:0x5d3b1d30",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "name": "",
+              "type": "uint16"
+            },
+            {
+              "index": 3,
+              "name": "",
+              "type": "uint32"
+            },
+            {
+              "index": 4,
+              "name": "",
+              "type": "uint32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOk1vY2tWcmZDb29yZGluYXRvciNmdW5jdGlvbjoweDVkM2IxZDMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestRandomWords",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 193,
+            "byteStart": 41926,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerLifecycle.t.sol#L975-L981",
+            "lineEnd": 981,
+            "lineStart": 975,
+            "snippetSha256": "sha256:6ce909b32968c31bddbbc978b71e5f2b4fc195af0f4372fd7c160500e198f26c",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0x5d3b1d30",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "fulfill(address,uint256,uint256[])",
+          "displaySignature": "fulfill(NextGenRandomizerVRF,uint256,uint256[])",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:MockVrfCoordinator#function:0x55c7bfb1",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "randomizer",
+              "type": "NextGenRandomizerVRF"
+            },
+            {
+              "index": 1,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "words",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOk1vY2tWcmZDb29yZGluYXRvciNmdW5jdGlvbjoweDU1YzdiZmIx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "fulfill",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 181,
+            "byteStart": 42125,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerLifecycle.t.sol#L983-L987",
+            "lineEnd": 987,
+            "lineStart": 983,
+            "snippetSha256": "sha256:1d6fe3746cac47b651b9827e31a4813141df8de3f86852d2b70f4ac6c02f8bc8",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0x55c7bfb1",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamRandomizerLifecycle.t.sol:MockVrfCoordinator#function:0x6a84a985",
+          "immutable": false,
+          "name": "nextRequestId",
+          "natspec": "",
+          "range": {
+            "byteLength": 32,
+            "byteStart": 41887,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerLifecycle.t.sol#L973",
+            "lineEnd": 973,
+            "lineStart": 973,
+            "snippetSha256": "sha256:c7015688cea9d50a6e063a7567b715d0c68802cb091f77014a5213efc709c785",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0x6a84a985",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 41918,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerLifecycle.t.sol#L973",
+            "lineEnd": 973,
+            "lineStart": 973,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "valueSource": "1",
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamRandomizerLifecycle.t.sol:MockVrfCoordinator",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOk1vY2tWcmZDb29yZGluYXRvcg",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamRandomizerLifecycle.t.sol:MockVrfCoordinator"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "MockVrfCoordinator",
+    "natspec": "",
+    "range": {
+      "byteLength": 455,
+      "byteStart": 41853,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerLifecycle.t.sol#L972-L988",
+      "lineEnd": 988,
+      "lineStart": 972,
+      "snippetSha256": "sha256:765349f49dd4eaa08de2bb831ef8acb6ec55e8d5de4230ded294eeaec506c6c6",
+      "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamRandomizerLifecycle.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-30.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:MockVrfCoordinator",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:MockVrfCoordinator#function:0x55c7bfb1",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:MockVrfCoordinator",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:MockVrfCoordinator#function:0x5d3b1d30",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:MockVrfCoordinator",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:MockVrfCoordinator#function:0x6a84a985",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:MockVrfCoordinator",
+      "severity": "advisory"
+    }
+  ]
+}

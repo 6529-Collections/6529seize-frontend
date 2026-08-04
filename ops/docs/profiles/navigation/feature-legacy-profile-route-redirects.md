@@ -3,7 +3,7 @@
 ## Overview
 
 Old profile-tab URLs still resolve so existing links keep working.
-Each supported legacy alias redirects to profile root: `/{user}`.
+Supported legacy aliases redirect to profile root.
 
 ## Location in the Site
 

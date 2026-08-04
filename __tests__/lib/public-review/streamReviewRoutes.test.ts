@@ -57,13 +57,13 @@ describe("6529 Stream public review routes", () => {
     ).toBeUndefined();
   });
 
-  it("returns no route model or source identifiers in production", () => {
+  it("resolves the production route without exposing source or discussion identifiers", () => {
     const model = resolveStreamReviewRoute({
       baseEndpoint: "https://6529.io",
       params: ACTIVE_REVIEW,
     });
 
-    expect(model).toBeUndefined();
+    expect(model?.canonicalPath).toBe("/reviews/6529-stream");
     const serialized = JSON.stringify(model) ?? "";
     expect(serialized).not.toContain(STREAM_REVIEW_SOURCE_COMMIT);
     expect(serialized).not.toMatch(/wave|subwave|discussion/i);
