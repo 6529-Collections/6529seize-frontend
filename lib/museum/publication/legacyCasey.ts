@@ -1,4 +1,9 @@
 import { assertApprovedArtBlocksUrl } from "./security";
+import {
+  assembleInstitutionalPractice,
+  INSTITUTIONAL_PRACTICE_REQUIRED_PATHS,
+  institutionalPracticeDocuments,
+} from "./institutionalPractice";
 import { parseHeading } from "./legacyCaseyMarkdown";
 import { PROJECT_PUBLIC_DOCUMENTS } from "./legacyCaseyProjectDocuments";
 import {
@@ -195,6 +200,7 @@ export const LEGACY_CASEY_REQUIRED_PATHS = [
   CASEY_GIFT_AUTHORIZATION_PATH,
   ...CASEY_PUBLIC_DOCUMENTS.map((document) => document.path),
   ...PROJECT_PUBLIC_DOCUMENTS.map((document) => document.path),
+  ...INSTITUTIONAL_PRACTICE_REQUIRED_PATHS,
 ] as const;
 
 type JsonRecord = Record<string, unknown>;
@@ -704,6 +710,13 @@ function assembleLegacyCaseyPublication(
     context.documents,
     projectByArtwork
   );
+  const institutionalPractice = assembleInstitutionalPractice(
+    context.documents
+  );
+  const allPublicDocuments = [
+    ...publicDocuments,
+    ...institutionalPracticeDocuments(institutionalPractice),
+  ];
   const visualObjects = visualObjectsById(context.documents);
 
   const artworks = drafts.map((draft): MuseumAccessionedArtwork => {
@@ -761,7 +774,8 @@ function assembleLegacyCaseyPublication(
     projects,
     gifts: [gift],
     artworks,
-    documents: publicDocuments,
+    documents: allPublicDocuments,
+    institutionalPractice,
   };
 }
 

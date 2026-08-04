@@ -65,9 +65,15 @@ const RELATED_SOURCE_LABEL_KEYS = {
   giftNarrative: "museum.network.openMuseum.strip.relatedLabels.giftNarrative",
   keysAndGates: "museum.network.openMuseum.strip.relatedLabels.keysAndGates",
   machineRecord: "museum.network.openMuseum.strip.relatedLabels.machineRecord",
+  institutionalStudy:
+    "museum.network.openMuseum.strip.relatedLabels.institutionalStudy",
   onchainTransition:
     "museum.network.openMuseum.strip.relatedLabels.onchainTransition",
+  primarySourceRegister:
+    "museum.network.openMuseum.strip.relatedLabels.primarySourceRegister",
   programRecord: "museum.network.openMuseum.strip.relatedLabels.programRecord",
+  scholarshipStandard:
+    "museum.network.openMuseum.strip.relatedLabels.scholarshipStandard",
   selectedWorks: "museum.network.openMuseum.strip.relatedLabels.selectedWorks",
   supportingRecord:
     "museum.network.openMuseum.strip.relatedLabels.supportingRecord",

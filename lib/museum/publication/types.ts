@@ -68,7 +68,10 @@ export type MuseumPublicDocumentKind =
   | "object_entry"
   | "gift_narrative"
   | "project_essay"
-  | "source_chronology_matrix";
+  | "source_chronology_matrix"
+  | "institutional_practice_study"
+  | "institution_profile"
+  | "institutional_practice_source_register";
 
 export interface MuseumPublicDocument {
   readonly id: string;
@@ -81,6 +84,36 @@ export interface MuseumPublicDocument {
   readonly projectIds: readonly string[];
   readonly giftIds: readonly string[];
   readonly artworkIds: readonly string[];
+}
+
+export type MuseumInstitutionProfileSlug =
+  | "met"
+  | "getty"
+  | "moma"
+  | "whitney"
+  | "tate"
+  | "centre-pompidou"
+  | "sfmoma"
+  | "guggenheim"
+  | "zkm"
+  | "ars-electronica"
+  | "rhizome-new-museum"
+  | "serpentine-arts-technologies"
+  | "v-and-a"
+  | "lacma";
+
+export interface MuseumInstitutionProfile {
+  readonly id: `institutional-practice:${MuseumInstitutionProfileSlug}`;
+  readonly slug: MuseumInstitutionProfileSlug;
+  readonly document: MuseumPublicDocument;
+}
+
+export interface MuseumInstitutionalPractice {
+  readonly id: "institutional-practice:a-field-of-practice";
+  readonly slug: "a-field-of-practice";
+  readonly introduction: MuseumPublicDocument;
+  readonly profiles: readonly MuseumInstitutionProfile[];
+  readonly sourceRegister: MuseumPublicDocument;
 }
 
 export interface MuseumArtist {
@@ -156,6 +189,7 @@ export interface MuseumPublication {
   readonly gifts: readonly MuseumGift[];
   readonly artworks: readonly MuseumArtwork[];
   readonly documents: readonly MuseumPublicDocument[];
+  readonly institutionalPractice: MuseumInstitutionalPractice;
 }
 
 export interface MuseumSourceDocument {

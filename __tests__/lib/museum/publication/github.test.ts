@@ -1,5 +1,6 @@
 import {
   GitHubMuseumPublicationSource,
+  LEGACY_CASEY_REQUIRED_PATHS,
   legacyCaseyPublicationAssembler,
 } from "@/lib/museum/publication";
 import { createCaseyFixture, EXACT_COMMIT, withObjectState } from "./fixture";
@@ -90,6 +91,53 @@ describe("GitHub Museum publication source", () => {
       publication: null,
       errorCode: "publication_document_hash_mismatch",
     });
+  });
+
+  it("rejects an excessive aggregate required-document size before fetching documents", async () => {
+    const fixture = createCaseyFixture({
+      manifestSizeOverrides: Object.fromEntries(
+        LEGACY_CASEY_REQUIRED_PATHS.map((path) => [path, 400_000])
+      ),
+    });
+
+    await expect(sourceFor(fixture).load()).resolves.toMatchObject({
+      status: "unavailable",
+      publication: null,
+      errorCode: "publication_required_documents_too_large",
+    });
+    expect(fixture.calls).toHaveLength(2);
+  });
+
+  it("fetches governed documents with bounded concurrency", async () => {
+    const fixture = createCaseyFixture();
+    let activeDocumentRequests = 0;
+    let maximumDocumentRequests = 0;
+    const boundedFetch: typeof fetch = async (input, init) => {
+      const url = typeof input === "string" ? input : input.toString();
+      const isDocument =
+        !url.startsWith("https://api.github.com/") &&
+        !url.endsWith("/release-artifacts/latest/record-manifest.json");
+      if (!isDocument) {
+        return fixture.fetch(input, init);
+      }
+      activeDocumentRequests += 1;
+      maximumDocumentRequests = Math.max(
+        maximumDocumentRequests,
+        activeDocumentRequests
+      );
+      await new Promise((resolve) => setTimeout(resolve, 2));
+      try {
+        return await fixture.fetch(input, init);
+      } finally {
+        activeDocumentRequests -= 1;
+      }
+    };
+
+    await expect(
+      sourceFor(fixture, boundedFetch).load()
+    ).resolves.toMatchObject({ status: "current" });
+    expect(maximumDocumentRequests).toBeGreaterThan(1);
+    expect(maximumDocumentRequests).toBeLessThanOrEqual(8);
   });
 
   it("rejects a response whose declared content length exceeds the boundary", async () => {

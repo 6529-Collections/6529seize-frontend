@@ -28,7 +28,31 @@ describe("legacy Casey publication projection", () => {
       }),
     ]);
     expect(publication.projects).toHaveLength(5);
-    expect(publication.documents).toHaveLength(26);
+    expect(publication.documents).toHaveLength(42);
+    expect(publication.institutionalPractice).toEqual(
+      expect.objectContaining({
+        id: "institutional-practice:a-field-of-practice",
+        slug: "a-field-of-practice",
+        introduction: expect.objectContaining({
+          title: "A field of practice",
+        }),
+        profiles: expect.arrayContaining([
+          expect.objectContaining({
+            slug: "centre-pompidou",
+            document: expect.objectContaining({ title: "Centre Pompidou" }),
+          }),
+          expect.objectContaining({
+            slug: "serpentine-arts-technologies",
+            document: expect.objectContaining({
+              title: "Serpentine Arts Technologies",
+            }),
+          }),
+        ]),
+        sourceRegister: expect.objectContaining({
+          title: "Source register: A field of practice",
+        }),
+      })
+    );
     expect(
       publication.documents
         .filter(({ kind }) =>
