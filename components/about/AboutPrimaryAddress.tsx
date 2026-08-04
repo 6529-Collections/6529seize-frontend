@@ -4,11 +4,13 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "./AboutLayout";
 import PrimaryAddressRecords from "./AboutPrimaryAddressTable";
 import {
   fetchPrimaryAddressData,
   PRIMARY_ADDRESS_QUERY_KEY,
+  sortPrimaryAddressData,
   type PrimaryAddressData,
 } from "./aboutPrimaryAddress.helpers";
 
@@ -30,6 +32,10 @@ export default function AboutPrimaryAddress() {
     queryKey: PRIMARY_ADDRESS_QUERY_KEY,
     queryFn: fetchPrimaryAddressData,
   });
+  const sortedPrimaryAddressData = useMemo(
+    () => sortPrimaryAddressData(primaryAddressData, locale),
+    [locale, primaryAddressData]
+  );
 
   return (
     <article
@@ -38,7 +44,7 @@ export default function AboutPrimaryAddress() {
       <PrimaryAddressHeader locale={locale} />
       <PrimaryAddressOverview locale={locale} />
       <PrimaryAddressRecords
-        data={primaryAddressData}
+        data={sortedPrimaryAddressData}
         error={error}
         isLoading={isLoading}
         locale={locale}

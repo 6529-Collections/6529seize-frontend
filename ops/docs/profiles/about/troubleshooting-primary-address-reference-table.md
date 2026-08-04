@@ -59,7 +59,7 @@ unexpected row links.
 
 - There is no in-page retry button.
 - There are no in-page filters or search controls.
-- Malformed CSV fields can render blank cells instead of validation errors.
+- CSV header rows, incomplete rows, and repeated profile IDs are ignored.
 
 ## Related Pages
 

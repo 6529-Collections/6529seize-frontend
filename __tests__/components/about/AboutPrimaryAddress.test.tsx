@@ -127,7 +127,7 @@ describe("AboutPrimaryAddress", () => {
     await screen.findByRole("link", { name: "alpha" });
     expect(
       screen.getByRole("region", {
-        name: /the following table shows the profiles/i,
+        name: "Primary address records",
       })
     ).toHaveAttribute("tabindex", "0");
     expect(screen.queryByRole("searchbox")).toBeNull();
@@ -142,6 +142,48 @@ describe("AboutPrimaryAddress", () => {
     expect(screen.getAllByRole("row")).toHaveLength(2);
   });
 
+  it("preserves lexical ordering for handles that start with numbers", async () => {
+    mockFetchWithCsv(
+      [
+        "3,4lteredBeast,0x4,0xchanged4",
+        "2,2601,0x2,0xchanged2",
+        "1,100series,0x1,0xchanged1",
+      ].join("\n")
+    );
+    renderWithQueryClient();
+
+    await screen.findByRole("link", { name: "100series" });
+    const rows = screen.getAllByRole("row");
+    expect(rows[1]).toHaveTextContent("100series");
+    expect(rows[2]).toHaveTextContent("2601");
+    expect(rows[3]).toHaveTextContent("4lteredBeast");
+  });
+
+  it("ignores header, incomplete, and duplicate profile records", async () => {
+    mockFetchWithCsv(
+      [
+        "profile_id,handle,current_primary,new_primary",
+        ",missing-id,0xcurrent,0xchanged",
+        "1,valid,0xcurrent,0xchanged",
+        "1,duplicate,0xduplicate,0xduplicate-changed",
+        "2,second,0xsecond,0xsecond-changed",
+        "3,missing-new,0xcurrent,",
+      ].join("\n")
+    );
+    renderWithQueryClient();
+
+    await screen.findByRole("link", { name: "valid" });
+    expect(screen.getAllByRole("row")).toHaveLength(3);
+    expect(screen.getByRole("link", { name: "second" })).toHaveAttribute(
+      "href",
+      "/0xsecond"
+    );
+    expect(screen.queryByRole("link", { name: "handle" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "duplicate" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "missing-id" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "missing-new" })).toBeNull();
+  });
+
   it("keeps the table structure when the data set is empty", async () => {
     mockFetchWithCsv("");
     renderWithQueryClient();
@@ -151,6 +193,9 @@ describe("AboutPrimaryAddress", () => {
     });
     expect(table).toBeInTheDocument();
     expect(screen.getAllByRole("row")).toHaveLength(1);
+    expect(
+      screen.getByRole("region", { name: "Primary address records" })
+    ).not.toHaveAttribute("tabindex");
   });
 
   it("keeps the existing error copy when loading fails", async () => {
