@@ -3,6 +3,18 @@ import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { ApiSubscriptionCoverageStatus } from "@/generated/models/ApiSubscriptionCoverageStatus";
 import type { INotificationSubscriptionCoverage } from "@/types/feed.types";
 import { render, screen } from "@testing-library/react";
+import type { ComponentProps } from "react";
+
+type MockNextLinkProps = ComponentProps<"a"> & {
+  readonly prefetch?: boolean | undefined;
+};
+
+jest.mock("next/link", () => ({
+  __esModule: true,
+  default: ({ prefetch, ...props }: MockNextLinkProps) => (
+    <a data-prefetch={String(prefetch)} {...props} />
+  ),
+}));
 
 describe("NotificationSubscriptionCoverage", () => {
   it("renders the risk, runway, authoritative deadline, and exact minimum top up", () => {
@@ -48,5 +60,8 @@ describe("NotificationSubscriptionCoverage", () => {
       "href",
       "/sesamenoodles/subscriptions#profile-subscriptions-top-up"
     );
+    expect(
+      screen.getByRole("link", { name: "Top up 0.01587 ETH" })
+    ).toHaveAttribute("data-prefetch", "false");
   });
 });

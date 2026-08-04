@@ -55,6 +55,9 @@
         "museum",
         "network museum",
         "museum collection",
+        "open museum",
+        "contribute to museum",
+        "museum source",
         "Keys and Gates"
       ],
       "keywords": [
@@ -76,7 +79,12 @@
         "Casey Reas: Sources and chronology is published at /museum/network/stories/source-and-chronology as a public research record spanning canonical accession facts through the collection's required omissions; the complete canonical source manuscript remains linked on GitHub.",
         "Casey Reas: seven works is an accepted and accessioned gift; Keys and Gates remains a separate program whose selected_unminted works are not Museum holdings.",
         "Official Art Blocks still and live URLs are labeled upstream presentation sources; the site does not claim retained Museum media or IIIF completion until governed assets are published.",
-        "The public release is the source of truth for current status; the website does not infer accession, rights, ownership, or preservation completion from a transfer or selected outcome."
+        "The public release is the source of truth for current status; the website does not infer accession, rights, ownership, or preservation completion from a transfer or selected outcome.",
+        "The Museum repository is the transitional public working record: visitors can inspect exact source commits, fork the repository, and propose reviewed changes through pull requests.",
+        "Every Museum page carries a quiet source and contribution strip. Exact inspection links stay bound to the verified release commit; the actionable contributor guide points to canonical main so its instructions remain current.",
+        "The Open Museum operating statement is working public guidance rather than adopted policy. The on-chain transition statement is a working migration statement rather than deployment evidence.",
+        "The Fall 2026 goal is for every admitted Museum record—from governance decisions and policies to accessions, provenance, rights, preservation events, and later corrections—to have an on-chain commitment and append-only lineage in a custom contract. That contract is being designed and has not been deployed or activated.",
+        "The planned contract records authorized decisions and claims; it does not make curatorial or governance decisions. A commitment records identity, schema, hash, URI, authority, effective time, and lineage; retrieving exact bytes does not establish availability or truth. Large essays and media remain content-addressed and the frontend remains replaceable."
       ],
       "canonical_path": "/museum/network",
       "related_paths": [
@@ -104,7 +112,11 @@
         "components/museum/MuseumGiftPage.tsx",
         "components/museum/MuseumMarkdown.tsx",
         "app/museum/network/stories/source-and-chronology/page.tsx",
+        "app/museum/network/about/page.tsx",
+        "components/museum/MuseumSourceContribution.tsx",
+        "components/museum/MuseumOpenMuseumStatement.tsx",
         "lib/museum/publication/legacyCasey.ts",
+        "lib/museum/publication/openMuseum.ts",
         "lib/museum/publication/runtime.ts",
         "__tests__/lib/museum/publication/runtime.test.ts"
       ]
@@ -183,7 +195,7 @@
         "The current Overview includes a separately dated, source-pinned development update covering recent work, work in progress, launch requirements, and the latest evidence counts. Daily figures come from that update.",
         "Fourteen editorial pages explain artwork lifecycle, artist controls, responsibilities, curation and TDH authorization, minting, sales, revenue, randomness, metadata, freezing, contract changes, current development, and community review.",
         "Every page shows the review version, exact source link, page navigation, on-page contents, and a collapsible feedback rail; snapshot evidence is collected on Where Development Stands.",
-        "Review, Technical reference, and Public feedback are the three consistent top-level review areas shown below the status banner; page comments and sending feedback remain separate page actions.",
+        "Review chapters stay in the review contents navigation. Technical reference and All public feedback are separate review-wide destinations; each standalone destination links back to the review contents and to the other destination. Page comments and sending feedback remain page-specific actions.",
         "Active and historical routes read immutable versioned editorial content and validate its manifest before rendering.",
         "Each immutable version has its own lifecycle, deployment status, and audit status: superseded versions can remain readable as REVIEW_CLOSED, stop accepting submissions, link back to the current review, and avoid inheriting newer deployment or audit claims.",
         "The generated technical reference exposes the exact versioned Solidity source, definitions, functions, events, errors, and other declarations.",

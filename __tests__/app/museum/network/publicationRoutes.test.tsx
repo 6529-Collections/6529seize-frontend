@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import MuseumAboutPage from "@/app/museum/network/about/page";
 import MuseumProjectPage from "@/app/museum/network/projects/[slug]/page";
 import MuseumSourceAndChronologyPage from "@/app/museum/network/stories/source-and-chronology/page";
 import { MuseumGiftPage } from "@/components/museum/MuseumGiftPage";
@@ -44,6 +45,12 @@ async function buildPublication(): Promise<MuseumPublication> {
         "# CENTURY: The Cut That Keeps Happening\n\nThe cut is an operation, not a motif.",
       "records/accessions/6529NM.2026.001/public/source-and-chronology-matrix.md":
         "# Casey Reas: shared source, chronology, and factual-boundary matrix\n\n- **Status:** internal metadata\n\n## 1. How all writing lanes should use this file\n\nInternal instruction.\n\n## 2. Canonical accession facts\n\n| Fact | Source |\n| --- | --- |\n| Artist | Governed record |\n\n## 11. Required omissions to acknowledge in the monograph and collection essay\n\nKnown limits.\n\n## 12. Notes style shared across lanes\n\nInternal style instruction.",
+      "docs/open-museum.md":
+        "# The record outlives the interface\n\nStatus: working public operating statement; not an adopted governance policy\n\n## An open museum, built in public\n\nThe public record can be inspected, forked, and improved through reviewed contributions.",
+      "docs/onchain-transition.md":
+        "# From public repository to on-chain Museum record\n\nStatus: working public migration statement; not deployment or activation\nevidence\n\n## The goal\n\nLarge writing and media remain content-addressed while commitments preserve institutional history.",
+      "CONTRIBUTING.md":
+        "# Contributing\n\nOpen a focused pull request against the canonical Museum repository.",
     },
   });
   const state = await new GitHubMuseumPublicationSource({
@@ -142,7 +149,7 @@ describe("Museum finished publication routes", () => {
     ).not.toBeInTheDocument();
     expect(
       screen.getByRole("link", {
-        name: "Read the complete canonical source manuscript on GitHub",
+        name: "Read the complete research manuscript",
       })
     ).toHaveAttribute(
       "href",
@@ -152,5 +159,78 @@ describe("Museum finished publication routes", () => {
       screen.getByRole("region", { name: "Scrollable research table" })
     ).toHaveAttribute("tabindex", "0");
     expect(screen.getByRole("table")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", {
+        level: 2,
+        name: "Research with a public source",
+      })
+    ).not.toBeInTheDocument();
+  });
+
+  it("presents the mission and public record as an edited Museum publication", async () => {
+    render(await MuseumAboutPage());
+
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "A permanent collection, held in public",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "The Museum collects internet-native art for long-term stewardship, research, interpretation, and access. Accessioned works are held for the benefit of the 6529 Network and the public commons."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 3,
+        name: "The collection's obligations",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 4, name: "Permanence" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Read the founding record" })
+    ).toHaveAttribute(
+      "href",
+      expect.stringContaining(`/blob/${"a".repeat(40)}/policies/`)
+    );
+    expect(
+      screen.getByRole("heading", { level: 2, name: "A public catalogue" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "A permanent record beyond the website",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/The public repository is the bridge/u)
+    ).toBeInTheDocument();
+    expect(screen.getAllByText(/Public operating statement/u)).toHaveLength(1);
+    expect(screen.getAllByText(/Contract design in progress/u)).toHaveLength(1);
+    expect(screen.queryByText(/Source HTML observed/u)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/The public record can be inspected, forked/u)
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", {
+        name: "An open museum, built in public",
+      })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "On-chain design" })
+    ).toHaveAttribute(
+      "href",
+      expect.stringContaining(`/blob/${"a".repeat(40)}/docs/onchain-design.md`)
+    );
+    expect(
+      screen.getByRole("link", { name: "Rights and reuse boundary" })
+    ).toHaveAttribute(
+      "href",
+      expect.stringContaining(`/blob/${"a".repeat(40)}/RIGHTS.md`)
+    );
   });
 });
