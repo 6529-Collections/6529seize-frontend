@@ -16,7 +16,6 @@ import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
 
 const STUDY_PATH = "/museum/network/stories/a-field-of-practice";
 const SOURCE_REPOSITORY = "6529-Collections/6529networkmuseum";
-const SOURCE_COMMIT = "f5080e1873a3b86280c5a92e1fbe6cbd7fea38a4";
 const EXACT_COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
 const MOBILE_PROJECT = "web-mobile-chromium";
 const MOBILE_VIEWPORT = { width: 390, height: 844 } as const;
@@ -45,6 +44,31 @@ const PROFILES = [
   ["serpentine-arts-technologies", "Serpentine Arts Technologies"],
   ["v-and-a", "Victoria and Albert Museum"],
   ["lacma", "Los Angeles County Museum of Art"],
+  ["hek-basel", "HEK Basel"],
+  ["li-ma", "LI-MA"],
+  ["v2", "V2_"],
+  ["transmediale", "transmediale"],
+  ["acmi", "ACMI — Collecting and Preserving Screen Culture"],
+  ["m-plus", "M+ — Collecting Digital and Moving-Image Culture"],
+  [
+    "nam-june-paik-art-center",
+    "Nam June Paik Art Center — Collection, Archive, and Media-Art Scholarship",
+  ],
+  [
+    "ntt-icc",
+    "NTT InterCommunication Center [ICC] — Media-Art Collection and Archive",
+  ],
+  [
+    "centro-multimedia",
+    "Centro Multimedia, CENART — Research and Production Center",
+  ],
+  [
+    "laboratorio-arte-alameda",
+    "Laboratorio Arte Alameda — Research and Documentation Center",
+  ],
+  ["dia", "Dia Art Foundation"],
+  ["walker-art-center", "Walker Art Center"],
+  ["mca-chicago", "Museum of Contemporary Art Chicago"],
 ] as const;
 
 const INDEX_ROUTE: StudyRoute = {
@@ -57,6 +81,20 @@ const SOURCE_ROUTE: StudyRoute = {
   path: `${STUDY_PATH}/sources`,
   sourcePath: "records/institutional-practice/source-register.md",
   title: "Source register: A field of practice",
+};
+
+const ADJACENT_ROUTE: StudyRoute = {
+  path: `${STUDY_PATH}/adjacent-practice`,
+  sourcePath:
+    "records/institutional-practice/adjacent-chain-native-practice.md",
+  title:
+    "Adjacent practice: platforms, archives, festivals, and chain-native systems",
+};
+
+const EDITORIAL_ROUTE: StudyRoute = {
+  path: "/museum/network/stories/scholarship-and-writing",
+  sourcePath: "docs/curatorial-publication-standard.md",
+  title: "Writing the 6529 Network Museum",
 };
 
 const PROFILE_ROUTES: readonly StudyRoute[] = PROFILES.map(([slug, title]) => ({
@@ -207,7 +245,7 @@ async function expectStudyRoute(
 test.describe("Museum institutional-practice publication @surface @large @readonly", () => {
   test.describe.configure({ mode: "serial" });
   test.setTimeout(120_000);
-  let sourceCommit: string | null = SOURCE_COMMIT;
+  let sourceCommit: string | null = null;
 
   test.beforeEach(async ({ page }, testInfo) => {
     if (testInfo.project.name === MOBILE_PROJECT) {
@@ -216,7 +254,7 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     }
   });
 
-  test("publishes the study index and all fourteen profile links", async ({
+  test("publishes the study index, all twenty-seven profiles, and its research apparatus", async ({
     page,
   }) => {
     sourceCommit = await expectStudyRoute(page, INDEX_ROUTE, sourceCommit);
@@ -228,6 +266,12 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     }
     await expect(
       page.locator(`a[href="${SOURCE_ROUTE.path}"]`).first()
+    ).toBeVisible();
+    await expect(
+      page.locator(`a[href="${ADJACENT_ROUTE.path}"]`).first()
+    ).toBeVisible();
+    await expect(
+      page.locator(`a[href="${EDITORIAL_ROUTE.path}"]`).first()
     ).toBeVisible();
   });
 
@@ -247,6 +291,26 @@ test.describe("Museum institutional-practice publication @surface @large @readon
       ).toBeVisible();
     });
   }
+
+  test("publishes the adjacent digital-art and chain-native study", async ({
+    page,
+  }) => {
+    sourceCommit = await expectStudyRoute(page, ADJACENT_ROUTE, sourceCommit);
+    await expect(page.locator("main table").first()).toBeVisible();
+    await expect(page.locator(`a[href="${STUDY_PATH}"]`).first()).toBeVisible();
+  });
+
+  test("publishes the Museum scholarship and writing standard", async ({
+    page,
+  }) => {
+    sourceCommit = await expectStudyRoute(page, EDITORIAL_ROUTE, sourceCommit);
+    await expect(
+      page.getByText("Forms demonstrated in the comparative study", {
+        exact: true,
+      })
+    ).toBeVisible();
+    await expect(page.locator(`a[href="${STUDY_PATH}"]`).first()).toBeVisible();
+  });
 
   test("publishes the complete primary-source register", async ({ page }) => {
     sourceCommit = await expectStudyRoute(page, SOURCE_ROUTE, sourceCommit);

@@ -15,8 +15,12 @@ const KEYS_AND_GATES_SELECTION_PATH =
   "records/programs/6529NM-AP-01/selected-works.json";
 const DONATION_POLICY_PATH = "policies/donation-acceptance.md";
 const INSTITUTIONAL_PRACTICE_ROUTE = `${MUSEUM_ROOT}/stories/a-field-of-practice`;
+const INSTITUTIONAL_PRACTICE_ADJACENT_ROUTE = `${INSTITUTIONAL_PRACTICE_ROUTE}/adjacent-practice`;
+const SCHOLARSHIP_EDITORIAL_STANDARD_ROUTE = `${MUSEUM_ROOT}/stories/scholarship-and-writing`;
 const INSTITUTIONAL_PRACTICE_STUDY_PATH =
   "records/institutional-practice/a-field-of-practice.md";
+const INSTITUTIONAL_PRACTICE_ADJACENT_PATH =
+  "records/institutional-practice/adjacent-chain-native-practice.md";
 const INSTITUTIONAL_PRACTICE_SOURCE_REGISTER_PATH =
   "records/institutional-practice/source-register.md";
 const CURATORIAL_PUBLICATION_STANDARD_PATH =
@@ -36,6 +40,19 @@ const INSTITUTIONAL_PRACTICE_PROFILE_SLUGS = [
   "serpentine-arts-technologies",
   "v-and-a",
   "lacma",
+  "hek-basel",
+  "li-ma",
+  "v2",
+  "transmediale",
+  "acmi",
+  "m-plus",
+  "nam-june-paik-art-center",
+  "ntt-icc",
+  "centro-multimedia",
+  "laboratorio-arte-alameda",
+  "dia",
+  "walker-art-center",
+  "mca-chicago",
 ] as const;
 
 const GOVERNANCE_DECISION_IDS = [
@@ -221,6 +238,10 @@ export function buildMuseumPageSourceCatalog(
   if (
     institutionalPractice?.introduction.sourcePath ===
       INSTITUTIONAL_PRACTICE_STUDY_PATH &&
+    institutionalPractice.adjacentPractice.sourcePath ===
+      INSTITUTIONAL_PRACTICE_ADJACENT_PATH &&
+    institutionalPractice.editorialStandard.sourcePath ===
+      CURATORIAL_PUBLICATION_STANDARD_PATH &&
     institutionalPractice.sourceRegister.sourcePath ===
       INSTITUTIONAL_PRACTICE_SOURCE_REGISTER_PATH &&
     institutionalPractice.profiles.length ===
@@ -259,6 +280,34 @@ export function buildMuseumPageSourceCatalog(
         {
           path: CURATORIAL_PUBLICATION_STANDARD_PATH,
           label: "scholarshipStandard",
+        },
+      ]
+    );
+    add(
+      INSTITUTIONAL_PRACTICE_ADJACENT_ROUTE,
+      institutionalPractice.adjacentPractice.sourcePath,
+      [
+        {
+          path: institutionalPractice.introduction.sourcePath,
+          label: "institutionalStudy",
+        },
+        {
+          path: institutionalPractice.sourceRegister.sourcePath,
+          label: "primarySourceRegister",
+        },
+      ]
+    );
+    add(
+      SCHOLARSHIP_EDITORIAL_STANDARD_ROUTE,
+      institutionalPractice.editorialStandard.sourcePath,
+      [
+        {
+          path: institutionalPractice.introduction.sourcePath,
+          label: "institutionalStudy",
+        },
+        {
+          path: institutionalPractice.sourceRegister.sourcePath,
+          label: "primarySourceRegister",
         },
       ]
     );

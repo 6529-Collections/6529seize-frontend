@@ -1,5 +1,26 @@
 # Run log
 
+## 2026-08-04 living-study expansion and whole-corpus editorial pass
+
+- Started from exact frontend main
+  `1e712d69a35980dab885057cc4c10ae6a8a7f0e2` on branch
+  `codex/museum-institutional-practice-v2-fe`.
+- The governed source lane expands the same living study from fourteen to
+  twenty-seven institutional profiles, adds a classified adjacent-practice
+  study, publishes *Writing the 6529 Network Museum* as the Museum's public
+  scholarship and editorial standard, and applies that standard across every
+  visitor-facing Museum manuscript while preserving adopted and historical
+  policy transcriptions.
+- The frontend candidate requires all thirty-one research manuscripts from one
+  exact source release. It adds onsite routes for adjacent practice and the
+  editorial standard, organizes the profiles into four reading paths, keeps
+  the comparator material restrained on Stories & Research, and extends the
+  exact-source/contribution mapping to every new page.
+- Focused publication, Markdown, route, source-projection, Open Museum, and
+  legacy aggregate validation currently passes 104/104 tests. Exact source
+  qualification, full Museum regression, browser evidence, PR review, staging,
+  and production release remain pending until the governed source PR merges.
+
 ## 2026-08-04 start
 
 - Created a clean frontend worktree from exact `origin/main`

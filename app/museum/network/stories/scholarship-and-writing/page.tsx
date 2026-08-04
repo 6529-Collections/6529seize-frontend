@@ -13,21 +13,24 @@ import { t } from "@/i18n/messages";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 
 export const metadata: Metadata = getAppMetadata({
-  title: t(DEFAULT_LOCALE, "museum.network.institutionalPractice.title"),
+  title: t(
+    DEFAULT_LOCALE,
+    "museum.network.institutionalPractice.editorialTitle"
+  ),
   description: t(
     DEFAULT_LOCALE,
-    "museum.network.institutionalPractice.description"
+    "museum.network.institutionalPractice.editorialDescription"
   ),
 });
 
-export default async function MuseumInstitutionalPracticePage() {
+export default async function MuseumScholarshipAndWritingPage() {
   const publicationState = await getMuseumPublicationState();
   const publication = publicationState.publication;
   if (!institutionalPracticePublicationIsComplete(publication)) {
     return <MuseumPublicationUnavailable />;
   }
 
-  const document = publication.institutionalPractice.introduction;
+  const document = publication.institutionalPractice.editorialStandard;
   const projection = projectInstitutionalPracticeManuscript(document.markdown);
   if (projection?.title !== document.title) {
     return <MuseumPublicationUnavailable />;
@@ -59,7 +62,6 @@ export default async function MuseumInstitutionalPracticePage() {
         )}
         <InstitutionalPracticePublicationLine projection={projection} />
       </header>
-
       <div className="tw-mt-12 tw-max-w-4xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-2">
         <InstitutionalPracticeManuscript
           projection={projection}
@@ -67,45 +69,6 @@ export default async function MuseumInstitutionalPracticePage() {
           sourcePath={document.sourcePath}
         />
       </div>
-
-      <nav
-        aria-label={t(
-          DEFAULT_LOCALE,
-          "museum.network.institutionalPractice.researchApparatus"
-        )}
-        className="tw-mt-12 tw-flex tw-flex-wrap tw-gap-x-6 tw-gap-y-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-6"
-      >
-        <Link
-          href="/museum/network/stories/a-field-of-practice/adjacent-practice"
-          prefetch={false}
-          className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-        >
-          {t(
-            DEFAULT_LOCALE,
-            "museum.network.institutionalPractice.readAdjacentPractice"
-          )}
-        </Link>
-        <Link
-          href="/museum/network/stories/scholarship-and-writing"
-          prefetch={false}
-          className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-        >
-          {t(
-            DEFAULT_LOCALE,
-            "museum.network.institutionalPractice.readEditorialStandard"
-          )}
-        </Link>
-        <Link
-          href="/museum/network/stories/a-field-of-practice/sources"
-          prefetch={false}
-          className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-        >
-          {t(
-            DEFAULT_LOCALE,
-            "museum.network.institutionalPractice.readSourceRegister"
-          )}
-        </Link>
-      </nav>
     </article>
   );
 }

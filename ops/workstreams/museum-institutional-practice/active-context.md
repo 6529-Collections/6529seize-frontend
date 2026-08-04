@@ -1,5 +1,35 @@
 # Active context
 
+## Current living-study expansion
+
+- Goal: expand the same living institutional-practice study to twenty-seven
+  profiles; publish adjacent digital-art and chain-native research; publish
+  *Writing the 6529 Network Museum* as a public scholarship and editorial
+  standard; apply that standard across the complete public Museum corpus; and
+  qualify one atomic source/frontend release through staging and production.
+- Museum source PR: `6529-Collections/6529networkmuseum#23`, in review and not
+  yet canonical. The final source commit and manifest commitments remain
+  pending.
+- Frontend branch: `codex/museum-institutional-practice-v2-fe`, based on exact
+  main `1e712d69a35980dab885057cc4c10ae6a8a7f0e2`. No frontend PR has been opened
+  for this expansion yet.
+- Publication boundary: one comparative overview, twenty-seven profiles, one
+  adjacent-practice study, the public scholarship and editorial standard, and
+  one source register—thirty-one manuscripts from one exact source release.
+- Presentation boundary: comparator research remains a restrained part of
+  Stories & Research. The overview provides four thematic reading paths; the
+  Stories page links only the study, adjacent practice, and writing standard.
+- Source/contribution boundary: every new page inherits the exact-commit source
+  panel, editable main-branch path, and contributor guide. Invalid or partial
+  publication state suppresses exact-source and edit claims.
+- Local frontend validation: 69 Museum suites / 218 tests and the 104 focused
+  publication/route tests pass; changed lint, changed typecheck, Playwright
+  typecheck, help-index sync (202 records), and React Doctor 100/100 pass.
+  Exact canonical source probing, optimized build, retained browser evidence,
+  PR/bot review, staging, and production qualification remain pending.
+
+## Previous qualified release
+
 - Goal: publish the Museum's institutional-practice study on 6529.io and carry
   it through source and frontend review, staging, production, and retained E2E.
 - Frontend release PR: `6529-Collections/6529seize-frontend#3569`, merged.

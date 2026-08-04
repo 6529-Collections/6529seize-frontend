@@ -77,7 +77,7 @@
         "The Museum adapter resolves canonical 6529-Collections/6529networkmuseum main to one exact commit, validates the release inventory, and activates the complete public publication atomically.",
         "The governed Gift into Public Trust narrative and all five Casey Reas project essays are readable onsite from the same atomic publication snapshot.",
         "Casey Reas: Sources and chronology is published at /museum/network/stories/source-and-chronology as a public research record spanning canonical accession facts through the collection's required omissions; the complete canonical source manuscript remains linked on GitHub.",
-        "A field of practice is published at /museum/network/stories/a-field-of-practice with a comparative essay, fourteen institutional profiles, and a primary-source register admitted from one exact Museum source edition.",
+        "A field of practice is published at /museum/network/stories/a-field-of-practice with a comparative essay, twenty-seven institutional profiles, an adjacent-practice study, the public scholarship and editorial standard, and a primary-source register admitted from one exact Museum source release.",
         "Casey Reas: seven works is an accepted and accessioned gift; Keys and Gates remains a separate program whose selected_unminted works are not Museum holdings.",
         "Official Art Blocks still and live URLs are labeled upstream presentation sources; the site does not claim retained Museum media or IIIF completion until governed assets are published.",
         "The public release is the source of truth for current status; the website does not infer accession, rights, ownership, or preservation completion from a transfer or selected outcome.",
@@ -103,6 +103,8 @@
         "/museum/network/stories",
         "/museum/network/stories/source-and-chronology",
         "/museum/network/stories/a-field-of-practice",
+        "/museum/network/stories/a-field-of-practice/adjacent-practice",
+        "/museum/network/stories/scholarship-and-writing",
         "/museum/network/about",
         "/museum"
       ],
@@ -146,21 +148,23 @@
         "sources"
       ],
       "facts": [
-        "A field of practice is the Network Museum's comparative study of fourteen contemporary-art, digital-art, conservation, and research institutions.",
-        "The study is at /museum/network/stories/a-field-of-practice; each institution has its own profile and the complete primary-source register is at /museum/network/stories/a-field-of-practice/sources.",
-        "The fourteen profiles cover the Met, Getty, MoMA, Whitney, Tate, Centre Pompidou, SFMOMA, Guggenheim, ZKM, Ars Electronica, Rhizome and the New Museum, Serpentine Arts Technologies, the V&A, and LACMA.",
+        "A field of practice is the Network Museum's comparative study of twenty-seven contemporary-art, digital-art, conservation, and research institutions.",
+        "The study is at /museum/network/stories/a-field-of-practice; each institution has its own profile, adjacent chain-native practice is at /museum/network/stories/a-field-of-practice/adjacent-practice, the public writing standard is at /museum/network/stories/scholarship-and-writing, and the primary-source register is at /museum/network/stories/a-field-of-practice/sources.",
+        "The twenty-seven profiles are organized into four reading paths: software, networks, and technical culture; media art across regions; collection and conservation; and scholarship, archives, and long duration.",
         "Each profile presents demonstrated practices, what the Network Museum should adopt, the limits of the comparison, and its sources.",
         "The study is a research instrument rather than a ranking; the profiles keep lessons and analytical limits attached to their institutional context.",
-        "The comparative essay, all fourteen profiles, and the source register must validate from the same exact Museum repository commit before the site publishes the study.",
+        "The comparative essay, all twenty-seven profiles, the adjacent-practice study, the scholarship and editorial standard, and the source register must validate from the same exact Museum repository commit before the site publishes the study.",
         "Read the source opens the immutable manuscript used for the page. Propose an edit opens the maintained manuscript on main, and Contributor guide explains the reviewed pull-request process.",
         "The source register records each primary source, its displayed date, its source type, and the evidence drawn from it.",
-        "If the current source cannot be verified, the Museum may serve a clearly identified last complete edition; it does not combine manuscripts from different source editions."
+        "If the current source cannot be verified, the Museum may serve a clearly identified last complete release; it never combines manuscripts from different source releases."
       ],
       "canonical_path": "/museum/network/stories/a-field-of-practice",
       "link_label": "Read A field of practice",
       "related_paths": [
         "/museum/network/stories",
+        "/museum/network/stories/a-field-of-practice/adjacent-practice",
         "/museum/network/stories/a-field-of-practice/sources",
+        "/museum/network/stories/scholarship-and-writing",
         "/museum/network/stories/a-field-of-practice/centre-pompidou",
         "/museum/network/stories/a-field-of-practice/serpentine-arts-technologies"
       ],
@@ -174,6 +178,8 @@
       "source_refs": [
         "ops/docs/museum/README.md",
         "ops/docs/museum/feature-institutional-practice.md",
+        "app/museum/network/stories/a-field-of-practice/adjacent-practice/page.tsx",
+        "app/museum/network/stories/scholarship-and-writing/page.tsx",
         "tests/museum/institutional-practice-readonly.spec.ts"
       ]
     },

@@ -70,8 +70,10 @@ export type MuseumPublicDocumentKind =
   | "project_essay"
   | "source_chronology_matrix"
   | "institutional_practice_study"
+  | "institutional_practice_adjacent"
   | "institution_profile"
-  | "institutional_practice_source_register";
+  | "institutional_practice_source_register"
+  | "scholarship_editorial_standard";
 
 export interface MuseumPublicDocument {
   readonly id: string;
@@ -100,7 +102,20 @@ export type MuseumInstitutionProfileSlug =
   | "rhizome-new-museum"
   | "serpentine-arts-technologies"
   | "v-and-a"
-  | "lacma";
+  | "lacma"
+  | "hek-basel"
+  | "li-ma"
+  | "v2"
+  | "transmediale"
+  | "acmi"
+  | "m-plus"
+  | "nam-june-paik-art-center"
+  | "ntt-icc"
+  | "centro-multimedia"
+  | "laboratorio-arte-alameda"
+  | "dia"
+  | "walker-art-center"
+  | "mca-chicago";
 
 export interface MuseumInstitutionProfile {
   readonly id: `institutional-practice:${MuseumInstitutionProfileSlug}`;
@@ -113,6 +128,8 @@ export interface MuseumInstitutionalPractice {
   readonly slug: "a-field-of-practice";
   readonly introduction: MuseumPublicDocument;
   readonly profiles: readonly MuseumInstitutionProfile[];
+  readonly adjacentPractice: MuseumPublicDocument;
+  readonly editorialStandard: MuseumPublicDocument;
   readonly sourceRegister: MuseumPublicDocument;
 }
 

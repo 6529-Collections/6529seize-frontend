@@ -209,7 +209,7 @@ describe("Museum finished publication routes", () => {
     expect(
       screen.getByText(/The public repository is the bridge/u)
     ).toBeInTheDocument();
-    expect(screen.getAllByText(/Public operating statement/u)).toHaveLength(1);
+    expect(screen.getAllByText(/Working public statement/u)).toHaveLength(1);
     expect(screen.getAllByText(/Contract design in progress/u)).toHaveLength(1);
     expect(screen.queryByText(/Source HTML observed/u)).not.toBeInTheDocument();
     expect(
