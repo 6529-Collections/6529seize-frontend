@@ -1761,6 +1761,9 @@ describe("sentry-client-filters", () => {
       frames?: SentryStackFrame[];
       transaction?: string;
       includeAdditionalException?: boolean;
+      includeMechanism?: boolean;
+      mechanismType?: string;
+      mechanismHandled?: boolean;
     } = {}
   ): SentryClientEvent => ({
     transaction: options.transaction ?? "/waves",
@@ -1769,6 +1772,14 @@ describe("sentry-client-filters", () => {
         {
           type: options.exceptionType ?? "NotFoundError",
           value: options.exceptionValue ?? reactDomInsertBeforeMessage,
+          ...(options.includeMechanism === false
+            ? {}
+            : {
+                mechanism: {
+                  type: options.mechanismType ?? "generic",
+                  handled: options.mechanismHandled ?? true,
+                },
+              }),
           stacktrace: {
             frames:
               options.frames ?? createLatestReactDomRawFrames(),
@@ -2006,13 +2017,16 @@ describe("sentry-client-filters", () => {
     }
   );
 
-  it("filters the latest observed 50-frame raw stack with repeated sN placement frames", () => {
-    const result = shouldFilterReactDomInsertBeforeNotFoundError(
-      createReactDomRawInsertBeforeEvent()
-    );
+  it.each(["/waves", "/waves/:wave", "/join-6529", "/:user", "/"])(
+    "filters the latest observed 50-frame raw stack on %s",
+    (transaction) => {
+      const result = shouldFilterReactDomInsertBeforeNotFoundError(
+        createReactDomRawInsertBeforeEvent({ transaction })
+      );
 
-    expect(result).toBe(true);
-  });
+      expect(result).toBe(true);
+    }
+  );
 
   it.each([
     {
@@ -2085,12 +2099,40 @@ describe("sentry-client-filters", () => {
       options: { exceptionValue: "The requested node was not found." },
     },
     {
-      name: "a non-waves route",
+      name: "an unobserved route",
       options: { transaction: "/about" },
+    },
+    {
+      name: "a different mechanism",
+      options: {
+        mechanismType: "auto.browser.global_handlers.onerror",
+      },
+    },
+    {
+      name: "an unhandled mechanism",
+      options: { mechanismHandled: false },
+    },
+    {
+      name: "no mechanism",
+      options: { includeMechanism: false },
     },
   ])("keeps the observed raw stack with $name", ({ options }) => {
     const result = shouldFilterReactDomInsertBeforeNotFoundError(
       createReactDomRawInsertBeforeEvent(options)
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps the broader source-mapped React DOM signature outside waves routes", () => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomInsertBeforeEvent({
+        transaction: "/join-6529",
+        tags: {
+          transaction: "/join-6529",
+          url: "/join-6529",
+        },
+      })
     );
 
     expect(result).toBe(false);

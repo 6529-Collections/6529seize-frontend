@@ -654,27 +654,34 @@ describe("instrumentation-client", () => {
     {
       name: "ending in sN",
       getFrames: () => createObservedReactDomRawInsertBeforeFrames("sN"),
+      transaction: "/waves",
     },
     {
       name: "ending in sR",
       getFrames: () => createObservedReactDomRawInsertBeforeFrames("sR"),
+      transaction: "/waves",
     },
     {
-      name: "with repeated sN placement frames",
+      name: "with repeated sN placement frames on join-6529",
       getFrames: createLatestReactDomRawFrames,
+      transaction: "/join-6529",
     },
   ])(
     "drops the production-shaped raw React DOM stack $name",
-    ({ getFrames }) => {
+    ({ getFrames, transaction }) => {
       const beforeSend = loadBeforeSend();
       const event = {
         event_id: "raw-react-dom-insert-before-event",
-        transaction: "/waves",
+        transaction,
         exception: {
           values: [
             {
               type: "NotFoundError",
               value: reactDomInsertBeforeMessage,
+              mechanism: {
+                type: "generic",
+                handled: true,
+              },
               stacktrace: {
                 frames: getFrames(),
               },
@@ -682,8 +689,8 @@ describe("instrumentation-client", () => {
           ],
         },
         tags: {
-          transaction: "/waves",
-          url: "/waves",
+          transaction,
+          url: transaction,
         },
       };
 
@@ -692,6 +699,37 @@ describe("instrumentation-client", () => {
       expect(result).toBeNull();
     }
   );
+
+  it("keeps the production-shaped raw React DOM stack on an unobserved route", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "raw-react-dom-insert-before-unobserved-route",
+      transaction: "/about",
+      exception: {
+        values: [
+          {
+            type: "NotFoundError",
+            value: reactDomInsertBeforeMessage,
+            mechanism: {
+              type: "generic",
+              handled: true,
+            },
+            stacktrace: {
+              frames: createLatestReactDomRawFrames(),
+            },
+          },
+        ],
+      },
+      tags: {
+        transaction: "/about",
+        url: "/about",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toEqual(event);
+  });
 
   it("drops exact React DOM removeChild NotFoundError events on affected routes with no app frames", () => {
     const beforeSend = loadBeforeSend();

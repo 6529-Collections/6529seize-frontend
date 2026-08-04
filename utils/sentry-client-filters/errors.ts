@@ -33,6 +33,7 @@ import {
   getRoutePathFromString,
   getRuntimeUserAgentString,
   getStringValue,
+  hasReactDomInsertBeforeRawRoute,
   hasReactDomRemoveChildRoute,
   hasRouteParameterizationRoute,
   hasWavesRoute,
@@ -56,7 +57,7 @@ import {
   hasInjectedWasmCspFrameSignature,
   hasLikelyAppOwnedFrame,
   hasNativeJsonStringifyFrame,
-  hasReactDomInsertBeforeNotFoundErrorSignature,
+  hasReactDomInsertBeforeRawNotFoundErrorSignature,
   hasReactDomNotFoundErrorSignature,
   hasSentryRouteParameterizationFrame,
   isSentryRouteParameterizationFrame,
@@ -616,11 +617,23 @@ export function shouldFilterTwitterCurrentInsetReferenceError(
 export function shouldFilterReactDomInsertBeforeNotFoundError(
   event: SentryClientEvent
 ): boolean {
+  // Minified React runtime names are not translator-specific. Keep the raw
+  // signature restricted to the observed route and capture-mechanism cohort.
+  if (
+    hasReactDomInsertBeforeRawRoute(event) &&
+    hasReactDomInsertBeforeRawNotFoundErrorSignature(
+      event,
+      REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE
+    )
+  ) {
+    return true;
+  }
+
   if (!hasWavesRoute(event)) {
     return false;
   }
 
-  return hasReactDomInsertBeforeNotFoundErrorSignature(
+  return hasReactDomNotFoundErrorSignature(
     event,
     REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE
   );

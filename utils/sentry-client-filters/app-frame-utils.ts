@@ -147,10 +147,10 @@ function hasRawReactDomInsertBeforeFrameSignature(
   );
 }
 
-function getReactDomNotFoundErrorFrames(
+function getReactDomNotFoundErrorValue(
   event: SentryClientEvent,
   message: string
-): SentryStackFrame[] | undefined {
+): SentryExceptionValue | undefined {
   const values = event.exception?.values;
   if (values?.length !== 1) {
     return undefined;
@@ -161,7 +161,14 @@ function getReactDomNotFoundErrorFrames(
     return undefined;
   }
 
-  return value.stacktrace?.frames;
+  return value;
+}
+
+function getReactDomNotFoundErrorFrames(
+  event: SentryClientEvent,
+  message: string
+): SentryStackFrame[] | undefined {
+  return getReactDomNotFoundErrorValue(event, message)?.stacktrace?.frames;
 }
 
 export function hasReactDomNotFoundErrorSignature(
@@ -173,14 +180,15 @@ export function hasReactDomNotFoundErrorSignature(
   );
 }
 
-export function hasReactDomInsertBeforeNotFoundErrorSignature(
+export function hasReactDomInsertBeforeRawNotFoundErrorSignature(
   event: SentryClientEvent,
   message: string
 ): boolean {
-  const frames = getReactDomNotFoundErrorFrames(event, message);
+  const value = getReactDomNotFoundErrorValue(event, message);
   return (
-    hasOnlyReactDomRuntimeFrames(frames) ||
-    hasRawReactDomInsertBeforeFrameSignature(frames)
+    value?.mechanism?.type === "generic" &&
+    value.mechanism.handled === true &&
+    hasRawReactDomInsertBeforeFrameSignature(value.stacktrace?.frames)
   );
 }
 
