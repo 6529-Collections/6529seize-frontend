@@ -9,6 +9,14 @@ on:
         description: Unique Deploy Hub operation identifier
         required: true
         type: string
+      action:
+        description: Deploy exact PRs or remove one exact PR from staging
+        required: true
+        type: choice
+        default: deploy
+        options:
+          - deploy
+          - remove-from-staging
       manifest:
         description: Ordered JSON array of exact frontend PR requests
         required: true
@@ -19,6 +27,7 @@ on:
         type: choice
         options:
           - DEPLOY
+          - REMOVE
 
 permissions:
   actions: write
@@ -64,6 +73,7 @@ jobs:
       - name: Execute Deploy Hub operation
         env:
           DEPLOY_HUB_ACTOR: ${{ github.actor }}
+          DEPLOY_HUB_ACTION: ${{ inputs.action }}
           DEPLOY_HUB_API_URL: ${{ github.api_url }}
           DEPLOY_HUB_BASE_REF: ${{ github.event.repository.default_branch }}
           DEPLOY_HUB_CONFIRMATION: ${{ inputs.confirmation }}

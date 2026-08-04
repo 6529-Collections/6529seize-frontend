@@ -10,6 +10,10 @@ function statusContext(target) {
   return `Deploy Hub — Target: ${targetLabel(target)}`;
 }
 
+function stagingPresenceContext() {
+  return "Deploy Hub — Staging Presence";
+}
+
 function stopContext(operationId) {
   return `Deploy Hub Stop — ${operationId}`;
 }
@@ -18,8 +22,8 @@ function e2eContext(correlation) {
   return `Deploy Hub E2E — ${correlation}`;
 }
 
-function correlationId(operationId, runIdentity, cohortIndex, phase, attempt) {
-  return `${operationId}-${runIdentity}-c${cohortIndex + 1}-${phase}-a${attempt}`;
+function correlationId(_operationId, runIdentity, cohortIndex, phase, attempt) {
+  return `dh-${runIdentity}-c${cohortIndex + 1}-${phase}-a${attempt}`;
 }
 
 async function publishStatus(github, requests, runUrl, state, description) {
@@ -52,6 +56,7 @@ async function waitForWorkflow({
   expectedSha,
   sleep,
   now,
+  notBefore = 0,
 }) {
   const deadline = now() + WORKFLOW_TIMEOUT_MILLISECONDS;
   let run;
@@ -60,7 +65,8 @@ async function waitForWorkflow({
     run = listing.workflow_runs?.find(
       (candidate) =>
         candidate.display_title === displayTitle &&
-        (!expectedSha || candidate.head_sha === expectedSha)
+        (!expectedSha || candidate.head_sha === expectedSha) &&
+        Date.parse(candidate.created_at ?? "") >= notBefore
     );
     if (run?.status === "completed") return run;
     await sleep(POLL_MILLISECONDS);
@@ -78,6 +84,7 @@ async function dispatchAndWait({
   sleep,
   now,
 }) {
+  const notBefore = Math.floor(now() / 1000) * 1000;
   await github.dispatchWorkflow(workflow, ref, inputs);
   return waitForWorkflow({
     github,
@@ -87,6 +94,7 @@ async function dispatchAndWait({
     expectedSha,
     sleep,
     now,
+    notBefore,
   });
 }
 
@@ -172,6 +180,7 @@ module.exports = {
   e2eContext,
   publishStatus,
   statusContext,
+  stagingPresenceContext,
   stopContext,
   stopRequested,
   targetLabel,

@@ -18,7 +18,10 @@ wrapper expects that location.
   adjacent target cohorts, and publishes clearly labelled, non-deploying shadow
   status phases for the Deploy Hub pilot.
 - `deploy-hub-operation.cjs`: runs the finite frontend-only Deploy Hub control
-  flow while canonical workflows retain deployment and E2E ownership.
+  flow, including forward-only staging removal, while canonical workflows
+  retain deployment and E2E ownership. Staging composition is carried in each
+  Deploy Hub staging commit by `deploy-hub-staging-composition.cjs`; no separate
+  state service is required.
 - `native-surface-evidence.cjs`: executable native-surface evidence
   classifier. It reports whether current Capacitor/Electron coverage is only
   browser simulation or whether package prerequisites are present.

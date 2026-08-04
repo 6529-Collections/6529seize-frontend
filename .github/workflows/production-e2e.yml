@@ -42,6 +42,7 @@ jobs:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
           FRONTEND_ARTIFACT_DIGEST: ${{ inputs.frontend_artifact_digest }}
           FRONTEND_SHA: ${{ inputs.frontend_sha }}
+          GITHUB_ACTOR: ${{ github.actor }}
           BACKEND_ARTIFACT_DIGEST: ${{ inputs.backend_artifact_digest }}
           BACKEND_SHA: ${{ inputs.backend_sha }}
           MANIFEST_ID: ${{ inputs.release_manifest_id }}
@@ -57,6 +58,7 @@ jobs:
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
           if [ -n "${DEPLOY_HUB_OPERATION_ID:-}" ]; then
             [[ "$DEPLOY_HUB_OPERATION_ID" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$ ]]
+            test "$GITHUB_ACTOR" = "github-actions[bot]"
             test "$SOURCE_REF" = main
             test -z "$TRAIN_ID$TRAIN_REVISION$OPERATION_KEY$MANIFEST_ID$MANIFEST_IDENTITY$FRONTEND_SHA$BACKEND_SHA$FRONTEND_ARTIFACT_DIGEST$BACKEND_ARTIFACT_DIGEST"
             exit 0
