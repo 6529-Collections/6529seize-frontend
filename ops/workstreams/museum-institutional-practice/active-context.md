@@ -2,8 +2,10 @@
 
 - Goal: publish the Museum's institutional-practice study on 6529.io and carry
   it through source and frontend review, staging, production, and retained E2E.
-- Frontend branch: `codex/museum-institutional-practice`.
-- Frontend base: `33f057f5003ed62269f2c6cca03dd1fdd40278e1`.
+- Frontend release PR: `6529-Collections/6529seize-frontend#3569`, merged.
+- Reliability follow-up PR: `6529-Collections/6529seize-frontend#3573`, merged.
+- Qualified production runtime:
+  `88a4f19885f9ff70a1632bda7255b8091263ee86`.
 - Museum source PR: `6529-Collections/6529networkmuseum#22`, merged.
 - Canonical Museum source commit:
   `f5080e1873a3b86280c5a92e1fbe6cbd7fea38a4`.
@@ -36,6 +38,22 @@
   Final desktop and mobile captures cover the study, long-name profile, source
   register, and the mobile Stories & Research directory at their layout
   extremes.
-- Immediate next actions: commit the exact candidate; open and iterate the
-  frontend PR; then qualify staging and production with retained browser
-  evidence and exact runtime-version readback.
+- Staging qualification: composition
+  `bc9f46cd52e2437595a3d1131371525f9cb28b3c`, deploy run `30894880378`,
+  automatic E2E run `30896314276`, and independent Museum 32/32 all passed.
+- Production deployment: run `30897509037`; runtime and announced version both
+  read exact `88a4f19885f` with `stale:false`; rendered desktop/mobile review
+  passed.
+- Production qualification: strict Museum 32/32, full read-only inventory
+  89/89, applicable surface matrix 28/28 with 22 intentional native-project
+  skips, WCAG/i18n 3/3, and final endpoint/version watch 60/60 all passed.
+- Hardening disposition: speculative Museum prefetch is disabled, silent
+  first-party 5xx responses fail the acceptance pack independently of console
+  output, and only the exact known blocked Coinbase analytics transport is
+  classified as benign. The original first-party prefetch failure did not
+  recur in staging or production qualification.
+- Manual-fallback Production E2E: no sanctioned workflow run exists; none is
+  claimed.
+- Status: complete. Future scholarship, source, or presentation changes begin
+  as new governed source and frontend revisions; this workstream has no open
+  release action.

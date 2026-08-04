@@ -36,30 +36,31 @@ unexpected row links.
    - Recovery: verify whether `"/primary_address.csv"` currently has parsable
      data rows.
 
-3. A table row looks like CSV headers
-   - Symptom: row values appear as `handle`, `current_primary`, `new_primary`.
-   - Recovery: expected when the CSV includes a header row; this page renders
-     every CSV row as table data.
-
-4. Row link opens an unexpected profile path
+3. Row link opens an unexpected profile path
    - Cause: each `Profile Handle` link always targets `/{current_primary}`.
    - Recovery: compare `Profile Handle` and `Current Selected Primary Address`
      before selecting a row link.
 
-5. Dated sentence appears stale
+4. April 2024 date appears in the page
    - Symptom: text still references `Monday 29th April 2024`.
    - Recovery: expected current behavior; this is static page copy.
 
-6. Revisit shows cached rows, then switches to an error
+5. Revisit shows cached rows, then switches to an error
    - Cause: after cached rows render, the background refresh can fail and the
      page switches to the error state.
    - Recovery: refresh and use the matching fetch/parse recovery case above.
+
+6. An address is hard to read on a small screen
+   - Cause: wallet addresses can wrap across multiple lines.
+   - Recovery: read the complete monospace value in its labeled stacked row;
+     horizontal scrolling is not required.
 
 ## Limits of Recovery
 
 - There is no in-page retry button.
 - There are no in-page filters or search controls.
-- Malformed CSV fields can render blank cells instead of validation errors.
+- CSV header rows, rows with the wrong column count, invalid addresses,
+  incomplete rows, and repeated profile IDs are ignored.
 
 ## Related Pages
 

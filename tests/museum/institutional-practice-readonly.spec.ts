@@ -9,6 +9,7 @@ import {
 } from "../testHelpers";
 import {
   assertNoConsoleErrors,
+  assertNoFailedResponses,
   attachPageDiagnostics,
 } from "../support/pageAssertions";
 import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
@@ -199,6 +200,7 @@ async function expectStudyRoute(
     assertNoConsoleErrors(diagnostics, {
       allowedConsoleErrorPatterns: LOCAL_SHELL_ALLOWED_CONSOLE_ERROR_PATTERNS,
     });
+    assertNoFailedResponses(diagnostics);
   }
 }
 
