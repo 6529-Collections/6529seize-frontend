@@ -93,9 +93,16 @@ describe("manual staging immutable artifact deployment", () => {
     expect(sendStep.run).toContain(
       'sudo -H -u "$RUN_AS" git -C "$REPO_DIR" "$@"'
     );
+    expect(sendStep.run).toContain(
+      'if [ "$remote_sha" != "$EXPECTED_SHA" ]; then'
+    );
+    expect(sendStep.run).toContain(
+      'cd "$REPO_DIR"\nbash -n ops/scripts/deploy-staging-artifact.sh'
+    );
     expect(sendStep.run).not.toContain(
       "git config --global --add safe.directory"
     );
+    expect(sendStep.run).not.toContain('if [[ "$remote_sha"');
     expect(sendStep.run).not.toContain("install:frozen");
     expect(sendStep.run).not.toContain("./bin/6529 run build");
     expect(workflowSource).toContain("--expires-in 2400");
