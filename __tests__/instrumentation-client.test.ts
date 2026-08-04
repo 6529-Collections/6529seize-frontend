@@ -160,6 +160,10 @@ describe("instrumentation-client", () => {
     },
     ...poperBlockerInjectedFetchFrames,
   ];
+  const poperBlockerLatestClientFrames = poperBlockerLatestRawFrames.map(
+    (frame) =>
+      frame.function === "window.fetch" ? { ...frame, function: "?" } : frame
+  );
   const poperBlockerRecommendedRawFrames = [
     {
       filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
@@ -1737,6 +1741,18 @@ describe("instrumentation-client", () => {
     const event = createPoperBlockerOrphanFetchRejectionEvent(
       poperBlockerNetworkErrorMessage,
       poperBlockerCurrentProcessedFrames
+    );
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops the current Poper Blocker rejection before Sentry normalizes its anonymous function", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createPoperBlockerOrphanFetchRejectionEvent(
+      poperBlockerNetworkErrorMessage,
+      poperBlockerLatestClientFrames
     );
 
     const result = beforeSend(event);
