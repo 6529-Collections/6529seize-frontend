@@ -37,18 +37,20 @@ export function DrilldownCard({
       }`}
       onClick={onClick}
     >
-      <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
-        <div className="tw-font-semibold">{title}</div>
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-2">
+        <div className="tw-text-lg tw-font-semibold tw-leading-6">{title}</div>
         {isCurrent && (
-          <span className="tw-rounded-full tw-bg-emerald-400/10 tw-px-2 tw-py-0.5 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-emerald-300 tw-ring-1 tw-ring-inset tw-ring-emerald-400/30">
+          <span className="tw-rounded-full tw-bg-emerald-400/10 tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wide tw-text-emerald-300 tw-ring-1 tw-ring-inset tw-ring-emerald-400/30">
             {t(locale, "memeCalendar.grid.current")}
           </span>
         )}
       </div>
-      <div className="tw-mt-1 tw-text-xs tw-leading-5 tw-text-iron-500">
+      <div className="tw-mt-1 tw-text-sm tw-leading-5 tw-text-iron-500">
         {range}
       </div>
-      <div className="tw-mt-2 tw-text-sm tw-text-iron-300">{mints}</div>
+      <div className="tw-mt-2 tw-text-sm tw-leading-5 tw-text-cyan-400">
+        {mints}
+      </div>
     </button>
   );
 }

@@ -7,10 +7,9 @@ type MemeCalendarPageSearchParams = Promise<{
   readonly locale?: string | string[] | undefined;
 }>;
 
-const PAGE_CONTAINER_CLASS_NAME =
-  "tw-mx-auto tw-w-full tw-px-4 md:tw-px-6 lg:tw-px-8 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]";
+const PAGE_CONTAINER_CLASS_NAME = "tw-w-full tw-px-4 sm:tw-px-8";
 
-export async function generateMetadata(): Promise<Metadata> {
+export function generateMetadata(): Metadata {
   return getAppMetadata({ title: "Memes Minting Calendar" });
 }
 
@@ -29,8 +28,10 @@ export default async function MemesMintingCalendarPage({
   const resolvedLocale = normalizeLocale(getFirstSearchParamValue(locale));
 
   return (
-    <div className={`${PAGE_CONTAINER_CLASS_NAME} tw-pb-8 tw-pt-6`}>
-      <MemesMintingCalendar locale={resolvedLocale} />
+    <div className="tailwind-scope tw-min-h-screen tw-overflow-x-hidden tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-700">
+      <div className={`${PAGE_CONTAINER_CLASS_NAME} tw-pb-8 tw-pt-6`}>
+        <MemesMintingCalendar locale={resolvedLocale} />
+      </div>
     </div>
   );
 }

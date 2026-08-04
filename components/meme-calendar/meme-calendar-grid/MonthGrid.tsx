@@ -120,10 +120,10 @@ function getHistoricalTooltipHtml(
   );
 
   return `<div class="tw-min-w-[13.75rem]">
-    <div class="tw-mb-1 tw-text-base tw-font-semibold tw-text-iron-50">
+    <div class="tw-mb-1 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-50">
       ${escapeHtml(tooltipTitle)}
     </div>
-    <div class="tw-mb-3 tw-text-sm tw-text-iron-300">${formatFullDate(
+    <div class="tw-mb-3 tw-text-sm tw-leading-5 tw-text-iron-300">${formatFullDate(
       firstInstant,
       displayTz,
       locale
@@ -146,7 +146,7 @@ function getScheduledMintTooltip({
   readonly mintNumber: number | undefined;
   readonly noteTooltipContent: string;
 }): MintTooltip {
-  if (!mintInstantUtc || !mintNumber) {
+  if (mintInstantUtc === undefined || mintNumber === undefined) {
     return { className: "!tw-border-iron-700", html: "" };
   }
 
@@ -156,9 +156,9 @@ function getScheduledMintTooltip({
     ? formatFullDateTime(mintInstantUtc, displayTz, locale)
     : formatFullDate(mintInstantUtc, displayTz, locale);
   const oneLineDivWithNote = noteTooltipContent
-    ? `<div class="tw-mb-3 tw-text-sm tw-text-iron-300">${oneLine}<br />
-      <span class="tw-text-xs tw-text-iron-400">*${noteTooltipContent}</span></div>`
-    : `<div class="tw-mb-3 tw-text-sm tw-text-iron-300">${oneLine}</div>`;
+    ? `<div class="tw-mb-3 tw-text-sm tw-leading-5 tw-text-iron-300">${oneLine}<br />
+      <span class="tw-text-sm tw-leading-5 tw-text-iron-400">*${noteTooltipContent}</span></div>`
+    : `<div class="tw-mb-3 tw-text-sm tw-leading-5 tw-text-iron-300">${oneLine}</div>`;
   const invites = isFutureMint
     ? printCalendarInvites(
         mintInstantUtc,
@@ -179,7 +179,7 @@ function getScheduledMintTooltip({
       : "!tw-border-iron-700",
     html: `
       <div class="tw-min-w-[13.75rem]">
-        <div class="tw-mb-1 tw-text-base tw-font-semibold tw-text-iron-50">${escapeHtml(tooltipTitle)}</div>
+        <div class="tw-mb-1 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-50">${escapeHtml(tooltipTitle)}</div>
         ${oneLineDivWithNote}
         ${invites}
       </div>`,
@@ -238,10 +238,31 @@ function MonthDayCell({
   let dayTextClass = "tw-text-iron-300";
 
   if (isToday) {
-    dayTextClass = "tw-font-semibold tw-text-emerald-300";
+    dayTextClass = "tw-font-semibold tw-text-iron-950";
   } else if (isWeekend) {
     dayTextClass = "tw-text-iron-500";
   }
+
+  const dayLabel = (
+    <>
+      <span
+        className={`tw-inline-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full max-[429px]:tw-hidden ${
+          isToday ? "tw-bg-emerald-500" : ""
+        }`}
+      >
+        {day}
+      </span>
+      <span
+        className={`tw-hidden tw-max-w-full tw-truncate max-[429px]:tw-inline-flex ${
+          isToday
+            ? "tw-items-center tw-justify-center tw-rounded-full tw-bg-emerald-500 tw-px-2.5 tw-py-1"
+            : ""
+        }`}
+      >
+        {formatFullDate(cellDateUtcDay, "utc", locale)}
+      </span>
+    </>
+  );
 
   if (!details.isMintDay) {
     return (
@@ -256,12 +277,8 @@ function MonthDayCell({
         <span
           className={`tw-flex tw-items-center tw-text-xs tw-leading-4 min-[430px]:tw-justify-center ${dayTextClass}`}
         >
-          <span className="max-[429px]:tw-hidden">{day}</span>
-          <span className="tw-hidden max-[429px]:tw-inline">
-            {formatFullDate(cellDateUtcDay, "utc", locale)}
-          </span>
+          {dayLabel}
         </span>
-        <span className="tw-mt-0.5 tw-text-xs tw-font-medium">&nbsp;</span>
       </div>
     );
   }
@@ -272,7 +289,7 @@ function MonthDayCell({
     <button
       type="button"
       id={`meme-cell-${ymd(cellDateUtcDay)}`}
-      className="tw-grid tw-min-h-11 tw-w-full tw-cursor-pointer tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/20 tw-bg-primary-400/[0.07] tw-px-3 tw-py-1.5 tw-text-left tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-primary-400/45 desktop-hover:hover:tw-bg-primary-400/[0.12] min-[430px]:tw-flex min-[430px]:tw-min-h-12 min-[430px]:tw-flex-col min-[430px]:tw-justify-start min-[430px]:tw-gap-0.5 min-[430px]:tw-rounded-md min-[430px]:tw-border-primary-400/10 min-[430px]:tw-bg-primary-400/[0.055] min-[430px]:tw-px-0 min-[430px]:desktop-hover:hover:tw-border-primary-400/30 min-[430px]:desktop-hover:hover:tw-bg-primary-400/[0.1]"
+      className="tw-grid tw-min-h-11 tw-w-full tw-cursor-pointer tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/60 tw-px-3 tw-py-1.5 tw-text-left tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900 min-[430px]:tw-flex min-[430px]:tw-min-h-12 min-[430px]:tw-flex-col min-[430px]:tw-justify-start min-[430px]:tw-gap-0 min-[430px]:tw-rounded-md min-[430px]:tw-px-0"
       data-tooltip-id="meme-tooltip"
       data-tooltip-html={tooltip.html}
       data-tooltip-class-name={tooltip.className}
@@ -286,16 +303,13 @@ function MonthDayCell({
     >
       <span
         className={`tw-flex tw-min-w-0 tw-items-center tw-text-xs tw-leading-4 min-[430px]:tw-justify-center ${
-          isToday ? "tw-font-semibold tw-text-emerald-300" : "tw-text-iron-200"
+          isToday ? "tw-font-semibold tw-text-iron-950" : "tw-text-iron-200"
         }`}
       >
-        <span className="max-[429px]:tw-hidden">{day}</span>
-        <span className="tw-hidden tw-truncate max-[429px]:tw-inline">
-          {formatFullDate(cellDateUtcDay, "utc", locale)}
-        </span>
+        {dayLabel}
       </span>
       {details.mintLabel && (
-        <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-primary-300 min-[430px]:tw-text-xs min-[430px]:tw-leading-4">
+        <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-leading-5 tw-text-primary-300 min-[430px]:tw-text-xs min-[430px]:tw-leading-4">
           {details.mintLabel}
         </span>
       )}
@@ -348,28 +362,28 @@ export function Month({
           inline: "center",
         });
       } catch {}
-      const t = setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         el.dispatchEvent(
           new MouseEvent("click", { bubbles: true, view: window })
         );
       }, 60);
-      return () => clearTimeout(t);
+      return () => clearTimeout(timeoutId);
     }
     return undefined;
   }, [autoOpenYmd, year, month]);
 
   return (
-    <div className="tw-flex tw-min-w-0 tw-flex-col tw-rounded-2xl tw-bg-iron-950 tw-p-3 tw-shadow-lg tw-ring-1 tw-ring-white/[0.04] sm:tw-p-4">
+    <div className="tw-flex tw-min-w-0 tw-flex-col tw-rounded-2xl tw-bg-iron-950 tw-p-3 tw-shadow-lg tw-ring-1 tw-ring-iron-800 sm:tw-p-4">
       {/* Month title */}
-      <div className="tw-mb-2 tw-text-left tw-text-sm tw-font-semibold tw-text-iron-100">
+      <div className="tw-mb-2 tw-text-center tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
         {monthName} {year}
       </div>
       {/* Weekday header */}
-      <div className="tw-grid tw-grid-cols-7 tw-gap-0.5 tw-text-center tw-text-xs tw-font-medium max-[429px]:tw-grid-cols-1 max-[429px]:tw-gap-1.5">
+      <div className="tw-grid tw-grid-cols-7 tw-gap-x-1 tw-gap-y-1.5 tw-text-center tw-text-xs tw-font-medium max-[429px]:tw-grid-cols-1 max-[429px]:tw-gap-1.5">
         {weekdays.map((wd) => (
           <div
             key={wd}
-            className="tw-pb-1.5 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-400 max-[429px]:tw-hidden"
+            className="tw-pb-1.5 tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-400 max-[429px]:tw-hidden"
           >
             {t(locale, wd)}
           </div>

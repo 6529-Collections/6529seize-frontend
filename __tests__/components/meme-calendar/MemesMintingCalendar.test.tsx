@@ -31,16 +31,14 @@ describe("MemesMintingCalendar timezone toggle", () => {
     render(<MemesMintingCalendar locale="de-DE" />);
 
     expect(
-      screen.getByRole("group", { name: "Calendar timezone" })
+      screen.getByRole("tablist", { name: "Calendar timezone" })
     ).toBeInTheDocument();
 
-    const localButton = screen.getByRole("button", {
-      name: "Show local time",
-    });
-    const utcButton = screen.getByRole("button", { name: "Show UTC" });
+    const localButton = screen.getByRole("tab", { name: "Local" });
+    const utcButton = screen.getByRole("tab", { name: "UTC" });
 
-    expect(localButton).toHaveAttribute("aria-pressed", "true");
-    expect(utcButton).toHaveAttribute("aria-pressed", "false");
+    expect(localButton).toHaveAttribute("aria-selected", "true");
+    expect(utcButton).toHaveAttribute("aria-selected", "false");
     expect(screen.getByTestId("overview")).toHaveAttribute(
       "data-locale",
       "de-DE"
@@ -53,8 +51,8 @@ describe("MemesMintingCalendar timezone toggle", () => {
 
     await userEvent.click(utcButton);
 
-    expect(localButton).toHaveAttribute("aria-pressed", "false");
-    expect(utcButton).toHaveAttribute("aria-pressed", "true");
+    expect(localButton).toHaveAttribute("aria-selected", "false");
+    expect(utcButton).toHaveAttribute("aria-selected", "true");
     expect(screen.getByTestId("overview")).toHaveAttribute("data-tz", "utc");
     expect(screen.getByTestId("calendar")).toHaveAttribute("data-tz", "utc");
   });

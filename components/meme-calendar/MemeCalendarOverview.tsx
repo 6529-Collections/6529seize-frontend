@@ -41,11 +41,12 @@ import {
   ScreenshotFeedback,
   type ScreenshotStatus,
 } from "./MemeCalendarScreenshotControls";
+import MemeNumberSearch from "./MemeNumberSearch";
 
 const MAX_MINT_NUMBER = 100_000;
-const CALENDAR_INVITE_ICON_SIZE = 22;
+const CALENDAR_INVITE_ICON_SIZE = 18;
 const OVERVIEW_CARD_CLASS =
-  "tw-rounded-2xl tw-bg-iron-950 tw-shadow-lg tw-ring-1 tw-ring-white/[0.04]";
+  "tw-rounded-2xl tw-bg-iron-950 tw-shadow-lg tw-ring-1 tw-ring-iron-800";
 
 /**
  * Layout wrapper: global Local/UTC toggle + two cards
@@ -67,7 +68,7 @@ export default function MemeCalendarOverview({
     <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-5 sm:tw-gap-6">
       <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-4">
         <div className="tw-min-w-0">
-          <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px] sm:tw-leading-8">
+          <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
             {t(locale, "memeCalendar.title")}
           </h1>
         </div>
@@ -77,7 +78,7 @@ export default function MemeCalendarOverview({
             <Link
               href={getRouteHrefWithLocale({ href: "/meme-calendar", locale })}
               aria-label={t(locale, "memeCalendar.viewFullCalendarAriaLabel")}
-              className="tw-rounded-sm tw-text-sm tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300"
+              className="tw-rounded-sm tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400 tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300"
             >
               <span className="tw-whitespace-nowrap">
                 {t(locale, "memeCalendar.viewFullCalendar")}
@@ -86,7 +87,7 @@ export default function MemeCalendarOverview({
           )}
         </div>
       </div>
-      <div className="tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-2">
         <div className="tw-h-full">
           <MemeCalendarOverviewNextMint displayTz={displayTz} locale={locale} />
         </div>
@@ -111,20 +112,22 @@ interface MemeCalendarOverviewNextMintProps {
   readonly locale?: SupportedLocale | undefined;
 }
 
-const TopControls = memo(function TopControls(props: {
-  canonicalNextMintNumber: number;
-  selectedMintNumber: number;
-  onSelect: (n: number) => void;
-  mintInputRef: React.RefObject<HTMLInputElement | null>;
-  mintInputValue: string;
-  mintInputError: string;
-  onMintInputChange: (v: string) => void;
-  onMintInputSubmit: (event: FormEvent<HTMLFormElement>) => void;
-  onScreenshot: () => void;
-  isCapturing: boolean;
-  screenshotStatus: ScreenshotStatus;
-  locale: SupportedLocale;
-}) {
+interface TopControlsProps {
+  readonly canonicalNextMintNumber: number;
+  readonly selectedMintNumber: number;
+  readonly onSelect: (n: number) => void;
+  readonly mintInputRef: React.RefObject<HTMLInputElement | null>;
+  readonly mintInputValue: string;
+  readonly mintInputError: string;
+  readonly onMintInputChange: (v: string) => void;
+  readonly onMintInputSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  readonly onScreenshot: () => void;
+  readonly isCapturing: boolean;
+  readonly screenshotStatus: ScreenshotStatus;
+  readonly locale: SupportedLocale;
+}
+
+const TopControls = memo((props: TopControlsProps) => {
   const { isCapacitor } = useCapacitor();
   const {
     canonicalNextMintNumber,
@@ -141,7 +144,6 @@ const TopControls = memo(function TopControls(props: {
     locale,
   } = props;
   const mintInputId = "meme-overview-mint-input";
-  const mintInputErrorId = `${mintInputId}-error`;
   const screenshotStatusId = "meme-overview-screenshot-status";
 
   return (
@@ -155,54 +157,24 @@ const TopControls = memo(function TopControls(props: {
         aria-label={t(locale, "memeCalendar.overview.controls.nextMint")}
         variant="primary"
         size="sm"
-        className="!tw-border-white !tw-bg-white !tw-text-iron-950 disabled:!tw-cursor-default disabled:!tw-opacity-100 enabled:desktop-hover:hover:!tw-border-iron-200 enabled:desktop-hover:hover:!tw-bg-iron-200"
+        className="disabled:!tw-cursor-default disabled:!tw-opacity-100"
         onClick={() => onSelect(canonicalNextMintNumber)}
       >
         {t(locale, "memeCalendar.overview.controls.nextMint")}
       </Button>
 
-      <form
-        className="tw-min-w-0 tw-flex-1 sm:tw-flex-none"
-        noValidate
+      <MemeNumberSearch
+        id={mintInputId}
+        inputRef={mintInputRef}
+        value={mintInputValue}
+        error={mintInputError}
+        label={t(locale, "memeCalendar.overview.controls.memeNumber")}
+        submitLabel={t(locale, "memeCalendar.numberInput.submit")}
+        max={MAX_MINT_NUMBER}
+        className="!tw-w-[140px] !tw-flex-none sm:!tw-w-44"
+        onChange={onMintInputChange}
         onSubmit={onMintInputSubmit}
-      >
-        <label
-          htmlFor={mintInputId}
-          className={`tw-flex tw-h-9 tw-w-full tw-min-w-0 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-bg-white/[0.07] tw-pl-3 tw-text-xs tw-font-semibold tw-text-iron-200 tw-shadow-sm tw-shadow-black/20 tw-transition-colors focus-within:tw-border-primary-400 focus-within:tw-ring-1 focus-within:tw-ring-primary-400 ${
-            mintInputError ? "tw-border-error" : "tw-border-iron-700"
-          }`}
-        >
-          <span className="tw-shrink-0 tw-select-none tw-pr-2">
-            {t(locale, "memeCalendar.overview.controls.memeNumber")}
-          </span>
-          <input
-            id={mintInputId}
-            ref={mintInputRef}
-            type="number"
-            min={1}
-            max={MAX_MINT_NUMBER}
-            name="meme-overview-mint-input"
-            placeholder="123"
-            value={mintInputValue}
-            aria-describedby={mintInputError ? mintInputErrorId : undefined}
-            aria-invalid={mintInputError ? true : undefined}
-            onChange={(event) => {
-              const v = event.target.value.replace(/\D/g, "");
-              onMintInputChange(v);
-            }}
-            className="tw-h-8 tw-min-w-[7ch] tw-flex-1 tw-rounded-r-lg tw-border-0 tw-bg-transparent tw-px-2 tw-text-iron-50 tw-outline-none [appearance:textfield] placeholder:tw-text-iron-600 sm:tw-w-[8ch] sm:tw-flex-none [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
-          />
-        </label>
-        {mintInputError && (
-          <p
-            id={mintInputErrorId}
-            className="tw-mb-0 tw-mt-1.5 tw-text-xs tw-leading-4 tw-text-error"
-            role="alert"
-          >
-            {mintInputError}
-          </p>
-        )}
-      </form>
+      />
 
       {!isCapacitor && (
         <>
@@ -222,6 +194,7 @@ const TopControls = memo(function TopControls(props: {
     </div>
   );
 });
+TopControls.displayName = "TopControls";
 
 export function MemeCalendarOverviewNextMint({
   displayTz,
@@ -235,7 +208,7 @@ export function MemeCalendarOverviewNextMint({
   const [now, setNow] = useState(new Date());
   const [isManualSelection, setIsManualSelection] = useState(false);
   const [selectedMintNumber, setSelectedMintNumber] = useState(() => {
-    if (id != null) return id;
+    if (id !== undefined) return id;
     const upcomingInstant = getNextMintStart(new Date());
     const upcomingUtcDay = new Date(
       Date.UTC(
@@ -283,11 +256,7 @@ export function MemeCalendarOverviewNextMint({
         parsed < 1 ||
         parsed > MAX_MINT_NUMBER
       ) {
-        setMintInputError(
-          t(locale, "memeCalendar.validation.memeNumber", {
-            max: formatInteger(locale, MAX_MINT_NUMBER),
-          })
-        );
+        setMintInputError(t(locale, "memeCalendar.validation.memeNumber"));
         return;
       }
       handleMintSelection(parsed);
@@ -302,8 +271,9 @@ export function MemeCalendarOverviewNextMint({
     return () => clearInterval(tick);
   }, []);
 
+  /* eslint-disable react-hooks/set-state-in-effect, react-you-might-not-need-an-effect/no-adjust-state-on-prop-change, react-you-might-not-need-an-effect/no-chain-state-updates, react-you-might-not-need-an-effect/no-derived-state, react-you-might-not-need-an-effect/no-event-handler, react-you-might-not-need-an-effect/no-pass-data-to-parent, react-you-might-not-need-an-effect/no-pass-live-state-to-parent -- Preserve the existing synchronization between the optional controlled mint, manual selection, and the live canonical mint rollover. */
   useEffect(() => {
-    if (id != null) {
+    if (id !== undefined) {
       setSelectedMintNumber(id);
       setIsManualSelection(true);
     }
@@ -311,7 +281,7 @@ export function MemeCalendarOverviewNextMint({
 
   useEffect(() => {
     if (
-      id == null &&
+      id === undefined &&
       !isManualSelection &&
       selectedMintNumber !== canonicalNextMintNumber
     ) {
@@ -321,13 +291,14 @@ export function MemeCalendarOverviewNextMint({
 
   useEffect(() => {
     if (
-      id == null &&
+      id === undefined &&
       isManualSelection &&
       selectedMintNumber === canonicalNextMintNumber
     ) {
       setIsManualSelection(false);
     }
   }, [id, canonicalNextMintNumber, isManualSelection, selectedMintNumber]);
+  /* eslint-enable react-hooks/set-state-in-effect, react-you-might-not-need-an-effect/no-adjust-state-on-prop-change, react-you-might-not-need-an-effect/no-chain-state-updates, react-you-might-not-need-an-effect/no-derived-state, react-you-might-not-need-an-effect/no-event-handler, react-you-might-not-need-an-effect/no-pass-data-to-parent, react-you-might-not-need-an-effect/no-pass-live-state-to-parent */
 
   const mintDetails = useMemo(
     () => getMintTimelineDetails(selectedMintNumber),
@@ -390,7 +361,9 @@ export function MemeCalendarOverviewNextMint({
   const finalCountdown = countdownSuffix ? (
     <>
       {countdownText}{" "}
-      <span className="tw-text-sm tw-font-normal">{countdownSuffix}</span>
+      <span className="tw-text-sm tw-font-normal tw-leading-5">
+        {countdownSuffix}
+      </span>
     </>
   ) : (
     countdownText
@@ -473,10 +446,10 @@ export function MemeCalendarOverviewNextMint({
       >
         <div
           aria-hidden="true"
-          className="tw-pointer-events-none tw-absolute tw-right-0 tw-top-24 tw-size-64 tw-rounded-full tw-bg-primary-500/10 tw-blur-3xl sm:-tw-right-20 sm:tw-top-20 sm:tw-size-96"
+          className="tw-pointer-events-none tw-absolute tw-right-0 tw-top-24 tw-size-64 tw-rounded-full tw-bg-primary-500/[0.06] tw-blur-3xl sm:-tw-right-20 sm:tw-top-20 sm:tw-size-96"
         />
         <div className="tw-relative tw-z-10">
-          {id == null && (
+          {id === undefined && (
             <TopControls
               canonicalNextMintNumber={canonicalNextMintNumber}
               selectedMintNumber={selectedMintNumber}
@@ -493,10 +466,10 @@ export function MemeCalendarOverviewNextMint({
             />
           )}
           <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
-            <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-400">
+            <div className="tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.16em] tw-text-primary-400">
               {heading}
             </div>
-            {id != null && (
+            {id !== undefined && (
               <ScreenshotCard
                 onScreenshot={handleScreenshot}
                 isCapturing={isCapturing}
@@ -514,21 +487,21 @@ export function MemeCalendarOverviewNextMint({
               <div className="!tw-text-3xl tw-font-semibold tw-tracking-[-0.035em] tw-text-iron-50 sm:!tw-text-4xl">
                 #{formatInteger(locale, mintDetails.mintNumber)}
               </div>
-              <div className="tw-mt-1.5 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300 sm:tw-text-base sm:tw-leading-6">
+              <div className="tw-mt-1.5 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300">
                 {formatFullDateTime(mintDetails.instantUtc, displayTz, locale)}
               </div>
             </div>
             <div className="tw-min-w-0 sm:tw-pb-0.5 sm:tw-text-right">
-              <div className="tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-iron-500">
+              <div className="tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.16em] tw-text-iron-500">
                 {countdownTitle}
               </div>
-              <div className="tw-mt-1 tw-break-words tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-whitespace-nowrap sm:tw-text-2xl">
+              <div className="tw-mt-1 tw-break-words tw-text-2xl tw-font-semibold tw-leading-8 tw-tracking-tight tw-text-iron-100 sm:tw-whitespace-nowrap">
                 {finalCountdown}
               </div>
             </div>
           </div>
 
-          <div className="tw-mt-5 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-2 tw-text-sm tw-text-iron-300">
+          <div className="tw-mt-5 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-2 tw-text-sm tw-leading-5 tw-text-iron-300">
             {formatToFullDivision(mintDetails.instantUtc, locale)}
           </div>
           <ScreenshotFeedback locale={locale} status={screenshotStatus} />
@@ -536,7 +509,7 @@ export function MemeCalendarOverviewNextMint({
 
         <div
           data-ignore-screenshot
-          className="tw-relative tw-z-10 tw-mt-5 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-3"
+          className="tw-relative tw-z-10 tw-mt-5 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-3"
           dangerouslySetInnerHTML={{ __html: invitesHtml }}
         />
       </div>
@@ -637,7 +610,7 @@ function MemeCalendarOverviewUpcomingMints({
       className={`${OVERVIEW_CARD_CLASS} tw-flex tw-h-full tw-flex-col tw-p-5 sm:tw-p-6`}
     >
       <div className="tw-mb-5 tw-flex tw-min-w-0 tw-flex-col tw-gap-1 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between sm:tw-gap-4">
-        <div className="tw-min-w-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100">
+        <div className="tw-min-w-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
           {upcomingHeading}
         </div>
         <div className="tw-min-w-0 tw-text-sm tw-leading-5 tw-text-iron-400 sm:tw-max-w-[15rem] sm:tw-text-right">
@@ -647,20 +620,18 @@ function MemeCalendarOverviewUpcomingMints({
       </div>
 
       <div className="tw-max-h-96 tw-flex-1 tw-overflow-x-auto tw-overflow-y-auto tw-pr-3 tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
-        <table className="tw-w-full tw-min-w-0 tw-border-collapse tw-text-sm sm:tw-min-w-[22rem]">
+        <table className="tw-w-full tw-min-w-0 tw-border-collapse tw-text-sm tw-leading-5 sm:tw-min-w-[22rem]">
           <caption className="tw-sr-only">{upcomingHeading}</caption>
-          <thead>
-            <tr className="tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.08] tw-text-left tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-500">
-              <th className="tw-pb-2.5" scope="col">
+          <thead className="tw-sr-only">
+            <tr>
+              <th scope="col">
                 {t(locale, "memeCalendar.overview.upcoming.memeNumber")}
               </th>
-              <th className="tw-pb-2.5" scope="col">
+              <th scope="col">
                 {t(locale, "memeCalendar.overview.upcoming.mintTime")}
               </th>
-              <th className="tw-pb-2.5 tw-text-right" scope="col">
-                <span className="tw-sr-only">
-                  {t(locale, "memeCalendar.overview.upcoming.calendarLinks")}
-                </span>
+              <th scope="col">
+                {t(locale, "memeCalendar.overview.upcoming.calendarLinks")}
               </th>
             </tr>
           </thead>
@@ -675,7 +646,7 @@ function MemeCalendarOverviewUpcomingMints({
               filteredRows.map(({ utcDay, instantUtc, meme }) => (
                 <tr
                   key={ymd(utcDay)}
-                  className="tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.05] last:tw-border-b-0"
+                  className="tw-h-12 tw-border-0 tw-border-b tw-border-solid tw-border-iron-800/80 last:tw-border-b-0"
                 >
                   <td className="tw-py-3 tw-font-medium tw-text-primary-300">
                     #{formatInteger(locale, meme)}
@@ -743,6 +714,7 @@ function formatDurationParts(
   locale: SupportedLocale
 ): string {
   const segments: string[] = [];
+  const secondsUnitKey = "memeCalendar.overview.duration.seconds";
   const segment = (
     value: number,
     unitKey:
@@ -757,21 +729,21 @@ function formatDurationParts(
       segment(parts.d, "memeCalendar.overview.duration.days"),
       segment(parts.h, "memeCalendar.overview.duration.hours"),
       segment(parts.m, "memeCalendar.overview.duration.minutes"),
-      segment(parts.s, "memeCalendar.overview.duration.seconds")
+      segment(parts.s, secondsUnitKey)
     );
   } else if (parts.h > 0) {
     segments.push(
       segment(parts.h, "memeCalendar.overview.duration.hours"),
       segment(parts.m, "memeCalendar.overview.duration.minutes"),
-      segment(parts.s, "memeCalendar.overview.duration.seconds")
+      segment(parts.s, secondsUnitKey)
     );
   } else if (parts.m > 0) {
     segments.push(
       segment(parts.m, "memeCalendar.overview.duration.minutes"),
-      segment(parts.s, "memeCalendar.overview.duration.seconds")
+      segment(parts.s, secondsUnitKey)
     );
   } else {
-    segments.push(segment(parts.s, "memeCalendar.overview.duration.seconds"));
+    segments.push(segment(parts.s, secondsUnitKey));
   }
   return segments.join(" : ");
 }
