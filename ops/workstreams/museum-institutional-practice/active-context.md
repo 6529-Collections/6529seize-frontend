@@ -17,7 +17,7 @@
   Post-merge source run `30922946613` passed the full Museum validator and the
   deterministic Ubuntu and Windows suites.
 - Frontend branch: `codex/museum-institutional-practice-v2-fe`, merged cleanly
-  onto exact frontend main `d608bf6b606ded9021d1a74e873bc8c6cc129ba4`.
+  onto exact frontend main `330aecff5ecae731b147d69b7ed5340cc15c6b4f`.
   Ready frontend PR #3588 is open and under exact-head review.
 - Publication boundary: one comparative overview, twenty-seven profiles, one
   adjacent-practice study, the public scholarship and editorial standard, and
@@ -56,8 +56,13 @@
   Tailwind prefix. The corrected study renders the four-group directory after
   its essay; all 27 links are asserted. Knip, 72 focused cases, lint,
   typechecking, and the exact optimized build pass. Desktop and mobile captures
-  show the directory without overflow. Fresh PR review, staging, and production
-  qualification remain pending.
+  show the directory without overflow. A later exact-merge-tree run passed the
+  build, smoke, and critical-shell packs but correctly failed closed when its
+  unauthenticated GitHub moving-ref lookup could not verify the source release.
+  The Museum browser gate now resolves one exact source commit before starting
+  its read-only server; the failed desktop/mobile case passes against canonical
+  commit `66c9eb9fa8c1512ca9450108151d2d7a037c4f31`. Fresh exact-head review,
+  staging, and production qualification remain pending.
 
 ## Previous qualified release
 

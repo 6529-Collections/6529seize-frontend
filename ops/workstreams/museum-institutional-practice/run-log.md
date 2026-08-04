@@ -363,3 +363,16 @@
   desktop and mobile captures show the four-group directory at 1,440 x 1,000
   and 390 x 844; all 27 links resolve, the exact canonical source is present,
   and mobile remains within its 375-pixel document width.
+- Exact merged-tree App PR CI run `30933048291` passed the production build,
+  smoke pack, and critical-shell pack, then failed closed on the first Museum
+  route because its unauthenticated moving-ref lookup could not verify the
+  canonical GitHub release. Desktop and mobile both rendered the intended
+  unavailable state; the trace showed no page-level regression.
+- The browser gate now resolves the Museum repository's `main` ref once with
+  `git ls-remote`, requires one exact forty-character commit, and gives that
+  immutable commit only to the read-only Museum Playwright server. Production
+  continues to resolve canonical `main` dynamically. The formerly failing
+  study-index case passes at desktop and mobile against exact source
+  `66c9eb9fa8c1512ca9450108151d2d7a037c4f31`; 69 focused unit and workflow
+  cases, lint, changed typechecking, workflow security, secret scanning,
+  formatting, and the portable diff check also pass.

@@ -452,6 +452,12 @@ describe("testing strategy CI plan", () => {
       "needs.plan.outputs.playwright_museum_required == 'true'"
     );
     expect(workflow).toContain(
+      "Resolve exact Museum publication for Playwright"
+    );
+    expect(workflow).toContain(
+      "MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.commit }}"
+    );
+    expect(workflow).toContain(
       "./bin/6529 run test:e2e:museum-institutional-practice"
     );
 
