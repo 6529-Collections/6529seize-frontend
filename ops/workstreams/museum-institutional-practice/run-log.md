@@ -131,3 +131,45 @@
   manuscript syntax.
 - Parser follow-up validation passed 33/33 route and publication tests,
   changed lint and typecheck (1,264 files), and the portable diff check.
+
+## 2026-08-04 frontend release and production hardening
+
+- Frontend PR #3569 reached exact head
+  `d14c248df11a6873940c188dac2ffffbd99587ff` with every configured quality,
+  security, DCO, review-bot, build, and 32-route browser check green. It
+  squash-merged as `655b5408b68bbdac79249f4531c196349eff7d52`.
+- Staging composition `6d3ceba25b2dccf258f62adcff511516e0b37fea`
+  preserved the existing shared staging head and added exact production main
+  as its second parent. Staging deploy run `30883469768` passed, automatic
+  staging E2E run `30884413504` passed, and the independent institutional-
+  practice pack passed all 32 desktop/mobile routes in 255.3 seconds.
+- Owning staging pixel review covered the study, Serpentine Arts Technologies,
+  the source register, and Stories & Research at 1,440 by 1,000 and exact 390
+  by 844 viewports. Source commit, headings, native shell, and page widths were
+  correct; no visual or editorial hold remained.
+- Production deploy run `30885146909` passed on exact main. Three independent
+  `/api/version` readbacks returned the same runtime and announced SHA with
+  `stale:false`. The public study and profile repeated the staging pixel,
+  source, heading, and width checks.
+- The first production pack exposed two distinct background-network failures.
+  The browser blocked Coinbase's nonessential analytics transport at
+  `cca-lite.coinbase.com`; its exact SDK diagnostic is now classified as
+  benign while every other host remains actionable. Subsequent failures were
+  first-party 502 responses from speculative Next.js RSC prefetches for Museum
+  shell routes such as Collection, Artists, and Programs. Shared assets also
+  returned isolated 502 responses during the early post-deploy interval.
+- The gate was not weakened for first-party failures. Diagnostics now retain
+  exact 5xx method and URL evidence. A 20-repeat mobile profile stress run
+  passed 20/20 and a five-endpoint watch passed 50/50, but a later full sweep
+  still caught a background Collection RSC 502. The product follow-up disables
+  speculative prefetch on the Museum shell and institutional-study links,
+  reducing needless server work while preserving ordinary navigation.
+- Follow-up local validation passed 19 focused shell, route, and diagnostic
+  tests; changed lint and typecheck (1,264 files); the portable diff check; and
+  an exact optimized production build in 425.2 seconds. No manuscript, source
+  identity, visible copy, layout, or styling changed.
+- Follow-up review correctly observed that collected 5xx responses were only
+  appended to a console-error failure. The Museum acceptance pack now fails on
+  every captured 5xx even when the browser emits no console message. All four
+  internal routes on Stories & Research also opt out of speculative prefetch,
+  and route-level tests preserve the boundary beyond the shared-shell test.
