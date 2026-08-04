@@ -24,6 +24,9 @@ import {
 
 import { containsDisallowedLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
 import { getMentionedGroupsFromEditorState } from "@/components/drops/create/lexical/utils/groupMentionDetection";
+import { getReferencedNftsFromEditorState } from "@/components/drops/create/lexical/utils/nftReferenceDetection";
+import { getMentionedUsersFromEditorState } from "@/components/drops/create/lexical/utils/userMentionDetection";
+import { getMentionedWavesFromEditorState } from "@/components/drops/create/lexical/utils/waveMentionDetection";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import { WsMessageType } from "@/helpers/Types";
@@ -287,6 +290,22 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         : [],
     [canMentionAll, editorState]
   );
+  // Derived from the editor rather than from the session pick-registry: mention
+  // nodes keep their profile id across the editor-state JSON a draft is stored
+  // as, so a restored draft still submits real mentions instead of dead
+  // `@[handle]` text.
+  const currentPartMentionedUsers = useMemo(
+    () => (editorState ? getMentionedUsersFromEditorState(editorState) : []),
+    [editorState]
+  );
+  const currentPartMentionedWaves = useMemo(
+    () => (editorState ? getMentionedWavesFromEditorState(editorState) : []),
+    [editorState]
+  );
+  const currentPartReferencedNfts = useMemo(
+    () => (editorState ? getReferencedNftsFromEditorState(editorState) : []),
+    [editorState]
+  );
 
   const sendTyping = React.useCallback(() => {
     send(WsMessageType.USER_IS_TYPING, { wave_id: wave.id });
@@ -437,6 +456,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     address,
     canMentionAll,
     currentPartMentionedGroups,
+    currentPartMentionedUsers,
+    currentPartMentionedWaves,
+    currentPartReferencedNfts,
     submitting,
     setDrop,
     setFiles,

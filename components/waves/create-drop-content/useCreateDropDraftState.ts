@@ -15,6 +15,12 @@ import { getMentionedGroupsFromParts } from "@/helpers/waves/drop-group-mentions
 import type { EditorState } from "lexical";
 import type { Dispatch, SetStateAction } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  mergeMentionedUsers,
+  type EditorMentionedUser,
+} from "@/components/drops/create/lexical/utils/userMentionDetection";
+import { mergeMentionedWaves } from "@/components/drops/create/lexical/utils/waveMentionDetection";
+import { mergeReferencedNfts } from "@/components/drops/create/lexical/utils/nftReferenceDetection";
 import type { CreateDropInputHandles } from "../CreateDropInput";
 import type { CreateDropPollDraft } from "../CreateDropPoll";
 import {
@@ -48,6 +54,9 @@ export const useCreateDropDraftState = ({
   address,
   canMentionAll,
   currentPartMentionedGroups,
+  currentPartMentionedUsers,
+  currentPartMentionedWaves,
+  currentPartReferencedNfts,
   submitting,
   setDrop,
   setFiles,
@@ -78,6 +87,15 @@ export const useCreateDropDraftState = ({
   readonly address: string | null | undefined;
   readonly canMentionAll: boolean;
   readonly currentPartMentionedGroups: ApiDropGroupMention[];
+  /**
+   * Mentions read out of the editor itself. Authoritative over the session
+   * pick-registry, which does not survive a draft restore.
+   */
+  readonly currentPartMentionedUsers: EditorMentionedUser[];
+  /** Wave mentions restored from the editor, including their persisted IDs. */
+  readonly currentPartMentionedWaves: MentionedWave[];
+  /** NFT references restored from the editor, including contract and token. */
+  readonly currentPartReferencedNfts: ReferencedNft[];
   readonly submitting: boolean;
   readonly setDrop: Dispatch<SetStateAction<CreateDropConfig | null>>;
   readonly setFiles: Dispatch<SetStateAction<File[]>>;
@@ -254,9 +272,18 @@ export const useCreateDropDraftState = ({
         existingMentions,
         existingNfts,
         existingWaves,
-        mentionedUsers: mentionedUsersRef.current,
-        referencedNfts,
-        mentionedWaves,
+        mentionedUsers: mergeMentionedUsers(
+          currentPartMentionedUsers,
+          mentionedUsersRef.current
+        ),
+        referencedNfts: mergeReferencedNfts(
+          currentPartReferencedNfts,
+          referencedNfts
+        ),
+        mentionedWaves: mergeMentionedWaves(
+          currentPartMentionedWaves,
+          mentionedWaves
+        ),
       });
 
     return createCurrentDrop(
