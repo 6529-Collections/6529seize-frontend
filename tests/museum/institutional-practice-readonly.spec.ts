@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 import {
   expect,
@@ -97,6 +97,39 @@ const EDITORIAL_ROUTE: StudyRoute = {
   title: "Writing the 6529 Network Museum",
 };
 
+const CASEY_ARTIST_ROUTE: StudyRoute = {
+  path: "/museum/network/artists/casey-reas",
+  sourcePath:
+    "records/accessions/6529NM.2026.001/public/casey-reas-artist-practice.md",
+  title: "Casey REAS",
+};
+
+const CASEY_GIFT_ROUTE: StudyRoute = {
+  path: "/museum/network/gifts/6529NM.2026.001",
+  sourcePath:
+    "records/accessions/6529NM.2026.001/public/gift-into-public-trust.md",
+  title: "Gift into Public Trust",
+};
+
+const CASEY_SOURCE_ROUTE: StudyRoute = {
+  path: "/museum/network/stories/source-and-chronology",
+  sourcePath:
+    "records/accessions/6529NM.2026.001/public/source-and-chronology-matrix.md",
+  title: "Casey Reas: Sources and chronology",
+};
+
+const KEYS_AND_GATES_ROUTE: StudyRoute = {
+  path: "/museum/network/programs/6529NM-AP-01",
+  sourcePath: "records/programs/6529NM-AP-01/program.json",
+  title: "Keys and Gates",
+};
+
+const KEYS_AND_GATES_OBJECT_ROUTE: StudyRoute = {
+  path: "/museum/network/objects/6529NM-AP-01-OUT-001",
+  sourcePath: "records/programs/6529NM-AP-01/outcomes/OUT-001.json",
+  title: "Take the Key!",
+};
+
 const PROFILE_ROUTES: readonly StudyRoute[] = PROFILES.map(([slug, title]) => ({
   path: `${STUDY_PATH}/${slug}`,
   sourcePath: `records/institutional-practice/profiles/${slug}.md`,
@@ -140,6 +173,26 @@ async function expectSafeLinks(page: Page) {
   );
 
   expect(problems, problems.join("\n")).toEqual([]);
+}
+
+async function expectImagesLoaded(images: Locator) {
+  const count = await images.count();
+  for (let index = 0; index < count; index += 1) {
+    const image = images.nth(index);
+    await image.scrollIntoViewIfNeeded();
+    await expect
+      .poll(
+        () =>
+          image.evaluate(
+            (node) =>
+              node instanceof HTMLImageElement &&
+              node.complete &&
+              node.naturalWidth > 0
+          ),
+        { timeout: 30_000 }
+      )
+      .toBe(true);
+  }
 }
 
 async function expectFreshExactSource(
@@ -273,6 +326,9 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     await expect(
       page.locator(`a[href="${EDITORIAL_ROUTE.path}"]`).first()
     ).toBeVisible();
+    await expect(page.locator("body")).not.toContainText(
+      /For this edition|retains fourteen|adds thirteen/iu
+    );
   });
 
   for (const profile of PROFILE_ROUTES) {
@@ -305,7 +361,7 @@ test.describe("Museum institutional-practice publication @surface @large @readon
   }) => {
     sourceCommit = await expectStudyRoute(page, EDITORIAL_ROUTE, sourceCommit);
     await expect(
-      page.getByText("Forms demonstrated in the comparative study", {
+      page.getByText("3.3 Forms demonstrated in the comparative study", {
         exact: true,
       })
     ).toBeVisible();
@@ -318,5 +374,77 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     expect(
       await page.locator('main a[href^="https://"]').count()
     ).toBeGreaterThan(50);
+  });
+
+  test("publishes the Casey artist and gift without production labels", async ({
+    page,
+  }) => {
+    sourceCommit = await expectStudyRoute(
+      page,
+      CASEY_ARTIST_ROUTE,
+      sourceCommit
+    );
+    await expect(page.locator("body")).not.toContainText(/Standfirst/iu);
+    const artistImages = page.locator("main figure img");
+    await expect(artistImages).toHaveCount(7);
+    await expectImagesLoaded(artistImages);
+
+    sourceCommit = await expectStudyRoute(page, CASEY_GIFT_ROUTE, sourceCommit);
+    await expect(page.locator("body")).not.toContainText(/Standfirst/iu);
+    const giftImages = page.locator("main figure img");
+    await expect(giftImages).toHaveCount(7);
+    await expectImagesLoaded(giftImages);
+  });
+
+  test("publishes the edited Casey source and chronology record", async ({
+    page,
+  }) => {
+    sourceCommit = await expectStudyRoute(
+      page,
+      CASEY_SOURCE_ROUTE,
+      sourceCommit
+    );
+    await expect(page.locator("body")).not.toContainText(
+      /shared source, chronology, and factual-boundary matrix/iu
+    );
+    await expect(page.locator("main table").first()).toBeVisible();
+  });
+
+  test("publishes Keys and Gates as an art-led program", async ({ page }) => {
+    sourceCommit = await expectStudyRoute(
+      page,
+      KEYS_AND_GATES_ROUTE,
+      sourceCommit
+    );
+    const programImages = page.locator('main img[alt*=" by "]');
+    await expect(programImages).toHaveCount(16);
+    await expectImagesLoaded(programImages);
+    await expect(
+      page.getByRole("heading", {
+        level: 2,
+        name: "Program history and curatorial record",
+      })
+    ).toBeVisible();
+    await expect(page.getByText("Selected; unminted")).toHaveCount(16);
+  });
+
+  test("publishes each Keys and Gates selection as a complete work page", async ({
+    page,
+  }) => {
+    sourceCommit = await expectStudyRoute(
+      page,
+      KEYS_AND_GATES_OBJECT_ROUTE,
+      sourceCommit
+    );
+    await expect(
+      page.getByRole("img", { name: "Take the Key! by GulYildiz" })
+    ).toBeVisible();
+    await expect(page.getByText("Selected; unminted")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 2, name: "Artist statement" })
+    ).toBeVisible();
+    await expect(page.locator("body")).toContainText(
+      "a Museum preservation copy has not yet been recorded"
+    );
   });
 });

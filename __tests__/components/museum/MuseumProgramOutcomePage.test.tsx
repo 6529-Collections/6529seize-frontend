@@ -45,9 +45,7 @@ describe("MuseumProgramOutcomePage", () => {
       screen.getByText("A door becomes a question of passage.")
     ).toBeInTheDocument();
     expect(screen.getByText(/Selected place 1/u)).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "Source record" })
-    ).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Source record" })).toHaveAttribute(
       "href",
       expect.stringContaining(`/blob/${"a".repeat(40)}/`)
     );

@@ -142,8 +142,7 @@ describe("Museum domain mapping", () => {
     expect(view.programs[0]?.curatorialFrame).toBe("A program.");
     expect(view.programs[0]?.selectedWorks[0]).toEqual(
       expect.objectContaining({
-        imageUrl:
-          "https://d3lqz0a4bldqgf.cloudfront.net/drops/work.jpg",
+        imageUrl: "https://d3lqz0a4bldqgf.cloudfront.net/drops/work.jpg",
         imageMimeType: "image/jpeg",
       })
     );
@@ -173,8 +172,7 @@ describe("Museum domain mapping", () => {
           accessionLotId: null,
           artistStatement: "A legacy artist statement.",
           programId: "6529NM-AP-01",
-          imageUrl:
-            "https://d3lqz0a4bldqgf.cloudfront.net/drops/work.jpg",
+          imageUrl: "https://d3lqz0a4bldqgf.cloudfront.net/drops/work.jpg",
           selectionPlace: 1,
           selectionDate: "2026-07-09T12:00:00Z",
           selectionSourceUrl:

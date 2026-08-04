@@ -69,6 +69,15 @@ export default async function MuseumScholarshipAndWritingPage() {
           sourcePath={document.sourcePath}
         />
       </div>
+      <div className="tw-mt-10 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-6">
+        <Link
+          href="/museum/network/stories/a-field-of-practice"
+          prefetch={false}
+          className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+        >
+          {t(DEFAULT_LOCALE, "museum.network.institutionalPractice.readStudy")}
+        </Link>
+      </div>
     </article>
   );
 }

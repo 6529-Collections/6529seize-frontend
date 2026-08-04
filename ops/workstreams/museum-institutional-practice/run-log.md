@@ -289,3 +289,45 @@
   Production E2E workflow run; none is claimed. The read-only production packs
   above are the explicit qualification evidence. No manuscript, source
   identity, visible copy, layout, or styling changed in the hardening release.
+
+## 2026-08-04 living-study expansion and complete copy desk
+
+- Museum source PRs #23 and #24 expanded the same living comparative study to
+  twenty-seven institutional profiles, added adjacent digital-art practice,
+  published *Writing the 6529 Network Museum*, and applied its editorial
+  standard across the complete public Museum corpus.
+- Final source PR #25 replaced the last residual use of `edition` for the
+  living study with `study`. It merged as exact canonical commit
+  `66c9eb9fa8c1512ca9450108151d2d7a037c4f31` after all three portable Museum
+  validation jobs passed and review had no unresolved thread.
+- Post-merge source workflow `30922946613` passed the full Museum validator
+  and both deterministic platform suites on that exact canonical commit.
+- The frontend publication probe resolves the canonical source atomically at
+  247 manifest entries, 57 public documents, and 27 profiles. The manifest
+  commitments are
+  `sha256:71458b77d145bd3592e4f0ee0a2d8c1c49c96a71782ab200d9430f36b4dcad8b`
+  and
+  `0xcdab557dacba52ab6752096436c01bba3b6c0c0afcd0c7e94a904ba1d492b5e3`.
+- Rendered review covers the study, writing standard, representative profile,
+  Casey Reas artist/gift/source pages, About, Keys and Gates program, and a
+  selected unminted outcome at desktop and exact 390 x 844 mobile widths.
+  Every Keys and Gates selection now has its governed image and object page.
+- The exact-source optimized production build passed in 463 seconds. The
+  writing-standard cross-link passed its two focused release-browser cases.
+  The complete desktop/mobile acceptance pack then passed 70/70 sequentially
+  in 7.1 minutes, with every console error, first-party 5xx, unsafe link,
+  source mismatch, unloaded image, and horizontal overflow remaining fatal.
+- An earlier two-worker pass reached 66/70 before the public settings endpoint
+  returned HTTP 429 on the Casey desktop case; the isolated Casey replay passed
+  and the serial full replay eliminated local rate pressure without weakening
+  diagnostics. A separate accidental all-project focused invocation passed all
+  five web targets but correctly failed the two simulated native shells on
+  their known unavailable push-notification plugins; those simulators are not
+  part of the Museum web release contract.
+- Final retained screenshots cover Stories, the study, writing standard, Casey
+  artist/gift/source pages, Keys and Gates, an individual selected outcome, and
+  About at 1,440 x 1,000 and 390 x 844. They resolve exact canonical source
+  `66c9eb9fa8c1...`, start at `scrollY=0`, remain within the viewport, and show
+  no browser error. Superseded local captures were removed before staging.
+- PR review, staging qualification, and production qualification remain the
+  open release actions.

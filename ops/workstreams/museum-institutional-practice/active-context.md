@@ -7,15 +7,17 @@
   *Writing the 6529 Network Museum* as a public scholarship and editorial
   standard; apply that standard across the complete public Museum corpus; and
   qualify one atomic source/frontend release through staging and production.
-- Museum source PRs: expansion PR #23 and rendered-copy correction PR #24 are
-  merged. Exact canonical main is
-  `72bf603ad63d60cfc00d6d875c6d191d83a6fdf5`.
+- Museum source PRs: expansion PR #23, rendered-copy correction PR #24, and
+  final terminology correction PR #25 are merged. Exact canonical main is
+  `66c9eb9fa8c1512ca9450108151d2d7a037c4f31`.
 - Canonical source release: 247 manifest entries;
-  `sha256:b4e810f45576d0c3b03733b5d399dc8ff1323281460bbfdf040eb185bb3bb90a`;
+  `sha256:71458b77d145bd3592e4f0ee0a2d8c1c49c96a71782ab200d9430f36b4dcad8b`;
   Keccak-256
-  `0x9f6706921e1bb20e20c608e2d80a00db9845c3afb6113563c94bc7709ddc21f2`.
+  `0xcdab557dacba52ab6752096436c01bba3b6c0c0afcd0c7e94a904ba1d492b5e3`.
+  Post-merge source run `30922946613` passed the full Museum validator and the
+  deterministic Ubuntu and Windows suites.
 - Frontend branch: `codex/museum-institutional-practice-v2-fe`, merged cleanly
-  onto exact frontend main `456e7a7f3519eaffb8e8d4981436290e467a1412`.
+  onto exact frontend main `9b9e3df3be80a6f987bce9d1f31b1b2846db3424`.
   No frontend PR has been opened for this expansion yet.
 - Publication boundary: one comparative overview, twenty-seven profiles, one
   adjacent-practice study, the public scholarship and editorial standard, and
@@ -26,19 +28,24 @@
 - Source/contribution boundary: every new page inherits the exact-commit source
   panel, editable main-branch path, and contributor guide. Invalid or partial
   publication state suppresses exact-source and edit claims.
-- Local frontend validation: 69 Museum suites / 218 tests and the 104 focused
+- Local frontend validation: 70 Museum suites / 220 tests and the 104 focused
   publication/route tests pass; changed lint, changed typecheck, Playwright
   typecheck, help-index sync (202 records), and React Doctor 100/100 pass.
-  The exact canonical-main probe resolves source commit `72bf603ad63d...`, 57
+  The exact canonical-main probe resolves source commit `66c9eb9fa8c1...`, 57
   public documents, 27 institutional profiles, all 31 institutional-practice
   manuscripts, and the canonical commitments above. Visible production labels
   are absent from the Casey artist and collection manuscripts, and the public
   source title is *Casey Reas: Sources and chronology*.
 - Final rendered-product correction: Keys and Gates now uses the governed
-  submission images, links every selected work to a working object page, and
+  submission images, links every selected work to a complete object page, and
   presents artist statement, selection evidence, rights status, and source
-  media without implying mint, acquisition, custody, or accession. Optimized
-  build, retained final browser evidence, PR/bot review, staging, and production
+  media without implying mint, acquisition, custody, or accession. The exact
+  optimized production build passed in 463 seconds. The strict sequential
+  desktop/mobile acceptance replay passed 70/70 routes, including all 27
+  institutional profiles and all 16 Keys and Gates selected-work images.
+  Retained 1,440 x 1,000 and 390 x 844 evidence resolves exact source
+  `66c9eb9fa8c1...`, has no console errors or horizontal overflow, and was
+  reviewed at the top of each route. PR/bot review, staging, and production
   qualification remain pending.
 
 ## Previous qualified release

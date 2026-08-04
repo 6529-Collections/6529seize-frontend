@@ -25,15 +25,12 @@ describe("Museum presentation semantics", () => {
   });
 
   it("presents an unverified program selection as pending Museum work", () => {
-    const status =
-      "selection_complete_acquisition_and_accession_unverified";
+    const status = "selection_complete_acquisition_and_accession_unverified";
 
     expect(displayMuseumStatus(status)).toBe(
       "Selection complete; acquisition and accession unverified"
     );
     expect(statusTone(status)).toBe("warning");
-    expect(displayMuseumStatus("selected_unminted")).toBe(
-      "Selected; unminted"
-    );
+    expect(displayMuseumStatus("selected_unminted")).toBe("Selected; unminted");
   });
 });

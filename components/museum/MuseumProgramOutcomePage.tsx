@@ -140,7 +140,7 @@ export function MuseumProgramOutcomePage({
                 href={outcome.selectionSourceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
               >
                 {t(DEFAULT_LOCALE, "museum.network.objects.openSelection")}
               </a>
@@ -150,7 +150,7 @@ export function MuseumProgramOutcomePage({
                 href={sourceHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                className="hover:tw-text-primary-200 tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
               >
                 {t(DEFAULT_LOCALE, "museum.network.detail.sourceRecord")}
               </a>

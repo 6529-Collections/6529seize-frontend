@@ -342,6 +342,9 @@ describe("Museum institutional-practice reading room", () => {
       })
     ).toBeInTheDocument();
     expectNextLinkWithoutPrefetch("/museum/network/stories");
+    expectNextLinkWithoutPrefetch(
+      "/museum/network/stories/a-field-of-practice"
+    );
   });
 
   it("renders the comparative study as one governed document hierarchy", async () => {
