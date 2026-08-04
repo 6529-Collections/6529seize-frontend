@@ -4363,13 +4363,14 @@ describe("sentry-client-filters", () => {
   });
 
   it.each([
-    ["latest", [5517, 3808, 1208] as const],
-    ["earlier", [6257, 4139, 1325] as const],
+    ["Instagram 439.x", [5421, 3712, 1142] as const, "app:///"],
+    ["Instagram 438.x", [5517, 3808, 1208] as const, "app:///profile/rep"],
+    ["Instagram 436.x/437.x", [6257, 4139, 1325] as const, "app:///waves/id"],
   ])(
-    "filters the %s Instagram iOS page-hide bridge signature",
-    (_cohort, columns) => {
+    "filters the %s iOS page-hide bridge signature",
+    (_cohort, columns, documentPath) => {
       const event = createInstagramPageHideBridgeEvent({
-        frames: createInstagramPageHideBridgeFrames(columns),
+        frames: createInstagramPageHideBridgeFrames(columns, documentPath),
       });
 
       const result = shouldFilterInstagramPageHideBridgeError(event);
@@ -4377,6 +4378,19 @@ describe("sentry-client-filters", () => {
       expect(result).toBe(true);
     }
   );
+
+  it("keeps the Instagram 439.x bridge shape with a changed coordinate", () => {
+    const event = createInstagramPageHideBridgeEvent({
+      frames: createInstagramPageHideBridgeFrames(
+        [5422, 3712, 1142],
+        "app:///"
+      ),
+    });
+
+    const result = shouldFilterInstagramPageHideBridgeError(event);
+
+    expect(result).toBe(false);
+  });
 
   it.each(instagramPageHideBridgeNearMisses)(
     "keeps an Instagram page-hide bridge near-miss with %s",

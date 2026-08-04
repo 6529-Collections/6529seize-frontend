@@ -1438,19 +1438,32 @@ describe("instrumentation-client", () => {
   });
 
   it.each([
-    ["latest", [5517, 3808, 1208] as const],
-    ["earlier", [6257, 4139, 1325] as const],
+    ["Instagram 439.x", [5421, 3712, 1142] as const, "app:///"],
+    ["Instagram 438.x", [5517, 3808, 1208] as const, "app:///profile/rep"],
+    ["Instagram 436.x/437.x", [6257, 4139, 1325] as const, "app:///waves/id"],
   ])(
-    "drops the %s raw Instagram iOS page-hide bridge signature",
-    (_cohort, columns) => {
+    "drops the %s raw iOS page-hide bridge signature",
+    (_cohort, columns, documentPath) => {
       const beforeSend = loadBeforeSend();
-      const event = createInstagramPageHideBridgeEvent(columns);
+      const event = createInstagramPageHideBridgeEvent(columns, documentPath);
 
       const result = beforeSend(event);
 
       expect(result).toBeNull();
     }
   );
+
+  it("keeps the Instagram 439.x bridge shape with a changed coordinate", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createInstagramPageHideBridgeEvent(
+      [5422, 3712, 1142],
+      "app:///"
+    );
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
 
   it("keeps an Instagram page-hide bridge error with changed coordinates", () => {
     const beforeSend = loadBeforeSend();

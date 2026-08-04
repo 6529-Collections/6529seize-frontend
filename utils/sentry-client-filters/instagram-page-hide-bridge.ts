@@ -18,6 +18,7 @@ const iosUserAgentPattern = /\b(?:iphone|ipad|ipod)\b/i;
 const instagramPageHideBridgeErrorMessage =
   "undefined is not an object (evaluating 'window.webkit.messageHandlers')";
 const instagramPageHideBridgeFrameColumnSignatures = new Set([
+  "5421:3712:1142",
   "5517:3808:1208",
   "6257:4139:1325",
 ]);
