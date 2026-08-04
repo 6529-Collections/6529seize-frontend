@@ -55,6 +55,7 @@ export const QuickDmChat = ({
   const queryClient = useQueryClient();
   const { directMessages, registerWave } = useMyStream();
   const markDirectMessageRead = directMessages.markWaveRead;
+  const restoreDirectMessageUnreadCount = directMessages.restoreWaveUnreadCount;
   const { updateEligibility } = useWaveEligibility();
   const markWaveNotificationsRead = useMarkWaveNotificationsRead();
   const { data: wave, isFetching, isError } = useWaveData({ waveId });
@@ -63,7 +64,10 @@ export const QuickDmChat = ({
   });
   const avatar = getQuickDmAvatarSource(title, listWave, wave);
   const listUnreadCount = listWave ? getUnreadCount(listWave) : 0;
-  const hasMarkedInitialReadRef = useRef<string | null>(null);
+  const lastAutomaticReadAttemptRef = useRef<{
+    readonly unreadCount: number;
+    readonly waveId: string;
+  } | null>(null);
   let chatContent: React.ReactNode = null;
 
   const markQuickDmRead = useCallback(() => {
@@ -74,18 +78,38 @@ export const QuickDmChat = ({
       return;
     }
 
-    markDirectMessageRead(waveId);
-    void markWaveNotificationsRead(waveId).catch(() => undefined);
-  }, [markDirectMessageRead, markWaveNotificationsRead, waveId]);
+    const previousUnreadCount = markDirectMessageRead(waveId);
+    void (async () => {
+      try {
+        const result = await markWaveNotificationsRead(waveId);
+        if (result !== "sent") {
+          restoreDirectMessageUnreadCount(waveId, previousUnreadCount);
+        }
+      } catch (error: unknown) {
+        console.error("Failed to mark direct message as read", error);
+        restoreDirectMessageUnreadCount(waveId, previousUnreadCount);
+      }
+    })();
+  }, [
+    markDirectMessageRead,
+    markWaveNotificationsRead,
+    restoreDirectMessageUnreadCount,
+    waveId,
+  ]);
 
   useEffect(() => {
+    const previousAttempt = lastAutomaticReadAttemptRef.current;
     const shouldMarkRead =
-      hasMarkedInitialReadRef.current !== waveId || listUnreadCount > 0;
+      previousAttempt?.waveId !== waveId ||
+      (listUnreadCount > 0 && previousAttempt.unreadCount !== listUnreadCount);
 
-    hasMarkedInitialReadRef.current = waveId;
     if (!shouldMarkRead) {
       return;
     }
+    lastAutomaticReadAttemptRef.current = {
+      unreadCount: listUnreadCount,
+      waveId,
+    };
 
     queueMicrotask(markQuickDmRead);
   }, [listUnreadCount, markQuickDmRead, waveId]);

@@ -4,6 +4,7 @@ import {
   ProcessIncomingDropType,
 } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { DropSize } from "@/helpers/waves/drop.helpers";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 
 const mockSetQueriesData = jest.fn();
 const mockSetQueryData = jest.fn();
@@ -35,6 +36,7 @@ jest.mock("@/services/api/common-api", () => ({
 
 jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: jest.fn(() => "test-jwt"),
+  PROFILE_SWITCHED_EVENT: "6529-profile-switched",
 }));
 
 jest.mock("jwt-decode", () => ({
@@ -619,6 +621,97 @@ describe("useWaveRealtimeUpdater", () => {
       endpoint: "notifications/wave/wave1/read",
       headers: { Authorization: "Bearer test-jwt" },
     });
+  });
+
+  it("discards a canonical fetch result after the profile switches", async () => {
+    let resolveCanonical!: (drop: ApiDrop) => void;
+    const canonicalPromise = new Promise<ApiDrop>((resolve) => {
+      resolveCanonical = resolve;
+    });
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "stale-profile-drop",
+            type: DropSize.FULL,
+            stableKey: "stale-profile-drop",
+            stableHash: "stale-profile-drop",
+            author: {},
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockReturnValue(canonicalPromise);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    let processing!: Promise<void>;
+
+    act(() => {
+      processing = result.current.processIncomingDrop(
+        {
+          id: "stale-profile-drop",
+          wave: { id: "wave1" },
+          author: {},
+        } as any,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      );
+    });
+    await act(async () => Promise.resolve());
+    act(() => {
+      globalThis.dispatchEvent(new CustomEvent("6529-profile-switched"));
+      resolveCanonical({
+        id: "stale-profile-drop",
+        wave: { id: "wave1" },
+        author: {},
+        context_profile_context: null,
+      });
+    });
+    await act(async () => processing);
+
+    expect(props.updateData).not.toHaveBeenCalled();
+    expect(mockSetQueriesData).not.toHaveBeenCalled();
+  });
+
+  it("aborts newest-message reconciliation when the profile switches", async () => {
+    let resolveNewest!: (value: {
+      drops: ApiDrop[];
+      highestSerialNo: number;
+    }) => void;
+    const newestPromise = new Promise<{
+      drops: ApiDrop[];
+      highestSerialNo: number;
+    }>((resolve) => {
+      resolveNewest = resolve;
+    });
+    const store = { wave1: { drops: [], latestFetchedSerialNo: 10 } };
+    const props = baseProps(store);
+    props.syncNewestMessages = jest.fn().mockReturnValue(newestPromise);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    let processing!: Promise<void>;
+
+    act(() => {
+      processing = result.current.processIncomingDrop(
+        { id: "d-new", wave: { id: "wave1" }, author: {} } as any,
+        ProcessIncomingDropType.DROP_INSERT
+      );
+    });
+    await act(async () => Promise.resolve());
+    const signal = props.syncNewestMessages.mock.calls[0]?.[2] as AbortSignal;
+    act(() => {
+      globalThis.dispatchEvent(new CustomEvent("6529-profile-switched"));
+    });
+    expect(signal.aborted).toBe(true);
+
+    act(() => {
+      resolveNewest({
+        drops: [{ id: "should-not-apply", wave: { id: "wave1" } } as ApiDrop],
+        highestSerialNo: 11,
+      });
+    });
+    await act(async () => processing);
+
+    expect(props.updateData).toHaveBeenCalledTimes(1);
   });
 
   it("does not mark background wave as read after reaction updates", async () => {

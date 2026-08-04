@@ -167,6 +167,10 @@ const createListData = (
   loadSubwavesForParent: jest.fn(),
   prefetchSubwavesForParent: jest.fn(),
   loadingSubwaveParentIds: [],
+  viewerIdentityKey: "viewer-1",
+  unreadDmDropsDataUpdatedAt: 123,
+  serverUnreadCountForIndicators: 0,
+  canTrustServerSnapshotUnreadState: false,
 });
 
 const CaptureMyStream = ({
@@ -219,6 +223,24 @@ describe("MyStreamProvider resume sync", () => {
       profileScopedWaveIds: new Set(["dm-wave"]),
       publicWaveIds: new Set(["public-wave"]),
     });
+  });
+
+  it("scopes both wave counters to the active viewer identity", () => {
+    render(
+      <MyStreamProvider>
+        <div />
+      </MyStreamProvider>
+    );
+
+    expect(useEnhancedWavesListCoreMock.mock.calls[0][2]).toEqual(
+      expect.objectContaining({ stateIdentityKey: "viewer-1" })
+    );
+    expect(useEnhancedWavesListCoreMock.mock.calls[1][2]).toEqual(
+      expect.objectContaining({
+        serverUnreadDataUpdatedAt: 123,
+        stateIdentityKey: "viewer-1",
+      })
+    );
   });
 
   it("registers private main-list waves as profile scoped", () => {

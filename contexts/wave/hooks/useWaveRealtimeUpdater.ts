@@ -11,6 +11,7 @@ import { WsMessageType } from "@/helpers/Types";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
+import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import {
   useCallback,
@@ -59,10 +60,22 @@ const useNewestMessagesSync = ({
   const needsRefetchAfterCurrentRef = useRef<Record<string, boolean>>({});
   const abortControllersRef = useRef<Record<string, AbortController>>({});
 
-  const cleanupController = useCallback((waveId: string) => {
-    if (abortControllersRef.current[waveId]) {
-      delete abortControllersRef.current[waveId];
-    }
+  const cleanupController = useCallback(
+    (waveId: string, controller: AbortController) => {
+      if (abortControllersRef.current[waveId] === controller) {
+        delete abortControllersRef.current[waveId];
+      }
+    },
+    []
+  );
+
+  const abortAllCycles = useCallback(() => {
+    Object.values(abortControllersRef.current).forEach((controller) =>
+      controller.abort()
+    );
+    abortControllersRef.current = {};
+    isFetchingNewestRef.current = {};
+    needsRefetchAfterCurrentRef.current = {};
   }, []);
 
   const initiateFetchNewestCycle = useCallback(
@@ -79,6 +92,10 @@ const useNewestMessagesSync = ({
       try {
         const { drops: fetchedDrops, highestSerialNo: fetchedHighestSerial } =
           await syncNewestMessages(waveId, sinceSerialNo, controller.signal);
+
+        if (controller.signal.aborted) {
+          return;
+        }
 
         if (fetchedDrops) {
           const currentData = getData(waveId);
@@ -103,7 +120,11 @@ const useNewestMessagesSync = ({
         }
         console.error("Error fetching newest messages:", error);
       } finally {
-        cleanupController(waveId);
+        if (abortControllersRef.current[waveId] !== controller) {
+          return;
+        }
+
+        cleanupController(waveId, controller);
         isFetchingNewestRef.current[waveId] = false;
 
         if (needsRefetchAfterCurrentRef.current[waveId]) {
@@ -120,15 +141,12 @@ const useNewestMessagesSync = ({
   );
 
   useEffect(() => {
+    globalThis.addEventListener(PROFILE_SWITCHED_EVENT, abortAllCycles);
     return () => {
-      Object.values(abortControllersRef.current).forEach((controller) =>
-        controller.abort()
-      );
-      abortControllersRef.current = {};
-      isFetchingNewestRef.current = {};
-      needsRefetchAfterCurrentRef.current = {};
+      globalThis.removeEventListener(PROFILE_SWITCHED_EVENT, abortAllCycles);
+      abortAllCycles();
     };
-  }, []);
+  }, [abortAllCycles]);
 
   return initiateFetchNewestCycle;
 };
@@ -247,6 +265,7 @@ interface ApplyCanonicalDropUpdateForExistingDropParams {
   readonly waveId: string;
   readonly type: ProcessIncomingDropType;
   readonly options: ProcessIncomingDropOptions;
+  readonly shouldApplyResult: () => boolean;
 }
 
 const useCanonicalDropUpdateForExistingDrop = ({
@@ -262,6 +281,7 @@ const useCanonicalDropUpdateForExistingDrop = ({
       waveId,
       type,
       options,
+      shouldApplyResult,
     }: ApplyCanonicalDropUpdateForExistingDropParams) => {
       try {
         await applyCanonicalDropUpdate({
@@ -272,6 +292,7 @@ const useCanonicalDropUpdateForExistingDrop = ({
           options,
           queryClient,
           updateData,
+          shouldApplyResult,
         });
       } catch (error) {
         reportBackgroundTaskError(
@@ -354,6 +375,19 @@ const useProcessIncomingDrop = ({
   const syncNewestMessagesAfterDropUpdate = useNewestMessagesAfterDropUpdate(
     initiateFetchNewestCycle
   );
+  const profileGenerationRef = useRef(0);
+
+  useEffect(() => {
+    const handleProfileSwitch = () => {
+      profileGenerationRef.current += 1;
+    };
+    globalThis.addEventListener(PROFILE_SWITCHED_EVENT, handleProfileSwitch);
+    return () =>
+      globalThis.removeEventListener(
+        PROFILE_SWITCHED_EVENT,
+        handleProfileSwitch
+      );
+  }, []);
 
   return useCallback(
     async (
@@ -361,6 +395,9 @@ const useProcessIncomingDrop = ({
       type: ProcessIncomingDropType,
       options: ProcessIncomingDropOptions = {}
     ) => {
+      const profileGeneration = profileGenerationRef.current;
+      const isCurrentProfileGeneration = () =>
+        profileGenerationRef.current === profileGeneration;
       const drop = normalizeRealtimeDrop(dropData);
       const waveId = getIncomingWaveId(drop);
 
@@ -380,7 +417,7 @@ const useProcessIncomingDrop = ({
 
       await refreshEligibilityAfterVisibilityChange(waveId);
 
-      if (shouldSkipMutedWave()) {
+      if (!isCurrentProfileGeneration() || shouldSkipMutedWave()) {
         return;
       }
 
@@ -424,7 +461,11 @@ const useProcessIncomingDrop = ({
           waveId,
           type,
           options,
+          shouldApplyResult: isCurrentProfileGeneration,
         });
+        if (!isCurrentProfileGeneration()) {
+          return;
+        }
         if (
           type === ProcessIncomingDropType.DROP_REACTION_UPDATE &&
           isHelpBotFinalReactionUpdate(drop)
@@ -435,6 +476,9 @@ const useProcessIncomingDrop = ({
             newestKnownSerialNo,
             drop.id
           );
+          if (!isCurrentProfileGeneration()) {
+            return;
+          }
         }
         if (
           type === ProcessIncomingDropType.DROP_REACTION_UPDATE &&
@@ -462,7 +506,9 @@ const useProcessIncomingDrop = ({
         optimisticDrop.id
       );
 
-      markActiveWaveAsRead(waveId);
+      if (isCurrentProfileGeneration()) {
+        markActiveWaveAsRead(waveId);
+      }
     },
     [
       activeWaveIdRef,
@@ -476,6 +522,7 @@ const useProcessIncomingDrop = ({
       isWaveMuted,
       queryClient,
       syncNewestMessagesAfterDropUpdate,
+      profileGenerationRef,
     ]
   );
 };

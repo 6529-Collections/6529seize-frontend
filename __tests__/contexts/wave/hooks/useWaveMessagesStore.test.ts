@@ -85,7 +85,7 @@ describe("useWaveMessagesStore", () => {
     expect(result.current.getData("wave1")).toBeUndefined();
   });
 
-  it("replaces loaded DM scopes when the DM list changes", () => {
+  it("clears loaded messages even when scope classification changes first", () => {
     const { result } = renderHook(() => useWaveMessagesStore());
     const listener = jest.fn();
 
@@ -106,10 +106,10 @@ describe("useWaveMessagesStore", () => {
       globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
     });
 
-    expect(listener).not.toHaveBeenCalled();
+    expect(listener).toHaveBeenCalledWith(undefined);
   });
 
-  it("preserves public cached messages when the profile switches", () => {
+  it("clears public cached messages because their viewer context is profile-specific", () => {
     const { result } = renderHook(() => useWaveMessagesStore());
 
     act(() => {
@@ -121,7 +121,7 @@ describe("useWaveMessagesStore", () => {
       globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
     });
 
-    expect(result.current.getData("wave1")?.drops[0]?.id).toBe("d1");
+    expect(result.current.getData("wave1")).toBeUndefined();
   });
 
   it("removes drops and exposes updated state", async () => {
@@ -516,7 +516,7 @@ describe("useWaveMessagesStore", () => {
     expect(listener).toHaveBeenCalledWith(undefined);
   });
 
-  it("does not replay queued old-profile updates after seed invalidation", async () => {
+  it("does not replay any queued old-profile updates after seed invalidation", async () => {
     const { result } = renderHook(() => useWaveMessagesStore());
     const seedPromise = Promise.resolve({
       ok: false,
@@ -546,11 +546,11 @@ describe("useWaveMessagesStore", () => {
         key: "wave1",
         drops: [oldProfileDrop],
       } as any);
+      globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
       result.current.updateData({
         key: "sentinel-wave",
         drops: [queueSentinel],
       } as any);
-      globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
     });
 
     await waitFor(() =>

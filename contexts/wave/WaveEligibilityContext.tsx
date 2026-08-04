@@ -7,10 +7,12 @@ import React, {
   useState,
   useRef,
   useMemo,
+  useEffect,
 } from "react";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ChatRestriction } from "@/hooks/useDropPriviledges";
+import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 
 export interface WaveEligibility {
   authenticated_user_eligible_to_chat: boolean;
@@ -60,7 +62,24 @@ export const WaveEligibilityProvider: React.FC<
   const [eligibility, setEligibility] = useState<
     Record<string, WaveEligibility>
   >({});
-  const refreshingRef = useRef<Set<string>>(new Set());
+  const eligibilityRef = useRef<Record<string, WaveEligibility>>({});
+  const refreshingRef = useRef<Map<string, number>>(new Map());
+  const profileGenerationRef = useRef(0);
+
+  useEffect(() => {
+    const handleProfileSwitch = () => {
+      profileGenerationRef.current += 1;
+      refreshingRef.current.clear();
+      eligibilityRef.current = {};
+      setEligibility({});
+    };
+    globalThis.addEventListener(PROFILE_SWITCHED_EVENT, handleProfileSwitch);
+    return () =>
+      globalThis.removeEventListener(
+        PROFILE_SWITCHED_EVENT,
+        handleProfileSwitch
+      );
+  }, []);
 
   const updateEligibility = useCallback(
     (waveId: string, newEligibility: Partial<WaveEligibility>) => {
@@ -70,16 +89,19 @@ export const WaveEligibilityProvider: React.FC<
         "authenticated_user_eligible_to_participate" in newEligibility ||
         "authenticated_user_admin" in newEligibility;
 
-      setEligibility((prev) => ({
-        ...prev,
+      const previous = eligibilityRef.current;
+      const next = {
+        ...previous,
         [waveId]: {
-          ...prev[waveId],
+          ...previous[waveId],
           ...newEligibility,
           lastUpdated: updatesRawEligibility
             ? Date.now()
-            : (prev[waveId]?.lastUpdated ?? 0),
+            : (previous[waveId]?.lastUpdated ?? 0),
         } as WaveEligibility,
-      }));
+      };
+      eligibilityRef.current = next;
+      setEligibility(next);
     },
     []
   );
@@ -87,22 +109,27 @@ export const WaveEligibilityProvider: React.FC<
   const refreshEligibility = useCallback(
     async (waveId: string) => {
       // Prevent multiple concurrent refreshes for the same wave
-      if (refreshingRef.current.has(waveId)) {
+      const profileGeneration = profileGenerationRef.current;
+      if (refreshingRef.current.get(waveId) === profileGeneration) {
         return;
       }
 
       // Check if data is recent (less than 5 minutes old)
-      const existing = eligibility[waveId];
+      const existing = eligibilityRef.current[waveId];
       if (existing && Date.now() - existing.lastUpdated < 5 * 60 * 1000) {
         return;
       }
 
-      refreshingRef.current.add(waveId);
+      refreshingRef.current.set(waveId, profileGeneration);
 
       try {
         const wave = await commonApiFetch<ApiWave>({
           endpoint: `waves/${waveId}`,
         });
+
+        if (profileGeneration !== profileGenerationRef.current) {
+          return;
+        }
 
         updateEligibility(waveId, {
           authenticated_user_eligible_to_chat:
@@ -120,10 +147,12 @@ export const WaveEligibilityProvider: React.FC<
           error
         );
       } finally {
-        refreshingRef.current.delete(waveId);
+        if (refreshingRef.current.get(waveId) === profileGeneration) {
+          refreshingRef.current.delete(waveId);
+        }
       }
     },
-    [eligibility, updateEligibility]
+    [updateEligibility]
   );
 
   const getEligibility = useCallback(

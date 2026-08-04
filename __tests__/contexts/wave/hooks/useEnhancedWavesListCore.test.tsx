@@ -332,6 +332,11 @@ describe("useEnhancedWavesListCore", () => {
 
     expect(result.current.waves[0]?.unreadDropsCount).toBe(1);
     expect(result.current.unreadCount).toBe(1);
+
+    rerender({ identityKey: "profile-1" });
+
+    expect(result.current.waves[0]?.unreadDropsCount).toBe(1);
+    expect(result.current.unreadCount).toBe(1);
   });
 
   it("keeps a locally read wave cleared when a later request returns the same unread snapshot", () => {
@@ -440,7 +445,7 @@ describe("useEnhancedWavesListCore", () => {
     expect(result.current.waves[0]?.unreadDropsCount).toBe(1);
   });
 
-  it("includes websocket unread counts for waves not loaded in the first page", () => {
+  it("does not expose an unread count until an unknown wave is classified", () => {
     mockedUseNewDropCounter.mockReturnValue({
       newDropsCounts: {
         "unknown-dm": {
@@ -464,7 +469,7 @@ describe("useEnhancedWavesListCore", () => {
       })
     );
 
-    expect(result.current.unreadCount).toBe(3);
+    expect(result.current.unreadCount).toBe(1);
   });
 
   it("subtracts only the locally read wave from the server aggregate", () => {
@@ -495,6 +500,39 @@ describe("useEnhancedWavesListCore", () => {
       ])
     );
     expect(result.current.unreadCount).toBe(3);
+  });
+
+  it("stops subtracting a locally read row after a newer aggregate snapshot", () => {
+    const wavesData = createWavesData({
+      mainWavesRefetch: jest.fn(),
+      refetchAllWaves: jest.fn(),
+      waves: [createSidebarWave({ id: "wave-1", unreadDropsCount: 1 })],
+    });
+    const { result, rerender } = renderHook(
+      ({ serverUnreadCount, serverUnreadDataUpdatedAt }) =>
+        useEnhancedWavesListCore(null, wavesData, {
+          serverUnreadCount,
+          serverUnreadDataUpdatedAt,
+          supportsPinning: false,
+          stateIdentityKey: "profile-1",
+        }),
+      {
+        initialProps: {
+          serverUnreadCount: 2,
+          serverUnreadDataUpdatedAt: 100,
+        },
+      }
+    );
+
+    act(() => {
+      result.current.markWaveRead("wave-1");
+    });
+    expect(result.current.unreadCount).toBe(1);
+
+    rerender({ serverUnreadCount: 1, serverUnreadDataUpdatedAt: 101 });
+
+    expect(result.current.waves[0]?.unreadDropsCount).toBe(0);
+    expect(result.current.unreadCount).toBe(1);
   });
 
   it("shows a websocket drop that arrives after a local clear", () => {

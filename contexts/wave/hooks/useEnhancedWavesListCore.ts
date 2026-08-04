@@ -5,11 +5,9 @@ import type { ApiWaveRepSummary } from "@/generated/models/ApiWaveRepSummary";
 import type { ApiWaveScore } from "@/generated/models/ApiWaveScore";
 import type { SidebarDiscoverySection } from "@/hooks/useWavesList";
 import type { SidebarWave, SidebarWaveContributor } from "@/types/waves.types";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { MinimalWaveNewDropsCount } from "./useNewDropCounter";
 import useNewDropCounter, { getNewestTimestamp } from "./useNewDropCounter";
-
-const UNREAD_CLEAR_DELAY_MS = 1000;
 
 export interface MinimalWave {
   id: string;
@@ -48,6 +46,7 @@ type EnhancedSidebarWave = SidebarWave & {
 interface WaveUnreadClearWatermark {
   readonly firstUnreadSerialNo: number | null;
   readonly latestDropTimestamp: number | null;
+  readonly serverUnreadDataUpdatedAt: number | null;
 }
 
 interface WaveUnreadState {
@@ -113,6 +112,7 @@ interface UseEnhancedWavesListCoreOptions {
   unknownWaveRefetchCooldownMs?: number | undefined;
   trustServerSnapshotUnreadState?: boolean | undefined;
   serverUnreadCount?: number | undefined;
+  serverUnreadDataUpdatedAt?: number | undefined;
   preserveBackendWaveOrder?: boolean | undefined;
   sortMutedLast?: boolean | undefined;
 }
@@ -164,6 +164,9 @@ function useEnhancedWavesListCore(
   const [unreadState, setUnreadState] = useState<WaveUnreadState>(() =>
     createWaveUnreadState(options.stateIdentityKey)
   );
+  if (unreadState.identityKey !== options.stateIdentityKey) {
+    setUnreadState(createWaveUnreadState(options.stateIdentityKey));
+  }
   const currentUnreadState = useMemo(
     () =>
       unreadState.identityKey === options.stateIdentityKey
@@ -171,7 +174,6 @@ function useEnhancedWavesListCore(
         : createWaveUnreadState(options.stateIdentityKey),
     [options.stateIdentityKey, unreadState]
   );
-
   const resetWaveUnreadCount = useCallback(
     (waveId: string, unreadCount: number) => {
       if (!isEnabled) {
@@ -193,7 +195,7 @@ function useEnhancedWavesListCore(
           clearedWaveIds,
           clearedUnreadCountsByWave: {
             ...current.clearedUnreadCountsByWave,
-            [waveId]: Math.max(unreadCount, 0),
+            [waveId]: Math.max(wave?.unreadDropsCount ?? unreadCount, 0),
           },
           clearedWatermarksByWave: {
             ...current.clearedWatermarksByWave,
@@ -206,13 +208,21 @@ function useEnhancedWavesListCore(
                 wave?.latestDropTimestamp,
                 realtimeUnread?.latestDropTimestamp
               ),
+              serverUnreadDataUpdatedAt:
+                options.serverUnreadDataUpdatedAt ?? null,
             },
           },
           forcedCounts,
         };
       });
     },
-    [isEnabled, newDropsCounts, options.stateIdentityKey, waves]
+    [
+      isEnabled,
+      newDropsCounts,
+      options.serverUnreadDataUpdatedAt,
+      options.stateIdentityKey,
+      waves,
+    ]
   );
 
   const restoreWaveUnreadCount = useCallback(
@@ -372,29 +382,14 @@ function useEnhancedWavesListCore(
         minimal.find((wave) => wave.id === waveId)?.unreadDropsCount ?? 0;
       resetWaveNewDropsCount(waveId);
       resetWaveUnreadCount(waveId, unreadCount);
+      return unreadCount;
     },
     [minimal, resetWaveNewDropsCount, resetWaveUnreadCount]
   );
 
-  useEffect(() => {
-    if (!isEnabled || !activeWaveId) return;
-    const timeout = setTimeout(() => {
-      const unreadCount =
-        minimal.find((wave) => wave.id === activeWaveId)?.unreadDropsCount ?? 0;
-      resetWaveUnreadCount(activeWaveId, unreadCount);
-    }, UNREAD_CLEAR_DELAY_MS);
-    return () => clearTimeout(timeout);
-  }, [activeWaveId, isEnabled, minimal, resetWaveUnreadCount]);
-
   const unreadCount = useMemo(() => {
-    const listedWaveIds = new Set(minimal.map((wave) => wave.id));
     const listedUnreadCount = minimal.reduce(
       (total, wave) => total + Math.max(wave.unreadDropsCount, 0),
-      0
-    );
-    const unknownRealtimeUnreadCount = Object.entries(newDropsCounts).reduce(
-      (total, [waveId, count]) =>
-        listedWaveIds.has(waveId) ? total : total + Math.max(count.count, 0),
       0
     );
 
@@ -405,7 +400,17 @@ function useEnhancedWavesListCore(
 
       const clearWatermark =
         currentUnreadState.clearedWatermarksByWave[wave.id];
-      if (hasServerUnreadAdvancedPastClear(wave, clearWatermark)) {
+      const hasNewerServerUnreadSnapshot = Boolean(
+        clearWatermark?.serverUnreadDataUpdatedAt !== null &&
+        clearWatermark?.serverUnreadDataUpdatedAt !== undefined &&
+        options.serverUnreadDataUpdatedAt !== undefined &&
+        options.serverUnreadDataUpdatedAt >
+          clearWatermark.serverUnreadDataUpdatedAt
+      );
+      if (
+        hasNewerServerUnreadSnapshot ||
+        hasServerUnreadAdvancedPastClear(wave, clearWatermark)
+      ) {
         return total;
       }
 
@@ -417,14 +422,12 @@ function useEnhancedWavesListCore(
       (options.serverUnreadCount ?? 0) - locallyClearedServerUnreadCount,
       0
     );
-    const localUnreadCount = listedUnreadCount + unknownRealtimeUnreadCount;
-
-    return Math.max(localUnreadCount, adjustedServerUnreadCount);
+    return Math.max(listedUnreadCount, adjustedServerUnreadCount);
   }, [
     currentUnreadState,
     minimal,
-    newDropsCounts,
     options.serverUnreadCount,
+    options.serverUnreadDataUpdatedAt,
     waves,
   ]);
 

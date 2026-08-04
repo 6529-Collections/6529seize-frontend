@@ -52,7 +52,7 @@ interface WavesContextData {
   readonly loadSubwavesForParent: (parentWaveId: string) => void;
   readonly prefetchSubwavesForParent: (parentWaveId: string) => void;
   readonly loadingSubwaveParentIds: readonly string[];
-  readonly markWaveRead: (waveId: string) => void;
+  readonly markWaveRead: (waveId: string) => number;
   readonly restoreWaveUnreadCount: (waveId: string, count?: number) => void;
 }
 
@@ -254,6 +254,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const wavesHookData = useEnhancedWavesListCore(activeWaveId, mainWavesData, {
     enabled: isMainWavesListEnabled,
     supportsPinning: true,
+    stateIdentityKey: dmWavesData.viewerIdentityKey,
     otherListWaveIds: dmWaveIds,
     preserveBackendWaveOrder: true,
   });
@@ -263,6 +264,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     otherListWaveIds: mainWaveIds,
     sortMutedLast: false,
     serverUnreadCount: dmWavesData.serverUnreadCountForIndicators,
+    serverUnreadDataUpdatedAt: dmWavesData.unreadDmDropsDataUpdatedAt,
     trustServerSnapshotUnreadState:
       dmWavesData.canTrustServerSnapshotUnreadState,
   });

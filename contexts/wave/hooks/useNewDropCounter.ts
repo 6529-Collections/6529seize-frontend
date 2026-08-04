@@ -10,6 +10,7 @@ import { getWebSocketMessageReason } from "@/services/websocket/WebSocketTypes";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import type { SidebarWave } from "@/types/waves.types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import useUnknownWaveRefetchRetry from "./useUnknownWaveRefetchRetry";
 
 /**
  * Interface for tracking new drops count for a wave
@@ -42,6 +43,26 @@ const removeWaveCounts = (
 
   waveIds.forEach((waveId) => {
     if (!(waveId in next)) {
+      return;
+    }
+
+    if (next === newDropsCounts) {
+      next = { ...newDropsCounts };
+    }
+    delete next[waveId];
+  });
+
+  return next;
+};
+
+const retainWaveCounts = (
+  newDropsCounts: NewDropsCounts,
+  waveIds: ReadonlySet<string>
+): NewDropsCounts => {
+  let next = newDropsCounts;
+
+  Object.keys(newDropsCounts).forEach((waveId) => {
+    if (waveIds.has(waveId)) {
       return;
     }
 
@@ -277,6 +298,13 @@ function useNewDropCounter(
     counts: {},
     websocketReceivedAtByWave: {},
   }));
+  if (rawNewDropsState.identityKey !== stateIdentityKey) {
+    setRawNewDropsState({
+      identityKey: stateIdentityKey,
+      counts: {},
+      websocketReceivedAtByWave: {},
+    });
+  }
   const currentRawNewDropsState = useMemo(
     () =>
       rawNewDropsState.identityKey === stateIdentityKey
@@ -326,7 +354,6 @@ function useNewDropCounter(
   const [previousOtherListWaveIds, setPreviousOtherListWaveIds] =
     useState(otherListWaveIds);
   const wavesRef = useRef(waves);
-  const lastUnknownWaveRefetchAtRef = useRef<number | null>(null);
 
   if (previousEnabled !== enabled) {
     setPreviousEnabled(enabled);
@@ -354,36 +381,54 @@ function useNewDropCounter(
   useEffect(() => {
     if (!enabled) {
       wavesRef.current = [];
-      lastUnknownWaveRefetchAtRef.current = null;
       return;
     }
 
     wavesRef.current = waves;
   }, [enabled, waves]);
 
-  const reconciledNewDropsCounts = useMemo(
-    () => {
-      const reconciled = reconcileNewDropsCounts({
-        newDropsCounts: rawNewDropsCounts,
-        trustServerSnapshotUnreadState,
-        websocketReceivedAtByWave,
-        waves,
-      });
-
-      // A wave can be unknown when its event arrives and classified by the
-      // opposite list only after the resulting refetch. Exclude it immediately
-      // so the wrong list cannot flash or retain a phantom unread count while
-      // the guarded state adjustment above permanently prunes the raw event.
-      return removeWaveCounts(reconciled, otherListWaveIds);
-    },
-    [
-      otherListWaveIds,
-      rawNewDropsCounts,
+  const ownWaveIds = useMemo(
+    () => new Set(waves.map((wave) => wave.id)),
+    [waves]
+  );
+  const reconciledRawNewDropsCounts = useMemo(() => {
+    const reconciled = reconcileNewDropsCounts({
+      newDropsCounts: rawNewDropsCounts,
       trustServerSnapshotUnreadState,
       websocketReceivedAtByWave,
       waves,
-    ]
+    });
+    return removeWaveCounts(reconciled, otherListWaveIds);
+  }, [
+    otherListWaveIds,
+    rawNewDropsCounts,
+    trustServerSnapshotUnreadState,
+    websocketReceivedAtByWave,
+    waves,
+  ]);
+  if (enabled && reconciledRawNewDropsCounts !== rawNewDropsCounts) {
+    setRawNewDropsState((previous) =>
+      previous.identityKey === stateIdentityKey &&
+      previous.counts === rawNewDropsCounts
+        ? { ...previous, counts: reconciledRawNewDropsCounts }
+        : previous
+    );
+  }
+  // Unknown events remain pending internally until one list classifies them,
+  // but they are never exposed on the wrong navigation surface meanwhile.
+  const reconciledNewDropsCounts = useMemo(
+    () => retainWaveCounts(reconciledRawNewDropsCounts, ownWaveIds),
+    [ownWaveIds, reconciledRawNewDropsCounts]
   );
+  const requestUnknownWaveRefetch = useUnknownWaveRefetchRetry({
+    cooldownMs: unknownWaveRefetchCooldownMs,
+    enabled,
+    identityKey: stateIdentityKey,
+    ownWaveIds,
+    otherListWaveIds,
+    rawCounts: rawNewDropsCounts,
+    refetchWaves,
+  });
 
   const updateNewDropsCountsForMessage = useCallback(
     (
@@ -638,17 +683,7 @@ function useNewDropCounter(
             websocketReceivedAt
           );
 
-          // Prevent refetch storms on bursts of unknown-wave websocket events.
-          const now = websocketReceivedAt;
-          if (
-            lastUnknownWaveRefetchAtRef.current !== null &&
-            now - lastUnknownWaveRefetchAtRef.current <
-              unknownWaveRefetchCooldownMs
-          ) {
-            return;
-          }
-          lastUnknownWaveRefetchAtRef.current = now;
-          refetchWaves();
+          requestUnknownWaveRefetch(waveId, websocketReceivedAt);
           return;
         }
 
@@ -721,9 +756,8 @@ function useNewDropCounter(
         connectedProfile,
         enabled,
         waves,
-        refetchWaves,
         otherListWaveIds,
-        unknownWaveRefetchCooldownMs,
+        requestUnknownWaveRefetch,
         trustServerSnapshotUnreadState,
         updateNewDropsCountsForMessage,
       ]

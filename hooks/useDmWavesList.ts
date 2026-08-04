@@ -223,10 +223,10 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       currentReconciliationState?.viewerIdentityKey === viewerIdentityKey;
     const isNewMismatchWithNewSnapshot = Boolean(
       isSameViewer &&
-        currentReconciliationState.attempts >=
-          MAX_RECONCILIATION_ATTEMPTS_PER_VIEWER &&
-        currentReconciliationState.mismatchKey !== mismatchKey &&
-        currentReconciliationState.lastDataUpdatedAt !== dmWavesDataUpdatedAt
+      currentReconciliationState.attempts >=
+        MAX_RECONCILIATION_ATTEMPTS_PER_VIEWER &&
+      currentReconciliationState.mismatchKey !== mismatchKey &&
+      currentReconciliationState.lastDataUpdatedAt !== dmWavesDataUpdatedAt
     );
     const previousViewerState =
       isSameViewer && !isNewMismatchWithNewSnapshot
@@ -353,6 +353,7 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       viewerIdentityKey,
       canTrustServerSnapshotUnreadState,
       unreadDmDropsCount,
+      unreadDmDropsDataUpdatedAt,
       serverUnreadCountForIndicators,
     }),
     [
@@ -368,6 +369,7 @@ const useDmWavesList = (options: UseDmWavesListOptions = {}) => {
       viewerIdentityKey,
       canTrustServerSnapshotUnreadState,
       unreadDmDropsCount,
+      unreadDmDropsDataUpdatedAt,
       serverUnreadCountForIndicators,
     ]
   );

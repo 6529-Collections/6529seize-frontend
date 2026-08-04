@@ -168,6 +168,15 @@ describe("useNewDropCounter", () => {
       firstUnreadSerialNo: null,
     });
 
+    rerender({
+      latestDropTimestamp: 31,
+      latestReadTimestamp: 20,
+      serverSnapshotLatestDropTimestamp: 31,
+      trustServerSnapshotUnreadState: false,
+      unreadDropsCount: 0,
+    });
+    expect(result.current.newDropsCounts["wave2"]?.count).toBe(0);
+
     emitDropUpdate({ createdAt: 30, serialNo: 5 });
     expect(result.current.newDropsCounts["wave2"]?.count).toBe(0);
 
@@ -515,6 +524,10 @@ describe("useNewDropCounter", () => {
     rerender({ identityKey: "profile-2" });
 
     expect(result.current.newDropsCounts).toEqual({});
+
+    rerender({ identityKey: "profile-1" });
+
+    expect(result.current.newDropsCounts).toEqual({});
   });
 
   it("updates muted wave timestamps without unread counts", () => {
@@ -588,8 +601,8 @@ describe("useNewDropCounter", () => {
 
     emitDropUpdate({ serialNo: 7, waveId: "initially-unknown-wave" });
 
-    expect(result.current.newDropsCounts["initially-unknown-wave"]?.count).toBe(
-      1
+    expect(result.current.newDropsCounts["initially-unknown-wave"]).toBe(
+      undefined
     );
     expect(refetch).toHaveBeenCalledTimes(1);
 
@@ -604,6 +617,53 @@ describe("useNewDropCounter", () => {
     expect(result.current.newDropsCounts["initially-unknown-wave"]).toBe(
       undefined
     );
+  });
+
+  it("reveals a pending unread only after its own list classifies the wave", () => {
+    const refetch = jest.fn();
+    const { result, rerender } = renderHook(
+      ({ currentWaves }) =>
+        useNewDropCounter(null, currentWaves as any, refetch, {
+          otherListWaveIds: new Set(),
+        }),
+      { initialProps: { currentWaves: waves }, wrapper }
+    );
+
+    emitDropUpdate({ serialNo: 7, waveId: "new-dm" });
+    expect(result.current.newDropsCounts["new-dm"]).toBeUndefined();
+
+    rerender({ currentWaves: [...waves, { id: "new-dm" }] as any });
+
+    expect(result.current.newDropsCounts["new-dm"]?.count).toBe(1);
+  });
+
+  it("retries unresolved unknown-wave refetches a bounded number of times", () => {
+    jest.useFakeTimers();
+    const refetch = jest.fn();
+    try {
+      renderHook(
+        () =>
+          useNewDropCounter(null, waves, refetch, {
+            otherListWaveIds: new Set(),
+            unknownWaveRefetchCooldownMs: 100,
+          }),
+        { wrapper }
+      );
+
+      emitDropUpdate({ serialNo: 7, waveId: "delayed-dm" });
+      expect(refetch).toHaveBeenCalledTimes(1);
+
+      act(() => jest.advanceTimersByTime(100));
+      expect(refetch).toHaveBeenCalledTimes(2);
+
+      act(() => jest.advanceTimersByTime(100));
+      expect(refetch).toHaveBeenCalledTimes(3);
+
+      act(() => jest.advanceTimersByTime(500));
+      expect(refetch).toHaveBeenCalledTimes(3);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("tracks own unknown-wave timestamps without refetching the list", () => {
@@ -622,11 +682,7 @@ describe("useNewDropCounter", () => {
       waveId: "unknown-own-wave",
     });
 
-    expect(result.current.newDropsCounts["unknown-own-wave"]).toEqual({
-      count: 0,
-      latestDropTimestamp: 55,
-      firstUnreadSerialNo: null,
-    });
+    expect(result.current.newDropsCounts["unknown-own-wave"]).toBeUndefined();
     expect(refetch).not.toHaveBeenCalled();
   });
 
@@ -646,15 +702,13 @@ describe("useNewDropCounter", () => {
       waveId: "unknown-active-wave",
     });
 
-    expect(result.current.newDropsCounts["unknown-active-wave"]).toEqual({
-      count: 0,
-      latestDropTimestamp: 56,
-      firstUnreadSerialNo: null,
-    });
+    expect(
+      result.current.newDropsCounts["unknown-active-wave"]
+    ).toBeUndefined();
     expect(refetch).not.toHaveBeenCalled();
   });
 
-  it("throttles unknown-wave refetches within cooldown window", () => {
+  it("throttles repeated refetches for the same unknown wave", () => {
     const refetch = jest.fn();
     const nowSpy = jest.spyOn(Date, "now");
     nowSpy.mockReturnValue(1000);
@@ -672,11 +726,11 @@ describe("useNewDropCounter", () => {
     expect(refetch).toHaveBeenCalledTimes(1);
 
     nowSpy.mockReturnValue(2000);
-    emitDropUpdate({ createdAt: 31, waveId: "unknown-2" });
+    emitDropUpdate({ createdAt: 31, waveId: "unknown-1" });
     expect(refetch).toHaveBeenCalledTimes(1);
 
     nowSpy.mockReturnValue(4501);
-    emitDropUpdate({ createdAt: 32, waveId: "unknown-3" });
+    emitDropUpdate({ createdAt: 32, waveId: "unknown-1" });
     expect(refetch).toHaveBeenCalledTimes(2);
   });
 });

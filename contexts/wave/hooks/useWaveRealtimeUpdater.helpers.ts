@@ -216,6 +216,7 @@ interface CanonicalDropUpdateParams {
   readonly options: ProcessIncomingDropOptions;
   readonly queryClient: QueryClient;
   readonly updateData: WaveDataStoreUpdater["updateData"];
+  readonly shouldApplyResult?: (() => boolean) | undefined;
 }
 
 const applyCanonicalDropUpdate = async ({
@@ -226,8 +227,13 @@ const applyCanonicalDropUpdate = async ({
   options,
   queryClient,
   updateData,
+  shouldApplyResult = () => true,
 }: CanonicalDropUpdateParams): Promise<void> => {
   const apiDrop = await fetchDropByIdBatched(dropId);
+  if (!shouldApplyResult()) {
+    return;
+  }
+
   const preferExistingPollVote = options.preferExistingPollVote;
   const reconciledApiDrop =
     preferExistingPollVote === undefined
