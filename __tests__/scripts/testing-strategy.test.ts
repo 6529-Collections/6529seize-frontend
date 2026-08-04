@@ -452,6 +452,12 @@ describe("testing strategy CI plan", () => {
       "needs.plan.outputs.playwright_museum_required == 'true'"
     );
     expect(workflow).toContain(
+      "Resolve exact Museum publication for Playwright"
+    );
+    expect(workflow).toContain(
+      "MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.commit }}"
+    );
+    expect(workflow).toContain(
       "./bin/6529 run test:e2e:museum-institutional-practice"
     );
 
@@ -461,6 +467,22 @@ describe("testing strategy CI plan", () => {
     expect(parsed.jobs["installed-checks"]?.if).toBe(
       "needs.plan.outputs.install_required == 'true' || needs.plan.outputs.playwright_museum_required == 'true'"
     );
+  });
+
+  it("keeps full-history CI checkouts blobless", () => {
+    const appPrCi = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),
+      "utf8"
+    );
+    const pushSecretScan = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/push-secret-scan.yml"),
+      "utf8"
+    );
+
+    expect(appPrCi.match(/filter: blob:none/gu)).toHaveLength(2);
+    expect(appPrCi.match(/fetch-depth: 0/gu)).toHaveLength(2);
+    expect(pushSecretScan).toContain("filter: blob:none");
+    expect(pushSecretScan).toContain("fetch-depth: 0");
   });
 });
 

@@ -38,6 +38,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
+          # Preserve complete history for the risk plan without transferring
+          # blobs that are reachable only from unrelated refs.
+          filter: blob:none
           fetch-depth: 0
           persist-credentials: false
 
@@ -194,6 +197,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
+          # The reviewed tree is materialized during checkout; historical
+          # blobs from unrelated refs are not needed by the installed gates.
+          filter: blob:none
           fetch-depth: 0
           persist-credentials: false
 
@@ -499,6 +505,24 @@ jobs:
         if: needs.plan.outputs.playwright_smoke_required == 'true' || needs.plan.outputs.playwright_critical_shell_required == 'true' || needs.plan.outputs.playwright_museum_required == 'true'
         run: ./bin/6529 exec playwright install --with-deps chromium
 
+      - name: Resolve exact Museum publication for Playwright
+        id: museum_publication
+        if: needs.plan.outputs.playwright_museum_required == 'true'
+        run: |
+          set -euo pipefail
+          mapfile -t museum_refs < <(
+            git ls-remote --refs \
+              https://github.com/6529-Collections/6529networkmuseum.git \
+              refs/heads/main
+          )
+          test "${#museum_refs[@]}" -eq 1
+          read -r museum_commit museum_ref extra <<< "${museum_refs[0]}"
+          test -z "${extra:-}"
+          test "$museum_ref" = "refs/heads/main"
+          [[ "$museum_commit" =~ ^[a-f0-9]{40}$ ]]
+          echo "commit=$museum_commit" >> "$GITHUB_OUTPUT"
+          echo "Museum Playwright source: $museum_commit"
+
       - name: Run small Playwright smoke pack
         if: needs.plan.outputs.playwright_smoke_required == 'true'
         env:
@@ -520,6 +544,7 @@ jobs:
         env:
           NEXT_DEV_DIST_DIR: ".next-playwright-museum"
           PLAYWRIGHT_READONLY: "1"
+          MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.commit }}
         run: ./bin/6529 run test:e2e:museum-institutional-practice
 
       - name: Upload app check artifacts

@@ -84,6 +84,8 @@ export interface MuseumSelectedWork {
   readonly winnerPlace: number | null;
   readonly voteTotal: number | null;
   readonly voterCount: number | null;
+  readonly imageUrl: string | null;
+  readonly imageMimeType: string | null;
 }
 
 export interface MuseumProgram {
@@ -125,6 +127,15 @@ export interface MuseumObjectRecord {
   readonly artistStatement: string | null;
   readonly classification: string;
   readonly status: string;
+  readonly statusAsOf: string | null;
+  readonly programId: string | null;
+  readonly imageUrl: string | null;
+  readonly imageMimeType: string | null;
+  readonly imageRetrievalStatus: string | null;
+  readonly selectionPlace: number | null;
+  readonly selectionDate: string | null;
+  readonly selectionSourceUrl: string | null;
+  readonly rightsStatus: string | null;
   readonly scope: string;
   readonly sourcePath: string;
   readonly record: unknown;

@@ -106,8 +106,20 @@ describe("Museum page source projection", () => {
       "records/institutional-practice/profiles/met.md",
     ],
     [
+      "/museum/network/stories/a-field-of-practice/mca-chicago",
+      "records/institutional-practice/profiles/mca-chicago.md",
+    ],
+    [
+      "/museum/network/stories/a-field-of-practice/adjacent-practice",
+      "records/institutional-practice/adjacent-chain-native-practice.md",
+    ],
+    [
       "/museum/network/stories/a-field-of-practice/sources",
       "records/institutional-practice/source-register.md",
+    ],
+    [
+      "/museum/network/stories/scholarship-and-writing",
+      "docs/curatorial-publication-standard.md",
     ],
     ["/museum/network/methodology", "policies/donation-acceptance.md"],
   ])("maps %s to an admitted exact source", (pathname, expectedPath) => {
@@ -180,6 +192,21 @@ describe("Museum page source projection", () => {
         label: "primarySourceRegister",
       },
     ]);
+    expect(
+      resolveMuseumPageSource(
+        "/museum/network/stories/scholarship-and-writing",
+        catalog
+      )?.relatedSources
+    ).toEqual([
+      {
+        path: "records/institutional-practice/a-field-of-practice.md",
+        label: "institutionalStudy",
+      },
+      {
+        path: "records/institutional-practice/source-register.md",
+        label: "primarySourceRegister",
+      },
+    ]);
   });
 
   it("covers every rendered static route and every current dynamic route", () => {
@@ -196,7 +223,9 @@ describe("Museum page source projection", () => {
       "/museum/network/stories",
       "/museum/network/stories/source-and-chronology",
       "/museum/network/stories/a-field-of-practice",
+      "/museum/network/stories/a-field-of-practice/adjacent-practice",
       "/museum/network/stories/a-field-of-practice/sources",
+      "/museum/network/stories/scholarship-and-writing",
     ];
     const dynamicRoutes = [
       ...publication.artists.map(
