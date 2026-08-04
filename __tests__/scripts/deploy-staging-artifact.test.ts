@@ -90,6 +90,12 @@ describe("manual staging immutable artifact deployment", () => {
     expect(sendStep.run).toContain(
       "bash ops/scripts/deploy-staging-artifact.sh"
     );
+    expect(sendStep.run).toContain(
+      'sudo -H -u "$RUN_AS" git -C "$REPO_DIR" "$@"'
+    );
+    expect(sendStep.run).not.toContain(
+      "git config --global --add safe.directory"
+    );
     expect(sendStep.run).not.toContain("install:frozen");
     expect(sendStep.run).not.toContain("./bin/6529 run build");
     expect(workflowSource).toContain("--expires-in 2400");

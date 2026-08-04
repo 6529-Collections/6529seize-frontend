@@ -592,21 +592,24 @@ jobs:
             fi
           done
 
-          cd "$REPO_DIR"
-          git fetch --no-tags origin "$BRANCH"
-          remote_sha="$(git rev-parse FETCH_HEAD)"
+          git_as_run_user() {
+            sudo -H -u "$RUN_AS" git -C "$REPO_DIR" "$@"
+          }
+
+          git_as_run_user fetch --no-tags origin "$BRANCH"
+          remote_sha="$(git_as_run_user rev-parse FETCH_HEAD)"
           if [[ "$remote_sha" != "$EXPECTED_SHA" ]]; then
             echo "origin $BRANCH is $remote_sha, expected $EXPECTED_SHA." >&2
             echo "A newer staging push superseded this run; refusing to deploy stale bytes." >&2
             exit 1
           fi
-          git reset --hard HEAD
-          git clean -fd generated
-          git checkout -B "$BRANCH" FETCH_HEAD
-          git config "branch.$BRANCH.remote" origin
-          git config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
-          git reset --hard FETCH_HEAD
-          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          git_as_run_user reset --hard HEAD
+          git_as_run_user clean -fd generated
+          git_as_run_user checkout -B "$BRANCH" FETCH_HEAD
+          git_as_run_user config "branch.$BRANCH.remote" origin
+          git_as_run_user config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
+          git_as_run_user reset --hard FETCH_HEAD
+          test "$(git_as_run_user rev-parse HEAD)" = "$EXPECTED_SHA"
           bash -n ops/scripts/deploy-staging-artifact.sh
           ARTIFACT_URL="$ARTIFACT_URL" \
           EXPECTED_DIGEST="$EXPECTED_DIGEST" \
