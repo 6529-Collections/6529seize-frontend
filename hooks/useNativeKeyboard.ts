@@ -42,6 +42,7 @@ const KEYBOARD_INSET_CSS_VARIABLE = "--native-keyboard-inset-bottom";
 const KEYBOARD_LAYOUT_TRANSITION_DURATION_CSS_VARIABLE =
   "--native-keyboard-layout-transition-duration";
 const KEYBOARD_EVENT_LAYOUT_TRANSITION_MS = 250;
+const REDUCED_MOTION_MEDIA_QUERY = "(prefers-reduced-motion: reduce)";
 const VIEWPORT_KEYBOARD_HEIGHT_TOLERANCE_PX = 8;
 const VIEWPORT_KEYBOARD_CLOSED_TOLERANCE_PX = 24;
 const FOCUSOUT_KEYBOARD_HIDE_FALLBACK_MS = 180;
@@ -132,8 +133,19 @@ function normalizeKeyboardHeight(height: number | null | undefined): number {
     : 0;
 }
 
+function getKeyboardEventLayoutTransitionMs(): number {
+  const matchMedia = globalThis.matchMedia;
+  return typeof matchMedia === "function" &&
+    matchMedia(REDUCED_MOTION_MEDIA_QUERY).matches
+    ? 0
+    : KEYBOARD_EVENT_LAYOUT_TRANSITION_MS;
+}
+
 function applyKeyboardLayoutVariables(
-  state: Pick<NativeKeyboardState, "keyboardHeight" | "phase" | "isAndroid">,
+  state: Pick<
+    NativeKeyboardState,
+    "isVisible" | "keyboardHeight" | "isAndroid"
+  >,
   transitionMs: number
 ): void {
   const documentRef = (globalThis as Partial<{ readonly document: Document }>)
@@ -145,7 +157,7 @@ function applyKeyboardLayoutVariables(
 
   const keyboardHeight = normalizeKeyboardHeight(state.keyboardHeight);
   const keyboardInset = getKeyboardLayoutInset(keyboardHeight, state.isAndroid);
-  const isKeyboardActive = keyboardHeight > 0 || state.phase !== "hidden";
+  const isKeyboardActive = state.isVisible || keyboardHeight > 0;
   documentElement.style.setProperty(
     KEYBOARD_INSET_CSS_VARIABLE,
     `${keyboardInset}px`
@@ -310,7 +322,7 @@ function markKeyboardHiddenFromFallback(): void {
   clearHiddenFallbackTimeout();
   nativeKeyboardLifecycleActive = false;
 
-  if (!currentState.isVisible) {
+  if (!currentState.isVisible && currentState.phase === "hidden") {
     rememberKeyboardClosedViewportHeight();
     return;
   }
@@ -376,7 +388,10 @@ function scheduleFocusoutKeyboardHideFallback(): void {
 
   hiddenFallbackTimeout = setTimeout(() => {
     hiddenFallbackTimeout = null;
-    if (!currentState.isVisible || hasEditableFocus()) {
+    if (
+      (!currentState.isVisible && currentState.phase === "hidden") ||
+      hasEditableFocus()
+    ) {
       return;
     }
 
@@ -540,6 +555,7 @@ function ensureKeyboardListeners(): void {
 
       const handles = await Promise.all([
         Keyboard.addListener("keyboardWillShow", (info) => {
+          clearHiddenFallbackTimeout();
           const keyboardHeight = getKeyboardHeight(info);
           nativeKeyboardLifecycleActive = keyboardHeight > 0;
           setKeyboardState(
@@ -548,10 +564,11 @@ function ensureKeyboardListeners(): void {
               keyboardHeight,
               phase: keyboardHeight > 0 ? "showing" : "hidden",
             },
-            { transitionMs: KEYBOARD_EVENT_LAYOUT_TRANSITION_MS }
+            { transitionMs: getKeyboardEventLayoutTransitionMs() }
           );
         }),
         Keyboard.addListener("keyboardDidShow", (info) => {
+          clearHiddenFallbackTimeout();
           const keyboardHeight = getKeyboardHeight(info);
           nativeKeyboardLifecycleActive = keyboardHeight > 0;
           setKeyboardState({
@@ -562,18 +579,22 @@ function ensureKeyboardListeners(): void {
         }),
         Keyboard.addListener("keyboardWillHide", () => {
           const wasKeyboardActive =
-            currentState.isVisible || currentState.keyboardHeight > 0;
+            currentState.isVisible ||
+            currentState.keyboardHeight > 0 ||
+            currentState.phase !== "hidden";
           nativeKeyboardLifecycleActive = wasKeyboardActive;
-          // willHide starts the native dismissal animation; target zero inset
-          // now so the app layout travels down with the keyboard instead of
-          // waiting for didHide.
+          // willHide provides the animation start and final geometry. Publish
+          // the complete closed layout now so keyboard inset, safe-area
+          // padding, and bottom-nav space settle in the same frame. Keep the
+          // lifecycle active until didHide so late iOS viewport frames cannot
+          // replace the native animation target.
           setKeyboardState(
             {
-              isVisible: wasKeyboardActive,
+              isVisible: false,
               keyboardHeight: 0,
               phase: wasKeyboardActive ? "hiding" : "hidden",
             },
-            { transitionMs: KEYBOARD_EVENT_LAYOUT_TRANSITION_MS }
+            { transitionMs: getKeyboardEventLayoutTransitionMs() }
           );
         }),
         Keyboard.addListener("keyboardDidHide", () => {

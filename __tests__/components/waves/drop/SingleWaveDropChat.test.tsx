@@ -1,10 +1,7 @@
 import { SingleWaveDropChat } from "@/components/waves/drop/SingleWaveDropChat";
 import { REPLY_TARGET_UNAVAILABLE_TOAST_ID } from "@/components/waves/create-drop-content/reply-target-unavailable";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import {
-  WsMessageType,
-  type WsDropDeleteMessage,
-} from "@/helpers/Types";
+import { WsMessageType, type WsDropDeleteMessage } from "@/helpers/Types";
 import { act, fireEvent, render } from "@testing-library/react";
 
 jest.mock("@/hooks/useDeviceInfo", () => () => ({
@@ -16,11 +13,13 @@ jest.mock("@/hooks/useDeviceInfo", () => () => ({
 
 // Mock useNativeKeyboard with configurable values
 let mockKeyboardVisible = false;
+let mockKeyboardPhase: "hidden" | "hiding" = "hidden";
 
 jest.mock("@/hooks/useNativeKeyboard", () => ({
   useNativeKeyboard: () => ({
     isVisible: mockKeyboardVisible,
     keyboardHeight: mockKeyboardVisible ? 350 : 0,
+    phase: mockKeyboardPhase,
   }),
 }));
 
@@ -108,6 +107,7 @@ describe("SingleWaveDropChat", () => {
 
   beforeEach(() => {
     mockKeyboardVisible = false;
+    mockKeyboardPhase = "hidden";
     capturedProps = undefined;
     capturedCreatorProps = undefined;
     mockSetToast.mockClear();
@@ -242,6 +242,24 @@ describe("SingleWaveDropChat", () => {
     const container = wrapper?.parentElement as HTMLElement;
 
     expect(container.style.paddingBottom).toBe("0px");
+  });
+
+  it("restores safe-area padding while keyboard dismissal finishes", () => {
+    mockKeyboardVisible = false;
+    mockKeyboardPhase = "hiding";
+
+    const wave = createWave();
+    const drop: any = { id: "d1" };
+    render(<SingleWaveDropChat wave={wave} drop={drop} />);
+
+    const wrapper = document.querySelector(
+      '[data-testid="wrapper"]'
+    ) as HTMLElement;
+    const container = wrapper?.parentElement as HTMLElement;
+
+    expect(container.style.paddingBottom).toBe(
+      "calc(env(safe-area-inset-bottom))"
+    );
   });
 
   it("passes approve wave state to WaveDropsAll", () => {
