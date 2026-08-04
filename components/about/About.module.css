@@ -75,7 +75,7 @@
   float: none;
   margin-top: 0;
   color: #efeff1;
-  font-family: "Montserrat", sans-serif !important;
+  font-family: Montserrat, sans-serif !important;
   font-weight: 600;
   letter-spacing: -0.015em;
 }
@@ -137,7 +137,7 @@
 .gdrcContent a:hover,
 .gdrcContent a:focus-visible {
   color: #84adff;
-  text-decoration-color: currentColor;
+  text-decoration-color: currentcolor;
 }
 
 .faqContainer {

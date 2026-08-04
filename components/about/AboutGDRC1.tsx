@@ -12,14 +12,52 @@ import { fetchAboutSectionFile } from "./about.helpers";
 
 type GdrcMessageKey = Extract<MessageKey, `about.gdrc.${string}`>;
 
+const GDRC_ALLOWED_TAG_NAMES = new Set([
+  "BR",
+  "DIV",
+  "EM",
+  "H2",
+  "H3",
+  "H4",
+  "H5",
+  "LI",
+  "OL",
+  "P",
+  "STRONG",
+  "UL",
+]);
+
 const m = (locale: SupportedLocale, key: GdrcMessageKey) => t(locale, key);
+
+function sanitizeGdrcHtml(value: string): string {
+  const document = new DOMParser().parseFromString(value, "text/html");
+
+  for (const element of Array.from(document.body.querySelectorAll("*"))) {
+    if (!GDRC_ALLOWED_TAG_NAMES.has(element.tagName)) {
+      element.remove();
+      continue;
+    }
+
+    for (const attribute of Array.from(element.attributes)) {
+      element.removeAttribute(attribute.name);
+    }
+  }
+
+  return document.body.innerHTML;
+}
 
 export default function AboutGDRC1() {
   const locale = useBrowserLocale();
   const [html, setHtml] = useState<string>("");
 
   useEffect(() => {
-    fetchAboutSectionFile("gdrc1").then(setHtml);
+    void fetchAboutSectionFile("gdrc1")
+      .then((content) => {
+        setHtml(sanitizeGdrcHtml(content));
+      })
+      .catch(() => {
+        setHtml("");
+      });
   }, []);
 
   return (
