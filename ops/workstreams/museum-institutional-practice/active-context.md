@@ -3,8 +3,9 @@
 - Goal: publish the Museum's institutional-practice study on 6529.io and carry
   it through source and frontend review, staging, production, and retained E2E.
 - Frontend release PR: `6529-Collections/6529seize-frontend#3569`, merged.
-- Released frontend main: `655b5408b68bbdac79249f4531c196349eff7d52`.
-- Follow-up branch: `codex/museum-institutional-practice-closeout`.
+- Reliability follow-up PR: `6529-Collections/6529seize-frontend#3573`, merged.
+- Qualified production runtime:
+  `88a4f19885f9ff70a1632bda7255b8091263ee86`.
 - Museum source PR: `6529-Collections/6529networkmuseum#22`, merged.
 - Canonical Museum source commit:
   `f5080e1873a3b86280c5a92e1fbe6cbd7fea38a4`.
@@ -38,15 +39,21 @@
   register, and the mobile Stories & Research directory at their layout
   extremes.
 - Staging qualification: composition
-  `6d3ceba25b2dccf258f62adcff511516e0b37fea`, deploy run `30883469768`,
-  automatic E2E run `30884413504`, and independent Museum 32/32 all passed.
-- Production deployment: run `30885146909`; runtime and announced version both
-  read exact `655b5408b68b` with `stale:false`; rendered desktop/mobile review
+  `bc9f46cd52e2437595a3d1131371525f9cb28b3c`, deploy run `30894880378`,
+  automatic E2E run `30896314276`, and independent Museum 32/32 all passed.
+- Production deployment: run `30897509037`; runtime and announced version both
+  read exact `88a4f19885f` with `stale:false`; rendered desktop/mobile review
   passed.
-- Production hardening finding: speculative Museum link prefetches can produce
-  unrelated first-party RSC 502 console failures. The follow-up disables those
-  prefetches, records exact failed-response URLs, and narrowly classifies only
-  the known blocked Coinbase analytics transport as benign.
-- Immediate next actions: publish the tested follow-up PR, iterate exact-head
-  bots and CI, merge, redeploy staging and production, and require a strict
-  green 32-route production pass with first-party 5xx handling unchanged.
+- Production qualification: strict Museum 32/32, full read-only inventory
+  89/89, applicable surface matrix 28/28 with 22 intentional native-project
+  skips, WCAG/i18n 3/3, and final endpoint/version watch 60/60 all passed.
+- Hardening disposition: speculative Museum prefetch is disabled, silent
+  first-party 5xx responses fail the acceptance pack independently of console
+  output, and only the exact known blocked Coinbase analytics transport is
+  classified as benign. The original first-party prefetch failure did not
+  recur in staging or production qualification.
+- Manual-fallback Production E2E: no sanctioned workflow run exists; none is
+  claimed.
+- Status: complete. Future scholarship, source, or presentation changes begin
+  as new governed source and frontend revisions; this workstream has no open
+  release action.
