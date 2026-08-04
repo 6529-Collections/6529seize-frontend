@@ -63,3 +63,10 @@
   label-sync step retained PR-write permissions. Label recommendations now
   appear in the job summary and the untrusted PR workflow is strictly
   read-only; mutation is no longer mixed with dependency evaluation.
+- First staging qualification of the merged pipeline built and uploaded the
+  exact artifact in 11m05s, concurrent with the 12m08s production prebuild.
+  Promotion then failed closed in 1m11s before activation: SSM executes as
+  root, but the staging checkout belongs to `ubuntu`, so Git rejected the
+  checkout as dubious ownership. The hotfix runs every repository operation as
+  the configured checkout owner and deliberately avoids a global
+  `safe.directory` exception.
