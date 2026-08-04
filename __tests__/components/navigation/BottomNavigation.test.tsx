@@ -197,6 +197,36 @@ describe("BottomNavigation", () => {
     ).toBeInTheDocument();
   });
 
+  it("preserves its measured element while the keyboard hides it", () => {
+    const { rerender, unmount } = render(<BottomNavigation />);
+    const measuredElement = registerRef.mock.calls.find(
+      ([refType, element]) =>
+        refType === "mobileNav" && element instanceof HTMLElement
+    )?.[1];
+
+    expect(measuredElement).toBeInstanceOf(HTMLElement);
+    registerRef.mockClear();
+
+    rerender(<BottomNavigation hidden preserveMeasurementWhileHidden />);
+
+    expect(registerRef).toHaveBeenCalledWith("mobileNav", measuredElement);
+    expect(registerRef).not.toHaveBeenCalledWith("mobileNav", null);
+
+    registerRef.mockClear();
+    unmount();
+
+    expect(registerRef).toHaveBeenCalledWith("mobileNav", null);
+  });
+
+  it("releases its measured element for non-keyboard hide conditions", () => {
+    const { rerender } = render(<BottomNavigation />);
+    registerRef.mockClear();
+
+    rerender(<BottomNavigation hidden />);
+
+    expect(registerRef).toHaveBeenCalledWith("mobileNav", null);
+  });
+
   it("renders a stable nav fallback when search params suspend", () => {
     const pendingSearchParams = new Promise<URLSearchParams>(() => {
       // Keep the promise pending so Suspense stays on the fallback.
