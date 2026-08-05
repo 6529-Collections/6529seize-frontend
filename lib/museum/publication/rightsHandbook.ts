@@ -6,6 +6,8 @@ import type {
   MuseumRightsExpression,
   MuseumRightsHandbook,
   MuseumRightsObjectAssignment,
+  MuseumRightsPracticeReading,
+  MuseumRightsPracticeStatus,
   MuseumRightsUseStatus,
   MuseumSourceDocument,
 } from "./types";
@@ -51,6 +53,14 @@ const USE_STATUSES = [
   "case_by_case",
 ] as const satisfies readonly MuseumRightsUseStatus[];
 
+const PRACTICE_STATUSES = [
+  "ordinary",
+  "ordinary_with_terms",
+  "purpose_limited",
+  "contextual",
+  "separate_basis",
+] as const satisfies readonly MuseumRightsPracticeStatus[];
+
 const EXPECTED_EXPRESSION_IDS = new Set([
   "in-copyright-no-public-license",
   "cc0-1.0",
@@ -90,6 +100,7 @@ const REGISTRY_KEYS = [
   "published_at",
   "actions",
   "use_status_definitions",
+  "museum_practice_status_definitions",
   "sources",
   "expressions",
   "object_assignments",
@@ -103,7 +114,35 @@ const REGISTRY_SOURCE_KEYS = [
   "rightsstatements_documentation",
   "rightsstatements_usage_guidelines",
   "observed_at",
+  "college_art_association_fair_use",
+  "us_public_display_law",
+  "uk_public_exhibition_guidance",
+  "us_nft_intellectual_property_study",
+  "creative_commons_noncommercial_guidance",
+  "rightsstatements_layer_guidance",
 ] as const;
+
+const REGISTRY_SOURCE_EXACT_URLS = {
+  creative_commons_data_repository:
+    "https://github.com/creativecommons/cc-legal-tools-data",
+  creative_commons_license_guide:
+    "https://creativecommons.org/share-your-work/use-remix/cc-licenses/",
+  rightsstatements_documentation:
+    "https://rightsstatements.org/en/documentation/",
+  rightsstatements_usage_guidelines:
+    "https://rightsstatements.org/en/documentation/usage_guidelines",
+  college_art_association_fair_use:
+    "https://www.collegeart.org/programs/caa-fair-use/best-practices",
+  us_public_display_law: "https://www.copyright.gov/title17/92chap1.html",
+  uk_public_exhibition_guidance:
+    "https://www.gov.uk/government/publications/copyright-notice-public-exhibition-of-copyright-works",
+  us_nft_intellectual_property_study:
+    "https://www.copyright.gov/policy/nft-study/Joint-USPTO-USCO-Report-on-NFTs-and-Intellectual-Property.pdf",
+  creative_commons_noncommercial_guidance:
+    "https://wiki.creativecommons.org/wiki/NonCommercial_interpretation",
+  rightsstatements_layer_guidance:
+    "https://rightsstatements.org/en/2018/12/where-statements-apply.html",
+} as const;
 
 const CREATIVE_COMMONS_DATA_COMMIT = "22fc2c31d0297a1feb8a257c0e6f84e95c9a38ae";
 
@@ -201,6 +240,38 @@ function parseUseMatrix(
   >;
 }
 
+function parseMuseumPracticeMatrix(
+  value: unknown
+): Readonly<Record<MuseumRightsAction, MuseumRightsPracticeReading>> {
+  if (!isRecord(value) || !exactKeys(value, EXPECTED_ACTIONS)) {
+    throw new Error("publication_rights_practice_matrix_invalid");
+  }
+  return Object.fromEntries(
+    EXPECTED_ACTIONS.map((action) => {
+      const reading = value[action];
+      if (
+        !isRecord(reading) ||
+        !exactKeys(reading, ["status", "note"]) ||
+        !PRACTICE_STATUSES.includes(
+          reading["status"] as MuseumRightsPracticeStatus
+        )
+      ) {
+        throw new Error("publication_rights_practice_matrix_invalid");
+      }
+      return [
+        action,
+        {
+          status: reading["status"] as MuseumRightsPracticeStatus,
+          note: requiredString(
+            reading["note"],
+            "publication_rights_practice_matrix_invalid"
+          ),
+        },
+      ] as const;
+    })
+  ) as Record<MuseumRightsAction, MuseumRightsPracticeReading>;
+}
+
 function parseExpression(
   value: unknown,
   documents: ReadonlyMap<string, MuseumSourceDocument>
@@ -221,6 +292,7 @@ function parseExpression(
     "boundaries",
     "visitor_note",
     "use_matrix",
+    "museum_practice_matrix",
   ] as const;
   if (!isRecord(value) || !exactKeys(value, keys)) {
     throw new Error("publication_rights_expression_shape_invalid");
@@ -346,6 +418,9 @@ function parseExpression(
       "publication_rights_expression_invalid"
     ),
     useMatrix: parseUseMatrix(value["use_matrix"]),
+    museumPracticeMatrix: parseMuseumPracticeMatrix(
+      value["museum_practice_matrix"]
+    ),
     legalCode,
   };
 }
@@ -390,6 +465,7 @@ export function assembleRightsHandbook(
   const expressions = parseExpressions(registry, documents);
   const expressionIds = new Set(expressions.map((expression) => expression.id));
   const useStatusDefinitions = parseStatusDefinitions(registry);
+  const practiceStatusDefinitions = parsePracticeStatusDefinitions(registry);
   const assignments = parseAssignments(registry, expressionIds);
   validateProgramNote(registry);
 
@@ -418,6 +494,7 @@ export function assembleRightsHandbook(
     collectorGuide,
     expressions,
     useStatusDefinitions,
+    practiceStatusDefinitions,
     objectAssignments: assignments,
     sourcePaths: [
       MUSEUM_RIGHTS_REGISTRY_PATH,
@@ -445,7 +522,7 @@ function parseRegistry(
     registry["$schema"] !==
       "../../schemas/rights-expression-registry.schema.json" ||
     registry["registry_type"] !== "6529NM_RIGHTS_EXPRESSION_REGISTRY" ||
-    registry["registry_version"] !== "1.0.0" ||
+    registry["registry_version"] !== "1.1.0" ||
     typeof registry["published_at"] !== "string" ||
     !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/u.test(registry["published_at"]) ||
     !Array.isArray(registry["actions"]) ||
@@ -465,15 +542,10 @@ function parseRegistry(
   const sources = registry["sources"];
   if (
     !exactKeys(sources, REGISTRY_SOURCE_KEYS) ||
-    sources["creative_commons_data_repository"] !==
-      "https://github.com/creativecommons/cc-legal-tools-data" ||
+    Object.entries(REGISTRY_SOURCE_EXACT_URLS).some(
+      ([key, expected]) => sources[key] !== expected
+    ) ||
     sources["creative_commons_data_commit"] !== CREATIVE_COMMONS_DATA_COMMIT ||
-    sources["creative_commons_license_guide"] !==
-      "https://creativecommons.org/share-your-work/use-remix/cc-licenses/" ||
-    sources["rightsstatements_documentation"] !==
-      "https://rightsstatements.org/en/documentation/" ||
-    sources["rightsstatements_usage_guidelines"] !==
-      "https://rightsstatements.org/en/documentation/usage_guidelines" ||
     typeof sources["observed_at"] !== "string" ||
     !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/u.test(sources["observed_at"])
   ) {
@@ -524,6 +596,27 @@ function parseStatusDefinitions(
       ),
     ])
   ) as Record<MuseumRightsUseStatus, string>;
+}
+
+function parsePracticeStatusDefinitions(
+  registry: JsonRecord
+): Readonly<Record<MuseumRightsPracticeStatus, string>> {
+  const definitionsValue = registry["museum_practice_status_definitions"];
+  if (
+    !isRecord(definitionsValue) ||
+    !exactKeys(definitionsValue, PRACTICE_STATUSES)
+  ) {
+    throw new Error("publication_rights_practice_status_definitions_invalid");
+  }
+  return Object.fromEntries(
+    PRACTICE_STATUSES.map((status) => [
+      status,
+      requiredString(
+        definitionsValue[status],
+        "publication_rights_practice_status_definitions_invalid"
+      ),
+    ])
+  ) as Record<MuseumRightsPracticeStatus, string>;
 }
 
 function parseAssignments(

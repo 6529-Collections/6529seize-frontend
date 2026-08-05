@@ -22,6 +22,7 @@ on:
           - search-waves-readonly
           - media-readonly
           - network-open-data-readonly
+          - museum-data-architecture
           - museum-institutional-practice
           - museum-inside-system
           - museum-rights
