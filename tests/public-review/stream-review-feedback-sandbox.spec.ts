@@ -68,6 +68,8 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
       const mobileNavigationToggle = page
         .locator("summary")
         .filter({ hasText: "Review navigation" });
+      const mobileNavigationDisclosure =
+        mobileNavigationToggle.locator("xpath=..");
       const pagePosition = page.getByText("Page 1 of 14", { exact: true });
       const [navigationBounds, pagePositionBounds, feedbackBounds] =
         await Promise.all([
@@ -110,6 +112,17 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
           return Math.abs(openReviewHeadingTop - reviewHeadingTop);
         })
         .toBeLessThanOrEqual(1);
+
+      await feedbackToggle.click();
+      await expect(mobileNavigationDisclosure).not.toHaveAttribute("open", "");
+      await expect(feedbackToggle).toHaveAttribute("aria-expanded", "true");
+      await feedbackPanel
+        .getByRole("button", { name: "Hide feedback" })
+        .click();
+      await expect(feedbackToggle).toHaveAttribute("aria-expanded", "false");
+
+      await mobileNavigationToggle.click();
+      await expect(mobileNavigationDisclosure).toHaveAttribute("open", "");
       const mobileViewport = page.viewportSize();
       expect(mobileViewport).not.toBeNull();
       await page.setViewportSize({
@@ -123,11 +136,17 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
       await expect(
         page.locator('section[aria-label="Review status"] > div')
       ).toHaveCSS("flex-direction", "column");
+
+      await feedbackToggle.click();
+      await expect(feedbackToggle).toHaveAttribute("aria-expanded", "true");
+      await expect(feedbackPanel).toBeVisible();
+      await mobileNavigationToggle.click();
+      await expect(feedbackToggle).toHaveAttribute("aria-expanded", "false");
+      await expect(mobileNavigationDisclosure).toHaveAttribute("open", "");
+      await mobileNavigationToggle.click();
       await page.setViewportSize(mobileViewport!);
       await expect(mobileNavigationToggle).toBeVisible();
-      await expect(
-        mobileNavigationToggle.locator("xpath=..")
-      ).not.toHaveAttribute("open", "");
+      await expect(mobileNavigationDisclosure).not.toHaveAttribute("open", "");
     }
     if ((await feedbackToggle.getAttribute("aria-expanded")) !== "true") {
       await feedbackToggle.click();

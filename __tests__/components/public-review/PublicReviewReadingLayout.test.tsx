@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+import { PublicReviewMobileNavigationDisclosure } from "@/components/public-review/PublicReviewMobileNavigationDisclosure";
 import { PublicReviewReadingLayout } from "@/components/public-review/PublicReviewReadingLayout";
 
 describe("PublicReviewReadingLayout", () => {
@@ -202,5 +203,70 @@ describe("PublicReviewReadingLayout", () => {
     expect(document.getElementById("public-review-feedback")).toHaveAttribute(
       "hidden"
     );
+  });
+
+  it("keeps feedback and mobile navigation mutually exclusive", async () => {
+    const user = userEvent.setup();
+    jest.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
+      bottom: 800,
+      height: 800,
+      left: 0,
+      right: 900,
+      top: 0,
+      width: 900,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    });
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      value: jest.fn((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+      })),
+    });
+
+    render(
+      <PublicReviewReadingLayout
+        content={<div>Review content</div>}
+        feedbackAvailable
+        mobileNavigation={
+          <PublicReviewMobileNavigationDisclosure resetKey="overview">
+            <summary>Review navigation</summary>
+            <div>Navigation links</div>
+          </PublicReviewMobileNavigationDisclosure>
+        }
+        panel={<div>Feedback panel</div>}
+        toolbar={<div>Page 1</div>}
+      />
+    );
+
+    const navigationToggle = screen.getByText("Review navigation");
+    const disclosure = navigationToggle.closest("details");
+    expect(disclosure).not.toBeNull();
+    if (!disclosure) {
+      return;
+    }
+
+    await user.click(navigationToggle);
+    expect(disclosure.open).toBe(true);
+
+    await user.click(screen.getByRole("button", { name: "Show feedback" }));
+    expect(disclosure.open).toBe(false);
+    expect(
+      screen.getByRole("complementary", { name: "Page comments" })
+    ).not.toHaveAttribute("hidden");
+
+    await user.click(navigationToggle);
+    expect(disclosure.open).toBe(true);
+    expect(
+      screen.getByRole("button", { name: "Show feedback" })
+    ).toHaveAttribute("aria-expanded", "false");
   });
 });

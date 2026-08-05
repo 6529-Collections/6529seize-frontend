@@ -3,6 +3,8 @@
 import type { ReactNode } from "react";
 import { useLayoutEffect, useRef } from "react";
 
+import { usePublicReviewFeedbackPanelCoordination } from "@/components/public-review/PublicReviewReadingLayout";
+
 const MOBILE_NAVIGATION_QUERY = "(max-width: 1023px)";
 
 export function PublicReviewMobileNavigationDisclosure({
@@ -13,6 +15,7 @@ export function PublicReviewMobileNavigationDisclosure({
   readonly resetKey: string;
 }) {
   const disclosureRef = useRef<HTMLDetailsElement>(null);
+  const feedbackPanel = usePublicReviewFeedbackPanelCoordination();
 
   useLayoutEffect(() => {
     const disclosure = disclosureRef.current;
@@ -42,10 +45,23 @@ export function PublicReviewMobileNavigationDisclosure({
     };
   }, [resetKey]);
 
+  useLayoutEffect(() => {
+    if (feedbackPanel.isOpen && disclosureRef.current) {
+      disclosureRef.current.open = false;
+    }
+  }, [feedbackPanel.isOpen]);
+
+  const handleToggle = (): void => {
+    if (disclosureRef.current?.open && feedbackPanel.isOpen) {
+      feedbackPanel.close();
+    }
+  };
+
   return (
     <details
       ref={disclosureRef}
       className="tw-group/navigation tw-static lg:tw-hidden"
+      onToggle={handleToggle}
     >
       {children}
     </details>

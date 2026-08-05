@@ -14,9 +14,11 @@ import { createPortal } from "react-dom";
 import {
   createContext,
   type ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -28,9 +30,20 @@ const COMMENT_PANEL_ID = "public-review-feedback";
 const COMMENT_PANEL_HEADING_ID = "public-review-feedback-heading";
 const COMMENT_PANEL_INLINE_MIN_WIDTH = 760;
 const PublicReviewCommentPanelOpenContext = createContext(true);
+const PublicReviewFeedbackPanelCoordinationContext = createContext({
+  close: (): void => undefined,
+  isOpen: false,
+});
 
 export function usePublicReviewCommentPanelOpen(): boolean {
   return useContext(PublicReviewCommentPanelOpenContext);
+}
+
+export function usePublicReviewFeedbackPanelCoordination(): {
+  readonly close: () => void;
+  readonly isOpen: boolean;
+} {
+  return useContext(PublicReviewFeedbackPanelCoordinationContext);
 }
 
 export function PublicReviewReadingLayout({
@@ -54,9 +67,13 @@ export function PublicReviewReadingLayout({
   const hasMobileNavigation =
     mobileNavigation !== null && mobileNavigation !== undefined;
 
-  const closePanel = (): void => {
+  const closePanel = useCallback((): void => {
     setIsPanelOpen(false);
-  };
+  }, []);
+  const feedbackPanelCoordination = useMemo(
+    () => ({ close: closePanel, isOpen: isPanelOpen }),
+    [closePanel, isPanelOpen]
+  );
 
   useLayoutEffect(() => {
     const layoutElement = layoutRef.current;
@@ -217,7 +234,11 @@ export function PublicReviewReadingLayout({
         <div className="tw-relative tw-flex tw-min-h-16 tw-items-center tw-gap-2 tw-px-3 sm:tw-gap-4 sm:tw-px-7 lg:tw-px-10">
           {hasMobileNavigation ? (
             <div className="tw-min-w-0 tw-flex-none lg:tw-hidden">
-              {mobileNavigation}
+              <PublicReviewFeedbackPanelCoordinationContext.Provider
+                value={feedbackPanelCoordination}
+              >
+                {mobileNavigation}
+              </PublicReviewFeedbackPanelCoordinationContext.Provider>
             </div>
           ) : null}
           <div
