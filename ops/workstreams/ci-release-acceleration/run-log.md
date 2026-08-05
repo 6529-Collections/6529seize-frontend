@@ -138,3 +138,15 @@
   second HTTP 200 soft failure (`404 | PAGE NOT FOUND`) on the collection-art
   route. The existing retry recognized only HTTP 502/503/504. Route readiness
   now retries either soft failure document once, then blocks on persistence.
+- Full staging qualification run 30972152707 attempt 1 passed thirteen of
+  fourteen packs, including both Museum packs. Collections failed on persistent
+  NextGen soft-error documents; an immediate isolated replay passed 20/20 in
+  77 seconds. Attempt 2 passed collections and both Museum packs but failed the
+  social pack on a public-profile `6529 Error`; its immediate isolated replay
+  passed 12/12 in 36 seconds.
+- Added one capability-negotiated serial retry for failed E2E packs after the
+  bounded parallel first pass. Only failed packs rerun. Per-attempt logs and
+  classifications are preserved, and a persistent retry failure still blocks
+  the release. Focused runner and performance contracts pass 31/31; changed
+  lint, application/test/Playwright typechecks, manifest sync, and Debt Ratchet
+  are green.
