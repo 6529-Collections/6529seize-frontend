@@ -36,6 +36,9 @@ describe("Museum rights handbook publication boundary", () => {
     expect(result.publication.rightsHandbook.expressions).toHaveLength(22);
     expect(result.publication.rightsHandbook.objectAssignments).toHaveLength(7);
     expect(
+      result.publication.rightsHandbook.practiceStatusDefinitions.ordinary
+    ).toBe("Ordinary Museum practice.");
+    expect(
       result.publication.rightsHandbook.objectAssignments.every(
         ({ expressionId }) => expressionId === "cc-by-nc-4.0"
       )
@@ -54,8 +57,11 @@ describe("Museum rights handbook publication boundary", () => {
     expect(
       result.publication.rightsHandbook.expressions.find(
         ({ id }) => id === "cc-by-nc-4.0"
-      )?.museumPracticeMatrix.display_the_work.note
-    ).toContain("specific Museum-practice reading");
+      )?.museumPracticeMatrix.display_the_work
+    ).toEqual({
+      status: "ordinary",
+      note: "Museum practice reading for display_the_work in the governed fixture.",
+    });
   });
 
   it("fails the publication closed when a required guide is absent", async () => {
@@ -88,6 +94,28 @@ describe("Museum rights handbook publication boundary", () => {
         documentOverrides: {
           [MUSEUM_RIGHTS_REGISTRY_PATH]: reorderedActions,
         },
+      })
+    ).toEqual(expect.objectContaining({ status: "unavailable" }));
+  });
+
+  it("rejects incomplete or unknown Museum-practice readings", async () => {
+    const registryText = mutatedRegistry((registry) => {
+      const expression = (
+        registry["expressions"] as Array<Record<string, unknown>>
+      )[0];
+      const matrix = expression?.["museum_practice_matrix"] as
+        | Record<string, Record<string, unknown>>
+        | undefined;
+      if (matrix !== undefined) {
+        matrix["display_the_work"] = {
+          status: "invented_status",
+          note: "A malformed fixture reading that must fail closed.",
+        };
+      }
+    });
+    expect(
+      await loadFixture({
+        documentOverrides: { [MUSEUM_RIGHTS_REGISTRY_PATH]: registryText },
       })
     ).toEqual(expect.objectContaining({ status: "unavailable" }));
   });

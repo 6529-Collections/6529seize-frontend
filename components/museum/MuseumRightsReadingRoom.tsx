@@ -8,7 +8,7 @@ import type {
   MuseumRightsAction,
   MuseumRightsExpression,
   MuseumRightsHandbook,
-  MuseumRightsMuseumPracticeStatus,
+  MuseumRightsPracticeStatus,
 } from "@/lib/museum/publication";
 
 const TEXT_LINK_CLASS =
@@ -39,7 +39,7 @@ const PRACTICE_STATUS_LABEL_KEYS = {
   purpose_limited: "museum.network.rights.practice.purpose_limited",
   contextual: "museum.network.rights.practice.contextual",
   separate_basis: "museum.network.rights.practice.separate_basis",
-} as const satisfies Record<MuseumRightsMuseumPracticeStatus, MessageKey>;
+} as const satisfies Record<MuseumRightsPracticeStatus, MessageKey>;
 
 function expressionGroups(handbook: MuseumRightsHandbook) {
   return [

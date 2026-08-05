@@ -277,3 +277,12 @@ production, or evidence gate remains open.
   changed typecheck across 1,358 files, React Doctor 100/100, targeted
   formatting, and `codex-diff-check`. Frontend base and `origin/main` both
   resolve to `d448d4c282c034fa2a1d5d1d95ce90fc85561e54`.
+- While exact-head review was running, frontend main advanced to
+  `a888054589e7311848278c53b187033d96b1f5fb` with the Museum ontology and
+  preservation reading room. The branch was merged forward before release.
+  Four publication files overlapped. Resolution retained main's data
+  architecture and shorter internal practice-type names while preserving the
+  approved rights substance, strict 1.1.0 projection, and editorial layout.
+  The resulting tree passes 5 focused suites / 31 tests, changed lint,
+  changed typecheck across 1,358 files, React Doctor 100/100, formatting, and
+  `codex-diff-check`.

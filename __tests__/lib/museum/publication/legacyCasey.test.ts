@@ -28,7 +28,7 @@ describe("legacy Casey publication projection", () => {
       }),
     ]);
     expect(publication.projects).toHaveLength(5);
-    expect(publication.documents).toHaveLength(60);
+    expect(publication.documents).toHaveLength(73);
     expect(publication.rightsHandbook).toEqual(
       expect.objectContaining({
         introduction: expect.objectContaining({

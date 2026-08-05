@@ -79,7 +79,7 @@ describe("Museum rights reading room", () => {
     expect(container.querySelectorAll("dl > div")).toHaveLength(6);
     expect(container.querySelectorAll("dl dt")).toHaveLength(6);
     expect(container.querySelectorAll("dl dd")).toHaveLength(6);
-    expect(screen.getAllByText("Ordinary with recorded terms")).toHaveLength(6);
+    expect(screen.getAllByText("Ordinary museum practice")).toHaveLength(6);
     expect(container.querySelector("dl [class*='rounded-full']")).toBeNull();
     expect(
       screen.getByText("Exact English legal code", { exact: true })
