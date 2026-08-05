@@ -76,6 +76,7 @@ const READONLY_SPECS = {
     "tests/museum/institutional-practice-readonly.spec.ts",
   ],
   museumInsideSystem: ["tests/museum/inside-system-readonly.spec.ts"],
+  museumRights: ["tests/museum/rights-readonly.spec.ts"],
 };
 
 function localPack(scriptKey, description, specs, tweaks = {}) {
@@ -293,6 +294,14 @@ const PACKS = [
   }),
   museumPack({
     ...localReadonlyPack(
+      "test:e2e:museum-rights",
+      "Network Museum rights education and object-license route sweep.",
+      READONLY_SPECS.museumRights
+    ),
+    triggers: ["pr-ci", "manual"],
+  }),
+  museumPack({
+    ...localReadonlyPack(
       "test:e2e:museum-inside-system",
       "Network Museum Inside the System project and comparison sweep.",
       READONLY_SPECS.museumInsideSystem,
@@ -498,6 +507,14 @@ const PACKS = [
       { timeoutMinutes: 30 }
     )
   ),
+  museumPack(
+    stagingPack(
+      "museum-rights",
+      "museum-rights",
+      "Staging Network Museum rights education and object-license route sweep.",
+      READONLY_SPECS.museumRights
+    )
+  ),
 
   productionPack(
     "home-readonly",
@@ -575,6 +592,16 @@ const PACKS = [
       [DESKTOP, MOBILE]
     )
   ),
+  museumPack(
+    productionPack(
+      "museum-rights",
+      "Production Network Museum rights education and object-license route sweep.",
+      READONLY_SPECS.museumRights,
+      ["post-deploy", "manual"],
+      15,
+      [DESKTOP, MOBILE]
+    )
+  ),
   productionPack(
     "readonly",
     "Combined production-safe release validation.",
@@ -592,6 +619,7 @@ const PACKS = [
       ...READONLY_SPECS.searchWaves,
       ...READONLY_SPECS.museumInstitutionalPractice,
       ...READONLY_SPECS.museumInsideSystem,
+      ...READONLY_SPECS.museumRights,
     ],
     // The disjoint post-deploy packs above cover this exact spec union and may
     // run concurrently. Retain the aggregate only as an operator diagnostic.

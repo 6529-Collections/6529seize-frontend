@@ -75,6 +75,9 @@ const RELATED_SOURCE_LABEL_KEYS = {
   programRecord: "museum.network.openMuseum.strip.relatedLabels.programRecord",
   scholarshipStandard:
     "museum.network.openMuseum.strip.relatedLabels.scholarshipStandard",
+  rightsRegistry:
+    "museum.network.openMuseum.strip.relatedLabels.rightsRegistry",
+  legalCode: "museum.network.openMuseum.strip.relatedLabels.legalCode",
   selectedWorks: "museum.network.openMuseum.strip.relatedLabels.selectedWorks",
   supportingRecord:
     "museum.network.openMuseum.strip.relatedLabels.supportingRecord",

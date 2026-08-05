@@ -15,6 +15,8 @@ const KEYS_AND_GATES_PROGRAM_PATH =
 const KEYS_AND_GATES_SELECTION_PATH =
   "records/programs/6529NM-AP-01/selected-works.json";
 const DONATION_POLICY_PATH = "policies/donation-acceptance.md";
+const RIGHTS_REGISTRY_PATH = "docs/rights/registry.json";
+const RIGHTS_ROUTE = `${MUSEUM_ROOT}/rights`;
 const INSTITUTIONAL_PRACTICE_ROUTE = `${MUSEUM_ROOT}/stories/a-field-of-practice`;
 const INSTITUTIONAL_PRACTICE_ADJACENT_ROUTE = `${INSTITUTIONAL_PRACTICE_ROUTE}/adjacent-practice`;
 const SCHOLARSHIP_EDITORIAL_STANDARD_ROUTE = `${MUSEUM_ROOT}/stories/scholarship-and-writing`;
@@ -99,6 +101,8 @@ export type MuseumRelatedPageSourceLabel =
   | "primarySourceRegister"
   | "projectEssay"
   | "programRecord"
+  | "rightsRegistry"
+  | "legalCode"
   | "scholarshipStandard"
   | "selectedWorks"
   | "supportingRecord";
@@ -112,6 +116,12 @@ interface MuseumRelatedPageSourceCandidate {
   readonly path: string | null | undefined;
   readonly label: MuseumRelatedPageSourceLabel;
 }
+
+type AddMuseumPageSource = (
+  pathname: string,
+  primaryCandidate: string | null | undefined,
+  relatedCandidates?: readonly MuseumRelatedPageSourceCandidate[]
+) => void;
 
 export interface MuseumPageSourceRoute {
   readonly pathname: string;
@@ -247,6 +257,110 @@ function hasCompleteInstitutionalPractice(
   return sourcePathsMatch && profileCountMatches && profilesMatch;
 }
 
+function addInstitutionalPracticePageSources(
+  publication: MuseumPublication,
+  add: AddMuseumPageSource
+): void {
+  const practice = (publication as Partial<MuseumPublication>)
+    .institutionalPractice;
+  if (!hasCompleteInstitutionalPractice(practice)) return;
+
+  add(INSTITUTIONAL_PRACTICE_ROUTE, practice.introduction.sourcePath, [
+    {
+      path: practice.sourceRegister.sourcePath,
+      label: "primarySourceRegister",
+    },
+    {
+      path: CURATORIAL_PUBLICATION_STANDARD_PATH,
+      label: "scholarshipStandard",
+    },
+  ]);
+  add(
+    `${INSTITUTIONAL_PRACTICE_ROUTE}/sources`,
+    practice.sourceRegister.sourcePath,
+    [
+      {
+        path: practice.introduction.sourcePath,
+        label: "institutionalStudy",
+      },
+      {
+        path: CURATORIAL_PUBLICATION_STANDARD_PATH,
+        label: "scholarshipStandard",
+      },
+    ]
+  );
+  add(
+    INSTITUTIONAL_PRACTICE_ADJACENT_ROUTE,
+    practice.adjacentPractice.sourcePath,
+    [
+      {
+        path: practice.introduction.sourcePath,
+        label: "institutionalStudy",
+      },
+      {
+        path: practice.sourceRegister.sourcePath,
+        label: "primarySourceRegister",
+      },
+    ]
+  );
+  add(
+    SCHOLARSHIP_EDITORIAL_STANDARD_ROUTE,
+    practice.editorialStandard.sourcePath,
+    [
+      {
+        path: practice.introduction.sourcePath,
+        label: "institutionalStudy",
+      },
+      {
+        path: practice.sourceRegister.sourcePath,
+        label: "primarySourceRegister",
+      },
+    ]
+  );
+  for (const profile of practice.profiles) {
+    add(
+      `${INSTITUTIONAL_PRACTICE_ROUTE}/${profile.slug}`,
+      profile.document.sourcePath,
+      [
+        {
+          path: practice.introduction.sourcePath,
+          label: "institutionalStudy",
+        },
+        {
+          path: practice.sourceRegister.sourcePath,
+          label: "primarySourceRegister",
+        },
+      ]
+    );
+  }
+}
+
+function addRightsPageSources(
+  publication: MuseumPublication,
+  add: AddMuseumPageSource
+): void {
+  const handbook = publication.rightsHandbook;
+  add(RIGHTS_ROUTE, handbook.introduction.sourcePath, [
+    { path: RIGHTS_REGISTRY_PATH, label: "rightsRegistry" },
+    { path: handbook.artistGuide.sourcePath, label: "supportingRecord" },
+  ]);
+  add(`${RIGHTS_ROUTE}/artists`, handbook.artistGuide.sourcePath, [
+    { path: RIGHTS_REGISTRY_PATH, label: "rightsRegistry" },
+    { path: handbook.collectorGuide.sourcePath, label: "supportingRecord" },
+  ]);
+  add(`${RIGHTS_ROUTE}/collectors`, handbook.collectorGuide.sourcePath, [
+    { path: RIGHTS_REGISTRY_PATH, label: "rightsRegistry" },
+    { path: handbook.artistGuide.sourcePath, label: "supportingRecord" },
+  ]);
+  for (const expression of handbook.expressions) {
+    add(
+      `${RIGHTS_ROUTE}/${encodeURIComponent(expression.id)}`,
+      RIGHTS_REGISTRY_PATH,
+      [{ path: expression.legalCode?.path, label: "legalCode" }]
+    );
+  }
+}
+
 export function buildMuseumPageSourceCatalog(
   publication: MuseumPublication
 ): MuseumPageSourceCatalog {
@@ -286,86 +400,12 @@ export function buildMuseumPageSourceCatalog(
     { path: giftNarrative?.sourcePath, label: "giftNarrative" },
   ]);
   add(`${MUSEUM_ROOT}/stories/source-and-chronology`, sourceMatrix?.sourcePath);
-  const institutionalPractice = (publication as Partial<MuseumPublication>)
-    .institutionalPractice;
-  if (hasCompleteInstitutionalPractice(institutionalPractice)) {
-    add(
-      INSTITUTIONAL_PRACTICE_ROUTE,
-      institutionalPractice.introduction.sourcePath,
-      [
-        {
-          path: institutionalPractice.sourceRegister.sourcePath,
-          label: "primarySourceRegister",
-        },
-        {
-          path: CURATORIAL_PUBLICATION_STANDARD_PATH,
-          label: "scholarshipStandard",
-        },
-      ]
-    );
-    add(
-      `${INSTITUTIONAL_PRACTICE_ROUTE}/sources`,
-      institutionalPractice.sourceRegister.sourcePath,
-      [
-        {
-          path: institutionalPractice.introduction.sourcePath,
-          label: "institutionalStudy",
-        },
-        {
-          path: CURATORIAL_PUBLICATION_STANDARD_PATH,
-          label: "scholarshipStandard",
-        },
-      ]
-    );
-    add(
-      INSTITUTIONAL_PRACTICE_ADJACENT_ROUTE,
-      institutionalPractice.adjacentPractice.sourcePath,
-      [
-        {
-          path: institutionalPractice.introduction.sourcePath,
-          label: "institutionalStudy",
-        },
-        {
-          path: institutionalPractice.sourceRegister.sourcePath,
-          label: "primarySourceRegister",
-        },
-      ]
-    );
-    add(
-      SCHOLARSHIP_EDITORIAL_STANDARD_ROUTE,
-      institutionalPractice.editorialStandard.sourcePath,
-      [
-        {
-          path: institutionalPractice.introduction.sourcePath,
-          label: "institutionalStudy",
-        },
-        {
-          path: institutionalPractice.sourceRegister.sourcePath,
-          label: "primarySourceRegister",
-        },
-      ]
-    );
-    for (const profile of institutionalPractice.profiles) {
-      add(
-        `${INSTITUTIONAL_PRACTICE_ROUTE}/${profile.slug}`,
-        profile.document.sourcePath,
-        [
-          {
-            path: institutionalPractice.introduction.sourcePath,
-            label: "institutionalStudy",
-          },
-          {
-            path: institutionalPractice.sourceRegister.sourcePath,
-            label: "primarySourceRegister",
-          },
-        ]
-      );
-    }
-  }
+  addInstitutionalPracticePageSources(publication, add);
   add(`${MUSEUM_ROOT}/about`, openMuseum?.sourcePath, [
     { path: transition?.sourcePath, label: "onchainTransition" },
     { path: founding?.sourcePath, label: "foundingPrinciples" },
   ]);
+  addRightsPageSources(publication, add);
   add(`${MUSEUM_ROOT}/methodology`, DONATION_POLICY_PATH, [
     { path: founding?.sourcePath, label: "foundingPrinciples" },
   ]);

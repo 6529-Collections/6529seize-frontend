@@ -44,7 +44,8 @@ function sourceErrorCode(error: unknown): string {
 }
 
 function mediaTypeForPath(path: string): MuseumSourceDocument["mediaType"] {
-  return path.endsWith(".json") ? "application/json" : "text/markdown";
+  if (path.endsWith(".json")) return "application/json";
+  return path.endsWith(".txt") ? "text/plain" : "text/markdown";
 }
 
 export class GitHubMuseumPublicationSource implements MuseumPublicationSource {

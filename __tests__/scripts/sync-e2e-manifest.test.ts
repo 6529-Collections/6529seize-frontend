@@ -44,7 +44,7 @@ describe("E2E pack manifest", () => {
 
   it("defines every package pack once and satisfies the safety contract", () => {
     expect(manifestTools.validateManifest(packs, { root: ROOT })).toEqual([]);
-    expect(packs).toHaveLength(62);
+    expect(packs).toHaveLength(65);
 
     const rendered = manifestTools.renderPackageJsonScripts(packs);
     const packageScripts = JSON.parse(
@@ -65,7 +65,7 @@ describe("E2E pack manifest", () => {
         pack.specs?.every((spec) => spec.startsWith("tests/museum/"))
     );
 
-    expect(museumOnlyPacks).toHaveLength(6);
+    expect(museumOnlyPacks).toHaveLength(9);
     expect(museumOnlyPacks.every((pack) => pack.changeScope === "museum")).toBe(
       true
     );
@@ -77,10 +77,13 @@ describe("E2E pack manifest", () => {
       [
         "local:test:e2e:museum-institutional-practice",
         "local:test:e2e:museum-inside-system",
+        "local:test:e2e:museum-rights",
         "production:test:e2e:production:museum-institutional-practice",
         "production:test:e2e:production:museum-inside-system",
+        "production:test:e2e:production:museum-rights",
         "staging:test:e2e:staging:museum-institutional-practice",
         "staging:test:e2e:staging:museum-inside-system",
+        "staging:test:e2e:staging:museum-rights",
       ].sort()
     );
   });
@@ -139,17 +142,17 @@ describe("E2E pack manifest", () => {
       (pack) => pack.environments[0] === "production"
     );
 
-    expect(staging).toHaveLength(15);
+    expect(staging).toHaveLength(16);
     expect(
       staging.filter((pack) => pack.triggers.includes("post-deploy"))
-    ).toHaveLength(14);
-    expect(production).toHaveLength(14);
+    ).toHaveLength(15);
+    expect(production).toHaveLength(15);
     expect(
       production.filter((pack) => pack.triggers.includes("cron"))
     ).toHaveLength(10);
     expect(
       production.filter((pack) => pack.triggers.includes("post-deploy"))
-    ).toHaveLength(13);
+    ).toHaveLength(14);
 
     for (const environmentPacks of [staging, production]) {
       const specs = environmentPacks
