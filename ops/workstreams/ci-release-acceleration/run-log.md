@@ -230,4 +230,6 @@
   exact prebuild. An ignored-only main SHA deliberately has no automatic
   deployable artifact. If an operator intentionally promotes that SHA, the
   existing manual dispatch must first build its exact artifact; production
-  deployment otherwise fails closed.
+  deployment otherwise fails closed. The contract also proves that the build
+  workflow consumes no ignored local `.github` action; introducing one must
+  first narrow the trigger exclusion.
