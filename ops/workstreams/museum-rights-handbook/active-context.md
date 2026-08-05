@@ -108,3 +108,20 @@ final copy/visual sweep.
   CC BY-NC entry, and a loaded Casey object at desktop and mobile widths. Pixel
   review confirms the native 6529 shell, legible type floor, restrained source
   treatment, loaded art, and no generic process-dashboard styling.
+
+### 2026-08-05 PR review checkpoint
+
+- Frontend PR [#3627](https://github.com/6529-Collections/6529seize-frontend/pull/3627)
+  opened from exact DCO-corrected head `e782b04ac2a48f77f51f1c4215ac3a4e04887c19`.
+  An initial HTTPS push was rejected because the OAuth token lacked workflow
+  scope; the branch was published through the configured SSH credential. Both
+  commits carry SSH signatures and DCO `Signed-off-by` trailers.
+- 6529bot general review on the pre-DCO-equivalent tree returned **Good to
+  merge**, with no correctness, security, or data-integrity finding. Two
+  non-blocking observations were accepted: internal rights paths now require a
+  complete expression identifier and malformed Museum-looking paths render as
+  unlinked text; the page-source catalog now reads the required handbook
+  contract directly instead of through `Partial<MuseumPublication>`.
+- Review-follow-up validation passes: 3 suites / 41 tests, changed lint,
+  changed typecheck (1,358 files), React Doctor 100/100, formatting, and
+  whitespace. The rendered copy, routes, and approved pixels are unchanged.

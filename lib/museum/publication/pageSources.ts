@@ -370,41 +370,34 @@ export function buildMuseumPageSourceCatalog(
     { path: transition?.sourcePath, label: "onchainTransition" },
     { path: founding?.sourcePath, label: "foundingPrinciples" },
   ]);
-  const rightsHandbook = (publication as Partial<MuseumPublication>)
-    .rightsHandbook;
-  if (rightsHandbook !== undefined) {
-    add(RIGHTS_ROUTE, rightsHandbook.introduction.sourcePath, [
-      { path: RIGHTS_REGISTRY_PATH, label: "rightsRegistry" },
-      {
-        path: rightsHandbook.artistGuide.sourcePath,
-        label: "supportingRecord",
-      },
-    ]);
-    add(`${RIGHTS_ROUTE}/artists`, rightsHandbook.artistGuide.sourcePath, [
-      { path: RIGHTS_REGISTRY_PATH, label: "rightsRegistry" },
-      {
-        path: rightsHandbook.collectorGuide.sourcePath,
-        label: "supportingRecord",
-      },
-    ]);
+  const rightsHandbook = publication.rightsHandbook;
+  add(RIGHTS_ROUTE, rightsHandbook.introduction.sourcePath, [
+    { path: RIGHTS_REGISTRY_PATH, label: "rightsRegistry" },
+    {
+      path: rightsHandbook.artistGuide.sourcePath,
+      label: "supportingRecord",
+    },
+  ]);
+  add(`${RIGHTS_ROUTE}/artists`, rightsHandbook.artistGuide.sourcePath, [
+    { path: RIGHTS_REGISTRY_PATH, label: "rightsRegistry" },
+    {
+      path: rightsHandbook.collectorGuide.sourcePath,
+      label: "supportingRecord",
+    },
+  ]);
+  add(`${RIGHTS_ROUTE}/collectors`, rightsHandbook.collectorGuide.sourcePath, [
+    { path: RIGHTS_REGISTRY_PATH, label: "rightsRegistry" },
+    {
+      path: rightsHandbook.artistGuide.sourcePath,
+      label: "supportingRecord",
+    },
+  ]);
+  for (const expression of rightsHandbook.expressions) {
     add(
-      `${RIGHTS_ROUTE}/collectors`,
-      rightsHandbook.collectorGuide.sourcePath,
-      [
-        { path: RIGHTS_REGISTRY_PATH, label: "rightsRegistry" },
-        {
-          path: rightsHandbook.artistGuide.sourcePath,
-          label: "supportingRecord",
-        },
-      ]
+      `${RIGHTS_ROUTE}/${encodeURIComponent(expression.id)}`,
+      RIGHTS_REGISTRY_PATH,
+      [{ path: expression.legalCode?.path, label: "legalCode" }]
     );
-    for (const expression of rightsHandbook.expressions) {
-      add(
-        `${RIGHTS_ROUTE}/${encodeURIComponent(expression.id)}`,
-        RIGHTS_REGISTRY_PATH,
-        [{ path: expression.legalCode?.path, label: "legalCode" }]
-      );
-    }
   }
   add(`${MUSEUM_ROOT}/methodology`, DONATION_POLICY_PATH, [
     { path: founding?.sourcePath, label: "foundingPrinciples" },
