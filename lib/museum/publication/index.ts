@@ -5,5 +5,6 @@ export * from "./manifest";
 export * from "./openMuseum";
 export * from "./pageSources";
 export * from "./runtime";
+export * from "./rightsHandbook";
 export * from "./security";
 export * from "./types";

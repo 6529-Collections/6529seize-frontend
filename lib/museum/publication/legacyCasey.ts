@@ -11,6 +11,11 @@ import {
   MUSEUM_ONCHAIN_TRANSITION_PATH,
   MUSEUM_OPEN_STATEMENT_PATH,
 } from "./openMuseum";
+import {
+  assembleRightsHandbook,
+  MUSEUM_RIGHTS_REQUIRED_PATHS,
+  rightsHandbookDocuments,
+} from "./rightsHandbook";
 import type {
   MuseumAccessionedArtwork,
   MuseumArtist,
@@ -201,6 +206,7 @@ export const LEGACY_CASEY_REQUIRED_PATHS = [
   ...CASEY_PUBLIC_DOCUMENTS.map((document) => document.path),
   ...PROJECT_PUBLIC_DOCUMENTS.map((document) => document.path),
   ...INSTITUTIONAL_PRACTICE_REQUIRED_PATHS,
+  ...MUSEUM_RIGHTS_REQUIRED_PATHS,
 ] as const;
 
 type JsonRecord = Record<string, unknown>;
@@ -713,17 +719,29 @@ function assembleLegacyCaseyPublication(
   const institutionalPractice = assembleInstitutionalPractice(
     context.documents
   );
+  const rightsHandbook = assembleRightsHandbook(context.documents);
   const allPublicDocuments = [
     ...publicDocuments,
     ...institutionalPracticeDocuments(institutionalPractice),
+    ...rightsHandbookDocuments(rightsHandbook),
   ];
   const visualObjects = visualObjectsById(context.documents);
 
   const artworks = drafts.map((draft): MuseumAccessionedArtwork => {
+    const rightsAssignment = rightsHandbook.objectAssignments.find(
+      (assignment) => assignment.objectId === draft.objectId
+    );
+    const rightsExpression = rightsHandbook.expressions.find(
+      (expression) => expression.id === rightsAssignment?.expressionId
+    );
+    if (rightsAssignment === undefined || rightsExpression === undefined) {
+      throw new Error("publication_casey_rights_incomplete");
+    }
     const rightsCredit: MuseumRightsCredit = {
       creditLine: draft.creditLine,
       licenseLabel: draft.licenseLabel,
-      licenseUrl: null,
+      licenseUrl: rightsExpression.canonicalUri,
+      rightsExpressionId: rightsExpression.id,
       sourcePath: draft.sourcePath,
     };
     const visualObject = visualObjects.get(draft.objectId);
@@ -776,6 +794,7 @@ function assembleLegacyCaseyPublication(
     artworks,
     documents: allPublicDocuments,
     institutionalPractice,
+    rightsHandbook,
   };
 }
 

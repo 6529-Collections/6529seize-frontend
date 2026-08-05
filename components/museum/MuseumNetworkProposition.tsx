@@ -79,6 +79,13 @@ const PRESENT_STATE = [
     href: MUSEUM_REPOSITORY_URL,
     external: true,
   },
+  {
+    titleKey: "museum.network.proposition.today.rights.title",
+    bodyKey: "museum.network.proposition.today.rights.body",
+    actionKey: "museum.network.proposition.today.rights.action",
+    href: "/museum/network/rights",
+    external: false,
+  },
 ] as const;
 
 const NEXT_STAGE = [
@@ -225,7 +232,7 @@ export function MuseumNetworkProposition({
             </p>
           </div>
         </div>
-        <div className="tw-mt-10 tw-grid tw-gap-8 lg:tw-grid-cols-3">
+        <div className="tw-mt-10 tw-grid tw-gap-8 md:tw-grid-cols-2">
           {PRESENT_STATE.map((item) => (
             <article
               key={item.titleKey}

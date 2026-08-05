@@ -1,0 +1,82 @@
+# Museum rights handbook — active context
+
+## Mandate
+
+Publish a readable Museum education section about copyright, the public
+domain, Creative Commons, cultural-heritage rights statements, and the rights
+of artists and collectors. Link every object-level rights label to the
+applicable Museum page. Keep exact official legal text and source evidence
+available without turning the visitor experience into a technical dashboard.
+
+## Source contract
+
+The source change is being constructed in `6529-Collections/6529networkmuseum`
+from base `f227930bba0f7aca3c9fa3f3cb2dbed13412c968`. The atomic frontend boundary
+will require:
+
+- `records/institutional-practice/rights-and-licenses.md`;
+- `records/institutional-practice/rights-for-artists.md`;
+- `records/institutional-practice/rights-for-collectors.md`;
+- `docs/rights/registry.json`;
+- the seven legal-code paths declared by that registry.
+
+The registry contains 22 entries: the six Creative Commons 4.0 International
+licenses, CC0 1.0, Public Domain Mark 1.0, all twelve RightsStatements.org 1.0
+terms, an in-copyright/no-public-license case, and custom terms. The seven
+Casey Reas objects map to the reviewed CC BY-NC 4.0 record. The Keys and Gates
+CC0 intention remains conditional while its outcomes are unminted.
+
+## Product decisions
+
+1. `/museum/network/rights` is an educational reading room, led by copyright,
+   ownership, and public-domain explanation rather than a license grid.
+2. Artist and collector guides receive dedicated pages.
+3. Every rights expression receives a stable detail route generated from the
+   governed registry. Creative Commons detail pages include the exact retained
+   legal code behind a disclosure and link to the official publication.
+4. Object credit lines link internally to the applicable detail page. That page
+   then supplies the official URI, conditions, practical uses, limits, and
+   exact source.
+5. Rights remains a quiet About-adjacent Museum section rather than a new
+   top-level art-navigation pillar.
+6. The complete source set activates atomically from one exact Museum commit.
+   Missing or malformed content fails the whole rights projection closed.
+
+## Validation and release
+
+Implementation start checkpoint: `2026-08-05T17:01:32Z`.
+
+Required work: focused parser/projector mutation tests; object-link tests;
+desktop and 390-pixel route checks; lint/typecheck/build; PR and bot iteration;
+staging deployment and E2E; production deployment and E2E; exact timings and a
+final copy/visual sweep.
+
+### 2026-08-05 source and local validation checkpoint
+
+- Museum source PR [#29](https://github.com/6529-Collections/6529networkmuseum/pull/29)
+  merged at `2026-08-05T18:17:19Z` as canonical main
+  `11c79489e0ae65d9a296577c44c881c3f79267d6`.
+- Canonical manifest: 326 governed files; SHA-256
+  `sha256:b6b1d5ddf19c88335b752bc610a1d4020236a3eb4a86a13d52182a29aa22ffb1`;
+  Keccak
+  `0x11546194ab32ec2553562d48aa21788329da52afa86470812d4c327aa2d3d025`.
+  The bootstrap validator separately reports 307 JSON files.
+- Source CI passed the complete Museum validator and deterministic Ubuntu and
+  Windows suites on the PR head and again on canonical main in post-merge run
+  `31034024802`.
+- Frontend static gates pass: changed lint, changed TypeScript (1,357 files),
+  Jest typecheck ratchet, Playwright typecheck, E2E manifest, help-index sync,
+  and React Doctor 100/100.
+- Frontend Museum regressions pass: 81 suites and 315 tests across library,
+  component, App Router, and legacy page surfaces.
+- The first local browser run reached the rendered product. Its overview and
+  object journeys passed; one assertion used the wrong accessible name for the
+  exact legal-text source link and was corrected. A development-server retry
+  then returned a transient cold-compilation 404 on the first route. Final
+  browser and pixel qualification will run against an optimized production
+  server, matching staging and production behavior.
+- A full build begun from frontend base `9b90bf5282` completed generation and
+  the repository-wide lint, then was stopped during Next compilation after a
+  fresh fetch showed current frontend main had advanced to `55913450cb`.
+  Current main will be integrated before the authoritative build so that the
+  retained artifact is the actual PR merge tree.

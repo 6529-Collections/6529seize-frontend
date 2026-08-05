@@ -23,6 +23,7 @@ export interface CaseyArtwork {
   readonly observedImageSha256: string;
   readonly creditLine: string;
   readonly rightsLabel: string;
+  readonly rightsExpressionId: string;
   readonly rightsUrl?: string | undefined;
   readonly status: "accessioned";
   readonly mediaRetention: "upstream_not_retained";
@@ -115,6 +116,8 @@ function createCaseyArtwork([
     observedImageSha256,
     creditLine: `Casey REAS, ${title}; 6529 Network Museum, gift of punk6529, ${objectId}.`,
     rightsLabel: CASEY_RIGHTS_LABEL,
+    rightsExpressionId: "cc-by-nc-4.0",
+    rightsUrl: "/museum/network/rights/cc-by-nc-4.0",
     status: "accessioned",
     mediaRetention: "upstream_not_retained",
   };
@@ -406,11 +409,12 @@ export function caseyArtworksFromPublication(
         rightsLabel
       ),
       rightsLabel,
+      rightsExpressionId:
+        governed.rightsCredit.rightsExpressionId ?? overlay.rightsExpressionId,
       rightsUrl:
-        governed.rightsCredit.licenseUrl ??
-        (governed.rightsCredit.licenseLabel === "CC BY-NC 4.0"
-          ? "https://creativecommons.org/licenses/by-nc/4.0/"
-          : undefined),
+        governed.rightsCredit.rightsExpressionId === null
+          ? undefined
+          : `/museum/network/rights/${governed.rightsCredit.rightsExpressionId}`,
     };
   });
 }

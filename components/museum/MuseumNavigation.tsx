@@ -42,7 +42,7 @@ const NAV_ITEMS: ReadonlyArray<{
   {
     labelKey: "museum.network.nav.about",
     href: "/museum/network/about",
-    activePrefixes: ["/museum/network/about"],
+    activePrefixes: ["/museum/network/about", "/museum/network/rights"],
   },
 ];
 

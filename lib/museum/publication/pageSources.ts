@@ -15,6 +15,8 @@ const KEYS_AND_GATES_PROGRAM_PATH =
 const KEYS_AND_GATES_SELECTION_PATH =
   "records/programs/6529NM-AP-01/selected-works.json";
 const DONATION_POLICY_PATH = "policies/donation-acceptance.md";
+const RIGHTS_REGISTRY_PATH = "docs/rights/registry.json";
+const RIGHTS_ROUTE = `${MUSEUM_ROOT}/rights`;
 const INSTITUTIONAL_PRACTICE_ROUTE = `${MUSEUM_ROOT}/stories/a-field-of-practice`;
 const INSTITUTIONAL_PRACTICE_ADJACENT_ROUTE = `${INSTITUTIONAL_PRACTICE_ROUTE}/adjacent-practice`;
 const SCHOLARSHIP_EDITORIAL_STANDARD_ROUTE = `${MUSEUM_ROOT}/stories/scholarship-and-writing`;
@@ -99,6 +101,8 @@ export type MuseumRelatedPageSourceLabel =
   | "primarySourceRegister"
   | "projectEssay"
   | "programRecord"
+  | "rightsRegistry"
+  | "legalCode"
   | "scholarshipStandard"
   | "selectedWorks"
   | "supportingRecord";
@@ -366,6 +370,42 @@ export function buildMuseumPageSourceCatalog(
     { path: transition?.sourcePath, label: "onchainTransition" },
     { path: founding?.sourcePath, label: "foundingPrinciples" },
   ]);
+  const rightsHandbook = (publication as Partial<MuseumPublication>)
+    .rightsHandbook;
+  if (rightsHandbook !== undefined) {
+    add(RIGHTS_ROUTE, rightsHandbook.introduction.sourcePath, [
+      { path: RIGHTS_REGISTRY_PATH, label: "rightsRegistry" },
+      {
+        path: rightsHandbook.artistGuide.sourcePath,
+        label: "supportingRecord",
+      },
+    ]);
+    add(`${RIGHTS_ROUTE}/artists`, rightsHandbook.artistGuide.sourcePath, [
+      { path: RIGHTS_REGISTRY_PATH, label: "rightsRegistry" },
+      {
+        path: rightsHandbook.collectorGuide.sourcePath,
+        label: "supportingRecord",
+      },
+    ]);
+    add(
+      `${RIGHTS_ROUTE}/collectors`,
+      rightsHandbook.collectorGuide.sourcePath,
+      [
+        { path: RIGHTS_REGISTRY_PATH, label: "rightsRegistry" },
+        {
+          path: rightsHandbook.artistGuide.sourcePath,
+          label: "supportingRecord",
+        },
+      ]
+    );
+    for (const expression of rightsHandbook.expressions) {
+      add(
+        `${RIGHTS_ROUTE}/${encodeURIComponent(expression.id)}`,
+        RIGHTS_REGISTRY_PATH,
+        [{ path: expression.legalCode?.path, label: "legalCode" }]
+      );
+    }
+  }
   add(`${MUSEUM_ROOT}/methodology`, DONATION_POLICY_PATH, [
     { path: founding?.sourcePath, label: "foundingPrinciples" },
   ]);
