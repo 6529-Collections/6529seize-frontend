@@ -198,18 +198,21 @@ function createStrictEvidence(root: string, mergeSha: string) {
     merge_sha: mergeSha,
     head_sha: "e".repeat(40),
     production_build_required: true,
+    dependency_analysis_required: true,
+    release_bus_contract_required: true,
+    test_typecheck_required: true,
     policy_bundle_contract: "pr-ci-policy-bundle-v1",
     policy_bundle_digest: sha256(policyBundle),
     policy_bundle_line_count: 1,
     required_gates: [
       "package-manager-discipline",
-      "dependency-analysis",
+      "dependency-analysis-or-plan-not-required",
       "reviewbot-contract",
       "generated-agent-files",
-      "release-bus-workflow-contract",
+      "release-bus-workflow-contract-or-plan-not-required",
       "changed-lint",
       "changed-typecheck",
-      "test-typecheck",
+      "test-typecheck-or-plan-not-required",
       "related-jest-selection",
       "production-build-or-plan-not-required",
       "pr-ci-policy-bundle",
@@ -217,12 +220,15 @@ function createStrictEvidence(root: string, mergeSha: string) {
   });
   fs.writeFileSync(path.join(evidenceRoot, "manifest.json"), manifest);
   fs.writeFileSync(path.join(evidenceRoot, "policy-bundle.txt"), policyBundle);
-  fs.writeFileSync(
-    path.join(evidenceRoot, "SHA256SUMS"),
-    `${sha256(manifest)}  ./manifest.json\n${sha256(
-      policyBundle
-    )}  ./policy-bundle.txt\n`
+  const checksums = spawnSync(
+    "bash",
+    ["-c", "sha256sum ./manifest.json ./policy-bundle.txt"],
+    { cwd: evidenceRoot, encoding: "utf8" }
   );
+  if (checksums.status !== 0) {
+    throw new Error(`Unable to construct strict evidence: ${checksums.stderr}`);
+  }
+  fs.writeFileSync(path.join(evidenceRoot, "SHA256SUMS"), checksums.stdout);
   return evidenceRoot;
 }
 
@@ -340,7 +346,7 @@ set -euo pipefail
 if [ "$*" = "exec node scripts/e2e-packs.cjs --capabilities" ]; then
   case "\${MOCK_RUNNER_CAPABILITY:-old}" in
     current)
-      printf '%s\\n' '{"contract":"release-bus-e2e-runner-capabilities.v1","features":{"readonly_pack_parallelism":{"version":1,"max_parallel":4}}}'
+      printf '%s\\n' '{"contract":"release-bus-e2e-runner-capabilities.v1","features":{"readonly_pack_parallelism":{"version":1,"max_parallel":4},"pack_exclusion":{"version":1},"serial_failed_pack_retry":{"version":1,"max_retries":1}}}'
       exit 0
       ;;
     incompatible)
@@ -351,6 +357,11 @@ if [ "$*" = "exec node scripts/e2e-packs.cjs --capabilities" ]; then
       exit 2
       ;;
   esac
+fi
+if [ "$*" = "exec node -" ] && [ "\${MOCK_MUSEUM_PACK_ALIASES:-0}" = 1 ]; then
+  cat >/dev/null
+  printf '%s\\n' museum-institutional-practice museum-inside-system
+  exit 0
 fi
 printf '%s\\n' "$@" > "$MOCK_6529_ARGS"
 `
@@ -728,7 +739,9 @@ describe("Release Bus artifact rollout compatibility", () => {
       const evidence = findStep(
         workflow,
         environment === "staging" ? "staging-packs" : "readonly",
-        "Validate exact manifest-bound E2E evidence"
+        environment === "staging"
+          ? "Validate exact manifest-bound E2E evidence"
+          : "Validate exact production E2E evidence"
       );
       const root = fs.mkdtempSync(
         path.join(os.tmpdir(), `release-bus-${environment}-runner-`)
@@ -736,8 +749,12 @@ describe("Release Bus artifact rollout compatibility", () => {
       try {
         createMock6529(root);
         const invocation = path.join(root, "runner-args");
+        const githubEnv = path.join(root, "github-env");
         const baseEnv = {
+          GITHUB_ENV: githubEnv,
           MOCK_6529_ARGS: invocation,
+          MUSEUM_E2E_REQUIRED: "false",
+          MOCK_MUSEUM_PACK_ALIASES: "1",
           SELECTED_PACK: "all",
         };
 
@@ -754,6 +771,11 @@ describe("Release Bus artifact rollout compatibility", () => {
         expect(currentArgs).toEqual(
           expect.arrayContaining(["--trigger", "post-deploy"])
         );
+        expect(
+          currentArgs.flatMap((arg, index) =>
+            arg === "--exclude-pack" ? [currentArgs[index + 1]] : []
+          )
+        ).toEqual(["museum-institutional-practice", "museum-inside-system"]);
 
         expect(
           runShell(step.run!, {
@@ -764,6 +786,7 @@ describe("Release Bus artifact rollout compatibility", () => {
         const oldArgs = fs.readFileSync(invocation, "utf8").split("\n");
         expect(oldArgs).not.toContain("--parallel");
         expect(oldArgs).not.toContain("--pack");
+        expect(oldArgs).not.toContain("--exclude-pack");
         expect(oldArgs).toEqual(
           expect.arrayContaining(["--trigger", "post-deploy"])
         );
@@ -779,6 +802,7 @@ describe("Release Bus artifact rollout compatibility", () => {
           .split("\n");
         expect(incompatibleArgs).not.toContain("--parallel");
         expect(incompatibleArgs).not.toContain("--pack");
+        expect(incompatibleArgs).not.toContain("--exclude-pack");
         expect(incompatibleArgs).toEqual(
           expect.arrayContaining(["--trigger", "post-deploy"])
         );
@@ -904,7 +928,7 @@ describe("Release Bus artifact rollout compatibility", () => {
         REUSE_ARTIFACT_DIGEST: artifactDigest,
         REUSE_ARTIFACT_NAME: artifactName,
         REUSE_ARTIFACT_RUN_ID: "1234",
-        RUNNER_TEMP: path.join(root, "runner"),
+        RUNNER_TEMP: path.join(root, "runner").replaceAll("\\", "/"),
         SOURCE_REF: "release-bus-v2/compatibility",
         TRAIN_ID,
         TRAIN_REVISION: "1",
@@ -939,7 +963,14 @@ describe("Release Bus artifact rollout compatibility", () => {
         }).status
       ).toBe(0);
       expect(fs.existsSync(curlPayload)).toBe(true);
-      expect(runShell(validateEvidence.run!, { env: baseEnv }).status).toBe(0);
+      const strictEvidenceResult = runShell(validateEvidence.run!, {
+        env: baseEnv,
+      });
+      if (strictEvidenceResult.status !== 0) {
+        throw new Error(
+          `strict evidence failed (${strictEvidenceResult.status}): ${strictEvidenceResult.stderr}\nstdout: ${strictEvidenceResult.stdout}`
+        );
+      }
       expect(baseEnv.EXPECTED_SHA).not.toBe(baseEnv.MOCK_HEAD_SHA);
       expect(fs.readFileSync(ghInvocations, "utf8")).toContain(
         "actions/runs/1234/artifacts"

@@ -1,6 +1,16 @@
 import { assertApprovedArtBlocksUrl } from "./security";
+import {
+  assembleInstitutionalPractice,
+  INSTITUTIONAL_PRACTICE_REQUIRED_PATHS,
+  institutionalPracticeDocuments,
+} from "./institutionalPractice";
 import { parseHeading } from "./legacyCaseyMarkdown";
 import { PROJECT_PUBLIC_DOCUMENTS } from "./legacyCaseyProjectDocuments";
+import {
+  MUSEUM_CONTRIBUTOR_GUIDE_PATH,
+  MUSEUM_ONCHAIN_TRANSITION_PATH,
+  MUSEUM_OPEN_STATEMENT_PATH,
+} from "./openMuseum";
 import type {
   MuseumAccessionedArtwork,
   MuseumArtist,
@@ -65,6 +75,27 @@ const CASEY_PUBLIC_DOCUMENTS: readonly PublicDocumentContract[] = [
     id: "founding-and-operating-principles",
     path: "policies/founding-and-operating-principles.md",
     kind: "founding_principles",
+    artworkId: null,
+    relation: "institution",
+  },
+  {
+    id: "open-museum",
+    path: MUSEUM_OPEN_STATEMENT_PATH,
+    kind: "open_museum_statement",
+    artworkId: null,
+    relation: "institution",
+  },
+  {
+    id: "onchain-transition",
+    path: MUSEUM_ONCHAIN_TRANSITION_PATH,
+    kind: "onchain_transition",
+    artworkId: null,
+    relation: "institution",
+  },
+  {
+    id: "museum-contributor-guide",
+    path: MUSEUM_CONTRIBUTOR_GUIDE_PATH,
+    kind: "contributor_guide",
     artworkId: null,
     relation: "institution",
   },
@@ -169,6 +200,7 @@ export const LEGACY_CASEY_REQUIRED_PATHS = [
   CASEY_GIFT_AUTHORIZATION_PATH,
   ...CASEY_PUBLIC_DOCUMENTS.map((document) => document.path),
   ...PROJECT_PUBLIC_DOCUMENTS.map((document) => document.path),
+  ...INSTITUTIONAL_PRACTICE_REQUIRED_PATHS,
 ] as const;
 
 type JsonRecord = Record<string, unknown>;
@@ -678,6 +710,13 @@ function assembleLegacyCaseyPublication(
     context.documents,
     projectByArtwork
   );
+  const institutionalPractice = assembleInstitutionalPractice(
+    context.documents
+  );
+  const allPublicDocuments = [
+    ...publicDocuments,
+    ...institutionalPracticeDocuments(institutionalPractice),
+  ];
   const visualObjects = visualObjectsById(context.documents);
 
   const artworks = drafts.map((draft): MuseumAccessionedArtwork => {
@@ -730,11 +769,13 @@ function assembleLegacyCaseyPublication(
 
   return {
     identity: context.identity,
+    declaredSourcePaths: context.declaredSourcePaths,
     artists: [artist],
     projects,
     gifts: [gift],
     artworks,
-    documents: publicDocuments,
+    documents: allPublicDocuments,
+    institutionalPractice,
   };
 }
 

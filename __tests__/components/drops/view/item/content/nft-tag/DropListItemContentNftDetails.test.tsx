@@ -10,7 +10,7 @@ jest.mock('@/helpers/image.helpers', () => ({
 
 describe('DropListItemContentNftDetails', () => {
   const referencedNft = { contract: 'c', token: '1', name: 'Token' } as any;
-  const nft = { token: { collection: { image: 'url' } } } as any;
+  const nft = { imageUrl: 'url' } as any;
 
   it('renders image and name', () => {
     render(<DropListItemContentNftDetails referencedNft={referencedNft} nft={nft} />);

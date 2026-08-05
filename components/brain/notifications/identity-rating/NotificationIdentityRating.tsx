@@ -134,6 +134,7 @@ export default function NotificationIdentityRating({
           {profileHref ? (
             <Link
               href={profileHref}
+              prefetch={false}
               className="tw-text-base tw-no-underline hover:tw-underline"
             >
               {ratingPhrase}

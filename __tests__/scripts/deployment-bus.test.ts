@@ -207,9 +207,7 @@ describe("release bus staging artifact transfer", () => {
     expect(productionDeployWorkflowSource).toContain(
       "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_PRODUCTION_DISCUSSION_DESTINATIONS }}"
     );
-    expect(productionDeployWorkflowSource).toContain(
-      'keys == ["production"]'
-    );
+    expect(productionDeployWorkflowSource).toContain('keys == ["production"]');
     expect(productionDeployWorkflowSource).toContain(
       'OptionName:"PUBLIC_REVIEW_DISCUSSION_DESTINATIONS"'
     );
@@ -430,6 +428,12 @@ describe("release bus v2 E2E callbacks", () => {
   });
 
   it("classifies staging setup transport separately from E2E failures", () => {
+    expect(stagingE2E).toContain("Check out immutable Release Bus tooling");
+    expect(stagingE2E).toContain("timeout-minutes: 2");
+    expect(stagingE2E).toContain("path: .release-bus-control");
+    expect(stagingE2E).not.toContain(
+      'git fetch --no-tags origin "$WORKFLOW_SHA"'
+    );
     expect(stagingE2E).toContain(
       "scripts/release-bus-install-dependencies.cjs"
     );

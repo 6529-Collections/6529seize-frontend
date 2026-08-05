@@ -42,8 +42,8 @@ The search control opens one of two clearly scoped experiences:
   - `View all <Category>` opens the full list for that category.
 - Pages catalog:
   - Page results can include top-level navigation destinations such as
-    `NFTs`, `Waves`, `DMs`, `Join 6529`, and `About`, secondary destinations
-    such as `Discover Waves` (`/discover`) and `6529 Apps`
+    `NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529`, and `About`, secondary
+    destinations such as `Discover Waves` (`/discover`) and `6529 Apps`
     (`/about/6529-apps`), plus
     permission-gated operational routes such as `Drop Forge`, `Craft Claims`,
     or `Launch Claims`, subject to the current route catalog.

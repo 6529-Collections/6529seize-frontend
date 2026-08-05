@@ -53,17 +53,21 @@ describe("renderStreamReviewFeedbackPage", () => {
       "/reviews/6529-stream"
     );
     const navigation = screen.getByRole("navigation", {
-      name: "Contract review areas",
+      name: "Review-wide destinations",
     });
     expect(
-      within(navigation).getByRole("link", { name: /Review/ })
+      within(navigation).getByRole("link", {
+        name: "Back to review contents",
+      })
     ).toHaveAttribute("href", "/reviews/6529-stream");
     expect(
-      within(navigation).getByRole("link", { name: /Technical reference/ })
+      within(navigation).getByRole("link", { name: "Technical reference" })
     ).toHaveAttribute("href", "/reviews/6529-stream/reference");
     expect(
-      within(navigation).getByRole("link", { name: /Public feedback/ })
-    ).toHaveAttribute("href", "/reviews/6529-stream/feedback");
+      within(navigation).queryByRole("link", {
+        name: "All public feedback",
+      })
+    ).not.toBeInTheDocument();
   });
 
   it("lets the ledger build immutable source links from the review root", async () => {
@@ -78,25 +82,26 @@ describe("renderStreamReviewFeedbackPage", () => {
       "/reviews/6529-stream"
     );
     const navigation = screen.getByRole("navigation", {
-      name: "Contract review areas",
+      name: "Review-wide destinations",
     });
     expect(
-      within(navigation).getByRole("link", { name: /Review/ })
+      within(navigation).getByRole("link", {
+        name: "Back to review contents",
+      })
     ).toHaveAttribute(
       "href",
       "/reviews/6529-stream/versions/2026-07-26.1"
     );
     expect(
-      within(navigation).getByRole("link", { name: /Technical reference/ })
+      within(navigation).getByRole("link", { name: "Technical reference" })
     ).toHaveAttribute(
       "href",
       "/reviews/6529-stream/versions/2026-07-26.1/reference"
     );
     expect(
-      within(navigation).getByRole("link", { name: /Public feedback/ })
-    ).toHaveAttribute(
-      "href",
-      "/reviews/6529-stream/versions/2026-07-26.1/feedback"
-    );
+      within(navigation).queryByRole("link", {
+        name: "All public feedback",
+      })
+    ).not.toBeInTheDocument();
   });
 });
