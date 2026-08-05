@@ -1,4 +1,8 @@
 import {
+  createLatestReactDomRawFrames,
+  createObservedReactDomRawInsertBeforeFrames,
+} from "@/__tests__/fixtures/reactDomRawInsertBeforeFixtures";
+import {
   __testing,
   getLowValueNetworkErrorDecision,
   getLowValueNetworkErrorTargetUrl,
@@ -92,8 +96,7 @@ type ExpectedWaveReplacementAbortOverrides = {
   additionalException?: SentryExceptionValue | undefined;
 };
 
-const expectedWaveAbortErrorValue =
-  "AbortError: The user aborted a request.";
+const expectedWaveAbortErrorValue = "AbortError: The user aborted a request.";
 const expectedWaveAbortEventTimestamp = 1_785_689_742.621;
 const expectedWaveAbortBreadcrumbTimestamp = 1_785_689_742.5;
 
@@ -196,6 +199,17 @@ describe("sentry-client-filters", () => {
       "https://6529.io/_next/static/webpack/1234567890abcdef.webpack.js",
     function: functionName,
   });
+  const reactDomRawChunkPath =
+    "app:///_next/static/chunks/0example-react-dom-runtime.js";
+  const reactDomRawStaticChunkFrame = (
+    functionName: string,
+    chunkPath: string = reactDomRawChunkPath
+  ): SentryStackFrame => ({
+    filename: chunkPath,
+    abs_path: chunkPath,
+    function: functionName,
+    in_app: true,
+  });
   const metaMaskCircularMetaElementMessage =
     "Converting circular structure to JSON --> starting at object with constructor 'HTMLMetaElement' | property '__reactFiber$nkfb4ziusym' -> object with constructor 'ry' --- property 'stateNode' closes the circle";
   const metaMaskMobileWebViewUserAgent =
@@ -273,16 +287,12 @@ describe("sentry-client-filters", () => {
           stacktrace: {
             frames: [
               {
-                filename:
-                  "app:///waves/00000000-0000-4000-8000-000000000002",
-                abs_path:
-                  "app:///waves/00000000-0000-4000-8000-000000000002",
+                filename: "app:///waves/00000000-0000-4000-8000-000000000002",
+                abs_path: "app:///waves/00000000-0000-4000-8000-000000000002",
               },
               {
-                filename:
-                  "app:///waves/00000000-0000-4000-8000-000000000002",
-                abs_path:
-                  "app:///waves/00000000-0000-4000-8000-000000000002",
+                filename: "app:///waves/00000000-0000-4000-8000-000000000002",
+                abs_path: "app:///waves/00000000-0000-4000-8000-000000000002",
               },
             ],
           },
@@ -405,10 +415,7 @@ describe("sentry-client-filters", () => {
       "a missing injected frame",
       { frames: createTwitterConfigRawFrames().slice(0, 3) },
     ],
-    [
-      "reordered injected frames",
-      { frames: reorderTwitterConfigRawFrames() },
-    ],
+    ["reordered injected frames", { frames: reorderTwitterConfigRawFrames() }],
     [
       "an application-owned frame",
       {
@@ -453,8 +460,7 @@ describe("sentry-client-filters", () => {
           stacktrace: {
             frames: [
               {
-                filename:
-                  "app:///waves/00000000-0000-4000-8000-000000000002",
+                filename: "app:///waves/00000000-0000-4000-8000-000000000002",
               },
             ],
           },
@@ -1978,6 +1984,61 @@ describe("sentry-client-filters", () => {
     ...overrides,
   });
 
+  const createReactDomRawInsertBeforeEvent = (
+    options: {
+      exceptionType?: string;
+      exceptionValue?: string;
+      frames?: SentryStackFrame[];
+      transaction?: string;
+      includeAdditionalException?: boolean;
+      includeMechanism?: boolean;
+      mechanismType?: string;
+      mechanismHandled?: boolean;
+    } = {}
+  ): SentryClientEvent => ({
+    transaction: options.transaction ?? "/waves",
+    exception: {
+      values: [
+        {
+          type: options.exceptionType ?? "NotFoundError",
+          value: options.exceptionValue ?? reactDomInsertBeforeMessage,
+          ...(options.includeMechanism === false
+            ? {}
+            : {
+                mechanism: {
+                  type: options.mechanismType ?? "generic",
+                  handled: options.mechanismHandled ?? true,
+                },
+              }),
+          stacktrace: {
+            frames: options.frames ?? createLatestReactDomRawFrames(),
+          },
+        },
+        ...(options.includeAdditionalException
+          ? [
+              {
+                type: "Error",
+                value: "Independent application failure",
+                stacktrace: {
+                  frames: [
+                    {
+                      filename: "app:///components/waves/Wave.tsx",
+                      function: "Wave",
+                      in_app: true,
+                    },
+                  ],
+                },
+              },
+            ]
+          : []),
+      ],
+    },
+    tags: {
+      transaction: options.transaction ?? "/waves",
+      url: options.transaction ?? "/waves",
+    },
+  });
+
   const createGifPickerTenorCategoriesEvent = (
     overrides: Partial<SentryClientEvent> = {}
   ): SentryClientEvent => ({
@@ -2169,6 +2230,152 @@ describe("sentry-client-filters", () => {
     );
 
     expect(result).toBe(true);
+  });
+
+  it.each(["sN", "sR"] as const)(
+    "filters the observed 50-frame raw React DOM stack ending in %s",
+    (terminalFunction) => {
+      const frames =
+        createObservedReactDomRawInsertBeforeFrames(terminalFunction);
+      expect(frames).toHaveLength(50);
+
+      const result = shouldFilterReactDomInsertBeforeNotFoundError(
+        createReactDomRawInsertBeforeEvent({ frames })
+      );
+
+      expect(result).toBe(true);
+    }
+  );
+
+  it("keeps the latest captured raw fixture at 50 frames", () => {
+    expect(createLatestReactDomRawFrames()).toHaveLength(50);
+  });
+
+  it.each(["/waves", "/waves/:wave", "/join-6529", "/:user", "/"])(
+    "filters the latest observed 50-frame raw stack on %s",
+    (transaction) => {
+      const result = shouldFilterReactDomInsertBeforeNotFoundError(
+        createReactDomRawInsertBeforeEvent({ transaction })
+      );
+
+      expect(result).toBe(true);
+    }
+  );
+
+  it.each([
+    {
+      name: "a changed frame count",
+      getFrames: () => createObservedReactDomRawInsertBeforeFrames().slice(1),
+    },
+    {
+      name: "an unknown function",
+      getFrames: () => [
+        reactDomRawStaticChunkFrame("WaveDrop"),
+        ...createObservedReactDomRawInsertBeforeFrames().slice(1),
+      ],
+    },
+    {
+      name: "multiple chunk files",
+      getFrames: () => [
+        reactDomRawStaticChunkFrame(
+          "lr",
+          "app:///_next/static/chunks/0different-runtime.js"
+        ),
+        ...createObservedReactDomRawInsertBeforeFrames().slice(1),
+      ],
+    },
+    {
+      name: "a missing required function",
+      getFrames: () =>
+        createObservedReactDomRawInsertBeforeFrames().map((frame) =>
+          frame.function === "lr" ? reactDomRawStaticChunkFrame("li") : frame
+        ),
+    },
+    {
+      name: "mixed sN and sR function variants",
+      getFrames: () => [
+        reactDomRawStaticChunkFrame("sR"),
+        ...createObservedReactDomRawInsertBeforeFrames().slice(1),
+      ],
+    },
+    {
+      name: "an allowed non-placement frame after an sR placement frame",
+      getFrames: () => [
+        reactDomRawStaticChunkFrame("lr"),
+        reactDomRawStaticChunkFrame("sR"),
+        ...createObservedReactDomRawInsertBeforeFrames("sR").slice(2, -1),
+        reactDomRawStaticChunkFrame("li"),
+      ],
+    },
+    {
+      name: "the production frame order reversed",
+      getFrames: () => createObservedReactDomRawInsertBeforeFrames().reverse(),
+    },
+  ])("keeps raw insertBefore events with $name", ({ getFrames }) => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomRawInsertBeforeEvent({ frames: getFrames() })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    {
+      name: "a different exception type",
+      options: { exceptionType: "TypeError" },
+    },
+    {
+      name: "a different exception message",
+      options: { exceptionValue: "The requested node was not found." },
+    },
+    {
+      name: "an unobserved route",
+      options: { transaction: "/about" },
+    },
+    {
+      name: "a different mechanism",
+      options: {
+        mechanismType: "auto.browser.global_handlers.onerror",
+      },
+    },
+    {
+      name: "an unhandled mechanism",
+      options: { mechanismHandled: false },
+    },
+    {
+      name: "no mechanism",
+      options: { includeMechanism: false },
+    },
+  ])("keeps the observed raw stack with $name", ({ options }) => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomRawInsertBeforeEvent(options)
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps the broader source-mapped React DOM signature outside waves routes", () => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomInsertBeforeEvent({
+        transaction: "/join-6529",
+        tags: {
+          transaction: "/join-6529",
+          url: "/join-6529",
+        },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps mixed-exception events containing the observed raw stack", () => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomRawInsertBeforeEvent({
+        includeAdditionalException: true,
+      })
+    );
+
+    expect(result).toBe(false);
   });
 
   it("filters React DOM insertBefore NotFoundError events from webpack static chunks", () => {
@@ -4323,16 +4530,19 @@ describe("sentry-client-filters", () => {
   it.each([
     ["a different capture mechanism", { mechanismType: "generic" }],
     ["a handled error", { handled: true }],
-  ])("does not filter Twitter currentInset errors from %s", (_label, options) => {
-    // Arrange
-    const event = createTwitterCurrentInsetEvent(options);
+  ])(
+    "does not filter Twitter currentInset errors from %s",
+    (_label, options) => {
+      // Arrange
+      const event = createTwitterCurrentInsetEvent(options);
 
-    // Act
-    const result = shouldFilterTwitterCurrentInsetReferenceError(event);
+      // Act
+      const result = shouldFilterTwitterCurrentInsetReferenceError(event);
 
-    // Assert
-    expect(result).toBe(false);
-  });
+      // Assert
+      expect(result).toBe(false);
+    }
+  );
 
   it("filters Twitter CONFIG reference errors with injected wave document frames", () => {
     // Arrange
@@ -7524,10 +7734,7 @@ describe("sentry-client-filters", () => {
 
   it.each([
     ["unrelated error", { value: "Application request validation failed." }],
-    [
-      "AbortError",
-      { type: "AbortError", value: "The operation was aborted" },
-    ],
+    ["AbortError", { type: "AbortError", value: "The operation was aborted" }],
     ["HTTP error", { value: "Request failed with status code 503" }],
     ["timeout", { value: "Request timed out after 30000 ms" }],
     ["non-TypeError", { type: "Error" }],
@@ -7966,8 +8173,7 @@ describe("sentry-client-filters", () => {
             stacktrace: {
               frames: [
                 {
-                  filename:
-                    "app:///_next/static/chunks/application-wallet.js",
+                  filename: "app:///_next/static/chunks/application-wallet.js",
                   function: "initializeWallet",
                   in_app: true,
                 },
@@ -8360,24 +8566,24 @@ describe("sentry-client-filters", () => {
       "wrapper function",
       createObservedRawAnonymousUnsafeEvalFrames({ function: "runTemplate" }),
     ],
-    [
-      "wrapper line",
-      createObservedRawAnonymousUnsafeEvalFrames({ lineno: 8 }),
-    ],
+    ["wrapper line", createObservedRawAnonymousUnsafeEvalFrames({ lineno: 8 })],
     [
       "wrapper column",
       createObservedRawAnonymousUnsafeEvalFrames({ colno: 4854 }),
     ],
-  ])("does not filter raw unsafe-eval frames with a changed %s", (_, frames) => {
-    // Arrange
-    const event = createObservedRawAnonymousUnsafeEvalCspEvent({ frames });
+  ])(
+    "does not filter raw unsafe-eval frames with a changed %s",
+    (_, frames) => {
+      // Arrange
+      const event = createObservedRawAnonymousUnsafeEvalCspEvent({ frames });
 
-    // Act
-    const result = shouldFilterAnonymousUnsafeEvalCspError(event);
+      // Act
+      const result = shouldFilterAnonymousUnsafeEvalCspError(event);
 
-    // Assert
-    expect(result).toBe(false);
-  });
+      // Assert
+      expect(result).toBe(false);
+    }
+  );
 
   it("does not filter incomplete raw anonymous unsafe-eval frame sequences", () => {
     // Arrange
