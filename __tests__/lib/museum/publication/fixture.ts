@@ -351,6 +351,15 @@ function buildBaseDocuments(): Record<string, string> {
     share_an_adaptation: "status_only",
     make_commercial_use: "status_only",
   };
+  const museumPracticeMatrix = Object.fromEntries(
+    Object.keys(useMatrix).map((action) => [
+      action,
+      {
+        status: "ordinary",
+        note: `Museum practice reading for ${action} in the governed fixture.`,
+      },
+    ])
+  );
   const expressions = expressionIds.map((id) => {
     const legalPath = legalPathById[id];
     const group = id.startsWith("cc-by")
@@ -397,13 +406,14 @@ function buildBaseDocuments(): Record<string, string> {
       boundaries: ["Read the complete object record before reuse."],
       visitor_note: "Read the recorded rights information before reuse.",
       use_matrix: useMatrix,
+      museum_practice_matrix: museumPracticeMatrix,
     };
   });
   documents[MUSEUM_RIGHTS_REGISTRY_PATH] = JSON.stringify({
     $schema: "../../schemas/rights-expression-registry.schema.json",
     registry_type: "6529NM_RIGHTS_EXPRESSION_REGISTRY",
-    registry_version: "1.0.0",
-    published_at: "2026-08-05T17:01:32Z",
+    registry_version: "1.1.0",
+    published_at: "2026-08-05T21:30:00Z",
     actions: Object.keys(useMatrix),
     use_status_definitions: {
       allowed: "Allowed.",
@@ -411,6 +421,13 @@ function buildBaseDocuments(): Record<string, string> {
       not_licensed: "Not licensed.",
       status_only: "Status information only.",
       case_by_case: "Review case by case.",
+    },
+    museum_practice_status_definitions: {
+      ordinary: "Ordinary Museum practice.",
+      ordinary_with_terms: "Ordinary Museum practice with governing terms.",
+      purpose_limited: "Available only for the stated institutional purpose.",
+      contextual: "The exact context determines the Museum practice.",
+      separate_basis: "A separate legal or contractual basis is required.",
     },
     sources: {
       creative_commons_data_repository:
@@ -423,6 +440,17 @@ function buildBaseDocuments(): Record<string, string> {
       rightsstatements_usage_guidelines:
         "https://rightsstatements.org/en/documentation/usage_guidelines",
       observed_at: "2026-08-05T16:45:00Z",
+      college_art_association_fair_use:
+        "https://www.collegeart.org/programs/caa-fair-use/best-practices",
+      us_public_display_law: "https://www.copyright.gov/title17/92chap1.html",
+      uk_public_exhibition_guidance:
+        "https://www.gov.uk/government/publications/copyright-notice-public-exhibition-of-copyright-works",
+      us_nft_intellectual_property_study:
+        "https://www.copyright.gov/policy/nft-study/Joint-USPTO-USCO-Report-on-NFTs-and-Intellectual-Property.pdf",
+      creative_commons_noncommercial_guidance:
+        "https://wiki.creativecommons.org/wiki/NonCommercial_interpretation",
+      rightsstatements_layer_guidance:
+        "https://rightsstatements.org/en/2018/12/where-statements-apply.html",
     },
     expressions,
     object_assignments: CASEY_OBJECTS.map((artwork, index) => ({

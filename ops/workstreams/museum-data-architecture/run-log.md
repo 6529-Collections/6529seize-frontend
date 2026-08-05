@@ -116,3 +116,26 @@
   without compressed logic. The ontology page sources and public frontend copy
   contain no em dashes. Source PR #32 applies the same punctuation rule to the
   five affected repository essays and regenerates the canonical manifest.
+- Source copy-edit PR #32 passed the core Museum validator and deterministic
+  Linux and Windows lanes, then merged as
+  `6f7f8b2168347cb623d53eeb6b9d7fe1242d7a73`. Its 345-entry manifest commits to
+  SHA-256
+  `sha256:7758e2f183c3df23016f99cf2e66f77518457f45931557155bbd8c7980577872`
+  and Keccak-256
+  `0xefd12f26d44350738a9653c241f114d60e2474da70d617c000de3d5161aae952`.
+- An exact browser replay found a genuine cross-PR integration defect before
+  release: the separately merged rights registry had advanced from v1.0 to
+  v1.1, so the strict publication adapter correctly withheld every atomic
+  Museum page. The adapter now validates the v1.1 practice-status definitions,
+  all 22 per-expression Museum-practice matrices, and the six added primary
+  sources. Malformed or unknown readings still fail the publication closed.
+  The exact canonical-source probe is current at 73 documents, 11 architecture
+  standards, and 22 rights expressions; the data-architecture Playwright pack
+  passes all six desktop and mobile cases against that combined edition.
+- Final local pixel review covered the complete overview at 1440 px and mobile
+  width, plus the full Casey implementation audit at 1440 px. The pages retain
+  the native 6529 shell, typographic hierarchy, tables, simple rules, and plain
+  disclosures; no chip treatment or horizontal overflow was introduced.
+  Current focused validation passes 8 suites / 102 tests, changed-file lint,
+  typecheck across 1,364 files, whitespace checks, and the ontology no-em-dash
+  scan.

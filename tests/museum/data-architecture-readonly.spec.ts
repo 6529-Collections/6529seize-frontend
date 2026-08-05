@@ -12,7 +12,10 @@ import {
   attachPageDiagnostics,
 } from "../support/pageAssertions";
 import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
-import { MUSEUM_DATA_ARCHITECTURE_STANDARDS } from "@/lib/museum/publication/dataArchitectureContract";
+import {
+  MUSEUM_DATA_ARCHITECTURE_CASEY_AUDIT_TITLE,
+  MUSEUM_DATA_ARCHITECTURE_STANDARDS,
+} from "@/lib/museum/publication/dataArchitectureContract";
 
 const BASE_PATH = "/museum/network/methodology/data-architecture";
 const SOURCE_REPOSITORY = "6529-Collections/6529networkmuseum";
@@ -56,7 +59,7 @@ const STANDARD_ROUTES: readonly ArchitectureRoute[] =
 const CASEY: ArchitectureRoute = {
   path: `${BASE_PATH}/casey-reas-implementation`,
   sourcePath: "docs/data-architecture/casey-reas-implementation.md",
-  title: "Casey Reas: the first implementation audit",
+  title: MUSEUM_DATA_ARCHITECTURE_CASEY_AUDIT_TITLE,
 };
 
 async function expectExactSource(
@@ -146,7 +149,9 @@ test.describe("Museum data architecture @surface @readonly", () => {
         "validated",
         "operational",
       ]);
-      expect(profile["standards"]).toHaveLength(11);
+      expect(profile["standards"]).toHaveLength(
+        MUSEUM_DATA_ARCHITECTURE_STANDARDS.length
+      );
       expect(profile["stream_convergence"]).toEqual({
         normative_for_profile: false,
         status: "deferred_until_museum_profile_release",

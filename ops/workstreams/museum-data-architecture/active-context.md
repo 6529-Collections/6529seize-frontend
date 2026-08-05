@@ -6,12 +6,14 @@
   public education: readable first encounters for artists and collectors,
   exact technical profiles for specialists and machines, and a worked mapping
   of the seven Casey Reas accessions.
-- Canonical Museum source PR #30 merged as
-  `ad8ea4338659e0825dc5a79295e824eadec876e6`.
-- Canonical release: 345 manifest entries;
-  `sha256:258a2aa6a970cc84d036de511902cbc1d5fbb5141067cc146fe83ac879d20544`;
+- Canonical Museum source PR #30 merged the architecture at
+  `ad8ea4338659e0825dc5a79295e824eadec876e6`. Copy-edit PR #32 subsequently
+  merged the requested punctuation pass into canonical `main` at
+  `6f7f8b2168347cb623d53eeb6b9d7fe1242d7a73`.
+- Current canonical release: 345 manifest entries;
+  `sha256:7758e2f183c3df23016f99cf2e66f77518457f45931557155bbd8c7980577872`;
   Keccak-256
-  `0x9ccca279ca25f1d0b65b2430168dd192a87dee77b682f63db25de44fc899ea26`.
+  `0xefd12f26d44350738a9653c241f114d60e2474da70d617c000de3d5161aae952`.
 - Publication boundary: one Museum-native overview, eleven standards essays,
   the complete machine profile, one Casey Reas implementation essay, and the
   exact seven-object machine schedule. Spectrum, CIDOC CRM, LIDO, PREMIS,
@@ -25,10 +27,10 @@
   references, incorrect implementation states, Stream becoming normative, or
   any mismatch between the Casey schedule and accession objects causes
   publication to fail closed.
-- Canonical source qualification: 141 repository tests passed with one expected
-  Windows capability skip; full semantic and manifest validation passed on
-  Windows and hosted Ubuntu/Windows. Exact-head 6529bot follow-up reported no
-  findings.
+- Canonical source qualification: the core validator and deterministic Linux
+  and Windows lanes passed on PR #32. CodeRabbit was rate limited, and two
+  exact-head 6529bot follow-up requests produced no response; the maintainer
+  disposition records those advisory lanes accurately.
 - Frontend validation: 74 Museum suites / 249 tests, the focused final 48-test
   publication/route/pack run, changed lint and typecheck, React Doctor 100/100,
   help-index sync (202), and the exact-source optimized production build passed.
@@ -44,4 +46,7 @@
   Museum regression, and the new pack is included in the combined manual
   production-safe read-only suite. The exact release-pack counts, workflow
   choice input, and Museum PR-lane ownership now agree and pass their 32-test
-  contract suite. A signed follow-up and fresh exact-head hosted review remain.
+  contract suite. The adapter now accepts the canonical rights registry v1.1
+  that merged independently during this release; an exact-source probe returns
+  73 documents, 11 architecture standards, and 22 rights expressions. A signed
+  follow-up and fresh exact-head hosted review remain.

@@ -1,5 +1,8 @@
 import { parseHeading } from "./legacyCaseyMarkdown";
-import { MUSEUM_DATA_ARCHITECTURE_STANDARDS } from "./dataArchitectureContract";
+import {
+  MUSEUM_DATA_ARCHITECTURE_CASEY_AUDIT_TITLE,
+  MUSEUM_DATA_ARCHITECTURE_STANDARDS,
+} from "./dataArchitectureContract";
 import type {
   MuseumDataArchitecture,
   MuseumDataArchitectureCaseStudy,
@@ -274,7 +277,7 @@ export function assembleDataArchitecture(
     documents,
     CASEY_IMPLEMENTATION_PATH,
     "data-architecture:casey-reas-implementation",
-    "Casey Reas: the first implementation audit",
+    MUSEUM_DATA_ARCHITECTURE_CASEY_AUDIT_TITLE,
     "data_architecture_case_study"
   );
 
