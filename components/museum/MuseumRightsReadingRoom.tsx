@@ -453,7 +453,14 @@ export function MuseumRightsExpressionPage({
                   "museum.network.rights.detail.showLegalCode"
                 )}
               </summary>
-              <pre className="tw-m-0 tw-max-h-[42rem] tw-overflow-auto tw-whitespace-pre-wrap tw-break-words tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-p-5 tw-text-sm tw-leading-6 tw-text-iron-300">
+              <pre
+                aria-label={t(
+                  DEFAULT_LOCALE,
+                  "museum.network.rights.detail.legalCodeRegionLabel"
+                )}
+                tabIndex={0}
+                className="tw-m-0 tw-max-h-[42rem] tw-overflow-auto tw-whitespace-pre-wrap tw-break-words tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-p-5 tw-text-sm tw-leading-6 tw-text-iron-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+              >
                 {expression.legalCode.text}
               </pre>
             </details>

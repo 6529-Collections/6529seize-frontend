@@ -2,10 +2,11 @@
 
 - Route/component: `/museum/network/rights/**`; `MuseumRightsReadingRoom` and
   the object-level `MuseumRightsLink` presentation.
-- Untranslated surface: navigational labels, use-table labels, and the three
-  governed English manuscripts loaded from the Museum publication. Official
-  Creative Commons legal-code snapshots remain in their published English
-  form and must not be machine-translated in place.
+- Untranslated surface: navigational labels; use-table labels; object-level
+  rights labels carried by governed Museum records; and the three governed
+  English manuscripts loaded from the Museum publication. Official Creative
+  Commons legal-code snapshots remain in their published English form and
+  must not be machine-translated in place.
 - Current fallback: the complete UI surface resolves through the reviewed
   `en-US` message catalog. The manuscripts are exact source documents from the
   canonical Museum release.

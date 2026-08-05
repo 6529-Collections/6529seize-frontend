@@ -113,8 +113,10 @@ function isRecord(value: unknown): value is JsonRecord {
 }
 
 function exactKeys(value: JsonRecord, keys: readonly string[]): boolean {
-  const actual = Object.keys(value).sort();
-  const expected = [...keys].sort();
+  const actual = Object.keys(value).sort((left, right) =>
+    left.localeCompare(right)
+  );
+  const expected = [...keys].sort((left, right) => left.localeCompare(right));
   return (
     actual.length === expected.length &&
     actual.every((key, index) => key === expected[index])
@@ -131,6 +133,31 @@ function requiredString(value: unknown, errorCode: string): string {
 function nullableString(value: unknown, errorCode: string): string | null {
   if (value === null) return null;
   return requiredString(value, errorCode);
+}
+
+function requiredHttpsUrl(value: unknown, errorCode: string): string {
+  const raw = requiredString(value, errorCode);
+  let parsed: URL;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    throw new Error(errorCode);
+  }
+  if (
+    raw !== raw.trim() ||
+    parsed.protocol !== "https:" ||
+    parsed.hostname.length === 0 ||
+    parsed.username.length > 0 ||
+    parsed.password.length > 0
+  ) {
+    throw new Error(errorCode);
+  }
+  return raw;
+}
+
+function nullableHttpsUrl(value: unknown, errorCode: string): string | null {
+  if (value === null) return null;
+  return requiredHttpsUrl(value, errorCode);
 }
 
 function stringArray(value: unknown, errorCode: string): readonly string[] {
@@ -260,11 +287,11 @@ function parseExpression(
     }
     legalCode = {
       path,
-      sourceUri: requiredString(
+      sourceUri: requiredHttpsUrl(
         legalValue["source_uri"],
         "publication_rights_legal_code_invalid"
       ),
-      publicationUri: requiredString(
+      publicationUri: requiredHttpsUrl(
         legalValue["publication_uri"],
         "publication_rights_legal_code_invalid"
       ),
@@ -293,7 +320,7 @@ function parseExpression(
       value["spdx_id"],
       "publication_rights_expression_invalid"
     ),
-    canonicalUri: nullableString(
+    canonicalUri: nullableHttpsUrl(
       value["canonical_uri"],
       "publication_rights_expression_invalid"
     ),
@@ -461,7 +488,7 @@ function parseExpressions(
 ): readonly MuseumRightsExpression[] {
   const values = registry["expressions"];
   if (!Array.isArray(values)) {
-    throw new Error("publication_rights_registry_shape_invalid");
+    throw new TypeError("publication_rights_registry_shape_invalid");
   }
   const expressions = values.map((expression) =>
     parseExpression(expression, documents)
@@ -504,7 +531,7 @@ function parseAssignments(
 ): readonly MuseumRightsObjectAssignment[] {
   const values = registry["object_assignments"];
   if (!Array.isArray(values)) {
-    throw new Error("publication_rights_registry_shape_invalid");
+    throw new TypeError("publication_rights_registry_shape_invalid");
   }
   const assignments = values.map((assignment): MuseumRightsObjectAssignment => {
     if (

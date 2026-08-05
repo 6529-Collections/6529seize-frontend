@@ -125,3 +125,31 @@ final copy/visual sweep.
 - Review-follow-up validation passes: 3 suites / 41 tests, changed lint,
   changed typecheck (1,358 files), React Doctor 100/100, formatting, and
   whitespace. The rendered copy, routes, and approved pixels are unchanged.
+
+### 2026-08-05 exact-head review hardening
+
+- Security review reported no finding. Its defense-in-depth observation was
+  accepted: canonical, legal-source, and legal-publication links carried by
+  the governed rights registry now require credential-free HTTPS URLs. Parser
+  mutations prove that `javascript:` and `data:` values fail the complete
+  publication closed.
+- Internationalization review identified two route metadata literals; both
+  now resolve through the Museum message catalog. The fallback-debt record
+  explicitly identifies governed object-level rights labels as untranslated
+  source data alongside the manuscripts and exact official legal text.
+- Accessibility review asked for quantitative status-chip evidence and a
+  keyboard path through overflowing legal text. Computed production styles
+  for all five statuses produce text contrast ratios of 18.29:1, 16.82:1,
+  16.51:1, 14.38:1, and 17.07:1 after alpha compositing on their rendered
+  backgrounds. The visible status words carry the meaning; border color is
+  decorative. The complete legal-code region is now focusable, labeled, and
+  ringed on keyboard focus, with a component assertion covering the contract.
+- Sonar's four exact issues were addressed: deterministic `localeCompare`
+  sorting, `TypeError` for array-shape violations, and extraction of the
+  institutional-practice and rights route builders from the page-source
+  catalog. The refactor does not alter any visitor-facing route or source.
+- Review-hardening validation at `2026-08-05T18:54:06Z`: four focused suites /
+  43 tests, changed lint, changed typecheck across 1,358 files, formatting, and
+  whitespace all pass. The local production server remains available only for
+  pixel-equivalent computed-style inspection; a fresh exact-head optimized
+  build will be run if hosted merge-tree qualification requires it.

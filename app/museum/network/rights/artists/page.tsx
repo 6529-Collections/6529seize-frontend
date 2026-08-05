@@ -8,7 +8,7 @@ import { t } from "@/i18n/messages";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 
 export const metadata: Metadata = getAppMetadata({
-  title: "Rights for artists",
+  title: t(DEFAULT_LOCALE, "museum.network.rights.artistGuideTitle"),
   description: t(
     DEFAULT_LOCALE,
     "museum.network.rights.artistGuideDescription"

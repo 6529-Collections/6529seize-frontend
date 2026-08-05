@@ -119,4 +119,41 @@ describe("Museum rights handbook publication boundary", () => {
     });
     expect(result.status).toBe("unavailable");
   });
+
+  it("rejects executable or non-HTTPS external rights references", async () => {
+    const executableCanonicalUri = mutatedRegistry((registry) => {
+      const expression = (
+        registry["expressions"] as Array<Record<string, unknown>>
+      )[0];
+      if (expression !== undefined) {
+        expression["canonical_uri"] = "javascript:alert(1)";
+      }
+    });
+    expect(
+      await loadFixture({
+        documentOverrides: {
+          [MUSEUM_RIGHTS_REGISTRY_PATH]: executableCanonicalUri,
+        },
+      })
+    ).toEqual(expect.objectContaining({ status: "unavailable" }));
+
+    const nonHttpsLegalSource = mutatedRegistry((registry) => {
+      const expression = (
+        registry["expressions"] as Array<Record<string, unknown>>
+      ).find(({ id }) => id === "cc-by-nc-4.0");
+      const legalCode = expression?.["legal_code"] as
+        | Record<string, unknown>
+        | undefined;
+      if (legalCode !== undefined) {
+        legalCode["source_uri"] = "data:text/plain,untrusted";
+      }
+    });
+    expect(
+      await loadFixture({
+        documentOverrides: {
+          [MUSEUM_RIGHTS_REGISTRY_PATH]: nonHttpsLegalSource,
+        },
+      })
+    ).toEqual(expect.objectContaining({ status: "unavailable" }));
+  });
 });
