@@ -138,3 +138,31 @@ packs, but the second hosted staging E2E run was cancelled before tests and the
 manual production lane created no hosted Production E2E run. This audit does
 not relabel those facts. The new pipeline adds the missing automatic production
 run and removes the staging tooling-fetch failure mode.
+
+## Implemented steady-state evidence
+
+The first complete accelerated release reached production from merge in 27m38s
+and completed automatic production qualification in 38m46s. The exact observed
+steps were:
+
+| Stage               | Run         |                                             Observed result |
+| ------------------- | ----------- | ----------------------------------------------------------: |
+| Final PR App CI     | 30963778437 |                         10m34s longest lane; Museum omitted |
+| Staging deploy      | 30964484960 | 12m53s, including 10m47s artifact build and 1m44s promotion |
+| Production prebuild | 30964439072 |                             13m33s, concurrent with staging |
+| Staging E2E         | 30965170461 |                       6m55s dispatch-to-finish; 12/12 packs |
+| Production deploy   | 30965594547 |                                     5m16s, down from 22m12s |
+| Production E2E      | 30965872983 |                                         10m54s; 12/12 packs |
+
+Production promotion is therefore about 76% faster than the audited 22m12s
+deployment. The final PR gate is about 77% faster than the audited 45m09s gate.
+The first live release met the 40-minute merge-to-production and 55-minute
+merge-to-qualified-production targets.
+
+That run also found one remaining selection defect: production E2E spent 8m14s
+inside the Museum institutional-practice pack even though the deployed change
+set contained no Museum-owned path. The production selector now compares the
+new exact tree with the most recent prior successful production deployment and
+uses the same centralized Museum path classifier as PR and staging. It fails
+closed: missing history, an invalid range, a Git failure, or an older runner
+without pack exclusion retains Museum coverage.
