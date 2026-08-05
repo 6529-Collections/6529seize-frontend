@@ -200,3 +200,46 @@ selection derive from that scope, with a validator requiring every pack made
 entirely of `tests/museum/` specs to declare it. A legacy `museum-*` alias
 fallback keeps rollback sources compatible. Future Museum packs therefore
 cannot silently enter unrelated release qualification.
+
+## Final corrected release qualification
+
+PR #3604 merged as exact main
+`2edfb2610c0cca9f49d45c5465c43bba8a20077e` at 05:58:51 UTC. The final
+release completed production qualification at 06:29:38 UTC.
+
+| Stage                     |         Run | UTC interval      | Duration | Result                                     |
+| ------------------------- | ----------: | ----------------- | -------: | ------------------------------------------ |
+| Final PR App CI           | 30979078634 | 05:45:13-05:57:36 |   12m23s | All lanes green; Museum omitted            |
+| Quality and contracts     | 30979078634 | 05:45:55-05:48:51 |    2m56s | Linux policy suite and related tests green |
+| Playwright smoke          | 30979078634 | 05:46:01-05:49:34 |    3m33s | Green                                      |
+| Playwright critical shell | 30979078634 | 05:46:01-05:50:40 |    4m39s | Green                                      |
+| PR production build       | 30979078634 | 05:46:00-05:57:23 |   11m23s | Green; longest PR lane                     |
+| Staging deploy            | 30979848612 | 05:59:42-06:12:41 |   12m59s | Exact composition `12b40bd96...` live      |
+| Production prebuild       | 30979804039 | 05:58:53-06:13:40 |   14m47s | Ran concurrently with staging              |
+| Staging E2E               | 30980599423 | 06:12:50-06:19:39 |    6m49s | 12 packs; zero Museum; zero final failures |
+| Production promotion      | 30981038834 | 06:20:40-06:26:38 |    5m58s | Prebuilt bytes promoted; no rebuild        |
+| Production E2E            | 30981386269 | 06:26:45-06:29:38 |    2m53s | 11 packs; zero Museum; zero failures       |
+
+The corrected pipeline reached production 27m47s after merge and completed
+automatic production qualification at 30m47s. The original audited production
+deployment took 22m12s by itself; exact-artifact promotion now takes 5m58s, a
+73% reduction. The original final PR gate took 45m09s; the corrected run's
+longest lane took 11m23s, a 75% reduction. More importantly for iteration
+speed, quality, smoke, and critical-shell feedback all completed within 4m39s
+instead of waiting behind the production build.
+
+The Museum-selection contract passed in every layer:
+
+- PR CI did not create a Museum lane for the release-infrastructure diff.
+- Staging evidence contained 12 non-Museum packs and no Museum script key.
+- Production evidence contained 11 non-Museum packs and no Museum script key.
+- The staging collection pack failed its first attempt and passed the one
+  permitted serial retry in 55.7 seconds; the other eleven packs were not
+  repeated.
+- Production completed all eleven packs on their first attempt in 82.6 seconds
+  of pack-execution wall time.
+
+The release therefore proves all four intended properties together: short
+independent PR feedback, Museum tests only for Museum-impacting changes,
+bounded failed-pack retry, and exact prebuilt production promotion followed by
+automatic read-only production qualification.

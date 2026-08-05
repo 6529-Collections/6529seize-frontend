@@ -1,26 +1,29 @@
 # Active context
 
-- Current branch: `codex/all-museum-e2e-selection`.
-- Current base: frontend main
-  `a36a5a437e68d03c886471caefe0bf01afc3827c`.
-- The accelerated pipeline is live. Merge-to-production was 27m38s and
-  merge-to-complete-production-E2E was 38m46s. Production promotion fell from
-  22m12s to 5m16s; the final PR gate fell from 45m09s to a 10m34s longest lane.
-- Exact live production and its automatic 12-pack E2E are green. Durable run
-  references are staging 30965170461 and production 30965872983.
-- The first staging qualification of current main failed collections while an
-  immediate isolated replay passed 20/20. The hosted retry passed collections
-  but failed social while an immediate isolated replay passed 12/12. Both
-  Museum packs passed on both hosted attempts.
-- Targeted failed-pack retry is merged as `852b43fd9dc5af86aaf75c2942aea6e490544e25`.
-  Staging run 30976430422 proved the retry contract but exposed one new Museum
-  pack outside the original single-alias exclusion.
-- Concurrent Museum shell-diagnostic PR #3602 is merged on the current base;
-  its test-only change is preserved and does not overlap this manifest fix.
-- This branch gives every dedicated Museum pack a manifest-owned change scope,
-  excludes every scoped pack on unrelated automatic releases, and ratchets
-  future `tests/museum/` packs into the same policy.
-- Required release work: qualify this manifest fix, merge it, deploy exact main
-  to staging, prove both Museum packs are absent for the tooling-only delta,
-  promote the new exact production prebuild, obtain green automatic production
-  E2E, then live readback and closeout.
+- The CI and release acceleration workstream is complete.
+- Live production version:
+  `2edfb2610c0cca9f49d45c5465c43bba8a20077e`, with three consecutive
+  `/api/version` readbacks reporting the same announced and served version and
+  `stale:false`.
+- Exact staging composition:
+  `12b40bd96de7f3769c4738a8796e7f915d34db0f`, containing exact main
+  `2edfb2610c0cca9f49d45c5465c43bba8a20077e`.
+- Final hosted qualification:
+  - PR App CI 30979078634: success; quality 2m56s, smoke 3m33s, critical
+    shell 4m39s, production build 11m23s, Museum omitted.
+  - Staging deploy 30979848612: success in 12m59s.
+  - Concurrent production prebuild 30979804039: success in 14m47s; immutable
+    artifact SHA-256
+    `5006419d86d2ab7faad723896a22590fac69b40caddf277f295bf6cd3e96c0d9`.
+  - Staging E2E 30980599423: success in 6m49s; 12 packs, three workers, zero
+    Museum packs, one collection-only retry, zero final failures.
+  - Production promotion 30981038834: success in 5m58s without rebuilding.
+  - Production E2E 30981386269: success in 2m53s; 11 packs, three workers,
+    zero Museum packs, zero retries, zero failures.
+- Merge-to-production was 27m47s. Merge-to-qualified-production was 30m47s.
+- Retained evidence:
+  - `C:\Users\Administrator\.codex\artifacts\ci-release-final\staging-30980599423`
+  - `C:\Users\Administrator\.codex\artifacts\ci-release-final\production-30981386269`
+- No release action remains. A future performance iteration can benchmark a
+  provisioned larger build runner against `ubuntu-latest`; runner variables are
+  already available, but no unprovisioned label is referenced.

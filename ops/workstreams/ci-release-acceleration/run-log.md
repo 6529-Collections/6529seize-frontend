@@ -184,3 +184,29 @@
   `O_NOFOLLOW` is unavailable and directory-descriptor `fchmod` returns `EPERM`.
   Those twelve platform failures are unrelated; hosted Linux remains the
   authoritative environment for those fail-closed controls.
+- PR #3604 final head `8aee301944e9140515cd6b07a2bac7e10621e0d2`
+  passed all 17 hosted checks. App CI run 30979078634 completed in 12m23s;
+  quality/contracts took 2m56s, smoke 3m33s, critical shell 4m39s, production
+  build 11m23s, and Museum was omitted. Zero review threads remained. The
+  controlled merge audit is PR comment 5188141004. PR #3604 merged as
+  `2edfb2610c0cca9f49d45c5465c43bba8a20077e` at 05:58:51 UTC.
+- Staging composition `12b40bd96de7f3769c4738a8796e7f915d34db0f`
+  deployed in run 30979848612. Concurrent production prebuild 30979804039
+  produced artifact `production-frontend-2edfb2610c0cca9f49d45c5465c43bba8a20077e`
+  with SHA-256
+  `5006419d86d2ab7faad723896a22590fac69b40caddf277f295bf6cd3e96c0d9`.
+- Automatic staging E2E 30980599423 passed. Retained evidence contains 12
+  packs, three workers, zero Museum packs, and zero final failures. Collections
+  alone used attempt 2 and passed in 55.7s; all other packs remained on attempt
+  1. Evidence is retained under
+     `C:\Users\Administrator\.codex\artifacts\ci-release-final\staging-30980599423`.
+- Production run 30981038834 promoted the exact prebuilt artifact in 5m58s.
+  Three consecutive live version requests returned exact main
+  `2edfb2610c0cca9f49d45c5465c43bba8a20077e` for both served and announced
+  versions with `stale:false`.
+- Automatic production E2E 30981386269 passed in 2m53s. Retained evidence
+  contains 11 packs, three workers, zero Museum packs, zero retries, and zero
+  failures. Evidence is retained under
+  `C:\Users\Administrator\.codex\artifacts\ci-release-final\production-30981386269`.
+- Final timing: merge-to-production 27m47s; merge-to-qualified-production
+  30m47s. The workstream is complete.
