@@ -345,6 +345,28 @@ describe("instrumentation-client", () => {
     },
   });
 
+  const createPoperBlockerOrphanFetchRejectionEvent = (
+    value = poperBlockerNetworkErrorMessage,
+    frames: Array<Record<string, unknown>> = poperBlockerProcessedFrames
+  ) => ({
+    level: "warning",
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value,
+          mechanism: {
+            type: browserUnhandledRejectionMechanismType,
+            handled: false,
+          },
+          stacktrace: {
+            frames,
+          },
+        },
+      ],
+    },
+  });
+
   const createBraveWalletPageEvaluationErrorEvent = (message: string) => ({
     transaction: "/waves/:wave",
     request: {
@@ -377,28 +399,6 @@ describe("instrumentation-client", () => {
                 in_app: true,
               },
             ],
-          },
-        },
-      ],
-    },
-  });
-
-  const createPoperBlockerOrphanFetchRejectionEvent = (
-    value = poperBlockerNetworkErrorMessage,
-    frames: Array<Record<string, unknown>> = poperBlockerProcessedFrames
-  ) => ({
-    level: "warning",
-    exception: {
-      values: [
-        {
-          type: "TypeError",
-          value,
-          mechanism: {
-            type: browserUnhandledRejectionMechanismType,
-            handled: false,
-          },
-          stacktrace: {
-            frames,
           },
         },
       ],

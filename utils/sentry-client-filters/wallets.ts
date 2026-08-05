@@ -67,7 +67,7 @@ import {
 
 const rabbyRainbowKitRawChunkPathPrefix = "app:///_next/static/chunks/";
 const braveWalletPageFramePrefix = "app:///";
-const braveBrowserUserAgentPattern = /\bBrave(?:[\/\s]|$)/i;
+const braveBrowserUserAgentPattern = /\bBrave(?:[/\s]|$)/i;
 
 function matchesStackPattern(
   value: string | undefined,
