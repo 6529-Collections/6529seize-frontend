@@ -3,7 +3,7 @@
   "config": "tsconfig.jest.json",
   "toolchain": {
     "typescript_version": "5.9.3",
-    "pnpm_lock_sha256": "c632f3912d432ba72829f12d4f6b4380f6e9ba641bfb3c3d9b67f2defcb9d986",
+    "pnpm_lock_sha256": "5c2c9c766aa7de50a96ccb233ab7af8cfbc4c0377cb41be778b497c550d0daaf",
     "jest_tsconfig_sha256": "feda509a89cdd90cbcd9da6eecae28759c34c7aaae3725593ec2b1c022017062",
     "base_tsconfig_sha256": "fdbd8e548aed634324fd228e74d541ea702c1311597aa938741651e50de59c5f"
   },
@@ -711,7 +711,7 @@
     "__tests__/components/waves/leaderboard/time/CompactVotingPhaseCard.test.tsx": 1,
     "__tests__/components/waves/leaderboard/time/ExpandedTimelineContent.test.tsx": 1,
     "__tests__/components/waves/leaderboard/time/HorizontalTimeline.test.tsx": 1,
-    "__tests__/components/waves/leaderboard/time/TimelineToggleHeader.test.tsx": 4,
+    "__tests__/components/waves/leaderboard/time/TimelineToggleHeader.test.tsx": 3,
     "__tests__/components/waves/leaderboard/WaveleaderboardDropRaters.test.tsx": 1,
     "__tests__/components/waves/leaderboard/WaveLeaderboardEmptyState.test.tsx": 2,
     "__tests__/components/waves/leaderboard/WaveLeaderboardTime.test.tsx": 1,
@@ -862,7 +862,7 @@
     "__tests__/scenarios/EditDropErrorScenarios.test.tsx": 1,
     "__tests__/scripts/dependency-risk-gate.test.ts": 1,
     "__tests__/scripts/deployment-bus.test.ts": 23,
-    "__tests__/scripts/testing-strategy.test.ts": 63,
+    "__tests__/scripts/testing-strategy.test.ts": 49,
     "__tests__/services/api/drop-v2-mappers.test.ts": 1,
     "__tests__/services/api/notifications-v2-api.test.ts": 1,
     "__tests__/services/api/quorum-participation-drop-preview-v2-api.test.ts": 2,

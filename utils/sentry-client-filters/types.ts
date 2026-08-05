@@ -18,11 +18,11 @@ export type SentryContext = Record<string, unknown>;
 
 export type SentryBreadcrumb = {
   type?: string | undefined;
-  timestamp?: number | undefined;
   category?: string | undefined;
   level?: string | undefined;
   message?: string | undefined;
   data?: Record<string, unknown> | undefined;
+  timestamp?: number | undefined;
 };
 
 export type NetworkTargetCandidate = {

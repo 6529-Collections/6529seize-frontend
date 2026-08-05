@@ -1,12 +1,13 @@
 # Museum Open Museum and source-contribution localization fallback debt
 
 - Routes/components: all `/museum/network` routes through
-  `MuseumSourceContribution`, plus the Open Museum and transition statements on
-  `/museum/network/about` and the research context on
-  `/museum/network/stories/source-and-chronology`.
-- Untranslated surface: the new `museum.network.openMuseum.*` visitor copy,
+  `MuseumSourceContribution`; the homepage and `/museum/network/about` through
+  `MuseumNetworkPage`, `MuseumNetworkProposition`, and `MuseumNavigation`; and
+  the research context on `/museum/network/stories/source-and-chronology`.
+- Untranslated surface: the `museum.network.openMuseum.*`,
+  `museum.network.home.*`, and `museum.network.proposition.*` visitor copy,
   action labels, source-state explanations, accessible navigation labels, and
-  transition explanation currently have reviewed source messages only in
+  institutional proposition currently have reviewed source messages only in
   `en-US`. Governed manuscript titles, rights text, credits, record identifiers,
   and repository paths remain source-authored content rather than interface
   translations.
@@ -15,8 +16,11 @@
 - User impact: exact source, improvement, and contribution actions remain
   functional and unambiguous, but visitors using `en-GB`, `fr-FR`, `es-ES`, or
   `de-DE` receive English explanatory and navigation copy on these surfaces.
-- Owner/follow-up: frontend Museum internationalization follow-up.
+- Owner/follow-up: frontend Museum internationalization follow-up covering the
+  homepage and proposition copy before enabling non-English Museum locales.
 - Remediation path: add reviewed translations for the complete
-  `museum.network.openMuseum.*` namespace, route the Museum shell through the
-  active locale, verify interpolated commit/path wrapping and accessible names
-  at desktop and 390px mobile widths, then remove this debt record.
+  `museum.network.openMuseum.*`, `museum.network.home.*`, and
+  `museum.network.proposition.*` namespaces; route the Museum shell through the
+  active locale; verify heading growth, interpolated caption/commit/path
+  wrapping, accessible names, and the four-column facts layout at desktop and
+  390px mobile widths; then remove this debt record.

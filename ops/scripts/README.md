@@ -14,6 +14,9 @@ wrapper expects that location.
   `ops/docs`.
 - `deployment-bus.cjs`: deployment bus manifest, validation, heartbeat,
   production-preflight, and GitHub Deployment status helper.
+- `deploy-hub-shadow.cjs`: validates exact frontend PR manifests, partitions
+  adjacent target cohorts, and publishes clearly labelled, non-deploying shadow
+  status phases for the Deploy Hub pilot.
 - `native-surface-evidence.cjs`: executable native-surface evidence
   classifier. It reports whether current Capacitor/Electron coverage is only
   browser simulation or whether package prerequisites are present.

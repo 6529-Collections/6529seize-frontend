@@ -18,6 +18,7 @@ import {
   shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
   shouldFilterPoperBlockerOrphanFetchRejection,
+  shouldFilterExpectedWaveRequestReplacementAbort,
   shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
@@ -81,6 +82,61 @@ type AppleWebKitSortedTrackListOverrides = {
   browserName?: string | undefined;
   transaction?: string | undefined;
 };
+
+type ExpectedWaveReplacementAbortOverrides = {
+  exception?: Partial<SentryExceptionValue> | undefined;
+  domExceptionCode?: unknown;
+  includeDomExceptionCode?: boolean | undefined;
+  eventTimestamp?: number | undefined;
+  includeEventTimestamp?: boolean | undefined;
+  breadcrumbs?: SentryClientEvent["breadcrumbs"];
+  additionalException?: SentryExceptionValue | undefined;
+};
+
+const expectedWaveAbortErrorValue =
+  "AbortError: The user aborted a request.";
+const expectedWaveAbortEventTimestamp = 1_785_689_742.621;
+const expectedWaveAbortBreadcrumbTimestamp = 1_785_689_742.5;
+
+const createExpectedWaveReplacementAbortEvent = ({
+  exception = {},
+  domExceptionCode = "20",
+  includeDomExceptionCode = true,
+  eventTimestamp = expectedWaveAbortEventTimestamp,
+  includeEventTimestamp = true,
+  breadcrumbs = [
+    {
+      category: "wave.request",
+      message: "wave_request_aborted",
+      timestamp: expectedWaveAbortBreadcrumbTimestamp,
+      data: {
+        request_kind: "background_sync",
+        trigger: "request_replaced",
+      },
+    },
+  ],
+  additionalException,
+}: ExpectedWaveReplacementAbortOverrides = {}): TestSentryClientEvent => ({
+  ...(includeEventTimestamp ? { timestamp: eventTimestamp } : {}),
+  exception: {
+    values: [
+      {
+        type: "Error",
+        value: expectedWaveAbortErrorValue,
+        mechanism: {
+          type: "auto.browser.global_handlers.onunhandledrejection",
+          handled: false,
+        },
+        ...exception,
+      },
+      ...(additionalException ? [additionalException] : []),
+    ],
+  },
+  tags: includeDomExceptionCode
+    ? { "DOMException.code": domExceptionCode }
+    : {},
+  breadcrumbs,
+});
 
 describe("sentry-client-filters", () => {
   const wrappedNetworkMessage =
@@ -8626,6 +8682,270 @@ describe("sentry-client-filters", () => {
     // Assert
     expect(result).toBe(false);
   });
+
+  it("filters the exact expected Wave background-sync replacement abort", () => {
+    const event = createExpectedWaveReplacementAbortEvent();
+
+    const result = shouldFilterExpectedWaveRequestReplacementAbort(event);
+
+    expect(result).toBe(true);
+  });
+
+  it("filters a Wave replacement abort at the observed breadcrumb boundary", () => {
+    const event = createExpectedWaveReplacementAbortEvent({
+      breadcrumbs: [
+        {
+          category: "wave.request",
+          message: "wave_request_aborted",
+          timestamp: expectedWaveAbortBreadcrumbTimestamp,
+          data: {
+            request_kind: "background_sync",
+            trigger: "request_replaced",
+          },
+        },
+        ...Array.from({ length: 14 }, (_, index) => ({
+          category: "fetch",
+          message: `later request ${index}`,
+        })),
+      ],
+    });
+
+    const result = shouldFilterExpectedWaveRequestReplacementAbort(event);
+
+    expect(result).toBe(true);
+  });
+
+  it("keeps an AbortError when the matching Wave breadcrumb is count-stale", () => {
+    const event = createExpectedWaveReplacementAbortEvent({
+      breadcrumbs: [
+        {
+          category: "wave.request",
+          message: "wave_request_aborted",
+          timestamp: expectedWaveAbortBreadcrumbTimestamp,
+          data: {
+            request_kind: "background_sync",
+            trigger: "request_replaced",
+          },
+        },
+        ...Array.from({ length: 15 }, (_, index) => ({
+          category: "fetch",
+          message: `later request ${index}`,
+        })),
+      ],
+    });
+
+    const result = shouldFilterExpectedWaveRequestReplacementAbort(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps an AbortError when the matching Wave breadcrumb is time-stale", () => {
+    const event = createExpectedWaveReplacementAbortEvent({
+      eventTimestamp: expectedWaveAbortBreadcrumbTimestamp + 1.001,
+    });
+
+    const result = shouldFilterExpectedWaveRequestReplacementAbort(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("filters a Wave replacement abort at the causal time boundary", () => {
+    const event = createExpectedWaveReplacementAbortEvent({
+      eventTimestamp: expectedWaveAbortBreadcrumbTimestamp + 1,
+    });
+
+    const result = shouldFilterExpectedWaveRequestReplacementAbort(event);
+
+    expect(result).toBe(true);
+  });
+
+  it("keeps an AbortError when a newer Wave cancellation supersedes the match", () => {
+    const event = createExpectedWaveReplacementAbortEvent({
+      breadcrumbs: [
+        {
+          category: "wave.request",
+          message: "wave_request_aborted",
+          timestamp: expectedWaveAbortBreadcrumbTimestamp,
+          data: {
+            request_kind: "background_sync",
+            trigger: "request_replaced",
+          },
+        },
+        {
+          category: "wave.request",
+          message: "wave_request_aborted",
+          data: {
+            request_kind: "background_sync",
+            trigger: "hook_unmounted",
+          },
+        },
+      ],
+    });
+
+    const result = shouldFilterExpectedWaveRequestReplacementAbort(event);
+
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    [
+      "an altered exception message",
+      { exception: { value: "AbortError: The request was aborted." } },
+    ],
+    ["a missing exception message", { exception: { value: undefined } }],
+    ["a different exception type", { exception: { type: "AbortError" } }],
+    ["a different DOMException code", { domExceptionCode: "19" }],
+    ["a numeric DOMException code", { domExceptionCode: 20 }],
+    ["a missing DOMException code", { includeDomExceptionCode: false }],
+    ["a missing event timestamp", { includeEventTimestamp: false }],
+    ["an invalid event timestamp", { eventTimestamp: Number.NaN }],
+    [
+      "a different mechanism",
+      {
+        exception: {
+          mechanism: {
+            type: "auto.browser.global_handlers.onerror",
+            handled: false,
+          },
+        },
+      },
+    ],
+    [
+      "a handled mechanism",
+      {
+        exception: {
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: true,
+          },
+        },
+      },
+    ],
+    [
+      "an exception frame",
+      {
+        exception: {
+          stacktrace: {
+            frames: [{ filename: "app:///services/api/common-api.ts" }],
+          },
+        },
+      },
+    ],
+    [
+      "a different breadcrumb category",
+      {
+        breadcrumbs: [
+          {
+            category: "wave.sync",
+            message: "wave_request_aborted",
+            timestamp: expectedWaveAbortBreadcrumbTimestamp,
+            data: {
+              request_kind: "background_sync",
+              trigger: "request_replaced",
+            },
+          },
+        ],
+      },
+    ],
+    [
+      "a different breadcrumb message",
+      {
+        breadcrumbs: [
+          {
+            category: "wave.request",
+            message: "wave_request_cancelled",
+            timestamp: expectedWaveAbortBreadcrumbTimestamp,
+            data: {
+              request_kind: "background_sync",
+              trigger: "request_replaced",
+            },
+          },
+        ],
+      },
+    ],
+    [
+      "a different request kind",
+      {
+        breadcrumbs: [
+          {
+            category: "wave.request",
+            message: "wave_request_aborted",
+            timestamp: expectedWaveAbortBreadcrumbTimestamp,
+            data: {
+              request_kind: "initial_visible",
+              trigger: "request_replaced",
+            },
+          },
+        ],
+      },
+    ],
+    [
+      "a different abort trigger",
+      {
+        breadcrumbs: [
+          {
+            category: "wave.request",
+            message: "wave_request_aborted",
+            timestamp: expectedWaveAbortBreadcrumbTimestamp,
+            data: {
+              request_kind: "background_sync",
+              trigger: "hook_unmounted",
+            },
+          },
+        ],
+      },
+    ],
+    [
+      "a missing breadcrumb timestamp",
+      {
+        breadcrumbs: [
+          {
+            category: "wave.request",
+            message: "wave_request_aborted",
+            data: {
+              request_kind: "background_sync",
+              trigger: "request_replaced",
+            },
+          },
+        ],
+      },
+    ],
+    [
+      "a breadcrumb timestamp after the event",
+      {
+        breadcrumbs: [
+          {
+            category: "wave.request",
+            message: "wave_request_aborted",
+            timestamp: expectedWaveAbortEventTimestamp + 0.001,
+            data: {
+              request_kind: "background_sync",
+              trigger: "request_replaced",
+            },
+          },
+        ],
+      },
+    ],
+    ["a missing Wave abort breadcrumb", { breadcrumbs: [] }],
+    [
+      "an additional exception",
+      {
+        additionalException: {
+          type: "TypeError",
+          value: "A nearby application failure",
+        },
+      },
+    ],
+  ] satisfies Array<[string, ExpectedWaveReplacementAbortOverrides]>)(
+    "keeps the expected Wave abort near miss with %s",
+    (_, overrides) => {
+      const event = createExpectedWaveReplacementAbortEvent(overrides);
+
+      const result = shouldFilterExpectedWaveRequestReplacementAbort(event);
+
+      expect(result).toBe(false);
+    }
+  );
 
   it("detects app URI-only frame stacks in testing helpers", () => {
     // Arrange

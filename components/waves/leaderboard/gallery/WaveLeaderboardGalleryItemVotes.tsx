@@ -52,7 +52,7 @@ export default function WaveLeaderboardGalleryItemVotes({
   return (
     <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
       <span
-        className={`tw-font-mono tw-text-sm tw-font-bold ${getColorClass()}`}
+        className={`tw-text-sm tw-font-semibold tw-tabular-nums ${getColorClass()}`}
       >
         {formatNumberWithCommas(current)}
       </span>
@@ -60,6 +60,8 @@ export default function WaveLeaderboardGalleryItemVotes({
         current={current}
         projected={drop.rating_prediction}
         subtle={variant === "subtle"}
+        numberFont="sans"
+        numberWeight="semibold"
       />
     </div>
   );

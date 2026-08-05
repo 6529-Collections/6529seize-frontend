@@ -58,7 +58,7 @@ import type { NextRequest } from "next/server";
 
 const mockFetchPublicUrl = fetchPublicUrl as jest.Mock;
 const PNG_1X1 = Buffer.from(
-  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=",
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAADUlEQVQImWP4////fwAJ+wP9CNHoHgAAAABJRU5ErkJggg==",
   "base64"
 );
 const GIF_2_FRAME = Buffer.from(

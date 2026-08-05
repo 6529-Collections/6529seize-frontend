@@ -1,10 +1,13 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { notFound } from "next/navigation";
+import type { AnchorHTMLAttributes, ReactNode } from "react";
 import MuseumInstitutionProfilePage, {
   generateMetadata,
 } from "@/app/museum/network/stories/a-field-of-practice/[slug]/page";
+import MuseumAdjacentPracticePage from "@/app/museum/network/stories/a-field-of-practice/adjacent-practice/page";
 import MuseumInstitutionalPracticePage from "@/app/museum/network/stories/a-field-of-practice/page";
 import MuseumInstitutionalPracticeSourcesPage from "@/app/museum/network/stories/a-field-of-practice/sources/page";
+import MuseumScholarshipAndWritingPage from "@/app/museum/network/stories/scholarship-and-writing/page";
 import MuseumStoriesPage from "@/app/museum/network/stories/page";
 import { projectInstitutionalPracticeManuscript } from "@/components/museum/InstitutionalPracticeReadingRoom";
 import {
@@ -22,6 +25,22 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
+jest.mock("next/link", () => ({
+  __esModule: true,
+  default: ({
+    children,
+    prefetch,
+    ...props
+  }: AnchorHTMLAttributes<HTMLAnchorElement> & {
+    readonly children: ReactNode;
+    readonly prefetch?: boolean;
+  }) => (
+    <a {...props} data-prefetch={String(prefetch)}>
+      {children}
+    </a>
+  ),
+}));
+
 jest.mock("@/lib/museum/publication/runtime", () => ({
   getMuseumPublicationState: jest.fn(),
 }));
@@ -36,6 +55,17 @@ jest.mock("@/components/museum/MuseumArtworkFigure", () => ({
 
 const mockedPublicationState = jest.mocked(getMuseumPublicationState);
 const mockedNotFound = jest.mocked(notFound);
+
+function expectNextLinkWithoutPrefetch(href: string) {
+  const link = screen
+    .getAllByRole("link")
+    .find(
+      (candidate) =>
+        candidate.getAttribute("href") === href &&
+        candidate.getAttribute("data-prefetch") === "false"
+    );
+  expect(link).toBeDefined();
+}
 
 function studyMarkdown(): string {
   return `# A field of practice
@@ -108,6 +138,39 @@ This register binds the study to primary institutional evidence.
 | [Open Access](https://www.metmuseum.org/about-the-met/policies-and-documents/open-access) | Data policy | Public reuse terms. |`;
 }
 
+function adjacentPracticeMarkdown(): string {
+  return `# Adjacent practice: platforms, archives, festivals, and chain-native systems
+
+- **Status:** public scholarship
+- **Institutional author:** 6529 Network Museum
+- **Version:** 1.0.0
+- **Publication date:** 2026-08-04
+- **Research cutoff:** 2026-08-04
+
+The study classifies each precedent by the functions its public record demonstrates.
+
+## Platforms and chain-native systems
+
+Feral File joins exhibition, object, and protocol records.`;
+}
+
+function editorialStandardMarkdown(): string {
+  return `# Writing the 6529 Network Museum
+
+- **Status:** active editorial and implementation standard
+- **Institutional author:** 6529 Network Museum
+- **Subtitle:** Scholarship and editorial standard
+- **Version:** 1.1.0
+- **Publication date:** 2026-08-04
+- **Research cutoff:** 2026-08-04
+
+This standard describes how the Museum studies, describes, and publishes art.
+
+## The Museum publishes arguments about art
+
+Each text should make a specific work newly intelligible.`;
+}
+
 function withVisitorManuscripts(
   publication: MuseumPublication
 ): MuseumPublication {
@@ -127,10 +190,20 @@ function withVisitorManuscripts(
     ...practice.sourceRegister,
     markdown: sourceRegisterMarkdown(),
   };
+  const adjacentPractice: MuseumPublicDocument = {
+    ...practice.adjacentPractice,
+    markdown: adjacentPracticeMarkdown(),
+  };
+  const editorialStandard: MuseumPublicDocument = {
+    ...practice.editorialStandard,
+    markdown: editorialStandardMarkdown(),
+  };
   const replacements = new Map(
     [
       introduction,
       ...profiles.map((profile) => profile.document),
+      adjacentPractice,
+      editorialStandard,
       sourceRegister,
     ].map((document) => [document.id, document])
   );
@@ -144,6 +217,8 @@ function withVisitorManuscripts(
       ...practice,
       introduction,
       profiles,
+      adjacentPractice,
+      editorialStandard,
       sourceRegister,
     },
   };
@@ -182,7 +257,7 @@ describe("Museum institutional-practice reading room", () => {
     jest.clearAllMocks();
   });
 
-  it("keeps the Casey feature first and follows it with the numbered directory", async () => {
+  it("keeps the Casey feature first and follows it with restrained research paths", async () => {
     render(await MuseumStoriesPage());
 
     const collectionEssayTitle = publication.documents.find(
@@ -197,28 +272,79 @@ describe("Museum institutional-practice reading room", () => {
     });
     const studyHeading = screen.getByRole("heading", {
       level: 2,
-      name: "A field of practice",
+      name: "Museums and practices we study",
     });
     expect(
       caseyHeading.compareDocumentPosition(studyHeading) &
         Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
 
-    const profileLinks = screen
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "Museums and practices we study",
+      })
+    ).toBeInTheDocument();
+    expectNextLinkWithoutPrefetch(
+      "/museum/network/stories/a-field-of-practice"
+    );
+    expectNextLinkWithoutPrefetch(
+      "/museum/network/stories/a-field-of-practice/adjacent-practice"
+    );
+    expectNextLinkWithoutPrefetch(
+      "/museum/network/stories/scholarship-and-writing"
+    );
+    for (const link of screen
       .getAllByRole("link")
-      .filter((link) =>
-        link
-          .getAttribute("href")
-          ?.startsWith("/museum/network/stories/a-field-of-practice/")
-      )
-      .filter(
-        (link) =>
-          link.getAttribute("href") !==
-          "/museum/network/stories/a-field-of-practice/sources"
-      );
-    expect(profileLinks).toHaveLength(14);
-    expect(profileLinks[0]).toHaveTextContent("01");
-    expect(profileLinks[13]).toHaveTextContent("14");
+      .filter((candidate) =>
+        candidate.getAttribute("href")?.startsWith("/museum/network")
+      )) {
+      expect(link).toHaveAttribute("data-prefetch", "false");
+    }
+  });
+
+  it("renders the adjacent-practice classification as governed scholarship", async () => {
+    render(await MuseumAdjacentPracticePage());
+
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: "Adjacent practice: platforms, archives, festivals, and chain-native systems",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "Platforms and chain-native systems",
+      })
+    ).toBeInTheDocument();
+    expectNextLinkWithoutPrefetch(
+      "/museum/network/stories/a-field-of-practice"
+    );
+  });
+
+  it("publishes the Museum scholarship and editorial standard onsite", async () => {
+    render(await MuseumScholarshipAndWritingPage());
+
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: "Writing the 6529 Network Museum",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Scholarship and editorial standard")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "The Museum publishes arguments about art",
+      })
+    ).toBeInTheDocument();
+    expectNextLinkWithoutPrefetch("/museum/network/stories");
+    expectNextLinkWithoutPrefetch(
+      "/museum/network/stories/a-field-of-practice"
+    );
   });
 
   it("renders the comparative study as one governed document hierarchy", async () => {
@@ -235,17 +361,26 @@ describe("Museum institutional-practice reading room", () => {
       screen.getByText("Institutions the 6529 Network Museum studies")
     ).toBeInTheDocument();
     expect(screen.getByText("Published August 4, 2026")).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "The Metropolitan Museum of Art" })
-    ).toHaveAttribute(
-      "href",
-      "/museum/network/stories/a-field-of-practice/met"
-    );
+    const directory = screen.getByRole("region", {
+      name: "Museums and practices we study",
+    });
+    for (const profile of publication.institutionalPractice.profiles) {
+      expect(
+        within(directory).getByRole("link", { name: profile.document.title })
+      ).toHaveAttribute(
+        "href",
+        `/museum/network/stories/a-field-of-practice/${profile.slug}`
+      );
+    }
     expect(
       screen.getByRole("link", { name: "curatorial publication standard" })
     ).toHaveAttribute(
       "href",
-      `https://github.com/6529-Collections/6529networkmuseum/blob/${"a".repeat(40)}/docs/curatorial-publication-standard.md`
+      "/museum/network/stories/scholarship-and-writing"
+    );
+    expectNextLinkWithoutPrefetch("/museum/network/stories");
+    expectNextLinkWithoutPrefetch(
+      "/museum/network/stories/a-field-of-practice/sources"
     );
   });
 
@@ -290,6 +425,15 @@ describe("Museum institutional-practice reading room", () => {
       "href",
       "/museum/network/stories/a-field-of-practice/getty"
     );
+    expectNextLinkWithoutPrefetch(
+      "/museum/network/stories/a-field-of-practice"
+    );
+    expectNextLinkWithoutPrefetch(
+      "/museum/network/stories/a-field-of-practice/sources"
+    );
+    expectNextLinkWithoutPrefetch(
+      "/museum/network/stories/a-field-of-practice/getty"
+    );
   });
 
   it("uses the governed profile title in page metadata", async () => {
@@ -317,6 +461,9 @@ describe("Museum institutional-practice reading room", () => {
       "target",
       "_blank"
     );
+    expectNextLinkWithoutPrefetch(
+      "/museum/network/stories/a-field-of-practice"
+    );
   });
 
   it("returns a 404 for an unknown profile slug", async () => {
@@ -335,7 +482,7 @@ describe("Museum institutional-practice reading room", () => {
         ...publication,
         institutionalPractice: {
           ...publication.institutionalPractice,
-          profiles: publication.institutionalPractice.profiles.slice(0, 13),
+          profiles: publication.institutionalPractice.profiles.slice(0, 26),
         },
       },
       errorCode: null,
