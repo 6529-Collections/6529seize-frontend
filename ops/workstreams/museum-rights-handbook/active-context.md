@@ -292,3 +292,8 @@ production, or evidence gate remains open.
   release classification without changing the rights runtime. The final
   merge tree passes 6 focused suites / 45 tests, changed lint, and changed
   typecheck across 1,364 files.
+- A second exact merge precondition later detected main
+  `f1a8a24937d2557b91f6db1c936ead0736b89dc7`, the independently reviewed
+  compact realtime-drop update. It merged without conflict and has no Museum
+  or rights-file overlap. The final candidate therefore combines the fully
+  green exact rights head with an already merged, unrelated mainline change.
