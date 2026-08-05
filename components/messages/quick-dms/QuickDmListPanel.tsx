@@ -22,11 +22,11 @@ const QuickDmEmptyState = ({
 }: {
   readonly locale: SupportedLocale;
 }) => (
-  <div className="tw-flex tw-flex-col tw-items-center tw-gap-3 tw-px-6 tw-py-10 tw-text-center">
-    <div className="tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-bg-white/5 tw-ring-1 tw-ring-white/10">
+  <div className="tw-flex tw-min-h-full tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-px-8 tw-py-12 tw-text-center">
+    <div className="tw-flex tw-size-12 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-iron-800">
       <InboxIcon className="tw-size-5 tw-text-iron-300" aria-hidden="true" />
     </div>
-    <p className="tw-text-sm tw-font-medium tw-text-iron-100">
+    <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
       {t(locale, "quickDm.emptyTitle")}
     </p>
   </div>
@@ -62,10 +62,10 @@ const QuickDmConversationRow = ({
       onClick={() => onOpen(wave.id)}
       onFocus={() => onHover(wave.id)}
       onMouseEnter={() => onHover(wave.id)}
-      className="tw-group tw-flex tw-w-full tw-appearance-none tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-iron-900/80 tw-px-2 tw-py-2.5 tw-text-left tw-text-inherit tw-ring-1 tw-ring-white/10 tw-transition hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+      className="tw-group tw-flex tw-w-full tw-appearance-none tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-3 tw-text-left tw-text-inherit tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-900 motion-reduce:tw-transition-none"
       aria-label={rowAriaLabel}
     >
-      <div className="tw-relative tw-size-10 tw-flex-shrink-0 tw-rounded-full tw-ring-1 tw-ring-white/15">
+      <div className="tw-relative tw-size-10 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-white/15">
         <WavePicture
           name={title}
           picture={wave.picture}
@@ -73,7 +73,7 @@ const QuickDmConversationRow = ({
         />
         {unreadCount > 0 && (
           <span
-            className="tw-absolute tw-right-[-6px] tw-top-[-6px] tw-flex tw-h-5 tw-min-w-5 tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-500 tw-px-1 tw-text-[11px] tw-font-semibold tw-leading-none tw-text-white tw-shadow-sm tw-ring-2 tw-ring-iron-950"
+            className="tw-absolute -tw-right-0.5 -tw-top-0.5 tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-600 tw-px-1 tw-text-[10px] tw-font-medium tw-leading-none tw-text-white tw-shadow-sm tw-ring-1 tw-ring-iron-950"
             aria-hidden="true"
           >
             {displayUnreadCount}
@@ -81,26 +81,26 @@ const QuickDmConversationRow = ({
         )}
       </div>
       <div className="tw-min-w-0 tw-flex-1">
-        <span className="tw-block tw-truncate tw-text-sm tw-font-medium tw-text-iron-100 group-hover:tw-text-white">
+        <span className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100 desktop-hover:group-hover:tw-text-white">
           {title}
         </span>
-        <p className="tw-mt-0.5 tw-truncate tw-text-xs tw-text-iron-400">
+        <p className="tw-m-0 tw-mt-0.5 tw-truncate tw-text-xs tw-font-medium tw-text-iron-500 desktop-hover:group-hover:tw-text-iron-400">
           {timeLabel}
         </p>
       </div>
       {scoreLabel !== null && (
         <div
-          className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-text-iron-200"
+          className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-text-[#e2e8f0]/[0.85] tw-transition-colors tw-duration-150 desktop-hover:group-hover:tw-text-[#e2e8f0]/[0.95] motion-reduce:tw-transition-none"
           title={t(locale, "waves.score.summary.scoreAria", {
             visibilityScore: scoreLabel,
           })}
           aria-hidden="true"
         >
           <ShieldCheckIcon
-            className="tw-size-4 tw-text-iron-400"
+            className="tw-size-3.5 tw-opacity-[0.64]"
             aria-hidden="true"
           />
-          <span className="tw-text-sm tw-font-semibold tw-tabular-nums">
+          <span className="tw-text-xs tw-font-medium tw-tabular-nums">
             {scoreLabel}
           </span>
         </div>
@@ -149,7 +149,7 @@ export const QuickDmListPanel = ({
     content = <QuickDmLoadingRows locale={locale} />;
   } else if (waves.length > 0) {
     content = (
-      <div className="tw-flex tw-flex-col tw-gap-1">
+      <div className="tw-flex tw-flex-col tw-gap-0.5">
         {waves.map((wave) => (
           <QuickDmConversationRow
             key={wave.id}
@@ -171,7 +171,7 @@ export const QuickDmListPanel = ({
                   {t(locale, "quickDm.loadingStatus")}
                 </span>
                 <span
-                  className="tw-h-1.5 tw-w-14 tw-rounded-full tw-bg-white/10"
+                  className="tw-h-1.5 tw-w-14 tw-animate-pulse tw-rounded-full tw-bg-white/10 motion-reduce:tw-animate-none"
                   aria-hidden="true"
                 />
               </>
@@ -185,7 +185,7 @@ export const QuickDmListPanel = ({
   }
 
   return (
-    <div className="tw-flex tw-max-h-[min(640px,calc(100dvh-8rem))] tw-w-[340px] tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
+    <div className="tw-flex tw-h-[560px] tw-max-h-[calc(100dvh-8rem)] tw-w-[380px] tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-shadow-[0_24px_80px_rgba(0,0,0,0.55)]">
       <QuickDmPanelHeader
         locale={locale}
         title={t(locale, "quickDm.listTitle")}
@@ -194,7 +194,7 @@ export const QuickDmListPanel = ({
       />
       <div
         ref={scrollContainerRef}
-        className="tw-min-h-0 tw-overflow-y-auto tw-p-2"
+        className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-p-2 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700 desktop-hover:hover:tw-scrollbar-thumb-iron-600"
       >
         {content}
       </div>

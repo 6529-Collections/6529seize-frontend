@@ -14,7 +14,7 @@ export default function GroupCreateIdentitiesSearchItemsContent({
 }) {
   if (loading) {
     return (
-      <li className="tw-py-2 tw-w-full tw-h-full tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-medium tw-text-white tw-rounded-lg tw-relative tw-select-none tw-px-2">
+      <li className="tw-relative tw-flex tw-min-h-10 tw-w-full tw-select-none tw-items-center tw-px-2.5 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-400">
         Loading...
       </li>
     );
@@ -36,7 +36,7 @@ export default function GroupCreateIdentitiesSearchItemsContent({
   }
 
   return (
-    <li className="tw-py-2 tw-w-full tw-h-full tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-medium tw-text-white tw-rounded-lg tw-relative tw-select-none tw-px-2">
+    <li className="tw-relative tw-flex tw-min-h-10 tw-w-full tw-select-none tw-items-center tw-px-2.5 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-400">
       No results
     </li>
   );

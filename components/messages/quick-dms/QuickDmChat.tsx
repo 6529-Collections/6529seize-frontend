@@ -146,14 +146,14 @@ export const QuickDmChat = ({
     chatContent = <QuickDmLoadingRows locale={locale} />;
   } else if (isError) {
     chatContent = (
-      <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-p-6 tw-text-center tw-text-sm tw-text-iron-300">
+      <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-bg-iron-950 tw-p-8 tw-text-center tw-text-sm tw-leading-5 tw-text-iron-300">
         {t(locale, "quickDm.chatLoadError")}
       </div>
     );
   }
 
   return (
-    <div className="tw-flex tw-h-[560px] tw-max-h-[calc(100dvh-2rem)] tw-w-[380px] tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
+    <div className="tw-flex tw-h-[560px] tw-max-h-[calc(100dvh-8rem)] tw-w-[380px] tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-shadow-[0_24px_80px_rgba(0,0,0,0.55)]">
       <QuickDmPanelHeader
         hasBackUnreadIndicator={hasUnreadOutsideCurrentChat}
         locale={locale}
@@ -164,7 +164,7 @@ export const QuickDmChat = ({
         onClose={onClose}
         onOpenAll={onOpenAll}
       />
-      <div className="tw-min-h-0 tw-flex-1">{chatContent}</div>
+      <div className="tw-min-h-0 tw-flex-1 tw-bg-iron-950">{chatContent}</div>
     </div>
   );
 };
