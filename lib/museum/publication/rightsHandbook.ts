@@ -113,13 +113,13 @@ const REGISTRY_SOURCE_KEYS = [
   "creative_commons_license_guide",
   "rightsstatements_documentation",
   "rightsstatements_usage_guidelines",
-  "observed_at",
   "college_art_association_fair_use",
   "us_public_display_law",
   "uk_public_exhibition_guidance",
   "us_nft_intellectual_property_study",
   "creative_commons_noncommercial_guidance",
   "rightsstatements_layer_guidance",
+  "observed_at",
 ] as const;
 
 const REGISTRY_SOURCE_EXACT_URLS = {
@@ -534,6 +534,7 @@ function parseRegistry(
     !Array.isArray(registry["object_assignments"]) ||
     !Array.isArray(registry["program_notes"]) ||
     !isRecord(registry["use_status_definitions"]) ||
+    !isRecord(registry["museum_practice_status_definitions"]) ||
     !isRecord(registry["sources"])
   ) {
     throw new Error("publication_rights_registry_shape_invalid");
