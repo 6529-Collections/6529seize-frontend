@@ -6994,6 +6994,36 @@ describe("sentry-client-filters", () => {
     }
   );
 
+  it("filters a matching event message when the exception value is missing", () => {
+    // Arrange
+    const event = createBrowserExtensionMessagingConnectionEvent({
+      message: extensionMessagingConnectionFailureMessage,
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: undefined,
+            stacktrace: {
+              frames: [
+                {
+                  filename: "app:///injected-script.js",
+                  abs_path: "app:///injected-script.js",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    // Act
+    const result = shouldFilterBrowserExtensionMessagingConnectionError(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
   it("does not filter frameless extension messaging failures", () => {
     // Arrange
     const event = createBrowserExtensionMessagingConnectionEvent({
