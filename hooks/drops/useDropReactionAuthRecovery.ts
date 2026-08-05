@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import type { AuthContextType } from "@/components/auth/authTypes";
+import { MAX_CONNECTED_PROFILES } from "@/constants/constants";
 import { getAuthStateFingerprint } from "@/services/auth/auth-token-fingerprint";
 import { getAuthJwt, getWalletAddress } from "@/services/auth/auth.utils";
 import { logErrorSecurely } from "@/utils/error-sanitizer";
@@ -17,7 +18,35 @@ interface InFlightRecovery {
 
 const recoveryListeners = new Set<() => void>();
 let inFlightRecovery: InFlightRecovery | null = null;
-let lastAttemptedAuthFingerprint: string | null = null;
+const lastAttemptedAuthFingerprintByAccount = new Map<string, string>();
+
+const getRecoveryAccountKey = (): string =>
+  getWalletAddress()?.trim().toLowerCase() ?? "none";
+
+const rememberRecoveryAttempt = ({
+  accountKey,
+  authFingerprint,
+}: {
+  readonly accountKey: string;
+  readonly authFingerprint: string;
+}): void => {
+  lastAttemptedAuthFingerprintByAccount.delete(accountKey);
+  lastAttemptedAuthFingerprintByAccount.set(accountKey, authFingerprint);
+
+  if (
+    lastAttemptedAuthFingerprintByAccount.size <=
+    MAX_CONNECTED_PROFILES + 1
+  ) {
+    return;
+  }
+
+  const oldestAccountKey = lastAttemptedAuthFingerprintByAccount
+    .keys()
+    .next().value;
+  if (oldestAccountKey !== undefined) {
+    lastAttemptedAuthFingerprintByAccount.delete(oldestAccountKey);
+  }
+};
 
 const subscribeToRecovery = (listener: () => void): (() => void) => {
   recoveryListeners.add(listener);
@@ -62,11 +91,18 @@ const startAuthRecovery = (
   if (inFlightRecovery) {
     return inFlightRecovery.promise;
   }
-  if (lastAttemptedAuthFingerprint === rejectedAuthFingerprint) {
+  const accountKey = getRecoveryAccountKey();
+  if (
+    lastAttemptedAuthFingerprintByAccount.get(accountKey) ===
+    rejectedAuthFingerprint
+  ) {
     return Promise.resolve(false);
   }
 
-  lastAttemptedAuthFingerprint = rejectedAuthFingerprint;
+  rememberRecoveryAttempt({
+    accountKey,
+    authFingerprint: rejectedAuthFingerprint,
+  });
   const recoveryId = Symbol();
   const recoveryPromise = (async (): Promise<boolean> => {
     try {
@@ -113,6 +149,6 @@ export const useDropReactionAuthRecovery = () => {
 
 export const __resetDropReactionAuthRecoveryForTests = (): void => {
   inFlightRecovery = null;
-  lastAttemptedAuthFingerprint = null;
+  lastAttemptedAuthFingerprintByAccount.clear();
   emitRecoveryChange();
 };

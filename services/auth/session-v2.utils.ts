@@ -1,4 +1,5 @@
 import { Capacitor } from "@capacitor/core";
+import { TokenRefreshCancelledError } from "@/errors/authentication";
 import type { ApiSessionNonceResponse } from "@/generated/models/ApiSessionNonceResponse";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { getWalletAddress, setAuthJwt } from "./auth.utils";
@@ -59,6 +60,10 @@ type SessionRefreshInFlight = {
   readonly promise: Promise<SessionRefreshResponse | null>;
   activeConsumers: number;
 };
+
+interface PersistSessionResponseOptions {
+  readonly shouldPersist?: (() => boolean) | undefined;
+}
 
 interface CreateConnectionShareResponse {
   readonly connection_share_code: string;
@@ -571,20 +576,35 @@ export function __resetSessionRefreshStateForTests(): void {
 }
 
 export async function persistSessionResponse(
-  response: SessionLoginResponse | SessionRefreshResponse
+  response: SessionLoginResponse | SessionRefreshResponse,
+  options: PersistSessionResponseOptions = {}
 ): Promise<boolean> {
+  const assertPersistenceIsCurrent = (): void => {
+    if (options.shouldPersist?.() === false) {
+      throw new TokenRefreshCancelledError(
+        "Auth state changed before session persistence completed"
+      );
+    }
+  };
+
   let didPersistNativeRefreshToken = false;
   if (response.client_type !== "web") {
     if (!isNativeSecureStorageAvailable()) {
       return false;
     }
 
+    assertPersistenceIsCurrent();
     await setNativeRefreshToken({
       address: response.address,
       refreshToken: response.native_refresh_token,
     });
     didPersistNativeRefreshToken = true;
   }
+
+  // Native secure storage is asynchronous. Re-check immediately before the
+  // synchronous active-account write so a stale operation cannot reactivate an
+  // account or replace a newer bearer token.
+  assertPersistenceIsCurrent();
 
   let didPersistAuth = false;
   try {

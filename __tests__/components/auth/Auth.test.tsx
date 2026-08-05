@@ -711,6 +711,94 @@ describe("Auth component", () => {
       expect(sessionV2.persistSessionResponse).not.toHaveBeenCalled();
     });
 
+    it("cancels server-rejected sign-in if auth changes during persistence", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      const authUtils =
+        require("@/services/auth/auth.utils") as typeof AuthUtilsModule;
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<
+        typeof authUtils.getAuthJwt
+      >;
+      const mockGetWalletAddress =
+        authUtils.getWalletAddress as jest.MockedFunction<
+          typeof authUtils.getWalletAddress
+        >;
+      const mockValidateJwt =
+        require("@/services/auth/jwt-validation.utils").validateJwt;
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const sessionResponse = {
+        client_type: "native",
+        address: validAddress,
+        role: null,
+        access_token: TEST_SESSION_VALUE,
+        access_token_expires_at: "2026-06-10T00:00:00.000Z",
+        native_refresh_token: "native-refresh-token",
+        refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+      };
+      let requestResult: Promise<{ success: boolean }> | undefined;
+
+      mockGetAuthJwt.mockReturnValue(TEST_REJECTED_SESSION_VALUE);
+      mockGetWalletAddress.mockReturnValue(validAddress);
+      const rejectedAuthStateFingerprint = getAuthStateFingerprint({
+        walletAddress: validAddress,
+        jwt: TEST_REJECTED_SESSION_VALUE,
+      });
+      mockValidateJwt.mockResolvedValue({
+        isValid: false,
+        wasCancelled: false,
+      });
+      sessionV2.loginWithSessionV2.mockResolvedValue(sessionResponse);
+      sessionV2.persistSessionResponse.mockImplementationOnce(
+        async (
+          _response: unknown,
+          options?: { readonly shouldPersist?: () => boolean }
+        ) => {
+          expect(options?.shouldPersist?.()).toBe(true);
+          mockGetAuthJwt.mockReturnValue(TEST_REPLACEMENT_SESSION_VALUE);
+          expect(options?.shouldPersist?.()).toBe(false);
+          throw new Error("stale session persistence");
+        }
+      );
+
+      const Child = () => {
+        const { requestAuth } = React.useContext(AuthContext);
+        return (
+          <button
+            type="button"
+            onClick={() => {
+              requestResult = requestAuth({
+                serverRejected: true,
+                expectedAuthStateFingerprint: rejectedAuthStateFingerprint,
+              });
+            }}
+          >
+            recover auth
+          </button>
+        );
+      };
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "recover auth" }));
+      await waitFor(() =>
+        expect(sessionV2.persistSessionResponse).toHaveBeenCalled()
+      );
+      await expect(requestResult).resolves.toEqual({ success: false });
+      expect(sessionV2.persistSessionResponse).toHaveBeenCalledWith(
+        sessionResponse,
+        { shouldPersist: expect.any(Function) }
+      );
+      expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+    });
+
     it("allows valid legacy auth before the session-v2 deadline without forcing the upgrade modal", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
@@ -854,7 +942,8 @@ describe("Auth component", () => {
         })
       );
       expect(sessionV2.persistSessionResponse).toHaveBeenCalledWith(
-        sessionResponse
+        sessionResponse,
+        { shouldPersist: expect.any(Function) }
       );
       expect(
         screen.queryByText("Upgrade Authentication")
@@ -908,7 +997,8 @@ describe("Auth component", () => {
         })
       );
       expect(sessionV2.persistSessionResponse).toHaveBeenCalledWith(
-        sessionResponse
+        sessionResponse,
+        { shouldPersist: expect.any(Function) }
       );
       expect(mockCommonApiPost).not.toHaveBeenCalled();
     });
@@ -1125,7 +1215,8 @@ describe("Auth component", () => {
         })
       );
       expect(sessionV2.persistSessionResponse).toHaveBeenCalledWith(
-        sessionResponse
+        sessionResponse,
+        { shouldPersist: expect.any(Function) }
       );
       expect(mockCommonApiPost).not.toHaveBeenCalled();
     });
@@ -2851,7 +2942,8 @@ describe("Auth component", () => {
 
       await waitFor(() => {
         expect(sessionV2.persistSessionResponse).toHaveBeenCalledWith(
-          sessionResponse
+          sessionResponse,
+          { shouldPersist: expect.any(Function) }
         );
       });
       await waitFor(() => {

@@ -9,7 +9,7 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import * as commonApi from "@/services/api/common-api";
 import * as dropReactionMonitoring from "@/utils/monitoring/dropReactionMonitoring";
-import { getAuthJwt } from "@/services/auth/auth.utils";
+import { getAuthJwt, getWalletAddress } from "@/services/auth/auth.utils";
 import { __resetDropReactionAuthRecoveryForTests } from "@/hooks/drops/useDropReactionAuthRecovery";
 import { act, renderHook, waitFor } from "@testing-library/react";
 
@@ -47,6 +47,7 @@ jest.mock("@/services/api/common-api", () => ({
 jest.mock("@/services/auth/auth.utils", () => ({
   ...jest.requireActual("@/services/auth/auth.utils"),
   getAuthJwt: jest.fn(),
+  getWalletAddress: jest.fn(),
 }));
 
 jest.mock("@/services/api/drop-api", () => ({
@@ -95,6 +96,9 @@ jest.mock("@/utils/monitoring/dropReactionMonitoring", () => ({
 
 const mockUseAuth = useAuth as jest.Mock;
 const mockGetAuthJwt = getAuthJwt as jest.MockedFunction<typeof getAuthJwt>;
+const mockGetWalletAddress = getWalletAddress as jest.MockedFunction<
+  typeof getWalletAddress
+>;
 const mockUseMyStream = useMyStream as jest.Mock;
 const { fetchDropByIdBatched } = require("@/services/api/drop-api");
 const {
@@ -213,6 +217,9 @@ describe("useDropReaction", () => {
     jest.clearAllMocks();
     __resetDropReactionAuthRecoveryForTests();
     mockGetAuthJwt.mockReturnValue("auth-token-before-recovery");
+    mockGetWalletAddress.mockReturnValue(
+      "0x1111111111111111111111111111111111111111"
+    );
     requestAuthMock.mockResolvedValue({ success: true });
     mockSetQueryData.mockReset();
     mockGetEligibility.mockReturnValue(null);
@@ -906,6 +913,46 @@ describe("useDropReaction", () => {
 
     expect(commonApi.commonApiPost).toHaveBeenCalledTimes(2);
     expect(requestAuthMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not repeat recovery when switching back to the same rejected account session", async () => {
+    const accountA = "0x1111111111111111111111111111111111111111";
+    const accountB = "0x2222222222222222222222222222222222222222";
+    const accountAToken = "account-a-token";
+    const accountBToken = "account-b-token";
+    const unauthorizedError = createStructuredReactionError({
+      message: "Unauthorized",
+      status: 401,
+    });
+    (commonApi.commonApiPost as jest.Mock)
+      .mockRejectedValueOnce(unauthorizedError)
+      .mockRejectedValueOnce(unauthorizedError)
+      .mockRejectedValueOnce(unauthorizedError);
+    mockGetWalletAddress.mockReturnValue(accountA);
+    mockGetAuthJwt.mockReturnValue(accountAToken);
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    mockGetWalletAddress.mockReturnValue(accountB);
+    mockGetAuthJwt.mockReturnValue(accountBToken);
+    await act(async () => {
+      await result.current.react(":wave:");
+    });
+
+    mockGetWalletAddress.mockReturnValue(accountA);
+    mockGetAuthJwt.mockReturnValue(accountAToken);
+    await act(async () => {
+      await result.current.react(":heart:");
+    });
+
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(3);
+    expect(requestAuthMock).toHaveBeenCalledTimes(2);
   });
 
   it("does not recover a stale 401 after the auth state changes", async () => {

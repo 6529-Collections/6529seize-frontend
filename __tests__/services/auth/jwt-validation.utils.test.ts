@@ -16,6 +16,7 @@ import { logErrorSecurely } from "@/utils/error-sanitizer";
 import {
   MissingActiveProfileError,
   RoleValidationError,
+  TokenRefreshCancelledError,
 } from "@/errors/authentication";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 
@@ -336,6 +337,47 @@ describe("jwt-validation.utils", () => {
       wasCancelled: true,
     });
     expect(mockedPersistSessionResponse).not.toHaveBeenCalled();
+  });
+
+  it("cancels a refresh when auth changes inside session persistence", async () => {
+    const refreshedSession = {
+      client_type: "web" as const,
+      address: "0x123",
+      role: null,
+      access_token: TEST_REFRESHED_SESSION_VALUE,
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    };
+    let isCurrentAuthState = true;
+    mockedJwtDecode
+      .mockReturnValueOnce(validPayload)
+      .mockReturnValueOnce({ ...validPayload, role: null });
+    mockedHasActiveSessionV2Auth.mockReturnValue(true);
+    mockedRefreshSessionV2.mockResolvedValue(refreshedSession);
+    mockedPersistSessionResponse.mockImplementationOnce(
+      async (_session, options) => {
+        expect(options?.shouldPersist?.()).toBe(true);
+        isCurrentAuthState = false;
+        expect(options?.shouldPersist?.()).toBe(false);
+        throw new TokenRefreshCancelledError();
+      }
+    );
+
+    await expect(
+      validateJwt({
+        ...validParams,
+        serverRejected: true,
+        shouldPersistRefreshedSession: () => isCurrentAuthState,
+      })
+    ).resolves.toEqual({
+      isValid: false,
+      refreshOutcome: "cancelled",
+      wasCancelled: true,
+    });
+    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(
+      refreshedSession,
+      { shouldPersist: expect.any(Function) }
+    );
+    expect(syncWalletRoleWithServer).not.toHaveBeenCalled();
   });
 
   it("refreshes the wallet being validated instead of another active stored account", async () => {
