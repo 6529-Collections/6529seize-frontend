@@ -130,15 +130,18 @@ test.describe("Museum rights education @surface @readonly", () => {
       const response = await gotoDocumentWithTransientRetry(page, objectPath);
       expect(response?.status()).toBe(200);
       await waitForRouteReady(page);
-      const rightsLink = page.getByRole("link", {
-        name: "CC BY-NC 4.0",
+      const rightsLinks = page.getByRole("link", {
+        name: "Licensed CC BY-NC 4.0.",
         exact: true,
       });
-      await expect(rightsLink).toHaveAttribute(
-        "href",
-        "/museum/network/rights/cc-by-nc-4.0"
-      );
-      await rightsLink.click();
+      await expect(rightsLinks).toHaveCount(2);
+      for (const rightsLink of await rightsLinks.all()) {
+        await expect(rightsLink).toHaveAttribute(
+          "href",
+          "/museum/network/rights/cc-by-nc-4.0"
+        );
+      }
+      await rightsLinks.first().click();
       await waitForRouteReady(page);
       await expect(page).toHaveURL(
         (url) => url.pathname === "/museum/network/rights/cc-by-nc-4.0"

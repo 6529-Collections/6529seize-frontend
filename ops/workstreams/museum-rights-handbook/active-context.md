@@ -80,3 +80,31 @@ final copy/visual sweep.
   fresh fetch showed current frontend main had advanced to `55913450cb`.
   Current main will be integrated before the authoritative build so that the
   retained artifact is the actual PR merge tree.
+
+### 2026-08-05 exact merge-tree qualification
+
+- Frontend main `55913450cbe360cba1195b680ab47bc6a2939825` was merged
+  without conflict. Its Museum About type floor and this work's rights card
+  are both present. Focused post-merge validation passed: 5 suites / 50 tests,
+  changed lint, changed typecheck (1,358 files), E2E manifest, and whitespace.
+- The first exact-tree compile completed its 58-second source phase, then the
+  type phase rejected a malformed generated `.next/dev/types/routes.d.ts`
+  retained from an interrupted development run. The generated `.next` tree
+  was moved to recoverable operator artifact storage and excluded from release
+  evidence; tracked files were untouched.
+- A clean exact-tree optimized build passed in 291.7 seconds: source compile
+  66 seconds, TypeScript 94 seconds, 31,719 static pages in 46 seconds, page
+  optimization, and sitemap generation.
+- Production-mode local E2E passed 6/6 in 7.0 seconds on the retained build:
+  rights overview, CC BY-NC practical/legal reading, and Casey object-to-rights
+  navigation on desktop and 390-by-844 mobile. The two Casey rights labels both
+  resolve internally to `/museum/network/rights/cc-by-nc-4.0`. No horizontal
+  overflow, page errors, or failed responses were observed.
+- Two preceding browser assertions used shorter visible labels instead of the
+  components' fuller accessible names. Those assertions were corrected to the
+  rendered accessibility tree; no product copy or accessibility label was
+  weakened.
+- Retained screenshots in `evidence/` cover the overview, collector guide,
+  CC BY-NC entry, and a loaded Casey object at desktop and mobile widths. Pixel
+  review confirms the native 6529 shell, legible type floor, restrained source
+  treatment, loaded art, and no generic process-dashboard styling.
