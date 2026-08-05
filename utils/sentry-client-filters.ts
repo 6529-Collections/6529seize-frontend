@@ -35,9 +35,11 @@ export {
   shouldFilterPoperBlockerOrphanFetchRejection,
 } from "./sentry-client-filters/extension-fetch";
 export {
+  shouldFilterBraveWalletPageEvaluationError,
+} from "./sentry-client-filters/brave-wallet";
+export {
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
-  shouldFilterBraveWalletPageEvaluationError,
   shouldFilterInjectedProviderProxyStartsWithError,
   shouldFilterInjectedWalletCollision,
   shouldFilterRabbyMobileRainbowKitNotFoundError,
