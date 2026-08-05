@@ -627,3 +627,87 @@
   fixture. They were replaced with closed workflow-fixture test types;
   the metric returns to its 126 baseline. The full Jest diagnostic ratchet and
   Playwright typecheck now pass alongside the debt ratchet.
+## 2026-08-05 — PR 5 local implementation: build cardinality
+
+- Audited all 23 page-level `generateStaticParams` contributors and removed
+  the six declaration-level contributors for active and historical Stream
+  review functions, events, and errors. The page handlers, metadata, runtime
+  reference resolution, immutable version selection, and explicit `notFound`
+  behavior remain unchanged.
+- The six reviewed contributors represented 5,612 active declaration params
+  and 22,448 historical declaration params (four public historical versions),
+  for a measured reduction of 28,060 expected build params. The expected
+  cardinality moves from the recorded 31,716 build routes / 31,437 generated
+  params to 3,656 build routes / 3,377 generated params. The 279-route
+  difference is the framework's route overhead, not an unaccounted source
+  contributor.
+- Added `museum-build-cardinality-v1`, a deterministic source-contract and
+  emitted-build-evidence check. It inventories every page contributor,
+  derives counts from checked-in review fixtures and source contracts, rejects
+  the six reviewed exports if they return, rejects unnoticed new contributors,
+  and enforces a 5,000 prerendered-route budget from
+  `.next/prerender-manifest.json`. It contains no timing assertion.
+- Added exact route tests for representative active and historical declaration
+  deep links. They prove the pages pass request-time params to the existing
+  renderer and preserve canonical active/versioned hrefs; the underlying
+  resolver tests preserve public-version selection and fail-closed behavior.
+- Museum pages were not the bottleneck: their retained generated contribution
+  is part of the 3,377-param remainder, while the six Stream declaration
+  routes account for 28,060 of the 31,437 generated params.
+
+### PR 5 local validation
+
+- Source-only cardinality contract: passed; 23 baseline contributors, 17
+  retained contributors, 28,060 removed params, 3,377 remaining params.
+- Focused tests: 20 tests passed across the new cardinality and dynamic-route
+  suites plus the related Stream reference-data and identity suites.
+- Changed lint: passed.
+- Changed TypeScript ratchet: passed for 1,358 changed TypeScript files.
+- Formatting: passed.
+- The protected policy-bundle suite was attempted and remains Windows-incompatible
+  at its existing `fs.constants.O_NOFOLLOW` guard (9 tests fail before their
+  assertions). This is the same platform limitation recorded for PR 1; the
+  new PR 5 policy entries are covered by the hosted Linux policy run.
+- A local production build was not claimed. The worktree's dependency
+  junction is rejected by Turbopack; hosted CI remains authoritative for the
+  build-evidence phase of `build:ci`.
+- Independent adversarial review found that the emitted-build gate enforced
+  only a broad ceiling. It now requires all six reviewed declaration patterns
+  in Next's `dynamicRoutes` and holds concrete prerendering below 500 routes;
+  tests reject a 501-route regression and any missing request-time declaration
+  route.
+
+## 2026-08-06 - PR 5 exact-head review correction
+
+- The first emitted-build contract compared against a frozen 3,656-route
+  result and mapped the four current public review versions to fixed narrative
+  counts. The 6529 general review correctly identified that routine publication
+  growth would have required a hand-edited exception.
+- The source model is now derived from current checked-in reference manifests,
+  each public version's editorial manifest, and the complete contributor
+  inventory. Adding an essay, definition, source, or public review version
+  updates that model through authoritative inputs. The historical
+  31,716-to-3,656 estimate is retained as release evidence rather than used as a
+  moving-content gate.
+- The contract still fails closed on a missing or duplicate active version,
+  malformed editorial manifests, an unmodeled `generateStaticParams`
+  contributor, restoration of any reviewed high-cardinality export, a missing
+  request-time declaration route, or more than 500 concretely prerendered
+  routes.
+- The test declaration now includes the returned evidence path, and coverage
+  proves both acceptance of ordinary growth within the tight bound and rejection
+  above it. No emergency build bypass was added; rollback remains the ordinary
+  revert of this isolated PR.
+
+## 2026-08-06 - PR 5 hosted artifact correction
+
+- Hosted build run 31074990093 completed the optimized Next build in about five
+  minutes, then proved that `.next/prerender-manifest.json` contains 241 concrete
+  prerendered routes. The 3,656 figure is the source model for retained
+  `generateStaticParams` results plus historical framework overhead; it is not
+  the manifest's concrete-route cardinality and must not be compared to that
+  artifact.
+- The emitted contract now follows the artifact's actual semantics: it records
+  the observed concrete count, rejects a count above 500, and requires all six
+  removed declaration route families to remain request-time dynamic. Exact
+  source contributor accounting remains a separate deterministic gate.
