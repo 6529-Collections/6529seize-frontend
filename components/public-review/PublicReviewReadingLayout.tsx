@@ -148,11 +148,65 @@ export function PublicReviewReadingLayout({
     };
   }, [feedbackAvailable]);
 
+  const feedbackToggle = feedbackAvailable ? (
+    <button
+      aria-controls={COMMENT_PANEL_ID}
+      aria-expanded={isPanelOpen}
+      className="tw-group/feedback-toggle tw-inline-flex tw-min-h-11 tw-flex-none tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-px-0 tw-text-xs tw-font-semibold tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-white sm:tw-gap-2"
+      onClick={() => (isPanelOpen ? closePanel() : setIsPanelOpen(true))}
+      type="button"
+    >
+      {isPanelOpen ? (
+        <XMarkIcon
+          className="tw-size-4 tw-transition-colors group-hover/feedback-toggle:tw-text-primary-300"
+          aria-hidden="true"
+        />
+      ) : (
+        <ChatBubbleLeftRightIcon
+          className="tw-size-4 tw-transition-colors group-hover/feedback-toggle:tw-text-primary-300"
+          aria-hidden="true"
+        />
+      )}
+      <span className="tw-transition-colors group-hover/feedback-toggle:tw-text-primary-300">
+        {t(
+          DEFAULT_LOCALE,
+          isPanelOpen
+            ? "publicReview.comments.hide"
+            : "publicReview.comments.show"
+        )}
+      </span>
+    </button>
+  ) : null;
+
+  const toolbarRow = (
+    <div className="tw-relative tw-flex tw-min-h-16 tw-items-center tw-gap-2 tw-px-3 sm:tw-gap-4 sm:tw-px-7 lg:tw-px-10">
+      {hasMobileNavigation ? (
+        <div className="tw-min-w-0 tw-flex-none lg:tw-hidden">
+          <PublicReviewFeedbackPanelCoordinationContext.Provider
+            value={feedbackPanelCoordination}
+          >
+            {mobileNavigation}
+          </PublicReviewFeedbackPanelCoordinationContext.Provider>
+        </div>
+      ) : null}
+      <div
+        className={
+          hasMobileNavigation
+            ? "tw-min-w-0 tw-flex-1 tw-text-center max-[359px]:tw-sr-only lg:tw-text-left"
+            : "tw-min-w-0 tw-flex-1"
+        }
+      >
+        {toolbar}
+      </div>
+      {feedbackToggle}
+    </div>
+  );
+
   if (!feedbackAvailable) {
     return (
       <section className="tw-min-w-0">
-        <div className="tw-sticky tw-top-[env(safe-area-inset-top,0px)] tw-z-30 tw-flex tw-min-h-16 tw-items-center tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.07] tw-bg-[#0D0D0F]/95 tw-px-4 tw-backdrop-blur-xl sm:tw-px-7 lg:tw-px-10">
-          {toolbar}
+        <div className="tw-sticky tw-top-[env(safe-area-inset-top,0px)] tw-z-30 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.07] tw-bg-[#0D0D0F]/95 tw-backdrop-blur-xl">
+          {toolbarRow}
         </div>
         {content}
       </section>
@@ -231,53 +285,7 @@ export function PublicReviewReadingLayout({
   return (
     <section className="tw-min-w-0 tw-@container" ref={layoutRef}>
       <div className="tw-sticky tw-top-[env(safe-area-inset-top,0px)] tw-z-30 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.07] tw-bg-[#0D0D0F]/95 tw-backdrop-blur-xl">
-        <div className="tw-relative tw-flex tw-min-h-16 tw-items-center tw-gap-2 tw-px-3 sm:tw-gap-4 sm:tw-px-7 lg:tw-px-10">
-          {hasMobileNavigation ? (
-            <div className="tw-min-w-0 tw-flex-none lg:tw-hidden">
-              <PublicReviewFeedbackPanelCoordinationContext.Provider
-                value={feedbackPanelCoordination}
-              >
-                {mobileNavigation}
-              </PublicReviewFeedbackPanelCoordinationContext.Provider>
-            </div>
-          ) : null}
-          <div
-            className={
-              hasMobileNavigation
-                ? "tw-min-w-0 tw-flex-1 tw-text-center max-[359px]:tw-sr-only lg:tw-text-left"
-                : "tw-min-w-0 tw-flex-1"
-            }
-          >
-            {toolbar}
-          </div>
-          <button
-            aria-controls={COMMENT_PANEL_ID}
-            aria-expanded={isPanelOpen}
-            className="tw-group/feedback-toggle tw-inline-flex tw-min-h-11 tw-flex-none tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-px-0 tw-text-xs tw-font-semibold tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-white sm:tw-gap-2"
-            onClick={() => (isPanelOpen ? closePanel() : setIsPanelOpen(true))}
-            type="button"
-          >
-            {isPanelOpen ? (
-              <XMarkIcon
-                className="tw-size-4 tw-transition-colors group-hover/feedback-toggle:tw-text-primary-300"
-                aria-hidden="true"
-              />
-            ) : (
-              <ChatBubbleLeftRightIcon
-                className="tw-size-4 tw-transition-colors group-hover/feedback-toggle:tw-text-primary-300"
-                aria-hidden="true"
-              />
-            )}
-            <span className="tw-transition-colors group-hover/feedback-toggle:tw-text-primary-300">
-              {t(
-                DEFAULT_LOCALE,
-                isPanelOpen
-                  ? "publicReview.comments.hide"
-                  : "publicReview.comments.show"
-              )}
-            </span>
-          </button>
-        </div>
+        {toolbarRow}
       </div>
 
       <div

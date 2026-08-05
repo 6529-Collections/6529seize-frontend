@@ -185,6 +185,43 @@ describe("PublicReviewReadingLayout", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("keeps mobile review navigation available without feedback", () => {
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      value: jest.fn((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+      })),
+    });
+
+    render(
+      <PublicReviewReadingLayout
+        content={<div>Review content</div>}
+        feedbackAvailable={false}
+        mobileNavigation={
+          <PublicReviewMobileNavigationDisclosure resetKey="overview">
+            <summary>Review navigation</summary>
+            <div>Navigation links</div>
+          </PublicReviewMobileNavigationDisclosure>
+        }
+        panel={<div>Feedback panel</div>}
+        toolbar={<div>Page 1</div>}
+      />
+    );
+
+    expect(screen.getByText("Review navigation")).toBeInTheDocument();
+    expect(screen.getByText("Page 1")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Show feedback" })
+    ).not.toBeInTheDocument();
+  });
+
   it("does not restore a previous browser-storage panel preference", () => {
     window.localStorage.setItem("public-review-comment-panel-open", "true");
 
