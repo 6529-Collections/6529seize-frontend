@@ -99,6 +99,14 @@ export const objectCapturedPromiseRejectionMessages = new Set([
   objectCapturedPromiseRejectionMessage,
   "Object captured as promise rejection with keys: code, message",
 ]);
+export const braveWalletSelectedAddressEvaluationErrorMessage =
+  "undefined is not an object (evaluating 'window.ethereum.selectedAddress = undefined')";
+export const braveWalletEmitEvaluationErrorMessage =
+  "undefined is not an object (evaluating 'window.ethereum.emit')";
+export const braveWalletPageEvaluationErrorMessages = new Set([
+  braveWalletSelectedAddressEvaluationErrorMessage,
+  braveWalletEmitEvaluationErrorMessage,
+]);
 export const providerDisconnectedCode = 4900;
 export const providerDisconnectedMessage =
   "The provider is disconnected from all chains.";
