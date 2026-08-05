@@ -54,6 +54,9 @@ export type MuseumMedia = MuseumRetainedMedia | MuseumUpstreamMedia;
 
 export type MuseumPublicDocumentKind =
   | "founding_principles"
+  | "open_museum_statement"
+  | "onchain_transition"
+  | "contributor_guide"
   | "artist_practice"
   | "collection_essay"
   | "curatorial_accession_review"
@@ -65,7 +68,12 @@ export type MuseumPublicDocumentKind =
   | "object_entry"
   | "gift_narrative"
   | "project_essay"
-  | "source_chronology_matrix";
+  | "source_chronology_matrix"
+  | "institutional_practice_study"
+  | "institutional_practice_adjacent"
+  | "institution_profile"
+  | "institutional_practice_source_register"
+  | "scholarship_editorial_standard";
 
 export interface MuseumPublicDocument {
   readonly id: string;
@@ -78,6 +86,51 @@ export interface MuseumPublicDocument {
   readonly projectIds: readonly string[];
   readonly giftIds: readonly string[];
   readonly artworkIds: readonly string[];
+}
+
+export type MuseumInstitutionProfileSlug =
+  | "met"
+  | "getty"
+  | "moma"
+  | "whitney"
+  | "tate"
+  | "centre-pompidou"
+  | "sfmoma"
+  | "guggenheim"
+  | "zkm"
+  | "ars-electronica"
+  | "rhizome-new-museum"
+  | "serpentine-arts-technologies"
+  | "v-and-a"
+  | "lacma"
+  | "hek-basel"
+  | "li-ma"
+  | "v2"
+  | "transmediale"
+  | "acmi"
+  | "m-plus"
+  | "nam-june-paik-art-center"
+  | "ntt-icc"
+  | "centro-multimedia"
+  | "laboratorio-arte-alameda"
+  | "dia"
+  | "walker-art-center"
+  | "mca-chicago";
+
+export interface MuseumInstitutionProfile {
+  readonly id: `institutional-practice:${MuseumInstitutionProfileSlug}`;
+  readonly slug: MuseumInstitutionProfileSlug;
+  readonly document: MuseumPublicDocument;
+}
+
+export interface MuseumInstitutionalPractice {
+  readonly id: "institutional-practice:a-field-of-practice";
+  readonly slug: "a-field-of-practice";
+  readonly introduction: MuseumPublicDocument;
+  readonly profiles: readonly MuseumInstitutionProfile[];
+  readonly adjacentPractice: MuseumPublicDocument;
+  readonly editorialStandard: MuseumPublicDocument;
+  readonly sourceRegister: MuseumPublicDocument;
 }
 
 export interface MuseumArtist {
@@ -147,11 +200,13 @@ export type MuseumArtwork =
 
 export interface MuseumPublication {
   readonly identity: MuseumPublicationIdentity;
+  readonly declaredSourcePaths: readonly string[];
   readonly artists: readonly MuseumArtist[];
   readonly projects: readonly MuseumProject[];
   readonly gifts: readonly MuseumGift[];
   readonly artworks: readonly MuseumArtwork[];
   readonly documents: readonly MuseumPublicDocument[];
+  readonly institutionalPractice: MuseumInstitutionalPractice;
 }
 
 export interface MuseumSourceDocument {
@@ -163,6 +218,7 @@ export interface MuseumSourceDocument {
 
 export interface MuseumPublicationAssemblyContext {
   readonly identity: MuseumPublicationIdentity;
+  readonly declaredSourcePaths: readonly string[];
   readonly documents: ReadonlyMap<string, MuseumSourceDocument>;
 }
 

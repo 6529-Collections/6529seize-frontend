@@ -10,6 +10,7 @@ import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
 interface MuseumMarkdownProps {
   readonly children: string;
   readonly className?: string | undefined;
+  readonly documentHeadings?: boolean | undefined;
   readonly embeddedDocument?: boolean | undefined;
   readonly sourceCommit: string | null;
   readonly sourcePath?: string | undefined;
@@ -38,8 +39,101 @@ const PROJECT_ROUTE_BY_DOCUMENT = new Map([
   ["still-life-and-ex-nihilo.md", "ex-nihilo-cosmos"],
 ]);
 
+const INSTITUTIONAL_PRACTICE_ROUTE =
+  "/museum/network/stories/a-field-of-practice";
+const INSTITUTIONAL_PRACTICE_PROFILE_ROUTE_BY_PATH = new Map([
+  ["records/institutional-practice/profiles/met.md", "met"],
+  ["records/institutional-practice/profiles/getty.md", "getty"],
+  ["records/institutional-practice/profiles/moma.md", "moma"],
+  ["records/institutional-practice/profiles/whitney.md", "whitney"],
+  ["records/institutional-practice/profiles/tate.md", "tate"],
+  [
+    "records/institutional-practice/profiles/centre-pompidou.md",
+    "centre-pompidou",
+  ],
+  ["records/institutional-practice/profiles/sfmoma.md", "sfmoma"],
+  ["records/institutional-practice/profiles/guggenheim.md", "guggenheim"],
+  ["records/institutional-practice/profiles/zkm.md", "zkm"],
+  [
+    "records/institutional-practice/profiles/ars-electronica.md",
+    "ars-electronica",
+  ],
+  [
+    "records/institutional-practice/profiles/rhizome-new-museum.md",
+    "rhizome-new-museum",
+  ],
+  [
+    "records/institutional-practice/profiles/serpentine-arts-technologies.md",
+    "serpentine-arts-technologies",
+  ],
+  ["records/institutional-practice/profiles/v-and-a.md", "v-and-a"],
+  ["records/institutional-practice/profiles/lacma.md", "lacma"],
+  ["records/institutional-practice/profiles/hek-basel.md", "hek-basel"],
+  ["records/institutional-practice/profiles/li-ma.md", "li-ma"],
+  ["records/institutional-practice/profiles/v2.md", "v2"],
+  ["records/institutional-practice/profiles/transmediale.md", "transmediale"],
+  ["records/institutional-practice/profiles/acmi.md", "acmi"],
+  ["records/institutional-practice/profiles/m-plus.md", "m-plus"],
+  [
+    "records/institutional-practice/profiles/nam-june-paik-art-center.md",
+    "nam-june-paik-art-center",
+  ],
+  ["records/institutional-practice/profiles/ntt-icc.md", "ntt-icc"],
+  [
+    "records/institutional-practice/profiles/centro-multimedia.md",
+    "centro-multimedia",
+  ],
+  [
+    "records/institutional-practice/profiles/laboratorio-arte-alameda.md",
+    "laboratorio-arte-alameda",
+  ],
+  ["records/institutional-practice/profiles/dia.md", "dia"],
+  [
+    "records/institutional-practice/profiles/walker-art-center.md",
+    "walker-art-center",
+  ],
+  ["records/institutional-practice/profiles/mca-chicago.md", "mca-chicago"],
+]);
+const INSTITUTIONAL_PRACTICE_STUDY_PATH =
+  "records/institutional-practice/a-field-of-practice.md";
+const INSTITUTIONAL_PRACTICE_SOURCE_REGISTER_PATH =
+  "records/institutional-practice/source-register.md";
+const INSTITUTIONAL_PRACTICE_ADJACENT_PATH =
+  "records/institutional-practice/adjacent-chain-native-practice.md";
+const CURATORIAL_PUBLICATION_STANDARD_PATH =
+  "docs/curatorial-publication-standard.md";
+const INSTITUTIONAL_SOURCE_INVENTORY_PATH =
+  "docs/institutional-source-inventory.json";
+
+function institutionalPracticeRoute(repositoryPath: string): string | null {
+  if (repositoryPath === INSTITUTIONAL_PRACTICE_STUDY_PATH) {
+    return INSTITUTIONAL_PRACTICE_ROUTE;
+  }
+  if (repositoryPath === INSTITUTIONAL_PRACTICE_SOURCE_REGISTER_PATH) {
+    return `${INSTITUTIONAL_PRACTICE_ROUTE}/sources`;
+  }
+  if (repositoryPath === INSTITUTIONAL_PRACTICE_ADJACENT_PATH) {
+    return `${INSTITUTIONAL_PRACTICE_ROUTE}/adjacent-practice`;
+  }
+  if (repositoryPath === CURATORIAL_PUBLICATION_STANDARD_PATH) {
+    return "/museum/network/stories/scholarship-and-writing";
+  }
+  const profileSlug =
+    INSTITUTIONAL_PRACTICE_PROFILE_ROUTE_BY_PATH.get(repositoryPath);
+  return profileSlug === undefined
+    ? null
+    : `${INSTITUTIONAL_PRACTICE_ROUTE}/${profileSlug}`;
+}
+
 function publicMuseumRoute(url: string): string | null {
   const withoutFragment = url.split("#", 1)[0] ?? "";
+  const practiceRoute = institutionalPracticeRoute(withoutFragment);
+  if (practiceRoute !== null) {
+    return practiceRoute;
+  }
+  if (withoutFragment.startsWith("records/institutional-practice/")) {
+    return null;
+  }
   const fileName = withoutFragment.split("/").at(-1) ?? "";
   const objectMatch = CASEY_OBJECT_DOCUMENT_PATTERN.exec(fileName);
   if (objectMatch?.[1]) {
@@ -80,6 +174,9 @@ function hasUnsafeRelativePath(url: string): boolean {
 
 function sourceBoundary(sourcePath: string): string {
   const segments = sourcePath.split("/");
+  if (segments[0] === "records" && segments[1] === "institutional-practice") {
+    return "records/institutional-practice/";
+  }
   if (
     segments[0] === "records" &&
     segments[1] === "accessions" &&
@@ -104,11 +201,24 @@ function resolveRepositoryPath(url: string, sourcePath: string): string | null {
       /^\/+/,
       ""
     );
+    const withinInstitutionalPractice = sourcePath.startsWith(
+      "records/institutional-practice/"
+    );
+    const isInstitutionalResearchDocument =
+      withinInstitutionalPractice &&
+      (normalizedPath === CURATORIAL_PUBLICATION_STANDARD_PATH ||
+        normalizedPath === INSTITUTIONAL_SOURCE_INVENTORY_PATH);
+    const isStandardRelatedPath =
+      sourcePath === CURATORIAL_PUBLICATION_STANDARD_PATH &&
+      (normalizedPath.startsWith("records/institutional-practice/") ||
+        normalizedPath === "CONTRIBUTING.md");
     if (
       normalizedPath.length === 0 ||
       normalizedPath.includes("\\") ||
       normalizedPath.split("/").includes("..") ||
-      !normalizedPath.startsWith(sourceBoundary(sourcePath))
+      (!normalizedPath.startsWith(sourceBoundary(sourcePath)) &&
+        !isInstitutionalResearchDocument &&
+        !isStandardRelatedPath)
     ) {
       return null;
     }
@@ -292,9 +402,29 @@ const baseComponents: Components = {
   hr: () => <hr className="tw-border-white/10" />,
 };
 
+const documentHeadingComponents: Components = {
+  ...baseComponents,
+  h1: ({ children }) => (
+    <h2 className="tw-mt-10 tw-text-2xl tw-font-semibold tw-text-white">
+      {children}
+    </h2>
+  ),
+  h2: ({ children }) => (
+    <h2 className="tw-mt-10 tw-text-2xl tw-font-semibold tw-text-white">
+      {children}
+    </h2>
+  ),
+  h3: ({ children }) => (
+    <h3 className="tw-mt-8 tw-text-xl tw-font-semibold tw-text-white">
+      {children}
+    </h3>
+  ),
+};
+
 export function MuseumMarkdown({
   children,
   className = "",
+  documentHeadings = false,
   embeddedDocument = false,
   sourceCommit,
   sourcePath,
@@ -302,7 +432,9 @@ export function MuseumMarkdown({
   return (
     <div className={`tw-space-y-4 ${className}`}>
       <ReactMarkdown
-        components={baseComponents}
+        components={
+          documentHeadings ? documentHeadingComponents : baseComponents
+        }
         rehypePlugins={[rehypeSanitize]}
         remarkPlugins={[remarkGfm]}
         urlTransform={(url) => safeUrlTransform(url, sourcePath, sourceCommit)}

@@ -119,7 +119,7 @@ describe("MyStreamWaveTabsHeader", () => {
     expect(screen.getByTestId("header-search-modal")).toBeInTheDocument();
   });
 
-  it("offsets the score actions row so the score icon aligns with the title", () => {
+  it("keeps the score actions in a compact row below the description", () => {
     render(
       <MyStreamWaveTabsHeader
         wave={wave}
@@ -136,11 +136,11 @@ describe("MyStreamWaveTabsHeader", () => {
 
     const scoreActions = screen.getByText("Add REP").parentElement;
 
-    expect(scoreActions).toHaveClass("-tw-ml-1.5");
-    expect(scoreActions).toHaveClass("tw-mt-1");
+    expect(scoreActions).toHaveClass("tw-mt-1.5");
+    expect(scoreActions).toHaveClass("tw-gap-1.5");
   });
 
-  it("keeps the compact mobile header to score only", () => {
+  it("hides score actions in the compact mobile header", () => {
     render(
       <MyStreamWaveTabsHeader
         wave={wave}
@@ -155,7 +155,7 @@ describe("MyStreamWaveTabsHeader", () => {
       />
     );
 
-    expect(screen.getByTestId("wave-score")).toBeInTheDocument();
+    expect(screen.queryByTestId("wave-score")).toBeNull();
     expect(screen.queryByText("Add REP")).toBeNull();
   });
 });

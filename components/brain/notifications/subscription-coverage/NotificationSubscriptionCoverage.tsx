@@ -101,6 +101,7 @@ export default function NotificationSubscriptionCoverage({
           <div className="tw-mt-3">
             <Link
               href={profileHref}
+              prefetch={false}
               className="tw-inline-flex tw-min-h-9 tw-items-center tw-gap-1.5 tw-rounded-lg tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 desktop-hover:hover:tw-bg-primary-400"
             >
               {context.minimum_top_up_eth

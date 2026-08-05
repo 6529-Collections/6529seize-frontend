@@ -7,8 +7,8 @@ describe("useSidebarSections", () => {
 
     expect(result.current.map((section) => section.key)).toEqual([
       "nfts",
-      "waves",
       "museum",
+      "waves",
       "about",
     ]);
 

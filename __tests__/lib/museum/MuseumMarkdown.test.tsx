@@ -126,4 +126,107 @@ describe("MuseumMarkdown public links", () => {
       screen.queryByRole("link", { name: "Protocol relative" })
     ).not.toBeInTheDocument();
   });
+
+  it("routes the closed institutional-practice package onsite", () => {
+    renderMarkdown(
+      [
+        "[Met](profiles/met.md)",
+        "[HEK](profiles/hek-basel.md)",
+        "[Adjacent](adjacent-chain-native-practice.md)",
+        "[Sources](source-register.md)",
+        "[Inventory](../../docs/institutional-source-inventory.json)",
+        "[Standard](../../docs/curatorial-publication-standard.md)",
+      ].join("\n\n"),
+      "records/institutional-practice/a-field-of-practice.md"
+    );
+
+    expect(screen.getByRole("link", { name: "Met" })).toHaveAttribute(
+      "href",
+      "/museum/network/stories/a-field-of-practice/met"
+    );
+    expect(screen.getByRole("link", { name: "Sources" })).toHaveAttribute(
+      "href",
+      "/museum/network/stories/a-field-of-practice/sources"
+    );
+    expect(screen.getByRole("link", { name: "HEK" })).toHaveAttribute(
+      "href",
+      "/museum/network/stories/a-field-of-practice/hek-basel"
+    );
+    expect(screen.getByRole("link", { name: "Adjacent" })).toHaveAttribute(
+      "href",
+      "/museum/network/stories/a-field-of-practice/adjacent-practice"
+    );
+    expect(screen.getByRole("link", { name: "Standard" })).toHaveAttribute(
+      "href",
+      "/museum/network/stories/scholarship-and-writing"
+    );
+    expect(screen.getByRole("link", { name: "Inventory" })).toHaveAttribute(
+      "href",
+      `https://github.com/6529-Collections/6529networkmuseum/blob/${SOURCE_COMMIT}/docs/institutional-source-inventory.json`
+    );
+  });
+
+  it("keeps the public editorial standard connected to its study and contribution source", () => {
+    renderMarkdown(
+      "[Study](../records/institutional-practice/a-field-of-practice.md)\n\n[Contribute](../CONTRIBUTING.md)",
+      "docs/curatorial-publication-standard.md"
+    );
+
+    expect(screen.getByRole("link", { name: "Study" })).toHaveAttribute(
+      "href",
+      "/museum/network/stories/a-field-of-practice"
+    );
+    expect(screen.getByRole("link", { name: "Contribute" })).toHaveAttribute(
+      "href",
+      `https://github.com/6529-Collections/6529networkmuseum/blob/${SOURCE_COMMIT}/CONTRIBUTING.md`
+    );
+  });
+
+  it("does not route an institutional filename collision onsite", () => {
+    renderMarkdown(
+      "[Collision](profiles/archive/century.md)",
+      "records/institutional-practice/a-field-of-practice.md"
+    );
+
+    expect(screen.getByRole("link", { name: "Collision" })).toHaveAttribute(
+      "href",
+      `https://github.com/6529-Collections/6529networkmuseum/blob/${SOURCE_COMMIT}/records/institutional-practice/profiles/archive/century.md`
+    );
+  });
+
+  it("retains source heading levels for a standalone manuscript", () => {
+    render(
+      <MuseumMarkdown
+        documentHeadings
+        sourceCommit={SOURCE_COMMIT}
+        sourcePath="records/institutional-practice/profiles/met.md"
+      >
+        {"## Demonstrated practices\n\n### Object records"}
+      </MuseumMarkdown>
+    );
+
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Demonstrated practices" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 3, name: "Object records" })
+    ).toBeInTheDocument();
+  });
+
+  it("demotes a manuscript body level-one heading", () => {
+    render(
+      <MuseumMarkdown
+        documentHeadings
+        sourceCommit={SOURCE_COMMIT}
+        sourcePath="records/institutional-practice/profiles/met.md"
+      >
+        {"# Body title"}
+      </MuseumMarkdown>
+    );
+
+    expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Body title" })
+    ).toBeInTheDocument();
+  });
 });

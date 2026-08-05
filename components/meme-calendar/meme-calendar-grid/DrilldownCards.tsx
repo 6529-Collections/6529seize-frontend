@@ -1,4 +1,5 @@
 import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 import { SZN1_RANGE } from "../meme-calendar.helpers";
 import {
@@ -7,22 +8,6 @@ import {
   getDrilldownCardAriaLabel,
   getMemeRangeLabel,
 } from "./calendarText";
-
-interface DrilldownCardProps {
-  readonly title: string;
-  readonly range: string;
-  readonly mints: string;
-  readonly isCurrent: boolean;
-  readonly onClick: () => void;
-  readonly locale: SupportedLocale;
-}
-
-interface HistoricalLaunchDrilldownCardProps {
-  readonly title: string;
-  readonly isCurrent: boolean;
-  readonly onClick: () => void;
-  readonly locale: SupportedLocale;
-}
 
 interface DrilldownCardProps {
   readonly title: string;
@@ -45,16 +30,27 @@ export function DrilldownCard({
     <button
       type="button"
       aria-label={getDrilldownCardAriaLabel(locale, title, range, mints)}
-      className={DRILLDOWN_CARD_CLASS}
-      style={{
-        borderColor: isCurrent ? "#20fa59" : "#222222",
-        borderWidth: isCurrent ? "2px" : "1px",
-      }}
+      className={`${DRILLDOWN_CARD_CLASS} ${
+        isCurrent
+          ? "tw-border-emerald-400/60 tw-ring-inset tw-ring-emerald-400/20"
+          : "tw-border-iron-800 tw-ring-iron-800 desktop-hover:hover:tw-border-iron-700"
+      }`}
       onClick={onClick}
     >
-      <div className="tw-font-semibold">{title}</div>
-      <div className="tw-text-xs tw-text-gray-500">{range}</div>
-      <div className="tw-mt-1 tw-text-sm">{mints}</div>
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-2">
+        <div className="tw-text-lg tw-font-semibold tw-leading-6">{title}</div>
+        {isCurrent && (
+          <span className="tw-rounded-full tw-bg-emerald-400/10 tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wide tw-text-emerald-300 tw-ring-1 tw-ring-inset tw-ring-emerald-400/30">
+            {t(locale, "memeCalendar.grid.current")}
+          </span>
+        )}
+      </div>
+      <div className="tw-mt-1 tw-text-sm tw-leading-5 tw-text-iron-500">
+        {range}
+      </div>
+      <div className="tw-mt-2 tw-text-sm tw-leading-5 tw-text-cyan-400">
+        {mints}
+      </div>
     </button>
   );
 }
@@ -78,7 +74,7 @@ export function HistoricalLaunchDrilldownCard({
   const mints = getMemeRangeLabel(locale, 1, 47);
 
   return (
-    <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
+    <div className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-3">
       <DrilldownCard
         title={title}
         range={range}

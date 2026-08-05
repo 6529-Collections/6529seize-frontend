@@ -44,6 +44,7 @@ export default function NotificationHeader({
           <UserProfileTooltipWrapper user={author.handle ?? ""}>
             <Link
               href={`/${author.handle}`}
+              prefetch={false}
               className={`${authorClassName} tw-font-semibold tw-text-iron-50 tw-no-underline`}
             >
               {author.handle}
