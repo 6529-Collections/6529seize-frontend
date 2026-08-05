@@ -355,23 +355,15 @@ jobs:
           set -euo pipefail
           museum_required=true
           if [ "$SELECTED_PACK" = all ] && [ -n "$DEPLOYED_SHA" ]; then
-            changed_files="$(mktemp)"
-            trap 'rm -f "$changed_files"' EXIT
-            if base_sha="$(git rev-parse "${DEPLOYED_SHA}^1" 2>/dev/null)" &&
-              git diff --no-renames --name-only -z \
-                "$base_sha" "$DEPLOYED_SHA" -- > "$changed_files"
-            then
-              museum_required=false
-              while IFS= read -r -d '' file; do
-                case "$file" in
-                  app/museum/network/*|components/museum/*|lib/museum/*|config/museumPublicationEnv.server.ts|i18n/messages/museum.en-US.json|tests/museum/*)
-                    museum_required=true
-                    break
-                    ;;
-                esac
-              done < "$changed_files"
+            if base_sha="$(git rev-parse "${DEPLOYED_SHA}^1" 2>/dev/null)"; then
+              candidate="$(node scripts/museum-e2e-change-set.cjs \
+                --base "$base_sha" --head "$DEPLOYED_SHA")"
+              case "$candidate" in
+                true|false) museum_required="$candidate" ;;
+                *) echo "::warning::Museum classifier returned an invalid value; retaining Museum E2E." ;;
+              esac
             else
-              echo "::warning::Unable to prove the deployed change range; retaining the Museum E2E pack."
+              echo "::warning::Unable to resolve the deployed change range; retaining Museum E2E."
             fi
           fi
           echo "required=$museum_required" >> "$GITHUB_OUTPUT"

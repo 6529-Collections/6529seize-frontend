@@ -37,10 +37,12 @@ The isolated desktop/mobile Museum browser lane is selected only by:
 - `i18n/messages/museum.en-US.json`
 - `tests/museum/**`
 
-The classifier is table-tested with positive and unrelated negative paths.
-Museum Jest tests continue to follow normal related-test selection. The
-deployed staging selector uses the same path boundary and retains the Museum
-pack if it cannot prove the first-parent diff.
+The classifier is centralized and table-tested with positive and unrelated
+negative paths. Museum Jest tests continue to follow normal related-test
+selection. Staging compares its deployed composition with its first parent.
+Production compares the new exact tree with the most recent prior successful
+production deployment. Both retain the Museum pack when the range cannot be
+proved or the deployed runner cannot honor pack exclusion.
 
 ## Immutable production artifact
 

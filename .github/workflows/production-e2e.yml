@@ -66,7 +66,8 @@ jobs:
           set -euo pipefail
           [[ "$AUTOMATIC_DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
           response_file="$(mktemp)"
-          trap 'rm -f "$response_file"' EXIT
+          runs_file=''
+          trap 'rm -f "$response_file"; if [ -n "$runs_file" ]; then rm -f "$runs_file"; fi' EXIT
           gh api \
             "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}" \
             > "$response_file"
@@ -84,6 +85,36 @@ jobs:
               (.head_sha | test("^[a-f0-9]{40}$"))
             ' "$response_file" >/dev/null
           echo "deployed-sha=$(jq -r .head_sha "$response_file")" >> "$GITHUB_OUTPUT"
+          started_at="$(jq -er .run_started_at "$response_file")"
+          runs_file="$(mktemp)"
+          gh api \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/build-upload-deploy-prod.yml/runs?status=completed&branch=main&event=workflow_dispatch&per_page=100" \
+            > "$runs_file"
+          previous_sha="$(jq -r \
+            --argjson current_run_id "$AUTOMATIC_DEPLOY_RUN_ID" \
+            --arg started_at "$started_at" '
+              [.workflow_runs[] |
+                select(
+                  .id != $current_run_id and
+                  .name == "Web Deploy - PROD" and
+                  .path == ".github/workflows/build-upload-deploy-prod.yml" and
+                  .event == "workflow_dispatch" and
+                  .status == "completed" and
+                  .conclusion == "success" and
+                  .head_branch == "main" and
+                  .run_started_at < $started_at and
+                  (.head_sha | test("^[a-f0-9]{40}$"))
+                )] |
+              sort_by(.run_started_at) |
+              last |
+              .head_sha // empty
+            ' "$runs_file")"
+          if [[ "$previous_sha" =~ ^[a-f0-9]{40}$ ]]; then
+            echo "previous_deployed_sha=$previous_sha" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::No prior successful production deployment could be proven; Museum E2E will be retained."
+            echo "previous_deployed_sha=" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Validate and authorize immutable inputs
         if: inputs.automatic_deploy_run_id == ''
@@ -141,6 +172,35 @@ jobs:
         run: |
           corepack enable pnpm
           corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+      - name: Select Museum pack for the deployed change set
+        id: museum-selection
+        env:
+          BASE_SHA: ${{ steps.automatic-deploy.outputs.previous_deployed_sha }}
+          DEPLOYED_SHA: ${{ inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha }}
+        run: |
+          set -euo pipefail
+          museum_required=true
+          if [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]] &&
+            [[ "$DEPLOYED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          then
+            base_available=true
+            if ! git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null &&
+              ! git fetch --no-tags --depth=1 origin "$BASE_SHA"
+            then
+              base_available=false
+              echo "::warning::Unable to fetch the prior production tree; retaining Museum E2E."
+            fi
+            if [ "$base_available" = true ]; then
+              candidate="$(node scripts/museum-e2e-change-set.cjs \
+                --base "$BASE_SHA" --head "$DEPLOYED_SHA")"
+              case "$candidate" in
+                true|false) museum_required="$candidate" ;;
+                *) echo "::warning::Museum classifier returned an invalid value; retaining Museum E2E." ;;
+              esac
+            fi
+          fi
+          echo "required=$museum_required" >> "$GITHUB_OUTPUT"
+          echo "Museum E2E required: $museum_required"
       - name: Restore pnpm store
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
@@ -186,6 +246,7 @@ jobs:
         if: steps.playwright.outcome == 'success'
         continue-on-error: true
         env:
+          MUSEUM_E2E_REQUIRED: ${{ steps.museum-selection.outputs.required }}
           RELEASE_BUS_E2E_MANIFEST_ID: ${{ inputs.release_manifest_id }}
           RELEASE_BUS_E2E_MANIFEST_IDENTITY_SHA256: ${{ inputs.release_manifest_identity_sha256 }}
           RELEASE_BUS_E2E_SOURCE_SHA: ${{ inputs.expected_sha }}
@@ -202,11 +263,19 @@ jobs:
               .features.readonly_pack_parallelism == {
                 version: 1,
                 max_parallel: 4
-              }
+              } and
+              .features.pack_exclusion == { version: 1 }
             ' <<< "$runner_capabilities" >/dev/null
           then
             args+=(--parallel 3)
+            if [ "$MUSEUM_E2E_REQUIRED" = false ]; then
+              args+=(--exclude-pack museum-institutional-practice)
+            fi
+          elif [ "$MUSEUM_E2E_REQUIRED" = false ]; then
+            echo "::warning::Deployed E2E runner cannot exclude packs; retaining the Museum E2E pack."
+            MUSEUM_E2E_REQUIRED=true
           fi
+          echo "MUSEUM_E2E_REQUIRED=$MUSEUM_E2E_REQUIRED" >> "$GITHUB_ENV"
           ./bin/6529 run e2e:packs -- "${args[@]}"
       - name: Validate exact production E2E evidence
         id: evidence
@@ -222,9 +291,11 @@ jobs:
           test -f production-e2e-artifacts/evidence.json
           expected_inventory="$(./bin/6529 exec node - <<'NODE'
           const { PACKS } = require("./tests/packs.manifest.cjs");
+          const museumRequired = process.env.MUSEUM_E2E_REQUIRED !== "false";
           const keys = PACKS.filter((pack) =>
             pack.environments.includes("production") &&
-            pack.triggers.includes("post-deploy")
+            pack.triggers.includes("post-deploy") &&
+            (museumRequired || pack.alias !== "museum-institutional-practice")
           ).map((pack) => pack.scriptKey);
           process.stdout.write(JSON.stringify(keys));
           NODE
