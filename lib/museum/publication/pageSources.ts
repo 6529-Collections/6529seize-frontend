@@ -199,6 +199,28 @@ function admittedRelatedSources(
   }, []);
 }
 
+function addMuseumPageSource(
+  routes: Map<string, MuseumPageSourceProjection>,
+  admittedPaths: ReadonlySet<string>,
+  pathname: string,
+  primaryCandidate: string | null | undefined,
+  relatedCandidates: readonly MuseumRelatedPageSourceCandidate[] = []
+): void {
+  const normalized = normalizedMuseumPathname(pathname);
+  const primaryPath = admittedPath(admittedPaths, primaryCandidate);
+  if (normalized === null || primaryPath === null || routes.has(normalized)) {
+    return;
+  }
+  routes.set(normalized, {
+    primaryPath,
+    relatedSources: admittedRelatedSources(
+      admittedPaths,
+      primaryPath,
+      relatedCandidates
+    ),
+  });
+}
+
 export function buildMuseumPageSourceCatalog(
   publication: MuseumPublication
 ): MuseumPageSourceCatalog {
@@ -209,19 +231,14 @@ export function buildMuseumPageSourceCatalog(
     pathname: string,
     primaryCandidate: string | null | undefined,
     relatedCandidates: readonly MuseumRelatedPageSourceCandidate[] = []
-  ) => {
-    const normalized = normalizedMuseumPathname(pathname);
-    const primaryPath = admittedPath(admittedPaths, primaryCandidate);
-    if (normalized === null || primaryPath === null || routes.has(normalized)) {
-      return;
-    }
-    const relatedSources = admittedRelatedSources(
+  ) =>
+    addMuseumPageSource(
+      routes,
       admittedPaths,
-      primaryPath,
+      pathname,
+      primaryCandidate,
       relatedCandidates
     );
-    routes.set(normalized, { primaryPath, relatedSources });
-  };
 
   const openMuseum = firstDocument(publication, "open_museum_statement");
   const transition = firstDocument(publication, "onchain_transition");

@@ -131,7 +131,10 @@ export function EmptyRoomsAmphitheater({
     candidateMode === "minted" ? seedFromHash(candidateToken.tokenHash) : seed;
   const formLabels = ["Sun", "Shard", "Cargo", "Hive", "Pyramid", "Moon"];
   const decodedForms = formLabels.flatMap((form, index) =>
-    Array.from({ length: comparisonCounts[index] ?? 0 }, () => form)
+    Array.from({ length: comparisonCounts[index] ?? 0 }, (_, occurrence) => ({
+      id: `${form}-${occurrence}`,
+      label: form,
+    }))
   );
   const comparisonCode =
     candidateMode === "minted"
@@ -236,7 +239,7 @@ export function EmptyRoomsAmphitheater({
                     (index / group.count) * Math.PI * 2 - Math.PI / 2;
                   return (
                     <circle
-                      key={index}
+                      key={`${group.label}-${angle}`}
                       cx={190 + Math.cos(angle) * radius}
                       cy={190 + Math.sin(angle) * radius}
                       r={groupIndex === 5 ? 0.72 : 1.15}
@@ -320,12 +323,12 @@ export function EmptyRoomsAmphitheater({
             "museum.network.insideSystem.decodedFormsLabel"
           )}
         >
-          {decodedForms.map((form, index) => (
+          {decodedForms.map((form) => (
             <div
-              key={`${form}-${index}`}
+              key={form.id}
               className="tw-flex tw-aspect-square tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-green/50 tw-bg-green/5 tw-text-center tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-text-iron-100"
             >
-              {form.slice(0, 2)}
+              {form.label.slice(0, 2)}
             </div>
           ))}
         </div>
@@ -350,9 +353,9 @@ export function EmptyRoomsAmphitheater({
                 strokeLinecap="square"
                 transform={`translate(${passOffset.toFixed(1)} 0)`}
               >
-                {roomSegments.map((segment, index) => (
+                {roomSegments.map((segment) => (
                   <path
-                    key={index}
+                    key={`${segment.x}-${segment.y}-${segment.z}`}
                     d={`M${segment.x.toFixed(1)} ${segment.y.toFixed(1)}l${(4 + Math.abs(segment.z) * 0.2).toFixed(1)} ${(-2 - segment.z * 0.12).toFixed(1)}`}
                     strokeWidth="0.7"
                     opacity={
@@ -373,7 +376,9 @@ export function EmptyRoomsAmphitheater({
           <ComparisonMarker x={260} y={142} />
         </svg>
         <figcaption className="tw-text-sm tw-leading-6 tw-text-iron-400">
-          {comparisonCode} → {decodedForms.join(" · ") || "gradient only"}{" "}
+          {comparisonCode} →
+          {decodedForms.map((form) => form.label).join(" · ") ||
+            "gradient only"}{" "}
           → {comparisonChannelLabel} depth field → line-built room.
         </figcaption>
         {candidateMode === "counterfactual" ? (

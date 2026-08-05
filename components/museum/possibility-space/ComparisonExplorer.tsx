@@ -187,10 +187,8 @@ function MintedMediaComparison({
             different: `${Math.max(0, traitNames.length - shared)}`,
           })}
         </summary>
-        <div
+        <section
           className="tw-mt-3 tw-overflow-x-auto"
-          tabIndex={0}
-          role="region"
           aria-label={t(
             locale,
             "museum.network.insideSystem.compareTraitsTable"
@@ -232,7 +230,7 @@ function MintedMediaComparison({
               })}
             </tbody>
           </table>
-        </div>
+        </section>
       </details>
     </div>
   );
@@ -469,14 +467,10 @@ export function ComparisonSelector({
                 {t(locale, "museum.network.insideSystem.mintedNotFound")}
               </p>
             ) : null}
-            <div
-              role="group"
-              aria-label={t(
-                locale,
-                "museum.network.insideSystem.browseMinted"
-              )}
-              className="tw-mt-3 tw-flex tw-flex-wrap tw-gap-2"
-            >
+            <fieldset className="tw-m-0 tw-mt-3 tw-flex tw-flex-wrap tw-gap-2 tw-border-0 tw-p-0">
+              <legend className="tw-sr-only">
+                {t(locale, "museum.network.insideSystem.browseMinted")}
+              </legend>
               <button
                 type="button"
                 onClick={() => chooseAdjacent(-1)}
@@ -498,7 +492,7 @@ export function ComparisonSelector({
               >
                 {t(locale, "museum.network.insideSystem.randomMinted")}
               </button>
-            </div>
+            </fieldset>
           </div>
           <div className="tw-grid tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-[minmax(9rem,1fr)_minmax(9rem,1fr)_auto]">
             <label className="tw-text-sm tw-font-medium tw-text-iron-200">

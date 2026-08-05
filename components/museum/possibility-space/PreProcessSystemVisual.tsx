@@ -39,14 +39,14 @@ function GrowthGlyph({
   return (
     <svg viewBox="0 0 36 24" aria-hidden="true" className="tw-h-6 tw-w-9">
       {origin === 1
-        ? points.map((index) => {
+        ? points.map((point) => {
             const radius =
-              growth === 4 ? 3.4 : 1.5 + ((index + growth) % 4) * 0.55;
+              growth === 4 ? 3.4 : 1.5 + ((point + growth) % 4) * 0.55;
             return (
               <circle
-                key={index}
-                cx={15 + (index % 2) * 6}
-                cy={9 + Math.floor(index / 2) * 6}
+                key={`cluster-${point}`}
+                cx={15 + (point % 2) * 6}
+                cy={9 + Math.floor(point / 2) * 6}
                 r={radius}
                 fill={selected ? "#f5f5f5" : "#848490"}
                 opacity={0.85}
@@ -54,23 +54,23 @@ function GrowthGlyph({
             );
           })
         : origin === 2
-          ? points.map((index) => (
+          ? points.map((point) => (
               <circle
-                key={index}
-                cx={7 + index * 7}
+                key={`line-${point}`}
+                cx={7 + point * 7}
                 cy="12"
-                r={growth === 4 ? 3 : 1.4 + index * 0.35}
+                r={growth === 4 ? 3 : 1.4 + point * 0.35}
                 fill={selected ? "#f5f5f5" : "#848490"}
               />
             ))
           : [
-              [7, 6],
-              [27, 7],
-              [12, 18],
-              [25, 17],
-            ].map(([x, y], index) => (
+              { id: "7-6", x: 7, y: 6 },
+              { id: "27-7", x: 27, y: 7 },
+              { id: "12-18", x: 12, y: 18 },
+              { id: "25-17", x: 25, y: 17 },
+            ].map(({ id, x, y }, index) => (
               <circle
-                key={index}
+                key={id}
                 cx={x}
                 cy={y}
                 r={growth === 4 ? 2.8 : 1.4 + ((index + growth) % 3) * 0.5}
@@ -127,7 +127,6 @@ function CollisionChamber({
   return (
     <svg
       viewBox="0 0 280 300"
-      role="img"
       aria-label={`${cell.row}, ${cell.group}, ${cell.value} collision chamber`}
       className="tw-w-full"
     >
@@ -160,7 +159,7 @@ function CollisionChamber({
             const previous = bodies[index];
             return previous ? (
               <path
-                key={index}
+                key={`${previous.x}-${previous.y}-${body.x}-${body.y}`}
                 d={`M${previous.x} ${previous.y}Q140 140 ${body.x} ${body.y}`}
                 fill="none"
               />
@@ -172,7 +171,7 @@ function CollisionChamber({
         <g fill="none" stroke={accent} opacity="0.24">
           {bodies.slice(0, 12).map((body, index) => (
             <circle
-              key={index}
+              key={`${body.x}-${body.y}-${body.radius}`}
               cx={body.x}
               cy={body.y}
               r={body.radius + 4 + (index % 4) * 3}
@@ -190,7 +189,7 @@ function CollisionChamber({
         >
           {bodies.slice(0, 18).map((body, index) => (
             <path
-              key={index}
+              key={`${body.x}-${body.y}-${body.radius}`}
               d={`M${body.x - 18 - (index % 3) * 6} ${body.y + 10}Q${body.x - 7} ${body.y - 8} ${body.x} ${body.y}`}
             />
           ))}
@@ -198,7 +197,7 @@ function CollisionChamber({
       ) : null}
       {bodies.map((body, index) => (
         <circle
-          key={index}
+          key={`${body.x}-${body.y}-${body.radius}`}
           cx={body.x}
           cy={body.y}
           r={body.radius}

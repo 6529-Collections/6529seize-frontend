@@ -48,7 +48,6 @@ function PossibilitySpaceTable({
   return (
     <section
       className="tw-overflow-x-auto tw-rounded-xl tw-border tw-border-solid tw-border-white/10"
-      tabIndex={0}
       aria-label={t(locale, "museum.network.insideSystem.dataTable")}
     >
       <table className="tw-w-full tw-min-w-[36rem] tw-border-collapse tw-text-left tw-text-sm">

@@ -126,7 +126,7 @@ function PhototaxisField({
   });
   const agent = { x: 310, y: 230 };
   const fieldScale =
-    magnification === 2 ? 1.18 : magnification === 0.66 ? 0.84 : 1;
+    magnification > 1.5 ? 1.18 : magnification < 0.8 ? 0.84 : 1;
   const agentScale = size === "Small" ? 0.72 : 1;
   return (
     <svg

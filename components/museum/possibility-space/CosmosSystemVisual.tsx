@@ -141,7 +141,7 @@ function CosmosSpecimen({
         <g strokeWidth="0.8">
           {segments.map((segment, index) => (
             <path
-              key={index}
+              key={`${segment.x}-${segment.y}-${segment.wave}`}
               d={`M${segment.x.toFixed(1)} ${segment.y.toFixed(1)}l${(4 + Math.abs(segment.wave) * 0.18).toFixed(1)} ${(segment.wave * 0.22).toFixed(1)}`}
               stroke={colors[index % colors.length]}
               opacity={0.12 + Math.min(0.58, Math.abs(segment.wave) / 45)}
@@ -329,7 +329,7 @@ export function CosmosStateAtlas({
                   const point = cosmosPoint(index, count, cx, 172, radius);
                   return (
                     <circle
-                      key={index}
+                      key={`${point.x}-${point.y}`}
                       cx={point.x}
                       cy={point.y}
                       r={selectedGroup && index === count - 1 ? 2.5 : 1.25}

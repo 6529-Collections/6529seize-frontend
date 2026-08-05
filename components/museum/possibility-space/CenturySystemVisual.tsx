@@ -123,7 +123,6 @@ function CenturyGlyph({
     <svg
       viewBox="0 0 240 280"
       className="tw-w-full"
-      role="img"
       aria-label={`${position.title}: ${slices} slices${janky ? ", Janky displacement" : ""}${alpha ? ", alpha" : ""}`}
     >
       <defs>
@@ -180,7 +179,7 @@ function CenturyGlyph({
             const width = 2 + seededUnit(config.seed, index + bands * 2) * 7;
             return (
               <path
-                key={index}
+                key={`band-${y}-${bend}-${phase}`}
                 d={`M10 ${y + phase * 0.22}Q120 ${y + bend} 230 ${y - phase * 0.18}`}
                 fill="none"
                 stroke={config.lineColors[index % config.lineColors.length]}
@@ -207,7 +206,7 @@ function CenturyGlyph({
           const targetX = 32 + destination * stripWidth + stripWidth / 2;
           return (
             <path
-              key={`thread-${index}`}
+              key={`thread-${sourceX}-${targetX}`}
               d={`M${sourceX} 10 C${sourceX} 48 ${targetX} 48 ${targetX} 70`}
               fill="none"
             />
@@ -222,7 +221,7 @@ function CenturyGlyph({
           const sourceX = 32 + source * stripWidth;
           const y = janky ? ((source % 3) - 1) * 8 : 0;
           return (
-            <g key={`strip-${index}`}>
+            <g key={`strip-${x}-${sourceX}`}>
               <clipPath id={`century-strip-${safeId}-${index}`}>
                 <rect
                   x={x}
