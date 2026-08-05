@@ -225,5 +225,9 @@
   the closeout's `.github`, `__tests__`, and `ops`-only delta. The run was
   cancelled because it could not produce deployable application changes.
   Production prebuild now ignores `.github/**`, `__tests__/**`, `ops/**`, and
-  `tests/**`-only pushes; any source, configuration, dependency, script, or
-  public-content change still triggers the fail-closed exact prebuild.
+  `tests/**`-only pushes; any application source, application configuration,
+  dependency, script, or public-content change still triggers the fail-closed
+  exact prebuild. An ignored-only main SHA deliberately has no automatic
+  deployable artifact. If an operator intentionally promotes that SHA, the
+  existing manual dispatch must first build its exact artifact; production
+  deployment otherwise fails closed.

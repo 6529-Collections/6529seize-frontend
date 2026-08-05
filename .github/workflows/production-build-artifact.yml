@@ -3,6 +3,9 @@ name: Build Production Artifact
 on:
   push:
     branches: [main]
+    # A non-runtime-only merge intentionally has no automatic deploy artifact.
+    # If that exact SHA must be promoted, dispatch this workflow manually first;
+    # production deployment otherwise fails closed on the missing artifact.
     paths-ignore:
       - ".github/**"
       - "__tests__/**"

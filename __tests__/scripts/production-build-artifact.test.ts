@@ -16,6 +16,7 @@ describe("production prebuild and promotion contract", () => {
 
   it("builds exact main bytes without deployment authority", () => {
     expect(build.on.push.branches).toEqual(["main"]);
+    expect(build.on.workflow_dispatch).toBeDefined();
     expect(build.on.push["paths-ignore"]).toEqual([
       ".github/**",
       "__tests__/**",
