@@ -54,6 +54,8 @@ export type ProcessIncomingDropFn = (
 
 export interface ProcessIncomingDropOptions {
   readonly preferExistingPollVote?: boolean;
+  /** Exact canonical payload already fetched for a compact WebSocket ref. */
+  readonly canonicalDrop?: ApiDrop;
 }
 
 function replaceAttachmentInPart(
@@ -227,7 +229,7 @@ const applyCanonicalDropUpdate = async ({
   queryClient,
   updateData,
 }: CanonicalDropUpdateParams): Promise<void> => {
-  const apiDrop = await fetchDropByIdBatched(dropId);
+  const apiDrop = options.canonicalDrop ?? (await fetchDropByIdBatched(dropId));
   const preferExistingPollVote = options.preferExistingPollVote;
   const reconciledApiDrop =
     preferExistingPollVote === undefined

@@ -4,6 +4,7 @@ import { useAuth } from "@/components/auth/Auth";
 import type { WsDropUpdateMessage } from "@/helpers/Types";
 import {
   WS_DROP_UPDATE_REASON_POLL_RESPONSE,
+  isWsDropUpdateRefData,
   WsMessageType,
 } from "@/helpers/Types";
 import { getWebSocketMessageReason } from "@/services/websocket/WebSocketTypes";
@@ -275,6 +276,84 @@ function useNewDropCounter(
       resetWaveNewDropsCount(activeWaveId);
     }
   }, [activeWaveId, enabled, resetWaveNewDropsCount]);
+
+  useWebSocketMessage<unknown>(
+    WsMessageType.DROP_UPDATE_REF,
+    useCallback(
+      (message) => {
+        if (
+          !enabled ||
+          !isWsDropUpdateRefData(message) ||
+          message.update_type !== WsMessageType.DROP_UPDATE ||
+          message.reason === WS_DROP_UPDATE_REASON_POLL_RESPONSE
+        ) {
+          return;
+        }
+
+        const { serial_no: serialNo, wave_id: waveId } = message;
+        const now = Date.now();
+        const wave = waves.find((candidate) => candidate.id === waveId);
+
+        if (!wave) {
+          if (otherListWaveIds.has(waveId)) {
+            return;
+          }
+
+          if (
+            lastUnknownWaveRefetchAtRef.current !== null &&
+            now - lastUnknownWaveRefetchAtRef.current <
+              unknownWaveRefetchCooldownMs
+          ) {
+            return;
+          }
+          lastUnknownWaveRefetchAtRef.current = now;
+          refetchWaves();
+          return;
+        }
+
+        if (wave.muted) {
+          setNewDropsCounts((prev) =>
+            updateLatestDropTimestamp({
+              createdAt: now,
+              firstUnreadSerialNo: null,
+              newDropsCounts: prev,
+              unreadCount: 0,
+              waveId,
+            })
+          );
+          return;
+        }
+
+        if (waveId === activeWaveId && document.visibilityState === "visible") {
+          setNewDropsCounts((prev) =>
+            updateLatestDropTimestamp({
+              createdAt: now,
+              newDropsCounts: prev,
+              waveId,
+            })
+          );
+          return;
+        }
+
+        setNewDropsCounts((prev) =>
+          addUnreadDropCount({
+            createdAt: now,
+            newDropsCounts: prev,
+            serialNo,
+            waveId,
+          })
+        );
+      },
+      [
+        activeWaveId,
+        enabled,
+        otherListWaveIds,
+        refetchWaves,
+        unknownWaveRefetchCooldownMs,
+        waves,
+      ]
+    )
+  );
 
   // WebSocket subscription for new drops using callback pattern
   useWebSocketMessage<WsDropUpdateMessage["data"]>(

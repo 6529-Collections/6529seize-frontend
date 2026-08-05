@@ -27,7 +27,7 @@ import {
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 import type { WsDropUpdateMessage } from "@/helpers/Types";
-import { WsMessageType } from "@/helpers/Types";
+import { isWsDropUpdateRefData, WsMessageType } from "@/helpers/Types";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import {
   fetchDropRepliesV2,
@@ -122,6 +122,20 @@ export function useDropMessages(
     isFetching,
     isFetchingNextPage,
   });
+
+  useWebSocketMessage<unknown>(
+    WsMessageType.DROP_UPDATE_REF,
+    useCallback(
+      (message) => {
+        if (!isWsDropUpdateRefData(message) || waveId !== message.wave_id) {
+          return;
+        }
+
+        requestRefetch();
+      },
+      [requestRefetch, waveId]
+    )
+  );
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,
