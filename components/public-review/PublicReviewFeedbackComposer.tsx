@@ -655,27 +655,29 @@ export default function PublicReviewFeedbackComposer({
             </details>
           </div>
 
-          <div className="tw-space-y-3">
-            <button
-              type="button"
-              disabled={busy || !referenceReady}
-              onClick={previewAndFocusError}
-              className="tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-white/[0.035] tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-colors hover:tw-bg-white/[0.065] hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-opacity-60"
-            >
-              <EyeIcon
-                aria-hidden="true"
-                className="tw-size-4 tw-text-iron-500"
-              />
-              {t(locale, "publicReview.feedback.preview")}
-            </button>
+          {draft.comment.trim() ? (
+            <div className="tw-space-y-3">
+              <button
+                type="button"
+                disabled={busy || !referenceReady}
+                onClick={previewAndFocusError}
+                className="tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-white/[0.035] tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-colors hover:tw-bg-white/[0.065] hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-opacity-60"
+              >
+                <EyeIcon
+                  aria-hidden="true"
+                  className="tw-size-4 tw-text-iron-500"
+                />
+                {t(locale, "publicReview.feedback.preview")}
+              </button>
 
-            <FeedbackPreview
-              formId={formId}
-              locale={locale}
-              preview={preview}
-              previewRef={previewRef}
-            />
-          </div>
+              <FeedbackPreview
+                formId={formId}
+                locale={locale}
+                preview={preview}
+                previewRef={previewRef}
+              />
+            </div>
+          ) : null}
 
           <div className="tw-pt-1">
             <button

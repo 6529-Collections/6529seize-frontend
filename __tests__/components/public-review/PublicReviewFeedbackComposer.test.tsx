@@ -168,6 +168,7 @@ describe("PublicReviewFeedbackComposer", () => {
   });
 
   it("keeps primary feedback text and actions on AA-contrast tokens", async () => {
+    const user = userEvent.setup();
     renderComposer(jest.fn());
 
     const comment = await screen.findByLabelText("Comment (required)", {
@@ -209,6 +210,10 @@ describe("PublicReviewFeedbackComposer", () => {
     );
     expect(comment.closest("form")).toHaveClass("tw-space-y-4");
     expect(comment.closest("form")).not.toHaveClass("tw-border-white/[0.12]");
+    expect(
+      screen.queryByRole("button", { name: "Preview Wave message" })
+    ).not.toBeInTheDocument();
+    await user.type(comment, "Check this feedback.");
     const previewButton = screen.getByRole("button", {
       name: "Preview Wave message",
     });
@@ -221,6 +226,10 @@ describe("PublicReviewFeedbackComposer", () => {
       "tw-size-4",
       "tw-text-iron-500"
     );
+    await user.clear(comment);
+    expect(
+      screen.queryByRole("button", { name: "Preview Wave message" })
+    ).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Post to review Wave" })
     ).toHaveClass("tw-bg-primary-600", "hover:tw-ring-primary-300/60");
