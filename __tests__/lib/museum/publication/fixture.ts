@@ -173,6 +173,133 @@ function buildBaseDocuments(): Record<string, string> {
     documents[contract.path] =
       `# ${contract.title}\n\nGoverned institutional research.`;
   }
+  const architectureStandards = [
+    [
+      "spectrum",
+      "Spectrum 5.1",
+      "Spectrum 5.1: the work of running a collection",
+      "operational",
+    ],
+    [
+      "cidoc-crm",
+      "CIDOC CRM",
+      "CIDOC CRM: a history made of events",
+      "source_fields_present",
+    ],
+    [
+      "lido",
+      "LIDO",
+      "LIDO: a public catalogue record that can travel",
+      "source_fields_present",
+    ],
+    [
+      "premis",
+      "PREMIS",
+      "PREMIS: keeping a digital artwork usable",
+      "source_fields_present",
+    ],
+    [
+      "prov-o",
+      "PROV-O",
+      "PROV-O: following the evidence",
+      "source_fields_present",
+    ],
+    [
+      "getty-aat-ulan",
+      "Getty AAT and ULAN",
+      "Getty AAT and ULAN: shared names for art and artists",
+      "conceptual_mapping",
+    ],
+    [
+      "iiif",
+      "IIIF Presentation API",
+      "IIIF: a shared plan for presenting digital objects",
+      "conceptual_mapping",
+    ],
+    [
+      "c2pa",
+      "C2PA Content Credentials",
+      "C2PA: signed claims about media",
+      "conceptual_mapping",
+    ],
+    [
+      "bagit",
+      "BagIt",
+      "BagIt: a package that can be checked on arrival",
+      "conceptual_mapping",
+    ],
+    ["ocfl", "OCFL", "OCFL: preserving every version", "conceptual_mapping"],
+    [
+      "caip-19",
+      "CAIP-19",
+      "CAIP-19: an address for a chain asset",
+      "source_fields_present",
+    ],
+  ] as const;
+  documents["docs/data-architecture.md"] =
+    "# How the Museum knows and cares for art\n\nA public introduction to the Museum data architecture.";
+  for (const [slug, , title] of architectureStandards) {
+    documents[`docs/data-architecture/${slug}.md`] =
+      `# ${title}\n\n## The question\n\nA governed standards profile.`;
+  }
+  documents["docs/data-architecture/casey-reas-implementation.md"] =
+    "# Casey Reas: the first implementation audit\n\nThe first accession tests the architecture against seven works.";
+  documents["docs/data-architecture/profile.json"] = JSON.stringify({
+    profile_id: "6529NM_DATA_ARCHITECTURE_V1",
+    profile_version: "1.0.0",
+    status: "working_standard",
+    observed_on: "2026-08-05",
+    title: "How the Museum knows and cares for art",
+    source_document: "docs/data-architecture.md",
+    implementation_states: [
+      "conceptual_mapping",
+      "source_fields_present",
+      "serialized",
+      "validated",
+      "operational",
+    ],
+    standards: architectureStandards.map(([slug, name, , caseyState]) => ({
+      slug,
+      name,
+      category: `${slug}_category`,
+      human_question: `What does ${name} contribute?`,
+      authority: `${name} authority`,
+      version: "test-version",
+      authority_status: "current",
+      official_url: `https://example.test/${slug}`,
+      document_path: `docs/data-architecture/${slug}.md`,
+      casey_state: caseyState,
+    })),
+    case_study_path: "docs/data-architecture/casey-reas-implementation.md",
+    case_study_data_path:
+      "docs/data-architecture/casey-reas-machine-schedule.json",
+    stream_convergence: {
+      normative_for_profile: false,
+      status: "deferred_until_museum_profile_release",
+      document_path: "docs/stream-interoperability.md",
+    },
+  });
+  documents["docs/data-architecture/casey-reas-machine-schedule.json"] =
+    JSON.stringify({
+      profile_id: "6529NM_DATA_ARCHITECTURE_V1",
+      accession_lot_id: "6529NM.2026.001",
+      custody_transaction: `0x${"1".repeat(64)}`,
+      custody_block: 25660311,
+      evidence_manifest_path: "evidence/casey-reas/manifest.json",
+      metadata_digest_scope: "retained raw metadata response bytes",
+      generator_digest_scope: "recorded generator observation",
+      objects: CASEY_OBJECTS.map((artwork, index) => ({
+        object_id: artwork.id,
+        title: artwork.title,
+        caip19: `eip155:1/erc721:0x${artwork.contract}/${artwork.token}`,
+        custody_receipt_log: 60 - index,
+        metadata_sha256: `sha256:${"2".repeat(64)}`,
+        generator_observation_sha256: `sha256:${"3".repeat(64)}`,
+        generator_bytes_retained: false,
+        accession_state: "accessioned",
+        preservation_state: "in_progress",
+      })),
+    });
   documents[MUSEUM_RIGHTS_INTRODUCTION_PATH] =
     "# Rights in digital art\n\n## Buying the artwork usually does not buy its copyright\n\nGoverned public guide.";
   documents[MUSEUM_RIGHTS_ARTIST_GUIDE_PATH] =
@@ -224,6 +351,15 @@ function buildBaseDocuments(): Record<string, string> {
     share_an_adaptation: "status_only",
     make_commercial_use: "status_only",
   };
+  const museumPracticeMatrix = Object.fromEntries(
+    Object.keys(useMatrix).map((action) => [
+      action,
+      {
+        status: "ordinary",
+        note: `Museum practice reading for ${action} in the governed fixture.`,
+      },
+    ])
+  );
   const expressions = expressionIds.map((id) => {
     const legalPath = legalPathById[id];
     const group = id.startsWith("cc-by")
@@ -270,13 +406,14 @@ function buildBaseDocuments(): Record<string, string> {
       boundaries: ["Read the complete object record before reuse."],
       visitor_note: "Read the recorded rights information before reuse.",
       use_matrix: useMatrix,
+      museum_practice_matrix: museumPracticeMatrix,
     };
   });
   documents[MUSEUM_RIGHTS_REGISTRY_PATH] = JSON.stringify({
     $schema: "../../schemas/rights-expression-registry.schema.json",
     registry_type: "6529NM_RIGHTS_EXPRESSION_REGISTRY",
-    registry_version: "1.0.0",
-    published_at: "2026-08-05T17:01:32Z",
+    registry_version: "1.1.0",
+    published_at: "2026-08-05T21:30:00Z",
     actions: Object.keys(useMatrix),
     use_status_definitions: {
       allowed: "Allowed.",
@@ -284,6 +421,13 @@ function buildBaseDocuments(): Record<string, string> {
       not_licensed: "Not licensed.",
       status_only: "Status information only.",
       case_by_case: "Review case by case.",
+    },
+    museum_practice_status_definitions: {
+      ordinary: "Ordinary Museum practice.",
+      ordinary_with_terms: "Ordinary Museum practice with governing terms.",
+      purpose_limited: "Available only for the stated institutional purpose.",
+      contextual: "The exact context determines the Museum practice.",
+      separate_basis: "A separate legal or contractual basis is required.",
     },
     sources: {
       creative_commons_data_repository:
@@ -296,6 +440,17 @@ function buildBaseDocuments(): Record<string, string> {
       rightsstatements_usage_guidelines:
         "https://rightsstatements.org/en/documentation/usage_guidelines",
       observed_at: "2026-08-05T16:45:00Z",
+      college_art_association_fair_use:
+        "https://www.collegeart.org/programs/caa-fair-use/best-practices",
+      us_public_display_law: "https://www.copyright.gov/title17/92chap1.html",
+      uk_public_exhibition_guidance:
+        "https://www.gov.uk/government/publications/copyright-notice-public-exhibition-of-copyright-works",
+      us_nft_intellectual_property_study:
+        "https://www.copyright.gov/policy/nft-study/Joint-USPTO-USCO-Report-on-NFTs-and-Intellectual-Property.pdf",
+      creative_commons_noncommercial_guidance:
+        "https://wiki.creativecommons.org/wiki/NonCommercial_interpretation",
+      rightsstatements_layer_guidance:
+        "https://rightsstatements.org/en/2018/12/where-statements-apply.html",
     },
     expressions,
     object_assignments: CASEY_OBJECTS.map((artwork, index) => ({

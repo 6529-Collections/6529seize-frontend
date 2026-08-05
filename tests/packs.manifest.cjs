@@ -76,6 +76,7 @@ const READONLY_SPECS = {
     "tests/museum/institutional-practice-readonly.spec.ts",
   ],
   museumInsideSystem: ["tests/museum/inside-system-readonly.spec.ts"],
+  museumDataArchitecture: ["tests/museum/data-architecture-readonly.spec.ts"],
   museumRights: ["tests/museum/rights-readonly.spec.ts"],
 };
 
@@ -285,6 +286,15 @@ const PACKS = [
   ),
   museumPack({
     ...localReadonlyPack(
+      "test:e2e:museum-data-architecture",
+      "Network Museum data-architecture reading room and machine profile sweep.",
+      READONLY_SPECS.museumDataArchitecture,
+      { timeoutMinutes: 30 }
+    ),
+    triggers: ["pr-ci", "manual"],
+  }),
+  museumPack({
+    ...localReadonlyPack(
       "test:e2e:museum-institutional-practice",
       "Network Museum institutional-practice study route sweep.",
       READONLY_SPECS.museumInstitutionalPractice,
@@ -492,6 +502,15 @@ const PACKS = [
   ),
   museumPack(
     stagingPack(
+      "museum-data-architecture",
+      "museum-data-architecture",
+      "Staging Network Museum data-architecture reading room and machine profile sweep.",
+      READONLY_SPECS.museumDataArchitecture,
+      { timeoutMinutes: 30 }
+    )
+  ),
+  museumPack(
+    stagingPack(
       "museum-institutional-practice",
       "museum-institutional-practice",
       "Staging Network Museum institutional-practice deployed route smoke.",
@@ -574,6 +593,16 @@ const PACKS = [
   ),
   museumPack(
     productionPack(
+      "museum-data-architecture",
+      "Production Network Museum data-architecture reading room and machine profile sweep.",
+      READONLY_SPECS.museumDataArchitecture,
+      ["post-deploy", "manual"],
+      30,
+      [DESKTOP, MOBILE]
+    )
+  ),
+  museumPack(
+    productionPack(
       "museum-institutional-practice",
       "Production Network Museum institutional-practice deployed route smoke.",
       READONLY_SPECS.museumInstitutionalPractice,
@@ -617,6 +646,7 @@ const PACKS = [
       ...READONLY_SPECS.publicContent,
       ...READONLY_SPECS.profileDeepLinks,
       ...READONLY_SPECS.searchWaves,
+      ...READONLY_SPECS.museumDataArchitecture,
       ...READONLY_SPECS.museumInstitutionalPractice,
       ...READONLY_SPECS.museumInsideSystem,
       ...READONLY_SPECS.museumRights,
