@@ -40,7 +40,7 @@ export default function AboutCookiePolicy() {
   };
 
   return (
-    <Container>
+    <Container className="!tw-px-0">
       <Row>
         <Col>
           <h1>Cookie Policy</h1>

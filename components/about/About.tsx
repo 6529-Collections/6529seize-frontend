@@ -9,6 +9,7 @@ import { t } from "@/i18n/messages";
 import {
   AboutCol as Col,
   AboutContainer as Container,
+  ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS,
   AboutRow as Row,
 } from "./AboutLayout";
 import AboutApply from "./AboutApply";
@@ -39,7 +40,7 @@ import {
 } from "./about.routes";
 
 const ABOUT_LEGAL_CONTENT_CLASS = [
-  "tw-w-full tw-max-w-4xl tw-break-words tw-px-1 tw-pb-12 tw-pt-4 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300 sm:tw-px-0 sm:tw-pt-8 lg:tw-px-2",
+  `tw-w-full tw-max-w-4xl tw-break-words tw-px-1 tw-pb-12 tw-pt-4 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300 sm:tw-px-2 sm:tw-pt-8 ${ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS}`,
   "[&_a]:tw-break-words [&_a]:tw-font-medium [&_a]:tw-text-primary-300 [&_a]:tw-underline [&_a]:tw-decoration-primary-400/50 [&_a]:tw-underline-offset-4 hover:[&_a]:tw-text-primary-200 focus-visible:[&_a]:tw-rounded-sm focus-visible:[&_a]:tw-outline-none focus-visible:[&_a]:tw-ring-2 focus-visible:[&_a]:tw-ring-primary-400",
   "[&_b]:tw-font-semibold [&_b]:tw-text-iron-100 [&_strong]:tw-font-semibold [&_strong]:tw-text-iron-100",
   "[&_h1]:tw-m-0 [&_h1]:tw-text-[22px] [&_h1]:tw-font-semibold [&_h1]:tw-leading-tight [&_h1]:tw-tracking-tight [&_h1]:tw-text-iron-50 sm:[&_h1]:tw-text-[26px]",

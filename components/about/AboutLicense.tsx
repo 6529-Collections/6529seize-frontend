@@ -7,7 +7,7 @@ import {
 
 export default function AboutLicense() {
   return (
-    <Container>
+    <Container className="!tw-px-0">
       <Row>
         <Col>
           <h1>License</h1>
