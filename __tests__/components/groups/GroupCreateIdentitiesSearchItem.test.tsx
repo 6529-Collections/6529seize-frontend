@@ -18,13 +18,13 @@ test("calls onProfileSelect when clicked", async () => {
   expect(onSelect).toHaveBeenCalledWith(item);
 });
 
-test("shows checkmark when selected", () => {
-  const { container } = render(
+test("exposes its selected state", () => {
+  render(
     <GroupCreateIdentitiesSearchItem
       item={item}
       selected
       onProfileSelect={() => {}}
     />
   );
-  expect(container.querySelector("svg")).toBeInTheDocument();
+  expect(screen.getByRole("button")).toHaveAttribute("aria-pressed", "true");
 });
