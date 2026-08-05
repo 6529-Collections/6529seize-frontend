@@ -50,8 +50,8 @@ describe("PublicReviewEditorialFeedback", () => {
     window.history.replaceState({}, "", window.location.pathname);
   });
 
-  it("fills the feedback rail and registers the open composer for overlay clearance", async () => {
-    render(
+  it("fills the feedback rail and registers its bottom action for overlay clearance", async () => {
+    const { unmount } = render(
       <PublicReviewEditorialFeedback
         config={config}
         destination={destination}
@@ -66,14 +66,14 @@ describe("PublicReviewEditorialFeedback", () => {
     const disclosure = screen
       .getByText("Send feedback", { exact: true })
       .closest("details");
+    await waitFor(() =>
+      expect(getWaveComposerDockElements()).toContain(disclosure)
+    );
     expect(disclosure).not.toHaveAttribute("open");
 
     fireEvent.click(screen.getByText("Send feedback", { exact: true }));
 
     expect(disclosure).toHaveAttribute("open");
-    await waitFor(() =>
-      expect(getWaveComposerDockElements()).toContain(disclosure)
-    );
     expect(screen.getByRole("combobox")).toHaveClass(
       "tw-bg-iron-900",
       "tw-ring-white/[0.09]"
@@ -81,6 +81,9 @@ describe("PublicReviewEditorialFeedback", () => {
     expect(screen.getByTestId("composer")).toBeInTheDocument();
 
     fireEvent.click(screen.getByText("Send feedback", { exact: true }));
+    expect(getWaveComposerDockElements()).toContain(disclosure);
+
+    unmount();
     await waitFor(() => expect(getWaveComposerDockElements()).toEqual([]));
   });
 

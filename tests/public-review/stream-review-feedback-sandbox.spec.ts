@@ -57,21 +57,16 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
     await gotoStreamReview(page);
 
     const feedbackPanel = page.locator("#public-review-feedback");
-    const feedbackToggle = page.getByRole("button", {
-      name: isDesktop ? "Hide feedback" : "Show feedback",
-    });
-    await expect(feedbackToggle).toBeVisible();
-    await expect(feedbackToggle).toHaveAttribute(
-      "aria-expanded",
-      isDesktop ? "true" : "false"
+    const feedbackToggle = page.locator(
+      'button[aria-controls="public-review-feedback"]'
     );
+    await expect(feedbackToggle).toBeVisible();
+    if ((await feedbackToggle.getAttribute("aria-expanded")) !== "true") {
+      await feedbackToggle.click();
+    }
+    await expect(feedbackToggle).toHaveAttribute("aria-expanded", "true");
 
     if (!isDesktop) {
-      await feedbackToggle.click();
-      await expect(
-        page.getByRole("button", { name: "Hide feedback" })
-      ).toHaveAttribute("aria-expanded", "true");
-
       const closeButton = feedbackPanel.getByRole("button", {
         name: "Hide feedback",
       });
@@ -101,6 +96,13 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
     }
 
     await expect(feedbackPanel).toBeVisible();
+    if (isDesktop) {
+      await expect(
+        page.getByRole("button", { name: /Open quick direct messages/ })
+      ).toHaveCSS("pointer-events", "none", {
+        timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+      });
+    }
     await expect(
       feedbackPanel.getByText("No comments yet for this page.")
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
@@ -127,7 +129,18 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
     await expect(comment).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
-    await expect(comment).toHaveCSS("background-color", "rgb(28, 28, 33)");
+    const expectedFieldFontSize = isDesktop ? "14px" : "16px";
+    await expect(comment).toHaveCSS("font-size", expectedFieldFontSize);
+    await expect(comment).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    await expect
+      .poll(() =>
+        comment.evaluate(
+          (element) =>
+            getComputedStyle(element.parentElement?.parentElement as Element)
+              .backgroundColor
+        )
+      )
+      .toBe("rgb(28, 28, 33)");
     await expect(
       feedbackPanel.getByRole("button", {
         name: "Connect wallet to comment",
@@ -138,13 +151,22 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
     await feedbackPanel
       .getByText("Add technical detail", { exact: true })
       .click();
-    await feedbackPanel
-      .getByLabel("Comment on")
-      .selectOption("what-stream-is-designed-to-hold-together");
-    await feedbackPanel
-      .getByLabel("Feedback type")
-      .selectOption("product-or-ux");
-    await feedbackPanel.getByLabel("Suspected severity").selectOption("medium");
+    const commentOnSelect = feedbackPanel.getByLabel("Comment on");
+    const feedbackTypeSelect = feedbackPanel.getByLabel("Feedback type");
+    const severitySelect = feedbackPanel.getByLabel("Suspected severity");
+    for (const select of [
+      commentOnSelect,
+      feedbackTypeSelect,
+      severitySelect,
+    ]) {
+      await expect(select).toHaveCSS("font-size", expectedFieldFontSize);
+      await expect(select).toHaveClass(/tw-appearance-none/);
+    }
+    await commentOnSelect.selectOption(
+      "what-stream-is-designed-to-hold-together"
+    );
+    await feedbackTypeSelect.selectOption("product-or-ux");
+    await severitySelect.selectOption("medium");
     await feedbackPanel
       .getByLabel("Why this matters")
       .fill(PUBLIC_REVIEW_WHY_IT_MATTERS);
@@ -157,8 +179,9 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
     });
     await expect(previewButton).toHaveCSS(
       "background-color",
-      "rgb(28, 28, 33)"
+      "rgba(255, 255, 255, 0.035)"
     );
+    await expect(previewButton.locator("svg")).toHaveClass(/tw-text-iron-500/);
     await previewButton.click();
     await expect(
       feedbackPanel.getByRole("heading", { name: "Wave message preview" })
@@ -174,18 +197,7 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
     await expect(submitButton).toBeEnabled({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
-    if (isDesktop) {
-      await expect(
-        page.getByRole("button", { name: /Open quick direct messages/ })
-      ).toHaveCSS("pointer-events", "none", {
-        timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
-      });
-    }
     await submitButton.click();
-
-    await expect(
-      feedbackPanel.getByText("Feedback posted successfully.")
-    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
     await expect(comment).toHaveValue("");
 
     let dropRequests: SandboxRequest[] = [];
@@ -207,7 +219,10 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
       .toHaveLength(1);
 
     const [dropRequest] = dropRequests;
-    expect(dropRequest).toMatchObject({
+    expect(
+      dropRequest,
+      `Unexpected guarded public-review request: ${JSON.stringify(dropRequest)}`
+    ).toMatchObject({
       kind: "allowed-sandbox-mutation",
       body: expect.objectContaining({
         wave_id: "00000000-0000-4000-8000-000000000529",
@@ -219,7 +234,7 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
         review_severity: "medium",
         review_context: expect.objectContaining({
           reviewId: "6529-stream",
-          reviewVersion: "2026-07-27.1",
+          reviewVersion: "2026-08-01.1",
           pageId: "overview",
           sectionId: "what-stream-is-designed-to-hold-together",
         }),

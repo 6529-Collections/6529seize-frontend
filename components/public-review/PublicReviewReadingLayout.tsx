@@ -194,7 +194,7 @@ export function PublicReviewReadingLayout({
   const panelContents = (showCloseButton: boolean) => (
     <PublicReviewCommentPanelOpenContext.Provider value={isPanelOpen}>
       <div className="tw-flex tw-h-full tw-min-h-0 tw-flex-col tw-bg-iron-950">
-        <header className="tw-flex tw-min-h-16 tw-flex-none tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.12] tw-bg-iron-900/70 tw-px-5">
+        <header className="tw-flex tw-min-h-16 tw-flex-none tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.07] tw-bg-[#101014] tw-px-5">
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2.5">
             <ChatBubbleLeftRightIcon
               className="tw-size-4 tw-flex-none tw-text-iron-400"

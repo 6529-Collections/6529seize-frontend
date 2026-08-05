@@ -28,7 +28,6 @@ export function PublicReviewEditorialFeedback({
   readonly sections: readonly PublicReviewSectionDefinition[];
 }) {
   const [sectionId, setSectionId] = useState("");
-  const [isComposerOpen, setIsComposerOpen] = useState(false);
   const composerDisclosureRef = useRef<HTMLDetailsElement>(null);
   const selectedSection = sections.find((section) => section.id === sectionId);
   const pageContext = useMemo<PublicReviewPageContext>(
@@ -48,7 +47,6 @@ export function PublicReviewEditorialFeedback({
     const revealComposerForFeedbackHash = (): void => {
       if (window.location.hash === "#public-review-feedback") {
         composerDisclosureRef.current?.setAttribute("open", "");
-        setIsComposerOpen(true);
       }
     };
 
@@ -62,12 +60,12 @@ export function PublicReviewEditorialFeedback({
 
   useEffect(() => {
     const disclosure = composerDisclosureRef.current;
-    if (!isComposerOpen || !disclosure) {
+    if (!disclosure) {
       return;
     }
 
     return registerWaveComposerDock(disclosure);
-  }, [isComposerOpen]);
+  }, []);
 
   return (
     <div className="tw-flex tw-min-h-0 tw-flex-col @[760px]:tw-h-full">
@@ -82,8 +80,7 @@ export function PublicReviewEditorialFeedback({
       </div>
       <details
         ref={composerDisclosureRef}
-        className="tw-group tw-flex-none tw-overflow-y-auto tw-overscroll-contain tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-transparent tw-bg-transparent tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 open:tw-max-h-[70vh] open:tw-border-white/[0.12] open:tw-bg-iron-900 desktop-hover:hover:tw-scrollbar-thumb-iron-500"
-        onToggle={(event) => setIsComposerOpen(event.currentTarget.open)}
+        className="tw-group tw-flex-none tw-overflow-y-auto tw-overscroll-contain tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-transparent tw-bg-transparent tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 open:tw-max-h-[70vh] open:tw-border-white/[0.07] open:tw-bg-[#111115] desktop-hover:hover:tw-scrollbar-thumb-iron-500"
       >
         <summary className="tw-mx-auto tw-mb-5 tw-mt-3 tw-flex tw-min-h-11 tw-w-fit tw-cursor-pointer tw-list-none tw-items-center tw-justify-center tw-gap-3 tw-rounded-full tw-border-0 tw-bg-primary-600 tw-px-5 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-shadow-[0_12px_28px_rgba(0,0,0,0.42)] tw-transition-[transform,box-shadow] tw-duration-200 tw-ease-out group-open:tw-mx-5 group-open:tw-mb-3 group-open:tw-mt-4 group-open:tw-w-auto group-open:tw-translate-y-0 group-open:tw-justify-between group-open:tw-rounded-none group-open:tw-bg-transparent group-open:tw-px-0 group-open:tw-py-0 group-open:tw-text-sm group-open:tw-text-iron-100 group-open:tw-shadow-none group-open:tw-transition-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-300 active:tw-translate-y-0 desktop-hover:hover:-tw-translate-y-0.5 desktop-hover:hover:tw-bg-primary-500 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.5)] desktop-hover:group-open:hover:tw-translate-y-0 desktop-hover:group-open:hover:tw-bg-transparent desktop-hover:group-open:hover:tw-shadow-none motion-reduce:tw-transform-none motion-reduce:tw-transition-none [&::-webkit-details-marker]:tw-hidden">
           <span className="tw-flex tw-items-center tw-gap-2">

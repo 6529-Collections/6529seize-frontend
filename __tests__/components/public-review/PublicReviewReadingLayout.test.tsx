@@ -99,7 +99,8 @@ describe("PublicReviewReadingLayout", () => {
     const dialog = await screen.findByRole("dialog", {
       name: "Page comments",
     });
-    expect(dialog).toHaveClass(
+    expect(dialog).toBeInTheDocument();
+    expect(document.getElementById("public-review-feedback")).toHaveClass(
       "tw-box-border",
       "tw-pt-[env(safe-area-inset-top,0px)]",
       "tw-pr-[env(safe-area-inset-right,0px)]",
