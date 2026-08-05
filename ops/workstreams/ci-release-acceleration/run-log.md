@@ -221,3 +221,15 @@
   exclusion is deliberately narrow: public or build-input Markdown remains
   deployment-triggering. Focused workflow tests pass 62/62 and the Jest type,
   changed-lint, Bash-parse, formatting, and whitespace ratchets are green.
+- The post-merge sweep observed production-prebuild run 30983293737 start for
+  the closeout's `.github`, `__tests__`, and `ops`-only delta. The run was
+  cancelled because it could not produce deployable application changes.
+  Production prebuild now ignores `.github/**`, `__tests__/**`, `ops/**`, and
+  `tests/**`-only pushes; any application source, application configuration,
+  dependency, script, or public-content change still triggers the fail-closed
+  exact prebuild. An ignored-only main SHA deliberately has no automatic
+  deployable artifact. If an operator intentionally promotes that SHA, the
+  existing manual dispatch must first build its exact artifact; production
+  deployment otherwise fails closed. The contract also proves that the build
+  workflow consumes no ignored local `.github` action; introducing one must
+  first narrow the trigger exclusion.
