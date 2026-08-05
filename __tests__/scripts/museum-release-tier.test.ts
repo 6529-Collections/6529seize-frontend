@@ -74,6 +74,28 @@ describe("Museum release report-only classifier", () => {
     ).toBe("NONE");
   });
 
+  it("classifies a Museum copy or stylesheet change as P1", () => {
+    expect(classify([{ file: "styles/museum.css", status: "M" }]).tier).toBe(
+      "P1"
+    );
+  });
+
+  it.each([
+    [
+      { file: "app/museum/network/page.tsx", status: "M" },
+      { file: "styles/museum.css", status: "M" },
+    ],
+    [
+      { file: "styles/museum.css", status: "M" },
+      { file: "app/museum/network/page.tsx", status: "M" },
+    ],
+  ])(
+    "keeps a mixed P1/P2 change at P2 regardless of file order",
+    (...entries) => {
+      expect(classify(entries).tier).toBe("P2");
+    }
+  );
+
   it("fails closed when the registered component is added or deleted", () => {
     expect(classify([{ file: componentPath, status: "A" }]).tier).toBe("P2");
     expect(classify([{ file: componentPath, status: "D" }]).tier).toBe("P2");

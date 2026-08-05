@@ -82,6 +82,8 @@ describe("effective App PR CI plan", () => {
     "ops/scripts/deploy-staging-artifact.sh",
     "scripts/museum-release-tier.cjs",
     "tests/packs.manifest.cjs",
+    "components/museum/MuseumNetworkProposition.tsx",
+    "__tests__/components/museum/MuseumNetworkProposition.test.tsx",
   ])("requires Release Bus contracts for %s", (file) => {
     expect(executePlan([file]).checks.release_bus_contract.required).toBe(true);
   });

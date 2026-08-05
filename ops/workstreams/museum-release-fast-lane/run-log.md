@@ -86,3 +86,20 @@
 - Added malformed-definition and malformed-matrix rejection tests. This defect
   establishes a permanent requirement for cross-repository compatibility
   evidence before a canonical Museum source change is considered releasable.
+
+## 2026-08-05 — PR 1 final CodeRabbit review
+
+- CodeRabbit found one valid order-dependent fold in the report-only tier
+  classifier: a P1 file appearing after a P2 file could lower the aggregate
+  result to P1. The fold now starts at `NONE` and applies `maxTier` to each
+  file result. P1-only and mixed P1/P2 order permutations are covered.
+- The registered P0 proposition component and its contract test now trigger
+  the Release Bus contract suite directly, so renames or deletions cannot
+  bypass registry-drift coverage.
+- The build proposal now permits duplicate Next typechecking suppression only
+  after full exact-tree typechecking has run after `.next` type generation.
+  Without that evidence, Next typechecking remains enabled.
+- Fixed two Markdown PR-reference warnings and added this run log to the
+  workstream's current-status index.
+- Focused classifier/effective-plan validation passed: 44 tests. Changed lint,
+  changed TypeScript ratchet (1,358 files), and scoped whitespace checks passed.

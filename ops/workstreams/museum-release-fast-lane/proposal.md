@@ -300,8 +300,9 @@ risk floor.
    history. The quality/classifier lane retains the necessary base history.
 4. Use an immutable runner image with Node, the pinned pnpm/Corepack toolchain,
    Chromium, and system dependencies. Dependency lock verification still runs.
-5. When exact PR merge-tree typecheck evidence is trusted and unchanged,
-   suppress duplicate Next build typechecking for the release artifact. The
+5. Suppress duplicate Next build typechecking only when a full exact PR
+   merge-tree typecheck has run after `.next` type generation and the artifact
+   inputs remain unchanged. Otherwise Next typechecking stays enabled. The
    build still fails on compilation, generation, packaging, and route errors.
 
 ### Reduce static generation
@@ -518,13 +519,13 @@ The redesign is complete only when all of these are demonstrated:
 
 ## Ideas incorporated and rejected
 
-The proposal keeps the useful work already merged through PRs #3593, #3597,
-#3598, #3599, #3603, #3604, #3605, and #3608: parallel App CI, exact artifacts,
+The proposal keeps the useful work already merged through PRs `#3593`, `#3597`,
+`#3598`, `#3599`, `#3603`, `#3604`, `#3605`, and `#3608`: parallel App CI, exact artifacts,
 cache boundaries, failed-pack-only retry, centralized Museum scope, and
 non-runtime prebuild exclusions.
 
 It also incorporates the route-family and canary concepts from older PRs
-#3191-#3193, but not their stale branches. The current CJS pack manifest remains
+`#3191`-`#3193`, but not their stale branches. The current CJS pack manifest remains
 the source of truth.
 
 PR #3586's Deploy Hub is not part of this design. A second mutation plane would

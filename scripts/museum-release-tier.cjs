@@ -317,13 +317,12 @@ function classifyEntries(entries, { readFileAt }) {
     }
   }
 
-  let tier = "P2";
+  let tier = "NONE";
   for (const { file } of museumEntries) {
-    if (P1_PATTERNS.some((pattern) => pattern.test(file))) {
-      tier = maxTier(tier === "P2" ? "P1" : tier, "P1");
-    } else {
-      tier = maxTier(tier, "P2");
-    }
+    const fileTier = P1_PATTERNS.some((pattern) => pattern.test(file))
+      ? "P1"
+      : "P2";
+    tier = maxTier(tier, fileTier);
   }
   return {
     affected_surfaces: [],
