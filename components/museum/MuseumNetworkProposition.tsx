@@ -134,7 +134,7 @@ export function MuseumNetworkProposition({
   return (
     <div className="tw-min-w-0">
       <header className="tw-max-w-5xl">
-        <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
+        <p className="tw-m-0 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
           {t(DEFAULT_LOCALE, "museum.network.proposition.eyebrow")}
         </p>
         <h1 className="tw-m-0 tw-mt-4 tw-max-w-4xl tw-text-4xl tw-font-semibold tw-leading-[1.06] tw-tracking-tight tw-text-iron-50 sm:tw-text-5xl xl:tw-text-6xl">
@@ -168,7 +168,7 @@ export function MuseumNetworkProposition({
           <p className="tw-m-0">
             {t(DEFAULT_LOCALE, "museum.network.proposition.ofNetwork.body3")}
           </p>
-          <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-400">
+          <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-400">
             {t(DEFAULT_LOCALE, "museum.network.proposition.ofNetwork.body4")}
           </p>
         </div>
@@ -193,7 +193,7 @@ export function MuseumNetworkProposition({
               <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-uppercase tw-tracking-[0.08em] tw-text-iron-100">
                 {t(DEFAULT_LOCALE, pillar.titleKey)}
               </h3>
-              <div className="tw-mt-4 tw-space-y-4 tw-text-sm tw-leading-6 tw-text-iron-400 sm:tw-text-base sm:tw-leading-7">
+              <div className="tw-mt-4 tw-space-y-4 tw-text-base tw-leading-7 tw-text-iron-400">
                 {pillar.bodyKeys.map((bodyKey) => (
                   <p key={bodyKey} className="tw-m-0">
                     {t(DEFAULT_LOCALE, bodyKey)}
@@ -234,7 +234,7 @@ export function MuseumNetworkProposition({
               <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-100">
                 {t(DEFAULT_LOCALE, item.titleKey)}
               </h3>
-              <p className="tw-m-0 tw-mt-3 tw-flex-1 tw-text-sm tw-leading-6 tw-text-iron-400">
+              <p className="tw-m-0 tw-mt-3 tw-flex-1 tw-text-base tw-leading-7 tw-text-iron-400">
                 {t(DEFAULT_LOCALE, item.bodyKey)}
               </p>
               {item.external ? (
@@ -281,7 +281,7 @@ export function MuseumNetworkProposition({
               <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-iron-100">
                 {t(DEFAULT_LOCALE, item.titleKey)}
               </h3>
-              <p className="tw-m-0 tw-mt-4 tw-text-sm tw-leading-6 tw-text-iron-400">
+              <p className="tw-m-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-400">
                 {t(DEFAULT_LOCALE, item.bodyKey)}
               </p>
             </article>
@@ -319,7 +319,7 @@ export function MuseumNetworkProposition({
         aria-labelledby="public-institution-title"
         className="tw-mt-20 tw-max-w-5xl"
       >
-        <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
+        <p className="tw-m-0 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
           {t(DEFAULT_LOCALE, "museum.network.proposition.final.eyebrow")}
         </p>
         <h2
@@ -366,7 +366,7 @@ export function MuseumNetworkProposition({
       >
         <h2
           id="museum-proposition-sources-title"
-          className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-iron-500"
+          className="tw-m-0 tw-text-sm tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-iron-500"
         >
           {t(DEFAULT_LOCALE, "museum.network.proposition.sources.title")}
         </h2>
