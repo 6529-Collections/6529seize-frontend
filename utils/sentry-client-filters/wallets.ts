@@ -63,6 +63,118 @@ import {
 } from "./walletlink-websocket";
 
 const rabbyRainbowKitRawChunkPathPrefix = "app:///_next/static/chunks/";
+const magicEdenWalletDisconnectTimeoutMessage =
+  "JSON-RPC: method call timeout calling disconnect";
+const magicEdenWalletExtensionScriptPath =
+  "chrome-extension://mkpegjkblkkefacfnmkajcjmabijhclg/inapp.js";
+const magicEdenWalletNormalizedScriptPath = "app:///inapp.js";
+const magicEdenWalletNormalizedScriptLine = 1;
+const magicEdenWalletNormalizedScriptColumn = 189867;
+// beforeSend sees the raw bundle frame; Sentry retains the processed helper
+// frame. Keep both signatures exact so any changed event shape fails open.
+const magicEdenWalletProcessedWrapperSignatures = new Set([
+  "r:111:58",
+  "n:117:17",
+]);
+const magicEdenWalletRawWrapperSignatures = new Set([
+  "n:3:4853",
+  "n:7:4853",
+]);
+const magicEdenWalletRawWrapperPathPattern =
+  /^app:\/\/\/_next\/static\/chunks\/[A-Za-z0-9._~-]+\.js$/;
+
+function hasOnlyMatchingFramePaths(
+  frame: SentryStackFrame,
+  predicate: (path: string) => boolean
+): boolean {
+  const paths = [frame.filename, frame.abs_path].filter(
+    (path): path is string => typeof path === "string" && path.length > 0
+  );
+  return paths.length > 0 && paths.every(predicate);
+}
+
+function getFrameSignature(frame: SentryStackFrame): string {
+  return `${frame.function ?? ""}:${frame.lineno ?? ""}:${frame.colno ?? ""}`;
+}
+
+function isObservedMagicEdenSentryWrapperFrame(
+  frame: SentryStackFrame
+): boolean {
+  const signature = getFrameSignature(frame);
+  const isProcessedSentryHelper =
+    frame.in_app === false &&
+    magicEdenWalletProcessedWrapperSignatures.has(signature) &&
+    hasOnlyMatchingFramePaths(
+      frame,
+      (path) =>
+        path.includes("/helpers.ts") &&
+        (path.includes("@sentry/browser") || path.includes("@sentry+browser"))
+    );
+  if (isProcessedSentryHelper) {
+    return true;
+  }
+
+  return (
+    frame.in_app === true &&
+    magicEdenWalletRawWrapperSignatures.has(signature) &&
+    hasOnlyMatchingFramePaths(frame, (path) =>
+      magicEdenWalletRawWrapperPathPattern.test(path)
+    )
+  );
+}
+
+function isExactMagicEdenExtensionFrame(frame: SentryStackFrame): boolean {
+  return hasOnlyMatchingFramePaths(
+    frame,
+    (path) => path === magicEdenWalletExtensionScriptPath
+  );
+}
+
+function isExactMagicEdenNormalizedFrame(frame: SentryStackFrame): boolean {
+  return (
+    (frame.function === undefined || frame.function === "?") &&
+    frame.in_app === true &&
+    frame.lineno === magicEdenWalletNormalizedScriptLine &&
+    frame.colno === magicEdenWalletNormalizedScriptColumn &&
+    hasOnlyMatchingFramePaths(
+      frame,
+      (path) => path === magicEdenWalletNormalizedScriptPath
+    )
+  );
+}
+
+function hasExactMagicEdenDisconnectTimeoutFrames(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  if (!Array.isArray(frames)) {
+    return false;
+  }
+
+  if (frames.length === 1) {
+    const [extensionFrame] = frames;
+    return extensionFrame
+      ? isExactMagicEdenExtensionFrame(extensionFrame)
+      : false;
+  }
+
+  if (frames.length !== 2) {
+    return false;
+  }
+
+  const [wrapperFrame, injectedFrame] = frames;
+  if (!wrapperFrame || !injectedFrame) {
+    return false;
+  }
+
+  if (!isObservedMagicEdenSentryWrapperFrame(wrapperFrame)) {
+    return false;
+  }
+
+  return (
+    isExactMagicEdenExtensionFrame(injectedFrame) ||
+    isExactMagicEdenNormalizedFrame(injectedFrame)
+  );
+}
 
 function matchesStackPattern(
   value: string | undefined,
@@ -419,6 +531,26 @@ export function shouldFilterDisconnectedWalletProviderRejection(
   }
 
   return isThirdPartyWalletExtensionStack(stack);
+}
+
+export function shouldFilterMagicEdenWalletDisconnectTimeout(
+  event: SentryClientEvent
+): boolean {
+  const values = event.exception?.values;
+  if (!Array.isArray(values) || values.length !== 1) {
+    return false;
+  }
+
+  const value = values[0];
+  if (
+    value?.type !== "Error" ||
+    value.value !== magicEdenWalletDisconnectTimeoutMessage ||
+    !hasBrowserUnhandledRejectionMechanism(value)
+  ) {
+    return false;
+  }
+
+  return hasExactMagicEdenDisconnectTimeoutFrames(value.stacktrace?.frames);
 }
 
 export function shouldFilterRabbyMobileUserRejectedRequest(

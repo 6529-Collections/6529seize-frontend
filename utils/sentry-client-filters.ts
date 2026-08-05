@@ -28,12 +28,18 @@ export {
   shouldFilterTwitterConfigReferenceError,
 } from "./sentry-client-filters/errors";
 export {
+  shouldFilterInstagramPageHideBridgeError,
+} from "./sentry-client-filters/instagram-page-hide-bridge";
+export {
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
 } from "./sentry-client-filters/extension-messaging";
 export {
   shouldFilterPoperBlockerOrphanFetchRejection,
 } from "./sentry-client-filters/extension-fetch";
+export {
+  shouldFilterExpectedWaveRequestReplacementAbort,
+} from "./sentry-client-filters/wave-abort";
 export {
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
@@ -43,5 +49,6 @@ export {
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterTalismanExtensionOnboardingError,
   shouldFilterWalletConnectStaleSessionTopic,
+  shouldFilterMagicEdenWalletDisconnectTimeout,
 } from "./sentry-client-filters/wallets";
 export { __testing } from "./sentry-client-filters/testing";
