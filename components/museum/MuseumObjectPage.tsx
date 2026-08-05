@@ -5,6 +5,7 @@ import { MuseumArtworkViewer } from "./MuseumArtworkViewer";
 import { MuseumJsonDisclosure, MuseumMarkdown } from "./MuseumMarkdown";
 import { MuseumPublicationUnavailable } from "./MuseumPublicationUnavailable";
 import { MuseumProgramOutcomePage } from "./MuseumProgramOutcomePage";
+import { MuseumInTheSystem } from "./MuseumInsideSystem";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -18,6 +19,7 @@ import {
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 import { getMuseumView } from "@/lib/museum/normalize";
 import { museumSlugMatches } from "@/lib/museum/presentation";
+import { getGenerativeStudyByObjectId } from "@/lib/museum/generative-studies";
 
 export async function getMuseumObjectMetadata(
   objectId: string
@@ -85,6 +87,10 @@ export async function MuseumObjectPage({
   const objectRecord = publication.artworks.find(
     (item) => item.id === artwork.objectId
   );
+  const generativeStudy = getGenerativeStudyByObjectId(artwork.objectId);
+  const heldPosition = generativeStudy?.heldPositions.find(
+    (position) => position.objectId === artwork.objectId
+  );
 
   return (
     <article className="tw-min-w-0">
@@ -121,6 +127,10 @@ export async function MuseumObjectPage({
       </header>
 
       <MuseumArtworkViewer artwork={artwork} />
+
+      {generativeStudy && heldPosition ? (
+        <MuseumInTheSystem study={generativeStudy} position={heldPosition} />
+      ) : null}
 
       <div className="tw-mt-12 tw-grid tw-gap-10 lg:tw-grid-cols-[minmax(0,1fr)_18rem] lg:tw-gap-16">
         <section aria-labelledby="museum-object-reading-title">

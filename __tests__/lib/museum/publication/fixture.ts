@@ -82,6 +82,16 @@ function objectPath(id: string): string {
 
 function buildBaseDocuments(): Record<string, string> {
   const documents: Record<string, string> = {};
+  for (const slug of [
+    "century",
+    "pre-process",
+    "phototaxis",
+    "923-empty-rooms",
+    "ex-nihilo-cosmos",
+  ]) {
+    documents[`notes/research/generative-systems/casey-reas/${slug}.md`] =
+      `# ${slug}\n\nGoverned technical study.`;
+  }
   for (const artwork of CASEY_OBJECTS) {
     documents[objectPath(artwork.id)] = JSON.stringify({
       envelope: { event_type: "MUSEUM_RECORD_COMMITTED" },

@@ -23,6 +23,7 @@ on:
           - media-readonly
           - network-open-data-readonly
           - museum-institutional-practice
+          - museum-inside-system
       release_train_id:
         description: Release Bus train id
         type: string
@@ -363,7 +364,7 @@ jobs:
                 *) echo "::warning::Museum classifier returned an invalid value; retaining Museum E2E." ;;
               esac
             else
-              echo "::warning::Unable to resolve the deployed change range; retaining Museum E2E."
+              echo "::warning::Unable to prove the deployed change range; retaining the Museum E2E pack."
             fi
           fi
           echo "required=$museum_required" >> "$GITHUB_OUTPUT"

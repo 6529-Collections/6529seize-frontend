@@ -437,6 +437,10 @@ describe("testing strategy CI plan", () => {
       path.join(process.cwd(), ".github/workflows/staging-e2e.yml"),
       "utf8"
     );
+    const museumChangeSetClassifier = fs.readFileSync(
+      path.join(process.cwd(), "scripts/museum-e2e-change-set.cjs"),
+      "utf8"
+    );
     const museumSpec = fs.readFileSync(
       path.join(
         process.cwd(),
@@ -455,16 +459,19 @@ describe("testing strategy CI plan", () => {
     expect(stagingWorkflow).toContain(
       "--exclude-pack museum-institutional-practice"
     );
-    expect(stagingWorkflow).toContain("git diff --no-renames --name-only -z");
+    expect(stagingWorkflow).toContain("scripts/museum-e2e-change-set.cjs");
+    expect(museumChangeSetClassifier).toContain(
+      '["diff", "--no-renames", "--name-only", "-z"'
+    );
     for (const ownedPath of [
-      "app/museum/network/*",
-      "components/museum/*",
-      "lib/museum/*",
+      '"app/museum/network/"',
+      '"components/museum/"',
+      '"lib/museum/"',
       "config/museumPublicationEnv.server.ts",
       "i18n/messages/museum.en-US.json",
-      "tests/museum/*",
+      '"tests/museum/"',
     ]) {
-      expect(stagingWorkflow).toContain(ownedPath);
+      expect(museumChangeSetClassifier).toContain(ownedPath);
     }
     expect(workflow).toContain(
       "playwright_museum_required: ${{ steps.plan_outputs.outputs.playwright_museum_required }}"
@@ -535,7 +542,7 @@ describe("testing strategy CI plan", () => {
           if: "matrix.lane == 'playwright-critical-shell'",
         }),
         expect.objectContaining({
-          name: "Run Network Museum institutional-practice Playwright pack",
+          name: "Run Network Museum Playwright packs",
           if: "matrix.lane == 'playwright-museum'",
         }),
       ])
