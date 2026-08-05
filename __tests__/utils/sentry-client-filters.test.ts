@@ -9249,4 +9249,58 @@ describe("sentry-client-filters", () => {
     // Assert
     expect(result).toBe(true);
   });
+
+  describe("Poper Blocker pre-ingest function normalization", () => {
+    it("filters the anonymous fetch sentinel", () => {
+      const event = createPoperBlockerOrphanFetchRejectionEvent({
+        frames: [
+          {
+            filename:
+              "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/dispatch/FetchHttpHandler.js",
+            function: "e.prototype.handle",
+            in_app: false,
+          },
+          {
+            filename: "app:///injectScriptAdjust.js",
+            abs_path: "app:///injectScriptAdjust.js",
+            function: "?",
+            lineno: 1,
+            colno: 4520,
+            in_app: true,
+          },
+          {
+            filename: "app:///injectScriptAdjust.js",
+            abs_path: "app:///injectScriptAdjust.js",
+            function: "VihJ",
+            lineno: 1,
+            colno: 3159,
+            in_app: true,
+          },
+        ],
+      });
+
+      expect(shouldFilterPoperBlockerOrphanFetchRejection(event)).toBe(true);
+    });
+
+    it("keeps the anonymous sentinel on the second signature frame", () => {
+      const event = createPoperBlockerOrphanFetchRejectionEvent({
+        frames: [
+          {
+            filename: "app:///injectScriptAdjust.js",
+            function: "window.fetch",
+            lineno: 1,
+            colno: 4520,
+          },
+          {
+            filename: "app:///injectScriptAdjust.js",
+            function: "?",
+            lineno: 1,
+            colno: 3159,
+          },
+        ],
+      });
+
+      expect(shouldFilterPoperBlockerOrphanFetchRejection(event)).toBe(false);
+    });
+  });
 });
