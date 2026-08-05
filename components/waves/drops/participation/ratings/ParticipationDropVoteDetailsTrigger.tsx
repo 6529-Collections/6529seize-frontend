@@ -302,7 +302,10 @@ export default function ParticipationDropVoteDetailsTrigger({
   } else {
     densityClassName = "tw-gap-1.5 tw-px-2 tw-py-1 tw-text-sm tw-leading-5";
   }
-  const triggerClassName = `tw-inline-flex tw-cursor-pointer tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-shadow-sm tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100 ${densityClassName}`;
+  const appearanceClassName = isGallery
+    ? "tw-rounded-md tw-border-white/[0.06] tw-bg-white/[0.05] tw-shadow-none desktop-hover:hover:tw-border-white/[0.09] desktop-hover:hover:tw-bg-white/[0.08] desktop-hover:hover:tw-text-iron-100"
+    : "tw-rounded-lg tw-border-iron-700 tw-bg-iron-900/40 tw-shadow-sm desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100";
+  const triggerClassName = `tw-inline-flex tw-cursor-pointer tw-items-center tw-border tw-border-solid tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 ${appearanceClassName} ${densityClassName}`;
   const chevronClassName = `tw-flex-shrink-0 tw-text-iron-500 tw-transition-transform tw-duration-200 ${
     isSmallDensity ? "tw-size-3" : "tw-size-3.5"
   } ${isOpen ? "tw-rotate-180" : ""}`;
@@ -320,10 +323,20 @@ export default function ParticipationDropVoteDetailsTrigger({
         onClick={toggleDetails}
         className={triggerClassName}
       >
-        <span className="tw-font-medium tw-text-iron-50">
+        <span
+          className={
+            isGallery
+              ? "tw-text-[10px] tw-font-semibold tw-text-iron-200"
+              : "tw-font-medium tw-text-iron-50"
+          }
+        >
           {formatNumberWithCommas(drop.raters_count)}
         </span>
-        <span className="tw-font-normal tw-text-iron-400">
+        <span
+          className={`tw-font-normal tw-text-iron-400 ${
+            isGallery ? "tw-text-[10px]" : ""
+          }`}
+        >
           {drop.raters_count === 1 ? "voter" : "voters"}
         </span>
         <ChevronDownIcon aria-hidden="true" className={chevronClassName} />

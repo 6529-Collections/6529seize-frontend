@@ -518,7 +518,6 @@ export default function MemePage({
                 fullWidth
               />
               <LatestDropNextMintSubscribe
-                appearance="quiet"
                 tokenId={nft.id}
                 statusSource="none"
               />
