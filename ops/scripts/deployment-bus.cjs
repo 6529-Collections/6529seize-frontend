@@ -2471,11 +2471,21 @@ function githubContext(env = process.env) {
   if (!env.GITHUB_TOKEN) {
     throw new Error("GITHUB_TOKEN must be set");
   }
+  const apiUrl = env.GITHUB_API_URL || "https://api.github.com";
+  let parsedApiUrl;
+  try {
+    parsedApiUrl = new URL(apiUrl);
+  } catch {
+    throw new Error("GITHUB_API_URL must be a valid HTTPS URL");
+  }
+  if (parsedApiUrl.protocol !== "https:") {
+    throw new Error("GITHUB_API_URL must be a valid HTTPS URL");
+  }
   return {
     owner,
     repo,
     token: env.GITHUB_TOKEN,
-    apiUrl: env.GITHUB_API_URL || "https://api.github.com",
+    apiUrl,
   };
 }
 
@@ -2529,6 +2539,7 @@ function githubRequestUrl(context, route) {
 function githubRequestInit(method, body, context, signal) {
   return {
     method,
+    redirect: "error",
     headers: {
       Accept: "application/vnd.github+json",
       Authorization: `Bearer ${context.token}`,

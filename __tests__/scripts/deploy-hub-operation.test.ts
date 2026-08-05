@@ -175,6 +175,7 @@ describe("Deploy Hub live workflow contracts", () => {
       ({ name }: { name?: string }) =>
         name === "Confirm frozen production candidate remains safe"
     );
+    expect(preflight).toBeDefined();
     expect(preflight.run).toContain("--current-production-sha");
     expect(preflight.run).toContain("--allow-rollback");
     expect(preflight.run).toContain("git ls-remote");
@@ -193,11 +194,26 @@ describe("Deploy Hub live workflow contracts", () => {
     expect(staging.jobs["staging-packs"].steps[0].run).toContain(
       '[[ "$AUTOMATIC_DEPLOY_RUN_ID" =~'
     );
+    const stagingPublisher = staging.jobs["publish-deploy-hub-result"];
+    expect(stagingPublisher).toBeDefined();
+    expect(stagingPublisher.needs).toEqual([
+      "baseline-adoption-decision",
+      "staging-packs",
+    ]);
+    expect(stagingPublisher.if).toContain("always()");
+    expect(stagingPublisher.permissions.statuses).toBe("write");
+    expect(stagingPublisher.steps[0].run).toContain(
+      'test "$GITHUB_ACTOR" = "github-actions[bot]"'
+    );
+    expect(stagingPublisher.steps[1].run).toContain(
+      "Staging E2E did not run to completion"
+    );
     const production = workflow("production-e2e.yml");
     expect(production.jobs.readonly.permissions.actions).toBe("read");
     const productionPublish = production.jobs.readonly.steps.find(
       ({ name }: { name?: string }) => name === "Publish Deploy Hub E2E result"
     );
+    expect(productionPublish).toBeDefined();
     expect(productionPublish.env.EXPECTED_SHA).toBe(
       "${{ inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha }}"
     );
@@ -700,6 +716,35 @@ describe("Deploy Hub operation clients", () => {
     ).rejects.toThrow("HTTP 503");
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
+
+  it("reports a production merge that is not based on the expected main", async () => {
+    const fetchImpl = jest
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ merged: true, sha: SHA_D }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          sha: SHA_D,
+          parents: [{ sha: SHA_E }, { sha: SHA_A }],
+        }),
+      });
+    const github = createGithubClient({
+      apiUrl: "https://api.github.com",
+      repository: EXPECTED_REPOSITORY,
+      token: "token",
+      fetchImpl,
+    });
+
+    await expect(
+      github.mergePullRequest(123, SHA_A, "operation-1", SHA_C)
+    ).resolves.toMatchObject({ merged: true, sha: SHA_D, base_matched: false });
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe("Deploy Hub production gates", () => {
@@ -820,6 +865,10 @@ describe("Deploy Hub production gates", () => {
         },
       ],
     }));
+    const mergePullRequest = jest.fn(async (pr: number) => {
+      mainSha = pr === 123 ? SHA_D : SHA_E;
+      return { merged: true, sha: mainSha };
+    });
     const github = {
       async getRef() {
         return { object: { sha: mainSha } };
@@ -829,10 +878,7 @@ describe("Deploy Hub production gates", () => {
       async getCombinedStatus() {
         return { statuses: [{ context: "DCO", state: "success" }] };
       },
-      async mergePullRequest(pr: number) {
-        mainSha = pr === 123 ? SHA_D : SHA_E;
-        return { merged: true, sha: mainSha };
-      },
+      mergePullRequest,
     };
 
     await expect(
@@ -850,6 +896,74 @@ describe("Deploy Hub production gates", () => {
     ).resolves.toEqual({ conclusion: "success", mainSha: SHA_E });
     expect(getPullRequest).toHaveBeenCalledTimes(2);
     expect(getCheckRuns).toHaveBeenCalledTimes(2);
+    expect(mergePullRequest).toHaveBeenNthCalledWith(
+      1,
+      123,
+      SHA_A,
+      "operation-1",
+      SHA_C
+    );
+    expect(mergePullRequest).toHaveBeenNthCalledWith(
+      2,
+      124,
+      SHA_B,
+      "operation-1",
+      SHA_D
+    );
+  });
+
+  it("stops production when GitHub merges against an advanced main", async () => {
+    const createCommitStatus = jest.fn();
+    const github = {
+      async getRef() {
+        return { object: { sha: SHA_C } };
+      },
+      async getPullRequest() {
+        return {
+          state: "open",
+          base: { ref: "main", sha: SHA_C },
+          head: { sha: SHA_A },
+          mergeable: true,
+          mergeable_state: "clean",
+        };
+      },
+      async getCheckRuns() {
+        return {
+          check_runs: [
+            {
+              name: "Installed app checks",
+              status: "completed",
+              conclusion: "success",
+            },
+          ],
+        };
+      },
+      async getCombinedStatus() {
+        return { statuses: [{ context: "DCO", state: "success" }] };
+      },
+      async mergePullRequest() {
+        return { merged: true, sha: SHA_D, base_matched: false };
+      },
+      createCommitStatus,
+    };
+
+    await expect(
+      mergeProductionRequests({
+        github,
+        requests: [request("production")],
+        operationId: "operation-1",
+        baseRef: "main",
+        runUrl: RUN_URL,
+        expectedMainSha: SHA_C,
+      })
+    ).resolves.toEqual({ conclusion: "failure", mainSha: SHA_D });
+    expect(createCommitStatus).toHaveBeenCalledWith(
+      SHA_A,
+      expect.objectContaining({
+        state: "error",
+        description: "Production stopped; main changed during PR #123 merge",
+      })
+    );
   });
 });
 

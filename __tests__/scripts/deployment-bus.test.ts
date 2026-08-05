@@ -2226,6 +2226,21 @@ describe("deployment bus manifest", () => {
     expect(String(fetchMock.mock.calls[0]?.[0] ?? "")).toContain(
       `/compare/${MAIN_SHA}...${descendantSha}`
     );
+    expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({ redirect: "error" });
+  });
+
+  it("rejects an insecure GitHub API URL before sending credentials", async () => {
+    const fetchMock = jest.fn();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+
+    await expect(
+      githubCommitIsAncestor(MAIN_SHA, STAGING_SHA, {
+        GITHUB_REPOSITORY: "6529-Collections/6529seize-frontend",
+        GITHUB_TOKEN: "test-token",
+        GITHUB_API_URL: "http://api.github.test",
+      })
+    ).rejects.toThrow("GITHUB_API_URL must be a valid HTTPS URL");
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("creates a GitHub Deployment with a static bus payload and returns the id", async () => {

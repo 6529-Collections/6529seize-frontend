@@ -121,6 +121,7 @@ cat > "$FAKE_PAYLOAD_PATH"
         ...process.env,
         DEFAULT_BRANCH: "main",
         DEPLOY_CONCLUSION: conclusion,
+        DEPLOY_DISPLAY_TITLE: "Manual staging deploy",
         DEPLOY_HEAD_BRANCH: "1a-staging",
         DEPLOY_HEAD_REPOSITORY: "6529-Collections/6529seize-frontend",
         DEPLOY_WORKFLOW_RUN_ID: "67890",
@@ -359,6 +360,7 @@ describe("baseline-adoption automatic E2E decision client", () => {
     expect(Object.keys(parsed.jobs)).toEqual([
       "baseline-adoption-decision",
       "staging-packs",
+      "publish-deploy-hub-result",
     ]);
     expect(parsed.jobs["staging-packs"].needs).toBe(
       "baseline-adoption-decision"
@@ -437,6 +439,7 @@ describe("baseline-adoption automatic E2E decision client", () => {
       ref: "main",
       inputs: {
         automatic_deploy_run_id: "67890",
+        deploy_hub_operation_id: "",
         pack: "all",
       },
     });

@@ -88,8 +88,19 @@ async function mergeProductionRequests({
     const merged = await github.mergePullRequest(
       request.pr,
       request.sha,
-      operationId
+      operationId,
+      expectedCurrentMainSha
     );
+    if (merged.base_matched === false && SHA_PATTERN.test(merged.sha ?? "")) {
+      await publishStatus(
+        github,
+        requests,
+        runUrl,
+        "error",
+        `Production stopped; main changed during PR #${request.pr} merge`
+      );
+      return { conclusion: "failure", mainSha: merged.sha };
+    }
     if (!merged.merged || !SHA_PATTERN.test(merged.sha ?? "")) {
       await publishStatus(
         github,

@@ -9,6 +9,7 @@ const REF_PATTERN = /^[A-Za-z0-9._/-]{1,255}$/;
 const ACTOR_PATTERN = /^[A-Za-z0-9-]{1,39}$/;
 const GIT_TIMEOUT_MILLISECONDS = 60_000;
 const GIT_MAX_BUFFER_BYTES = 10 * 1024 * 1024;
+const INVALID_GITHUB_SHA = "GitHub SHA is invalid.";
 const WORKFLOWS = new Set([
   "build-upload-deploy-prod.yml",
   "deploy-hub-production.yml",
@@ -88,6 +89,41 @@ async function githubRequest({
   throw new Error("GitHub request retry budget was exhausted.");
 }
 
+async function mergeExactPullRequest(
+  request,
+  pr,
+  sha,
+  operationId,
+  expectedMainSha
+) {
+  assert(Number.isInteger(pr) && pr > 0, "GitHub PR number is invalid.");
+  assert(SHA_PATTERN.test(sha), INVALID_GITHUB_SHA);
+  assert(
+    OPERATION_ID_PATTERN.test(operationId),
+    "GitHub operation ID is invalid."
+  );
+  const merged = await request(["pulls", String(pr), "merge"], {
+    method: "PUT",
+    body: {
+      sha,
+      merge_method: "merge",
+      commit_title: `Deploy Hub ${operationId}: merge frontend PR #${pr}`,
+    },
+  });
+  if (expectedMainSha === undefined || merged?.merged !== true) return merged;
+  assert(SHA_PATTERN.test(expectedMainSha), INVALID_GITHUB_SHA);
+  assert(SHA_PATTERN.test(merged.sha), INVALID_GITHUB_SHA);
+  const commit = await request(["commits", merged.sha]);
+  // GitHub's merge endpoint only supports a head-SHA precondition. The exact
+  // merge parents are the fail-closed base binding before production continues.
+  return {
+    ...merged,
+    base_matched:
+      commit?.parents?.[0]?.sha === expectedMainSha &&
+      commit?.parents?.[1]?.sha === sha,
+  };
+}
+
 function createGithubClient({
   apiUrl,
   repository,
@@ -115,7 +151,7 @@ function createGithubClient({
   }
 
   function validSha(sha) {
-    assert(SHA_PATTERN.test(sha), "GitHub SHA is invalid.");
+    assert(SHA_PATTERN.test(sha), INVALID_GITHUB_SHA);
     return sha;
   }
 
@@ -229,20 +265,8 @@ function createGithubClient({
       );
     },
     listOpenPullRequests,
-    mergePullRequest: (pr, sha, operationId) => {
-      assert(
-        OPERATION_ID_PATTERN.test(operationId),
-        "GitHub operation ID is invalid."
-      );
-      return request(["pulls", validPr(pr), "merge"], {
-        method: "PUT",
-        body: {
-          sha: validSha(sha),
-          merge_method: "merge",
-          commit_title: `Deploy Hub ${operationId}: merge frontend PR #${pr}`,
-        },
-      });
-    },
+    mergePullRequest: (pr, sha, operationId, expectedMainSha) =>
+      mergeExactPullRequest(request, pr, sha, operationId, expectedMainSha),
   };
 }
 
