@@ -271,6 +271,49 @@ it("keeps the worth checking out info tooltip available on touch devices", () =>
   ).not.toBeInTheDocument();
 });
 
+it("keeps the overlaid touch score inside the wave navigation link", () => {
+  mockIsTouchDevice = true;
+  const scoredWave = createMockMinimalWave({
+    id: "h-score",
+    name: "Touch Discovery",
+    sidebarSection: "highly-rated",
+    waveScore: {
+      visibility_score: 82,
+      quality_score: 86,
+      hotness_score: 75,
+      rep_sort_score: 64,
+    } as any,
+  });
+
+  renderWebWaves({ waves: [scoredWave] });
+
+  const waveLink = screen.getByRole("link", {
+    name: "Open Touch Discovery, score 82",
+  });
+  const scoreBadgeText = screen.getByText("82", { selector: "text" });
+  const scoreBadge = scoreBadgeText.closest("span");
+
+  expect(waveLink).toHaveClass(
+    "tw-relative",
+    "tw-size-11",
+    "tw-cursor-pointer"
+  );
+  expect(scoreBadgeText.closest("a")).toBe(waveLink);
+  expect(scoreBadge).toHaveClass(
+    "tw-absolute",
+    "-tw-bottom-1.5",
+    "-tw-right-2",
+    "tw-h-6",
+    "tw-w-7",
+    "tw-cursor-pointer"
+  );
+
+  fireEvent.click(scoreBadgeText);
+  expect(
+    screen.queryByRole("dialog", { name: "Wave score details" })
+  ).not.toBeInTheDocument();
+});
+
 it("hides the worth checking out info tooltip when no profile is connected", () => {
   mockAuthResult = {
     connectedProfile: null,
