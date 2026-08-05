@@ -86,6 +86,7 @@ test.describe("About Pages @smoke @medium @large", () => {
   test("should keep GDRC in view beside the narrow desktop menu", async ({
     page,
   }) => {
+    // Reproduce the reported failure inside the narrow desktop sidebar band.
     await page.setViewportSize({ width: 1054, height: 900 });
     await page.goto("/about/gdrc1", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
@@ -95,9 +96,11 @@ test.describe("About Pages @smoke @medium @large", () => {
     await page.getByRole("button", { name: "Toggle right sidebar" }).click();
     await expect(layoutMain).toHaveAttribute("data-offcanvas", "true");
 
+    const gdrcArticle = layoutMain.getByRole("article");
+    await expect(gdrcArticle).toHaveCount(1);
     await expect
       .poll(() =>
-        page.locator("article").evaluate((article) => {
+        gdrcArticle.evaluate((article) => {
           const articleRight = article.getBoundingClientRect().right;
           return articleRight <= document.documentElement.clientWidth;
         })
