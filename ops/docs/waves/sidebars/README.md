@@ -32,8 +32,8 @@ Route scope:
 ### Left Sidebar and Lists
 
 - [Wave List Navigation](feature-wave-list-navigation.md):
-  row open/clear behavior, unread `divider` routing, and stale `wave` query
-  cleanup.
+  row open/clear behavior, `Worth Checking Out` avatar and score controls,
+  unread `divider` routing, and stale `wave` query cleanup.
 - [Brain Wave Row Metadata and Last Drop Indicator](feature-brain-list-last-drop-indicator.md):
   canonical owner for row-name labels, web tooltip rules, `Last drop` timestamp
   source, live refresh, and sorting behavior across wave and DM lists.

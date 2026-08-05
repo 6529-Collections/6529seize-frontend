@@ -2013,7 +2013,8 @@
         "Waves are the main social threads for conversations, drops, reactions, voting, and wave-specific activity.",
         "Standard wave threads live at /waves/{waveId}; direct messages live at /messages/{waveId}.",
         "Public wave content can remain readable for authenticated wallets without a profile, but posting and other participation actions require profile setup.",
-        "The Waves panel includes wave lists, pinned waves, highly rated waves, a Discover Waves link, and create controls."
+        "The Waves panel includes wave lists, pinned waves, highly rated waves, a Discover Waves link, and create controls.",
+        "In Worth Checking Out, each avatar is a full wave navigation link, while the separate score shield below it opens score details without covering the avatar."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves?create=wave", "/messages"],

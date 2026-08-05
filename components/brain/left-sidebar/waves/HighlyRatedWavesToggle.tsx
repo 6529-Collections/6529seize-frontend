@@ -262,7 +262,7 @@ function HighlyRatedWavePreviewScoreBadge({
       aria-label={ariaLabel}
       onClick={onClick}
       onMouseEnter={onMouseEnter}
-      className={`tw-absolute ${isTouchPreview ? "-tw-bottom-1.5 -tw-right-2" : "-tw-bottom-1 -tw-right-1.5"} tw-z-20 tw-inline-flex tw-h-6 tw-w-7 tw-cursor-help tw-appearance-none tw-items-center tw-justify-center tw-overflow-visible tw-border-0 tw-bg-transparent tw-p-0 tw-drop-shadow-[0_5px_9px_rgba(0,0,0,0.50)] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-1 focus-visible:tw-outline-primary-400`}
+      className={`tw-mt-1 tw-inline-flex ${isTouchPreview ? "tw-h-7 tw-w-11" : "tw-h-6 tw-w-8"} tw-cursor-pointer tw-appearance-none tw-items-center tw-justify-center tw-overflow-visible tw-border-0 tw-bg-transparent tw-p-0 tw-drop-shadow-[0_5px_9px_rgba(0,0,0,0.50)] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-1 focus-visible:tw-outline-primary-400`}
     >
       <svg
         aria-hidden="true"
@@ -368,7 +368,7 @@ function HighlyRatedWavePreviewLink({
       waveScore={wave.waveScore}
     >
       <span
-        className={`tw-relative tw-flex ${isTouchPreview ? "tw-size-11" : "tw-size-8"} tw-flex-shrink-0 tw-items-center tw-justify-center`}
+        className={`tw-flex ${isTouchPreview ? "tw-w-11" : "tw-w-8"} tw-flex-shrink-0 tw-flex-col tw-items-center`}
       >
         <Link
           href={item.href}
@@ -376,7 +376,7 @@ function HighlyRatedWavePreviewLink({
           aria-label={linkLabel}
           onClick={handleLinkClick}
           {...(item.onMouseEnter ? { onMouseEnter: item.onMouseEnter } : {})}
-          className={`tw-group/preview tw-flex ${isTouchPreview ? "tw-size-11" : "tw-size-8"} tw-items-center tw-justify-center tw-rounded-full tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
+          className={`tw-group/preview tw-flex ${isTouchPreview ? "tw-size-11" : "tw-size-8"} tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
         >
           <WaveAvatar
             dropBadgePlacement="bottom-left"

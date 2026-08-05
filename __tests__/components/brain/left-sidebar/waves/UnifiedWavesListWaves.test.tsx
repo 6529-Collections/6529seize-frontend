@@ -437,24 +437,26 @@ it("uses highly rated preview score semantics instead of unread badges", () => {
     />
   );
 
-  expect(
-    screen.getByRole("link", { name: "Open Scored Discovery, score 93" })
-  ).toBeInTheDocument();
+  const waveLink = screen.getByRole("link", {
+    name: "Open Scored Discovery, score 93",
+  });
+  expect(waveLink).toHaveClass("tw-cursor-pointer");
   const scoreDetailsButton = screen.getByRole("button", {
     name: "Open Scored Discovery score details, score 93",
   });
   const scoreBadgeText = screen.getByText("93", { selector: "text" });
   expect(scoreBadgeText).toBeInTheDocument();
   expect(scoreBadgeText.closest("button")).toBe(scoreDetailsButton);
-  expect(scoreDetailsButton).toHaveClass("-tw-bottom-1");
-  expect(scoreDetailsButton).toHaveClass("-tw-right-1.5");
-  expect(scoreDetailsButton).toHaveClass("tw-h-6");
-  expect(scoreDetailsButton).toHaveClass("tw-w-7");
+  expect(scoreDetailsButton).toHaveClass(
+    "tw-mt-1",
+    "tw-h-6",
+    "tw-w-8",
+    "tw-cursor-pointer"
+  );
+  expect(scoreDetailsButton).not.toHaveClass("tw-absolute", "tw-cursor-help");
   expect(scoreBadgeText.closest("svg")).toHaveClass("tw-h-5");
   expect(scoreBadgeText.closest("svg")).toHaveClass("tw-w-6");
-  fireEvent.click(
-    screen.getByRole("link", { name: "Open Scored Discovery, score 93" })
-  );
+  fireEvent.click(waveLink);
   expect(
     screen.queryByRole("dialog", { name: "Wave score details" })
   ).not.toBeInTheDocument();
