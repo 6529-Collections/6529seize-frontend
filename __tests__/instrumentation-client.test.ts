@@ -268,6 +268,8 @@ describe("instrumentation-client", () => {
   ];
   const webkitExtensionMessagingTabNotFoundMessage =
     "Invalid call to runtime.sendMessage(). Tab not found.";
+  const injectedIosAutoplayNotAllowedMessage =
+    "The request is not allowed by the user agent or the platform in the current context, possibly because the user denied permission.";
   const rainbowKitNotFoundMessage = "not found rainbowkit";
   const nativeJsonStringifyFrame = {
     filename: "[native code]",
@@ -574,6 +576,69 @@ describe("instrumentation-client", () => {
           stacktrace: {
             frames,
           },
+        },
+      ],
+    },
+  });
+
+  const createInjectedIosAutoplayFrames = (documentPath = "app:///") => [
+    {
+      filename: documentPath,
+      function: "global code",
+      lineno: 27,
+      colno: 5,
+    },
+    {
+      filename: documentPath,
+      function: "?",
+      lineno: 4,
+      colno: 32,
+    },
+    {
+      filename: "[native code]",
+      function: "forEach",
+    },
+    {
+      filename: documentPath,
+      function: "?",
+      lineno: 6,
+      colno: 21,
+    },
+    {
+      filename: "[native code]",
+      function: "play",
+    },
+  ];
+
+  const createInjectedIosAutoplayNotAllowedEvent = (
+    valueOverrides: Record<string, unknown> = {},
+    eventOverrides: Record<string, unknown> = {},
+    frames: Array<Record<string, unknown>> = createInjectedIosAutoplayFrames()
+  ) => ({
+    contexts: {
+      browser: {
+        name: "Mobile Safari",
+        version: "17.4.1",
+      },
+      os: {
+        name: "iOS",
+        version: "17.4.1",
+      },
+    },
+    ...eventOverrides,
+    exception: {
+      values: [
+        {
+          type: "NotAllowedError",
+          value: injectedIosAutoplayNotAllowedMessage,
+          mechanism: {
+            type: browserUnhandledRejectionMechanismType,
+            handled: false,
+          },
+          stacktrace: {
+            frames,
+          },
+          ...valueOverrides,
         },
       ],
     },
@@ -1790,6 +1855,22 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
+  it.each(["app:///", "app:///waves/11111111-2222-4333-8444-555555555555"])(
+    "drops the exact client-shaped injected iOS autoplay rejection from %s",
+    (path) => {
+      const beforeSend = loadBeforeSend();
+      const event = createInjectedIosAutoplayNotAllowedEvent(
+        {},
+        {},
+        createInjectedIosAutoplayFrames(path)
+      );
+
+      const result = beforeSend(event);
+
+      expect(result).toBeNull();
+    }
+  );
+
   it.each([
     ["Instagram 439.x", [5421, 3712, 1142] as const, "app:///"],
     ["Instagram 438.x", [5517, 3808, 1208] as const, "app:///profile/rep"],
@@ -1805,6 +1886,152 @@ describe("instrumentation-client", () => {
       expect(result).toBeNull();
     }
   );
+
+  it.each<
+    [
+      string,
+      Record<string, unknown>,
+      Record<string, unknown>,
+      Array<Record<string, unknown>> | undefined,
+    ]
+  >([
+    [
+      "an unrelated permission message",
+      { value: "The operation is not allowed in the current context." },
+      {},
+      undefined,
+    ],
+    ["a different exception type", { type: "Error" }, {}, undefined],
+    [
+      "a different mechanism",
+      {
+        mechanism: {
+          type: "auto.browser.global_handlers.onerror",
+          handled: false,
+        },
+      },
+      {},
+      undefined,
+    ],
+    [
+      "a handled rejection",
+      {
+        mechanism: {
+          type: browserUnhandledRejectionMechanismType,
+          handled: true,
+        },
+      },
+      {},
+      undefined,
+    ],
+    [
+      "a non-iOS browser context",
+      {},
+      {
+        contexts: {
+          browser: { name: "Chrome" },
+          os: { name: "Android" },
+        },
+      },
+      undefined,
+    ],
+    [
+      "an application chunk frame",
+      {},
+      {},
+      [
+        {
+          filename:
+            "webpack-internal:///(app-pages-browser)/./components/media/VideoPlayer.tsx",
+          abs_path:
+            "webpack-internal:///(app-pages-browser)/./components/media/VideoPlayer.tsx",
+          function: "playVideo",
+          lineno: 27,
+          colno: 5,
+        },
+        ...createInjectedIosAutoplayFrames().slice(1),
+      ],
+    ],
+    [
+      "a conflicting absolute path",
+      {},
+      {},
+      createInjectedIosAutoplayFrames().map((frame, index) =>
+        index === 0
+          ? { ...frame, abs_path: "app:///components/media/VideoPlayer.tsx" }
+          : frame
+      ),
+    ],
+    [
+      "a named document callback",
+      {},
+      {},
+      createInjectedIosAutoplayFrames().map((frame, index) =>
+        index === 1 ? { ...frame, function: "playVideo" } : frame
+      ),
+    ],
+    [
+      "a changed document coordinate",
+      {},
+      {},
+      createInjectedIosAutoplayFrames().map((frame, index) =>
+        index === 1 ? { ...frame, lineno: 5 } : frame
+      ),
+    ],
+    [
+      "an extra frame",
+      {},
+      {},
+      [
+        ...createInjectedIosAutoplayFrames(),
+        { filename: "[native code]", function: "dispatchEvent" },
+      ],
+    ],
+    [
+      "a different document route",
+      {},
+      {},
+      createInjectedIosAutoplayFrames("app:///notifications"),
+    ],
+  ])("keeps the iOS autoplay near miss with %s", (_, value, event, frames) => {
+    const beforeSend = loadBeforeSend();
+    const result = beforeSend(
+      createInjectedIosAutoplayNotAllowedEvent(value, event, frames)
+    );
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps mixed events containing the injected autoplay rejection", () => {
+    const beforeSend = loadBeforeSend();
+    const autoplayEvent = createInjectedIosAutoplayNotAllowedEvent();
+    const event = {
+      ...autoplayEvent,
+      exception: {
+        values: [
+          ...autoplayEvent.exception.values,
+          {
+            type: "TypeError",
+            value: "Application media state failed.",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./components/media/VideoPlayer.tsx",
+                  function: "updatePlaybackState",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
 
   it("keeps the Instagram 439.x bridge shape with a changed coordinate", () => {
     const beforeSend = loadBeforeSend();

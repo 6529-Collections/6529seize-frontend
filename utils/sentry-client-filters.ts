@@ -27,6 +27,9 @@ export {
   shouldFilterTwitterConfigReferenceError,
 } from "./sentry-client-filters/errors";
 export {
+  shouldFilterInjectedIosAutoplayNotAllowedError,
+} from "./sentry-client-filters/media";
+export {
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
 } from "./sentry-client-filters/react-dom";
