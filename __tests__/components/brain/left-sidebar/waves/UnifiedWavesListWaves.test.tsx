@@ -407,7 +407,7 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   expect(ref.current?.sentinelRef.current).toBeInstanceOf(HTMLElement);
 });
 
-it("uses highly rated preview score semantics instead of unread badges", () => {
+it("keeps the overlaid score inside the wave link and opens details on hover", async () => {
   const latestDropTimestamp = Date.now() - 60 * 60 * 1000;
 
   render(
@@ -440,29 +440,32 @@ it("uses highly rated preview score semantics instead of unread badges", () => {
   const waveLink = screen.getByRole("link", {
     name: "Open Scored Discovery, score 93",
   });
-  expect(waveLink).toHaveClass("tw-cursor-pointer");
-  const scoreDetailsButton = screen.getByRole("button", {
-    name: "Open Scored Discovery score details, score 93",
-  });
-  const scoreBadgeText = screen.getByText("93", { selector: "text" });
-  expect(scoreBadgeText).toBeInTheDocument();
-  expect(scoreBadgeText.closest("button")).toBe(scoreDetailsButton);
-  expect(scoreDetailsButton).toHaveClass(
-    "tw-mt-1",
-    "tw-h-6",
-    "tw-w-8",
+  expect(waveLink).toHaveClass(
+    "tw-relative",
+    "tw-size-8",
     "tw-cursor-pointer"
   );
-  expect(scoreDetailsButton).not.toHaveClass("tw-absolute", "tw-cursor-help");
+  const scoreBadgeText = screen.getByText("93", { selector: "text" });
+  const scoreBadge = scoreBadgeText.closest("span");
+  expect(scoreBadgeText).toBeInTheDocument();
+  expect(scoreBadgeText.closest("a")).toBe(waveLink);
+  expect(scoreBadge).toHaveClass(
+    "tw-absolute",
+    "-tw-bottom-1",
+    "-tw-right-1.5",
+    "tw-h-6",
+    "tw-w-7",
+    "tw-cursor-pointer"
+  );
   expect(scoreBadgeText.closest("svg")).toHaveClass("tw-h-5");
   expect(scoreBadgeText.closest("svg")).toHaveClass("tw-w-6");
-  fireEvent.click(waveLink);
+  fireEvent.click(scoreBadgeText);
   expect(
     screen.queryByRole("dialog", { name: "Wave score details" })
   ).not.toBeInTheDocument();
-  fireEvent.click(scoreDetailsButton);
+  fireEvent.mouseEnter(scoreBadgeText);
   expect(
-    screen.getByRole("dialog", { name: "Wave score details" })
+    await screen.findByRole("dialog", { name: "Wave score details" })
   ).toBeInTheDocument();
   expect(screen.getByText("Scored Discovery")).toBeInTheDocument();
   expect(screen.getByText("Last message")).toBeInTheDocument();
@@ -489,7 +492,7 @@ it("uses highly rated preview score semantics instead of unread badges", () => {
   );
 });
 
-it("uses no-message copy in the combined highly rated score card", () => {
+it("uses no-message copy in the combined highly rated score card", async () => {
   render(
     <UnifiedWavesListWaves
       waves={[
@@ -511,19 +514,19 @@ it("uses no-message copy in the combined highly rated score card", () => {
     />
   );
 
-  fireEvent.click(
-    screen.getByRole("button", {
-      name: "Open Quiet Discovery score details, score 88",
+  fireEvent.mouseEnter(
+    screen.getByRole("link", {
+      name: "Open Quiet Discovery, score 88",
     })
   );
   expect(
-    screen.getByRole("dialog", { name: "Wave score details" })
+    await screen.findByRole("dialog", { name: "Wave score details" })
   ).toBeInTheDocument();
   expect(screen.getByText("Quiet Discovery")).toBeInTheDocument();
   expect(screen.getByText("No messages yet")).toBeInTheDocument();
 });
 
-it("opens the combined highly rated score card from keyboard score activation", async () => {
+it("opens the combined highly rated score card from the focused wave link", async () => {
   const user = userEvent.setup();
   render(
     <UnifiedWavesListWaves
@@ -547,11 +550,11 @@ it("opens the combined highly rated score card from keyboard score activation", 
   );
 
   screen
-    .getByRole("button", {
-      name: "Open Keyboard Discovery score details, score 86",
+    .getByRole("link", {
+      name: "Open Keyboard Discovery, score 86",
     })
     .focus();
-  await user.keyboard("{Enter}");
+  await user.keyboard("{ArrowDown}");
 
   expect(
     await screen.findByRole("dialog", { name: "Wave score details" })

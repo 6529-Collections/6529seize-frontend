@@ -2010,7 +2010,7 @@
         "Standard wave threads live at /waves/{waveId}; direct messages live at /messages/{waveId}.",
         "Public wave content can remain readable for authenticated wallets without a profile, but posting and other participation actions require profile setup.",
         "The Waves panel includes wave lists, pinned waves, highly rated waves, a Discover Waves link, and create controls.",
-        "In Worth Checking Out, each avatar is a full wave navigation link, while the separate score shield below it opens score details without covering the avatar."
+        "In Worth Checking Out, each avatar and its overlaid score shield form one wave navigation link; hovering or focusing the combined link shows score details."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves?create=wave", "/messages"],

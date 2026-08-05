@@ -271,7 +271,7 @@ it("keeps the worth checking out info tooltip available on touch devices", () =>
   ).not.toBeInTheDocument();
 });
 
-it("keeps touch wave navigation separate from score details", () => {
+it("keeps the overlaid touch score inside the wave navigation link", () => {
   mockIsTouchDevice = true;
   const scoredWave = createMockMinimalWave({
     id: "h-score",
@@ -290,28 +290,28 @@ it("keeps touch wave navigation separate from score details", () => {
   const waveLink = screen.getByRole("link", {
     name: "Open Touch Discovery, score 82",
   });
-  const scoreDetailsButton = screen.getByRole("button", {
-    name: "Open Touch Discovery score details, score 82",
-  });
+  const scoreBadgeText = screen.getByText("82", { selector: "text" });
+  const scoreBadge = scoreBadgeText.closest("span");
 
-  expect(waveLink).toHaveClass("tw-size-11", "tw-cursor-pointer");
-  expect(scoreDetailsButton).toHaveClass(
-    "tw-mt-1",
-    "tw-h-7",
-    "tw-w-11",
+  expect(waveLink).toHaveClass(
+    "tw-relative",
+    "tw-size-11",
     "tw-cursor-pointer"
   );
-  expect(scoreDetailsButton).not.toHaveClass("tw-absolute");
+  expect(scoreBadgeText.closest("a")).toBe(waveLink);
+  expect(scoreBadge).toHaveClass(
+    "tw-absolute",
+    "-tw-bottom-1.5",
+    "-tw-right-2",
+    "tw-h-6",
+    "tw-w-7",
+    "tw-cursor-pointer"
+  );
 
-  fireEvent.click(waveLink);
+  fireEvent.click(scoreBadgeText);
   expect(
     screen.queryByRole("dialog", { name: "Wave score details" })
   ).not.toBeInTheDocument();
-
-  fireEvent.click(scoreDetailsButton);
-  expect(
-    screen.getByRole("dialog", { name: "Wave score details" })
-  ).toBeInTheDocument();
 });
 
 it("hides the worth checking out info tooltip when no profile is connected", () => {
