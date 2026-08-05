@@ -341,11 +341,11 @@ export default function QuickDirectMessages() {
                 : t(locale, "quickDm.openButtonAriaLabel")
             }
             title={t(locale, "quickDm.openButtonTitle")}
-            className="tw-relative tw-flex tw-size-14 tw-appearance-none tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-900 tw-p-0 tw-text-iron-200 tw-shadow-[0_18px_50px_rgba(0,0,0,0.48)] tw-ring-1 tw-ring-iron-700 tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 active:tw-scale-95 desktop-hover:hover:tw-scale-105 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
+            className="tw-relative tw-flex tw-size-14 tw-appearance-none tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-900 tw-p-0 tw-text-iron-200 tw-shadow-[0_18px_50px_rgba(0,0,0,0.48)] tw-ring-1 tw-ring-white/15 tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 active:tw-scale-95 desktop-hover:hover:tw-scale-105 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
           >
             <ChatBubbleLeftRightIcon className="tw-size-6" aria-hidden="true" />
             {hasUnread && (
-              <span className="tw-absolute tw-right-[-2px] tw-top-[-2px] tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-600 tw-px-1 tw-text-[10px] tw-font-medium tw-leading-none tw-text-white tw-shadow-sm tw-ring-1 tw-ring-black">
+              <span className="tw-absolute tw-right-[-2px] tw-top-[-2px] tw-flex tw-h-5 tw-min-w-5 tw-items-center tw-justify-center tw-rounded-full tw-bg-red tw-px-1.5 tw-text-[11px] tw-font-semibold tw-text-white tw-ring-2 tw-ring-black">
                 {displayUnreadCount}
               </span>
             )}
