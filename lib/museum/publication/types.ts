@@ -15,6 +15,7 @@ export interface MuseumRightsCredit {
   readonly creditLine: string;
   readonly licenseLabel: string | null;
   readonly licenseUrl: string | null;
+  readonly rightsExpressionId: string | null;
   readonly sourcePath: string;
 }
 
@@ -73,7 +74,10 @@ export type MuseumPublicDocumentKind =
   | "institutional_practice_adjacent"
   | "institution_profile"
   | "institutional_practice_source_register"
-  | "scholarship_editorial_standard";
+  | "scholarship_editorial_standard"
+  | "rights_handbook"
+  | "rights_artist_guide"
+  | "rights_collector_guide";
 
 export interface MuseumPublicDocument {
   readonly id: string;
@@ -131,6 +135,79 @@ export interface MuseumInstitutionalPractice {
   readonly adjacentPractice: MuseumPublicDocument;
   readonly editorialStandard: MuseumPublicDocument;
   readonly sourceRegister: MuseumPublicDocument;
+}
+
+export type MuseumRightsUseStatus =
+  | "allowed"
+  | "allowed_with_conditions"
+  | "not_licensed"
+  | "status_only"
+  | "case_by_case";
+
+export type MuseumRightsAction =
+  | "display_the_work"
+  | "publish_online"
+  | "publish_in_print"
+  | "make_preservation_copies"
+  | "share_an_adaptation"
+  | "make_commercial_use";
+
+export interface MuseumRightsLegalCode {
+  readonly path: string;
+  readonly sourceUri: string;
+  readonly publicationUri: string;
+  readonly sha256: MuseumSha256;
+  readonly text: string;
+}
+
+export interface MuseumRightsExpression {
+  readonly id: string;
+  readonly label: string;
+  readonly shortLabel: string;
+  readonly group:
+    | "creative_commons_license"
+    | "creative_commons_tool"
+    | "rights_statement"
+    | "copyright_case"
+    | "custom_license";
+  readonly instrumentKind:
+    | "public_license"
+    | "public_domain_dedication"
+    | "public_domain_mark"
+    | "descriptive_status"
+    | "no_public_license"
+    | "custom_terms";
+  readonly version: string | null;
+  readonly spdxId: string | null;
+  readonly canonicalUri: string | null;
+  readonly summary: string;
+  readonly museumCan: readonly string[];
+  readonly conditions: readonly string[];
+  readonly boundaries: readonly string[];
+  readonly visitorNote: string;
+  readonly useMatrix: Readonly<
+    Record<MuseumRightsAction, MuseumRightsUseStatus>
+  >;
+  readonly legalCode: MuseumRightsLegalCode | null;
+}
+
+export interface MuseumRightsObjectAssignment {
+  readonly objectId: string;
+  readonly expressionId: string;
+  readonly rightsRecordPath: string;
+  readonly evidenceBasis: string;
+}
+
+export interface MuseumRightsHandbook {
+  readonly introduction: MuseumPublicDocument;
+  readonly artistGuide: MuseumPublicDocument;
+  readonly collectorGuide: MuseumPublicDocument;
+  readonly expressions: readonly MuseumRightsExpression[];
+  readonly useStatusDefinitions: Readonly<
+    Record<MuseumRightsUseStatus, string>
+  >;
+  readonly objectAssignments: readonly MuseumRightsObjectAssignment[];
+  readonly sourcePaths: readonly string[];
 }
 
 export interface MuseumArtist {
@@ -207,12 +284,13 @@ export interface MuseumPublication {
   readonly artworks: readonly MuseumArtwork[];
   readonly documents: readonly MuseumPublicDocument[];
   readonly institutionalPractice: MuseumInstitutionalPractice;
+  readonly rightsHandbook: MuseumRightsHandbook;
 }
 
 export interface MuseumSourceDocument {
   readonly path: string;
   readonly sha256: MuseumSha256 | null;
-  readonly mediaType: "application/json" | "text/markdown";
+  readonly mediaType: "application/json" | "text/markdown" | "text/plain";
   readonly text: string;
 }
 

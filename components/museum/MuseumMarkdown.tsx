@@ -104,6 +104,20 @@ const CURATORIAL_PUBLICATION_STANDARD_PATH =
   "docs/curatorial-publication-standard.md";
 const INSTITUTIONAL_SOURCE_INVENTORY_PATH =
   "docs/institutional-source-inventory.json";
+const RIGHTS_ROUTE_BY_PATH = new Map([
+  [
+    "records/institutional-practice/rights-and-licenses.md",
+    "/museum/network/rights",
+  ],
+  [
+    "records/institutional-practice/rights-for-artists.md",
+    "/museum/network/rights/artists",
+  ],
+  [
+    "records/institutional-practice/rights-for-collectors.md",
+    "/museum/network/rights/collectors",
+  ],
+]);
 
 function institutionalPracticeRoute(repositoryPath: string): string | null {
   if (repositoryPath === INSTITUTIONAL_PRACTICE_STUDY_PATH) {
@@ -127,6 +141,10 @@ function institutionalPracticeRoute(repositoryPath: string): string | null {
 
 function publicMuseumRoute(url: string): string | null {
   const withoutFragment = url.split("#", 1)[0] ?? "";
+  const rightsRoute = RIGHTS_ROUTE_BY_PATH.get(withoutFragment);
+  if (rightsRoute !== undefined) {
+    return rightsRoute;
+  }
   const practiceRoute = institutionalPracticeRoute(withoutFragment);
   if (practiceRoute !== null) {
     return practiceRoute;

@@ -826,9 +826,9 @@ describe("E2E runner CLI resolution", () => {
   });
 
   it.each([
-    ["staging", "post-deploy", 14],
+    ["staging", "post-deploy", 15],
     ["production", "cron", 10],
-    ["production", "post-deploy", 13],
+    ["production", "post-deploy", 14],
   ])(
     "lists %s/%s as a non-empty deterministic pack set",
     (env, trigger, count) => {
@@ -902,7 +902,7 @@ describe("E2E runner CLI resolution", () => {
   it("classifies every dedicated Museum pack across local and deployed environments", () => {
     const museumPacks = PACKS.filter((pack) => pack.changeScope === "museum");
 
-    expect(museumPacks).toHaveLength(6);
+    expect(museumPacks).toHaveLength(9);
     expect(
       museumPacks.every(
         (pack) =>
@@ -912,12 +912,12 @@ describe("E2E runner CLI resolution", () => {
     ).toBe(true);
     expect(
       museumPacks.filter((pack) => pack.environments[0] === "local")
-    ).toHaveLength(2);
+    ).toHaveLength(3);
     expect(
       museumPacks.filter((pack) => pack.environments[0] === "staging")
-    ).toHaveLength(2);
+    ).toHaveLength(3);
     expect(
       museumPacks.filter((pack) => pack.environments[0] === "production")
-    ).toHaveLength(2);
+    ).toHaveLength(3);
   });
 });
