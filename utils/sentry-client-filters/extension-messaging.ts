@@ -78,14 +78,18 @@ function hasExtensionMessagingConnectionFailureMessage(
   event: SentryClientEvent,
   hint?: SentryEventHint
 ): boolean {
-  const value = event.exception?.values?.[0];
-  const messageCandidates = [
-    value?.value,
-    event.message,
-    getHintExceptionMessage(hint),
-  ];
+  const exceptionMessage = event.exception?.values?.[0]?.value;
+  if (
+    typeof exceptionMessage === "string" &&
+    exceptionMessage.trim().length > 0
+  ) {
+    return (
+      normalizeErrorPrefix(exceptionMessage) ===
+      extensionMessagingConnectionFailureMessage
+    );
+  }
 
-  return messageCandidates.some(
+  return [event.message, getHintExceptionMessage(hint)].some(
     (candidate) =>
       typeof candidate === "string" &&
       normalizeErrorPrefix(candidate) ===
@@ -97,7 +101,12 @@ export function shouldFilterBrowserExtensionMessagingConnectionError(
   event: SentryClientEvent,
   hint?: SentryEventHint
 ): boolean {
-  const value = event.exception?.values?.[0];
+  const values = event.exception?.values;
+  if (!Array.isArray(values) || values.length !== 1) {
+    return false;
+  }
+
+  const [value] = values;
   if (!hasExtensionMessagingConnectionFailureMessage(event, hint)) {
     return false;
   }
