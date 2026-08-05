@@ -22,6 +22,7 @@ import {
   getLowValueNetworkErrorDecision,
   getNetworkErrorMessageTargetUrl,
   getThirdPartyTelemetrySpanTargetKey,
+  redactDropReactionFailureIdentifiers,
   shouldFilterAnonymousUnsafeEvalCspError,
   shouldFilterAppleWebKitSortedTrackListTypeError,
   shouldFilterByFilenameExceptions,
@@ -31,6 +32,7 @@ import {
   shouldFilterExpectedWaveRequestReplacementAbort,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
+  shouldFilterInjectedIosAutoplayNotAllowedError,
   shouldFilterInjectedProviderProxyStartsWithError,
   shouldFilterInjectedWalletCollision,
   shouldFilterInstagramPageHideBridgeError,
@@ -222,6 +224,10 @@ function shouldFilterEvent(
   // retaining only the sampled diagnostic subset would hide genuine app errors.
 
   if (shouldFilterAppleWebKitSortedTrackListTypeError(event)) {
+    return true;
+  }
+
+  if (shouldFilterInjectedIosAutoplayNotAllowedError(event)) {
     return true;
   }
 
@@ -531,6 +537,7 @@ Sentry.init({
     }
     if (networkNoiseDecision === "keep_sampled") {
       tagSampledLowValueNetworkError(event);
+      redactDropReactionFailureIdentifiers(event);
     }
 
     return sanitizeSentryEvent(event);

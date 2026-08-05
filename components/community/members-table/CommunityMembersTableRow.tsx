@@ -10,6 +10,7 @@ import {
   getTimeAgoShort,
 } from "@/helpers/Helpers";
 import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
+import { DATA_TABLE_INTERACTIVE_ROW_CLASS_NAME } from "@/components/utils/table/tableStyles";
 import Link from "next/link";
 import { Tooltip } from "react-tooltip";
 
@@ -29,7 +30,7 @@ export default function CommunityMembersTableRow({
   const textColorClass = isProfile ? "tw-text-iron-50" : "tw-text-iron-400";
   const path = `/${member.detail_view_key}`;
   return (
-    <tr className="tw-group odd:tw-bg-transparent even:tw-bg-iron-900/45 hover:tw-bg-iron-900/70">
+    <tr className={`tw-group ${DATA_TABLE_INTERACTIVE_ROW_CLASS_NAME}`}>
       <td
         className={`${TABLE_CELL_CLASS_NAME} tw-text-center tw-font-semibold tw-text-iron-100`}
       >
@@ -55,7 +56,7 @@ export default function CommunityMembersTableRow({
           >
             <Link
               href={path}
-              className={`tw-text-[13px] tw-font-medium tw-leading-5 tw-no-underline tw-transition tw-duration-300 tw-ease-out group-hover:tw-text-iron-400 group-hover:tw-no-underline md:tw-text-sm ${textColorClass}`}
+              className={`tw-text-[13px] tw-font-medium tw-leading-5 tw-no-underline tw-transition tw-duration-300 tw-ease-out group-focus-within:tw-text-iron-400 group-focus-within:tw-no-underline group-hover:tw-text-iron-400 group-hover:tw-no-underline md:tw-text-sm ${textColorClass}`}
             >
               {member.display}
             </Link>
