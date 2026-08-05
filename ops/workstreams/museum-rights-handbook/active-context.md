@@ -153,3 +153,13 @@ final copy/visual sweep.
   whitespace all pass. The local production server remains available only for
   pixel-equivalent computed-style inspection; a fresh exact-head optimized
   build will be run if hosted merge-tree qualification requires it.
+- Hosted-equivalent contract replay found exact inventory assertions that had
+  not advanced with the three new local/staging/production rights packs. The
+  E2E manifest tests, runner tests, and Release Bus performance contract now
+  record 65 packs, nine Museum-scoped packs, 15 staging post-deploy packs, and
+  14 production post-deploy packs. The packs remain disjoint and read-only.
+- The rights assembly had also moved `legacyCasey.ts` four lines above the
+  800-line source ceiling. Generic assignment-to-credit resolution now lives
+  with the rights handbook; the Casey assembler is 795 lines and the debt
+  ratchet returns to zero oversized files. The exact hosted-failure set now
+  passes locally: five suites / 58 tests plus the complete debt ratchet.

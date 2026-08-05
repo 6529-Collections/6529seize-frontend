@@ -14,6 +14,7 @@ import {
 import {
   assembleRightsHandbook,
   MUSEUM_RIGHTS_REQUIRED_PATHS,
+  rightsCreditForObject,
   rightsHandbookDocuments,
 } from "./rightsHandbook";
 import type {
@@ -728,22 +729,12 @@ function assembleLegacyCaseyPublication(
   const visualObjects = visualObjectsById(context.documents);
 
   const artworks = drafts.map((draft): MuseumAccessionedArtwork => {
-    const rightsAssignment = rightsHandbook.objectAssignments.find(
-      (assignment) => assignment.objectId === draft.objectId
-    );
-    const rightsExpression = rightsHandbook.expressions.find(
-      (expression) => expression.id === rightsAssignment?.expressionId
-    );
-    if (rightsAssignment === undefined || rightsExpression === undefined) {
-      throw new Error("publication_casey_rights_incomplete");
-    }
-    const rightsCredit: MuseumRightsCredit = {
+    const rightsCredit = rightsCreditForObject(rightsHandbook, {
+      id: draft.objectId,
       creditLine: draft.creditLine,
       licenseLabel: draft.licenseLabel,
-      licenseUrl: rightsExpression.canonicalUri,
-      rightsExpressionId: rightsExpression.id,
       sourcePath: draft.sourcePath,
-    };
+    });
     const visualObject = visualObjects.get(draft.objectId);
     if (visualObject === undefined) {
       throw new Error("publication_casey_media_incomplete");

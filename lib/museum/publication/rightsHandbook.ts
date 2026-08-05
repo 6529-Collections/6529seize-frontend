@@ -2,6 +2,7 @@ import { parseHeading } from "./legacyCaseyMarkdown";
 import type {
   MuseumPublicDocument,
   MuseumRightsAction,
+  MuseumRightsCredit,
   MuseumRightsExpression,
   MuseumRightsHandbook,
   MuseumRightsObjectAssignment,
@@ -608,4 +609,31 @@ export function rightsHandbookDocuments(
   handbook: MuseumRightsHandbook
 ): readonly MuseumPublicDocument[] {
   return [handbook.introduction, handbook.artistGuide, handbook.collectorGuide];
+}
+
+export function rightsCreditForObject(
+  handbook: MuseumRightsHandbook,
+  object: {
+    readonly id: string;
+    readonly creditLine: string;
+    readonly licenseLabel: string | null;
+    readonly sourcePath: string;
+  }
+): MuseumRightsCredit {
+  const assignment = handbook.objectAssignments.find(
+    (candidate) => candidate.objectId === object.id
+  );
+  const expression = handbook.expressions.find(
+    (candidate) => candidate.id === assignment?.expressionId
+  );
+  if (assignment === undefined || expression === undefined) {
+    throw new Error("publication_object_rights_incomplete");
+  }
+  return {
+    creditLine: object.creditLine,
+    licenseLabel: object.licenseLabel,
+    licenseUrl: expression.canonicalUri,
+    rightsExpressionId: expression.id,
+    sourcePath: object.sourcePath,
+  };
 }
