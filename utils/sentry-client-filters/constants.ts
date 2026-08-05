@@ -95,13 +95,26 @@ export const noisyThirdPartyTelemetryNetworkPaths = new Set([
 ]);
 export const objectCapturedPromiseRejectionMessage =
   "Object captured as promise rejection with keys: code, message, stack";
+export const objectCapturedPromiseRejectionWithoutStackMessage =
+  "Object captured as promise rejection with keys: code, message";
 export const objectCapturedPromiseRejectionMessages = new Set([
   objectCapturedPromiseRejectionMessage,
-  "Object captured as promise rejection with keys: code, message",
+  objectCapturedPromiseRejectionWithoutStackMessage,
 ]);
 export const providerDisconnectedCode = 4900;
 export const providerDisconnectedMessage =
   "The provider is disconnected from all chains.";
+export const walletRevokePermissionsUnsupportedCode = -32601;
+export const walletRevokePermissionsUnsupportedMessage =
+  "the method wallet_revokePermissions does not exist/is not available";
+export const backpackInternalJsonRpcErrorCode = -32603;
+export const backpackInternalJsonRpcErrorMessage =
+  "Internal JSON-RPC error.";
+export const backpackWalletCollisionBreadcrumbMessage =
+  "Backpack was unable to override window.ethereum. If you're having issues connecting to a dapp, disable any other wallets and try again.";
+export const readOnlyEthereumProxyBreadcrumbPattern =
+  /^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\] \[\[WagmiSetup\] Skipping safe ethereum proxy install for read-only window\.ethereum\] Error: Signature request failed\. Please try again\.$/;
+export const backpackCollisionBreadcrumbWindowSeconds = 1;
 export const talismanExtensionOnboardingMessage =
   "Talisman extension has not been configured yet. Please continue with onboarding.";
 export const browserExtensionUrlPrefixes = [
