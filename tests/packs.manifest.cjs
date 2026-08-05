@@ -76,6 +76,7 @@ const READONLY_SPECS = {
     "tests/museum/institutional-practice-readonly.spec.ts",
   ],
   museumInsideSystem: ["tests/museum/inside-system-readonly.spec.ts"],
+  museumDataArchitecture: ["tests/museum/data-architecture-readonly.spec.ts"],
 };
 
 function localPack(scriptKey, description, specs, tweaks = {}) {
@@ -284,6 +285,15 @@ const PACKS = [
   ),
   museumPack({
     ...localReadonlyPack(
+      "test:e2e:museum-data-architecture",
+      "Network Museum data-architecture reading room and machine profile sweep.",
+      READONLY_SPECS.museumDataArchitecture,
+      { timeoutMinutes: 30 }
+    ),
+    triggers: ["pr-ci", "manual"],
+  }),
+  museumPack({
+    ...localReadonlyPack(
       "test:e2e:museum-institutional-practice",
       "Network Museum institutional-practice study route sweep.",
       READONLY_SPECS.museumInstitutionalPractice,
@@ -483,6 +493,15 @@ const PACKS = [
   ),
   museumPack(
     stagingPack(
+      "museum-data-architecture",
+      "museum-data-architecture",
+      "Staging Network Museum data-architecture reading room and machine profile sweep.",
+      READONLY_SPECS.museumDataArchitecture,
+      { timeoutMinutes: 30 }
+    )
+  ),
+  museumPack(
+    stagingPack(
       "museum-institutional-practice",
       "museum-institutional-practice",
       "Staging Network Museum institutional-practice deployed route smoke.",
@@ -554,6 +573,16 @@ const PACKS = [
     "search-waves-readonly",
     "Production search canary.",
     READONLY_SPECS.searchWaves
+  ),
+  museumPack(
+    productionPack(
+      "museum-data-architecture",
+      "Production Network Museum data-architecture reading room and machine profile sweep.",
+      READONLY_SPECS.museumDataArchitecture,
+      ["post-deploy", "manual"],
+      30,
+      [DESKTOP, MOBILE]
+    )
   ),
   museumPack(
     productionPack(

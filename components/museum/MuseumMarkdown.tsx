@@ -104,6 +104,11 @@ const CURATORIAL_PUBLICATION_STANDARD_PATH =
   "docs/curatorial-publication-standard.md";
 const INSTITUTIONAL_SOURCE_INVENTORY_PATH =
   "docs/institutional-source-inventory.json";
+const DATA_ARCHITECTURE_OVERVIEW_PATH = "docs/data-architecture.md";
+const DATA_ARCHITECTURE_CASEY_PATH =
+  "docs/data-architecture/casey-reas-implementation.md";
+const DATA_ARCHITECTURE_STANDARD_PATH =
+  /^docs\/data-architecture\/(spectrum|cidoc-crm|lido|premis|prov-o|getty-aat-ulan|iiif|c2pa|bagit|ocfl|caip-19)\.md$/u;
 
 function institutionalPracticeRoute(repositoryPath: string): string | null {
   if (repositoryPath === INSTITUTIONAL_PRACTICE_STUDY_PATH) {
@@ -125,12 +130,24 @@ function institutionalPracticeRoute(repositoryPath: string): string | null {
     : `${INSTITUTIONAL_PRACTICE_ROUTE}/${profileSlug}`;
 }
 
+function dataArchitectureRoute(repositoryPath: string): string | null {
+  const root = "/museum/network/methodology/data-architecture";
+  if (repositoryPath === DATA_ARCHITECTURE_OVERVIEW_PATH) return root;
+  if (repositoryPath === DATA_ARCHITECTURE_CASEY_PATH) {
+    return `${root}/casey-reas-implementation`;
+  }
+  const match = DATA_ARCHITECTURE_STANDARD_PATH.exec(repositoryPath);
+  return match?.[1] === undefined ? null : `${root}/${match[1]}`;
+}
+
 function publicMuseumRoute(url: string): string | null {
   const withoutFragment = url.split("#", 1)[0] ?? "";
   const practiceRoute = institutionalPracticeRoute(withoutFragment);
   if (practiceRoute !== null) {
     return practiceRoute;
   }
+  const architectureRoute = dataArchitectureRoute(withoutFragment);
+  if (architectureRoute !== null) return architectureRoute;
   if (withoutFragment.startsWith("records/institutional-practice/")) {
     return null;
   }

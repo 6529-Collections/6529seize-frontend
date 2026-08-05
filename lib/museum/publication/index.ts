@@ -1,4 +1,5 @@
 export * from "./github";
+export * from "./dataArchitecture";
 export * from "./institutionalPractice";
 export * from "./legacyCasey";
 export * from "./manifest";

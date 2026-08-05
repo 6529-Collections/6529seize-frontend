@@ -1,5 +1,10 @@
 import { assertApprovedArtBlocksUrl } from "./security";
 import {
+  assembleDataArchitecture,
+  DATA_ARCHITECTURE_REQUIRED_PATHS,
+  dataArchitectureDocuments,
+} from "./dataArchitecture";
+import {
   assembleInstitutionalPractice,
   INSTITUTIONAL_PRACTICE_REQUIRED_PATHS,
   institutionalPracticeDocuments,
@@ -201,6 +206,7 @@ export const LEGACY_CASEY_REQUIRED_PATHS = [
   ...CASEY_PUBLIC_DOCUMENTS.map((document) => document.path),
   ...PROJECT_PUBLIC_DOCUMENTS.map((document) => document.path),
   ...INSTITUTIONAL_PRACTICE_REQUIRED_PATHS,
+  ...DATA_ARCHITECTURE_REQUIRED_PATHS,
 ] as const;
 
 type JsonRecord = Record<string, unknown>;
@@ -713,9 +719,14 @@ function assembleLegacyCaseyPublication(
   const institutionalPractice = assembleInstitutionalPractice(
     context.documents
   );
+  const dataArchitecture = assembleDataArchitecture(
+    context.documents,
+    new Map(drafts.map(({ objectId, title }) => [objectId, title]))
+  );
   const allPublicDocuments = [
     ...publicDocuments,
     ...institutionalPracticeDocuments(institutionalPractice),
+    ...dataArchitectureDocuments(dataArchitecture),
   ];
   const visualObjects = visualObjectsById(context.documents);
 
@@ -776,6 +787,7 @@ function assembleLegacyCaseyPublication(
     artworks,
     documents: allPublicDocuments,
     institutionalPractice,
+    dataArchitecture,
   };
 }
 
