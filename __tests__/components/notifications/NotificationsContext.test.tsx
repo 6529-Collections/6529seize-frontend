@@ -908,31 +908,35 @@ describe("push registration behavior", () => {
     );
   });
 
-  it("records the observed iOS SSL registration error as transient", async () => {
-    const sentry = require("@sentry/nextjs");
-    const errorMessage =
-      "An SSL error has occurred and a secure connection to the server cannot be made.";
-    const nativeError = { error: errorMessage };
-    const { registrationErrorCallback } = await setupRegistrationCallback();
+  it.each([
+    "An SSL error has occurred and a secure connection to the server cannot be made.",
+    "A TLS error caused the secure connection to fail.",
+  ])(
+    "records observed iOS secure-connection registration error %s as transient",
+    async (errorMessage) => {
+      const sentry = require("@sentry/nextjs");
+      const nativeError = { error: errorMessage };
+      const { registrationErrorCallback } = await setupRegistrationCallback();
 
-    act(() => {
-      registrationErrorCallback(nativeError);
-    });
+      act(() => {
+        registrationErrorCallback(nativeError);
+      });
 
-    expect(sentry.captureException).not.toHaveBeenCalled();
-    expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
-      expect.objectContaining({
-        level: "warning",
-        message: "Push registration transient error.",
-        data: expect.objectContaining({
-          component: "NotificationsProvider",
-          operation: "pushRegistrationError",
-          retryable: true,
-          error_message: errorMessage,
-        }),
-      })
-    );
-  });
+      expect(sentry.captureException).not.toHaveBeenCalled();
+      expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
+        expect.objectContaining({
+          level: "warning",
+          message: "Push registration transient error.",
+          data: expect.objectContaining({
+            component: "NotificationsProvider",
+            operation: "pushRegistrationError",
+            retryable: true,
+            error_message: errorMessage,
+          }),
+        })
+      );
+    }
+  );
 
   it.each([
     "The request timed out.",
@@ -973,6 +977,8 @@ describe("push registration behavior", () => {
     "Too many server requests because the push configuration is invalid.",
     "An SSL error has occurred and a secure connection to the server cannot be made. More details followed.",
     "An SSL error has occurred and a secure connection to the server cannot be made because the push configuration is invalid.",
+    "A TLS error caused the secure connection to fail. More details followed.",
+    "A TLS error caused the secure connection to fail because the push configuration is invalid.",
   ])(
     "captures native registration near-miss %s",
     async (errorMessage) => {
