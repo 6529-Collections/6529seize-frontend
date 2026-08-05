@@ -612,13 +612,15 @@ jobs:
           PLAYWRIGHT_READONLY: "1"
         run: ./bin/6529 run test:e2e:critical-shell
 
-      - name: Run Network Museum institutional-practice Playwright pack
+      - name: Run Network Museum Playwright packs
         if: matrix.lane == 'playwright-museum'
         env:
           NEXT_DEV_DIST_DIR: ".next-playwright-museum"
           PLAYWRIGHT_READONLY: "1"
           MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.commit }}
-        run: ./bin/6529 run test:e2e:museum-institutional-practice
+        run: |
+          ./bin/6529 run test:e2e:museum-institutional-practice
+          ./bin/6529 run test:e2e:museum-inside-system
 
       - name: Upload app check artifacts
         if: always()

@@ -23,6 +23,7 @@ on:
           - media-readonly
           - network-open-data-readonly
           - museum-institutional-practice
+          - museum-inside-system
       release_train_id:
         description: Release Bus train id
         type: string

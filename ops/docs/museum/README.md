@@ -24,6 +24,9 @@ records.
   homepage hierarchy, Network ownership and TDH governance, present operating
   boundaries, on-chain direction, permanence objective, and public-record
   links.
+- [Inside the System](feature-inside-the-system.md): project-level generative
+  system studies, possibility-space maps, causal stages, and the positions of
+  works held by the Museum.
 - [Institutional practice](feature-institutional-practice.md): the comparative
   essay, twenty-seven profiles, an adjacent-practice study, the Museum's public
   scholarship and editorial standard, and the primary-source register.
@@ -33,6 +36,9 @@ records.
 - The [public Museum guide](feature-public-museum-proposition.md#user-journey)
   follows the route from the homepage proposition and featured artwork to the
   complete institutional page and public record.
+- The [Inside the System guide](feature-inside-the-system.md#user-journey)
+  follows the route from a project or object to its analytical map, causal
+  sequence, held-work positions, and research limits.
 - The [institutional-practice guide](feature-institutional-practice.md#user-journey)
   follows the route from the study index to a profile, its citations, the
   source register, and the public contribution links.

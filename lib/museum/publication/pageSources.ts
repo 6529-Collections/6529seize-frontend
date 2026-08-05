@@ -25,6 +25,15 @@ const INSTITUTIONAL_PRACTICE_SOURCE_REGISTER_PATH =
   "records/institutional-practice/source-register.md";
 const CURATORIAL_PUBLICATION_STANDARD_PATH =
   "docs/curatorial-publication-standard.md";
+const CASEY_GENERATIVE_DOSSIER_ROOT =
+  "notes/research/generative-systems/casey-reas";
+const CASEY_GENERATIVE_DOSSIER_SLUGS = new Set([
+  "century",
+  "pre-process",
+  "phototaxis",
+  "923-empty-rooms",
+  "ex-nihilo-cosmos",
+]);
 const INSTITUTIONAL_PRACTICE_PROFILE_SLUGS = [
   "met",
   "getty",
@@ -87,6 +96,7 @@ export type MuseumRelatedPageSourceLabel =
   | "institutionalStudy"
   | "onchainTransition"
   | "primarySourceRegister"
+  | "projectEssay"
   | "programRecord"
   | "scholarshipStandard"
   | "selectedWorks"
@@ -381,6 +391,13 @@ export function buildMuseumPageSourceCatalog(
       document?.sourcePath,
       project.sourcePaths.map((path) => ({ path, label: "machineRecord" }))
     );
+    if (CASEY_GENERATIVE_DOSSIER_SLUGS.has(project.slug)) {
+      add(
+        `${MUSEUM_ROOT}/projects/${encodeURIComponent(project.slug)}/system`,
+        `${CASEY_GENERATIVE_DOSSIER_ROOT}/${project.slug}.md`,
+        [{ path: document?.sourcePath, label: "projectEssay" }]
+      );
+    }
   }
 
   for (const gift of publication.gifts) {

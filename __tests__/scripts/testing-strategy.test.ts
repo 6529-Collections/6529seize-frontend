@@ -535,7 +535,7 @@ describe("testing strategy CI plan", () => {
           if: "matrix.lane == 'playwright-critical-shell'",
         }),
         expect.objectContaining({
-          name: "Run Network Museum institutional-practice Playwright pack",
+          name: "Run Network Museum Playwright packs",
           if: "matrix.lane == 'playwright-museum'",
         }),
       ])

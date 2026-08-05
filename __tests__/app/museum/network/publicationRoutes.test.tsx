@@ -1,7 +1,10 @@
+jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
+
 import { render, screen } from "@testing-library/react";
 import MuseumAboutPage from "@/app/museum/network/about/page";
 import MuseumNetworkPage from "@/app/museum/network/page";
 import MuseumProjectPage from "@/app/museum/network/projects/[slug]/page";
+import MuseumGenerativeSystemPage from "@/app/museum/network/projects/[slug]/system/page";
 import MuseumSourceAndChronologyPage from "@/app/museum/network/stories/source-and-chronology/page";
 import { MuseumGiftPage } from "@/components/museum/MuseumGiftPage";
 import type { CaseyArtwork } from "@/lib/museum/casey";
@@ -108,6 +111,50 @@ describe("Museum finished publication routes", () => {
         name: "Read the source and chronology matrix",
       })
     ).toHaveAttribute("href", "/museum/network/stories/source-and-chronology");
+    expect(
+      screen.getByRole("link", { name: "Enter the system" })
+    ).toHaveAttribute("href", "/museum/network/projects/century/system");
+  });
+
+  it("publishes a project-owned system study with a complete map", async () => {
+    render(
+      await MuseumGenerativeSystemPage({
+        params: Promise.resolve({ slug: "pre-process" }),
+      })
+    );
+
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Pre-Process" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "Complete 120-position lattice",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("grid", {
+        name: /Complete Surface by Origin by Growth lattice/u,
+      })
+    ).toHaveAttribute("aria-rowcount", "8");
+    expect(
+      screen.getByRole("heading", { level: 3, name: "Pre-Process #63" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByText("Museum model · held conditions").length
+    ).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "How the system makes the work",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "Scope and open questions",
+      })
+    ).toBeInTheDocument();
   });
 
   it("presents one Network Museum proposition before the art-led homepage", async () => {
@@ -167,6 +214,15 @@ describe("Museum finished publication routes", () => {
     for (const figure of artworkFigures.slice(3)) {
       expect(figure).toHaveAttribute("data-eager", "false");
     }
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "Five projects, seven works",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /CENTURY.*Explore the system/su })
+    ).toHaveAttribute("href", "/museum/network/projects/century/system");
   });
 
   it("renders the source matrix onsite with an accessible table region", async () => {
