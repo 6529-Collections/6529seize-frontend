@@ -1,0 +1,27 @@
+.root {
+  min-width: 0;
+  width: 100%;
+  transition-duration: 300ms;
+  transition-property: width;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:global(.layout-root):has(
+  > :global(
+      .layout-main[data-mobile="false"][data-narrow="true"][data-offcanvas="true"][data-right-open="false"]
+    )
+    > .root
+) {
+  overflow-x: clip;
+}
+
+@media (min-width: 1024px) {
+  /* Match the narrow desktop sidebar's horizontal shift so the route's right
+     edge remains anchored to the viewport throughout the shared transition. */
+  :global(
+      .layout-main[data-mobile="false"][data-narrow="true"][data-offcanvas="true"][data-right-open="false"]
+    )
+    > .root {
+    width: calc(100% - (var(--expanded-width) - var(--collapsed-width)));
+  }
+}
