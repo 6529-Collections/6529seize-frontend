@@ -300,6 +300,28 @@ function useNewDropCounter(
           }
 
           if (
+            waveId === activeWaveId &&
+            document.visibilityState === "visible"
+          ) {
+            setNewDropsCounts((prev) =>
+              updateLatestDropTimestamp({
+                createdAt: now,
+                newDropsCounts: prev,
+                waveId,
+              })
+            );
+          } else {
+            setNewDropsCounts((prev) =>
+              addUnreadDropCount({
+                createdAt: now,
+                newDropsCounts: prev,
+                serialNo,
+                waveId,
+              })
+            );
+          }
+
+          if (
             lastUnknownWaveRefetchAtRef.current !== null &&
             now - lastUnknownWaveRefetchAtRef.current <
               unknownWaveRefetchCooldownMs

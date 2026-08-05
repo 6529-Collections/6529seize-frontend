@@ -155,6 +155,32 @@ describe("useNewDropCounter", () => {
     expect(refetch).not.toHaveBeenCalled();
   });
 
+  it("counts an unknown-wave compact content ref before refreshing Waves", () => {
+    const refetch = jest.fn();
+    jest.spyOn(Date, "now").mockReturnValue(2345);
+    const { result } = renderHook(
+      () =>
+        useNewDropCounter(null, waves, refetch, {
+          otherListWaveIds: new Set(),
+        }),
+      { wrapper }
+    );
+
+    emitDropUpdateRef({
+      drop_id: "new-drop",
+      wave_id: "unknown-wave",
+      serial_no: 23,
+      update_type: WsMessageType.DROP_UPDATE,
+    });
+
+    expect(result.current.newDropsCounts["unknown-wave"]).toEqual({
+      count: 1,
+      latestDropTimestamp: 2345,
+      firstUnreadSerialNo: 23,
+    });
+    expect(refetch).toHaveBeenCalledTimes(1);
+  });
+
   it("does not process websocket updates or resets while disabled", () => {
     const refetch = jest.fn();
     const { result } = renderHook(

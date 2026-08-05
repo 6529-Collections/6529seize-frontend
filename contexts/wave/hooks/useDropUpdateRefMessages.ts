@@ -44,7 +44,7 @@ const getProcessType = (
 };
 
 const getStateKey = (data: WsDropUpdateRefData): string =>
-  `${data.wave_id}:${data.drop_id}:${data.update_type}`;
+  JSON.stringify([data.wave_id, data.drop_id, data.update_type]);
 
 const fetchAndApplyCanonicalDrop = async ({
   isActive,

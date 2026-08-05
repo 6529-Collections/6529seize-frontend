@@ -127,13 +127,17 @@ export function useDropMessages(
     WsMessageType.DROP_UPDATE_REF,
     useCallback(
       (message) => {
-        if (!isWsDropUpdateRefData(message) || waveId !== message.wave_id) {
+        if (
+          !dropId ||
+          !isWsDropUpdateRefData(message) ||
+          waveId !== message.wave_id
+        ) {
           return;
         }
 
         requestRefetch();
       },
-      [requestRefetch, waveId]
+      [dropId, requestRefetch, waveId]
     )
   );
 

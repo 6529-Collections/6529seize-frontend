@@ -178,13 +178,17 @@ export function useWaveDrops({
     WsMessageType.DROP_UPDATE_REF,
     useCallback(
       (message) => {
-        if (!isWsDropUpdateRefData(message) || waveId !== message.wave_id) {
+        if (
+          !enabled ||
+          !isWsDropUpdateRefData(message) ||
+          waveId !== message.wave_id
+        ) {
           return;
         }
 
         requestRefetch();
       },
-      [requestRefetch, waveId]
+      [enabled, requestRefetch, waveId]
     )
   );
 

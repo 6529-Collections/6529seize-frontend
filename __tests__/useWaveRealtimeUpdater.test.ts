@@ -297,6 +297,38 @@ describe("useWaveRealtimeUpdater", () => {
     expect(fetchDropByIdBatched).toHaveBeenCalledTimes(2);
   });
 
+  it("keeps delimiter-bearing compact reference identities distinct", async () => {
+    const store = {
+      "wave:one": { drops: [], latestFetchedSerialNo: 10 },
+      wave: { drops: [], latestFetchedSerialNo: 10 },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockImplementation(async (dropId: string) => ({
+      id: dropId,
+      serial_no: 11,
+      wave: { id: dropId === "drop" ? "wave:one" : "wave" },
+      author: {},
+    }));
+    renderHook(() => useWaveRealtimeUpdater(props));
+
+    emitWebSocketMessage(WsMessageType.DROP_UPDATE_REF, {
+      drop_id: "drop",
+      wave_id: "wave:one",
+      serial_no: 11,
+      update_type: WsMessageType.DROP_UPDATE,
+    });
+    emitWebSocketMessage(WsMessageType.DROP_UPDATE_REF, {
+      drop_id: "one:drop",
+      wave_id: "wave",
+      serial_no: 11,
+      update_type: WsMessageType.DROP_UPDATE,
+    });
+    await flushPromises();
+
+    expect(fetchDropByIdBatched).toHaveBeenCalledWith("drop");
+    expect(fetchDropByIdBatched).toHaveBeenCalledWith("one:drop");
+  });
+
   it("retries compact refetches when the first read is behind", async () => {
     jest.useFakeTimers();
     const store = { wave1: { drops: [], latestFetchedSerialNo: 10 } };
