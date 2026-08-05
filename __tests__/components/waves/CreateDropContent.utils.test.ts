@@ -305,6 +305,26 @@ describe("CreateDropContent utilities", () => {
       ).toBe(false);
     });
 
+    it("enforces the 65,535-byte UTF-8 limit for each Storm part", () => {
+      expect(
+        canAddDropPart({
+          markdown: "界".repeat(21_845),
+          files: [],
+          drop: null,
+          hasPendingInlineImageUpload: false,
+        })
+      ).toBe(true);
+
+      expect(
+        canAddDropPart({
+          markdown: "界".repeat(21_846),
+          files: [],
+          drop: null,
+          hasPendingInlineImageUpload: false,
+        })
+      ).toBe(false);
+    });
+
     it("rejects whitespace-only storm parts", () => {
       expect(
         canAddDropPart({

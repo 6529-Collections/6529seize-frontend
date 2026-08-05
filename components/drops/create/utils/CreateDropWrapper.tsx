@@ -43,9 +43,9 @@ import { WalletValidationError } from "@/errors/wallet";
 import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
 import { hasPendingInlineImageUploadMarkdown } from "@/helpers/waves/inline-image-upload.helpers";
 import {
-  MAX_DROP_PART_CHARACTERS,
-  MAX_DROP_STORM_CHARACTERS,
-} from "@/helpers/Helpers";
+  MAX_DROP_STORM_UTF16_UNITS,
+  isDropPartWithinLimits,
+} from "@/helpers/waves/drop-content-limits";
 
 export enum CreateDropScreenType {
   DESKTOP = "DESKTOP",
@@ -417,16 +417,16 @@ const CreateDropWrapper = forwardRef<
       (drop?.parts.reduce(
         (acc, part) => acc + (part.content?.length ?? 0),
         getMarkdown()?.length ?? 0
-      ) ?? 0) > MAX_DROP_STORM_CHARACTERS;
+      ) ?? 0) > MAX_DROP_STORM_UTF16_UNITS;
 
-    const getIsCharsLimit = () =>
-      (getMarkdown()?.length ?? 0) > MAX_DROP_PART_CHARACTERS;
+    const getIsPartLimit = () =>
+      !isDropPartWithinLimits(getMarkdown() ?? "");
 
     const getCanAddPart = () =>
       getHaveMarkdownOrFile() &&
       !getHasPendingInlineImageUpload() &&
       !getIsDropLimit() &&
-      !getIsCharsLimit();
+      !getIsPartLimit();
     const [canAddPart, setCanAddPart] = useState(getCanAddPart());
     useEffect(() => {
       setCanSubmit(getCanSubmit());

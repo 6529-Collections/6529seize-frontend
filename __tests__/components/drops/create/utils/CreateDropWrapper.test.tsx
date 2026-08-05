@@ -724,6 +724,33 @@ describe("CreateDropWrapper Authentication Validation", () => {
       });
     });
 
+    it("rejects a Storm part above the UTF-8 byte limit", async () => {
+      mockUseSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
+        address: "0x1234567890123456789012345678901234567890",
+        isSafeWallet: false,
+      });
+
+      const { getByTestId } = render(
+        <QueryClientProvider client={queryClient}>
+          <CreateDropWrapper
+            {...defaultProps}
+            viewType={CreateDropViewType.FULL}
+          />
+        </QueryClientProvider>
+      );
+
+      mockMarkdown = "界".repeat(21_846);
+      fireEvent.click(getByTestId("set-full-editor-state"));
+
+      await waitFor(() => {
+        expect(getByTestId("create-drop-full")).toHaveAttribute(
+          "data-can-add-part",
+          "false"
+        );
+      });
+    });
+
     it("does not save a storm part while inline image upload markdown is pending", () => {
       mockMarkdown = "pending ![Seize](loading)";
       mockUseSeizeConnectContext.mockReturnValue({

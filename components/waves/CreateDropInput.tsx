@@ -71,7 +71,7 @@ import { $selectEndOfRootBlock } from "@/components/drops/create/lexical/utils/r
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useDropComposerDensity } from "./CreateDropWaveWrapper";
-import { MAX_DROP_PART_CHARACTERS } from "@/helpers/Helpers";
+import { MAX_DROP_PART_UTF16_UNITS } from "@/helpers/waves/drop-content-limits";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
@@ -476,7 +476,7 @@ const CreateDropInput = forwardRef<
                 onSelect={onHashtagAdded}
                 ref={hashtagPluginRef}
               />
-              <MaxLengthPlugin maxLength={MAX_DROP_PART_CHARACTERS} />
+              <MaxLengthPlugin maxLength={MAX_DROP_PART_UTF16_UNITS} />
               <DragDropPastePlugin onAttachmentFiles={onAttachmentFiles} />
               <ListPlugin />
               <PlainTextPastePlugin />

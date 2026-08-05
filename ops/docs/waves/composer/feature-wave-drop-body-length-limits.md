@@ -2,10 +2,12 @@
 
 ## Overview
 
-The standard thread composer enforces three text-length rules:
+The standard thread composer enforces four text-length rules:
 
-- Body input is capped at `25,000` characters.
-- A Storm may contain up to `50,000` characters across all of its parts.
+- Each part is capped at `25,000` UTF-16 code units.
+- Each part is also capped at `65,535` UTF-8 bytes so it fits the persisted
+  text field for every supported script and emoji combination.
+- A Storm may contain up to `50,000` UTF-16 code units across all of its parts.
 - When a storm already has at least one part, submit is blocked if current
   draft text is over `240` characters.
 
@@ -27,7 +29,8 @@ These rules apply to non-curation thread composer flows in both `Post` and
 
 ## Rules in Practice
 
-- A single-part post/drop can submit above `240` chars, up to `25,000`.
+- A single-part post/drop can submit above `240` UTF-16 units, up to the
+  per-part unit and byte limits.
 - Storm add uses the `50,000` total-text rule, not the `240` submit rule.
 - With existing storm parts, submit can only finalize when current draft text is
   `240` chars or less.
@@ -39,7 +42,8 @@ These rules apply to non-curation thread composer flows in both `Post` and
 
 ## Common Scenarios
 
-- Two `25,000`-character parts can form one Storm at the total limit.
+- Two `25,000`-unit ASCII parts can form one Storm at the total limit. Text
+  that uses more UTF-8 bytes per unit may reach the per-part byte limit first.
 - In storm mode, a `500`-character draft can still be added with `Add part`
   (if total text stays at or below `50,000`), but submit stays blocked until the
   draft is shortened or cleared.
