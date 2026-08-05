@@ -16,6 +16,7 @@ const { PACKS: E2E_PACKS } = require("../../tests/packs.manifest.cjs") as {
     environments: string[];
     triggers: string[];
     specs?: string[];
+    changeScope?: "museum";
   }>;
 };
 
@@ -474,6 +475,36 @@ describe("Release Bus frontend performance contract", () => {
     expect(productionSource).toContain("args+=(--retry-failed-packs 1)");
     expect(stagingSource).toContain("serial_failed_pack_retry");
     expect(productionSource).toContain("serial_failed_pack_retry");
+    for (const source of [stagingSource, productionSource]) {
+      expect(source).toContain('pack.changeScope === "museum"');
+      expect(source).toContain('pack.changeScope !== "museum"');
+      expect(source).toContain('args+=(--exclude-pack "$museum_pack_alias")');
+    }
+    for (const [definition, jobName, stepName] of [
+      [staging, "staging-packs", "Run staging packs against staging.6529.io"],
+      [production, "readonly", "Run production-safe read-only packs"],
+    ] as const) {
+      const packStep = definition.jobs[jobName].steps.find(
+        (step: { name?: string }) => step.name === stepName
+      );
+      expect(
+        packStep.run
+          .split("\n")
+          .filter((line: string) => line.trim() === "NODE")
+      ).toEqual(["NODE"]);
+    }
+    const museumPacks = E2E_PACKS.filter(
+      (pack) => pack.changeScope === "museum"
+    );
+    expect(museumPacks).toHaveLength(6);
+    for (const pack of museumPacks.filter((candidate) =>
+      candidate.environments.includes("local")
+    )) {
+      expect(stagingSource).not.toContain(`./bin/6529 run ${pack.scriptKey}`);
+      expect(read(".github/workflows/app-pr-ci.yml")).toContain(
+        `./bin/6529 run ${pack.scriptKey}`
+      );
+    }
     expect(stagingSource).toContain(
       '.contract == "release-bus-e2e-runner-capabilities.v1"'
     );

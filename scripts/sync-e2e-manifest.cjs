@@ -33,6 +33,7 @@ const KNOWN_PROJECTS = new Set([
 const KNOWN_SAFETY = new Set(["local", "readonly", "sandbox"]);
 const KNOWN_ENVIRONMENTS = new Set(["local", "staging", "production"]);
 const KNOWN_TRIGGERS = new Set(["manual", "pr-ci", "post-deploy", "cron"]);
+const KNOWN_CHANGE_SCOPES = new Set(["museum"]);
 const KNOWN_FIELDS = new Set([
   "scriptKey",
   "alias",
@@ -48,6 +49,7 @@ const KNOWN_FIELDS = new Set([
   "traceOff",
   "extraArgs",
   "timeoutMinutes",
+  "changeScope",
 ]);
 const REMOTE_CONTRACTS = {
   staging: {
@@ -274,6 +276,14 @@ function validateManifest(packs, { root } = {}) {
     }
     validateStringArray(problems, pack, "environments", KNOWN_ENVIRONMENTS);
     validateStringArray(problems, pack, "triggers", KNOWN_TRIGGERS);
+    if (
+      pack.changeScope !== undefined &&
+      !KNOWN_CHANGE_SCOPES.has(pack.changeScope)
+    ) {
+      problems.push(
+        `${packLabel(pack)}: unknown changeScope "${pack.changeScope}".`
+      );
+    }
     if (pack.environments?.length !== 1) {
       problems.push(
         `${packLabel(pack)}: exactly one environment is required per pack.`
@@ -301,6 +311,20 @@ function validateManifest(packs, { root } = {}) {
     validateEnvironmentVariables(problems, pack);
     validateCommandShape(problems, pack, root);
     validateRemoteContract(problems, pack, environment);
+
+    const hasSpecs = Array.isArray(pack.specs) && pack.specs.length > 0;
+    const isMuseumOnly =
+      hasSpecs && pack.specs.every((spec) => spec.startsWith("tests/museum/"));
+    if (isMuseumOnly && pack.changeScope !== "museum") {
+      problems.push(
+        `${packLabel(pack)}: Museum-only packs must set changeScope "museum".`
+      );
+    }
+    if (pack.changeScope === "museum" && !isMuseumOnly) {
+      problems.push(
+        `${packLabel(pack)}: changeScope "museum" requires only tests/museum specs.`
+      );
+    }
 
     if (pack.safety === "sandbox" && environment !== "local") {
       problems.push(`${packLabel(pack)}: sandbox packs must be local-only.`);

@@ -190,3 +190,13 @@ artifact path and structured evidence entry. A pack is green only if its final
 attempt passes; a persistent second failure remains release-blocking. This
 keeps the broad quality gate while replacing an all-pack workflow rerun with a
 bounded retry of only the work that failed.
+
+The first green run of that retry contract, staging run 30976430422, exposed a
+separate selection defect before production: `museum-institutional-practice`
+was omitted, but the newer `museum-inside-system` pack still ran because the
+workflow excluded one literal alias. The manifest now owns the `museum` change
+scope for every dedicated Museum pack. Automatic PR and deployed-environment
+selection derive from that scope, with a validator requiring every pack made
+entirely of `tests/museum/` specs to declare it. A legacy `museum-*` alias
+fallback keeps rollback sources compatible. Future Museum packs therefore
+cannot silently enter unrelated release qualification.

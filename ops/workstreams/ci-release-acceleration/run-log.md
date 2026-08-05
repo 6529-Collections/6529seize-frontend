@@ -150,3 +150,15 @@
   the release. Focused runner and performance contracts pass 31/31; changed
   lint, application/test/Playwright typechecks, manifest sync, and Debt Ratchet
   are green.
+- PR #3603 merged as `852b43fd9dc5af86aaf75c2942aea6e490544e25`.
+  Its App CI completed in 11m32s; quality/contracts took 2m36s, smoke 3m14s,
+  critical shell 4m23s, and Museum PR CI was omitted.
+- Staging composition `474a04f67701028807fb49747d5aa0e548f7a3a4`
+  deployed successfully in run 30975793722. Production prebuild 30975744759
+  completed concurrently in 13m28s. Automatic staging E2E 30976430422 passed
+  in 7m23s with three workers and the new retry evidence contract.
+- Retained evidence showed 13 packs: institutional-practice was correctly
+  absent, but the newly added Inside the System Museum pack was still present.
+  Production promotion was stopped. Replaced literal single-pack exclusion
+  with manifest-owned Museum scope selection plus a validator ratchet and
+  rollback-compatible `museum-*` fallback.

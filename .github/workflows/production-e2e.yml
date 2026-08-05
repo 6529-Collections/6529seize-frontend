@@ -269,10 +269,26 @@ jobs:
           then
             args+=(--parallel 3)
             if [ "$MUSEUM_E2E_REQUIRED" = false ]; then
-              args+=(--exclude-pack museum-institutional-practice)
+              museum_pack_aliases="$(./bin/6529 exec node - <<'NODE'
+          const { PACKS } = require("./tests/packs.manifest.cjs");
+          const aliases = PACKS.filter((pack) =>
+            pack.environments.includes("production") &&
+            pack.triggers.includes("post-deploy") &&
+            (pack.changeScope === "museum" || /^museum-/.test(pack.alias ?? ""))
+          ).map((pack) => pack.alias ?? pack.scriptKey);
+          if (aliases.length === 0) {
+            process.stderr.write("No production Museum packs were identified.\n");
+            process.exit(1);
+          }
+          process.stdout.write(aliases.join("\n"));
+          NODE
+              )"
+              while IFS= read -r museum_pack_alias; do
+                args+=(--exclude-pack "$museum_pack_alias")
+              done <<< "$museum_pack_aliases"
             fi
           elif [ "$MUSEUM_E2E_REQUIRED" = false ]; then
-            echo "::warning::Deployed E2E runner cannot exclude packs; retaining the Museum E2E pack."
+            echo "::warning::Deployed E2E runner cannot exclude packs; retaining all Museum E2E packs."
             MUSEUM_E2E_REQUIRED=true
           fi
           if [ -n "${runner_capabilities:-}" ] &&
@@ -309,7 +325,10 @@ jobs:
           const keys = PACKS.filter((pack) =>
             pack.environments.includes("production") &&
             pack.triggers.includes("post-deploy") &&
-            (museumRequired || pack.alias !== "museum-institutional-practice")
+            (museumRequired || (
+              pack.changeScope !== "museum" &&
+              !/^museum-/.test(pack.alias ?? "")
+            ))
           ).map((pack) => pack.scriptKey);
           process.stdout.write(JSON.stringify(keys));
           NODE
