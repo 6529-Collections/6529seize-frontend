@@ -10,11 +10,14 @@ import { numberWithCommas } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 import { LeaderboardFocus } from "@/types/enums";
+import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import DotLoader, { Spinner } from "../dotLoader/DotLoader";
+import type { CommonSelectItem } from "../utils/select/CommonSelect";
+import CommonDropdown from "../utils/select/dropdown/CommonDropdown";
+import CommonTabs from "../utils/select/tabs/CommonTabs";
 import {
   SearchModalDisplay,
   SearchWalletsDisplay,
@@ -41,65 +44,18 @@ export enum Collector {
   NEXTGEN = "NextGen",
 }
 
-function LeaderboardDropdown({
-  children,
-  disabled,
-  label,
-}: Readonly<{
-  children: ReactNode;
-  disabled?: boolean;
-  label: ReactNode;
-}>) {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    function handlePointerDown(event: PointerEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    }
-
-    document.addEventListener("pointerdown", handlePointerDown);
-    return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
-    };
-  }, [isOpen]);
-
-  return (
-    <span ref={dropdownRef} className={styles["contentDropdown"]}>
-      <button
-        type="button"
-        disabled={disabled}
-        aria-expanded={isOpen}
-        onClick={() => setIsOpen((open) => !open)}
-      >
-        {label}
-        <span aria-hidden="true" className={styles["dropdownCaret"]} />
-      </button>
-      {isOpen && (
-        <span
-          className={styles["contentDropdownMenu"]}
-          onClick={() => setIsOpen(false)}
-          onKeyDown={(event) => {
-            if (event.key === "Escape") {
-              setIsOpen(false);
-            }
-          }}
-        >
-          {children}
-        </span>
-      )}
-    </span>
-  );
-}
+const TDH_VIEW_ITEMS: CommonSelectItem<ApiConsolidatedTdhView>[] = [
+  {
+    label: "Boosted",
+    value: ApiConsolidatedTdhView.Boosted,
+    key: "tdh-view-boosted",
+  },
+  {
+    label: "Unboosted",
+    value: ApiConsolidatedTdhView.Unboosted,
+    key: "tdh-view-unboosted",
+  },
+];
 
 function getSelectedNetworkTdh(
   globalTdhHistory: GlobalTDHHistory | undefined,
@@ -228,86 +184,74 @@ export default function Leaderboard(
   }, []);
 
   function printCollectorsDropdown() {
+    const items: CommonSelectItem<Collector>[] = Object.values(Collector).map(
+      (value) => ({
+        label: value,
+        value,
+        key: `collector-${value}`,
+      })
+    );
+
     return (
-      <LeaderboardDropdown label={<span>Collectors: {collector}</span>}>
-        {Object.values(Collector).map((collector) => (
-          <button
-            type="button"
-            className={styles["contentDropdownItem"]}
-            key={collector}
-            onClick={() => setCollector(collector)}
-          >
-            {[Collector.MEMES_SETS, Collector.GENESIS].includes(collector) ? (
-              <>&nbsp;&nbsp;{collector}</>
-            ) : (
-              collector
-            )}
-          </button>
-        ))}
-      </LeaderboardDropdown>
+      <CommonDropdown
+        filterLabel="Collectors"
+        items={items}
+        activeItem={collector}
+        setSelected={setCollector}
+        size="sm"
+        variant="editorial"
+        showFilterLabel
+      />
     );
   }
 
   function printTdhViewToggle() {
-    const isBoostedTdhView = props.tdhView !== ApiConsolidatedTdhView.Unboosted;
-
     return (
-      <fieldset className={styles["tdhViewSegmentedControl"]}>
-        <legend className="tw-sr-only">TDH view</legend>
-        <button
-          type="button"
-          aria-pressed={isBoostedTdhView}
-          className={`${styles["tdhViewSegment"]} ${
-            isBoostedTdhView ? styles["tdhViewSegmentActive"] : ""
-          }`}
-          onClick={() => props.setTdhView(ApiConsolidatedTdhView.Boosted)}
-        >
-          Boosted
-        </button>
-        <button
-          type="button"
-          aria-pressed={props.tdhView === ApiConsolidatedTdhView.Unboosted}
-          className={`${styles["tdhViewSegment"]} ${
-            props.tdhView === ApiConsolidatedTdhView.Unboosted
-              ? styles["tdhViewSegmentActive"]
-              : ""
-          }`}
-          onClick={() => props.setTdhView(ApiConsolidatedTdhView.Unboosted)}
-        >
-          Unboosted
-        </button>
+      <div className="tw-w-fit">
+        <CommonTabs
+          items={TDH_VIEW_ITEMS}
+          activeItem={props.tdhView}
+          setSelected={props.setTdhView}
+          filterLabel="TDH view"
+          fill={false}
+        />
         <span className="tw-sr-only" aria-live="polite">
           {props.tdhView === ApiConsolidatedTdhView.Unboosted
             ? "Showing unboosted TDH values"
             : "Showing boosted TDH values"}
         </span>
-      </fieldset>
+      </div>
     );
   }
 
   function printCardsInteractionsToggle() {
     return (
-      <fieldset className={styles["focusToggle"]}>
+      <fieldset className="tw-m-0 tw-inline-flex tw-min-w-0 tw-items-center tw-gap-3 tw-border-0 tw-p-0 sm:tw-gap-4">
         <legend className="tw-sr-only">Leaderboard view</legend>
         <button
           type="button"
           aria-pressed={props.focus === LeaderboardFocus.TDH}
           onClick={() => props.setFocus(LeaderboardFocus.TDH)}
-          className={`${styles["focus"]} ${
-            props.focus === LeaderboardFocus.TDH ? "" : styles["disabled"]
+          className={`tw-rounded-sm tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-semibold tw-leading-5 tw-transition tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 md:tw-text-base md:tw-leading-6 ${
+            props.focus === LeaderboardFocus.TDH
+              ? "tw-text-iron-50"
+              : "tw-text-iron-500 hover:tw-text-iron-200"
           }`}
         >
           {LeaderboardFocus.TDH}
         </button>
-        <span aria-hidden="true">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+        <span
+          aria-hidden="true"
+          className="tw-h-6 tw-w-px tw-shrink-0 tw-bg-iron-800 sm:tw-h-8"
+        />
         <button
           type="button"
           aria-pressed={props.focus === LeaderboardFocus.INTERACTIONS}
           onClick={() => props.setFocus(LeaderboardFocus.INTERACTIONS)}
-          className={`${styles["focus"]} ${
+          className={`tw-rounded-sm tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-semibold tw-leading-5 tw-transition tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 md:tw-text-base md:tw-leading-6 ${
             props.focus === LeaderboardFocus.INTERACTIONS
-              ? ""
-              : styles["disabled"]
+              ? "tw-text-iron-50"
+              : "tw-text-iron-500 hover:tw-text-iron-200"
           }`}
         >
           {LeaderboardFocus.INTERACTIONS}
@@ -317,50 +261,52 @@ export default function Leaderboard(
   }
 
   function printCollectionsDropdown() {
+    const items: CommonSelectItem<Content>[] = Object.values(Content).map(
+      (value) => ({
+        label: value,
+        value,
+        key: `content-${value}`,
+      })
+    );
+
     return (
-      <LeaderboardDropdown label={<span>Collection: {content}</span>}>
-        {Object.values(Content).map((content) => (
-          <button
-            type="button"
-            key={content}
-            className={styles["contentDropdownItem"]}
-            onClick={() => setContent(content)}
-          >
-            {content}
-          </button>
-        ))}
-      </LeaderboardDropdown>
+      <CommonDropdown
+        filterLabel="Collection"
+        items={items}
+        activeItem={content}
+        setSelected={setContent}
+        size="sm"
+        variant="editorial"
+        showFilterLabel
+      />
     );
   }
 
   function printSeasonsDropdown() {
+    const items: CommonSelectItem<number>[] = [
+      { label: "All", value: 0, key: "season-all" },
+      ...seasons.map((season) => ({
+        label: season.display,
+        value: season.id,
+        key: `season-${season.id}`,
+      })),
+    ];
+
     return (
-      <LeaderboardDropdown
+      <CommonDropdown
         disabled={
           content != Content.MEMES &&
           collector != Collector.MEMES &&
           collector != Collector.MEMES_SETS
         }
-        label={<span>SZN: {selectedSeason > 0 ? selectedSeason : "All"}</span>}
-      >
-        <button
-          type="button"
-          className={styles["contentDropdownItem"]}
-          onClick={() => setSelectedSeason(0)}
-        >
-          All
-        </button>
-        {seasons.map((season) => (
-          <button
-            type="button"
-            key={season.display}
-            className={styles["contentDropdownItem"]}
-            onClick={() => setSelectedSeason(season.id)}
-          >
-            {season.display}
-          </button>
-        ))}
-      </LeaderboardDropdown>
+        filterLabel="SZN"
+        items={items}
+        activeItem={selectedSeason}
+        setSelected={setSelectedSeason}
+        size="sm"
+        variant="editorial"
+        showFilterLabel
+      />
     );
   }
 
@@ -377,8 +323,8 @@ export default function Leaderboard(
             )}
           </h1>
           {isNetworkPage && (
-            <div className="tw-mt-5 tw-flex tw-items-center tw-gap-3">
-              <span className="tw-text-xs tw-font-bold tw-uppercase tw-tracking-wide tw-text-iron-500">
+            <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+              <span className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500">
                 TDH View
               </span>
               {printTdhViewToggle()}
@@ -437,25 +383,26 @@ export default function Leaderboard(
               {printCollectionsDropdown()}
               {printSeasonsDropdown()}
             </div>
-            <div className={styles["networkViewTabs"]}>
-              {printCardsInteractionsToggle()}
-            </div>
-          </div>
-          <div className={styles["networkToolbarSearchRow"]}>
-            <div className={styles["networkSearch"]}>
-              <div
-                className={`${styles["networkLoadingSlot"]} ${
-                  isLoading ? "" : "tw-invisible"
-                }`}
-              >
-                <Spinner dimension={30} />
+            <div className={styles["networkToolbarActions"]}>
+              <div className={styles["networkViewTabs"]}>
+                {printCardsInteractionsToggle()}
               </div>
-              <SearchWalletsDisplay
-                searchWallets={searchWallets}
-                setSearchWallets={setSearchWallets}
-                setShowSearchModal={setShowSearchModal}
-                variant="dark"
-              />
+              <div className={styles["networkSearch"]}>
+                <div
+                  className={clsx(
+                    styles["networkLoadingSlot"],
+                    !isLoading && "tw-invisible"
+                  )}
+                >
+                  <Spinner dimension={30} />
+                </div>
+                <SearchWalletsDisplay
+                  searchWallets={searchWallets}
+                  setSearchWallets={setSearchWallets}
+                  setShowSearchModal={setShowSearchModal}
+                  variant="dark"
+                />
+              </div>
             </div>
           </div>
         </section>

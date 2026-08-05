@@ -1,16 +1,20 @@
-import { render, screen } from '@testing-library/react';
-import LeaderboardInteractionsComponent from '@/components/leaderboard/LeaderboardInteractions';
-import { Content, Collector } from '@/components/leaderboard/Leaderboard';
+import { render, screen } from "@testing-library/react";
+import LeaderboardInteractionsComponent from "@/components/leaderboard/LeaderboardInteractions";
+import { Content, Collector } from "@/components/leaderboard/Leaderboard";
 
-jest.mock('@/components/leaderboard/leaderboard_helpers', () => {
-  const original = jest.requireActual('../../../components/leaderboard/leaderboard_helpers');
+jest.mock("@/components/leaderboard/leaderboard_helpers", () => {
+  const original = jest.requireActual(
+    "../../../components/leaderboard/leaderboard_helpers"
+  );
   return {
     ...original,
     useFetchLeaderboard: jest.fn(),
   };
 });
 
-const useFetchLeaderboard = require('@/components/leaderboard/leaderboard_helpers').useFetchLeaderboard as jest.Mock;
+const useFetchLeaderboard =
+  require("@/components/leaderboard/leaderboard_helpers")
+    .useFetchLeaderboard as jest.Mock;
 
 const baseProps = {
   block: 1,
@@ -25,47 +29,46 @@ const baseProps = {
 
 function renderComponent(data: any, loading = false) {
   useFetchLeaderboard.mockReturnValue({
-    myFetchUrl: '/api',
+    myFetchUrl: "/api",
     totalResults: data ? data.length : 0,
     leaderboard: data,
   });
   render(
-    <LeaderboardInteractionsComponent
-      {...baseProps}
-      isLoading={loading}
-    />
+    <LeaderboardInteractionsComponent {...baseProps} isLoading={loading} />
   );
 }
 
-describe('LeaderboardInteractionsComponent', () => {
+describe("LeaderboardInteractionsComponent", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('exports a function', () => {
-    expect(typeof LeaderboardInteractionsComponent).toBe('function');
+  it("exports a function", () => {
+    expect(typeof LeaderboardInteractionsComponent).toBe("function");
   });
 
-  it('renders nothing when leaderboard undefined', () => {
+  it("renders nothing when leaderboard undefined", () => {
     renderComponent(undefined);
-    expect(screen.queryByRole('table')).toBeNull();
+    expect(screen.queryByRole("table")).toBeNull();
   });
 
-  it('shows message when no results and not loading', () => {
+  it("shows message when no results and not loading", () => {
     renderComponent([], false);
-    expect(screen.getByText('No results found. Change filters and try again.')).toBeInTheDocument();
+    expect(
+      screen.getByText("No results found. Change filters and try again.")
+    ).toBeInTheDocument();
   });
 
-  it('renders rows for leaderboard data', () => {
+  it("renders rows for leaderboard data", () => {
     const leaderboard = [
       {
-        consolidation_key: '1',
-        handle: 'alice',
-        consolidation_display: 'Alice',
-        pfp_url: '',
+        consolidation_key: "1",
+        handle: "alice",
+        consolidation_display: "Alice",
+        pfp_url: "",
         rep_score: 0,
         cic_score: 0,
-        primary_wallet: '0x',
+        primary_wallet: "0x",
         boosted_tdh: 0,
         day_change: 0,
         level: 1,
@@ -82,8 +85,24 @@ describe('LeaderboardInteractionsComponent', () => {
       },
     ];
     renderComponent(leaderboard);
-    const rows = screen.getAllByRole('row');
+    const rows = screen.getAllByRole("row");
     // two header rows plus one data row
     expect(rows).toHaveLength(3);
+    expect(rows[0].querySelectorAll("th")[1]).toHaveClass(
+      "tw-border-iron-800",
+      "tw-text-iron-300",
+      "md:tw-text-sm"
+    );
+    expect(rows[1].querySelectorAll("th")[2]).toHaveClass(
+      "tw-border-iron-800",
+      "tw-text-iron-400",
+      "md:tw-text-sm"
+    );
+    expect(rows[2]).toHaveClass(
+      "tw-group",
+      "even:tw-bg-iron-900/70",
+      "hover:tw-bg-iron-900",
+      "focus-within:tw-bg-iron-900"
+    );
   });
 });

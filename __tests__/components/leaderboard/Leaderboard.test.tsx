@@ -60,13 +60,14 @@ test("renders seasons and switches focus", async () => {
   usePathnameMock.mockReturnValue("/network/nerd/cards-collected");
   commonApiFetch.mockResolvedValue([{ id: 1, display: "S1" }]);
   const setFocus = jest.fn();
+  const setTdhView = jest.fn();
   const user = userEvent.setup();
   render(
     <Leaderboard
       focus={LeaderboardFocus.TDH}
       setFocus={setFocus}
       tdhView={ApiConsolidatedTdhView.Boosted}
-      setTdhView={jest.fn()}
+      setTdhView={setTdhView}
     />
   );
   await waitFor(() => expect(commonApiFetch).toHaveBeenCalled());
@@ -76,13 +77,24 @@ test("renders seasons and switches focus", async () => {
   await user.click(screen.getByRole("button", { name: "Interactions" }));
   expect(setFocus).toHaveBeenCalledWith(LeaderboardFocus.INTERACTIONS);
 
+  await user.click(screen.getByRole("tab", { name: "Unboosted" }));
+  expect(setTdhView).toHaveBeenCalledWith(ApiConsolidatedTdhView.Unboosted);
+
   // Change collector to MEMES to enable seasons dropdown
-  await user.click(screen.getByText("Collectors: All"));
-  await user.click(screen.getByText("Memes"));
+  await user.click(
+    screen.getByRole("button", { name: "Collectors: All", exact: true })
+  );
+  await user.click(
+    await screen.findByRole("menuitem", { name: "Memes", exact: true })
+  );
 
   // Now seasons dropdown should be enabled and we can find S1
-  await user.click(screen.getByText("SZN: All"));
-  expect(await screen.findByText("S1")).toBeInTheDocument();
+  await user.click(
+    screen.getByRole("button", { name: "SZN: All", exact: true })
+  );
+  expect(
+    await screen.findByRole("menuitem", { name: "S1", exact: true })
+  ).toBeInTheDocument();
 });
 
 test("shows zero daily change without a loader when selected network TDH is zero", async () => {
