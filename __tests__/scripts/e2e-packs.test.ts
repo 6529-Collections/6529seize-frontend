@@ -36,6 +36,10 @@ const runner = require("../../scripts/e2e-packs.cjs") as {
       pack_exclusion: {
         version: number;
       };
+      serial_failed_pack_retry: {
+        version: number;
+        max_retries: number;
+      };
     };
   };
   assertParallelSafe: (packs: Pack[], parallel: number) => void;
@@ -56,6 +60,7 @@ const runner = require("../../scripts/e2e-packs.cjs") as {
     excludePacks: string[];
     artifactRoot: string | null;
     parallel: number;
+    retryFailedPacks: number;
     capabilities: boolean;
     list: boolean;
     forward: string[];
@@ -82,6 +87,7 @@ const runner = require("../../scripts/e2e-packs.cjs") as {
       environment?: string;
       trigger?: string;
       parallel?: number;
+      retryFailedPacks?: number;
       forward: string[];
       spawn: (
         pack: Pack,
@@ -89,7 +95,13 @@ const runner = require("../../scripts/e2e-packs.cjs") as {
         outputPaths: { root: string; testResults: string; report: string }
       ) => SpawnResult | Promise<SpawnResult>;
       cleanup: (pack: Pack) => void;
-      preserve: (artifactRoot: string, pack: Pack, output: string) => string;
+      preserve: (
+        artifactRoot: string,
+        pack: Pack,
+        output: string,
+        outputPaths: { root: string; testResults: string; report: string },
+        attempt: number
+      ) => string;
       prepare: (artifactRoot: string) => void;
     }
   ) => Promise<{
@@ -98,7 +110,17 @@ const runner = require("../../scripts/e2e-packs.cjs") as {
     evidence: {
       parallelism_requested: number;
       worker_count: number;
-      results: Array<{ script_key: string; failure_class: string | null }>;
+      results: Array<{
+        script_key: string;
+        status: string;
+        failure_class: string | null;
+        attempt_count: number;
+        attempts: Array<{
+          attempt: number;
+          status: string;
+          failure_class: string | null;
+        }>;
+      }>;
     };
   }>;
   runProcessGroup: (
@@ -157,6 +179,8 @@ describe("manifest-driven E2E runner", () => {
         "artifacts/e2e",
         "--parallel",
         "3",
+        "--retry-failed-packs",
+        "1",
         "--shard",
         "1/2",
         "--list",
@@ -168,6 +192,7 @@ describe("manifest-driven E2E runner", () => {
       excludePacks: ["museum-institutional-practice"],
       artifactRoot: "artifacts/e2e",
       parallel: 3,
+      retryFailedPacks: 1,
       capabilities: false,
       list: true,
       forward: ["--shard=1/2"],
@@ -184,6 +209,9 @@ describe("manifest-driven E2E runner", () => {
     expect(() => runner.parseArgs(["--parallel", "5"])).toThrow(
       "--parallel must be between 1 and 4"
     );
+    expect(() => runner.parseArgs(["--retry-failed-packs", "2"])).toThrow(
+      "--retry-failed-packs must be 0 or 1"
+    );
   });
 
   it("reports an explicit versioned parallel-runner capability without requiring an environment", () => {
@@ -197,11 +225,16 @@ describe("manifest-driven E2E runner", () => {
         pack_exclusion: {
           version: 1,
         },
+        serial_failed_pack_retry: {
+          version: 1,
+          max_retries: 1,
+        },
       },
     });
     expect(runner.parseArgs(["--capabilities"])).toMatchObject({
       env: null,
       parallel: 1,
+      retryFailedPacks: 0,
       capabilities: true,
     });
     const result = spawnSync(
@@ -387,6 +420,104 @@ describe("manifest-driven E2E runner", () => {
       } else {
         process.env["GITHUB_STEP_SUMMARY"] = previousSummary;
       }
+      fs.rmSync(summaryDir, { recursive: true, force: true });
+    }
+  });
+
+  it("retries only failed packs once in serial and preserves both attempts", async () => {
+    const summaryDir = fs.mkdtempSync(path.join(os.tmpdir(), "e2e-retry-"));
+    const packs = [
+      samplePacks[0]!,
+      {
+        ...samplePacks[0]!,
+        scriptKey: "test:e2e:staging:second-readonly",
+      },
+      {
+        ...samplePacks[0]!,
+        scriptKey: "test:e2e:staging:third-readonly",
+      },
+    ];
+    const calls = new Map<string, number>();
+    let active = 0;
+    let peak = 0;
+    const retryOrder: string[] = [];
+
+    try {
+      const result = await runner.runPacks(packs, {
+        artifactRoot: path.join(summaryDir, "staging-e2e-artifacts"),
+        environment: "staging",
+        trigger: "post-deploy",
+        parallel: 3,
+        retryFailedPacks: 1,
+        forward: [],
+        spawn: async (pack, _forward, outputPaths) => {
+          const call = (calls.get(pack.scriptKey) ?? 0) + 1;
+          calls.set(pack.scriptKey, call);
+          active += 1;
+          peak = Math.max(peak, active);
+          if (call === 2) {
+            retryOrder.push(pack.scriptKey);
+            expect(active).toBe(1);
+            expect(outputPaths.root).toContain("attempt-2");
+          }
+          await new Promise((resolve) => setTimeout(resolve, 5));
+          active -= 1;
+          const persistentFailure = pack.scriptKey.includes("second");
+          const transientFailure =
+            pack.scriptKey.includes("smoke") && call === 1;
+          return {
+            status: persistentFailure || transientFailure ? 1 : 0,
+            signal: null,
+            stdout: `attempt ${call}`,
+            stderr: "",
+          };
+        },
+        cleanup: () => undefined,
+        preserve: (_artifactRoot, pack, _output, _paths, attempt) =>
+          `staging-e2e-artifacts/${pack.alias ?? pack.scriptKey}/attempt-${attempt}`,
+        prepare: (artifactRoot) =>
+          fs.mkdirSync(artifactRoot, { recursive: true }),
+      });
+
+      expect(peak).toBe(3);
+      expect(retryOrder).toEqual([
+        "test:e2e:staging:smoke",
+        "test:e2e:staging:second-readonly",
+      ]);
+      expect(Object.fromEntries(calls)).toEqual({
+        "test:e2e:staging:smoke": 2,
+        "test:e2e:staging:second-readonly": 2,
+        "test:e2e:staging:third-readonly": 1,
+      });
+      expect(result).toMatchObject({
+        failedCount: 1,
+        infrastructureFailureCount: 0,
+        evidence: {
+          serial_retry_limit: 1,
+          results: [
+            {
+              script_key: "test:e2e:staging:smoke",
+              status: "passed",
+              attempt_count: 2,
+              attempts: [
+                { attempt: 1, status: "failed", failure_class: "e2e" },
+                { attempt: 2, status: "passed", failure_class: null },
+              ],
+            },
+            {
+              script_key: "test:e2e:staging:second-readonly",
+              status: "failed",
+              attempt_count: 2,
+            },
+            {
+              script_key: "test:e2e:staging:third-readonly",
+              status: "passed",
+              attempt_count: 1,
+            },
+          ],
+        },
+      });
+    } finally {
       fs.rmSync(summaryDir, { recursive: true, force: true });
     }
   });
