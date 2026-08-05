@@ -81,7 +81,12 @@ export default function AboutCookiePolicy() {
           <Container className="!tw-px-0">
             <Row className="tw-pb-3">
               <Col>
-                <h3 className="tw-mb-0">Strictly Necessary Cookies</h3>
+                <h3
+                  id="strictly-necessary-cookies-heading"
+                  className="tw-mb-0"
+                >
+                  Strictly Necessary Cookies
+                </h3>
               </Col>
             </Row>
             <Row className="tw-pt-2">
@@ -96,7 +101,12 @@ export default function AboutCookiePolicy() {
               </Col>
             </Row>
             <Row>
-              <Col className="tw-overflow-x-auto">
+              <Col
+                role="region"
+                aria-labelledby="strictly-necessary-cookies-heading"
+                tabIndex={0}
+                className="tw-overflow-x-auto tw-rounded-lg focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
+              >
                 <Table className={COOKIE_POLICY_TABLE_CLASS}>
                   <thead>
                     <tr>
@@ -167,10 +177,13 @@ export default function AboutCookiePolicy() {
           <Container className="!tw-px-0">
             <Row className="tw-pb-3">
               <Col className="tw-flex tw-items-center tw-justify-between">
-                <h3 className="tw-mb-0">Performance Cookies</h3>
+                <h3 id="performance-cookies-heading" className="tw-mb-0">
+                  Performance Cookies
+                </h3>
                 <span className="tw-flex tw-items-center tw-gap-2">
                   <label
                     htmlFor={"performance-cookies-toggle"}
+                    id="performance-cookies-state"
                     className="tw-text-iron-100"
                   >
                     <b>
@@ -180,6 +193,7 @@ export default function AboutCookiePolicy() {
                   <Toggle
                     disabled={showCookieConsent}
                     id={"performance-cookies-toggle"}
+                    aria-labelledby="performance-cookies-heading performance-cookies-state"
                     checked={isPerformanceCookiesEnabled}
                     onChange={togglePerformanceCookies}
                   />
@@ -200,7 +214,12 @@ export default function AboutCookiePolicy() {
               </Col>
             </Row>
             <Row>
-              <Col className="tw-overflow-x-auto">
+              <Col
+                role="region"
+                aria-labelledby="performance-cookies-heading"
+                tabIndex={0}
+                className="tw-overflow-x-auto tw-rounded-lg focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
+              >
                 <Table className={COOKIE_POLICY_TABLE_CLASS}>
                   <thead>
                     <tr>
