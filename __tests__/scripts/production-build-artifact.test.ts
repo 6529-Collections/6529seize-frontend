@@ -16,6 +16,13 @@ describe("production prebuild and promotion contract", () => {
 
   it("builds exact main bytes without deployment authority", () => {
     expect(build.on.push.branches).toEqual(["main"]);
+    expect(build.on.workflow_dispatch).toBeDefined();
+    expect(build.on.push["paths-ignore"]).toEqual([
+      ".github/**",
+      "__tests__/**",
+      "ops/**",
+      "tests/**",
+    ]);
     const job = build.jobs["build-production-artifact"];
     const serialized = JSON.stringify(job);
     const verifyIndex = job.steps.findIndex(
@@ -37,6 +44,7 @@ describe("production prebuild and promotion contract", () => {
     expect(buildSource).toContain("find manifest.json target -type f -print0");
     expect(buildSource).toContain("production-frontend-${{ github.sha }}");
     expect(job["runs-on"]).toContain("PRODUCTION_BUILD_RUNNER");
+    expect(JSON.stringify(build.jobs)).not.toContain('"uses":"./.github/');
   });
 
   it("promotes only a successful exact-workflow artifact and never rebuilds", () => {
@@ -66,6 +74,9 @@ describe("production prebuild and promotion contract", () => {
     expect(locate.run).toContain('.conclusion == "success"');
     expect(locate.run).toContain(
       '(.event == "push" or .event == "workflow_dispatch")'
+    );
+    expect(locate.run).toContain(
+      "No successful exact production prebuild is available"
     );
     expect(verifyIndex).toBeGreaterThan(-1);
     expect(verifyIndex).toBeLessThan(awsIndex);
