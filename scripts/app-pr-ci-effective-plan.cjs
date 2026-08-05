@@ -3,6 +3,9 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
+const {
+  isMuseumOwnedPath,
+} = require("./museum-e2e-change-set.cjs");
 
 const PACKAGE_GOVERNANCE_FILES = new Set([
   ".npmrc",
@@ -32,20 +35,11 @@ const RELEASE_BUS_CONTRACT_PATTERNS = [
   /^\.github\/workflows\//u,
   /^ops\/deployment-bus\//u,
   /^ops\/scripts\/(?:deployment-bus|deploy-staging-artifact|release-bus-status|verify-deployment-version)\./u,
-  /^scripts\/(?:app-pr-ci-effective-plan|e2e-packs|pr-ci-policy-bundle|release-bus-|sync-e2e-manifest)/u,
+  /^scripts\/(?:app-pr-ci-effective-plan|e2e-packs|museum-e2e-change-set|pr-ci-policy-bundle|release-bus-|sync-e2e-manifest)/u,
   /^tests\/packs\.manifest\.cjs$/u,
-  /^__tests__\/scripts\/(?:app-pr-ci-effective-plan|deployment-bus|e2e-packs|manual-deploy-routing-guard|pr-ci-policy-bundle|release-bus-|sync-e2e-manifest)/u,
+  /^__tests__\/scripts\/(?:app-pr-ci-effective-plan|deployment-bus|e2e-packs|manual-deploy-routing-guard|museum-e2e-change-set|pr-ci-policy-bundle|release-bus-|sync-e2e-manifest)/u,
   /^(?:package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml)$/u,
 ];
-const MUSEUM_PLAYWRIGHT_PATTERNS = [
-  /^app\/museum\/network\//u,
-  /^components\/museum\//u,
-  /^lib\/museum\//u,
-  /^config\/museumPublicationEnv\.server\.ts$/u,
-  /^tests\/museum\//u,
-  /^i18n\/messages\/museum\.en-US\.json$/u,
-];
-
 function check(required, reason) {
   return { required, reason };
 }
@@ -99,9 +93,7 @@ function applyEffectiveAppPrCiPlan(plan, { cwd = process.cwd() } = {}) {
   const releaseBusContract = files.some((file) =>
     RELEASE_BUS_CONTRACT_PATTERNS.some((pattern) => pattern.test(file))
   );
-  const playwrightMuseum = files.some((file) =>
-    MUSEUM_PLAYWRIGHT_PATTERNS.some((pattern) => pattern.test(file))
-  );
+  const playwrightMuseum = files.some(isMuseumOwnedPath);
 
   const checks = {
     ...plan.checks,

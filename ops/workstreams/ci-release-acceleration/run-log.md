@@ -109,3 +109,25 @@
   `origin/main` merge base and diffs that commit against the current index and
   working tree, matching the changed-lint boundary. A contract test rejects a
   return to the local-main range.
+
+## 2026-08-05
+
+- PR #3598 merged as `1b88da6214d1c97c6a22ea40e8e7e0d5285dcd0d`.
+  Exact App CI run 30963778437 completed with a 10m34s longest lane and omitted
+  Museum coverage for its non-Museum change set.
+- Staging composition `dbc152937798086696f007b43e0c83652ab9074b`
+  deployed in run 30964484960. Automatic staging E2E 30965170461 passed all
+  twelve selected packs in 6m55s dispatch-to-finish. Concurrent production
+  prebuild 30964439072 completed in 13m33s.
+- Production run 30965594547 promoted the verified prebuild in 5m16s, down
+  from the audited 22m12s. Automatic production E2E 30965872983 passed all
+  twelve packs; exact live version and representative Museum/non-Museum routes
+  were healthy.
+- Merge-to-production was 27m38s; merge-to-complete-production-E2E was 38m46s.
+  Both beat the target pipeline's initial service levels.
+- Final live evidence showed the non-Museum production release still selected
+  the 8m14s Museum pack. A shared exact path classifier now owns staging and
+  production selection. Production derives its base from the immediately prior
+  successful production deployment rather than assuming the new commit's first
+  parent. Missing history, invalid SHAs, Git failures, and older runners all
+  retain Museum E2E fail-closed.
