@@ -106,6 +106,56 @@ describe("Museum domain mapping", () => {
             record_scope: "Not an accession statement.",
           }
         ),
+        "records/programs/6529NM-AP-01/media-manifest.json": jsonDocument(
+          "records/programs/6529NM-AP-01/media-manifest.json",
+          {
+            items: [
+              {
+                record_id: "6529NM-AP-01-OUT-001",
+                source: {
+                  url: "https://d3lqz0a4bldqgf.cloudfront.net/drops/work.jpg",
+                  mime_type: "image/jpeg",
+                  sha256: `sha256:${"b".repeat(64)}`,
+                  byte_size: 12000000,
+                  pixel_width: 6000,
+                  pixel_height: 4000,
+                },
+                presentation: {
+                  alt_text:
+                    "A figure stands before a bright gate in a dark stone hall.",
+                  alt_text_status:
+                    "constructed_visual_description_pending_independent_review",
+                  derivatives: [
+                    {
+                      url: "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/6529NM-AP-01/work/640.webp",
+                      width: 640,
+                      height: 427,
+                      mime_type: "image/webp",
+                      sha256: `sha256:${"c".repeat(64)}`,
+                      byte_size: 32000,
+                    },
+                    {
+                      url: "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/6529NM-AP-01/work/1280.webp",
+                      width: 1280,
+                      height: 853,
+                      mime_type: "image/webp",
+                      sha256: `sha256:${"d".repeat(64)}`,
+                      byte_size: 110000,
+                    },
+                    {
+                      url: "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/6529NM-AP-01/work/2400.webp",
+                      width: 2400,
+                      height: 1600,
+                      mime_type: "image/webp",
+                      sha256: `sha256:${"e".repeat(64)}`,
+                      byte_size: 410000,
+                    },
+                  ],
+                },
+              },
+            ],
+          }
+        ),
         "records/accessions/6529NM.2026.001/objects/object-001.json":
           jsonDocument(
             "records/accessions/6529NM.2026.001/objects/object-001.json",
@@ -142,8 +192,13 @@ describe("Museum domain mapping", () => {
     expect(view.programs[0]?.curatorialFrame).toBe("A program.");
     expect(view.programs[0]?.selectedWorks[0]).toEqual(
       expect.objectContaining({
-        imageUrl: "https://d3lqz0a4bldqgf.cloudfront.net/drops/work.jpg",
-        imageMimeType: "image/jpeg",
+        media: expect.objectContaining({
+          sourceUrl: "https://d3lqz0a4bldqgf.cloudfront.net/drops/work.jpg",
+          altText: "A figure stands before a bright gate in a dark stone hall.",
+          variants: expect.arrayContaining([
+            expect.objectContaining({ width: 640, height: 427 }),
+          ]),
+        }),
       })
     );
     expect(view.objects).toEqual(
@@ -172,7 +227,13 @@ describe("Museum domain mapping", () => {
           accessionLotId: null,
           artistStatement: "A legacy artist statement.",
           programId: "6529NM-AP-01",
-          imageUrl: "https://d3lqz0a4bldqgf.cloudfront.net/drops/work.jpg",
+          media: expect.objectContaining({
+            sourceUrl: "https://d3lqz0a4bldqgf.cloudfront.net/drops/work.jpg",
+            variants: expect.arrayContaining([
+              expect.objectContaining({ width: 1280, height: 853 }),
+              expect.objectContaining({ width: 2400, height: 1600 }),
+            ]),
+          }),
           selectionPlace: 1,
           selectionDate: "2026-07-09T12:00:00Z",
           selectionSourceUrl:
@@ -180,6 +241,65 @@ describe("Museum domain mapping", () => {
           rightsStatus: "unverified until acquisition",
         }),
       ])
+    );
+
+    const mediaManifestPath =
+      "records/programs/6529NM-AP-01/media-manifest.json";
+    const duplicateWidthManifest = JSON.parse(
+      corpus.documents[mediaManifestPath]!.text
+    ) as {
+      items: Array<{
+        presentation: {
+          derivatives: Array<Record<string, unknown>>;
+        };
+      }>;
+    };
+    const firstDerivative =
+      duplicateWidthManifest.items[0]!.presentation.derivatives[0]!;
+    duplicateWidthManifest.items[0]!.presentation.derivatives.push({
+      ...firstDerivative,
+      url: "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/6529NM-AP-01/work/conflicting-640.webp",
+      sha256: `sha256:${"f".repeat(64)}`,
+    });
+    const duplicateWidthView = normalizeMuseumCorpus({
+      ...corpus,
+      documents: {
+        ...corpus.documents,
+        [mediaManifestPath]: jsonDocument(
+          mediaManifestPath,
+          duplicateWidthManifest
+        ),
+      },
+    });
+    expect(duplicateWidthView.programs[0]?.selectedWorks[0]?.media).toEqual(
+      expect.objectContaining({
+        altText: "Selected work by Artist",
+        altTextStatus: "identification_only_fallback",
+        variants: [],
+      })
+    );
+
+    const duplicateRecordManifest = JSON.parse(
+      corpus.documents[mediaManifestPath]!.text
+    ) as { items: Array<Record<string, unknown>> };
+    duplicateRecordManifest.items.push({
+      ...duplicateRecordManifest.items[0]!,
+    });
+    const duplicateRecordView = normalizeMuseumCorpus({
+      ...corpus,
+      documents: {
+        ...corpus.documents,
+        [mediaManifestPath]: jsonDocument(
+          mediaManifestPath,
+          duplicateRecordManifest
+        ),
+      },
+    });
+    expect(duplicateRecordView.programs[0]?.selectedWorks[0]?.media).toEqual(
+      expect.objectContaining({
+        altTextStatus: "identification_only_fallback",
+        variants: [],
+      })
     );
   });
 });

@@ -27,6 +27,9 @@ records.
 - [Inside the System](feature-inside-the-system.md): project-level generative
   system studies, possibility-space maps, causal stages, and the positions of
   works held by the Museum.
+- [Keys and Gates winners](feature-keys-and-gates.md): the sixteen works
+  selected by TDH, their current unminted state, responsive artwork viewing,
+  and access to each submitted high-resolution source.
 - [Institutional practice](feature-institutional-practice.md): the comparative
   essay, twenty-seven profiles, an adjacent-practice study, the Museum's public
   scholarship and editorial standard, and the primary-source register.
@@ -39,12 +42,17 @@ records.
 - The [Inside the System guide](feature-inside-the-system.md#user-journey)
   follows the route from a project or object to its analytical map, causal
   sequence, held-work positions, and research limits.
+- The [Keys and Gates guide](feature-keys-and-gates.md#user-journey) follows a
+  winner from the program page to its artwork page and high-resolution source.
 - The [institutional-practice guide](feature-institutional-practice.md#user-journey)
   follows the route from the study index to a profile, its citations, the
   source register, and the public contribution links.
 
 ## Troubleshooting
 
+- The [Keys and Gates recovery guidance](feature-keys-and-gates.md#failure-and-recovery)
+  explains delayed images, unavailable high-resolution sources, and source
+  publication failures.
 - The [failure and recovery section](feature-institutional-practice.md#failure-and-recovery)
   explains source refreshes, unavailable publications, and external source
   failures.
