@@ -16,9 +16,12 @@ On web layouts, route switching is sidebar-first.
 - Collapsed flyouts enter with a short opacity and horizontal-position reveal;
   reduced-motion preferences show them immediately without animation.
 - The 6529 logo links to `/`; there is no labeled `Home` product row.
-- Primary menu concepts are `NFTs`, `Waves`, `DMs`, `Join 6529`, and `About`.
-- `NFTs` and `About` are expandable groups; `Waves`, `DMs`, and `Join 6529`
-  are direct rows.
+- Primary menu concepts are ordered `NFTs`, `Museum`, `Waves`, `DMs`,
+  `Join 6529`, and `About` so art destinations stay together while Waves and
+  DMs remain adjacent.
+- `NFTs` and `About` are expandable groups; `Museum`, `Waves`, `DMs`, and
+  `Join 6529` are direct rows.
+- The `Museum` row opens `/museum/network` in one click.
 - The `Waves` sidebar row opens `/waves` in one click. `Discover Waves`
   remains a secondary Waves experience link and searchable destination.
 - When the connected wallet can access Drop Forge, the sidebar adds a
@@ -34,7 +37,8 @@ On web layouts, route switching is sidebar-first.
 
 - Web routes rendered with `WebLayout` or `SmallScreenLayout` (non-app).
 - Home entry: 6529 logo link to `/`.
-- Primary rows/groups: `NFTs`, `Waves`, `DMs`, `Join 6529`, `About`.
+- Primary rows/groups: `NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529`,
+  `About`.
 - Gated primary row: `Drop Forge`, after `About`, only when the connected
   wallet can access it.
 - Utility rows: desktop `Search`, connected-only `Notifications`,
@@ -47,6 +51,7 @@ On web layouts, route switching is sidebar-first.
 - Desktop and narrow desktop web: use sidebar chevron toggle.
 - Touch small-screen web: use header menu button.
 - Select direct rows or expand groups for nested routes.
+- Open `Museum` directly from the primary sidebar row.
 - Open `Waves` directly from the primary sidebar row.
 - Open `Join 6529` directly from the primary sidebar row.
 - Open `Discover Waves` from the expanded Waves panel header or search.
@@ -64,8 +69,8 @@ On web layouts, route switching is sidebar-first.
 2. Switch primary sections with direct rows.
 3. Use lower utility rows for connected `Notifications`, connected `Profile`,
    or disconnected `Share`.
-4. Open `NFTs` or `About` for nested routes; use the `Waves` row for direct
-   `/waves` navigation and the `Join 6529` row for `/join-6529`.
+4. Open `NFTs` or `About` for nested routes; use the `Museum`, `Waves`, and
+   `Join 6529` rows for direct navigation.
 5. In collapsed mode, hover a group row with a mouse or activate it by tap,
    click, or keyboard to open an anchored flyout submenu. The flyout preserves
    subsection labels such as `Network & Reputation`, `Delegation & Wallets`, or
@@ -78,9 +83,15 @@ On web layouts, route switching is sidebar-first.
 - Open `NFTs` routes:
   `/the-memes`, `/6529-gradient`, `/nextgen`, `/meme-lab`, `/rememes`,
   `/nft-activity`, `/meme-calendar`.
+- On local development and shared staging, open the pre-deployment Stream
+  review from `NFTs > 6529 Stream — Review`. It appears after `ReMemes` and
+  before `NFT Activity` and opens `/reviews/6529-stream`. It is absent on
+  production.
 - Open `Waves` routes:
   use the primary `Waves` row for `/waves`; use `Discover Waves` in the Waves
   panel header or search for `/discover`.
+- Open `Museum`:
+  use the primary `Museum` row for `/museum/network`.
 - Open `Join 6529`:
   use the primary `Join 6529` row for the shareable onboarding guide at
   `/join-6529`.
@@ -107,7 +118,7 @@ On web layouts, route switching is sidebar-first.
   `NFTs` keeps collection and NFT activity links, and `About` keeps subsection
   labels such as `Network & Reputation`, `Delegation & Wallets`, and
   `Data & Developer Tools` instead of flattening every route into one list.
-  `Waves` and `Join 6529` remain direct rows in collapsed mode.
+  `Museum`, `Waves`, and `Join 6529` remain direct rows in collapsed mode.
 - Open `About` and `6529 Capital` routes from grouped links.
 - Open connected `Notifications` from the lower row above `Profile`.
 - Open `Share` to generate QR/deep links for the current route:
@@ -179,6 +190,9 @@ On web layouts, route switching is sidebar-first.
 - Desktop-web sidebar search supports both `⌘K` and `Ctrl+K`.
 - Sidebar rows change with auth, device context, country gate, and runtime
   feature gates.
+- The Stream review item is controlled by the public-review environment gate,
+  not wallet state. Only loopback development and the exact shared staging
+  hostname enable it initially.
 - Native app primary switching is owned by
   [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md).
 

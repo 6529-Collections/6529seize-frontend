@@ -1,0 +1,446 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0x331c288c",
+          "declaringDefinitionId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase",
+          "inherited": true,
+          "inputs": [],
+          "name": "streamModuleCodeHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x331c288c",
+          "signature": "streamModuleCodeHash()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0x665e0a0b",
+          "declaringDefinitionId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase",
+          "inherited": true,
+          "inputs": [],
+          "name": "streamModuleDeploymentManifestHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x665e0a0b",
+          "signature": "streamModuleDeploymentManifestHash()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamModuleIdentity.t.sol:IdentityTestModule#function:0x1e414a33",
+          "declaringDefinitionId": "test/StreamModuleIdentity.t.sol:IdentityTestModule",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamModuleInterfaceId",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "selector": "0x1e414a33",
+          "signature": "streamModuleInterfaceId()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0x0294a858",
+          "declaringDefinitionId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase",
+          "inherited": true,
+          "inputs": [],
+          "name": "streamModuleManifest",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "uri",
+              "type": "string"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "hash",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x0294a858",
+          "signature": "streamModuleManifest()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0xdbff3398",
+          "declaringDefinitionId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase",
+          "inherited": true,
+          "inputs": [],
+          "name": "streamModuleSchemaHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xdbff3398",
+          "signature": "streamModuleSchemaHash()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0x28746186",
+          "declaringDefinitionId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase",
+          "inherited": true,
+          "inputs": [],
+          "name": "streamModuleSupersedes",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x28746186",
+          "signature": "streamModuleSupersedes()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamModuleIdentity.t.sol:IdentityTestModule#function:0x3cc00767",
+          "declaringDefinitionId": "test/StreamModuleIdentity.t.sol:IdentityTestModule",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamModuleType",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x3cc00767",
+          "signature": "streamModuleType()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/StreamModuleIdentity.t.sol:IdentityTestModule#function:0x99d8b2df",
+          "declaringDefinitionId": "test/StreamModuleIdentity.t.sol:IdentityTestModule",
+          "inherited": false,
+          "inputs": [],
+          "name": "streamModuleVersion",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x99d8b2df",
+          "signature": "streamModuleVersion()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase#function:0x01ffc9a7",
+          "declaringDefinitionId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase",
+          "inherited": true,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x01ffc9a7",
+          "signature": "supportsInterface(bytes4)",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(bytes32,address,bytes32,string,bytes32)",
+          "functionKind": "constructor",
+          "id": "test/StreamModuleIdentity.t.sol:IdentityTestModule#function:constructor(bytes32,address,bytes32,string,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "schemaHash_",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "supersedes_",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "deploymentManifestHash_",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "manifestURI_",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 4,
+              "name": "manifestHash_",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVJZGVudGl0eS50LnNvbDpJZGVudGl0eVRlc3RNb2R1bGUjZnVuY3Rpb246Y29uc3RydWN0b3IoYnl0ZXMzMixhZGRyZXNzLGJ5dGVzMzIsc3RyaW5nLGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [
+            "StreamModuleBase"
+          ],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 318,
+            "byteStart": 335,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleIdentity.t.sol#L11-L21",
+            "lineEnd": 21,
+            "lineStart": 11,
+            "snippetSha256": "sha256:505085658adca7221ac10ad3e8f617c975d6e4f08b7062b1655192984f5a48cb",
+            "sourceSha256": "sha256:84a082d7d7c395020e1127149cc7ccfffbb988a1ead5d807c38418cecf0716cd"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "streamModuleType()",
+          "displaySignature": "streamModuleType()",
+          "functionKind": "function",
+          "id": "test/StreamModuleIdentity.t.sol:IdentityTestModule#function:0x3cc00767",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVJZGVudGl0eS50LnNvbDpJZGVudGl0eVRlc3RNb2R1bGUjZnVuY3Rpb246MHgzY2MwMDc2Nw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamModuleType",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 122,
+            "byteStart": 659,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleIdentity.t.sol#L23-L25",
+            "lineEnd": 25,
+            "lineStart": 23,
+            "snippetSha256": "sha256:b7ebbf33e3690520be9bd291257eabcf5d877c531b0ab3f401e1c6481d8340fc",
+            "sourceSha256": "sha256:84a082d7d7c395020e1127149cc7ccfffbb988a1ead5d807c38418cecf0716cd"
+          },
+          "selector": "0x3cc00767",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "streamModuleVersion()",
+          "displaySignature": "streamModuleVersion()",
+          "functionKind": "function",
+          "id": "test/StreamModuleIdentity.t.sol:IdentityTestModule#function:0x99d8b2df",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVJZGVudGl0eS50LnNvbDpJZGVudGl0eVRlc3RNb2R1bGUjZnVuY3Rpb246MHg5OWQ4YjJkZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamModuleVersion",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 113,
+            "byteStart": 787,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleIdentity.t.sol#L27-L29",
+            "lineEnd": 29,
+            "lineStart": 27,
+            "snippetSha256": "sha256:a04d1d1b4b935b4f2c46a685380185974a2559a394a5e2cb1f7e78532dc39a22",
+            "sourceSha256": "sha256:84a082d7d7c395020e1127149cc7ccfffbb988a1ead5d807c38418cecf0716cd"
+          },
+          "selector": "0x99d8b2df",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "streamModuleInterfaceId()",
+          "displaySignature": "streamModuleInterfaceId()",
+          "functionKind": "function",
+          "id": "test/StreamModuleIdentity.t.sol:IdentityTestModule#function:0x1e414a33",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVJZGVudGl0eS50LnNvbDpJZGVudGl0eVRlc3RNb2R1bGUjZnVuY3Rpb246MHgxZTQxNGEzMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "streamModuleInterfaceId",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "range": {
+            "byteLength": 128,
+            "byteStart": 906,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleIdentity.t.sol#L31-L33",
+            "lineEnd": 33,
+            "lineStart": 31,
+            "snippetSha256": "sha256:561abbe95c09aece677e8538e16517da24781ca66e3cf36cdd302c374f13820c",
+            "sourceSha256": "sha256:84a082d7d7c395020e1127149cc7ccfffbb988a1ead5d807c38418cecf0716cd"
+          },
+          "selector": "0x1e414a33",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamModuleIdentity.t.sol:IdentityTestModule",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/StreamModuleBase.sol:StreamModuleBase",
+        "name": "StreamModuleBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Nb2R1bGVJZGVudGl0eS50LnNvbDpJZGVudGl0eVRlc3RNb2R1bGU",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamModuleIdentity.t.sol:IdentityTestModule",
+      "smart-contracts/StreamModuleBase.sol:StreamModuleBase",
+      "smart-contracts/IStreamModule.sol:IStreamModule",
+      "smart-contracts/ERC165.sol:ERC165",
+      "smart-contracts/IERC165.sol:IERC165"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "IdentityTestModule",
+    "natspec": "",
+    "range": {
+      "byteLength": 755,
+      "byteStart": 281,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleIdentity.t.sol#L10-L34",
+      "lineEnd": 34,
+      "lineStart": 10,
+      "snippetSha256": "sha256:747ffda8d0d63906b6913f965c6c9c8a6104cec3e047db726b689461f94600df",
+      "sourceSha256": "sha256:84a082d7d7c395020e1127149cc7ccfffbb988a1ead5d807c38418cecf0716cd"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamModuleIdentity.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 5
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 4
+    },
+    "totalCount": 5
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamModuleIdentity.t.sol:IdentityTestModule",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleIdentity.t.sol:IdentityTestModule#function:0x1e414a33",
+      "definitionId": "test/StreamModuleIdentity.t.sol:IdentityTestModule",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleIdentity.t.sol:IdentityTestModule#function:0x3cc00767",
+      "definitionId": "test/StreamModuleIdentity.t.sol:IdentityTestModule",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleIdentity.t.sol:IdentityTestModule#function:0x99d8b2df",
+      "definitionId": "test/StreamModuleIdentity.t.sol:IdentityTestModule",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleIdentity.t.sol:IdentityTestModule#function:constructor(bytes32,address,bytes32,string,bytes32)",
+      "definitionId": "test/StreamModuleIdentity.t.sol:IdentityTestModule",
+      "severity": "advisory"
+    }
+  ]
+}

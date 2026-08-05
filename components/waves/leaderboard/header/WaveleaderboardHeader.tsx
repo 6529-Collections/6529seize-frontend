@@ -1,11 +1,12 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { resolveWaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { useWaveSubmissionButtonLabel } from "@/hooks/waves/useWaveMetadata";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useWave } from "@/hooks/useWave";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { AnimatePresence, motion } from "framer-motion";
@@ -288,6 +289,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   maxPrice,
   onPriceRangeChange,
 }) => {
+  const isLargeScreen = useMediaQuery("(min-width: 1024px)");
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { isMemesWave, isCurationWave, isQuorumWave, participation } =
     useWave(wave);
@@ -381,6 +383,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
       }),
     [measurements, showPriceActions]
   );
+  const sortMode = isLargeScreen ? "tabs" : "dropdown";
 
   const onTogglePriceFilters = () => {
     if (hasActivePriceFilters) {
@@ -443,7 +446,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             <WaveleaderboardSort
               sort={sort}
               onSortChange={onSortChange}
-              mode={layout.sortMode}
+              mode={sortMode}
               items={sortItems}
             />
           </div>
@@ -465,15 +468,14 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             className={`tw-flex tw-flex-col tw-items-end ${isMemesWave ? "lg:tw-hidden" : ""}`}
           >
             {canCreateDrop && onCreateDrop && (
-              <PrimaryButton
-                loading={false}
-                disabled={false}
-                onClicked={onCreateDrop}
-                padding="tw-px-3 tw-py-2"
+              <Button
+                onClick={onCreateDrop}
+                variant="primary"
+                size="sm"
               >
-                <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
+                <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
                 <span>{createLabel}</span>
-              </PrimaryButton>
+              </Button>
             )}
           </div>
         )}

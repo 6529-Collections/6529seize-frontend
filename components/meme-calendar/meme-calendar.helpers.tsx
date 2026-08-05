@@ -31,7 +31,7 @@ const MINT_END_EUROPE_MINUTE = 0;
 const MILLIS_PER_DAY = 1000 * 60 * 60 * 24;
 
 // UTC helpers
-function startOfUtcDay(d: Date): Date {
+export function startOfUtcDay(d: Date): Date {
   return new Date(
     Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
   );
@@ -71,9 +71,9 @@ const HISTORIC_MINT_PHASES: Array<{ startUtcDay: Date; endUtcDay: Date }> = [
 
 // Helper: does this UTC day fall in a mintable phase?
 function isInHistoricPhase(utcDay: Date): boolean {
-  const t = +startOfUtcDay(utcDay);
+  const timestamp = +startOfUtcDay(utcDay);
   for (const p of HISTORIC_MINT_PHASES) {
-    if (t >= +p.startUtcDay && t <= +p.endUtcDay) return true;
+    if (timestamp >= +p.startUtcDay && timestamp <= +p.endUtcDay) return true;
   }
   return false;
 }
@@ -94,7 +94,7 @@ export function isMintEligibleUtcDay(utcDay: Date): boolean {
 const FIRST_MINT_DATE: Date = (() => {
   // find first Mon/Wed/Fri on/after 2023-01-01 that is inside the first phase
   const phase = HISTORIC_MINT_PHASES[0];
-  let d = startOfUtcDay(phase?.startUtcDay!);
+  const d = startOfUtcDay(phase?.startUtcDay!);
   while (+d <= +phase?.endUtcDay!) {
     if (isMintEligibleUtcDay(d)) return d;
     d.setUTCDate(d.getUTCDate() + 1);
@@ -158,7 +158,7 @@ export function nextMintDateOnOrAfter(d: Date = new Date()): Date {
 }
 
 function prevMintDateOnOrBefore(d: Date): Date {
-  let x = startOfUtcDay(d);
+  const x = startOfUtcDay(d);
   // if we go before the first historic mint, just return the first historic mint day
   if (+x < +FIRST_MINT_DATE) return new Date(FIRST_MINT_DATE);
   for (let i = 0; i < 4000; i++) {
@@ -176,7 +176,7 @@ export function mintStartInstantUtcForMintDay(utcDay: Date): Date {
   );
 }
 
-function mintEndInstantUtcForMintDay(utcDay: Date): Date {
+export function mintEndInstantUtcForMintDay(utcDay: Date): Date {
   const nextDay = new Date(
     Date.UTC(
       utcDay.getUTCFullYear(),
@@ -669,115 +669,6 @@ export const formatFullDateTime = (
 };
 
 // ---- Calendar links: create timed events with UTC Z timestamps ----
-function ymdHmsUtc(d: Date): string {
-  const y = d.getUTCFullYear();
-  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const da = String(d.getUTCDate()).padStart(2, "0");
-  const hh = String(d.getUTCHours()).padStart(2, "0");
-  const mm = String(d.getUTCMinutes()).padStart(2, "0");
-  const ss = String(d.getUTCSeconds()).padStart(2, "0");
-  return `${y}${m}${da}T${hh}${mm}${ss}Z`;
-}
-function createGoogleCalendarUrl(
-  startInstantUtc: Date,
-  endInstantUtc: Date,
-  title: string,
-  details: string
-): string {
-  const params = new URLSearchParams({
-    action: "TEMPLATE",
-    text: `${title} Minting`,
-    dates: `${ymdHmsUtc(startInstantUtc)}/${ymdHmsUtc(endInstantUtc)}`,
-    details,
-  });
-  return `https://calendar.google.com/calendar/render?${params.toString()}`;
-}
-function createIcsDataUrl(
-  startInstantUtc: Date,
-  endInstantUtc: Date,
-  title: string,
-  description: string
-): string {
-  const dtStart = ymdHmsUtc(startInstantUtc);
-  const dtEnd = ymdHmsUtc(endInstantUtc);
-  const uid = `meme-${dtStart}@6529.io`;
-  const ics = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//6529.io//Meme Calendar//EN",
-    "BEGIN:VEVENT",
-    `UID:${uid}`,
-    `DTSTAMP:${ymdHmsUtc(new Date())}`,
-    `DTSTART:${dtStart}`,
-    `DTEND:${dtEnd}`,
-    `SUMMARY:${title} Minting`,
-    `DESCRIPTION:${description.replaceAll("\n", "\\n")}`,
-    "END:VEVENT",
-    "END:VCALENDAR",
-  ].join("\r\n");
-  return `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`;
-}
-
-type CalendarInviteLabels = {
-  readonly addToCalendar: string;
-  readonly addToGoogleCalendar: string;
-};
-
-const DEFAULT_CALENDAR_INVITE_LABELS: CalendarInviteLabels = {
-  addToCalendar: "Add to Calendar",
-  addToGoogleCalendar: "Add to Google Calendar",
-};
-
-function escapeHtmlAttribute(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
-}
-
-// Accept either a UTC day (mint day) or an instant; always emit timed links at the correct mint instant
-export function printCalendarInvites(
-  dateOrInstant: Date,
-  mintNumber: number,
-  fontColor: string = "#fff",
-  size: number = 22,
-  labels: CalendarInviteLabels = DEFAULT_CALENDAR_INVITE_LABELS,
-  locale = "en-US"
-): string {
-  // Normalize to mint instant in UTC
-  const utcDay = startOfUtcDay(dateOrInstant);
-  const isEligibleMintDay = isMintEligibleUtcDay(utcDay);
-  const mintStartUtc = isEligibleMintDay
-    ? mintStartInstantUtcForMintDay(utcDay)
-    : new Date(dateOrInstant);
-  const mintEndUtc = mintEndInstantUtcForMintDay(utcDay);
-
-  const title = `Meme ${formatMint(mintNumber, locale)}`;
-  const fullLocal = formatFullDateTime(mintStartUtc, "local", locale);
-  const fullUtc = formatFullDateTime(mintStartUtc, "utc", locale);
-  const desc = `${title} — ${fullLocal} / ${fullUtc}\n\nhttps://6529.io/the-memes/mint`;
-
-  const gUrl = createGoogleCalendarUrl(mintStartUtc, mintEndUtc, title, desc);
-  const icsUrl = createIcsDataUrl(mintStartUtc, mintEndUtc, title, desc);
-  const addToCalendarLabel = escapeHtmlAttribute(labels.addToCalendar);
-  const addToGoogleCalendarLabel = escapeHtmlAttribute(
-    labels.addToGoogleCalendar
-  );
-  const safeFontColor = escapeHtmlAttribute(fontColor);
-
-  return `
-    <div style="display:flex; gap:15px; align-items:center;">
-      <a href="${icsUrl}" download="meme-${mintNumber}-minting.ics" aria-label="${addToCalendarLabel}" title="${addToCalendarLabel}" style="display:flex; align-items:center; gap:5px; text-decoration:none; color:${safeFontColor};">
-        <img src="/calendar-ics.png" alt="" aria-hidden="true" style="width:${size}px;height:${size}px" />
-      </a>
-      <a href="${gUrl}" target="_blank" rel="noopener noreferrer" aria-label="${addToGoogleCalendarLabel}" title="${addToGoogleCalendarLabel}" style="display:flex; align-items:center; gap:5px; text-decoration:none; color:${safeFontColor};">
-        <img src="/calendar-google.png" alt="" aria-hidden="true" style="width:${size}px;height:${size}px" />
-      </a>
-    </div>`;
-}
-
 // Helper: get label for a date range using mint numbers (locale formatted)
 export function getRangeLabel(
   start: Date,
@@ -824,7 +715,7 @@ export function formatToFullDivision(
   const eonDates = getRangeDatesByZoom("eon", idx);
 
   return (
-    <table className="tw-inline-table tw-w-auto tw-table-auto tw-border-collapse">
+    <table className="tw-w-full tw-border-collapse">
       <tbody>
         {printDivision(
           "SZN",
@@ -864,145 +755,29 @@ function printDivision(
   locale: SupportedLocale
 ) {
   return (
-    <tr>
-      <td className="tw-whitespace-nowrap tw-py-1 tw-pr-4 tw-font-semibold">
+    <tr className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800/80 last:tw-border-b-0">
+      <td className="tw-w-24 tw-whitespace-nowrap tw-py-2 tw-pr-4 tw-align-top tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
         {label} {formatInteger(locale, number)}
       </td>
-      <td className="tw-whitespace-nowrap tw-py-1">
-        <span className="tw-text-gray-400">{range}</span>
+      <td className="tw-min-w-0 tw-py-2 tw-text-right tw-align-top">
+        <span className="tw-break-words tw-text-sm tw-leading-5 tw-text-iron-300">
+          {range}
+        </span>
       </td>
     </tr>
   );
 }
 
+// eslint-disable-next-line import/no-cycle -- Keep the established helper barrel API while the invite module consumes date helpers from this file.
+export { printCalendarInvites } from "./meme-calendar.invites";
+// eslint-disable-next-line import/no-cycle -- Keep the established helper barrel API while the upcoming module consumes schedule helpers from this file.
+export {
+  getCanonicalNextMintNumber,
+  getUpcomingMintsAcrossSeasons,
+  getUpcomingMintsForCurrentOrNextSeason,
+  getUpcomingMintsForSeasonIndex,
+  type SeasonMintRow,
+  type SeasonMintScanResult,
+} from "./meme-calendar.upcoming";
+
 // ---- Reusable season scan helper ----
-export interface SeasonMintRow {
-  utcDay: Date;
-  instantUtc: Date;
-  meme: number;
-  seasonIndex: number;
-}
-
-export interface SeasonMintScanResult {
-  /** First UTC day considered for the season (1st of month at 00:00 UTC). */
-  seasonStart: Date;
-  /** Last UTC day considered for the season (last day of month at 00:00 UTC). */
-  seasonEndInclusive: Date;
-  /** Season index derived from the provided range's start. */
-  seasonIndex: number;
-  /** Upcoming mints strictly after `now`. */
-  rows: SeasonMintRow[];
-}
-
-/**
- * Compute upcoming mints within a [start, end] range (inclusive by UTC day).
- * - Clamps the scan start to **today (UTC)** so only *future* mint instants are returned.
- * - Honors all scheduling rules via `isMintEligibleUtcDay` and `mintStartInstantUtcForMintDay`.
- */
-function getUpcomingMintsBetween(
-  start: Date,
-  end: Date,
-  now: Date = new Date()
-): SeasonMintScanResult {
-  // Normalize anchors to UTC day boundaries
-  const todayUtcDay = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
-  );
-  const seasonStart = new Date(
-    Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1)
-  );
-  const seasonEndInclusive = new Date(
-    Date.UTC(end.getUTCFullYear(), end.getUTCMonth() + 1, 0)
-  );
-
-  // Begin scanning from the later of today vs season start
-  const scanStart = new Date(
-    Math.max(todayUtcDay.getTime(), seasonStart.getTime())
-  );
-
-  const seasonIndex = getSeasonIndexForDate(seasonStart);
-  const out: SeasonMintRow[] = [];
-  const cursor = new Date(scanStart);
-  while (+cursor <= +seasonEndInclusive) {
-    if (isMintEligibleUtcDay(cursor)) {
-      const mintInstant = mintStartInstantUtcForMintDay(cursor);
-      out.push({
-        utcDay: new Date(cursor),
-        instantUtc: mintInstant,
-        meme: getMintNumberForMintDate(cursor),
-        seasonIndex,
-      });
-    }
-    cursor.setUTCDate(cursor.getUTCDate() + 1);
-  }
-
-  const rows = out.filter((x) => x.instantUtc.getTime() > now.getTime());
-
-  return { seasonStart, seasonEndInclusive, seasonIndex, rows };
-}
-
-/**
- * Get upcoming mints for the season containing `now`. If none remain in that
- * season (strictly after `now`), automatically fall forward to the next season.
- */
-export function getUpcomingMintsForCurrentOrNextSeason(
-  now: Date = new Date()
-): SeasonMintScanResult {
-  const idx = getSeasonIndexForDate(now);
-  const start = getSeasonStartDate(idx);
-  const end = addMonths(start, 2);
-
-  let current = getUpcomingMintsBetween(start, end, now);
-  if (current.rows.length > 0) {
-    return current;
-  }
-
-  const nextIdx = idx + 1;
-  const nextStart = getSeasonStartDate(nextIdx);
-  const nextEnd = addMonths(nextStart, 2);
-  const next = getUpcomingMintsBetween(nextStart, nextEnd, now);
-
-  // Ensure seasonIndex reflects the next season when we roll forward
-  return {
-    ...next,
-    seasonIndex: nextIdx,
-  };
-}
-
-export function getUpcomingMintsForSeasonIndex(
-  seasonIndex: number,
-  now: Date = new Date()
-): SeasonMintScanResult {
-  const start = getSeasonStartDate(seasonIndex);
-  const end = addMonths(start, 2);
-  return getUpcomingMintsBetween(start, end, now);
-}
-
-export function getUpcomingMintsAcrossSeasons(
-  minCount: number,
-  now: Date = new Date()
-): SeasonMintRow[] {
-  const result: SeasonMintRow[] = [];
-  let idx = getSeasonIndexForDate(now);
-
-  while (result.length < minCount) {
-    const season = getUpcomingMintsForSeasonIndex(idx, now);
-    result.push(...season.rows);
-    idx++;
-    if (idx > getSeasonIndexForDate(now) + 4) break;
-  }
-
-  return result.slice(0, minCount);
-}
-
-export function getCanonicalNextMintNumber(now: Date = new Date()): number {
-  const upcomingInstant = getNextMintStart(now);
-  const upcomingUtcDay = new Date(
-    Date.UTC(
-      upcomingInstant.getUTCFullYear(),
-      upcomingInstant.getUTCMonth(),
-      upcomingInstant.getUTCDate()
-    )
-  );
-  return getMintNumberForMintDate(upcomingUtcDay);
-}

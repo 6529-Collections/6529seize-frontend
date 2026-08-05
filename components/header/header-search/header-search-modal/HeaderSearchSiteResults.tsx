@@ -16,6 +16,7 @@ import {
 } from "react";
 
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
+import Button from "@/components/utils/button/Button";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -240,6 +241,7 @@ export function HeaderSearchSiteResults({
   const goToProfile = useCallback(
     (profile: CommunityMemberMinimal) => {
       rememberCurrentSearch();
+      onClose();
       router.push(
         getProfileTargetRoute({
           handleOrWallet: profile.handle ?? profile.wallet.toLowerCase(),
@@ -247,7 +249,6 @@ export function HeaderSearchSiteResults({
           defaultPath: USER_PAGE_TAB_IDS.REP,
         })
       );
-      onClose();
     },
     [onClose, pathname, rememberCurrentSearch, router]
   );
@@ -255,13 +256,13 @@ export function HeaderSearchSiteResults({
   const goToWave = useCallback(
     (wave: ApiWave) => {
       rememberCurrentSearch();
+      onClose();
       const isDirectMessage = isHeaderSearchWaveDirectMessage(wave);
       if (myStream) {
         myStream.activeWave.set(wave.id, { isDirectMessage });
       } else {
         router.push(getHeaderSearchWavePath({ wave, isApp }));
       }
-      onClose();
     },
     [isApp, myStream, onClose, rememberCurrentSearch, router]
   );
@@ -270,14 +271,14 @@ export function HeaderSearchSiteResults({
     (item: HeaderSearchModalItemType) => {
       if (isPageResult(item)) {
         rememberCurrentSearch();
-        router.push(item.href);
         onClose();
+        router.push(item.href);
       } else if (isNftResult(item)) {
         const collection = getNftCollectionMap()[item.contract.toLowerCase()];
         if (!collection) return;
         rememberCurrentSearch();
-        router.push(`${collection.path}/${item.id}`);
         onClose();
+        router.push(`${collection.path}/${item.id}`);
       } else if (isProfileResult(item)) {
         goToProfile(item);
       } else if (isWaveResult(item)) {
@@ -489,13 +490,13 @@ export function HeaderSearchSiteResults({
                       }
                 )}
               </p>
-              <button
-                type="button"
+              <Button
                 onClick={() => onRetry(failedCategories)}
-                className="tw-text-primary-200 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold hover:tw-bg-white/5 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                variant="tertiary"
+                size="xs"
               >
                 {t(locale, "headerSearch.retry")}
-              </button>
+              </Button>
             </div>
           )}
           <div
@@ -569,13 +570,13 @@ export function HeaderSearchSiteResults({
           <p role="alert" className="tw-m-0 tw-text-sm tw-text-iron-300">
             {t(locale, "headerSearch.error")}
           </p>
-          <button
-            type="button"
+          <Button
             onClick={() => onRetry(failedCategories)}
-            className="tw-text-primary-100 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/40 tw-bg-primary-500/15 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold hover:tw-bg-primary-500/25 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            variant="tertiary"
+            size="md"
           >
             {t(locale, "headerSearch.retry")}
-          </button>
+          </Button>
         </div>
       );
     }

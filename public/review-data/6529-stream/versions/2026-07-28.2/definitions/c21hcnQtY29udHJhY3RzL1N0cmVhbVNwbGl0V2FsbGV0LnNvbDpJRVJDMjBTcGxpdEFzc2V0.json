@@ -1,0 +1,232 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/StreamSplitWallet.sol:IERC20SplitAsset#function:0x70a08231",
+          "declaringDefinitionId": "smart-contracts/StreamSplitWallet.sol:IERC20SplitAsset",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "balanceOf",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x70a08231",
+          "signature": "balanceOf(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/StreamSplitWallet.sol:IERC20SplitAsset#function:0xa9059cbb",
+          "declaringDefinitionId": "smart-contracts/StreamSplitWallet.sol:IERC20SplitAsset",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "transfer",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xa9059cbb",
+          "signature": "transfer(address,uint256)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "first_party_candidate",
+    "classificationReason": "First-party protocol definition outside the release and published-interface catalogs.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "balanceOf(address)",
+          "displaySignature": "balanceOf(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitWallet.sol:IERC20SplitAsset#function:0x70a08231",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0V2FsbGV0LnNvbDpJRVJDMjBTcGxpdEFzc2V0I2Z1bmN0aW9uOjB4NzBhMDgyMzE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "balanceOf",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 68,
+            "byteStart": 180,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitWallet.sol#L9",
+            "lineEnd": 9,
+            "lineStart": 9,
+            "snippetSha256": "sha256:7a9cdf099db2241a909d1a400a56960a5d33ee5889266d5f29c6dfa382355da4",
+            "sourceSha256": "sha256:4c6510c0c2fcceab21998d09fb2b53b92fc53142dbef7f9381308aceb3f73c75"
+          },
+          "selector": "0x70a08231",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "transfer(address,uint256)",
+          "displaySignature": "transfer(address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/StreamSplitWallet.sol:IERC20SplitAsset#function:0xa9059cbb",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0V2FsbGV0LnNvbDpJRVJDMjBTcGxpdEFzc2V0I2Z1bmN0aW9uOjB4YTkwNTljYmI",
+          "kind": "function",
+          "modifiers": [],
+          "name": "transfer",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 77,
+            "byteStart": 253,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitWallet.sol#L10",
+            "lineEnd": 10,
+            "lineStart": 10,
+            "snippetSha256": "sha256:8c0ba06110ab9168fe01876cfc2b0e5854572193857173d705104f44e848f76e",
+            "sourceSha256": "sha256:4c6510c0c2fcceab21998d09fb2b53b92fc53142dbef7f9381308aceb3f73c75"
+          },
+          "selector": "0xa9059cbb",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/StreamSplitWallet.sol:IERC20SplitAsset",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL1N0cmVhbVNwbGl0V2FsbGV0LnNvbDpJRVJDMjBTcGxpdEFzc2V0",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/StreamSplitWallet.sol:IERC20SplitAsset"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "IERC20SplitAsset",
+    "natspec": "",
+    "range": {
+      "byteLength": 185,
+      "byteStart": 147,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/StreamSplitWallet.sol#L8-L11",
+      "lineEnd": 11,
+      "lineStart": 8,
+      "snippetSha256": "sha256:ee60603167d6ead74a6421bc95b933b05d7651500d250ac00e330154bf99cf79",
+      "sourceSha256": "sha256:4c6510c0c2fcceab21998d09fb2b53b92fc53142dbef7f9381308aceb3f73c75"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/StreamSplitWallet.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 3
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 2
+    },
+    "totalCount": 3
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/StreamSplitWallet.sol:IERC20SplitAsset",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamSplitWallet.sol:IERC20SplitAsset#function:0x70a08231",
+      "definitionId": "smart-contracts/StreamSplitWallet.sol:IERC20SplitAsset",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "smart-contracts/StreamSplitWallet.sol:IERC20SplitAsset#function:0xa9059cbb",
+      "definitionId": "smart-contracts/StreamSplitWallet.sol:IERC20SplitAsset",
+      "severity": "advisory"
+    }
+  ]
+}

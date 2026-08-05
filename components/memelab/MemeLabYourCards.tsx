@@ -74,8 +74,6 @@ export function MemeLabYourTransactionsTable({
             {transactions.map((transaction) => (
               <LatestActivityRow
                 tr={transaction}
-                variant="tailwind"
-                rowStyle="striped"
                 key={`${transaction.from_address}-${transaction.to_address}-${transaction.transaction}-${transaction.token_id}`}
               />
             ))}

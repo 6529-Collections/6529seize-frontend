@@ -1,4 +1,11 @@
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
 import { act, render, screen } from "@testing-library/react";
+import type { ReactNode } from "react";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { WsMessageType } from "@/helpers/Types";
 import {
   setNotificationRealtimeState,
@@ -12,10 +19,12 @@ const sendMock = jest.fn();
 const messageCallbacks = new Map<WsMessageType, (value: unknown) => void>();
 const getAuthJwtMock = jest.fn();
 const getConnectedWalletAccountsMock = jest.fn();
+const mockUseQueryClient = jest.fn();
 let webSocketStatus = WebSocketStatus.CONNECTED;
 
 jest.mock("@tanstack/react-query", () => ({
-  useQueryClient: () => ({ invalidateQueries: invalidateQueriesMock }),
+  ...jest.requireActual("@tanstack/react-query"),
+  useQueryClient: () => mockUseQueryClient(),
 }));
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
@@ -78,10 +87,40 @@ function Subject() {
   );
 }
 
+function ActiveNotificationsRefresh({
+  queryFn,
+}: {
+  readonly queryFn: (context: {
+    readonly signal: AbortSignal;
+  }) => Promise<{ readonly unread_count: number }>;
+}) {
+  useQuery({
+    queryKey: [QueryKey.IDENTITY_NOTIFICATIONS, "active-refresh"],
+    queryFn,
+  });
+  return null;
+}
+
+const createQueryClientWrapper = (
+  queryClient: QueryClient,
+  children: ReactNode
+) => <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+
+const flushQueryWork = async (): Promise<void> => {
+  await act(async () => {
+    await Promise.resolve();
+    await jest.advanceTimersByTimeAsync(0);
+    await Promise.resolve();
+  });
+};
+
 describe("NotificationWebSocketSync", () => {
   beforeEach(() => {
     jest.useFakeTimers();
     jest.clearAllMocks();
+    mockUseQueryClient.mockReturnValue({
+      invalidateQueries: invalidateQueriesMock,
+    });
     messageCallbacks.clear();
     webSocketStatus = WebSocketStatus.CONNECTED;
     setNotificationRealtimeState(false);
@@ -120,9 +159,14 @@ describe("NotificationWebSocketSync", () => {
     });
 
     expect(invalidateQueriesMock).toHaveBeenCalledTimes(1);
-    expect(invalidateQueriesMock).toHaveBeenCalledWith({
-      queryKey: ["CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS"],
-    });
+    expect(invalidateQueriesMock).toHaveBeenCalledWith(
+      {
+        queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
+      },
+      {
+        cancelRefetch: false,
+      }
+    );
     unmount();
   });
 
@@ -188,12 +232,22 @@ describe("NotificationWebSocketSync", () => {
     });
 
     expect(invalidateQueriesMock).toHaveBeenCalledTimes(2);
-    expect(invalidateQueriesMock).toHaveBeenCalledWith({
-      queryKey: ["IDENTITY_NOTIFICATIONS"],
-    });
-    expect(invalidateQueriesMock).toHaveBeenCalledWith({
-      queryKey: ["CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS"],
-    });
+    expect(invalidateQueriesMock).toHaveBeenCalledWith(
+      {
+        queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
+      },
+      {
+        cancelRefetch: false,
+      }
+    );
+    expect(invalidateQueriesMock).toHaveBeenCalledWith(
+      {
+        queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
+      },
+      {
+        cancelRefetch: false,
+      }
+    );
     expect(screen.getByTestId("realtime-state")).toHaveTextContent(
       "true:profile-2"
     );
@@ -222,12 +276,87 @@ describe("NotificationWebSocketSync", () => {
     });
 
     expect(invalidateQueriesMock).toHaveBeenCalledTimes(2);
-    expect(invalidateQueriesMock).toHaveBeenCalledWith({
-      queryKey: ["IDENTITY_NOTIFICATIONS"],
-    });
-    expect(invalidateQueriesMock).toHaveBeenCalledWith({
-      queryKey: ["CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS"],
-    });
+    expect(invalidateQueriesMock).toHaveBeenCalledWith(
+      {
+        queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
+      },
+      {
+        cancelRefetch: false,
+      }
+    );
+    expect(invalidateQueriesMock).toHaveBeenCalledWith(
+      {
+        queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
+      },
+      {
+        cancelRefetch: false,
+      }
+    );
     unmount();
+  });
+
+  it("coalesces an in-flight refresh and still refreshes again when idle", async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          gcTime: Number.POSITIVE_INFINITY,
+          retry: false,
+        },
+      },
+    });
+    mockUseQueryClient.mockReturnValue(queryClient);
+    queryClient.setQueryData(
+      [QueryKey.IDENTITY_NOTIFICATIONS, "active-refresh"],
+      { unread_count: 0 }
+    );
+    let resolveRefresh!: (value: { readonly unread_count: number }) => void;
+    const refreshPromise = new Promise<{ readonly unread_count: number }>(
+      (resolve) => {
+        resolveRefresh = resolve;
+      }
+    );
+    const queryFn = jest.fn(({ signal }: { readonly signal: AbortSignal }) => {
+      expect(signal.aborted).toBe(false);
+      return refreshPromise;
+    });
+
+    const { unmount } = render(
+      createQueryClientWrapper(
+        queryClient,
+        <>
+          <NotificationWebSocketSync />
+          <ActiveNotificationsRefresh queryFn={queryFn} />
+        </>
+      )
+    );
+    await flushQueryWork();
+    expect(queryFn).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      messageCallbacks.get(WsMessageType.IDENTITY_NOTIFICATIONS_CHANGED)?.({
+        profile_id: "profile-1",
+      });
+      jest.advanceTimersByTime(150);
+    });
+    await flushQueryWork();
+
+    expect(queryFn).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      resolveRefresh({ unread_count: 1 });
+      await Promise.resolve();
+    });
+    await flushQueryWork();
+
+    act(() => {
+      messageCallbacks.get(WsMessageType.IDENTITY_NOTIFICATIONS_CHANGED)?.({
+        profile_id: "profile-1",
+      });
+      jest.advanceTimersByTime(150);
+    });
+    await flushQueryWork();
+    expect(queryFn).toHaveBeenCalledTimes(2);
+
+    unmount();
+    queryClient.clear();
   });
 });

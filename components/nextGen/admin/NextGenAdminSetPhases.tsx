@@ -20,7 +20,6 @@ import {
 } from "../nextgen_helpers";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
 import { printAdminErrors } from "./NextGenAdmin";
-import styles from "./NextGenAdmin.module.css";
 import {
   Button,
   Col,
@@ -182,7 +181,6 @@ export default function NextGenAdminSetPhases(props: Readonly<Props>) {
             <Form.Group className="tw-mb-4">
               <Form.Label>Merkle Roots</Form.Label>
               <Form.Select
-                className={`${styles["formInput"]}`}
                 value={selectedAllowlist?.merkle_root ?? ""}
                 onChange={(e) => {
                   const merkleRoot = e.target.value;

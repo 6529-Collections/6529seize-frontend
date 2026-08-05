@@ -1,5 +1,7 @@
 "use client";
 
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import type { SingleWaveDropVoteMode } from "../waves/drop/SingleWaveDropVote.types";
 
 interface VoteModeControlProps {
@@ -7,17 +9,19 @@ interface VoteModeControlProps {
   readonly onChange: (mode: SingleWaveDropVoteMode) => void;
 }
 
-const voteModeOptions: ReadonlyArray<{
-  readonly label: string;
-  readonly value: SingleWaveDropVoteMode;
-}> = [
-  { label: "Slider", value: "slider" },
-  { label: "Numeric", value: "numeric" },
-];
+const voteModeOptions = [
+  { labelKey: "waves.voteMode.slider", value: "slider" },
+  { labelKey: "waves.voteMode.numeric", value: "numeric" },
+] as const;
 
 export function VoteModeControl({ value, onChange }: VoteModeControlProps) {
+  const locale = useBrowserLocale();
+
   return (
-    <div className="tw-flex tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-[#26272B]">
+    <fieldset className="tw-m-0 tw-flex tw-min-w-0 tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-p-0">
+      <legend className="tw-sr-only">
+        {t(locale, "waves.voteMode.groupLabel")}
+      </legend>
       {voteModeOptions.map((mode) => {
         const isActive = value === mode.value;
 
@@ -26,16 +30,17 @@ export function VoteModeControl({ value, onChange }: VoteModeControlProps) {
             key={mode.value}
             type="button"
             onClick={() => onChange(mode.value)}
-            className={`tw-border-0 tw-px-2.5 tw-py-1 tw-text-[11px] tw-transition-colors ${
+            aria-pressed={isActive}
+            className={`tw-min-h-7 tw-border-0 tw-px-2.5 tw-py-1 tw-text-[11px] tw-transition-colors focus-visible:tw-relative focus-visible:tw-z-10 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 ${
               isActive
-                ? "tw-bg-[#26272B] tw-font-semibold tw-text-iron-100"
-                : "tw-bg-transparent tw-font-normal tw-text-iron-600 desktop-hover:hover:tw-text-iron-300"
+                ? "tw-bg-iron-700 tw-font-semibold tw-text-iron-50"
+                : "tw-bg-transparent tw-font-normal tw-text-iron-400 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-200"
             }`}
           >
-            {mode.label}
+            {t(locale, mode.labelKey)}
           </button>
         );
       })}
-    </div>
+    </fieldset>
   );
 }

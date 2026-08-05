@@ -28,7 +28,7 @@ describe("DelegationCenterComponent", () => {
   it("triggers wallet connect when not connected", () => {
     const setSection = jest.fn();
     render(<DelegationCenterComponent setSection={setSection} />);
-    fireEvent.click(screen.getByRole("button", { name: "Register Delegation" }));
+    fireEvent.click(screen.getByRole("button", { name: "Delegation" }));
     expect(seizeCtx.seizeConnect).toHaveBeenCalled();
     expect(setSection).not.toHaveBeenCalled();
   });
@@ -37,7 +37,7 @@ describe("DelegationCenterComponent", () => {
     seizeCtx.isConnected = true;
     const setSection = jest.fn();
     render(<DelegationCenterComponent setSection={setSection} />);
-    fireEvent.click(screen.getByRole("button", { name: "Register Delegation" }));
+    fireEvent.click(screen.getByRole("button", { name: "Delegation" }));
     await waitFor(() =>
       expect(setSection).toHaveBeenCalledWith(
         DelegationCenterSection.REGISTER_DELEGATION

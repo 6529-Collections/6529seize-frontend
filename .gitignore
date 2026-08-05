@@ -13,6 +13,7 @@
 /playwright-report/
 /playwright/.cache/
 /.playwright-mcp/
+/.release-bus-e2e-output/
 /storageState.json
 /playwright/.auth/
 storageState.json
@@ -20,6 +21,7 @@ storageState.json
 
 # next.js
 /.next/
+/.next-playwright-*/
 /out/
 # standalone/standalone-memes-mint
 /standalone/standalone-memes-mint/src/.next/

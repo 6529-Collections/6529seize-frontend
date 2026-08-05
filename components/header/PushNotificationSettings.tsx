@@ -3,6 +3,7 @@
 import { useAuth } from "@/components/auth/Auth";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { getStableDeviceId } from "@/components/notifications/stable-device-id";
+import Button from "@/components/utils/button/Button";
 import type { ApiPushNotificationSettings } from "@/generated/models/ApiPushNotificationSettings";
 import { commonApiFetch, commonApiPut } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
@@ -25,6 +26,7 @@ const SETTINGS_LABELS: Record<keyof ApiPushNotificationSettings, string> = {
   drop_reacted: "Drops - Reacted",
   drop_boosted: "Drops - Boosted",
   wave_created: "Wave Invites",
+  subscription_coverage: "Subscription Coverage",
 };
 
 const DEFAULT_SETTINGS: ApiPushNotificationSettings = {
@@ -38,6 +40,7 @@ const DEFAULT_SETTINGS: ApiPushNotificationSettings = {
   drop_reacted: true,
   drop_boosted: true,
   wave_created: true,
+  subscription_coverage: true,
 };
 
 export default function PushNotificationSettings({
@@ -65,7 +68,7 @@ export default function PushNotificationSettings({
     };
 
     updateScrollState();
-    el.addEventListener("scroll", updateScrollState);
+    el.addEventListener("scroll", updateScrollState, { passive: true });
     const resizeObserver = new ResizeObserver(updateScrollState);
     resizeObserver.observe(el);
 
@@ -116,14 +119,15 @@ export default function PushNotificationSettings({
     loadSettings();
   }, [isOpen]);
 
-  const hasChanges =
+  const hasChanges = Boolean(
     currentSettings &&
-    originalSettings &&
-    Object.keys(originalSettings).some(
-      (key) =>
-        originalSettings[key as keyof ApiPushNotificationSettings] !==
-        currentSettings[key as keyof ApiPushNotificationSettings]
-    );
+      originalSettings &&
+      Object.keys(originalSettings).some(
+        (key) =>
+          originalSettings[key as keyof ApiPushNotificationSettings] !==
+          currentSettings[key as keyof ApiPushNotificationSettings]
+      )
+  );
 
   const updateSetting = useCallback(
     (key: keyof ApiPushNotificationSettings, value: boolean) => {
@@ -167,6 +171,12 @@ export default function PushNotificationSettings({
   const settingKeys = Object.keys(SETTINGS_LABELS) as Array<
     keyof ApiPushNotificationSettings
   >;
+  let saveButtonLabel = "No Changes";
+  if (isSaving) {
+    saveButtonLabel = "Saving...";
+  } else if (hasChanges) {
+    saveButtonLabel = "Save Changes";
+  }
 
   return (
     <MobileWrapperDialog
@@ -235,25 +245,17 @@ export default function PushNotificationSettings({
                   Tap below to save your changes
                 </p>
               )}
-              <button
+              <Button
                 type="button"
                 onClick={handleSave}
-                disabled={!hasChanges || isSaving}
-                className={`tw-w-full tw-rounded-lg tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-transition-colors ${
-                  hasChanges && !isSaving
-                    ? "tw-bg-primary-500 tw-text-white hover:tw-bg-primary-600"
-                    : "tw-cursor-not-allowed tw-bg-iron-800 tw-text-iron-500"
-                }`}
+                disabled={!hasChanges}
+                loading={isSaving}
+                variant="action"
+                size="md"
+                fullWidth
               >
-                {isSaving && (
-                  <span className="tw-flex tw-items-center tw-justify-center tw-gap-2">
-                    <span className="tw-size-4 tw-animate-spin tw-rounded-full tw-border-2 tw-border-iron-400 tw-border-t-white" />
-                    <span>Saving...</span>
-                  </span>
-                )}
-                {!isSaving && hasChanges && "Save Changes"}
-                {!isSaving && !hasChanges && "No Changes"}
-              </button>
+                {saveButtonLabel}
+              </Button>
             </div>
           </>
         )}

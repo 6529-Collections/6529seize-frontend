@@ -338,8 +338,8 @@ export function SearchWalletsDisplay(
           <button
             aria-label="Clear all search wallets"
             onClick={() => setSearchWallets([])}
-            className={`tw-mr-2.5 tw-inline-flex tw-size-10 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-inherit tw-transition hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
-              isDark ? "tw-mr-0 tw-size-9 tw-rounded-full" : ""
+            className={`tw-mr-2.5 tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-inherit tw-transition hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
+              isDark ? "tw-mr-0 tw-rounded-full" : ""
             }`}
             data-tooltip-id="clear-all-display"
             type="button"
@@ -363,9 +363,7 @@ export function SearchWalletsDisplay(
       <button
         aria-label={t(locale, "identityFilter.open")}
         onClick={() => setShowSearchModal(true)}
-        className={`tw-inline-flex ${
-          isDark ? "tw-size-9" : "tw-size-10"
-        } tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-p-0 tw-transition-colors focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
+        className={`tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-p-0 tw-transition-colors focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
           searchButtonClass
         }`}
         type="button"

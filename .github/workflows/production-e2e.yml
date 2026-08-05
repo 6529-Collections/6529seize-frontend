@@ -3,25 +3,129 @@ name: Production E2E
 on:
   workflow_dispatch:
     inputs:
-      release_train_id: { type: string, required: true }
-      release_train_revision: { type: string, required: true }
-      operation_key: { type: string, required: true }
-      source_ref: { type: string, required: true }
-      expected_sha: { type: string, required: true }
+      release_train_id: { type: string, required: false }
+      release_train_revision: { type: string, required: false }
+      operation_key: { type: string, required: false }
+      source_ref: { type: string, required: false }
+      expected_sha: { type: string, required: false }
+      release_manifest_id: { type: string, required: false }
+      release_manifest_identity_sha256: { type: string, required: false }
+      frontend_sha: { type: string, required: false, default: "" }
+      backend_sha: { type: string, required: false, default: "" }
+      frontend_artifact_digest: { type: string, required: false, default: "" }
+      backend_artifact_digest: { type: string, required: false, default: "" }
+      automatic_deploy_run_id: { type: string, required: false, default: "" }
 
 permissions:
   contents: read
 
-run-name: Production E2E ${{ inputs.release_train_id }} [${{ inputs.operation_key }}]
+run-name: Production E2E ${{ inputs.release_train_id || (inputs.automatic_deploy_run_id && 'automatic') || 'manual' }}
+
+concurrency:
+  group: production-e2e
+  # Production read-only validation owns its lane independently. Never cancel
+  # a manifest-bound run or share staging/ALL ownership.
+  cancel-in-progress: false
 
 jobs:
   readonly:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.E2E_RUNNER || vars.CI_LINUX_RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 90
+    permissions:
+      actions: read
+      contents: read
     steps:
+      - name: Reject mixed automatic dispatch identity
+        if: inputs.automatic_deploy_run_id != ''
+        env:
+          AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
+          BACKEND_ARTIFACT_DIGEST: ${{ inputs.backend_artifact_digest }}
+          BACKEND_SHA: ${{ inputs.backend_sha }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          FRONTEND_ARTIFACT_DIGEST: ${{ inputs.frontend_artifact_digest }}
+          FRONTEND_SHA: ${{ inputs.frontend_sha }}
+          MANIFEST_ID: ${{ inputs.release_manifest_id }}
+          MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          SOURCE_REF: ${{ inputs.source_ref }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+          TRAIN_REVISION: ${{ inputs.release_train_revision }}
+        run: |
+          set -euo pipefail
+          [[ "$AUTOMATIC_DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
+          identity_values="$TRAIN_ID$TRAIN_REVISION$OPERATION_KEY$SOURCE_REF$EXPECTED_SHA$MANIFEST_ID$MANIFEST_IDENTITY$FRONTEND_SHA$BACKEND_SHA$FRONTEND_ARTIFACT_DIGEST$BACKEND_ARTIFACT_DIGEST"
+          test -z "$identity_values"
+
+      - name: Resolve successful automatic production deploy
+        id: automatic-deploy
+        if: inputs.automatic_deploy_run_id != ''
+        env:
+          AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          [[ "$AUTOMATIC_DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
+          response_file="$(mktemp)"
+          runs_file=''
+          trap 'rm -f "$response_file"; if [ -n "$runs_file" ]; then rm -f "$runs_file"; fi' EXIT
+          gh api \
+            "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}" \
+            > "$response_file"
+          jq -e \
+            --arg repository "$GITHUB_REPOSITORY" \
+            --argjson run_id "$AUTOMATIC_DEPLOY_RUN_ID" '
+              .id == $run_id and
+              .name == "Web Deploy - PROD" and
+              .path == ".github/workflows/build-upload-deploy-prod.yml" and
+              .event == "workflow_dispatch" and
+              .status == "completed" and
+              .conclusion == "success" and
+              .head_branch == "main" and
+              .repository.full_name == $repository and
+              (.head_sha | test("^[a-f0-9]{40}$"))
+            ' "$response_file" >/dev/null
+          echo "deployed-sha=$(jq -r .head_sha "$response_file")" >> "$GITHUB_OUTPUT"
+          started_at="$(jq -er .run_started_at "$response_file")"
+          runs_file="$(mktemp)"
+          gh api \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/build-upload-deploy-prod.yml/runs?status=completed&branch=main&event=workflow_dispatch&per_page=100" \
+            > "$runs_file"
+          previous_sha="$(jq -r \
+            --argjson current_run_id "$AUTOMATIC_DEPLOY_RUN_ID" \
+            --arg started_at "$started_at" '
+              [.workflow_runs[] |
+                select(
+                  .id != $current_run_id and
+                  .name == "Web Deploy - PROD" and
+                  .path == ".github/workflows/build-upload-deploy-prod.yml" and
+                  .event == "workflow_dispatch" and
+                  .status == "completed" and
+                  .conclusion == "success" and
+                  .head_branch == "main" and
+                  .run_started_at < $started_at and
+                  (.head_sha | test("^[a-f0-9]{40}$"))
+                )] |
+              sort_by(.run_started_at) |
+              last |
+              .head_sha // empty
+            ' "$runs_file")"
+          if [[ "$previous_sha" =~ ^[a-f0-9]{40}$ ]]; then
+            echo "previous_deployed_sha=$previous_sha" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::No prior successful production deployment could be proven; Museum E2E will be retained."
+            echo "previous_deployed_sha=" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Validate and authorize immutable inputs
+        if: inputs.automatic_deploy_run_id == ''
         env:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
+          FRONTEND_ARTIFACT_DIGEST: ${{ inputs.frontend_artifact_digest }}
+          FRONTEND_SHA: ${{ inputs.frontend_sha }}
+          BACKEND_ARTIFACT_DIGEST: ${{ inputs.backend_artifact_digest }}
+          BACKEND_SHA: ${{ inputs.backend_sha }}
+          MANIFEST_ID: ${{ inputs.release_manifest_id }}
+          MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
           OPERATION_KEY: ${{ inputs.operation_key }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
@@ -32,40 +136,320 @@ jobs:
           set -euo pipefail
           [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$TRAIN_ID" =~ ^[A-Za-z0-9._-]{1,100}$ ]]
-          [[ "$TRAIN_REVISION" =~ ^[1-9][0-9]{0,8}$ ]]
+          [[ "$TRAIN_REVISION" =~ ^([1-9][0-9]{0,8}|rollback-[1-9][0-9]{0,8})$ ]]
           [[ "$OPERATION_KEY" =~ ^[A-Za-z0-9:._-]{1,180}$ ]]
           [[ "$SOURCE_REF" =~ ^[A-Za-z0-9._/-]{1,255}$ ]]
-          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg expected_sha "$EXPECTED_SHA" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"prod",service:null,expected_sha:$expected_sha,artifact_digest:null}')"
+          [[ "$MANIFEST_ID" =~ ^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$ ]]
+          [[ "$MANIFEST_IDENTITY" =~ ^[a-f0-9]{64}$ ]]
+          [[ -z "$FRONTEND_SHA" || "$FRONTEND_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ -z "$BACKEND_SHA" || "$BACKEND_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ -z "$FRONTEND_ARTIFACT_DIGEST" || "$FRONTEND_ARTIFACT_DIGEST" =~ ^[a-f0-9]{64}$ ]]
+          [[ -z "$BACKEND_ARTIFACT_DIGEST" || "$BACKEND_ARTIFACT_DIGEST" =~ ^[a-f0-9]{64}$ ]]
+          test -n "$FRONTEND_SHA$BACKEND_SHA"
+          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg expected_sha "$EXPECTED_SHA" --arg artifact_digest "$MANIFEST_IDENTITY" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,artifact_run_id:null,repository:"frontend",environment:"prod",service:null,expected_sha:$expected_sha,artifact_digest:$artifact_digest}')"
           curl --fail-with-body --silent --show-error \
             -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
             -H 'Content-Type: application/json' \
             --data "$payload" \
-            "$RELEASE_BUS_API_URL/deploy/release-bus/authorize"
+            "$RELEASE_BUS_API_URL/deploy/release-bus-v2/authorize"
       - name: Check out exact production SHA
+        # workflow_dispatch itself is trusted orchestration from the selected
+        # default-branch ref. All pack code, the pack manifest, dependencies,
+        # and evidence below come from this independently read-back deployed
+        # SHA, so a later main advance cannot change the tested inventory.
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
-          ref: ${{ inputs.expected_sha }}
+          ref: ${{ inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha }}
           persist-credentials: false
       - name: Verify immutable source
         env:
-          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          EXPECTED_SHA: ${{ inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - name: Install Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
-        with: { node-version: "22" }
+        with: { node-version: "22.17.1" }
       - name: Activate pinned pnpm
         run: |
           corepack enable pnpm
           corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+      - name: Select Museum pack for the deployed change set
+        id: museum-selection
+        env:
+          BASE_SHA: ${{ steps.automatic-deploy.outputs.previous_deployed_sha }}
+          DEPLOYED_SHA: ${{ inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha }}
+        run: |
+          set -euo pipefail
+          museum_required=true
+          if [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]] &&
+            [[ "$DEPLOYED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          then
+            base_available=true
+            if ! git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null &&
+              ! git fetch --no-tags --depth=1 origin "$BASE_SHA"
+            then
+              base_available=false
+              echo "::warning::Unable to fetch the prior production tree; retaining Museum E2E."
+            fi
+            if [ "$base_available" = true ]; then
+              candidate="$(node scripts/museum-e2e-change-set.cjs \
+                --base "$BASE_SHA" --head "$DEPLOYED_SHA")"
+              case "$candidate" in
+                true|false) museum_required="$candidate" ;;
+                *) echo "::warning::Museum classifier returned an invalid value; retaining Museum E2E." ;;
+              esac
+            fi
+          fi
+          echo "required=$museum_required" >> "$GITHUB_OUTPUT"
+          echo "Museum E2E required: $museum_required"
+      - name: Restore pnpm store
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-node22-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node22-pnpm-
+      - name: Use cached pnpm store
+        run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
       - name: Install Socket Firewall
         id: socket-firewall
+        continue-on-error: true
         uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
         with: { mode: firewall }
       - name: Install frozen dependencies
+        id: dependencies
+        if: steps.socket-firewall.outcome == 'success'
+        continue-on-error: true
         env:
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 install:frozen
+      - name: Restore Playwright browser
+        if: steps.dependencies.outcome == 'success'
+        id: playwright-cache
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
       - name: Install Playwright browser
-        run: ./bin/6529 exec playwright install --with-deps chromium
+        id: playwright
+        if: steps.dependencies.outcome == 'success'
+        continue-on-error: true
+        env:
+          PLAYWRIGHT_CACHE_HIT: ${{ steps.playwright-cache.outputs.cache-hit }}
+        run: |
+          if [ "$PLAYWRIGHT_CACHE_HIT" = true ]; then
+            ./bin/6529 exec playwright install-deps chromium
+          else
+            ./bin/6529 exec playwright install --with-deps chromium
+          fi
       - name: Run production-safe read-only packs
-        run: ./bin/6529 run test:e2e:production:readonly
+        id: e2e
+        if: steps.playwright.outcome == 'success'
+        continue-on-error: true
+        env:
+          MUSEUM_E2E_REQUIRED: ${{ steps.museum-selection.outputs.required }}
+          RELEASE_BUS_E2E_MANIFEST_ID: ${{ inputs.release_manifest_id }}
+          RELEASE_BUS_E2E_MANIFEST_IDENTITY_SHA256: ${{ inputs.release_manifest_identity_sha256 }}
+          RELEASE_BUS_E2E_SOURCE_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          args=(
+            --env production
+            --trigger post-deploy
+            --artifact-root production-e2e-artifacts
+          )
+          if runner_capabilities="$(./bin/6529 exec node scripts/e2e-packs.cjs --capabilities 2>/dev/null)" &&
+            jq -e '
+              .contract == "release-bus-e2e-runner-capabilities.v1" and
+              .features.readonly_pack_parallelism == {
+                version: 1,
+                max_parallel: 4
+              } and
+              .features.pack_exclusion == { version: 1 }
+            ' <<< "$runner_capabilities" >/dev/null
+          then
+            args+=(--parallel 3)
+            if [ "$MUSEUM_E2E_REQUIRED" = false ]; then
+              museum_pack_aliases="$(./bin/6529 exec node - <<'NODE'
+          const { PACKS } = require("./tests/packs.manifest.cjs");
+          const isMuseumPack = (pack) =>
+            pack.changeScope === "museum" || /^museum-/.test(pack.alias ?? "");
+          const aliases = PACKS.filter((pack) =>
+            pack.environments.includes("production") &&
+            pack.triggers.includes("post-deploy") &&
+            isMuseumPack(pack)
+          ).map((pack) => pack.alias ?? pack.scriptKey);
+          if (aliases.length === 0) {
+            process.stderr.write("No production Museum packs were identified.\n");
+            process.exit(1);
+          }
+          process.stdout.write(aliases.join("\n"));
+          NODE
+              )"
+              while IFS= read -r museum_pack_alias; do
+                args+=(--exclude-pack "$museum_pack_alias")
+              done <<< "$museum_pack_aliases"
+            fi
+          elif [ "$MUSEUM_E2E_REQUIRED" = false ]; then
+            echo "::warning::Deployed E2E runner cannot exclude packs; retaining all Museum E2E packs."
+            MUSEUM_E2E_REQUIRED=true
+          fi
+          if [ -n "${runner_capabilities:-}" ] &&
+            jq -e '
+              .contract == "release-bus-e2e-runner-capabilities.v1" and
+              .features.serial_failed_pack_retry == {
+                version: 1,
+                max_retries: 1
+              }
+            ' <<< "$runner_capabilities" >/dev/null
+          then
+            args+=(--retry-failed-packs 1)
+            echo "SERIAL_FAILED_PACK_RETRY=true" >> "$GITHUB_ENV"
+          else
+            echo "SERIAL_FAILED_PACK_RETRY=false" >> "$GITHUB_ENV"
+          fi
+          echo "MUSEUM_E2E_REQUIRED=$MUSEUM_E2E_REQUIRED" >> "$GITHUB_ENV"
+          ./bin/6529 run e2e:packs -- "${args[@]}"
+      - name: Validate exact production E2E evidence
+        id: evidence
+        if: always() && steps.dependencies.outcome == 'success' && steps.playwright.outcome == 'success'
+        env:
+          E2E_OUTCOME: ${{ steps.e2e.outcome }}
+          AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
+          EXPECTED_SHA: ${{ inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha }}
+          MANIFEST_ID: ${{ inputs.release_manifest_id }}
+          MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
+        run: |
+          set -euo pipefail
+          test -f production-e2e-artifacts/evidence.json
+          expected_inventory="$(./bin/6529 exec node - <<'NODE'
+          const { PACKS } = require("./tests/packs.manifest.cjs");
+          const museumRequired = process.env.MUSEUM_E2E_REQUIRED !== "false";
+          const isMuseumPack = (pack) =>
+            pack.changeScope === "museum" || /^museum-/.test(pack.alias ?? "");
+          const keys = PACKS.filter((pack) =>
+            pack.environments.includes("production") &&
+            pack.triggers.includes("post-deploy") &&
+            (museumRequired || !isMuseumPack(pack))
+          ).map((pack) => pack.scriptKey);
+          process.stdout.write(JSON.stringify(keys));
+          NODE
+          )"
+          jq -e --argjson expected "$expected_inventory" --argjson retry "$SERIAL_FAILED_PACK_RETRY" '
+            .schema_version == "release-bus-e2e-packs.v1" and
+            .environment == "production" and
+            .trigger == "post-deploy" and
+            (.worker_count | type == "number" and . >= 1 and . <= 3) and
+            .pack_count == ($expected | length) and
+            (.results | map(.script_key)) == $expected and
+            (.results | map(.script_key) | unique | length) == .pack_count and
+            (.results | all(.safety == "readonly")) and
+            (if $retry then
+              .serial_retry_limit == 1 and
+              (.results | all(
+                .attempt_count == (.attempts | length) and
+                .attempt_count >= 1 and .attempt_count <= 2 and
+                (.attempts | to_entries | all(.value.attempt == (.key + 1))) and
+                .status == .attempts[-1].status and
+                .failure_class == .attempts[-1].failure_class and
+                .detail == .attempts[-1].detail and
+                .artifact_path == .attempts[-1].artifact_path and
+                .duration_ms == ([.attempts[].duration_ms] | add)
+              ))
+            else
+              (.serial_retry_limit // 0) == 0
+            end) and
+            .failed_count == ([.results[] | select(.status == "failed")] | length) and
+            .infrastructure_failure_count == ([.results[] | select(.failure_class == "infrastructure")] | length)
+          ' production-e2e-artifacts/evidence.json >/dev/null
+          if [ -n "$AUTOMATIC_DEPLOY_RUN_ID" ]; then
+            test -z "$MANIFEST_ID$MANIFEST_IDENTITY"
+            jq -e '.release_binding == null' \
+              production-e2e-artifacts/evidence.json >/dev/null
+          else
+            jq -e --arg manifest_id "$MANIFEST_ID" --arg identity "$MANIFEST_IDENTITY" --arg source_sha "$EXPECTED_SHA" '
+              .release_binding == {
+                manifest_id:$manifest_id,
+                manifest_identity_sha256:$identity,
+                source_sha:$source_sha
+              }
+            ' production-e2e-artifacts/evidence.json >/dev/null
+          fi
+          if [ "$E2E_OUTCOME" = success ]; then
+            jq -e '
+              .failed_count == 0 and
+              .infrastructure_failure_count == 0 and
+              (.results | all(.status == "passed" and .failure_class == null))
+            ' production-e2e-artifacts/evidence.json >/dev/null
+          fi
+      - name: Upload manifest-bound Playwright evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: production-e2e-artifacts-${{ inputs.release_train_id || inputs.automatic_deploy_run_id || github.run_id }}
+          path: production-e2e-artifacts/
+          retention-days: 30
+          if-no-files-found: ignore
+      - name: Report structured Release Bus E2E result
+        if: always() && inputs.operation_key != ''
+        env:
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          SOCKET_OUTCOME: ${{ steps.socket-firewall.outcome }}
+          DEPENDENCIES_OUTCOME: ${{ steps.dependencies.outcome }}
+          PLAYWRIGHT_OUTCOME: ${{ steps.playwright.outcome }}
+          E2E_OUTCOME: ${{ steps.e2e.outcome }}
+          EVIDENCE_OUTCOME: ${{ steps.evidence.outcome }}
+          TRAIN_ID: ${{ inputs.release_train_id }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+        run: |
+          set -euo pipefail
+          status=SUCCEEDED
+          failure_class=null
+          failure_phase=null
+          retryable=false
+          if [ "$SOCKET_OUTCOME" != success ] || [ "$DEPENDENCIES_OUTCOME" != success ] || [ "$PLAYWRIGHT_OUTCOME" != success ]; then
+            status=FAILED
+            failure_class=INFRASTRUCTURE
+            failure_phase=production_e2e_setup
+            retryable=true
+          elif [ "$EVIDENCE_OUTCOME" != success ]; then
+            status=FAILED
+            failure_class=CONTROL_PLANE
+            failure_phase=production_e2e_evidence
+          elif [ "$E2E_OUTCOME" != success ]; then
+            status=FAILED
+            if [ -f production-e2e-artifacts/evidence.json ] && \
+              [ "$(jq -r '.infrastructure_failure_count // 0' production-e2e-artifacts/evidence.json)" -gt 0 ]; then
+              failure_class=INFRASTRUCTURE
+              failure_phase=production_e2e_infrastructure
+              retryable=true
+            else
+              failure_class=E2E
+              failure_phase=production_e2e
+            fi
+          fi
+          if [ -f production-e2e-artifacts/evidence.json ]; then
+            evidence_digest="$(sha256sum production-e2e-artifacts/evidence.json | cut -d' ' -f1)"
+          else
+            evidence_digest=''
+          fi
+          payload="$(jq -n --arg train_id "$TRAIN_ID" --arg operation_key "$OPERATION_KEY" --arg workflow_run_id "$GITHUB_RUN_ID" --arg status "$status" --arg failure_class "$failure_class" --arg failure_phase "$failure_phase" --argjson retryable "$retryable" --arg evidence_digest "$evidence_digest" '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"complete",status:$status,failure_class:(if $failure_class == "null" then null else $failure_class end),failure_phase:(if $failure_phase == "null" then null else $failure_phase end),retryable:$retryable,summary:{e2e_evidence_digest:(if $evidence_digest == "" then null else $evidence_digest end)},stages:[],jest:null,backend_evidence:null}')"
+          curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$RELEASE_BUS_API_URL/deploy/release-bus-v2/report-progress"
+      - name: Return production E2E result
+        if: always()
+        env:
+          SOCKET_OUTCOME: ${{ steps.socket-firewall.outcome }}
+          DEPENDENCIES_OUTCOME: ${{ steps.dependencies.outcome }}
+          PLAYWRIGHT_OUTCOME: ${{ steps.playwright.outcome }}
+          E2E_OUTCOME: ${{ steps.e2e.outcome }}
+          EVIDENCE_OUTCOME: ${{ steps.evidence.outcome }}
+        run: |
+          test "$SOCKET_OUTCOME" = success
+          test "$DEPENDENCIES_OUTCOME" = success
+          test "$PLAYWRIGHT_OUTCOME" = success
+          test "$EVIDENCE_OUTCOME" = success
+          test "$E2E_OUTCOME" = success

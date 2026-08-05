@@ -80,6 +80,9 @@ Transfer mode is part of the Native collected view (not a separate route).
        labels are message-backed from the source locale
      - collected details tables include screen-reader captions and row headers
        for assistive technologies
+     - wide tables stay inside their bordered sections on narrow screens; the
+       first label column remains visible while the numeric columns scroll
+       horizontally by touch or the browser's horizontal scroll controls
    - `Activity Overview`
    - Activity Overview heading, table headings, row labels, and per-season
      labels are message-backed from the source locale
@@ -113,6 +116,10 @@ Transfer mode is part of the Native collected view (not a separate route).
    - View, collection, sort, seized, and filter-scroll control names are
      message-backed from the source locale.
 7. Apply sort and browse pages.
+   - Collection, filter, sort, and pagination changes add browser-history
+     entries, so browser Back and Forward restore earlier collected views.
+   - Automatic correction of an unavailable page replaces the current history
+     entry instead of adding another one.
 8. In native view (outside transfer mode), open token routes from cards:
    - `/the-memes/{id}`, `/6529-gradient/{id}`, `/nextgen/token/{id}`, `/meme-lab/{id}`.
    - Native card results render as a labelled `Collected cards` list with one

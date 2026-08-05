@@ -29,7 +29,6 @@ describe("CreateDropCompact", () => {
       <CreateDropCompact
         waveId="1"
         profile={{} as any}
-        screenType={"MOBILE" as any}
         editorState={null}
         title={null}
         files={[]}
@@ -71,7 +70,6 @@ describe("CreateDropCompact", () => {
       <CreateDropCompact
         waveId="1"
         profile={{} as any}
-        screenType={"MOBILE" as any}
         editorState={null}
         title={null}
         files={[file]}

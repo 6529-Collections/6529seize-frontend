@@ -35,7 +35,7 @@ import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import HeaderPageShareButton from "./share/HeaderPageShareButton";
 import HeaderActionButtons from "./HeaderActionButtons";
 import NetworkHealthCTA from "./NetworkHealthCTA";
-import PrimaryButton from "../utils/button/PrimaryButton";
+import Button from "../utils/button/Button";
 import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
 import WaveDescriptionPopover from "@/components/waves/header/WaveDescriptionPopover";
 import WavePicture from "@/components/waves/WavePicture";
@@ -351,18 +351,16 @@ const HeaderDropActionButton = ({
   }
 
   return (
-    <PrimaryButton
-      loading={false}
-      disabled={false}
-      onClicked={action.onOpen}
-      padding="tw-p-0 sm:tw-px-2.5 sm:tw-py-2"
+    <Button
+      onClick={action.onOpen}
+      size={null}
       title={title}
-      ariaLabel={action.label}
+      aria-label={action.label}
       className="tw-size-9 tw-min-w-9 tw-p-0"
     >
       <PlusIcon className="tw-size-5 tw-flex-shrink-0" />
       <span className="tw-sr-only">{action.compactLabel}</span>
-    </PrimaryButton>
+    </Button>
   );
 };
 
@@ -749,15 +747,17 @@ export default function AppHeader() {
               <HeaderPageShareButton isCapacitor={isCapacitor} />
             </div>
           )}
-          <div className="tw-flex-shrink-0">
-            <HeaderSearchButton
-              wave={
-                isInsideWave && (isWavesRoute || isMessagesRoute)
-                  ? activeWave
-                  : null
-              }
-            />
-          </div>
+          {!isCreateRoute && (
+            <div className="tw-flex-shrink-0">
+              <HeaderSearchButton
+                wave={
+                  isInsideWave && (isWavesRoute || isMessagesRoute)
+                    ? activeWave
+                    : null
+                }
+              />
+            </div>
+          )}
           <HeaderMoreMenu items={appHeaderMoreMenuItems} />
         </div>
       </div>

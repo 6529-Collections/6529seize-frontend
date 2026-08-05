@@ -1,0 +1,138 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "vendored_dependency",
+    "classificationReason": "Source path is explicitly classified as vendored in the input manifest.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "encode(bytes)",
+          "functionKind": "function",
+          "id": "smart-contracts/Base64.sol:Base64#function:encode(bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0Jhc2U2NC5zb2w6QmFzZTY0I2Z1bmN0aW9uOmVuY29kZShieXRlcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "encode",
+          "natspec": "@dev Converts a `bytes` to its Bytes64 `string` representation.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "range": {
+            "byteLength": 3026,
+            "byteStart": 506,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Base64.sol#L20-L91",
+            "lineEnd": 91,
+            "lineStart": 20,
+            "snippetSha256": "sha256:0fe5fd530a63fdb272a207e6d674a76e182525dcc97556cc969e7c473cd72a81",
+            "sourceSha256": "sha256:3735f85c6e229e85144fbb306cd46f83bcd6965df4705a97d06aa22f2ab8261e"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "_TABLE",
+          "natspec": "@dev Base64 Encoding/Decoding Table",
+          "range": {
+            "byteLength": 100,
+            "byteStart": 312,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Base64.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:02cf6b58be51f8ab24d87ee1c1aa9db0b416dff0dad15fdcfed673247c1394c0",
+            "sourceSha256": "sha256:3735f85c6e229e85144fbb306cd46f83bcd6965df4705a97d06aa22f2ab8261e"
+          },
+          "selector": null,
+          "type": "string",
+          "typeString": "string",
+          "valueRange": {
+            "byteLength": 66,
+            "byteStart": 346,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Base64.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:80b0eea59ea09224a830461df6a1d17e4247bf76e67987222e6290f6fc9c1ab6",
+            "sourceSha256": "sha256:3735f85c6e229e85144fbb306cd46f83bcd6965df4705a97d06aa22f2ab8261e"
+          },
+          "valueSource": "\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/\"",
+          "visibility": "internal"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/Base64.sol:Base64",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0Jhc2U2NC5zb2w6QmFzZTY0",
+    "kind": "library",
+    "linearizedDefinitionIds": [
+      "smart-contracts/Base64.sol:Base64"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "Base64",
+    "natspec": "@dev Provides a set of functions to operate with Base64 strings.\n _Available since v4.5._",
+    "range": {
+      "byteLength": 3302,
+      "byteStart": 232,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/Base64.sol#L11-L92",
+      "lineEnd": 92,
+      "lineStart": 11,
+      "snippetSha256": "sha256:078699422e26032aa07ddfb8e51cac1e3bdf3251eacf38fbefd2bb3926959c75",
+      "sourceSha256": "sha256:3735f85c6e229e85144fbb306cd46f83bcd6965df4705a97d06aa22f2ab8261e"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/Base64.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

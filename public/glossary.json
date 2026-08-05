@@ -4,7 +4,7 @@
   "base_url": "https://6529.io",
   "description": "Glossary of 6529 terms projected from the site's curated help corpus. Each term links back to its help-index.json record via id.",
   "source": "/help-index.json",
-  "term_count": 27,
+  "term_count": 28,
   "terms": [
     {
       "id": "about.license",
@@ -305,6 +305,7 @@
       ],
       "facts": [
         "Network definitions explain Cards Collected, Unique Memes, Meme Sets, TDH variants, purchases, sales, transfers, and related Network metrics.",
+        "The glossary groups terms into Collection metrics, Activity metrics, and TDH metrics.",
         "Genesis Sets are complete sets of the first three Meme NFTs.",
         "Use the definitions page when users ask what a Network metric means.",
         "For a single TDH explanation, point users to the TDH page."
@@ -389,6 +390,9 @@
       "facts": [
         "The Profile Brain tab surfaces Brain-related profile activity and wave context.",
         "Brain views include activity and wave sidebar surfaces where available.",
+        "Created Waves is labeled Wave posts, and each row's Last activity time refers to the newest post by anyone in that wave.",
+        "Most Active In is labeled All time and ranks accessible non-direct-message waves by how many posts the identity has written in them across all time.",
+        "Most Active In shows up to five ranked waves and labels each desktop row Last post with when the viewed identity last posted in that specific wave.",
         "Use /{user}/brain for profile-specific Brain context."
       ],
       "canonical_path": "/{user}/brain",
@@ -414,6 +418,9 @@
         "network identity check",
         "rate nic",
         "rep dialog",
+        "grant rep",
+        "rep category spelling",
+        "memesnominee rep",
         "activity log"
       ],
       "facts": [
@@ -421,6 +428,8 @@
         "NIC is the 6529 network identity trust signal shown on profile identity surfaces.",
         "App copy refers to NIC as Network Identity Credits in the FAQ and Network Identity Check in the profile identity header.",
         "The Identity tab surfaces profile identity, REP behavior, NIC ratings, NIC statements, and activity log behavior where available.",
+        "Grant REP keeps its compact category pills and existing search and selection behavior, including similarly named categories remaining separate and selectable.",
+        "The exact MemesNominee category pill is marked as counting toward the 50,000 REP submission requirement and is surfaced first when the typed value differs only by capitalization, spacing, punctuation, or Unicode width; search guidance stays neutral until a category is selected, selecting exact MemesNominee confirms the requirement in green, and selecting a subdued look-alike shows an amber note explaining that it remains a separate category.",
         "Owner and permission rules affect which identity actions are visible."
       ],
       "canonical_path": "/{user}",
@@ -463,6 +472,34 @@
       "tags": [
         "profiles",
         "proxy",
+        "glossary"
+      ]
+    },
+    {
+      "id": "profiles.quick-tags",
+      "term": "Profile Quick Tags",
+      "aliases": [
+        "quick tags",
+        "quick tag settings",
+        "mention shortcuts",
+        "personal mention aliases"
+      ],
+      "facts": [
+        "Quick Tags are managed from the compact owner-only section beneath Activity on the Profile Brain tab.",
+        "The section shows up to three tags in one row and uses a +N more chip when additional tags exist.",
+        "Manage, a visible Quick Tag, and +N more open the Quick Tags manager.",
+        "The section is hidden on other profiles and while acting through a proxy.",
+        "Quick Tags do not have a dedicated profile tab or route."
+      ],
+      "canonical_path": "/{user}/brain",
+      "related_paths": [
+        "/{user}/brain",
+        "/waves"
+      ],
+      "tags": [
+        "profiles",
+        "waves",
+        "mentions",
         "glossary"
       ]
     },
@@ -550,6 +587,7 @@
         "Category A is the complete Meme Card set boost, with diminishing additional-set boosts.",
         "Category B covers season, genesis, and nakamoto set boosts.",
         "Category C is the Gradient boost, up to 5 Gradients.",
+        "The current TDH guide presents the Category A or Category B comparison before Category C, then groups formulas, examples, season boosts, limits, and related destinations for quick reference.",
         "TDH is calculated daily at 00:00 UTC and is used throughout the network: profiles, leaderboards, Levels, groups, Network views, Waves voting and eligibility, and public data."
       ],
       "canonical_path": "/network/tdh",
@@ -664,6 +702,10 @@
         "The /about/subscriptions primary action says Connect to Subscribe when a wallet or profile handoff is needed and Manage when the user can continue to their profile subscription settings.",
         "Users manage their subscription mode, balance, airdrop address, top-ups, upcoming drops, and history under their profile Subscriptions tab.",
         "Automatic mode mints eligible cards until the balance is used unless the user opts out; Manual mode only mints cards the user opts into.",
+        "Automatic mode does not expire when the balance is insufficient; coverage describes what the current balance funds, not an expiration date for the mode.",
+        "Coverage counts consecutive fully funded intended drops from the immediate next intended drop and accounts for mode, eligibility, edition preference, selections, opt-outs, balance, and the published schedule.",
+        "Coverage is green at 7 or more funded drops, gives an early plan-a-top-up warning at 4 to 6, shows running low at 2 to 3, and requires action at 0 to 1.",
+        "When available, Funded through and Next unfunded identify the Meme card and date; Top up by is shown only for an authoritative backend deadline.",
         "If an eligible card is unavailable, no card is airdropped and the unused balance stays available.",
         "The About Subscriptions overview links to the Subscriptions Report for aggregate subscribed and redeemed subscription counts."
       ],

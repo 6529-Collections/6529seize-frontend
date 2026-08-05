@@ -173,6 +173,11 @@ describe("next-sitemap config", () => {
     expect(shouldExcludeSitemapPath("/access")).toBe(true);
     expect(shouldExcludeSitemapPath("/messages/create?wave=abc")).toBe(true);
     expect(shouldExcludeSitemapPath("/tools/app-wallets")).toBe(true);
+    expect(shouldExcludeSitemapPath("/stream")).toBe(true);
+    expect(shouldExcludeSitemapPath("/reviews/6529-stream")).toBe(true);
+    expect(
+      shouldExcludeSitemapPath("/reviews/6529-stream/for-artists?ref=nav")
+    ).toBe(true);
     expect(shouldExcludeSitemapPath("/waves")).toBe(false);
   });
 

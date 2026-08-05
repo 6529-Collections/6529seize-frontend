@@ -44,6 +44,7 @@ const collection: any = {
 
 describe("NextGen component", () => {
   it("calls setView when Learn More clicked", async () => {
+    window.scrollTo = jest.fn();
     const setView = jest.fn();
     render(<NextGen collection={collection} setView={setView} />);
     await userEvent.click(screen.getByText("Learn More"));
@@ -61,6 +62,20 @@ describe("DistributionLink", () => {
       .mockReturnValueOnce("COMPLETE");
     render(<DistributionLink collection={collection} />);
     expect(screen.getByText("Distribution Plan")).toBeInTheDocument();
+  });
+
+  it("uses the large tertiary treatment when emphasized", () => {
+    getStatusFromDates
+      .mockReturnValueOnce("UPCOMING")
+      .mockReturnValueOnce("COMPLETE");
+    render(<DistributionLink collection={collection} emphasized />);
+
+    expect(screen.getByRole("link", { name: "Distribution Plan" })).toHaveClass(
+      "tw-border-iron-800",
+      "tw-bg-iron-950",
+      "tw-text-iron-100",
+      "tw-min-h-11"
+    );
   });
 
   it("renders nothing when complete", () => {

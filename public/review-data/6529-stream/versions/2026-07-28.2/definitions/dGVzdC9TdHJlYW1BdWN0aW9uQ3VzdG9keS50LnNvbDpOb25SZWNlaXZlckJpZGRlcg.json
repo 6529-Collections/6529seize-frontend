@@ -1,0 +1,148 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamAuctionCustody.t.sol:NonReceiverBidder#function:0x59d667a5",
+          "declaringDefinitionId": "test/StreamAuctionCustody.t.sol:NonReceiverBidder",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "contract StreamAuctions",
+              "name": "auctions",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "bid",
+          "outputs": [],
+          "selector": "0x59d667a5",
+          "signature": "bid(address,uint256)",
+          "stateMutability": "payable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "bid(address,uint256)",
+          "displaySignature": "bid(StreamAuctions,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionCustody.t.sol:NonReceiverBidder#function:0x59d667a5",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "auctions",
+              "type": "StreamAuctions"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uQ3VzdG9keS50LnNvbDpOb25SZWNlaXZlckJpZGRlciNmdW5jdGlvbjoweDU5ZDY2N2E1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "bid",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 147,
+            "byteStart": 12074,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionCustody.t.sol#L279-L281",
+            "lineEnd": 281,
+            "lineStart": 279,
+            "snippetSha256": "sha256:a21cdfbe74e713b736cfd363ff3168446db7402aaa4746d462dbf3e35bd7fceb",
+            "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+          },
+          "selector": "0x59d667a5",
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamAuctionCustody.t.sol:NonReceiverBidder",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1BdWN0aW9uQ3VzdG9keS50LnNvbDpOb25SZWNlaXZlckJpZGRlcg",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamAuctionCustody.t.sol:NonReceiverBidder"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "NonReceiverBidder",
+    "natspec": "",
+    "range": {
+      "byteLength": 182,
+      "byteStart": 12041,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionCustody.t.sol#L278-L282",
+      "lineEnd": 282,
+      "lineStart": 278,
+      "snippetSha256": "sha256:4658bb0ebfc2471168edf4ebcc2f0bc474f4708271fe25b3a872dadf1132d8ac",
+      "sourceSha256": "sha256:cc94fdbc17dadfa3b0ebf8fade1fb2446eb0d74512f5518d0f2b03d5d45e1c7f"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamAuctionCustody.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamAuctionCustody.t.sol:NonReceiverBidder",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionCustody.t.sol:NonReceiverBidder#function:0x59d667a5",
+      "definitionId": "test/StreamAuctionCustody.t.sol:NonReceiverBidder",
+      "severity": "advisory"
+    }
+  ]
+}

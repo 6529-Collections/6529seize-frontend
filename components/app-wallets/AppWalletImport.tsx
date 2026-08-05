@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/utils/button/Button";
 import styles from "./AppWallet.module.css";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -181,22 +182,24 @@ function AppWalletImportMnemonic() {
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
         <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-items-center tw-justify-between tw-px-3">
-          <button
+          <Button
             type="button"
             onClick={clear}
-            className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#ffc107] tw-bg-[#ffc107] tw-px-3 tw-py-1.5 tw-text-base tw-font-bold tw-leading-6 tw-text-black tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#ffc720] enabled:hover:tw-bg-[#ffca2c] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
             disabled={!phrase.some(Boolean) && !isCompletePhrase()}
+            variant="secondary"
+            size="md"
           >
             Clear
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             disabled={!isCompletePhrase() || isReadonly}
             onClick={validate}
-            className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#0d6efd] tw-bg-[#0d6efd] tw-px-3 tw-py-1.5 tw-text-base tw-font-bold tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#0a58ca] enabled:hover:tw-bg-[#0b5ed7] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
+            variant="action"
+            size="md"
           >
             Validate
-          </button>
+          </Button>
         </div>
       </div>
       {error && <ValidationError error={error} />}
@@ -261,22 +264,24 @@ function AppWalletImportPrivateKey() {
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
         <div className="tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-1 tw-items-center tw-justify-between tw-px-3">
-          <button
+          <Button
             type="button"
             onClick={clear}
-            className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#ffc107] tw-bg-[#ffc107] tw-px-3 tw-py-1.5 tw-text-base tw-font-bold tw-leading-6 tw-text-black tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#ffc720] enabled:hover:tw-bg-[#ffca2c] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
             disabled={!privateKey}
+            variant="secondary"
+            size="md"
           >
             Clear
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             disabled={!privateKey || isReadonly}
             onClick={validate}
-            className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#0d6efd] tw-bg-[#0d6efd] tw-px-3 tw-py-1.5 tw-text-base tw-font-bold tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#0a58ca] enabled:hover:tw-bg-[#0b5ed7] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
+            variant="action"
+            size="md"
           >
             Validate
-          </button>
+          </Button>
         </div>
       </div>
       {error && <ValidationError error={error} />}
@@ -350,13 +355,14 @@ function ImportWallet(
           privateKey: props.wallet.privateKey,
         }}
       />
-      <button
+      <Button
         type="button"
         onClick={() => setShowImportModal(true)}
-        className="tw-inline-flex tw-cursor-pointer tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-[#0d6efd] tw-bg-[#0d6efd] tw-px-3 tw-py-1.5 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-border-[#0a58ca] enabled:hover:tw-bg-[#0b5ed7] disabled:tw-pointer-events-none disabled:tw-cursor-default disabled:tw-opacity-[0.65]"
+        variant="action"
+        size="md"
       >
         <FontAwesomeIcon icon={faPlusCircle} height={16} /> Import Wallet
-      </button>
+      </Button>
     </div>
   );
 }

@@ -18,10 +18,18 @@ import {
   $applyNodeReplacement,
   TextNode,
 } from "lexical";
+import type { ReferencedNft } from "@/entities/IDrop";
+
+type NftReferenceIdentity = Pick<ReferencedNft, "contract" | "token"> & {
+  readonly name?: string | undefined;
+};
 
 type SerializedHashtagNode = Spread<
   {
     hashtagName: string;
+    nftContract?: string | null;
+    nftName?: string | null;
+    nftToken?: string | null;
   },
   SerializedTextNode
 >;
@@ -32,7 +40,15 @@ function convertHashtagElement(
   const textContent = domNode.textContent;
 
   if (textContent !== null) {
-    const node = $createHashtagNode(textContent);
+    const nftContract = domNode.dataset["mentionedNftContract"];
+    const nftName = domNode.dataset["mentionedNftName"];
+    const nftToken = domNode.dataset["mentionedNftToken"];
+    const node = $createHashtagNode(
+      textContent,
+      nftContract && nftToken
+        ? { contract: nftContract, token: nftToken, name: nftName }
+        : null
+    );
     return {
       node,
     };
@@ -43,18 +59,42 @@ function convertHashtagElement(
 
 export class HashtagNode extends TextNode {
   __hashtag: string;
+  __nftContract: string | null;
+  __nftName: string | null;
+  __nftToken: string | null;
 
   static override getType(): string {
     return "hashtag";
   }
 
   static override clone(node: HashtagNode): HashtagNode {
-    return new HashtagNode(node.__hashtag, node.__text, node.__key);
+    const referencedNft =
+      node.__nftContract && node.__nftToken
+        ? {
+            contract: node.__nftContract,
+            token: node.__nftToken,
+            name: node.__nftName ?? undefined,
+          }
+        : null;
+    return new HashtagNode(
+      node.__hashtag,
+      referencedNft,
+      node.__text,
+      node.__key
+    );
   }
   static override importJSON(
     serializedNode: SerializedHashtagNode
   ): HashtagNode {
-    const node = $createHashtagNode(serializedNode.hashtagName);
+    const referencedNft =
+      serializedNode.nftContract && serializedNode.nftToken
+        ? {
+            contract: serializedNode.nftContract,
+            token: serializedNode.nftToken,
+            name: serializedNode.nftName ?? undefined,
+          }
+        : null;
+    const node = $createHashtagNode(serializedNode.hashtagName, referencedNft);
     node.setTextContent(serializedNode.text);
     node.setFormat(serializedNode.format);
     node.setDetail(serializedNode.detail);
@@ -63,15 +103,28 @@ export class HashtagNode extends TextNode {
     return node;
   }
 
-  constructor(hashtagName: string, text?: string, key?: NodeKey) {
+  constructor(
+    hashtagName: string,
+    referencedNft: NftReferenceIdentity | null = null,
+    text?: string,
+    key?: NodeKey
+  ) {
     super(text ?? hashtagName, key);
     this.__hashtag = hashtagName;
+    this.__nftContract = referencedNft?.contract ?? null;
+    this.__nftName = referencedNft
+      ? (referencedNft.name ?? hashtagName.replace(/^\$/, ""))
+      : null;
+    this.__nftToken = referencedNft?.token ?? null;
   }
 
   override exportJSON(): SerializedHashtagNode {
     return {
       ...super.exportJSON(),
       hashtagName: this.__hashtag,
+      nftContract: this.__nftContract,
+      nftName: this.__nftName,
+      nftToken: this.__nftToken,
       type: "hashtag",
       version: 1,
     };
@@ -87,6 +140,13 @@ export class HashtagNode extends TextNode {
   override exportDOM(): DOMExportOutput {
     const element = document.createElement("span");
     element.setAttribute("data-lexical-hashtag", "true");
+    if (this.__nftContract && this.__nftToken) {
+      element.dataset["mentionedNftContract"] = this.__nftContract;
+      if (this.__nftName) {
+        element.dataset["mentionedNftName"] = this.__nftName;
+      }
+      element.dataset["mentionedNftToken"] = this.__nftToken;
+    }
 
     element.textContent = this.__text;
 
@@ -118,10 +178,27 @@ export class HashtagNode extends TextNode {
   override canInsertTextAfter(): boolean {
     return false;
   }
+
+  getReferencedNft(): ReferencedNft | null {
+    if (!this.__nftContract || !this.__nftToken) {
+      return null;
+    }
+    if (!this.__nftName) {
+      return null;
+    }
+    return {
+      contract: this.__nftContract,
+      token: this.__nftToken,
+      name: this.__nftName,
+    };
+  }
 }
 
-export function $createHashtagNode(hashtagName: string): HashtagNode {
-  const hashtagNode = new HashtagNode(hashtagName);
+export function $createHashtagNode(
+  hashtagName: string,
+  referencedNft: NftReferenceIdentity | null = null
+): HashtagNode {
+  const hashtagNode = new HashtagNode(hashtagName, referencedNft);
   hashtagNode.setMode("segmented").toggleDirectionless();
   return $applyNodeReplacement(hashtagNode);
 }

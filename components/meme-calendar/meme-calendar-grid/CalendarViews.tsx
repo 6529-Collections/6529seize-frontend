@@ -59,7 +59,7 @@ export function SeasonView({
       });
 
   return (
-    <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-3">
+    <div className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2 lg:tw-grid-cols-3">
       {months.map((m) => (
         <Month
           key={toISO(m)}
@@ -120,7 +120,7 @@ export function YearView({
   });
 
   return (
-    <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
+    <div className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2">
       {seasons.map((s) => {
         const isCurrent = currentIdx === s.sIdx;
         return (
@@ -171,6 +171,7 @@ export function EpochView({
         }}
       />
     );
+    // eslint-disable-next-line no-else-return -- Preserve the established drilldown branch structure while changing only the calendar presentation.
   } else {
     // For epochNumber >= 1, show 4 years, starting with Jan 1 of year 2023 + 4*(epochNumber-1)
     const startYear = 2023 + 4 * (epochNumber - 1);
@@ -198,7 +199,7 @@ export function EpochView({
       };
     });
     return (
-      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
+      <div className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2">
         {years.map((y) => {
           const isCurrent =
             currentIdx >= y.seasonIndex &&
@@ -249,6 +250,7 @@ export function PeriodView({
         }}
       />
     );
+    // eslint-disable-next-line no-else-return -- Preserve the established drilldown branch structure while changing only the calendar presentation.
   } else {
     // For periodNumber >= 1, show 5 epochs, starting with epochNumber = 1 + 5*(periodNumber-1)
     const firstEpochNumber = 1 + 5 * (periodNumber - 1);
@@ -276,7 +278,7 @@ export function PeriodView({
       };
     });
     return (
-      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
+      <div className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2">
         {epochs.map((ep) => {
           const isCurrent =
             currentIdx >= ep.seasonIndex &&
@@ -354,7 +356,7 @@ export function EraView({
   });
 
   return (
-    <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
+    <div className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2">
       {periods.map((p) => {
         const isCurrent =
           currentIdx >= p.seasonIndex &&
@@ -431,7 +433,7 @@ export function EonView({
   });
 
   return (
-    <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2">
+    <div className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2">
       {eras.map((er) => {
         const isCurrent =
           currentIdx >= er.seasonIndex &&

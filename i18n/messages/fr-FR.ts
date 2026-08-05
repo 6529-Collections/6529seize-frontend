@@ -3,10 +3,15 @@ import { FR_FR_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-to
 import { FR_FR_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { FR_FR_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import { FR_FR_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
+import { FR_FR_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import stormComposerFrMessages from "@/i18n/messages/stormComposer.fr-FR.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const FR_FR_MESSAGES = {
+  "linkPreview.twitter.kind.article": "Article",
+  "linkPreview.twitter.kind.post": "Publication",
+  "linkPreview.twitter.article.provider": "Article sur X",
+  "linkPreview.twitter.article.read": "Lire l’article : {title}",
   "waves.drop.actions.copyText": "Copier le texte",
   "waves.drop.actions.copyLink": "Copier le lien",
   "waves.drop.actions.copied": "Copie !",
@@ -60,6 +65,38 @@ export const FR_FR_MESSAGES = {
   "linkPreview.github.fact.mime": "MIME",
   "linkPreview.github.fact.type": "Type",
   "linkPreview.github.fileKind": "Fichier {kind}",
+  "linkPreview.etherscan.provider": "Etherscan",
+  "linkPreview.etherscan.previewLabel": "Aperçu Etherscan {kind} sur {network}",
+  "linkPreview.etherscan.open": "Ouvrir sur Etherscan",
+  "linkPreview.etherscan.copy": "Copier {kind}",
+  "linkPreview.etherscan.copied": "{kind} copié",
+  "linkPreview.etherscan.copyFailed": "Impossible de copier {kind}",
+  "linkPreview.etherscan.retry": "Réessayer",
+  "linkPreview.etherscan.loading": "Chargement de l’aperçu Etherscan",
+  "linkPreview.etherscan.partial":
+    "Certaines données en direct sont indisponibles",
+  "linkPreview.etherscan.liveUnavailable": "Données en direct indisponibles",
+  "linkPreview.etherscan.legacy":
+    "Réseau historique — les données en direct ne sont pas disponibles pour cet explorateur archivé.",
+  "linkPreview.etherscan.status.success": "Réussie",
+  "linkPreview.etherscan.status.pending": "En attente",
+  "linkPreview.etherscan.status.reverted": "Annulée",
+  "linkPreview.etherscan.status.finalized": "Finalisé",
+  "linkPreview.etherscan.status.proposed": "Proposé",
+  "linkPreview.etherscan.status.future": "Bloc futur",
+  "linkPreview.etherscan.status.unknown": "Statut indisponible",
+  "linkPreview.etherscan.action.nativeTransfer": "{value} ETH envoyés",
+  "linkPreview.etherscan.action.tokenTransfer": "Transfert de jeton",
+  "linkPreview.etherscan.action.contractCreation": "Contrat créé",
+  "linkPreview.etherscan.action.contractInteraction":
+    "Interaction avec un contrat",
+  "linkPreview.etherscan.action.transaction": "Transaction Ethereum",
+  "linkPreview.etherscan.action.compound":
+    "Compound {action} : {amount} {token}",
+  "linkPreview.etherscan.description.tool":
+    "Lien en lecture seule vers un outil Etherscan. 6529 n’envoie pas son formulaire.",
+  "linkPreview.etherscan.description.unknown":
+    "Une page Etherscan. Ouvrez-la pour consulter la route complète.",
   "profileCms.block.audioUnavailable": "Audio indisponible",
   "profileCms.block.collectionFallback": "Collection",
   "profileCms.block.galleryUnavailable": "Galerie indisponible",
@@ -377,6 +414,7 @@ export const FR_FR_MESSAGES = {
     "Zone d'envoi de fichiers du chat de wave",
   ...stormComposerFrMessages,
   "waves.loadingStatus": "Chargement des waves",
+  "waves.gifPicker.open": "Ajouter un GIF",
   "waves.gifPicker.dialogTitle": "Recherche de GIF",
   "waves.gifPicker.searchPlaceholder": "Rechercher des GIF",
   "waves.gifPicker.noResults": "Aucun GIF trouvé.",
@@ -389,6 +427,11 @@ export const FR_FR_MESSAGES = {
   "waves.gifPicker.unavailable.hint":
     "Vous pouvez televerser un fichier GIF a la place.",
   "common.close": "Fermer",
+  "waves.create.actions.cancel": "Annuler",
+  "waves.create.actions.complete": "Terminer",
+  "waves.create.actions.next": "Suivant",
+  "waves.create.actions.previous": "Précédent",
+  "waves.create.actions.save": "Enregistrer",
   ...FR_FR_PAGINATION_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} restant ce tour",
   "memes.quickVote.unrated": "{count} non notés",
@@ -417,6 +460,32 @@ export const FR_FR_MESSAGES = {
   "waves.leaderboard.retryMore": "Réessayer de charger d’autres drops",
   "waves.leaderboard.loadMore": "Charger plus de drops",
   "waves.leaderboard.loadingMoreButton": "Chargement…",
+  "waves.leaderboard.timeline.toggle":
+    "Afficher ou masquer la chronologie des décisions",
+  "waves.leaderboard.timeline.decisionTimeline":
+    "Chronologie des décisions",
+  "waves.leaderboard.timeline.announcementHistory":
+    "Historique des annonces",
+  "waves.leaderboard.timeline.paused": "En pause",
+  "waves.leaderboard.timeline.nextDecisionAfter":
+    "Prochaine décision après le {date}",
+  "waves.leaderboard.timeline.noDecisionScheduled":
+    "Aucune décision planifiée",
+  "waves.leaderboard.timeline.noUpcomingEvents": "Aucun événement à venir",
+  "waves.leaderboard.timeline.nextWinner": "Prochain gagnant",
+  "waves.leaderboard.timeline.nextWinnerIn":
+    "Prochain gagnant dans {countdown}",
+  "waves.leaderboard.timeline.unit.day.one": "{count} jour",
+  "waves.leaderboard.timeline.unit.day.other": "{count} jours",
+  "waves.leaderboard.timeline.unit.hour.one": "{count} heure",
+  "waves.leaderboard.timeline.unit.hour.other": "{count} heures",
+  "waves.leaderboard.timeline.unit.minute.one": "{count} minute",
+  "waves.leaderboard.timeline.unit.minute.other": "{count} minutes",
+  "waves.leaderboard.timeline.unit.second.one": "{count} seconde",
+  "waves.leaderboard.timeline.unit.second.other": "{count} secondes",
+  "waves.leaderboard.timeline.status.next": "Suivant",
+  "waves.leaderboard.timeline.status.done": "Fait",
+  "waves.leaderboard.timeline.status.completed": "Terminé",
   "waves.poll.actions.viewResults": "Voir les résultats",
   "waves.poll.actions.vote": "Voter",
   "waves.poll.actions.changeVote": "Modifier le vote",
@@ -468,4 +537,5 @@ export const FR_FR_MESSAGES = {
   "theMemes.volume.7Days": "7 jours",
   "theMemes.volume.30Days": "30 jours",
   "theMemes.volume.allTime": "Tout l’historique",
+  ...FR_FR_TRANSFER_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;

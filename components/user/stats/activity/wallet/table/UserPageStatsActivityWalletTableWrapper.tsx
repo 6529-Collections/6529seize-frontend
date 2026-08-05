@@ -1,4 +1,5 @@
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import { UserPageStatsTableScroll } from "@/components/user/stats/UserPageStatsTableShared";
 import type { NFTLite } from "@/components/user/settings/UserSettingsImgSelectMeme";
 import CommonCardSkeleton from "@/components/utils/animation/CommonCardSkeleton";
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
@@ -7,8 +8,11 @@ import type { Transaction } from "@/entities/ITransaction";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import UserPageStatsActivityWalletFilter from "../filter/UserPageStatsActivityWalletFilter";
-import { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityWallet.types";
-import { getWalletActivityEmptyMessage } from "../wallet-activity.messages";
+import type { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityWallet.types";
+import {
+  getWalletActivityEmptyMessage,
+  getWalletActivityMessage,
+} from "../wallet-activity.messages";
 import UserPageStatsActivityWalletTable from "./UserPageStatsActivityWalletTable";
 export default function UserPageStatsActivityWalletTableWrapper({
   filter,
@@ -50,7 +54,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
   }
 
   return (
-    <div className="tw-mt-2 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 lg:tw-mt-4">
+    <div className="tw-mt-2 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.04] lg:tw-mt-4">
       <div className="tw-mt-6 tw-inline-flex tw-w-full tw-items-center tw-justify-between tw-space-x-4 tw-px-4 sm:tw-px-6">
         <UserPageStatsActivityWalletFilter
           activeFilter={filter}
@@ -61,15 +65,23 @@ export default function UserPageStatsActivityWalletTableWrapper({
       </div>
       <div>
         {transactions.length ? (
-          <div className="tw-flow-root tw-scroll-py-3 tw-overflow-auto">
-            <UserPageStatsActivityWalletTable
-              transactions={transactions}
-              profile={profile}
-              memes={memes}
-              memeLab={memeLab}
-              nextgenCollections={nextgenCollections}
-              locale={locale}
-            />
+          <div className="tw-flow-root">
+            <UserPageStatsTableScroll
+              label={getWalletActivityMessage(
+                "user.collected.stats.walletActivity.tableCaption",
+                undefined,
+                locale
+              )}
+            >
+              <UserPageStatsActivityWalletTable
+                transactions={transactions}
+                profile={profile}
+                memes={memes}
+                memeLab={memeLab}
+                nextgenCollections={nextgenCollections}
+                locale={locale}
+              />
+            </UserPageStatsTableScroll>
             {totalPages > 1 && (
               <CommonTablePagination
                 currentPage={page}
@@ -82,7 +94,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
             )}
           </div>
         ) : (
-          <output className="tw-px-4 tw-py-4 tw-text-sm tw-italic tw-text-iron-500 sm:tw-px-6 sm:tw-text-base">
+          <output className="tw-block tw-px-4 tw-py-5 tw-text-sm tw-italic tw-text-iron-500 sm:tw-px-6 sm:tw-text-base">
             {getWalletActivityEmptyMessage(filter, locale)}
           </output>
         )}

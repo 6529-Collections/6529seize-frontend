@@ -123,16 +123,26 @@ export function NotificationWebSocketSync() {
 
       if (shouldRefreshActive) {
         queryClient
-          .invalidateQueries({
-            queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
-          })
+          .invalidateQueries(
+            {
+              queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
+            },
+            {
+              cancelRefetch: false,
+            }
+          )
           .catch(() => undefined);
       }
       if (shouldRefreshConnectedAccounts) {
         queryClient
-          .invalidateQueries({
-            queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
-          })
+          .invalidateQueries(
+            {
+              queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
+            },
+            {
+              cancelRefetch: false,
+            }
+          )
           .catch(() => undefined);
       }
     },

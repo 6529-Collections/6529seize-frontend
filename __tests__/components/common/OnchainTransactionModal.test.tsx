@@ -60,6 +60,22 @@ describe("OnchainTransactionModal", () => {
     ).toHaveAccessibleDescription("2 Cards - 0.13 ETH");
   });
 
+  it("preserves deliberate line breaks in the title", () => {
+    render(
+      <OnchainTransactionModal
+        status="confirm_wallet"
+        title={"Locking Wallet on Use Case\n#3 Airdrops"}
+        onClose={jest.fn()}
+      />
+    );
+
+    const heading = screen.getByRole("heading", {
+      name: /Locking Wallet on Use Case\s+#3 Airdrops/,
+    });
+    expect(heading).toHaveClass("tw-whitespace-pre-line");
+    expect(heading.textContent).toBe("Locking Wallet on Use Case\n#3 Airdrops");
+  });
+
   it("ignores Escape and has no dismissing backdrop before a terminal state", () => {
     const onClose = jest.fn();
     render(

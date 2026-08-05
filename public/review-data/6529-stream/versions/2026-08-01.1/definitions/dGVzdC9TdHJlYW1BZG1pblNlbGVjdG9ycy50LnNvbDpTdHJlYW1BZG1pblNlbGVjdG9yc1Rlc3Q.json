@@ -1,0 +1,695 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0xc231ace5",
+          "declaringDefinitionId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testDropSignerCannotManageRolesByDefault",
+          "outputs": [],
+          "selector": "0xc231ace5",
+          "signature": "testDropSignerCannotManageRolesByDefault()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0x8a21b0ed",
+          "declaringDefinitionId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFunctionAdminGrantIsTargetScoped",
+          "outputs": [],
+          "selector": "0x8a21b0ed",
+          "signature": "testFunctionAdminGrantIsTargetScoped()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0x5f335bbd",
+          "declaringDefinitionId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testGlobalAdminBypassIsExplicit",
+          "outputs": [],
+          "selector": "0x5f335bbd",
+          "signature": "testGlobalAdminBypassIsExplicit()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0x628c43f1",
+          "declaringDefinitionId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testOwnerCanManageRolesButIsNotImplicitOperationalAdmin",
+          "outputs": [],
+          "selector": "0x628c43f1",
+          "signature": "testOwnerCanManageRolesButIsNotImplicitOperationalAdmin()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0xc5f32b67",
+          "declaringDefinitionId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testRevokedFunctionAdminCannotCallProtectedFunction",
+          "outputs": [],
+          "selector": "0xc5f32b67",
+          "signature": "testRevokedFunctionAdminCannotCallProtectedFunction()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0x74f774ef",
+          "declaringDefinitionId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSetCollectionDataRequiresItsOwnSelector",
+          "outputs": [],
+          "selector": "0x74f774ef",
+          "signature": "testSetCollectionDataRequiresItsOwnSelector()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0xee4ddbe7",
+          "declaringDefinitionId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSetMultipleMerkleRootsRequiresItsOwnSelector",
+          "outputs": [],
+          "selector": "0xee4ddbe7",
+          "signature": "testSetMultipleMerkleRootsRequiresItsOwnSelector()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0x4939e180",
+          "declaringDefinitionId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testUpdateCollectionInfoRequiresItsOwnSelector",
+          "outputs": [],
+          "selector": "0x4939e180",
+          "signature": "testUpdateCollectionInfoRequiresItsOwnSelector()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "testSetCollectionDataRequiresItsOwnSelector()",
+          "displaySignature": "testSetCollectionDataRequiresItsOwnSelector()",
+          "functionKind": "function",
+          "id": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0x74f774ef",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pblNlbGVjdG9ycy50LnNvbDpTdHJlYW1BZG1pblNlbGVjdG9yc1Rlc3QjZnVuY3Rpb246MHg3NGY3NzRlZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSetCollectionDataRequiresItsOwnSelector",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 856,
+            "byteStart": 536,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdminSelectors.t.sol#L17-L36",
+            "lineEnd": 36,
+            "lineStart": 17,
+            "snippetSha256": "sha256:c8a4083c9766c032f675798717b1e316eae83653548e62aeb7d19ed22767819d",
+            "sourceSha256": "sha256:5051f0c7734d92e321e59ec645d025e016766aea9dcc1c9cf0d0db6a0681ee66"
+          },
+          "selector": "0x74f774ef",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testUpdateCollectionInfoRequiresItsOwnSelector()",
+          "displaySignature": "testUpdateCollectionInfoRequiresItsOwnSelector()",
+          "functionKind": "function",
+          "id": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0x4939e180",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pblNlbGVjdG9ycy50LnNvbDpTdHJlYW1BZG1pblNlbGVjdG9yc1Rlc3QjZnVuY3Rpb246MHg0OTM5ZTE4MA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testUpdateCollectionInfoRequiresItsOwnSelector",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 896,
+            "byteStart": 1398,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdminSelectors.t.sol#L38-L59",
+            "lineEnd": 59,
+            "lineStart": 38,
+            "snippetSha256": "sha256:8b6bf32c9dab47b3ebcb8e084400834aab742d223f65286d0b28a3594276551e",
+            "sourceSha256": "sha256:5051f0c7734d92e321e59ec645d025e016766aea9dcc1c9cf0d0db6a0681ee66"
+          },
+          "selector": "0x4939e180",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSetMultipleMerkleRootsRequiresItsOwnSelector()",
+          "displaySignature": "testSetMultipleMerkleRootsRequiresItsOwnSelector()",
+          "functionKind": "function",
+          "id": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0xee4ddbe7",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pblNlbGVjdG9ycy50LnNvbDpTdHJlYW1BZG1pblNlbGVjdG9yc1Rlc3QjZnVuY3Rpb246MHhlZTRkZGJlNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSetMultipleMerkleRootsRequiresItsOwnSelector",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1053,
+            "byteStart": 2300,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdminSelectors.t.sol#L61-L82",
+            "lineEnd": 82,
+            "lineStart": 61,
+            "snippetSha256": "sha256:73d231a7ea3507f92f20705ef4b6b23899708e3c1d1b6279f511a5b13215e671",
+            "sourceSha256": "sha256:5051f0c7734d92e321e59ec645d025e016766aea9dcc1c9cf0d0db6a0681ee66"
+          },
+          "selector": "0xee4ddbe7",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testFunctionAdminGrantIsTargetScoped()",
+          "displaySignature": "testFunctionAdminGrantIsTargetScoped()",
+          "functionKind": "function",
+          "id": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0x8a21b0ed",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pblNlbGVjdG9ycy50LnNvbDpTdHJlYW1BZG1pblNlbGVjdG9yc1Rlc3QjZnVuY3Rpb246MHg4YTIxYjBlZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFunctionAdminGrantIsTargetScoped",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 947,
+            "byteStart": 3359,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdminSelectors.t.sol#L84-L102",
+            "lineEnd": 102,
+            "lineStart": 84,
+            "snippetSha256": "sha256:60e4d03a8ee33a8fcdd0238b1460960e2cc0c0fb85dd171e203de3521983e209",
+            "sourceSha256": "sha256:5051f0c7734d92e321e59ec645d025e016766aea9dcc1c9cf0d0db6a0681ee66"
+          },
+          "selector": "0x8a21b0ed",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testRevokedFunctionAdminCannotCallProtectedFunction()",
+          "displaySignature": "testRevokedFunctionAdminCannotCallProtectedFunction()",
+          "functionKind": "function",
+          "id": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0xc5f32b67",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pblNlbGVjdG9ycy50LnNvbDpTdHJlYW1BZG1pblNlbGVjdG9yc1Rlc3QjZnVuY3Rpb246MHhjNWYzMmI2Nw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testRevokedFunctionAdminCannotCallProtectedFunction",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 765,
+            "byteStart": 4312,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdminSelectors.t.sol#L104-L119",
+            "lineEnd": 119,
+            "lineStart": 104,
+            "snippetSha256": "sha256:6690b77165f9489952a741d16d264963ae84fe2ac2164a6b7222d591fe39a4d6",
+            "sourceSha256": "sha256:5051f0c7734d92e321e59ec645d025e016766aea9dcc1c9cf0d0db6a0681ee66"
+          },
+          "selector": "0xc5f32b67",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testGlobalAdminBypassIsExplicit()",
+          "displaySignature": "testGlobalAdminBypassIsExplicit()",
+          "functionKind": "function",
+          "id": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0x5f335bbd",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pblNlbGVjdG9ycy50LnNvbDpTdHJlYW1BZG1pblNlbGVjdG9yc1Rlc3QjZnVuY3Rpb246MHg1ZjMzNWJiZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testGlobalAdminBypassIsExplicit",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 562,
+            "byteStart": 5083,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdminSelectors.t.sol#L121-L132",
+            "lineEnd": 132,
+            "lineStart": 121,
+            "snippetSha256": "sha256:ffb694f7898934de436779c71b7f6eec83df077235d4f250141bf87b7d049fa1",
+            "sourceSha256": "sha256:5051f0c7734d92e321e59ec645d025e016766aea9dcc1c9cf0d0db6a0681ee66"
+          },
+          "selector": "0x5f335bbd",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testOwnerCanManageRolesButIsNotImplicitOperationalAdmin()",
+          "displaySignature": "testOwnerCanManageRolesButIsNotImplicitOperationalAdmin()",
+          "functionKind": "function",
+          "id": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0x628c43f1",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pblNlbGVjdG9ycy50LnNvbDpTdHJlYW1BZG1pblNlbGVjdG9yc1Rlc3QjZnVuY3Rpb246MHg2MjhjNDNmMQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testOwnerCanManageRolesButIsNotImplicitOperationalAdmin",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 883,
+            "byteStart": 5651,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdminSelectors.t.sol#L134-L150",
+            "lineEnd": 150,
+            "lineStart": 134,
+            "snippetSha256": "sha256:0709367d59ab2de31ef6b707f3859a507353db1fc5e95ac0d560ca697821958f",
+            "sourceSha256": "sha256:5051f0c7734d92e321e59ec645d025e016766aea9dcc1c9cf0d0db6a0681ee66"
+          },
+          "selector": "0x628c43f1",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testDropSignerCannotManageRolesByDefault()",
+          "displaySignature": "testDropSignerCannotManageRolesByDefault()",
+          "functionKind": "function",
+          "id": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0xc231ace5",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pblNlbGVjdG9ycy50LnNvbDpTdHJlYW1BZG1pblNlbGVjdG9yc1Rlc3QjZnVuY3Rpb246MHhjMjMxYWNlNQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testDropSignerCannotManageRolesByDefault",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1294,
+            "byteStart": 6540,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdminSelectors.t.sol#L152-L181",
+            "lineEnd": 181,
+            "lineStart": 152,
+            "snippetSha256": "sha256:c546f1e42a165c4d7022a0e92cf17adffb1b5543ce78447d592f76a7f1d407fb",
+            "sourceSha256": "sha256:5051f0c7734d92e321e59ec645d025e016766aea9dcc1c9cf0d0db6a0681ee66"
+          },
+          "selector": "0xc231ace5",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_deployCore()",
+          "functionKind": "function",
+          "id": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:_deployCore()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pblNlbGVjdG9ycy50LnNvbDpTdHJlYW1BZG1pblNlbGVjdG9yc1Rlc3QjZnVuY3Rpb246X2RlcGxveUNvcmUoKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_deployCore",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "admins",
+              "type": "StreamAdmins"
+            },
+            {
+              "index": 1,
+              "name": "core",
+              "type": "StreamCore"
+            }
+          ],
+          "range": {
+            "byteLength": 357,
+            "byteStart": 7840,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdminSelectors.t.sol#L183-L188",
+            "lineEnd": 188,
+            "lineStart": 183,
+            "snippetSha256": "sha256:bdecc1513387a01d615e33f3ec1511b742434da449f04576359d89702be4d6f4",
+            "sourceSha256": "sha256:5051f0c7734d92e321e59ec645d025e016766aea9dcc1c9cf0d0db6a0681ee66"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_createCollection(StreamCore)",
+          "functionKind": "function",
+          "id": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:_createCollection(StreamCore)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "core",
+              "type": "StreamCore"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BZG1pblNlbGVjdG9ycy50LnNvbDpTdHJlYW1BZG1pblNlbGVjdG9yc1Rlc3QjZnVuY3Rpb246X2NyZWF0ZUNvbGxlY3Rpb24oU3RyZWFtQ29yZSk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_createCollection",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 431,
+            "byteStart": 8203,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdminSelectors.t.sol#L190-L204",
+            "lineEnd": 204,
+            "lineStart": 190,
+            "snippetSha256": "sha256:498d966371b355f94e4922cf4f408d4a47029f0182072b2dd65b167d30bb33c8",
+            "sourceSha256": "sha256:5051f0c7734d92e321e59ec645d025e016766aea9dcc1c9cf0d0db6a0681ee66"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_setCollectionDataCall()",
+          "functionKind": "function",
+          "id": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:_setCollectionDataCall()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pblNlbGVjdG9ycy50LnNvbDpTdHJlYW1BZG1pblNlbGVjdG9yc1Rlc3QjZnVuY3Rpb246X3NldENvbGxlY3Rpb25EYXRhQ2FsbCgp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_setCollectionDataCall",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 309,
+            "byteStart": 8640,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdminSelectors.t.sol#L206-L215",
+            "lineEnd": 215,
+            "lineStart": 206,
+            "snippetSha256": "sha256:309191096015e46548839f3917a5195dd4ed1a2d92c9ce87c20c785f8daefc12",
+            "sourceSha256": "sha256:5051f0c7734d92e321e59ec645d025e016766aea9dcc1c9cf0d0db6a0681ee66"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_updateCollectionInfoCall()",
+          "functionKind": "function",
+          "id": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:_updateCollectionInfoCall()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BZG1pblNlbGVjdG9ycy50LnNvbDpTdHJlYW1BZG1pblNlbGVjdG9yc1Rlc3QjZnVuY3Rpb246X3VwZGF0ZUNvbGxlY3Rpb25JbmZvQ2FsbCgp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_updateCollectionInfoCall",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 579,
+            "byteStart": 8955,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdminSelectors.t.sol#L217-L234",
+            "lineEnd": 234,
+            "lineStart": 217,
+            "snippetSha256": "sha256:784112b47eeccee5dbe724b4cb82e2d176d5957d5d41bdbc894ec43370120ed9",
+            "sourceSha256": "sha256:5051f0c7734d92e321e59ec645d025e016766aea9dcc1c9cf0d0db6a0681ee66"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_setMultipleMerkleRootsCall(bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:_setMultipleMerkleRootsCall(bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "root",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BZG1pblNlbGVjdG9ycy50LnNvbDpTdHJlYW1BZG1pblNlbGVjdG9yc1Rlc3QjZnVuY3Rpb246X3NldE11bHRpcGxlTWVya2xlUm9vdHNDYWxsKGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_setMultipleMerkleRootsCall",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 394,
+            "byteStart": 9540,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdminSelectors.t.sol#L236-L244",
+            "lineEnd": 244,
+            "lineStart": 236,
+            "snippetSha256": "sha256:cd5c86f711f34c54e9453ca7dae78e7c69e69bc54cbf84541c1608b8743480d0",
+            "sourceSha256": "sha256:5051f0c7734d92e321e59ec645d025e016766aea9dcc1c9cf0d0db6a0681ee66"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_addDependencyCall(bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:_addDependencyCall(bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "name",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BZG1pblNlbGVjdG9ycy50LnNvbDpTdHJlYW1BZG1pblNlbGVjdG9yc1Rlc3QjZnVuY3Rpb246X2FkZERlcGVuZGVuY3lDYWxsKGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_addDependencyCall",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 265,
+            "byteStart": 9940,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdminSelectors.t.sol#L246-L250",
+            "lineEnd": 250,
+            "lineStart": 246,
+            "snippetSha256": "sha256:fc67d995a12251410b52e00f666b3d9fc564b4e00e6935cd16b9b2370f2ef999",
+            "sourceSha256": "sha256:5051f0c7734d92e321e59ec645d025e016766aea9dcc1c9cf0d0db6a0681ee66"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "FUNCTION_ADMIN",
+          "natspec": "",
+          "range": {
+            "byteLength": 58,
+            "byteStart": 471,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdminSelectors.t.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:b97c2e225346d9bd5324b6d342424c972f57cc70d8604e96a778ed8eb8126ac9",
+            "sourceSha256": "sha256:5051f0c7734d92e321e59ec645d025e016766aea9dcc1c9cf0d0db6a0681ee66"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 16,
+            "byteStart": 513,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdminSelectors.t.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:ff90295fee849d58a9a67d401763bcdf9a2e87e84bdeb02ce3ca102c5621224f",
+            "sourceSha256": "sha256:5051f0c7734d92e321e59ec645d025e016766aea9dcc1c9cf0d0db6a0681ee66"
+          },
+          "valueSource": "address(0xA11CE)",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1BZG1pblNlbGVjdG9ycy50LnNvbDpTdHJlYW1BZG1pblNlbGVjdG9yc1Rlc3Q",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamAdminSelectorsTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 9870,
+      "byteStart": 337,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAdminSelectors.t.sol#L11-L251",
+      "lineEnd": 251,
+      "lineStart": 11,
+      "snippetSha256": "sha256:00dbc2c484ef4c9d320dc11011cf1cea9a3d11ab93bbda955d587d5935ab5d1d",
+      "sourceSha256": "sha256:5051f0c7734d92e321e59ec645d025e016766aea9dcc1c9cf0d0db6a0681ee66"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamAdminSelectors.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 9
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 8
+    },
+    "totalCount": 9
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0x4939e180",
+      "definitionId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0x5f335bbd",
+      "definitionId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0x628c43f1",
+      "definitionId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0x74f774ef",
+      "definitionId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0x8a21b0ed",
+      "definitionId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0xc231ace5",
+      "definitionId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0xc5f32b67",
+      "definitionId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest#function:0xee4ddbe7",
+      "definitionId": "test/StreamAdminSelectors.t.sol:StreamAdminSelectorsTest",
+      "severity": "advisory"
+    }
+  ]
+}

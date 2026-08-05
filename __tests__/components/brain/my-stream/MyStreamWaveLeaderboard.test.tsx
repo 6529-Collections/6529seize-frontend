@@ -187,6 +187,17 @@ const renderLeaderboard = (leaderboardWave: ApiWave = wave) =>
     </AuthContext.Provider>
   );
 
+const getLeaderboardControlsFrame = (): HTMLElement => {
+  const controlsFrame =
+    screen.getByTestId("header").parentElement?.parentElement;
+
+  if (!(controlsFrame instanceof HTMLElement)) {
+    throw new Error("Leaderboard controls frame was not rendered");
+  }
+
+  return controlsFrame;
+};
+
 describe("MyStreamWaveLeaderboard", () => {
   afterAll(() => {
     resetIntersectionObserver();
@@ -237,7 +248,7 @@ describe("MyStreamWaveLeaderboard", () => {
     ]); // sort
     renderLeaderboard();
 
-    const stickyHeader = screen.getByTestId("header").parentElement;
+    const stickyHeader = getLeaderboardControlsFrame();
     expect(stickyHeader).toHaveClass("tw-sticky");
     expect(stickyHeader).toHaveClass("tw-z-30");
     expect(stickyHeader).toHaveClass("tw-flex-none");
@@ -276,7 +287,7 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(
       screen.getByTestId("approval-controls-sticky-sentinel")
     ).toBeInTheDocument();
-    const controls = screen.getByTestId("header").parentElement;
+    const controls = getLeaderboardControlsFrame();
     expect(controls).not.toHaveClass("tw-sticky");
     expect(controls).toHaveClass("tw-flex-none");
   });
@@ -303,10 +314,10 @@ describe("MyStreamWaveLeaderboard", () => {
     renderLeaderboard(makeOpenApproveWave());
 
     const sentinel = screen.getByTestId("approval-controls-sticky-sentinel");
-    const controls = screen.getByTestId("header").parentElement;
+    const controls = getLeaderboardControlsFrame();
     const observer = intersectionObserverInstances[0];
 
-    expect(observer?.options.root).toBe(sentinel.parentElement);
+    expect(observer?.options.root).toBe(sentinel.closest('[tabindex="-1"]'));
     expect(observer?.observe).toHaveBeenCalledWith(sentinel);
     expect(controls).not.toHaveClass("tw-sticky");
 
@@ -366,7 +377,7 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(
       screen.queryByTestId("approval-controls-sticky-sentinel")
     ).not.toBeInTheDocument();
-    expect(screen.getByTestId("header").parentElement).toHaveClass("tw-sticky");
+    expect(getLeaderboardControlsFrame()).toHaveClass("tw-sticky");
   });
 
   it("uses rank for saved projected vote sort when the wave has no time lock", () => {
@@ -459,6 +470,12 @@ describe("MyStreamWaveLeaderboard", () => {
     renderLeaderboard();
 
     expect(headerProps.viewMode).toBe("grid");
+    expect(screen.getByTestId("header")).toBeInTheDocument();
+    expect(getLeaderboardControlsFrame()).toHaveClass(
+      "tw-max-w-full",
+      "!tw-flex-[1_0_15rem]",
+      "lg:!tw-flex-[1_0_27rem]"
+    );
     expect(galleryProps.isVotingClosed).toBe(false);
     expect(galleryProps.isVotingControlsLocked).toBe(false);
     await user.click(screen.getByTestId("header"));

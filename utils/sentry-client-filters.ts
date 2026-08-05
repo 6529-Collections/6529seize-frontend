@@ -38,6 +38,9 @@ export {
   shouldFilterPoperBlockerOrphanFetchRejection,
 } from "./sentry-client-filters/extension-fetch";
 export {
+  shouldFilterExpectedWaveRequestReplacementAbort,
+} from "./sentry-client-filters/wave-abort";
+export {
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterInjectedProviderProxyStartsWithError,

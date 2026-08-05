@@ -5,15 +5,9 @@ import type { ApiDropsLeaderboardPageV2 } from "@/generated/models/ApiDropsLeade
 import type { ApiDropMetadataResponse } from "@/generated/models/ApiDropMetadataResponse";
 import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import type { ApiDropPartV2 } from "@/generated/models/ApiDropPartV2";
-import type { ApiDropPoll } from "@/generated/models/ApiDropPoll";
 import type { ApiDropPollVoteRequest } from "@/generated/models/ApiDropPollVoteRequest";
-import type { ApiDropPollsPage } from "@/generated/models/ApiDropPollsPage";
 import type { ApiDropPollVotersPage } from "@/generated/models/ApiDropPollVotersPage";
 import type { ApiDropRater } from "@/generated/models/ApiDropRater";
-import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
-import type { ApiDropReactionV2 } from "@/generated/models/ApiDropReactionV2";
-import type { ApiDropSearchStrategy } from "@/generated/models/ApiDropSearchStrategy";
-import type { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import type { ApiDropV2Page } from "@/generated/models/ApiDropV2Page";
 import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2PageWithoutCount";
@@ -22,9 +16,6 @@ import type { ApiDropWithoutWavesPageWithoutCount } from "@/generated/models/Api
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import type { ApiWaveDropsFeedV2 } from "@/generated/models/ApiWaveDropsFeedV2";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import type { ApiWavePoll } from "@/generated/models/ApiWavePoll";
-import type { ApiPageSortDirection } from "@/generated/models/ApiPageSortDirection";
 import {
   commonApiFetch,
   commonApiFetchWithRetry,
@@ -53,6 +44,29 @@ import type {
   ApiDropV2View,
   ApiDropWithoutWaveV2View,
 } from "@/services/api/drop-v2-view.types";
+import type {
+  ApiWaveDropsV2PageFeed,
+  ApiWavePollsPage,
+  FetchBoostedDropsV2Props,
+  FetchDropRepliesV2Props,
+  FetchDropsV2ByIdsProps,
+  FetchGlobalBoostedDropsV2Props,
+  FetchWaveCompetitionDropsV2Props,
+  FetchWaveDropsSearchV2Props,
+  FetchWaveDropsV2Props,
+  FetchWaveLeaderboardV2Props,
+  FetchWavePollsV2Props,
+  WaveCompetitionDropsPage,
+} from "./wave-drops-v2.types";
+
+export { fetchDropReactionDetailsV2 } from "./wave-drop-reactions-v2-api";
+
+export type {
+  ApiWaveDropsV2PageFeed,
+  ApiWavePollDropRow,
+  WavePollsSort,
+  WavePollsState,
+} from "./wave-drops-v2.types";
 
 const DEFAULT_RETRY_OPTIONS = {
   maxRetries: 2,
@@ -60,110 +74,6 @@ const DEFAULT_RETRY_OPTIONS = {
   backoffFactor: 1.5,
   jitter: 0.1,
 } as const;
-
-interface FetchWaveDropsV2Props {
-  readonly waveId: string;
-  readonly limit: number;
-  readonly serialNoLimit?: number | null | undefined;
-  readonly searchStrategy?: ApiDropSearchStrategy | undefined;
-  readonly dropType?: ApiDropType | undefined;
-  readonly signal?: AbortSignal | undefined;
-  readonly headers?: Record<string, string> | undefined;
-  readonly includeFullMetadata?: boolean | undefined;
-  readonly includeTopRaters?: boolean | undefined;
-  readonly withRetry?: boolean | undefined;
-}
-
-interface FetchBoostedDropsV2Props {
-  readonly waveId: string;
-  readonly wave: ApiWave | ApiWaveMin;
-  readonly limit: number;
-  readonly sortDirection?: string | undefined;
-  readonly sort?: string | undefined;
-  readonly countOnlyBoostsAfter?: number | undefined;
-}
-
-interface FetchGlobalBoostedDropsV2Props {
-  readonly limit: number;
-  readonly sortDirection?: string | undefined;
-  readonly sort?: string | undefined;
-  readonly countOnlyBoostsAfter?: number | undefined;
-  readonly minBoosts?: number | undefined;
-  readonly signal?: AbortSignal | undefined;
-}
-
-interface FetchDropRepliesV2Props {
-  readonly parentDropId: string;
-  readonly page: number;
-  readonly pageSize: number;
-  readonly wave?: ApiWave | ApiWaveMin | undefined;
-  readonly signal?: AbortSignal | undefined;
-}
-
-interface FetchWaveLeaderboardV2Props {
-  readonly waveId: string;
-  readonly params: Record<string, string>;
-  readonly signal?: AbortSignal | undefined;
-}
-
-interface FetchWaveDropsSearchV2Props {
-  readonly wave: ApiWave | ApiWaveMin;
-  readonly term: string;
-  readonly page: number;
-  readonly size: number;
-  readonly signal?: AbortSignal | undefined;
-}
-
-interface FetchWaveCompetitionDropsV2Props {
-  readonly wave: ApiWave | ApiWaveMin;
-  readonly authorId: string;
-  readonly dropType: ApiDropType.Participatory | ApiDropType.Winner;
-  readonly page: number;
-  readonly pageSize: number;
-  readonly signal?: AbortSignal | undefined;
-}
-
-type WaveCompetitionDrop = ApiDrop & {
-  readonly voting_open: boolean;
-};
-
-interface WaveCompetitionDropsPage {
-  readonly data: WaveCompetitionDrop[];
-  readonly page: number;
-  readonly next: boolean;
-}
-
-export type WavePollsState = "OPEN" | "CLOSED";
-export type WavePollsSort = "created_at" | "closing_time";
-export type ApiWavePollDropRow = Partial<ApiWavePoll> & {
-  readonly poll?: ApiDropPoll | undefined;
-};
-type ApiWavePollsPage = Omit<ApiDropPollsPage, "data"> & {
-  readonly data: ApiWavePollDropRow[];
-};
-
-interface FetchWavePollsV2Props {
-  readonly waveId: string;
-  readonly page: number;
-  readonly pageSize: number;
-  readonly sortDirection: ApiPageSortDirection;
-  readonly sort: WavePollsSort;
-  readonly state?: WavePollsState | undefined;
-  readonly signal?: AbortSignal | undefined;
-}
-
-interface FetchDropsV2ByIdsProps {
-  readonly dropIds: readonly string[];
-  readonly signal?: AbortSignal | undefined;
-  readonly includeFullMetadata?: boolean | undefined;
-  readonly includeTopRaters?: boolean | undefined;
-}
-
-export type ApiWaveDropsV2PageFeed = ApiWaveDropsFeed & {
-  readonly count: number;
-  readonly page: number;
-  readonly next: boolean;
-};
 
 const fetchDropPartV2 = async ({
   dropId,
@@ -212,31 +122,6 @@ const hydrateDropParts = async (
     .filter((part): part is ApiDropPart => !!part);
 
   return [basePart, ...extraParts];
-};
-
-export const fetchDropReactionDetailsV2 = async (
-  dropId: string,
-  signal?: AbortSignal
-): Promise<ApiDropReaction[]> => {
-  const normalizedDropId = dropId.trim();
-  if (!normalizedDropId) {
-    return [];
-  }
-
-  try {
-    const reactions = await commonApiFetch<ApiDropReactionV2[]>({
-      endpoint: `v2/drops/${getDropEndpointId(normalizedDropId)}/reactions`,
-      signal,
-    });
-
-    return reactions.map((reaction) => ({
-      reaction: reaction.reaction,
-      profiles: reaction.reactors.map(mapIdentityOverviewToProfileMin),
-    }));
-  } catch (error) {
-    rethrowAbortFetchError(error);
-    return [];
-  }
 };
 
 const mergeMetadata = (

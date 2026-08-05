@@ -78,6 +78,12 @@ interface CreateDropWrapperProps {
   readonly showDropError?: boolean | undefined;
   readonly wave: CreateDropWrapperWaveProps | null;
   readonly waveId: string | null;
+  /**
+   * Pins the rendering branch regardless of breakpoint. Embedded usages
+   * (the create-wave Description step) must stay inline (DESKTOP): the
+   * MOBILE branch is a modal sheet that cannot host a page-flow step.
+   */
+  readonly forceScreenType?: CreateDropScreenType | undefined;
   readonly children: React.ReactNode;
   readonly setIsStormMode: (isStormMode: boolean) => void;
   readonly setViewType: (newV: CreateDropViewType) => void;
@@ -137,6 +143,7 @@ const CreateDropWrapper = forwardRef<
       showDropError = false,
       wave: waveProps,
       waveId,
+      forceScreenType,
       children,
       setIsStormMode,
       setViewType,
@@ -169,16 +176,16 @@ const CreateDropWrapper = forwardRef<
         );
       }
     }, [hasValidWalletAuth, address]);
-    const [screenType, setScreenType] = useState<CreateDropScreenType>(
-      CreateDropScreenType.DESKTOP
-    );
-    useEffect(() => {
-      if (breakpoint === "LG") {
-        setScreenType(CreateDropScreenType.DESKTOP);
-      } else {
-        setScreenType(CreateDropScreenType.MOBILE);
-      }
-    }, [breakpoint]);
+    // Derived straight from the breakpoint (and the optional pin), so compute
+    // it during render rather than mirroring it into state via an effect.
+    // Embedded usages (the create-wave Description step) pin the inline
+    // rendering: the MOBILE branch wraps the editor in a modal sheet, which
+    // cannot host a page-flow step (dismissing it would kill the step).
+    const screenType: CreateDropScreenType =
+      forceScreenType ??
+      (breakpoint === "LG"
+        ? CreateDropScreenType.DESKTOP
+        : CreateDropScreenType.MOBILE);
 
     const prevWaveIdRef = useRef<string | null>(waveProps?.id ?? null);
     const isWaveSwitch = prevWaveIdRef.current !== (waveProps?.id ?? null);
@@ -598,7 +605,6 @@ const CreateDropWrapper = forwardRef<
       [CreateDropViewType.COMPACT]: (
         <CreateDropCompact
           ref={createDropContendCompactRef}
-          screenType={screenType}
           editorState={editorState}
           files={files}
           canSubmit={canSubmit}

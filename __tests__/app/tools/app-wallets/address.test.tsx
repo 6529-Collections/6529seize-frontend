@@ -1,5 +1,8 @@
 import { generateMetadata } from "@/app/tools/app-wallets/[app-wallet-address]/page";
+import { publicEnv } from "@/config/env";
 import React from "react";
+
+const domain = new URL(publicEnv.BASE_ENDPOINT).hostname;
 
 jest.mock("next/dynamic", () => () => (p: any) => (
   <div data-testid="wallet" {...p} />
@@ -30,6 +33,6 @@ describe("App Wallet page", () => {
       params: Promise.resolve({ "app-wallet-address": "0xdef" }),
     });
     expect(meta.title).toEqual("fmt-0xdef | App Wallets | 6529.io");
-    expect(meta.description).toEqual("Tools | 6529.io");
+    expect(meta.description).toEqual(`Tools | ${domain}`);
   });
 });

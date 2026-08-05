@@ -4,9 +4,9 @@ import {
   ArrowRightIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import { memo, useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 
 interface NowMintingCountdownActiveProps {
   readonly countdown: CountdownData;
@@ -73,16 +73,18 @@ export default function NowMintingCountdownActive({
       </div>
 
       {countdown.showMintBtn && (
-        <Link
+        <ButtonLink
           href="/the-memes/mint"
-          className="tw-mt-3 tw-flex tw-h-10 tw-w-full tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-iron-200 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950 tw-no-underline tw-ring-1 tw-ring-inset tw-ring-white tw-transition tw-duration-300 tw-ease-out focus:tw-z-10 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset desktop-hover:hover:tw-bg-iron-300 desktop-hover:hover:tw-text-iron-950 desktop-hover:hover:tw-ring-iron-300"
+          size="md"
+          fullWidth
+          className="tw-mt-3"
         >
           Mint
           <ArrowRightIcon
             className="tw-size-4 tw-flex-shrink-0"
             strokeWidth={2}
           />
-        </Link>
+        </ButtonLink>
       )}
     </div>
   );
