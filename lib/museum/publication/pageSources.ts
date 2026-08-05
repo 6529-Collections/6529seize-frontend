@@ -1,5 +1,6 @@
 import { assertGovernedMuseumPath } from "./security";
 import type {
+  MuseumInstitutionalPractice,
   MuseumPublication,
   MuseumPublicDocument,
   MuseumPublicDocumentKind,
@@ -221,6 +222,31 @@ function addMuseumPageSource(
   });
 }
 
+function hasCompleteInstitutionalPractice(
+  practice: MuseumInstitutionalPractice | undefined
+): practice is MuseumInstitutionalPractice {
+  if (practice === undefined) return false;
+  const sourcePathsMatch =
+    practice.introduction.sourcePath === INSTITUTIONAL_PRACTICE_STUDY_PATH &&
+    practice.adjacentPractice.sourcePath ===
+      INSTITUTIONAL_PRACTICE_ADJACENT_PATH &&
+    practice.editorialStandard.sourcePath ===
+      CURATORIAL_PUBLICATION_STANDARD_PATH &&
+    practice.sourceRegister.sourcePath ===
+      INSTITUTIONAL_PRACTICE_SOURCE_REGISTER_PATH;
+  const profileCountMatches =
+    practice.profiles.length === INSTITUTIONAL_PRACTICE_PROFILE_SLUGS.length;
+  const profilesMatch = practice.profiles.every(
+    (profile, index) =>
+      profile.slug === INSTITUTIONAL_PRACTICE_PROFILE_SLUGS[index] &&
+      profile.id === `institutional-practice:${profile.slug}` &&
+      profile.document.id === profile.id &&
+      profile.document.sourcePath ===
+        `records/institutional-practice/profiles/${profile.slug}.md`
+  );
+  return sourcePathsMatch && profileCountMatches && profilesMatch;
+}
+
 export function buildMuseumPageSourceCatalog(
   publication: MuseumPublication
 ): MuseumPageSourceCatalog {
@@ -262,26 +288,7 @@ export function buildMuseumPageSourceCatalog(
   add(`${MUSEUM_ROOT}/stories/source-and-chronology`, sourceMatrix?.sourcePath);
   const institutionalPractice = (publication as Partial<MuseumPublication>)
     .institutionalPractice;
-  if (
-    institutionalPractice?.introduction.sourcePath ===
-      INSTITUTIONAL_PRACTICE_STUDY_PATH &&
-    institutionalPractice.adjacentPractice.sourcePath ===
-      INSTITUTIONAL_PRACTICE_ADJACENT_PATH &&
-    institutionalPractice.editorialStandard.sourcePath ===
-      CURATORIAL_PUBLICATION_STANDARD_PATH &&
-    institutionalPractice.sourceRegister.sourcePath ===
-      INSTITUTIONAL_PRACTICE_SOURCE_REGISTER_PATH &&
-    institutionalPractice.profiles.length ===
-      INSTITUTIONAL_PRACTICE_PROFILE_SLUGS.length &&
-    institutionalPractice.profiles.every(
-      (profile, index) =>
-        profile.slug === INSTITUTIONAL_PRACTICE_PROFILE_SLUGS[index] &&
-        profile.id === `institutional-practice:${profile.slug}` &&
-        profile.document.id === profile.id &&
-        profile.document.sourcePath ===
-          `records/institutional-practice/profiles/${profile.slug}.md`
-    )
-  ) {
+  if (hasCompleteInstitutionalPractice(institutionalPractice)) {
     add(
       INSTITUTIONAL_PRACTICE_ROUTE,
       institutionalPractice.introduction.sourcePath,
