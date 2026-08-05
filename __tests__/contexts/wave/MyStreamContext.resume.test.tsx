@@ -38,6 +38,7 @@ jest.mock("@/services/websocket/useWebSocketMessage", () => ({
 
 jest.mock("@/services/dm-unread/DmUnreadStateProvider", () => ({
   useDmUnreadConversations: jest.fn(() => ({})),
+  useDmUnreadSnapshotReady: jest.fn(() => true),
 }));
 
 jest.mock("@/hooks/useMarkWaveNotificationsRead", () => ({

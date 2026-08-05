@@ -11,7 +11,7 @@ import {
 } from "@/hooks/useMarkWaveNotificationsRead.helpers";
 import { getAuthJwt } from "@/services/auth/auth.utils";
 import { useCallback, useContext } from "react";
-import { useDmUnreadActions } from "@/services/dm-unread/DmUnreadStateProvider";
+import { useOptionalDmUnreadActions } from "@/services/dm-unread/DmUnreadStateProvider";
 
 export function useWaveNotificationsReadMarkerState(): WaveNotificationsReadMarkerState {
   const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
@@ -38,18 +38,29 @@ export function useMarkWaveNotificationsRead(): (
   options?: MarkWaveNotificationsReadOptions
 ) => Promise<MarkWaveNotificationsReadResult> {
   const { markWaveNotificationsRead } = useWaveNotificationsReadMarkerState();
-  const { applyServerState, beginRead, cancelRead, reconcileFailedRead } =
-    useDmUnreadActions();
+  const dmUnreadActions = useOptionalDmUnreadActions();
+  const applyDmServerState = dmUnreadActions?.applyServerState;
+  const beginDmRead = dmUnreadActions?.beginRead;
+  const cancelDmRead = dmUnreadActions?.cancelRead;
+  const reconcileFailedDmRead = dmUnreadActions?.reconcileFailedRead;
+  const hasDmUnreadActions = dmUnreadActions !== null;
 
   return useCallback(
     (
       waveId: string,
       options?: MarkWaveNotificationsReadOptions
     ): Promise<MarkWaveNotificationsReadResult> => {
-      const readOperation = beginRead(waveId, options?.readThroughSerialNo);
+      const readOperation =
+        beginDmRead?.(waveId, options?.readThroughSerialNo) ?? null;
       const shouldHandleDmResponse =
-        readOperation !== null || options?.requestDmUnreadState === true;
-      if (!shouldHandleDmResponse) {
+        hasDmUnreadActions &&
+        (readOperation !== null || options?.requestDmUnreadState === true);
+      if (
+        !shouldHandleDmResponse ||
+        !applyDmServerState ||
+        !cancelDmRead ||
+        !reconcileFailedDmRead
+      ) {
         return markWaveNotificationsRead(waveId, options);
       }
 
@@ -63,17 +74,17 @@ export function useMarkWaveNotificationsRead(): (
             onReadResponse: (response) => {
               options?.onReadResponse?.(response);
               if (response.dm_unread_state) {
-                applyServerState(response.dm_unread_state);
+                applyDmServerState(response.dm_unread_state);
               }
             },
           });
           if (readOperation && result === "skipped") {
-            cancelRead(readOperation);
+            cancelDmRead(readOperation);
           }
           return result;
         } catch (error) {
           if (readOperation) {
-            await reconcileFailedRead(readOperation);
+            await reconcileFailedDmRead(readOperation);
           }
           throw error;
         }
@@ -82,11 +93,12 @@ export function useMarkWaveNotificationsRead(): (
       return markDmRead();
     },
     [
-      applyServerState,
-      beginRead,
-      cancelRead,
+      applyDmServerState,
+      beginDmRead,
+      cancelDmRead,
+      hasDmUnreadActions,
       markWaveNotificationsRead,
-      reconcileFailedRead,
+      reconcileFailedDmRead,
     ]
   );
 }

@@ -2,6 +2,7 @@ import type { ApiDmUnreadConversationState } from "@/generated/models/ApiDmUnrea
 import {
   DmUnreadStore,
   getDmUnreadConversation,
+  getDmUnreadSnapshotReady,
   getDmUnreadSummary,
 } from "@/services/dm-unread/dm-unread-store";
 
@@ -32,6 +33,25 @@ const state = ({
 });
 
 describe("DmUnreadStore", () => {
+  it("reports readiness only after a complete snapshot is applied", () => {
+    const store = new DmUnreadStore();
+    store.applyServerState(state({ unreadCount: 1, version: 1 }));
+
+    expect(getDmUnreadSnapshotReady(store.getSnapshot(), "profile-a")).toBe(
+      false
+    );
+
+    store.applySnapshot({
+      profile_id: "profile-a",
+      count: 1,
+      conversations: [state({ unreadCount: 1, version: 1 })],
+    });
+
+    expect(getDmUnreadSnapshotReady(store.getSnapshot(), "profile-a")).toBe(
+      true
+    );
+  });
+
   it("derives one unread message in one conversation", () => {
     const store = new DmUnreadStore();
     store.applyServerState(state({ unreadCount: 1, version: 1 }));

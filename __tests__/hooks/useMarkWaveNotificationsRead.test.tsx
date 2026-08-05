@@ -43,7 +43,7 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 }));
 
 jest.mock("@/services/dm-unread/DmUnreadStateProvider", () => ({
-  useDmUnreadActions: () => ({
+  useOptionalDmUnreadActions: () => ({
     applyServerState: mockApplyDmServerState,
     beginRead: mockBeginDmRead,
     cancelRead: mockCancelDmRead,

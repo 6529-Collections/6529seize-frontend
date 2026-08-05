@@ -36,7 +36,10 @@ import useWaveMessagesStore from "./hooks/useWaveMessagesStore";
 import type { NextPageProps } from "./hooks/useWavePagination";
 import type { ProcessIncomingDropType } from "./hooks/useWaveRealtimeUpdater";
 import { useWaveRealtimeUpdater } from "./hooks/useWaveRealtimeUpdater";
-import { useDmUnreadConversations } from "@/services/dm-unread/DmUnreadStateProvider";
+import {
+  useDmUnreadConversations,
+  useDmUnreadSnapshotReady,
+} from "@/services/dm-unread/DmUnreadStateProvider";
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
 
 // Define nested structures for context data
@@ -224,6 +227,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     enabled: isDirectMessagesListEnabled,
   });
   const dmUnreadByWaveId = useDmUnreadConversations();
+  const isDmUnreadSnapshotReady = useDmUnreadSnapshotReady();
   const markWaveNotificationsRead = useMarkWaveNotificationsRead();
   const mainWaveIds = useMemo<ReadonlySet<string>>(
     () => new Set(mainWavesData.waves.map((wave) => wave.id)),
@@ -245,6 +249,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     otherListWaveIds: mainWaveIds,
     sortMutedLast: false,
     canonicalUnreadByWaveId: dmUnreadByWaveId,
+    canonicalUnreadReady: isDmUnreadSnapshotReady,
   });
   const waveMessagesStore = useWaveMessagesStore();
   const websocketStatus = useWebsocketStatus();

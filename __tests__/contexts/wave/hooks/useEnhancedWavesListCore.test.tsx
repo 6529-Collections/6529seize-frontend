@@ -333,6 +333,7 @@ describe("useEnhancedWavesListCore", () => {
     const { result } = renderHook(() =>
       useEnhancedWavesListCore(null, wavesData, {
         supportsPinning: false,
+        canonicalUnreadReady: true,
         canonicalUnreadByWaveId: {
           "wave-1": {
             profile_id: "profile-1",
@@ -361,5 +362,49 @@ describe("useEnhancedWavesListCore", () => {
 
     result.current.markWaveRead("wave-1");
     expect(resetWaveNewDropsCount).not.toHaveBeenCalled();
+  });
+
+  it("keeps API and websocket unread data until the canonical snapshot is ready", () => {
+    mockedUseNewDropCounter.mockReturnValue({
+      newDropsCounts: {
+        "wave-1": {
+          count: 2,
+          latestDropTimestamp: 200,
+          firstUnreadSerialNo: 12,
+        },
+      },
+      resetAllWavesNewDropsCount: jest.fn(),
+      resetWaveNewDropsCount: jest.fn(),
+    });
+    const wavesData = createWavesData({
+      mainWavesRefetch: jest.fn(),
+      refetchAllWaves: jest.fn(),
+      waves: [
+        createSidebarWave({
+          unreadDropsCount: 4,
+          firstUnreadDropSerialNo: 10,
+        }),
+      ],
+    });
+
+    const { result } = renderHook(() =>
+      useEnhancedWavesListCore(null, wavesData, {
+        supportsPinning: false,
+        canonicalUnreadByWaveId: {},
+        canonicalUnreadReady: false,
+      })
+    );
+
+    expect(mockedUseNewDropCounter).toHaveBeenCalledWith(
+      null,
+      wavesData.waves,
+      wavesData.refetchAllWaves,
+      expect.objectContaining({ enabled: true })
+    );
+    expect(result.current.waves[0]).toMatchObject({
+      unreadDropsCount: 6,
+      firstUnreadDropSerialNo: 10,
+      newDropsCount: { count: 2, firstUnreadSerialNo: 12 },
+    });
   });
 });

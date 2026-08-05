@@ -71,6 +71,7 @@ interface UseEnhancedWavesListCoreOptions {
   canonicalUnreadByWaveId?:
     | Readonly<Record<string, ApiDmUnreadConversationState>>
     | undefined;
+  canonicalUnreadReady?: boolean | undefined;
 }
 
 const DEFAULT_OPTIONS: UseEnhancedWavesListCoreOptions = {
@@ -84,7 +85,9 @@ function useEnhancedWavesListCore(
   options: UseEnhancedWavesListCoreOptions = DEFAULT_OPTIONS
 ) {
   const isEnabled = options.enabled !== false;
-  const usesCanonicalUnread = options.canonicalUnreadByWaveId !== undefined;
+  const usesCanonicalUnread =
+    options.canonicalUnreadByWaveId !== undefined &&
+    options.canonicalUnreadReady === true;
   const {
     addPinnedWave: addPinnedWaveFromData,
     fetchNextPage: fetchNextPageFromData,

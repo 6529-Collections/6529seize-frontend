@@ -19,6 +19,7 @@ interface DmUnreadProfileState {
 
 export interface DmUnreadStoreSnapshot {
   readonly profiles: Readonly<Record<string, DmUnreadProfileState>>;
+  readonly snapshotReadyProfiles: Readonly<Record<string, true>>;
 }
 
 export interface DmUnreadReadOperation {
@@ -34,7 +35,10 @@ export interface DmUnreadSummary {
   readonly hasUnread: boolean;
 }
 
-const EMPTY_STORE_SNAPSHOT: DmUnreadStoreSnapshot = { profiles: {} };
+const EMPTY_STORE_SNAPSHOT: DmUnreadStoreSnapshot = {
+  profiles: {},
+  snapshotReadyProfiles: {},
+};
 const EMPTY_SUMMARY: DmUnreadSummary = {
   totalUnreadMessages: 0,
   unreadConversationCount: 0,
@@ -174,6 +178,7 @@ export class DmUnreadStore {
           },
         },
       },
+      snapshotReadyProfiles: this.snapshot.snapshotReadyProfiles,
     });
     return true;
   }
@@ -184,6 +189,8 @@ export class DmUnreadStore {
       return false;
     }
     const currentProfile = this.snapshot.profiles[profileId];
+    const wasSnapshotReady =
+      this.snapshot.snapshotReadyProfiles[profileId] === true;
     let conversations = currentProfile?.conversations ?? {};
     let changed = false;
     for (const incoming of snapshot.conversations) {
@@ -198,13 +205,17 @@ export class DmUnreadStore {
       conversations = { ...conversations, [incoming.wave_id]: next };
       changed = true;
     }
-    if (!changed && currentProfile) {
+    if (!changed && currentProfile && wasSnapshotReady) {
       return false;
     }
     this.publish({
       profiles: {
         ...this.snapshot.profiles,
         [profileId]: { conversations },
+      },
+      snapshotReadyProfiles: {
+        ...this.snapshot.snapshotReadyProfiles,
+        [profileId]: true,
       },
     });
     return true;
@@ -258,6 +269,7 @@ export class DmUnreadStore {
           },
         },
       },
+      snapshotReadyProfiles: this.snapshot.snapshotReadyProfiles,
     });
     return {
       id: optimisticRead.id,
@@ -283,6 +295,7 @@ export class DmUnreadStore {
           },
         },
       },
+      snapshotReadyProfiles: this.snapshot.snapshotReadyProfiles,
     });
     return true;
   }
@@ -298,6 +311,12 @@ export const getDmUnreadConversation = (
         snapshot.profiles[profileId]?.conversations[waveId]
       )
     : null;
+
+export const getDmUnreadSnapshotReady = (
+  snapshot: DmUnreadStoreSnapshot,
+  profileId: string | null
+): boolean =>
+  profileId !== null && snapshot.snapshotReadyProfiles[profileId] === true;
 
 export const getDmUnreadConversations = (
   snapshot: DmUnreadStoreSnapshot,

@@ -33,6 +33,7 @@ import {
   DmUnreadStore,
   getDmUnreadConversation,
   getDmUnreadConversations,
+  getDmUnreadSnapshotReady,
   getDmUnreadSummary,
   type DmUnreadReadOperation,
   type DmUnreadSummary,
@@ -340,11 +341,27 @@ export const useDmUnreadConversations = (): Readonly<
   );
 };
 
-export const useDmUnreadActions = () => {
-  const { activeProfileId, cancelRead, reconcileFailedRead, store } =
-    useDmUnreadContext();
-  return useMemo(
-    () => ({
+export const useDmUnreadSnapshotReady = (): boolean => {
+  const { activeProfileId, store } = useDmUnreadContext();
+  const snapshot = useSyncExternalStore(
+    store.subscribe,
+    store.getSnapshot,
+    store.getSnapshot
+  );
+  return getDmUnreadSnapshotReady(snapshot, activeProfileId);
+};
+
+export const useOptionalDmUnreadActions = () => {
+  const context = useContext(DmUnreadContext);
+  const activeProfileId = context?.activeProfileId ?? null;
+  const cancelRead = context?.cancelRead ?? null;
+  const reconcileFailedRead = context?.reconcileFailedRead ?? null;
+  const store = context?.store ?? null;
+  return useMemo(() => {
+    if (!store || !cancelRead || !reconcileFailedRead) {
+      return null;
+    }
+    return {
       activeProfileId,
       applyServerState: (state: ApiDmUnreadConversationState) =>
         store.applyServerState(state),
@@ -352,7 +369,16 @@ export const useDmUnreadActions = () => {
         store.beginRead(activeProfileId, waveId, readThroughSerialNo),
       cancelRead,
       reconcileFailedRead,
-    }),
-    [activeProfileId, cancelRead, reconcileFailedRead, store]
-  );
+    };
+  }, [activeProfileId, cancelRead, reconcileFailedRead, store]);
+};
+
+export const useDmUnreadActions = () => {
+  const actions = useOptionalDmUnreadActions();
+  if (!actions) {
+    throw new Error(
+      "DM unread actions must be used within DmUnreadStateProvider"
+    );
+  }
+  return actions;
 };
