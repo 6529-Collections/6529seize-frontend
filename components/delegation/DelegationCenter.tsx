@@ -101,7 +101,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
             <button
               key={c.contract}
               type="button"
-              className="tw-group tw-flex tw-min-h-20 tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-4 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-[#111115] tw-p-4 tw-text-iron-100 tw-transition-colors hover:tw-border-white/10 hover:tw-bg-iron-900/60 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-flex-row sm:tw-justify-start"
+              className="tw-group tw-flex tw-min-h-20 tw-w-full tw-flex-col tw-items-center tw-justify-center tw-gap-4 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-900/70 tw-p-4 tw-text-iron-100 tw-transition-colors hover:tw-border-white/10 hover:tw-bg-iron-900 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-flex-row sm:tw-justify-start"
               onClick={() => {
                 const newSection = getCollectionSection(c.contract);
                 if (newSection !== undefined) {
@@ -181,7 +181,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
         {actionCards.map((card) => (
           <article
             key={card.title}
-            className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-[#111115] tw-p-5 tw-transition-colors hover:tw-border-white/[0.08] hover:tw-bg-iron-900/60 sm:tw-p-6"
+            className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-900/70 tw-p-5 tw-transition-colors hover:tw-border-white/[0.08] hover:tw-bg-iron-900 sm:tw-p-6"
           >
             <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100">
               {card.title}

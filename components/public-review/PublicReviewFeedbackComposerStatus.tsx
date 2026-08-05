@@ -127,7 +127,7 @@ export function FeedbackPreview({
   return (
     <section
       aria-labelledby={`${formId}-preview`}
-      className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-p-4"
+      className="tw-rounded-lg tw-bg-black/25 tw-p-4"
     >
       <h3
         ref={previewRef}
@@ -163,7 +163,7 @@ export function FeedbackResultMessages({
     <>
       {feedbackGate ? (
         <output
-          className="tw-mb-0 tw-mt-4 tw-block tw-rounded-lg tw-bg-iron-950 tw-p-3 tw-text-sm tw-text-iron-300"
+          className="tw-mb-0 tw-mt-2 tw-block tw-px-1 tw-text-center tw-text-[10px] tw-leading-4 tw-text-iron-600"
           aria-live="polite"
           aria-atomic="true"
         >
