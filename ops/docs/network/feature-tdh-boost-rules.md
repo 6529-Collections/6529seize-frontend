@@ -13,7 +13,8 @@ boosters.
 - Sidebar path (web): `Network -> TDH`
 - Sidebar path (app): `Network -> TDH`
 - Current rule anchor: `#tdh-1-4`
-- Current rule heading: `TDH 1.4 (October 10, 2025 — present)`
+- Current rule heading in `en-US`: `TDH 1.4 (October 10, 2025 — present)`;
+  the displayed date follows the active browser locale.
 
 ## Entry Points
 
@@ -26,18 +27,25 @@ boosters.
 ## User Journey
 
 1. Open `/network/tdh`.
-2. Read `How TDH is computed`:
-   unweighted days -> edition weighting -> boosters.
-3. Review the active block `TDH 1.4 (October 10, 2025 — present)`.
-4. Use bottom buttons to move to historic rules, definitions, stats, or levels.
+2. Read the opening definition of the TDH holding metric.
+3. Read `How TDH is computed`:
+   unweighted days -> edition weighting -> collection boosters.
+4. Review `TDH 1.4 (October 10, 2025 — present)`, where one focused rules panel
+   presents Category A and Category B before Category C.
+5. Scan the Category A formulas and examples, the Category B season grid, and
+   the Category C Gradient limit.
+6. Use the linked reference cards to open historic rules, definitions, Network
+   TDH stats, or Levels.
 
 ## Page Behavior and States
 
 - Static reference page: no filters, sorting, query params, or submit actions.
 - Same content for signed-in and signed-out users (no wallet gating).
 - No route-specific loading, empty, or retry state on this page.
-- Navigation buttons shown on page:
-  `View Historic Boosts`, `Definitions`, `View Network Stats`, `View Levels`.
+- Related destinations appear as linked reference cards:
+  `View Historic Boosts`, `Definitions`, `Network TDH Stats`, and `Levels`.
+- Dates and numbers use the browser locale. Untranslated TDH copy falls back to
+  the canonical `en-US` messages.
 
 ## Current Rule Details (`TDH 1.4`)
 
@@ -77,6 +85,8 @@ boosters.
 - This page documents current visible rules only.
 - It is not a wallet-specific TDH calculator.
 - Historic versions live on `/network/tdh/historic-boosts`.
+- TDH copy outside `en-US` currently uses the standard English fallback; full
+  translations remain localization debt.
 
 ## Related Pages
 

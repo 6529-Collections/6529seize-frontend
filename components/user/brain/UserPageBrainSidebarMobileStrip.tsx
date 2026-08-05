@@ -1,7 +1,5 @@
 "use client";
 
-import type { QueryStatus } from "@tanstack/react-query";
-import type { ReactNode } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ImageScale } from "@/helpers/image.helpers";
 import type { SidebarWave } from "@/types/waves.types";
@@ -9,6 +7,7 @@ import { ChatBubbleLeftRightIcon, PlusIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import Image from "next/image";
 import WavesIcon from "@/components/common/icons/WavesIcon";
+import { getUserPageBrainSidebarMessage } from "./userPageBrainSidebar.messages";
 import {
   getSidebarWaveHref,
   getSidebarWaveImageSrc,
@@ -18,9 +17,7 @@ import {
 
 interface UserPageBrainSidebarMobileStripProps {
   readonly createdWaves: ApiWave[];
-  readonly createdStatus: QueryStatus;
   readonly mostActiveWaves: SidebarWave[];
-  readonly mostActiveStatus: QueryStatus;
   readonly onOpenCreatedWaves: () => void;
 }
 
@@ -38,13 +35,22 @@ function UserPageBrainSidebarMobileWavePill({
     <Link
       href={href}
       prefetch={false}
-      className="tw-group tw-inline-flex tw-h-9 tw-max-w-[14rem] tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 tw-p-1 tw-pr-3 tw-no-underline tw-shadow-sm tw-transition-all tw-duration-200 desktop-hover:hover:tw-border-white/[0.15] desktop-hover:hover:tw-bg-white/[0.05]"
+      className="tw-group tw-inline-flex tw-h-9 tw-max-w-[14rem] tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 tw-p-1 tw-pr-3 tw-no-underline tw-shadow-sm tw-transition-all tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/[0.15] desktop-hover:hover:tw-bg-white/[0.05] motion-reduce:tw-transition-none"
     >
       <div className="tw-relative tw-flex tw-h-7 tw-w-7 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-900 tw-shadow-sm tw-transition-colors desktop-hover:group-hover:tw-border-white/[0.1]">
         {imageSrc ? (
           <Image
             src={imageSrc}
-            alt={wave.name ? `Wave ${wave.name}` : "Wave picture"}
+            alt={
+              wave.name
+                ? getUserPageBrainSidebarMessage(
+                    "user.brain.sidebar.waveImageAlt",
+                    { waveName: wave.name }
+                  )
+                : getUserPageBrainSidebarMessage(
+                    "user.brain.sidebar.wavePictureAlt"
+                  )
+            }
             fill
             sizes="28px"
             className="tw-object-cover"
@@ -60,35 +66,13 @@ function UserPageBrainSidebarMobileWavePill({
   );
 }
 
-function MobileWavePillSkeleton({ keyId }: { readonly keyId: string }) {
-  return (
-    <div
-      key={keyId}
-      className="tw-inline-flex tw-h-9 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/70 tw-p-1 tw-pr-3"
-    >
-      <div className="tw-h-7 tw-w-7 tw-shrink-0 tw-animate-pulse tw-rounded-full tw-bg-white/[0.07]" />
-      <div className="tw-h-3 tw-w-20 tw-animate-pulse tw-rounded tw-bg-white/[0.07]" />
-    </div>
-  );
-}
-
 export default function UserPageBrainSidebarMobileStrip({
   createdWaves,
-  createdStatus,
   mostActiveWaves,
-  mostActiveStatus,
   onOpenCreatedWaves,
 }: UserPageBrainSidebarMobileStripProps) {
-  const shouldShowCreatedLoading =
-    createdStatus === "pending" && createdWaves.length === 0;
-  const shouldShowCreatedWaves = createdWaves.length > 0;
-  const shouldShowMostActiveLoading =
-    mostActiveStatus === "pending" && mostActiveWaves.length === 0;
-  const shouldShowMostActiveWaves = mostActiveWaves.length > 0;
-  const shouldShowCreatedSection =
-    shouldShowCreatedLoading || shouldShowCreatedWaves;
-  const shouldShowMostActiveSection =
-    shouldShowMostActiveLoading || shouldShowMostActiveWaves;
+  const shouldShowCreatedSection = createdWaves.length > 0;
+  const shouldShowMostActiveSection = mostActiveWaves.length > 0;
 
   if (!shouldShowCreatedSection && !shouldShowMostActiveSection) {
     return null;
@@ -96,37 +80,30 @@ export default function UserPageBrainSidebarMobileStrip({
 
   const firstCreatedWave = createdWaves[0];
   const remainingCreatedCount = Math.max(createdWaves.length - 1, 0);
-  let createdSectionContent: ReactNode = null;
-
-  if (shouldShowCreatedLoading) {
-    createdSectionContent = (
-      <>
-        <MobileWavePillSkeleton keyId="created-0" />
-        <MobileWavePillSkeleton keyId="created-1" />
-      </>
-    );
-  } else if (firstCreatedWave) {
-    createdSectionContent = (
-      <>
-        <UserPageBrainSidebarMobileWavePill wave={firstCreatedWave} />
-        {remainingCreatedCount > 0 && (
-          <button
-            type="button"
-            onClick={onOpenCreatedWaves}
-            className="tw-inline-flex tw-h-9 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 tw-px-3 tw-text-xs tw-font-semibold tw-text-iron-400 tw-shadow-sm tw-transition-all tw-duration-200 desktop-hover:hover:tw-border-white/[0.15] desktop-hover:hover:tw-bg-white/[0.05] desktop-hover:hover:tw-text-iron-100"
-            aria-label="View all created waves"
-          >
-            <PlusIcon className="tw-h-3 tw-w-3 tw-flex-shrink-0" />
-            <span>{remainingCreatedCount}</span>
-          </button>
-        )}
-      </>
-    );
-  }
+  const createdSectionContent = firstCreatedWave ? (
+    <>
+      <UserPageBrainSidebarMobileWavePill wave={firstCreatedWave} />
+      {remainingCreatedCount > 0 && (
+        <button
+          type="button"
+          onClick={onOpenCreatedWaves}
+          className="tw-inline-flex tw-h-9 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 tw-px-3 tw-text-xs tw-font-semibold tw-text-iron-400 tw-shadow-sm tw-transition-all tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/[0.15] desktop-hover:hover:tw-bg-white/[0.05] desktop-hover:hover:tw-text-iron-100 motion-reduce:tw-transition-none"
+          aria-label={getUserPageBrainSidebarMessage(
+            "user.brain.sidebar.viewAllCreatedWaves"
+          )}
+        >
+          <PlusIcon className="tw-h-3 tw-w-3 tw-flex-shrink-0" />
+          <span>{remainingCreatedCount}</span>
+        </button>
+      )}
+    </>
+  ) : null;
 
   return (
     <section
-      aria-label="Brain waves strip"
+      aria-label={getUserPageBrainSidebarMessage(
+        "user.brain.sidebar.mobileStripLabel"
+      )}
       className="tw-mb-4 lg:tw-hidden"
       data-testid="brain-sidebar-mobile-strip"
     >
@@ -135,7 +112,9 @@ export default function UserPageBrainSidebarMobileStrip({
           {shouldShowCreatedSection && (
             <div className="tw-flex tw-shrink-0 tw-flex-col tw-gap-2">
               <span className="tw-px-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-                Created
+                {getUserPageBrainSidebarMessage(
+                  "user.brain.sidebar.createdMobileHeading"
+                )}
               </span>
               <div className="tw-flex tw-items-center tw-gap-2">
                 {createdSectionContent}
@@ -149,25 +128,28 @@ export default function UserPageBrainSidebarMobileStrip({
 
           {shouldShowMostActiveSection && (
             <div className="tw-flex tw-shrink-0 tw-flex-col tw-gap-2">
-              <span className="tw-px-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-                Active In
-              </span>
+              <div className="tw-flex tw-min-w-0 tw-items-baseline tw-gap-1.5 tw-px-1">
+                <span className="tw-shrink-0 tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+                  {getUserPageBrainSidebarMessage(
+                    "user.brain.sidebar.mostActiveHeading"
+                  )}
+                </span>
+                <span className="tw-max-w-44 tw-truncate tw-text-[10px] tw-font-normal tw-text-iron-600">
+                  ·{" "}
+                  {getUserPageBrainSidebarMessage(
+                    "user.brain.sidebar.rankingBasis"
+                  )}
+                </span>
+              </div>
               <div className="tw-flex tw-items-center tw-gap-2">
-                {shouldShowMostActiveLoading
-                  ? [0, 1, 2].map((key) => (
-                      <MobileWavePillSkeleton
-                        key={`most-active-${key}`}
-                        keyId={`most-active-${key}`}
-                      />
-                    ))
-                  : mostActiveWaves
-                      .slice(0, 3)
-                      .map((wave) => (
-                        <UserPageBrainSidebarMobileWavePill
-                          key={wave.id}
-                          wave={wave}
-                        />
-                      ))}
+                <div className="tw-flex tw-items-center tw-gap-2">
+                  {mostActiveWaves.map((wave) => (
+                    <UserPageBrainSidebarMobileWavePill
+                      key={wave.id}
+                      wave={wave}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           )}

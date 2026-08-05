@@ -5,7 +5,7 @@ export default function TDH() {
   return <TDHMainPage />;
 }
 
-export const generateMetadata = async () => {
+export const generateMetadata = () => {
   return getAppMetadata({
     title: "TDH | Network",
     description: "Network",

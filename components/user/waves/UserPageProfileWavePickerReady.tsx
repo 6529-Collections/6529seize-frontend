@@ -1,6 +1,7 @@
 "use client";
 
 import WavesIcon from "@/components/common/icons/WavesIcon";
+import Button from "@/components/utils/button/Button";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
@@ -150,15 +151,14 @@ function PanelCandidateWaveRow({
             Active
           </span>
         ) : (
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => onSelect(wave.id)}
-            disabled={isSubmitting}
-            className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-100 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 disabled:tw-cursor-not-allowed disabled:tw-border-white/5 disabled:tw-text-iron-500 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-white/10 sm:tw-px-4 sm:tw-py-2 sm:tw-text-sm"
+            loading={isSubmitting}
           >
-            {isSubmitting ? <Spinner dimension={14} /> : null}
             <span>{isSubmitting ? "Setting active" : "Set active"}</span>
-          </button>
+          </Button>
         )}
       </div>
     </div>

@@ -67,8 +67,24 @@
       ],
       "components/drops/create/lexical/utils/rootContent.ts": ["exports"],
       "components/utils/toast/AppToast.tsx": ["exports"],
+      // Stacked public-review foundation. The route integration imports these
+      // components and exports in the next feature slice, which removes these
+      // exact exemptions when they become reachable from App Router entries.
+      "components/public-review/PublicReviewFeedbackComposer.tsx": ["files"],
+      "components/public-review/PublicReviewLedger.tsx": ["files"],
       "hooks/useAnimatedSidebarWaveRows.ts": ["exports"],
       "hooks/useWavePreviewById.ts": ["exports"],
+      // The public-review generator exposes pure internals to its focused Jest
+      // contract tests; Knip intentionally does not analyze test-only usage.
+      "scripts/public-reviews/solidity-reference.cjs": ["exports"],
+      "scripts/public-reviews/solidity-reference-lib.cjs": ["exports"],
+      "scripts/public-reviews/stream-knowledge.cjs": ["exports"],
+      "scripts/public-reviews/stream-knowledge-packs.cjs": ["exports"],
+      // Exact policy-bundle helpers are a testable CLI API. Knip intentionally
+      // excludes their focused Jest consumers from its usage graph.
+      "scripts/pr-ci-policy-bundle.cjs": ["exports"],
+      "services/api/public-review/feedback-codec.ts": ["exports", "types"],
+      "services/api/public-review/ledger.ts": ["exports"],
       "services/**": ["files"],
       "lib/storage/idb-keyval.ts": ["files"],
       "playwright.config.ts": ["exports"],
@@ -93,12 +109,13 @@
       "__tests__/**",
       "**/*.test.{ts,tsx,js,jsx}",
       "**/*.spec.{ts,tsx,js,jsx}",
-      "generated/**",        // don't list generated files as "Unused files"
       "tests/**",
       "stubs/empty.js"
     ],
     "ignoreBinaries": [
       "coderabbit",
+      // GitHub-hosted runner utility used by deployment workflows.
+      "jq",
       // Capacitor CLI, run via npx inside the 6529-core-mobile checkout in
       // .github/workflows/device-farm-qa.yml — not a dependency of this repo.
       "cap"

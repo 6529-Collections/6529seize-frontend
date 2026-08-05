@@ -7,6 +7,13 @@ import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import { fetchAlchemyMetadataCandidate } from "../opensea/alchemy";
 import {
+  TOKEN_URI_PREFIXED_PLACEHOLDER_PATTERN,
+  buildTokenIdCandidates,
+  getTokenIdParts,
+  hasTokenIdPlaceholder,
+  replaceTokenIdPlaceholders,
+} from "../opensea/tokenUri";
+import {
   OPEN_SEA_IMAGE_CANDIDATE_SOURCES,
   OPEN_SEA_IMAGE_SOURCE_READERS,
   asNonEmptyString,
@@ -20,7 +27,6 @@ const TRANSIENT_CACHE_TTL_MS = 5 * 60 * 1000;
 const TRANSIENT_HOST = "transient.xyz";
 const TRANSIENT_NFT_PATH_PATTERN =
   /^\/nfts\/([^/]+)\/(0x[a-f0-9]{40})\/([^/?#]+)\/?$/i;
-const TOKEN_URI_PREFIXED_PLACEHOLDER_PATTERN = /0x(?:\{id\}|%7Bid%7D)/i;
 
 const ALCHEMY_NETWORK_BY_TRANSIENT_CHAIN: Record<string, string> = {
   arbitrum: "arb-mainnet",
@@ -88,70 +94,6 @@ type TransientPreviewBuildResult =
       readonly details?: Record<string, unknown> | undefined;
       readonly preview?: LinkPreviewResponse | undefined;
     };
-
-const normalizeTokenIdCandidate = (tokenId: string): string => {
-  const trimmed = tokenId.trim();
-  if (trimmed.startsWith("0x") || trimmed.startsWith("0X")) {
-    try {
-      return `0x${BigInt(trimmed).toString(16)}`;
-    } catch {
-      return trimmed;
-    }
-  }
-
-  return trimmed;
-};
-
-const toHexTokenId = (tokenId: string): string | null => {
-  const trimmed = tokenId.trim();
-  if (!trimmed) {
-    return null;
-  }
-
-  try {
-    return `0x${BigInt(trimmed).toString(16)}`;
-  } catch {
-    return null;
-  }
-};
-
-const buildTokenIdCandidates = (tokenId: string): string[] => {
-  const normalizedPrimary = normalizeTokenIdCandidate(tokenId);
-  const candidates = [normalizedPrimary];
-  const hexCandidate = toHexTokenId(tokenId);
-
-  if (hexCandidate && !candidates.includes(hexCandidate)) {
-    candidates.push(hexCandidate);
-  }
-
-  return candidates;
-};
-
-const getTokenIdParts = (
-  tokenId: string
-): {
-  readonly decimal: string;
-  readonly hexNoPrefix: string;
-  readonly hex64NoPrefix: string;
-} | null => {
-  try {
-    const parsed = BigInt(tokenId.trim());
-    const hexNoPrefix = parsed.toString(16);
-    return {
-      decimal: parsed.toString(10),
-      hexNoPrefix,
-      hex64NoPrefix: hexNoPrefix.padStart(64, "0"),
-    };
-  } catch {
-    return null;
-  }
-};
-
-const hasTokenIdPlaceholder = (tokenUri: string): boolean =>
-  /\{id\}/i.test(tokenUri) || /%7Bid%7D/i.test(tokenUri);
-
-const replaceTokenIdPlaceholders = (tokenUri: string, value: string): string =>
-  tokenUri.replaceAll(/\{id\}/gi, value).replaceAll(/%7Bid%7D/gi, value);
 
 const logFallback = (
   requestId: string,

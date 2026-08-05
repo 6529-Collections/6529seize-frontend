@@ -1,6 +1,8 @@
 import { renderWithAuth } from "@/__tests__/utils/testContexts";
 import LatestDropNextMintSubscribe from "@/components/home/now-minting/LatestDropNextMintSubscribe";
 import { isMintingToday } from "@/components/meme-calendar/meme-calendar.helpers";
+import { ApiSubscriptionCoverageMode } from "@/generated/models/ApiSubscriptionCoverageMode";
+import { ApiSubscriptionCoverageStatus } from "@/generated/models/ApiSubscriptionCoverageStatus";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { fireEvent, screen } from "@testing-library/react";
@@ -74,14 +76,14 @@ function expectReadonlySubscriptionToggle(
   expect(statusText.tagName).toBe("OUTPUT");
   expect(container).toContainElement(statusText);
   expect(screen.queryByRole("switch", { name: tooltipLabel })).toBeNull();
-  expect(screen.queryByRole("img", { name: tooltipLabel })).toBeNull();
 
   const triggerElement = screen.getByTestId(
     "readonly-subscription-toggle-trigger"
   );
+  expect(screen.getByRole("img", { name: tooltipLabel })).toBe(triggerElement);
   expect(triggerElement).not.toHaveAttribute("aria-checked");
   expect(triggerElement).not.toHaveAttribute("aria-disabled");
-  expect(triggerElement).not.toHaveAttribute("tabindex");
+  expect(triggerElement).toHaveAttribute("tabindex", "0");
 
   const toggle = screen.getByTestId("readonly-subscription-toggle-visual");
   expect(triggerElement).toContainElement(toggle);
@@ -141,7 +143,20 @@ describe("LatestDropNextMintSubscribe", () => {
   it("renders the subscribe section for the connected profile", () => {
     const { container } = renderWithAuth(<LatestDropNextMintSubscribe />);
 
-    expect(screen.getByText("Subscription Minting")).toBeInTheDocument();
+    const awarenessLabel = screen.getByText("Subscription Minting");
+    expect(awarenessLabel).toBeInTheDocument();
+    const awarenessRow = awarenessLabel.closest(".tw-group");
+    expect(awarenessRow).toHaveClass(
+      "tw-rounded-2xl",
+      "tw-border-primary-400/25",
+      "tw-bg-primary-500/10",
+      "tw-p-5"
+    );
+    expect(awarenessRow).not.toHaveClass(
+      "tw-rounded-lg",
+      "tw-border-white/5",
+      "tw-bg-iron-900/60"
+    );
     expect(screen.getByText("x12 subscribers")).toBeInTheDocument();
     expect(screen.getByText("x1")).toBeInTheDocument();
     expectReadonlySubscriptionToggle(
@@ -157,6 +172,50 @@ describe("LatestDropNextMintSubscribe", () => {
     expect(
       screen.getByLabelText("Learn more about The Memes subscriptions")
     ).toHaveAttribute("href", "/about/subscriptions");
+  });
+
+  it("surfaces connected-profile coverage and routes low runway to top up", () => {
+    useQueryMock.mockImplementation(({ queryKey }) => {
+      if (queryKey[0] === "SUBSCRIPTION_COVERAGE") {
+        return {
+          data: {
+            status: ApiSubscriptionCoverageStatus.RunningLow,
+            mode: ApiSubscriptionCoverageMode.Automatic,
+            balance_eth: "0.18",
+            fully_funded_drops: 2,
+          },
+        };
+      }
+      if (
+        queryKey[0] === "mint-subscription-status" &&
+        queryKey[1] === "upcoming"
+      ) {
+        return {
+          data: {
+            subscribed: true,
+            eligibility: 3,
+            count: 1,
+          },
+        };
+      }
+      if (
+        queryKey[0] === "mint-subscription-counts" &&
+        queryKey[1] === "by-token"
+      ) {
+        return { data: { token_id: 478, count: 12 } };
+      }
+      return { data: undefined };
+    });
+
+    renderWithAuth(<LatestDropNextMintSubscribe />);
+
+    expect(
+      screen.getByText("Automatic · 0.18 ETH · 2 drops funded")
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Top up" })).toHaveAttribute(
+      "href",
+      "/test-handle/subscriptions#profile-subscriptions-top-up"
+    );
   });
 
   it("uses a provided token id for upcoming subscription state", () => {

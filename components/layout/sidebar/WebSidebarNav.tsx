@@ -90,6 +90,7 @@ const WebSidebarNav = React.forwardRef<
   const sectionMap = useSectionMap(sections);
   const nftsSection = sectionMap.get("nfts");
   const wavesSection = sectionMap.get("waves");
+  const museumSection = sectionMap.get("museum");
   const aboutSection = sectionMap.get("about");
 
   const clearHoverOpenTimer = useCallback(() => {
@@ -418,6 +419,8 @@ const WebSidebarNav = React.forwardRef<
     >
       <ul className="tw-m-0 tw-list-none tw-p-0">
         {nftsSection && renderExpandableSection(nftsSection)}
+
+        {museumSection && renderDirectSectionLink(museumSection)}
 
         {wavesSection && renderDirectSectionLink(wavesSection)}
 

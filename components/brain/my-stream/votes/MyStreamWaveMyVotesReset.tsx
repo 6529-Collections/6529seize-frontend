@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useContext, useState } from "react";
-import SecondaryButton from "@/components/utils/button/SecondaryButton";
+import Button from "@/components/utils/button/Button";
 import MyStreamWaveMyVotesResetProgress from "./MyStreamWaveMyVotesResetProgress";
 import { commonApiPost } from "@/services/api/common-api";
 import type { DropRateChangeRequest } from "@/entities/IDrop";
@@ -116,20 +116,22 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
     <div className="tw-pl-1">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2">
         <div className="tw-flex tw-items-center tw-gap-x-2">
-          <SecondaryButton
-            onClicked={onToggleSelectAll}
-            size="sm"
+          <Button
+            onClick={onToggleSelectAll}
+            variant="secondary"
+            size="xs"
             disabled={isResetting}
           >
             {allItemsSelected ? "Deselect All" : "Select All"}
-          </SecondaryButton>
-          <SecondaryButton
-            onClicked={handleResetClick}
-            size="sm"
+          </Button>
+          <Button
+            onClick={handleResetClick}
+            variant="secondary"
+            size="xs"
             disabled={!selectedCount || isResetting}
           >
             {isResetting ? "Resetting..." : "Reset Votes"}
-          </SecondaryButton>
+          </Button>
         </div>
         {typeof availableVotes === "number" && (
           <p className="tw-mb-0 tw-text-xs tw-text-iron-500">

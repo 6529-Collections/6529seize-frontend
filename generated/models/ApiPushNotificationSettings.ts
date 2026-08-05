@@ -1,7 +1,7 @@
 // @ts-nocheck
 /**
  * 6529.io API
- * This is the API interface description. Brief terminology overview and an authentication example can be found at <a href=\"https://6529.io/about/api\">https://6529.io/about/api</a>.
+ * JSON REST API for 6529.io. New here? A terminology overview and a step-by-step authentication walkthrough (guides &amp; auth) live at <a href=\"https://6529.io/tools/api\">https://6529.io/tools/api</a>. The raw machine-readable spec is downloadable at <a href=\"/openapi.yaml\">/openapi.yaml</a> and <a href=\"/openapi.json\">/openapi.json</a>.
  *
  * OpenAPI spec version: 1.0.0
  * 
@@ -54,6 +54,10 @@ export class ApiPushNotificationSettings {
     * Notify when you are invited to a wave
     */
     'wave_created': boolean;
+    /**
+    * Notify when The Memes subscription coverage becomes low
+    */
+    'subscription_coverage': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -117,6 +121,12 @@ export class ApiPushNotificationSettings {
         {
             "name": "wave_created",
             "baseName": "wave_created",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "subscription_coverage",
+            "baseName": "subscription_coverage",
             "type": "boolean",
             "format": ""
         }    ];

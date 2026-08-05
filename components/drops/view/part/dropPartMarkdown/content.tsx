@@ -21,9 +21,9 @@ import {
   type DropListItemContentPartProps,
 } from "@/components/drops/view/item/content/DropListItemContentPart.types";
 import {
-  ALL_GROUP_MENTION_TEXT,
+  GROUP_MENTION_TEXT,
   hasMentionedGroup,
-  markAllGroupMentionTokens,
+  markGroupMentionTokens,
 } from "@/helpers/waves/drop-group-mentions";
 import { isDirectImageUrl } from "./linkUtils";
 import { normalizeDropMarkdownContent } from "./normalizeContent";
@@ -292,15 +292,20 @@ export const createMarkdownContentRenderers = ({
         }),
         {}
       ),
-      ...(hasMentionedGroup(mentionedGroups, ApiDropGroupMentionValue.All)
-        ? {
-            [ALL_GROUP_MENTION_TEXT]: {
-              type: DropContentPartType.GROUP_MENTION,
-              value: ApiDropGroupMentionValue.All,
-              match: ALL_GROUP_MENTION_TEXT,
-            },
-          }
-        : {}),
+      ...Object.values(ApiDropGroupMentionValue).reduce(
+        (acc, group) =>
+          hasMentionedGroup(mentionedGroups, group)
+            ? {
+                ...acc,
+                [GROUP_MENTION_TEXT[group]]: {
+                  type: DropContentPartType.GROUP_MENTION,
+                  value: group,
+                  match: GROUP_MENTION_TEXT[group],
+                },
+              }
+            : acc,
+        {} as Record<string, DropListItemContentPartProps>
+      ),
       ...mentionedWaves.reduce(
         (acc, wave) => ({
           ...acc,
@@ -344,21 +349,33 @@ export const createMarkdownContentRenderers = ({
       );
     }
 
-    if (hasMentionedGroup(mentionedGroups, ApiDropGroupMentionValue.All)) {
-      currentContent = markAllGroupMentionTokens({
-        content: currentContent,
-        marker: splitter,
-      });
+    for (const group of Object.values(ApiDropGroupMentionValue)) {
+      if (hasMentionedGroup(mentionedGroups, group)) {
+        currentContent = markGroupMentionTokens({
+          content: currentContent,
+          group,
+          marker: splitter,
+        });
+      }
     }
 
     return currentContent
       .split(splitter)
       .filter((part) => part !== "")
       .map((part): ReactNode => {
-        const partProps = values[part];
+        const partProps = values[part] ?? values[part.toLowerCase()];
         if (partProps) {
           const randomId = getRandomObjectId();
-          return <DropListItemContentPart key={randomId} part={partProps} />;
+          return (
+            <DropListItemContentPart
+              key={randomId}
+              part={
+                partProps.type === DropContentPartType.GROUP_MENTION
+                  ? { ...partProps, match: part }
+                  : partProps
+              }
+            />
+          );
         }
 
         const segments = part.split(customEmojiRegex);

@@ -30,6 +30,8 @@ March 19, 2026.
   [Profiles](profiles/README.md),
   [Profile Troubleshooting](profiles/troubleshooting/README.md)
 - Browse memes, collections, minting, and media actions: [Media](media/README.md)
+- Review a proposed permanent contract before deployment:
+  [Public Contract Reviews](public-reviews/README.md)
 - Run Drop Forge craft and launch claim operations: [Drop Forge](drop-forge/README.md)
 - Check app notifications and push behavior:
   [Notifications](notifications/README.md)
@@ -48,6 +50,8 @@ March 19, 2026.
 - Use direct utility routes under `/tools/*`, including the secondary `/tools`
   index and private 6529bot operator tools: [API Tool](api-tool/README.md)
 - Debug shared cross-route behavior: [Shared](shared/README.md)
+- Stage, promote, or recover an exact release:
+  [Developer Operations](developer/README.md)
 
 ## Area Index
 
@@ -59,6 +63,9 @@ March 19, 2026.
 - [Media](media/README.md): `/the-memes`, `/the-memes/{param*}`,
   `/6529-gradient`, `/6529-gradient/{param*}`, `/meme-lab`,
   `/meme-lab/{param*}`, `/rememes`, `/rememes/{param*}`, `/meme-calendar`
+- [Public Contract Reviews](public-reviews/README.md):
+  local/staging-only `/stream`, `/reviews/6529-stream`,
+  `/reviews/6529-stream/{page}`, and versioned review routes
 - [Drop Forge](drop-forge/README.md): `/drop-forge`, `/drop-forge/craft`,
   `/drop-forge/craft/{id}`, `/drop-forge/launch`, `/drop-forge/launch/{id}`
 - [Notifications](notifications/README.md): `/notifications`
@@ -75,9 +82,13 @@ March 19, 2026.
 - [Open Data](open-data/README.md): `/open-data`, `/open-data/6529bot`,
   `/open-data/meme-subscriptions`, `/open-data/network-metrics`,
   `/open-data/rememes`, `/open-data/royalties`, `/open-data/team`
+- [Network Museum](museum/README.md): `/museum/network` and
+  `/museum/network/{param*}`
 - [Navigation](navigation/README.md): app shell controls, `/open-mobile`, and
   `/about/6529-apps`
 - [Shared](shared/README.md): behavior reused by multiple areas
+- [Developer Operations](developer/README.md): release, QA, and repository
+  operations
 
 ## Route Coverage
 
@@ -102,6 +113,10 @@ Route patterns use normalized placeholders: `{param}` for one segment,
   `/meme-lab`, `/meme-lab/collection/{collection}`, `/meme-lab/{id}`,
   `/meme-lab/{id}/distribution`, `/rememes`, `/rememes/add`,
   `/rememes/{contract}/{id}`, `/meme-calendar`
+- Public contract reviews, on local development and shared staging only:
+  `/stream`, `/reviews/6529-stream`, `/reviews/6529-stream/{page}`,
+  `/reviews/6529-stream/versions/{version}`,
+  `/reviews/6529-stream/versions/{version}/{page}`
 - Drop Forge:
   `/drop-forge`, `/drop-forge/craft`, `/drop-forge/craft/{id}`,
   `/drop-forge/launch`, `/drop-forge/launch/{id}`
@@ -131,12 +146,17 @@ Route patterns use normalized placeholders: `{param}` for one segment,
 - Shared app-shell behavior:
   [Navigation](navigation/README.md) and [Shared](shared/README.md),
   including `/open-mobile` and `/about/6529-apps`
+- Network Museum:
+  `/museum/network`, including collection, artist, project, gift, program,
+  about, and Stories & Research routes. The institutional-practice study is at
+  `/museum/network/stories/a-field-of-practice/{param*}`.
 
 ### Out of Scope
 
 - Content, editorial, and legal routes:
   `/about/*` (except `/about/primary-address` and `/about/6529-apps`),
-  `/museum`, `/museum/*`,
+  legacy gallery routes under `/museum` and `/museum/*` outside
+  `/museum/network`,
   `/blog/*`, `/news/*`, `/city/*`, `/om`, `/om/*`, `/education`,
   `/education/*`, `/capital`, `/capital/*`, `/author/*`, `/category/*`,
   `/buidl`, `/casabatllo`
@@ -166,6 +186,7 @@ Route patterns use normalized placeholders: `{param}` for one segment,
 - Media: [Memes](media/memes/README.md),
   [Collections](media/collections/README.md), [NFT](media/nft/README.md),
   [Rendering](media/rendering/README.md)
+- Network Museum: [Museum documentation](museum/README.md)
 
 ## Troubleshooting Entry Point
 

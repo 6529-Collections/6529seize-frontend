@@ -14,6 +14,8 @@ import {
   isMintingToday,
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import type { Page } from "@/helpers/Types";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -26,6 +28,8 @@ import UserPageSubscriptionsMode from "./UserPageSubscriptionsMode";
 import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
 import UserPageSubscriptionsTopUp from "./UserPageSubscriptionsTopUp";
 import UserPageSubscriptionsUpcoming from "./UserPageSubscriptionsUpcoming";
+import SubscriptionCoverageSummary from "./coverage/SubscriptionCoverageSummary";
+import { useSubscriptionCoverage } from "./coverage/useSubscriptionCoverage";
 
 const HISTORY_PAGE_SIZE = 10;
 const SUBSCRIBE_GROUP_CLASS =
@@ -48,6 +52,7 @@ export default function UserPageSubscriptions(
   }>
 ) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const locale = useBrowserLocale();
 
   const profileKey = activeProfileProxy
     ? undefined
@@ -56,6 +61,7 @@ export default function UserPageSubscriptions(
     ? undefined
     : getSubscriptionProfileKey(connectedProfile);
   const isConnectedAccount = !!profileKey && connectedProfileKey === profileKey;
+  const coverageQuery = useSubscriptionCoverage({ profileKey });
 
   const [details, setDetails] = useState<SubscriptionDetails>();
   const [fetchingDetails, setFetchingDetails] = useState<boolean>(true);
@@ -223,10 +229,7 @@ export default function UserPageSubscriptions(
       });
   }
 
-  const refresh = (): void => {
-    if (!profileKey) {
-      return;
-    }
+  const fetchSubscriptionData = (): void => {
     fetchDetails();
     fetchAirdropAddress();
     fetchTopUpHistory(1);
@@ -235,8 +238,22 @@ export default function UserPageSubscriptions(
     fetchLogs(1);
   };
 
+  const refresh = (): void => {
+    if (!profileKey) {
+      return;
+    }
+    void coverageQuery.refetch();
+    fetchSubscriptionData();
+  };
+
   useEffect(() => {
-    refresh();
+    const fetchTimeout = window.setTimeout(() => {
+      fetchSubscriptionData();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(fetchTimeout);
+    };
   }, [profileKey]);
 
   if (!profileKey) {
@@ -247,66 +264,89 @@ export default function UserPageSubscriptions(
     <div className="tw-space-y-4 tw-pb-6">
       <UserPageSubscriptionsSection
         id="profile-subscriptions-overview"
-        title="Subscribe"
+        title={t(locale, "subscriptions.page.title")}
         action={
           <Link
             href="/about/subscriptions"
             className="tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-font-semibold tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-rounded-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 desktop-hover:hover:tw-text-primary-300"
           >
-            Learn More
+            {t(locale, "subscriptions.page.learnMore")}
             <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
           </Link>
         }
       >
-        <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2">
-          <div className={SUBSCRIBE_GROUP_CLASS}>
-            <div
-              className={`${SUBSCRIBE_GROUP_CONTENT_CLASS} md:-tw-translate-y-1 md:tw-justify-start`}
-            >
-              <UserPageSubscriptionsBalance
-                details={details}
-                fetching={fetchingDetails}
-                refresh={refresh}
-                show_refresh={isConnectedAccount}
-              />
+        <SubscriptionCoverageSummary
+          coverage={coverageQuery.data}
+          isError={coverageQuery.isError}
+          isLoading={coverageQuery.isLoading}
+          isOwner={isConnectedAccount}
+          onRefresh={() => {
+            void coverageQuery.refetch();
+          }}
+        />
+        <div
+          id="profile-subscriptions-settings"
+          className="tw-mt-6 tw-scroll-mt-24"
+        >
+          <h3 className="tw-mb-3 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+            {t(locale, "subscriptions.page.settingsTitle")}
+          </h3>
+          <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2">
+            <div className={SUBSCRIBE_GROUP_CLASS}>
+              <div
+                className={`${SUBSCRIBE_GROUP_CONTENT_CLASS} md:-tw-translate-y-1 md:tw-justify-start`}
+              >
+                <UserPageSubscriptionsBalance
+                  coverage={coverageQuery.data}
+                  details={details}
+                  fetching={fetchingDetails}
+                  refresh={refresh}
+                  show_refresh={isConnectedAccount}
+                />
+              </div>
+              <div className="tw-my-4 tw-h-px tw-bg-white/[0.05]" />
+              <div
+                className={`${SUBSCRIBE_GROUP_CONTENT_CLASS} md:tw-justify-start`}
+              >
+                <UserPageSubscriptionsAirdropAddress
+                  show_edit={isConnectedAccount}
+                  airdrop={airdropResult}
+                  fetching={fetchingAirdropAddress}
+                />
+              </div>
             </div>
-            <div className="tw-my-4 tw-h-px tw-bg-white/[0.05]" />
-            <div
-              className={`${SUBSCRIBE_GROUP_CONTENT_CLASS} md:tw-justify-start`}
-            >
-              <UserPageSubscriptionsAirdropAddress
-                show_edit={isConnectedAccount}
-                airdrop={airdropResult}
-                fetching={fetchingAirdropAddress}
-              />
-            </div>
-          </div>
-          <div className={SUBSCRIBE_GROUP_CLASS}>
-            <div
-              className={`${SUBSCRIBE_GROUP_CONTENT_CLASS} md:tw-justify-start`}
-            >
-              <UserPageSubscriptionsMode
-                profileKey={profileKey}
-                details={details}
-                readonly={!isConnectedAccount}
-                refresh={refresh}
-              />
-            </div>
-            <div className="tw-my-4 tw-h-px tw-bg-white/[0.05]" />
-            <div
-              className={`${SUBSCRIBE_GROUP_CONTENT_CLASS} md:tw-justify-center`}
-            >
-              <UserPageSubscriptionsEditionPreference
-                profileKey={profileKey}
-                details={details}
-                readonly={!isConnectedAccount}
-                refresh={refresh}
-              />
+            <div className={SUBSCRIBE_GROUP_CLASS}>
+              <div
+                className={`${SUBSCRIBE_GROUP_CONTENT_CLASS} md:tw-justify-start`}
+              >
+                <UserPageSubscriptionsMode
+                  profileKey={profileKey}
+                  details={details}
+                  readonly={!isConnectedAccount}
+                  refresh={refresh}
+                />
+              </div>
+              <div className="tw-my-4 tw-h-px tw-bg-white/[0.05]" />
+              <div
+                className={`${SUBSCRIBE_GROUP_CONTENT_CLASS} md:tw-justify-center`}
+              >
+                <UserPageSubscriptionsEditionPreference
+                  profileKey={profileKey}
+                  details={details}
+                  readonly={!isConnectedAccount}
+                  refresh={refresh}
+                />
+              </div>
             </div>
           </div>
         </div>
       </UserPageSubscriptionsSection>
-      {isConnectedAccount && <UserPageSubscriptionsTopUp />}
+      {isConnectedAccount && (
+        <UserPageSubscriptionsTopUp
+          coverage={coverageQuery.data}
+          onTransactionConfirmed={refresh}
+        />
+      )}
       <UserPageSubscriptionsUpcoming
         profileKey={profileKey}
         details={details}

@@ -1,0 +1,2998 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0x31b6efe6",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            }
+          ],
+          "name": "InvalidAssignmentScope",
+          "selector": "0x31b6efe6",
+          "signature": "InvalidAssignmentScope(uint8,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0x64619be4",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "assignmentType",
+              "type": "uint8"
+            }
+          ],
+          "name": "InvalidAssignmentType",
+          "selector": "0x64619be4",
+          "signature": "InvalidAssignmentType(uint8)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0x6a717330",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "accountSource",
+              "type": "bytes32"
+            }
+          ],
+          "name": "InvalidMaterializedAccount",
+          "selector": "0x6a717330",
+          "signature": "InvalidMaterializedAccount(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0x963c043a",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [],
+          "name": "InvalidPrimaryPolicyHash",
+          "selector": "0x963c043a",
+          "signature": "InvalidPrimaryPolicyHash()"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0x8c3f5079",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "InvalidPrimaryTemplateEntry",
+          "selector": "0x8c3f5079",
+          "signature": "InvalidPrimaryTemplateEntry(uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0x3be6f55d",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "totalSharePpm",
+              "type": "uint256"
+            }
+          ],
+          "name": "InvalidPrimaryTemplateTotal",
+          "selector": "0x3be6f55d",
+          "signature": "InvalidPrimaryTemplateTotal(uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0xbda654e9",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            }
+          ],
+          "name": "InvalidRevenueClass",
+          "selector": "0xbda654e9",
+          "signature": "InvalidRevenueClass(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0x10c06f4c",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            }
+          ],
+          "name": "PrimaryAssignmentFrozen",
+          "selector": "0x10c06f4c",
+          "signature": "PrimaryAssignmentFrozen(bytes32,uint8,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0x36f9576d",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            }
+          ],
+          "name": "PrimaryAssignmentMissing",
+          "selector": "0x36f9576d",
+          "signature": "PrimaryAssignmentMissing(bytes32,uint8,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0xf2ff63c1",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "UnknownPrimaryTemplate",
+          "selector": "0xf2ff63c1",
+          "signature": "UnknownPrimaryTemplate(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0xa46a80f9",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "accountSource",
+              "type": "bytes32"
+            }
+          ],
+          "name": "UnsupportedAccountSource",
+          "selector": "0xa46a80f9",
+          "signature": "UnsupportedAccountSource(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0x193fd9f7",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "UnverifiedSplitProfile",
+          "selector": "0x193fd9f7",
+          "signature": "UnverifiedSplitProfile(bytes32)"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#event:PrimaryAssignmentCleared(bytes32,uint8,uint256,bytes32,address)",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "previousAssignmentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "name": "PrimaryAssignmentCleared",
+          "signature": "PrimaryAssignmentCleared(bytes32,uint8,uint256,bytes32,address)",
+          "topic0": "0xbca357e7cd064d57d69f9f520883f432e496218f5a792b0dc30c64309da81dfd"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#event:PrimaryAssignmentFrozenEvent(bytes32,uint8,uint256,bytes32,bytes32,address)",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "previousAssignmentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "frozenAssignmentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "name": "PrimaryAssignmentFrozenEvent",
+          "signature": "PrimaryAssignmentFrozenEvent(bytes32,uint8,uint256,bytes32,bytes32,address)",
+          "topic0": "0x89db4c1d868193ff5340fd0ac375cdcc3aa22d0287149012fd1f72438688041d"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#event:PrimaryAssignmentSet(bytes32,uint8,uint256,uint8,bytes32,bytes32,bytes32,bytes32,address)",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "uint8",
+              "name": "assignmentType",
+              "type": "uint8"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "assignmentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "name": "PrimaryAssignmentSet",
+          "signature": "PrimaryAssignmentSet(bytes32,uint8,uint256,uint8,bytes32,bytes32,bytes32,bytes32,address)",
+          "topic0": "0x340e49d8842e86cf1dd9299fe316cab76d929d26ac4482523844ebf6f8d6e8f7"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#event:PrimaryTemplateCreated(bytes32,bytes32,bytes32,uint16,uint16)",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "entriesHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "metadataURIHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "templateVersion",
+              "type": "uint16"
+            }
+          ],
+          "name": "PrimaryTemplateCreated",
+          "signature": "PrimaryTemplateCreated(bytes32,bytes32,bytes32,uint16,uint16)",
+          "topic0": "0xd863f5b407f2f1529b2e13232d767a5c062626cbda8476058eb9f86867b23ce0"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#event:PrimaryTemplateEntryRecorded(bytes32,uint16,address,bytes32,uint32,bytes32)",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint16",
+              "name": "index",
+              "type": "uint16"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "accountSource",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint32",
+              "name": "sharePpm",
+              "type": "uint32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "labelId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "PrimaryTemplateEntryRecorded",
+          "signature": "PrimaryTemplateEntryRecorded(bytes32,uint16,address,bytes32,uint32,bytes32)",
+          "topic0": "0x62095eaabe7eaeb775f525c179d498d50c096cd57cb01bcfb73093f3998a8294"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#event:PrimaryTemplateMaterialized(bytes32,bytes32,address,bytes32,bytes32,address)",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "entriesHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "metadataURIHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "address",
+              "name": "salePoster",
+              "type": "address"
+            }
+          ],
+          "name": "PrimaryTemplateMaterialized",
+          "signature": "PrimaryTemplateMaterialized(bytes32,bytes32,address,bytes32,bytes32,address)",
+          "topic0": "0x26e12ec66ef582780cbff95b5bf90760c5c597edc8c997952480c0550f19ff07"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x93197046",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [],
+          "name": "ACCOUNT_SOURCE_SALE_POSTER",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x93197046",
+          "signature": "ACCOUNT_SOURCE_SALE_POSTER()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x32943255",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [],
+          "name": "ASSIGNMENT_TYPE_PROFILE",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x32943255",
+          "signature": "ASSIGNMENT_TYPE_PROFILE()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x94d464e9",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [],
+          "name": "ASSIGNMENT_TYPE_TEMPLATE",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x94d464e9",
+          "signature": "ASSIGNMENT_TYPE_TEMPLATE()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x09195c81",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [],
+          "name": "SCOPE_COLLECTION",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x09195c81",
+          "signature": "SCOPE_COLLECTION()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x3f1ca966",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [],
+          "name": "SCOPE_DEFAULT",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x3f1ca966",
+          "signature": "SCOPE_DEFAULT()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x2571ae1f",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [],
+          "name": "SCOPE_TOKEN",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "selector": "0x2571ae1f",
+          "signature": "SCOPE_TOKEN()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0xccd963df",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            }
+          ],
+          "name": "clearPrimaryAssignment",
+          "outputs": [],
+          "selector": "0xccd963df",
+          "signature": "clearPrimaryAssignment(bytes32,uint8,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x898e4875",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamRevenueResolver.PrimaryTemplateEntry[]",
+              "name": "entries",
+              "type": "(address,bytes32,uint32,bytes32)[]"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "metadataURIHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "createPrimaryTemplate",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x898e4875",
+          "signature": "createPrimaryTemplate((address,bytes32,uint32,bytes32)[],bytes32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x14f0e30d",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            }
+          ],
+          "name": "freezePrimaryAssignment",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "frozenAssignmentHash",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x14f0e30d",
+          "signature": "freezePrimaryAssignment(bytes32,uint8,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0xaf446d7a",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [],
+          "name": "isStreamRevenueResolver",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xaf446d7a",
+          "signature": "isStreamRevenueResolver()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x0dcd6d8e",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "salePoster",
+              "type": "address"
+            }
+          ],
+          "name": "materializePrimaryProfile",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "entriesHash",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x0dcd6d8e",
+          "signature": "materializePrimaryProfile(bytes32,address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x1e39dcdd",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "uint8",
+              "name": "assignmentType",
+              "type": "uint8"
+            },
+            {
+              "index": 4,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "internalType": "bool",
+              "name": "frozen",
+              "type": "bool"
+            }
+          ],
+          "name": "primaryAssignmentHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x1e39dcdd",
+          "signature": "primaryAssignmentHash(bytes32,uint8,uint256,uint8,bytes32,bytes32,bytes32,bool)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x23fb037e",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "primaryTemplate",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "entriesHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "metadataURIHash",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x23fb037e",
+          "signature": "primaryTemplate(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0xe2d1e20a",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "primaryTemplateEntry",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "accountSource",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "uint32",
+              "name": "sharePpm",
+              "type": "uint32"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "labelId",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xe2d1e20a",
+          "signature": "primaryTemplateEntry(bytes32,uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x9ab871eb",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "primaryTemplateEntryCount",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x9ab871eb",
+          "signature": "primaryTemplateEntryCount(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0xd6938915",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            }
+          ],
+          "name": "resolvePrimaryAssignment",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamRevenueResolver.ResolvedPrimaryAssignment",
+              "name": "assignment",
+              "type": "(bool,uint8,uint256,uint8,bytes32,bytes32,bytes32,bytes32,bool)"
+            }
+          ],
+          "selector": "0xd6938915",
+          "signature": "resolvePrimaryAssignment(uint256,uint256,bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0xa68c7f3e",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "setPrimaryProfileAssignment",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "assignmentHash",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0xa68c7f3e",
+          "signature": "setPrimaryProfileAssignment(bytes32,uint8,uint256,bytes32,bytes32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x829477ad",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "setPrimaryTemplateAssignment",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "assignmentHash",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x829477ad",
+          "signature": "setPrimaryTemplateAssignment(bytes32,uint8,uint256,bytes32,bytes32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x5720babb",
+          "declaringDefinitionId": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+          "inherited": false,
+          "inputs": [],
+          "name": "splitFactory",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0x5720babb",
+          "signature": "splitFactory()",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "published_interface",
+    "classificationReason": "Listed in release-artifacts/contracts.json interfaces.",
+    "declarations": {
+      "enums": [],
+      "errors": [
+        {
+          "astId": 16460,
+          "canonicalSignature": "InvalidRevenueClass(bytes32)",
+          "displaySignature": "InvalidRevenueClass(bytes32)",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0xbda654e9",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "revenueClass",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZXJyb3I6MHhiZGE2NTRlOQ",
+          "kind": "error",
+          "name": "InvalidRevenueClass",
+          "natspec": "@notice Reverts when a revenue class is zero.",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 844,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:4f9f02877ac334aa964f55e7ab73abaa260c43f25d24bb16c8f91ed147cc7a70",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0xbda654e9"
+        },
+        {
+          "astId": 16467,
+          "canonicalSignature": "InvalidAssignmentScope(uint8,uint256)",
+          "displaySignature": "InvalidAssignmentScope(uint8,uint256)",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0x31b6efe6",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "scopeId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZXJyb3I6MHgzMWI2ZWZlNg",
+          "kind": "error",
+          "name": "InvalidAssignmentScope",
+          "natspec": "@notice Reverts when an assignment scope is unsupported or has invalid identity.",
+          "range": {
+            "byteLength": 59,
+            "byteStart": 986,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L32",
+            "lineEnd": 32,
+            "lineStart": 32,
+            "snippetSha256": "sha256:f8e2bc63dbc729e4095814857cdd7040f557a47747a2630e3844c06899178ab7",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x31b6efe6"
+        },
+        {
+          "astId": 16472,
+          "canonicalSignature": "InvalidAssignmentType(uint8)",
+          "displaySignature": "InvalidAssignmentType(uint8)",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0x64619be4",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "assignmentType",
+              "type": "uint8"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZXJyb3I6MHg2NDYxOWJlNA",
+          "kind": "error",
+          "name": "InvalidAssignmentType",
+          "natspec": "@notice Reverts when an assignment type is unsupported.",
+          "range": {
+            "byteLength": 50,
+            "byteStart": 1114,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L34",
+            "lineEnd": 34,
+            "lineStart": 34,
+            "snippetSha256": "sha256:bfe24c5210c476d30e88b0fad6d365207feb11b7deba7d24cfc36cbed78166c3",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x64619be4"
+        },
+        {
+          "astId": 16475,
+          "canonicalSignature": "InvalidPrimaryPolicyHash()",
+          "displaySignature": "InvalidPrimaryPolicyHash()",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0x963c043a",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZXJyb3I6MHg5NjNjMDQzYQ",
+          "kind": "error",
+          "name": "InvalidPrimaryPolicyHash",
+          "natspec": "@notice Reverts when assignment evidence hash is zero.",
+          "range": {
+            "byteLength": 33,
+            "byteStart": 1232,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L36",
+            "lineEnd": 36,
+            "lineStart": 36,
+            "snippetSha256": "sha256:57b041d78ce123da09f878206ddc86e2e3a0e01f49262cb82be4c3ed3798aa0d",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x963c043a"
+        },
+        {
+          "astId": 16480,
+          "canonicalSignature": "UnverifiedSplitProfile(bytes32)",
+          "displaySignature": "UnverifiedSplitProfile(bytes32)",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0x193fd9f7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZXJyb3I6MHgxOTNmZDlmNw",
+          "kind": "error",
+          "name": "UnverifiedSplitProfile",
+          "natspec": "@notice Reverts when a split profile is unknown or lacks a verified wallet.",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 1354,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L38",
+            "lineEnd": 38,
+            "lineStart": 38,
+            "snippetSha256": "sha256:ba752c82edbc656ac7a3d646a612c48cdde49075013d23da467d4b8f4ac1b826",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x193fd9f7"
+        },
+        {
+          "astId": 16485,
+          "canonicalSignature": "InvalidPrimaryTemplateEntry(uint256)",
+          "displaySignature": "InvalidPrimaryTemplateEntry(uint256)",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0x8c3f5079",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZXJyb3I6MHg4YzNmNTA3OQ",
+          "kind": "error",
+          "name": "InvalidPrimaryTemplateEntry",
+          "natspec": "@notice Reverts when a template entry is invalid.",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 1465,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L40",
+            "lineEnd": 40,
+            "lineStart": 40,
+            "snippetSha256": "sha256:f34d59b8ef74c003094716e567aaacce608c66d18e64fd9d813eec31ef735c72",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x8c3f5079"
+        },
+        {
+          "astId": 16490,
+          "canonicalSignature": "InvalidPrimaryTemplateTotal(uint256)",
+          "displaySignature": "InvalidPrimaryTemplateTotal(uint256)",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0x3be6f55d",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "totalSharePpm",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZXJyb3I6MHgzYmU2ZjU1ZA",
+          "kind": "error",
+          "name": "InvalidPrimaryTemplateTotal",
+          "natspec": "@notice Reverts when template shares do not sum to the share denominator.",
+          "range": {
+            "byteLength": 57,
+            "byteStart": 1601,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L42",
+            "lineEnd": 42,
+            "lineStart": 42,
+            "snippetSha256": "sha256:670883ab84ce9c58e61833a6024e5c83a20bf54364b8201d64a0458aeb53d7bf",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x3be6f55d"
+        },
+        {
+          "astId": 16495,
+          "canonicalSignature": "UnknownPrimaryTemplate(bytes32)",
+          "displaySignature": "UnknownPrimaryTemplate(bytes32)",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0xf2ff63c1",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "templateId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZXJyb3I6MHhmMmZmNjNjMQ",
+          "kind": "error",
+          "name": "UnknownPrimaryTemplate",
+          "natspec": "@notice Reverts when the template does not exist.",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 1721,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L44",
+            "lineEnd": 44,
+            "lineStart": 44,
+            "snippetSha256": "sha256:7720789d5d87a8baf8096949cc631ffccf21f21a62b03933ed32ec1b8be9bde1",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0xf2ff63c1"
+        },
+        {
+          "astId": 16500,
+          "canonicalSignature": "UnsupportedAccountSource(bytes32)",
+          "displaySignature": "UnsupportedAccountSource(bytes32)",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0xa46a80f9",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "accountSource",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZXJyb3I6MHhhNDZhODBmOQ",
+          "kind": "error",
+          "name": "UnsupportedAccountSource",
+          "natspec": "@notice Reverts when a dynamic account source is unsupported.",
+          "range": {
+            "byteLength": 54,
+            "byteStart": 1845,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L46",
+            "lineEnd": 46,
+            "lineStart": 46,
+            "snippetSha256": "sha256:8253e85ada5d97873b9b4f438bd08a810645b6f3a49ac25729da1f6f475a37c1",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0xa46a80f9"
+        },
+        {
+          "astId": 16505,
+          "canonicalSignature": "InvalidMaterializedAccount(bytes32)",
+          "displaySignature": "InvalidMaterializedAccount(bytes32)",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0x6a717330",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "accountSource",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZXJyb3I6MHg2YTcxNzMzMA",
+          "kind": "error",
+          "name": "InvalidMaterializedAccount",
+          "natspec": "@notice Reverts when a dynamic account source materializes to zero.",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 1980,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L48",
+            "lineEnd": 48,
+            "lineStart": 48,
+            "snippetSha256": "sha256:5ad92f185820875f7d0d16cc56d8586d257a36c4af0d7f0612fa4d9edaaa3718",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x6a717330"
+        },
+        {
+          "astId": 16514,
+          "canonicalSignature": "PrimaryAssignmentFrozen(bytes32,uint8,uint256)",
+          "displaySignature": "PrimaryAssignmentFrozen(bytes32,uint8,uint256)",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0x10c06f4c",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "scopeId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZXJyb3I6MHgxMGMwNmY0Yw",
+          "kind": "error",
+          "name": "PrimaryAssignmentFrozen",
+          "natspec": "@notice Reverts when a frozen assignment would be changed or cleared.",
+          "range": {
+            "byteLength": 82,
+            "byteStart": 2119,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L50",
+            "lineEnd": 50,
+            "lineStart": 50,
+            "snippetSha256": "sha256:cf295c4ef43ed52778e62ea106b219307013fb1397c8407c4358d0a470db8e5d",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x10c06f4c"
+        },
+        {
+          "astId": 16523,
+          "canonicalSignature": "PrimaryAssignmentMissing(bytes32,uint8,uint256)",
+          "displaySignature": "PrimaryAssignmentMissing(bytes32,uint8,uint256)",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#error:0x36f9576d",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "scopeId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZXJyb3I6MHgzNmY5NTc2ZA",
+          "kind": "error",
+          "name": "PrimaryAssignmentMissing",
+          "natspec": "@notice Reverts when freezing a missing assignment.",
+          "range": {
+            "byteLength": 83,
+            "byteStart": 2266,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L52",
+            "lineEnd": 52,
+            "lineStart": 52,
+            "snippetSha256": "sha256:103a9b9c301cb0e00bf108c6839fe424b788ca8b7869878125f710f9a3f04efc",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x36f9576d"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 16536,
+          "canonicalSignature": "PrimaryTemplateCreated(bytes32,bytes32,bytes32,uint16,uint16)",
+          "displaySignature": "PrimaryTemplateCreated(bytes32,bytes32,bytes32,uint16,uint16)",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#event:PrimaryTemplateCreated(bytes32,bytes32,bytes32,uint16,uint16)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "entriesHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "metadataURIHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "templateVersion",
+              "type": "uint16"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZXZlbnQ6UHJpbWFyeVRlbXBsYXRlQ3JlYXRlZChieXRlczMyLGJ5dGVzMzIsYnl0ZXMzMix1aW50MTYsdWludDE2KQ",
+          "kind": "event",
+          "name": "PrimaryTemplateCreated",
+          "natspec": "@notice Emitted once when a primary split template is created.",
+          "range": {
+            "byteLength": 211,
+            "byteStart": 2426,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L55-L61",
+            "lineEnd": 61,
+            "lineStart": 55,
+            "snippetSha256": "sha256:2846cac91783d7a53f8d668ee90d46a2e31cc68a1ea7464652996f7871a3f671",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "topic0": "0xd863f5b407f2f1529b2e13232d767a5c062626cbda8476058eb9f86867b23ce0"
+        },
+        {
+          "anonymous": false,
+          "astId": 16551,
+          "canonicalSignature": "PrimaryTemplateEntryRecorded(bytes32,uint16,address,bytes32,uint32,bytes32)",
+          "displaySignature": "PrimaryTemplateEntryRecorded(bytes32,uint16,address,bytes32,uint32,bytes32)",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#event:PrimaryTemplateEntryRecorded(bytes32,uint16,address,bytes32,uint32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "index",
+              "type": "uint16"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "accountSource",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "sharePpm",
+              "type": "uint32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "labelId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZXZlbnQ6UHJpbWFyeVRlbXBsYXRlRW50cnlSZWNvcmRlZChieXRlczMyLHVpbnQxNixhZGRyZXNzLGJ5dGVzMzIsdWludDMyLGJ5dGVzMzIp",
+          "kind": "event",
+          "name": "PrimaryTemplateEntryRecorded",
+          "natspec": "@notice Emitted for each canonical template entry.",
+          "range": {
+            "byteLength": 221,
+            "byteStart": 2701,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L63-L70",
+            "lineEnd": 70,
+            "lineStart": 63,
+            "snippetSha256": "sha256:4719f6d10a5e86b45bcf8df3ba20b8d22e39ab1f7ee3d5bb5650083a1e7d9b90",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "topic0": "0x62095eaabe7eaeb775f525c179d498d50c096cd57cb01bcfb73093f3998a8294"
+        },
+        {
+          "anonymous": false,
+          "astId": 16572,
+          "canonicalSignature": "PrimaryAssignmentSet(bytes32,uint8,uint256,uint8,bytes32,bytes32,bytes32,bytes32,address)",
+          "displaySignature": "PrimaryAssignmentSet(bytes32,uint8,uint256,uint8,bytes32,bytes32,bytes32,bytes32,address)",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#event:PrimaryAssignmentSet(bytes32,uint8,uint256,uint8,bytes32,bytes32,bytes32,bytes32,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "scopeId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "assignmentType",
+              "type": "uint8"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "name": "policyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "name": "assignmentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZXZlbnQ6UHJpbWFyeUFzc2lnbm1lbnRTZXQoYnl0ZXMzMix1aW50OCx1aW50MjU2LHVpbnQ4LGJ5dGVzMzIsYnl0ZXMzMixieXRlczMyLGJ5dGVzMzIsYWRkcmVzcyk",
+          "kind": "event",
+          "name": "PrimaryAssignmentSet",
+          "natspec": "@notice Emitted when a primary assignment is set.",
+          "range": {
+            "byteLength": 301,
+            "byteStart": 2985,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L72-L82",
+            "lineEnd": 82,
+            "lineStart": 72,
+            "snippetSha256": "sha256:080fc8391811c7224d4b9ab6f9a2c3bc940bec83dc58764e9dc0e9bf22ce7ff4",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "topic0": "0x340e49d8842e86cf1dd9299fe316cab76d929d26ac4482523844ebf6f8d6e8f7"
+        },
+        {
+          "anonymous": false,
+          "astId": 16585,
+          "canonicalSignature": "PrimaryAssignmentCleared(bytes32,uint8,uint256,bytes32,address)",
+          "displaySignature": "PrimaryAssignmentCleared(bytes32,uint8,uint256,bytes32,address)",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#event:PrimaryAssignmentCleared(bytes32,uint8,uint256,bytes32,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "scopeId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "previousAssignmentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZXZlbnQ6UHJpbWFyeUFzc2lnbm1lbnRDbGVhcmVkKGJ5dGVzMzIsdWludDgsdWludDI1NixieXRlczMyLGFkZHJlc3Mp",
+          "kind": "event",
+          "name": "PrimaryAssignmentCleared",
+          "natspec": "@notice Emitted when a primary assignment is cleared.",
+          "range": {
+            "byteLength": 200,
+            "byteStart": 3353,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L84-L90",
+            "lineEnd": 90,
+            "lineStart": 84,
+            "snippetSha256": "sha256:ea59383caeda2351f58ce68548497ee2374c9c65c1121d052e4f2c6221f93144",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "topic0": "0xbca357e7cd064d57d69f9f520883f432e496218f5a792b0dc30c64309da81dfd"
+        },
+        {
+          "anonymous": false,
+          "astId": 16600,
+          "canonicalSignature": "PrimaryAssignmentFrozenEvent(bytes32,uint8,uint256,bytes32,bytes32,address)",
+          "displaySignature": "PrimaryAssignmentFrozenEvent(bytes32,uint8,uint256,bytes32,bytes32,address)",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#event:PrimaryAssignmentFrozenEvent(bytes32,uint8,uint256,bytes32,bytes32,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "scopeId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "previousAssignmentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "frozenAssignmentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZXZlbnQ6UHJpbWFyeUFzc2lnbm1lbnRGcm96ZW5FdmVudChieXRlczMyLHVpbnQ4LHVpbnQyNTYsYnl0ZXMzMixieXRlczMyLGFkZHJlc3Mp",
+          "kind": "event",
+          "name": "PrimaryAssignmentFrozenEvent",
+          "natspec": "@notice Emitted when a primary assignment is frozen against later mutation.",
+          "range": {
+            "byteLength": 242,
+            "byteStart": 3642,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L92-L99",
+            "lineEnd": 99,
+            "lineStart": 92,
+            "snippetSha256": "sha256:61c5d2036039e2a0c2830da67c0cdd8cc6e63c88f2c27b72f947c68e7b03d635",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "topic0": "0x89db4c1d868193ff5340fd0ac375cdcc3aa22d0287149012fd1f72438688041d"
+        },
+        {
+          "anonymous": false,
+          "astId": 16615,
+          "canonicalSignature": "PrimaryTemplateMaterialized(bytes32,bytes32,address,bytes32,bytes32,address)",
+          "displaySignature": "PrimaryTemplateMaterialized(bytes32,bytes32,address,bytes32,bytes32,address)",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#event:PrimaryTemplateMaterialized(bytes32,bytes32,address,bytes32,bytes32,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "entriesHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "metadataURIHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "salePoster",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZXZlbnQ6UHJpbWFyeVRlbXBsYXRlTWF0ZXJpYWxpemVkKGJ5dGVzMzIsYnl0ZXMzMixhZGRyZXNzLGJ5dGVzMzIsYnl0ZXMzMixhZGRyZXNzKQ",
+          "kind": "event",
+          "name": "PrimaryTemplateMaterialized",
+          "natspec": "@notice Emitted when a dynamic template is materialized into a fixed split profile.",
+          "range": {
+            "byteLength": 233,
+            "byteStart": 3981,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L101-L108",
+            "lineEnd": 108,
+            "lineStart": 101,
+            "snippetSha256": "sha256:abefe92f4451086a048e30d4fb9902bb71001a3a4d49cb874fd17b0b258d4313",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "topic0": "0x26e12ec66ef582780cbff95b5bf90760c5c597edc8c997952480c0550f19ff07"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "SCOPE_DEFAULT()",
+          "displaySignature": "SCOPE_DEFAULT()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x3f1ca966",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZnVuY3Rpb246MHgzZjFjYTk2Ng",
+          "kind": "function",
+          "modifiers": [],
+          "name": "SCOPE_DEFAULT",
+          "natspec": "@notice Default resolver scope.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 55,
+            "byteStart": 4260,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L111",
+            "lineEnd": 111,
+            "lineStart": 111,
+            "snippetSha256": "sha256:a0c0ff3541ae4b72f10219901c252d79aa0e797828c3f79a4ad488f31e85a9a0",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x3f1ca966",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "SCOPE_COLLECTION()",
+          "displaySignature": "SCOPE_COLLECTION()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x09195c81",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZnVuY3Rpb246MHgwOTE5NWM4MQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "SCOPE_COLLECTION",
+          "natspec": "@notice Collection resolver scope.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 58,
+            "byteStart": 4363,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L113",
+            "lineEnd": 113,
+            "lineStart": 113,
+            "snippetSha256": "sha256:1d67fdd0bac6f3069a49b56017b329bea3c84a988cd80830b6546d226403638a",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x09195c81",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "SCOPE_TOKEN()",
+          "displaySignature": "SCOPE_TOKEN()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x2571ae1f",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZnVuY3Rpb246MHgyNTcxYWUxZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "SCOPE_TOKEN",
+          "natspec": "@notice Token resolver scope.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 53,
+            "byteStart": 4464,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L115",
+            "lineEnd": 115,
+            "lineStart": 115,
+            "snippetSha256": "sha256:5f813177488dd6e7b5c85e84e8fc8f5b5218fdd7a3fa85aa7e39826a7c0c1212",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x2571ae1f",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "ASSIGNMENT_TYPE_PROFILE()",
+          "displaySignature": "ASSIGNMENT_TYPE_PROFILE()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x32943255",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZnVuY3Rpb246MHgzMjk0MzI1NQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "ASSIGNMENT_TYPE_PROFILE",
+          "natspec": "@notice Fixed split profile assignment type.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 65,
+            "byteStart": 4575,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L117",
+            "lineEnd": 117,
+            "lineStart": 117,
+            "snippetSha256": "sha256:8ac6da13b5bb20502fd6d2c020792a0d74bcc953df0432f90ff2c761183438eb",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x32943255",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "ASSIGNMENT_TYPE_TEMPLATE()",
+          "displaySignature": "ASSIGNMENT_TYPE_TEMPLATE()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x94d464e9",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZnVuY3Rpb246MHg5NGQ0NjRlOQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "ASSIGNMENT_TYPE_TEMPLATE",
+          "natspec": "@notice Dynamic primary template assignment type.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "range": {
+            "byteLength": 66,
+            "byteStart": 4703,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L119",
+            "lineEnd": 119,
+            "lineStart": 119,
+            "snippetSha256": "sha256:18ea37143c74e7fad0ee100456fb041553d3f2165de0ae9bdf6792591da48d3e",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x94d464e9",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "ACCOUNT_SOURCE_SALE_POSTER()",
+          "displaySignature": "ACCOUNT_SOURCE_SALE_POSTER()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x93197046",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZnVuY3Rpb246MHg5MzE5NzA0Ng",
+          "kind": "function",
+          "modifiers": [],
+          "name": "ACCOUNT_SOURCE_SALE_POSTER",
+          "natspec": "@notice Dynamic account source for the poster attached to a sale.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 70,
+            "byteStart": 4848,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L121",
+            "lineEnd": 121,
+            "lineStart": 121,
+            "snippetSha256": "sha256:759d08f6bf70cdc818eede83748d521aa20a50b3a9670e928df49af5e7dcdbe4",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x93197046",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "splitFactory()",
+          "displaySignature": "splitFactory()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x5720babb",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZnVuY3Rpb246MHg1NzIwYmFiYg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "splitFactory",
+          "natspec": "@notice The split factory used to verify and materialize profiles.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 56,
+            "byteStart": 4998,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L123",
+            "lineEnd": 123,
+            "lineStart": 123,
+            "snippetSha256": "sha256:39315cfb7285747ec5259d30e87d94d3bfe1c6b5406cd32244cb8cd3d726c9df",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x5720babb",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isStreamRevenueResolver()",
+          "displaySignature": "isStreamRevenueResolver()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0xaf446d7a",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZnVuY3Rpb246MHhhZjQ0NmQ3YQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isStreamRevenueResolver",
+          "natspec": "@notice Returns true for deployment validation.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 64,
+            "byteStart": 5115,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L125",
+            "lineEnd": 125,
+            "lineStart": 125,
+            "snippetSha256": "sha256:d35a55e61085d9c8dc7f6ccd1652817ae2a34bc51a437ba6b2dd13398e0f32c1",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0xaf446d7a",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "createPrimaryTemplate((address,bytes32,uint32,bytes32)[],bytes32)",
+          "displaySignature": "createPrimaryTemplate(PrimaryTemplateEntry[],bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x898e4875",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "entries",
+              "storageLocation": "calldata",
+              "type": "PrimaryTemplateEntry[]"
+            },
+            {
+              "index": 1,
+              "name": "metadataURIHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZnVuY3Rpb246MHg4OThlNDg3NQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "createPrimaryTemplate",
+          "natspec": "@notice Creates or reuses a primary split template.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "templateId",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 151,
+            "byteStart": 5244,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L127-L129",
+            "lineEnd": 129,
+            "lineStart": 127,
+            "snippetSha256": "sha256:d0700073a09cb87cde2161a373a9c5d9f5b6c8562a41e039c8c512a5ed614269",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x898e4875",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setPrimaryProfileAssignment(bytes32,uint8,uint256,bytes32,bytes32)",
+          "displaySignature": "setPrimaryProfileAssignment(bytes32,uint8,uint256,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0xa68c7f3e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "scopeId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZnVuY3Rpb246MHhhNjhjN2YzZQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setPrimaryProfileAssignment",
+          "natspec": "@notice Sets a fixed-profile primary assignment.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "assignmentHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 216,
+            "byteStart": 5457,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L131-L137",
+            "lineEnd": 137,
+            "lineStart": 131,
+            "snippetSha256": "sha256:6b89a20b6883e7c00ca893d01dda1cae97351fa43b286e0d2cbeed5a9898c8b5",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0xa68c7f3e",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setPrimaryTemplateAssignment(bytes32,uint8,uint256,bytes32,bytes32)",
+          "displaySignature": "setPrimaryTemplateAssignment(bytes32,uint8,uint256,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x829477ad",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "scopeId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZnVuY3Rpb246MHg4Mjk0NzdhZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setPrimaryTemplateAssignment",
+          "natspec": "@notice Sets a dynamic-template primary assignment.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "assignmentHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 218,
+            "byteStart": 5738,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L139-L145",
+            "lineEnd": 145,
+            "lineStart": 139,
+            "snippetSha256": "sha256:f38b8456f7c44fe5e9adfa8f05ee479aa3f0a10c63719982a53c2187e4f84990",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x829477ad",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "clearPrimaryAssignment(bytes32,uint8,uint256)",
+          "displaySignature": "clearPrimaryAssignment(bytes32,uint8,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0xccd963df",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "scopeId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZnVuY3Rpb246MHhjY2Q5NjNkZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "clearPrimaryAssignment",
+          "natspec": "@notice Clears a mutable primary assignment.",
+          "outputs": [],
+          "range": {
+            "byteLength": 93,
+            "byteStart": 6014,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L147",
+            "lineEnd": 147,
+            "lineStart": 147,
+            "snippetSha256": "sha256:2f815eb6260e4aadd3b5d9d19154fa87094bad5cc007cc64a91108e02ce65946",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0xccd963df",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "freezePrimaryAssignment(bytes32,uint8,uint256)",
+          "displaySignature": "freezePrimaryAssignment(bytes32,uint8,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x14f0e30d",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "scopeId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZnVuY3Rpb246MHgxNGYwZTMwZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "freezePrimaryAssignment",
+          "natspec": "@notice Freezes an existing primary assignment.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "frozenAssignmentHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 149,
+            "byteStart": 6168,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L149-L151",
+            "lineEnd": 151,
+            "lineStart": 149,
+            "snippetSha256": "sha256:aec6ee9ddde4e5f5d0d9fcb78bb778ae84d7cc69a2b265e64375a356a54b6f52",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x14f0e30d",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "resolvePrimaryAssignment(uint256,uint256,bytes32)",
+          "displaySignature": "resolvePrimaryAssignment(uint256,uint256,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0xd6938915",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "revenueClass",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZnVuY3Rpb246MHhkNjkzODkxNQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "resolvePrimaryAssignment",
+          "natspec": "@notice Resolves token, collection, then default primary assignment for a sale context.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "assignment",
+              "storageLocation": "memory",
+              "type": "ResolvedPrimaryAssignment"
+            }
+          ],
+          "range": {
+            "byteLength": 187,
+            "byteStart": 6418,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L153-L156",
+            "lineEnd": 156,
+            "lineStart": 153,
+            "snippetSha256": "sha256:ef16d25fb90f95326499afe32d3a2c46c5b4d857997fafd4066e9d0b6d141f28",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0xd6938915",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "materializePrimaryProfile(bytes32,address)",
+          "displaySignature": "materializePrimaryProfile(bytes32,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x0dcd6d8e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "salePoster",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZnVuY3Rpb246MHgwZGNkNmQ4ZQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "materializePrimaryProfile",
+          "natspec": "@notice Materializes a dynamic template into a deterministic split profile.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "entriesHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 165,
+            "byteStart": 6694,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L158-L160",
+            "lineEnd": 160,
+            "lineStart": 158,
+            "snippetSha256": "sha256:811e9f2d99db934d053b4cd04c1b9577f69be44f66801e4644401b80e7c3a5eb",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x0dcd6d8e",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "primaryTemplate(bytes32)",
+          "displaySignature": "primaryTemplate(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x23fb037e",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "templateId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZnVuY3Rpb246MHgyM2ZiMDM3ZQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "primaryTemplate",
+          "natspec": "@notice Returns deterministic template metadata.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "exists",
+              "type": "bool"
+            },
+            {
+              "index": 1,
+              "name": "entriesHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "metadataURIHash",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 151,
+            "byteStart": 6921,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L162-L165",
+            "lineEnd": 165,
+            "lineStart": 162,
+            "snippetSha256": "sha256:3e267e0dbbf1ef6cb2c305eab1cc9c6cb71556cb677ce35d0d36cf2587685ceb",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x23fb037e",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "primaryTemplateEntryCount(bytes32)",
+          "displaySignature": "primaryTemplateEntryCount(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x9ab871eb",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "templateId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZnVuY3Rpb246MHg5YWI4NzFlYg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "primaryTemplateEntryCount",
+          "natspec": "@notice Returns the number of canonical entries in a template.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 87,
+            "byteStart": 7148,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L167",
+            "lineEnd": 167,
+            "lineStart": 167,
+            "snippetSha256": "sha256:8fab861ee2adbf5f3fa0c5eb7a5b5adccc78f6b80fa510379ea91b19d6f61e89",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x9ab871eb",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "primaryTemplateEntry(bytes32,uint256)",
+          "displaySignature": "primaryTemplateEntry(bytes32,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0xe2d1e20a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZnVuY3Rpb246MHhlMmQxZTIwYQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "primaryTemplateEntry",
+          "natspec": "@notice Returns one canonical template entry.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "accountSource",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "sharePpm",
+              "type": "uint32"
+            },
+            {
+              "index": 3,
+              "name": "labelId",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 186,
+            "byteStart": 7294,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L169-L172",
+            "lineEnd": 172,
+            "lineStart": 169,
+            "snippetSha256": "sha256:07de9c2cffd31cde6562844a81378065bc6dec1e0fe9b9d5b380555e1ad6c639",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0xe2d1e20a",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "primaryAssignmentHash(bytes32,uint8,uint256,uint8,bytes32,bytes32,bytes32,bool)",
+          "displaySignature": "primaryAssignmentHash(bytes32,uint8,uint256,uint8,bytes32,bytes32,bytes32,bool)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver#function:0x1e39dcdd",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "scopeId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "assignmentType",
+              "type": "uint8"
+            },
+            {
+              "index": 4,
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "name": "policyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "name": "frozen",
+              "type": "bool"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXIjZnVuY3Rpb246MHgxZTM5ZGNkZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "primaryAssignmentHash",
+          "natspec": "@notice Computes the current assignment hash for explicit inputs.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 279,
+            "byteStart": 7559,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L174-L183",
+            "lineEnd": 183,
+            "lineStart": 174,
+            "snippetSha256": "sha256:53c32e09862264096156753dd68cf924ea4f8376eb2f1c94a28bebe4ff99a710",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          },
+          "selector": "0x1e39dcdd",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "account",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 329,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L10",
+                "lineEnd": 10,
+                "lineStart": 10,
+                "snippetSha256": "sha256:9c56e572ed334c1174a1b7d94e306540c316e6a946d9098a1aac4a72d7b48991",
+                "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 1,
+              "name": "accountSource",
+              "natspec": "",
+              "range": {
+                "byteLength": 21,
+                "byteStart": 354,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L11",
+                "lineEnd": 11,
+                "lineStart": 11,
+                "snippetSha256": "sha256:e7275ad911cb6fcf8be97a3718c8735539bd9877ce2e3d7bef7f88d155c41633",
+                "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "sharePpm",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 385,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L12",
+                "lineEnd": 12,
+                "lineStart": 12,
+                "snippetSha256": "sha256:836c2bb111b7e74cc75795ed81035896ee4c1eaebb597686d7fc75f54193d7aa",
+                "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+              },
+              "type": "uint32",
+              "typeString": "uint32"
+            },
+            {
+              "index": 3,
+              "name": "labelId",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 410,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L13",
+                "lineEnd": 13,
+                "lineStart": 13,
+                "snippetSha256": "sha256:9e5f880870d9beb539d9a43eb481ba41317e487b52aa1b39d352ad8ecc7171e2",
+                "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            }
+          ],
+          "name": "PrimaryTemplateEntry",
+          "natspec": "",
+          "range": {
+            "byteLength": 141,
+            "byteStart": 291,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L9-L14",
+            "lineEnd": 14,
+            "lineStart": 9,
+            "snippetSha256": "sha256:fd293b8dcc2484f698ff5bfce755abad549d18eb3555a371bcd90224a9596afa",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          }
+        },
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "exists",
+              "natspec": "",
+              "range": {
+                "byteLength": 11,
+                "byteStart": 554,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L18",
+                "lineEnd": 18,
+                "lineStart": 18,
+                "snippetSha256": "sha256:041ce23d54f8b35f170b82ee9449e0912fe43a77cf4182d478591f51ef1fb39d",
+                "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+              },
+              "type": "bool",
+              "typeString": "bool"
+            },
+            {
+              "index": 1,
+              "name": "scope",
+              "natspec": "",
+              "range": {
+                "byteLength": 11,
+                "byteStart": 575,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L19",
+                "lineEnd": 19,
+                "lineStart": 19,
+                "snippetSha256": "sha256:8996799be137cbd058a140ef4030cfc47b2dfb85fd6b4e57f6638c00f8b7ebe9",
+                "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+              },
+              "type": "uint8",
+              "typeString": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "scopeId",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 596,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L20",
+                "lineEnd": 20,
+                "lineStart": 20,
+                "snippetSha256": "sha256:909b3661a2931cb1eabf67613b7609a4ee924e71f1d133b4b86c9ceb52c14ee6",
+                "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "assignmentType",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 621,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L21",
+                "lineEnd": 21,
+                "lineStart": 21,
+                "snippetSha256": "sha256:f5476c853143235f90e2d934d9030ddc4a1f724379cfb8dddc0ce67958d91a3f",
+                "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+              },
+              "type": "uint8",
+              "typeString": "uint8"
+            },
+            {
+              "index": 4,
+              "name": "profileId",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 651,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L22",
+                "lineEnd": 22,
+                "lineStart": 22,
+                "snippetSha256": "sha256:9f154ecbe289dfcbcd7915cdb1b76db2162efe110fe1998098198b6d406c4e34",
+                "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "templateId",
+              "natspec": "",
+              "range": {
+                "byteLength": 18,
+                "byteStart": 678,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L23",
+                "lineEnd": 23,
+                "lineStart": 23,
+                "snippetSha256": "sha256:4bb94f67985b3b2e43836e4a38e7d25ed4e6255253e58d6c6dab59bd1819b683",
+                "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 6,
+              "name": "policyHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 18,
+                "byteStart": 706,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L24",
+                "lineEnd": 24,
+                "lineStart": 24,
+                "snippetSha256": "sha256:6771d08a5b2928cbb704032e4b8859546407990ce67e70e7a054aac21fa22f31",
+                "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 7,
+              "name": "assignmentHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 22,
+                "byteStart": 734,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L25",
+                "lineEnd": 25,
+                "lineStart": 25,
+                "snippetSha256": "sha256:1da723630c9ccd3822843065e70f4812bb7c634ade6cf1f57ba60be20adaffa9",
+                "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 8,
+              "name": "frozen",
+              "natspec": "",
+              "range": {
+                "byteLength": 11,
+                "byteStart": 766,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L26",
+                "lineEnd": 26,
+                "lineStart": 26,
+                "snippetSha256": "sha256:1321df7d339f5c5dafadcb099432cd75578443145508da07c465ae70792dbe78",
+                "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+              },
+              "type": "bool",
+              "typeString": "bool"
+            }
+          ],
+          "name": "ResolvedPrimaryAssignment",
+          "natspec": "",
+          "range": {
+            "byteLength": 273,
+            "byteStart": 511,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L17-L27",
+            "lineEnd": 27,
+            "lineStart": 17,
+            "snippetSha256": "sha256:5788c2d6146fd53cf84f9eaf9fc8a17023675737851f23144c4c7f37eca0f1d0",
+            "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver",
+    "inheritance": [],
+    "interface": {
+      "abiSha256": "sha256:bac7233f0764d26ab7bd20e5a0c49941b90823658016ebcd434fcb7119b30032",
+      "interfaceId": "0x3503c22e",
+      "interfaceIdSource": "selector_xor",
+      "published": true
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1SZXZlbnVlUmVzb2x2ZXIuc29sOklTdHJlYW1SZXZlbnVlUmVzb2x2ZXI",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IStreamRevenueResolver.sol:IStreamRevenueResolver"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "published_interface"
+    },
+    "name": "IStreamRevenueResolver",
+    "natspec": "@notice Interface for outside-Core primary revenue assignment resolution.",
+    "range": {
+      "byteLength": 7668,
+      "byteStart": 172,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamRevenueResolver.sol#L7-L184",
+      "lineEnd": 184,
+      "lineStart": 7,
+      "snippetSha256": "sha256:977c26dba5001fcd983d4754325667613463d6d51e95e75f934895d62835ad65",
+      "sourceSha256": "sha256:acb12854cc86088015dbe6be0d8ea667bf6368fcb5d944834cd8157e8be94ce1"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IStreamRevenueResolver.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

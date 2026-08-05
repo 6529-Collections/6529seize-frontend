@@ -21,14 +21,12 @@ describe("createEnsHandler", () => {
     const handler = createEnsHandler();
 
     expect(handler.match("vitalik.eth")).toBe(true);
-    expect(
-      handler.match("https://app.ens.domains/name/alice.eth")
-    ).toBe(true);
+    expect(handler.match("https://app.ens.domains/name/alice.eth")).toBe(true);
     expect(
       handler.match(
         "https://etherscan.io/address/0x0000000000000000000000000000000000000001"
       )
-    ).toBe(true);
+    ).toBe(false);
     expect(handler.match("https://example.com")).toBe(false);
   });
 

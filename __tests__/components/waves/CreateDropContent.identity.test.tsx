@@ -124,6 +124,10 @@ jest.mock("@/components/waves/CreateDropInput", () => {
       const typedContentCountRef = ReactLib.useRef(0);
       ReactLib.useImperativeHandle(ref, () => ({
         clearEditorState: () => undefined,
+        expandMentionAliases: async () => ({
+          completed: true,
+          editorState: undefined,
+        }),
         focus: () => undefined,
       }));
 
@@ -174,6 +178,45 @@ jest.mock(
   "@/components/drops/create/lexical/utils/groupMentionDetection",
   () => ({
     getMentionedGroupsFromEditorState: jest.fn(() => []),
+  })
+);
+// This suite feeds a stub editor state, so the editor-derived mention reader is
+// stubbed alongside the group one. Its real behaviour is covered in
+// __tests__/components/drops/create/lexical/utils/userMentionDetection.test.ts.
+jest.mock(
+  "@/components/drops/create/lexical/utils/userMentionDetection",
+  () => ({
+    getMentionedUsersFromEditorState: jest.fn(() => []),
+    mergeMentionedUsers: jest.fn(
+      (editorMentions: unknown[], registryMentions: unknown[]) => [
+        ...registryMentions,
+        ...editorMentions,
+      ]
+    ),
+  })
+);
+jest.mock(
+  "@/components/drops/create/lexical/utils/nftReferenceDetection",
+  () => ({
+    getReferencedNftsFromEditorState: jest.fn(() => []),
+    mergeReferencedNfts: jest.fn(
+      (editorReferences: unknown[], registryReferences: unknown[]) => [
+        ...registryReferences,
+        ...editorReferences,
+      ]
+    ),
+  })
+);
+jest.mock(
+  "@/components/drops/create/lexical/utils/waveMentionDetection",
+  () => ({
+    getMentionedWavesFromEditorState: jest.fn(() => []),
+    mergeMentionedWaves: jest.fn(
+      (editorMentions: unknown[], registryMentions: unknown[]) => [
+        ...registryMentions,
+        ...editorMentions,
+      ]
+    ),
   })
 );
 jest.mock("@/components/waves/CreateDropContentRequirements", () => () => (

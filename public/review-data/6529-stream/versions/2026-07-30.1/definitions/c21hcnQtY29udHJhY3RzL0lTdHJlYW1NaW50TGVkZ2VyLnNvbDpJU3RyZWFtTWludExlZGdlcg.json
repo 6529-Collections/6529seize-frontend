@@ -1,0 +1,2903 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0x1fa74eff",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "authorizationId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "AuthorizationAlreadyConsumed",
+          "selector": "0x1fa74eff",
+          "signature": "AuthorizationAlreadyConsumed(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0xb9351ed6",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "valueKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "projectedValue",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "cap",
+              "type": "uint256"
+            }
+          ],
+          "name": "CounterCapExceeded",
+          "selector": "0xb9351ed6",
+          "signature": "CounterCapExceeded(bytes32,uint256,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0x73515794",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "counterIds",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "counterPolicies",
+              "type": "uint256"
+            }
+          ],
+          "name": "CounterPolicyLengthMismatch",
+          "selector": "0x73515794",
+          "signature": "CounterPolicyLengthMismatch(uint256,uint256)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0xfc27079f",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "CounterPolicyMismatch",
+          "selector": "0xfc27079f",
+          "signature": "CounterPolicyMismatch(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0x39974ca3",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "CounterPolicyNotRegistered",
+          "selector": "0x39974ca3",
+          "signature": "CounterPolicyNotRegistered(address,uint256,bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0x28b04095",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "suppliedValueKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "expectedValueKey",
+              "type": "bytes32"
+            }
+          ],
+          "name": "CounterValueKeyMismatch",
+          "selector": "0x28b04095",
+          "signature": "CounterValueKeyMismatch(bytes32,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0x3cc24c87",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "valueKey",
+              "type": "bytes32"
+            }
+          ],
+          "name": "CounterValueOverflow",
+          "selector": "0x3cc24c87",
+          "signature": "CounterValueOverflow(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0xcf64ab23",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "DuplicateCounterPolicy",
+          "selector": "0xcf64ab23",
+          "signature": "DuplicateCounterPolicy(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0xa5d90131",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [],
+          "name": "EmptyCounterConsumption",
+          "selector": "0xa5d90131",
+          "signature": "EmptyCounterConsumption()"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0x728f72d5",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "InvalidCounterPolicy",
+          "selector": "0x728f72d5",
+          "signature": "InvalidCounterPolicy(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0x4de4b4bf",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "writer",
+              "type": "address"
+            }
+          ],
+          "name": "InvalidLedgerWriter",
+          "selector": "0x4de4b4bf",
+          "signature": "InvalidLedgerWriter(address)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0xfc104ec9",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "InvalidPhasePolicy",
+          "selector": "0xfc104ec9",
+          "signature": "InvalidPhasePolicy(address,uint256,bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0x246e419a",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "nullifier",
+              "type": "bytes32"
+            }
+          ],
+          "name": "NullifiersUnsupported",
+          "selector": "0x246e419a",
+          "signature": "NullifiersUnsupported(bytes32)"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0xe44bbd7a",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "writer",
+              "type": "address"
+            }
+          ],
+          "name": "UnauthorizedLedgerWriter",
+          "selector": "0xe44bbd7a",
+          "signature": "UnauthorizedLedgerWriter(address)"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#event:MintLedgerAuthorizationConsumed(bytes32,bytes32,address)",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "authorizationId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            }
+          ],
+          "name": "MintLedgerAuthorizationConsumed",
+          "signature": "MintLedgerAuthorizationConsumed(bytes32,bytes32,address)",
+          "topic0": "0x170050316626fefe250858536af6af8753ebf37619b701c7338727074e34097c"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#event:MintLedgerCounterConsumed(bytes32,uint256,bytes32,address,bytes32,bytes32,uint64,uint64,uint64,bytes32)",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "valueKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "subjectKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "increment",
+              "type": "uint64"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "newValue",
+              "type": "uint64"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "cap",
+              "type": "uint64"
+            },
+            {
+              "index": 9,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "MintLedgerCounterConsumed",
+          "signature": "MintLedgerCounterConsumed(bytes32,uint256,bytes32,address,bytes32,bytes32,uint64,uint64,uint64,bytes32)",
+          "topic0": "0x16d3a734de15430b6ad9fd83e96b7c3cfba5273b1df717ec0d7c6a7f2e82c9d9"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#event:MintLedgerCounterConsumptionContext(bytes32,bytes32,bytes32,address,address,address,address,address,bytes32,bytes32)",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "valueKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "subjectKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "address",
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "address",
+              "name": "authorizer",
+              "type": "address"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "internalType": "address",
+              "name": "executor",
+              "type": "address"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "contextHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 9,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "resolutionHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "MintLedgerCounterConsumptionContext",
+          "signature": "MintLedgerCounterConsumptionContext(bytes32,bytes32,bytes32,address,address,address,address,address,bytes32,bytes32)",
+          "topic0": "0xa3049a575ab4fe3b222dfb963cea75bfa3e1801a4b40ad0d8d3a74d4f20a1fb1"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#event:MintLedgerCounterPolicyRegistered(address,uint256,bytes32,bytes32,uint8,uint8,uint64,uint64,bytes32,bytes32)",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "enum IStreamMintLedger.CounterCapMode",
+              "name": "capMode",
+              "type": "uint8"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "enum IStreamMintLedger.CounterDeltaMode",
+              "name": "deltaMode",
+              "type": "uint8"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "staticCap",
+              "type": "uint64"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "staticIncrement",
+              "type": "uint64"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "counterConfigHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 9,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "MintLedgerCounterPolicyRegistered",
+          "signature": "MintLedgerCounterPolicyRegistered(address,uint256,bytes32,bytes32,uint8,uint8,uint64,uint64,bytes32,bytes32)",
+          "topic0": "0x694c9293d1bd959f76c9e1b65a51ba1e6d29a3eb94adf848703760bbae6d1ff6"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#event:MintLedgerNullifierConsumed(bytes32,bytes32)",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "nullifier",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "MintLedgerNullifierConsumed",
+          "signature": "MintLedgerNullifierConsumed(bytes32,bytes32)",
+          "topic0": "0x8061ec1389e0afbacb674d33a8c93fbb747eaa1de355f10c9b8e42e8214ea8b3"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#event:MintLedgerPhasePolicyRegistered(address,uint256,bytes32,bytes32)",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "MintLedgerPhasePolicyRegistered",
+          "signature": "MintLedgerPhasePolicyRegistered(address,uint256,bytes32,bytes32)",
+          "topic0": "0x6f41e2a9e986cff4c1e2f2cc6b6d88cc3eca296af684d42342ab2fa0e1e1ae45"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#event:MintLedgerWriterUpdated(address,bool)",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "writer",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "internalType": "bool",
+              "name": "allowed",
+              "type": "bool"
+            }
+          ],
+          "name": "MintLedgerWriterUpdated",
+          "signature": "MintLedgerWriterUpdated(address,bool)",
+          "topic0": "0x88d85fc89c81edc05ac1e9204dc5a5a9b0ea1b7d9ca3baf010890ec51f5103f6"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0xa6ad4f24",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamMintLedger.CounterConsumption[]",
+              "name": "consumptions",
+              "type": "(bytes32,uint256,bytes32,bytes32,bytes32,address,address,address,address,uint64,uint64,bytes32,bytes32)[]"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "authorizationId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32[]",
+              "name": "nullifiers",
+              "type": "bytes32[]"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "consume",
+          "outputs": [],
+          "selector": "0xa6ad4f24",
+          "signature": "consume((bytes32,uint256,bytes32,bytes32,bytes32,address,address,address,address,uint64,uint64,bytes32,bytes32)[],bytes32,bytes32[],bytes32)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0x4c310e09",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "valueKey",
+              "type": "bytes32"
+            }
+          ],
+          "name": "counterValue",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "selector": "0x4c310e09",
+          "signature": "counterValue(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0x7d9d849b",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "internalType": "bytes32",
+              "name": "subjectKey",
+              "type": "bytes32"
+            }
+          ],
+          "name": "deriveCounterValueKey",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x7d9d849b",
+          "signature": "deriveCounterValueKey(address,uint256,bytes32,bytes32,bytes32)",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0x14335b8d",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "authorizationId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "isAuthorizationUsed",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x14335b8d",
+          "signature": "isAuthorizationUsed(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0x867137d3",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bytes32",
+              "name": "authorizationId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "isManagerAuthorizationUsed",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x867137d3",
+          "signature": "isManagerAuthorizationUsed(address,bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0x22dc7b4c",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "nullifier",
+              "type": "bytes32"
+            }
+          ],
+          "name": "isNullifierUsed",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x22dc7b4c",
+          "signature": "isNullifierUsed(bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0x35329e20",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [],
+          "name": "isStreamMintLedger",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x35329e20",
+          "signature": "isStreamMintLedger()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0xe05ac6da",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "writer",
+              "type": "address"
+            }
+          ],
+          "name": "ledgerWriter",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xe05ac6da",
+          "signature": "ledgerWriter(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0x82873943",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "internalType": "bytes32[]",
+              "name": "counterIds",
+              "type": "bytes32[]"
+            },
+            {
+              "index": 5,
+              "internalType": "struct IStreamMintLedger.LedgerCounterPolicy[]",
+              "name": "counterPolicies",
+              "type": "(bool,uint8,uint8,uint64,uint64,bytes32)[]"
+            }
+          ],
+          "name": "registerPhasePolicy",
+          "outputs": [],
+          "selector": "0x82873943",
+          "signature": "registerPhasePolicy(address,uint256,bytes32,bytes32,bytes32[],(bool,uint8,uint8,uint64,uint64,bytes32)[])",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0x93623d24",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "registeredCounterPolicy",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "struct IStreamMintLedger.LedgerCounterPolicy",
+              "name": "",
+              "type": "(bool,uint8,uint8,uint64,uint64,bytes32)"
+            }
+          ],
+          "selector": "0x93623d24",
+          "signature": "registeredCounterPolicy(address,uint256,bytes32,bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0x194dba81",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "registeredPhasePolicyHash",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x194dba81",
+          "signature": "registeredPhasePolicyHash(address,uint256,bytes32)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0x83e3452a",
+          "declaringDefinitionId": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "writer",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "bool",
+              "name": "allowed",
+              "type": "bool"
+            }
+          ],
+          "name": "setLedgerWriter",
+          "outputs": [],
+          "selector": "0x83e3452a",
+          "signature": "setLedgerWriter(address,bool)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "published_interface",
+    "classificationReason": "Listed in release-artifacts/contracts.json interfaces.",
+    "declarations": {
+      "enums": [
+        {
+          "memberDetails": [
+            {
+              "index": 0,
+              "name": "NONE",
+              "range": {
+                "byteLength": 4,
+                "byteStart": 262,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L8",
+                "lineEnd": 8,
+                "lineStart": 8,
+                "snippetSha256": "sha256:c627c09c14e58e44bc51622dac392958ec88244e414b508020634f53cfcd1e69",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              }
+            },
+            {
+              "index": 1,
+              "name": "STATIC",
+              "range": {
+                "byteLength": 6,
+                "byteStart": 276,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L9",
+                "lineEnd": 9,
+                "lineStart": 9,
+                "snippetSha256": "sha256:0e19f02ca15d6060d63dc1946cc784d739c69a4cc5e6ef266a50e3b58c673f35",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              }
+            },
+            {
+              "index": 2,
+              "name": "RESOLVER",
+              "range": {
+                "byteLength": 8,
+                "byteStart": 292,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L10",
+                "lineEnd": 10,
+                "lineStart": 10,
+                "snippetSha256": "sha256:cca1bbe796b5475a28926a78b14a1308b469e585f8f23d1f11176aadafd1f8f0",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              }
+            }
+          ],
+          "members": [
+            "NONE",
+            "STATIC",
+            "RESOLVER"
+          ],
+          "name": "CounterCapMode",
+          "natspec": "",
+          "range": {
+            "byteLength": 74,
+            "byteStart": 232,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L7-L11",
+            "lineEnd": 11,
+            "lineStart": 7,
+            "snippetSha256": "sha256:aa48ba7ad2dbbef174cd4ab77850531938f2078b749092692d2b0e77547638f1",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          }
+        },
+        {
+          "memberDetails": [
+            {
+              "index": 0,
+              "name": "STATIC",
+              "range": {
+                "byteLength": 6,
+                "byteStart": 413,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L15",
+                "lineEnd": 15,
+                "lineStart": 15,
+                "snippetSha256": "sha256:0e19f02ca15d6060d63dc1946cc784d739c69a4cc5e6ef266a50e3b58c673f35",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              }
+            },
+            {
+              "index": 1,
+              "name": "RESOLVER",
+              "range": {
+                "byteLength": 8,
+                "byteStart": 429,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L16",
+                "lineEnd": 16,
+                "lineStart": 16,
+                "snippetSha256": "sha256:cca1bbe796b5475a28926a78b14a1308b469e585f8f23d1f11176aadafd1f8f0",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              }
+            }
+          ],
+          "members": [
+            "STATIC",
+            "RESOLVER"
+          ],
+          "name": "CounterDeltaMode",
+          "natspec": "",
+          "range": {
+            "byteLength": 62,
+            "byteStart": 381,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L14-L17",
+            "lineEnd": 17,
+            "lineStart": 14,
+            "snippetSha256": "sha256:28b98bc3274f4cce9688f9215f2e1296c705d14b33dd0e110afc936185d140d9",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          }
+        }
+      ],
+      "errors": [
+        {
+          "astId": 14198,
+          "canonicalSignature": "UnauthorizedLedgerWriter(address)",
+          "displaySignature": "UnauthorizedLedgerWriter(address)",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0xe44bbd7a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "writer",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNlcnJvcjoweGU0NGJiZDdh",
+          "kind": "error",
+          "name": "UnauthorizedLedgerWriter",
+          "natspec": "@notice Reverts when a caller is not authorized to write ledger state.",
+          "range": {
+            "byteLength": 47,
+            "byteStart": 1286,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L47",
+            "lineEnd": 47,
+            "lineStart": 47,
+            "snippetSha256": "sha256:57b890fd073f7cde888145fd058e2566c4ca97e941200f3d826d7e4c49160f0b",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0xe44bbd7a"
+        },
+        {
+          "astId": 14203,
+          "canonicalSignature": "InvalidLedgerWriter(address)",
+          "displaySignature": "InvalidLedgerWriter(address)",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0x4de4b4bf",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "writer",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNlcnJvcjoweDRkZTRiNGJm",
+          "kind": "error",
+          "name": "InvalidLedgerWriter",
+          "natspec": "@notice Reverts when the owner tries to configure an invalid writer.",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 1415,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L49",
+            "lineEnd": 49,
+            "lineStart": 49,
+            "snippetSha256": "sha256:f390718b8c9b859d533be44efa89db5df8df1068eedd71336f6f1835d03a90eb",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0x4de4b4bf"
+        },
+        {
+          "astId": 14212,
+          "canonicalSignature": "InvalidPhasePolicy(address,uint256,bytes32)",
+          "displaySignature": "InvalidPhasePolicy(address,uint256,bytes32)",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0xfc104ec9",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "phaseId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNlcnJvcjoweGZjMTA0ZWM5",
+          "kind": "error",
+          "name": "InvalidPhasePolicy",
+          "natspec": "@notice Reverts when a phase policy registration or lookup is invalid.",
+          "range": {
+            "byteLength": 81,
+            "byteStart": 1541,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L51",
+            "lineEnd": 51,
+            "lineStart": 51,
+            "snippetSha256": "sha256:5fdefb39877e65d2693f588982c164624e247cc59d331d3ef81e682dd4a1e54e",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0xfc104ec9"
+        },
+        {
+          "astId": 14217,
+          "canonicalSignature": "InvalidCounterPolicy(bytes32)",
+          "displaySignature": "InvalidCounterPolicy(bytes32)",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0x728f72d5",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "counterId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNlcnJvcjoweDcyOGY3MmQ1",
+          "kind": "error",
+          "name": "InvalidCounterPolicy",
+          "natspec": "@notice Reverts when a counter policy is invalid or unsupported for launch.",
+          "range": {
+            "byteLength": 46,
+            "byteStart": 1711,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L53",
+            "lineEnd": 53,
+            "lineStart": 53,
+            "snippetSha256": "sha256:2f31c21b516b93cd10e0c60f1880fa8bbd97d6050b6134cf568abd219d14c7b0",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0x728f72d5"
+        },
+        {
+          "astId": 14222,
+          "canonicalSignature": "DuplicateCounterPolicy(bytes32)",
+          "displaySignature": "DuplicateCounterPolicy(bytes32)",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0xcf64ab23",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "counterId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNlcnJvcjoweGNmNjRhYjIz",
+          "kind": "error",
+          "name": "DuplicateCounterPolicy",
+          "natspec": "@notice Reverts when a phase policy repeats a counter ID.",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 1828,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L55",
+            "lineEnd": 55,
+            "lineStart": 55,
+            "snippetSha256": "sha256:9d43007fd3f3b3721424ff3bde1b3bb45f227cb82865df320db342274e7ec6ff",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0xcf64ab23"
+        },
+        {
+          "astId": 14229,
+          "canonicalSignature": "CounterPolicyLengthMismatch(uint256,uint256)",
+          "displaySignature": "CounterPolicyLengthMismatch(uint256,uint256)",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0x73515794",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "counterIds",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "counterPolicies",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNlcnJvcjoweDczNTE1Nzk0",
+          "kind": "error",
+          "name": "CounterPolicyLengthMismatch",
+          "natspec": "@notice Reverts when counter ID and counter policy arrays differ in length.",
+          "range": {
+            "byteLength": 79,
+            "byteStart": 1965,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L57",
+            "lineEnd": 57,
+            "lineStart": 57,
+            "snippetSha256": "sha256:3e0e5adaf019d8d88a3ef65d73b199c91e600994bfe8ef1d20ccd29189fda401",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0x73515794"
+        },
+        {
+          "astId": 14232,
+          "canonicalSignature": "EmptyCounterConsumption()",
+          "displaySignature": "EmptyCounterConsumption()",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0xa5d90131",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNlcnJvcjoweGE1ZDkwMTMx",
+          "kind": "error",
+          "name": "EmptyCounterConsumption",
+          "natspec": "@notice Reverts when callers try to consume no counters.",
+          "range": {
+            "byteLength": 32,
+            "byteStart": 2114,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L59",
+            "lineEnd": 59,
+            "lineStart": 59,
+            "snippetSha256": "sha256:bd1106af309dbce50cc53fcaac2e3b50151c3080109eb094ade722bcb4bba2af",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0xa5d90131"
+        },
+        {
+          "astId": 14243,
+          "canonicalSignature": "CounterPolicyNotRegistered(address,uint256,bytes32,bytes32)",
+          "displaySignature": "CounterPolicyNotRegistered(address,uint256,bytes32,bytes32)",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0x39974ca3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "counterId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNlcnJvcjoweDM5OTc0Y2Ez",
+          "kind": "error",
+          "name": "CounterPolicyNotRegistered",
+          "natspec": "@notice Reverts when a consumed counter has no registered policy.",
+          "range": {
+            "byteLength": 122,
+            "byteStart": 2225,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L61-L63",
+            "lineEnd": 63,
+            "lineStart": 61,
+            "snippetSha256": "sha256:e38b90c1cbcd2e02cd3be89c1526f22adfa555b5bd10fb2b60cc3a58e59c547f",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0x39974ca3"
+        },
+        {
+          "astId": 14248,
+          "canonicalSignature": "CounterPolicyMismatch(bytes32)",
+          "displaySignature": "CounterPolicyMismatch(bytes32)",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0xfc27079f",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "counterId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNlcnJvcjoweGZjMjcwNzlm",
+          "kind": "error",
+          "name": "CounterPolicyMismatch",
+          "natspec": "@notice Reverts when a consumed counter does not match its registered policy.",
+          "range": {
+            "byteLength": 47,
+            "byteStart": 2438,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L65",
+            "lineEnd": 65,
+            "lineStart": 65,
+            "snippetSha256": "sha256:ffa60f2d5afbe3a91f34afc64052a354c2067a4e029598f4fc9a241cf05b4811",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0xfc27079f"
+        },
+        {
+          "astId": 14255,
+          "canonicalSignature": "CounterValueKeyMismatch(bytes32,bytes32)",
+          "displaySignature": "CounterValueKeyMismatch(bytes32,bytes32)",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0x28b04095",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "suppliedValueKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "expectedValueKey",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNlcnJvcjoweDI4YjA0MDk1",
+          "kind": "error",
+          "name": "CounterValueKeyMismatch",
+          "natspec": "@notice Reverts when a supplied value key does not match the ledger key derivation.",
+          "range": {
+            "byteLength": 82,
+            "byteStart": 2582,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L67",
+            "lineEnd": 67,
+            "lineStart": 67,
+            "snippetSha256": "sha256:b66bc9db5c6cde1bca10b7791f2016fac4c7686cf628f0d1c93924b7fb14fded",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0x28b04095"
+        },
+        {
+          "astId": 14264,
+          "canonicalSignature": "CounterCapExceeded(bytes32,uint256,uint256)",
+          "displaySignature": "CounterCapExceeded(bytes32,uint256,uint256)",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0xb9351ed6",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "valueKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "projectedValue",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "cap",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNlcnJvcjoweGI5MzUxZWQ2",
+          "kind": "error",
+          "name": "CounterCapExceeded",
+          "natspec": "@notice Reverts when a static counter increment would exceed its cap.",
+          "range": {
+            "byteLength": 80,
+            "byteStart": 2747,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L69",
+            "lineEnd": 69,
+            "lineStart": 69,
+            "snippetSha256": "sha256:dce8229e3f2f8dbf55a49206c86a8dc790a016a79897750e8ebe0cb8ee541a85",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0xb9351ed6"
+        },
+        {
+          "astId": 14269,
+          "canonicalSignature": "CounterValueOverflow(bytes32)",
+          "displaySignature": "CounterValueOverflow(bytes32)",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0x3cc24c87",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "valueKey",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNlcnJvcjoweDNjYzI0Yzg3",
+          "kind": "error",
+          "name": "CounterValueOverflow",
+          "natspec": "@notice Reverts when a counter increment would overflow uint64 storage.",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 2912,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L71",
+            "lineEnd": 71,
+            "lineStart": 71,
+            "snippetSha256": "sha256:867207c76970956169b88a000296c8edbdf34723f260337c95e827d473570cf3",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0x3cc24c87"
+        },
+        {
+          "astId": 14274,
+          "canonicalSignature": "AuthorizationAlreadyConsumed(bytes32)",
+          "displaySignature": "AuthorizationAlreadyConsumed(bytes32)",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0x1fa74eff",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authorizationId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNlcnJvcjoweDFmYTc0ZWZm",
+          "kind": "error",
+          "name": "AuthorizationAlreadyConsumed",
+          "natspec": "@notice Reverts when an authorization ID has already been consumed.",
+          "range": {
+            "byteLength": 60,
+            "byteStart": 3038,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L73",
+            "lineEnd": 73,
+            "lineStart": 73,
+            "snippetSha256": "sha256:3070b3d5388837fec6e05d671bdf8a8e5497e7be1bbe2c3dec0387204a35cc9d",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0x1fa74eff"
+        },
+        {
+          "astId": 14279,
+          "canonicalSignature": "NullifiersUnsupported(bytes32)",
+          "displaySignature": "NullifiersUnsupported(bytes32)",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#error:0x246e419a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "nullifier",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNlcnJvcjoweDI0NmU0MTlh",
+          "kind": "error",
+          "name": "NullifiersUnsupported",
+          "natspec": "@notice Reverts when callers attempt to use unsupported nullifier writes.",
+          "range": {
+            "byteLength": 47,
+            "byteStart": 3185,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L75",
+            "lineEnd": 75,
+            "lineStart": 75,
+            "snippetSha256": "sha256:8e5f3a4f4b5c1c04560856df3afd3b368d6f7aa3996541ec98733a5afdf41558",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0x246e419a"
+        }
+      ],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 14286,
+          "canonicalSignature": "MintLedgerWriterUpdated(address,bool)",
+          "displaySignature": "MintLedgerWriterUpdated(address,bool)",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#event:MintLedgerWriterUpdated(address,bool)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "writer",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "name": "allowed",
+              "type": "bool"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNldmVudDpNaW50TGVkZ2VyV3JpdGVyVXBkYXRlZChhZGRyZXNzLGJvb2wp",
+          "kind": "event",
+          "name": "MintLedgerWriterUpdated",
+          "natspec": "@notice Emitted when the owner enables or disables a ledger writer.",
+          "range": {
+            "byteLength": 68,
+            "byteStart": 3314,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L78",
+            "lineEnd": 78,
+            "lineStart": 78,
+            "snippetSha256": "sha256:b66b7b431445bbd886c04259bf26d961cf993520242f89ca1a2c8eb5b7e958f8",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "topic0": "0x88d85fc89c81edc05ac1e9204dc5a5a9b0ea1b7d9ca3baf010890ec51f5103f6"
+        },
+        {
+          "anonymous": false,
+          "astId": 14297,
+          "canonicalSignature": "MintLedgerPhasePolicyRegistered(address,uint256,bytes32,bytes32)",
+          "displaySignature": "MintLedgerPhasePolicyRegistered(address,uint256,bytes32,bytes32)",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#event:MintLedgerPhasePolicyRegistered(address,uint256,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNldmVudDpNaW50TGVkZ2VyUGhhc2VQb2xpY3lSZWdpc3RlcmVkKGFkZHJlc3MsdWludDI1NixieXRlczMyLGJ5dGVzMzIp",
+          "kind": "event",
+          "name": "MintLedgerPhasePolicyRegistered",
+          "natspec": "@notice Emitted when a manager registers a phase policy hash.",
+          "range": {
+            "byteLength": 176,
+            "byteStart": 3457,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L80-L85",
+            "lineEnd": 85,
+            "lineStart": 80,
+            "snippetSha256": "sha256:53012a6cef752005b06365616fcb522943950212f8b998b5b33433df55fa4614",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "topic0": "0x6f41e2a9e986cff4c1e2f2cc6b6d88cc3eca296af684d42342ab2fa0e1e1ae45"
+        },
+        {
+          "anonymous": false,
+          "astId": 14322,
+          "canonicalSignature": "MintLedgerCounterPolicyRegistered(address,uint256,bytes32,bytes32,uint8,uint8,uint64,uint64,bytes32,bytes32)",
+          "displaySignature": "MintLedgerCounterPolicyRegistered(address,uint256,bytes32,bytes32,CounterCapMode,CounterDeltaMode,uint64,uint64,bytes32,bytes32)",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#event:MintLedgerCounterPolicyRegistered(address,uint256,bytes32,bytes32,uint8,uint8,uint64,uint64,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "capMode",
+              "type": "CounterCapMode"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "deltaMode",
+              "type": "CounterDeltaMode"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "name": "staticCap",
+              "type": "uint64"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "name": "staticIncrement",
+              "type": "uint64"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "name": "counterConfigHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 9,
+              "indexed": false,
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNldmVudDpNaW50TGVkZ2VyQ291bnRlclBvbGljeVJlZ2lzdGVyZWQoYWRkcmVzcyx1aW50MjU2LGJ5dGVzMzIsYnl0ZXMzMix1aW50OCx1aW50OCx1aW50NjQsdWludDY0LGJ5dGVzMzIsYnl0ZXMzMik",
+          "kind": "event",
+          "name": "MintLedgerCounterPolicyRegistered",
+          "natspec": "@notice Emitted for each counter policy registered under a phase policy.",
+          "range": {
+            "byteLength": 366,
+            "byteStart": 3719,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L87-L98",
+            "lineEnd": 98,
+            "lineStart": 87,
+            "snippetSha256": "sha256:530d11c4b1d0c6b1826183c3eb66e16837374c153cf30d679edf85b2870e0846",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "topic0": "0x694c9293d1bd959f76c9e1b65a51ba1e6d29a3eb94adf848703760bbae6d1ff6"
+        },
+        {
+          "anonymous": false,
+          "astId": 14345,
+          "canonicalSignature": "MintLedgerCounterConsumed(bytes32,uint256,bytes32,address,bytes32,bytes32,uint64,uint64,uint64,bytes32)",
+          "displaySignature": "MintLedgerCounterConsumed(bytes32,uint256,bytes32,address,bytes32,bytes32,uint64,uint64,uint64,bytes32)",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#event:MintLedgerCounterConsumed(bytes32,uint256,bytes32,address,bytes32,bytes32,uint64,uint64,uint64,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "valueKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "subjectKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "name": "increment",
+              "type": "uint64"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "name": "newValue",
+              "type": "uint64"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "name": "cap",
+              "type": "uint64"
+            },
+            {
+              "index": 9,
+              "indexed": false,
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNldmVudDpNaW50TGVkZ2VyQ291bnRlckNvbnN1bWVkKGJ5dGVzMzIsdWludDI1NixieXRlczMyLGFkZHJlc3MsYnl0ZXMzMixieXRlczMyLHVpbnQ2NCx1aW50NjQsdWludDY0LGJ5dGVzMzIp",
+          "kind": "event",
+          "name": "MintLedgerCounterConsumed",
+          "natspec": "@notice Emitted when a registered counter value is incremented.",
+          "range": {
+            "byteLength": 322,
+            "byteStart": 4162,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L100-L111",
+            "lineEnd": 111,
+            "lineStart": 100,
+            "snippetSha256": "sha256:20f4bc607856364d09638337b550be083d32b00aae721394a7749e0d33db3330",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "topic0": "0x16d3a734de15430b6ad9fd83e96b7c3cfba5273b1df717ec0d7c6a7f2e82c9d9"
+        },
+        {
+          "anonymous": false,
+          "astId": 14368,
+          "canonicalSignature": "MintLedgerCounterConsumptionContext(bytes32,bytes32,bytes32,address,address,address,address,address,bytes32,bytes32)",
+          "displaySignature": "MintLedgerCounterConsumptionContext(bytes32,bytes32,bytes32,address,address,address,address,address,bytes32,bytes32)",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#event:MintLedgerCounterConsumptionContext(bytes32,bytes32,bytes32,address,address,address,address,address,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "valueKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "subjectKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "name": "authorizer",
+              "type": "address"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "name": "executor",
+              "type": "address"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "name": "contextHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 9,
+              "indexed": false,
+              "name": "resolutionHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNldmVudDpNaW50TGVkZ2VyQ291bnRlckNvbnN1bXB0aW9uQ29udGV4dChieXRlczMyLGJ5dGVzMzIsYnl0ZXMzMixhZGRyZXNzLGFkZHJlc3MsYWRkcmVzcyxhZGRyZXNzLGFkZHJlc3MsYnl0ZXMzMixieXRlczMyKQ",
+          "kind": "event",
+          "name": "MintLedgerCounterConsumptionContext",
+          "natspec": "@notice Emitted with non-indexed context for reconstructing a counter increment.",
+          "range": {
+            "byteLength": 343,
+            "byteStart": 4578,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L113-L124",
+            "lineEnd": 124,
+            "lineStart": 113,
+            "snippetSha256": "sha256:7c96cfadce2a154cd3b0b95bbde1857557c9ee193fa9bc5311b600c989646aab",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "topic0": "0xa3049a575ab4fe3b222dfb963cea75bfa3e1801a4b40ad0d8d3a74d4f20a1fb1"
+        },
+        {
+          "anonymous": false,
+          "astId": 14377,
+          "canonicalSignature": "MintLedgerAuthorizationConsumed(bytes32,bytes32,address)",
+          "displaySignature": "MintLedgerAuthorizationConsumed(bytes32,bytes32,address)",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#event:MintLedgerAuthorizationConsumed(bytes32,bytes32,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "authorizationId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "policyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "manager",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNldmVudDpNaW50TGVkZ2VyQXV0aG9yaXphdGlvbkNvbnN1bWVkKGJ5dGVzMzIsYnl0ZXMzMixhZGRyZXNzKQ",
+          "kind": "event",
+          "name": "MintLedgerAuthorizationConsumed",
+          "natspec": "@notice Emitted when an authorization ID is consumed.",
+          "range": {
+            "byteLength": 138,
+            "byteStart": 4988,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L126-L128",
+            "lineEnd": 128,
+            "lineStart": 126,
+            "snippetSha256": "sha256:8b5d705c76e66c4e74a501afcf5be1ae05a32106a8d7bcaebc03ebf63ed460c8",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "topic0": "0x170050316626fefe250858536af6af8753ebf37619b701c7338727074e34097c"
+        },
+        {
+          "anonymous": false,
+          "astId": 14384,
+          "canonicalSignature": "MintLedgerNullifierConsumed(bytes32,bytes32)",
+          "displaySignature": "MintLedgerNullifierConsumed(bytes32,bytes32)",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#event:MintLedgerNullifierConsumed(bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "nullifier",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNldmVudDpNaW50TGVkZ2VyTnVsbGlmaWVyQ29uc3VtZWQoYnl0ZXMzMixieXRlczMyKQ",
+          "kind": "event",
+          "name": "MintLedgerNullifierConsumed",
+          "natspec": "@notice Reserved for future nullifier-supporting ledger implementations.",
+          "range": {
+            "byteLength": 89,
+            "byteStart": 5212,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L130",
+            "lineEnd": 130,
+            "lineStart": 130,
+            "snippetSha256": "sha256:27351edb72277a0fdf224ec6117b357612f52c71bf7c1f5f044e614af0151da0",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "topic0": "0x8061ec1389e0afbacb674d33a8c93fbb747eaa1de355f10c9b8e42e8214ea8b3"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "isStreamMintLedger()",
+          "displaySignature": "isStreamMintLedger()",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0x35329e20",
+          "inputs": [],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNmdW5jdGlvbjoweDM1MzI5ZTIw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isStreamMintLedger",
+          "natspec": "@notice Returns true for deployment validation.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 59,
+            "byteStart": 5363,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L133",
+            "lineEnd": 133,
+            "lineStart": 133,
+            "snippetSha256": "sha256:9a8d8d8d022fe318ea1d5b1c791ef7b4ba9fc4c7b956ad1cdecbfeed9aa1a2a6",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0x35329e20",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setLedgerWriter(address,bool)",
+          "displaySignature": "setLedgerWriter(address,bool)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0x83e3452a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "writer",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "allowed",
+              "type": "bool"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNmdW5jdGlvbjoweDgzZTM0NTJh",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setLedgerWriter",
+          "natspec": "@notice Enables or disables a deployed manager contract as an authorized ledger writer.",
+          "outputs": [],
+          "range": {
+            "byteLength": 64,
+            "byteStart": 5524,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L136",
+            "lineEnd": 136,
+            "lineStart": 136,
+            "snippetSha256": "sha256:f439ff81953afe967084f00f67b3e43e7b734b456f95420a25aa77933a806e1c",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0x83e3452a",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "ledgerWriter(address)",
+          "displaySignature": "ledgerWriter(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0xe05ac6da",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "writer",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNmdW5jdGlvbjoweGUwNWFjNmRh",
+          "kind": "function",
+          "modifiers": [],
+          "name": "ledgerWriter",
+          "natspec": "@notice Returns whether an address may register and consume ledger state.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 67,
+            "byteStart": 5676,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L139",
+            "lineEnd": 139,
+            "lineStart": 139,
+            "snippetSha256": "sha256:fbace832546164e0af3879bfc47064a089c61eae9e05dbd9dba5c002df8c9de3",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0xe05ac6da",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "registerPhasePolicy(address,uint256,bytes32,bytes32,bytes32[],(bool,uint8,uint8,uint64,uint64,bytes32)[])",
+          "displaySignature": "registerPhasePolicy(address,uint256,bytes32,bytes32,bytes32[],LedgerCounterPolicy[])",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0x82873943",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "policyHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "counterIds",
+              "storageLocation": "calldata",
+              "type": "bytes32[]"
+            },
+            {
+              "index": 5,
+              "name": "counterPolicies",
+              "storageLocation": "calldata",
+              "type": "LedgerCounterPolicy[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNmdW5jdGlvbjoweDgyODczOTQz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "registerPhasePolicy",
+          "natspec": "@notice Registers one launch-static phase policy for the calling manager.",
+          "outputs": [],
+          "range": {
+            "byteLength": 247,
+            "byteStart": 5831,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L142-L149",
+            "lineEnd": 149,
+            "lineStart": 142,
+            "snippetSha256": "sha256:435d92f44373b40159cbd68439b5ab7ed4035c2e297804feab1f33b8e0aa38d7",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0x82873943",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "consume((bytes32,uint256,bytes32,bytes32,bytes32,address,address,address,address,uint64,uint64,bytes32,bytes32)[],bytes32,bytes32[],bytes32)",
+          "displaySignature": "consume(CounterConsumption[],bytes32,bytes32[],bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0xa6ad4f24",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "consumptions",
+              "storageLocation": "calldata",
+              "type": "CounterConsumption[]"
+            },
+            {
+              "index": 1,
+              "name": "authorizationId",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "nullifiers",
+              "storageLocation": "calldata",
+              "type": "bytes32[]"
+            },
+            {
+              "index": 3,
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNmdW5jdGlvbjoweGE2YWQ0ZjI0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "consume",
+          "natspec": "@notice Consumes static counter increments and an optional authorization ID.",
+          "outputs": [],
+          "range": {
+            "byteLength": 184,
+            "byteStart": 6169,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L152-L157",
+            "lineEnd": 157,
+            "lineStart": 152,
+            "snippetSha256": "sha256:3116be9010164366a0c5c25e4b4f7ddac9f665617a21c5844f31c0348bb0f0f2",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0xa6ad4f24",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "registeredPhasePolicyHash(address,uint256,bytes32)",
+          "displaySignature": "registeredPhasePolicyHash(address,uint256,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0x194dba81",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "phaseId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNmdW5jdGlvbjoweDE5NGRiYTgx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "registeredPhasePolicyHash",
+          "natspec": "@notice Returns the registered policy hash for a manager phase.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 147,
+            "byteStart": 6431,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L160-L163",
+            "lineEnd": 163,
+            "lineStart": 160,
+            "snippetSha256": "sha256:adf6f545fd7526c775c9f9386ae5c8fb0d8bbc5ae37a9a8f11967cd5f798def0",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0x194dba81",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "registeredCounterPolicy(address,uint256,bytes32,bytes32)",
+          "displaySignature": "registeredCounterPolicy(address,uint256,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0x93623d24",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "counterId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNmdW5jdGlvbjoweDkzNjIzZDI0",
+          "kind": "function",
+          "modifiers": [],
+          "name": "registeredCounterPolicy",
+          "natspec": "@notice Returns the registered static policy for one manager phase counter.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "LedgerCounterPolicy"
+            }
+          ],
+          "range": {
+            "byteLength": 197,
+            "byteStart": 6668,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L166-L171",
+            "lineEnd": 171,
+            "lineStart": 166,
+            "snippetSha256": "sha256:ce365737ecd84b68da935be16215413f9ad8ebb77d35f19014ee6e3308127d39",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0x93623d24",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "counterValue(bytes32)",
+          "displaySignature": "counterValue(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0x4c310e09",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "valueKey",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNmdW5jdGlvbjoweDRjMzEwZTA5",
+          "kind": "function",
+          "modifiers": [],
+          "name": "counterValue",
+          "natspec": "@notice Returns the durable uint64 value for one ledger counter key.\n @dev Counter values are not reset by phase policy re-registration.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "range": {
+            "byteLength": 71,
+            "byteStart": 7023,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L175",
+            "lineEnd": 175,
+            "lineStart": 175,
+            "snippetSha256": "sha256:956a4c2dd205c011a19816558c67087c6acabca765c6b4475f117ff66118a5bc",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0x4c310e09",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "deriveCounterValueKey(address,uint256,bytes32,bytes32,bytes32)",
+          "displaySignature": "deriveCounterValueKey(address,uint256,bytes32,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0x7d9d849b",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "subjectKey",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNmdW5jdGlvbjoweDdkOWQ4NDli",
+          "kind": "function",
+          "modifiers": [],
+          "name": "deriveCounterValueKey",
+          "natspec": "@notice Derives the canonical value key for a manager counter subject.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 204,
+            "byteStart": 7179,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L178-L184",
+            "lineEnd": 184,
+            "lineStart": 178,
+            "snippetSha256": "sha256:543b9fbc57da419eeacc232480c0e1bebba4d8fd8747dd688be3074fec3c0c96",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0x7d9d849b",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isAuthorizationUsed(bytes32)",
+          "displaySignature": "isAuthorizationUsed(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0x14335b8d",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "authorizationId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNmdW5jdGlvbjoweDE0MzM1Yjhk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isAuthorizationUsed",
+          "natspec": "@notice Returns whether the caller has already consumed an authorization ID.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 83,
+            "byteStart": 7474,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L187",
+            "lineEnd": 187,
+            "lineStart": 187,
+            "snippetSha256": "sha256:3a14856ad2ce4c32a111061b23e5bb42a0214dae727e379f7b75504e718b03a5",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0x14335b8d",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isManagerAuthorizationUsed(address,bytes32)",
+          "displaySignature": "isManagerAuthorizationUsed(address,bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0x867137d3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "authorizationId",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNmdW5jdGlvbjoweDg2NzEzN2Qz",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isManagerAuthorizationUsed",
+          "natspec": "@notice Returns whether a manager has already consumed an authorization ID.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 131,
+            "byteStart": 7647,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L190-L193",
+            "lineEnd": 193,
+            "lineStart": 190,
+            "snippetSha256": "sha256:add7c83a991de4a6fe50cd4d1b1ad96e9e9eb0e26292697e2aef3c572552eb68",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0x867137d3",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "isNullifierUsed(bytes32)",
+          "displaySignature": "isNullifierUsed(bytes32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger#function:0x22dc7b4c",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "nullifier",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlciNmdW5jdGlvbjoweDIyZGM3YjRj",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isNullifierUsed",
+          "natspec": "@notice Returns false until a future nullifier-supporting implementation is accepted.",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 73,
+            "byteStart": 7878,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L196",
+            "lineEnd": 196,
+            "lineStart": 196,
+            "snippetSha256": "sha256:a607ed298db20b8d7343504214603a83b232f2d39879212db978db0c0d108a6b",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          },
+          "selector": "0x22dc7b4c",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "enabled",
+              "natspec": "",
+              "range": {
+                "byteLength": 12,
+                "byteStart": 551,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L21",
+                "lineEnd": 21,
+                "lineStart": 21,
+                "snippetSha256": "sha256:615fa9e7e391617ec09b175769dd2e411df843553b10c24c0eae68f96fbaf462",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              },
+              "type": "bool",
+              "typeString": "bool"
+            },
+            {
+              "index": 1,
+              "name": "capMode",
+              "natspec": "",
+              "range": {
+                "byteLength": 22,
+                "byteStart": 573,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L22",
+                "lineEnd": 22,
+                "lineStart": 22,
+                "snippetSha256": "sha256:88733f7b83ad07bc64b2adedf427c377f23a628359248ab14404b6d96ad2ddf1",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              },
+              "type": "CounterCapMode",
+              "typeString": "enum IStreamMintLedger.CounterCapMode"
+            },
+            {
+              "index": 2,
+              "name": "deltaMode",
+              "natspec": "",
+              "range": {
+                "byteLength": 26,
+                "byteStart": 605,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L23",
+                "lineEnd": 23,
+                "lineStart": 23,
+                "snippetSha256": "sha256:563fd6a53a9d02ba29beee059b26d3dfead283b78c64722982934c5702defb94",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              },
+              "type": "CounterDeltaMode",
+              "typeString": "enum IStreamMintLedger.CounterDeltaMode"
+            },
+            {
+              "index": 3,
+              "name": "staticCap",
+              "natspec": "",
+              "range": {
+                "byteLength": 16,
+                "byteStart": 641,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L24",
+                "lineEnd": 24,
+                "lineStart": 24,
+                "snippetSha256": "sha256:f19cb6532ff58e32f1ad177e9b6891c2c9c5f50745584bfc1637914e17157ad7",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              },
+              "type": "uint64",
+              "typeString": "uint64"
+            },
+            {
+              "index": 4,
+              "name": "staticIncrement",
+              "natspec": "",
+              "range": {
+                "byteLength": 22,
+                "byteStart": 667,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L25",
+                "lineEnd": 25,
+                "lineStart": 25,
+                "snippetSha256": "sha256:e187621144268b35122db4eb5f6ca5fd0fa02649db2c2ff714454ea82fea3971",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              },
+              "type": "uint64",
+              "typeString": "uint64"
+            },
+            {
+              "index": 5,
+              "name": "counterConfigHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 25,
+                "byteStart": 699,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L26",
+                "lineEnd": 26,
+                "lineStart": 26,
+                "snippetSha256": "sha256:367856afc0cc7a9767416af90a04edefe140e699eecdedfd5b470becbcdd2056",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            }
+          ],
+          "name": "LedgerCounterPolicy",
+          "natspec": "",
+          "range": {
+            "byteLength": 217,
+            "byteStart": 514,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L20-L27",
+            "lineEnd": 27,
+            "lineStart": 20,
+            "snippetSha256": "sha256:240ea81ae5890ab6346df1e813d22895d125024424d3a6d2730fc45b8d12b50e",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          }
+        },
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "valueKey",
+              "natspec": "",
+              "range": {
+                "byteLength": 16,
+                "byteStart": 857,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L31",
+                "lineEnd": 31,
+                "lineStart": 31,
+                "snippetSha256": "sha256:8f439932b7c9a790495695b8bface6cab44a347eb3d0c99a7cf5accef7fabe85",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "natspec": "",
+              "range": {
+                "byteLength": 20,
+                "byteStart": 883,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L32",
+                "lineEnd": 32,
+                "lineStart": 32,
+                "snippetSha256": "sha256:59d930bd0f2dfed41bacd10f1ff469fcacef2b565f94ee3556e462d42461f316",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              },
+              "type": "uint256",
+              "typeString": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "phaseId",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 913,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L33",
+                "lineEnd": 33,
+                "lineStart": 33,
+                "snippetSha256": "sha256:3978b5acb6899597c4a6f59b9f64917317d63766942cfcb68a340a1ce6c0586d",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "counterId",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 938,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L34",
+                "lineEnd": 34,
+                "lineStart": 34,
+                "snippetSha256": "sha256:5b95cdd5f388ea0b01b6c60b8b57d728023e2592a49dcddd41de13138418e33c",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "subjectKey",
+              "natspec": "",
+              "range": {
+                "byteLength": 18,
+                "byteStart": 965,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L35",
+                "lineEnd": 35,
+                "lineStart": 35,
+                "snippetSha256": "sha256:e7c21877a87250906149a6a97c8262d8f7fa8520b03d4d879a4a6c2aaee06c1e",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "payer",
+              "natspec": "",
+              "range": {
+                "byteLength": 13,
+                "byteStart": 993,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L36",
+                "lineEnd": 36,
+                "lineStart": 36,
+                "snippetSha256": "sha256:8564827c1f7f42fa027684a6c3b150798262726908409a46935c582691c56eaa",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 6,
+              "name": "recipient",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 1016,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L37",
+                "lineEnd": 37,
+                "lineStart": 37,
+                "snippetSha256": "sha256:91531000e2c59c408e2d745c8842f319c279c32d4b372286eb98b03c4294e3fb",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 7,
+              "name": "authorizer",
+              "natspec": "",
+              "range": {
+                "byteLength": 18,
+                "byteStart": 1043,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L38",
+                "lineEnd": 38,
+                "lineStart": 38,
+                "snippetSha256": "sha256:2fcb69f90b0960b3247543f1382dfcc7e6395c130aaa2841dbd0d0c4ebf7e65b",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 8,
+              "name": "executor",
+              "natspec": "",
+              "range": {
+                "byteLength": 16,
+                "byteStart": 1071,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L39",
+                "lineEnd": 39,
+                "lineStart": 39,
+                "snippetSha256": "sha256:7b9d50cff2ba0e4bd5cdf1eb8a9637f3ddee488aaed28f15fb1b87b6038fe6c7",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              },
+              "type": "address",
+              "typeString": "address"
+            },
+            {
+              "index": 9,
+              "name": "increment",
+              "natspec": "",
+              "range": {
+                "byteLength": 16,
+                "byteStart": 1097,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L40",
+                "lineEnd": 40,
+                "lineStart": 40,
+                "snippetSha256": "sha256:5cec54adf9247a5f1a6f198c7ed114bd1700e0af97b7749f56b75445f341a558",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              },
+              "type": "uint64",
+              "typeString": "uint64"
+            },
+            {
+              "index": 10,
+              "name": "cap",
+              "natspec": "",
+              "range": {
+                "byteLength": 10,
+                "byteStart": 1123,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L41",
+                "lineEnd": 41,
+                "lineStart": 41,
+                "snippetSha256": "sha256:37dbd3655ec86cf976beba3738d1db76ddc01fbb90cb700cb90d3b7ebe7a4227",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              },
+              "type": "uint64",
+              "typeString": "uint64"
+            },
+            {
+              "index": 11,
+              "name": "contextHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 19,
+                "byteStart": 1143,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L42",
+                "lineEnd": 42,
+                "lineStart": 42,
+                "snippetSha256": "sha256:e081491bff05923c57957798809b7c61694209f4d3007db647c3db912f60eb8a",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            },
+            {
+              "index": 12,
+              "name": "resolutionHash",
+              "natspec": "",
+              "range": {
+                "byteLength": 22,
+                "byteStart": 1172,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L43",
+                "lineEnd": 43,
+                "lineStart": 43,
+                "snippetSha256": "sha256:91e44f40ea6c3aff0076c8432ab136178fe66b900f1cbf54ab9219efeb6fa8ee",
+                "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+              },
+              "type": "bytes32",
+              "typeString": "bytes32"
+            }
+          ],
+          "name": "CounterConsumption",
+          "natspec": "",
+          "range": {
+            "byteLength": 380,
+            "byteStart": 821,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L30-L44",
+            "lineEnd": 44,
+            "lineStart": 30,
+            "snippetSha256": "sha256:3e0becc6379a26a884060ab6b14494967e5a8d7258142271d1455a4e8adf69d8",
+            "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger",
+    "inheritance": [],
+    "interface": {
+      "abiSha256": "sha256:0ad44fc08e116d4b741d39b07f335eb34a3048bf0be71a468e217f9a63ed5149",
+      "interfaceId": "0x79bc7192",
+      "interfaceIdSource": "selector_xor",
+      "published": true
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lTdHJlYW1NaW50TGVkZ2VyLnNvbDpJU3RyZWFtTWludExlZGdlcg",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IStreamMintLedger.sol:IStreamMintLedger"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": "published_interface"
+    },
+    "name": "IStreamMintLedger",
+    "natspec": "@notice Durable outside-Core accounting ledger for launch mint counters.",
+    "range": {
+      "byteLength": 7818,
+      "byteStart": 135,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IStreamMintLedger.sol#L5-L197",
+      "lineEnd": 197,
+      "lineStart": 5,
+      "snippetSha256": "sha256:999915475a0e334b595a15f7006e398694b212ff46d4f4312d1b93b5f4000eb0",
+      "sourceSha256": "sha256:fb6856eec0003948467cc3d5e1c58c318e623b105f0f6fc13590564f2d66168e"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IStreamMintLedger.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-30.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {},
+    "byCode": {},
+    "totalCount": 0
+  },
+  "warnings": []
+}

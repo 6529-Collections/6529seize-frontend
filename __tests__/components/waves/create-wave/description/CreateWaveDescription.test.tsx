@@ -22,6 +22,10 @@ jest.mock("@/components/drops/create/DropEditor", () =>
       useCreateDropEmojiPickerLayer,
     } = require("@/components/waves/CreateDropEmojiPickerLayerContext");
     const emojiPickerLayer = useCreateDropEmojiPickerLayer();
+    const {
+      useDraftMentionSearchScope,
+    } = require("@/components/drops/create/lexical/plugins/mentions/MentionSearchScopeContext");
+    const draftMentionSearchScope = useDraftMentionSearchScope();
 
     React.useImperativeHandle(ref, () => ({
       getDropSnapshot: () => ({ content: "snapshot drop" }),
@@ -45,6 +49,9 @@ jest.mock("@/components/drops/create/DropEditor", () =>
         <div data-testid="wave-name">{props.wave?.name}</div>
         <div data-testid="wave-image">{props.wave?.image}</div>
         <div data-testid="wave-id-prop">{props.wave?.id}</div>
+        <div data-testid="draft-mention-search-scope">
+          {JSON.stringify(draftMentionSearchScope)}
+        </div>
         <div data-testid="emoji-picker-desktop-z-index">
           {emojiPickerLayer.desktopZIndex}
         </div>
@@ -89,6 +96,7 @@ describe("CreateWaveDescription", () => {
     wave: mockWave,
     submitting: false,
     showDropError: false,
+    visibilityGroupId: "visibility-group",
     onHaveDropToSubmitChange: jest.fn(),
   };
 
@@ -133,6 +141,22 @@ describe("CreateWaveDescription", () => {
       "https://example.com/image.png"
     );
     expect(screen.getByTestId("wave-id-prop")).toHaveTextContent("wave-123");
+    expect(screen.getByTestId("draft-mention-search-scope")).toHaveTextContent(
+      JSON.stringify({
+        kind: "group",
+        visibilityGroupId: "visibility-group",
+      })
+    );
+  });
+
+  it("uses the explicit public draft mention scope", () => {
+    render(
+      <CreateWaveDescription {...defaultProps} visibilityGroupId={null} />
+    );
+
+    expect(screen.getByTestId("draft-mention-search-scope")).toHaveTextContent(
+      JSON.stringify({ kind: "public" })
+    );
   });
 
   it("scopes emoji picker layer above the create-wave modal", () => {
@@ -174,12 +198,17 @@ describe("CreateWaveDescription", () => {
     expect(screen.getByTestId("wave-id-prop")).toHaveTextContent("");
   });
 
-  it("returns null when profile has no id or handle", () => {
+  it("explains the missing profile instead of rendering a blank step", () => {
     mockProfileAndConsolidationsToProfileMin.mockReturnValue(null);
 
-    const { container } = render(<CreateWaveDescription {...defaultProps} />);
+    render(<CreateWaveDescription {...defaultProps} />);
 
-    expect(container.firstChild).toBeNull();
+    // Rendering nothing left users staring at a dead Complete button; the
+    // step must say why it cannot continue.
+    expect(
+      screen.getByText(/A profile handle is required to create a wave/)
+    ).toBeVisible();
+    expect(screen.queryByTestId("drop-editor")).not.toBeInTheDocument();
   });
 
   it("exposes requestDrop through ref", () => {

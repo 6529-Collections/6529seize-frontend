@@ -13,7 +13,7 @@ blank space.
 
 - Native app routes rendered through `AppLayout` (`isApp` context).
 - Wave/message stream surfaces that use mobile nav-space calculations.
-- Single-drop reply composer in app mode (Android padding change).
+- Single-drop reply chat in app mode.
 - Create-wave flow in app mode (iOS margin change).
 
 ## Entry Points
@@ -31,21 +31,29 @@ blank space.
 4. Layout height recalculates without the normal `85px` bottom-nav reserve
    space.
 5. User types with composer/input controls kept in the visible area.
-6. User closes keyboard; bottom navigation and normal spacing return unless
-   another hide condition is active.
+6. User closes keyboard; the final safe-area padding, bottom-navigation
+   measurement, and normal spacing are targeted together when native dismissal
+   starts, unless another hide condition is active.
 
 ## Common Scenarios
 
 - Wave or message composing: bottom navigation hides while typing and returns
   after keyboard close, restoring reserve spacing.
-- Single-drop reply on Android: composer bottom safe-area padding becomes `0`
-  while keyboard is open.
+- Single-drop reply chat on iOS and Android: the full-screen chat panel docks
+  above the keyboard, and composer bottom safe-area padding becomes `0` while
+  the keyboard is open.
 - Create Wave flow on iOS: extra bottom margin used in non-keyboard state is
   removed while typing.
 
 ## Edge Cases
 
 - Android keyboard show/hide updates are debounced to reduce rapid flicker.
+- On iOS, closed-state spacing returns as keyboard dismissal starts, while the
+  native animation remains authoritative until the keyboard is fully closed.
+  This prevents the composer from briefly touching the physical bottom before
+  safe-area and navigation spacing return.
+- When reduced motion is enabled, keyboard-driven layout changes use no added
+  transition duration.
 - If keyboard listeners are unavailable or fail, layout stays in non-keyboard
   state.
 - This behavior does not apply to desktop web or small-screen web sidebar layout.

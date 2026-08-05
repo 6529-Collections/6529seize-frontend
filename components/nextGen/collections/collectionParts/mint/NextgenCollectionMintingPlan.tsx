@@ -8,7 +8,6 @@ import type {
   NextgenAllowlist,
   NextgenAllowlistCollection,
 } from "@/entities/INextgen";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -17,8 +16,9 @@ import {
   SearchModalDisplay,
   SearchWalletsDisplay,
 } from "@/components/searchModal/SearchModal";
-import styles from "@/components/nextGen/collections/NextGen.module.css";
-import NextGenCollectionHeader from "../NextGenCollectionHeader";
+import NextGenCollectionHeader, {
+  NextGenBackToCollectionPageLink,
+} from "../NextGenCollectionHeader";
 import { getJsonData } from "./NextGenMintWidget";
 
 const PdfViewer = dynamic(() => import("../../../../pdfViewer/PdfViewer"), {
@@ -38,7 +38,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
   const [selectedPhase, setSelectedPhase] =
     useState<NextgenAllowlistCollection>();
 
-  const allowlistScrollTarget = useRef<HTMLDivElement>(null);
+  const allowlistScrollTarget = useRef<HTMLElement>(null);
   const [allowlist, setAllowlist] = useState<NextgenAllowlist[]>([]);
   const [page, setPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
@@ -105,12 +105,12 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
 
   function printPhaseDateTime(date: Time) {
     if (date.toMillis() === 0) {
-      return <b>N/A</b>;
+      return <span className="tw-font-semibold tw-text-white">N/A</span>;
     }
     return (
-      <b>
+      <span className="tw-font-semibold tw-text-white">
         {date.toIsoDateString()} {date.toIsoTimeString()}
-      </b>
+      </span>
     );
   }
 
@@ -118,161 +118,206 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
     const startTime = Time.seconds(start);
     const endTime = Time.seconds(end);
     return (
-      <div key={getRandomObjectId()} className="tw-flex tw-flex-col tw-py-2">
-        <div className={styles["phaseBox"]}>
-          <span className="tw-flex tw-items-center tw-justify-center tw-pb-4">
-            <h4 className="tw-mb-0 tw-text-white">{phaseName}</h4>
-          </span>
-          <table className="tw-w-full">
-            <tbody>
-              <tr>
-                <th scope="row" className="tw-flex tw-justify-center tw-gap-3">
-                  <span>
-                    <b>Start</b>
-                  </span>
-                  <span>{printPhaseDateTime(startTime)}</span>
-                </th>
-              </tr>
-              <tr>
-                <th scope="row" className="tw-flex tw-justify-center tw-gap-3">
-                  <span>
-                    <b>End</b>
-                  </span>
-                  <span>{printPhaseDateTime(endTime)}</span>
-                </th>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <article
+        key={`${phaseName}-${start}-${end}`}
+        className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-5"
+      >
+        <h3 className="tw-mb-4 tw-mt-0 tw-text-lg tw-font-semibold tw-text-white">
+          {phaseName}
+        </h3>
+        <dl className="tw-m-0 tw-grid tw-gap-3">
+          <div className="tw-grid tw-gap-1">
+            <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
+              Start
+            </dt>
+            <dd className="tw-m-0 tw-text-sm">
+              {printPhaseDateTime(startTime)}
+            </dd>
+          </div>
+          <div className="tw-grid tw-gap-1">
+            <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
+              End
+            </dt>
+            <dd className="tw-m-0 tw-text-sm">{printPhaseDateTime(endTime)}</dd>
+          </div>
+        </dl>
+      </article>
     );
   }
 
   return (
-    <div className="tailwind-scope tw-mx-auto tw-w-full tw-px-3 tw-py-4 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] xl:tw-max-w-[1140px] 2xl:tw-max-w-[1320px]">
-      <div className="tw-pb-4">
-        <NextGenCollectionHeader
-          collection={props.collection}
-          collection_link={true}
-        />
-      </div>
-      <div className="tw-pt-4">
-        <h3 className="tw-mb-0">Distribution Plan</h3>
-      </div>
-      <hr />
-      <div className="tw-grid tw-grid-cols-1 tw-gap-x-6 tw-pt-3 sm:tw-grid-cols-2 md:tw-grid-cols-3">
-        <div className="tw-col-span-full">
-          <h2>Phases</h2>
+    <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-pb-12 md:tw-px-6 lg:tw-px-8">
+      <section className="tw-py-6 sm:tw-py-8">
+        <NextGenBackToCollectionPageLink collection={props.collection} />
+        <div className="tw-mt-2">
+          <NextGenCollectionHeader
+            collection={props.collection}
+            contained={false}
+            compact={true}
+            show_links={true}
+          />
         </div>
-        {phases.map((phase) =>
-          printPhase(phase.phase, phase.start_time, phase.end_time)
-        )}
-        {phasesSet &&
-          printPhase(
-            "Public Phase",
-            props.collection.public_start,
-            props.collection.public_end
+      </section>
+
+      <section>
+        <h2 className="tw-mb-5 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-3xl">
+          Distribution Plan
+        </h2>
+        <div className="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
+          <h3 className="tw-col-span-full tw-mb-0 tw-text-lg tw-font-semibold tw-text-white">
+            Phases
+          </h3>
+          {phases.map((phase) =>
+            printPhase(phase.phase, phase.start_time, phase.end_time)
           )}
-      </div>
+          {phasesSet &&
+            printPhase(
+              "Public Phase",
+              props.collection.public_start,
+              props.collection.public_end
+            )}
+        </div>
+      </section>
+
       {props.collection.distribution_plan && (
-        <div className="tw-pt-3">
+        <section className="tw-pt-8">
           <PdfViewer
             file={props.collection.distribution_plan}
             name={`${props.collection.name} Distribution Plan`}
           />
-        </div>
+        </section>
       )}
-      <div className="tw-pt-4" ref={allowlistScrollTarget}>
-        <div className="tw-flex tw-items-center tw-justify-between">
-          <label
-            className={`${styles["filterDropdown"]} tw-flex tw-items-center tw-gap-2`}
-          >
-            <span className="tw-sr-only">Phase</span>
-            <select
-              value={selectedPhase?.phase ?? ""}
-              onChange={(event) => {
-                const nextPhase = phases.find(
-                  (phase) => phase.phase === event.target.value
-                );
-                setSelectedPhase(nextPhase);
-              }}
-              className="tw-cursor-pointer tw-rounded-md tw-border-0 tw-bg-transparent tw-py-1 tw-pl-1 tw-pr-8 tw-text-lg tw-font-bold tw-text-white focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-              style={{ colorScheme: "dark" }}
-            >
-              <option value="" className="tw-bg-black tw-text-white">
-                All Phases
-              </option>
-              {phases.map((p) => (
-                <option
-                  key={`filter-${p.phase}`}
-                  value={p.phase}
-                  className="tw-bg-black tw-text-white"
-                >
-                  {p.phase}
+
+      <section className="tw-pt-8" ref={allowlistScrollTarget}>
+        <div className="tw-mb-4 tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+          <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-white">
+            Allowlist
+          </h3>
+          <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center">
+            <label className="tw-grid tw-gap-1">
+              <span className="tw-sr-only">Filter by phase</span>
+              <select
+                value={selectedPhase?.phase ?? ""}
+                onChange={(event) => {
+                  const nextPhase = phases.find(
+                    (phase) => phase.phase === event.target.value
+                  );
+                  setSelectedPhase(nextPhase);
+                }}
+                className="tw-[color-scheme:dark] tw-min-h-11 tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-base tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+              >
+                <option value="" className="tw-bg-black tw-text-white">
+                  All Phases
                 </option>
-              ))}
-            </select>
-          </label>
-          <SearchWalletsDisplay
-            searchWallets={searchWallets}
-            setSearchWallets={setSearchWallets}
-            setShowSearchModal={setShowSearchModal}
-          />
-        </div>
-      </div>
-      <div className="tw-no-scrollbar tw-overflow-x-auto">
-        <table className={styles["logsTable"]}>
-          <thead>
-            <tr>
-              <th>Address x{totalResults.toLocaleString()}</th>
-              <th className="tw-text-center">Phase</th>
-              <th className="tw-text-center">Spots</th>
-              <th className="tw-text-center">Data</th>
-            </tr>
-          </thead>
-          <tbody>
-            {allowlist.map((al) => (
-              <tr key={`${al.address}-${al.spots}-${al.info}`}>
-                <td>
-                  <Link
-                    href={`/${al.address}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="tw-no-underline hover:tw-underline"
+                {phases.map((p) => (
+                  <option
+                    key={`filter-${p.phase}`}
+                    value={p.phase}
+                    className="tw-bg-black tw-text-white"
                   >
-                    {al.wallet_display && `${al.wallet_display} - `}
-                    {al.address}
-                  </Link>
-                </td>
-                <td className="tw-text-center">{al.phase}</td>
-                <td className="tw-text-center">
-                  {adjustSpots(al.address, al.keccak)}
-                </td>
-                <td className="tw-flex tw-justify-center">
-                  {getJsonData(al.keccak, al.info)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {totalResults > PAGE_SIZE && allowlistLoaded && (
-        <div className="tw-py-4 tw-text-center">
-          <Pagination
-            page={page}
-            pageSize={PAGE_SIZE}
-            totalResults={totalResults}
-            setPage={function (newPage: number) {
-              setPage(newPage);
-              if (allowlistScrollTarget.current) {
-                allowlistScrollTarget.current.scrollIntoView({
-                  behavior: "smooth",
-                });
-              }
-            }}
-          />
+                    {p.phase}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <SearchWalletsDisplay
+              searchWallets={searchWallets}
+              setSearchWallets={setSearchWallets}
+              setShowSearchModal={setShowSearchModal}
+            />
+          </div>
         </div>
-      )}
+
+        <div className="tw-no-scrollbar tw-overflow-x-auto tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80">
+          <table className="tw-w-full tw-min-w-[760px] tw-border-collapse">
+            <thead>
+              <tr className="tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-text-left tw-text-xs tw-uppercase tw-tracking-wide tw-text-iron-400">
+                <th className="tw-px-4 tw-py-3 tw-font-semibold">
+                  Address ({totalResults.toLocaleString()})
+                </th>
+                <th className="tw-px-4 tw-py-3 tw-text-center tw-font-semibold">
+                  Phase
+                </th>
+                <th className="tw-px-4 tw-py-3 tw-text-center tw-font-semibold">
+                  Spots
+                </th>
+                <th className="tw-px-4 tw-py-3 tw-text-center tw-font-semibold">
+                  Data
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {!allowlistLoaded && (
+                <tr>
+                  <td
+                    colSpan={4}
+                    className="tw-px-4 tw-py-8 tw-text-center tw-text-iron-400"
+                  >
+                    Loading allowlist…
+                  </td>
+                </tr>
+              )}
+              {allowlistLoaded && allowlist.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={4}
+                    className="tw-px-4 tw-py-8 tw-text-center tw-text-iron-400"
+                  >
+                    No allowlist entries match these filters.
+                  </td>
+                </tr>
+              )}
+              {allowlistLoaded &&
+                allowlist.map((al) => (
+                  <tr
+                    key={`${al.address}-${al.spots}-${al.info}`}
+                    className="tw-border-0 tw-border-b tw-border-solid tw-border-white/5 last:tw-border-b-0 hover:tw-bg-white/[0.03]"
+                  >
+                    <td className="tw-px-4 tw-py-3">
+                      <Link
+                        href={`/${al.address}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="tw-no-underline hover:tw-underline"
+                      >
+                        {al.wallet_display && `${al.wallet_display} - `}
+                        {al.address}
+                      </Link>
+                    </td>
+                    <td className="tw-px-4 tw-py-3 tw-text-center">
+                      {al.phase}
+                    </td>
+                    <td className="tw-px-4 tw-py-3 tw-text-center">
+                      {adjustSpots(al.address, al.keccak)}
+                    </td>
+                    <td className="tw-px-4 tw-py-3">
+                      <div className="tw-flex tw-justify-center">
+                        {getJsonData(al.keccak, al.info)}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+        {totalResults > PAGE_SIZE && allowlistLoaded && (
+          <div className="tw-py-5 tw-text-center">
+            <Pagination
+              page={page}
+              pageSize={PAGE_SIZE}
+              totalResults={totalResults}
+              setPage={function (newPage: number) {
+                setPage(newPage);
+                if (allowlistScrollTarget.current) {
+                  allowlistScrollTarget.current.scrollIntoView({
+                    behavior: "smooth",
+                  });
+                }
+              }}
+            />
+          </div>
+        )}
+      </section>
       <SearchModalDisplay
         show={showSearchModal}
         setShow={setShowSearchModal}

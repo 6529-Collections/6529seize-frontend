@@ -144,6 +144,7 @@ export default function CreateWaveVotingThresholdTime({
         <input
           type="text"
           inputMode="numeric"
+          pattern="[0-9]*"
           autoComplete="off"
           value={inputValue}
           onChange={onThresholdTimeChange}

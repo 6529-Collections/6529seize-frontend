@@ -180,6 +180,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
       media.mime_type.includes("video") && reserveFullWidthMediaHeight;
     const useNaturalHeightVideo =
       media.mime_type.includes("video") && !useVideoReservedHeight;
+    const useNaturalHeightAudio = media.mime_type.includes("audio");
     const galleryItemId = media.mime_type.includes("image")
       ? getDropImageGalleryItemId("media", i, media.url)
       : undefined;
@@ -190,9 +191,10 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
     const mediaContainerClassName = getMediaContainerClassName({
       groupedImage,
       reserveMediaHeight: useImageReservedHeight || useVideoReservedHeight,
-      useNaturalHeightMedia: useNaturalHeightImage || useNaturalHeightVideo,
+      useNaturalHeightMedia:
+        useNaturalHeightImage || useNaturalHeightVideo || useNaturalHeightAudio,
       useCompactLink,
-      alignStart: useNaturalHeightVideo,
+      alignStart: useNaturalHeightVideo || useNaturalHeightAudio,
     });
     let mediaContent;
 

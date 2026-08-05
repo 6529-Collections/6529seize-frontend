@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/utils/button/Button";
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -65,9 +66,6 @@ export const ExpandedTimelineContent: React.FC<
     return `Show ${count} ${noun}`;
   };
 
-  const loadMoreButtonClasses =
-    "tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-solid tw-border-iron-800/60 tw-bg-iron-900/60 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-100 tw-shadow-sm tw-transition-all tw-duration-200 tw-ease-out desktop-hover:hover:tw-border-iron-600/70 desktop-hover:hover:tw-bg-iron-700/60 desktop-hover:hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-500";
-
   return (
     <motion.div
       initial={{ height: 0, opacity: 0 }}
@@ -75,43 +73,47 @@ export const ExpandedTimelineContent: React.FC<
       exit={{ height: 0, opacity: 0 }}
       transition={{ duration: 0.3 }}
       onAnimationComplete={() => setAnimationComplete(true)}
-      className="tw-bg-iron-950"
+      className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-bg-black/15"
     >
-      <div className="tw-px-3 tw-py-4">
+      <div className="tw-px-3 tw-py-3">
         {(hasMorePast || hasMoreFuture) && (
-          <div className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-pb-3 tw-text-xs tw-text-iron-300">
+          <div className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-pb-3 tw-text-xs tw-text-iron-400">
             <div className="tw-flex tw-items-center tw-gap-2">
               {hasMorePast && onLoadMorePast && (
-                <button
+                <Button
                   type="button"
                   onClick={onLoadMorePast}
-                  className={loadMoreButtonClasses}
+                  variant="tertiary"
+                  size="xs"
+                  className="!tw-h-7 !tw-rounded-md !tw-border-white/[0.06] !tw-bg-white/[0.025] !tw-px-2.5 !tw-text-[11px] !tw-font-medium !tw-text-iron-400 !tw-shadow-none desktop-hover:hover:!tw-border-white/10 desktop-hover:hover:!tw-bg-white/[0.05] desktop-hover:hover:!tw-text-iron-200"
                 >
                   <FontAwesomeIcon
                     icon={faChevronLeft}
-                    className="tw-size-4 tw-flex-shrink-0"
+                    className="tw-size-3 tw-flex-shrink-0"
                   />
                   <span className="tw-whitespace-nowrap">
                     {formatLabel(pastCountToDisplay, "earlier")}
                   </span>
-                </button>
+                </Button>
               )}
             </div>
             <div className="tw-flex tw-items-center tw-gap-2">
               {hasMoreFuture && onLoadMoreFuture && (
-                <button
+                <Button
                   type="button"
                   onClick={onLoadMoreFuture}
-                  className={loadMoreButtonClasses}
+                  variant="tertiary"
+                  size="xs"
+                  className="!tw-h-7 !tw-rounded-md !tw-border-white/[0.06] !tw-bg-white/[0.025] !tw-px-2.5 !tw-text-[11px] !tw-font-medium !tw-text-iron-400 !tw-shadow-none desktop-hover:hover:!tw-border-white/10 desktop-hover:hover:!tw-bg-white/[0.05] desktop-hover:hover:!tw-text-iron-200"
                 >
                   <span className="tw-whitespace-nowrap">
                     {formatLabel(remainingFutureCount, "later")}
                   </span>
                   <FontAwesomeIcon
                     icon={faChevronRight}
-                    className="tw-size-4 tw-flex-shrink-0"
+                    className="tw-size-3 tw-flex-shrink-0"
                   />
-                </button>
+                </Button>
               )}
             </div>
           </div>

@@ -78,6 +78,14 @@ const isGithubBlobUrl = (url: URL): boolean => {
   return kindSegment === "blob";
 };
 
+const isWikimediaCommonsFilePage = (url: URL): boolean => {
+  const hostname = url.hostname.replace(/^www\./i, "").toLowerCase();
+  return (
+    hostname === "commons.wikimedia.org" &&
+    /^\/wiki\/file(?::|%3a)/i.test(url.pathname)
+  );
+};
+
 const isDirectImageUrl = (href: string, parsedUrl?: URL | null): boolean => {
   const url = parsedUrl ?? parseUrl(href);
   if (!url) {
@@ -89,7 +97,7 @@ const isDirectImageUrl = (href: string, parsedUrl?: URL | null): boolean => {
     return false;
   }
 
-  if (isGithubBlobUrl(url)) {
+  if (isGithubBlobUrl(url) || isWikimediaCommonsFilePage(url)) {
     return false;
   }
 

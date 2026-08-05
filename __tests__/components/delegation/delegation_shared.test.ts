@@ -32,6 +32,14 @@ describe("getGasError", () => {
   });
 
   it("handles locked error", () => {
-    expect(getGasError({ message: "Other" })).toContain("CANNOT ESTIMATE");
+    expect(getGasError({ message: "Cannot estimate gas" })).toContain(
+      "CANNOT ESTIMATE"
+    );
+  });
+
+  it("leaves unrelated write errors to the shared transaction modal", () => {
+    expect(
+      getGasError({ message: "User rejected the request" })
+    ).toBeUndefined();
   });
 });

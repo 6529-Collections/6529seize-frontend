@@ -16,6 +16,11 @@ export interface DelegationWriteParams {
   readonly args: readonly unknown[];
 }
 
+export type DelegationWriteSettledHandler = (
+  data: unknown,
+  error: Error | null
+) => void;
+
 export function useOrignalDelegatorEnsResolution(
   props: Readonly<{
     subdelegation?: { originalDelegator: string } | undefined;
@@ -36,10 +41,24 @@ const DELEGATION_NETWORK_ERROR = `Switch to ${
 const DELEGATION_LOCKED_ERROR =
   "CANNOT ESTIMATE GAS - This can be caused by locked collections/use-cases";
 
-export function getGasError(error: Error) {
-  if (error.message.includes("Chain mismatch")) {
+export function getGasError(
+  error: Readonly<Pick<Error, "message">>
+): string | undefined {
+  if (
+    /chain mismatch|does not match the target chain|current chain.*target chain|unsupported chain|switch (?:the )?(?:wallet )?network/i.test(
+      error.message
+    )
+  ) {
     return DELEGATION_NETWORK_ERROR;
-  } else {
+  }
+
+  if (
+    /cannot estimate gas|estimate gas|gas estimation|execution reverted|\breverted\b|call exception/i.test(
+      error.message
+    )
+  ) {
     return DELEGATION_LOCKED_ERROR;
   }
+
+  return undefined;
 }

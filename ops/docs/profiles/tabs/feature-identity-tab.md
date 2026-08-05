@@ -84,15 +84,35 @@ Mobile (`< lg`):
 ### Grant Rep Dialog
 
 - Category search accepts 3-100 characters.
-- Results appear after a short debounce.
-- Dropdown order is typed value first, then matching categories.
-- Selecting a category validates availability before selection.
+- Results appear after a short debounce as compact category pills, including the
+  typed category and matching categories returned by the existing search.
+- Similar categories remain independent and selectable. The exact
+  `MemesNominee` pill is marked as counting toward the 50,000 REP submission
+  requirement. When the typed value differs from it only by capitalization,
+  spacing, punctuation, or Unicode width, the exact pill is surfaced first; the
+  typed value remains available and look-alikes use subdued styling. Search
+  guidance stays neutral until a category is selected. Selecting exact
+  `MemesNominee` confirms the requirement in green; selecting a look-alike
+  instead shows an amber informational note explaining that the categories are
+  separate and only exact `MemesNominee` counts toward the requirement. All
+  other category pills keep their existing behavior.
+- Selecting an option validates availability before enabling the REP amount.
 - If availability fails, inline error is shown.
 - Editing text after category selection clears selected category and amount.
 - Amount accepts integers.
 - In non-proxy mode, amount clamps to allowed min/max on blur.
 - `Grant Rep` stays disabled until category is selected, amount changed, amount
   is valid, and submit is idle.
+
+### Localization fallback debt
+
+- Surface: the Grant REP dialog under the profile Identity tab.
+- Current fallback: `rep.categories.grant.*` messages use the canonical `en-US`
+  source copy in locales without translated entries.
+- User impact: supported non-English locales can see English fallback copy while
+  the complete grant flow remains functional.
+- Owner/follow-up: frontend localization maintainers can add translated entries
+  during the next profile localization pass.
 
 ## NIC and Statements Behavior
 
@@ -142,6 +162,9 @@ Statement ownership in this tab:
 
 - `Received` and `Given` keep separate expanded-category counts while you stay
   on the same profile route.
+- Category spelling remains exact. Similar spellings stay separate and
+  selectable, matching the existing Grant REP behavior.
+- Mobile keyboards do not auto-capitalize or autocorrect category input.
 - Opening a different profile resets the visible category counts back to that
   profile's initial list state.
 - Outside proxy mode, self-rating is blocked even when the rest of the profile

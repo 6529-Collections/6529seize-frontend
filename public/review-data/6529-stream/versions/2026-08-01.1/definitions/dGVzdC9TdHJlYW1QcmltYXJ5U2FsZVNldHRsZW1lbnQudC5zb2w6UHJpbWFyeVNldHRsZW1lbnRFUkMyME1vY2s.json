@@ -1,0 +1,692 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0xdd62ed3e",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "allowance",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xdd62ed3e",
+          "signature": "allowance(address,address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0x095ea7b3",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "approve",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x095ea7b3",
+          "signature": "approve(address,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0x70a08231",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "balanceOf",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x70a08231",
+          "signature": "balanceOf(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0x40c10f19",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "mint",
+          "outputs": [],
+          "selector": "0x40c10f19",
+          "signature": "mint(address,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0xa9059cbb",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "transfer",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xa9059cbb",
+          "signature": "transfer(address,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0x23b872dd",
+          "declaringDefinitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "transferFrom",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x23b872dd",
+          "signature": "transferFrom(address,address,uint256)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "allowance(address,address)",
+          "displaySignature": "allowance(address,address)",
+          "functionKind": "getter",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0xdd62ed3e",
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6UHJpbWFyeVNldHRsZW1lbnRFUkMyME1vY2sjZnVuY3Rpb246MHhkZDYyZWQzZQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "allowance",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 64,
+            "byteStart": 70988,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1522",
+            "lineEnd": 1522,
+            "lineStart": 1522,
+            "snippetSha256": "sha256:c12d131bb1525d6dddd2851e276df5083d9adc2416e16c36e47f8052efea71c5",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0xdd62ed3e",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "mint(address,uint256)",
+          "displaySignature": "mint(address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0x40c10f19",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6UHJpbWFyeVNldHRsZW1lbnRFUkMyME1vY2sjZnVuY3Rpb246MHg0MGMxMGYxOQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "mint",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 100,
+            "byteStart": 71059,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1524-L1526",
+            "lineEnd": 1526,
+            "lineStart": 1524,
+            "snippetSha256": "sha256:3e8d24725a7090e39a970531c90f98a49bd16721b2c5fa52d195a189e6a599fc",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x40c10f19",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "balanceOf(address)",
+          "displaySignature": "balanceOf(address)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0x70a08231",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6UHJpbWFyeVNldHRsZW1lbnRFUkMyME1vY2sjZnVuY3Rpb246MHg3MGEwODIzMQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "balanceOf",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 117,
+            "byteStart": 71165,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1528-L1530",
+            "lineEnd": 1530,
+            "lineStart": 1528,
+            "snippetSha256": "sha256:06d0221bcbf9dbe262ffd0d3a9503ae2e5eb7cbaef020a9ae386cf046e92d039",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x70a08231",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "approve(address,uint256)",
+          "displaySignature": "approve(address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0x095ea7b3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6UHJpbWFyeVNldHRsZW1lbnRFUkMyME1vY2sjZnVuY3Rpb246MHgwOTVlYTdiMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "approve",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 159,
+            "byteStart": 71288,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1532-L1535",
+            "lineEnd": 1535,
+            "lineStart": 1532,
+            "snippetSha256": "sha256:24fd0c87959331c509171434ace63adef0e2425d9cf25f25d0d94dbd65d1fab6",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x095ea7b3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "transfer(address,uint256)",
+          "displaySignature": "transfer(address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0xa9059cbb",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6UHJpbWFyeVNldHRsZW1lbnRFUkMyME1vY2sjZnVuY3Rpb246MHhhOTA1OWNiYg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "transfer",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 159,
+            "byteStart": 71453,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1537-L1540",
+            "lineEnd": 1540,
+            "lineStart": 1537,
+            "snippetSha256": "sha256:c7a230b947b82fc3b423142f25ce95a9bd1934faeda4818bd4f0f24cd434ff3a",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0xa9059cbb",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "transferFrom(address,address,uint256)",
+          "displaySignature": "transferFrom(address,address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0x23b872dd",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6UHJpbWFyeVNldHRsZW1lbnRFUkMyME1vY2sjZnVuY3Rpb246MHgyM2I4NzJkZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "transferFrom",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 256,
+            "byteStart": 71618,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1542-L1550",
+            "lineEnd": 1550,
+            "lineStart": 1542,
+            "snippetSha256": "sha256:13171c153e20791146207817e6b0866125b13721eff43968679322ffb8df8335",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0x23b872dd",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_spendAllowance(address,address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:_spendAllowance(address,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6UHJpbWFyeVNldHRsZW1lbnRFUkMyME1vY2sjZnVuY3Rpb246X3NwZW5kQWxsb3dhbmNlKGFkZHJlc3MsYWRkcmVzcyx1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_spendAllowance",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 280,
+            "byteStart": 71880,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1552-L1556",
+            "lineEnd": 1556,
+            "lineStart": 1552,
+            "snippetSha256": "sha256:9958978e90c8512acee7e207779e36aec0058bf245681f40504474ef37f40182",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_move(address,address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:_move(address,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6UHJpbWFyeVNldHRsZW1lbnRFUkMyME1vY2sjZnVuY3Rpb246X21vdmUoYWRkcmVzcyxhZGRyZXNzLHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_move",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 221,
+            "byteStart": 72166,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1558-L1562",
+            "lineEnd": 1562,
+            "lineStart": 1558,
+            "snippetSha256": "sha256:43b96aada046a0f5e3e0e3986e16d863c9508152c15c098fffef5b50cdbce4b1",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "internal"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "balances",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 70937,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1521",
+            "lineEnd": 1521,
+            "lineStart": 1521,
+            "snippetSha256": "sha256:e11839b7044a8480e61b27aeb7aa3125fd0c97ed7d88af071a59642579781e08",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": null,
+          "type": "mapping(address => uint256)",
+          "typeString": "mapping(address => uint256)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "internal"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0xdd62ed3e",
+          "immutable": false,
+          "name": "allowance",
+          "natspec": "",
+          "range": {
+            "byteLength": 64,
+            "byteStart": 70988,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1522",
+            "lineEnd": 1522,
+            "lineStart": 1522,
+            "snippetSha256": "sha256:c12d131bb1525d6dddd2851e276df5083d9adc2416e16c36e47f8052efea71c5",
+            "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+          },
+          "selector": "0xdd62ed3e",
+          "type": "mapping(address => mapping(address => uint256))",
+          "typeString": "mapping(address => mapping(address => uint256))",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1QcmltYXJ5U2FsZVNldHRsZW1lbnQudC5zb2w6UHJpbWFyeVNldHRsZW1lbnRFUkMyME1vY2s",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "PrimarySettlementERC20Mock",
+    "natspec": "",
+    "range": {
+      "byteLength": 1494,
+      "byteStart": 70895,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPrimarySaleSettlement.t.sol#L1520-L1563",
+      "lineEnd": 1563,
+      "lineStart": 1520,
+      "snippetSha256": "sha256:c39fe421c0db1694ccd94396bd48fb13e4c18015e3118332c2b042b750e19438",
+      "sourceSha256": "sha256:265c23dc2a6b5b7986ff3c4d7f8e5815d24235178ca316b785867bdfa88c0b88"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamPrimarySaleSettlement.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 7
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 6
+    },
+    "totalCount": 7
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0x095ea7b3",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0x23b872dd",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0x40c10f19",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0x70a08231",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0xa9059cbb",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock#function:0xdd62ed3e",
+      "definitionId": "test/StreamPrimarySaleSettlement.t.sol:PrimarySettlementERC20Mock",
+      "severity": "advisory"
+    }
+  ]
+}
