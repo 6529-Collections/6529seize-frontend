@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { MuseumHeldPositionSelection } from "@/components/museum/MuseumHeldPositionSelection";
 import { MuseumProjectSystemVisual } from "@/components/museum/possibility-space/MuseumProjectSystemVisual";
+import { replaceBrowserUrl } from "@/components/museum/possibility-space/shared";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -142,7 +143,7 @@ export function MuseumPossibilitySpace({
     const url = new URL(window.location.href);
     url.searchParams.set("work", objectId);
     url.hash = "possibility-space";
-    window.history.replaceState(window.history.state, "", url);
+    replaceBrowserUrl(url);
   };
 
   return (
