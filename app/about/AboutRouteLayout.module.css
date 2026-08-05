@@ -6,18 +6,15 @@
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-:global(.layout-root):has(
-  > :global(
-      .layout-main[data-mobile="false"][data-narrow="true"][data-offcanvas="true"][data-right-open="false"]
-    )
-    > .root
+:global(
+  .layout-root[data-mobile="false"][data-narrow="true"][data-offcanvas="true"][data-right-open="false"]
 ) {
   overflow-x: clip;
 }
 
 @media (min-width: 1024px) {
-  /* Match the narrow desktop sidebar's horizontal shift so the route's right
-     edge remains anchored to the viewport throughout the shared transition. */
+  /* Mirror WebLayout.tsx and styles/globals.css: match the narrow desktop
+     sidebar shift so the route's right edge stays anchored during transition. */
   :global(
       .layout-main[data-mobile="false"][data-narrow="true"][data-offcanvas="true"][data-right-open="false"]
     )

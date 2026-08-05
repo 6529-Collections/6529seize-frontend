@@ -82,4 +82,27 @@ test.describe("About Pages @smoke @medium @large", () => {
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
   });
+
+  test("should keep GDRC in view beside the narrow desktop menu", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1054, height: 900 });
+    await page.goto("/about/gdrc1", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+
+    const layoutMain = page.locator(".layout-main");
+    await expect(layoutMain).toHaveAttribute("data-narrow", "true");
+    await page.getByRole("button", { name: "Toggle right sidebar" }).click();
+    await expect(layoutMain).toHaveAttribute("data-offcanvas", "true");
+
+    await expect
+      .poll(() =>
+        page.locator("article").evaluate((article) => {
+          const articleRight = article.getBoundingClientRect().right;
+          return articleRight <= document.documentElement.clientWidth;
+        })
+      )
+      .toBe(true);
+    await expectNoHorizontalOverflow(page);
+  });
 });
