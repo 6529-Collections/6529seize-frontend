@@ -1,8 +1,8 @@
 # Active context
 
-- Current branch: `codex/e2e-pack-targeted-rerun`.
+- Current branch: `codex/all-museum-e2e-selection`.
 - Current base: frontend main
-  `5b03302719b306b29582d43f6910fd1a843de1f7`.
+  `a36a5a437e68d03c886471caefe0bf01afc3827c`.
 - The accelerated pipeline is live. Merge-to-production was 27m38s and
   merge-to-complete-production-E2E was 38m46s. Production promotion fell from
   22m12s to 5m16s; the final PR gate fell from 45m09s to a 10m34s longest lane.
@@ -12,9 +12,15 @@
   immediate isolated replay passed 20/20. The hosted retry passed collections
   but failed social while an immediate isolated replay passed 12/12. Both
   Museum packs passed on both hosted attempts.
-- This branch keeps the three-worker first pass and adds one serial rerun of
-  failed packs with per-attempt evidence. Persistent failures remain blocking.
-- Required release work: open and qualify the targeted-retry PR, merge it,
-  deploy exact main to staging, obtain green automatic E2E, promote the exact
-  production prebuild, obtain green automatic production E2E, then live
-  readback and closeout.
+- Targeted failed-pack retry is merged as `852b43fd9dc5af86aaf75c2942aea6e490544e25`.
+  Staging run 30976430422 proved the retry contract but exposed one new Museum
+  pack outside the original single-alias exclusion.
+- Concurrent Museum shell-diagnostic PR #3602 is merged on the current base;
+  its test-only change is preserved and does not overlap this manifest fix.
+- This branch gives every dedicated Museum pack a manifest-owned change scope,
+  excludes every scoped pack on unrelated automatic releases, and ratchets
+  future `tests/museum/` packs into the same policy.
+- Required release work: qualify this manifest fix, merge it, deploy exact main
+  to staging, prove both Museum packs are absent for the tooling-only delta,
+  promote the new exact production prebuild, obtain green automatic production
+  E2E, then live readback and closeout.
