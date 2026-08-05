@@ -1419,6 +1419,10 @@ describe("sentry-client-filters", () => {
     ["a changed operating system", { osName: "macOS" }],
     ["a changed operating system version", { osVersion: "26.5.3" }],
     [
+      "no platform information",
+      { includeContexts: false, includeUserAgent: false },
+    ],
+    [
       "a changed raw user agent",
       {
         includeContexts: false,
@@ -1445,6 +1449,12 @@ describe("sentry-client-filters", () => {
         frames: [
           createChromeMobileIosInjectedGaFrame({ function: "renderArt" }),
         ],
+      },
+    ],
+    [
+      "a whitespace-padded function",
+      {
+        frames: [createChromeMobileIosInjectedGaFrame({ function: " ? " })],
       },
     ],
     [

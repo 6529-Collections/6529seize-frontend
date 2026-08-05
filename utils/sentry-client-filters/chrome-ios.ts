@@ -47,7 +47,7 @@ function isExactChromeMobileIosInjectedGaFrame(
   frame: SentryStackFrame
 ): boolean {
   const paths = getFramePaths(frame);
-  const functionName = frame.function?.trim();
+  const functionName = frame.function;
 
   return (
     paths.length > 0 &&

@@ -1902,15 +1902,19 @@ describe("instrumentation-client", () => {
   it("keeps the Chrome Mobile iOS ga error when an application chunk frame is present", () => {
     const beforeSend = loadBeforeSend();
     const documentEvent = createChromeMobileIosInjectedGaEvent();
+    const [documentException] = documentEvent.exception.values;
+    if (!documentException) {
+      throw new Error("Expected the test event to contain an exception.");
+    }
     const event = {
       ...documentEvent,
       exception: {
         values: [
           {
-            ...documentEvent.exception.values[0],
+            ...documentException,
             stacktrace: {
               frames: [
-                ...documentEvent.exception.values[0].stacktrace.frames,
+                ...documentException.stacktrace.frames,
                 {
                   filename: "app:///_next/static/chunks/app-owned.js",
                   function: "renderArt",
