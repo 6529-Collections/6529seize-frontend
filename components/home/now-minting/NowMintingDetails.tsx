@@ -36,7 +36,6 @@ export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
         />
         <NowMintingStatsGrid nftId={nft.id} floorPrice={floorPrice} />
         <LatestDropNextMintSubscribe
-          appearance="featured"
           tokenId={nft.id}
           statusSource="none"
         />

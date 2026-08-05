@@ -143,7 +143,20 @@ describe("LatestDropNextMintSubscribe", () => {
   it("renders the subscribe section for the connected profile", () => {
     const { container } = renderWithAuth(<LatestDropNextMintSubscribe />);
 
-    expect(screen.getByText("Subscription Minting")).toBeInTheDocument();
+    const awarenessLabel = screen.getByText("Subscription Minting");
+    expect(awarenessLabel).toBeInTheDocument();
+    const awarenessRow = awarenessLabel.closest(".tw-group");
+    expect(awarenessRow).toHaveClass(
+      "tw-rounded-2xl",
+      "tw-border-primary-400/25",
+      "tw-bg-primary-500/10",
+      "tw-p-5"
+    );
+    expect(awarenessRow).not.toHaveClass(
+      "tw-rounded-lg",
+      "tw-border-white/5",
+      "tw-bg-iron-900/60"
+    );
     expect(screen.getByText("x12 subscribers")).toBeInTheDocument();
     expect(screen.getByText("x1")).toBeInTheDocument();
     expectReadonlySubscriptionToggle(
