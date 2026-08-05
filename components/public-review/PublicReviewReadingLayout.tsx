@@ -14,12 +14,13 @@ import { createPortal } from "react-dom";
 import {
   createContext,
   type ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
-  useSyncExternalStore,
 } from "react";
 
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -28,84 +29,51 @@ import { t } from "@/i18n/messages";
 const COMMENT_PANEL_ID = "public-review-feedback";
 const COMMENT_PANEL_HEADING_ID = "public-review-feedback-heading";
 const COMMENT_PANEL_INLINE_MIN_WIDTH = 760;
-const COMMENT_PANEL_STORAGE_KEY = "public-review-comment-panel-open";
-const COMMENT_PANEL_PREFERENCE_EVENT = "public-review-comment-panel-preference";
 const PublicReviewCommentPanelOpenContext = createContext(true);
-let inMemoryPanelPreference: boolean | null = null;
+const PublicReviewFeedbackPanelCoordinationContext = createContext({
+  close: (): void => undefined,
+  isOpen: false,
+});
 
 export function usePublicReviewCommentPanelOpen(): boolean {
   return useContext(PublicReviewCommentPanelOpenContext);
 }
 
-function getPanelPreferenceSnapshot(): boolean {
-  if (typeof window === "undefined") {
-    return false;
-  }
-  try {
-    const storedPreference = window.localStorage.getItem(
-      COMMENT_PANEL_STORAGE_KEY
-    );
-    if (storedPreference !== null) {
-      return storedPreference === "true";
-    }
-  } catch {
-    // Storage can be unavailable in privacy-restricted browser contexts.
-  }
-  if (inMemoryPanelPreference !== null) {
-    return inMemoryPanelPreference;
-  }
-  return false;
-}
-
-function subscribeToPanelPreference(onStoreChange: () => void): () => void {
-  const handleStorage = (event: StorageEvent): void => {
-    if (event.key === COMMENT_PANEL_STORAGE_KEY) {
-      onStoreChange();
-    }
-  };
-
-  window.addEventListener("storage", handleStorage);
-  window.addEventListener(COMMENT_PANEL_PREFERENCE_EVENT, onStoreChange);
-  return () => {
-    window.removeEventListener("storage", handleStorage);
-    window.removeEventListener(COMMENT_PANEL_PREFERENCE_EVENT, onStoreChange);
-  };
-}
-
-function updatePanelPreference(isOpen: boolean): void {
-  inMemoryPanelPreference = isOpen;
-  try {
-    window.localStorage.setItem(COMMENT_PANEL_STORAGE_KEY, String(isOpen));
-  } catch {
-    // Keep the in-memory preference when storage is unavailable.
-  }
-  window.dispatchEvent(new Event(COMMENT_PANEL_PREFERENCE_EVENT));
+export function usePublicReviewFeedbackPanelCoordination(): {
+  readonly close: () => void;
+  readonly isOpen: boolean;
+} {
+  return useContext(PublicReviewFeedbackPanelCoordinationContext);
 }
 
 export function PublicReviewReadingLayout({
   content,
   feedbackAvailable,
+  mobileNavigation,
   panel,
   toolbar,
 }: {
   readonly content: ReactNode;
   readonly feedbackAvailable: boolean;
+  readonly mobileNavigation?: ReactNode | undefined;
   readonly panel: ReactNode;
   readonly toolbar: ReactNode;
 }) {
-  const isPanelOpen = useSyncExternalStore(
-    subscribeToPanelPreference,
-    getPanelPreferenceSnapshot,
-    () => false
-  );
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [focusRequest, setFocusRequest] = useState(0);
   const [isOverlayLayout, setIsOverlayLayout] = useState<boolean | null>(null);
   const handledFocusRequestRef = useRef(0);
   const layoutRef = useRef<HTMLElement>(null);
+  const hasMobileNavigation =
+    mobileNavigation !== null && mobileNavigation !== undefined;
 
-  const closePanel = (): void => {
-    updatePanelPreference(false);
-  };
+  const closePanel = useCallback((): void => {
+    setIsPanelOpen(false);
+  }, []);
+  const feedbackPanelCoordination = useMemo(
+    () => ({ close: closePanel, isOpen: isPanelOpen }),
+    [closePanel, isPanelOpen]
+  );
 
   useLayoutEffect(() => {
     const layoutElement = layoutRef.current;
@@ -169,7 +137,7 @@ export function PublicReviewReadingLayout({
         return;
       }
       setFocusRequest((request) => request + 1);
-      updatePanelPreference(true);
+      setIsPanelOpen(true);
     };
 
     const revealTimer = window.setTimeout(revealHashTarget, 0);
@@ -180,11 +148,65 @@ export function PublicReviewReadingLayout({
     };
   }, [feedbackAvailable]);
 
+  const feedbackToggle = feedbackAvailable ? (
+    <button
+      aria-controls={COMMENT_PANEL_ID}
+      aria-expanded={isPanelOpen}
+      className="tw-group/feedback-toggle tw-inline-flex tw-min-h-11 tw-flex-none tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-px-0 tw-text-xs tw-font-semibold tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-white sm:tw-gap-2"
+      onClick={() => (isPanelOpen ? closePanel() : setIsPanelOpen(true))}
+      type="button"
+    >
+      {isPanelOpen ? (
+        <XMarkIcon
+          className="tw-size-4 tw-transition-colors group-hover/feedback-toggle:tw-text-primary-300"
+          aria-hidden="true"
+        />
+      ) : (
+        <ChatBubbleLeftRightIcon
+          className="tw-size-4 tw-transition-colors group-hover/feedback-toggle:tw-text-primary-300"
+          aria-hidden="true"
+        />
+      )}
+      <span className="tw-transition-colors group-hover/feedback-toggle:tw-text-primary-300">
+        {t(
+          DEFAULT_LOCALE,
+          isPanelOpen
+            ? "publicReview.comments.hide"
+            : "publicReview.comments.show"
+        )}
+      </span>
+    </button>
+  ) : null;
+
+  const toolbarRow = (
+    <div className="tw-relative tw-flex tw-min-h-16 tw-items-center tw-gap-2 tw-px-3 sm:tw-gap-4 sm:tw-px-7 lg:tw-px-10">
+      {hasMobileNavigation ? (
+        <div className="tw-min-w-0 tw-flex-none lg:tw-hidden">
+          <PublicReviewFeedbackPanelCoordinationContext.Provider
+            value={feedbackPanelCoordination}
+          >
+            {mobileNavigation}
+          </PublicReviewFeedbackPanelCoordinationContext.Provider>
+        </div>
+      ) : null}
+      <div
+        className={
+          hasMobileNavigation
+            ? "tw-min-w-0 tw-flex-1 tw-text-center max-[359px]:tw-sr-only lg:tw-text-left"
+            : "tw-min-w-0 tw-flex-1"
+        }
+      >
+        {toolbar}
+      </div>
+      {feedbackToggle}
+    </div>
+  );
+
   if (!feedbackAvailable) {
     return (
       <section className="tw-min-w-0">
-        <div className="tw-sticky tw-top-0 tw-z-30 tw-flex tw-min-h-16 tw-items-center tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.07] tw-bg-[#0D0D0F]/95 tw-px-4 tw-backdrop-blur-xl sm:tw-px-7 lg:tw-px-10">
-          {toolbar}
+        <div className="tw-sticky tw-top-[env(safe-area-inset-top,0px)] tw-z-30 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.07] tw-bg-[#0D0D0F]/95 tw-backdrop-blur-xl">
+          {toolbarRow}
         </div>
         {content}
       </section>
@@ -194,7 +216,7 @@ export function PublicReviewReadingLayout({
   const panelContents = (showCloseButton: boolean) => (
     <PublicReviewCommentPanelOpenContext.Provider value={isPanelOpen}>
       <div className="tw-flex tw-h-full tw-min-h-0 tw-flex-col tw-bg-iron-950">
-        <header className="tw-flex tw-min-h-16 tw-flex-none tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-px-5">
+        <header className="tw-flex tw-min-h-16 tw-flex-none tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.07] tw-bg-[#101014] tw-px-5">
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2.5">
             <ChatBubbleLeftRightIcon
               className="tw-size-4 tw-flex-none tw-text-iron-400"
@@ -245,10 +267,10 @@ export function PublicReviewReadingLayout({
             onClose={closePanel}
             open
           >
-            <DialogBackdrop className="tw-fixed tw-inset-0 tw-bg-black/55" />
+            <DialogBackdrop className="tw-fixed tw-inset-0 tw-bg-iron-600/60" />
             <div className="tw-fixed tw-inset-0 tw-flex tw-justify-end tw-overflow-hidden">
               <DialogPanel
-                className="tw-relative tw-h-[100dvh] tw-w-96 tw-max-w-[calc(100vw-1rem)] tw-border-y-0 tw-border-b-0 tw-border-l tw-border-r-0 tw-border-solid tw-border-white/[0.1] tw-bg-iron-950 tw-shadow-2xl tw-shadow-black/60"
+                className="tw-relative tw-box-border tw-h-[100dvh] tw-w-96 tw-max-w-[calc(100vw-1rem)] tw-border-y-0 tw-border-b-0 tw-border-l tw-border-r-0 tw-border-solid tw-border-white/[0.1] tw-bg-iron-950 tw-pb-[env(safe-area-inset-bottom,0px)] tw-pr-[env(safe-area-inset-right,0px)] tw-pt-[env(safe-area-inset-top,0px)] tw-shadow-2xl tw-shadow-black/60"
                 id={COMMENT_PANEL_ID}
                 tabIndex={-1}
               >
@@ -262,39 +284,8 @@ export function PublicReviewReadingLayout({
 
   return (
     <section className="tw-min-w-0 tw-@container" ref={layoutRef}>
-      <div className="tw-sticky tw-top-0 tw-z-30 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.07] tw-bg-[#0D0D0F]/95 tw-backdrop-blur-xl">
-        <div className="tw-flex tw-min-h-16 tw-items-center tw-justify-between tw-gap-4 tw-px-4 sm:tw-px-7 lg:tw-px-10">
-          {toolbar}
-          <button
-            aria-controls={COMMENT_PANEL_ID}
-            aria-expanded={isPanelOpen}
-            className="tw-group/feedback-toggle tw-inline-flex tw-min-h-11 tw-flex-none tw-items-center tw-gap-2 tw-border-0 tw-bg-transparent tw-px-0 tw-text-xs tw-font-semibold tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-white"
-            onClick={() =>
-              isPanelOpen ? closePanel() : updatePanelPreference(true)
-            }
-            type="button"
-          >
-            {isPanelOpen ? (
-              <XMarkIcon
-                className="tw-size-4 tw-transition-colors group-hover/feedback-toggle:tw-text-primary-300"
-                aria-hidden="true"
-              />
-            ) : (
-              <ChatBubbleLeftRightIcon
-                className="tw-size-4 tw-transition-colors group-hover/feedback-toggle:tw-text-primary-300"
-                aria-hidden="true"
-              />
-            )}
-            <span className="tw-transition-colors group-hover/feedback-toggle:tw-text-primary-300">
-              {t(
-                DEFAULT_LOCALE,
-                isPanelOpen
-                  ? "publicReview.comments.hide"
-                  : "publicReview.comments.show"
-              )}
-            </span>
-          </button>
-        </div>
+      <div className="tw-sticky tw-top-[env(safe-area-inset-top,0px)] tw-z-30 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.07] tw-bg-[#0D0D0F]/95 tw-backdrop-blur-xl">
+        {toolbarRow}
       </div>
 
       <div
@@ -310,7 +301,7 @@ export function PublicReviewReadingLayout({
           <aside
             id={COMMENT_PANEL_ID}
             aria-labelledby={COMMENT_PANEL_HEADING_ID}
-            className={`tw-order-1 tw-scroll-mt-20 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400 @[760px]:tw-sticky @[760px]:tw-top-16 @[760px]:tw-order-2 @[760px]:tw-h-[calc(100dvh-4rem)] @[760px]:tw-overflow-hidden @[760px]:tw-border-b-0 @[760px]:tw-border-l ${
+            className={`tw-order-1 tw-scroll-mt-[calc(5rem+env(safe-area-inset-top,0px))] tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400 @[760px]:tw-sticky @[760px]:tw-top-[calc(4rem+env(safe-area-inset-top,0px))] @[760px]:tw-order-2 @[760px]:tw-h-[calc(100dvh-4rem-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px))] @[760px]:tw-overflow-hidden @[760px]:tw-border-b-0 @[760px]:tw-border-l ${
               inlinePanelIsVisible ? "tw-block" : "tw-hidden"
             }`}
             hidden={!inlinePanelIsVisible}

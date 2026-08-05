@@ -75,7 +75,13 @@ describe("NFTLeaderboard component", () => {
   it("fetches data and paginates", async () => {
     commonApiFetch.mockResolvedValue({ count: 1, data: [collector] });
     renderLeaderboard();
-    await screen.findByText("alice");
+    const collectorRow = (await screen.findByText("alice")).closest("tr");
+    expect(collectorRow).toHaveClass(
+      "tw-group",
+      "even:tw-bg-iron-900/70",
+      "hover:tw-bg-iron-900",
+      "focus-within:tw-bg-iron-900"
+    );
     expect(commonApiFetch).toHaveBeenCalledWith(
       expect.objectContaining({
         endpoint: expect.stringContaining("tdh/nft/0x1/1"),
