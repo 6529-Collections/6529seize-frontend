@@ -91,18 +91,20 @@ test.describe("About Pages @smoke @medium @large", () => {
     await page.goto("/about/gdrc1", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
 
-    const layoutMain = page.locator(".layout-main");
-    await expect(layoutMain).toHaveAttribute("data-narrow", "true");
+    const layoutRoot = page.locator(".layout-root");
+    await expect(layoutRoot).toHaveAttribute("data-mobile", "false");
+    await expect(layoutRoot).toHaveAttribute("data-narrow", "true");
+    await expect(layoutRoot).toHaveAttribute("data-right-open", "false");
     await page.getByRole("button", { name: "Toggle right sidebar" }).click();
-    await expect(layoutMain).toHaveAttribute("data-offcanvas", "true");
+    await expect(layoutRoot).toHaveAttribute("data-offcanvas", "true");
 
-    const gdrcArticle = layoutMain.getByRole("article");
+    const gdrcArticle = layoutRoot.getByRole("article");
     await expect(gdrcArticle).toHaveCount(1);
     await expect
       .poll(() =>
         gdrcArticle.evaluate((article) => {
-          const articleRight = article.getBoundingClientRect().right;
-          return articleRight <= document.documentElement.clientWidth;
+          const { left, right } = article.getBoundingClientRect();
+          return left >= 0 && right <= document.documentElement.clientWidth;
         })
       )
       .toBe(true);
