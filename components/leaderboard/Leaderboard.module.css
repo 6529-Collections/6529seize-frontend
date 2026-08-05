@@ -61,15 +61,6 @@
   padding-left: 0;
 }
 
-.networkStatLabel {
-  color: rgb(113, 113, 122);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  line-height: 1rem;
-  text-transform: uppercase;
-}
-
 .networkStatValue {
   color: rgb(239, 239, 241);
   font-size: 1.125rem;
@@ -115,9 +106,6 @@
     margin-top: 0.75rem;
     padding-left: 0;
     padding-top: 0.75rem;
-  }
-  .networkStatLabel {
-    font-size: 0.6875rem;
   }
   .networkStatValue {
     font-size: 0.875rem;

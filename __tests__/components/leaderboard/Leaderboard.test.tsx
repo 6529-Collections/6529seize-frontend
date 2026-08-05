@@ -72,6 +72,20 @@ test("renders seasons and switches focus", async () => {
   );
   await waitFor(() => expect(commonApiFetch).toHaveBeenCalled());
   expect(screen.queryByText("View All")).toBeNull();
+  for (const label of [
+    "TDH View",
+    "TDH Block",
+    "Network TDH",
+    "Daily Change",
+  ]) {
+    expect(screen.getByText(label)).toHaveClass(
+      "tw-text-[11px]",
+      "tw-font-semibold",
+      "tw-uppercase",
+      "tw-tracking-wider",
+      "tw-text-iron-500"
+    );
+  }
 
   // Switch to Interactions focus
   await user.click(screen.getByRole("button", { name: "Interactions" }));

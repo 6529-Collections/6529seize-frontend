@@ -57,6 +57,9 @@ const TDH_VIEW_ITEMS: CommonSelectItem<ApiConsolidatedTdhView>[] = [
   },
 ];
 
+const NETWORK_META_LABEL_CLASS_NAME =
+  "tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500";
+
 function getSelectedNetworkTdh(
   globalTdhHistory: GlobalTDHHistory | undefined,
   isUnboostedTdhView: boolean
@@ -326,7 +329,7 @@ export default function Leaderboard(
         <div className={styles["networkHeaderMain"]}>
           {isNetworkPage && (
             <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-              <span className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500">
+              <span className={NETWORK_META_LABEL_CLASS_NAME}>
                 TDH View
               </span>
               {printTdhViewToggle()}
@@ -334,7 +337,7 @@ export default function Leaderboard(
           )}
           <div className={styles["networkStats"]}>
             <div className={styles["networkStat"]}>
-              <span className={styles["networkStatLabel"]}>TDH Block</span>
+              <span className={NETWORK_META_LABEL_CLASS_NAME}>TDH Block</span>
               <span className={styles["networkStatValue"]}>
                 {lastTDH ? (
                   <a
@@ -350,7 +353,7 @@ export default function Leaderboard(
               </span>
             </div>
             <div className={styles["networkStat"]}>
-              <span className={styles["networkStatLabel"]}>Network TDH</span>
+              <span className={NETWORK_META_LABEL_CLASS_NAME}>Network TDH</span>
               <span className={styles["networkStatValue"]}>
                 {selectedNetworkTdh === undefined ? (
                   <DotLoader />
@@ -360,7 +363,9 @@ export default function Leaderboard(
               </span>
             </div>
             <div className={styles["networkStat"]}>
-              <span className={styles["networkStatLabel"]}>Daily Change</span>
+              <span className={NETWORK_META_LABEL_CLASS_NAME}>
+                Daily Change
+              </span>
               <span
                 className={clsx(
                   styles["networkStatValue"],
