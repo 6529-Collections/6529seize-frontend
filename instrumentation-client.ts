@@ -34,6 +34,7 @@ import {
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterInjectedProviderProxyStartsWithError,
   shouldFilterInjectedWalletCollision,
+  shouldFilterInstagramPageHideBridgeError,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
@@ -192,6 +193,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterTwitterCurrentInsetReferenceError(event)) {
+    return true;
+  }
+
+  if (shouldFilterInstagramPageHideBridgeError(event, hint)) {
     return true;
   }
 
