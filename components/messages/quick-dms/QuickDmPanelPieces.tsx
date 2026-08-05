@@ -36,7 +36,7 @@ const QuickDmIconButton = ({
     {children}
     {hasUnreadIndicator && (
       <span
-        className="tw-absolute tw-right-1 tw-top-1 tw-size-2.5 tw-rounded-full tw-bg-red tw-shadow-sm tw-ring-2 tw-ring-iron-900"
+        className="tw-absolute tw-right-1 tw-top-1 tw-size-2.5 tw-rounded-full tw-bg-indigo-600 tw-shadow-sm tw-ring-2 tw-ring-iron-900"
         aria-hidden="true"
       />
     )}
