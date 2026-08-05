@@ -166,3 +166,27 @@ new exact tree with the most recent prior successful production deployment and
 uses the same centralized Museum path classifier as PR and staging. It fails
 closed: missing history, an invalid range, a Git failure, or an older runner
 without pack exclusion retains Museum coverage.
+
+## Qualification feedback: retry the failed pack, not the release
+
+The first full staging qualification of main `5b03302719b306b29582d43f6910fd1a843de1f7`
+exposed a second-order effect of pack parallelism. Run 30972152707 attempt 1
+executed fourteen packs with three workers. Thirteen packs passed, including
+both Museum packs. The collections pack received persistent `6529 Error` and
+`404 | PAGE NOT FOUND` documents from several NextGen routes. An immediate
+isolated replay against the same deployment passed 20/20 in 77 seconds.
+
+Attempt 2 again passed thirteen packs, including collections and both Museum
+packs, but the social pack received a persistent `6529 Error` document for the
+public profile route. Its immediate isolated replay passed 12/12 in 36 seconds.
+The failure moved between unrelated packs while each failed pack passed in
+isolation. That evidence is consistent with transient staging service pressure,
+not a source regression. The gate correctly blocked production in both cases,
+but rerunning all fourteen packs repeated more than thirteen minutes of work.
+
+The pack runner now retains the three-worker first pass and supports one
+capability-negotiated serial retry of failed packs. Every attempt has a separate
+artifact path and structured evidence entry. A pack is green only if its final
+attempt passes; a persistent second failure remains release-blocking. This
+keeps the broad quality gate while replacing an all-pack workflow rerun with a
+bounded retry of only the work that failed.
