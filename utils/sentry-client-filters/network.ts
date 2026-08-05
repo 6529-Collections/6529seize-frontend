@@ -22,6 +22,7 @@ import {
   hasAppOwnedSourceStackValue,
   hasLikelyAppOwnedFrame,
 } from "./app-frame-utils";
+import { hasDropReactionFailure } from "./drop-reaction";
 import {
   getBooleanValue,
   getBreadcrumbValues,
@@ -523,6 +524,10 @@ function hasMatchingFailedTransportBreadcrumb(
 }
 
 function isLowValueFirstPartyNetworkError(event: SentryClientEvent): boolean {
+  if (hasDropReactionFailure(event)) {
+    return true;
+  }
+
   if (event.tags?.["errorType"] !== "network") {
     return false;
   }
