@@ -78,6 +78,14 @@
   white-space: nowrap;
 }
 
+.networkStatChangeValue {
+  color: rgb(206, 207, 212);
+}
+
+.networkStatChangeRate {
+  color: rgb(132, 132, 144);
+}
+
 @media only screen and (max-width: 1100px) {
   .networkHeaderMain {
     align-items: flex-start;

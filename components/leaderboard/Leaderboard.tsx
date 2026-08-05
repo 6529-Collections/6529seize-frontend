@@ -361,13 +361,23 @@ export default function Leaderboard(
             </div>
             <div className={styles["networkStat"]}>
               <span className={styles["networkStatLabel"]}>Daily Change</span>
-              <span className={styles["networkStatValue"]}>
+              <span
+                className={clsx(
+                  styles["networkStatValue"],
+                  styles["networkStatChangeValue"]
+                )}
+              >
                 {isSelectedNetworkTdhChangeLoading ? (
                   <DotLoader />
                 ) : (
                   <>
                     {numberWithCommas(selectedNetworkTdhChange)}{" "}
-                    <span className="tw-text-sm">
+                    <span
+                      className={clsx(
+                        styles["networkStatChangeRate"],
+                        "tw-text-sm"
+                      )}
+                    >
                       ({selectedGlobalTdhRateChangeLabel})
                     </span>
                   </>

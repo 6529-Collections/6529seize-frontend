@@ -16,15 +16,13 @@ import { t } from "@/i18n/messages";
 import { formatInteger } from "@/i18n/format";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
-import {
-  DATA_TABLE_HEADER_TEXT_CLASS_NAME,
-  DATA_TABLE_INTERACTIVE_ROW_CLASS_NAME,
-} from "@/components/utils/table/tableStyles";
+import { DATA_TABLE_HEADER_TEXT_CLASS_NAME } from "@/components/utils/table/tableStyles";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "@/entities/ISort";
 import type { CICType } from "@/entities/IProfile";
 import type { DBResponse } from "@/entities/IDBResponse";
 import { LeaderboardCollector } from "./LeaderboardCollector";
+import { LEADERBOARD_ROW_CLASS_NAME } from "./leaderboardTableStyles";
 import {
   SearchModalDisplay,
   SearchWalletsDisplay,
@@ -295,7 +293,7 @@ export function NftLeaderboardCollectorRow({
   lead: NftTDHRanked;
 }>) {
   return (
-    <tr className={DATA_TABLE_INTERACTIVE_ROW_CLASS_NAME}>
+    <tr className={LEADERBOARD_ROW_CLASS_NAME}>
       <td className="tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-100 md:tw-px-4 md:tw-py-3 md:tw-text-sm">
         {numberWithCommas(lead.rank)}
       </td>
