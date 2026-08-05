@@ -5,6 +5,7 @@ import remarkGfm from "remark-gfm";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { CASEY_ACCESSION_ID, getCaseyDossierAnchor } from "@/lib/museum/casey";
+import { MUSEUM_DATA_ARCHITECTURE_STANDARD_SLUGS } from "@/lib/museum/publication/dataArchitectureContract";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
 
 interface MuseumMarkdownProps {
@@ -104,6 +105,14 @@ const CURATORIAL_PUBLICATION_STANDARD_PATH =
   "docs/curatorial-publication-standard.md";
 const INSTITUTIONAL_SOURCE_INVENTORY_PATH =
   "docs/institutional-source-inventory.json";
+const DATA_ARCHITECTURE_OVERVIEW_PATH = "docs/data-architecture.md";
+const DATA_ARCHITECTURE_CASEY_PATH =
+  "docs/data-architecture/casey-reas-implementation.md";
+const DATA_ARCHITECTURE_STANDARD_PREFIX = "docs/data-architecture/";
+const DATA_ARCHITECTURE_STANDARD_SUFFIX = ".md";
+const DATA_ARCHITECTURE_STANDARD_SLUG_SET = new Set<string>(
+  MUSEUM_DATA_ARCHITECTURE_STANDARD_SLUGS
+);
 const RIGHTS_ROUTE_BY_PATH = new Map([
   [
     "records/institutional-practice/rights-and-licenses.md",
@@ -139,6 +148,27 @@ function institutionalPracticeRoute(repositoryPath: string): string | null {
     : `${INSTITUTIONAL_PRACTICE_ROUTE}/${profileSlug}`;
 }
 
+function dataArchitectureRoute(repositoryPath: string): string | null {
+  const root = "/museum/network/methodology/data-architecture";
+  if (repositoryPath === DATA_ARCHITECTURE_OVERVIEW_PATH) return root;
+  if (repositoryPath === DATA_ARCHITECTURE_CASEY_PATH) {
+    return `${root}/casey-reas-implementation`;
+  }
+  if (
+    !repositoryPath.startsWith(DATA_ARCHITECTURE_STANDARD_PREFIX) ||
+    !repositoryPath.endsWith(DATA_ARCHITECTURE_STANDARD_SUFFIX)
+  ) {
+    return null;
+  }
+  const slug = repositoryPath.slice(
+    DATA_ARCHITECTURE_STANDARD_PREFIX.length,
+    -DATA_ARCHITECTURE_STANDARD_SUFFIX.length
+  );
+  return DATA_ARCHITECTURE_STANDARD_SLUG_SET.has(slug)
+    ? `${root}/${slug}`
+    : null;
+}
+
 function publicMuseumRoute(url: string): string | null {
   const withoutFragment = url.split("#", 1)[0] ?? "";
   const rightsRoute = RIGHTS_ROUTE_BY_PATH.get(withoutFragment);
@@ -149,6 +179,8 @@ function publicMuseumRoute(url: string): string | null {
   if (practiceRoute !== null) {
     return practiceRoute;
   }
+  const architectureRoute = dataArchitectureRoute(withoutFragment);
+  if (architectureRoute !== null) return architectureRoute;
   if (withoutFragment.startsWith("records/institutional-practice/")) {
     return null;
   }
@@ -465,18 +497,24 @@ export function MuseumMarkdown({
 
 export function MuseumJsonDisclosure({
   label,
-  value,
+  ...content
 }: {
   readonly label: string;
-  readonly value: unknown;
-}) {
+} & (
+  | { readonly value: unknown; readonly sourceJson?: never }
+  | { readonly sourceJson: string; readonly value?: never }
+)) {
+  const json =
+    "sourceJson" in content
+      ? content.sourceJson
+      : JSON.stringify(content.value, null, 2);
   return (
     <details className="tw-rounded-lg tw-border tw-border-white/10 tw-bg-iron-950/60">
       <summary className="tw-cursor-pointer tw-list-none tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400">
         {label}
       </summary>
       <pre className="tw-m-0 tw-max-h-96 tw-overflow-auto tw-border-t tw-border-white/10 tw-p-4 tw-text-xs tw-leading-5 tw-text-iron-300">
-        {JSON.stringify(value, null, 2)}
+        {json}
       </pre>
     </details>
   );

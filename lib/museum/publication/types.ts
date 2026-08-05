@@ -1,3 +1,5 @@
+import type { MuseumDataArchitectureStandardSlug as DataArchitectureStandardSlug } from "./dataArchitectureContract";
+
 export type MuseumSha256 = `sha256:${string}`;
 
 export interface MuseumPublicationIdentity {
@@ -75,6 +77,9 @@ export type MuseumPublicDocumentKind =
   | "institution_profile"
   | "institutional_practice_source_register"
   | "scholarship_editorial_standard"
+  | "data_architecture_overview"
+  | "data_architecture_standard"
+  | "data_architecture_case_study"
   | "rights_handbook"
   | "rights_artist_guide"
   | "rights_collector_guide";
@@ -137,6 +142,69 @@ export interface MuseumInstitutionalPractice {
   readonly sourceRegister: MuseumPublicDocument;
 }
 
+export type MuseumDataArchitectureStandardSlug = DataArchitectureStandardSlug;
+
+export type MuseumDataArchitectureImplementationState =
+  | "conceptual_mapping"
+  | "source_fields_present"
+  | "serialized"
+  | "validated"
+  | "operational";
+
+export interface MuseumDataArchitectureStandard {
+  readonly slug: MuseumDataArchitectureStandardSlug;
+  readonly name: string;
+  readonly category: string;
+  readonly humanQuestion: string;
+  readonly authority: string;
+  readonly version: string;
+  readonly authorityStatus: string;
+  readonly officialUrl: string;
+  readonly caseyState: MuseumDataArchitectureImplementationState;
+  readonly document: MuseumPublicDocument;
+}
+
+export interface MuseumDataArchitectureCaseyObject {
+  readonly objectId: string;
+  readonly title: string;
+  readonly caip19: string;
+  readonly custodyReceiptLog: number;
+  readonly metadataSha256: MuseumSha256;
+  readonly generatorObservationSha256: MuseumSha256;
+  readonly generatorBytesRetained: false;
+  readonly accessionState: "accessioned";
+  readonly preservationState: "in_progress";
+}
+
+export interface MuseumDataArchitectureCaseStudy {
+  readonly profileId: "6529NM_DATA_ARCHITECTURE_V1";
+  readonly accessionLotId: "6529NM.2026.001";
+  readonly custodyTransaction: string;
+  readonly custodyBlock: number;
+  readonly evidenceManifestPath: string;
+  readonly metadataDigestScope: string;
+  readonly generatorDigestScope: string;
+  readonly objects: readonly MuseumDataArchitectureCaseyObject[];
+  readonly sourceJson: string;
+  readonly sourcePath: string;
+  readonly sha256: MuseumSha256 | null;
+}
+
+export interface MuseumDataArchitecture {
+  readonly id: "6529NM_DATA_ARCHITECTURE_V1";
+  readonly version: "1.0.0";
+  readonly status: "working_standard";
+  readonly observedOn: string;
+  readonly title: string;
+  readonly introduction: MuseumPublicDocument;
+  readonly standards: readonly MuseumDataArchitectureStandard[];
+  readonly caseyImplementation: MuseumPublicDocument;
+  readonly caseySchedule: MuseumDataArchitectureCaseStudy;
+  readonly profileJson: string;
+  readonly profileSourcePath: string;
+  readonly profileSha256: MuseumSha256 | null;
+}
+
 export type MuseumRightsUseStatus =
   | "allowed"
   | "allowed_with_conditions"
@@ -151,6 +219,18 @@ export type MuseumRightsAction =
   | "make_preservation_copies"
   | "share_an_adaptation"
   | "make_commercial_use";
+
+export type MuseumRightsPracticeStatus =
+  | "ordinary"
+  | "ordinary_with_terms"
+  | "purpose_limited"
+  | "contextual"
+  | "separate_basis";
+
+export interface MuseumRightsPracticeReading {
+  readonly status: MuseumRightsPracticeStatus;
+  readonly note: string;
+}
 
 export interface MuseumRightsLegalCode {
   readonly path: string;
@@ -188,6 +268,9 @@ export interface MuseumRightsExpression {
   readonly useMatrix: Readonly<
     Record<MuseumRightsAction, MuseumRightsUseStatus>
   >;
+  readonly museumPracticeMatrix: Readonly<
+    Record<MuseumRightsAction, MuseumRightsPracticeReading>
+  >;
   readonly legalCode: MuseumRightsLegalCode | null;
 }
 
@@ -205,6 +288,9 @@ export interface MuseumRightsHandbook {
   readonly expressions: readonly MuseumRightsExpression[];
   readonly useStatusDefinitions: Readonly<
     Record<MuseumRightsUseStatus, string>
+  >;
+  readonly practiceStatusDefinitions: Readonly<
+    Record<MuseumRightsPracticeStatus, string>
   >;
   readonly objectAssignments: readonly MuseumRightsObjectAssignment[];
   readonly sourcePaths: readonly string[];
@@ -284,6 +370,7 @@ export interface MuseumPublication {
   readonly artworks: readonly MuseumArtwork[];
   readonly documents: readonly MuseumPublicDocument[];
   readonly institutionalPractice: MuseumInstitutionalPractice;
+  readonly dataArchitecture: MuseumDataArchitecture;
   readonly rightsHandbook: MuseumRightsHandbook;
 }
 

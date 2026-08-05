@@ -1,4 +1,5 @@
 import { assertGovernedMuseumPath } from "./security";
+import { MUSEUM_DATA_ARCHITECTURE_STANDARD_COUNT } from "./dataArchitectureContract";
 import type {
   MuseumInstitutionalPractice,
   MuseumPublication,
@@ -91,12 +92,15 @@ interface MuseumPageSourceProjection {
 export type MuseumRelatedPageSourceLabel =
   | "accessionRecord"
   | "accessionRegister"
+  | "applicationProfile"
   | "collectionEssay"
   | "foundingPrinciples"
   | "giftNarrative"
   | "keysAndGates"
   | "machineRecord"
   | "institutionalStudy"
+  | "implementationAudit"
+  | "machineSchedule"
   | "onchainTransition"
   | "primarySourceRegister"
   | "projectEssay"
@@ -401,6 +405,51 @@ export function buildMuseumPageSourceCatalog(
   ]);
   add(`${MUSEUM_ROOT}/stories/source-and-chronology`, sourceMatrix?.sourcePath);
   addInstitutionalPracticePageSources(publication, add);
+  const dataArchitecture = (publication as Partial<MuseumPublication>)
+    .dataArchitecture;
+  if (
+    dataArchitecture?.id === "6529NM_DATA_ARCHITECTURE_V1" &&
+    dataArchitecture.standards.length ===
+      MUSEUM_DATA_ARCHITECTURE_STANDARD_COUNT
+  ) {
+    const route = `${MUSEUM_ROOT}/methodology/data-architecture`;
+    add(route, dataArchitecture.introduction.sourcePath, [
+      {
+        path: dataArchitecture.profileSourcePath,
+        label: "applicationProfile",
+      },
+      {
+        path: dataArchitecture.caseyImplementation.sourcePath,
+        label: "implementationAudit",
+      },
+    ]);
+    for (const standard of dataArchitecture.standards) {
+      add(`${route}/${standard.slug}`, standard.document.sourcePath, [
+        {
+          path: dataArchitecture.profileSourcePath,
+          label: "applicationProfile",
+        },
+        {
+          path: dataArchitecture.caseyImplementation.sourcePath,
+          label: "implementationAudit",
+        },
+      ]);
+    }
+    add(
+      `${route}/casey-reas-implementation`,
+      dataArchitecture.caseyImplementation.sourcePath,
+      [
+        {
+          path: dataArchitecture.caseySchedule.sourcePath,
+          label: "machineSchedule",
+        },
+        {
+          path: dataArchitecture.profileSourcePath,
+          label: "applicationProfile",
+        },
+      ]
+    );
+  }
   add(`${MUSEUM_ROOT}/about`, openMuseum?.sourcePath, [
     { path: transition?.sourcePath, label: "onchainTransition" },
     { path: founding?.sourcePath, label: "foundingPrinciples" },
