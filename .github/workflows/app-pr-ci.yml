@@ -310,6 +310,7 @@ jobs:
             __tests__/scripts/deployment-bus.test.ts \
             __tests__/scripts/e2e-packs.test.ts \
             __tests__/scripts/manual-deploy-routing-guard.test.ts \
+            __tests__/scripts/museum-release-tier.test.ts \
             __tests__/scripts/package-public-review-artifacts.test.ts \
             __tests__/scripts/production-build-artifact.test.ts \
             __tests__/scripts/production-e2e-dispatch.test.ts \
@@ -426,6 +427,23 @@ jobs:
             mapfile -t related_jest_tests < "${related_tests_file}"
             rm -f "${related_tests_file}"
 
+            if [ "${#jest_test_files[@]}" -gt 0 ]; then
+              declare -A direct_jest_paths=()
+              for test_file in "${jest_test_files[@]}"; do
+                direct_jest_paths["$(realpath "$test_file")"]=1
+              done
+              filtered_related_tests=()
+              for related_test in "${related_jest_tests[@]}"; do
+                related_path="$(realpath "$related_test")"
+                if [ -n "${direct_jest_paths[$related_path]:-}" ]; then
+                  echo "Skipping related Jest duplicate already selected directly: $related_test"
+                else
+                  filtered_related_tests+=("$related_test")
+                fi
+              done
+              related_jest_tests=("${filtered_related_tests[@]}")
+            fi
+
             if [ "${#related_jest_tests[@]}" -eq 0 ]; then
               echo "No related Jest tests found."
               return 0
@@ -451,6 +469,45 @@ jobs:
           if [ "${#jest_test_files[@]}" -eq 0 ] && [ "${#related_source_files[@]}" -eq 0 ]; then
             echo "No Jest-related source or test files need coverage."
           fi
+
+      - name: Classify Museum release tier (report only)
+        if: matrix.lane == 'quality'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          ./bin/6529 run museum:release-tier -- \
+            --base "origin/${BASE_REF}" \
+            --head HEAD \
+            --output test-results/app-pr-ci/museum-release-classification.json
+          node <<'NODE'
+          const fs = require("node:fs");
+          const report = JSON.parse(
+            fs.readFileSync(
+              "test-results/app-pr-ci/museum-release-classification.json",
+              "utf8"
+            )
+          );
+          if (
+            !Array.isArray(report.affected_surfaces) ||
+            typeof report.mode !== "string" ||
+            typeof report.tier !== "string" ||
+            typeof report.reason !== "string" ||
+            !/^[a-f0-9]{64}$/.test(report.classification_digest)
+          ) {
+            throw new Error("Museum release classification report is malformed.");
+          }
+          const lines = [
+            "## Museum release classification",
+            "",
+            `Mode: ${report.mode}`,
+            `Tier: ${report.tier}`,
+            `Affected surfaces: ${report.affected_surfaces.join(", ") || "none"}`,
+            `Reason: ${report.reason}`,
+            `Classification digest: \`${report.classification_digest}\``,
+          ];
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join("\n")}\n`);
+          NODE
 
       - name: Restore Next.js build cache
         id: nextjs_build_cache
