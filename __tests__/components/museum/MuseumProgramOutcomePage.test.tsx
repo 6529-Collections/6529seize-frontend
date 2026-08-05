@@ -12,9 +12,42 @@ const outcome: MuseumObjectRecord = {
   status: "selected_unminted",
   statusAsOf: "2026-08-01T15:03:35Z",
   programId: "6529NM-AP-01",
-  imageUrl: "https://d3lqz0a4bldqgf.cloudfront.net/drops/work.jpg",
-  imageMimeType: "image/jpeg",
-  imageRetrievalStatus: "source URL observed",
+  media: {
+    sourceUrl: "https://d3lqz0a4bldqgf.cloudfront.net/drops/work-original.jpg",
+    sourceMimeType: "image/jpeg",
+    sourceSha256: `sha256:${"a".repeat(64)}`,
+    sourceByteSize: 12000000,
+    sourceWidth: 6000,
+    sourceHeight: 4000,
+    altText: "A figure stands before a bright gate in a dark stone hall.",
+    altTextStatus: "constructed_visual_description_pending_independent_review",
+    variants: [
+      {
+        url: "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/work-640.webp",
+        width: 640,
+        height: 427,
+        mimeType: "image/webp",
+        sha256: `sha256:${"b".repeat(64)}`,
+        byteSize: 32000,
+      },
+      {
+        url: "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/work-1280.webp",
+        width: 1280,
+        height: 853,
+        mimeType: "image/webp",
+        sha256: `sha256:${"c".repeat(64)}`,
+        byteSize: 110000,
+      },
+      {
+        url: "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/work-2400.webp",
+        width: 2400,
+        height: 1600,
+        mimeType: "image/webp",
+        sha256: `sha256:${"d".repeat(64)}`,
+        byteSize: 410000,
+      },
+    ],
+  },
   selectionPlace: 1,
   selectionDate: "2026-07-09T12:00:00Z",
   selectionSourceUrl:
@@ -37,10 +70,26 @@ describe("MuseumProgramOutcomePage", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "Take the Key!" })
     ).toBeInTheDocument();
+    const image = screen.getByRole("img", {
+      name: "A figure stands before a bright gate in a dark stone hall.",
+    });
+    expect(image).toHaveAttribute(
+      "src",
+      "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/work-640.webp"
+    );
+    expect(image).toHaveAttribute(
+      "srcset",
+      expect.stringContaining("work-2400.webp 2400w")
+    );
+    expect(image).toHaveAttribute("width", "640");
+    expect(image).toHaveAttribute("height", "427");
     expect(
-      screen.getByRole("img", { name: "Take the Key! by GulYildiz" })
-    ).toHaveAttribute("src", outcome.imageUrl);
+      screen.getByRole("link", {
+        name: "Open submitted high-resolution image",
+      })
+    ).toHaveAttribute("href", outcome.media?.sourceUrl);
     expect(screen.getByText("Selected; unminted")).toBeInTheDocument();
+    expect(screen.getByText("A Keys and Gates winner")).toBeInTheDocument();
     expect(
       screen.getByText("A door becomes a question of passage.")
     ).toBeInTheDocument();
@@ -52,5 +101,21 @@ describe("MuseumProgramOutcomePage", () => {
     expect(
       screen.getByRole("link", { name: "Back to Keys and Gates" })
     ).toHaveAttribute("href", "/museum/network/programs/6529NM-AP-01");
+  });
+
+  it("does not apply Keys and Gates status copy to another program", () => {
+    render(
+      <MuseumProgramOutcomePage
+        outcome={{ ...outcome, programId: "6529NM-AP-02" }}
+        sourceCommit={"a".repeat(40)}
+      />
+    );
+
+    expect(
+      screen.queryByText("A Keys and Gates winner")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Back to program" })
+    ).toHaveAttribute("href", "/museum/network/programs/6529NM-AP-02");
   });
 });
