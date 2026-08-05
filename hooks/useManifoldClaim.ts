@@ -223,7 +223,6 @@ export interface ManifoldClaim {
   phase: ManifoldPhase;
   memePhase?: MemePhase | undefined;
   nextMemePhase?: MemePhase | undefined;
-  isFetching: boolean;
   isFinalized: boolean;
   isDropComplete: boolean;
   isSoldOut: boolean;
@@ -349,7 +348,6 @@ function buildClaimFromReadData({
     phase,
     memePhase,
     nextMemePhase,
-    isFetching: false,
     isFinalized,
     isDropComplete,
     isSoldOut,
@@ -575,18 +573,6 @@ export function useManifoldClaim({
       onError?.();
     }
   }, [readContract.error, onError]);
-
-  useEffect(() => {
-    setClaim((prevClaim) => {
-      if (prevClaim) {
-        return {
-          ...prevClaim,
-          isFetching: readContract.isFetching,
-        };
-      }
-      return;
-    });
-  }, [readContract.isFetching]);
 
   return {
     claim,
