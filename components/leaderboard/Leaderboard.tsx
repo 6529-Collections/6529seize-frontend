@@ -232,7 +232,7 @@ export default function Leaderboard(
           type="button"
           aria-pressed={props.focus === LeaderboardFocus.TDH}
           onClick={() => props.setFocus(LeaderboardFocus.TDH)}
-          className={`tw-rounded-sm tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-semibold tw-leading-5 tw-transition tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 md:tw-text-base md:tw-leading-6 ${
+          className={`tw-rounded-sm tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-semibold tw-leading-5 tw-transition tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
             props.focus === LeaderboardFocus.TDH
               ? "tw-text-iron-50"
               : "tw-text-iron-500 hover:tw-text-iron-200"
@@ -248,7 +248,7 @@ export default function Leaderboard(
           type="button"
           aria-pressed={props.focus === LeaderboardFocus.INTERACTIONS}
           onClick={() => props.setFocus(LeaderboardFocus.INTERACTIONS)}
-          className={`tw-rounded-sm tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-semibold tw-leading-5 tw-transition tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 md:tw-text-base md:tw-leading-6 ${
+          className={`tw-rounded-sm tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-semibold tw-leading-5 tw-transition tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
             props.focus === LeaderboardFocus.INTERACTIONS
               ? "tw-text-iron-50"
               : "tw-text-iron-500 hover:tw-text-iron-200"
@@ -322,56 +322,58 @@ export default function Leaderboard(
               </Link>
             )}
           </h1>
+        </div>
+        <div className={styles["networkHeaderMain"]}>
           {isNetworkPage && (
-            <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
               <span className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500">
                 TDH View
               </span>
               {printTdhViewToggle()}
             </div>
           )}
-        </div>
-        <div className={styles["networkStats"]}>
-          <div className={styles["networkStat"]}>
-            <span className={styles["networkStatLabel"]}>TDH Block</span>
-            <span className={styles["networkStatValue"]}>
-              {lastTDH ? (
-                <a
-                  href={`https://etherscan.io/block/${lastTDH.block}`}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  {lastTDH.block}
-                </a>
-              ) : (
-                <DotLoader />
-              )}
-            </span>
-          </div>
-          <div className={styles["networkStat"]}>
-            <span className={styles["networkStatLabel"]}>Network TDH</span>
-            <span className={styles["networkStatValue"]}>
-              {selectedNetworkTdh === undefined ? (
-                <DotLoader />
-              ) : (
-                numberWithCommas(selectedNetworkTdh)
-              )}
-            </span>
-          </div>
-          <div className={styles["networkStat"]}>
-            <span className={styles["networkStatLabel"]}>Daily Change</span>
-            <span className={styles["networkStatValue"]}>
-              {isSelectedNetworkTdhChangeLoading ? (
-                <DotLoader />
-              ) : (
-                <>
-                  {numberWithCommas(selectedNetworkTdhChange)}{" "}
-                  <span className="tw-text-sm">
-                    ({selectedGlobalTdhRateChangeLabel})
-                  </span>
-                </>
-              )}
-            </span>
+          <div className={styles["networkStats"]}>
+            <div className={styles["networkStat"]}>
+              <span className={styles["networkStatLabel"]}>TDH Block</span>
+              <span className={styles["networkStatValue"]}>
+                {lastTDH ? (
+                  <a
+                    href={`https://etherscan.io/block/${lastTDH.block}`}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    {lastTDH.block}
+                  </a>
+                ) : (
+                  <DotLoader />
+                )}
+              </span>
+            </div>
+            <div className={styles["networkStat"]}>
+              <span className={styles["networkStatLabel"]}>Network TDH</span>
+              <span className={styles["networkStatValue"]}>
+                {selectedNetworkTdh === undefined ? (
+                  <DotLoader />
+                ) : (
+                  numberWithCommas(selectedNetworkTdh)
+                )}
+              </span>
+            </div>
+            <div className={styles["networkStat"]}>
+              <span className={styles["networkStatLabel"]}>Daily Change</span>
+              <span className={styles["networkStatValue"]}>
+                {isSelectedNetworkTdhChangeLoading ? (
+                  <DotLoader />
+                ) : (
+                  <>
+                    {numberWithCommas(selectedNetworkTdhChange)}{" "}
+                    <span className="tw-text-sm">
+                      ({selectedGlobalTdhRateChangeLabel})
+                    </span>
+                  </>
+                )}
+              </span>
+            </div>
           </div>
         </div>
       </section>
