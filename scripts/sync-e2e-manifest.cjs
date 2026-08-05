@@ -313,8 +313,21 @@ function validateManifest(packs, { root } = {}) {
     validateRemoteContract(problems, pack, environment);
 
     const hasSpecs = Array.isArray(pack.specs) && pack.specs.length > 0;
+    const hasMuseumSpecs =
+      hasSpecs && pack.specs.some((spec) => spec.startsWith("tests/museum/"));
+    const hasNonMuseumSpecs =
+      hasSpecs && pack.specs.some((spec) => !spec.startsWith("tests/museum/"));
     const isMuseumOnly =
       hasSpecs && pack.specs.every((spec) => spec.startsWith("tests/museum/"));
+    if (
+      pack.triggers?.includes("post-deploy") &&
+      hasMuseumSpecs &&
+      hasNonMuseumSpecs
+    ) {
+      problems.push(
+        `${packLabel(pack)}: post-deploy packs must not mix Museum and non-Museum specs.`
+      );
+    }
     if (isMuseumOnly && pack.changeScope !== "museum") {
       problems.push(
         `${packLabel(pack)}: Museum-only packs must set changeScope "museum".`

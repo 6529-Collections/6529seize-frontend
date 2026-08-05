@@ -457,8 +457,9 @@ describe("testing strategy CI plan", () => {
     expect(stagingWorkflow).toContain("--trigger post-deploy");
     expect(stagingWorkflow).toContain("SELECTED_PACK");
     expect(stagingWorkflow).toContain(
-      "--exclude-pack museum-institutional-practice"
+      'args+=(--exclude-pack "$museum_pack_alias")'
     );
+    expect(stagingWorkflow).toContain("const isMuseumPack = (pack) =>");
     expect(stagingWorkflow).toContain("scripts/museum-e2e-change-set.cjs");
     expect(museumChangeSetClassifier).toContain(
       '["diff", "--no-renames", "--name-only", "-z"'

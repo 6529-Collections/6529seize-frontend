@@ -476,10 +476,12 @@ jobs:
             if [ "$pack_exclusion_supported" = true ]; then
               museum_pack_aliases="$(./bin/6529 exec node - <<'NODE'
           const { PACKS } = require("./tests/packs.manifest.cjs");
+          const isMuseumPack = (pack) =>
+            pack.changeScope === "museum" || /^museum-/.test(pack.alias ?? "");
           const aliases = PACKS.filter((pack) =>
             pack.environments.includes("staging") &&
             pack.triggers.includes("post-deploy") &&
-            (pack.changeScope === "museum" || /^museum-/.test(pack.alias ?? ""))
+            isMuseumPack(pack)
           ).map((pack) => pack.alias ?? pack.scriptKey);
           if (aliases.length === 0) {
             process.stderr.write("No staging Museum packs were identified.\n");
@@ -515,13 +517,12 @@ jobs:
           const { PACKS } = require("./tests/packs.manifest.cjs");
           const selected = process.env.SELECTED_PACK || "all";
           const museumRequired = process.env.MUSEUM_E2E_REQUIRED !== "false";
+          const isMuseumPack = (pack) =>
+            pack.changeScope === "museum" || /^museum-/.test(pack.alias ?? "");
           const keys = PACKS.filter((pack) =>
             pack.environments.includes("staging") &&
             pack.triggers.includes("post-deploy") &&
-            (museumRequired || (
-              pack.changeScope !== "museum" &&
-              !/^museum-/.test(pack.alias ?? "")
-            )) &&
+            (museumRequired || !isMuseumPack(pack)) &&
             (selected === "all" || pack.scriptKey === selected || pack.alias === selected)
           ).map((pack) => pack.scriptKey);
           process.stdout.write(JSON.stringify(keys));

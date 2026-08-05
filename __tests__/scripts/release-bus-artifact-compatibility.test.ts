@@ -220,12 +220,15 @@ function createStrictEvidence(root: string, mergeSha: string) {
   });
   fs.writeFileSync(path.join(evidenceRoot, "manifest.json"), manifest);
   fs.writeFileSync(path.join(evidenceRoot, "policy-bundle.txt"), policyBundle);
-  fs.writeFileSync(
-    path.join(evidenceRoot, "SHA256SUMS"),
-    `${sha256(manifest)}  ./manifest.json\n${sha256(
-      policyBundle
-    )}  ./policy-bundle.txt\n`
+  const checksums = spawnSync(
+    "bash",
+    ["-c", "sha256sum ./manifest.json ./policy-bundle.txt"],
+    { cwd: evidenceRoot, encoding: "utf8" }
   );
+  if (checksums.status !== 0) {
+    throw new Error(`Unable to construct strict evidence: ${checksums.stderr}`);
+  }
+  fs.writeFileSync(path.join(evidenceRoot, "SHA256SUMS"), checksums.stdout);
   return evidenceRoot;
 }
 
@@ -343,7 +346,7 @@ set -euo pipefail
 if [ "$*" = "exec node scripts/e2e-packs.cjs --capabilities" ]; then
   case "\${MOCK_RUNNER_CAPABILITY:-old}" in
     current)
-      printf '%s\\n' '{"contract":"release-bus-e2e-runner-capabilities.v1","features":{"readonly_pack_parallelism":{"version":1,"max_parallel":4},"pack_exclusion":{"version":1}}}'
+      printf '%s\\n' '{"contract":"release-bus-e2e-runner-capabilities.v1","features":{"readonly_pack_parallelism":{"version":1,"max_parallel":4},"pack_exclusion":{"version":1},"serial_failed_pack_retry":{"version":1,"max_retries":1}}}'
       exit 0
       ;;
     incompatible)
@@ -354,6 +357,11 @@ if [ "$*" = "exec node scripts/e2e-packs.cjs --capabilities" ]; then
       exit 2
       ;;
   esac
+fi
+if [ "$*" = "exec node -" ] && [ "\${MOCK_MUSEUM_PACK_ALIASES:-0}" = 1 ]; then
+  cat >/dev/null
+  printf '%s\\n' museum-institutional-practice museum-inside-system
+  exit 0
 fi
 printf '%s\\n' "$@" > "$MOCK_6529_ARGS"
 `
@@ -746,6 +754,7 @@ describe("Release Bus artifact rollout compatibility", () => {
           GITHUB_ENV: githubEnv,
           MOCK_6529_ARGS: invocation,
           MUSEUM_E2E_REQUIRED: "false",
+          MOCK_MUSEUM_PACK_ALIASES: "1",
           SELECTED_PACK: "all",
         };
 
@@ -762,14 +771,11 @@ describe("Release Bus artifact rollout compatibility", () => {
         expect(currentArgs).toEqual(
           expect.arrayContaining(["--trigger", "post-deploy"])
         );
-        if (environment === "staging") {
-          expect(currentArgs).toEqual(
-            expect.arrayContaining([
-              "--exclude-pack",
-              "museum-institutional-practice",
-            ])
-          );
-        }
+        expect(
+          currentArgs.flatMap((arg, index) =>
+            arg === "--exclude-pack" ? [currentArgs[index + 1]] : []
+          )
+        ).toEqual(["museum-institutional-practice", "museum-inside-system"]);
 
         expect(
           runShell(step.run!, {
@@ -922,7 +928,7 @@ describe("Release Bus artifact rollout compatibility", () => {
         REUSE_ARTIFACT_DIGEST: artifactDigest,
         REUSE_ARTIFACT_NAME: artifactName,
         REUSE_ARTIFACT_RUN_ID: "1234",
-        RUNNER_TEMP: path.join(root, "runner"),
+        RUNNER_TEMP: path.join(root, "runner").replaceAll("\\", "/"),
         SOURCE_REF: "release-bus-v2/compatibility",
         TRAIN_ID,
         TRAIN_REVISION: "1",
@@ -962,7 +968,7 @@ describe("Release Bus artifact rollout compatibility", () => {
       });
       if (strictEvidenceResult.status !== 0) {
         throw new Error(
-          `strict evidence failed (${strictEvidenceResult.status}): ${strictEvidenceResult.stderr}`
+          `strict evidence failed (${strictEvidenceResult.status}): ${strictEvidenceResult.stderr}\nstdout: ${strictEvidenceResult.stdout}`
         );
       }
       expect(baseEnv.EXPECTED_SHA).not.toBe(baseEnv.MOCK_HEAD_SHA);

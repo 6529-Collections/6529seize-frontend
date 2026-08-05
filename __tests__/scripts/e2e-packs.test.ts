@@ -911,6 +911,9 @@ describe("E2E runner CLI resolution", () => {
       )
     ).toBe(true);
     expect(
+      museumPacks.filter((pack) => pack.environments[0] === "local")
+    ).toHaveLength(2);
+    expect(
       museumPacks.filter((pack) => pack.environments[0] === "staging")
     ).toHaveLength(2);
     expect(

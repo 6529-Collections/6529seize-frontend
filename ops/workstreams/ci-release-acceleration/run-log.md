@@ -162,3 +162,25 @@
   Production promotion was stopped. Replaced literal single-pack exclusion
   with manifest-owned Museum scope selection plus a validator ratchet and
   rollback-compatible `museum-*` fallback.
+- PR #3604 first head `cb658f7c8e6af83af438ab61a1c368ac964eaf0b`
+  failed the quality lane because one compatibility test still expected a
+  single literal Museum alias. The 6529 reviewer also required a contract that
+  the run-step and evidence-step predicates cannot drift. Updated the mock to
+  enumerate both scoped aliases, asserted both exclusions in staging and
+  production, and added byte-identical predicate plus local-pack-count
+  ratchets. Product lanes were cancelled immediately after the quality failure.
+- The follow-up review also added executable coverage for the legacy
+  `museum-*` rollback classifier, locked both selector snippets to the correct
+  deployed environment and `post-deploy` trigger, and rejected mixed Museum and
+  non-Museum specs in every automatic post-deploy pack. The intentionally mixed
+  production aggregate remains available only as a manual operator diagnostic.
+  The release-bus compatibility fixture now writes checksums with the same
+  platform tool used by the workflow and normalizes its Bash-facing temporary
+  path, eliminating a Windows-only false failure without weakening evidence
+  validation.
+- A full `__tests__/scripts` sweep found and replaced one more stale literal
+  single-pack assertion in `testing-strategy.test.ts`. The same Windows run also
+  reported the repository's existing POSIX-only security-test baseline:
+  `O_NOFOLLOW` is unavailable and directory-descriptor `fchmod` returns `EPERM`.
+  Those twelve platform failures are unrelated; hosted Linux remains the
+  authoritative environment for those fail-closed controls.

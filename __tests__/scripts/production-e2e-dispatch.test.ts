@@ -88,7 +88,7 @@ describe("automatic production E2E dispatch", () => {
     expect(job.steps[packsIndex].run).toContain(
       'args+=(--exclude-pack "$museum_pack_alias")'
     );
-    expect(evidence.run).toContain('pack.changeScope !== "museum"');
+    expect(evidence.run).toContain("!isMuseumPack(pack)");
     expect(evidence.run).toContain(".release_binding == null");
     expect(e2eSource).toContain("args+=(--parallel 3)");
     expect(e2eSource).toContain("Restore Playwright browser");

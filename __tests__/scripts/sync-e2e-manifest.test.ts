@@ -70,15 +70,19 @@ describe("E2E pack manifest", () => {
       true
     );
     expect(
-      museumOnlyPacks.map((pack) => [pack.environments[0], pack.scriptKey])
-    ).toEqual([
-      ["local", "test:e2e:museum-institutional-practice"],
-      ["local", "test:e2e:museum-inside-system"],
-      ["staging", "test:e2e:staging:museum-institutional-practice"],
-      ["staging", "test:e2e:staging:museum-inside-system"],
-      ["production", "test:e2e:production:museum-institutional-practice"],
-      ["production", "test:e2e:production:museum-inside-system"],
-    ]);
+      museumOnlyPacks
+        .map((pack) => `${pack.environments[0]}:${pack.scriptKey}`)
+        .sort()
+    ).toEqual(
+      [
+        "local:test:e2e:museum-institutional-practice",
+        "local:test:e2e:museum-inside-system",
+        "production:test:e2e:production:museum-institutional-practice",
+        "production:test:e2e:production:museum-inside-system",
+        "staging:test:e2e:staging:museum-institutional-practice",
+        "staging:test:e2e:staging:museum-inside-system",
+      ].sort()
+    );
   });
 
   it("rejects missing, unknown, or overbroad Museum change scopes", () => {
@@ -107,6 +111,25 @@ describe("E2E pack manifest", () => {
     nonMuseumPack.changeScope = "museum";
     expect(manifestTools.validateManifest([nonMuseumPack])).toContain(
       'pack "test:e2e:staging": changeScope "museum" requires only tests/museum specs.'
+    );
+
+    const mixedPostDeployPack = clonePack(museumPack);
+    delete mixedPostDeployPack.changeScope;
+    mixedPostDeployPack.specs?.push("tests/home/home.spec.ts");
+    expect(manifestTools.validateManifest([mixedPostDeployPack])).toContain(
+      'pack "test:e2e:staging:museum-inside-system": post-deploy packs must not mix Museum and non-Museum specs.'
+    );
+
+    const mutatedManifest = packs.map(clonePack);
+    delete (
+      mutatedManifest.find(
+        (pack) => pack.scriptKey === "test:e2e:staging:museum-inside-system"
+      ) as Pack
+    ).changeScope;
+    expect(
+      manifestTools.validateManifest(mutatedManifest, { root: ROOT })
+    ).toContain(
+      'pack "test:e2e:staging:museum-inside-system": Museum-only packs must set changeScope "museum".'
     );
   });
 
