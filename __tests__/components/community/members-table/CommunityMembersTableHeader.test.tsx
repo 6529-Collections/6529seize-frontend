@@ -44,6 +44,14 @@ describe("CommunityMembersTableHeader", () => {
       screen.getByText(ApiCommunityMembersSortOption.Cic)
     ).toBeInTheDocument();
     expect(screen.getByText("Last Seen")).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Rank" })).toHaveClass(
+      "tw-text-xs",
+      "md:tw-text-sm"
+    );
+    expect(screen.getByRole("button", { name: "level" })).toHaveClass(
+      "tw-text-xs",
+      "md:tw-text-sm"
+    );
   });
 
   it("calls onSort when clicking sortable column", () => {
