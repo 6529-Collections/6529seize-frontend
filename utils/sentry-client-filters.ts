@@ -31,6 +31,9 @@ export {
   shouldFilterInjectedIosAutoplayNotAllowedError,
 } from "./sentry-client-filters/media";
 export {
+  shouldFilterInstagramPageHideBridgeError,
+} from "./sentry-client-filters/instagram-page-hide-bridge";
+export {
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
 } from "./sentry-client-filters/extension-messaging";
