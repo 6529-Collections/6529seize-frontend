@@ -221,3 +221,31 @@ Canonical Museum `main` resolved to
 immutable source exactly, returned `adapter_status=current`, and bound the
 publication commit to the same SHA. The earlier stale-adapter result remains in
 the run log as historical evidence; it is superseded for this integrated tree.
+
+## PR 4 checkpoint — runner benchmark boundary
+
+The dispatch-only runner benchmark is implemented on the PR4 branch. It has a
+trusted `main`-only controller, exact main-ancestor source validation, an
+explicit `ubuntu-latest` control profile, and a candidate profile whose label
+is supplied by the maintainer rather than invented by workflow code. The
+controller polls only its request-correlated candidate runs and cancels only a
+run that it dispatched when the configured timeout expires; an absent or
+timed-out label is recorded as `unavailable`.
+
+The candidate has only read `contents`/`actions` permissions, checks out the
+benchmark tool from the trusted workflow SHA separately from the exact source
+SHA, and runs without deployment credentials. It records queue/setup,
+checkout, install, build, and package timings plus non-secret environment
+metadata in unique JSON/Markdown artifacts. The activation playbook records
+the current state: no larger-runner entitlement, no self-hosted capacity, and
+no runner variables are provisioned. No GitHub setting or runner has been
+activated by this work.
+
+## PR 4 closeout correction
+
+The source trust helper now compares exact-main requests with the declared
+trusted main SHA and accepts a distinct source only when the trusted checkout
+proves ancestry. Focused tests cover both paths. Generated benchmark evidence
+uses UTF-8 em dashes, with no mojibake in the candidate or controller Markdown
+documents. The branch remains intentionally uncommitted and has not changed
+GitHub, runner capacity, or deployment state.

@@ -466,3 +466,61 @@
   longer receives unused repository-content permission; the adversarial
   evidence mutation restores its fixture in `finally`; and the hold-evidence
   ordering contract proves both markers exist before comparing their offsets.
+
+## 2026-08-05 — PR 4 runner benchmark implementation
+
+- Added a dispatch-only controller and candidate workflow for exact-SHA runner
+  measurement. The controller runs on `ubuntu-latest`, validates a strict
+  source SHA/label/profile/timeout/repeat request, and retains `ubuntu-latest`
+  as the explicit control profile.
+- Added request-correlated polling with a bounded default 90-second timeout.
+  A missing or non-terminal candidate is classified as `unavailable`; only the
+  controller's own timed-out run may receive a cancellation request.
+- Added a trusted-tool/source split in the candidate workflow. The candidate
+  source is required to be an exact commit reachable from `main`; the
+  benchmark tool is checked out from the trusted workflow SHA. The candidate
+  has read-only `contents` and `actions` permissions and no deployment
+  credentials.
+- Added canonical JSON/Markdown evidence for controller and candidate runs,
+  including queue/setup, checkout, install, build, and package durations and
+  non-secret runner metadata. Unique artifact names make the uploaded evidence
+  immutable.
+- Added the runner activation playbook. Current status remains explicitly
+  unprovisioned: the organization has no larger-runner entitlement, no
+  self-hosted runners, and no repository runner variables. No activation or
+  settings mutation was performed.
+
+### PR 4 local validation
+
+- Runner workflow contract/self-check: passed.
+- Focused runner contract/evidence suite: 7 tests passed, including strict
+  input rejection, source ancestry rejection, reusable-call fallback,
+  controller/candidate permissions, hashed JSON/Markdown output, and
+  secret-shaped evidence rejection.
+- Changed lint: passed.
+- Changed TypeScript: passed for 1,358 files.
+- Jest and Playwright typecheck ratchets: passed with the existing 2,125
+  diagnostics across 872 files and no new debt.
+- Changed secret scan and workflow-security validation: passed with no
+  findings.
+- Package metadata, script syntax, `git diff --check`, and `codex-diff-check`:
+  passed.
+- The policy-bundle suite remains Linux-only on this Windows host because
+  Node does not expose `fs.constants.O_NOFOLLOW`; hosted Linux remains the
+  authoritative gate. The local `actionlint` binary timed out and is not
+  claimed as passed.
+
+## 2026-08-05 - PR 4 closeout correction
+
+- Corrected `validateTrustedSource` to compare against the declared
+  `trustedMainSha`; the earlier implementation referenced an undeclared
+  variable.
+- Added explicit regression coverage for both an exact trusted-main source
+  and a distinct source commit proven to be an ancestor of trusted main.
+- Confirmed generated evidence Markdown contains UTF-8 em dashes rather than
+  mojibake; the focused evidence test checks both candidate and controller
+  documents.
+- Re-ran the focused contract, evidence, lint, changed TypeScript, secret
+  scan, workflow-security, and diff checks after the correction. No commit,
+  push, PR, merge, deployment, runner activation, or settings mutation was
+  performed.

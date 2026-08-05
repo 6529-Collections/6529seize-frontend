@@ -1,0 +1,351 @@
+name: Runner benchmark candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact trusted main-ancestor commit to benchmark
+        required: true
+        type: string
+      candidate_label:
+        description: Explicit candidate runner label
+        required: true
+        type: string
+      timeout_seconds:
+        description: Controller availability timeout recorded in evidence
+        required: true
+        default: 90
+        type: number
+      profile:
+        description: Control or candidate runner profile
+        required: true
+        default: candidate
+        type: choice
+        options:
+          - control
+          - candidate
+      repeat_number:
+        description: One-based repeat number
+        required: true
+        default: 1
+        type: number
+      request_id:
+        description: Controller-owned request correlation identifier
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      source_sha:
+        required: true
+        type: string
+      candidate_label:
+        required: true
+        type: string
+      timeout_seconds:
+        required: true
+        type: number
+      profile:
+        required: true
+        type: string
+      repeat_number:
+        required: true
+        type: number
+      request_id:
+        required: true
+        type: string
+    secrets: {}
+
+run-name: Runner benchmark candidate / ${{ inputs.request_id }}
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: runner-benchmark-candidate-${{ inputs.request_id }}
+  cancel-in-progress: false
+
+jobs:
+  benchmark:
+    name: Benchmark ${{ inputs.profile }} runner
+    # Reusable calls are always control-only. The controller is the supported
+    # path for selecting candidate capacity.
+    runs-on: ${{ github.event_name == 'workflow_call' && 'ubuntu-latest' || inputs.profile == 'control' && 'ubuntu-latest' || inputs.candidate_label }}
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+    env:
+      SOURCE_SHA: ${{ inputs.source_sha }}
+      CANDIDATE_LABEL: ${{ inputs.candidate_label }}
+      TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
+      PROFILE: ${{ inputs.profile }}
+      REPEAT_NUMBER: ${{ inputs.repeat_number }}
+      REQUEST_ID: ${{ inputs.request_id }}
+      WORKFLOW_SHA: ${{ github.workflow_sha }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Require trusted repository dispatch
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = "6529-Collections/6529seize-frontend"
+          test "$GITHUB_REF" = "refs/heads/main"
+          case "$GITHUB_EVENT_NAME" in
+            workflow_dispatch|workflow_call) ;;
+            *) echo "Unsupported benchmark event." >&2; exit 1 ;;
+          esac
+
+      - name: Capture benchmark start
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/runner-benchmark-candidate"
+          echo "FIRST_STEP_MS=$(date +%s%3N)" >> "$GITHUB_ENV"
+          echo "CHECKOUT_START_MS=$(date +%s%3N)" >> "$GITHUB_ENV"
+
+      - name: Check out trusted benchmark tool
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          sparse-checkout: ops/scripts/runner-benchmark.cjs
+          sparse-checkout-cone-mode: false
+          path: trusted-tools
+          persist-credentials: false
+
+      - name: Check out exact trusted source SHA
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ inputs.source_sha }}
+          fetch-depth: 0
+          path: source
+          persist-credentials: false
+
+      - name: Verify exact source is a main ancestor
+        id: verify_source
+        working-directory: source
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin refs/heads/main:refs/remotes/origin/main
+          checked_out_sha="$(git rev-parse HEAD)"
+          main_sha="$(git rev-parse refs/remotes/origin/main)"
+          is_ancestor=false
+          if git merge-base --is-ancestor "$SOURCE_SHA" "$main_sha"; then
+            is_ancestor=true
+          fi
+          node "$GITHUB_WORKSPACE/trusted-tools/ops/scripts/runner-benchmark.cjs" verify-source \
+            --source-sha "$SOURCE_SHA" \
+            --checked-out-sha "$checked_out_sha" \
+            --main-sha "$main_sha" \
+            --is-ancestor "$is_ancestor"
+
+      - name: Finish checkout timing
+        if: always()
+        run: |
+          if [ -n "${CHECKOUT_START_MS:-}" ]; then
+            echo "CHECKOUT_MS=$(( $(date +%s%3N) - CHECKOUT_START_MS ))" >> "$GITHUB_ENV"
+          fi
+
+      - name: Start dependency timing
+        if: success()
+        run: echo "INSTALL_START_MS=$(date +%s%3N)" >> "$GITHUB_ENV"
+
+      - name: Install Node.js
+        if: success()
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.17.1"
+          cache: pnpm
+          cache-dependency-path: source/pnpm-lock.yaml
+
+      - name: Restore pnpm store
+        if: success()
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-node22-runner-benchmark-pnpm-${{ hashFiles('source/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node22-runner-benchmark-pnpm-
+
+      - name: Install Socket Firewall
+        if: success()
+        id: socket_firewall
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
+        with:
+          mode: firewall
+
+      - name: Install frozen dependencies
+        if: success()
+        id: install_frozen
+        working-directory: source
+        env:
+          SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
+        run: ./bin/6529 install:frozen
+
+      - name: Finish dependency timing
+        if: always()
+        run: |
+          if [ -n "${INSTALL_START_MS:-}" ]; then
+            echo "INSTALL_MS=$(( $(date +%s%3N) - INSTALL_START_MS ))" >> "$GITHUB_ENV"
+          fi
+
+      - name: Start build timing
+        if: success()
+        run: echo "BUILD_START_MS=$(date +%s%3N)" >> "$GITHUB_ENV"
+
+      - name: Build exact source without deployment credentials
+        if: success()
+        id: build_exact_source
+        working-directory: source
+        env:
+          NODE_ENV: production
+          VERSION: ${{ inputs.source_sha }}
+          API_ENDPOINT: https://api.6529.io
+          WS_ENDPOINT: wss://ws.6529.io
+          ALLOWLIST_API_ENDPOINT: https://allowlist-api.6529.io
+          BASE_ENDPOINT: https://6529.io
+          NEXTGEN_CHAIN_ID: "1"
+          MOBILE_APP_SCHEME: mobile6529
+          CORE_SCHEME: core6529
+          IPFS_API_ENDPOINT: https://api-ipfs.6529.io
+          IPFS_GATEWAY_ENDPOINT: https://ipfs.6529.io
+          ASSETS_FROM_S3: "false"
+        run: ./bin/6529 run build:ci
+
+      - name: Finish build timing
+        if: always()
+        run: |
+          if [ -n "${BUILD_START_MS:-}" ]; then
+            echo "BUILD_MS=$(( $(date +%s%3N) - BUILD_START_MS ))" >> "$GITHUB_ENV"
+          fi
+
+      - name: Start package timing
+        if: success()
+        run: echo "PACKAGE_START_MS=$(date +%s%3N)" >> "$GITHUB_ENV"
+
+      - name: Package build output for measurement
+        if: success()
+        id: package_build_output
+        working-directory: source
+        env:
+          PACKAGE_OUTPUT: ${{ runner.temp }}/runner-benchmark-candidate/next-build.tar.gz
+        run: |
+          set -euo pipefail
+          test -d .next
+          tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner -czf "$PACKAGE_OUTPUT" .next
+
+      - name: Finish package timing
+        if: always()
+        run: |
+          if [ -n "${PACKAGE_START_MS:-}" ]; then
+            echo "PACKAGE_MS=$(( $(date +%s%3N) - PACKAGE_START_MS ))" >> "$GITHUB_ENV"
+          fi
+
+      - name: Write immutable candidate evidence
+        if: always()
+        env:
+          VERIFY_OUTCOME: ${{ steps.verify_source.outcome }}
+          INSTALL_OUTCOME: ${{ steps.install_frozen.outcome }}
+          BUILD_OUTCOME: ${{ steps.build_exact_source.outcome }}
+          PACKAGE_OUTCOME: ${{ steps.package_build_output.outcome }}
+          RAW_OUTPUT: ${{ runner.temp }}/runner-benchmark-candidate/raw.json
+          EVIDENCE_OUTPUT: ${{ runner.temp }}/runner-benchmark-candidate
+        run: |
+          set -euo pipefail
+          status=success
+          failure_class=""
+          for outcome in "$VERIFY_OUTCOME" "$INSTALL_OUTCOME" "$BUILD_OUTCOME" "$PACKAGE_OUTCOME"; do
+            if [ "$outcome" != success ]; then
+              status=failure
+              failure_class=benchmark_stage_failure
+              break
+            fi
+          done
+          export BENCH_STATUS="$status"
+          export BENCH_FAILURE_CLASS="$failure_class"
+          node <<'NODE'
+          const fs = require("node:fs");
+          const os = require("node:os");
+          const { execFileSync } = require("node:child_process");
+          let queueMs = null;
+          let setupMs = null;
+          try {
+            const run = JSON.parse(
+              execFileSync(
+                "gh",
+                ["api", `repos/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`],
+                { encoding: "utf8" }
+              )
+            );
+            const createdMs = Date.parse(run.created_at);
+            const startedMs = Date.parse(run.run_started_at);
+            const firstStepMs = Number(process.env.FIRST_STEP_MS);
+            if (Number.isFinite(createdMs) && Number.isFinite(startedMs)) {
+              queueMs = Math.max(0, startedMs - createdMs);
+              if (Number.isFinite(firstStepMs)) {
+                setupMs = Math.max(0, firstStepMs - startedMs);
+              }
+            }
+          } catch {
+            // Evidence remains valid with null queue/setup timings if the read-only run readback is unavailable.
+          }
+          const raw = {
+            source_sha: process.env.SOURCE_SHA,
+            candidate_label: process.env.CANDIDATE_LABEL,
+            timeout_seconds: Number(process.env.TIMEOUT_SECONDS),
+            profile: process.env.PROFILE,
+            repeat_count: Number(process.env.REPEAT_NUMBER),
+            repeat: Number(process.env.REPEAT_NUMBER),
+            status: process.env.BENCH_STATUS,
+            repository: process.env.GITHUB_REPOSITORY,
+            workflow_sha: process.env.WORKFLOW_SHA,
+            run_id: process.env.GITHUB_RUN_ID,
+            request_id: process.env.REQUEST_ID,
+            observed_at: new Date().toISOString(),
+            timings_ms: {
+              queue_ms: queueMs,
+              setup_ms: setupMs,
+              checkout_ms: process.env.CHECKOUT_MS || null,
+              install_ms: process.env.INSTALL_MS || null,
+              build_ms: process.env.BUILD_MS || null,
+              package_ms: process.env.PACKAGE_MS || null,
+            },
+            environment: {
+              runner_os: process.env.RUNNER_OS,
+              runner_arch: process.env.RUNNER_ARCH,
+              runner_environment: process.env.RUNNER_ENVIRONMENT,
+              node_version: (() => {
+                try {
+                  return require("node:child_process").execFileSync("node", ["--version"], { encoding: "utf8" }).trim();
+                } catch {
+                  return "unavailable";
+                }
+              })(),
+              pnpm_version: (() => {
+                try {
+                  return require("node:child_process").execFileSync("pnpm", ["--version"], { encoding: "utf8" }).trim();
+                } catch {
+                  return "unavailable";
+                }
+              })(),
+              cpu_count: os.cpus().length,
+              kernel_release: os.release(),
+            },
+            failure_class: process.env.BENCH_FAILURE_CLASS || null,
+            failure_reason: process.env.BENCH_STATUS === "success" ? null : "one or more benchmark stages did not complete",
+          };
+          fs.mkdirSync(require("node:path").dirname(process.env.RAW_OUTPUT), { recursive: true });
+          fs.writeFileSync(process.env.RAW_OUTPUT, `${JSON.stringify(raw)}\n`);
+          NODE
+          node "$GITHUB_WORKSPACE/trusted-tools/ops/scripts/runner-benchmark.cjs" write-evidence \
+            --input "$RAW_OUTPUT" \
+            --output-dir "$EVIDENCE_OUTPUT"
+
+      - name: Upload immutable candidate evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: runner-benchmark-candidate-${{ inputs.source_sha }}-${{ inputs.request_id }}
+          path: |
+            ${{ runner.temp }}/runner-benchmark-candidate/runner-benchmark-evidence.json
+            ${{ runner.temp }}/runner-benchmark-candidate/runner-benchmark-evidence.md
+          if-no-files-found: ignore
+          retention-days: 30

@@ -1,0 +1,280 @@
+name: Runner benchmark controller
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact trusted main-ancestor commit to benchmark
+        required: true
+        type: string
+      candidate_label:
+        description: Explicit runner label; use ubuntu-latest only with the control profile
+        required: true
+        type: string
+      timeout_seconds:
+        description: Per-candidate availability timeout (default 90 seconds)
+        required: true
+        default: 90
+        type: number
+      profile:
+        description: Control uses ubuntu-latest; candidate probes the supplied label
+        required: true
+        default: candidate
+        type: choice
+        options:
+          - control
+          - candidate
+      repeat_count:
+        description: Number of sequential exact-SHA observations (1-5)
+        required: true
+        default: 1
+        type: number
+
+run-name: Runner benchmark / ${{ inputs.profile }} / ${{ inputs.source_sha }}
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: runner-benchmark-controller-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate benchmark request
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: write
+    outputs:
+      source_sha: ${{ steps.normalized.outputs.source_sha }}
+      candidate_label: ${{ steps.normalized.outputs.candidate_label }}
+      timeout_seconds: ${{ steps.normalized.outputs.timeout_seconds }}
+      profile: ${{ steps.normalized.outputs.profile }}
+      repeat_count: ${{ steps.normalized.outputs.repeat_count }}
+    steps:
+      - name: Require trusted default-branch dispatch
+        env:
+          EXPECTED_REPOSITORY: 6529-Collections/6529seize-frontend
+          EXPECTED_REF: refs/heads/main
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = "$EXPECTED_REPOSITORY"
+          test "$GITHUB_REF" = "$EXPECTED_REF"
+          test "$GITHUB_EVENT_NAME" = workflow_dispatch
+
+      - name: Check out trusted benchmark tool
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          sparse-checkout: ops/scripts/runner-benchmark.cjs
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Install pinned Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.17.1"
+
+      - name: Validate strict inputs
+        id: normalized
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          CANDIDATE_LABEL: ${{ inputs.candidate_label }}
+          TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
+          PROFILE: ${{ inputs.profile }}
+          REPEAT_COUNT: ${{ inputs.repeat_count }}
+        run: |
+          set -euo pipefail
+          normalized="$(node ops/scripts/runner-benchmark.cjs validate \
+            --source-sha "$SOURCE_SHA" \
+            --candidate-label "$CANDIDATE_LABEL" \
+            --timeout-seconds "$TIMEOUT_SECONDS" \
+            --profile "$PROFILE" \
+            --repeat-count "$REPEAT_COUNT")"
+          jq -e '(.contract == "runner-benchmark-inputs-v1") and (.source_sha | test("^[a-f0-9]{40}$"))' <<< "$normalized" >/dev/null
+          while IFS='=' read -r key value; do
+            echo "$key=$value" >> "$GITHUB_OUTPUT"
+          done < <(jq -r 'to_entries[] | "\(.key)=\(.value)"' <<< "$normalized" | sed 's/^source_sha=/source_sha=/; s/^candidate_label=/candidate_label=/; s/^timeout_seconds=/timeout_seconds=/; s/^profile=/profile=/; s/^repeat_count=/repeat_count=/')
+
+      - name: Verify source is reachable from trusted main
+        env:
+          SOURCE_SHA: ${{ steps.normalized.outputs.source_sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          commit_sha="$(gh api "repos/$GITHUB_REPOSITORY/commits/$SOURCE_SHA" --jq '.sha')"
+          test "$commit_sha" = "$SOURCE_SHA"
+          main_sha="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha')"
+          compare_status="$(gh api "repos/$GITHUB_REPOSITORY/compare/$SOURCE_SHA...$main_sha" --jq '.status')"
+          case "$compare_status" in
+            identical|ahead) ;;
+            *)
+              echo "Source SHA is not a trusted main-ancestor: $compare_status" >&2
+              exit 1
+              ;;
+          esac
+          node ops/scripts/runner-benchmark.cjs verify-source \
+            --source-sha "$SOURCE_SHA" \
+            --checked-out-sha "$SOURCE_SHA" \
+            --main-sha "$main_sha" \
+            --is-ancestor true
+
+  dispatch:
+    name: Dispatch and observe runner candidate
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      actions: write
+    env:
+      SOURCE_SHA: ${{ needs.validate.outputs.source_sha }}
+      CANDIDATE_LABEL: ${{ needs.validate.outputs.candidate_label }}
+      TIMEOUT_SECONDS: ${{ needs.validate.outputs.timeout_seconds }}
+      PROFILE: ${{ needs.validate.outputs.profile }}
+      REPEAT_COUNT: ${{ needs.validate.outputs.repeat_count }}
+      WORKFLOW_SHA: ${{ github.workflow_sha }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check out trusted benchmark tool
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          sparse-checkout: ops/scripts/runner-benchmark.cjs
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Install pinned Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.17.1"
+
+      - name: Dispatch and poll only this benchmark's candidate runs
+        id: observe
+        run: |
+          set -euo pipefail
+          evidence_dir="$RUNNER_TEMP/runner-benchmark-controller"
+          mkdir -p "$evidence_dir"
+          results_file="$evidence_dir/results.jsonl"
+          : > "$results_file"
+          controller_started_ms="$(date +%s%3N)"
+
+          for repeat in $(seq 1 "$REPEAT_COUNT"); do
+            request_id="runner-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${repeat}"
+            request_started_ms="$(date +%s%3N)"
+            payload="$(jq -n \
+              --arg source_sha "$SOURCE_SHA" \
+              --arg candidate_label "$CANDIDATE_LABEL" \
+              --arg timeout_seconds "$TIMEOUT_SECONDS" \
+              --arg profile "$PROFILE" \
+              --arg repeat_number "$repeat" \
+              --arg request_id "$request_id" \
+              '{ref:"main",inputs:{source_sha:$source_sha,candidate_label:$candidate_label,timeout_seconds:$timeout_seconds,profile:$profile,repeat_number:$repeat_number,request_id:$request_id}}')"
+            printf '%s' "$payload" | gh api \
+              --method POST \
+              "repos/$GITHUB_REPOSITORY/actions/workflows/runner-benchmark-candidate.yml/dispatches" \
+              --input - >/dev/null
+
+            deadline_ms=$((request_started_ms + TIMEOUT_SECONDS * 1000))
+            run_id=""
+            run_status="queued"
+            run_conclusion=""
+            observed_ms=""
+            dispatch_ms=""
+            cancellation_requested=false
+            failure_class=""
+
+            while [ "$(date +%s%3N)" -lt "$deadline_ms" ]; do
+              title="Runner benchmark candidate / $request_id"
+              run_id="$(gh api \
+                "repos/$GITHUB_REPOSITORY/actions/workflows/runner-benchmark-candidate.yml/runs?event=workflow_dispatch&per_page=100" |
+                jq -r --arg title "$title" '[.workflow_runs[] | select(.display_title == $title) | select(.head_branch == "main")] | sort_by(.created_at) | last | .id // empty')"
+              if [ -n "$run_id" ]; then
+                run_json="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id")"
+                run_status="$(jq -r '.status' <<< "$run_json")"
+                run_conclusion="$(jq -r '.conclusion // empty' <<< "$run_json")"
+                if [ -z "$dispatch_ms" ]; then
+                  dispatch_ms=$(( $(date +%s%3N) - request_started_ms ))
+                fi
+                if [ "$run_status" = completed ]; then
+                  observed_ms=$(( $(date +%s%3N) - request_started_ms ))
+                  break
+                fi
+              fi
+              sleep 5
+            done
+
+            if [ -z "$observed_ms" ]; then
+              observed_ms=$(( $(date +%s%3N) - request_started_ms ))
+              if [ -z "$run_id" ]; then
+                title="Runner benchmark candidate / $request_id"
+                run_id="$(gh api \
+                  "repos/$GITHUB_REPOSITORY/actions/workflows/runner-benchmark-candidate.yml/runs?event=workflow_dispatch&per_page=100" |
+                  jq -r --arg title "$title" '[.workflow_runs[] | select(.display_title == $title) | select(.head_branch == "main")] | sort_by(.created_at) | last | .id // empty')"
+                if [ -n "$run_id" ]; then
+                  run_status="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id" --jq '.status')"
+                fi
+              fi
+              if [ -n "$run_id" ] && [ "$run_status" != completed ]; then
+                gh api --method POST "repos/$GITHUB_REPOSITORY/actions/runs/$run_id/cancel" >/dev/null || true
+                cancellation_requested=true
+                failure_class="candidate_timeout"
+              else
+                failure_class="candidate_unavailable"
+              fi
+              status=unavailable
+            elif [ "$run_conclusion" = success ]; then
+              status=success
+            elif [ "$run_conclusion" = cancelled ]; then
+              status=cancelled
+              failure_class="candidate_cancelled"
+            else
+              status=failure
+              failure_class="candidate_failure"
+            fi
+
+            jq -n \
+              --argjson repeat "$repeat" \
+              --arg request_id "$request_id" \
+              --arg run_id "$run_id" \
+              --arg status "$status" \
+              --arg failure_class "$failure_class" \
+              --argjson dispatch_ms "${dispatch_ms:-null}" \
+              --argjson observed_ms "$observed_ms" \
+              --argjson cancellation_requested "$cancellation_requested" \
+              '{repeat:$repeat,request_id:$request_id,run_id:(if $run_id == "" then null else $run_id end),status:$status,failure_class:(if $failure_class == "" then null else $failure_class end),dispatch_ms:$dispatch_ms,observed_ms:$observed_ms,cancellation_requested:$cancellation_requested}' \
+              >> "$results_file"
+          done
+
+          results_json="$(jq -s . "$results_file")"
+          controller_elapsed_ms=$(( $(date +%s%3N) - controller_started_ms ))
+          raw="$evidence_dir/controller-raw.json"
+          jq -n \
+            --arg source_sha "$SOURCE_SHA" \
+            --arg candidate_label "$CANDIDATE_LABEL" \
+            --arg timeout_seconds "$TIMEOUT_SECONDS" \
+            --arg profile "$PROFILE" \
+            --arg repeat_count "$REPEAT_COUNT" \
+            --arg repository "$GITHUB_REPOSITORY" \
+            --arg controller_run_id "$GITHUB_RUN_ID" \
+            --arg workflow_sha "$WORKFLOW_SHA" \
+            --arg observed_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --argjson controller_elapsed_ms "$controller_elapsed_ms" \
+            --argjson results "$results_json" \
+            '{source_sha:$source_sha,candidate_label:$candidate_label,timeout_seconds:($timeout_seconds|tonumber),profile:$profile,repeat_count:($repeat_count|tonumber),repository:$repository,controller_run_id:$controller_run_id,workflow_sha:$workflow_sha,observed_at:$observed_at,controller_elapsed_ms:$controller_elapsed_ms,results:$results}' \
+            > "$raw"
+          node ops/scripts/runner-benchmark.cjs write-controller-evidence \
+            --input "$raw" \
+            --output-dir "$evidence_dir"
+
+      - name: Upload immutable controller evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: runner-benchmark-controller-${{ github.run_id }}
+          path: ${{ runner.temp }}/runner-benchmark-controller/runner-benchmark-controller-evidence.*
+          if-no-files-found: ignore
+          retention-days: 30
