@@ -165,6 +165,7 @@ export const REACT_DOM_INSERT_BEFORE_RUNTIME_FUNCTIONS = new Set([
   "commitMutationEffectsOnFiber",
   "recursivelyTraverseMutationEffects",
 ]);
+export const JOIN_6529_ROUTE_PATH = "/join-6529";
 export const WAVES_ROUTE_PATH = "/waves";
 export const GRADIENT_ROUTE_PATH = "/6529-gradient";
 export const USER_PROFILE_ROUTE_TRANSACTION = "/:user";
