@@ -38,45 +38,53 @@ export function useMarkWaveNotificationsRead(): (
   options?: MarkWaveNotificationsReadOptions
 ) => Promise<MarkWaveNotificationsReadResult> {
   const { markWaveNotificationsRead } = useWaveNotificationsReadMarkerState();
-  const { applyServerState, beginRead, reconcileFailedRead } =
+  const { applyServerState, beginRead, cancelRead, reconcileFailedRead } =
     useDmUnreadActions();
 
   return useCallback(
-    async (
+    (
       waveId: string,
       options?: MarkWaveNotificationsReadOptions
     ): Promise<MarkWaveNotificationsReadResult> => {
       const readOperation = beginRead(waveId, options?.readThroughSerialNo);
-      try {
-        const result = await markWaveNotificationsRead(
-          waveId,
-          readOperation
-            ? {
-                ...options,
-                readThroughSerialNo: readOperation.readThroughSerialNo,
-                onReadResponse: (response) => {
-                  options?.onReadResponse?.(response);
-                  if (response.dm_unread_state) {
-                    applyServerState(response.dm_unread_state);
-                  }
-                },
-              }
-            : options
-        );
-        if (readOperation && result === "skipped") {
-          await reconcileFailedRead(readOperation);
-        }
-        return result;
-      } catch (error) {
-        if (readOperation) {
-          await reconcileFailedRead(readOperation);
-        }
-        throw error;
+      const shouldHandleDmResponse =
+        readOperation !== null || options?.requestDmUnreadState === true;
+      if (!shouldHandleDmResponse) {
+        return markWaveNotificationsRead(waveId, options);
       }
+
+      const markDmRead = async (): Promise<MarkWaveNotificationsReadResult> => {
+        try {
+          const result = await markWaveNotificationsRead(waveId, {
+            ...options,
+            readThroughSerialNo:
+              readOperation?.readThroughSerialNo ??
+              options?.readThroughSerialNo,
+            onReadResponse: (response) => {
+              options?.onReadResponse?.(response);
+              if (response.dm_unread_state) {
+                applyServerState(response.dm_unread_state);
+              }
+            },
+          });
+          if (readOperation && result === "skipped") {
+            cancelRead(readOperation);
+          }
+          return result;
+        } catch (error) {
+          if (readOperation) {
+            await reconcileFailedRead(readOperation);
+          }
+          throw error;
+        }
+      };
+
+      return markDmRead();
     },
     [
       applyServerState,
       beginRead,
+      cancelRead,
       markWaveNotificationsRead,
       reconcileFailedRead,
     ]

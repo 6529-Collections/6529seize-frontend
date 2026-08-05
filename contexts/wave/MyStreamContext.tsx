@@ -51,7 +51,7 @@ interface WavesContextData {
   readonly loadSubwavesForParent: (parentWaveId: string) => void;
   readonly prefetchSubwavesForParent: (parentWaveId: string) => void;
   readonly loadingSubwaveParentIds: readonly string[];
-  readonly markWaveRead: (waveId: string) => void;
+  readonly markWaveRead: (waveId: string, readThroughSerialNo?: number) => void;
   readonly restoreWaveUnreadCount: (waveId: string, count?: number) => void;
 }
 
@@ -252,8 +252,11 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const lastBrowserResumeSyncAtRef = useRef(0);
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
   const markDirectMessageRead = useCallback(
-    (waveId: string) => {
-      void markWaveNotificationsRead(waveId).catch(() => undefined);
+    (waveId: string, readThroughSerialNo?: number) => {
+      void markWaveNotificationsRead(waveId, {
+        readThroughSerialNo,
+        requestDmUnreadState: true,
+      }).catch(() => undefined);
     },
     [markWaveNotificationsRead]
   );

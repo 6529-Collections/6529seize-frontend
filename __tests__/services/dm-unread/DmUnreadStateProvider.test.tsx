@@ -137,6 +137,27 @@ describe("DmUnreadStateProvider", () => {
     expect(screen.getByTestId("wave")).toHaveTextContent("3");
   });
 
+  it("keeps empty state and reports an initial snapshot failure", async () => {
+    const error = new Error("snapshot failed");
+    const consoleError = jest.spyOn(console, "error").mockImplementation();
+    commonApiFetchMock.mockRejectedValueOnce(error);
+
+    render(
+      <DmUnreadStateProvider>
+        <Capture />
+      </DmUnreadStateProvider>
+    );
+
+    await waitFor(() =>
+      expect(consoleError).toHaveBeenCalledWith(
+        "Failed to synchronize DM unread state",
+        error
+      )
+    );
+    expect(screen.getByTestId("messages")).toHaveTextContent("0");
+    expect(screen.getByTestId("wave")).toHaveTextContent("0");
+  });
+
   it("takes one recovery snapshot on reconnect and visible foreground events", async () => {
     const { rerender } = render(
       <DmUnreadStateProvider>

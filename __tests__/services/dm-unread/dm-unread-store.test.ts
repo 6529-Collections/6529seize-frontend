@@ -43,6 +43,31 @@ describe("DmUnreadStore", () => {
     });
   });
 
+  it("clamps negative server counters and serials to zero", () => {
+    const store = new DmUnreadStore();
+    store.applyServerState(
+      state({
+        unreadCount: -2,
+        firstUnreadSerialNo: -1,
+        latestDropSerialNo: -4,
+        latestReadSerialNo: -3,
+        version: -1,
+      })
+    );
+
+    expect(
+      getDmUnreadConversation(store.getSnapshot(), "profile-a", "wave-a")
+    ).toEqual({
+      profile_id: "profile-a",
+      wave_id: "wave-a",
+      unread_count: 0,
+      first_unread_drop_serial_no: null,
+      latest_drop_serial_no: 0,
+      latest_read_serial_no: 0,
+      version: 0,
+    });
+  });
+
   it("derives totals from multiple messages across multiple conversations", () => {
     const store = new DmUnreadStore();
     store.applyServerState(state({ unreadCount: 2, version: 1 }));

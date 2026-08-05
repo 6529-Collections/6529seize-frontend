@@ -44,6 +44,7 @@ interface DmUnreadContextValue {
   readonly reconcileFailedRead: (
     operation: DmUnreadReadOperation
   ) => Promise<void>;
+  readonly cancelRead: (operation: DmUnreadReadOperation) => void;
 }
 
 const DmUnreadContext = createContext<DmUnreadContextValue | null>(null);
@@ -90,21 +91,20 @@ export function DmUnreadStateProvider({
   const { activeProfileProxy, connectedProfile, isAuthenticated } = useAuth();
   const { isActive, isCapacitor } = useCapacitor();
   const [authRevision, setAuthRevision] = useState(0);
-  const storeRef = useRef<DmUnreadStore | null>(null);
-  if (!storeRef.current) {
-    storeRef.current = new DmUnreadStore();
-  }
-  const store = storeRef.current;
+  const [store] = useState(() => new DmUnreadStore());
   const activeProfileId =
     activeProfileProxy?.created_by.id ?? connectedProfile?.id ?? null;
   const activeProfileIdRef = useRef(activeProfileId);
-  activeProfileIdRef.current = activeProfileId;
   const latestSnapshotRequestByProfileRef = useRef(new Map<string, number>());
   const nextSnapshotRequestIdRef = useRef(1);
   const previousWebSocketStatusRef = useRef<WebSocketStatus | null>(null);
   const previousMobileActiveRef = useRef(isActive);
   const authJwt = getAuthJwt();
   const authFingerprint = getAuthTokenFingerprint(authJwt);
+
+  useEffect(() => {
+    activeProfileIdRef.current = activeProfileId;
+  }, [activeProfileId]);
 
   useEffect(() => {
     const handleAuthChanged = () =>
@@ -156,14 +156,19 @@ export function DmUnreadStateProvider({
   const requestActiveSnapshot = useCallback(async (): Promise<boolean> => {
     const profileId = activeProfileIdRef.current;
     const jwt = getAuthJwt();
-    if (!profileId || !isAuthJwtUsable(jwt)) {
+    if (!profileId || typeof jwt !== "string" || !isAuthJwtUsable(jwt)) {
       return false;
     }
     return requestSnapshot(profileId, jwt);
   }, [requestSnapshot]);
 
   useEffect(() => {
-    if (!activeProfileId || !isAuthenticated || !isAuthJwtUsable(authJwt)) {
+    if (
+      !activeProfileId ||
+      !isAuthenticated ||
+      typeof authJwt !== "string" ||
+      !isAuthJwtUsable(authJwt)
+    ) {
       return;
     }
     void requestSnapshot(activeProfileId, authJwt);
@@ -218,6 +223,8 @@ export function DmUnreadStateProvider({
       : WebSocketStatus.DISCONNECTED;
     previousWebSocketStatusRef.current = currentStatus;
     if (
+      // The websocket hook exposes connection state, not a reconnect callback.
+      // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler
       currentStatus === WebSocketStatus.CONNECTED &&
       previousStatus !== WebSocketStatus.CONNECTED
     ) {
@@ -258,7 +265,7 @@ export function DmUnreadStateProvider({
     async (operation: DmUnreadReadOperation): Promise<void> => {
       if (activeProfileIdRef.current === operation.profileId) {
         const jwt = getAuthJwt();
-        if (isAuthJwtUsable(jwt)) {
+        if (typeof jwt === "string" && isAuthJwtUsable(jwt)) {
           await requestSnapshot(operation.profileId, jwt);
         }
       }
@@ -267,9 +274,16 @@ export function DmUnreadStateProvider({
     [requestSnapshot, store]
   );
 
+  const cancelRead = useCallback(
+    (operation: DmUnreadReadOperation): void => {
+      store.rollbackRead(operation);
+    },
+    [store]
+  );
+
   const contextValue = useMemo<DmUnreadContextValue>(
-    () => ({ activeProfileId, store, reconcileFailedRead }),
-    [activeProfileId, reconcileFailedRead, store]
+    () => ({ activeProfileId, store, reconcileFailedRead, cancelRead }),
+    [activeProfileId, cancelRead, reconcileFailedRead, store]
   );
 
   return (
@@ -327,7 +341,8 @@ export const useDmUnreadConversations = (): Readonly<
 };
 
 export const useDmUnreadActions = () => {
-  const { activeProfileId, reconcileFailedRead, store } = useDmUnreadContext();
+  const { activeProfileId, cancelRead, reconcileFailedRead, store } =
+    useDmUnreadContext();
   return useMemo(
     () => ({
       activeProfileId,
@@ -335,8 +350,9 @@ export const useDmUnreadActions = () => {
         store.applyServerState(state),
       beginRead: (waveId: string, readThroughSerialNo?: number) =>
         store.beginRead(activeProfileId, waveId, readThroughSerialNo),
+      cancelRead,
       reconcileFailedRead,
     }),
-    [activeProfileId, reconcileFailedRead, store]
+    [activeProfileId, cancelRead, reconcileFailedRead, store]
   );
 };

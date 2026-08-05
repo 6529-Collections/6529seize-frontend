@@ -41,14 +41,7 @@ const EMPTY_SUMMARY: DmUnreadSummary = {
   hasUnread: false,
 };
 
-const toCount = (value: number): number => {
-  if (!Number.isFinite(value) || value <= 0) {
-    return 0;
-  }
-  return Math.floor(value);
-};
-
-const toSerialNo = (value: number): number => {
+const toNonNegativeInteger = (value: number): number => {
   if (!Number.isFinite(value) || value <= 0) {
     return 0;
   }
@@ -64,14 +57,14 @@ const normalizeState = (
   return {
     profile_id: state.profile_id,
     wave_id: state.wave_id,
-    unread_count: toCount(state.unread_count),
+    unread_count: toNonNegativeInteger(state.unread_count),
     first_unread_drop_serial_no:
       state.first_unread_drop_serial_no === null
         ? null
-        : toSerialNo(state.first_unread_drop_serial_no) || null,
-    latest_drop_serial_no: toSerialNo(state.latest_drop_serial_no),
-    latest_read_serial_no: toSerialNo(state.latest_read_serial_no),
-    version: toCount(state.version),
+        : toNonNegativeInteger(state.first_unread_drop_serial_no) || null,
+    latest_drop_serial_no: toNonNegativeInteger(state.latest_drop_serial_no),
+    latest_read_serial_no: toNonNegativeInteger(state.latest_read_serial_no),
+    version: toNonNegativeInteger(state.version),
   };
 };
 
@@ -229,9 +222,9 @@ export class DmUnreadStore {
     const current = profile?.conversations[waveId];
     const targetSerialNo = Math.max(
       current?.server.latest_drop_serial_no ?? 0,
-      toSerialNo(requestedSerialNo ?? 0)
+      toNonNegativeInteger(requestedSerialNo ?? 0)
     );
-    if (!current || targetSerialNo <= 0) {
+    if (!profile || !current || targetSerialNo <= 0) {
       return null;
     }
     if (
@@ -277,7 +270,7 @@ export class DmUnreadStore {
   rollbackRead(operation: DmUnreadReadOperation): boolean {
     const profile = this.snapshot.profiles[operation.profileId];
     const current = profile?.conversations[operation.waveId];
-    if (current?.optimisticRead?.id !== operation.id) {
+    if (!profile || current?.optimisticRead?.id !== operation.id) {
       return false;
     }
     this.publish({

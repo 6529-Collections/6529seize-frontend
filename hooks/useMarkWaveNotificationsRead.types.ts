@@ -12,7 +12,8 @@ export type MarkWaveNotificationsReadResult = "sent" | "skipped";
 export interface MarkWaveNotificationsReadOptions {
   readonly shouldSend?: () => boolean;
   readonly queueIfBlocked?: boolean;
-  readonly readThroughSerialNo?: number;
+  readonly readThroughSerialNo?: number | undefined;
+  readonly requestDmUnreadState?: boolean;
   readonly onReadResponse?: (response: ApiMarkWaveReadResponse) => void;
 }
 

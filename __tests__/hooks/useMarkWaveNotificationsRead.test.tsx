@@ -31,6 +31,7 @@ import type { ReactNode } from "react";
 
 const mockApplyDmServerState = jest.fn();
 const mockBeginDmRead = jest.fn();
+const mockCancelDmRead = jest.fn();
 const mockReconcileFailedDmRead = jest.fn();
 
 jest.mock("@/components/auth/Auth", () => ({
@@ -45,6 +46,7 @@ jest.mock("@/services/dm-unread/DmUnreadStateProvider", () => ({
   useDmUnreadActions: () => ({
     applyServerState: mockApplyDmServerState,
     beginRead: mockBeginDmRead,
+    cancelRead: mockCancelDmRead,
     reconcileFailedRead: mockReconcileFailedDmRead,
   }),
 }));
@@ -225,6 +227,7 @@ describe("useMarkWaveNotificationsRead", () => {
     mockApplyDmServerState.mockReset();
     mockBeginDmRead.mockReset();
     mockBeginDmRead.mockReturnValue(null);
+    mockCancelDmRead.mockReset();
     mockReconcileFailedDmRead.mockReset();
     mockReconcileFailedDmRead.mockResolvedValue(undefined);
     jwtPayloadsByToken.clear();
@@ -311,6 +314,68 @@ describe("useMarkWaveNotificationsRead", () => {
 
     expect(mockReconcileFailedDmRead).toHaveBeenCalledWith(operation);
     expect(mockApplyDmServerState).not.toHaveBeenCalled();
+  });
+
+  it("requests and applies authoritative DM state before a conversation is cached", async () => {
+    const invalidateNotifications = jest.fn();
+    const dmUnreadState = {
+      profile_id: "profile-1",
+      wave_id: "wave-1",
+      unread_count: 0,
+      first_unread_drop_serial_no: null,
+      latest_drop_serial_no: 42,
+      latest_read_serial_no: 42,
+      version: 3,
+    };
+    apiPostWithBodyMock.mockResolvedValueOnce({
+      dm_unread_state: dmUnreadState,
+    });
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-a",
+      connectedProfileId: "profile-1",
+    });
+    const { result } = renderHook(() => useMarkWaveNotificationsRead(), {
+      wrapper: createWrapper(invalidateNotifications),
+    });
+
+    await expect(
+      result.current("wave-1", { requestDmUnreadState: true })
+    ).resolves.toBe("sent");
+
+    expect(apiPostWithBodyMock).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave-1/read",
+      headers: { Authorization: "Bearer jwt-a" },
+      body: {},
+    });
+    expect(mockApplyDmServerState).toHaveBeenCalledWith(dmUnreadState);
+  });
+
+  it("cancels an optimistic DM read without fetching when sending is skipped", async () => {
+    const invalidateNotifications = jest.fn();
+    const operation = {
+      id: 8,
+      profileId: "profile-1",
+      waveId: "wave-1",
+      readThroughSerialNo: 42,
+    };
+    mockBeginDmRead.mockReturnValue(operation);
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-a",
+      connectedProfileId: "profile-1",
+    });
+    const { result } = renderHook(() => useMarkWaveNotificationsRead(), {
+      wrapper: createWrapper(invalidateNotifications),
+    });
+
+    await expect(
+      result.current("wave-1", { shouldSend: () => false })
+    ).resolves.toBe("skipped");
+
+    expect(mockCancelDmRead).toHaveBeenCalledWith(operation);
+    expect(mockReconcileFailedDmRead).not.toHaveBeenCalled();
+    expect(apiPostWithBodyMock).not.toHaveBeenCalled();
   });
 
   it("treats a missing active profile proxy as no proxy", async () => {

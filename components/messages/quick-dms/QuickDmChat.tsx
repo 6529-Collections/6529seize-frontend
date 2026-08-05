@@ -11,6 +11,7 @@ import { useWaveData } from "@/hooks/useWaveData";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getDropQueryKey } from "@/services/api/drop-api";
+import { useDmUnreadConversation } from "@/services/dm-unread/DmUnreadStateProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import type React from "react";
@@ -56,11 +57,14 @@ export const QuickDmChat = ({
   const markDirectMessageRead = directMessages.markWaveRead;
   const { updateEligibility } = useWaveEligibility();
   const { data: wave, isFetching, isError } = useWaveData({ waveId });
+  const unreadConversation = useDmUnreadConversation(waveId);
   const title = getFormattedWaveName({
     name: wave?.name ?? listWave?.name ?? "",
   });
   const avatar = getQuickDmAvatarSource(title, listWave, wave);
-  const listUnreadCount = listWave ? getUnreadCount(listWave) : 0;
+  const listUnreadCount =
+    unreadConversation?.unread_count ??
+    (listWave ? getUnreadCount(listWave) : 0);
   const hasMarkedInitialReadRef = useRef<string | null>(null);
   let chatContent: React.ReactNode = null;
 
@@ -72,8 +76,12 @@ export const QuickDmChat = ({
       return;
     }
 
-    markDirectMessageRead(waveId);
-  }, [markDirectMessageRead, waveId]);
+    markDirectMessageRead(waveId, unreadConversation?.latest_drop_serial_no);
+  }, [
+    markDirectMessageRead,
+    unreadConversation?.latest_drop_serial_no,
+    waveId,
+  ]);
 
   useEffect(() => {
     const shouldMarkRead =
