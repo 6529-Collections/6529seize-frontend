@@ -21,9 +21,16 @@
   - Production E2E 30981386269: success in 2m53s; 11 packs, three workers,
     zero Museum packs, zero retries, zero failures.
 - Merge-to-production was 27m47s. Merge-to-qualified-production was 30m47s.
-- Retained evidence:
-  - `C:\Users\Administrator\.codex\artifacts\ci-release-final\staging-30980599423`
-  - `C:\Users\Administrator\.codex\artifacts\ci-release-final\production-30981386269`
+- Reviewer-accessible retained evidence:
+  - [Staging E2E run 30980599423](https://github.com/6529-Collections/6529seize-frontend/actions/runs/30980599423),
+    artifact `staging-e2e-artifacts-30980599423`, retained by GitHub through
+    2026-09-04.
+  - [Production E2E run 30981386269](https://github.com/6529-Collections/6529seize-frontend/actions/runs/30981386269),
+    artifact `production-e2e-artifacts-30981038834`, retained by GitHub through
+    2026-09-04.
+  - Operator-local mirrors are under
+    `C:\Users\Administrator\.codex\artifacts\ci-release-final`; these are
+    machine-local convenience copies, not the portable review record.
 - No release action remains. A future performance iteration can benchmark a
   provisioned larger build runner against `ubuntu-latest`; runner variables are
   already available, but no unprovisioned label is referenced.

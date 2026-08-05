@@ -223,10 +223,10 @@ release completed production qualification at 06:29:38 UTC.
 The corrected pipeline reached production 27m47s after merge and completed
 automatic production qualification at 30m47s. The original audited production
 deployment took 22m12s by itself; exact-artifact promotion now takes 5m58s, a
-73% reduction. The original final PR gate took 45m09s; the corrected run's
-longest lane took 11m23s, a 75% reduction. More importantly for iteration
-speed, quality, smoke, and critical-shell feedback all completed within 4m39s
-instead of waiting behind the production build.
+73% reduction. The original final PR gate took 45m09s; corrected PR App CI took
+12m23s, also a 73% reduction. More importantly for iteration speed, quality,
+smoke, and critical-shell feedback all completed within 4m39s instead of
+waiting behind the production build.
 
 The Museum-selection contract passed in every layer:
 

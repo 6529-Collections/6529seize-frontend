@@ -198,15 +198,26 @@
 - Automatic staging E2E 30980599423 passed. Retained evidence contains 12
   packs, three workers, zero Museum packs, and zero final failures. Collections
   alone used attempt 2 and passed in 55.7s; all other packs remained on attempt
-  1. Evidence is retained under
-     `C:\Users\Administrator\.codex\artifacts\ci-release-final\staging-30980599423`.
+  1. Reviewer evidence is the `staging-e2e-artifacts-30980599423` artifact on
+     [run 30980599423](https://github.com/6529-Collections/6529seize-frontend/actions/runs/30980599423),
+     retained by GitHub through 2026-09-04.
 - Production run 30981038834 promoted the exact prebuilt artifact in 5m58s.
   Three consecutive live version requests returned exact main
   `2edfb2610c0cca9f49d45c5465c43bba8a20077e` for both served and announced
   versions with `stale:false`.
 - Automatic production E2E 30981386269 passed in 2m53s. Retained evidence
   contains 11 packs, three workers, zero Museum packs, zero retries, and zero
-  failures. Evidence is retained under
-  `C:\Users\Administrator\.codex\artifacts\ci-release-final\production-30981386269`.
+  failures. Reviewer evidence is the `production-e2e-artifacts-30981038834`
+  artifact on
+  [run 30981386269](https://github.com/6529-Collections/6529seize-frontend/actions/runs/30981386269),
+  retained by GitHub through 2026-09-04. Machine-local mirrors remain under
+  `C:\Users\Administrator\.codex\artifacts\ci-release-final` for operator
+  convenience only.
 - Final timing: merge-to-production 27m47s; merge-to-qualified-production
   30m47s. The workstream is complete.
+- Closeout PR #3605 review replaced machine-local-only evidence references with
+  GitHub run/artifact references, corrected the PR comparison to total elapsed
+  time on both sides, and added a tested `ops/**` staging path exclusion. The
+  exclusion is deliberately narrow: public or build-input Markdown remains
+  deployment-triggering. Focused workflow tests pass 62/62 and the Jest type,
+  changed-lint, Bash-parse, formatting, and whitespace ratchets are green.

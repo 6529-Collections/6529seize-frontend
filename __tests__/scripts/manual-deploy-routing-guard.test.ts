@@ -27,6 +27,7 @@ type Workflow = {
   readonly on: {
     readonly push?: {
       readonly branches?: readonly string[];
+      readonly "paths-ignore"?: readonly string[];
     };
     readonly workflow_dispatch?: {
       readonly inputs?: Readonly<Record<string, unknown>>;
@@ -330,6 +331,7 @@ describe("frontend manual deployment routing guards", () => {
     const production = workflow("build-upload-deploy-prod.yml");
 
     expect(staging.on.push?.branches).toEqual(["1a-staging"]);
+    expect(staging.on.push?.["paths-ignore"]).toEqual(["ops/**"]);
     expect(staging.on.workflow_dispatch).toBeDefined();
     expect(production.on.push).toBeUndefined();
     expect(production.on.workflow_dispatch).toBeDefined();
