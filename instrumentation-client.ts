@@ -34,6 +34,7 @@ import {
   shouldFilterInjectedProviderProxyStartsWithError,
   shouldFilterInjectedWalletCollision,
   shouldFilterInstagramPageHideBridgeError,
+  shouldFilterKnownWalletProviderObjectRejection,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
@@ -140,6 +141,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterDisconnectedWalletProviderRejection(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterKnownWalletProviderObjectRejection(event, hint)) {
     return true;
   }
 
