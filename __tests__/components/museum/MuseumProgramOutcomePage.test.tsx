@@ -81,6 +81,8 @@ describe("MuseumProgramOutcomePage", () => {
       "srcset",
       expect.stringContaining("work-2400.webp 2400w")
     );
+    expect(image).toHaveAttribute("width", "640");
+    expect(image).toHaveAttribute("height", "427");
     expect(
       screen.getByRole("link", {
         name: "Open submitted high-resolution image",

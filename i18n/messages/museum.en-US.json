@@ -318,6 +318,7 @@
   "museum.network.objects.viewProject": "View project",
   "museum.network.objects.reading": "About this work",
   "museum.network.objects.readingUnavailable": "The governed public object text is temporarily unavailable. The artwork, credit, rights, and collection facts remain visible.",
+  "museum.network.objects.mediaAltFallback": "{title} by {artist}",
   "museum.network.objects.collectionDetails": "Collection details",
   "museum.network.objects.status": "Status",
   "museum.network.objects.medium": "Medium",

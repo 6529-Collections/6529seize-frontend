@@ -1,5 +1,6 @@
 import { compareLocalized } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { cache } from "react";
 import { getMuseumCorpus } from "./source";
 import type {
@@ -242,7 +243,10 @@ function legacyProgramMedia(
     sourceByteSize: null,
     sourceWidth: null,
     sourceHeight: null,
-    altText: `${title} by ${artist}`,
+    altText: t(DEFAULT_LOCALE, "museum.network.objects.mediaAltFallback", {
+      title,
+      artist,
+    }),
     altTextStatus: "identification_only_fallback",
     variants: [],
   };
