@@ -65,6 +65,8 @@ describe("instrumentation-client", () => {
     "auto.browser.browserapierrors.setTimeout";
   const browserUnhandledRejectionMechanismType =
     "auto.browser.global_handlers.onunhandledrejection";
+  const expectedWaveAbortErrorValue =
+    "AbortError: The user aborted a request.";
   const poperBlockerNetworkErrorMessage =
     "Network request failed. Please check your connection and try again. (/api/dm-drops/unread)";
   const poperBlockerInjectedFetchFrames = [
@@ -337,6 +339,25 @@ describe("instrumentation-client", () => {
         },
       ],
     },
+  });
+
+  const createExpectedWaveReplacementAbortEvent = () => ({
+    ...createUnhandledRejectionEvent(expectedWaveAbortErrorValue),
+    timestamp: 1_785_689_742.621,
+    tags: {
+      "DOMException.code": "20",
+    },
+    breadcrumbs: [
+      {
+        category: "wave.request",
+        message: "wave_request_aborted",
+        timestamp: 1_785_689_742.5,
+        data: {
+          request_kind: "background_sync",
+          trigger: "request_replaced",
+        },
+      },
+    ],
   });
 
   const createPoperBlockerOrphanFetchRejectionEvent = (
@@ -1726,6 +1747,27 @@ describe("instrumentation-client", () => {
 
     expect(result).not.toBeNull();
     expect(result?.tags?.["network_noise_sampled"]).toBe("true");
+  });
+
+  it("drops the exact expected Wave background-sync replacement abort", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createExpectedWaveReplacementAbortEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps the Wave AbortError without the replacement breadcrumb", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      ...createExpectedWaveReplacementAbortEvent(),
+      breadcrumbs: [],
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("drops the normalized Poper Blocker orphan fetch rejection", () => {
