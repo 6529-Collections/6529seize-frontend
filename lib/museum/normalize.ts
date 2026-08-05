@@ -14,6 +14,7 @@ import type {
   MuseumTextDocument,
   MuseumView,
 } from "./types";
+import { KEYS_AND_GATES_PROGRAM_ID } from "./constants";
 
 interface JsonObject {
   readonly [key: string]: unknown;
@@ -117,8 +118,7 @@ function nullableString(value: unknown): string | null {
 }
 
 const PROGRAM_MEDIA_HOSTS = new Set(["d3lqz0a4bldqgf.cloudfront.net"]);
-const PROGRAM_MEDIA_MANIFEST_PATH =
-  "records/programs/6529NM-AP-01/media-manifest.json";
+const PROGRAM_MEDIA_MANIFEST_PATH = `records/programs/${KEYS_AND_GATES_PROGRAM_ID}/media-manifest.json`;
 
 function approvedProgramMediaUrl(value: unknown): string | null {
   if (typeof value !== "string") {
@@ -254,12 +254,20 @@ function programMediaIndex(
   const root = jsonObject(documents[PROGRAM_MEDIA_MANIFEST_PATH]);
   const items = root?.items;
   const result = new Map<string, MuseumProgramMedia>();
+  const seenRecordIds = new Set<string>();
 
   for (const item of Array.isArray(items) ? items : []) {
     if (!isObject(item)) {
       continue;
     }
     const recordId = stringValue(item.record_id);
+    if (recordId.length > 0 && seenRecordIds.has(recordId)) {
+      result.delete(recordId);
+      continue;
+    }
+    if (recordId.length > 0) {
+      seenRecordIds.add(recordId);
+    }
     const source = isObject(item.source) ? item.source : null;
     const presentation = isObject(item.presentation) ? item.presentation : null;
     const sourceUrl = approvedProgramMediaUrl(source?.url);

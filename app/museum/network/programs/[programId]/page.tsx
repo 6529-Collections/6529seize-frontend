@@ -14,6 +14,7 @@ import {
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { formatInteger } from "@/i18n/format";
+import { KEYS_AND_GATES_PROGRAM_ID } from "@/lib/museum/constants";
 import { getMuseumView } from "@/lib/museum/normalize";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
@@ -57,15 +58,21 @@ export default async function MuseumProgramDetailPage({
     museumSlugMatches(item.programId, programId)
   );
   if (!program) notFound();
-  const programEssay = view.methodology.find(
-    (document) => document.path === "docs/programs/keys-and-gates.md"
-  );
+  const isKeysAndGates = program.programId === KEYS_AND_GATES_PROGRAM_ID;
+  const programEssay = isKeysAndGates
+    ? view.methodology.find(
+        (document) => document.path === "docs/programs/keys-and-gates.md"
+      )
+    : undefined;
   const sourceCommit = publicationState.publication?.identity.commit ?? null;
   const programSourceHref =
     sourceCommit === null
       ? buildMuseumRawUrl(program.sourcePath)
       : (buildImmutableMuseumBlobUrl(sourceCommit, program.sourcePath) ??
         buildMuseumRawUrl(program.sourcePath));
+  const selectionPlaceMessageKey = isKeysAndGates
+    ? "museum.network.programs.detail.winnerPlace"
+    : "museum.network.programs.detail.selectionPlace";
 
   return (
     <article>
@@ -86,47 +93,25 @@ export default async function MuseumProgramDetailPage({
           tone={statusTone(program.status)}
         />
       </div>
-      <section
-        aria-labelledby="program-winners-title"
-        className="tw-mt-8 tw-overflow-hidden tw-rounded-xl tw-border tw-border-primary-400/30 tw-bg-iron-900/70"
-      >
-        <div className="tw-p-6 sm:tw-p-8">
-          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
-            {t(DEFAULT_LOCALE, "museum.network.programs.detail.winnersEyebrow")}
-          </p>
-          <h2
-            id="program-winners-title"
-            className="tw-m-0 tw-mt-3 tw-text-2xl tw-font-semibold tw-leading-tight tw-text-white sm:tw-text-3xl"
-          >
-            {t(DEFAULT_LOCALE, "museum.network.programs.detail.winnersTitle", {
-              count: formatInteger(
-                DEFAULT_LOCALE,
-                program.selectedWorks.length
-              ),
-            })}
-          </h2>
-          <p className="tw-m-0 tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-200">
-            {t(
-              DEFAULT_LOCALE,
-              "museum.network.programs.detail.winnersDescription"
-            )}
-          </p>
-        </div>
-        <ol className="tw-m-0 tw-grid tw-list-none tw-gap-px tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-white/10 tw-p-0 md:tw-grid-cols-3">
-          <li className="tw-bg-iron-950 tw-p-5">
-            <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-white">
-              <span aria-hidden="true" className="tw-mr-2 tw-text-success">
-                ✓
-              </span>
+      {isKeysAndGates && (
+        <section
+          aria-labelledby="program-winners-title"
+          className="tw-mt-8 tw-overflow-hidden tw-rounded-xl tw-border tw-border-primary-400/30 tw-bg-iron-900/70"
+        >
+          <div className="tw-p-6 sm:tw-p-8">
+            <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
               {t(
                 DEFAULT_LOCALE,
-                "museum.network.programs.detail.stageSelected"
+                "museum.network.programs.detail.winnersEyebrow"
               )}
             </p>
-            <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-success">
+            <h2
+              id="program-winners-title"
+              className="tw-m-0 tw-mt-3 tw-text-2xl tw-font-semibold tw-leading-tight tw-text-white sm:tw-text-3xl"
+            >
               {t(
                 DEFAULT_LOCALE,
-                "museum.network.programs.detail.stageSelectedStatus",
+                "museum.network.programs.detail.winnersTitle",
                 {
                   count: formatInteger(
                     DEFAULT_LOCALE,
@@ -134,44 +119,78 @@ export default async function MuseumProgramDetailPage({
                   ),
                 }
               )}
-            </p>
-          </li>
-          <li className="tw-bg-iron-950 tw-p-5">
-            <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-white">
-              <span aria-hidden="true" className="tw-mr-2 tw-text-primary-300">
-                02
-              </span>
-              {t(DEFAULT_LOCALE, "museum.network.programs.detail.stageMint")}
-            </p>
-            <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+            </h2>
+            <p className="tw-m-0 tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-200">
               {t(
                 DEFAULT_LOCALE,
-                "museum.network.programs.detail.stageMintStatus"
+                "museum.network.programs.detail.winnersDescription"
               )}
             </p>
-          </li>
-          <li className="tw-bg-iron-950 tw-p-5">
-            <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-white">
-              <span aria-hidden="true" className="tw-mr-2 tw-text-iron-500">
-                03
-              </span>
-              {t(
-                DEFAULT_LOCALE,
-                "museum.network.programs.detail.stageAccession"
-              )}
-            </p>
-            <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
-              {t(
-                DEFAULT_LOCALE,
-                "museum.network.programs.detail.stageAccessionStatus"
-              )}
-            </p>
-          </li>
-        </ol>
-        <p className="tw-m-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-black/30 tw-px-6 tw-py-4 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-px-8">
-          {t(DEFAULT_LOCALE, "museum.network.programs.detail.statusBoundary")}
-        </p>
-      </section>
+          </div>
+          <ol className="tw-m-0 tw-grid tw-list-none tw-gap-px tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-white/10 tw-p-0 md:tw-grid-cols-3">
+            <li className="tw-bg-iron-950 tw-p-5">
+              <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-white">
+                <span aria-hidden="true" className="tw-mr-2 tw-text-success">
+                  ✓
+                </span>
+                {t(
+                  DEFAULT_LOCALE,
+                  "museum.network.programs.detail.stageSelected"
+                )}
+              </p>
+              <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-success">
+                {t(
+                  DEFAULT_LOCALE,
+                  "museum.network.programs.detail.stageSelectedStatus",
+                  {
+                    count: formatInteger(
+                      DEFAULT_LOCALE,
+                      program.selectedWorks.length
+                    ),
+                  }
+                )}
+              </p>
+            </li>
+            <li className="tw-bg-iron-950 tw-p-5">
+              <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-white">
+                <span
+                  aria-hidden="true"
+                  className="tw-mr-2 tw-text-primary-300"
+                >
+                  02
+                </span>
+                {t(DEFAULT_LOCALE, "museum.network.programs.detail.stageMint")}
+              </p>
+              <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+                {t(
+                  DEFAULT_LOCALE,
+                  "museum.network.programs.detail.stageMintStatus"
+                )}
+              </p>
+            </li>
+            <li className="tw-bg-iron-950 tw-p-5">
+              <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-white">
+                <span aria-hidden="true" className="tw-mr-2 tw-text-iron-500">
+                  03
+                </span>
+                {t(
+                  DEFAULT_LOCALE,
+                  "museum.network.programs.detail.stageAccession"
+                )}
+              </p>
+              <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
+                {t(
+                  DEFAULT_LOCALE,
+                  "museum.network.programs.detail.stageAccessionStatus"
+                )}
+              </p>
+            </li>
+          </ol>
+          <p className="tw-m-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-black/30 tw-px-6 tw-py-4 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-px-8">
+            {t(DEFAULT_LOCALE, "museum.network.programs.detail.statusBoundary")}
+          </p>
+        </section>
+      )}
       {program.curatorialFrame && (
         <p className="tw-mt-6 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-200">
           {program.curatorialFrame}
@@ -186,11 +205,21 @@ export default async function MuseumProgramDetailPage({
             id="program-selected-works-title"
             className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white"
           >
-            {t(DEFAULT_LOCALE, "museum.network.programs.detail.selectedWorks")}
+            {t(
+              DEFAULT_LOCALE,
+              isKeysAndGates
+                ? "museum.network.programs.detail.selectedWinners"
+                : "museum.network.programs.detail.selectedWorks"
+            )}
           </h2>
-          <p className="tw-m-0 tw-text-xs tw-text-iron-500">
-            {t(DEFAULT_LOCALE, "museum.network.programs.detail.selectionNote")}
-          </p>
+          {isKeysAndGates && (
+            <p className="tw-m-0 tw-text-xs tw-text-iron-500">
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.programs.detail.selectionNote"
+              )}
+            </p>
+          )}
         </div>
         <div className="tw-mt-4 tw-grid tw-gap-4 md:tw-grid-cols-2 xl:tw-grid-cols-3">
           {program.selectedWorks.map((work) => (
@@ -204,11 +233,9 @@ export default async function MuseumProgramDetailPage({
               meta={
                 work.winnerPlace === null
                   ? undefined
-                  : t(
-                      DEFAULT_LOCALE,
-                      "museum.network.programs.detail.selectionPlace",
-                      { place: work.winnerPlace }
-                    )
+                  : t(DEFAULT_LOCALE, selectionPlaceMessageKey, {
+                      place: work.winnerPlace,
+                    })
               }
             >
               <MuseumStatusBadge

@@ -100,4 +100,20 @@ describe("MuseumProgramOutcomePage", () => {
       screen.getByRole("link", { name: "Back to Keys and Gates" })
     ).toHaveAttribute("href", "/museum/network/programs/6529NM-AP-01");
   });
+
+  it("does not apply Keys and Gates status copy to another program", () => {
+    render(
+      <MuseumProgramOutcomePage
+        outcome={{ ...outcome, programId: "6529NM-AP-02" }}
+        sourceCommit={"a".repeat(40)}
+      />
+    );
+
+    expect(
+      screen.queryByText("A Keys and Gates winner")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Back to program" })
+    ).toHaveAttribute("href", "/museum/network/programs/6529NM-AP-02");
+  });
 });

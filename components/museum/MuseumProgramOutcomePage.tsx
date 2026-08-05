@@ -5,6 +5,7 @@ import { MuseumStatusBadge } from "./MuseumShell";
 import { formatDate } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { KEYS_AND_GATES_PROGRAM_ID } from "@/lib/museum/constants";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication/security";
 import { displayMuseumStatus, statusTone } from "@/lib/museum/presentation";
 import type { MuseumObjectRecord } from "@/lib/museum/types";
@@ -16,8 +17,9 @@ export function MuseumProgramOutcomePage({
   readonly outcome: MuseumObjectRecord;
   readonly sourceCommit: string;
 }) {
+  const isKeysAndGates = outcome.programId === KEYS_AND_GATES_PROGRAM_ID;
   const programHref = `/museum/network/programs/${encodeURIComponent(
-    outcome.programId ?? "6529NM-AP-01"
+    outcome.programId ?? KEYS_AND_GATES_PROGRAM_ID
   )}`;
   const sourceHref = buildImmutableMuseumBlobUrl(
     sourceCommit,
@@ -30,7 +32,12 @@ export function MuseumProgramOutcomePage({
         href={programHref}
         className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-medium tw-text-iron-400 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
       >
-        {t(DEFAULT_LOCALE, "museum.network.objects.backToProgram")}
+        {t(
+          DEFAULT_LOCALE,
+          isKeysAndGates
+            ? "museum.network.objects.backToKeysAndGates"
+            : "museum.network.objects.backToProgram"
+        )}
       </Link>
 
       <header className="tw-mb-8 tw-mt-6">
@@ -48,20 +55,25 @@ export function MuseumProgramOutcomePage({
         </div>
       </header>
 
-      <section
-        aria-label={t(
-          DEFAULT_LOCALE,
-          "museum.network.objects.winnerStatusLabel"
-        )}
-        className="tw-mb-8 tw-rounded-xl tw-border tw-border-primary-400/30 tw-bg-primary-400/10 tw-p-5"
-      >
-        <p className="tw-text-primary-200 tw-m-0 tw-text-sm tw-font-semibold">
-          {t(DEFAULT_LOCALE, "museum.network.objects.winnerStatusTitle")}
-        </p>
-        <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-200">
-          {t(DEFAULT_LOCALE, "museum.network.objects.winnerStatusDescription")}
-        </p>
-      </section>
+      {isKeysAndGates && (
+        <section
+          aria-label={t(
+            DEFAULT_LOCALE,
+            "museum.network.objects.winnerStatusLabel"
+          )}
+          className="tw-mb-8 tw-rounded-xl tw-border tw-border-primary-400/30 tw-bg-primary-400/10 tw-p-5"
+        >
+          <p className="tw-text-primary-200 tw-m-0 tw-text-sm tw-font-semibold">
+            {t(DEFAULT_LOCALE, "museum.network.objects.winnerStatusTitle")}
+          </p>
+          <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-200">
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.objects.winnerStatusDescription"
+            )}
+          </p>
+        </section>
+      )}
 
       {outcome.media && (
         <figure className="tw-m-0 tw-min-w-0">

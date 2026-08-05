@@ -278,5 +278,28 @@ describe("Museum domain mapping", () => {
         variants: [],
       })
     );
+
+    const duplicateRecordManifest = JSON.parse(
+      corpus.documents[mediaManifestPath]!.text
+    ) as { items: Array<Record<string, unknown>> };
+    duplicateRecordManifest.items.push({
+      ...duplicateRecordManifest.items[0]!,
+    });
+    const duplicateRecordView = normalizeMuseumCorpus({
+      ...corpus,
+      documents: {
+        ...corpus.documents,
+        [mediaManifestPath]: jsonDocument(
+          mediaManifestPath,
+          duplicateRecordManifest
+        ),
+      },
+    });
+    expect(duplicateRecordView.programs[0]?.selectedWorks[0]?.media).toEqual(
+      expect.objectContaining({
+        altTextStatus: "identification_only_fallback",
+        variants: [],
+      })
+    );
   });
 });
