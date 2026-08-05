@@ -457,7 +457,9 @@ jobs:
             configure_profile "$profile"
             ./bin/6529 run help-index:sync
             ./bin/6529 run agent-files:sync
-            rm -rf .next
+            if [ -d .next ]; then
+              find .next -mindepth 1 -maxdepth 1 ! -name cache -exec rm -rf {} +
+            fi
             ./bin/6529 run base-build
             package_profile "$profile" "$destination"
           }
@@ -500,6 +502,10 @@ jobs:
             # contract input and older deploy workflows understand only this
             # exact dual-profile schema.
             build_profile staging release-bus-artifact/profiles/staging
+            # Profile-specific endpoints and PUBLIC_RUNTIME are build inputs.
+            # The legacy bridge builds both profiles in one workspace, so its
+            # second build must not reuse staging's Next.js cache.
+            rm -rf .next/cache
             build_profile production release-bus-artifact/profiles/production
             staging_digest="$(sha256sum release-bus-artifact/profiles/staging/target/package.zip | cut -d' ' -f1)"
             production_digest="$(sha256sum release-bus-artifact/profiles/production/target/package.zip | cut -d' ' -f1)"

@@ -286,3 +286,9 @@ production, or evidence gate remains open.
   The resulting tree passes 5 focused suites / 31 tests, changed lint,
   changed typecheck across 1,358 files, React Doctor 100/100, formatting, and
   `codex-diff-check`.
+- The first exact merge attempt was rejected because main advanced after the
+  final readback. The branch was merged forward again to
+  `af31aaaf7498d66516422d141b261de4c2774307`, which adds report-only Museum
+  release classification without changing the rights runtime. The final
+  merge tree passes 6 focused suites / 45 tests, changed lint, and changed
+  typecheck across 1,364 files.
