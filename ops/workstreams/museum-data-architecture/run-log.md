@@ -102,3 +102,17 @@
   manual-only institutional sweep is excluded. A contract test enforces both
   inclusion and exclusion from the manifest rather than assuming every Museum
   pack belongs in PR CI.
+- Frontend `main` advanced to `d448d4c282c034fa2a1d5d1d95ce90fc85561e54`
+  with the separately governed rights handbook while this PR was under review.
+  The candidate now preserves both atomic publications. The combined Casey
+  projection exposes 73 public documents, both publication contracts, and four
+  dedicated Museum packs in each local, staging, and production inventory.
+  Staging and production post-deploy totals are 16 and 15. The merged
+  publication, route, E2E-manifest, and release-contract replay passes 7 suites
+  / 94 tests, followed by changed-file lint and typecheck across 1,357 files.
+- The combined adapters exceeded the Casey assembler's module-size limit by
+  eight lines. Stable accession and object identifiers now live in
+  `legacyCaseyIdentifiers.ts`; the assembler remains below its 750-line limit
+  without compressed logic. The ontology page sources and public frontend copy
+  contain no em dashes. Source PR #32 applies the same punctuation rule to the
+  five affected repository essays and regenerates the canonical manifest.

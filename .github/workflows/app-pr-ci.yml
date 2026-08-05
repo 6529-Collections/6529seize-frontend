@@ -621,6 +621,7 @@ jobs:
         run: |
           ./bin/6529 run test:e2e:museum-data-architecture
           ./bin/6529 run test:e2e:museum-inside-system
+          ./bin/6529 run test:e2e:museum-rights
 
       - name: Upload app check artifacts
         if: always()

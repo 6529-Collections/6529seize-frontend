@@ -25,6 +25,7 @@ on:
           - museum-data-architecture
           - museum-institutional-practice
           - museum-inside-system
+          - museum-rights
       release_train_id:
         description: Release Bus train id
         type: string

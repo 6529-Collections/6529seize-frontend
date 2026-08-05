@@ -10,12 +10,28 @@ import {
   institutionalPracticeDocuments,
 } from "./institutionalPractice";
 import { parseHeading } from "./legacyCaseyMarkdown";
+import {
+  CASEY_ACCESSION_ID,
+  CASEY_ARTIST_ID,
+  CASEY_GIFT_AUTHORIZATION_PATH,
+  CASEY_GIFT_NARRATIVE_PATH,
+  CASEY_OBJECT_IDS,
+  CASEY_OBJECT_PATHS,
+  CASEY_SOURCE_MATRIX_PATH,
+  CASEY_VISUAL_OBSERVATION_PATH,
+} from "./legacyCaseyIdentifiers";
 import { PROJECT_PUBLIC_DOCUMENTS } from "./legacyCaseyProjectDocuments";
 import {
   MUSEUM_CONTRIBUTOR_GUIDE_PATH,
   MUSEUM_ONCHAIN_TRANSITION_PATH,
   MUSEUM_OPEN_STATEMENT_PATH,
 } from "./openMuseum";
+import {
+  assembleRightsHandbook,
+  MUSEUM_RIGHTS_REQUIRED_PATHS,
+  rightsCreditForObject,
+  rightsHandbookDocuments,
+} from "./rightsHandbook";
 import type {
   MuseumAccessionedArtwork,
   MuseumArtist,
@@ -30,27 +46,6 @@ import type {
   MuseumRightsCredit,
   MuseumSourceDocument,
 } from "./types";
-
-const CASEY_ARTIST_ID = "casey-reas";
-const CASEY_ACCESSION_ID = "6529NM.2026.001";
-const CASEY_OBJECT_IDS = [
-  "6529NM.2026.001.01",
-  "6529NM.2026.001.02",
-  "6529NM.2026.001.03",
-  "6529NM.2026.001.04",
-  "6529NM.2026.001.05",
-  "6529NM.2026.001.06",
-  "6529NM.2026.001.07",
-] as const;
-
-const CASEY_OBJECT_PATHS = CASEY_OBJECT_IDS.map(
-  (objectId) =>
-    `records/accessions/${CASEY_ACCESSION_ID}/objects/${objectId}.json`
-);
-const CASEY_VISUAL_OBSERVATION_PATH = `records/accessions/${CASEY_ACCESSION_ID}/visual-observation-record.json`;
-const CASEY_GIFT_AUTHORIZATION_PATH = `records/accessions/${CASEY_ACCESSION_ID}/gift-acceptance-authorization.json`;
-const CASEY_GIFT_NARRATIVE_PATH = `records/accessions/${CASEY_ACCESSION_ID}/public/gift-into-public-trust.md`;
-const CASEY_SOURCE_MATRIX_PATH = `records/accessions/${CASEY_ACCESSION_ID}/public/source-and-chronology-matrix.md`;
 
 interface PublicDocumentContract {
   readonly id: string;
@@ -207,6 +202,7 @@ export const LEGACY_CASEY_REQUIRED_PATHS = [
   ...PROJECT_PUBLIC_DOCUMENTS.map((document) => document.path),
   ...INSTITUTIONAL_PRACTICE_REQUIRED_PATHS,
   ...DATA_ARCHITECTURE_REQUIRED_PATHS,
+  ...MUSEUM_RIGHTS_REQUIRED_PATHS,
 ] as const;
 
 type JsonRecord = Record<string, unknown>;
@@ -723,20 +719,22 @@ function assembleLegacyCaseyPublication(
     context.documents,
     new Map(drafts.map(({ objectId, title }) => [objectId, title]))
   );
+  const rightsHandbook = assembleRightsHandbook(context.documents);
   const allPublicDocuments = [
     ...publicDocuments,
     ...institutionalPracticeDocuments(institutionalPractice),
     ...dataArchitectureDocuments(dataArchitecture),
+    ...rightsHandbookDocuments(rightsHandbook),
   ];
   const visualObjects = visualObjectsById(context.documents);
 
   const artworks = drafts.map((draft): MuseumAccessionedArtwork => {
-    const rightsCredit: MuseumRightsCredit = {
+    const rightsCredit = rightsCreditForObject(rightsHandbook, {
+      id: draft.objectId,
       creditLine: draft.creditLine,
       licenseLabel: draft.licenseLabel,
-      licenseUrl: null,
       sourcePath: draft.sourcePath,
-    };
+    });
     const visualObject = visualObjects.get(draft.objectId);
     if (visualObject === undefined) {
       throw new Error("publication_casey_media_incomplete");
@@ -788,6 +786,7 @@ function assembleLegacyCaseyPublication(
     documents: allPublicDocuments,
     institutionalPractice,
     dataArchitecture,
+    rightsHandbook,
   };
 }
 

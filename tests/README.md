@@ -42,6 +42,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:search-waves-readonly`                    | —                             | readonly | local       | pr-ci, manual             | 15m     | Global and wave-local search coverage.                                              |
 | `test:e2e:museum-data-architecture`                 | —                             | readonly | local       | pr-ci, manual             | 30m     | Network Museum data-architecture reading room and machine profile sweep.            |
 | `test:e2e:museum-institutional-practice`            | —                             | readonly | local       | manual                    | 30m     | Network Museum institutional-practice study route sweep.                            |
+| `test:e2e:museum-rights`                            | —                             | readonly | local       | pr-ci, manual             | 15m     | Network Museum rights education and object-license route sweep.                     |
 | `test:e2e:museum-inside-system`                     | —                             | readonly | local       | pr-ci, manual             | 30m     | Network Museum Inside the System project and comparison sweep.                      |
 | `test:e2e:composer-sandbox`                         | —                             | sandbox  | local       | manual                    | 15m     | Waves composer sandbox against the local mock API.                                  |
 | `test:e2e:public-review-sandbox`                    | —                             | sandbox  | local       | manual                    | 15m     | Stream review feedback sandbox against the local mock API.                          |
@@ -72,6 +73,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:staging:museum-data-architecture`         | museum-data-architecture      | readonly | staging     | post-deploy, manual       | 30m     | Staging Network Museum data-architecture reading room and machine profile sweep.    |
 | `test:e2e:staging:museum-institutional-practice`    | museum-institutional-practice | readonly | staging     | post-deploy, manual       | 15m     | Staging Network Museum institutional-practice deployed route smoke.                 |
 | `test:e2e:staging:museum-inside-system`             | museum-inside-system          | readonly | staging     | post-deploy, manual       | 30m     | Staging Network Museum Inside the System project and comparison sweep.              |
+| `test:e2e:staging:museum-rights`                    | museum-rights                 | readonly | staging     | post-deploy, manual       | 15m     | Staging Network Museum rights education and object-license route sweep.             |
 | `test:e2e:production:home-readonly`                 | home-readonly                 | readonly | production  | post-deploy, manual       | 15m     | Production home-page read-only canary.                                              |
 | `test:e2e:production:social-readonly`               | social-readonly               | readonly | production  | cron, manual, post-deploy | 15m     | Production waves and profile read-only canary.                                      |
 | `test:e2e:production:media-readonly`                | media-readonly                | readonly | production  | cron, manual, post-deploy | 15m     | Production media and mint detail read-only canary.                                  |
@@ -86,6 +88,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:production:museum-data-architecture`      | museum-data-architecture      | readonly | production  | post-deploy, manual       | 30m     | Production Network Museum data-architecture reading room and machine profile sweep. |
 | `test:e2e:production:museum-institutional-practice` | museum-institutional-practice | readonly | production  | post-deploy, manual       | 30m     | Production Network Museum institutional-practice deployed route smoke.              |
 | `test:e2e:production:museum-inside-system`          | museum-inside-system          | readonly | production  | post-deploy, manual       | 30m     | Production Network Museum Inside the System project and comparison sweep.           |
+| `test:e2e:production:museum-rights`                 | museum-rights                 | readonly | production  | post-deploy, manual       | 15m     | Production Network Museum rights education and object-license route sweep.          |
 | `test:e2e:production:readonly`                      | readonly                      | readonly | production  | manual                    | 60m     | Combined production-safe release validation.                                        |
 
 <!-- END GENERATED: e2e-pack-table -->

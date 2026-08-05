@@ -2,6 +2,11 @@ import { createHash } from "node:crypto";
 import {
   INSTITUTIONAL_PRACTICE_DOCUMENT_CONTRACTS,
   LEGACY_CASEY_REQUIRED_PATHS,
+  MUSEUM_RIGHTS_ARTIST_GUIDE_PATH,
+  MUSEUM_RIGHTS_COLLECTOR_GUIDE_PATH,
+  MUSEUM_RIGHTS_INTRODUCTION_PATH,
+  MUSEUM_RIGHTS_LEGAL_TEXT_PATHS,
+  MUSEUM_RIGHTS_REGISTRY_PATH,
 } from "@/lib/museum/publication";
 
 export const EXACT_COMMIT = "a".repeat(40);
@@ -295,6 +300,147 @@ function buildBaseDocuments(): Record<string, string> {
         preservation_state: "in_progress",
       })),
     });
+  documents[MUSEUM_RIGHTS_INTRODUCTION_PATH] =
+    "# Rights in digital art\n\n## Buying the artwork usually does not buy its copyright\n\nGoverned public guide.";
+  documents[MUSEUM_RIGHTS_ARTIST_GUIDE_PATH] =
+    "# Rights for artists\n\nGoverned public guide.";
+  documents[MUSEUM_RIGHTS_COLLECTOR_GUIDE_PATH] =
+    "# Rights for collectors\n\n## The public domain is part of everyday collecting\n\nGoverned public guide.";
+
+  const legalPathById: Readonly<Record<string, string>> = {
+    "cc0-1.0": "docs/rights/legal-texts/cc0-1.0.txt",
+    "cc-by-4.0": "docs/rights/legal-texts/cc-by-4.0.txt",
+    "cc-by-sa-4.0": "docs/rights/legal-texts/cc-by-sa-4.0.txt",
+    "cc-by-nd-4.0": "docs/rights/legal-texts/cc-by-nd-4.0.txt",
+    "cc-by-nc-4.0": "docs/rights/legal-texts/cc-by-nc-4.0.txt",
+    "cc-by-nc-sa-4.0": "docs/rights/legal-texts/cc-by-nc-sa-4.0.txt",
+    "cc-by-nc-nd-4.0": "docs/rights/legal-texts/cc-by-nc-nd-4.0.txt",
+  };
+  for (const path of MUSEUM_RIGHTS_LEGAL_TEXT_PATHS) {
+    documents[path] = `Exact official fixture text for ${path}.`;
+  }
+  const expressionIds = [
+    "in-copyright-no-public-license",
+    "cc0-1.0",
+    "cc-by-4.0",
+    "cc-by-sa-4.0",
+    "cc-by-nd-4.0",
+    "cc-by-nc-4.0",
+    "cc-by-nc-sa-4.0",
+    "cc-by-nc-nd-4.0",
+    "public-domain-mark-1.0",
+    "rightsstatements-inc",
+    "rightsstatements-inc-ow-eu",
+    "rightsstatements-inc-edu",
+    "rightsstatements-inc-nc",
+    "rightsstatements-inc-ruu",
+    "rightsstatements-noc-cr",
+    "rightsstatements-noc-nc",
+    "rightsstatements-noc-oklr",
+    "rightsstatements-noc-us",
+    "rightsstatements-cne",
+    "rightsstatements-und",
+    "rightsstatements-nkc",
+    "custom-license",
+  ] as const;
+  const useMatrix = {
+    display_the_work: "status_only",
+    publish_online: "status_only",
+    publish_in_print: "status_only",
+    make_preservation_copies: "status_only",
+    share_an_adaptation: "status_only",
+    make_commercial_use: "status_only",
+  };
+  const expressions = expressionIds.map((id) => {
+    const legalPath = legalPathById[id];
+    const group = id.startsWith("cc-by")
+      ? "creative_commons_license"
+      : id === "cc0-1.0" || id === "public-domain-mark-1.0"
+        ? "creative_commons_tool"
+        : id.startsWith("rightsstatements-")
+          ? "rights_statement"
+          : id === "custom-license"
+            ? "custom_license"
+            : "copyright_case";
+    const instrumentKind = id.startsWith("cc-by")
+      ? "public_license"
+      : id === "cc0-1.0"
+        ? "public_domain_dedication"
+        : id === "public-domain-mark-1.0"
+          ? "public_domain_mark"
+          : id.startsWith("rightsstatements-")
+            ? "descriptive_status"
+            : id === "custom-license"
+              ? "custom_terms"
+              : "no_public_license";
+    return {
+      id,
+      label: `Label for ${id}`,
+      short_label: id === "cc-by-nc-4.0" ? "CC BY-NC 4.0" : id,
+      group,
+      instrument_kind: instrumentKind,
+      version: id.includes("4.0") ? "4.0" : null,
+      spdx_id: null,
+      canonical_uri: null,
+      legal_code:
+        legalPath === undefined
+          ? null
+          : {
+              path: legalPath,
+              source_uri: `https://example.com/source/${id}`,
+              publication_uri: `https://example.com/publication/${id}`,
+              sha256: sha256(documents[legalPath] ?? ""),
+            },
+      summary: `A plain-language summary for ${id}.`,
+      museum_can: ["Use the recorded term according to its conditions."],
+      conditions: [],
+      boundaries: ["Read the complete object record before reuse."],
+      visitor_note: "Read the recorded rights information before reuse.",
+      use_matrix: useMatrix,
+    };
+  });
+  documents[MUSEUM_RIGHTS_REGISTRY_PATH] = JSON.stringify({
+    $schema: "../../schemas/rights-expression-registry.schema.json",
+    registry_type: "6529NM_RIGHTS_EXPRESSION_REGISTRY",
+    registry_version: "1.0.0",
+    published_at: "2026-08-05T17:01:32Z",
+    actions: Object.keys(useMatrix),
+    use_status_definitions: {
+      allowed: "Allowed.",
+      allowed_with_conditions: "Allowed with conditions.",
+      not_licensed: "Not licensed.",
+      status_only: "Status information only.",
+      case_by_case: "Review case by case.",
+    },
+    sources: {
+      creative_commons_data_repository:
+        "https://github.com/creativecommons/cc-legal-tools-data",
+      creative_commons_data_commit: "22fc2c31d0297a1feb8a257c0e6f84e95c9a38ae",
+      creative_commons_license_guide:
+        "https://creativecommons.org/share-your-work/use-remix/cc-licenses/",
+      rightsstatements_documentation:
+        "https://rightsstatements.org/en/documentation/",
+      rightsstatements_usage_guidelines:
+        "https://rightsstatements.org/en/documentation/usage_guidelines",
+      observed_at: "2026-08-05T16:45:00Z",
+    },
+    expressions,
+    object_assignments: CASEY_OBJECTS.map((artwork, index) => ({
+      object_id: artwork.id,
+      expression_id: "cc-by-nc-4.0",
+      rights_record_path: `records/accessions/6529NM.2026.001/rights/6529NM.2026.001.RIGHTS.${String(index + 1).padStart(2, "0")}.json`,
+      evidence_basis: "Reviewed object-specific Art Blocks metadata.",
+    })),
+    program_notes: [
+      {
+        program_id: "6529NM-AP-01",
+        expression_id: "cc0-1.0",
+        effective_status: "conditional_not_yet_effective",
+        explanation:
+          "Keys and Gates remains unminted, so this CC0 intention is not yet effective.",
+      },
+    ],
+  });
   return documents;
 }
 

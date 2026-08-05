@@ -532,7 +532,7 @@ describe("Release Bus frontend performance contract", () => {
     const museumPacks = E2E_PACKS.filter(
       (pack) => pack.changeScope === "museum"
     );
-    expect(museumPacks).toHaveLength(9);
+    expect(museumPacks).toHaveLength(12);
     for (const pack of museumPacks.filter((candidate) =>
       candidate.environments.includes("local")
     )) {

@@ -113,6 +113,20 @@ const DATA_ARCHITECTURE_STANDARD_SUFFIX = ".md";
 const DATA_ARCHITECTURE_STANDARD_SLUG_SET = new Set<string>(
   MUSEUM_DATA_ARCHITECTURE_STANDARD_SLUGS
 );
+const RIGHTS_ROUTE_BY_PATH = new Map([
+  [
+    "records/institutional-practice/rights-and-licenses.md",
+    "/museum/network/rights",
+  ],
+  [
+    "records/institutional-practice/rights-for-artists.md",
+    "/museum/network/rights/artists",
+  ],
+  [
+    "records/institutional-practice/rights-for-collectors.md",
+    "/museum/network/rights/collectors",
+  ],
+]);
 
 function institutionalPracticeRoute(repositoryPath: string): string | null {
   if (repositoryPath === INSTITUTIONAL_PRACTICE_STUDY_PATH) {
@@ -157,6 +171,10 @@ function dataArchitectureRoute(repositoryPath: string): string | null {
 
 function publicMuseumRoute(url: string): string | null {
   const withoutFragment = url.split("#", 1)[0] ?? "";
+  const rightsRoute = RIGHTS_ROUTE_BY_PATH.get(withoutFragment);
+  if (rightsRoute !== undefined) {
+    return rightsRoute;
+  }
   const practiceRoute = institutionalPracticeRoute(withoutFragment);
   if (practiceRoute !== null) {
     return practiceRoute;
