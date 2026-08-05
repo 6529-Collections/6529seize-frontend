@@ -37,9 +37,9 @@ export {
 export {
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
+  shouldFilterBraveWalletPageEvaluationError,
   shouldFilterInjectedProviderProxyStartsWithError,
   shouldFilterInjectedWalletCollision,
-  shouldFilterBraveWalletPageEvaluationError,
   shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterTalismanExtensionOnboardingError,

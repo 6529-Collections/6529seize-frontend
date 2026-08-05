@@ -306,6 +306,26 @@ describe("instrumentation-client", () => {
     ) => BeforeSendResult;
   };
 
+  const withRuntimeUserAgent = <T>(
+    userAgent: string,
+    callback: () => T
+  ): T => {
+    const originalUserAgent = globalThis.navigator.userAgent;
+    Object.defineProperty(globalThis.navigator, "userAgent", {
+      configurable: true,
+      value: userAgent,
+    });
+
+    try {
+      return callback();
+    } finally {
+      Object.defineProperty(globalThis.navigator, "userAgent", {
+        configurable: true,
+        value: originalUserAgent,
+      });
+    }
+  };
+
   const loadBeforeSendTransaction = () => {
     const config = loadSentryConfig();
     expect(typeof config.beforeSendTransaction).toBe("function");
@@ -367,14 +387,21 @@ describe("instrumentation-client", () => {
     },
   });
 
-  const createBraveWalletPageEvaluationErrorEvent = (message: string) => ({
+  const createBraveWalletPageEvaluationErrorEvent = (
+    message: string,
+    includeRequest = true
+  ) => ({
     transaction: "/waves/:wave",
-    request: {
-      url: "/waves/[wave]",
-      headers: {
-        "User-Agent": braveWalletUserAgent,
-      },
-    },
+    ...(includeRequest
+      ? {
+          request: {
+            url: "/waves/[wave]",
+            headers: {
+              "User-Agent": braveWalletUserAgent,
+            },
+          },
+        }
+      : {}),
     tags: {
       transaction: "/waves/:wave",
       url: "/waves/[wave]",
@@ -667,35 +694,6 @@ describe("instrumentation-client", () => {
     });
   });
 
-  it("drops disconnected wallet-provider object promise rejections", () => {
-    const beforeSend = loadBeforeSend();
-    const event = {
-      event_id: "wallet-provider-disconnected",
-      exception: {
-        values: [
-          {
-            type: "UnhandledRejection",
-            value: objectCapturedPromiseRejectionMessage,
-          },
-        ],
-      },
-      extra: {
-        __serialized__: {
-          code: 4900,
-          message: "The provider is disconnected from all chains.",
-          stack: disconnectedProviderStack,
-        },
-      },
-      tags: {
-        mechanism: "auto.browser.global_handlers.onunhandledrejection",
-      },
-    };
-
-    const result = beforeSend(event);
-
-    expect(result).toBeNull();
-  });
-
   it.each([
     braveWalletSelectedAddressMessage,
     braveWalletEmitMessage,
@@ -707,6 +705,21 @@ describe("instrumentation-client", () => {
 
     expect(event).not.toHaveProperty("contexts.browser");
     expect(event).not.toHaveProperty("tags.browser.name");
+    expect(result).toBeNull();
+  });
+
+  it("drops a Brave Wallet page-evaluation error using the runtime user agent without request data", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createBraveWalletPageEvaluationErrorEvent(
+      braveWalletSelectedAddressMessage,
+      false
+    );
+
+    const result = withRuntimeUserAgent(braveWalletUserAgent, () =>
+      beforeSend(event)
+    );
+
+    expect(event).not.toHaveProperty("request");
     expect(result).toBeNull();
   });
 
@@ -737,6 +750,35 @@ describe("instrumentation-client", () => {
     const result = beforeSend(event);
 
     expect(result).not.toBeNull();
+  });
+
+  it("drops disconnected wallet-provider object promise rejections", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "wallet-provider-disconnected",
+      exception: {
+        values: [
+          {
+            type: "UnhandledRejection",
+            value: objectCapturedPromiseRejectionMessage,
+          },
+        ],
+      },
+      extra: {
+        __serialized__: {
+          code: 4900,
+          message: "The provider is disconnected from all chains.",
+          stack: disconnectedProviderStack,
+        },
+      },
+      tags: {
+        mechanism: "auto.browser.global_handlers.onunhandledrejection",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
   });
 
   it("drops exact React DOM insertBefore NotFoundError events on waves routes with no app frames", () => {

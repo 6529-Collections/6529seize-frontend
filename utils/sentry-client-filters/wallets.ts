@@ -1,7 +1,7 @@
 import {
+  circularReactMetaElementMessagePatterns,
   braveWalletPageEvaluationErrorMessages,
   browserGlobalHandlerOnErrorMechanism,
-  circularReactMetaElementMessagePatterns,
   injectedProviderProxyStartsWithMessage,
   jsonStringifyFunction,
   metaMaskMobileUpdateUrlFunction,

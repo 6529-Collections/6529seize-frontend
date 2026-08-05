@@ -46,14 +46,10 @@ type TwitterConfigRawEventOptions = {
   userAgent?: string | undefined;
   includeAdditionalException?: boolean | undefined;
 };
-type TwitterCurrentInsetEventOptions = {
-  request?: TestSentryClientEvent["request"];
-  mechanismType?: string;
-  handled?: boolean;
-};
 type BraveWalletPageEvaluationEventOptions = {
   message?: string;
   userAgent?: string;
+  includeRequest?: boolean;
   exceptionType?: string;
   mechanismType?: string;
   handled?: boolean;
@@ -69,6 +65,11 @@ type BraveWalletPageEvaluationEventOptions = {
   urlTag?: string;
   additionalException?: SentryExceptionValue;
   serializedStack?: string;
+};
+type TwitterCurrentInsetEventOptions = {
+  request?: TestSentryClientEvent["request"];
+  mechanismType?: string;
+  handled?: boolean;
 };
 type AppleWebKitSortedTrackListOverrides = {
   type?: string | undefined;
@@ -419,6 +420,80 @@ describe("sentry-client-filters", () => {
     },
   });
 
+  const createBraveWalletPageEvaluationErrorEvent = ({
+    message = braveWalletSelectedAddressMessage,
+    userAgent = braveWalletUserAgent,
+    includeRequest = true,
+    exceptionType = "TypeError",
+    mechanismType = "auto.browser.global_handlers.onerror",
+    handled = false,
+    frameFilename =
+      "app:///waves/00000000-0000-4000-8000-000000000002",
+    frameAbsPath,
+    functionName = "global code",
+    lineNo = 1,
+    colNo = 16,
+    frames,
+    transaction = "/waves/:wave",
+    requestUrl = "/waves/[wave]",
+    transactionTag = transaction,
+    urlTag = requestUrl,
+    additionalException,
+    serializedStack,
+  }: BraveWalletPageEvaluationEventOptions = {}): TestSentryClientEvent => {
+    const defaultFrame: SentryStackFrame = {
+      filename: frameFilename,
+      ...(frameAbsPath === undefined ? {} : { abs_path: frameAbsPath }),
+      function: functionName,
+      lineno: lineNo,
+      colno: colNo,
+      in_app: true,
+    };
+
+    return {
+      transaction,
+      ...(includeRequest
+        ? {
+            request: {
+              url: requestUrl,
+              headers: {
+                "User-Agent": userAgent,
+              },
+            },
+          }
+        : {}),
+      tags: {
+        transaction: transactionTag,
+        url: urlTag,
+      },
+      exception: {
+        values: [
+          {
+            type: exceptionType,
+            value: message,
+            mechanism: {
+              type: mechanismType,
+              handled,
+            },
+            stacktrace: {
+              frames: frames ?? [defaultFrame],
+            },
+          },
+          ...(additionalException ? [additionalException] : []),
+        ],
+      },
+      ...(serializedStack
+        ? {
+            extra: {
+              __serialized__: {
+                stack: serializedStack,
+              },
+            },
+          }
+        : {}),
+    };
+  };
+
   const createInjectedWalletCollisionEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent => ({
@@ -456,75 +531,6 @@ describe("sentry-client-filters", () => {
     },
     ...overrides,
   });
-
-  const createBraveWalletPageEvaluationErrorEvent = ({
-    message = braveWalletSelectedAddressMessage,
-    userAgent = braveWalletUserAgent,
-    exceptionType = "TypeError",
-    mechanismType = "auto.browser.global_handlers.onerror",
-    handled = false,
-    frameFilename =
-      "app:///waves/00000000-0000-4000-8000-000000000002",
-    frameAbsPath,
-    functionName = "global code",
-    lineNo = 1,
-    colNo = 16,
-    frames,
-    transaction = "/waves/:wave",
-    requestUrl = "/waves/[wave]",
-    transactionTag = transaction,
-    urlTag = requestUrl,
-    additionalException,
-    serializedStack,
-  }: BraveWalletPageEvaluationEventOptions = {}): TestSentryClientEvent => {
-    const defaultFrame: SentryStackFrame = {
-      filename: frameFilename,
-      ...(frameAbsPath === undefined ? {} : { abs_path: frameAbsPath }),
-      function: functionName,
-      lineno: lineNo,
-      colno: colNo,
-      in_app: true,
-    };
-
-    return {
-      transaction,
-      request: {
-        url: requestUrl,
-        headers: {
-          "User-Agent": userAgent,
-        },
-      },
-      tags: {
-        transaction: transactionTag,
-        url: urlTag,
-      },
-      exception: {
-        values: [
-          {
-            type: exceptionType,
-            value: message,
-            mechanism: {
-              type: mechanismType,
-              handled,
-            },
-            stacktrace: {
-              frames: frames ?? [defaultFrame],
-            },
-          },
-          ...(additionalException ? [additionalException] : []),
-        ],
-      },
-      ...(serializedStack
-        ? {
-            extra: {
-              __serialized__: {
-                stack: serializedStack,
-              },
-            },
-          }
-        : {}),
-    };
-  };
 
   const createInjectedKeplrWalletCollisionEvent = (
     overrides: TestSentryClientEventOverrides = {}
@@ -6404,6 +6410,22 @@ describe("sentry-client-filters", () => {
     expect(event.request?.headers?.["User-Agent"]).toBe(
       braveWalletUserAgent
     );
+    expect(result).toBe(true);
+  });
+
+  it("uses the runtime user agent for a Brave Wallet page-evaluation error without request data", () => {
+    // Arrange
+    const event = createBraveWalletPageEvaluationErrorEvent({
+      includeRequest: false,
+    });
+
+    // Act
+    const result = withRuntimeUserAgent(braveWalletUserAgent, () =>
+      shouldFilterBraveWalletPageEvaluationError(event)
+    );
+
+    // Assert
+    expect(event.request).toBeUndefined();
     expect(result).toBe(true);
   });
 
