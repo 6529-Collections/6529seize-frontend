@@ -99,6 +99,7 @@ export function PublicReviewShell({
   displayedVersion,
   feedbackSlot,
   introNotice,
+  showAudiencePaths = true,
   source,
 }: {
   readonly editorialMarkdown: string;
@@ -110,6 +111,7 @@ export function PublicReviewShell({
   readonly displayedVersion: string;
   readonly feedbackSlot: ReactNode;
   readonly introNotice?: ReactNode;
+  readonly showAudiencePaths?: boolean;
   readonly source: PublicReviewSource;
 }) {
   const pageIndex = reviewVersion.pages.findIndex(
@@ -181,7 +183,7 @@ export function PublicReviewShell({
 
                 {introNotice}
 
-                {page.id === "overview" && (
+                {page.id === "overview" && showAudiencePaths && (
                   <div className="tw-mt-10 tw-w-full">
                     <PublicReviewAudiencePaths
                       entryPageIds={reviewVersion.audienceEntryPageIds}

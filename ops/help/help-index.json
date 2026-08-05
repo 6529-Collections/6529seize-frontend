@@ -239,6 +239,8 @@
         "review",
         "solidity",
         "artist",
+        "collector",
+        "minter",
         "audit",
         "security",
         "audit planned",
@@ -247,8 +249,9 @@
       "facts": [
         "The 6529 Stream public review is published at /reviews/6529-stream in local development, shared staging, and production while its lifecycle permits public routes.",
         "The review explains how Stream supports serious one-of-one digital art and artist-chosen editions.",
-        "The overview explains how each major mechanism protects artist consent, artwork identity, sales, preservation, and long-term operation.",
-        "The current Overview includes a separately dated, source-pinned development update covering recent work, work in progress, launch requirements, and the latest evidence counts. Daily figures come from that update.",
+        "The current Overview begins with a plain definition of Stream, a five-part map of artwork identity, materials, artist approval, rules and payments, and preservation, a six-step artwork journey, and focused starting points for artists, collectors and minters, and smart contract auditors.",
+        "The current For Artists page begins with a plain artist guide covering the artwork package, the prepare-to-finalize journey, what to check before signing, what can change, who else has power, sales and payments, and finality; the detailed contract review remains below as technical evidence.",
+        "After that introduction, the current Overview includes a separately dated, source-pinned development update covering recent work, work in progress, launch requirements, and the latest evidence counts. Daily figures come from that update.",
         "Fourteen editorial pages explain artwork lifecycle, artist controls, responsibilities, curation and TDH authorization, minting, sales, revenue, randomness, metadata, freezing, contract changes, current development, and community review.",
         "Every page shows the review version, exact source link, page navigation, on-page contents, and a collapsible feedback rail; snapshot evidence is collected on Where Development Stands.",
         "Review chapters stay in the review contents navigation. Technical reference and All public feedback are separate review-wide destinations; each standalone destination links back to the review contents and to the other destination. Page comments and sending feedback remain page-specific actions.",
@@ -284,6 +287,8 @@
       "source_refs": [
         "app/reviews/[review]/page.tsx",
         "components/public-review/PublicReviewShell.tsx",
+        "components/public-review/StreamReviewForArtistsGuide.tsx",
+        "components/public-review/StreamReviewOverviewGuide.tsx",
         "components/public-review/StreamReviewDevelopmentStatus.tsx",
         "config/public-reviews/6529-stream.development-status.json",
         "ops/docs/public-reviews/README.md"
