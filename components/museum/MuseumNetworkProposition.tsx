@@ -150,7 +150,7 @@ export function MuseumNetworkProposition({
         <p className="tw-m-0 tw-mt-7 tw-max-w-4xl tw-text-lg tw-leading-8 tw-text-iron-200 sm:tw-text-xl sm:tw-leading-9">
           {t(DEFAULT_LOCALE, "museum.network.proposition.intro")}
         </p>
-        <p className="tw-m-0 tw-mt-5 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-400">
+        <p className="tw-m-0 tw-mt-5 tw-max-w-4xl tw-text-lg tw-leading-8 tw-text-iron-200 sm:tw-text-xl sm:tw-leading-9">
           {t(DEFAULT_LOCALE, "museum.network.proposition.principle")}
         </p>
       </header>
@@ -175,7 +175,7 @@ export function MuseumNetworkProposition({
           <p className="tw-m-0">
             {t(DEFAULT_LOCALE, "museum.network.proposition.ofNetwork.body3")}
           </p>
-          <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-iron-400">
+          <p className="tw-m-0">
             {t(DEFAULT_LOCALE, "museum.network.proposition.ofNetwork.body4")}
           </p>
         </div>

@@ -23,7 +23,7 @@ function document(
 }
 
 describe("MuseumNetworkProposition", () => {
-  it("keeps public labels at 14px and narrative copy at 16px or larger", () => {
+  it("keeps public labels readable without demoting section conclusions", () => {
     render(
       <MuseumNetworkProposition
         commit={"a".repeat(40)}
@@ -50,7 +50,6 @@ describe("MuseumNetworkProposition", () => {
     }
 
     for (const key of [
-      "museum.network.proposition.ofNetwork.body4",
       "museum.network.proposition.today.collection.body",
       "museum.network.proposition.next.decisions.body",
     ] as const) {
@@ -59,5 +58,22 @@ describe("MuseumNetworkProposition", () => {
         "tw-leading-7"
       );
     }
+
+    const principle = screen.getByText(
+      t(DEFAULT_LOCALE, "museum.network.proposition.principle")
+    );
+    expect(principle).toHaveClass(
+      "tw-text-lg",
+      "tw-leading-8",
+      "tw-text-iron-200",
+      "sm:tw-text-xl",
+      "sm:tw-leading-9"
+    );
+
+    const conclusion = screen.getByText(
+      t(DEFAULT_LOCALE, "museum.network.proposition.ofNetwork.body4")
+    );
+    expect(conclusion).toHaveClass("tw-m-0");
+    expect(conclusion).not.toHaveClass("tw-text-iron-400");
   });
 });
