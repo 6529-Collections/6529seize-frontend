@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - 1a-staging
+    paths-ignore:
+      - "ops/**"
   workflow_dispatch:
     inputs:
       deploy_hub_operation_id:
