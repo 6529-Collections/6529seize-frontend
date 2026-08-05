@@ -6,7 +6,12 @@ import { buildWaveRules } from "@/helpers/waves/wave-rules.helpers";
 import type { CreateWaveConfig } from "@/types/waves.types";
 
 const createConfig = (): CreateWaveConfig => ({
-  overview: { type: ApiWaveType.Approve, name: "Approve", image: null },
+  overview: {
+    type: ApiWaveType.Approve,
+    typeSelected: true,
+    name: "Approve",
+    image: null,
+  },
   groups: {
     canView: null,
     canDrop: "drop-group",
@@ -99,7 +104,12 @@ describe("wave-rules.helpers", () => {
   it("builds chat create rules without drop or voting sections", () => {
     const config: CreateWaveConfig = {
       ...createConfig(),
-      overview: { type: ApiWaveType.Chat, name: "Chat", image: null },
+      overview: {
+        type: ApiWaveType.Chat,
+        typeSelected: true,
+        name: "Chat",
+        image: null,
+      },
       display: {
         customRules: "Keep chat respectful.",
         outcomesVisible: false,
@@ -205,7 +215,12 @@ describe("wave-rules.helpers", () => {
     const base = createConfig();
     const config: CreateWaveConfig = {
       ...base,
-      overview: { type: ApiWaveType.Rank, name: "Nodes", image: null },
+      overview: {
+        type: ApiWaveType.Rank,
+        typeSelected: true,
+        name: "Nodes",
+        image: null,
+      },
       dates: {
         submissionStartDate: 1000,
         votingStartDate: 2000,

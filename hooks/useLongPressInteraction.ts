@@ -2,6 +2,13 @@
 
 import { useState, useRef, useCallback } from "react";
 
+/**
+ * Default hold time before a touch counts as a long press. Exported so E2E
+ * specs that synthesize long presses (tests/input) derive their hold time
+ * from the real value instead of hardcoding a copy that can drift.
+ */
+export const DEFAULT_LONG_PRESS_DURATION_MS = 500;
+
 interface UseLongPressInteractionOptions {
   longPressDuration?: number | undefined;
   moveThreshold?: number | undefined;
@@ -27,7 +34,7 @@ export default function useLongPressInteraction(
   options: UseLongPressInteractionOptions = {}
 ) {
   const {
-    longPressDuration = 500,
+    longPressDuration = DEFAULT_LONG_PRESS_DURATION_MS,
     moveThreshold = 10,
     onInteractionStart,
     hasTouchScreen = false, // default to false, should be provided by component

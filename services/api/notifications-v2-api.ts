@@ -8,6 +8,7 @@ import type { ApiNotificationV2 } from "@/generated/models/ApiNotificationV2";
 import type { ApiNotificationsResponseV2 } from "@/generated/models/ApiNotificationsResponseV2";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import { ApiSubscriptionCoverageStatus } from "@/generated/models/ApiSubscriptionCoverageStatus";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -20,6 +21,7 @@ import {
   DROP_POLL_VOTED_NOTIFICATION_CAUSE,
   type INotificationDropPollVoted,
   type INotificationDropReacted,
+  type INotificationSubscriptionCoverage,
   type NotificationCause,
   type NotificationPollVoteOption,
   type TypedNotification,
@@ -48,8 +50,7 @@ const toStringValue = (value: string | number | undefined): string =>
 
 const getPollOptionsValue = (
   context: ApiNotificationAdditionalContextV2
-): unknown =>
-  (context as { readonly poll_options?: unknown }).poll_options;
+): unknown => (context as { readonly poll_options?: unknown }).poll_options;
 
 const isNotificationPollVoteOption = (
   value: unknown
@@ -183,24 +184,74 @@ const mapReactorToProfileMin = (
   });
 };
 
-const mapBaseNotification = (notification: ApiNotificationV2) => ({
+const mapBaseNotification = (
+  notification: ApiNotificationV2,
+  relatedIdentity: NonNullable<ApiNotificationV2["related_identity"]>
+) => ({
   id: notification.id,
   cause: notification.cause,
   created_at: notification.created_at,
   read_at: notification.read_at,
-  related_identity: mapIdentityOverviewToProfileMin(
-    notification.related_identity
-  ),
+  related_identity: mapIdentityOverviewToProfileMin(relatedIdentity),
 });
+
+const SUBSCRIPTION_COVERAGE_NOTIFICATION_STATUSES =
+  new Set<ApiSubscriptionCoverageStatus>([
+    ApiSubscriptionCoverageStatus.EarlyWarning,
+    ApiSubscriptionCoverageStatus.RunningLow,
+    ApiSubscriptionCoverageStatus.ActionRequired,
+  ]);
+
+const mapSubscriptionCoverageNotification = (
+  notification: ApiNotificationV2
+): INotificationSubscriptionCoverage[] => {
+  const context = notification.additional_context;
+  if (
+    !context.profile_handle ||
+    !context.consolidation_key ||
+    context.status === undefined ||
+    !SUBSCRIPTION_COVERAGE_NOTIFICATION_STATUSES.has(context.status) ||
+    typeof context.mint_capacity !== "number" ||
+    typeof context.allocated_mints !== "number" ||
+    typeof context.fully_funded_drops !== "number"
+  ) {
+    console.error(
+      `Invalid SUBSCRIPTION_COVERAGE notification context for notification ${notification.id}`
+    );
+    return [];
+  }
+
+  return [
+    {
+      id: notification.id,
+      cause: ApiNotificationCause.SubscriptionCoverage,
+      created_at: notification.created_at,
+      read_at: notification.read_at,
+      additional_context: {
+        profile_handle: context.profile_handle,
+        status: context.status,
+        consolidation_key: context.consolidation_key,
+        mint_capacity: context.mint_capacity,
+        allocated_mints: context.allocated_mints,
+        fully_funded_drops: context.fully_funded_drops,
+        funded_through: context.funded_through ?? null,
+        next_unfunded: context.next_unfunded ?? null,
+        minimum_top_up_eth: context.minimum_top_up_eth ?? null,
+        top_up_deadline: context.top_up_deadline ?? null,
+      },
+    },
+  ];
+};
 
 const mapDropReactedNotification = (
   notification: ApiNotificationV2,
-  relatedDrops: ApiDrop[]
+  relatedDrops: ApiDrop[],
+  relatedIdentity: NonNullable<ApiNotificationV2["related_identity"]>
 ): INotificationDropReacted[] => {
   const reaction = notification.additional_context.reaction ?? "";
   const reactors = notification.additional_context.reactors ?? [];
   const base = {
-    ...mapBaseNotification(notification),
+    ...mapBaseNotification(notification, relatedIdentity),
     cause: ApiNotificationCause.DropReacted,
     related_drops: relatedDrops,
     additional_context: {
@@ -248,7 +299,17 @@ const handleUnknownNotificationCause = (
 const mapNotificationV2 = (
   notification: ApiNotificationV2
 ): TypedNotification[] => {
-  const base = mapBaseNotification(notification);
+  if (notification.cause === ApiNotificationCause.SubscriptionCoverage) {
+    return mapSubscriptionCoverageNotification(notification);
+  }
+  if (!notification.related_identity) {
+    console.error(
+      `Notification ${notification.id} is missing its related identity`
+    );
+    return [];
+  }
+
+  const base = mapBaseNotification(notification, notification.related_identity);
   const relatedDrops = mapRelatedDrops(notification);
   const context: ApiNotificationAdditionalContextV2 =
     notification.additional_context;
@@ -328,7 +389,11 @@ const mapNotificationV2 = (
         } satisfies INotificationDropPollVoted,
       ];
     case ApiNotificationCause.DropReacted:
-      return mapDropReactedNotification(notification, relatedDrops);
+      return mapDropReactedNotification(
+        notification,
+        relatedDrops,
+        notification.related_identity
+      );
     case ApiNotificationCause.DropBoosted:
       return [
         {
@@ -450,6 +515,7 @@ export const fetchNotificationsV2 = async ({
     params: buildNotificationsV2Params({ limit, cause, pageParam }),
     signal,
     headers,
+    cache: "no-store",
   });
 
   return mapNotificationsV2Response(response);

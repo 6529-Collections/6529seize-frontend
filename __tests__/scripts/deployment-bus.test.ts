@@ -8,6 +8,7 @@ const {
   createReleaseReport,
   evaluateReleaseReadiness,
   heartbeatManifest,
+  parseArgs,
   productionPreflight,
   recordPostDeployWatch,
   recordValidationCheck,
@@ -21,12 +22,768 @@ const childProcess = require("node:child_process");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
+const YAML = require("yaml");
 
 const STAGING_SHA = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 const MAIN_SHA = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 const ARTIFACT_SHA256 =
   "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 const REQUIRED_WEB_SURFACES = ["web:desktop-chromium", "web:mobile-chromium"];
+
+describe("release bus staging artifact transfer", () => {
+  const productionDeployWorkflowSource = fs.readFileSync(
+    path.join(
+      process.cwd(),
+      ".github/workflows/release-bus-deploy-production.yml"
+    ),
+    "utf8"
+  );
+  const deployWorkflow = YAML.parse(
+    fs.readFileSync(
+      path.join(
+        process.cwd(),
+        ".github/workflows/release-bus-deploy-staging.yml"
+      ),
+      "utf8"
+    )
+  );
+
+  it("selects an exact environment-bound artifact with an explicit legacy bridge and never rebuilds", () => {
+    const inputs = deployWorkflow.on.workflow_dispatch.inputs;
+    const downloadStep = deployWorkflow.jobs.deploy.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Download immutable preflight artifact"
+    );
+    const verifyStep = deployWorkflow.jobs.deploy.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Verify and bind immutable artifact"
+    );
+
+    expect(inputs.artifact_environment).toMatchObject({
+      required: false,
+      default: "staging",
+      options: ["staging", "production"],
+    });
+    expect(inputs.artifact_digest).toMatchObject({ required: true });
+    expect(inputs.artifact_contract_version).toMatchObject({
+      required: false,
+      default: "legacy-v2",
+      options: ["legacy-v2", "environment-bound-v3"],
+    });
+    expect(downloadStep.with.name).toBe(
+      "release-bus-frontend-${{ inputs.artifact_train_id || inputs.release_train_id }}-r${{ inputs.release_train_revision }}"
+    );
+    expect(verifyStep.run).toContain(
+      '.artifact_contract == "environment-bound-v1"'
+    );
+    expect(verifyStep.run).toContain('.environment == "staging"');
+    expect(verifyStep.run).toContain(
+      '[ "$ARTIFACT_CONTRACT_VERSION" = legacy-v2 ]'
+    );
+    expect(verifyStep.run).toContain('.environment == "dual"');
+    expect(verifyStep.run).toContain("target/package.zip");
+    expect(verifyStep.run).toContain("profiles/staging/target/package.zip");
+    expect(verifyStep.run).toContain(
+      'test "$artifact_digest" = "$EXPECTED_ARTIFACT_DIGEST"'
+    );
+    expect(
+      deployWorkflow.jobs.deploy.steps.filter((step: { name?: string }) =>
+        /build/i.test(step.name ?? "")
+      )
+    ).toEqual([]);
+  });
+
+  it("checks out each immutable deployment verifier before invoking it", () => {
+    for (const { workflow, verifyStepName } of [
+      {
+        workflow: deployWorkflow,
+        verifyStepName: "Verify exact staging version",
+      },
+      {
+        workflow: YAML.parse(productionDeployWorkflowSource),
+        verifyStepName: "Verify exact production version",
+      },
+    ]) {
+      const steps = workflow.jobs.deploy.steps;
+      const checkoutIndex = steps.findIndex(
+        (step: { name?: string }) =>
+          step.name === "Check out deployment verifier"
+      );
+      const verifyIndex = steps.findIndex(
+        (step: { name?: string }) => step.name === verifyStepName
+      );
+
+      expect(checkoutIndex).toBeGreaterThanOrEqual(0);
+      expect(verifyIndex).toBeGreaterThanOrEqual(0);
+      expect(checkoutIndex).toBeLessThan(verifyIndex);
+      const checkout = steps[checkoutIndex];
+      const verify = steps[verifyIndex];
+      expect(checkout.uses).toMatch(/^actions\/checkout@/);
+      expect(checkout.with).toMatchObject({
+        ref: "${{ github.workflow_sha }}",
+        "persist-credentials": false,
+        path: ".release-bus-verifier",
+        "sparse-checkout-cone-mode": false,
+      });
+      expect(checkout.with["sparse-checkout"]).toContain(
+        "ops/scripts/verify-deployment-version.cjs"
+      );
+      expect(checkout.with["sparse-checkout"]).toContain(
+        "ops/scripts/cli-args.cjs"
+      );
+      expect(verify.run).toContain(
+        "node .release-bus-verifier/ops/scripts/verify-deployment-version.cjs"
+      );
+      expect(verify.run).not.toContain(
+        "node ops/scripts/verify-deployment-version.cjs"
+      );
+    }
+  });
+
+  it("uses the bucket region and rejects redirect bodies before activation", () => {
+    const stageStep = deployWorkflow.jobs.deploy.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Stage artifact for the managed instance"
+    );
+    const deployStep = deployWorkflow.jobs.deploy.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Deploy immutable bundle through SSM"
+    );
+
+    expect(deployWorkflow.env.ARTIFACT_BUCKET_REGION).toContain("us-east-1");
+    expect(
+      stageStep.run.match(/--region "\$ARTIFACT_BUCKET_REGION"/g)
+    ).toHaveLength(2);
+    const artifactTransfer = deployStep.run.slice(
+      deployStep.run.indexOf('http_status="$(curl'),
+      deployStep.run.indexOf('test "$http_status" = 200')
+    );
+    expect(artifactTransfer).not.toContain("curl --fail");
+    expect(deployStep.run).toContain("--write-out '%{http_code}'");
+    expect(deployStep.run).toContain('test "$http_status" = 200');
+    expect(deployStep.run.indexOf('test "$http_status" = 200')).toBeLessThan(
+      deployStep.run.indexOf("sha256sum -c -")
+    );
+  });
+
+  it("injects public-review destinations at staging runtime only", () => {
+    const deployStep = deployWorkflow.jobs.deploy.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Deploy immutable bundle through SSM"
+    );
+
+    expect(deployStep.env.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS).toBe(
+      "${{ secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS }}"
+    );
+    expect(deployStep.run).toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64"
+    );
+    expect(deployStep.run).toContain(
+      "public-review-discussion-destinations.json"
+    );
+    expect(deployStep.run).toContain("PUBLIC_REVIEW_DISCUSSION_DESTINATIONS:");
+    expect(deployStep.run).toContain(
+      '> "$release_dir/public-review-discussion-destinations.json"'
+    );
+    expect(deployStep.run).not.toContain(
+      '> "$release_root/public-review-discussion-destinations.json"'
+    );
+    expect(deployStep.run).toContain(
+      "const currentApp = fs.realpathSync(path.join(__dirname, 'current'));"
+    );
+    expect(deployStep.run).toContain("path.dirname(currentApp)");
+    expect(deployStep.run).toContain(
+      "disables review submission rather than selecting another Wave."
+    );
+    expect(deployStep.run).toContain("if (error?.code !== 'ENOENT')");
+    expect(
+      deployStep.run.indexOf(
+        '> "$release_dir/public-review-discussion-destinations.json"'
+      )
+    ).toBeLessThan(
+      deployStep.run.indexOf('ln -sfn "$release_dir/app" "$current_link"')
+    );
+    expect(deployStep.run).toContain('(has("production") | not)');
+    expect(productionDeployWorkflowSource).toContain(
+      "PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_PRODUCTION_DISCUSSION_DESTINATIONS }}"
+    );
+    expect(productionDeployWorkflowSource).toContain('keys == ["production"]');
+    expect(productionDeployWorkflowSource).toContain(
+      'OptionName:"PUBLIC_REVIEW_DISCUSSION_DESTINATIONS"'
+    );
+  });
+
+  it("migrates only the exact legacy PM2 process and verifies locally", () => {
+    const deployStep = deployWorkflow.jobs.deploy.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Deploy immutable bundle through SSM"
+    );
+    const script = deployStep.run;
+
+    expect(script).toContain(
+      'process_count="$(jq \'[.[] | select(.name == "6529seize")] | length\''
+    );
+    expect(script).toContain('.pm_exec_path == "/usr/bin/bash"');
+    expect(script).toContain(".pm_cwd == $repo_dir");
+    expect(script).toContain(
+      '.args == ["-lc", ("cd \\\"" + $repo_dir + "\\\" && ./bin/6529 run start:standalone")]'
+    );
+    expect(script).toContain(
+      "Refusing to replace an unrecognized 6529seize PM2 process."
+    );
+    expect(script).toContain(
+      "Refusing to deploy with duplicate 6529seize PM2 processes."
+    );
+    expect(script).toContain("process_kind='legacy'");
+    expect(script).toContain("restore_legacy_process");
+    expect(script).toContain("delete_6529_process || return 1");
+    expect(script).toContain("restore_previous_link || return 1");
+    expect(script).toContain("--update-env || return 1");
+    expect(script).toContain("pm2 save || return 1");
+    expect(script).toContain(
+      'wait_for_local_version "$previous_local_version" || return 1'
+    );
+    expect(script).toContain('wait_for_local_version "$EXPECTED_SHA"');
+    expect(script).toContain(
+      "Refusing to deploy without an exact healthy pre-mutation local version."
+    );
+    expect(script).toContain("http://127.0.0.1:3001/api/version");
+    expect(
+      script.lastIndexOf('wait_for_local_version "$EXPECTED_SHA"')
+    ).toBeLessThan(script.lastIndexOf("pm2 save"));
+  });
+
+  it("bounds rebuildable staging releases without deleting the active rollback", () => {
+    const deployStep = deployWorkflow.jobs.deploy.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Deploy immutable bundle through SSM"
+    );
+    const script = deployStep.run;
+
+    expect(script).toContain("prune_release_cache");
+    expect(script).toContain(
+      '[[ "$previous_target" =~ ^${release_root}/releases/[a-f0-9]{40}/app$ ]]'
+    );
+    expect(script).toContain('[ "$cached_release" = "$release_dir" ]');
+    expect(script).toContain('[ "$cached_release" = "$current_release" ]');
+    expect(script).toContain('if ! [[ "$cached_sha" =~ ^[a-f0-9]{40}$ ]] ||');
+    expect(script).toContain(
+      '[ "$cached_release" != "$release_root/releases/$cached_sha" ]'
+    );
+    expect(script).toContain(
+      "Preserving unrecognized staging release cache entry"
+    );
+    expect(script).toContain(
+      "Refusing to prune without the exact managed current release."
+    );
+    expect(script.indexOf("continue\n")).toBeLessThan(
+      script.indexOf('rm -rf -- "$cached_release"')
+    );
+    expect(script).toContain('rm -rf -- "$cached_release"');
+    expect(script.indexOf("prune_release_cache\n")).toBeGreaterThan(
+      script.indexOf(
+        "Refusing to deploy without an exact healthy pre-mutation local version."
+      )
+    );
+    expect(script.indexOf("prune_release_cache\n")).toBeLessThan(
+      script.indexOf('http_status="$(curl')
+    );
+    expect(script.indexOf('rm -f "$release_dir/package.zip"')).toBeGreaterThan(
+      script.indexOf('test -f "$release_dir/app/server.js"')
+    );
+  });
+});
+
+describe("release bus contributor notifications", () => {
+  const workflows = ["staging", "production"].map(
+    (environment) =>
+      [
+        environment,
+        YAML.parse(
+          fs.readFileSync(
+            path.join(
+              process.cwd(),
+              `.github/workflows/release-bus-deploy-${environment}.yml`
+            ),
+            "utf8"
+          )
+        ),
+      ] as const
+  );
+  const notifier = fs.readFileSync(
+    path.join(process.cwd(), "scripts/notify-ci-wave.mjs"),
+    "utf8"
+  );
+
+  it.each(workflows)(
+    "validates and signs %s Release Train contributor metadata",
+    (_environment, workflow) => {
+      const inputs = workflow.on.workflow_dispatch.inputs;
+      const steps = workflow.jobs.deploy.steps;
+      const validation = steps.find(
+        (step: { name?: string }) =>
+          step.name === "Validate dispatch inputs before using credentials"
+      );
+      const checkout = steps.find(
+        (step: { name?: string }) => step.name === "Check out CI wave notifier"
+      );
+      const verifyCheckout = steps.find(
+        (step: { name?: string }) =>
+          step.name === "Verify CI wave notifier checkout"
+      );
+      const failure = steps.find(
+        (step: { name?: string }) =>
+          step.name === "Notify CI wave about failure"
+      );
+      const success = steps.find(
+        (step: { name?: string }) =>
+          step.name === "Notify CI wave about success"
+      );
+
+      expect(inputs.release_contributors).toMatchObject({
+        required: false,
+        default: "[]",
+      });
+      expect(validation.run).toContain(
+        'jq -e \'type == "array" and length <= 100'
+      );
+      expect(validation.run).toContain(
+        "Semantic GitHub-login validation is centralized in notify-ci-wave.mjs"
+      );
+      expect(checkout).toMatchObject({
+        if: "always()",
+        with: {
+          ref: "${{ github.workflow_sha }}",
+          path: ".ci-wave-notifier",
+          "persist-credentials": false,
+        },
+      });
+      expect(verifyCheckout).toMatchObject({
+        if: "always()",
+        run: expect.stringContaining(
+          "test -f .ci-wave-notifier/scripts/notify-ci-wave.mjs"
+        ),
+      });
+      expect(failure).toMatchObject({
+        if: "failure() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''",
+        "continue-on-error": true,
+        run: "node .ci-wave-notifier/scripts/notify-ci-wave.mjs",
+      });
+      expect(success).toMatchObject({
+        if: "success() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''",
+        "continue-on-error": true,
+        run: "node .ci-wave-notifier/scripts/notify-ci-wave.mjs",
+      });
+      for (const notifyStep of [failure, success]) {
+        expect(notifyStep.env).toMatchObject({
+          CI_PIPELINES_SHA: "${{ inputs.expected_sha }}",
+          CI_RELEASE_TRAIN_ID: "${{ inputs.release_train_id }}",
+          CI_RELEASE_CONTRIBUTORS: "${{ inputs.release_contributors }}",
+        });
+      }
+      expect(failure.env).not.toHaveProperty("CI_RELEASE_NOTES_PROMPT_PATH");
+      if (_environment === "production") {
+        expect(success.env).toMatchObject({
+          CI_PIPELINES_TARGET_ENV: "prod",
+          CI_PIPELINES_STATUS: "success",
+          CI_PIPELINES_SERVICE: "web",
+          CI_RELEASE_NOTES_PROMPT_PATH:
+            "ops/release-notes/release-notes.prompt.md",
+        });
+        expect(
+          fs.existsSync(
+            path.join(process.cwd(), success.env.CI_RELEASE_NOTES_PROMPT_PATH)
+          )
+        ).toBe(true);
+      } else {
+        expect(success.env).not.toHaveProperty("CI_RELEASE_NOTES_PROMPT_PATH");
+      }
+    }
+  );
+
+  it("includes contributor fields in the signed payload", () => {
+    expect(notifier).toContain(
+      "contributor_github_logins: releaseContributors"
+    );
+    expect(notifier).toContain("sha: CI_PIPELINES_SHA || GITHUB_SHA || null");
+  });
+});
+
+describe("release bus v2 E2E callbacks", () => {
+  const stagingE2E = fs.readFileSync(
+    path.join(process.cwd(), ".github/workflows/staging-e2e.yml"),
+    "utf8"
+  );
+  const productionE2E = fs.readFileSync(
+    path.join(process.cwd(), ".github/workflows/production-e2e.yml"),
+    "utf8"
+  );
+
+  it.each([
+    ["staging", stagingE2E],
+    ["production", productionE2E],
+  ])("binds %s E2E authorization and progress to v2", (_name, workflow) => {
+    expect(workflow).toContain("/deploy/release-bus-v2/authorize");
+    expect(workflow).toContain("/deploy/release-bus-v2/report-progress");
+  });
+
+  it("classifies staging setup transport separately from E2E failures", () => {
+    expect(stagingE2E).toContain("Check out immutable Release Bus tooling");
+    expect(stagingE2E).toContain("timeout-minutes: 2");
+    expect(stagingE2E).toContain("path: .release-bus-control");
+    expect(stagingE2E).not.toContain(
+      'git fetch --no-tags origin "$WORKFLOW_SHA"'
+    );
+    expect(stagingE2E).toContain(
+      "scripts/release-bus-install-dependencies.cjs"
+    );
+    expect(stagingE2E).toContain('run: node "$RELEASE_BUS_INSTALL_TOOL"');
+    expect(stagingE2E).toContain("id: socket-firewall");
+    expect(stagingE2E).toContain(
+      "SOCKET_OUTCOME: ${{ steps.socket-firewall.outcome }}"
+    );
+    expect(stagingE2E).toContain("failure_class=INFRASTRUCTURE");
+    expect(stagingE2E).toContain("failure_phase=staging_e2e_setup");
+    expect(stagingE2E).toContain("failure_class=E2E");
+    expect(stagingE2E).toContain("failure_phase=staging_e2e");
+  });
+});
+
+describe("release bus v2 frontend composition", () => {
+  const workflow = YAML.parse(
+    fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/release-bus-v2-compose.yml"),
+      "utf8"
+    )
+  );
+  const composeScript = workflow.jobs.compose.steps.find(
+    (step: { name?: string }) =>
+      step.name === "Compose deterministic candidate set"
+  ).run;
+  const validateScript = workflow.jobs.compose.steps.find(
+    (step: { name?: string }) => step.name === "Validate immutable inputs"
+  ).run;
+
+  function runCompositionScenario(
+    setup: string,
+    candidates: string,
+    assertions: string
+  ) {
+    const tempDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "release-bus-v2-compose-")
+    );
+    try {
+      childProcess.execFileSync("bash", ["-s"], {
+        cwd: tempDir,
+        env: {
+          ...process.env,
+          GIT_CONFIG_NOSYSTEM: "1",
+        },
+        input: `
+set -euo pipefail
+# The Windows jq binary writes CRLF even inside Git Bash. Normalize its output
+# so this fixture exercises the workflow's Ubuntu line semantics locally too.
+jq_executable="$(command -v jq)"
+jq() {
+  "$jq_executable" "$@" | tr -d '\\r'
+}
+git init --bare origin.git >/dev/null
+git init seed >/dev/null
+cd seed
+git config user.name "Fixture Author"
+git config user.email "fixture@example.com"
+printf 'base\\n' > shared.txt
+git add shared.txt
+git commit -m base >/dev/null
+base_sha="$(git rev-parse HEAD)"
+git branch -M main
+git remote add origin "$OLDPWD/origin.git"
+git push origin main >/dev/null
+${setup}
+cd ..
+git clone --no-checkout origin.git work >/dev/null
+cd work
+git checkout --detach "$base_sha" >/dev/null
+mkdir -p runner-temp
+export BASE_SHA="$base_sha"
+export CANDIDATE_SHAS="$(jq -nc ${candidates})"
+export RELEASE_BRANCH="release-bus-v2/staging-train-fixture"
+export RELEASE_BUS_GIT_EMAIL="release-bus@example.com"
+export RELEASE_BUS_GIT_NAME="Release Bus Fixture"
+export RUNNER_TEMP="$PWD/runner-temp"
+export TRAIN_ID="fixture"
+(
+${composeScript}
+)
+${assertions}
+`,
+        stdio: "pipe",
+      });
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  }
+
+  it("accepts a base-only composition with an empty candidate set", () => {
+    expect(validateScript).toContain(
+      'type == "array" and all(.[]; test("^[a-f0-9]{40}$"))'
+    );
+    expect(validateScript).not.toContain("length > 0");
+
+    runCompositionScenario(
+      "",
+      "'[]'",
+      `
+test "$(jq -r '.reused' "$RUNNER_TEMP/composition.json")" = false
+test "$(jq -c '.excluded_shas' "$RUNNER_TEMP/composition.json")" = '[]'
+test "$(jq -r '.composed_sha' "$RUNNER_TEMP/composition.json")" = "$base_sha"
+test "$(git rev-parse HEAD)" = "$base_sha"
+`
+    );
+  });
+
+  it("commits candidates only from an active merge state", () => {
+    const merge = composeScript.indexOf(
+      'if git merge --no-ff --no-commit "$sha"; then'
+    );
+    const mergeHead = composeScript.indexOf(
+      "git rev-parse --verify --quiet MERGE_HEAD >/dev/null"
+    );
+    const commit = composeScript.indexOf(
+      "git -c core.hooksPath=/dev/null commit -s",
+      mergeHead
+    );
+
+    expect(merge).toBeGreaterThan(-1);
+    expect(mergeHead).toBeGreaterThan(merge);
+    expect(commit).toBeGreaterThan(mergeHead);
+    expect(composeScript).not.toContain("--allow-empty");
+  });
+
+  it("accepts ancestor and repeated candidate SHAs without empty commits", () => {
+    runCompositionScenario(
+      `
+printf 'candidate\\n' > candidate.txt
+git add candidate.txt
+git commit -m candidate >/dev/null
+candidate_sha="$(git rev-parse HEAD)"
+git push origin HEAD:refs/heads/candidate >/dev/null
+`,
+      '--arg base "$base_sha" --arg candidate "$candidate_sha" \'[$base, $candidate, $candidate]\'',
+      `
+test "$(jq -r '.reused' "$RUNNER_TEMP/composition.json")" = false
+test "$(jq -c '.excluded_shas' "$RUNNER_TEMP/composition.json")" = '[]'
+composed_sha="$(jq -r '.composed_sha' "$RUNNER_TEMP/composition.json")"
+test "$composed_sha" = "$(git rev-parse HEAD)"
+git merge-base --is-ancestor "$base_sha" "$composed_sha"
+git merge-base --is-ancestor "$candidate_sha" "$composed_sha"
+test "$(git rev-list --merges --count "$base_sha..$composed_sha")" = 1
+test "$(git log --format=%B "$base_sha..$composed_sha" | grep -c "Candidate-SHA: $candidate_sha")" = 1
+`
+    );
+  });
+
+  it("reuses an existing immutable branch and reports candidates outside it", () => {
+    runCompositionScenario(
+      `
+git switch -c existing "$base_sha" >/dev/null
+printf 'existing\\n' > existing.txt
+git add existing.txt
+git commit -m existing >/dev/null
+existing_sha="$(git rev-parse HEAD)"
+git push origin HEAD:refs/heads/release-bus-v2/staging-train-fixture >/dev/null
+git switch -c outside "$base_sha" >/dev/null
+printf 'outside\\n' > outside.txt
+git add outside.txt
+git commit -m outside >/dev/null
+outside_sha="$(git rev-parse HEAD)"
+git push origin HEAD:refs/heads/outside >/dev/null
+`,
+      '--arg existing "$existing_sha" --arg outside "$outside_sha" \'[$existing, $outside]\'',
+      `
+test "$(jq -r '.reused' "$RUNNER_TEMP/composition.json")" = true
+test "$(jq -r '.composed_sha' "$RUNNER_TEMP/composition.json")" = "$existing_sha"
+test "$(jq -r '.excluded_shas | length' "$RUNNER_TEMP/composition.json")" = 1
+test "$(jq -r '.excluded_shas[0]' "$RUNNER_TEMP/composition.json")" = "$outside_sha"
+`
+    );
+  });
+
+  it("continues with a compatible candidate after excluding a conflict", () => {
+    runCompositionScenario(
+      `
+git switch -c first "$base_sha" >/dev/null
+printf 'first\\n' > shared.txt
+git commit -am first >/dev/null
+first_sha="$(git rev-parse HEAD)"
+git push origin HEAD:refs/heads/first >/dev/null
+git switch -c conflicting "$base_sha" >/dev/null
+printf 'conflicting\\n' > shared.txt
+git commit -am conflicting >/dev/null
+conflicting_sha="$(git rev-parse HEAD)"
+git push origin HEAD:refs/heads/conflicting >/dev/null
+git switch -c following "$first_sha" >/dev/null
+printf 'following\\n' > following.txt
+git add following.txt
+git commit -m following >/dev/null
+following_sha="$(git rev-parse HEAD)"
+git push origin HEAD:refs/heads/following >/dev/null
+`,
+      '--arg first "$first_sha" --arg conflicting "$conflicting_sha" --arg following "$following_sha" \'[$first, $conflicting, $following]\'',
+      `
+test "$(jq -r '.reused' "$RUNNER_TEMP/composition.json")" = false
+test "$(jq -r '.excluded_shas | length' "$RUNNER_TEMP/composition.json")" = 1
+test "$(jq -r '.excluded_shas[0]' "$RUNNER_TEMP/composition.json")" = "$conflicting_sha"
+composed_sha="$(jq -r '.composed_sha' "$RUNNER_TEMP/composition.json")"
+git merge-base --is-ancestor "$first_sha" "$composed_sha"
+git merge-base --is-ancestor "$following_sha" "$composed_sha"
+if git merge-base --is-ancestor "$conflicting_sha" "$composed_sha"; then
+  exit 1
+fi
+test -z "$(git ls-files --unmerged)"
+test "$(cat shared.txt)" = first
+test "$(cat following.txt)" = following
+test "$(git rev-list --merges --count "$base_sha..$composed_sha")" = 2
+`
+    );
+  });
+});
+
+describe("release bus v2 combined preflight", () => {
+  const appPrCi = fs.readFileSync(
+    path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),
+    "utf8"
+  );
+  const workflow = YAML.parse(
+    fs.readFileSync(
+      path.join(
+        process.cwd(),
+        ".github/workflows/release-bus-v2-preflight.yml"
+      ),
+      "utf8"
+    )
+  );
+
+  it("publishes small exact merge-tree CI evidence instead of deploy bytes", () => {
+    expect(appPrCi).not.toContain("github.event.pull_request.merge_commit_sha");
+    expect(appPrCi).toContain("EXPECTED_MERGE_SHA: ${{ github.sha }}");
+    expect(appPrCi).toContain("name: release-bus-v2-pr-${{ github.sha }}");
+    if (appPrCi.includes("exact-merge-tree-pr-ci-v1")) {
+      expect(appPrCi).toContain('workflow:".github/workflows/app-pr-ci.yml"');
+      expect(appPrCi).not.toContain("release-bus-v2-pr-artifact/profiles");
+      expect(appPrCi).not.toContain(
+        "Build staging profile for exact artifact reuse"
+      );
+    } else {
+      expect(appPrCi).toContain(
+        "Upload exact PR merge-tree dual-profile artifact"
+      );
+      expect(appPrCi).toContain("schema_version:2");
+      expect(appPrCi).toContain('environment:"dual"');
+    }
+  });
+
+  it("authorizes before the only secretless candidate checkout", () => {
+    const job = workflow.jobs.build;
+    expect(job.permissions).toEqual({ contents: "read" });
+    expect(JSON.stringify(job.env ?? {})).not.toContain("secrets.");
+    expect(
+      workflow.jobs.authorize.steps.some((step: { uses?: string }) =>
+        step.uses?.startsWith("actions/checkout@")
+      )
+    ).toBe(false);
+    const source = fs.readFileSync(
+      path.join(
+        process.cwd(),
+        ".github/workflows/release-bus-v2-preflight.yml"
+      ),
+      "utf8"
+    );
+    expect(
+      source.match(/codeql\[actions\/untrusted-checkout\/medium\]/g)
+    ).toHaveLength(1);
+  });
+
+  it("builds only the requested profile for v3 and keeps bounded legacy compatibility", () => {
+    const build = workflow.jobs.build;
+    const buildStep = build.steps.find(
+      (step: { name?: string }) =>
+        step.name ===
+        "Build and package only the authorized environment contract"
+    );
+    expect(buildStep.run).toContain(
+      '[ "$ARTIFACT_CONTRACT_VERSION" = environment-bound-v3 ]'
+    );
+    expect(buildStep.run).toContain(
+      'build_profile "$ARTIFACT_ENVIRONMENT" release-bus-artifact'
+    );
+    expect(buildStep.run).toContain(
+      "build_profile staging release-bus-artifact/profiles/staging"
+    );
+    expect(buildStep.run).toContain(
+      "build_profile production release-bus-artifact/profiles/production"
+    );
+    expect(buildStep.run).toContain("unset ANNOUNCED_VERSION_ENDPOINT");
+    expect(
+      workflow.on.workflow_dispatch.inputs.artifact_contract_version
+    ).toMatchObject({
+      default: "legacy-v2",
+      options: ["legacy-v2", "environment-bound-v3"],
+    });
+  });
+
+  it("removes repository-wide quality matrices from the train critical path", () => {
+    expect(Object.keys(workflow.jobs)).toEqual([
+      "authorize",
+      "evidence",
+      "build",
+      "finalize",
+    ]);
+    expect(workflow.jobs).not.toHaveProperty("quality");
+    expect(workflow.jobs.build).not.toHaveProperty("strategy");
+    const source = fs.readFileSync(
+      path.join(
+        process.cwd(),
+        ".github/workflows/release-bus-v2-preflight.yml"
+      ),
+      "utf8"
+    );
+    expect(source).not.toContain("test:no-coverage");
+    expect(source).not.toContain("lint:quiet");
+    expect(source).not.toContain("typecheck:ci");
+    expect(source).not.toContain("Jest inventory");
+    expect(
+      source.match(/node scripts\/release-bus-install-dependencies\.cjs/g)
+    ).toHaveLength(1);
+  });
+
+  it("binds schema v3 to exact environment/SHA and fails closed on v3 schema2", () => {
+    const buildStep = workflow.jobs.build.steps.find(
+      (step: { name?: string }) =>
+        step.name ===
+        "Build and package only the authorized environment contract"
+    );
+    const verify = workflow.jobs.finalize.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Verify structured artifact result"
+    );
+    expect(buildStep.run).toContain("schema_version:3");
+    expect(buildStep.run).toContain('artifact_contract:"environment-bound-v1"');
+    expect(verify.run).toContain(".source_sha == $source_sha");
+    expect(verify.run).toContain(".environment == $environment");
+    expect(verify.run.indexOf("environment-bound-v3")).toBeLessThan(
+      verify.run.indexOf("schema_version == 2")
+    );
+    expect(verify.run).not.toContain("environment-bound-v3 ] ||");
+  });
+
+  it("accepts rollback revisions without weakening ordinary revision validation", () => {
+    const validation = workflow.jobs.authorize.steps.find(
+      (step: { name?: string }) => step.name === "Validate exact local inputs"
+    );
+    expect(validation.run).toContain("rollback-[1-9][0-9]{0,8}");
+  });
+});
 
 function releaseArtifact(uri, metadata) {
   return {
@@ -129,6 +886,30 @@ describe("deployment bus manifest", () => {
   afterEach(() => {
     jest.restoreAllMocks();
     Reflect.deleteProperty(globalThis, "fetch");
+  });
+
+  it("preserves an explicit empty production candidate from manual workflow dispatch", () => {
+    const args = parseArgs([
+      "--environment",
+      "staging",
+      "--staging-deploy-sha",
+      STAGING_SHA,
+      "--production-candidate-sha",
+      "",
+      "--production-eligible",
+      "false",
+    ]);
+
+    expect(args["production-candidate-sha"]).toBe("");
+    const manifest = buildManifest({
+      environment: args.environment,
+      stagingDeploySha: args["staging-deploy-sha"],
+      productionCandidateSha: args["production-candidate-sha"],
+      productionEligible: args["production-eligible"],
+      now: "2026-06-18T12:00:00.000Z",
+    });
+    expect(manifest.shas.production_candidate_sha).toBeNull();
+    expect(manifest.production_eligible).toBe(false);
   });
 
   it("builds a valid standard staging manifest", () => {

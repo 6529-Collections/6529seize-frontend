@@ -51,7 +51,7 @@ export function useWavePagination({
     cancelFetch: cancelAbort,
     createController,
     cleanupController,
-  } = useWaveAbortController();
+  } = useWaveAbortController("pagination");
 
   // Track pagination loading state
   const paginationStates = useRef<Record<string, PaginationState>>({});
@@ -333,7 +333,7 @@ export function useWavePagination({
   const cancelPaginationFetch = useCallback(
     (waveId: string) => {
       // Cancel the abort controller
-      cancelAbort(waveId);
+      cancelAbort(waveId, "pagination_cancelled");
 
       // Clear pagination state
       if (paginationStates.current[waveId]) {

@@ -7,7 +7,7 @@ import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { mainnet } from "viem/chains";
 
@@ -15,14 +15,15 @@ import LatestDropNextMintSubscribe from "@/components/home/now-minting/LatestDro
 import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";
 import { getMemeYearFromMintNumber } from "@/components/the-memes/theMemesFilters";
 import { getTheMemesRouteHrefWithLocale } from "@/components/the-memes/theMemesRouteParams";
+import Button from "@/components/utils/button/Button";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
-import type { NFT, NftRank, NftTDH } from "@/entities/INFT";
+import type { NftRank, NftTDH } from "@/entities/INFT";
 import type { ConsolidatedTDH } from "@/entities/ITDH";
 import type { Transaction } from "@/entities/ITransaction";
-import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { formatInteger } from "@/i18n/format";
 import { normalizeLocale, type SupportedLocale } from "@/i18n/locales";
@@ -32,9 +33,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import NftNavigation from "../nft-navigation/NftNavigation";
 import MemeCalendarPeriods from "./MemeCalendarPeriods";
 import { MemePageArtViewer } from "./MemePageArtViewer";
-import { MemePageCollectorsSubMenu } from "./MemePageCollectors";
 import { MemePageLiveRightMenu, MemePageLiveSubMenu } from "./MemePageLive";
-import { MemePageReferencesSubMenu } from "./MemePageReferences";
 import {
   MemePageNavigationSkeleton,
   MemePageSkeleton,
@@ -53,6 +52,11 @@ import {
 } from "./MemeShared";
 import styles from "./TheMemes.module.css";
 import UpcomingMemePage from "./UpcomingMemePage";
+import {
+  isAbortError,
+  type MemePageInitialData,
+  useMemePageFallbackData,
+} from "./useMemePageFallbackData";
 
 const MemePageActivity = dynamic(() =>
   import("./MemePageActivity").then((mod) => mod.MemePageActivity)
@@ -60,6 +64,14 @@ const MemePageActivity = dynamic(() =>
 
 const MemePageTimeline = dynamic(() =>
   import("./MemePageTimeline").then((mod) => mod.MemePageTimeline)
+);
+
+const MemePageCollectorsSubMenu = dynamic(() =>
+  import("./MemePageCollectors").then((mod) => mod.MemePageCollectorsSubMenu)
+);
+
+const MemePageReferencesSubMenu = dynamic(() =>
+  import("./MemePageReferences").then((mod) => mod.MemePageReferencesSubMenu)
 );
 
 const ACTIVITY_PAGE_SIZE = 25;
@@ -86,7 +98,12 @@ const MEME_HISTORY_TABS: {
 ];
 
 const MEME_TAB_BUTTON_BASE_CLASS_NAME =
-  "tw-m-0 tw-flex tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-4 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+  "tw-m-0 tw-flex tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-4 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline tw-transition-colors tw-duration-150 tw-ease-out motion-reduce:tw-transition-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+
+interface MemeOwnerState {
+  readonly consolidationKey: string;
+  readonly owner: ConsolidatedTDH;
+}
 
 function getMemeHistoryTabLabel(
   tab: MEME_HISTORY_TAB,
@@ -143,13 +160,15 @@ function UpcomingMemeDistributionHeaderLink({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <Link
+    <ButtonLink
       href={getDistributionDetailHref({
         basePath: "/the-memes",
         id,
         locale,
       })}
-      className="tw-ml-auto tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1.5 tw-rounded-md tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-text-sm"
+      variant="tertiary"
+      size="xs"
+      className="tw-ml-auto"
     >
       <span className="tw-whitespace-nowrap">
         {t(locale, "distribution.planLink")}
@@ -158,7 +177,7 @@ function UpcomingMemeDistributionHeaderLink({
         aria-hidden="true"
         className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-400"
       />
-    </Link>
+    </ButtonLink>
   );
 }
 
@@ -204,14 +223,22 @@ function getRouteFocus(
   return MEME_FOCUS.ACTIVITY;
 }
 
-export default function MemePage({ nftId }: { readonly nftId: string }) {
-  const router = useRouter();
+export default function MemePage({
+  nftId,
+  initialData,
+}: {
+  readonly nftId: string;
+  readonly initialData?: MemePageInitialData | undefined;
+}) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const locale = normalizeLocale(searchParams.get("locale"));
   const { setTitle } = useTitle();
   const { connectedProfile } = useContext(AuthContext);
-  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
+  const connectedWallets = useMemo(
+    () => connectedProfile?.wallets?.map((wallet) => wallet.wallet) ?? [],
+    [connectedProfile?.wallets]
+  );
 
   const focusParam = parseMemeFocus(searchParams.get("focus"));
   const resolvedRouterFocus = useMemo(() => {
@@ -233,29 +260,45 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   }, [focusParam]);
 
   const activeTab = resolvedRouterFocus ?? MEME_FOCUS.LIVE;
+  const [loadedPrimaryTabs, setLoadedPrimaryTabs] = useState<
+    ReadonlySet<MEME_FOCUS>
+  >(() => new Set([activeTab]));
   const requestedHistoryTab =
     activeTab === MEME_FOCUS.HISTORY
       ? getHistoryTabForFocus(focusParam)
       : MEME_HISTORY_TAB.ACTIVITY;
-
-  useEffect(() => {
-    setConnectedWallets(connectedProfile?.wallets?.map((w) => w.wallet) ?? []);
-  }, [connectedProfile]);
 
   const searchParamsString = useMemo(
     () => searchParams.toString(),
     [searchParams]
   );
 
-  const [nft, setNft] = useState<NFT>();
-  const [nftNotFound, setNftNotFound] = useState(false);
-  const [nftMeta, setNftMeta] = useState<ApiMemesExtendedData>();
+  const { pageData, cardLoadFailed, retryCardData } = useMemePageFallbackData({
+    nftId,
+    initialData,
+  });
+  const nft = pageData?.nft;
+  const nftMeta = pageData?.nftMeta;
+  const nftNotFound = pageData?.nftNotFound ?? false;
   const [nftBalance, setNftBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-  const [myOwner, setMyOwner] = useState<ConsolidatedTDH>();
-  const [myTDH, setMyTDH] = useState<NftTDH>();
-  const [myRank, setMyRank] = useState<NftRank>();
+  const [ownerState, setOwnerState] = useState<MemeOwnerState>();
+  const consolidationKey = connectedProfile?.consolidation_key;
+  const hasConnectedWallets = connectedWallets.length > 0;
+  const myOwner =
+    hasConnectedWallets && ownerState?.consolidationKey === consolidationKey
+      ? ownerState?.owner
+      : undefined;
+  const numericNftId = Number.parseInt(nftId, 10);
+  const myTDH = useMemo<NftTDH | undefined>(
+    () => myOwner?.memes.find((meme) => meme.id === numericNftId),
+    [myOwner, numericNftId]
+  );
+  const myRank = useMemo<NftRank | undefined>(
+    () => myOwner?.memes_ranks.find((meme) => meme.id === numericNftId),
+    [myOwner, numericNftId]
+  );
 
   const [userLoaded, setUserLoaded] = useState(false);
 
@@ -305,15 +348,24 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     const params = new URLSearchParams(searchParamsString);
     params.set("focus", nextFocus);
     const queryString = params.toString();
-    router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
-      scroll: false,
-    });
+    globalThis.history.replaceState(
+      null,
+      "",
+      queryString ? `${pathname}?${queryString}` : pathname
+    );
   }
 
   function setActiveMemeTab(nextTab: MEME_FOCUS) {
     if (nextTab === activeTab) {
       return;
     }
+
+    setLoadedPrimaryTabs((current) => {
+      if (current.has(activeTab) && current.has(nextTab)) {
+        return current;
+      }
+      return new Set([...current, activeTab, nextTab]);
+    });
 
     if (nextTab === MEME_FOCUS.HISTORY) {
       replaceRouteFocus(getRouteFocus(MEME_FOCUS.HISTORY, activeHistoryTab));
@@ -327,53 +379,10 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     replaceRouteFocus(getRouteFocus(MEME_FOCUS.HISTORY, nextTab));
   }
 
-  useEffect(() => {
-    if (!nftId) {
-      return;
-    }
-
-    let cancelled = false;
-
-    const metaPromise = fetchUrl(
-      `${publicEnv.API_ENDPOINT}/api/memes_extended_data?id=${nftId}`
-    );
-    const nftPromise = fetchUrl(
-      `${publicEnv.API_ENDPOINT}/api/nfts?id=${nftId}&contract=${MEMES_CONTRACT}`
-    );
-
-    Promise.all([metaPromise, nftPromise])
-      .then(([metaResponse, nftResponse]: [DBResponse, DBResponse]) => {
-        if (cancelled) {
-          return;
-        }
-        const nftMetas = metaResponse.data;
-        if (Array.isArray(nftMetas) && nftMetas.length === 1) {
-          setNftMeta(nftMetas[0]);
-          const mynft = nftResponse.data?.[0];
-          setNft(mynft);
-          setNftNotFound(false);
-        } else {
-          setNftMeta(undefined);
-          setNft(undefined);
-          setNftNotFound(true);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setNftMeta(undefined);
-          setNft(undefined);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [nftId]);
-
   function updateNftBalances(data: Transaction[]) {
     let countIn = 0;
     let countOut = 0;
-    data.map((d: Transaction) => {
+    data.forEach((d: Transaction) => {
       if (connectedWallets.some((w) => areEqualAddresses(w, d.from_address))) {
         countOut += d.token_count;
       }
@@ -386,51 +395,76 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
 
   useEffect(() => {
     if (connectedWallets.length && nftId) {
-      fetchUrl(
-        `${
-          publicEnv.API_ENDPOINT
-        }/api/transactions?contract=${MEMES_CONTRACT}&wallet=${connectedWallets.join(
-          ","
-        )}&id=${nftId}`
-      ).then((response: DBResponse) => {
-        setTransactions(response.data);
-        updateNftBalances(response.data);
-        setUserLoaded(true);
-      });
+      const controller = new AbortController();
+      setUserLoaded(false);
+      setTransactions([]);
+      setNftBalance(0);
+
+      async function loadTransactions() {
+        try {
+          const response = await fetchUrl<DBResponse<Transaction>>(
+            `${
+              publicEnv.API_ENDPOINT
+            }/api/transactions?contract=${MEMES_CONTRACT}&wallet=${connectedWallets.join(
+              ","
+            )}&id=${nftId}`,
+            { signal: controller.signal }
+          );
+          if (controller.signal.aborted) {
+            return;
+          }
+          setTransactions(response.data);
+          updateNftBalances(response.data);
+          setUserLoaded(true);
+        } catch (error: unknown) {
+          if (isAbortError(error)) {
+            return;
+          }
+          setTransactions([]);
+          setNftBalance(0);
+          setUserLoaded(true);
+        }
+      }
+
+      void loadTransactions();
+
+      return () => controller.abort();
     } else {
       setNftBalance(0);
       setUserLoaded(true);
       setTransactions([]);
+      return undefined;
     }
   }, [nftId, connectedWallets]);
 
   useEffect(() => {
-    if (
-      connectedWallets.length > 0 &&
-      nftId &&
-      connectedProfile?.consolidation_key
-    ) {
-      commonApiFetch<ConsolidatedTDH>({
-        endpoint: `tdh/consolidation/${connectedProfile.consolidation_key}`,
-      })
-        .then((response) => {
-          setMyOwner(response);
-          setMyTDH(
-            response.memes.find((m) => m.id === Number.parseInt(nftId, 10))
-          );
-          setMyRank(
-            response.memes_ranks.find(
-              (m) => m.id === Number.parseInt(nftId, 10)
-            )
-          );
-        })
-        .catch(() => {
-          setMyOwner(undefined);
-          setMyTDH(undefined);
-          setMyRank(undefined);
-        });
+    if (hasConnectedWallets && consolidationKey) {
+      const controller = new AbortController();
+      const activeConsolidationKey = consolidationKey;
+
+      async function loadOwner() {
+        try {
+          const response = await commonApiFetch<ConsolidatedTDH>({
+            endpoint: `tdh/consolidation/${activeConsolidationKey}`,
+            signal: controller.signal,
+          });
+          setOwnerState({
+            consolidationKey: activeConsolidationKey,
+            owner: response,
+          });
+        } catch (error: unknown) {
+          if (isAbortError(error)) {
+            return;
+          }
+          // Preserve already loaded metrics for this profile on transient errors.
+        }
+      }
+
+      void loadOwner();
+      return () => controller.abort();
     }
-  }, [nftId, connectedWallets, connectedProfile?.consolidation_key]);
+    return undefined;
+  }, [consolidationKey, hasConnectedWallets]);
 
   function printStaticCardHeader() {
     if (!nft) {
@@ -484,7 +518,6 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                 fullWidth
               />
               <LatestDropNextMintSubscribe
-                appearance="quiet"
                 tokenId={nft.id}
                 statusSource="none"
               />
@@ -562,11 +595,14 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
             defaultAdditionalDetailsOpen={focusParam === MEME_FOCUS.THE_ART}
             locale={locale}
           />
-          <MemePageReferencesSubMenu
-            show={activeTab === MEME_FOCUS.REFERENCES}
-            nft={nft}
-            locale={locale}
-          />
+          {(activeTab === MEME_FOCUS.REFERENCES ||
+            loadedPrimaryTabs.has(MEME_FOCUS.REFERENCES)) && (
+            <MemePageReferencesSubMenu
+              show={activeTab === MEME_FOCUS.REFERENCES}
+              nft={nft}
+              locale={locale}
+            />
+          )}
           {userLoaded && (
             <MemePageYourCardsSubMenu
               show={
@@ -576,12 +612,15 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               transactions={transactions}
             />
           )}
-          <MemePageCollectorsSubMenu
-            show={activeTab === MEME_FOCUS.COLLECTORS}
-            nft={nft}
-            nftMeta={nftMeta}
-            locale={locale}
-          />
+          {(activeTab === MEME_FOCUS.COLLECTORS ||
+            loadedPrimaryTabs.has(MEME_FOCUS.COLLECTORS)) && (
+            <MemePageCollectorsSubMenu
+              show={activeTab === MEME_FOCUS.COLLECTORS}
+              nft={nft}
+              nftMeta={nftMeta}
+              locale={locale}
+            />
+          )}
         </div>
         {activeTab === MEME_FOCUS.HISTORY &&
           activeHistoryTab === MEME_HISTORY_TAB.ACTIVITY && (
@@ -601,11 +640,12 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   }
 
   const isLastCard = nftMeta?.collection_size === nft?.id;
-  const isLoadingNft = !nft && !nftNotFound;
+  const isLoadingNft =
+    !cardLoadFailed && (pageData === undefined || (!nft && !nftNotFound));
   const nftYear = nft === undefined ? null : getMemeYearFromMintNumber(nft.id);
-  const numericNftId = Number(nftId);
+  const parsedNftId = Number(nftId);
   const showUpcomingDistributionLink =
-    nftNotFound && Number.isInteger(numericNftId) && numericNftId > 0;
+    nftNotFound && Number.isInteger(parsedNftId) && parsedNftId > 0;
 
   return (
     <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
@@ -631,7 +671,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               </div>
               {showUpcomingDistributionLink && (
                 <UpcomingMemeDistributionHeaderLink
-                  id={numericNftId}
+                  id={parsedNftId}
                   locale={locale}
                 />
               )}
@@ -699,6 +739,24 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
             )}
           </div>
         </header>
+        {cardLoadFailed && (
+          <div
+            role="alert"
+            className="tw-mb-8 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/60 tw-p-5 tw-text-center"
+          >
+            <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+              {t(locale, "theMemes.detail.loadError.message")}
+            </p>
+            <Button
+              variant="action"
+              size="sm"
+              onClick={retryCardData}
+              className="tw-mt-4"
+            >
+              {t(locale, "theMemes.detail.loadError.retry")}
+            </Button>
+          </div>
+        )}
         {isLoadingNft && <MemePageSkeleton />}
         {nftMeta && nft && (
           <>

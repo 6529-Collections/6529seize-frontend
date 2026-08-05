@@ -38,12 +38,45 @@ describe("MobileWrapperDialog", () => {
       expect(screen.getByText("Test Title")).toBeInTheDocument();
     });
 
+    it("renders title actions beside the title", () => {
+      render(
+        <MobileWrapperDialog
+          {...defaultProps}
+          isOpen={true}
+          title="Test Title"
+          titleActions={<button type="button">Title action</button>}
+        />
+      );
+
+      const title = screen.getByText("Test Title");
+      const action = screen.getByRole("button", { name: "Title action" });
+
+      expect(title.parentElement).toContainElement(action);
+    });
+
     it("renders close button when open", () => {
       render(<MobileWrapperDialog {...defaultProps} isOpen={true} />);
 
       expect(
         screen.getByRole("button", { name: "Close panel" })
       ).toBeInTheDocument();
+    });
+
+    it("applies custom styling to the tablet modal close button", () => {
+      render(
+        <MobileWrapperDialog
+          {...defaultProps}
+          isOpen={true}
+          tabletModal
+          headerCloseButtonClassName="!tw-rounded-lg"
+        />
+      );
+
+      const desktopCloseButton = screen
+        .getAllByRole("button", { name: "Close panel" })
+        .find((button) => button.classList.contains("md:tw-inline-flex"));
+
+      expect(desktopCloseButton).toHaveClass("!tw-rounded-lg");
     });
   });
 

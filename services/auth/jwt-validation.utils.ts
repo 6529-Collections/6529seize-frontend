@@ -278,10 +278,7 @@ const handleTokenRefresh = async ({
       return createInvalidJwtResult("empty");
     }
 
-    if (
-      isAbortSignalAborted(abortSignal) ||
-      !shouldPersistRefreshedSession()
-    ) {
+    if (isAbortSignalAborted(abortSignal) || !shouldPersistRefreshedSession()) {
       return CANCELLED_JWT_RESULT;
     }
 

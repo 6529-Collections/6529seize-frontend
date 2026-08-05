@@ -1,0 +1,112 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "receive()",
+          "functionKind": "receive",
+          "id": "test/StreamPaymentsInvariant.t.sol:RejectingInvariantRecipient#function:receive()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QYXltZW50c0ludmFyaWFudC50LnNvbDpSZWplY3RpbmdJbnZhcmlhbnRSZWNpcGllbnQjZnVuY3Rpb246cmVjZWl2ZSgp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "receive",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 81,
+            "byteStart": 30893,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPaymentsInvariant.t.sol#L735-L737",
+            "lineEnd": 737,
+            "lineStart": 735,
+            "snippetSha256": "sha256:db022153c2c4108612e00cebee38a7b6ee41ea6f0586ae389261d345c3523f16",
+            "sourceSha256": "sha256:5d98b9adfd5444f5188b7ed3c4e67153f8fba9f4db059c31768809edf681175c"
+          },
+          "selector": null,
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamPaymentsInvariant.t.sol:RejectingInvariantRecipient",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1QYXltZW50c0ludmFyaWFudC50LnNvbDpSZWplY3RpbmdJbnZhcmlhbnRSZWNpcGllbnQ",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamPaymentsInvariant.t.sol:RejectingInvariantRecipient"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "RejectingInvariantRecipient",
+    "natspec": "",
+    "range": {
+      "byteLength": 126,
+      "byteStart": 30850,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPaymentsInvariant.t.sol#L734-L738",
+      "lineEnd": 738,
+      "lineStart": 734,
+      "snippetSha256": "sha256:b36f01d0791a3a670e35e85cde03482a6c2c1bf6d3c2f99d434fab74eaff3f92",
+      "sourceSha256": "sha256:5d98b9adfd5444f5188b7ed3c4e67153f8fba9f4db059c31768809edf681175c"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamPaymentsInvariant.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-26.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamPaymentsInvariant.t.sol:RejectingInvariantRecipient",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPaymentsInvariant.t.sol:RejectingInvariantRecipient#function:receive()",
+      "definitionId": "test/StreamPaymentsInvariant.t.sol:RejectingInvariantRecipient",
+      "severity": "advisory"
+    }
+  ]
+}

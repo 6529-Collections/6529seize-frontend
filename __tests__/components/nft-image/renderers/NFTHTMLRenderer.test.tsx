@@ -89,6 +89,7 @@ describe("NFTHTMLRenderer", () => {
       const iframe = screen.getByTitle("test-iframe");
       expect(iframe).toBeInTheDocument();
       expect(iframe.tagName).toBe("IFRAME");
+      expect(iframe).toHaveAttribute("data-nft-media-renderer", "html");
     });
 
     it("applies correct CSS classes from props", () => {

@@ -16,10 +16,12 @@ import {
 import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint";
 import { commonApiFetch } from "@/services/api/common-api";
 import useCapacitor from "./useCapacitor";
+import { useNotificationRealtimeState } from "@/services/notifications/notification-realtime-state";
 
 type ConnectedAccountUnreadCounts = Readonly<Record<string, number>>;
 
 const POLL_INTERVAL_MS = 15000;
+const REALTIME_RECONCILIATION_INTERVAL_MS = 5 * 60_000;
 
 const toAddressKey = (address: string): string => address.toLowerCase();
 const toAccountAuthKey = (address: string): string =>
@@ -100,7 +102,8 @@ const clampUnreadCount = (count: number | null | undefined): number => {
 };
 
 const fetchUnreadCountForAccount = async (
-  account: ConnectedWalletAccount
+  account: ConnectedWalletAccount,
+  signal: AbortSignal
 ): Promise<number> => {
   if (!account.jwt) {
     return 0;
@@ -122,7 +125,9 @@ const fetchUnreadCountForAccount = async (
       headers: {
         Authorization: `Bearer ${account.jwt}`,
       },
+      cache: "no-store",
       errorMode: "structured",
+      signal,
     });
     return clampUnreadCount(notifications.unread_count);
   } catch (error) {
@@ -141,6 +146,7 @@ export function useConnectedAccountsUnreadNotifications(
   accounts: readonly ConnectedWalletAccount[]
 ): ConnectedAccountUnreadCounts {
   const { isCapacitor } = useCapacitor();
+  const notificationRealtimeState = useNotificationRealtimeState();
   const queryClient = useQueryClient();
   const [terminalJwtFingerprintByAccount, setTerminalJwtFingerprintByAccount] =
     useState<Readonly<Record<string, string>>>({});
@@ -165,10 +171,17 @@ export function useConnectedAccountsUnreadNotifications(
     "v2",
     pollableAccounts.map((account) => toAddressKey(account.address)),
   ] as const;
+  const isRealtimeCovered =
+    notificationRealtimeState.connected &&
+    pollableAccounts.every(
+      (account) =>
+        !!account.profileId &&
+        notificationRealtimeState.syncedProfileIds.includes(account.profileId)
+    );
 
   const { data } = useQuery<ConnectedAccountUnreadCounts>({
     queryKey,
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       if (pollableAccounts.length === 0) {
         return {};
       }
@@ -176,7 +189,9 @@ export function useConnectedAccountsUnreadNotifications(
       const previousCounts =
         queryClient.getQueryData<ConnectedAccountUnreadCounts>(queryKey) ?? {};
       const results = await Promise.allSettled(
-        pollableAccounts.map((account) => fetchUnreadCountForAccount(account))
+        pollableAccounts.map((account) =>
+          fetchUnreadCountForAccount(account, signal)
+        )
       );
       const nextCounts: Record<string, number> = {};
       const terminalAuthFailures: {
@@ -207,8 +222,9 @@ export function useConnectedAccountsUnreadNotifications(
           account.jwt &&
           isTerminalNotificationAuthQueryError(result.reason)
         ) {
-          const nestedTerminalAuthFailures =
-            getTerminalAuthFailuresFromError(result.reason);
+          const nestedTerminalAuthFailures = getTerminalAuthFailuresFromError(
+            result.reason
+          );
           if (nestedTerminalAuthFailures.length > 0) {
             nestedTerminalAuthFailures.forEach((failure) => {
               terminalAuthFailures.push({
@@ -250,7 +266,9 @@ export function useConnectedAccountsUnreadNotifications(
       return nextCounts;
     },
     enabled: pollableAccounts.length > 0,
-    refetchInterval: POLL_INTERVAL_MS,
+    refetchInterval: isRealtimeCovered
+      ? REALTIME_RECONCILIATION_INTERVAL_MS
+      : POLL_INTERVAL_MS,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     refetchOnReconnect: true,

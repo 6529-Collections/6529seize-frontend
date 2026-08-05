@@ -1,0 +1,171 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamAuctionPayments.t.sol:RejectingProceedsRecipient#function:0x421607bf",
+          "declaringDefinitionId": "test/StreamAuctionPayments.t.sol:RejectingProceedsRecipient",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "contract StreamAuctions",
+              "name": "auctions",
+              "type": "address"
+            }
+          ],
+          "name": "withdrawProceedsToSelf",
+          "outputs": [],
+          "selector": "0x421607bf",
+          "signature": "withdrawProceedsToSelf(address)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "receive()",
+          "functionKind": "receive",
+          "id": "test/StreamAuctionPayments.t.sol:RejectingProceedsRecipient#function:receive()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUGF5bWVudHMudC5zb2w6UmVqZWN0aW5nUHJvY2VlZHNSZWNpcGllbnQjZnVuY3Rpb246cmVjZWl2ZSgp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "receive",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 64,
+            "byteStart": 30941,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionPayments.t.sol#L678-L680",
+            "lineEnd": 680,
+            "lineStart": 678,
+            "snippetSha256": "sha256:5af2087cadb2eb80c43063d69d46c9a2d99fd9eeda0e031b2de64675411dad43",
+            "sourceSha256": "sha256:543a0698c6732c75b5b682cd5ce6a08037afd6bfc9440253f9f391e395c779e6"
+          },
+          "selector": null,
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "withdrawProceedsToSelf(address)",
+          "displaySignature": "withdrawProceedsToSelf(StreamAuctions)",
+          "functionKind": "function",
+          "id": "test/StreamAuctionPayments.t.sol:RejectingProceedsRecipient#function:0x421607bf",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "auctions",
+              "type": "StreamAuctions"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BdWN0aW9uUGF5bWVudHMudC5zb2w6UmVqZWN0aW5nUHJvY2VlZHNSZWNpcGllbnQjZnVuY3Rpb246MHg0MjE2MDdiZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "withdrawProceedsToSelf",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 123,
+            "byteStart": 31011,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionPayments.t.sol#L682-L684",
+            "lineEnd": 684,
+            "lineStart": 682,
+            "snippetSha256": "sha256:48696139bb9a9c4cefdbae6b54fe620e03f4ca2b4fe96da670a218cc0bba64de",
+            "sourceSha256": "sha256:543a0698c6732c75b5b682cd5ce6a08037afd6bfc9440253f9f391e395c779e6"
+          },
+          "selector": "0x421607bf",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamAuctionPayments.t.sol:RejectingProceedsRecipient",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1BdWN0aW9uUGF5bWVudHMudC5zb2w6UmVqZWN0aW5nUHJvY2VlZHNSZWNpcGllbnQ",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamAuctionPayments.t.sol:RejectingProceedsRecipient"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "RejectingProceedsRecipient",
+    "natspec": "",
+    "range": {
+      "byteLength": 237,
+      "byteStart": 30899,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamAuctionPayments.t.sol#L677-L685",
+      "lineEnd": 685,
+      "lineStart": 677,
+      "snippetSha256": "sha256:b4d69a3f7a0db2f4008151219baf0e15b3b7ecdb3bc765bc347c7c4e21f98772",
+      "sourceSha256": "sha256:543a0698c6732c75b5b682cd5ce6a08037afd6bfc9440253f9f391e395c779e6"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamAuctionPayments.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 3
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 2
+    },
+    "totalCount": 3
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamAuctionPayments.t.sol:RejectingProceedsRecipient",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionPayments.t.sol:RejectingProceedsRecipient#function:0x421607bf",
+      "definitionId": "test/StreamAuctionPayments.t.sol:RejectingProceedsRecipient",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamAuctionPayments.t.sol:RejectingProceedsRecipient#function:receive()",
+      "definitionId": "test/StreamAuctionPayments.t.sol:RejectingProceedsRecipient",
+      "severity": "advisory"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+import { getAuthStateFingerprint } from "@/services/auth/auth-token-fingerprint";
+import { getAuthJwt, getWalletAddress } from "@/services/auth/auth.utils";
+import type { RequestAuthOptions } from "./authTypes";
+
+export interface AuthRequestGuard {
+  readonly isCurrent: () => boolean;
+  readonly acceptCurrentState: (walletAddress: string) => boolean;
+}
+
+export const isAuthRequestStale = (
+  authRequestGuard: AuthRequestGuard | undefined
+): boolean => authRequestGuard?.isCurrent() === false;
+
+const getCurrentAuthStateFingerprint = (): string =>
+  getAuthStateFingerprint({
+    walletAddress: getWalletAddress(),
+    jwt: getAuthJwt(),
+  });
+
+export const createAuthRequestGuard = ({
+  expectedAuthStateFingerprint,
+}: RequestAuthOptions): AuthRequestGuard => {
+  let expectedFingerprint = expectedAuthStateFingerprint;
+
+  return {
+    isCurrent: () =>
+      expectedFingerprint === undefined ||
+      getCurrentAuthStateFingerprint() === expectedFingerprint,
+    acceptCurrentState: (walletAddress: string) => {
+      if (expectedFingerprint === undefined) {
+        return true;
+      }
+
+      const currentWalletAddress = getWalletAddress();
+      if (currentWalletAddress?.toLowerCase() !== walletAddress.toLowerCase()) {
+        return false;
+      }
+
+      expectedFingerprint = getCurrentAuthStateFingerprint();
+      return true;
+    },
+  };
+};

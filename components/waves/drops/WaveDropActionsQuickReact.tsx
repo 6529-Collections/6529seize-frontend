@@ -25,12 +25,21 @@ const DEFAULT_QUICK_REACTION_ID = "+1";
 const WaveDropActionsQuickReact: React.FC<{
   readonly drop: ExtendedDrop;
   readonly isMobile?: boolean;
-  readonly onReacted?: () => void;
-}> = ({ drop, isMobile = false, onReacted }) => {
-  const { react, canReact } = useDropReaction(drop, {
-    source: "quick-react",
-    onSuccess: onReacted,
-  });
+  readonly onReactionStarted?: () => void;
+}> = ({ drop, isMobile = false, onReactionStarted }) => {
+  const { react, canReact } = useDropReaction(drop, { source: "quick-react" });
+
+  const handleReaction = useCallback(
+    (reactionCode: string) => {
+      if (!canReact) {
+        return;
+      }
+
+      void react(reactionCode);
+      onReactionStarted?.();
+    },
+    [canReact, onReactionStarted, react]
+  );
 
   // Subscribe to localStorage changes (hydration-safe)
   useSyncExternalStore(
@@ -47,7 +56,7 @@ const WaveDropActionsQuickReact: React.FC<{
       reactionCode={code}
       dropId={drop.id}
       canReact={canReact}
-      onReact={react}
+      onReact={handleReaction}
       isMobile={isMobile}
     />
   ));

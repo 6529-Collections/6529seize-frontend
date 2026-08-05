@@ -12,8 +12,10 @@ jest.mock('@/components/drops/view/item/content/nft-tag/DropListItemContentNftDe
   <div data-testid="details" data-contract={props.referencedNft.contract}>{props.referencedNft.name}</div>
 ));
 
-jest.mock('@tanstack/react-query', () => ({
-  useQuery: jest.fn().mockReturnValue({ data: [{ token: { imageLarge: 'img' } }] }),
+jest.mock('@/hooks/useAlchemyNftQueries', () => ({
+  useTokenMetadataQuery: jest.fn().mockReturnValue({
+    data: [{ tokenIdRaw: '5', imageUrl: 'img' }],
+  }),
 }));
 
 describe('DropListItemContentNft', () => {
@@ -28,6 +30,20 @@ describe('DropListItemContentNft', () => {
 
     rerender(<DropListItemContentNft nft={{ ...baseNft, contract: GRADIENT_CONTRACT }} />);
     await waitFor(() => expect(screen.getByTestId('link')).toHaveAttribute('href', `/6529-gradient/${baseNft.token}`));
+  });
+
+  it('loads display metadata through the internal Alchemy proxy hook', () => {
+    const {
+      useTokenMetadataQuery,
+    } = require('@/hooks/useAlchemyNftQueries');
+
+    render(<DropListItemContentNft nft={baseNft} />);
+
+    expect(useTokenMetadataQuery).toHaveBeenCalledWith({
+      tokens: [{ contract: '0x1', tokenId: '5' }],
+      enabled: true,
+    });
+    expect(screen.getByAltText('NFT token')).toHaveAttribute('src', 'img');
   });
 
   it('defaults to external link for other contracts', async () => {

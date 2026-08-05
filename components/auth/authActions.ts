@@ -13,21 +13,13 @@ import {
   SigningProviderError,
 } from "@/hooks/useSecureSign";
 import { t } from "@/i18n/messages";
-import { AUTH_SIGNATURE_FAILED_MESSAGE } from "@/services/auth/auth.messages";
 import {
-  canStoreAnotherWalletAccount,
   getAuthJwt,
-  getWalletAddress,
   PROFILE_SWITCHED_EVENT,
   removeAuthJwt,
 } from "@/services/auth/auth.utils";
-import { getAuthStateFingerprint } from "@/services/auth/auth-token-fingerprint";
 import { validateJwt } from "@/services/auth/jwt-validation.utils";
-import {
-  getSessionNonce,
-  loginWithSessionV2,
-  persistSessionResponse,
-} from "@/services/auth/session-v2.utils";
+import { getSessionNonce } from "@/services/auth/session-v2.utils";
 import { logErrorSecurely } from "@/utils/error-sanitizer";
 import { validateRoleForAuthentication } from "@/utils/role-validation";
 import {
@@ -50,6 +42,11 @@ import {
   InvalidSignerAddressError,
   NonceResponseValidationError,
 } from "./authErrors";
+import {
+  createAuthRequestGuard,
+  type AuthRequestGuard,
+} from "./authRequestGuard";
+import { createAuthRequestSignIn } from "./authRequestSignIn";
 
 type SignMessage = (message: string) => Promise<{
   readonly signature: string | null;
@@ -97,45 +94,7 @@ interface AuthRequestActions {
   readonly requestSessionUpgrade: () => Promise<{ success: boolean }>;
 }
 
-interface AuthRequestGuard {
-  readonly isCurrent: () => boolean;
-  readonly acceptCurrentState: (walletAddress: string) => boolean;
-}
-
 const MANUAL_AUTH_VALIDATION_TIMEOUT_MS = 30_000;
-
-const getCurrentAuthStateFingerprint = (): string =>
-  getAuthStateFingerprint({
-    walletAddress: getWalletAddress(),
-    jwt: getAuthJwt(),
-  });
-
-const createAuthRequestGuard = ({
-  expectedAuthStateFingerprint,
-}: RequestAuthOptions): AuthRequestGuard => {
-  let expectedFingerprint = expectedAuthStateFingerprint;
-
-  return {
-    isCurrent: () =>
-      expectedFingerprint === undefined ||
-      getCurrentAuthStateFingerprint() === expectedFingerprint,
-    acceptCurrentState: (walletAddress: string) => {
-      if (expectedFingerprint === undefined) {
-        return true;
-      }
-
-      const currentWalletAddress = getWalletAddress();
-      if (
-        currentWalletAddress?.toLowerCase() !== walletAddress.toLowerCase()
-      ) {
-        return false;
-      }
-
-      expectedFingerprint = getCurrentAuthStateFingerprint();
-      return true;
-    },
-  };
-};
 
 const dispatchProfileSwitchedEvent = (profileProxy: ApiProfileProxy | null) => {
   if (globalThis.window === undefined) {
@@ -311,113 +270,11 @@ export function createAuthRequestActions({
     }
   };
 
-  const requestSignIn = async ({
-    signerAddress,
-    role,
-    authRequestGuard,
-  }: {
-    readonly signerAddress: string;
-    readonly role: string | null;
-    readonly authRequestGuard?: AuthRequestGuard | undefined;
-  }): Promise<{ success: boolean }> => {
-    try {
-      if (authRequestGuard && !authRequestGuard.isCurrent()) {
-        return { success: false };
-      }
-      if (!canStoreAnotherWalletAccount(signerAddress)) {
-        setToast({
-          message: "You've reached the connected profile limit.",
-          type: "error",
-        });
-        return { success: false };
-      }
-
-      const nonceResponse = await getNonce({ signerAddress });
-      if (authRequestGuard && !authRequestGuard.isCurrent()) {
-        return { success: false };
-      }
-      const { signable_message, server_signature } = nonceResponse;
-
-      const clientSignature = await getSignature({ message: signable_message });
-      if (authRequestGuard && !authRequestGuard.isCurrent()) {
-        return { success: false };
-      }
-      if (clientSignature.userRejected) {
-        setToast({
-          message: "Authentication was canceled in your wallet.",
-          type: "error",
-        });
-        return { success: false };
-      }
-
-      if (!clientSignature.signature) {
-        if (!clientSignature.failureToastShown) {
-          setToast({
-            message: AUTH_SIGNATURE_FAILED_MESSAGE,
-            type: "error",
-          });
-        }
-        return { success: false };
-      }
-
-      const sessionResponse = await loginWithSessionV2({
-        serverSignature: server_signature,
-        clientSignature: clientSignature.signature,
-        signerAddress,
-        role,
-      });
-      if (authRequestGuard && !authRequestGuard.isCurrent()) {
-        return { success: false };
-      }
-      const isPersisted = await persistSessionResponse(sessionResponse);
-      if (!isPersisted) {
-        setToast({
-          message: "Couldn't save this connected profile. Please try again.",
-          type: "error",
-        });
-        return { success: false };
-      }
-      if (
-        authRequestGuard &&
-        !authRequestGuard.acceptCurrentState(signerAddress)
-      ) {
-        return { success: false };
-      }
-
-      return { success: true };
-    } catch (error) {
-      if (authRequestGuard && !authRequestGuard.isCurrent()) {
-        return { success: false };
-      }
-      if (error instanceof InvalidSignerAddressError) {
-        setToast({
-          message: "Enter a valid wallet address.",
-          type: "error",
-        });
-      } else if (error instanceof NonceResponseValidationError) {
-        setToast({
-          message:
-            "Couldn't verify the authentication response. Please try again.",
-          type: "error",
-        });
-      } else if (error instanceof AuthenticationNonceError) {
-        setToast({
-          message:
-            "Couldn't reach the authentication service. Please try again.",
-          type: "error",
-        });
-      } else {
-        logErrorSecurely("requestSignIn", error);
-        setToast({
-          type: "error",
-          title: "Couldn't authenticate.",
-          description: "Reconnect your wallet and try again.",
-          details: getToastErrorDetails(error),
-        });
-      }
-      return { success: false };
-    }
-  };
+  const requestSignIn = createAuthRequestSignIn({
+    getNonce,
+    getSignature,
+    setToast,
+  });
 
   const ensureConnectedWalletAddress = (): string | null => {
     if (address) {
@@ -567,6 +424,50 @@ export function createAuthRequestActions({
     return isSuccess;
   };
 
+  const reauthenticateAuthorizedWallet = async ({
+    authRequestGuard,
+    role,
+    serverRejected,
+    validationResult,
+    walletAddress,
+  }: {
+    readonly authRequestGuard: AuthRequestGuard;
+    readonly role: string | null;
+    readonly serverRejected: boolean;
+    readonly validationResult: AuthorizedWalletValidationResult;
+    readonly walletAddress: string;
+  }): Promise<boolean> => {
+    const canReauthenticate = await prepareAuthorizedWalletReauthentication({
+      serverRejected,
+      walletAddress,
+      validationResult,
+    });
+    if (!canReauthenticate || !authRequestGuard.isCurrent()) {
+      return false;
+    }
+
+    const { success } = await requestSignIn({
+      signerAddress: walletAddress,
+      role,
+      authRequestGuard,
+    });
+    if (!authRequestGuard.isCurrent()) {
+      return false;
+    }
+    if (!success) {
+      return await handleAuthorizedWalletSignInFailure(
+        validationResult.requiresSessionUpgrade
+      );
+    }
+
+    invalidateAll();
+    if (validationResult.requiresSessionUpgrade) {
+      clearSessionUpgradeReminder(walletAddress);
+      setSessionUpgradeRequired(false);
+    }
+    return finishAuthorizedWalletAuthentication();
+  };
+
   const authenticateAuthorizedWallet = async (
     walletAddress: string,
     serverRejected: boolean,
@@ -614,36 +515,13 @@ export function createAuthRequestActions({
     }
 
     if (!validationResult.isValid) {
-      const canReauthenticate = await prepareAuthorizedWalletReauthentication({
-        serverRejected,
-        walletAddress,
-        validationResult,
-      });
-      if (!canReauthenticate || !authRequestGuard.isCurrent()) {
-        return false;
-      }
-
-      const { success } = await requestSignIn({
-        signerAddress: walletAddress,
-        role,
+      return await reauthenticateAuthorizedWallet({
         authRequestGuard,
+        role,
+        serverRejected,
+        validationResult,
+        walletAddress,
       });
-
-      if (!authRequestGuard.isCurrent()) {
-        return false;
-      }
-
-      if (!success) {
-        return await handleAuthorizedWalletSignInFailure(
-          validationResult.requiresSessionUpgrade
-        );
-      }
-
-      invalidateAll();
-      if (validationResult.requiresSessionUpgrade) {
-        clearSessionUpgradeReminder(walletAddress);
-        setSessionUpgradeRequired(false);
-      }
     }
 
     return finishAuthorizedWalletAuthentication();

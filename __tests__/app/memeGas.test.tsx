@@ -1,8 +1,11 @@
 // @ts-nocheck
 import MemeGasPage, { generateMetadata } from "@/app/meme-gas/page";
 import { AuthContext } from "@/components/auth/Auth";
+import { publicEnv } from "@/config/env";
 import { render, screen } from "@testing-library/react";
 import React from "react";
+
+const domain = new URL(publicEnv.BASE_ENDPOINT).hostname;
 
 jest.mock("@/components/gas-royalties/Gas", () => () => (
   <div data-testid="gas" />
@@ -54,7 +57,7 @@ describe("MemeGasPage", () => {
     });
     expect(metadata).toMatchObject({
       title: "Meme Gas - The Memes",
-      description: "Tools | 6529.io",
+      description: `Tools | ${domain}`,
     });
   });
 });

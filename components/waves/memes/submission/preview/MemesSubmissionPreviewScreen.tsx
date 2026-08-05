@@ -61,7 +61,7 @@ export function MemesSubmissionPreviewScreen({
           onClicked={onSubmit}
           disabled={false}
           loading={isSubmitting}
-          padding="tw-px-6 tw-py-3"
+          size="lg"
         >
           {submitLabel}
         </PrimaryButton>

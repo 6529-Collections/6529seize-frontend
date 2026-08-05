@@ -9,6 +9,7 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import {
   fetchBoostedDropsV2,
   fetchDropPollOptionVotersV2,
+  fetchDropReactionDetailsV2,
   fetchDropMetadataByIdV2,
   fetchDropRepliesV2,
   fetchDropsV2ByIds,
@@ -32,6 +33,59 @@ const commonApiFetchMock = commonApiFetch as jest.MockedFunction<
 const commonApiPostMock = commonApiPost as jest.MockedFunction<
   typeof commonApiPost
 >;
+
+describe("fetchDropReactionDetailsV2", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("records non-abort failures before returning the empty fallback", async () => {
+    const error = new Error("reaction request failed");
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    commonApiFetchMock.mockRejectedValueOnce(error);
+
+    await expect(fetchDropReactionDetailsV2("drop-1")).resolves.toEqual([]);
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Failed to fetch Wave drop reaction details.",
+      error
+    );
+  });
+
+  it("rethrows abort failures without recording them", async () => {
+    const abortError = Object.assign(new Error("aborted"), {
+      name: "AbortError",
+    });
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    commonApiFetchMock.mockRejectedValueOnce(abortError);
+
+    await expect(fetchDropReactionDetailsV2("drop-1")).rejects.toBe(abortError);
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+  });
+
+  it("rethrows ERR_CANCELED failures without recording them", async () => {
+    const canceledError = Object.assign(new Error("canceled"), {
+      code: "ERR_CANCELED",
+    });
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    commonApiFetchMock.mockRejectedValueOnce(canceledError);
+
+    await expect(fetchDropReactionDetailsV2("drop-1")).rejects.toBe(
+      canceledError
+    );
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+  });
+});
 
 const identity = {
   id: "author-id",
@@ -550,6 +604,71 @@ describe("fetchWaveDropsFeedV2", () => {
       "Part 1",
       "Part 2",
     ]);
+  });
+
+  it("forwards the same server headers to the feed and every nested hydration request", async () => {
+    const safeServerHeaders = { "x-safe-server-context": "present" };
+    const fullMetadata = [{ data_key: "artist", data_value: "Alice" }];
+    commonApiFetchMock.mockImplementation(async ({ endpoint }) => {
+      if (endpoint === "v2/waves/wave-1/drops") {
+        return {
+          wave,
+          drops: [createEnrichableDrop({ parts_count: 2 })],
+        } as never;
+      }
+      if (endpoint === "v2/drops/drop-1/parts/2") {
+        return {
+          part_no: 2,
+          content: "Part 2",
+          media: [],
+          attachments: [],
+          quoted_drop: null,
+        } as never;
+      }
+      if (endpoint === "v2/drops/drop-1/metadata") {
+        return fullMetadata as never;
+      }
+      if (endpoint === "v2/drops/drop-1/votes") {
+        return {
+          data: [{ voter: identity, vote: 5 }],
+          count: 1,
+          page: 1,
+          next: false,
+        } as never;
+      }
+      throw new Error(`Unexpected test endpoint: ${endpoint}`);
+    });
+
+    const result = await fetchWaveDropsFeedV2({
+      waveId: "wave-1",
+      limit: 20,
+      headers: safeServerHeaders,
+      includeFullMetadata: true,
+      includeTopRaters: true,
+    });
+
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(4);
+    expect(
+      commonApiFetchMock.mock.calls.map(([request]) => request.endpoint)
+    ).toEqual(
+      expect.arrayContaining([
+        "v2/waves/wave-1/drops",
+        "v2/drops/drop-1/parts/2",
+        "v2/drops/drop-1/metadata",
+        "v2/drops/drop-1/votes",
+      ])
+    );
+    for (const [request] of commonApiFetchMock.mock.calls) {
+      expect(request.headers).toEqual(safeServerHeaders);
+    }
+    expect(result.drops[0]).toEqual(
+      expect.objectContaining({
+        metadata: [...priorityMetadata, ...fullMetadata],
+        top_raters: [expect.objectContaining({ rating: 5 })],
+      })
+    );
+    expect(JSON.stringify(result)).not.toContain("x-safe-server-context");
+    expect(JSON.stringify(result)).not.toContain("present");
   });
 
   it("rethrows abort errors from additional part fetches", async () => {

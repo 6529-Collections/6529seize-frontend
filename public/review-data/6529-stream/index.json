@@ -1,0 +1,49 @@
+{
+  "activeVersion": "2026-08-01.1",
+  "reviewId": "6529-stream",
+  "schemaVersion": "public-review.solidity-reference-index.v1",
+  "versions": [
+    {
+      "bundlePath": "/review-data/6529-stream/versions/2026-07-26.1/reference-manifest.json",
+      "bundleSha256": "sha256:17c1bc7c0745e562fe7df860a0bdfc14f47b0c3cb12398d9b17367c78558e0b9",
+      "commit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786",
+      "tree": "b50ec53109f5f8d6b4f4b07f4cb6fd3c1d0e3100",
+      "version": "2026-07-26.1"
+    },
+    {
+      "bundlePath": "/review-data/6529-stream/versions/2026-07-27.1/reference-manifest.json",
+      "bundleSha256": "sha256:11daa4d88d196d03fd8181b6e42409a856b0280c57dc7b5f276e9daa0e9a0dff",
+      "commit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786",
+      "tree": "b50ec53109f5f8d6b4f4b07f4cb6fd3c1d0e3100",
+      "version": "2026-07-27.1"
+    },
+    {
+      "bundlePath": "/review-data/6529-stream/versions/2026-07-28.1/reference-manifest.json",
+      "bundleSha256": "sha256:343415d72a8bc25a4c31018e1c287abdd40257e584c4b6664519a8f3c534f0c7",
+      "commit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786",
+      "tree": "b50ec53109f5f8d6b4f4b07f4cb6fd3c1d0e3100",
+      "version": "2026-07-28.1"
+    },
+    {
+      "bundlePath": "/review-data/6529-stream/versions/2026-07-28.2/reference-manifest.json",
+      "bundleSha256": "sha256:060fa416133b6a2870c3428c1005b6b771493a6c18653b55675b55861f2db8a2",
+      "commit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786",
+      "tree": "b50ec53109f5f8d6b4f4b07f4cb6fd3c1d0e3100",
+      "version": "2026-07-28.2"
+    },
+    {
+      "bundlePath": "/review-data/6529-stream/versions/2026-07-30.1/reference-manifest.json",
+      "bundleSha256": "sha256:aa18e1661925d22c9e8b9fc054b3ac3114ffeccf6d341995343e91bbf7f90b09",
+      "commit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786",
+      "tree": "b50ec53109f5f8d6b4f4b07f4cb6fd3c1d0e3100",
+      "version": "2026-07-30.1"
+    },
+    {
+      "bundlePath": "/review-data/6529-stream/versions/2026-08-01.1/reference-manifest.json",
+      "bundleSha256": "sha256:03b8384bc07c4e62318f87d8ccd4d17465f03b525cba56b4cd9de212f3218890",
+      "commit": "513bd7e079eafe109df6ae1ae21bfbca6fec6786",
+      "tree": "b50ec53109f5f8d6b4f4b07f4cb6fd3c1d0e3100",
+      "version": "2026-08-01.1"
+    }
+  ]
+}

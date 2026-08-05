@@ -23,6 +23,10 @@ with cause filters, grouped reactions, and inline drop previews.
 
 ## Before Rows Render
 
+- Wallet session restoration or connection: a centered loading indicator
+  remains visible while the site restores an existing wallet in a new tab or
+  completes an active connect/reconnect attempt. The disconnected wallet prompt
+  is shown only after that process finishes without valid auth.
 - Wallet missing: `Connect your wallet to view notifications.` with
   `Reconnect wallet`.
 - Profile loading: `Loading profile...`.
@@ -43,7 +47,8 @@ with cause filters, grouped reactions, and inline drop previews.
 ## Feed Filters
 
 - Cause filters are horizontal chips:
-  `All`, `Mentions`, `Replies`, `Identity`, `Reactions`, `Invites`.
+  `All`, `Mentions`, `Replies`, `Identity`, `Reactions`, `Invites`,
+  `Subscriptions`.
 - Filter mapping:
   - `All`: all notification causes, including priority alerts, all-drops rows,
     and unknown causes.
@@ -53,6 +58,8 @@ with cause filters, grouped reactions, and inline drop previews.
   - `Reactions`: voted, reacted, and boosted drop notifications.
   - `Invites`: wave-created notifications, including standard waves the user
     can access and direct-message waves started with the user.
+  - `Subscriptions`: coverage alerts as a profile moves into plan-a-top-up,
+    running-low, or action-required state.
 
 ## Row and Action Behavior
 
@@ -62,6 +69,10 @@ with cause filters, grouped reactions, and inline drop previews.
   `New reactions` row with grouped avatars and reaction badges.
 - Grouped reactions rows include batch follow action:
   `Follow All` or `Following All`.
+- Header actions stay beside notification text when both remain readable and
+  wrap below it when the available width is too narrow.
+- Multi-actor reaction summaries keep their heading at the row edge while the
+  batch action follows the same scan line as actor-notification actions.
 - Priority alerts show `sent a priority alert 🚨` as:
   - header-only rows (no related drop), or
   - header plus first related drop preview.
@@ -69,6 +80,11 @@ with cause filters, grouped reactions, and inline drop previews.
   and can include `Join wave` plus `Follow creator` controls.
 - Direct-message wave-created rows say the creator started a DM with the user
   and expose `Open DM` instead of the wave join control.
+- Subscription coverage rows show the severity, consecutive funded runway,
+  funded-through or next-unfunded Meme context, an authoritative deadline when
+  available, and an exact minimum top-up action when supplied.
+- Coverage alerts are transition-based so routine balance recalculation does
+  not repeatedly nag the user without a meaningful risk-state change.
 - Unknown causes render a generic row (formatted cause/context) instead of
   failing feed render.
 
@@ -97,10 +113,33 @@ with cause filters, grouped reactions, and inline drop previews.
 ## Limits and Notes
 
 - Notifications are unavailable while users are in profile-proxy mode.
+- While the authenticated websocket is healthy, recipient-scoped invalidation
+  events refresh the active notification feed and unread indicators without
+  waiting for the previous 30-second poll. The event contains only the target
+  profile ID; notification rows remain REST-authoritative.
+- Connected secondary accounts subscribe with their own stored JWTs and refresh
+  only when the backend acknowledges those profile subscriptions.
+- REST polling remains as a 30-second active-profile / 15-second
+  connected-account fallback while realtime coverage is disconnected or
+  unconfirmed. Covered profiles use a five-minute REST reconciliation poll to
+  recover from any missed event.
 - `PRIORITY_ALERT` and `ALL_DROPS` rows stay under `All` (no dedicated chip).
 - Cause filters only affect `/notifications` results.
 - If auth expires, the page can trigger one re-auth request automatically after
   an unauthorized notifications error.
+
+### Localization fallback debt
+
+- Route or component: `/notifications` wallet connection loader.
+- Untranslated surface: the loader's accessible status label.
+- Current fallback behavior: all supported locales use the canonical `en-US`
+  `Loading notifications` status while this route has no local message family.
+- User impact: the loading state remains accessible and functional, but its
+  announcement is English-only.
+- Owner or follow-up issue: frontend i18n backlog.
+- Expected remediation path: move the notifications loading and recovery copy,
+  including accessible names, into one shared message family and verify its
+  fallback behavior across all supported locales.
 
 ## Related Pages
 

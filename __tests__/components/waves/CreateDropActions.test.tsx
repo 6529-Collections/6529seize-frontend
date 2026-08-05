@@ -403,14 +403,19 @@ describe("CreateDropActions", () => {
     });
   });
 
-  it("does not show GIF button when API key is not available", () => {
+  it("keeps the GIF action visible when API configuration is unavailable", async () => {
     const { publicEnv } = require("@/config/env");
-    const prevKey = publicEnv.GIPHY_API_KEY;
     publicEnv.GIPHY_API_KEY = undefined;
     render(<CreateDropActions {...defaultProps} />);
 
-    expect(screen.queryByLabelText("Add GIF")).not.toBeInTheDocument();
-    publicEnv.GIPHY_API_KEY = prevKey;
+    const gifButton = screen.getByRole("button", { name: "Add GIF" });
+    expect(gifButton).toBeVisible();
+
+    await userEvent.click(gifButton);
+
+    expect(screen.getByTestId("gif-picker")).not.toHaveAttribute(
+      "data-api-key"
+    );
   });
 
   it("highlights metadata button when metadata is missing", () => {
@@ -459,7 +464,7 @@ describe("CreateDropActions", () => {
     expect(fileInput).toHaveAttribute("multiple");
   });
 
-  it("passes correct props to StormButton", () => {
+  it("hides the storm action after storm mode starts", () => {
     render(
       <CreateDropActions
         {...defaultProps}
@@ -469,9 +474,7 @@ describe("CreateDropActions", () => {
       />
     );
 
-    const stormButtons = screen.getAllByTestId("storm-button");
-    expect(stormButtons[0]).toHaveTextContent("Storm Mode");
-    expect(stormButtons[0]).toBeDisabled();
+    expect(screen.queryByTestId("storm-button")).not.toBeInTheDocument();
   });
 
   it("calls breakIntoStorm when storm button is clicked", async () => {

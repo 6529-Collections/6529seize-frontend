@@ -97,13 +97,14 @@ export interface NextGenToken {
 
 export interface NextGenLog {
   created_at: string;
-  id: number;
+  id: number | string;
   transaction: string;
   block: number;
   block_timestamp: number;
   heading: string;
   log: string;
   collection_id: number;
+  token_id?: number | null | undefined;
   source: string;
   from_address: string;
   to_address: string;

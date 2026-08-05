@@ -7,8 +7,8 @@ Site data such as TDH, REP, and Wave activity changes continuously. Fetch the fi
 ## Machine-readable files
 
 - [llms.txt]({{BASE_URL}}/llms.txt): this file — the stable entry point.
-- [help-index.json]({{BASE_URL}}/help-index.json): {{HELP_RECORD_COUNT}} curated records covering routes, workflows, UI affordances, business rules, and glossary terms. Each record has an id, title, aliases, facts, and a canonical_path that is validated against the app's real routes at build time. This is the primary reference for answering questions about 6529.io.
-- [glossary.json]({{BASE_URL}}/glossary.json): {{GLOSSARY_TERM_COUNT}} term definitions (TDH, xTDH, REP, NIC, Waves, Drops, Groups, Subscriptions, and more) projected from the same help corpus. Each term carries its help-index record id, definition facts, and canonical page path.
+- [help-index.json]({{BASE_URL}}/help-index.json): Curated records covering routes, workflows, UI affordances, business rules, and glossary terms. Each record has an id, title, aliases, facts, and a canonical_path that is validated against the app's real routes at build time. This is the primary reference for answering questions about 6529.io.
+- [glossary.json]({{BASE_URL}}/glossary.json): Term definitions (TDH, xTDH, REP, NIC, Waves, Drops, Groups, Subscriptions, and more) projected from the same help corpus. Each term carries its help-index record id, definition facts, and canonical page path.
 - [sitemap.xml]({{BASE_URL}}/sitemap.xml): the crawlable page list, regenerated on every deploy.
 - [robots.txt]({{BASE_URL}}/robots.txt): standard crawler directives; it also references the files above.
 

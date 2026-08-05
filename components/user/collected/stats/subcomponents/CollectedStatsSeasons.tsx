@@ -123,7 +123,7 @@ export function CollectedStatsSeasons({
   );
 
   return (
-    <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4">
+    <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-gradient-to-b tw-from-iron-900/50 tw-via-iron-950/40 tw-to-black tw-px-4 tw-pb-4 tw-pt-4 tw-ring-1 tw-ring-inset tw-ring-white/[0.04] sm:tw-px-5 sm:tw-pb-5">
       <div className="tw-flex tw-items-baseline tw-gap-2 tw-px-1">
         <span className="tw-text-xs tw-font-semibold tw-tracking-tight tw-text-iron-400">
           {title}

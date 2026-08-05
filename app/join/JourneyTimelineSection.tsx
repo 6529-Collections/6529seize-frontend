@@ -185,7 +185,7 @@ function TimelineProgressStrip({
 function TimelineGroupLabel({ label }: { readonly label: string }) {
   return (
     <div className="tw-relative tw-z-10 tw-mb-3 tw-flex tw-justify-start md:tw-justify-center">
-      <span className="tw-ml-16 tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-[#030303] tw-px-3 tw-py-1 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-iron-500 md:tw-ml-0">
+      <span className="tw-ml-16 tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-[#030303] tw-px-3 tw-py-1 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.16em] tw-text-iron-400 md:tw-ml-0">
         {label}
       </span>
     </div>
@@ -241,7 +241,7 @@ function TimelineRow({
           </h3>
           {showStatusBadge && <StatusBadge locale={locale} status={status} />}
         </div>
-        <p className="tw-mt-1.5 tw-text-pretty tw-text-[15px] tw-font-light tw-leading-6 tw-text-iron-500">
+        <p className="tw-mt-1.5 tw-text-pretty tw-text-[15px] tw-font-normal tw-leading-6 tw-text-iron-400">
           {m(locale, item.bodyKey)}
         </p>
         {actionHref && actionLabel && (

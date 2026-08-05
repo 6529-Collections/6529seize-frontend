@@ -1,4 +1,5 @@
 import { parseEther } from "viem";
+import type { OnchainTransactionModalStatus } from "@/components/common/OnchainTransactionModal";
 import { getClaimPrimaryStatus } from "@/components/drop-forge/drop-forge-status.helpers";
 import {
   findBestMatchingLaunchActionName,
@@ -17,11 +18,7 @@ import type { MintingClaim } from "@/generated/models/MintingClaim";
 import type { PhaseAirdrop } from "@/generated/models/PhaseAirdrop";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 
-export type ClaimTxModalStatus =
-  | "confirm_wallet"
-  | "submitted"
-  | "success"
-  | "error";
+export type ClaimTxModalStatus = OnchainTransactionModalStatus;
 
 export interface ClaimTxModalState {
   status: ClaimTxModalStatus;
@@ -227,33 +224,26 @@ export function getPayArtistAddressError({
 export function getActiveTxModalState({
   payArtistTxModal,
   claimTxModal,
-  payArtistTxModalClosable,
-  claimTxModalClosable,
   closePayArtistTxModal,
   closeClaimTxModal,
 }: Readonly<{
   payArtistTxModal: ClaimTxModalState | null;
   claimTxModal: ClaimTxModalState | null;
-  payArtistTxModalClosable: boolean;
-  claimTxModalClosable: boolean;
   closePayArtistTxModal: () => void;
   closeClaimTxModal: () => void;
 }>): {
   activeTxModal: ClaimTxModalState | null;
-  activeTxModalClosable: boolean;
   closeActiveTxModal: () => void;
 } {
   if (payArtistTxModal) {
     return {
       activeTxModal: payArtistTxModal,
-      activeTxModalClosable: payArtistTxModalClosable,
       closeActiveTxModal: closePayArtistTxModal,
     };
   }
 
   return {
     activeTxModal: claimTxModal,
-    activeTxModalClosable: claimTxModalClosable,
     closeActiveTxModal: closeClaimTxModal,
   };
 }

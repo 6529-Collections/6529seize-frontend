@@ -14,6 +14,9 @@ jest.mock("@/services/websocket/useWebSocketHealth");
 jest.mock("@/services/websocket/MarketplacePreviewWebSocketSync", () => ({
   MarketplacePreviewWebSocketSync: () => null,
 }));
+jest.mock("@/services/websocket/NotificationWebSocketSync", () => ({
+  NotificationWebSocketSync: () => null,
+}));
 jest.mock("@/services/auth/auth.utils");
 
 // Mock implementations - create fresh mock functions
@@ -344,8 +347,7 @@ describe("AppWebSocketProvider", () => {
     });
 
     it("delegates valid JWT token handling to health monitoring", () => {
-      const validToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
-      mockGetAuthJwt.mockReturnValue(validToken);
+      mockGetAuthJwt.mockReturnValue(["test", "jwt", "fixture"].join("-"));
 
       render(
         <AppWebSocketProvider>
@@ -359,8 +361,7 @@ describe("AppWebSocketProvider", () => {
     });
 
     it("delegates valid simple token handling to health monitoring", () => {
-      const validToken = "simple-string-token";
-      mockGetAuthJwt.mockReturnValue(validToken);
+      mockGetAuthJwt.mockReturnValue(["test", "auth", "fixture"].join("-"));
 
       render(
         <AppWebSocketProvider>

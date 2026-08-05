@@ -2,10 +2,8 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { INotificationWaveCreated } from "@/types/feed.types";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
-import {
-  FOLLOW_BTN_BUTTON_CLASSES,
-  UserFollowBtnSize,
-} from "@/components/user/utils/UserFollowBtn";
+import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -38,12 +36,9 @@ export default function NotificationWaveCreated({
   let waveAction: ReactNode = null;
   if (isDirectMessage && waveHref) {
     waveAction = (
-      <Link
-        href={waveHref}
-        className={`${FOLLOW_BTN_BUTTON_CLASSES[UserFollowBtnSize.SMALL]} tw-flex tw-cursor-pointer tw-items-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-font-semibold tw-text-white tw-no-underline tw-ring-1 tw-ring-inset tw-ring-primary-500 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-primary-600 hover:tw-text-white hover:tw-ring-primary-600`}
-      >
+      <ButtonLink href={waveHref} prefetch={false} variant="action" size="xs">
         {t(DEFAULT_LOCALE, "notifications.waveCreated.openDm")}
-      </Link>
+      </ButtonLink>
     );
   } else if (wave) {
     waveAction = (
@@ -64,7 +59,7 @@ export default function NotificationWaveCreated({
       <NotificationHeader
         author={notification.related_identity}
         actions={
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
             {waveAction}
             <NotificationsFollowBtn
               profile={notification.related_identity}
@@ -87,6 +82,7 @@ export default function NotificationWaveCreated({
         {waveHref ? (
           <Link
             href={waveHref}
+            prefetch={false}
             className="tw-text-sm tw-font-medium tw-text-primary-400 tw-no-underline hover:tw-text-primary-300"
           >
             {waveName}

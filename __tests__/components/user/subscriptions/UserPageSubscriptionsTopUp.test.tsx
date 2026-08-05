@@ -4,20 +4,34 @@ import {
   SUBSCRIPTIONS_ADDRESS,
   SUBSCRIPTIONS_CHAIN,
 } from "@/constants/constants";
+import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { parseEther } from "viem";
 
-const sendTransaction = {
+const sendTransaction: {
+  data: `0x${string}` | undefined;
+  sendTransaction: jest.Mock;
+  reset: jest.Mock;
+  isPending: boolean;
+  error: Error | undefined;
+} = {
   data: undefined,
   sendTransaction: jest.fn(),
   reset: jest.fn(),
   isPending: false,
   error: undefined,
 };
-const waitSendTransaction = {
+const waitSendTransaction: {
+  isLoading: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+  error: Error | undefined;
+} = {
   isLoading: false,
   isSuccess: false,
+  isError: false,
+  error: undefined,
 };
 
 jest.mock("wagmi", () => ({
@@ -75,6 +89,8 @@ describe("UserPageSubscriptionsTopUp", () => {
     sendTransaction.error = undefined;
     waitSendTransaction.isLoading = false;
     waitSendTransaction.isSuccess = false;
+    waitSendTransaction.isError = false;
+    waitSendTransaction.error = undefined;
     jest.clearAllMocks();
   });
 
@@ -85,7 +101,9 @@ describe("UserPageSubscriptionsTopUp", () => {
     const oneCardOption = screen.getByRole("radio", { name: "1 Card" });
     await user.click(oneCardOption);
 
-    const sendButton = screen.getByRole("button", { name: "Send top up" });
+    const sendButton = screen.getByRole("button", {
+      name: "Top up 0.06529 ETH",
+    });
     expect(sendButton).not.toBeDisabled();
     await user.click(sendButton);
 
@@ -97,7 +115,7 @@ describe("UserPageSubscriptionsTopUp", () => {
   });
 
   it("shows success message when transaction succeeded", async () => {
-    sendTransaction.data = "0x123" as any;
+    sendTransaction.data = "0x123";
     waitSendTransaction.isSuccess = true;
 
     render(<UserPageSubscriptionsTopUp />);
@@ -105,6 +123,65 @@ describe("UserPageSubscriptionsTopUp", () => {
     await waitFor(() => {
       expect(screen.getByText("Top Up Successful!")).toBeInTheDocument();
     });
+    expect(screen.getByRole("dialog", { name: "Top up" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "View Tx" })).toHaveAttribute(
+      "href",
+      expect.stringContaining("/tx/0x123")
+    );
+  });
+
+  it("shows the shared non-closable wallet confirmation state", () => {
+    sendTransaction.isPending = true;
+
+    render(<UserPageSubscriptionsTopUp />);
+
+    expect(screen.getByRole("dialog", { name: "Top up" })).toBeInTheDocument();
+    expect(screen.getByText("Confirm in your wallet")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Close modal" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("normalizes wallet submission failures in the shared error modal", () => {
+    sendTransaction.error = new Error(
+      "User rejected the request\n\nRequest Arguments:\nfrom: 0xabc"
+    );
+
+    render(<UserPageSubscriptionsTopUp />);
+
+    expect(
+      screen.getByRole("textbox", { name: "Transaction error details" })
+    ).toHaveValue("Error - User rejected the request");
+  });
+
+  it("keeps receipt failures visible in a closable error modal", () => {
+    sendTransaction.data = "0x123";
+    waitSendTransaction.isError = true;
+    waitSendTransaction.error = new Error(
+      "Transaction receipt failed\n\nRequest Arguments:\nfrom: 0xabc"
+    );
+
+    render(<UserPageSubscriptionsTopUp />);
+
+    expect(screen.getByRole("dialog", { name: "Top up" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Transaction error details" })
+    ).toHaveValue("Error - Transaction receipt failed");
+    expect(
+      screen.getByRole("button", { name: "Close modal" })
+    ).toBeInTheDocument();
+  });
+
+  it("uses a useful fallback for an empty receipt error", () => {
+    sendTransaction.data = "0x123";
+    waitSendTransaction.isError = true;
+    waitSendTransaction.error = new Error("");
+
+    render(<UserPageSubscriptionsTopUp />);
+
+    expect(
+      screen.getByRole("textbox", { name: "Transaction error details" })
+    ).toHaveValue("Transaction failed");
   });
 
   it("submits custom count when Other option is selected", async () => {
@@ -119,7 +196,9 @@ describe("UserPageSubscriptionsTopUp", () => {
     const countInput = screen.getByPlaceholderText("count");
     await user.type(countInput, "2");
 
-    const sendButton = screen.getByRole("button", { name: "Send top up" });
+    const sendButton = screen.getByRole("button", {
+      name: "Top up 0.13058 ETH",
+    });
     expect(sendButton).not.toBeDisabled();
     await user.click(sendButton);
 
@@ -127,6 +206,87 @@ describe("UserPageSubscriptionsTopUp", () => {
       chainId: SUBSCRIPTIONS_CHAIN.id,
       to: SUBSCRIPTIONS_ADDRESS,
       value: parseEther((2 * MEMES_MINT_PRICE).toString()),
+    });
+  });
+
+  it("treats a decimal custom count as whole cards without throwing", async () => {
+    const user = userEvent.setup();
+    render(<UserPageSubscriptionsTopUp />);
+
+    await user.click(
+      screen.getByRole("radio", {
+        name: "Other card count",
+      })
+    );
+    await user.type(screen.getByPlaceholderText("count"), "1.8");
+    await user.click(
+      screen.getByRole("button", {
+        name: "Top up 0.06529 ETH",
+      })
+    );
+
+    expect(sendTransaction.sendTransaction).toHaveBeenCalledWith({
+      chainId: SUBSCRIPTIONS_CHAIN.id,
+      to: SUBSCRIPTIONS_ADDRESS,
+      value: parseEther(MEMES_MINT_PRICE.toString()),
+    });
+  });
+
+  it("uses the exact backend recommendation for the primary top-up", async () => {
+    const user = userEvent.setup();
+    const coverage = {
+      recommended_top_up: {
+        target_fully_funded_drops: 7,
+        additional_mints: 3,
+        amount_eth: "0.17087",
+        projected_through: {
+          token_id: 560,
+          mint_at: new Date("2026-10-12T15:40:00Z"),
+        },
+      },
+      minimum_top_up: {
+        additional_mints: 1,
+        amount_eth: "0.04029",
+        resulting_fully_funded_drops: 1,
+        projected_through: {
+          token_id: 554,
+          mint_at: new Date("2026-09-30T15:40:00Z"),
+        },
+      },
+    } as ApiSubscriptionCoverage;
+
+    render(<UserPageSubscriptionsTopUp coverage={coverage} />);
+
+    await user.click(
+      screen.getByRole("radio", { name: "Recommended - 3 Cards" })
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Top up 0.17087 ETH" })
+    );
+
+    expect(
+      screen.getByText("Funds 7 intended drops through The Memes #560")
+    ).toBeInTheDocument();
+    expect(sendTransaction.sendTransaction).toHaveBeenCalledWith({
+      chainId: SUBSCRIPTIONS_CHAIN.id,
+      to: SUBSCRIPTIONS_ADDRESS,
+      value: parseEther("0.17087"),
+    });
+  });
+
+  it("refreshes coverage after the submitted transaction is confirmed", async () => {
+    const onTransactionConfirmed = jest.fn();
+    sendTransaction.data = "0x123";
+    waitSendTransaction.isSuccess = true;
+
+    render(
+      <UserPageSubscriptionsTopUp
+        onTransactionConfirmed={onTransactionConfirmed}
+      />
+    );
+
+    await waitFor(() => {
+      expect(onTransactionConfirmed).toHaveBeenCalledTimes(1);
     });
   });
 });

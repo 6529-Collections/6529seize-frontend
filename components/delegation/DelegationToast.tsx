@@ -1,21 +1,20 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
-import styles from "./Delegation.module.css";
+import { useCallback, useState } from "react";
+
+import OnchainTransactionModal, {
+  type OnchainTransactionModalStatus,
+} from "@/components/common/OnchainTransactionModal";
+import { DELEGATION_CONTRACT } from "@/constants/constants";
 
 export interface DelegationToastState {
-  title: string;
-  message?: ReactNode;
+  readonly status: OnchainTransactionModalStatus;
+  readonly title: string;
+  readonly message?: string | undefined;
+  readonly transactionHash?: string | undefined;
 }
 
 export function useDelegationToast() {
-  const toastRef = useRef<HTMLDivElement>(null);
   const [toast, setToast] = useState<DelegationToastState | undefined>(
     undefined
   );
@@ -23,6 +22,7 @@ export function useDelegationToast() {
 
   const showDelegationToast = useCallback((nextToast: DelegationToastState) => {
     setToast(nextToast);
+    setShowToast(true);
   }, []);
 
   const clearDelegationToast = useCallback(() => {
@@ -37,14 +37,7 @@ export function useDelegationToast() {
     }
   }, []);
 
-  useEffect(() => {
-    if (toast) {
-      setShowToast(true);
-    }
-  }, [toast]);
-
   return {
-    toastRef,
     toast,
     showToast,
     showDelegationToast,
@@ -55,47 +48,25 @@ export function useDelegationToast() {
 
 export function DelegationToast(
   props: Readonly<{
-    toastRef: React.RefObject<HTMLDivElement | null>;
     toast: DelegationToastState;
     showToast: boolean;
     setShowToast: (show: boolean) => void;
   }>
 ) {
-  if (!props.showToast) {
+  const { toast, showToast, setShowToast } = props;
+
+  if (!showToast) {
     return null;
   }
 
   return (
-    <div className={styles["toastWrapper"]}>
-      <button
-        type="button"
-        aria-label="Close notification backdrop"
-        className={styles["toastBackdrop"]}
-        onClick={() => props.setShowToast(false)}
-      />
-      <div
-        className={`${styles["toast"]} tw-w-[min(92vw,420px)] tw-overflow-hidden tw-rounded-lg tw-bg-white tw-text-black tw-shadow-xl`}
-        ref={props.toastRef}
-        role="status"
-        aria-live="polite"
-      >
-        <div className="tw-flex tw-items-center tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-black/10 tw-px-3 tw-py-2">
-          <span className="tw-mr-auto tw-font-semibold">
-            {props.toast.title}
-          </span>
-          <button
-            type="button"
-            aria-label="Dismiss delegation notification"
-            className="tw-border-0 tw-bg-transparent tw-p-1 tw-text-2xl tw-leading-none tw-text-black/60 hover:tw-text-black focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-            onClick={() => props.setShowToast(false)}
-          >
-            &times;
-          </button>
-        </div>
-        {props.toast.message && (
-          <div className="tw-px-3 tw-py-3">{props.toast.message}</div>
-        )}
-      </div>
-    </div>
+    <OnchainTransactionModal
+      status={toast.status}
+      title={toast.title}
+      message={toast.message}
+      transactionHash={toast.transactionHash}
+      chain={{ id: DELEGATION_CONTRACT.chain_id }}
+      onClose={() => setShowToast(false)}
+    />
   );
 }

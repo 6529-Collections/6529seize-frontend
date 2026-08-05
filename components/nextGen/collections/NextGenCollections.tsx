@@ -1,6 +1,7 @@
 "use client";
 
 import Pagination from "@/components/pagination/Pagination";
+import FilterGridDropdown from "@/components/utils/select/dropdown/FilterGridDropdown";
 import { publicEnv } from "@/config/env";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NextGenCollection } from "@/entities/INextgen";
@@ -11,110 +12,142 @@ import NextGenCollectionPreview from "./NextGenCollectionPreview";
 const PAGE_SIZE = 25;
 
 enum StatusFilter {
-  ALL = "ALL",
   LIVE = "LIVE",
   UPCOMING = "UPCOMING",
   COMPLETED = "COMPLETED",
 }
 
-export default function NextGenCollections() {
-  const [selectedStatus, setSelectedStatus] = useState<StatusFilter>(
-    StatusFilter.ALL
-  );
+const STATUS_FILTER_ITEMS = [
+  { value: StatusFilter.LIVE, label: "Live" },
+  { value: StatusFilter.UPCOMING, label: "Upcoming" },
+  { value: StatusFilter.COMPLETED, label: "Completed" },
+] as const;
 
+const COLLECTION_SKELETONS = Array.from({ length: 6 }, (_, index) => index);
+
+export default function NextGenCollections() {
+  const [selectedStatus, setSelectedStatus] = useState<StatusFilter | null>(
+    null
+  );
   const [collections, setCollections] = useState<NextGenCollection[]>([]);
   const [collectionsLoaded, setCollectionsLoaded] = useState(false);
+  const [collectionsError, setCollectionsError] = useState(false);
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
 
-  function fetchResults(mypage: number) {
+  useEffect(() => {
+    let cancelled = false;
     setCollectionsLoaded(false);
-    let statusFilter = "";
-    if (selectedStatus !== StatusFilter.ALL) {
-      statusFilter = `&status=${selectedStatus}`;
-    }
+    setCollectionsError(false);
+    const statusFilter =
+      selectedStatus !== null ? `&status=${selectedStatus}` : "";
+    const url = `${publicEnv.API_ENDPOINT}/api/nextgen/collections?page_size=${PAGE_SIZE}&page=${page}${statusFilter}`;
 
-    let url = `${publicEnv.API_ENDPOINT}/api/nextgen/collections?page_size=${PAGE_SIZE}&page=${mypage}${statusFilter}`;
-    fetchUrl(url).then((response: DBResponse) => {
-      setTotalResults(response.count);
-      setCollections(response.data);
-      setCollectionsLoaded(true);
-    });
-  }
+    void fetchUrl<DBResponse<NextGenCollection>>(url)
+      .then((response) => {
+        if (cancelled) {
+          return;
+        }
 
-  useEffect(() => {
-    if (page === 1) {
-      fetchResults(page);
-    } else {
-      setPage(1);
-    }
-  }, [selectedStatus]);
+        setTotalResults(response.count);
+        setCollections(response.data);
+        setCollectionsLoaded(true);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setTotalResults(0);
+          setCollections([]);
+          setCollectionsError(true);
+          setCollectionsLoaded(true);
+        }
+      });
 
-  useEffect(() => {
-    fetchResults(page);
-  }, [page]);
+    return () => {
+      cancelled = true;
+    };
+  }, [page, selectedStatus]);
 
   return (
-    <div className="tw-mx-auto tw-w-full tw-px-3 tw-py-6 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-      <div className="tw-pb-4 -tw-mx-3 tw-flex tw-flex-wrap">
-        <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-justify-between tw-px-3">
-          <h1>Collections</h1>
-          <label className="tw-flex tw-items-center tw-gap-2 tw-text-lg tw-font-bold">
-            <span>Status:</span>
-            <select
-              value={selectedStatus}
-              onChange={(event) =>
-                setSelectedStatus(event.target.value as StatusFilter)
-              }
-              className="tw-cursor-pointer tw-rounded-md tw-border-0 tw-bg-transparent tw-py-1 tw-pl-1 tw-pr-8 tw-font-bold tw-text-white focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-              style={{ colorScheme: "dark" }}
-            >
-              {Object.values(StatusFilter).map((filter) => (
-                <option
-                  key={`filter-${filter}`}
-                  value={filter}
-                  className="tw-bg-black tw-text-white"
-                >
-                  {filter}
-                </option>
-              ))}
-            </select>
-          </label>
+    <section className="tw-py-6 sm:tw-py-8">
+      <div className="tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+        <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-3xl">
+          Collections
+        </h1>
+        <div className="tw-w-full sm:tw-w-56">
+          <FilterGridDropdown
+            filterLabel="Status"
+            triggerAriaLabel="Filter collections by status"
+            items={STATUS_FILTER_ITEMS}
+            selectedValue={selectedStatus}
+            allItemLabel="All statuses"
+            onSelect={(status) => {
+              setSelectedStatus(status);
+              setPage(1);
+            }}
+          />
         </div>
       </div>
 
-      <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-py-6">
-        {collections.map((collection) => (
-          <div
-            className="tw-pb-4 tw-relative tw-w-full tw-shrink-0 tw-grow-0 tw-basis-auto tw-px-3 min-[576px]:tw-w-full min-[576px]:tw-shrink-0 min-[576px]:tw-grow-0 min-[576px]:tw-basis-auto md:tw-w-1/2 md:tw-shrink-0 md:tw-grow-0 md:tw-basis-auto min-[992px]:tw-w-1/3 min-[992px]:tw-shrink-0 min-[992px]:tw-grow-0 min-[992px]:tw-basis-auto"
-            key={`collection-preview-${collection.id}`}
-            style={{ maxWidth: "100%" }}
-          >
+      <div
+        className="tw-grid tw-grid-cols-1 tw-gap-4 tw-py-6 md:tw-grid-cols-2 xl:tw-grid-cols-3"
+        aria-busy={!collectionsLoaded}
+      >
+        {!collectionsLoaded &&
+          COLLECTION_SKELETONS.map((skeleton) => (
+            <div
+              key={`collection-skeleton-${skeleton}`}
+              className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900"
+              aria-hidden="true"
+            >
+              <div className="tw-aspect-square tw-animate-pulse tw-bg-iron-800 motion-reduce:tw-animate-none" />
+              <div className="tw-space-y-3 tw-p-4">
+                <div className="tw-h-5 tw-w-2/3 tw-animate-pulse tw-rounded-md tw-bg-iron-700 motion-reduce:tw-animate-none" />
+                <div className="tw-h-4 tw-w-1/2 tw-animate-pulse tw-rounded-md tw-bg-iron-800 motion-reduce:tw-animate-none" />
+                <div className="tw-h-4 tw-w-3/4 tw-animate-pulse tw-rounded-md tw-bg-iron-800 motion-reduce:tw-animate-none" />
+              </div>
+            </div>
+          ))}
+
+        {collectionsLoaded &&
+          !collectionsError &&
+          collections.map((collection) => (
             <NextGenCollectionPreview
               collection={collection}
-              key={`gen-memes-collection-${collection.id}`}
+              key={`nextgen-collection-${collection.id}`}
             />
-          </div>
-        ))}
-        {collectionsLoaded && collections.length === 0 && (
-          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-text-center">
-            <h4>No collections found</h4>
-          </div>
-        )}
+          ))}
       </div>
-      {totalResults > PAGE_SIZE && collectionsLoaded && (
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-py-6 tw-text-center">
+
+      {collectionsError && (
+        <div
+          role="alert"
+          className="tw-rounded-xl tw-border tw-border-solid tw-border-error/40 tw-bg-error/10 tw-px-6 tw-py-12 tw-text-center tw-text-error"
+        >
+          Unable to load collections. Refresh the page to try again.
+        </div>
+      )}
+
+      {collectionsLoaded && !collectionsError && collections.length === 0 && (
+        <div className="tw-rounded-xl tw-border tw-border-dashed tw-border-iron-700 tw-bg-iron-900/50 tw-px-6 tw-py-12 tw-text-center">
+          <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-200">
+            No collections found
+          </h2>
+        </div>
+      )}
+
+      {totalResults > PAGE_SIZE && collectionsLoaded && !collectionsError && (
+        <div className="tw-flex tw-justify-center tw-py-6">
           <Pagination
             page={page}
             pageSize={PAGE_SIZE}
             totalResults={totalResults}
-            setPage={function (newPage: number) {
+            setPage={(newPage: number) => {
               setPage(newPage);
               window.scrollTo(0, 0);
             }}
           />
         </div>
       )}
-    </div>
+    </section>
   );
 }

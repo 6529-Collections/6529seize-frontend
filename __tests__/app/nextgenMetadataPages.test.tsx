@@ -166,26 +166,35 @@ describe("NextGen metadata", () => {
     jest.clearAllMocks();
   });
 
-  it("uses the branded NextGen collection card on view pages", async () => {
-    const metadata = await generateNextGenMetadata({
-      params: Promise.resolve({ view: ["collections"] }),
-    });
-    const image = getSocialImage(metadata);
-    const url = new URL(image.url);
+  it.each([
+    [undefined, "NextGen"],
+    ["collections", "Collections | NextGen"],
+    ["artists", "Artists | NextGen"],
+    ["about", "About | NextGen"],
+  ])(
+    "uses consistent metadata for the %s landing view",
+    async (view, title) => {
+      const metadata = await generateNextGenMetadata({
+        params: Promise.resolve({ view: view ? [view] : undefined }),
+      });
+      const image = getSocialImage(metadata);
+      const url = new URL(image.url);
 
-    expect(metadata.title).toBe("NextGen Collections");
-    expect(metadata.twitter?.card).toBe("summary_large_image");
-    expect(image).toMatchObject({
-      alt: "NextGen Collections social card",
-      height: 630,
-      width: 1200,
-    });
-    expect(url.pathname).toBe("/api/og-metadata/collections/nextgen");
-    expect(url.searchParams.get("subtitle")).toBe(
-      "Generative art collections from 6529"
-    );
-    expect(url.searchParams.get("title")).toBe("NextGen Collections");
-  });
+      expect(metadata.title).toBe(title);
+      expect(metadata.openGraph?.title).toBe(title);
+      expect(metadata.twitter?.card).toBe("summary_large_image");
+      expect(image).toMatchObject({
+        alt: `${title} social card`,
+        height: 630,
+        width: 1200,
+      });
+      expect(url.pathname).toBe("/api/og-metadata/collections/nextgen");
+      expect(url.searchParams.get("subtitle")).toBe(
+        "Generative art collections from 6529"
+      );
+      expect(url.searchParams.get("title")).toBe(title);
+    }
+  );
 
   it("uses a route-specific NextGen collection card for admin metadata", async () => {
     const metadata = await generateNextGenAdminMetadata();
@@ -199,68 +208,90 @@ describe("NextGen metadata", () => {
     expect(url.searchParams.get("title")).toBe("NextGen Admin");
   });
 
-  it("uses collection facts in NextGen collection page cards", async () => {
-    mockNextgenFetches();
+  it.each([
+    [undefined, "Pebbles | NextGen", "Pebbles"],
+    ["about", "About | Pebbles", "About | Pebbles"],
+    ["provenance", "Provenance | Pebbles", "Provenance | Pebbles"],
+    ["rarity", "Rarity | Pebbles", "Rarity | Pebbles"],
+    ["top-trait-sets", "Trait Sets | Pebbles", "Trait Sets | Pebbles"],
+  ])(
+    "uses collection facts in the %s collection view card",
+    async (view, documentTitle, cardTitle) => {
+      mockNextgenFetches();
 
-    const metadata = await generateNextGenCollectionMetadata({
-      params: Promise.resolve({
+      const metadata = await generateNextGenCollectionMetadata({
+        params: Promise.resolve({
+          collection: "pebbles",
+          view: view ? [view] : undefined,
+        }),
+      });
+      const image = getSocialImage(metadata);
+      const url = new URL(image.url);
+
+      expect(metadata.title).toBe(documentTitle);
+      expect(metadata.openGraph?.title).toBe(documentTitle);
+      expect(metadata.twitter?.card).toBe("summary_large_image");
+      expect(image).toMatchObject({
+        alt: `${cardTitle} social card`,
+        height: 630,
+        width: 1200,
+      });
+      expect(url.pathname).toBe("/api/og-metadata/collections/nextgen");
+      expect(url.searchParams.get("image")).toBe(
+        "https://cdn.test/pebbles-banner.png"
+      );
+      expect(url.searchParams.get("subtitle")).toBe("Pebbles | NextGen");
+      expect(url.searchParams.get("title")).toBe(cardTitle);
+    }
+  );
+
+  it.each(["Art", "Mint", "Trait Sets", "Distribution Plan"])(
+    "uses collection facts in the %s subpage card",
+    async (page) => {
+      mockNextgenFetches();
+
+      const metadata = await generateNextgenCollectionMetadata({
         collection: "pebbles",
-        view: ["rarity"],
-      }),
-    });
-    const image = getSocialImage(metadata);
-    const url = new URL(image.url);
+        headers: { "x-test": "1" },
+        page,
+      });
+      const image = getSocialImage(metadata);
+      const url = new URL(image.url);
+      const title = `${page} | Pebbles`;
 
-    expect(metadata.title).toBe("Pebbles | Rarity | NextGen");
-    expect(metadata.twitter?.card).toBe("summary_large_image");
-    expect(image).toMatchObject({
-      alt: "Pebbles | Rarity social card",
-      height: 630,
-      width: 1200,
-    });
-    expect(url.pathname).toBe("/api/og-metadata/collections/nextgen");
-    expect(url.searchParams.get("image")).toBe(
-      "https://cdn.test/pebbles-banner.png"
-    );
-    expect(url.searchParams.get("subtitle")).toBe("Pebbles | NextGen");
-    expect(url.searchParams.get("title")).toBe("Pebbles | Rarity");
-  });
+      expect(metadata.title).toBe(title);
+      expect(metadata.openGraph?.title).toBe(title);
+      expect(image.alt).toBe(`${title} social card`);
+      expect(url.pathname).toBe("/api/og-metadata/collections/nextgen");
+      expect(url.searchParams.get("image")).toBe(
+        "https://cdn.test/pebbles-banner.png"
+      );
+      expect(url.searchParams.get("title")).toBe(title);
+    }
+  );
 
-  it("uses collection facts in NextGen collection subpage cards", async () => {
-    mockNextgenFetches();
-
-    const metadata = await generateNextgenCollectionMetadata({
-      collection: "pebbles",
-      headers: { "x-test": "1" },
-      page: "Mint",
-    });
-    const image = getSocialImage(metadata);
-    const url = new URL(image.url);
-
-    expect(metadata.title).toBe("Mint | Pebbles");
-    expect(url.pathname).toBe("/api/og-metadata/collections/nextgen");
-    expect(url.searchParams.get("image")).toBe(
-      "https://cdn.test/pebbles-banner.png"
-    );
-    expect(url.searchParams.get("title")).toBe("Mint | Pebbles");
-  });
-
-  it("uses branded NFT card metadata for NextGen token pages", async () => {
+  it.each([
+    [undefined, "Pebble #42"],
+    ["provenance", "Provenance | Pebble #42"],
+    ["display-center", "Display Center | Pebble #42"],
+    ["rarity", "Rarity | Pebble #42"],
+  ])("uses branded NFT metadata for the %s token view", async (view, title) => {
     mockNextgenFetches();
 
     const metadata = await generateNextGenTokenMetadata({
       params: Promise.resolve({
         token: "10000000042",
-        view: ["provenance"],
+        view: view ? [view] : undefined,
       }),
     });
     const image = getSocialImage(metadata);
     const url = new URL(image.url);
 
-    expect(metadata.title).toBe("Pebble #42 | Provenance");
+    expect(metadata.title).toBe(title);
+    expect(metadata.openGraph?.title).toBe(title);
     expect(metadata.twitter?.card).toBe("summary_large_image");
     expect(image).toMatchObject({
-      alt: "Pebble #42 | Provenance social card",
+      alt: `${title} social card`,
       height: 630,
       width: 1200,
     });
@@ -273,7 +304,7 @@ describe("NextGen metadata", () => {
     expect(url.searchParams.get("displayId")).toBe("42");
     expect(url.searchParams.get("image")).toBe("https://cdn.test/thumb.png");
     expect(url.searchParams.get("subtitle")).toBe("Pebbles #42 | NextGen");
-    expect(url.searchParams.get("title")).toBe("Pebble #42 | Provenance");
+    expect(url.searchParams.get("title")).toBe(title);
   });
 
   it("falls back to a branded NextGen token card when token data is missing", async () => {

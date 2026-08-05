@@ -24,6 +24,7 @@ jest.mock("@/contexts/EditingDropContext", () => ({
 }));
 
 const mockRegisterWave = jest.fn();
+const mockCompleteInitialRegistration = jest.fn();
 const mockSetQueryData = jest.fn();
 const mockSetWaveData = jest.fn();
 const mockSetViewMode = jest.fn();
@@ -131,6 +132,9 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
     waves: { list: [] },
     directMessages: { list: [] },
     registerWave: mockRegisterWave,
+    serverFeedSeed: {
+      completeInitialRegistration: mockCompleteInitialRegistration,
+    },
   }),
 }));
 
@@ -266,6 +270,7 @@ describe("MyStreamWave registration", () => {
 
     await waitFor(() => {
       expect(mockRegisterWave).toHaveBeenCalledWith("wave-1", true);
+      expect(mockCompleteInitialRegistration).toHaveBeenCalledWith("wave-1");
     });
   });
 

@@ -3,8 +3,11 @@ import MemeAccountingPage, {
   generateMetadata,
 } from "@/app/meme-accounting/page";
 import { AuthContext } from "@/components/auth/Auth";
+import { publicEnv } from "@/config/env";
 import { render, screen } from "@testing-library/react";
 import React from "react";
+
+const domain = new URL(publicEnv.BASE_ENDPOINT).hostname;
 
 jest.mock("@/components/gas-royalties/Royalties", () => () => (
   <div data-testid="royalties" />
@@ -56,7 +59,7 @@ describe("MemeAccountingPage", () => {
     });
     expect(metadata).toMatchObject({
       title: "Meme Accounting - The Memes",
-      description: "Tools | 6529.io",
+      description: `Tools | ${domain}`,
     });
   });
 });

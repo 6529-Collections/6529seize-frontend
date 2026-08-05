@@ -1,0 +1,367 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamSplitWallet.t.sol:StandardERC20Mock#function:0x70a08231",
+          "declaringDefinitionId": "test/StreamSplitWallet.t.sol:StandardERC20Mock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "balanceOf",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x70a08231",
+          "signature": "balanceOf(address)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamSplitWallet.t.sol:StandardERC20Mock#function:0x40c10f19",
+          "declaringDefinitionId": "test/StreamSplitWallet.t.sol:StandardERC20Mock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "mint",
+          "outputs": [],
+          "selector": "0x40c10f19",
+          "signature": "mint(address,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamSplitWallet.t.sol:StandardERC20Mock#function:0xa9059cbb",
+          "declaringDefinitionId": "test/StreamSplitWallet.t.sol:StandardERC20Mock",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "transfer",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0xa9059cbb",
+          "signature": "transfer(address,uint256)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "mint(address,uint256)",
+          "displaySignature": "mint(address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamSplitWallet.t.sol:StandardERC20Mock#function:0x40c10f19",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TcGxpdFdhbGxldC50LnNvbDpTdGFuZGFyZEVSQzIwTW9jayNmdW5jdGlvbjoweDQwYzEwZjE5",
+          "kind": "function",
+          "modifiers": [],
+          "name": "mint",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 100,
+            "byteStart": 71289,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1481-L1483",
+            "lineEnd": 1483,
+            "lineStart": 1481,
+            "snippetSha256": "sha256:3e8d24725a7090e39a970531c90f98a49bd16721b2c5fa52d195a189e6a599fc",
+            "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+          },
+          "selector": "0x40c10f19",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "balanceOf(address)",
+          "displaySignature": "balanceOf(address)",
+          "functionKind": "function",
+          "id": "test/StreamSplitWallet.t.sol:StandardERC20Mock#function:0x70a08231",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TcGxpdFdhbGxldC50LnNvbDpTdGFuZGFyZEVSQzIwTW9jayNmdW5jdGlvbjoweDcwYTA4MjMx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "balanceOf",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 117,
+            "byteStart": 71395,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1485-L1487",
+            "lineEnd": 1487,
+            "lineStart": 1485,
+            "snippetSha256": "sha256:06d0221bcbf9dbe262ffd0d3a9503ae2e5eb7cbaef020a9ae386cf046e92d039",
+            "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+          },
+          "selector": "0x70a08231",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "transfer(address,uint256)",
+          "displaySignature": "transfer(address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamSplitWallet.t.sol:StandardERC20Mock#function:0xa9059cbb",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TcGxpdFdhbGxldC50LnNvbDpTdGFuZGFyZEVSQzIwTW9jayNmdW5jdGlvbjoweGE5MDU5Y2Ji",
+          "kind": "function",
+          "modifiers": [],
+          "name": "transfer",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 159,
+            "byteStart": 71518,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1489-L1492",
+            "lineEnd": 1492,
+            "lineStart": 1489,
+            "snippetSha256": "sha256:c7a230b947b82fc3b423142f25ce95a9bd1934faeda4818bd4f0f24cd434ff3a",
+            "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+          },
+          "selector": "0xa9059cbb",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": true,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_move(address,address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamSplitWallet.t.sol:StandardERC20Mock#function:_move(address,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TcGxpdFdhbGxldC50LnNvbDpTdGFuZGFyZEVSQzIwTW9jayNmdW5jdGlvbjpfbW92ZShhZGRyZXNzLGFkZHJlc3MsdWludDI1Nik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_move",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 198,
+            "byteStart": 71683,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1494-L1498",
+            "lineEnd": 1498,
+            "lineStart": 1494,
+            "snippetSha256": "sha256:3f69f737859ee33ca521be61c50a3eda92d25fedf5eb5e980c204b9108676b6d",
+            "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "balances",
+          "natspec": "",
+          "range": {
+            "byteLength": 45,
+            "byteStart": 71237,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1479",
+            "lineEnd": 1479,
+            "lineStart": 1479,
+            "snippetSha256": "sha256:e11839b7044a8480e61b27aeb7aa3125fd0c97ed7d88af071a59642579781e08",
+            "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+          },
+          "selector": null,
+          "type": "mapping(address => uint256)",
+          "typeString": "mapping(address => uint256)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "internal"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamSplitWallet.t.sol:StandardERC20Mock",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1TcGxpdFdhbGxldC50LnNvbDpTdGFuZGFyZEVSQzIwTW9jaw",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamSplitWallet.t.sol:StandardERC20Mock"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StandardERC20Mock",
+    "natspec": "",
+    "range": {
+      "byteLength": 679,
+      "byteStart": 71204,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSplitWallet.t.sol#L1478-L1499",
+      "lineEnd": 1499,
+      "lineStart": 1478,
+      "snippetSha256": "sha256:157f14bc626d79e98b59fb25f1a86954f73f2b55510dca17f96d27b1ff3d4c3c",
+      "sourceSha256": "sha256:507e40012d913b9780b8eb5597e06e056f1fbec011798dff6eadea8dd34697c7"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamSplitWallet.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-30.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamSplitWallet.t.sol:StandardERC20Mock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSplitWallet.t.sol:StandardERC20Mock#function:0x40c10f19",
+      "definitionId": "test/StreamSplitWallet.t.sol:StandardERC20Mock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSplitWallet.t.sol:StandardERC20Mock#function:0x70a08231",
+      "definitionId": "test/StreamSplitWallet.t.sol:StandardERC20Mock",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSplitWallet.t.sol:StandardERC20Mock#function:0xa9059cbb",
+      "definitionId": "test/StreamSplitWallet.t.sol:StandardERC20Mock",
+      "severity": "advisory"
+    }
+  ]
+}

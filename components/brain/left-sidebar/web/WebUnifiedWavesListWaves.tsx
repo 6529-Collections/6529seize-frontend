@@ -1,10 +1,12 @@
 "use client";
 
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { useLoadActiveSidebarParentSubwaves } from "@/hooks/useLoadActiveSidebarParentSubwaves";
+import { useLoadPersistedExpandedSubwaves } from "@/hooks/useLoadPersistedExpandedSubwaves";
+import { useActiveSubwaveParentHint } from "@/hooks/useActiveSubwaveParentHint";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -159,14 +161,15 @@ function CreateWaveButton({ onClick }: { readonly onClick: () => void }) {
       data-tooltip-id="create-wave-tooltip"
       data-tooltip-content="Create wave"
     >
-      <PrimaryButton
-        onClicked={onClick}
-        loading={false}
-        disabled={false}
-        padding="tw-p-2.5"
+      <Button
+        onClick={onClick}
+        aria-label="Create wave"
+        variant="primary"
+        size={null}
+        className="tw-size-9 tw-p-0"
       >
         <FontAwesomeIcon icon={faPlus} className="tw-size-4 tw-flex-shrink-0" />
-      </PrimaryButton>
+      </Button>
     </div>
   );
 }
@@ -265,18 +268,26 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     parentWaveId: activeParentWaveId,
     set: setActiveWave,
   } = activeWave;
+  // Falls back to the persisted hint while the live parent is still loading
+  // after a cold reload, so the active subwave expands/highlights without the
+  // fetch-waterfall flicker.
+  const effectiveActiveParentWaveId = useActiveSubwaveParentHint(
+    activeWaveId,
+    activeParentWaveId
+  );
   const { topLevelWaves, getRows, toggleParent } = useSidebarWaveTree({
     waves,
     activeWaveId: activeWave.id,
-    activeParentWaveId: activeWave.parentWaveId,
+    activeParentWaveId: effectiveActiveParentWaveId,
     loadingSubwaveParentIds: streamWaves.loadingSubwaveParentIds,
     onParentExpand: streamWaves.loadSubwavesForParent,
     showExpandedSubwaves: !isCollapsed,
   });
   useLoadActiveSidebarParentSubwaves({
-    activeParentWaveId,
+    activeParentWaveId: effectiveActiveParentWaveId,
     waves,
   });
+  useLoadPersistedExpandedSubwaves({ waves });
 
   const showCreateWaveButton = !isApp && !!connectedProfile;
   const shouldShowProfileFeedShortcut = !hideHeaders && showProfileFeedShortcut;

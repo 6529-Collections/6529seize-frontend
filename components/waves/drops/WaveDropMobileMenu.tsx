@@ -162,7 +162,7 @@ function WaveDropMobileMenuAuthenticatedActions({
       <WaveDropActionsQuickReact
         drop={extendedDrop}
         isMobile
-        onReacted={closeMenu}
+        onReactionStarted={closeMenu}
       />
       <WaveDropActionsAddReaction
         drop={extendedDrop}

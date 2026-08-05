@@ -1,8 +1,8 @@
 "use client";
 
-import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
 import type { EditorState } from "lexical";
 import React, {
@@ -16,33 +16,28 @@ import React, {
   useState,
 } from "react";
 import { useAuth } from "../auth/Auth";
-import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
-import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
-import { MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/MentionTransformer";
-import { WAVE_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/WaveMentionTransformer";
-import { GROUP_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/GroupMentionTransformer";
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 import {
-  createDefaultDropPollDraft,
   validateCreateDropPollDraft,
   type CreateDropPollDraft,
 } from "./CreateDropPoll";
 
-import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
 import { containsDisallowedLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
 import { getMentionedGroupsFromEditorState } from "@/components/drops/create/lexical/utils/groupMentionDetection";
+import { getReferencedNftsFromEditorState } from "@/components/drops/create/lexical/utils/nftReferenceDetection";
+import { getMentionedUsersFromEditorState } from "@/components/drops/create/lexical/utils/userMentionDetection";
+import { getMentionedWavesFromEditorState } from "@/components/drops/create/lexical/utils/waveMentionDetection";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import { WsMessageType } from "@/helpers/Types";
 import { isReservedIdentitySubmissionMetadataKey } from "@/helpers/waves/identity-submission-metadata";
-import { normalizeTypedEmojiShortcuts } from "@/helpers/waves/typed-emoji-shortcuts";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { useWebSocket } from "@/services/websocket";
 import throttle from "lodash/throttle";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import { EMOJI_TRANSFORMER } from "../drops/create/lexical/transformers/EmojiTransformer";
 import { generateMetadataId, useDropMetadata } from "./hooks/useDropMetadata";
 import {
   hasPendingInlineImageUploadDrop,
@@ -58,6 +53,7 @@ import { useLatestEditableChatDropTarget } from "./hooks/useLatestEditableChatDr
 import CreateDropLayout from "./create-drop-content/CreateDropLayout";
 import {
   canAddDropPart,
+  canSubmitComposerAction,
   canSubmitDrop,
   createMetadataHandlers,
   hasMetadataContent,
@@ -68,6 +64,10 @@ import { useCreateDropFileHandlers } from "./create-drop-content/useCreateDropFi
 import { useCreateDropFocusBehavior } from "./create-drop-content/useCreateDropFocusBehavior";
 import { useCreateDropIdentityState } from "./create-drop-content/useCreateDropIdentityState";
 import { useCreateDropSubmission } from "./create-drop-content/useCreateDropSubmission";
+import { exportComposerMarkdown } from "./create-drop-content/exportComposerMarkdown";
+import { useCreateDropContainerWidth } from "./create-drop-content/useCreateDropContainerWidth";
+import { useCreateDropPollActions } from "./create-drop-content/useCreateDropPollActions";
+import { useStormPartActions } from "./create-drop-content/useStormPartActions";
 import type {
   CreateDropContentProps,
   ScopedValueState,
@@ -78,8 +78,6 @@ export type {
   CreateDropMetadataType,
   UploadingFile,
 } from "./create-drop-content/types";
-
-const CONTAINER_WIDTH_THRESHOLD = 500;
 
 const CreateDropContent: React.FC<CreateDropContentProps> = ({
   activeDrop,
@@ -112,13 +110,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const { isSafeWallet, address } = useSeizeConnectContext();
   const { send } = useWebSocket();
   const { isApp } = useDeviceInfo();
+  const isMobile = useIsMobileScreen();
   const locale = useBrowserLocale();
-  const actionsContainerRef = useRef<HTMLDivElement>(null);
-  const [actionsContainerElement, setActionsContainerElement] =
-    useState<HTMLDivElement | null>(null);
+  const { actionsContainerRef, isWideContainer, setActionsContainerRef } =
+    useCreateDropContainerWidth();
   const shouldAnimateOptionsRef = useRef(false);
   const prevWaveIdRef = useRef(wave.id);
-  const [isWideContainer, setIsWideContainer] = useState(false);
   const { editingDropId, setEditingDropId } = useEditingDrop();
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useAuth();
@@ -128,6 +125,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const { signDrop } = useDropSignature();
 
   const [submitting, setSubmitting] = useState(false);
+  const [editingPartIndex, setEditingPartIndex] = useState<number | null>(null);
   const [editorState, setEditorState] = useState<EditorState | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
@@ -149,40 +147,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
   }
   const dropModeSessionScopeKey = `${wave.id}:drop-mode:${dropModeSessionEpoch}`;
+  const keepDesktopOptionsVisible = !isMobile && isWideContainer;
+  // Keep the scoped collapse state live so resizing back to a narrow layout
+  // restores the chevron immediately.
   const showOptions =
-    showOptionsState?.scopeKey === wave.id
-      ? showOptionsState.value
-      : isWideContainer;
-
-  const setActionsContainerRef = useCallback((node: HTMLDivElement | null) => {
-    actionsContainerRef.current = node;
-    setActionsContainerElement(node);
-  }, []);
-
-  useLayoutEffect(() => {
-    if (!actionsContainerElement) return;
-
-    const setWidthState = (width: number) => {
-      const isWide = width >= CONTAINER_WIDTH_THRESHOLD;
-      setIsWideContainer((prev) => (prev === isWide ? prev : isWide));
-    };
-
-    const measureWidth = () => {
-      setWidthState(actionsContainerElement.getBoundingClientRect().width);
-    };
-
-    measureWidth();
-
-    const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (entry) {
-        setWidthState(entry.contentRect.width);
-      }
-    });
-
-    observer.observe(actionsContainerElement);
-    return () => observer.disconnect();
-  }, [actionsContainerElement]);
+    keepDesktopOptionsVisible ||
+    (showOptionsState?.scopeKey === wave.id && showOptionsState.value);
 
   useLayoutEffect(() => {
     if (prevIsDropModeRef.current && !isDropMode) {
@@ -288,21 +258,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     pollDraft !== null && pollValidation.error !== null;
 
   const getMarkdown = useMemo(
-    () =>
-      editorState
-        ? normalizeTypedEmojiShortcuts(
-            exportDropMarkdown(editorState, [
-              ...SAFE_MARKDOWN_TRANSFORMERS,
-              MENTION_TRANSFORMER,
-              ...(canMentionAll ? [GROUP_MENTION_TRANSFORMER] : []),
-              HASHTAG_TRANSFORMER,
-              WAVE_MENTION_TRANSFORMER,
-              IMAGE_TRANSFORMER,
-              EMOJI_TRANSFORMER,
-            ])
-          )
-        : null,
-    [canMentionAll, editorState]
+    () => (editorState ? exportComposerMarkdown(editorState) : null),
+    [editorState]
   );
   const collapseOptions = useCallback(() => {
     shouldAnimateOptionsRef.current = true;
@@ -332,6 +289,22 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         ? getMentionedGroupsFromEditorState(editorState, canMentionAll)
         : [],
     [canMentionAll, editorState]
+  );
+  // Derived from the editor rather than from the session pick-registry: mention
+  // nodes keep their profile id across the editor-state JSON a draft is stored
+  // as, so a restored draft still submits real mentions instead of dead
+  // `@[handle]` text.
+  const currentPartMentionedUsers = useMemo(
+    () => (editorState ? getMentionedUsersFromEditorState(editorState) : []),
+    [editorState]
+  );
+  const currentPartMentionedWaves = useMemo(
+    () => (editorState ? getMentionedWavesFromEditorState(editorState) : []),
+    [editorState]
+  );
+  const currentPartReferencedNfts = useMemo(
+    () => (editorState ? getReferencedNftsFromEditorState(editorState) : []),
+    [editorState]
   );
 
   const sendTyping = React.useCallback(() => {
@@ -392,10 +365,20 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }) &&
     !isSlowModeSubmitBlocked &&
     !isLinksSubmitBlocked;
+  const dropForPartLimit = useMemo(() => {
+    if (editingPartIndex === null || !drop) {
+      return drop;
+    }
+
+    return {
+      ...drop,
+      parts: drop.parts.filter((_, index) => index !== editingPartIndex),
+    };
+  }, [drop, editingPartIndex]);
   const canAddPart = canAddDropPart({
     markdown: getMarkdown,
     files,
-    drop,
+    drop: dropForPartLimit,
     hasPendingInlineImageUpload,
   });
   const latestEditableChatDropTarget = useLatestEditableChatDropTarget({
@@ -453,7 +436,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     restoreMentionedEntities,
     getUpdatedDrop,
     createGifDrop,
-    finalizeAndAddDropPart,
+    finalizeAndAddDropPart: finalizeAndAddDropPartDraft,
     refreshState,
   } = useCreateDropDraftState({
     metadata,
@@ -473,6 +456,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     address,
     canMentionAll,
     currentPartMentionedGroups,
+    currentPartMentionedUsers,
+    currentPartMentionedWaves,
+    currentPartReferencedNfts,
     submitting,
     setDrop,
     setFiles,
@@ -485,6 +471,41 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     shouldAnimateOptionsRef,
     closeOnNextInputRef,
     shouldCollapseOptionsAfterMarkdownSyncRef,
+  });
+
+  const showMentionAliasExpansionError = useCallback(() => {
+    setToast({
+      type: "error",
+      title: t(locale, "waves.composer.mentionShortcuts.loadErrorTitle"),
+      message: t(locale, "waves.composer.mentionShortcuts.loadErrorMessage"),
+    });
+  }, [locale, setToast]);
+
+  const {
+    breakIntoStorm,
+    finalizeResolvedDropPart,
+    onCancelPartEdit,
+    onDiscardStorm,
+    onEditPart,
+    onMovePart,
+    onRemovePart,
+  } = useStormPartActions({
+    canAddPart,
+    canMentionAll,
+    collapseOptions,
+    createDropInputRef,
+    drop,
+    editingPartIndex,
+    finalizeAndAddDropPartDraft,
+    keepOptionsVisible: keepDesktopOptionsVisible,
+    onMentionAliasExpansionError: showMentionAliasExpansionError,
+    refreshState,
+    setDrop,
+    setEditingPartIndex,
+    setEditorState,
+    setFiles,
+    setIsStormMode,
+    submitting,
   });
 
   useCreateDropFocusBehavior({
@@ -562,7 +583,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     disableIdentityPickerAutoOpen,
     getUpdatedDrop,
     createGifDrop,
-    finalizeAndAddDropPart,
+    finalizeAndAddDropPart: finalizeResolvedDropPart,
     refreshState,
     setSubmitting,
     setUploadingFiles,
@@ -585,7 +606,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const { handleFileChange, removeFile } = useCreateDropFileHandlers({
     drop,
     files,
-    isWideContainer,
+    keepOptionsVisible: keepDesktopOptionsVisible,
     waveId: wave.id,
     externalAttachmentDrop,
     onExternalAttachmentDropConsumed,
@@ -601,13 +622,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     (next: boolean) => {
       shouldAnimateOptionsRef.current = true;
       setShowOptionsState({ scopeKey: wave.id, value: next });
-      if (isWideContainer) {
+      if (keepDesktopOptionsVisible) {
         closeOnNextInputRef.current = false;
         return;
       }
       closeOnNextInputRef.current = next;
     },
-    [isWideContainer, wave.id]
+    [keepDesktopOptionsVisible, wave.id]
   );
 
   const handleEditorStateChange = useCallback(
@@ -615,7 +636,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       setEditorState(newEditorState);
       shouldCollapseOptionsAfterMarkdownSyncRef.current = true;
 
-      if (isWideContainer) {
+      if (keepDesktopOptionsVisible) {
         return;
       }
 
@@ -623,12 +644,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         collapseOptions();
       }
     },
-    [collapseOptions, isWideContainer]
+    [collapseOptions, keepDesktopOptionsVisible]
   );
 
   const handleEditorBlur = useCallback(
     (event: React.FocusEvent<HTMLDivElement>) => {
-      if (isWideContainer) {
+      if (keepDesktopOptionsVisible) {
         return;
       }
       const nextTarget = event.relatedTarget as Node | null;
@@ -639,7 +660,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       setShowOptionsState({ scopeKey: wave.id, value: false });
       closeOnNextInputRef.current = false;
     },
-    [isWideContainer, wave.id]
+    [keepDesktopOptionsVisible, wave.id]
   );
 
   useEffect(() => {
@@ -660,34 +681,11 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     });
   }, [dropModeSessionScopeKey]);
 
-  const togglePoll = useCallback(() => {
-    if (!canCreatePoll) {
-      return;
-    }
-
-    setPollDraftState((current) =>
-      current?.scopeKey === wave.id
-        ? null
-        : {
-            scopeKey: wave.id,
-            value: createDefaultDropPollDraft(),
-          }
-    );
-  }, [canCreatePoll, wave.id]);
-
-  const updatePollDraft = useCallback(
-    (value: CreateDropPollDraft) => {
-      setPollDraftState({
-        scopeKey: wave.id,
-        value,
-      });
-    },
-    [wave.id]
-  );
-
-  const removePoll = useCallback(() => {
-    setPollDraftState(null);
-  }, []);
+  const { removePoll, togglePoll, updatePollDraft } = useCreateDropPollActions({
+    canCreatePoll,
+    setPollDraftState,
+    waveId: wave.id,
+  });
 
   const { onChangeKey, onChangeValue, onAddMetadata, onRemoveMetadata } =
     createMetadataHandlers({
@@ -695,11 +693,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       setMetadata,
       generateMetadataId,
     });
-
-  const breakIntoStorm = () => {
-    finalizeAndAddDropPart();
-    setIsStormMode(true);
-  };
 
   // Clear active reply/quote when entering edit mode on mobile
   useEffect(() => {
@@ -750,13 +743,24 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       openMetadata={openMetadata}
       togglePoll={togglePoll}
       breakIntoStorm={breakIntoStorm}
+      editingPartIndex={editingPartIndex}
+      onCancelPartEdit={onCancelPartEdit}
+      onEditPart={onEditPart}
+      onMovePart={onMovePart}
+      onRemovePart={onRemovePart}
+      onDiscardStorm={onDiscardStorm}
       handleSetShowOptions={handleSetShowOptions}
       onGifDrop={onGifDrop}
       dropEditorRefreshKey={dropEditorRefreshKey}
       createDropInputRef={createDropInputRef}
       editorState={editorState}
       canMentionAll={canMentionAll}
-      canSubmit={canSubmit}
+      canSubmit={canSubmitComposerAction({
+        canAddPart,
+        canSubmit,
+        editingPartIndex,
+        isStormMode,
+      })}
       handleEditorStateChange={handleEditorStateChange}
       handleEditorBlur={handleEditorBlur}
       onReferencedNft={onReferencedNft}

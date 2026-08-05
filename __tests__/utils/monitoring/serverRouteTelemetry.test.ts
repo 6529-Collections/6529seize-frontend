@@ -59,6 +59,35 @@ describe("serverRouteTelemetry", () => {
     expect(serializedOptions).not.toContain("Authorization");
   });
 
+  it("omits request count when nested hydration can issue more than one call", async () => {
+    await traceServerRouteData(
+      {
+        name: SERVER_ROUTE_SPAN_NAMES.wavesInitialFeedFetch,
+        routeFamily: "/messages/[wave]",
+        dataPath: "wave_initial_feed",
+        authCohort: "authenticated",
+      },
+      () => "feed"
+    );
+
+    expect(mockStartInactiveSpan).toHaveBeenCalledWith({
+      name: "waves.initial_feed.fetch",
+      op: "function.nextjs.server_data",
+      onlyIfParent: true,
+      attributes: {
+        "route.family": "/messages/[wave]",
+        "data.path": "wave_initial_feed",
+        "auth.cohort": "authenticated",
+      },
+    });
+    const spanOptions = mockStartInactiveSpan.mock.calls[0]?.[0] as {
+      readonly attributes: Record<string, unknown>;
+    };
+    expect(Object.keys(spanOptions.attributes)).not.toContain(
+      "data.api_request_count"
+    );
+  });
+
   it("rethrows task errors after ending the span", async () => {
     const taskError = new Error("data path failed");
 

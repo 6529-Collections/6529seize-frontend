@@ -9,6 +9,16 @@ jest.mock("next/navigation", () => ({
   redirect: jest.fn(),
 }));
 
+jest.mock("@/app/waves/wave-feed-seed.server", () => ({
+  fetchServerWaveFeedSeed: jest.fn(),
+}));
+
+jest.mock("@/components/waves/WaveServerFeedSeed", () => ({
+  __esModule: true,
+  default: () => null,
+  WaveServerFeedSeedGate: ({ children }: any) => children,
+}));
+
 jest.mock("@/app/waves/waves-page.shared", () => ({
   buildWavesMetadata: jest.fn(),
   getFirstSearchParamValue: jest.requireActual("@/app/waves/waves-page.shared")

@@ -46,6 +46,7 @@ const PRODUCTION_HOSTNAMES = new Set(["6529.io", "www.6529.io"]);
 const FIRST_PARTY_READONLY_ROUTE_HANDLER_PATHS = new Set([
   "/api/alchemy/contracts",
   "/api/alchemy/token-metadata",
+  "/api/github-preview",
   "/api/open-graph",
   "/api/twitter/preview",
 ]);
@@ -81,8 +82,10 @@ const YOUTUBE_TELEMETRY_HOSTS = new Set([
 const WALLETCONNECT_RPC_HOST = "rpc.walletconnect.org";
 const PUBLIC_ETHEREUM_RPC_HOSTS = new Set([
   "cloudflare-eth.com",
+  "eth.drpc.org",
   "eth.llamarpc.com",
   "ethereum-rpc.publicnode.com",
+  "rpc.flashbots.net",
 ]);
 const SAFE_ETHEREUM_RPC_METHODS = new Set([
   "eth_accounts",

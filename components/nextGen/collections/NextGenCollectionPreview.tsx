@@ -3,7 +3,6 @@ import Link from "next/link";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { formatNameForUrl } from "../nextgen_helpers";
 import { NextGenMintCounts } from "./collectionParts/NextGenCollectionHeader";
-import styles from "./NextGen.module.css";
 
 interface Props {
   collection: NextGenCollection;
@@ -13,56 +12,34 @@ export default function NextGenCollectionPreview(props: Readonly<Props>) {
   return (
     <Link
       href={`/nextgen/collection/${formatNameForUrl(props.collection.name)}`}
-      className="tw-no-underline"
+      className="tw-group tw-flex tw-h-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-text-iron-100 tw-no-underline tw-shadow-lg tw-transition tw-duration-200 hover:-tw-translate-y-0.5 hover:tw-border-white/20 hover:tw-bg-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 motion-reduce:tw-transform-none"
     >
-      <div
-        className={`tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] ${styles["collectionPreview"]}`}
-      >
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-pb-6">
-            <Image
-              unoptimized
-              priority
-              loading={"eager"}
-              width="0"
-              height="0"
-              style={{
-                height: "auto",
-                width: "auto",
-                maxHeight: "100%",
-                maxWidth: "100%",
-                padding: "10px",
-              }}
-              src={props.collection.image}
-              alt={`NextGen Collection #${props.collection.id} - ${props.collection.name}`}
-              onError={(e) => {
-                e.currentTarget.src = "/pebbles-loading.jpeg";
-              }}
-            />
-          </div>
-        </div>
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-          <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-            <div
-              className={`tw-mx-auto tw-w-full tw-px-3 max-[1100px]:tw-max-w-[950px] min-[1101px]:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] ${styles["collectionPreviewTitle"]}`}
-            >
-              <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-                <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-                  <h3 className="tw-mb-0">{props.collection.name}</h3>
-                </div>
-              </div>
-              <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-                <div className="tw-relative tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3">
-                  by <b>{props.collection.artist}</b>
-                </div>
-              </div>
-              <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-                <div className="tw-relative tw-flex tw-w-full tw-shrink-0 tw-grow tw-basis-0 tw-px-3 tw-text-[#9a9a9a]">
-                  <NextGenMintCounts collection={props.collection} />
-                </div>
-              </div>
-            </div>
-          </div>
+      <div className="tw-flex tw-aspect-square tw-items-center tw-justify-center tw-overflow-hidden tw-bg-black/40 tw-p-3">
+        <Image
+          unoptimized
+          width={900}
+          height={900}
+          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="tw-h-full tw-w-full tw-object-contain tw-transition tw-duration-300 group-hover:tw-scale-[1.02] motion-reduce:tw-transform-none"
+          src={props.collection.image}
+          alt={`NextGen Collection #${props.collection.id} - ${props.collection.name}`}
+          onError={(event) => {
+            event.currentTarget.src = "/pebbles-loading.jpeg";
+          }}
+        />
+      </div>
+      <div className="tw-flex tw-flex-col tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-p-4">
+        <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-lg">
+          {props.collection.name}
+        </h2>
+        <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-iron-300 sm:tw-text-sm">
+          by{" "}
+          <strong className="tw-font-semibold tw-text-iron-100">
+            {props.collection.artist}
+          </strong>
+        </p>
+        <div className="tw-mt-2 tw-text-xs tw-text-iron-400 sm:tw-text-sm">
+          <NextGenMintCounts collection={props.collection} />
         </div>
       </div>
     </Link>

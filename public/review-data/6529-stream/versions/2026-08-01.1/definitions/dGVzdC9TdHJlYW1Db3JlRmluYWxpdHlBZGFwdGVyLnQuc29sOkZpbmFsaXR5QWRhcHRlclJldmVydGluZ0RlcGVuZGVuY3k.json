@@ -1,0 +1,112 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "fallback()",
+          "functionKind": "fallback",
+          "id": "test/StreamCoreFinalityAdapter.t.sol:FinalityAdapterRevertingDependency#function:fallback()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlRmluYWxpdHlBZGFwdGVyLnQuc29sOkZpbmFsaXR5QWRhcHRlclJldmVydGluZ0RlcGVuZGVuY3kjZnVuY3Rpb246ZmFsbGJhY2soKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "fallback",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 64,
+            "byteStart": 4945,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreFinalityAdapter.t.sol#L159-L161",
+            "lineEnd": 161,
+            "lineStart": 159,
+            "snippetSha256": "sha256:d7050bfd579fe9565a88ec3636c4bbbda8c1f0bb6d9d191659d6f30c4cf5c9d1",
+            "sourceSha256": "sha256:f0d5d703d8daf4974737b0061fbb4b3e30c9ab9a60dce5fc240c6a9cd7468f3a"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamCoreFinalityAdapter.t.sol:FinalityAdapterRevertingDependency",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Db3JlRmluYWxpdHlBZGFwdGVyLnQuc29sOkZpbmFsaXR5QWRhcHRlclJldmVydGluZ0RlcGVuZGVuY3k",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamCoreFinalityAdapter.t.sol:FinalityAdapterRevertingDependency"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "FinalityAdapterRevertingDependency",
+    "natspec": "",
+    "range": {
+      "byteLength": 116,
+      "byteStart": 4895,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreFinalityAdapter.t.sol#L158-L162",
+      "lineEnd": 162,
+      "lineStart": 158,
+      "snippetSha256": "sha256:2062ae268b138f27c4700e01874f25c8b201eaedf4216df1707b849407579310",
+      "sourceSha256": "sha256:f0d5d703d8daf4974737b0061fbb4b3e30c9ab9a60dce5fc240c6a9cd7468f3a"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamCoreFinalityAdapter.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamCoreFinalityAdapter.t.sol:FinalityAdapterRevertingDependency",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCoreFinalityAdapter.t.sol:FinalityAdapterRevertingDependency#function:fallback()",
+      "definitionId": "test/StreamCoreFinalityAdapter.t.sol:FinalityAdapterRevertingDependency",
+      "severity": "advisory"
+    }
+  ]
+}

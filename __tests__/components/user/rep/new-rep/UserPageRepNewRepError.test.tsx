@@ -6,12 +6,15 @@ jest.mock('@/components/user/utils/UserPageErrorWrapper', () => (props:any) => (
   <div data-testid="wrapper" onClick={props.closeError}>{props.children}</div>
 ));
 
-test('shows message and triggers close', async () => {
+test('shows title, message and details, and triggers close', async () => {
   const user = userEvent.setup();
   const close = jest.fn();
   render(<UserPageRepNewRepError msg="oops" closeError={close} />);
+  expect(
+    screen.getByRole('heading', { name: /category name won't work/i })
+  ).toBeInTheDocument();
   expect(screen.getByText('oops')).toBeInTheDocument();
-  expect(screen.getByText(/Rep is not meant for insults/)).toBeInTheDocument();
+  expect(screen.getByText(/AI filter/)).toBeInTheDocument();
   await user.click(screen.getByTestId('wrapper'));
   expect(close).toHaveBeenCalled();
 });
@@ -29,7 +32,5 @@ test('can hide the abuse-filter details for reserved categories', () => {
   expect(
     screen.getByText('Help6529 Credits is managed by help6529.')
   ).toBeInTheDocument();
-  expect(
-    screen.queryByText(/Rep is not meant for insults/)
-  ).not.toBeInTheDocument();
+  expect(screen.queryByText(/AI filter/)).not.toBeInTheDocument();
 });

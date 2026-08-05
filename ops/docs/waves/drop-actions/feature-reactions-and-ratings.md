@@ -47,6 +47,8 @@ rolls back if the request fails.
 - Quick-react options come from local emoji history. If history is empty, quick
   react falls back to `:+1:`.
 - Touch move inside the mobile emoji picker stays inside the picker dialog.
+- Reactions added or removed by other people appear live while the wave or
+  direct-message thread is open.
 - Repeated clap taps in a short burst are merged into one rating request.
 - Rating values are clamped to each drop's allowed min/max range.
 

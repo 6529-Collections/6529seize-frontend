@@ -72,26 +72,6 @@ jest.mock(
   }
 );
 
-jest.mock("@/components/utils/button/PrimaryButton", () => {
-  return function PrimaryButton({
-    onClicked,
-    disabled,
-    loading,
-    children,
-  }: any) {
-    return (
-      <button
-        onClick={onClicked}
-        disabled={disabled}
-        data-testid="primary-button"
-        data-loading={loading}
-      >
-        {children}
-      </button>
-    );
-  };
-});
-
 describe("CreateWaveOutcomesRepRank", () => {
   const mockOnOutcome = jest.fn();
   const mockOnCancel = jest.fn();
@@ -115,7 +95,7 @@ describe("CreateWaveOutcomesRepRank", () => {
     expect(screen.getByTestId("rep-category-search")).toBeInTheDocument();
     expect(screen.getByTestId("outcomes-winners")).toBeInTheDocument();
     expect(screen.getByText("Cancel")).toBeInTheDocument();
-    expect(screen.getByTestId("primary-button")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
   });
 
   it("initializes with REP outcome type", () => {
@@ -150,7 +130,7 @@ describe("CreateWaveOutcomesRepRank", () => {
     renderComponent();
 
     // Try to submit without category
-    await user.click(screen.getByTestId("primary-button"));
+    await user.click(screen.getByRole("button", { name: "Save" }));
 
     expect(screen.getByTestId("category-error")).toBeInTheDocument();
     expect(mockOnOutcome).not.toHaveBeenCalled();
@@ -168,7 +148,7 @@ describe("CreateWaveOutcomesRepRank", () => {
     await user.click(screen.getByTestId("update-winners"));
 
     // Submit
-    await user.click(screen.getByTestId("primary-button"));
+    await user.click(screen.getByRole("button", { name: "Save" }));
 
     expect(mockOnOutcome).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -191,7 +171,7 @@ describe("CreateWaveOutcomesRepRank", () => {
     await user.type(categoryInput, "Test Category");
 
     // Submit with invalid winners
-    await user.click(screen.getByTestId("primary-button"));
+    await user.click(screen.getByRole("button", { name: "Save" }));
 
     expect(screen.getByTestId("total-value-error")).toBeInTheDocument();
     expect(mockOnOutcome).not.toHaveBeenCalled();
@@ -209,7 +189,7 @@ describe("CreateWaveOutcomesRepRank", () => {
     await user.click(screen.getByTestId("set-percentage-mode"));
 
     // Submit with invalid percentage
-    await user.click(screen.getByTestId("primary-button"));
+    await user.click(screen.getByRole("button", { name: "Save" }));
 
     expect(screen.getByTestId("percentage-error")).toBeInTheDocument();
     expect(mockOnOutcome).not.toHaveBeenCalled();
@@ -220,7 +200,7 @@ describe("CreateWaveOutcomesRepRank", () => {
     renderComponent();
 
     // Trigger category error
-    await user.click(screen.getByTestId("primary-button"));
+    await user.click(screen.getByRole("button", { name: "Save" }));
     expect(screen.getByTestId("category-error")).toBeInTheDocument();
 
     // Set category to clear error
@@ -228,6 +208,22 @@ describe("CreateWaveOutcomesRepRank", () => {
     await user.type(categoryInput, "Test Category");
 
     expect(screen.queryByTestId("category-error")).not.toBeInTheDocument();
+  });
+
+  it("names the broken category rule live and blocks submit", async () => {
+    const user = userEvent.setup();
+    renderComponent();
+
+    const categoryInput = screen.getByTestId("category-input");
+    await user.type(categoryInput, "Bad@Category");
+
+    // The violation surfaces while typing, before any submit attempt.
+    expect(screen.getByRole("alert")).toHaveTextContent('"@"');
+
+    await user.click(screen.getByTestId("update-winners"));
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(mockOnOutcome).not.toHaveBeenCalled();
   });
 
   it("keeps winners config when winners are updated", async () => {
@@ -240,7 +236,7 @@ describe("CreateWaveOutcomesRepRank", () => {
 
     await user.click(screen.getByTestId("update-winners"));
 
-    await user.click(screen.getByTestId("primary-button"));
+    await user.click(screen.getByRole("button", { name: "Save" }));
 
     expect(mockOnOutcome).toHaveBeenCalledWith(
       expect.objectContaining({

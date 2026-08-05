@@ -3,6 +3,7 @@ import { useWavePagination } from "./useWavePagination";
 import type { WaveDataStoreUpdater } from "./types";
 
 interface WaveDataManagerProps extends WaveDataStoreUpdater {
+  readonly hasServerFeedSeed: (waveId: string) => boolean;
   readonly isCapacitor?: boolean | undefined;
 }
 
@@ -13,6 +14,7 @@ interface WaveDataManagerProps extends WaveDataStoreUpdater {
 export function useWaveDataManager({
   updateData,
   getData,
+  hasServerFeedSeed,
   removeDrop,
   isCapacitor = false,
 }: WaveDataManagerProps) {
@@ -21,6 +23,7 @@ export function useWaveDataManager({
     useWaveDataFetching({
       updateData,
       getData,
+      hasServerFeedSeed,
       removeDrop,
       isCapacitor,
     });

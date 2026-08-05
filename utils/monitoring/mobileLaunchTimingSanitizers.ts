@@ -114,6 +114,7 @@ const STATIC_TOP_LEVEL_ROUTE_SEGMENTS = new Set([
   "om",
   "open-data",
   "open-mobile",
+  "rep",
   "rememes",
   "restricted",
   "sentry-example-page",
@@ -155,7 +156,6 @@ const STATIC_MEME_LAB_SEGMENTS = new Set(["collection"]);
 const STATIC_NEXTGEN_SEGMENTS = new Set(["collection", "manager", "token"]);
 
 const AWS_RUM_NON_PAGE_ROUTE_SEGMENTS = new Set(["api"]);
-const AWS_RUM_ADDITIONAL_PAGE_ROUTE_SEGMENTS = new Set(["rep"]);
 const AWS_RUM_PROFILE_CMS_PAGE_ID = "/[user]/[...cmsPath]";
 const AWS_RUM_UNKNOWN_PAGE_ID = "/unknown";
 
@@ -306,8 +306,7 @@ export function getAwsRumPageId(route: string): string {
   }
 
   const isKnownStaticPageRoot =
-    STATIC_TOP_LEVEL_ROUTE_SEGMENTS.has(firstSegment) ||
-    AWS_RUM_ADDITIONAL_PAGE_ROUTE_SEGMENTS.has(firstSegment);
+    STATIC_TOP_LEVEL_ROUTE_SEGMENTS.has(firstSegment);
 
   return isKnownStaticPageRoot
     ? `/${firstSegment}`
@@ -375,7 +374,7 @@ function getUserRouteTemplate(segments: readonly string[]): string | undefined {
     return `/[user]/${segments[1]}`;
   }
 
-  return undefined;
+  return AWS_RUM_PROFILE_CMS_PAGE_ID;
 }
 
 function matchesRouteFamilyPattern(

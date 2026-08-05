@@ -36,7 +36,7 @@ export function FaqSection({
         <h2 className={cx("tw-mb-4", SECTION_HEADING_CLASS)}>
           {m(locale, "join6529.faq.heading")}
         </h2>
-        <p className="tw-text-[15px] tw-font-light tw-leading-6 tw-text-iron-500">
+        <p className="tw-text-[15px] tw-font-normal tw-leading-6 tw-text-iron-400">
           {m(locale, "join6529.faq.subheading")}
         </p>
       </div>

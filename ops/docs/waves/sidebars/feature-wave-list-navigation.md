@@ -11,6 +11,9 @@ Wave and DM rows in the left list control which thread is open.
 - On expanded rows, pin/unpin sits in the trailing metadata cluster before the
   wave score instead of beside the wave name, keeping the score at the far
   right.
+- In `Worth Checking Out`, each avatar and its overlaid score shield form one
+  wave navigation link. Hovering or focusing the combined link shows score
+  details without creating a competing click target.
 - The expanded web Waves panel header includes a secondary `Discover Waves`
   link to `/discover`.
 - Browser back/forward keeps the active row and URL in sync.
@@ -50,6 +53,9 @@ Wave and DM rows in the left list control which thread is open.
 
 - Wave rows open `/waves/{waveId}`.
 - Direct-message rows open `/messages/{waveId}`.
+- `Worth Checking Out` avatars and their overlaid score shields open the wave
+  on the first activation; hovering or focusing either visual shows score
+  details.
 - Active-row re-click returns to `/waves` or `/messages`.
 - Native-app edge swipe from `/waves/{waveId}` returns to `/waves`.
 - Inside the `/waves` or `/messages` shell, row changes update URL/history in
@@ -70,6 +76,10 @@ Wave and DM rows in the left list control which thread is open.
   idle desktop rows do not reserve the hidden pin width.
 - Non-touch devices can prefetch an inactive row on hover.
 - Touch devices do not use hover prefetch.
+- `Worth Checking Out` keeps the avatar and overlaid score in one keyboard and
+  touch target, so the score cannot intercept wave navigation. The link's
+  accessible name includes the score; hover or keyboard focus exposes the score
+  details card, while touch activation opens the wave.
 - Edge-swipe navigation applies only to native-app standard wave details. It is
   disabled on web, direct messages, list routes, create overlays, and focused
   drop views.

@@ -3,6 +3,7 @@ import { recordMobileLaunchApiRequest } from "@/utils/monitoring/mobileLaunchTim
 import { getAuthJwt, getStagingAuth } from "../auth/auth.utils";
 
 type ApiErrorMode = "legacy-string" | "structured";
+type ApiRequestOrigin = "api" | "app";
 
 type StructuredApiError = Error & {
   status: number;
@@ -33,10 +34,13 @@ const getHeaders = (
 const buildUrl = (
   endpoint: string,
   params?: Record<string, string>,
-  transformParams?: (params: Record<string, string>) => Record<string, string>
+  transformParams?: (params: Record<string, string>) => Record<string, string>,
+  requestOrigin: ApiRequestOrigin = "api"
 ): string => {
   let path = `/api/${endpoint}`;
-  let url = `${publicEnv.API_ENDPOINT}${path}`;
+  const apiEndpoint =
+    requestOrigin === "app" ? publicEnv.BASE_ENDPOINT : publicEnv.API_ENDPOINT;
+  let url = `${apiEndpoint}${path}`;
 
   if (params) {
     const queryParams = new URLSearchParams();
@@ -185,6 +189,7 @@ interface ExecuteApiRequestParams {
   readonly parseJson?: boolean | undefined;
   readonly errorMode?: ApiErrorMode | undefined;
   readonly credentials?: RequestCredentials | undefined;
+  readonly cache?: RequestCache | undefined;
 }
 
 type RequestStatus = number | "aborted" | "network_error" | "unknown";
@@ -195,9 +200,10 @@ const createRequestInit = ({
   body,
   signal,
   credentials,
+  cache,
 }: Pick<
   ExecuteApiRequestParams,
-  "method" | "headers" | "body" | "signal" | "credentials"
+  "method" | "headers" | "body" | "signal" | "credentials" | "cache"
 >): RequestInit => {
   const requestInit: RequestInit = {
     method,
@@ -206,6 +212,7 @@ const createRequestInit = ({
   const hasBody = body !== undefined;
   const hasSignal = signal !== undefined;
   const hasCredentials = credentials !== undefined;
+  const hasCache = cache !== undefined;
 
   if (hasBody) {
     requestInit.body = body;
@@ -215,6 +222,9 @@ const createRequestInit = ({
   }
   if (hasCredentials) {
     requestInit.credentials = credentials;
+  }
+  if (hasCache) {
+    requestInit.cache = cache;
   }
 
   return requestInit;
@@ -299,6 +309,7 @@ const executeApiRequest = async <T>({
   parseJson = true,
   errorMode = "legacy-string",
   credentials,
+  cache,
 }: ExecuteApiRequestParams): Promise<T> => {
   const requestStartedAtMs = getRequestTimingNow();
   let status: RequestStatus = "unknown";
@@ -308,6 +319,7 @@ const executeApiRequest = async <T>({
     body,
     signal,
     credentials,
+    cache,
   });
 
   try {
@@ -342,11 +354,13 @@ function getRequestTimingNow(): number {
 
 export const commonApiFetch = async <T, U = Record<string, string>>(param: {
   endpoint: string;
+  requestOrigin?: ApiRequestOrigin | undefined;
   headers?: Record<string, string> | undefined;
   params?: U | undefined;
   signal?: AbortSignal | undefined;
   errorMode?: ApiErrorMode | undefined;
   includeWalletAuth?: boolean | undefined;
+  cache?: RequestCache | undefined;
 }): Promise<T> => {
   const url = buildUrl(
     param.endpoint,
@@ -357,7 +371,8 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
         transformed[key] = value === "nic" ? "cic" : value;
       });
       return transformed;
-    }
+    },
+    param.requestOrigin
   );
 
   return executeApiRequest<T>({
@@ -370,6 +385,7 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
     ),
     signal: param.signal,
     errorMode: param.errorMode ?? "legacy-string",
+    cache: param.cache,
   });
 };
 

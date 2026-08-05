@@ -1,22 +1,24 @@
 "use client";
 
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { BoltIcon } from "@heroicons/react/24/outline";
-import { AnimatePresence, motion } from "framer-motion";
-import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { Tooltip } from "react-tooltip";
-import { parseEther } from "viem";
+import { formatEther, parseEther } from "viem";
 import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "@/components/distribution-plan-tool/common/CircleLoader";
+import OnchainTransactionModal, {
+  type OnchainTransactionModalStatus,
+} from "@/components/common/OnchainTransactionModal";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import {
   displayedEonNumberFromIndex,
   displayedEpochNumberFromIndex,
@@ -35,32 +37,107 @@ import {
   SUBSCRIPTIONS_ADDRESS_ENS,
   SUBSCRIPTIONS_CHAIN,
 } from "@/constants/constants";
-import {
-  formatAddress,
-  getTransactionLink,
-  numberWithCommasFromString,
-} from "@/helpers/Helpers";
+import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
+import { formatAddress } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import styles from "./UserPageSubscriptions.module.css";
 import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
+import { formatSubscriptionEth } from "./coverage/subscriptionCoverage.helpers";
 
-function getEthForCards(count: number): number {
-  return Math.round(count * MEMES_MINT_PRICE * 1e10) / 1e10;
+const MEMES_MINT_PRICE_WEI = parseEther(MEMES_MINT_PRICE.toString());
+
+function getEthForCards(count: number): string {
+  return formatEther(BigInt(Math.trunc(count)) * MEMES_MINT_PRICE_WEI);
 }
 
-function getTopUpModalEmoji(
-  status: "confirm_wallet" | "submitted" | "success" | "error"
+function getCardCountLabel(
+  locale: ReturnType<typeof useBrowserLocale>,
+  count: number
 ): string {
-  const emojiByStatus: Record<
-    "confirm_wallet" | "submitted" | "success" | "error",
-    string
-  > = {
-    confirm_wallet: "/emojis/sgt_flushed.webp",
-    submitted: "/emojis/sgt_flushed.webp",
-    success: "/emojis/sgt_saluting_face.webp",
-    error: "/emojis/sgt_sob.webp",
+  const messageKey =
+    count === 1
+      ? "subscriptions.topUp.cardCount.one"
+      : "subscriptions.topUp.cardCount.many";
+  return t(locale, messageKey, {
+    count: formatInteger(locale, count),
+  });
+}
+
+function getTopUpTransactionErrorMessage(
+  transactionError: Error | null | undefined
+): string {
+  const message = transactionError?.message
+    .split("Request Arguments")[0]
+    ?.trim();
+  return message ? `Error - ${message}` : "Transaction failed";
+}
+
+interface TopUpTransactionModalInput {
+  readonly localError: string;
+  readonly sendIsPending: boolean;
+  readonly sendErrorMessage: string | undefined;
+  readonly receiptIsLoading: boolean;
+  readonly receiptIsSuccess: boolean;
+  readonly receiptHasError: boolean;
+  readonly receiptErrorMessage: string | undefined;
+}
+
+interface TopUpTransactionModalState {
+  readonly closable: boolean;
+  readonly message: string | undefined;
+  readonly status: OnchainTransactionModalStatus | null;
+}
+
+function getTopUpTransactionModalStatus(
+  input: TopUpTransactionModalInput
+): OnchainTransactionModalStatus | null {
+  if (input.localError || input.sendErrorMessage || input.receiptHasError) {
+    return "error";
+  }
+  if (input.sendIsPending) {
+    return "confirm_wallet";
+  }
+  if (input.receiptIsLoading) {
+    return "submitted";
+  }
+  if (input.receiptIsSuccess) {
+    return "success";
+  }
+  return null;
+}
+
+function getTopUpTransactionModalMessage(
+  status: OnchainTransactionModalStatus | null,
+  input: TopUpTransactionModalInput
+): string | undefined {
+  if (status === "success") {
+    return "Top Up Successful!";
+  }
+  if (status !== "error") {
+    return undefined;
+  }
+  if (input.localError) {
+    return input.localError;
+  }
+  return input.sendErrorMessage ?? input.receiptErrorMessage;
+}
+
+function getTopUpTransactionModalState(
+  input: TopUpTransactionModalInput
+): TopUpTransactionModalState {
+  const status = getTopUpTransactionModalStatus(input);
+  return {
+    closable:
+      input.receiptIsSuccess ||
+      Boolean(input.localError) ||
+      input.sendErrorMessage !== undefined ||
+      input.receiptHasError,
+    message: getTopUpTransactionModalMessage(status, input),
+    status,
   };
-  return emojiByStatus[status];
 }
 
 const TOP_UP_OPTION_GRID_CLASS =
@@ -72,8 +149,150 @@ const TOP_UP_OPTION_SURFACE_CLASS =
 const TOP_UP_OPTION_CLASS = `${TOP_UP_OPTION_SURFACE_CLASS} tw-w-full tw-p-4 tw-transition-all tw-duration-500 tw-ease-out motion-reduce:tw-transform-none motion-reduce:tw-transition-none desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-shadow-2xl desktop-hover:hover:tw-shadow-black/50`;
 const TOP_UP_CUSTOM_OPTION_CLASS = `${TOP_UP_OPTION_SURFACE_CLASS} tw-w-full tw-px-3 tw-py-2`;
 
-export default function UserPageSubscriptionsTopUp() {
+interface TopUpSelection {
+  readonly amountEth: string;
+  readonly count: number;
+}
+
+interface TopUpSelectionInput {
+  readonly coverage: ApiSubscriptionCoverage | undefined;
+  readonly customCount: string;
+  readonly option: string | null;
+  readonly optionCounts: Readonly<Record<string, number>>;
+}
+
+function getTopUpSelection({
+  coverage,
+  customCount,
+  option,
+  optionCounts,
+}: TopUpSelectionInput): TopUpSelection | null {
+  if (option === "recommended" && coverage?.recommended_top_up) {
+    return {
+      amountEth: coverage.recommended_top_up.amount_eth,
+      count: coverage.recommended_top_up.additional_mints,
+    };
+  }
+  if (option === "minimum" && coverage?.minimum_top_up) {
+    return {
+      amountEth: coverage.minimum_top_up.amount_eth,
+      count: coverage.minimum_top_up.additional_mints,
+    };
+  }
+  if (option === "other") {
+    const count = Number.parseInt(customCount, 10);
+    return Number.isNaN(count) || count < 1
+      ? null
+      : { amountEth: getEthForCards(count), count };
+  }
+  if (option === null) {
+    return null;
+  }
+  const count = optionCounts[option];
+  return count === undefined || count < 1
+    ? null
+    : { amountEth: getEthForCards(count), count };
+}
+
+function getTopUpOptionStateClass(
+  selected: boolean,
+  featured: boolean
+): string {
+  if (selected) {
+    return featured
+      ? "tw-bg-primary-500/15 tw-ring-primary-300/45"
+      : "tw-bg-iron-900 tw-ring-white/[0.05]";
+  }
+  return featured
+    ? "tw-bg-primary-500/[0.08] tw-ring-primary-400/25"
+    : "tw-bg-iron-950 tw-ring-white/[0.03]";
+}
+
+function CoverageTopUpOptions({
+  coverage,
+  onSelect,
+  selectedOption,
+}: Readonly<{
+  coverage: ApiSubscriptionCoverage | undefined;
+  onSelect: (option: "minimum" | "recommended") => void;
+  selectedOption: string | null;
+}>) {
+  const locale = useBrowserLocale();
+  const recommendedTopUp = coverage?.recommended_top_up ?? null;
+  const minimumTopUp = coverage?.minimum_top_up ?? null;
+  const showMinimumTopUp =
+    minimumTopUp !== null &&
+    minimumTopUp.amount_eth !== recommendedTopUp?.amount_eth;
+
+  if (recommendedTopUp === null && !showMinimumTopUp) {
+    return null;
+  }
+
+  return (
+    <div className="tw-mb-4 tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2">
+      {recommendedTopUp !== null ? (
+        <CardCountOption
+          id="subscription-top-up-recommended"
+          count={recommendedTopUp.additional_mints}
+          amountEth={recommendedTopUp.amount_eth}
+          badge={t(locale, "subscriptions.topUp.recommended")}
+          description={getCoverageTopUpDescription(
+            locale,
+            recommendedTopUp.target_fully_funded_drops,
+            recommendedTopUp.projected_through.token_id
+          )}
+          featured
+          selected={selectedOption === "recommended"}
+          onSelect={() => {
+            onSelect("recommended");
+          }}
+        />
+      ) : null}
+      {showMinimumTopUp ? (
+        <CardCountOption
+          id="subscription-top-up-minimum"
+          count={minimumTopUp.additional_mints}
+          amountEth={minimumTopUp.amount_eth}
+          badge={t(locale, "subscriptions.topUp.minimum")}
+          description={getCoverageTopUpDescription(
+            locale,
+            minimumTopUp.resulting_fully_funded_drops,
+            minimumTopUp.projected_through.token_id
+          )}
+          selected={selectedOption === "minimum"}
+          onSelect={() => {
+            onSelect("minimum");
+          }}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function getCoverageTopUpDescription(
+  locale: ReturnType<typeof useBrowserLocale>,
+  fundedDrops: number,
+  tokenId: number
+): string {
+  const messageKey =
+    fundedDrops === 1
+      ? "subscriptions.topUp.coversDrops.one"
+      : "subscriptions.topUp.coversDrops.many";
+  return t(locale, messageKey, {
+    count: formatInteger(locale, fundedDrops),
+    token: formatInteger(locale, tokenId),
+  });
+}
+
+export default function UserPageSubscriptionsTopUp({
+  coverage,
+  onTransactionConfirmed,
+}: Readonly<{
+  coverage?: ApiSubscriptionCoverage | undefined;
+  onTransactionConfirmed?: (() => void) | undefined;
+}>) {
   const { isIos } = useCapacitor();
+  const locale = useBrowserLocale();
   const { country } = useCookieConsent();
   const hideSubscriptions = shouldHideSubscriptions({
     capacitorIsIos: isIos,
@@ -108,10 +327,16 @@ export default function UserPageSubscriptionsTopUp() {
 
   const [error, setError] = useState<string>("");
   const [showDeep, setShowDeep] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const [topUpAmount, setTopUpAmount] = useState<number | null>(null);
+  const [topUpAmount, setTopUpAmount] = useState<string | null>(null);
+  const [topUpCardCount, setTopUpCardCount] = useState<number | null>(null);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const otherInputRef = useRef<HTMLInputElement | null>(null);
+  const confirmedHashRef = useRef<string | undefined>(undefined);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
   const handleSelectOther = useCallback(() => {
     setSelectedOption("other");
@@ -120,200 +345,95 @@ export default function UserPageSubscriptionsTopUp() {
   }, []);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  function handleSend() {
-    setError("");
-    let count: number;
-    if (selectedOption && selectedOption !== "other") {
-      const optionCountMap: Record<string, number> = {
-        "1": 1,
-        szn: remainingMintsForSeason,
-        year: remainingMintsForYear,
-        epoch: remainingMintsForEpoch,
-        period: remainingMintsForPeriod,
-        era: remainingMintsForEra,
-        eon: remainingMintsForEon,
-      };
-      count = optionCountMap[selectedOption]!;
-      if (!count || count < 1) {
-        setError("Invalid option selected");
-        return;
-      }
-    } else if (
-      memeCount &&
-      !Number.isNaN(Number.parseInt(memeCount, 10)) &&
-      Number.parseInt(memeCount, 10) > 0
+    if (
+      !waitSendTransaction.isSuccess ||
+      !sendTransaction.data ||
+      confirmedHashRef.current === sendTransaction.data
     ) {
-      count = Number.parseInt(memeCount, 10);
-    } else {
-      setError("Select a top-up option");
+      return;
+    }
+    confirmedHashRef.current = sendTransaction.data;
+    onTransactionConfirmed?.();
+  }, [
+    onTransactionConfirmed,
+    sendTransaction.data,
+    waitSendTransaction.isSuccess,
+  ]);
+
+  const optionCounts: Readonly<Record<string, number>> = {
+    "1": 1,
+    szn: remainingMintsForSeason,
+    year: remainingMintsForYear,
+    epoch: remainingMintsForEpoch,
+    period: remainingMintsForPeriod,
+    era: remainingMintsForEra,
+    eon: remainingMintsForEon,
+  };
+  const selectedTopUp = getTopUpSelection({
+    coverage,
+    customCount: memeCount,
+    option: selectedOption,
+    optionCounts,
+  });
+
+  function handleSend(): void {
+    setError("");
+    if (selectedTopUp === null) {
+      setError(t(locale, "subscriptions.topUp.validation.selectOption"));
       return;
     }
     if (!isConnected) {
-      setError("You must have an active wallet connection to top up");
+      setError(t(locale, "subscriptions.topUp.validation.wallet"));
       return;
     }
-    const value = getEthForCards(count);
-    setTopUpAmount(value);
+    setTopUpAmount(selectedTopUp.amountEth);
+    setTopUpCardCount(selectedTopUp.count);
     sendTransaction.reset();
     sendTransaction.sendTransaction({
       chainId: SUBSCRIPTIONS_CHAIN.id,
       to: SUBSCRIPTIONS_ADDRESS,
-      value: parseEther(value.toString()),
+      value: parseEther(selectedTopUp.amountEth),
     });
   }
 
-  useEffect(() => {
-    if (sendTransaction.error) {
-      const errorMsg =
-        sendTransaction.error.message.split("Request Arguments")[0];
-      setError(`Error - ${errorMsg}`);
-    }
-  }, [sendTransaction.error]);
-
-  const showModal =
-    sendTransaction.isPending ||
-    waitSendTransaction.isLoading ||
-    waitSendTransaction.isSuccess ||
-    !!error;
-
-  const isClosable = waitSendTransaction.isSuccess || !!error;
-
-  useEffect(() => {
-    if (showModal) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [showModal]);
+  const sendTransactionErrorMessage = sendTransaction.error
+    ? getTopUpTransactionErrorMessage(sendTransaction.error)
+    : undefined;
+  const receiptErrorMessage = waitSendTransaction.error
+    ? getTopUpTransactionErrorMessage(waitSendTransaction.error)
+    : undefined;
+  const transactionModal = getTopUpTransactionModalState({
+    localError: error,
+    sendIsPending: sendTransaction.isPending,
+    sendErrorMessage: sendTransactionErrorMessage,
+    receiptIsLoading: waitSendTransaction.isLoading,
+    receiptIsSuccess: waitSendTransaction.isSuccess,
+    receiptHasError:
+      waitSendTransaction.isError || receiptErrorMessage !== undefined,
+    receiptErrorMessage,
+  });
 
   const closeModal = useCallback(() => {
-    if (isClosable) {
+    if (transactionModal.closable) {
       sendTransaction.reset();
       setError("");
       setTopUpAmount(null);
+      setTopUpCardCount(null);
       setSelectedOption(null);
       setMemeCount("");
     }
-  }, [isClosable, sendTransaction]);
+  }, [transactionModal.closable, sendTransaction]);
 
-  useEffect(() => {
-    function handleEscape(e: KeyboardEvent) {
-      if (e.key === "Escape" && isClosable && showModal) {
-        closeModal();
-      }
-    }
-
-    if (!showModal) return;
-    globalThis.addEventListener("keydown", handleEscape);
-    return () => {
-      globalThis.removeEventListener("keydown", handleEscape);
-    };
-  }, [showModal, isClosable, closeModal]);
-
-  function getModalContent() {
-    if (error) {
-      return (
-        <div className="tw-text-center">
-          <p className="tw-mb-4 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-lg tw-font-medium tw-text-red">
-            <span>Error</span>
-            <img
-              src={getTopUpModalEmoji("error")}
-              alt=""
-              role="presentation"
-              className="tw-h-6 tw-w-6"
-            />
-          </p>
-          <p className="tw-mb-0 tw-text-iron-100">{error}</p>
-        </div>
-      );
-    }
-
-    if (sendTransaction.isPending) {
-      return (
-        <div className="tw-flex tw-items-center tw-justify-center tw-gap-2">
-          <img
-            src={getTopUpModalEmoji("confirm_wallet")}
-            alt=""
-            role="presentation"
-            className="tw-h-6 tw-w-6"
-          />
-          <p className="tw-mb-0 tw-text-lg tw-font-medium tw-text-iron-100">
-            Confirm in your wallet
-          </p>
-          <CircleLoader size={CircleLoaderSize.LARGE} />
-        </div>
-      );
-    }
-
-    if (waitSendTransaction.isLoading) {
-      return (
-        <div className="tw-text-center">
-          <p className="tw-mb-4 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-lg tw-font-medium tw-text-iron-100">
-            <img
-              src={getTopUpModalEmoji("submitted")}
-              alt=""
-              role="presentation"
-              className="tw-h-6 tw-w-6"
-            />
-            Transaction Submitted
-            {sendTransaction.data && (
-              <a
-                className="tw-rounded-md tw-bg-white tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-black"
-                href={getTransactionLink(
-                  SUBSCRIPTIONS_CHAIN.id,
-                  sendTransaction.data
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View Tx
-              </a>
-            )}
-          </p>
-          <p className="tw-mb-2 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-md tw-font-medium tw-text-iron-100">
-            Waiting for confirmation{" "}
-            <CircleLoader size={CircleLoaderSize.MEDIUM} />
-          </p>
-        </div>
-      );
-    }
-
-    if (waitSendTransaction.isSuccess) {
-      return (
-        <div className="tw-text-center">
-          <p className="tw-mb-0 tw-flex tw-items-center tw-justify-center tw-gap-2 tw-text-lg tw-font-medium tw-text-green">
-            <img
-              src={getTopUpModalEmoji("success")}
-              alt=""
-              role="presentation"
-              className="tw-h-6 tw-w-6"
-            />
-            Top Up Successful!
-            {sendTransaction.data && (
-              <a
-                className="tw-rounded-md tw-bg-white tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-black"
-                href={getTransactionLink(
-                  SUBSCRIPTIONS_CHAIN.id,
-                  sendTransaction.data
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View Tx
-              </a>
-            )}
-          </p>
-        </div>
-      );
-    }
-
-    return null;
+  let modalSubtitle: string | undefined;
+  if (topUpAmount !== null && topUpCardCount !== null) {
+    const modalSubtitleKey =
+      topUpCardCount === 1
+        ? "subscriptions.topUp.modalSubtitle.one"
+        : "subscriptions.topUp.modalSubtitle.many";
+    modalSubtitle = t(locale, modalSubtitleKey, {
+      amount: formatSubscriptionEth(locale, topUpAmount),
+      count: formatInteger(locale, topUpCardCount),
+    });
   }
 
   if (hideSubscriptions) {
@@ -321,21 +441,31 @@ export default function UserPageSubscriptionsTopUp() {
   }
 
   const isSending = sendTransaction.isPending || waitSendTransaction.isLoading;
-  const parsedMemeCount = Number.parseInt(memeCount, 10);
-  const isSendDisabled =
-    selectedOption === null ||
-    (selectedOption === "other" &&
-      (!memeCount || Number.isNaN(parsedMemeCount) || parsedMemeCount < 1));
+  const selectedAmount = selectedTopUp?.amountEth ?? null;
+  const isSendDisabled = selectedTopUp === null;
+  const submitLabel =
+    selectedAmount === null
+      ? t(locale, "subscriptions.topUp.chooseAmount")
+      : t(locale, "subscriptions.topUp.submit", {
+          amount: formatSubscriptionEth(locale, selectedAmount),
+        });
+  const selectCoverageTopUp = (option: "minimum" | "recommended"): void => {
+    setSelectedOption(option);
+    setMemeCount("");
+    setError("");
+  };
 
   const iOsContent = mounted ? (
-    <Link
+    <ButtonLink
       href={window.location.href}
-      className="tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-300 tw-bg-iron-100 tw-px-3 tw-py-2 tw-font-semibold tw-text-iron-950 tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+      variant="primary"
+      size="lg"
+      fullWidth
       target="_blank"
       rel="noopener noreferrer"
     >
       Top-up on 6529.io
-    </Link>
+    </ButtonLink>
   ) : null;
 
   const printRemainingMints = (
@@ -350,7 +480,7 @@ export default function UserPageSubscriptionsTopUp() {
           <CardCountOption
             id={`subscription-top-up-${optionId}`}
             count={count}
-            display={`Remaining ${label} ${value.toLocaleString()}`}
+            display={`Remaining ${label} ${formatInteger(locale, value)}`}
             selected={selectedOption === optionId}
             onSelect={() => {
               setSelectedOption(optionId);
@@ -363,9 +493,13 @@ export default function UserPageSubscriptionsTopUp() {
     }
     return null;
   };
-
   const topUpContent = (
     <>
+      <CoverageTopUpOptions
+        coverage={coverage}
+        selectedOption={selectedOption}
+        onSelect={selectCoverageTopUp}
+      />
       <div className={TOP_UP_OPTION_GRID_CLASS}>
         <div>
           <CardCountOption
@@ -461,7 +595,14 @@ export default function UserPageSubscriptionsTopUp() {
                   {!Number.isNaN(Number.parseInt(memeCount, 10)) &&
                     Number.parseInt(memeCount, 10) > 0 && (
                       <>
-                        ({getEthForCards(Number.parseInt(memeCount, 10))} ETH)
+                        (
+                        {t(locale, "subscriptions.coverage.balanceEth", {
+                          amount: formatSubscriptionEth(
+                            locale,
+                            getEthForCards(Number.parseInt(memeCount, 10))
+                          ),
+                        })}
+                        )
                       </>
                     )}
                 </span>
@@ -470,16 +611,19 @@ export default function UserPageSubscriptionsTopUp() {
           </div>
         </div>
         <div className="tw-flex tw-items-center tw-justify-end sm:tw-flex-shrink-0">
-          <PrimaryButton
+          <Button
+            variant="primary"
+            size="lg"
             loading={isSending}
             disabled={isSendDisabled}
-            onClicked={handleSend}
-            ariaLabel="Send top up"
-            className="tw-min-h-11 tw-w-full sm:tw-w-auto"
+            onClick={handleSend}
+            aria-label={submitLabel}
+            fullWidth
+            className="sm:tw-w-auto"
           >
             <BoltIcon className="tw-size-4" aria-hidden="true" />
-            Send
-          </PrimaryButton>
+            {submitLabel}
+          </Button>
         </div>
       </div>
     </>
@@ -489,11 +633,11 @@ export default function UserPageSubscriptionsTopUp() {
     <>
       <UserPageSubscriptionsSection
         id="profile-subscriptions-top-up"
-        title="Top Up"
-        className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-pb-4 tw-pt-8"
+        title={t(locale, "subscriptions.page.topUpTitle")}
+        className="tw-scroll-mt-24 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-pb-4 tw-pt-8"
         action={
           <span className="tw-inline-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-0.5 tw-rounded-full tw-bg-iron-900/60 tw-px-2.5 tw-py-1 tw-text-xs tw-leading-4 tw-text-iron-500 tw-ring-1 tw-ring-white/10">
-            <span>Sending to</span>
+            <span>{t(locale, "subscriptions.topUp.sendingTo")}</span>
             <span
               className="tw-break-all tw-text-iron-300"
               data-tooltip-id="subscription-address"
@@ -515,60 +659,17 @@ export default function UserPageSubscriptionsTopUp() {
       >
         {isIos ? iOsContent : topUpContent}
       </UserPageSubscriptionsSection>
-      {mounted &&
-        createPortal(
-          <AnimatePresence>
-            {showModal && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="tw-fixed tw-inset-0 tw-z-[9999] tw-flex tw-items-center tw-justify-center tw-bg-gray-600 tw-bg-opacity-50 tw-px-4 tw-backdrop-blur-[1px]"
-                onClick={isClosable ? closeModal : undefined}
-              >
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                  className="tw-relative tw-w-full tw-max-w-md tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-2xl"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-iron-800 tw-pb-3">
-                    <div>
-                      <h2 className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-white">
-                        Top up
-                      </h2>
-                      {topUpAmount !== null && (
-                        <p className="tw-mt-1 tw-text-sm tw-text-iron-400">
-                          {(topUpAmount / MEMES_MINT_PRICE).toLocaleString()}{" "}
-                          Cards -{" "}
-                          {numberWithCommasFromString(topUpAmount.toString())}{" "}
-                          ETH
-                        </p>
-                      )}
-                    </div>
-                    {isClosable && (
-                      <button
-                        onClick={closeModal}
-                        className="-tw-mt-0.5 tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-400"
-                        aria-label="Close modal"
-                      >
-                        <FontAwesomeIcon
-                          icon={faXmark}
-                          className="tw-size-5 tw-flex-shrink-0"
-                        />
-                      </button>
-                    )}
-                  </div>
-                  <div className="tw-flex tw-min-h-[120px] tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-800 tw-p-2">
-                    {getModalContent()}
-                  </div>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>,
-          document.body
-        )}
+      {mounted && transactionModal.status ? (
+        <OnchainTransactionModal
+          status={transactionModal.status}
+          title="Top up"
+          subtitle={modalSubtitle}
+          message={transactionModal.message}
+          transactionHash={sendTransaction.data}
+          chain={SUBSCRIPTIONS_CHAIN}
+          onClose={closeModal}
+        />
+      ) : null}
     </>
   );
 }
@@ -577,24 +678,38 @@ function CardCountOption(
   props: Readonly<{
     id: string;
     count: number;
+    amountEth?: string | undefined;
+    badge?: string | undefined;
+    description?: string | undefined;
     display?: string | undefined;
+    featured?: boolean | undefined;
     selected: boolean;
     onSelect: () => void;
   }>
 ) {
-  const cardLabel = props.count > 1 ? "Cards" : "Card";
-  const labelText = props.display
-    ? `${props.display} - ${props.count.toLocaleString()} Cards`
-    : `${props.count.toLocaleString()} ${cardLabel}`;
+  const locale = useBrowserLocale();
+  const cardCountLabel = getCardCountLabel(locale, props.count);
+  const displayLabel = props.badge ?? props.display;
+  const cardOptionMessageKey =
+    props.count === 1
+      ? "subscriptions.topUp.cardOption.one"
+      : "subscriptions.topUp.cardOption.many";
+  const labelText = displayLabel
+    ? t(locale, cardOptionMessageKey, {
+        count: formatInteger(locale, props.count),
+        label: displayLabel,
+      })
+    : cardCountLabel;
+  const amountEth = props.amountEth ?? getEthForCards(props.count);
+  const optionStateClass = getTopUpOptionStateClass(
+    props.selected,
+    props.featured === true
+  );
 
   return (
     <label
       htmlFor={props.id}
-      className={`${TOP_UP_OPTION_CLASS} ${
-        props.selected
-          ? "tw-bg-iron-900 tw-ring-white/[0.05]"
-          : "tw-bg-iron-950 tw-ring-white/[0.03]"
-      } tw-block tw-min-h-[122px] tw-cursor-pointer`}
+      className={`${TOP_UP_OPTION_CLASS} ${optionStateClass} tw-block tw-min-h-[122px] tw-cursor-pointer`}
     >
       <span className="tw-absolute tw-right-4 tw-top-4 tw-flex">
         <input
@@ -614,25 +729,32 @@ function CardCountOption(
         />
       </span>
       <div className="tw-flex tw-min-h-[90px] tw-min-w-0 tw-flex-col tw-justify-between tw-pr-8">
-        {props.display && (
+        {displayLabel && (
           <span
             className={`tw-text-xs tw-font-medium tw-leading-4 ${
               props.selected ? "tw-text-primary-300" : "tw-text-iron-500"
             }`}
           >
-            {props.display}
+            {displayLabel}
           </span>
         )}
         <div className="tw-mt-auto tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
           <span className="tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100">
-            {props.count.toLocaleString()} Card{props.count > 1 && "s"}
+            {cardCountLabel}
           </span>
           <span className="tw-flex tw-items-center tw-gap-1.5">
             <span className="tw-text-sm tw-leading-5 tw-text-iron-400">
-              {numberWithCommasFromString(getEthForCards(props.count))}
+              {formatSubscriptionEth(locale, amountEth)}
             </span>
-            <span className="tw-text-xs tw-text-iron-600">ETH</span>
+            <span className="tw-text-xs tw-text-iron-600">
+              {t(locale, "subscriptions.balance.ethUnit")}
+            </span>
           </span>
+          {props.description ? (
+            <span className="tw-mt-1 tw-text-xs tw-leading-4 tw-text-iron-500">
+              {props.description}
+            </span>
+          ) : null}
         </div>
       </div>
     </label>

@@ -50,10 +50,7 @@ jest.mock("@/components/nextGen/collections/NextGenNavigationHeader", () => {
   return {
     __esModule: true,
     default: ({ view, setView }: any) => (
-      <button
-        data-testid="nav"
-        onClick={() => setView(NextgenView.ARTISTS)}
-      >
+      <button data-testid="nav" onClick={() => setView(NextgenView.ARTISTS)}>
         {view}
       </button>
     ),
@@ -87,7 +84,7 @@ describe("generateMetadata", () => {
     const md = await generateMetadata({
       params: Promise.resolve({ view: ["artists"] }),
     } as any);
-    expect(md).toMatchObject({ title: "NextGen Artists" });
+    expect(md).toMatchObject({ title: "Artists | NextGen" });
   });
 });
 
@@ -101,6 +98,7 @@ describe("NextGen page component", () => {
     mockedFetch.mockReset().mockResolvedValue(createFeaturedCollection());
     useRouterMock.mockReturnValue({ push });
     useParamsMock.mockReturnValue({ view: undefined }); // landing (no view)
+    window.history.replaceState({}, "", "/nextgen");
     pushStateSpy = jest
       .spyOn(window.history, "pushState")
       .mockImplementation(() => {});
@@ -138,6 +136,39 @@ describe("NextGen page component", () => {
     );
   });
 
+  it("restores an enum-cased view from popstate history", async () => {
+    const jsx = await NextGenPage({
+      params: Promise.resolve({ view: undefined }),
+    } as any);
+
+    render(jsx);
+
+    const nav = await screen.findByTestId("nav");
+    expect(nav).toBeEmptyDOMElement();
+
+    fireEvent.popState(window, {
+      state: { view: NextgenView.COLLECTIONS },
+    });
+
+    expect(nav).toHaveTextContent(NextgenView.COLLECTIONS);
+  });
+
+  it("restores a lowercased view from the pathname without history state", async () => {
+    const jsx = await NextGenPage({
+      params: Promise.resolve({ view: undefined }),
+    } as any);
+
+    render(jsx);
+
+    const nav = await screen.findByTestId("nav");
+    expect(nav).toBeEmptyDOMElement();
+
+    window.history.replaceState({}, "", "/nextgen/artists");
+    fireEvent.popState(window, { state: null });
+
+    expect(nav).toHaveTextContent(NextgenView.ARTISTS);
+  });
+
   it("shows placeholder when collection missing", async () => {
     mockedFetch.mockResolvedValueOnce(null); // no featured collection
 
@@ -148,7 +179,9 @@ describe("NextGen page component", () => {
     render(jsx);
 
     await waitFor(() =>
-      expect(screen.getByAltText("questionmark")).toBeInTheDocument()
+      expect(
+        screen.getByAltText("NextGen collection unavailable")
+      ).toBeInTheDocument()
     );
   });
 });

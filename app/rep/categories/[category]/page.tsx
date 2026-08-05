@@ -22,7 +22,7 @@ export default async function GlobalRepCategoryPage({ params }: Props) {
   const category = decodeRepCategoryParam(rawCategory);
 
   return (
-    <main className="tailwind-scope tw-min-h-screen tw-bg-[#050506] tw-px-4 tw-py-6 sm:tw-px-6 lg:tw-px-8">
+    <main className="tailwind-scope tw-min-h-screen tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-[#050506] tw-px-4 tw-py-6 sm:tw-px-6 lg:tw-px-8">
       <div className="tw-mx-auto tw-w-full tw-max-w-7xl">
         <GlobalRepCategoryDetail
           category={category}

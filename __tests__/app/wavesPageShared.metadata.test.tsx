@@ -16,6 +16,16 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
 }));
 
+jest.mock("@/app/waves/wave-feed-seed.server", () => ({
+  fetchServerWaveFeedSeed: jest.fn(),
+}));
+
+jest.mock("@/components/waves/WaveServerFeedSeed", () => ({
+  __esModule: true,
+  default: () => null,
+  WaveServerFeedSeedGate: ({ children }: any) => children,
+}));
+
 jest.mock("@/app/waves/page.client", () => ({
   __esModule: true,
   default: () => <div data-testid="waves-page-client" />,

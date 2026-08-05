@@ -1,0 +1,326 @@
+"use client";
+
+import {
+  Dialog,
+  DialogBackdrop,
+  DialogPanel,
+  DialogTitle,
+} from "@headlessui/react";
+import {
+  ChatBubbleLeftRightIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
+import { createPortal } from "react-dom";
+import {
+  createContext,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
+
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+
+const COMMENT_PANEL_ID = "public-review-feedback";
+const COMMENT_PANEL_HEADING_ID = "public-review-feedback-heading";
+const COMMENT_PANEL_INLINE_MIN_WIDTH = 760;
+const COMMENT_PANEL_STORAGE_KEY = "public-review-comment-panel-open";
+const COMMENT_PANEL_PREFERENCE_EVENT = "public-review-comment-panel-preference";
+const PublicReviewCommentPanelOpenContext = createContext(true);
+let inMemoryPanelPreference: boolean | null = null;
+
+export function usePublicReviewCommentPanelOpen(): boolean {
+  return useContext(PublicReviewCommentPanelOpenContext);
+}
+
+function getPanelPreferenceSnapshot(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  try {
+    const storedPreference = window.localStorage.getItem(
+      COMMENT_PANEL_STORAGE_KEY
+    );
+    if (storedPreference !== null) {
+      return storedPreference === "true";
+    }
+  } catch {
+    // Storage can be unavailable in privacy-restricted browser contexts.
+  }
+  if (inMemoryPanelPreference !== null) {
+    return inMemoryPanelPreference;
+  }
+  return false;
+}
+
+function subscribeToPanelPreference(onStoreChange: () => void): () => void {
+  const handleStorage = (event: StorageEvent): void => {
+    if (event.key === COMMENT_PANEL_STORAGE_KEY) {
+      onStoreChange();
+    }
+  };
+
+  window.addEventListener("storage", handleStorage);
+  window.addEventListener(COMMENT_PANEL_PREFERENCE_EVENT, onStoreChange);
+  return () => {
+    window.removeEventListener("storage", handleStorage);
+    window.removeEventListener(COMMENT_PANEL_PREFERENCE_EVENT, onStoreChange);
+  };
+}
+
+function updatePanelPreference(isOpen: boolean): void {
+  inMemoryPanelPreference = isOpen;
+  try {
+    window.localStorage.setItem(COMMENT_PANEL_STORAGE_KEY, String(isOpen));
+  } catch {
+    // Keep the in-memory preference when storage is unavailable.
+  }
+  window.dispatchEvent(new Event(COMMENT_PANEL_PREFERENCE_EVENT));
+}
+
+export function PublicReviewReadingLayout({
+  content,
+  feedbackAvailable,
+  panel,
+  toolbar,
+}: {
+  readonly content: ReactNode;
+  readonly feedbackAvailable: boolean;
+  readonly panel: ReactNode;
+  readonly toolbar: ReactNode;
+}) {
+  const isPanelOpen = useSyncExternalStore(
+    subscribeToPanelPreference,
+    getPanelPreferenceSnapshot,
+    () => false
+  );
+  const [focusRequest, setFocusRequest] = useState(0);
+  const [isOverlayLayout, setIsOverlayLayout] = useState<boolean | null>(null);
+  const handledFocusRequestRef = useRef(0);
+  const layoutRef = useRef<HTMLElement>(null);
+
+  const closePanel = (): void => {
+    updatePanelPreference(false);
+  };
+
+  useLayoutEffect(() => {
+    const layoutElement = layoutRef.current;
+    if (!layoutElement) {
+      return;
+    }
+    const updateLayout = () => {
+      setIsOverlayLayout(
+        layoutElement.getBoundingClientRect().width <
+          COMMENT_PANEL_INLINE_MIN_WIDTH
+      );
+    };
+    updateLayout();
+    const resizeObserver =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(updateLayout);
+    resizeObserver?.observe(layoutElement);
+    globalThis.addEventListener("resize", updateLayout);
+
+    return () => {
+      resizeObserver?.disconnect();
+      globalThis.removeEventListener("resize", updateLayout);
+    };
+  }, [feedbackAvailable]);
+
+  useLayoutEffect(() => {
+    if (
+      !feedbackAvailable ||
+      !isPanelOpen ||
+      isOverlayLayout === null ||
+      focusRequest === handledFocusRequestRef.current
+    ) {
+      return;
+    }
+
+    const panelElement = document.getElementById(COMMENT_PANEL_ID);
+    if (!panelElement) {
+      return;
+    }
+    handledFocusRequestRef.current = focusRequest;
+    panelElement.focus({ preventScroll: true });
+    const prefersReducedMotion =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!isOverlayLayout) {
+      panelElement.scrollIntoView({
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+        block: "start",
+      });
+    }
+  }, [feedbackAvailable, focusRequest, isOverlayLayout, isPanelOpen]);
+
+  useEffect(() => {
+    if (!feedbackAvailable) {
+      return;
+    }
+
+    const revealHashTarget = (): void => {
+      if (window.location.hash !== `#${COMMENT_PANEL_ID}`) {
+        return;
+      }
+      setFocusRequest((request) => request + 1);
+      updatePanelPreference(true);
+    };
+
+    const revealTimer = window.setTimeout(revealHashTarget, 0);
+    window.addEventListener("hashchange", revealHashTarget);
+    return () => {
+      window.clearTimeout(revealTimer);
+      window.removeEventListener("hashchange", revealHashTarget);
+    };
+  }, [feedbackAvailable]);
+
+  if (!feedbackAvailable) {
+    return (
+      <section className="tw-min-w-0">
+        <div className="tw-sticky tw-top-0 tw-z-30 tw-flex tw-min-h-16 tw-items-center tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.07] tw-bg-[#0D0D0F]/95 tw-px-4 tw-backdrop-blur-xl sm:tw-px-7 lg:tw-px-10">
+          {toolbar}
+        </div>
+        {content}
+      </section>
+    );
+  }
+
+  const panelContents = (showCloseButton: boolean) => (
+    <PublicReviewCommentPanelOpenContext.Provider value={isPanelOpen}>
+      <div className="tw-flex tw-h-full tw-min-h-0 tw-flex-col tw-bg-iron-950">
+        <header className="tw-flex tw-min-h-16 tw-flex-none tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-px-5">
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2.5">
+            <ChatBubbleLeftRightIcon
+              className="tw-size-4 tw-flex-none tw-text-iron-400"
+              aria-hidden="true"
+            />
+            {showCloseButton ? (
+              <DialogTitle
+                as="h2"
+                id={COMMENT_PANEL_HEADING_ID}
+                className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-200"
+              >
+                {t(DEFAULT_LOCALE, "publicReview.comments.title")}
+              </DialogTitle>
+            ) : (
+              <h2
+                id={COMMENT_PANEL_HEADING_ID}
+                className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-200"
+              >
+                {t(DEFAULT_LOCALE, "publicReview.comments.title")}
+              </h2>
+            )}
+          </div>
+          {showCloseButton ? (
+            <button
+              aria-label={t(DEFAULT_LOCALE, "publicReview.comments.hide")}
+              className="tw-inline-flex tw-size-10 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/[0.05] desktop-hover:hover:tw-text-white"
+              onClick={closePanel}
+              type="button"
+            >
+              <XMarkIcon aria-hidden="true" className="tw-size-5" />
+            </button>
+          ) : null}
+        </header>
+        <div className="tw-min-h-0 tw-flex-1 tw-overflow-hidden [&>*]:tw-h-full">
+          {panel}
+        </div>
+      </div>
+    </PublicReviewCommentPanelOpenContext.Provider>
+  );
+
+  const overlayIsOpen = isOverlayLayout === true && isPanelOpen;
+  const inlinePanelIsVisible = isOverlayLayout === false && isPanelOpen;
+  const overlayPanel =
+    overlayIsOpen && typeof document !== "undefined"
+      ? createPortal(
+          <Dialog
+            className="tailwind-scope tw-relative tw-z-[1000]"
+            onClose={closePanel}
+            open
+          >
+            <DialogBackdrop className="tw-fixed tw-inset-0 tw-bg-black/55" />
+            <div className="tw-fixed tw-inset-0 tw-flex tw-justify-end tw-overflow-hidden">
+              <DialogPanel
+                className="tw-relative tw-h-[100dvh] tw-w-96 tw-max-w-[calc(100vw-1rem)] tw-border-y-0 tw-border-b-0 tw-border-l tw-border-r-0 tw-border-solid tw-border-white/[0.1] tw-bg-iron-950 tw-shadow-2xl tw-shadow-black/60"
+                id={COMMENT_PANEL_ID}
+                tabIndex={-1}
+              >
+                {panelContents(true)}
+              </DialogPanel>
+            </div>
+          </Dialog>,
+          document.body
+        )
+      : null;
+
+  return (
+    <section className="tw-min-w-0 tw-@container" ref={layoutRef}>
+      <div className="tw-sticky tw-top-0 tw-z-30 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.07] tw-bg-[#0D0D0F]/95 tw-backdrop-blur-xl">
+        <div className="tw-flex tw-min-h-16 tw-items-center tw-justify-between tw-gap-4 tw-px-4 sm:tw-px-7 lg:tw-px-10">
+          {toolbar}
+          <button
+            aria-controls={COMMENT_PANEL_ID}
+            aria-expanded={isPanelOpen}
+            className="tw-group/feedback-toggle tw-inline-flex tw-min-h-11 tw-flex-none tw-items-center tw-gap-2 tw-border-0 tw-bg-transparent tw-px-0 tw-text-xs tw-font-semibold tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-white"
+            onClick={() =>
+              isPanelOpen ? closePanel() : updatePanelPreference(true)
+            }
+            type="button"
+          >
+            {isPanelOpen ? (
+              <XMarkIcon
+                className="tw-size-4 tw-transition-colors group-hover/feedback-toggle:tw-text-primary-300"
+                aria-hidden="true"
+              />
+            ) : (
+              <ChatBubbleLeftRightIcon
+                className="tw-size-4 tw-transition-colors group-hover/feedback-toggle:tw-text-primary-300"
+                aria-hidden="true"
+              />
+            )}
+            <span className="tw-transition-colors group-hover/feedback-toggle:tw-text-primary-300">
+              {t(
+                DEFAULT_LOCALE,
+                isPanelOpen
+                  ? "publicReview.comments.hide"
+                  : "publicReview.comments.show"
+              )}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div
+        className={`tw-grid tw-min-w-0 ${
+          isPanelOpen ? "@[760px]:tw-grid-cols-[minmax(0,1fr)_20rem]" : ""
+        }`}
+      >
+        <div className="tw-order-2 tw-min-w-0 @[760px]:tw-order-1">
+          {content}
+        </div>
+
+        {overlayIsOpen ? null : (
+          <aside
+            id={COMMENT_PANEL_ID}
+            aria-labelledby={COMMENT_PANEL_HEADING_ID}
+            className={`tw-order-1 tw-scroll-mt-20 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400 @[760px]:tw-sticky @[760px]:tw-top-16 @[760px]:tw-order-2 @[760px]:tw-h-[calc(100dvh-4rem)] @[760px]:tw-overflow-hidden @[760px]:tw-border-b-0 @[760px]:tw-border-l ${
+              inlinePanelIsVisible ? "tw-block" : "tw-hidden"
+            }`}
+            hidden={!inlinePanelIsVisible}
+            tabIndex={-1}
+          >
+            {panelContents(false)}
+          </aside>
+        )}
+      </div>
+      {overlayPanel}
+    </section>
+  );
+}

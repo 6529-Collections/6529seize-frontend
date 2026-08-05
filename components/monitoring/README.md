@@ -53,7 +53,11 @@ The AWS RUM service will automatically create:
   service traffic, Google Analytics collect, Coinbase telemetry, Mixpanel
   track/engage, and WalletConnect RPC/identity requests are excluded from HTTP
   telemetry. The provider's `urlsToExclude` list is the source of truth for the
-  exact URL patterns.
+  exact URL patterns. The provider uses the SDK's official fetch and XHR
+  plugins behind a narrow record filter that drops only `AbortError`,
+  `signal is aborted without reason`, and `Fetch is aborted` cancellation
+  failures. Successful responses, non-2xx responses, timeouts, and other
+  network failures remain visible.
 - Custom-event ownership and compatibility status are catalogued in
   `ops/telemetry/registry.json`.
 

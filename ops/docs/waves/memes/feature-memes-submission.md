@@ -42,9 +42,9 @@ reached), select the header restriction control to see the reason, then use
   the restriction control for the full reason and use
   [Wave Leaderboard Drop Entry and Eligibility](../leaderboard/feature-drop-entry-and-eligibility.md)
   for the gating states.
-- On The Memes Main Stage, the desktop `How to Submit` state shows live
-  MemesNominee REP progress and a `Get nominated` action. The native app lock
-  shows the same current REP requirement in its restriction details.
+- On The Memes Main Stage, the desktop `How to Submit` state and the native app
+  lock both open `Unlock submissions`, with live MemesNominee REP progress and
+  a `Get nominated` action.
 
 ## User Journey
 

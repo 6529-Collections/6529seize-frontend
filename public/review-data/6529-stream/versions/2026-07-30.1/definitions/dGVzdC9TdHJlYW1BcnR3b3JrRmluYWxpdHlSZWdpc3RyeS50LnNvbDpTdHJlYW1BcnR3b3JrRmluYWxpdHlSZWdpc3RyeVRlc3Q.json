@@ -1,0 +1,3374 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#event:ArtworkScopeFinalized(uint16,uint8,uint256,bytes32,uint256,bytes32,bytes32,bytes32,string)",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint8",
+              "name": "scopeType",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "finalityRecordHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "scopeId",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "componentsHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "manifestContentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "internalType": "string",
+              "name": "finalityManifestURI",
+              "type": "string"
+            }
+          ],
+          "name": "ArtworkScopeFinalized",
+          "signature": "ArtworkScopeFinalized(uint16,uint8,uint256,bytes32,uint256,bytes32,bytes32,bytes32,string)",
+          "topic0": "0xdb00af932194f18a6e8271fc236e9a6750bdaeffffa39d1befb886ab2d626cbd"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#event:ArtworkTerminalFreezeExecuted(uint16,bytes32,bytes32,address)",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "scopeKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "finalityRecordHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "executor",
+              "type": "address"
+            }
+          ],
+          "name": "ArtworkTerminalFreezeExecuted",
+          "signature": "ArtworkTerminalFreezeExecuted(uint16,bytes32,bytes32,address)",
+          "topic0": "0x033accc2758781ce7c38966f1ef2e13422f6b313f4612827bbff7348d86118b4"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#event:CollectionArtworkFinalized(uint16,uint256,bytes32,address,bytes32,bytes32,string)",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "finalityRecordHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "internalType": "address",
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "componentsHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "manifestContentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "string",
+              "name": "finalityManifestURI",
+              "type": "string"
+            }
+          ],
+          "name": "CollectionArtworkFinalized",
+          "signature": "CollectionArtworkFinalized(uint16,uint256,bytes32,address,bytes32,bytes32,string)",
+          "topic0": "0x7f1457ace03f21997598970165d871fdc3bee66222ab211f05fdab7a01a86e99"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#event:FinalityManifestPointerRecorded(uint16,bytes32,address,bytes32)",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "finalityRecordHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "internalType": "address",
+              "name": "manifestPointer",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "manifestContentHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "FinalityManifestPointerRecorded",
+          "signature": "FinalityManifestPointerRecorded(uint16,bytes32,address,bytes32)",
+          "topic0": "0x7ee7dab9cda0dfcaa516e7de46426c0c34c4faebc512f00b459dcbc8cd3c81aa"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#event:FinalityManifestStaged(uint16,bytes32,uint256,address)",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "manifestContentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "byteLength",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "address",
+              "name": "actor",
+              "type": "address"
+            }
+          ],
+          "name": "FinalityManifestStaged",
+          "signature": "FinalityManifestStaged(uint16,bytes32,uint256,address)",
+          "topic0": "0x7abed506dd35947307ec9412248b54ebcdc1447c99f6fb43cbc937547a5582d5"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "test/helpers/FinalityTestBase.sol:FinalityTestBase#function:0x0a9254e4",
+          "declaringDefinitionId": "test/helpers/FinalityTestBase.sol:FinalityTestBase",
+          "inherited": true,
+          "inputs": [],
+          "name": "setUp",
+          "outputs": [],
+          "selector": "0x0a9254e4",
+          "signature": "setUp()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x2c17545f",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCalldataCapBlocksOversizedSubmissions",
+          "outputs": [],
+          "selector": "0x2c17545f",
+          "signature": "testCalldataCapBlocksOversizedSubmissions()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xf1d30a2c",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCollectionGatesExistenceClosedBurnBlockAndFreeze",
+          "outputs": [],
+          "selector": "0xf1d30a2c",
+          "signature": "testCollectionGatesExistenceClosedBurnBlockAndFreeze()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xb075b563",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCollectionLifecycleArtistBound",
+          "outputs": [],
+          "selector": "0xb075b563",
+          "signature": "testCollectionLifecycleArtistBound()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xd494d7b2",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCollectionLifecyclePlatformWorks",
+          "outputs": [],
+          "selector": "0xd494d7b2",
+          "signature": "testCollectionLifecyclePlatformWorks()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xc50203aa",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCollectionMintedSupplyAboveUint64FailsClosedWithoutDowncast",
+          "outputs": [],
+          "selector": "0xc50203aa",
+          "signature": "testCollectionMintedSupplyAboveUint64FailsClosedWithoutDowncast()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x1a177262",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testCollectionStatusAndSupplyModeDomainsFailClosed",
+          "outputs": [],
+          "selector": "0x1a177262",
+          "signature": "testCollectionStatusAndSupplyModeDomainsFailClosed()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x01533af6",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testComponentListShapeGates",
+          "outputs": [],
+          "selector": "0x01533af6",
+          "signature": "testComponentListShapeGates()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x2c527dfc",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testComponentReadBombsFailClosedAcrossStrictPreviewAndDiagnostics",
+          "outputs": [],
+          "selector": "0x2c527dfc",
+          "signature": "testComponentReadBombsFailClosedAcrossStrictPreviewAndDiagnostics()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xaf381ad2",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testConstructorBindsActualCoreMetadataAdapterAndMandatoryDiscovery",
+          "outputs": [],
+          "selector": "0xaf381ad2",
+          "signature": "testConstructorBindsActualCoreMetadataAdapterAndMandatoryDiscovery()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xe568fa97",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testConstructorRejectsAdapterCoreBindingMismatch",
+          "outputs": [],
+          "selector": "0xe568fa97",
+          "signature": "testConstructorRejectsAdapterCoreBindingMismatch()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x4bfe1d83",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testConstructorRejectsAdapterMetadataBindingMismatch",
+          "outputs": [],
+          "selector": "0x4bfe1d83",
+          "signature": "testConstructorRejectsAdapterMetadataBindingMismatch()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xd8e8c1c2",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testConstructorRejectsCodelessMandatoryDiscovery",
+          "outputs": [],
+          "selector": "0xd8e8c1c2",
+          "signature": "testConstructorRejectsCodelessMandatoryDiscovery()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xf8ea4927",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testConstructorRejectsLegacyNoncanonicalAndSemanticAdapterPayloads",
+          "outputs": [],
+          "selector": "0xf8ea4927",
+          "signature": "testConstructorRejectsLegacyNoncanonicalAndSemanticAdapterPayloads()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xe6b60eb2",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testConstructorRejectsNonAdapterContract",
+          "outputs": [],
+          "selector": "0xe6b60eb2",
+          "signature": "testConstructorRejectsNonAdapterContract()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x83489606",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testConstructorRejectsNoncanonicalAddressReturn",
+          "outputs": [],
+          "selector": "0x83489606",
+          "signature": "testConstructorRejectsNoncanonicalAddressReturn()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x31784a96",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testConstructorRejectsOversizedInterfaceAndAddressReturns",
+          "outputs": [],
+          "selector": "0x31784a96",
+          "signature": "testConstructorRejectsOversizedInterfaceAndAddressReturns()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xb6096d01",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testConstructorRejectsZeroMandatoryDiscovery",
+          "outputs": [],
+          "selector": "0xb6096d01",
+          "signature": "testConstructorRejectsZeroMandatoryDiscovery()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xb575fb68",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testConstructorRequiresCanonicalERC165InvalidInterfaceResponse",
+          "outputs": [],
+          "selector": "0xb575fb68",
+          "signature": "testConstructorRequiresCanonicalERC165InvalidInterfaceResponse()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xba95bb5a",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testContentRootGates",
+          "outputs": [],
+          "selector": "0xba95bb5a",
+          "signature": "testContentRootGates()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xbea786b5",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testDiscoveryComponentAtExact224ByteReturnPassesExecutionAndPreview",
+          "outputs": [],
+          "selector": "0xbea786b5",
+          "signature": "testDiscoveryComponentAtExact224ByteReturnPassesExecutionAndPreview()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xd5aac0b5",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testDiscoveryComponentAtFailuresRejectExecutionAndFailClosedInPreview",
+          "outputs": [],
+          "selector": "0xd5aac0b5",
+          "signature": "testDiscoveryComponentAtFailuresRejectExecutionAndFailClosedInPreview()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xb7d98059",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testDiscoveryFactFailuresRejectExecutionAndFailClosedInPreview",
+          "outputs": [],
+          "selector": "0xb7d98059",
+          "signature": "testDiscoveryFactFailuresRejectExecutionAndFailClosedInPreview()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x17b34536",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testExpectedRecordHashMismatchBlocks",
+          "outputs": [],
+          "selector": "0x17b34536",
+          "signature": "testExpectedRecordHashMismatchBlocks()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xdc5affb9",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testFinalizeRequiresFinalityAdmin",
+          "outputs": [],
+          "selector": "0xdc5affb9",
+          "signature": "testFinalizeRequiresFinalityAdmin()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x307427f4",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testLiveComponentVerificationGates",
+          "outputs": [],
+          "selector": "0x307427f4",
+          "signature": "testLiveComponentVerificationGates()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x8dbaf76a",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testMandatoryDiscoveryGate",
+          "outputs": [],
+          "selector": "0x8dbaf76a",
+          "signature": "testMandatoryDiscoveryGate()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x3aa8f931",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testManifestGates",
+          "outputs": [],
+          "selector": "0x3aa8f931",
+          "signature": "testManifestGates()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x1ef02bbd",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testManifestStagingContentAddressedAndBounded",
+          "outputs": [],
+          "selector": "0x1ef02bbd",
+          "signature": "testManifestStagingContentAddressedAndBounded()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xe5f3fb3e",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPreviewParityAcrossGates",
+          "outputs": [],
+          "selector": "0xe5f3fb3e",
+          "signature": "testPreviewParityAcrossGates()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x929b9576",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPreviewStagedFreezeMirrorsGuardianGate",
+          "outputs": [],
+          "selector": "0x929b9576",
+          "signature": "testPreviewStagedFreezeMirrorsGuardianGate()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xfb718dd8",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testReleaseSeasonViewScopeLifecycles",
+          "outputs": [],
+          "selector": "0xfb718dd8",
+          "signature": "testReleaseSeasonViewScopeLifecycles()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xdf564853",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSanctionComponentGates",
+          "outputs": [],
+          "selector": "0xdf564853",
+          "signature": "testSanctionComponentGates()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x70fe16e5",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testScopedCollectionStatusAndSupplyModeDomainsMatchExecutionAndPreview",
+          "outputs": [],
+          "selector": "0x70fe16e5",
+          "signature": "testScopedCollectionStatusAndSupplyModeDomainsMatchExecutionAndPreview()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x98240910",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testScopedDiagnosticsUseScopedReads",
+          "outputs": [],
+          "selector": "0x98240910",
+          "signature": "testScopedDiagnosticsUseScopedReads()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x3bc5a599",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testScopedDiscoveryComponentAtFailuresFailClosedInDiagnosticsAndPreview",
+          "outputs": [],
+          "selector": "0x3bc5a599",
+          "signature": "testScopedDiscoveryComponentAtFailuresFailClosedInDiagnosticsAndPreview()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x58336b93",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testScopedDiscoveryReadFailuresRejectExecutionAndFailClosedInPreview",
+          "outputs": [],
+          "selector": "0x58336b93",
+          "signature": "testScopedDiscoveryReadFailuresRejectExecutionAndFailClosedInPreview()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x600f67b5",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testScopedEntryRejectsCollectionScopeAndBadShapes",
+          "outputs": [],
+          "selector": "0x600f67b5",
+          "signature": "testScopedEntryRejectsCollectionScopeAndBadShapes()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xdb201786",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testScopedGatesCollectionExistenceAndTokenLifecycle",
+          "outputs": [],
+          "selector": "0xdb201786",
+          "signature": "testScopedGatesCollectionExistenceAndTokenLifecycle()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xd0de7314",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testScopedPreviewMatchesScopedExecution",
+          "outputs": [],
+          "selector": "0xd0de7314",
+          "signature": "testScopedPreviewMatchesScopedExecution()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xcc8912f9",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSlowComponentReadPassesStrictAndPreviewButExceedsDiagnosticBudget",
+          "outputs": [],
+          "selector": "0xcc8912f9",
+          "signature": "testSlowComponentReadPassesStrictAndPreviewButExceedsDiagnosticBudget()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xddbd43b2",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSlowDiscoveryReadsPassStrictAndPreviewButExceedDiagnosticBudget",
+          "outputs": [],
+          "selector": "0xddbd43b2",
+          "signature": "testSlowDiscoveryReadsPassStrictAndPreviewButExceedDiagnosticBudget()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xe46cdbb5",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testTokenScopeLifecycle",
+          "outputs": [],
+          "selector": "0xe46cdbb5",
+          "signature": "testTokenScopeLifecycle()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xc60fcae0",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testTokenScopeRequiresExactlyOneLeaf",
+          "outputs": [],
+          "selector": "0xc60fcae0",
+          "signature": "testTokenScopeRequiresExactlyOneLeaf()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x4b774ead",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testVerifyFinalityDegradesWithoutReverting",
+          "outputs": [],
+          "selector": "0x4b774ead",
+          "signature": "testVerifyFinalityDegradesWithoutReverting()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xad31ff08",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testVerifyFinalityDetectsPostFinalizationDiscoveryDrift",
+          "outputs": [],
+          "selector": "0xad31ff08",
+          "signature": "testVerifyFinalityDetectsPostFinalizationDiscoveryDrift()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x77b1f2e3",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testVerifyFinalityDiscoveryFailuresDegradeWithoutReverting",
+          "outputs": [],
+          "selector": "0x77b1f2e3",
+          "signature": "testVerifyFinalityDiscoveryFailuresDegradeWithoutReverting()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x658eefe8",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testVerifyFinalityGasBurningDiscoveryPreservesParentGas",
+          "outputs": [],
+          "selector": "0x658eefe8",
+          "signature": "testVerifyFinalityGasBurningDiscoveryPreservesParentGas()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x45af2548",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testVerifyFinalityRangePaginatesAndDetectsDrift",
+          "outputs": [],
+          "selector": "0x45af2548",
+          "signature": "testVerifyFinalityRangePaginatesAndDetectsDrift()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x933fd7c6",
+          "declaringDefinitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testVerifyScopedFinalityDetectsPostFinalizationDiscoveryDrift",
+          "outputs": [],
+          "selector": "0x933fd7c6",
+          "signature": "testVerifyScopedFinalityDetectsPostFinalizationDiscoveryDrift()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 96123,
+          "canonicalSignature": "CollectionArtworkFinalized(uint16,uint256,bytes32,address,bytes32,bytes32,string)",
+          "displaySignature": "CollectionArtworkFinalized(uint16,uint256,bytes32,address,bytes32,bytes32,string)",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#event:CollectionArtworkFinalized(uint16,uint256,bytes32,address,bytes32,bytes32,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "finalityRecordHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "componentsHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "manifestContentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "name": "finalityManifestURI",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZXZlbnQ6Q29sbGVjdGlvbkFydHdvcmtGaW5hbGl6ZWQodWludDE2LHVpbnQyNTYsYnl0ZXMzMixhZGRyZXNzLGJ5dGVzMzIsYnl0ZXMzMixzdHJpbmcp",
+          "kind": "event",
+          "name": "CollectionArtworkFinalized",
+          "natspec": "",
+          "range": {
+            "byteLength": 287,
+            "byteStart": 4610,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L131-L139",
+            "lineEnd": 139,
+            "lineStart": 131,
+            "snippetSha256": "sha256:5b6df333e9593703b00644d6c113cb5de3765bb45fa934acc25578e3bfafcf96",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "topic0": "0x7f1457ace03f21997598970165d871fdc3bee66222ab211f05fdab7a01a86e99"
+        },
+        {
+          "anonymous": false,
+          "astId": 96143,
+          "canonicalSignature": "ArtworkScopeFinalized(uint16,uint8,uint256,bytes32,uint256,bytes32,bytes32,bytes32,string)",
+          "displaySignature": "ArtworkScopeFinalized(uint16,uint8,uint256,bytes32,uint256,bytes32,bytes32,bytes32,string)",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#event:ArtworkScopeFinalized(uint16,uint8,uint256,bytes32,uint256,bytes32,bytes32,bytes32,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "scopeType",
+              "type": "uint8"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": true,
+              "name": "finalityRecordHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "scopeId",
+              "type": "bytes32"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "name": "componentsHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "name": "manifestContentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 8,
+              "indexed": false,
+              "name": "finalityManifestURI",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZXZlbnQ6QXJ0d29ya1Njb3BlRmluYWxpemVkKHVpbnQxNix1aW50OCx1aW50MjU2LGJ5dGVzMzIsdWludDI1NixieXRlczMyLGJ5dGVzMzIsYnl0ZXMzMixzdHJpbmcp",
+          "kind": "event",
+          "name": "ArtworkScopeFinalized",
+          "natspec": "",
+          "range": {
+            "byteLength": 334,
+            "byteStart": 4903,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L141-L151",
+            "lineEnd": 151,
+            "lineStart": 141,
+            "snippetSha256": "sha256:b2a12decd84c36fd65f2f0d26dd7df6a5a8fa9108313f41dbf30b7ae6cab1637",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "topic0": "0xdb00af932194f18a6e8271fc236e9a6750bdaeffffa39d1befb886ab2d626cbd"
+        },
+        {
+          "anonymous": false,
+          "astId": 96153,
+          "canonicalSignature": "FinalityManifestStaged(uint16,bytes32,uint256,address)",
+          "displaySignature": "FinalityManifestStaged(uint16,bytes32,uint256,address)",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#event:FinalityManifestStaged(uint16,bytes32,uint256,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "manifestContentHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "name": "byteLength",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "actor",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZXZlbnQ6RmluYWxpdHlNYW5pZmVzdFN0YWdlZCh1aW50MTYsYnl0ZXMzMix1aW50MjU2LGFkZHJlc3Mp",
+          "kind": "event",
+          "name": "FinalityManifestStaged",
+          "natspec": "",
+          "range": {
+            "byteLength": 137,
+            "byteStart": 5243,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L153-L155",
+            "lineEnd": 155,
+            "lineStart": 153,
+            "snippetSha256": "sha256:1e6fc71b8c6c3404e012fc4853f7debdd5667c0507f34cf78dc1b8812c62f7fb",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "topic0": "0x7abed506dd35947307ec9412248b54ebcdc1447c99f6fb43cbc937547a5582d5"
+        },
+        {
+          "anonymous": false,
+          "astId": 96163,
+          "canonicalSignature": "FinalityManifestPointerRecorded(uint16,bytes32,address,bytes32)",
+          "displaySignature": "FinalityManifestPointerRecorded(uint16,bytes32,address,bytes32)",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#event:FinalityManifestPointerRecorded(uint16,bytes32,address,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "finalityRecordHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "name": "manifestPointer",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "manifestContentHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZXZlbnQ6RmluYWxpdHlNYW5pZmVzdFBvaW50ZXJSZWNvcmRlZCh1aW50MTYsYnl0ZXMzMixhZGRyZXNzLGJ5dGVzMzIp",
+          "kind": "event",
+          "name": "FinalityManifestPointerRecorded",
+          "natspec": "",
+          "range": {
+            "byteLength": 188,
+            "byteStart": 5386,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L157-L162",
+            "lineEnd": 162,
+            "lineStart": 157,
+            "snippetSha256": "sha256:be2b4c9f9c3fa29088f3e03da074fecfba297c3c728e9208ed0fae8150ea5bb3",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "topic0": "0x7ee7dab9cda0dfcaa516e7de46426c0c34c4faebc512f00b459dcbc8cd3c81aa"
+        },
+        {
+          "anonymous": false,
+          "astId": 96173,
+          "canonicalSignature": "ArtworkTerminalFreezeExecuted(uint16,bytes32,bytes32,address)",
+          "displaySignature": "ArtworkTerminalFreezeExecuted(uint16,bytes32,bytes32,address)",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#event:ArtworkTerminalFreezeExecuted(uint16,bytes32,bytes32,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "scopeKey",
+              "type": "bytes32"
+            },
+            {
+              "index": 2,
+              "indexed": true,
+              "name": "finalityRecordHash",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "executor",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZXZlbnQ6QXJ0d29ya1Rlcm1pbmFsRnJlZXplRXhlY3V0ZWQodWludDE2LGJ5dGVzMzIsYnl0ZXMzMixhZGRyZXNzKQ",
+          "kind": "event",
+          "name": "ArtworkTerminalFreezeExecuted",
+          "natspec": "",
+          "range": {
+            "byteLength": 176,
+            "byteStart": 5580,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L164-L169",
+            "lineEnd": 169,
+            "lineStart": 164,
+            "snippetSha256": "sha256:2dbdab64bdf37ba6ab50c702a6336fb9654e0cbd2117d134bb2dbabca4e6a913",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "topic0": "0x033accc2758781ce7c38966f1ef2e13422f6b313f4612827bbff7348d86118b4"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "testConstructorBindsActualCoreMetadataAdapterAndMandatoryDiscovery()",
+          "displaySignature": "testConstructorBindsActualCoreMetadataAdapterAndMandatoryDiscovery()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xaf381ad2",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhhZjM4MWFkMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testConstructorBindsActualCoreMetadataAdapterAndMandatoryDiscovery",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 737,
+            "byteStart": 5931,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L175-L183",
+            "lineEnd": 183,
+            "lineStart": 175,
+            "snippetSha256": "sha256:97bdaeb24ae292c37d5f84395e5df21008b4ffc73f2da2155713e3dbf3025077",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xaf381ad2",
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testConstructorRejectsZeroMandatoryDiscovery()",
+          "displaySignature": "testConstructorRejectsZeroMandatoryDiscovery()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xb6096d01",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhiNjA5NmQwMQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testConstructorRejectsZeroMandatoryDiscovery",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 445,
+            "byteStart": 6674,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L185-L197",
+            "lineEnd": 197,
+            "lineStart": 185,
+            "snippetSha256": "sha256:f2f6f920228d1de95bcf40cc8cb5e7434a13e15889f5f1e1ccccb08083bd04fc",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xb6096d01",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testConstructorRejectsCodelessMandatoryDiscovery()",
+          "displaySignature": "testConstructorRejectsCodelessMandatoryDiscovery()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xd8e8c1c2",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhkOGU4YzFjMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testConstructorRejectsCodelessMandatoryDiscovery",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 540,
+            "byteStart": 7125,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L199-L214",
+            "lineEnd": 214,
+            "lineStart": 199,
+            "snippetSha256": "sha256:c67b017e0567ad83e3136217b6df3965096355426433d5ccf1f05407d67f729b",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xd8e8c1c2",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testConstructorRejectsAdapterCoreBindingMismatch()",
+          "displaySignature": "testConstructorRejectsAdapterCoreBindingMismatch()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xe568fa97",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhlNTY4ZmE5Nw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testConstructorRejectsAdapterCoreBindingMismatch",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 844,
+            "byteStart": 7671,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L216-L237",
+            "lineEnd": 237,
+            "lineStart": 216,
+            "snippetSha256": "sha256:ebd2ccc05e60d6041e7ed572a9a025bca8acfc221a16318d06c6cd45acaa231f",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xe568fa97",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testConstructorRejectsAdapterMetadataBindingMismatch()",
+          "displaySignature": "testConstructorRejectsAdapterMetadataBindingMismatch()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x4bfe1d83",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHg0YmZlMWQ4Mw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testConstructorRejectsAdapterMetadataBindingMismatch",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 860,
+            "byteStart": 8521,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L239-L260",
+            "lineEnd": 260,
+            "lineStart": 239,
+            "snippetSha256": "sha256:00194cd3796a8b472e57a76c74f40cf6e6b6aeec9d150b7987154ef9dd977384",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x4bfe1d83",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testConstructorRejectsNonAdapterContract()",
+          "displaySignature": "testConstructorRejectsNonAdapterContract()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xe6b60eb2",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhlNmI2MGViMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testConstructorRejectsNonAdapterContract",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 531,
+            "byteStart": 9387,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L262-L277",
+            "lineEnd": 277,
+            "lineStart": 262,
+            "snippetSha256": "sha256:1bb78b9d016971ebe3a1281f680b040fb773b6555396f5892cb8eeba2ad0b4f6",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xe6b60eb2",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testConstructorRequiresCanonicalERC165InvalidInterfaceResponse()",
+          "displaySignature": "testConstructorRequiresCanonicalERC165InvalidInterfaceResponse()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xb575fb68",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhiNTc1ZmI2OA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testConstructorRequiresCanonicalERC165InvalidInterfaceResponse",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 850,
+            "byteStart": 9924,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L279-L299",
+            "lineEnd": 299,
+            "lineStart": 279,
+            "snippetSha256": "sha256:669782d829f8a5bbaf019d46860349066f361cce5bafa25e7db4269f811abc9f",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xb575fb68",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testConstructorRejectsOversizedInterfaceAndAddressReturns()",
+          "displaySignature": "testConstructorRejectsOversizedInterfaceAndAddressReturns()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x31784a96",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHgzMTc4NGE5Ng",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testConstructorRejectsOversizedInterfaceAndAddressReturns",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1002,
+            "byteStart": 10780,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L301-L322",
+            "lineEnd": 322,
+            "lineStart": 301,
+            "snippetSha256": "sha256:3d13074d16d72e0e763cf7f964e72d076c78351795e705702dd88608ac4b2972",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x31784a96",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testConstructorRejectsNoncanonicalAddressReturn()",
+          "displaySignature": "testConstructorRejectsNoncanonicalAddressReturn()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x83489606",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHg4MzQ4OTYwNg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testConstructorRejectsNoncanonicalAddressReturn",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 526,
+            "byteStart": 11788,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L324-L334",
+            "lineEnd": 334,
+            "lineStart": 324,
+            "snippetSha256": "sha256:e78e6ce067d2e97223e8f6c625577dd32a776643948283b2dcfe03a1058ef5d6",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x83489606",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testConstructorRejectsLegacyNoncanonicalAndSemanticAdapterPayloads()",
+          "displaySignature": "testConstructorRejectsLegacyNoncanonicalAndSemanticAdapterPayloads()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xf8ea4927",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhmOGVhNDkyNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testConstructorRejectsLegacyNoncanonicalAndSemanticAdapterPayloads",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1532,
+            "byteStart": 12320,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L336-L367",
+            "lineEnd": 367,
+            "lineStart": 336,
+            "snippetSha256": "sha256:dc35b9f78e9aa4aac31a35a33224825d054e7d83169edd7e3b980dd76b377a3f",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xf8ea4927",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_deployRegistryWithAdapter(address)",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:_deployRegistryWithAdapter(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "adapter",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246X2RlcGxveVJlZ2lzdHJ5V2l0aEFkYXB0ZXIoYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_deployRegistryWithAdapter",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 311,
+            "byteStart": 13858,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L369-L378",
+            "lineEnd": 378,
+            "lineStart": 369,
+            "snippetSha256": "sha256:8b498e2caee7e743a4010e87976eb3e6fd50782b9d549369181ec3a7f5bac6ee",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": "testManifestStagingContentAddressedAndBounded()",
+          "displaySignature": "testManifestStagingContentAddressedAndBounded()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x1ef02bbd",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHgxZWYwMmJiZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testManifestStagingContentAddressedAndBounded",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1334,
+            "byteStart": 14365,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L384-L413",
+            "lineEnd": 413,
+            "lineStart": 384,
+            "snippetSha256": "sha256:861027925825f06d8e4ad28b981fb9321f5f74c738b11957076e6a6c16c4441b",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x1ef02bbd",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCollectionLifecycleArtistBound()",
+          "displaySignature": "testCollectionLifecycleArtistBound()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xb075b563",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhiMDc1YjU2Mw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCollectionLifecycleArtistBound",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2023,
+            "byteStart": 15882,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L419-L462",
+            "lineEnd": 462,
+            "lineStart": 419,
+            "snippetSha256": "sha256:ba7b064f2d4bd1bfe3e01a1515782c702fcb503147cd12ef1002dfc108bf34ef",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xb075b563",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertStoredCollectionRecord(Fixture)",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:_assertStoredCollectionRecord(Fixture)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "fixture",
+              "storageLocation": "memory",
+              "type": "Fixture"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246X2Fzc2VydFN0b3JlZENvbGxlY3Rpb25SZWNvcmQoRml4dHVyZSk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertStoredCollectionRecord",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1355,
+            "byteStart": 17911,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L464-L483",
+            "lineEnd": 483,
+            "lineStart": 464,
+            "snippetSha256": "sha256:b2a086c355a9242809a059f866242457b294683aaa402f04e40d18bbdeca30b3",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertComponentPagination(Fixture)",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:_assertComponentPagination(Fixture)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "fixture",
+              "storageLocation": "memory",
+              "type": "Fixture"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246X2Fzc2VydENvbXBvbmVudFBhZ2luYXRpb24oRml4dHVyZSk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertComponentPagination",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 708,
+            "byteStart": 19272,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L485-L494",
+            "lineEnd": 494,
+            "lineStart": 485,
+            "snippetSha256": "sha256:a5452e8299d87f6097f8033098e05477f753822cbaa1353e88390ac4b1ebcc3c",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertHealthyDiagnostics(Fixture)",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:_assertHealthyDiagnostics(Fixture)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "fixture",
+              "storageLocation": "memory",
+              "type": "Fixture"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246X2Fzc2VydEhlYWx0aHlEaWFnbm9zdGljcyhGaXh0dXJlKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertHealthyDiagnostics",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 462,
+            "byteStart": 19986,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L496-L502",
+            "lineEnd": 502,
+            "lineStart": 496,
+            "snippetSha256": "sha256:173e4e7507f4fd0b71fc3acc233260bb1fae6f8bcb7e7b66e486570bac34ca9a",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertFrozenRoutes(Fixture)",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:_assertFrozenRoutes(Fixture)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "fixture",
+              "storageLocation": "memory",
+              "type": "Fixture"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246X2Fzc2VydEZyb3plblJvdXRlcyhGaXh0dXJlKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertFrozenRoutes",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 947,
+            "byteStart": 20454,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L504-L517",
+            "lineEnd": 517,
+            "lineStart": 504,
+            "snippetSha256": "sha256:e862d505ceae43fc77121b99d00a653a7a22a2287baad8ef088ce4d4365699be",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertCollectionImmutability(Fixture)",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:_assertCollectionImmutability(Fixture)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "fixture",
+              "storageLocation": "memory",
+              "type": "Fixture"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246X2Fzc2VydENvbGxlY3Rpb25JbW11dGFiaWxpdHkoRml4dHVyZSk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertCollectionImmutability",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 629,
+            "byteStart": 21407,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L519-L531",
+            "lineEnd": 531,
+            "lineStart": 519,
+            "snippetSha256": "sha256:5e0cb7af5c31b01d846b94cf9086b67ef5a5c6a26b69f89c44266a9e9b0cf274",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": "testCollectionLifecyclePlatformWorks()",
+          "displaySignature": "testCollectionLifecyclePlatformWorks()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xd494d7b2",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhkNDk0ZDdiMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCollectionLifecyclePlatformWorks",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 726,
+            "byteStart": 22042,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L533-L544",
+            "lineEnd": 544,
+            "lineStart": 533,
+            "snippetSha256": "sha256:5f8a753606a1b5b47d68320e2072575c60d35de4f624cf239347d8941ff26175",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xd494d7b2",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testTokenScopeLifecycle()",
+          "displaySignature": "testTokenScopeLifecycle()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xe46cdbb5",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhlNDZjZGJiNQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testTokenScopeLifecycle",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2114,
+            "byteStart": 22979,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L550-L597",
+            "lineEnd": 597,
+            "lineStart": 550,
+            "snippetSha256": "sha256:ccde491f62e7a14ac55dba0c2bee1cbfb437cf4d38acce9b28dd9d97887d2d01",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xe46cdbb5",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testReleaseSeasonViewScopeLifecycles()",
+          "displaySignature": "testReleaseSeasonViewScopeLifecycles()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xfb718dd8",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhmYjcxOGRkOA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testReleaseSeasonViewScopeLifecycles",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1081,
+            "byteStart": 25099,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L599-L619",
+            "lineEnd": 619,
+            "lineStart": 599,
+            "snippetSha256": "sha256:9e252f8d58db064c788c34ae0690ac9ee33a308769f0b7acde5b04c9bfa235b2",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xfb718dd8",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testScopedEntryRejectsCollectionScopeAndBadShapes()",
+          "displaySignature": "testScopedEntryRejectsCollectionScopeAndBadShapes()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x600f67b5",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHg2MDBmNjdiNQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testScopedEntryRejectsCollectionScopeAndBadShapes",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1625,
+            "byteStart": 26186,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L621-L658",
+            "lineEnd": 658,
+            "lineStart": 621,
+            "snippetSha256": "sha256:58ec81facb9b6e0a4b5133603dbf132bd9c49094678d50086790fbd893498996",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x600f67b5",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testScopedGatesCollectionExistenceAndTokenLifecycle()",
+          "displaySignature": "testScopedGatesCollectionExistenceAndTokenLifecycle()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xdb201786",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhkYjIwMTc4Ng",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testScopedGatesCollectionExistenceAndTokenLifecycle",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2505,
+            "byteStart": 27817,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L660-L707",
+            "lineEnd": 707,
+            "lineStart": 660,
+            "snippetSha256": "sha256:ce2c67c8df4e522a48b70564c58e5251fdab21e53d656d7a68c1a0ae09c2aa61",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xdb201786",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testTokenScopeRequiresExactlyOneLeaf()",
+          "displaySignature": "testTokenScopeRequiresExactlyOneLeaf()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xc60fcae0",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhjNjBmY2FlMA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testTokenScopeRequiresExactlyOneLeaf",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 886,
+            "byteStart": 30328,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L709-L731",
+            "lineEnd": 731,
+            "lineStart": 709,
+            "snippetSha256": "sha256:7864db3dd7314c42bd9b49263f30e28c258cd5bd268cbc1bf537d71143c1ec4c",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xc60fcae0",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testFinalizeRequiresFinalityAdmin()",
+          "displaySignature": "testFinalizeRequiresFinalityAdmin()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xdc5affb9",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhkYzVhZmZiOQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testFinalizeRequiresFinalityAdmin",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 547,
+            "byteStart": 31421,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L737-L749",
+            "lineEnd": 749,
+            "lineStart": 737,
+            "snippetSha256": "sha256:689ecdb149be68cc577b22d55299ac68e7eec7632f8a9308b5d1af70202bd3f4",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xdc5affb9",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCollectionGatesExistenceClosedBurnBlockAndFreeze()",
+          "displaySignature": "testCollectionGatesExistenceClosedBurnBlockAndFreeze()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xf1d30a2c",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhmMWQzMGEyYw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCollectionGatesExistenceClosedBurnBlockAndFreeze",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3099,
+            "byteStart": 31974,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L751-L820",
+            "lineEnd": 820,
+            "lineStart": 751,
+            "snippetSha256": "sha256:514b617f78904b9503e8a1dd1c7bce20482b6ed76cd1498d61b48bcb468ba597",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xf1d30a2c",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCollectionStatusAndSupplyModeDomainsFailClosed()",
+          "displaySignature": "testCollectionStatusAndSupplyModeDomainsFailClosed()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x1a177262",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHgxYTE3NzI2Mg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCollectionStatusAndSupplyModeDomainsFailClosed",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2694,
+            "byteStart": 35079,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L822-L888",
+            "lineEnd": 888,
+            "lineStart": 822,
+            "snippetSha256": "sha256:0b6cba9005aa9fbf89db93b23c0202f5b0cd973322752b0834d2e2a60a76fbb6",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x1a177262",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testScopedCollectionStatusAndSupplyModeDomainsMatchExecutionAndPreview()",
+          "displaySignature": "testScopedCollectionStatusAndSupplyModeDomainsMatchExecutionAndPreview()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x70fe16e5",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHg3MGZlMTZlNQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testScopedCollectionStatusAndSupplyModeDomainsMatchExecutionAndPreview",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2485,
+            "byteStart": 37779,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L890-L942",
+            "lineEnd": 942,
+            "lineStart": 890,
+            "snippetSha256": "sha256:a277d0c715d8df87b67f7755d0d04cfb6b565174894edbe02bb055edbe62b1a9",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x70fe16e5",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testContentRootGates()",
+          "displaySignature": "testContentRootGates()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xba95bb5a",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhiYTk1YmI1YQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testContentRootGates",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1860,
+            "byteStart": 40270,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L944-L987",
+            "lineEnd": 987,
+            "lineStart": 944,
+            "snippetSha256": "sha256:5695031561acc4c18d522cbec165b90f8181673e5684f933ee1c623785c6006f",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xba95bb5a",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCollectionMintedSupplyAboveUint64FailsClosedWithoutDowncast()",
+          "displaySignature": "testCollectionMintedSupplyAboveUint64FailsClosedWithoutDowncast()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xc50203aa",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhjNTAyMDNhYQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCollectionMintedSupplyAboveUint64FailsClosedWithoutDowncast",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1393,
+            "byteStart": 42136,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L989-L1021",
+            "lineEnd": 1021,
+            "lineStart": 989,
+            "snippetSha256": "sha256:f3f1690fb33556e35f2d34c29d01e2e4b1a4f6a8e4863fbb9f6c2fd55f36fc53",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xc50203aa",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_cloneManifest(StreamFinalityManifestRef)",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:_cloneManifest(StreamFinalityManifestRef)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "manifest",
+              "storageLocation": "memory",
+              "type": "StreamFinalityManifestRef"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246X2Nsb25lTWFuaWZlc3QoU3RyZWFtRmluYWxpdHlNYW5pZmVzdFJlZik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_cloneManifest",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "StreamFinalityManifestRef"
+            }
+          ],
+          "range": {
+            "byteLength": 435,
+            "byteStart": 43535,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1023-L1035",
+            "lineEnd": 1035,
+            "lineStart": 1023,
+            "snippetSha256": "sha256:0fb96d4da08359461fa650143e68eb627041561562b4149a2cd9dbb47794a349",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_cloneComponents(StreamFinalityComponentExpectation[])",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:_cloneComponents(StreamFinalityComponentExpectation[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "components",
+              "storageLocation": "memory",
+              "type": "StreamFinalityComponentExpectation[]"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246X2Nsb25lQ29tcG9uZW50cyhTdHJlYW1GaW5hbGl0eUNvbXBvbmVudEV4cGVjdGF0aW9uW10p",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_cloneComponents",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "cloned",
+              "storageLocation": "memory",
+              "type": "StreamFinalityComponentExpectation[]"
+            }
+          ],
+          "range": {
+            "byteLength": 799,
+            "byteStart": 43976,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1037-L1054",
+            "lineEnd": 1054,
+            "lineStart": 1037,
+            "snippetSha256": "sha256:f511e6cfef97794c4c5e67ffd94f74d0821d3c921b3bbdf341ff5e9f6b12b2bb",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": "testManifestGates()",
+          "displaySignature": "testManifestGates()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x3aa8f931",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHgzYWE4ZjkzMQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testManifestGates",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1939,
+            "byteStart": 44781,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1056-L1101",
+            "lineEnd": 1101,
+            "lineStart": 1056,
+            "snippetSha256": "sha256:e82088b07e26140dca27f4b4d9e0f478c34a930cb4e5636c237bea4b8ac7d1ed",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x3aa8f931",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testComponentListShapeGates()",
+          "displaySignature": "testComponentListShapeGates()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x01533af6",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHgwMTUzM2FmNg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testComponentListShapeGates",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2516,
+            "byteStart": 46726,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1103-L1165",
+            "lineEnd": 1165,
+            "lineStart": 1103,
+            "snippetSha256": "sha256:4eeb05c88668121a00c2e6af1b15e6de15fa62104f67e83b880dcd1a88c58d2c",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x01533af6",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSanctionComponentGates()",
+          "displaySignature": "testSanctionComponentGates()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xdf564853",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhkZjU2NDg1Mw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSanctionComponentGates",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 5528,
+            "byteStart": 49248,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1167-L1296",
+            "lineEnd": 1296,
+            "lineStart": 1167,
+            "snippetSha256": "sha256:fb6c749348b49c90afd0f38daaf7dcb267810ae95d80e48c5772242c4d8886fa",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xdf564853",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testLiveComponentVerificationGates()",
+          "displaySignature": "testLiveComponentVerificationGates()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x307427f4",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHgzMDc0MjdmNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testLiveComponentVerificationGates",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 4099,
+            "byteStart": 54782,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1298-L1384",
+            "lineEnd": 1384,
+            "lineStart": 1298,
+            "snippetSha256": "sha256:4822a5718c02f80ffc6f63779adf5cb4b2d0c11b03302d2a79104d34bc5fcb35",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x307427f4",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testExpectedRecordHashMismatchBlocks()",
+          "displaySignature": "testExpectedRecordHashMismatchBlocks()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x17b34536",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHgxN2IzNDUzNg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testExpectedRecordHashMismatchBlocks",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1161,
+            "byteStart": 58887,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1386-L1407",
+            "lineEnd": 1407,
+            "lineStart": 1386,
+            "snippetSha256": "sha256:5200b963b2ccdd7c1c25cf736e98669ceeda32b8f19abde15a57856f7794807a",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x17b34536",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testMandatoryDiscoveryGate()",
+          "displaySignature": "testMandatoryDiscoveryGate()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x8dbaf76a",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHg4ZGJhZjc2YQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testMandatoryDiscoveryGate",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2710,
+            "byteStart": 60235,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1413-L1471",
+            "lineEnd": 1471,
+            "lineStart": 1413,
+            "snippetSha256": "sha256:deaad4c891e68359bd12fdadc6fc1a82b0889c96c4c90acc133f9781625daa2e",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x8dbaf76a",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testDiscoveryComponentAtExact224ByteReturnPassesExecutionAndPreview()",
+          "displaySignature": "testDiscoveryComponentAtExact224ByteReturnPassesExecutionAndPreview()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xbea786b5",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhiZWE3ODZiNQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testDiscoveryComponentAtExact224ByteReturnPassesExecutionAndPreview",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1884,
+            "byteStart": 62951,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1473-L1512",
+            "lineEnd": 1512,
+            "lineStart": 1473,
+            "snippetSha256": "sha256:2c536258fb0cdaafda20bac0e869464b113bce45840f6fa7b0e555e31b2ef22e",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xbea786b5",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testDiscoveryFactFailuresRejectExecutionAndFailClosedInPreview()",
+          "displaySignature": "testDiscoveryFactFailuresRejectExecutionAndFailClosedInPreview()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xb7d98059",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhiN2Q5ODA1OQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testDiscoveryFactFailuresRejectExecutionAndFailClosedInPreview",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 806,
+            "byteStart": 64841,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1514-L1532",
+            "lineEnd": 1532,
+            "lineStart": 1514,
+            "snippetSha256": "sha256:09e799f1a864c9aa4a29028469333f879ea75abc89551a35011412c0707eb5e7",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xb7d98059",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertCollectionDiscoveryExecutionUnreadable(Fixture)",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:_assertCollectionDiscoveryExecutionUnreadable(Fixture)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "fixture",
+              "storageLocation": "memory",
+              "type": "Fixture"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246X2Fzc2VydENvbGxlY3Rpb25EaXNjb3ZlcnlFeGVjdXRpb25VbnJlYWRhYmxlKEZpeHR1cmUp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertCollectionDiscoveryExecutionUnreadable",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 466,
+            "byteStart": 65653,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1534-L1544",
+            "lineEnd": 1544,
+            "lineStart": 1534,
+            "snippetSha256": "sha256:d4bf7b771e12e119de808de1553f7a66938c6941e1fee23fc021ef7dfd9ecdf0",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": "testDiscoveryComponentAtFailuresRejectExecutionAndFailClosedInPreview()",
+          "displaySignature": "testDiscoveryComponentAtFailuresRejectExecutionAndFailClosedInPreview()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xd5aac0b5",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhkNWFhYzBiNQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testDiscoveryComponentAtFailuresRejectExecutionAndFailClosedInPreview",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 962,
+            "byteStart": 66125,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1546-L1567",
+            "lineEnd": 1567,
+            "lineStart": 1546,
+            "snippetSha256": "sha256:c687e77d0616222378a6fc323c2d5df0eb775313381aba8ce929122290d1b302",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xd5aac0b5",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSlowDiscoveryReadsPassStrictAndPreviewButExceedDiagnosticBudget()",
+          "displaySignature": "testSlowDiscoveryReadsPassStrictAndPreviewButExceedDiagnosticBudget()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xddbd43b2",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhkZGJkNDNiMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSlowDiscoveryReadsPassStrictAndPreviewButExceedDiagnosticBudget",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1044,
+            "byteStart": 67093,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1569-L1590",
+            "lineEnd": 1590,
+            "lineStart": 1569,
+            "snippetSha256": "sha256:e7c517245e4a0558519e6bfaf27cb0456d5d72c9a24e87d4454286d01f2633cc",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xddbd43b2",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testComponentReadBombsFailClosedAcrossStrictPreviewAndDiagnostics()",
+          "displaySignature": "testComponentReadBombsFailClosedAcrossStrictPreviewAndDiagnostics()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x2c527dfc",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHgyYzUyN2RmYw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testComponentReadBombsFailClosedAcrossStrictPreviewAndDiagnostics",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1622,
+            "byteStart": 68143,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1592-L1628",
+            "lineEnd": 1628,
+            "lineStart": 1592,
+            "snippetSha256": "sha256:63bc56a77b8216f247f8a02f987c4b3afa0477cb815168434a893c0dfc76d28b",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x2c527dfc",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSlowComponentReadPassesStrictAndPreviewButExceedsDiagnosticBudget()",
+          "displaySignature": "testSlowComponentReadPassesStrictAndPreviewButExceedsDiagnosticBudget()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xcc8912f9",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhjYzg5MTJmOQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSlowComponentReadPassesStrictAndPreviewButExceedsDiagnosticBudget",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 910,
+            "byteStart": 69771,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1630-L1647",
+            "lineEnd": 1647,
+            "lineStart": 1630,
+            "snippetSha256": "sha256:e0a7f44c1a1dc67c7e26627420ec2af56296c0eb52392c09e165539ac2fa99fb",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xcc8912f9",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testScopedDiscoveryComponentAtFailuresFailClosedInDiagnosticsAndPreview()",
+          "displaySignature": "testScopedDiscoveryComponentAtFailuresFailClosedInDiagnosticsAndPreview()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x3bc5a599",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHgzYmM1YTU5OQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testScopedDiscoveryComponentAtFailuresFailClosedInDiagnosticsAndPreview",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2469,
+            "byteStart": 70687,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1649-L1697",
+            "lineEnd": 1697,
+            "lineStart": 1649,
+            "snippetSha256": "sha256:58b96d1e3978dd9c794cb7a3e872080f23e73e0a6088d93a84d9cc01d729d2bc",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x3bc5a599",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testScopedDiscoveryReadFailuresRejectExecutionAndFailClosedInPreview()",
+          "displaySignature": "testScopedDiscoveryReadFailuresRejectExecutionAndFailClosedInPreview()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x58336b93",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHg1ODMzNmI5Mw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testScopedDiscoveryReadFailuresRejectExecutionAndFailClosedInPreview",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1174,
+            "byteStart": 73162,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1699-L1723",
+            "lineEnd": 1723,
+            "lineStart": 1699,
+            "snippetSha256": "sha256:359484790459b80ebc57e441158f69ef8383f60b4279b2513df22774370125a8",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x58336b93",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertScopedDiscoveryExecutionUnreadable(Fixture,bool)",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:_assertScopedDiscoveryExecutionUnreadable(Fixture,bool)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "fixture",
+              "storageLocation": "memory",
+              "type": "Fixture"
+            },
+            {
+              "index": 1,
+              "name": "componentRead",
+              "type": "bool"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246X2Fzc2VydFNjb3BlZERpc2NvdmVyeUV4ZWN1dGlvblVucmVhZGFibGUoRml4dHVyZSxib29sKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertScopedDiscoveryExecutionUnreadable",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 819,
+            "byteStart": 74342,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1725-L1747",
+            "lineEnd": 1747,
+            "lineStart": 1725,
+            "snippetSha256": "sha256:b469a8bd2dc855e4c325310148e53ded047a58ba395e78779b0b6dceffa6526e",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertScopedDiscoveryDiagnosticFalse(Fixture,string)",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:_assertScopedDiscoveryDiagnosticFalse(Fixture,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "fixture",
+              "storageLocation": "memory",
+              "type": "Fixture"
+            },
+            {
+              "index": 1,
+              "name": "reason",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246X2Fzc2VydFNjb3BlZERpc2NvdmVyeURpYWdub3N0aWNGYWxzZShGaXh0dXJlLHN0cmluZyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertScopedDiscoveryDiagnosticFalse",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 674,
+            "byteStart": 75167,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1749-L1764",
+            "lineEnd": 1764,
+            "lineStart": 1749,
+            "snippetSha256": "sha256:8ef287a5a4b661e6235d49392a121940a865216c682518961aa1ba7c82840b3a",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_boundedPreview(Fixture)",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:_boundedPreview(Fixture)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "fixture",
+              "storageLocation": "memory",
+              "type": "Fixture"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246X2JvdW5kZWRQcmV2aWV3KEZpeHR1cmUp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_boundedPreview",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "p",
+              "storageLocation": "memory",
+              "type": "StreamFinalityPreview"
+            }
+          ],
+          "range": {
+            "byteLength": 1036,
+            "byteStart": 75847,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1766-L1791",
+            "lineEnd": 1791,
+            "lineStart": 1766,
+            "snippetSha256": "sha256:e251c4af77bbdd42428eb46a6a47fd50dba7dd807e12063a9c4e7512abb7d991",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertBoundedFinalizeRevert(Fixture,bytes)",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:_assertBoundedFinalizeRevert(Fixture,bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "fixture",
+              "storageLocation": "memory",
+              "type": "Fixture"
+            },
+            {
+              "index": 1,
+              "name": "expectedRevert",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246X2Fzc2VydEJvdW5kZWRGaW5hbGl6ZVJldmVydChGaXh0dXJlLGJ5dGVzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertBoundedFinalizeRevert",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1188,
+            "byteStart": 76889,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1793-L1819",
+            "lineEnd": 1819,
+            "lineStart": 1793,
+            "snippetSha256": "sha256:c56d2f19617126eedd468f21c22ec2a36c2fc0f63130110b040bef525626a51c",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": "testVerifyFinalityDetectsPostFinalizationDiscoveryDrift()",
+          "displaySignature": "testVerifyFinalityDetectsPostFinalizationDiscoveryDrift()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xad31ff08",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhhZDMxZmYwOA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testVerifyFinalityDetectsPostFinalizationDiscoveryDrift",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1348,
+            "byteStart": 78083,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1821-L1844",
+            "lineEnd": 1844,
+            "lineStart": 1821,
+            "snippetSha256": "sha256:33f813dc027a31056a462619176f6c309b64abd7d9c9edb7b0de3aa8643ed8fb",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xad31ff08",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testVerifyScopedFinalityDetectsPostFinalizationDiscoveryDrift()",
+          "displaySignature": "testVerifyScopedFinalityDetectsPostFinalizationDiscoveryDrift()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x933fd7c6",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHg5MzNmZDdjNg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testVerifyScopedFinalityDetectsPostFinalizationDiscoveryDrift",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1790,
+            "byteStart": 79437,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1846-L1875",
+            "lineEnd": 1875,
+            "lineStart": 1846,
+            "snippetSha256": "sha256:b61ffc7866f4822d49289cf138869459080402a072ff2679f07b7010e60b9031",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x933fd7c6",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testVerifyFinalityDiscoveryFailuresDegradeWithoutReverting()",
+          "displaySignature": "testVerifyFinalityDiscoveryFailuresDegradeWithoutReverting()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x77b1f2e3",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHg3N2IxZjJlMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testVerifyFinalityDiscoveryFailuresDegradeWithoutReverting",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 964,
+            "byteStart": 81233,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1877-L1898",
+            "lineEnd": 1898,
+            "lineStart": 1877,
+            "snippetSha256": "sha256:0c72935fa6da2fbe9b0fe1a73fc1596464dcd91b69f527869b3b4dcf003e34dc",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x77b1f2e3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testVerifyFinalityGasBurningDiscoveryPreservesParentGas()",
+          "displaySignature": "testVerifyFinalityGasBurningDiscoveryPreservesParentGas()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x658eefe8",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHg2NThlZWZlOA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testVerifyFinalityGasBurningDiscoveryPreservesParentGas",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1161,
+            "byteStart": 82203,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1900-L1921",
+            "lineEnd": 1921,
+            "lineStart": 1900,
+            "snippetSha256": "sha256:228a46bfb68f1b512ae7da1ca74ac8e2c86fd6ab3ba89729a8870209ea8deb33",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x658eefe8",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertCollectionDiscoveryDiagnosticFalse(Fixture,string)",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:_assertCollectionDiscoveryDiagnosticFalse(Fixture,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "fixture",
+              "storageLocation": "memory",
+              "type": "Fixture"
+            },
+            {
+              "index": 1,
+              "name": "reason",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246X2Fzc2VydENvbGxlY3Rpb25EaXNjb3ZlcnlEaWFnbm9zdGljRmFsc2UoRml4dHVyZSxzdHJpbmcp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertCollectionDiscoveryDiagnosticFalse",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 660,
+            "byteStart": 83370,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1923-L1935",
+            "lineEnd": 1935,
+            "lineStart": 1923,
+            "snippetSha256": "sha256:f9b5657fb33f7a58cd65a5d7299a0ec2d8b13711ba6ba70aaa4e7f733d198220",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": "testVerifyFinalityDegradesWithoutReverting()",
+          "displaySignature": "testVerifyFinalityDegradesWithoutReverting()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x4b774ead",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHg0Yjc3NGVhZA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testVerifyFinalityDegradesWithoutReverting",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2814,
+            "byteStart": 84251,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1941-L1988",
+            "lineEnd": 1988,
+            "lineStart": 1941,
+            "snippetSha256": "sha256:bb427dd0c63b1dd6b757efabbe12ffa30adf4b010f6ee60d19a0ac7d04791ee1",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x4b774ead",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testVerifyFinalityRangePaginatesAndDetectsDrift()",
+          "displaySignature": "testVerifyFinalityRangePaginatesAndDetectsDrift()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x45af2548",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHg0NWFmMjU0OA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testVerifyFinalityRangePaginatesAndDetectsDrift",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2002,
+            "byteStart": 87071,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L1990-L2027",
+            "lineEnd": 2027,
+            "lineStart": 1990,
+            "snippetSha256": "sha256:3470825e79b9bb1377a1dfe4c1bdda00beac4a6873c95592124a554ad2b46832",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x45af2548",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testScopedDiagnosticsUseScopedReads()",
+          "displaySignature": "testScopedDiagnosticsUseScopedReads()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x98240910",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHg5ODI0MDkxMA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testScopedDiagnosticsUseScopedReads",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1164,
+            "byteStart": 89079,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L2029-L2049",
+            "lineEnd": 2049,
+            "lineStart": 2029,
+            "snippetSha256": "sha256:da12910245c1eba5b3ceef68e6ae1dee8fe322b2de50a37683ab6ffe8eb2c6f2",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x98240910",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testCalldataCapBlocksOversizedSubmissions()",
+          "displaySignature": "testCalldataCapBlocksOversizedSubmissions()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x2c17545f",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHgyYzE3NTQ1Zg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testCalldataCapBlocksOversizedSubmissions",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1411,
+            "byteStart": 90418,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L2055-L2087",
+            "lineEnd": 2087,
+            "lineStart": 2055,
+            "snippetSha256": "sha256:a9ec5f6ada9f91fa29d60426cbd53b9df5ec1fc9af306928813db5b6502dc07e",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x2c17545f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testPreviewParityAcrossGates()",
+          "displaySignature": "testPreviewParityAcrossGates()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xe5f3fb3e",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhlNWYzZmIzZQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPreviewParityAcrossGates",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2273,
+            "byteStart": 92025,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L2093-L2134",
+            "lineEnd": 2134,
+            "lineStart": 2093,
+            "snippetSha256": "sha256:cae8467de4582d6d8dd86eb22c99f9beba43d045fb15570a77cd25f9a1410f96",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xe5f3fb3e",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testScopedPreviewMatchesScopedExecution()",
+          "displaySignature": "testScopedPreviewMatchesScopedExecution()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xd0de7314",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHhkMGRlNzMxNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testScopedPreviewMatchesScopedExecution",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 852,
+            "byteStart": 94304,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L2136-L2149",
+            "lineEnd": 2149,
+            "lineStart": 2136,
+            "snippetSha256": "sha256:00e3152b447e85cb1328d116b4064a3fa1b16e3bd96cc238da4eab9746731fcf",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0xd0de7314",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testPreviewStagedFreezeMirrorsGuardianGate()",
+          "displaySignature": "testPreviewStagedFreezeMirrorsGuardianGate()",
+          "functionKind": "function",
+          "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x929b9576",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3QjZnVuY3Rpb246MHg5MjliOTU3Ng",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPreviewStagedFreezeMirrorsGuardianGate",
+          "natspec": "@notice Preview mirrors the [LTA-FREEZE] rule 4 live-guardian gate: clearing the veto\n         guardian after scheduling makes previewFinality.stagedFreezeReady and the real\n         finalize call reject together, so preview and execution never diverge on it.",
+          "outputs": [],
+          "range": {
+            "byteLength": 2088,
+            "byteStart": 95444,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L2154-L2192",
+            "lineEnd": 2192,
+            "lineStart": 2154,
+            "snippetSha256": "sha256:161a012d45c26f57ce1438347e1e5c3ce0188b93213535eaedab52d801c9b4c6",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": "0x929b9576",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "ADVERSARIAL_CALL_GAS",
+          "natspec": "",
+          "range": {
+            "byteLength": 57,
+            "byteStart": 4546,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L129",
+            "lineEnd": 129,
+            "lineStart": 129,
+            "snippetSha256": "sha256:9e8ad3671bbb5f0c4ddac96459ea766433bada33a470cdb3482986741d119b80",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 9,
+            "byteStart": 4594,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L129",
+            "lineEnd": 129,
+            "lineStart": 129,
+            "snippetSha256": "sha256:64e5260b1a82a48ce2a9d0d7d7b2b50492794d6019c0d2fd14017c2ab1a92df7",
+            "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+          },
+          "valueSource": "2_000_000",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/FinalityTestBase.sol:FinalityTestBase",
+        "name": "FinalityTestBase"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeS50LnNvbDpTdHJlYW1BcnR3b3JrRmluYWxpdHlSZWdpc3RyeVRlc3Q",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "test/helpers/FinalityTestBase.sol:FinalityTestBase",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamArtworkFinalityRegistryTest",
+    "natspec": "@notice Five-scope lifecycle, execution-gate, diagnostic, and preview coverage for\n         StreamArtworkFinalityRegistry ([LTA-FINALITY], [CMC-FINALITY-INPUTS],\n         [AA-SANCTION], ADR 0009 decision 6).",
+    "range": {
+      "byteLength": 93224,
+      "byteStart": 4310,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamArtworkFinalityRegistry.t.sol#L122-L2193",
+      "lineEnd": 2193,
+      "lineStart": 122,
+      "snippetSha256": "sha256:3b7f65535d3690b31cb24fb5048f17da98e6db1df30b3b2c1ddc0e90ce6369b3",
+      "sourceSha256": "sha256:d812be5dcf1e2a2cb7f6e1638fcf858d2b4935e3ea84b894b70873301acec337"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamArtworkFinalityRegistry.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-30.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 48
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 48
+    },
+    "totalCount": 48
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x01533af6",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x17b34536",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x1a177262",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x1ef02bbd",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x2c17545f",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x2c527dfc",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x307427f4",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x31784a96",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x3aa8f931",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x3bc5a599",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x45af2548",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x4b774ead",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x4bfe1d83",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x58336b93",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x600f67b5",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x658eefe8",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x70fe16e5",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x77b1f2e3",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x83489606",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x8dbaf76a",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x933fd7c6",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0x98240910",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xad31ff08",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xaf381ad2",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xb075b563",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xb575fb68",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xb6096d01",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xb7d98059",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xba95bb5a",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xbea786b5",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xc50203aa",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xc60fcae0",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xcc8912f9",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xd0de7314",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xd494d7b2",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xd5aac0b5",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xd8e8c1c2",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xdb201786",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xdc5affb9",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xddbd43b2",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xdf564853",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xe46cdbb5",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xe568fa97",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xe5f3fb3e",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xe6b60eb2",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xf1d30a2c",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xf8ea4927",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest#function:0xfb718dd8",
+      "definitionId": "test/StreamArtworkFinalityRegistry.t.sol:StreamArtworkFinalityRegistryTest",
+      "severity": "advisory"
+    }
+  ]
+}

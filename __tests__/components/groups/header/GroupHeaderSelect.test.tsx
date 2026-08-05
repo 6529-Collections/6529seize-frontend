@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { AuthContext } from '@/components/auth/Auth';
 
-jest.mock('@/components/utils/button/PrimaryButtonLink', () => ({
+jest.mock('@/components/utils/button/ButtonLink', () => ({
   __esModule: true,
   default: ({ children }: any) => <a data-testid="btn">{children}</a>
 }));

@@ -35,7 +35,7 @@ import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import HeaderPageShareButton from "./share/HeaderPageShareButton";
 import HeaderActionButtons from "./HeaderActionButtons";
 import NetworkHealthCTA from "./NetworkHealthCTA";
-import PrimaryButton from "../utils/button/PrimaryButton";
+import Button from "../utils/button/Button";
 import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
 import WaveDescriptionPopover from "@/components/waves/header/WaveDescriptionPopover";
 import WavePicture from "@/components/waves/WavePicture";
@@ -53,6 +53,7 @@ import {
   useHeaderActiveWave,
 } from "./app-header-wave-preview";
 import WaveHeaderRestrictionButton from "@/components/waves/header/WaveHeaderRestrictionButton";
+import MainStageNominationPopover from "@/components/brain/my-stream/tabs/MainStageNominationPopover";
 
 const COLLECTION_TITLES: Record<string, string> = {
   "the-memes": "The Memes",
@@ -61,6 +62,8 @@ const COLLECTION_TITLES: Record<string, string> = {
   nextgen: "NextGen",
 };
 const PROFILE_DOUBLE_ACTIVATE_DELAY_MS = 280;
+const HEADER_RESTRICTION_BUTTON_CLASS =
+  "tw-size-9 tw-min-w-9 tw-rounded-lg tw-border-0 tw-bg-black tw-p-0 tw-text-iron-300 tw-shadow-sm desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50";
 
 interface HeaderConnectedAccount {
   readonly address: string;
@@ -316,11 +319,30 @@ const HeaderDropActionButton = ({
   const title = action.restrictionMessage ?? action.label;
 
   if (!action.canOpen) {
+    if (action.restrictionKind === "memes-nomination") {
+      return (
+        <MainStageNominationPopover>
+          <button
+            type="button"
+            aria-label={action.label}
+            aria-haspopup="dialog"
+            className={clsx(
+              "tw-flex tw-cursor-pointer tw-items-center tw-justify-center tw-transition tw-duration-150 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400",
+              HEADER_RESTRICTION_BUTTON_CLASS
+            )}
+          >
+            <LockClosedIcon className="tw-size-5 tw-flex-shrink-0" />
+            <span className="tw-sr-only">{action.compactLabel}</span>
+          </button>
+        </MainStageNominationPopover>
+      );
+    }
+
     return (
       <WaveHeaderRestrictionButton
         label={action.label}
         reason={title}
-        className="tw-size-9 tw-min-w-9 tw-rounded-lg tw-border-0 tw-bg-black tw-p-0 tw-text-iron-300 tw-shadow-sm desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50"
+        className={HEADER_RESTRICTION_BUTTON_CLASS}
       >
         <LockClosedIcon className="tw-size-5 tw-flex-shrink-0" />
         <span className="tw-sr-only">{action.compactLabel}</span>
@@ -329,18 +351,16 @@ const HeaderDropActionButton = ({
   }
 
   return (
-    <PrimaryButton
-      loading={false}
-      disabled={false}
-      onClicked={action.onOpen}
-      padding="tw-p-0 sm:tw-px-2.5 sm:tw-py-2"
+    <Button
+      onClick={action.onOpen}
+      size={null}
       title={title}
-      ariaLabel={action.label}
+      aria-label={action.label}
       className="tw-size-9 tw-min-w-9 tw-p-0"
     >
       <PlusIcon className="tw-size-5 tw-flex-shrink-0" />
       <span className="tw-sr-only">{action.compactLabel}</span>
-    </PrimaryButton>
+    </Button>
   );
 };
 
@@ -727,15 +747,17 @@ export default function AppHeader() {
               <HeaderPageShareButton isCapacitor={isCapacitor} />
             </div>
           )}
-          <div className="tw-flex-shrink-0">
-            <HeaderSearchButton
-              wave={
-                isInsideWave && (isWavesRoute || isMessagesRoute)
-                  ? activeWave
-                  : null
-              }
-            />
-          </div>
+          {!isCreateRoute && (
+            <div className="tw-flex-shrink-0">
+              <HeaderSearchButton
+                wave={
+                  isInsideWave && (isWavesRoute || isMessagesRoute)
+                    ? activeWave
+                    : null
+                }
+              />
+            </div>
+          )}
           <HeaderMoreMenu items={appHeaderMoreMenuItems} />
         </div>
       </div>

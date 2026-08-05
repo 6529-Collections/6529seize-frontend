@@ -564,10 +564,15 @@ describe("Auth component", () => {
     it("force-validates an authorized session after the server rejects it", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
-      const mockGetAuthJwt = require("@/services/auth/auth.utils")
-        .getAuthJwt as jest.MockedFunction<any>;
-      const mockGetWalletAddress = require("@/services/auth/auth.utils")
-        .getWalletAddress as jest.MockedFunction<any>;
+      const authUtils =
+        require("@/services/auth/auth.utils") as typeof AuthUtilsModule;
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<
+        typeof authUtils.getAuthJwt
+      >;
+      const mockGetWalletAddress =
+        authUtils.getWalletAddress as jest.MockedFunction<
+          typeof authUtils.getWalletAddress
+        >;
       const mockValidateJwt =
         require("@/services/auth/jwt-validation.utils").validateJwt;
       mockGetAuthJwt.mockReturnValue(TEST_REJECTED_SESSION_VALUE);
@@ -622,13 +627,18 @@ describe("Auth component", () => {
     it("cancels deferred server-rejected recovery after the token changes", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
-      const authUtils = require("@/services/auth/auth.utils");
-      const mockGetAuthJwt =
-        authUtils.getAuthJwt as jest.MockedFunction<any>;
+      const authUtils =
+        require("@/services/auth/auth.utils") as typeof AuthUtilsModule;
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<
+        typeof authUtils.getAuthJwt
+      >;
       const mockGetWalletAddress =
-        authUtils.getWalletAddress as jest.MockedFunction<any>;
-      const mockRemoveAuthJwt =
-        authUtils.removeAuthJwt as jest.MockedFunction<any>;
+        authUtils.getWalletAddress as jest.MockedFunction<
+          typeof authUtils.getWalletAddress
+        >;
+      const mockRemoveAuthJwt = authUtils.removeAuthJwt as jest.MockedFunction<
+        typeof authUtils.removeAuthJwt
+      >;
       const mockValidateJwt =
         require("@/services/auth/jwt-validation.utils").validateJwt;
       const sessionV2 = require("@/services/auth/session-v2.utils");
@@ -648,8 +658,7 @@ describe("Auth component", () => {
       });
       mockValidateJwt.mockImplementationOnce(
         (params: { shouldPersistRefreshedSession?: () => boolean }) => {
-          shouldPersistRefreshedSession =
-            params.shouldPersistRefreshedSession;
+          shouldPersistRefreshedSession = params.shouldPersistRefreshedSession;
           return validation.promise;
         }
       );

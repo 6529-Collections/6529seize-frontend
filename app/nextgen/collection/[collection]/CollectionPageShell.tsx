@@ -1,9 +1,8 @@
 "use client";
 
-import styles from "@/styles/Home.module.css";
 import NextGenNavigationHeader from "@/components/nextGen/collections/NextGenNavigationHeader";
+import { NEXTGEN_PAGE_FRAME_CLASSNAME } from "@/components/nextGen/collections/NextGenPageFrame";
 import type { NextGenCollection } from "@/entities/INextgen";
-import { NextGenCollectionHead } from "@/components/nextGen/collections/collectionParts/NextGenCollectionHeader";
 import type { ReactNode } from "react";
 import { useShallowRedirect } from "./useShallowRedirect";
 
@@ -19,12 +18,9 @@ export default function CollectionPageShell({
   useShallowRedirect(collection.name);
 
   return (
-    <>
-      <NextGenCollectionHead collection={collection} />
-      <main className={`${styles["main"]} tailwind-scope`}>
-        {withNav && <NextGenNavigationHeader />}
-        {children}
-      </main>
-    </>
+    <main className={NEXTGEN_PAGE_FRAME_CLASSNAME}>
+      {withNav && <NextGenNavigationHeader />}
+      {children}
+    </main>
   );
 }

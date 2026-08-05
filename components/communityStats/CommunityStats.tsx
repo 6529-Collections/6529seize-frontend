@@ -4,7 +4,10 @@ import { publicEnv } from "@/config/env";
 import { useSetTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { GlobalTDHHistory } from "@/entities/ITDH";
-import { numberWithCommas } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger, formatNumber } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t as translate, type MessageKey } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
 import {
   BarElement,
@@ -28,6 +31,19 @@ ChartJS.register(
   Legend,
   BarElement
 );
+
+type NetworkStatsMessageKey = Extract<MessageKey, `network.stats.${string}`>;
+
+const SECTION_HEADING_CLASS =
+  "tw-m-0 tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl";
+const SUMMARY_PANEL_CLASS =
+  "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/55 tw-p-3 sm:tw-p-4";
+
+const m = (
+  locale: SupportedLocale,
+  key: NetworkStatsMessageKey,
+  params: Parameters<typeof translate>[2] = {}
+) => translate(locale, key, params);
 
 const GRAPH_OPTIONS = {
   scales: {
@@ -58,6 +74,8 @@ const GRAPH_OPTIONS = {
 };
 
 export default function CommunityStats() {
+  const locale = useBrowserLocale();
+
   useSetTitle("Stats | Network");
 
   const page = 1;
@@ -92,12 +110,20 @@ export default function CommunityStats() {
   function printEstimatedDaysUntilCheckpoints(history: GlobalTDHHistory) {
     const checkpoints = getNextCheckpoints(history.total_boosted_tdh);
     return checkpoints.map((x) => (
-      <tr key={x}>
-        <th scope="row" className="tw-text-left">
-          Estimated days until {formatTdh(x)}
+      <tr
+        className="tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] last:tw-border-b-0"
+        key={x}
+      >
+        <th
+          scope="row"
+          className="tw-py-1 tw-text-left tw-text-sm tw-font-normal tw-text-iron-400 sm:tw-py-1.5"
+        >
+          {m(locale, "network.stats.summary.estimatedDays", {
+            target: formatTdh(x),
+          })}
         </th>
-        <td className="tw-text-right">
-          {numberWithCommas(getEstimatedDaysUntil(history, x))}
+        <td className="tw-py-1 tw-text-right tw-font-mono tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100 sm:tw-py-1.5">
+          {formatInteger(locale, getEstimatedDaysUntil(history, x))}
         </td>
       </tr>
     ));
@@ -120,7 +146,7 @@ export default function CommunityStats() {
       labels: tdhLabels,
       datasets: [
         {
-          label: "Total Boosted TDH",
+          label: m(locale, "network.stats.charts.totalBoosted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.total_boosted_tdh
           ),
@@ -128,7 +154,7 @@ export default function CommunityStats() {
           backgroundColor: "#00DC21",
         },
         {
-          label: "Total Unboosted TDH",
+          label: m(locale, "network.stats.charts.totalUnboosted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.total_tdh
           ),
@@ -136,7 +162,7 @@ export default function CommunityStats() {
           backgroundColor: "#1861FF",
         },
         {
-          label: "Total Unweighted TDH",
+          label: m(locale, "network.stats.charts.totalUnweighted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.total_tdh__raw
           ),
@@ -152,7 +178,7 @@ export default function CommunityStats() {
           data={data}
           options={GRAPH_OPTIONS}
           role="img"
-          aria-label="Bar chart comparing total boosted, unboosted, and unweighted TDH over time."
+          aria-label={m(locale, "network.stats.charts.totalAria")}
         />
         {/* <Line data={data} /> */}
       </>
@@ -164,7 +190,7 @@ export default function CommunityStats() {
       labels: tdhLabels,
       datasets: [
         {
-          label: "Net Boosted TDH",
+          label: m(locale, "network.stats.charts.netBoosted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.net_boosted_tdh
           ),
@@ -172,7 +198,7 @@ export default function CommunityStats() {
           backgroundColor: "#00DC21",
         },
         {
-          label: "Net Unboosted TDH",
+          label: m(locale, "network.stats.charts.netUnboosted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.net_tdh
           ),
@@ -180,7 +206,7 @@ export default function CommunityStats() {
           backgroundColor: "#1861FF",
         },
         {
-          label: "Net Unweighted TDH",
+          label: m(locale, "network.stats.charts.netUnweighted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.net_tdh__raw
           ),
@@ -196,7 +222,7 @@ export default function CommunityStats() {
           data={data}
           options={GRAPH_OPTIONS}
           role="img"
-          aria-label="Bar chart comparing daily net boosted, unboosted, and unweighted TDH changes."
+          aria-label={m(locale, "network.stats.charts.netAria")}
         />
         {/* <Line data={data} /> */}
       </>
@@ -208,7 +234,7 @@ export default function CommunityStats() {
       labels: tdhLabels,
       datasets: [
         {
-          label: "Created Boosted TDH",
+          label: m(locale, "network.stats.charts.createdBoosted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.created_boosted_tdh
           ),
@@ -216,7 +242,7 @@ export default function CommunityStats() {
           backgroundColor: "#00DC21",
         },
         {
-          label: "Created Unboosted TDH",
+          label: m(locale, "network.stats.charts.createdUnboosted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.created_tdh
           ),
@@ -224,7 +250,7 @@ export default function CommunityStats() {
           backgroundColor: "#1861FF",
         },
         {
-          label: "Created Unweighted TDH",
+          label: m(locale, "network.stats.charts.createdUnweighted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.created_tdh__raw
           ),
@@ -240,7 +266,7 @@ export default function CommunityStats() {
           data={data}
           options={GRAPH_OPTIONS}
           role="img"
-          aria-label="Bar chart comparing daily created boosted, unboosted, and unweighted TDH."
+          aria-label={m(locale, "network.stats.charts.createdAria")}
         />
         {/* <Line data={data} /> */}
       </>
@@ -252,7 +278,7 @@ export default function CommunityStats() {
       labels: tdhLabels,
       datasets: [
         {
-          label: "Destroyed Boosted TDH",
+          label: m(locale, "network.stats.charts.destroyedBoosted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.destroyed_boosted_tdh
           ),
@@ -260,7 +286,7 @@ export default function CommunityStats() {
           backgroundColor: "#00DC21",
         },
         {
-          label: "Destroyed Unboosted TDH",
+          label: m(locale, "network.stats.charts.destroyedUnboosted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.destroyed_tdh
           ),
@@ -268,7 +294,7 @@ export default function CommunityStats() {
           backgroundColor: "#1861FF",
         },
         {
-          label: "Destroyed Unweighted TDH",
+          label: m(locale, "network.stats.charts.destroyedUnweighted"),
           data: tdhLabels.map(
             (l) => tdhHistory.find((t) => t.date === l)?.destroyed_tdh__raw
           ),
@@ -284,7 +310,7 @@ export default function CommunityStats() {
           data={data}
           options={GRAPH_OPTIONS}
           role="img"
-          aria-label="Bar chart comparing daily destroyed boosted, unboosted, and unweighted TDH."
+          aria-label={m(locale, "network.stats.charts.destroyedAria")}
         />
         {/* <Line data={data} /> */}
       </>
@@ -293,50 +319,65 @@ export default function CommunityStats() {
 
   return (
     <section className="tw-w-full">
-      <div className="tw-pt-4 md:tw-w-2/3">
-        <h1 className="tw-mb-0">Network TDH Stats</h1>
-      </div>
+      <header className="tw-pb-6 sm:tw-pb-8">
+        <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
+          {m(locale, "network.stats.hero.title")}
+        </h1>
+      </header>
       {tdhHistory.length > 0 && (
         <>
-          <section className="tw-grid tw-grid-cols-1 tw-gap-6 tw-py-4 tw-font-bold md:tw-grid-cols-2 lg:tw-grid-cols-3">
-            <div className="tw-flex tw-flex-col tw-gap-2 lg:tw-col-span-1">
-              <table className="tw-mb-4 tw-w-full">
+          <section className="tw-grid tw-grid-cols-1 tw-gap-3 tw-pb-8 sm:tw-gap-6 md:tw-grid-cols-2">
+            <div className={SUMMARY_PANEL_CLASS}>
+              <table className="tw-m-0 tw-w-full">
                 <tbody>
-                  <tr>
-                    <th scope="row" className="tw-text-left">
-                      Network TDH
+                  <tr className="tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07]">
+                    <th
+                      scope="row"
+                      className="tw-py-1 tw-text-left tw-text-sm tw-font-normal tw-text-iron-400 sm:tw-py-1.5"
+                    >
+                      {m(locale, "network.stats.summary.networkTdh")}
                     </th>
-                    <td className="tw-text-right">
-                      {numberWithCommas(latestHistory!.total_boosted_tdh)}
+                    <td className="tw-py-1 tw-text-right tw-font-mono tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100 sm:tw-py-1.5">
+                      {formatInteger(locale, latestHistory!.total_boosted_tdh)}
+                    </td>
+                  </tr>
+                  <tr className="tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07]">
+                    <th
+                      scope="row"
+                      className="tw-py-1 tw-text-left tw-text-sm tw-font-normal tw-text-iron-400 sm:tw-py-1.5"
+                    >
+                      {m(locale, "network.stats.summary.dailyChange")}
+                    </th>
+                    <td className="tw-py-1 tw-text-right tw-font-mono tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100 sm:tw-py-1.5">
+                      {formatInteger(locale, latestHistory!.net_boosted_tdh)}
                     </td>
                   </tr>
                   <tr>
-                    <th scope="row" className="tw-text-left">
-                      Daily Change
+                    <th
+                      scope="row"
+                      className="tw-py-1 tw-text-left tw-text-sm tw-font-normal tw-text-iron-400 sm:tw-py-1.5"
+                    >
+                      {m(locale, "network.stats.summary.dailyPercentChange")}
                     </th>
-                    <td className="tw-text-right">
-                      {numberWithCommas(latestHistory!.net_boosted_tdh)}
-                    </td>
-                  </tr>
-                  <tr>
-                    <th scope="row" className="tw-text-left">
-                      Daily % Change
-                    </th>
-                    <td className="tw-text-right">
-                      {(
-                        (latestHistory!.net_boosted_tdh /
-                          latestHistory!.total_boosted_tdh) *
-                        100
-                      ).toFixed(2)}
-                      %
+                    <td className="tw-py-1 tw-text-right tw-font-mono tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100 sm:tw-py-1.5">
+                      {formatNumber(
+                        locale,
+                        latestHistory!.net_boosted_tdh /
+                          latestHistory!.total_boosted_tdh,
+                        {
+                          maximumFractionDigits: 2,
+                          minimumFractionDigits: 2,
+                          style: "percent",
+                        }
+                      )}
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <div className="md:tw-col-span-1 lg:tw-col-start-3">
+            <div className={SUMMARY_PANEL_CLASS}>
               {latestHistory && (
-                <table className="tw-mb-4 tw-w-full">
+                <table className="tw-m-0 tw-w-full">
                   <tbody>
                     {printEstimatedDaysUntilCheckpoints(latestHistory)}
                   </tbody>
@@ -345,56 +386,56 @@ export default function CommunityStats() {
             </div>
           </section>
           <section
-            className="tw-py-4"
+            className="tw-pb-8 sm:tw-pb-12"
             aria-labelledby="network-stats-total-tdh-heading"
           >
             <h2
               id="network-stats-total-tdh-heading"
-              className="tw-mb-0 tw-text-white"
+              className={SECTION_HEADING_CLASS}
             >
-              Total TDH
+              {m(locale, "network.stats.charts.total")}
             </h2>
             <div className="tw-flex tw-justify-center tw-pt-4">
               {printTotalTDH()}
             </div>
           </section>
           <section
-            className="tw-py-4"
+            className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-py-8 sm:tw-py-12"
             aria-labelledby="network-stats-net-tdh-heading"
           >
             <h2
               id="network-stats-net-tdh-heading"
-              className="tw-mb-0 tw-text-white"
+              className={SECTION_HEADING_CLASS}
             >
-              Net TDH Daily Change
+              {m(locale, "network.stats.charts.netDailyChange")}
             </h2>
             <div className="tw-flex tw-justify-center tw-pt-4">
               {printNetTDH()}
             </div>
           </section>
           <section
-            className="tw-py-4"
+            className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-py-8 sm:tw-py-12"
             aria-labelledby="network-stats-created-tdh-heading"
           >
             <h2
               id="network-stats-created-tdh-heading"
-              className="tw-mb-0 tw-text-white"
+              className={SECTION_HEADING_CLASS}
             >
-              Created TDH Daily Change
+              {m(locale, "network.stats.charts.createdDailyChange")}
             </h2>
             <div className="tw-flex tw-justify-center tw-pt-4">
               {printCreatedTDH()}
             </div>
           </section>
           <section
-            className="tw-py-4"
+            className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-py-8 sm:tw-py-12"
             aria-labelledby="network-stats-destroyed-tdh-heading"
           >
             <h2
               id="network-stats-destroyed-tdh-heading"
-              className="tw-mb-0 tw-text-white"
+              className={SECTION_HEADING_CLASS}
             >
-              Destroyed TDH Change
+              {m(locale, "network.stats.charts.destroyedChange")}
             </h2>
             <div className="tw-flex tw-justify-center tw-pt-4">
               {printDestroyedTDH()}

@@ -1,18 +1,32 @@
 import type { ConsolidatedTDH, TDH, TDHBoostBreakdown } from "@/entities/ITDH";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { buildTooltipId } from "@/helpers/tooltip.helpers";
 import { formatNumber, roundTo } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
+import { useId } from "react";
 import { Tooltip } from "react-tooltip";
+import {
+  STATS_SECTION_HEADING_CLASS,
+  STATS_TABLE_CLASS,
+  STATS_TABLE_HEADER_CELL_CLASS,
+  STATS_TABLE_HEAD_CLASS,
+  STATS_TABLE_ROW_CLASS,
+  STATS_TABLE_VALUE_CELL_CLASS,
+  UserPageStatsTableScroll,
+} from "./UserPageStatsTableShared";
 
 const BOOST_VERSION = "1.4";
 const BOOST_VALUE_FORMAT_OPTIONS = {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 } satisfies Intl.NumberFormatOptions;
+
+const BOOST_ROW_HEADER_CLASS =
+  "tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-left tw-font-medium tw-text-iron-400";
+const BOOST_VALUE_CELL_CLASS = `${STATS_TABLE_VALUE_CELL_CLASS} tw-min-w-36`;
 
 type BoostMessageKey = Extract<
   MessageKey,
@@ -49,56 +63,44 @@ export default function UserPageStatsBoostBreakdown({
   readonly tdh: ConsolidatedTDH | TDH | undefined;
   readonly locale?: SupportedLocale | undefined;
 }) {
-  if (!tdh?.boost_breakdown || !tdh.boost) {
-    return <></>;
+  if (!tdh?.boost_breakdown || tdh.boost == null) {
+    return null;
   }
+
+  const boostBreakdown = tdh.boost_breakdown;
+  const boost = tdh.boost;
+  const caption = boostMessage(
+    locale,
+    "user.collected.stats.boostBreakdown.tableCaption"
+  );
 
   function getMemeRow(name: string, breakdown: TDHBoostBreakdown | undefined) {
     return (
-      <tr key={getRandomObjectId()}>
-        <th
-          scope="row"
-          className="tw-group tw-whitespace-nowrap tw-px-8 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-10 sm:tw-text-md lg:tw-pr-4"
-        >
+      <tr key={name} className={STATS_TABLE_ROW_CLASS}>
+        <th scope="row" className={`${BOOST_ROW_HEADER_CLASS} tw-pl-8`}>
           {name}
         </th>
-        <td className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4">
-          {hasBoostValue(breakdown?.available) ? (
-            <span className="tw-flex tw-items-center tw-justify-center tw-gap-2">
-              {formatBoostValue(locale, breakdown.available)}
-              <BoostBreakdownInfo
-                info={breakdown.available_info}
-                locale={locale}
-              />
-            </span>
-          ) : (
-            "-"
-          )}
-        </td>
-        <td className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4">
-          {hasBoostValue(breakdown?.acquired) ? (
-            <span className="tw-flex tw-items-center tw-justify-center tw-gap-2">
-              {formatBoostValue(locale, breakdown.acquired)}
-              <BoostBreakdownInfo
-                info={breakdown.acquired_info}
-                locale={locale}
-              />
-            </span>
-          ) : (
-            "-"
-          )}
-        </td>
+        <BoostValueCell
+          value={breakdown?.available}
+          info={breakdown?.available_info}
+          locale={locale}
+        />
+        <BoostValueCell
+          value={breakdown?.acquired}
+          info={breakdown?.acquired_info}
+          locale={locale}
+        />
       </tr>
     );
   }
 
   function getMemesRows() {
     const headerRow = (
-      <tr key={getRandomObjectId()}>
+      <tr key="memes" className="tw-bg-white/[0.02]">
         <th
           scope="rowgroup"
           colSpan={3}
-          className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-px-4 tw-pt-3 tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4"
+          className="tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-left tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-300"
         >
           {boostMessage(
             locale,
@@ -108,9 +110,6 @@ export default function UserPageStatsBoostBreakdown({
       </tr>
     );
 
-    const bb = tdh?.boost_breakdown;
-    if (!bb) return [headerRow];
-
     const baseRows = [
       headerRow,
       getMemeRow(
@@ -118,15 +117,15 @@ export default function UserPageStatsBoostBreakdown({
           locale,
           "user.collected.stats.boostBreakdown.rows.fullCollectionSet"
         ),
-        bb.memes_card_sets
+        boostBreakdown.memes_card_sets
       ),
     ];
 
-    if (bb.memes_card_sets?.acquired !== 0) {
+    if (boostBreakdown.memes_card_sets?.acquired !== 0) {
       return baseRows;
     }
 
-    const seasonKeys = Object.keys(bb)
+    const seasonKeys = Object.keys(boostBreakdown)
       .filter((key): key is `memes_szn${number}` => /^memes_szn\d+$/.test(key))
       .sort((a, b) => {
         const numA = Number.parseInt(a.replace("memes_szn", ""), 10);
@@ -135,34 +134,32 @@ export default function UserPageStatsBoostBreakdown({
       });
 
     const extraRows = seasonKeys.flatMap((key) => {
-      const sznNum = key.replace("memes_szn", "");
+      const seasonNumber = key.replace("memes_szn", "");
       const rows = [
         getMemeRow(
           boostMessage(
             locale,
             "user.collected.stats.boostBreakdown.seasonLabel",
-            {
-              seasonNumber: sznNum,
-            }
+            { seasonNumber }
           ),
-          bb[key]
+          boostBreakdown[key]
         ),
       ];
-      if (key === "memes_szn1" && !bb[key]?.acquired) {
+      if (key === "memes_szn1" && !boostBreakdown[key]?.acquired) {
         rows.push(
           getMemeRow(
             boostMessage(
               locale,
               "user.collected.stats.boostBreakdown.rows.genesisSet"
             ),
-            bb.memes_genesis
+            boostBreakdown.memes_genesis
           ),
           getMemeRow(
             boostMessage(
               locale,
               "user.collected.stats.boostBreakdown.rows.nakamoto"
             ),
-            bb.memes_nakamoto
+            boostBreakdown.memes_nakamoto
           )
         );
       }
@@ -173,184 +170,164 @@ export default function UserPageStatsBoostBreakdown({
   }
 
   function getBaseBoostRow(name: string, breakdown?: TDHBoostBreakdown) {
-    if (breakdown) {
-      return (
-        <tr key={getRandomObjectId()}>
-          <th
-            scope="row"
-            className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4"
-          >
-            {name}
-          </th>
-          <td className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4">
-            {hasBoostValue(breakdown.available) ? (
-              <span className="tw-flex tw-items-center tw-justify-center tw-gap-2">
-                {formatBoostValue(locale, breakdown.available)}
-                <BoostBreakdownInfo
-                  info={breakdown.available_info}
-                  locale={locale}
-                />
-              </span>
-            ) : (
-              "-"
-            )}
-          </td>
-          <td className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4">
-            {hasBoostValue(breakdown.acquired) ? (
-              <span className="tw-flex tw-items-center tw-justify-center tw-gap-2">
-                {formatBoostValue(locale, breakdown.acquired)}
-                <BoostBreakdownInfo
-                  info={breakdown.acquired_info}
-                  locale={locale}
-                />
-              </span>
-            ) : (
-              "-"
-            )}
-          </td>
-        </tr>
-      );
+    if (!breakdown) {
+      return null;
     }
 
-    return <></>;
+    return (
+      <tr key={name} className={STATS_TABLE_ROW_CLASS}>
+        <th scope="row" className={BOOST_ROW_HEADER_CLASS}>
+          {name}
+        </th>
+        <BoostValueCell
+          value={breakdown.available}
+          info={breakdown.available_info}
+          locale={locale}
+        />
+        <BoostValueCell
+          value={breakdown.acquired}
+          info={breakdown.acquired_info}
+          locale={locale}
+        />
+      </tr>
+    );
   }
 
   return (
-    <div className="tw-mt-6 lg:tw-mt-8">
-      <div className="tw-flex tw-items-center tw-justify-between">
-        <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
+    <section aria-labelledby="boost-breakdown-heading" className="tw-space-y-3">
+      <div className="tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-2">
+        <h3
+          className={STATS_SECTION_HEADING_CLASS}
+          id="boost-breakdown-heading"
+        >
           {boostMessage(locale, "user.collected.stats.boostBreakdown.title")}
         </h3>
-        <span>
-          <Link
-            href="/network/tdh#tdh-1-4"
-            className="tw-text-sm tw-no-underline hover:tw-underline"
-          >
-            {boostMessage(
-              locale,
-              "user.collected.stats.boostBreakdown.versionLink",
-              {
-                version: BOOST_VERSION,
-              }
-            )}
-          </Link>
-        </span>
+        <Link
+          href="/network/tdh#tdh-1-4"
+          className="tw-text-xs tw-font-medium tw-text-iron-500 tw-no-underline hover:tw-text-iron-300 hover:tw-underline"
+        >
+          {boostMessage(
+            locale,
+            "user.collected.stats.boostBreakdown.versionLink",
+            { version: BOOST_VERSION }
+          )}
+        </Link>
       </div>
-      <div className="tw-mt-2 tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 lg:tw-mt-4">
-        <div className="tw-flow-root">
-          <div className="tw-inline-block tw-min-w-full tw-align-middle">
-            <table className="tw-min-w-full">
-              <caption className="tw-sr-only">
-                {boostMessage(
+      <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.02]">
+        <UserPageStatsTableScroll label={caption}>
+          <table className={`${STATS_TABLE_CLASS} tw-min-w-[34rem]`}>
+            <caption className="tw-sr-only">{caption}</caption>
+            <thead className={STATS_TABLE_HEAD_CLASS}>
+              <tr>
+                <th
+                  scope="col"
+                  className={`${STATS_TABLE_HEADER_CELL_CLASS} tw-text-left`}
+                >
+                  {boostMessage(
+                    locale,
+                    "user.collected.stats.boostBreakdown.columns.type"
+                  )}
+                </th>
+                <th
+                  scope="col"
+                  className={`${STATS_TABLE_HEADER_CELL_CLASS} tw-text-right`}
+                >
+                  {boostMessage(
+                    locale,
+                    "user.collected.stats.boostBreakdown.columns.potential"
+                  )}
+                </th>
+                <th
+                  scope="col"
+                  className={`${STATS_TABLE_HEADER_CELL_CLASS} tw-text-right`}
+                >
+                  {boostMessage(
+                    locale,
+                    "user.collected.stats.boostBreakdown.columns.actual"
+                  )}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {getMemesRows()}
+              {getBaseBoostRow(
+                boostMessage(
                   locale,
-                  "user.collected.stats.boostBreakdown.tableCaption"
-                )}
-              </caption>
-              <thead className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-iron-700 tw-bg-iron-900">
-                <tr key={getRandomObjectId()}>
-                  <th
-                    scope="col"
-                    className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pr-4"
-                  >
-                    {boostMessage(
+                  "user.collected.stats.boostBreakdown.rows.gradients"
+                ),
+                boostBreakdown.gradients
+              )}
+              <tr className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.1] tw-bg-white/[0.02]">
+                <th
+                  scope="row"
+                  className={`${BOOST_ROW_HEADER_CLASS} tw-font-semibold tw-text-iron-100`}
+                >
+                  {boostMessage(
+                    locale,
+                    "user.collected.stats.boostBreakdown.rows.total"
+                  )}
+                </th>
+                <BoostValueCell
+                  value={
+                    (boostBreakdown.memes_card_sets?.available ?? 0) +
+                    (boostBreakdown.gradients?.available ?? 0)
+                  }
+                  info={[
+                    boostMessage(
                       locale,
-                      "user.collected.stats.boostBreakdown.columns.type"
-                    )}
-                  </th>
-                  <th
-                    scope="col"
-                    className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pr-4"
-                  >
-                    {boostMessage(
+                      "user.collected.stats.boostBreakdown.info.totalPotential"
+                    ),
+                  ]}
+                  locale={locale}
+                  emphasized
+                />
+                <BoostValueCell
+                  value={roundTo(boost - 1, 2)}
+                  info={[
+                    boostMessage(
                       locale,
-                      "user.collected.stats.boostBreakdown.columns.potential"
-                    )}
-                  </th>
-                  <th
-                    scope="col"
-                    className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pr-4"
-                  >
-                    {boostMessage(
-                      locale,
-                      "user.collected.stats.boostBreakdown.columns.actual"
-                    )}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {tdh?.boost_breakdown && (
-                  <>
-                    {getMemesRows()}
-                    {getBaseBoostRow(
-                      boostMessage(
-                        locale,
-                        "user.collected.stats.boostBreakdown.rows.gradients"
-                      ),
-                      tdh?.boost_breakdown.gradients
-                    )}
-                    <tr key={getRandomObjectId()}>
-                      <th
-                        scope="row"
-                        className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold sm:tw-px-6 sm:tw-text-md lg:tw-pr-4"
-                      >
-                        {boostMessage(
-                          locale,
-                          "user.collected.stats.boostBreakdown.rows.total"
-                        )}
-                      </th>
-                      <td className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700 tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4">
-                        {tdh?.boost ? (
-                          <span className="tw-flex tw-items-center tw-justify-center tw-gap-2">
-                            {formatBoostValue(
-                              locale,
-                              (tdh.boost_breakdown.memes_card_sets?.available ??
-                                0) +
-                                (tdh.boost_breakdown.gradients?.available ?? 0)
-                            )}
-                            <BoostBreakdownInfo
-                              info={[
-                                boostMessage(
-                                  locale,
-                                  "user.collected.stats.boostBreakdown.info.totalPotential"
-                                ),
-                              ]}
-                              locale={locale}
-                            />
-                          </span>
-                        ) : (
-                          "-"
-                        )}
-                      </td>
-                      <td className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700 tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4">
-                        {tdh?.boost ? (
-                          <span className="tw-flex tw-items-center tw-justify-center tw-gap-2">
-                            {formatBoostValue(
-                              locale,
-                              roundTo(tdh.boost - 1, 2)
-                            )}
-                            <BoostBreakdownInfo
-                              info={[
-                                boostMessage(
-                                  locale,
-                                  "user.collected.stats.boostBreakdown.info.totalActual"
-                                ),
-                              ]}
-                              locale={locale}
-                            />
-                          </span>
-                        ) : (
-                          "-"
-                        )}
-                      </td>
-                    </tr>
-                  </>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                      "user.collected.stats.boostBreakdown.info.totalActual"
+                    ),
+                  ]}
+                  locale={locale}
+                  emphasized
+                />
+              </tr>
+            </tbody>
+          </table>
+        </UserPageStatsTableScroll>
       </div>
-    </div>
+    </section>
+  );
+}
+
+/** Renders a boost value with optional breakdown detail and row emphasis. */
+function BoostValueCell({
+  value,
+  info,
+  locale,
+  emphasized = false,
+}: {
+  readonly value: number | undefined | null;
+  readonly info: string[] | undefined;
+  readonly locale: SupportedLocale;
+  readonly emphasized?: boolean;
+}) {
+  return (
+    <td
+      className={`${BOOST_VALUE_CELL_CLASS} ${
+        emphasized ? "tw-font-semibold" : ""
+      }`}
+    >
+      {hasBoostValue(value) ? (
+        <span className="tw-flex tw-items-center tw-justify-end tw-gap-2">
+          {formatBoostValue(locale, value)}
+          <BoostBreakdownInfo info={info ?? []} locale={locale} />
+        </span>
+      ) : (
+        "-"
+      )}
+    </td>
   );
 }
 
@@ -361,49 +338,34 @@ function BoostBreakdownInfo({
   readonly info: string[];
   readonly locale: SupportedLocale;
 }) {
-  if (!info || info.length === 0) {
-    return <></>;
-  }
+  const tooltipId = buildTooltipId("boost-info", useId());
 
-  const tooltipId = `boost-info-${getRandomObjectId()}`;
+  if (info.length === 0) {
+    return null;
+  }
 
   return (
     <>
       <button
         type="button"
-        className="tw-inline-flex tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+        className="tw-inline-flex tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
         aria-label={boostMessage(
           locale,
           "user.collected.stats.boostBreakdown.info.ariaLabel"
         )}
         data-tooltip-id={tooltipId}
       >
-        <FontAwesomeIcon
-          icon={faInfoCircle}
-          height={16}
-          color="lightgrey"
-          aria-hidden="true"
-        />
+        <FontAwesomeIcon icon={faInfoCircle} height={16} aria-hidden="true" />
       </button>
       <Tooltip
         id={tooltipId}
         place="top"
-        style={{
-          backgroundColor: "#1F2937",
-          color: "white",
-          padding: "4px 8px",
-          zIndex: 10,
-        }}
+        className="!tw-bg-iron-800 !tw-px-2 !tw-py-1 !tw-text-iron-50"
       >
         {info.length > 1 ? (
-          <ul
-            className="tw-mb-0"
-            style={{ paddingLeft: "1rem", textAlign: "left" }}
-          >
-            {info.map((i) => (
-              <li key={getRandomObjectId()} className="tw-text-left">
-                {i}
-              </li>
+          <ul className="tw-mb-0 tw-pl-4 tw-text-left">
+            {info.map((item, index) => (
+              <li key={`${item}-${index}`}>{item}</li>
             ))}
           </ul>
         ) : (

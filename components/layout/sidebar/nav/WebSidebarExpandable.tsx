@@ -1,17 +1,28 @@
 "use client";
 
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import WebSidebarNavItem from "./WebSidebarNavItem";
 import WebSidebarExpandableGroup from "./WebSidebarExpandableGroup";
 import type { SidebarSection } from "@/components/navigation/navTypes";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { isSidebarNavItemActive } from "./sidebarActive";
 
 interface WebSidebarExpandableProps {
   readonly section: SidebarSection;
   readonly expanded: boolean;
   readonly onToggle: (e?: React.MouseEvent) => void;
+  readonly onPointerEnter?:
+    | React.PointerEventHandler<HTMLButtonElement>
+    | undefined;
+  readonly onPointerLeave?:
+    | React.PointerEventHandler<HTMLButtonElement>
+    | undefined;
+  readonly onKeyDown?:
+    | React.KeyboardEventHandler<HTMLButtonElement>
+    | undefined;
   readonly collapsed: boolean;
   readonly pathname: string | null;
   readonly "data-section"?: string | undefined;
@@ -21,6 +32,9 @@ function WebSidebarExpandable({
   section,
   expanded,
   onToggle,
+  onPointerEnter,
+  onPointerLeave,
+  onKeyDown,
   collapsed,
   pathname,
   "data-section": dataSection,
@@ -30,19 +44,31 @@ function WebSidebarExpandable({
       sub.items.some((item) => isSidebarNavItemActive(item, pathname))
     )?.name ?? null;
 
-  const [expandedSubsection, setExpandedSubsection] = useState<string | null>(
-    () => activeSubsection
-  );
+  const [subsectionSelection, setSubsectionSelection] = useState<{
+    readonly pathname: string | null;
+    readonly activeSubsection: string | null;
+    readonly selectedSubsection: string | null;
+  }>(() => ({
+    pathname,
+    activeSubsection,
+    selectedSubsection: activeSubsection,
+  }));
 
-  useEffect(() => {
-    setExpandedSubsection(activeSubsection);
-  }, [activeSubsection, pathname]);
+  const expandedSubsection =
+    subsectionSelection.pathname === pathname &&
+    subsectionSelection.activeSubsection === activeSubsection
+      ? subsectionSelection.selectedSubsection
+      : activeSubsection;
 
   const handleSubsectionToggle = useCallback(
     (subsectionName: string, isNowExpanded: boolean) => {
-      setExpandedSubsection(isNowExpanded ? subsectionName : null);
+      setSubsectionSelection({
+        pathname,
+        activeSubsection,
+        selectedSubsection: isNowExpanded ? subsectionName : null,
+      });
     },
-    []
+    [activeSubsection, pathname]
   );
 
   const hasActiveItem = useMemo(() => {
@@ -59,17 +85,21 @@ function WebSidebarExpandable({
   }, [section.items, section.subsections, pathname]);
 
   const panelId = `section-${section.key}`;
+  const flyoutId = `sidebar-flyout-${section.key}`;
 
   return (
     <>
       <WebSidebarNavItem
         onClick={(e) => onToggle(e)}
+        onPointerEnter={onPointerEnter}
+        onPointerLeave={onPointerLeave}
+        onKeyDown={onKeyDown}
         icon={section.icon}
         label={section.name}
         active={hasActiveItem}
         collapsed={collapsed}
         ariaExpanded={expanded}
-        ariaControls={panelId}
+        ariaControls={collapsed ? flyoutId : panelId}
         data-section={dataSection}
         rightSlot={
           !collapsed && (
@@ -91,7 +121,10 @@ function WebSidebarExpandable({
           <div className="tw-overflow-hidden">
             <div
               id={panelId}
-              aria-label={`${section.name} items`}
+              role="group"
+              aria-label={t(DEFAULT_LOCALE, "navigation.sidebar.panelLabel", {
+                section: section.name,
+              })}
               className="tw-relative tw-m-0 tw-p-0"
             >
               <div
@@ -108,14 +141,16 @@ function WebSidebarExpandable({
                     <li key={item.href} className="tw-m-0 tw-p-0">
                       <Link
                         href={item.href}
-                        className={`tw-touch-action-manipulation tw-ml-[2.75rem] tw-flex tw-h-11 tw-w-[calc(100%-2.75rem)] tw-cursor-pointer tw-items-center tw-justify-start tw-rounded-xl tw-border-none tw-pl-3 tw-pr-3 tw-text-base tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 motion-reduce:tw-transition-none ${
+                        className={`tw-touch-action-manipulation tw-ml-[2.75rem] tw-flex tw-min-h-11 tw-w-[calc(100%-2.75rem)] tw-cursor-pointer tw-items-center tw-justify-start tw-rounded-xl tw-border-none tw-py-2 tw-pl-3 tw-pr-3 tw-text-sm tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:tw-min-h-10 motion-reduce:tw-transition-none ${
                           active
                             ? "tw-bg-iron-900 tw-text-white active:tw-text-white desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
                             : "tw-bg-transparent tw-text-iron-400 active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
                         }`}
                         aria-current={active ? "page" : undefined}
                       >
-                        {item.name}
+                        <span className="tw-min-w-0 tw-break-words">
+                          {item.name}
+                        </span>
                       </Link>
                     </li>
                   );

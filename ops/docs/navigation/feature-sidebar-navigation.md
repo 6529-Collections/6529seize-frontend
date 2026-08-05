@@ -11,10 +11,17 @@ On web layouts, route switching is sidebar-first.
 - Touch small-screen web: header menu button opens the same sidebar as overlay.
 - In collapsed rail mode, flyout submenus keep the same subsection labels and
   nested route grouping shown in the expanded rail.
+- In collapsed rail mode, a mouse hover opens `NFTs` and `About` after a short
+  intent delay; tap or click remains available for touch and pointer users.
+- Collapsed flyouts enter with a short opacity and horizontal-position reveal;
+  reduced-motion preferences show them immediately without animation.
 - The 6529 logo links to `/`; there is no labeled `Home` product row.
-- Primary menu concepts are `NFTs`, `Waves`, `DMs`, `Join 6529`, and `About`.
-- `NFTs` and `About` are expandable groups; `Waves`, `DMs`, and `Join 6529`
-  are direct rows.
+- Primary menu concepts are ordered `NFTs`, `Museum`, `Waves`, `DMs`,
+  `Join 6529`, and `About` so art destinations stay together while Waves and
+  DMs remain adjacent.
+- `NFTs` and `About` are expandable groups; `Museum`, `Waves`, `DMs`, and
+  `Join 6529` are direct rows.
+- The `Museum` row opens `/museum/network` in one click.
 - The `Waves` sidebar row opens `/waves` in one click. `Discover Waves`
   remains a secondary Waves experience link and searchable destination.
 - When the connected wallet can access Drop Forge, the sidebar adds a
@@ -23,12 +30,15 @@ On web layouts, route switching is sidebar-first.
   `Notifications` row with its own unread dot.
 - Connected account avatar in the sidebar account area can show an unread dot
   when another connected account has unread notifications.
+- In the collapsed rail, the connected account avatar gets a visible hover
+  highlight; the account menu still opens by click or keyboard activation.
 
 ## Location in the Site
 
 - Web routes rendered with `WebLayout` or `SmallScreenLayout` (non-app).
 - Home entry: 6529 logo link to `/`.
-- Primary rows/groups: `NFTs`, `Waves`, `DMs`, `Join 6529`, `About`.
+- Primary rows/groups: `NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529`,
+  `About`.
 - Gated primary row: `Drop Forge`, after `About`, only when the connected
   wallet can access it.
 - Utility rows: desktop `Search`, connected-only `Notifications`,
@@ -41,6 +51,7 @@ On web layouts, route switching is sidebar-first.
 - Desktop and narrow desktop web: use sidebar chevron toggle.
 - Touch small-screen web: use header menu button.
 - Select direct rows or expand groups for nested routes.
+- Open `Museum` directly from the primary sidebar row.
 - Open `Waves` directly from the primary sidebar row.
 - Open `Join 6529` directly from the primary sidebar row.
 - Open `Discover Waves` from the expanded Waves panel header or search.
@@ -58,9 +69,10 @@ On web layouts, route switching is sidebar-first.
 2. Switch primary sections with direct rows.
 3. Use lower utility rows for connected `Notifications`, connected `Profile`,
    or disconnected `Share`.
-4. Open `NFTs` or `About` for nested routes; use the `Waves` row for direct
-   `/waves` navigation and the `Join 6529` row for `/join-6529`.
-5. In collapsed mode, group rows open anchored flyout submenus that preserve
+4. Open `NFTs` or `About` for nested routes; use the `Museum`, `Waves`, and
+   `Join 6529` rows for direct navigation.
+5. In collapsed mode, hover a group row with a mouse or activate it by tap,
+   click, or keyboard to open an anchored flyout submenu. The flyout preserves
    subsection labels such as `Network & Reputation`, `Delegation & Wallets`, or
    `Data & Developer Tools`.
 6. Select a destination and watch active state update.
@@ -71,9 +83,15 @@ On web layouts, route switching is sidebar-first.
 - Open `NFTs` routes:
   `/the-memes`, `/6529-gradient`, `/nextgen`, `/meme-lab`, `/rememes`,
   `/nft-activity`, `/meme-calendar`.
+- On local development and shared staging, open the pre-deployment Stream
+  review from `NFTs > 6529 Stream — Review`. It appears after `ReMemes` and
+  before `NFT Activity` and opens `/reviews/6529-stream`. It is absent on
+  production.
 - Open `Waves` routes:
   use the primary `Waves` row for `/waves`; use `Discover Waves` in the Waves
   panel header or search for `/discover`.
+- Open `Museum`:
+  use the primary `Museum` row for `/museum/network`.
 - Open `Join 6529`:
   use the primary `Join 6529` row for the shareable onboarding guide at
   `/join-6529`.
@@ -100,7 +118,7 @@ On web layouts, route switching is sidebar-first.
   `NFTs` keeps collection and NFT activity links, and `About` keeps subsection
   labels such as `Network & Reputation`, `Delegation & Wallets`, and
   `Data & Developer Tools` instead of flattening every route into one list.
-  `Waves` and `Join 6529` remain direct rows in collapsed mode.
+  `Museum`, `Waves`, and `Join 6529` remain direct rows in collapsed mode.
 - Open `About` and `6529 Capital` routes from grouped links.
 - Open connected `Notifications` from the lower row above `Profile`.
 - Open `Share` to generate QR/deep links for the current route:
@@ -118,9 +136,16 @@ On web layouts, route switching is sidebar-first.
   connected accounts (not the active one).
 - Active grouped routes auto-expand their section on route load/change.
 - In collapsed mode, selecting the same group toggles flyout open/closed.
+- Mouse hover uses a short intent delay before opening and a close grace period
+  so crossing from the group icon into the flyout does not dismiss it.
+- Only one collapsed flyout is open at a time. Moving from one group to another
+  replaces the open flyout.
 - Collapsed flyouts keep subsection headers as labels; only the nested rows
   inside each subsection navigate.
-- Flyouts close on outside click, `Escape`, or when rail exits collapsed mode.
+- Flyouts close after the mouse leaves both the trigger and flyout, on outside
+  click, with `Escape`, or when the rail exits collapsed mode. Keyboard opening
+  moves focus into the links, and `Escape` restores focus to the group trigger.
+- The collapsed-row tooltip stays hidden while its flyout is open.
 - Flyouts reposition on sidebar scroll and window resize.
 - `Notifications` row appears only when wallet connection is active.
 - `Profile` row appears only when wallet connection is active.
@@ -129,6 +154,8 @@ On web layouts, route switching is sidebar-first.
 - Connected user row opens the account menu on a single activate; a quick
   second activate cycles to the next connected account when at least two are
   available.
+- The web account dropdown stays horizontally anchored to the connected user
+  row when the centered desktop layout adds wide-screen margins.
 - Disconnected `Share` row is hidden in Capacitor/native context and
   mobile-device web.
 - Connected desktop-web `Share` moves into the user menu and stays hidden until
@@ -163,6 +190,9 @@ On web layouts, route switching is sidebar-first.
 - Desktop-web sidebar search supports both `⌘K` and `Ctrl+K`.
 - Sidebar rows change with auth, device context, country gate, and runtime
   feature gates.
+- The Stream review item is controlled by the public-review environment gate,
+  not wallet state. Only loopback development and the exact shared staging
+  hostname enable it initially.
 - Native app primary switching is owned by
   [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md).
 

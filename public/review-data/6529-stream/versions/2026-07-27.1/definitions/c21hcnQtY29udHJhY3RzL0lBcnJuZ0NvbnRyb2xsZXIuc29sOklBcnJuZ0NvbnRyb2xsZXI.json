@@ -1,0 +1,1871 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#event:ArrngRefundInsufficientTokenForGas(address,uint256)",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "caller",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "name": "ArrngRefundInsufficientTokenForGas",
+          "signature": "ArrngRefundInsufficientTokenForGas(address,uint256)",
+          "topic0": "0xe6ddfbdd5ed4c905f0494be8d48d3fae5e7d78a848d6fec1de1fd4a4b14c36e9"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#event:ArrngRequest(address,uint64,uint32,uint64,uint64,uint64,uint64,address)",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "address",
+              "name": "caller",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "internalType": "uint64",
+              "name": "requestId",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "internalType": "uint32",
+              "name": "method",
+              "type": "uint32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "numberOfNumbers",
+              "type": "uint64"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "minValue",
+              "type": "uint64"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "maxvalue",
+              "type": "uint64"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "ethValue",
+              "type": "uint64"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "internalType": "address",
+              "name": "refundAddress",
+              "type": "address"
+            }
+          ],
+          "name": "ArrngRequest",
+          "signature": "ArrngRequest(address,uint64,uint32,uint64,uint64,uint64,uint64,address)",
+          "topic0": "0xa3097c9e913577149004678bcd9af9e87f11dc65f0157774aed42c32703599ec"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#event:ArrngResponse(bytes32)",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "requestTxnHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "ArrngResponse",
+          "signature": "ArrngResponse(bytes32)",
+          "topic0": "0x287b566bd1c5e155fea4e6b0b27a03fc60495accd83b90f63d3e472031749e80"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#event:ArrngServed(uint128,uint128,uint256[],string,string)",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "internalType": "uint128",
+              "name": "requestId",
+              "type": "uint128"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "internalType": "uint128",
+              "name": "feeCharged",
+              "type": "uint128"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "internalType": "uint256[]",
+              "name": "randomNumbers",
+              "type": "uint256[]"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "internalType": "string",
+              "name": "apiResponse",
+              "type": "string"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "internalType": "string",
+              "name": "apiSignature",
+              "type": "string"
+            }
+          ],
+          "name": "ArrngServed",
+          "signature": "ArrngServed(uint128,uint128,uint256[],string,string)",
+          "topic0": "0x2f4e34c2e65889cb3bd8836a6aa41071c3b123bc7277a740070decb05c144f00"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#event:ENSNameSet(string,bytes32)",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "string",
+              "name": "ensName",
+              "type": "string"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "ensNameHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "ENSNameSet",
+          "signature": "ENSNameSet(string,bytes32)",
+          "topic0": "0x1e35a1a96eba8b2f2c87d5ef9a703b36193b12ed0ec2c11bbf35437703dd504b"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#event:ENSReverseRegistrarSet(address)",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "address",
+              "name": "newENSReverseRegistrar",
+              "type": "address"
+            }
+          ],
+          "name": "ENSReverseRegistrarSet",
+          "signature": "ENSReverseRegistrarSet(address)",
+          "topic0": "0x24625640821500d1ed82bf4cfa7973b775a4403ba28f029db24efa6b80241aac"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#event:MaximumNumberOfNumbersSet(uint256)",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "newNumberLimited",
+              "type": "uint256"
+            }
+          ],
+          "name": "MaximumNumberOfNumbersSet",
+          "signature": "MaximumNumberOfNumbersSet(uint256)",
+          "topic0": "0x943e9efb30a1f63dc3548baa55ae4bcf7d8af831a0539ab48ccc08d9f2c58a0d"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#event:MinimumNativeTokenSet(uint256)",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "minimumNativeToken",
+              "type": "uint256"
+            }
+          ],
+          "name": "MinimumNativeTokenSet",
+          "signature": "MinimumNativeTokenSet(uint256)",
+          "topic0": "0x81c1467f6ed8e906874cbd13844312f7ef450d069d2fb03a2bf037bd01b6a611"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#event:OracleAddressSet(address)",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "address",
+              "name": "oracle",
+              "type": "address"
+            }
+          ],
+          "name": "OracleAddressSet",
+          "signature": "OracleAddressSet(address)",
+          "topic0": "0xdd82bdfc28fcc826c53263dc2a2b6083e27e92699ebfee617227e08e21c202f0"
+        },
+        {
+          "anonymous": false,
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#event:TreasuryAddressSet(address)",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "internalType": "address",
+              "name": "treasury",
+              "type": "address"
+            }
+          ],
+          "name": "TreasuryAddressSet",
+          "signature": "TreasuryAddressSet(address)",
+          "topic0": "0x5cc4bdb402e519d4921d6bfaca9c17c16ea3a8e658ff5accd29e6080635562ce"
+        }
+      ],
+      "functions": [
+        {
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#function:0xa1b81d96",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "numberOfNumbers_",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "minValue_",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "maxValue_",
+              "type": "uint256"
+            }
+          ],
+          "name": "requestRandomNumbersInRange",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "uniqueID_",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xa1b81d96",
+          "signature": "requestRandomNumbersInRange(uint256,uint256,uint256)",
+          "stateMutability": "payable"
+        },
+        {
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#function:0xf3e090e4",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "numberOfNumbers_",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "minValue_",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "maxValue_",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "address",
+              "name": "refundAddress_",
+              "type": "address"
+            }
+          ],
+          "name": "requestRandomNumbersInRange",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "uniqueID_",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xf3e090e4",
+          "signature": "requestRandomNumbersInRange(uint256,uint256,uint256,address)",
+          "stateMutability": "payable"
+        },
+        {
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#function:0xbc85777c",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "numberOfNumbers_",
+              "type": "uint256"
+            }
+          ],
+          "name": "requestRandomWords",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "uniqueID_",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xbc85777c",
+          "signature": "requestRandomWords(uint256)",
+          "stateMutability": "payable"
+        },
+        {
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#function:0xd4e0f337",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "numberOfNumbers_",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "refundAddress_",
+              "type": "address"
+            }
+          ],
+          "name": "requestRandomWords",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "uniqueID_",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xd4e0f337",
+          "signature": "requestRandomWords(uint256,address)",
+          "stateMutability": "payable"
+        },
+        {
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#function:0x9bd1a9a9",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "numberOfNumbers_",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "minValue_",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "maxValue_",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "address",
+              "name": "refundAddress_",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "internalType": "uint32",
+              "name": "method_",
+              "type": "uint32"
+            }
+          ],
+          "name": "requestWithMethod",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "uniqueID_",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x9bd1a9a9",
+          "signature": "requestWithMethod(uint256,uint256,uint256,address,uint32)",
+          "stateMutability": "payable"
+        },
+        {
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#function:0x8b2c846a",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "numberOfNumbers_",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "minValue_",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "maxValue_",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "uint32",
+              "name": "method_",
+              "type": "uint32"
+            }
+          ],
+          "name": "requestWithMethod",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "uniqueID_",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x8b2c846a",
+          "signature": "requestWithMethod(uint256,uint256,uint256,uint32)",
+          "stateMutability": "payable"
+        },
+        {
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#function:0x97bfe15f",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "arrngRequestId_",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "callingAddress_",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "bytes32",
+              "name": "requestTxnHash_",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "internalType": "uint256",
+              "name": "responseCode_",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "internalType": "uint256[]",
+              "name": "randomNumbers_",
+              "type": "uint256[]"
+            },
+            {
+              "index": 5,
+              "internalType": "address",
+              "name": "refundAddress_",
+              "type": "address"
+            },
+            {
+              "index": 6,
+              "internalType": "string",
+              "name": "apiResponse_",
+              "type": "string"
+            },
+            {
+              "index": 7,
+              "internalType": "string",
+              "name": "apiSignature_",
+              "type": "string"
+            },
+            {
+              "index": 8,
+              "internalType": "uint256",
+              "name": "feeCharged_",
+              "type": "uint256"
+            }
+          ],
+          "name": "serveRandomness",
+          "outputs": [],
+          "selector": "0x97bfe15f",
+          "signature": "serveRandomness(uint256,address,bytes32,uint256,uint256[],address,string,string,uint256)",
+          "stateMutability": "payable"
+        },
+        {
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#function:0x77dd4ac3",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "string",
+              "name": "ensName_",
+              "type": "string"
+            }
+          ],
+          "name": "setENSName",
+          "outputs": [],
+          "selector": "0x77dd4ac3",
+          "signature": "setENSName(string)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#function:0xb52d1c19",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "ensRegistrar_",
+              "type": "address"
+            }
+          ],
+          "name": "setENSReverseRegistrar",
+          "outputs": [],
+          "selector": "0xb52d1c19",
+          "signature": "setENSReverseRegistrar(address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#function:0xe70b3496",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint16",
+              "name": "maxNumbersPerTxn_",
+              "type": "uint16"
+            }
+          ],
+          "name": "setMaximumNumberOfNumbers",
+          "outputs": [],
+          "selector": "0xe70b3496",
+          "signature": "setMaximumNumberOfNumbers(uint16)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#function:0x558615f7",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint176",
+              "name": "minNativeToken_",
+              "type": "uint176"
+            }
+          ],
+          "name": "setMinimumNativeToken",
+          "outputs": [],
+          "selector": "0x558615f7",
+          "signature": "setMinimumNativeToken(uint176)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#function:0x4c69c00f",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address payable",
+              "name": "oracle_",
+              "type": "address"
+            }
+          ],
+          "name": "setOracleAddress",
+          "outputs": [],
+          "selector": "0x4c69c00f",
+          "signature": "setOracleAddress(address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#function:0x6605bfda",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address payable",
+              "name": "treasury_",
+              "type": "address"
+            }
+          ],
+          "name": "setTreasuryAddress",
+          "outputs": [],
+          "selector": "0x6605bfda",
+          "signature": "setTreasuryAddress(address)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#function:0xa1db9782",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "erc20Address_",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "amount_",
+              "type": "uint256"
+            }
+          ],
+          "name": "withdrawERC20",
+          "outputs": [],
+          "selector": "0xa1db9782",
+          "signature": "withdrawERC20(address,uint256)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#function:0x13edab81",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "erc721Address_",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256[]",
+              "name": "tokenIDs_",
+              "type": "uint256[]"
+            }
+          ],
+          "name": "withdrawERC721",
+          "outputs": [],
+          "selector": "0x13edab81",
+          "signature": "withdrawERC721(address,uint256[])",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "smart-contracts/IArrngController.sol:IArrngController#function:0x17e0f252",
+          "declaringDefinitionId": "smart-contracts/IArrngController.sol:IArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "amount_",
+              "type": "uint256"
+            }
+          ],
+          "name": "withdrawNativeToken",
+          "outputs": [],
+          "selector": "0x17e0f252",
+          "signature": "withdrawNativeToken(uint256)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "vendored_dependency",
+    "classificationReason": "Source path is explicitly classified as vendored in the input manifest.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [
+        {
+          "anonymous": false,
+          "astId": 9470,
+          "canonicalSignature": "ENSReverseRegistrarSet(address)",
+          "displaySignature": "ENSReverseRegistrarSet(address)",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#event:ENSReverseRegistrarSet(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "newENSReverseRegistrar",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZXZlbnQ6RU5TUmV2ZXJzZVJlZ2lzdHJhclNldChhZGRyZXNzKQ",
+          "kind": "event",
+          "name": "ENSReverseRegistrarSet",
+          "natspec": "",
+          "range": {
+            "byteLength": 61,
+            "byteStart": 211,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L14",
+            "lineEnd": 14,
+            "lineStart": 14,
+            "snippetSha256": "sha256:fbfb38aba32f1e40143e6b32d3fbdd42a3186204c141dc91f5854e4d8cef71f9",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "topic0": "0x24625640821500d1ed82bf4cfa7973b775a4403ba28f029db24efa6b80241aac"
+        },
+        {
+          "anonymous": false,
+          "astId": 9476,
+          "canonicalSignature": "ENSNameSet(string,bytes32)",
+          "displaySignature": "ENSNameSet(string,bytes32)",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#event:ENSNameSet(string,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "ensName",
+              "type": "string"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "name": "ensNameHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZXZlbnQ6RU5TTmFtZVNldChzdHJpbmcsYnl0ZXMzMik",
+          "kind": "event",
+          "name": "ENSNameSet",
+          "natspec": "",
+          "range": {
+            "byteLength": 54,
+            "byteStart": 277,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L15",
+            "lineEnd": 15,
+            "lineStart": 15,
+            "snippetSha256": "sha256:6bc09207d5d93436601ea2c9773ee55a94a14371a5f12395873b8f40e0b2fb94",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "topic0": "0x1e35a1a96eba8b2f2c87d5ef9a703b36193b12ed0ec2c11bbf35437703dd504b"
+        },
+        {
+          "anonymous": false,
+          "astId": 9480,
+          "canonicalSignature": "MinimumNativeTokenSet(uint256)",
+          "displaySignature": "MinimumNativeTokenSet(uint256)",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#event:MinimumNativeTokenSet(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "minimumNativeToken",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZXZlbnQ6TWluaW11bU5hdGl2ZVRva2VuU2V0KHVpbnQyNTYp",
+          "kind": "event",
+          "name": "MinimumNativeTokenSet",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 336,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L16",
+            "lineEnd": 16,
+            "lineStart": 16,
+            "snippetSha256": "sha256:f0d83dc1fada02ed9aeeaf3268e6d252e2f6f157c3475ab96b8dbb4b0714496b",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "topic0": "0x81c1467f6ed8e906874cbd13844312f7ef450d069d2fb03a2bf037bd01b6a611"
+        },
+        {
+          "anonymous": false,
+          "astId": 9484,
+          "canonicalSignature": "MaximumNumberOfNumbersSet(uint256)",
+          "displaySignature": "MaximumNumberOfNumbersSet(uint256)",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#event:MaximumNumberOfNumbersSet(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "newNumberLimited",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZXZlbnQ6TWF4aW11bU51bWJlck9mTnVtYmVyc1NldCh1aW50MjU2KQ",
+          "kind": "event",
+          "name": "MaximumNumberOfNumbersSet",
+          "natspec": "",
+          "range": {
+            "byteLength": 58,
+            "byteStart": 397,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:1a54c500dcb1ca9d64b966e88868d9acc5515fcbdfc86a8f7b6717c1c040aef0",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "topic0": "0x943e9efb30a1f63dc3548baa55ae4bcf7d8af831a0539ab48ccc08d9f2c58a0d"
+        },
+        {
+          "anonymous": false,
+          "astId": 9488,
+          "canonicalSignature": "OracleAddressSet(address)",
+          "displaySignature": "OracleAddressSet(address)",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#event:OracleAddressSet(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "oracle",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZXZlbnQ6T3JhY2xlQWRkcmVzc1NldChhZGRyZXNzKQ",
+          "kind": "event",
+          "name": "OracleAddressSet",
+          "natspec": "",
+          "range": {
+            "byteLength": 39,
+            "byteStart": 460,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:7750f913d47daf431fd20e37468494951cdbdeb29c55f1af166eb0cf75e5a3db",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "topic0": "0xdd82bdfc28fcc826c53263dc2a2b6083e27e92699ebfee617227e08e21c202f0"
+        },
+        {
+          "anonymous": false,
+          "astId": 9492,
+          "canonicalSignature": "TreasuryAddressSet(address)",
+          "displaySignature": "TreasuryAddressSet(address)",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#event:TreasuryAddressSet(address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "treasury",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZXZlbnQ6VHJlYXN1cnlBZGRyZXNzU2V0KGFkZHJlc3Mp",
+          "kind": "event",
+          "name": "TreasuryAddressSet",
+          "natspec": "",
+          "range": {
+            "byteLength": 43,
+            "byteStart": 504,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:917c2d0aaf0e0e6c63da980fb0d8345330249f24d663d76fa566b771a69cd31c",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "topic0": "0x5cc4bdb402e519d4921d6bfaca9c17c16ea3a8e658ff5accd29e6080635562ce"
+        },
+        {
+          "anonymous": false,
+          "astId": 9510,
+          "canonicalSignature": "ArrngRequest(address,uint64,uint32,uint64,uint64,uint64,uint64,address)",
+          "displaySignature": "ArrngRequest(address,uint64,uint32,uint64,uint64,uint64,uint64,address)",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#event:ArrngRequest(address,uint64,uint32,uint64,uint64,uint64,uint64,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "caller",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": true,
+              "name": "requestId",
+              "type": "uint64"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "name": "method",
+              "type": "uint32"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "numberOfNumbers",
+              "type": "uint64"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "minValue",
+              "type": "uint64"
+            },
+            {
+              "index": 5,
+              "indexed": false,
+              "name": "maxvalue",
+              "type": "uint64"
+            },
+            {
+              "index": 6,
+              "indexed": false,
+              "name": "ethValue",
+              "type": "uint64"
+            },
+            {
+              "index": 7,
+              "indexed": false,
+              "name": "refundAddress",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZXZlbnQ6QXJybmdSZXF1ZXN0KGFkZHJlc3MsdWludDY0LHVpbnQzMix1aW50NjQsdWludDY0LHVpbnQ2NCx1aW50NjQsYWRkcmVzcyk",
+          "kind": "event",
+          "name": "ArrngRequest",
+          "natspec": "",
+          "range": {
+            "byteLength": 252,
+            "byteStart": 552,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L20-L29",
+            "lineEnd": 29,
+            "lineStart": 20,
+            "snippetSha256": "sha256:4c102e3697cb275dfa7894e00cc99788c930504548f44018f6b7160058475991",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "topic0": "0xa3097c9e913577149004678bcd9af9e87f11dc65f0157774aed42c32703599ec"
+        },
+        {
+          "anonymous": false,
+          "astId": 9514,
+          "canonicalSignature": "ArrngResponse(bytes32)",
+          "displaySignature": "ArrngResponse(bytes32)",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#event:ArrngResponse(bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": false,
+              "name": "requestTxnHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZXZlbnQ6QXJybmdSZXNwb25zZShieXRlczMyKQ",
+          "kind": "event",
+          "name": "ArrngResponse",
+          "natspec": "",
+          "range": {
+            "byteLength": 44,
+            "byteStart": 809,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:6356f125c7337497768019fbba0906cc7a98cbc7c22b02be27ce878caa26ba77",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "topic0": "0x287b566bd1c5e155fea4e6b0b27a03fc60495accd83b90f63d3e472031749e80"
+        },
+        {
+          "anonymous": false,
+          "astId": 9527,
+          "canonicalSignature": "ArrngServed(uint128,uint128,uint256[],string,string)",
+          "displaySignature": "ArrngServed(uint128,uint128,uint256[],string,string)",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#event:ArrngServed(uint128,uint128,uint256[],string,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "requestId",
+              "type": "uint128"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "name": "feeCharged",
+              "type": "uint128"
+            },
+            {
+              "index": 2,
+              "indexed": false,
+              "name": "randomNumbers",
+              "type": "uint256[]"
+            },
+            {
+              "index": 3,
+              "indexed": false,
+              "name": "apiResponse",
+              "type": "string"
+            },
+            {
+              "index": 4,
+              "indexed": false,
+              "name": "apiSignature",
+              "type": "string"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZXZlbnQ6QXJybmdTZXJ2ZWQodWludDEyOCx1aW50MTI4LHVpbnQyNTZbXSxzdHJpbmcsc3RyaW5nKQ",
+          "kind": "event",
+          "name": "ArrngServed",
+          "natspec": "",
+          "range": {
+            "byteLength": 177,
+            "byteStart": 858,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L31-L37",
+            "lineEnd": 37,
+            "lineStart": 31,
+            "snippetSha256": "sha256:44d76bf9a9b41cb89d8ad2a8a1cd6345e4929ab39f1a28188dbe18afe7bc3e3d",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "topic0": "0x2f4e34c2e65889cb3bd8836a6aa41071c3b123bc7277a740070decb05c144f00"
+        },
+        {
+          "anonymous": false,
+          "astId": 9533,
+          "canonicalSignature": "ArrngRefundInsufficientTokenForGas(address,uint256)",
+          "displaySignature": "ArrngRefundInsufficientTokenForGas(address,uint256)",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#event:ArrngRefundInsufficientTokenForGas(address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "indexed": true,
+              "name": "caller",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "indexed": false,
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZXZlbnQ6QXJybmdSZWZ1bmRJbnN1ZmZpY2llbnRUb2tlbkZvckdhcyhhZGRyZXNzLHVpbnQyNTYp",
+          "kind": "event",
+          "name": "ArrngRefundInsufficientTokenForGas",
+          "natspec": "",
+          "range": {
+            "byteLength": 84,
+            "byteStart": 1040,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L38",
+            "lineEnd": 38,
+            "lineStart": 38,
+            "snippetSha256": "sha256:85e5f48575651cdac526e8e2784dbcc54cb4e9cea75ca9ad185c4b470a0f4ca8",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "topic0": "0xe6ddfbdd5ed4c905f0494be8d48d3fae5e7d78a848d6fec1de1fd4a4b14c36e9"
+        }
+      ],
+      "functions": [
+        {
+          "canonicalSignature": "setENSReverseRegistrar(address)",
+          "displaySignature": "setENSReverseRegistrar(address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#function:0xb52d1c19",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "ensRegistrar_",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZnVuY3Rpb246MHhiNTJkMWMxOQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setENSReverseRegistrar",
+          "natspec": "@dev setENSReverseRegistrar: set the ENS register address\n @param ensRegistrar_: ENS Reverse Registrar address",
+          "outputs": [],
+          "range": {
+            "byteLength": 64,
+            "byteStart": 1473,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L53",
+            "lineEnd": 53,
+            "lineStart": 53,
+            "snippetSha256": "sha256:a97e21c86eb69f213c23c027b428618030b00333949e75ba80f650f8b05b25db",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "selector": "0xb52d1c19",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setENSName(string)",
+          "displaySignature": "setENSName(string)",
+          "functionKind": "function",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#function:0x77dd4ac3",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "ensName_",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZnVuY3Rpb246MHg3N2RkNGFjMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setENSName",
+          "natspec": "@dev setENSName: used to set reverse record so interactions with this contract\n are easy to identify\n @param ensName_: string ENS name",
+          "outputs": [],
+          "range": {
+            "byteLength": 53,
+            "byteStart": 1734,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L63",
+            "lineEnd": 63,
+            "lineStart": 63,
+            "snippetSha256": "sha256:dccadfd7b50659430e5041bd25268545fa949123bb416c4cd5cf92f489fe10dc",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "selector": "0x77dd4ac3",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setMinimumNativeToken(uint176)",
+          "displaySignature": "setMinimumNativeToken(uint176)",
+          "functionKind": "function",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#function:0x558615f7",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "minNativeToken_",
+              "type": "uint176"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZnVuY3Rpb246MHg1NTg2MTVmNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setMinimumNativeToken",
+          "natspec": "@dev setMinimumNativeToken: set a new value of required native token for gas\n @param minNativeToken_: the new minimum native token per call",
+          "outputs": [],
+          "range": {
+            "byteLength": 65,
+            "byteStart": 1983,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L72",
+            "lineEnd": 72,
+            "lineStart": 72,
+            "snippetSha256": "sha256:b2e1cb68c38351115e4cb74de5ce8385fd8ed3b11575a05cb61b9b1c0248c540",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "selector": "0x558615f7",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setMaximumNumberOfNumbers(uint16)",
+          "displaySignature": "setMaximumNumberOfNumbers(uint16)",
+          "functionKind": "function",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#function:0xe70b3496",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "maxNumbersPerTxn_",
+              "type": "uint16"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZnVuY3Rpb246MHhlNzBiMzQ5Ng",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setMaximumNumberOfNumbers",
+          "natspec": "@dev setMaximumNumberOfNumbers: set a new max number of numbers\n @param maxNumbersPerTxn_: the new max requested numbers",
+          "outputs": [],
+          "range": {
+            "byteLength": 70,
+            "byteStart": 2225,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L81",
+            "lineEnd": 81,
+            "lineStart": 81,
+            "snippetSha256": "sha256:9d6708d0a97d09453ae061981dccb5fd369faee41bae3723e592ea3578a011f3",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "selector": "0xe70b3496",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setOracleAddress(address)",
+          "displaySignature": "setOracleAddress(address payable)",
+          "functionKind": "function",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#function:0x4c69c00f",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "oracle_",
+              "type": "address payable"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZnVuY3Rpb246MHg0YzY5YzAwZg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setOracleAddress",
+          "natspec": "@dev setOracleAddress: set a new oracle address\n @param oracle_: the new oracle address",
+          "outputs": [],
+          "range": {
+            "byteLength": 60,
+            "byteStart": 2439,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L90",
+            "lineEnd": 90,
+            "lineStart": 90,
+            "snippetSha256": "sha256:3ce829dbcf7b094a3ed58897e5816b67d27a69a0e105e1276b2809c618ba1e34",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "selector": "0x4c69c00f",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "setTreasuryAddress(address)",
+          "displaySignature": "setTreasuryAddress(address payable)",
+          "functionKind": "function",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#function:0x6605bfda",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "treasury_",
+              "type": "address payable"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZnVuY3Rpb246MHg2NjA1YmZkYQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "setTreasuryAddress",
+          "natspec": "@dev setTreasuryAddress: set a new treasury address\n @param treasury_: the new treasury address",
+          "outputs": [],
+          "range": {
+            "byteLength": 64,
+            "byteStart": 2651,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L99",
+            "lineEnd": 99,
+            "lineStart": 99,
+            "snippetSha256": "sha256:bf18c0bcd3bb86fc2c9b8e28e311fd15ced11c44fd0299115f015aeb5a256a8a",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "selector": "0x6605bfda",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "withdrawNativeToken(uint256)",
+          "displaySignature": "withdrawNativeToken(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#function:0x17e0f252",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "amount_",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZnVuY3Rpb246MHgxN2UwZjI1Mg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "withdrawNativeToken",
+          "natspec": "@dev withdrawNativeToken: pull native token to the treasuryAddress\n @param amount_: amount to withdraw",
+          "outputs": [],
+          "range": {
+            "byteLength": 55,
+            "byteStart": 2874,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L108",
+            "lineEnd": 108,
+            "lineStart": 108,
+            "snippetSha256": "sha256:9ac3f44b5e884483cffd155a4778b30cfd000bf26a004725130bddebe0e7e1b0",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "selector": "0x17e0f252",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "withdrawERC20(address,uint256)",
+          "displaySignature": "withdrawERC20(address,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#function:0xa1db9782",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "erc20Address_",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "amount_",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZnVuY3Rpb246MHhhMWRiOTc4Mg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "withdrawERC20",
+          "natspec": "@dev withdrawERC20: pull ERC20 tokens to the treasuryAddress\n @param erc20Address_: the contract address for the token\n @param amount_: amount to withdraw",
+          "outputs": [],
+          "range": {
+            "byteLength": 72,
+            "byteStart": 3146,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L118",
+            "lineEnd": 118,
+            "lineStart": 118,
+            "snippetSha256": "sha256:eb9f07c8d80c416cc3e6b43a4b237ca19acac32ef3b9290229e595e12d52f13b",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "selector": "0xa1db9782",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "withdrawERC721(address,uint256[])",
+          "displaySignature": "withdrawERC721(address,uint256[])",
+          "functionKind": "function",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#function:0x13edab81",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "erc721Address_",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "tokenIDs_",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZnVuY3Rpb246MHgxM2VkYWI4MQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "withdrawERC721",
+          "natspec": "@dev withdrawERC721: Pull ERC721s (likely only the ENS\n associated with this contract) to the treasuryAddress.\n @param erc721Address_: The token contract for the withdrawal\n @param tokenIDs_: the list of tokenIDs for the withdrawal",
+          "outputs": [],
+          "range": {
+            "byteLength": 85,
+            "byteStart": 3518,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L129",
+            "lineEnd": 129,
+            "lineStart": 129,
+            "snippetSha256": "sha256:e5a51c161f18aeaf0736a62fd28d1caed454b6f1ba6f47e1bd69fe68a4f7d399",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "selector": "0x13edab81",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "requestRandomWords(uint256)",
+          "displaySignature": "requestRandomWords(uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#function:0xbc85777c",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "numberOfNumbers_",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZnVuY3Rpb246MHhiYzg1Nzc3Yw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestRandomWords",
+          "natspec": "@dev requestRandomWords: request 1 to n uint256 integers\n requestRandomWords is overloaded. In this instance you can\n call it without explicitly declaring a refund address, with the\n refund being paid to the transaction origin for this call.\n @param numberOfNumbers_: the amount of numbers to request\n @return uniqueID_ : unique ID for this request",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "uniqueID_",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 123,
+            "byteStart": 4216,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L148-L151",
+            "lineEnd": 151,
+            "lineStart": 148,
+            "snippetSha256": "sha256:5701b7df2e2876c43889fa002e6dc9da3353262b881607509a6e7c9aab9ecc72",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "selector": "0xbc85777c",
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "requestRandomWords(uint256,address)",
+          "displaySignature": "requestRandomWords(uint256,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#function:0xd4e0f337",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "numberOfNumbers_",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "refundAddress_",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZnVuY3Rpb246MHhkNGUwZjMzNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestRandomWords",
+          "natspec": "@dev requestRandomWords: request 1 to n uint256 integers\n requestRandomWords is overloaded. In this instance you must\n specify the refund address for unused native token.\n @param numberOfNumbers_: the amount of numbers to request\n @param refundAddress_: the address for refund of native token\n @return uniqueID_ : unique ID for this request",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "uniqueID_",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 147,
+            "byteStart": 4760,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L164-L167",
+            "lineEnd": 167,
+            "lineStart": 164,
+            "snippetSha256": "sha256:989741caa915dd7f69474b5c4811afc48e9ba87b900b477ddb650b379edd1d18",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "selector": "0xd4e0f337",
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "requestRandomNumbersInRange(uint256,uint256,uint256)",
+          "displaySignature": "requestRandomNumbersInRange(uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#function:0xa1b81d96",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "numberOfNumbers_",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "minValue_",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "maxValue_",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZnVuY3Rpb246MHhhMWI4MWQ5Ng",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestRandomNumbersInRange",
+          "natspec": "@dev requestRandomNumbersInRange: request 1 to n integers within\n a given range (e.g. 1 to 10,000)\n requestRandomNumbersInRange is overloaded. In this instance you can\n call it without explicitly declaring a refund address, with the\n refund being paid to the transaction origin for this call.\n @param numberOfNumbers_: the amount of numbers to request\n @param minValue_: the min of the range\n @param maxValue_: the max of the range\n @return uniqueID_ : unique ID for this request",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "uniqueID_",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 176,
+            "byteStart": 5485,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L183-L187",
+            "lineEnd": 187,
+            "lineStart": 183,
+            "snippetSha256": "sha256:6834e1442e05dcc1d676f7ef9b69f733297a288fffa933bd2899ca35c16bc7f3",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "selector": "0xa1b81d96",
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "requestRandomNumbersInRange(uint256,uint256,uint256,address)",
+          "displaySignature": "requestRandomNumbersInRange(uint256,uint256,uint256,address)",
+          "functionKind": "function",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#function:0xf3e090e4",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "numberOfNumbers_",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "minValue_",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "maxValue_",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "refundAddress_",
+              "type": "address"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZnVuY3Rpb246MHhmM2UwOTBlNA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestRandomNumbersInRange",
+          "natspec": "@dev requestRandomNumbersInRange: request 1 to n integers within\n a given range (e.g. 1 to 10,000)\n requestRandomNumbersInRange is overloaded. In this instance you must\n specify the refund address for unused native token.\n @param numberOfNumbers_: the amount of numbers to request\n @param minValue_: the min of the range\n @param maxValue_: the max of the range\n @param refundAddress_: the address for refund of native token\n @return uniqueID_ : unique ID for this request",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "uniqueID_",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 208,
+            "byteStart": 6232,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L204-L209",
+            "lineEnd": 209,
+            "lineStart": 204,
+            "snippetSha256": "sha256:7eee81e6d26d72c69bb7adf0c641cf6950783f846c7ef9dfdb8ca0dab07cc2f3",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "selector": "0xf3e090e4",
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "requestWithMethod(uint256,uint256,uint256,uint32)",
+          "displaySignature": "requestWithMethod(uint256,uint256,uint256,uint32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#function:0x8b2c846a",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "numberOfNumbers_",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "minValue_",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "maxValue_",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "method_",
+              "type": "uint32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZnVuY3Rpb246MHg4YjJjODQ2YQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestWithMethod",
+          "natspec": "@dev requestWithMethod: public method to allow calls specifying the\n arrng method, allowing functionality to be extensible without\n requiring a new controller contract.\n requestWithMethod is overloaded. In this instance you can\n call it without explicitly declaring a refund address, with the\n refund being paid to the transaction origin for this call.\n @param numberOfNumbers_: the amount of numbers to request\n @param minValue_: the min of the range\n @param maxValue_: the max of the range\n @param method_: the arrng method to call\n @return uniqueID_ : unique ID for this request",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "uniqueID_",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 190,
+            "byteStart": 7132,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L227-L232",
+            "lineEnd": 232,
+            "lineStart": 227,
+            "snippetSha256": "sha256:190db1217d72232ee57a1fb2cad1c9a2241da9c3edd053e7588e4d021ea6ea73",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "selector": "0x8b2c846a",
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "requestWithMethod(uint256,uint256,uint256,address,uint32)",
+          "displaySignature": "requestWithMethod(uint256,uint256,uint256,address,uint32)",
+          "functionKind": "function",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#function:0x9bd1a9a9",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "numberOfNumbers_",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "minValue_",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "maxValue_",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "refundAddress_",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "name": "method_",
+              "type": "uint32"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZnVuY3Rpb246MHg5YmQxYTlhOQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestWithMethod",
+          "natspec": "@dev requestWithMethod: public method to allow calls specifying the\n arrng method, allowing functionality to be extensible without\n requiring a new controller contract.\n requestWithMethod is overloaded. In this instance you must\n specify the refund address for unused native token.\n @param numberOfNumbers_: the amount of numbers to request\n @param minValue_: the min of the range\n @param maxValue_: the max of the range\n @param refundAddress_: the address for refund of native token\n @param method_: the arrng method to call\n @return uniqueID_ : unique ID for this request",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "uniqueID_",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 222,
+            "byteStart": 8006,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L250-L256",
+            "lineEnd": 256,
+            "lineStart": 250,
+            "snippetSha256": "sha256:bf4cc6925102ac8ccaacf82d87207dca33af1c7ee3d72e07506a01fe91a6730f",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "selector": "0x9bd1a9a9",
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "serveRandomness(uint256,address,bytes32,uint256,uint256[],address,string,string,uint256)",
+          "displaySignature": "serveRandomness(uint256,address,bytes32,uint256,uint256[],address,string,string,uint256)",
+          "functionKind": "function",
+          "id": "smart-contracts/IArrngController.sol:IArrngController#function:0x97bfe15f",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "arrngRequestId_",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "callingAddress_",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "requestTxnHash_",
+              "type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "responseCode_",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "randomNumbers_",
+              "storageLocation": "calldata",
+              "type": "uint256[]"
+            },
+            {
+              "index": 5,
+              "name": "refundAddress_",
+              "type": "address"
+            },
+            {
+              "index": 6,
+              "name": "apiResponse_",
+              "storageLocation": "calldata",
+              "type": "string"
+            },
+            {
+              "index": 7,
+              "name": "apiSignature_",
+              "storageLocation": "calldata",
+              "type": "string"
+            },
+            {
+              "index": 8,
+              "name": "feeCharged_",
+              "type": "uint256"
+            }
+          ],
+          "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXIjZnVuY3Rpb246MHg5N2JmZTE1Zg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "serveRandomness",
+          "natspec": "@dev serveRandomness: serve result of the call\n @param arrngRequestId_: unique request ID\n @param callingAddress_: the contract to call\n @param requestTxnHash_: the txn hash of the original request\n @param responseCode_: 0 is success, !0 = failure\n @param randomNumbers_: the array of random integers\n @param refundAddress_: the address for refund of native token not used for gas\n @param apiResponse_: the response from the off-chain rng provider\n @param apiSignature_: signature for the rng response\n @param feeCharged_: the fee for this rng",
+          "outputs": [],
+          "range": {
+            "byteLength": 359,
+            "byteStart": 8876,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L273-L283",
+            "lineEnd": 283,
+            "lineStart": 273,
+            "snippetSha256": "sha256:371729e34e615c9c0b9207eb9dce7edadd8dac7279bba4fc0449a95da6495391",
+            "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+          },
+          "selector": "0x97bfe15f",
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "smart-contracts/IArrngController.sol:IArrngController",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "c21hcnQtY29udHJhY3RzL0lBcnJuZ0NvbnRyb2xsZXIuc29sOklBcnJuZ0NvbnRyb2xsZXI",
+    "kind": "interface",
+    "linearizedDefinitionIds": [
+      "smart-contracts/IArrngController.sol:IArrngController"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "IArrngController",
+    "natspec": "",
+    "range": {
+      "byteLength": 9059,
+      "byteStart": 178,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/smart-contracts/IArrngController.sol#L13-L284",
+      "lineEnd": 284,
+      "lineStart": 13,
+      "snippetSha256": "sha256:2d0c1c91515d329ec4ea4cb3ceaccbf326377f8cc431014898ca90e9fcf4671b",
+      "sourceSha256": "sha256:93d1cfa82acb5d72f3a0b2a14d8e879363752dc0987dd370537e3719a308ea70"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "protocol",
+    "sourcePath": "smart-contracts/IArrngController.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 1
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1
+    },
+    "totalCount": 1
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "smart-contracts/IArrngController.sol:IArrngController",
+      "severity": "advisory"
+    }
+  ]
+}

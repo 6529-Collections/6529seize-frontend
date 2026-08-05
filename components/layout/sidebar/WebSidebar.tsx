@@ -6,8 +6,6 @@ import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useKey } from "react-use";
 import BellIcon from "@/components/common/icons/BellIcon";
-import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
-import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
@@ -49,7 +47,10 @@ function WebSidebar({
   });
   const { haveUnreadNotifications } = useUnreadNotifications(
     hasValidWalletAuth ? (connectedProfile?.handle ?? null) : null,
-    { enabled: hasValidWalletAuth }
+    {
+      enabled: hasValidWalletAuth,
+      profileId: connectedProfile?.id,
+    }
   );
   const profilePath = useMemo(() => {
     if (connectedProfile?.handle) return `/${connectedProfile.handle}`;
@@ -222,21 +223,9 @@ function WebSidebar({
           </div>
         </div>
       </div>
-      <CommonAnimationWrapper mode="sync" initial>
-        {isSearchOpen && (
-          <CommonAnimationOpacity
-            key="search-modal"
-            elementClasses="tw-fixed tw-inset-0 tw-z-50"
-            elementRole="dialog"
-            onClicked={(event) => event.stopPropagation()}
-          >
-            <HeaderSearchModal
-              onClose={() => setIsSearchOpen(false)}
-              wave={null}
-            />
-          </CommonAnimationOpacity>
-        )}
-      </CommonAnimationWrapper>
+      {isSearchOpen && (
+        <HeaderSearchModal onClose={() => setIsSearchOpen(false)} wave={null} />
+      )}
       {!isTouchScreen && (
         <ReactTooltip
           id="sidebar-tooltip"

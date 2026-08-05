@@ -1,0 +1,1295 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:0xdd45874a",
+          "declaringDefinitionId": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testBurnEmitsProtocolEventAndRetainsAuditState",
+          "outputs": [],
+          "selector": "0xdd45874a",
+          "signature": "testBurnEmitsProtocolEventAndRetainsAuditState()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:0x59f3feaa",
+          "declaringDefinitionId": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testBurnedTokenIdCannotBeReminted",
+          "outputs": [],
+          "selector": "0x59f3feaa",
+          "signature": "testBurnedTokenIdCannotBeReminted()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:0x2988656a",
+          "declaringDefinitionId": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPostBurnArrngFulfillmentRecordsAuditWithoutMetadata",
+          "outputs": [],
+          "selector": "0x2988656a",
+          "signature": "testPostBurnArrngFulfillmentRecordsAuditWithoutMetadata()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:0x235047c2",
+          "declaringDefinitionId": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testPostBurnVrfFulfillmentAfterFreezeRecordsAuditWithoutMetadata",
+          "outputs": [],
+          "selector": "0x235047c2",
+          "signature": "testPostBurnVrfFulfillmentAfterFreezeRecordsAuditWithoutMetadata()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "testBurnEmitsProtocolEventAndRetainsAuditState()",
+          "displaySignature": "testBurnEmitsProtocolEventAndRetainsAuditState()",
+          "functionKind": "function",
+          "id": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:0xdd45874a",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlQnVybi50LnNvbDpTdHJlYW1Db3JlQnVyblRlc3QjZnVuY3Rpb246MHhkZDQ1ODc0YQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testBurnEmitsProtocolEventAndRetainsAuditState",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 3280,
+            "byteStart": 1814,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L37-L105",
+            "lineEnd": 105,
+            "lineStart": 37,
+            "snippetSha256": "sha256:35b6c7d6c50d509f1e86671437f6886e2fe9650213d4a1540019f81ac83a8d52",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": "0xdd45874a",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testBurnedTokenIdCannotBeReminted()",
+          "displaySignature": "testBurnedTokenIdCannotBeReminted()",
+          "functionKind": "function",
+          "id": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:0x59f3feaa",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlQnVybi50LnNvbDpTdHJlYW1Db3JlQnVyblRlc3QjZnVuY3Rpb246MHg1OWYzZmVhYQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testBurnedTokenIdCannotBeReminted",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 832,
+            "byteStart": 5100,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L107-L122",
+            "lineEnd": 122,
+            "lineStart": 107,
+            "snippetSha256": "sha256:181bd15251cc4d0226f22b6857b0fe7f764301c8600d79a7ad66a52343537384",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": "0x59f3feaa",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testPostBurnVrfFulfillmentAfterFreezeRecordsAuditWithoutMetadata()",
+          "displaySignature": "testPostBurnVrfFulfillmentAfterFreezeRecordsAuditWithoutMetadata()",
+          "functionKind": "function",
+          "id": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:0x235047c2",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlQnVybi50LnNvbDpTdHJlYW1Db3JlQnVyblRlc3QjZnVuY3Rpb246MHgyMzUwNDdjMg",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPostBurnVrfFulfillmentAfterFreezeRecordsAuditWithoutMetadata",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 2662,
+            "byteStart": 5938,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L124-L183",
+            "lineEnd": 183,
+            "lineStart": 124,
+            "snippetSha256": "sha256:8162ec98b630591a73260135981cab3a3876b5d6118efa77c0b9cea3b576e720",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": "0x235047c2",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testPostBurnArrngFulfillmentRecordsAuditWithoutMetadata()",
+          "displaySignature": "testPostBurnArrngFulfillmentRecordsAuditWithoutMetadata()",
+          "functionKind": "function",
+          "id": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:0x2988656a",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlQnVybi50LnNvbDpTdHJlYW1Db3JlQnVyblRlc3QjZnVuY3Rpb246MHgyOTg4NjU2YQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testPostBurnArrngFulfillmentRecordsAuditWithoutMetadata",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1590,
+            "byteStart": 8606,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L185-L222",
+            "lineEnd": 222,
+            "lineStart": 185,
+            "snippetSha256": "sha256:55e3f694029240d3c911d8bc41343d67aa53af9842d2dfd942ad1f13869b844f",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": "0x2988656a",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_deployVrfRandomizer()",
+          "functionKind": "function",
+          "id": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:_deployVrfRandomizer()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlQnVybi50LnNvbDpTdHJlYW1Db3JlQnVyblRlc3QjZnVuY3Rpb246X2RlcGxveVZyZlJhbmRvbWl6ZXIoKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_deployVrfRandomizer",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "DeployedStream"
+            },
+            {
+              "index": 1,
+              "name": "coordinator",
+              "type": "BurnMockVrfCoordinator"
+            },
+            {
+              "index": 2,
+              "name": "vrf",
+              "type": "NextGenRandomizerVRF"
+            }
+          ],
+          "range": {
+            "byteLength": 527,
+            "byteStart": 10202,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L224-L238",
+            "lineEnd": 238,
+            "lineStart": 224,
+            "snippetSha256": "sha256:fd99cc24446a034508d12c6b698176a84a001c529e3e1be324bd04142a3e0cc7",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_mintToken(DeployedStream,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:_mintToken(DeployedStream,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "DeployedStream"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "salt",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlQnVybi50LnNvbDpTdHJlYW1Db3JlQnVyblRlc3QjZnVuY3Rpb246X21pbnRUb2tlbihEZXBsb3llZFN0cmVhbSx1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_mintToken",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 219,
+            "byteStart": 10735,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L240-L243",
+            "lineEnd": 243,
+            "lineStart": 240,
+            "snippetSha256": "sha256:960cc92c55bdbed3bcb5e96b781d74b43c6f2bc03136cd1fc35d6208720dc061",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_warpPastFinalSupplyWindow()",
+          "functionKind": "function",
+          "id": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:_warpPastFinalSupplyWindow()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Db3JlQnVybi50LnNvbDpTdHJlYW1Db3JlQnVyblRlc3QjZnVuY3Rpb246X3dhcnBQYXN0RmluYWxTdXBwbHlXaW5kb3coKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_warpPastFinalSupplyWindow",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 101,
+            "byteStart": 10960,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L245-L247",
+            "lineEnd": 247,
+            "lineStart": 245,
+            "snippetSha256": "sha256:82a6688bff813f04a0b4678165717eac2ee27e3657eac19a004bc225f1440737",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_words(uint256)",
+          "functionKind": "function",
+          "id": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:_words(uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "word",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlQnVybi50LnNvbDpTdHJlYW1Db3JlQnVyblRlc3QjZnVuY3Rpb246X3dvcmRzKHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_words",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "words",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "range": {
+            "byteLength": 142,
+            "byteStart": 11067,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L249-L252",
+            "lineEnd": 252,
+            "lineStart": 249,
+            "snippetSha256": "sha256:d6af2cee67be55b91c46afe15a3baa95954c87ee2bc75d3203858594f9faf5ad",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_rawOutputHash(uint256[])",
+          "functionKind": "function",
+          "id": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:_rawOutputHash(uint256[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "words",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlQnVybi50LnNvbDpTdHJlYW1Db3JlQnVyblRlc3QjZnVuY3Rpb246X3Jhd091dHB1dEhhc2godWludDI1NltdKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_rawOutputHash",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 131,
+            "byteStart": 11215,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L254-L256",
+            "lineEnd": 256,
+            "lineStart": 254,
+            "snippetSha256": "sha256:fe56b88581c468f84ff84f3c434ffee91ca460ba812c6bed83b142287154547c",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_expectedSeed(address,uint256,uint256,uint256,uint256,uint256[])",
+          "functionKind": "function",
+          "id": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:_expectedSeed(address,uint256,uint256,uint256,uint256,uint256[])",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "words",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlQnVybi50LnNvbDpTdHJlYW1Db3JlQnVyblRlc3QjZnVuY3Rpb246X2V4cGVjdGVkU2VlZChhZGRyZXNzLHVpbnQyNTYsdWludDI1Nix1aW50MjU2LHVpbnQyNTYsdWludDI1NltdKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_expectedSeed",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 536,
+            "byteStart": 11352,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L258-L277",
+            "lineEnd": 277,
+            "lineStart": 258,
+            "snippetSha256": "sha256:d79c2cdbeacbb6ceab1aef827adcd7f1c8bb82ead7c5e72b4942d2652994d288",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertPostBurnAudit(DeployedStream,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:_assertPostBurnAudit(DeployedStream,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "DeployedStream"
+            },
+            {
+              "index": 1,
+              "name": "expectedSeed",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlQnVybi50LnNvbDpTdHJlYW1Db3JlQnVyblRlc3QjZnVuY3Rpb246X2Fzc2VydFBvc3RCdXJuQXVkaXQoRGVwbG95ZWRTdHJlYW0sYnl0ZXMzMik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertPostBurnAudit",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1179,
+            "byteStart": 11894,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L279-L306",
+            "lineEnd": 306,
+            "lineStart": 279,
+            "snippetSha256": "sha256:21ce69f4c7b60636e70fa84baaf85dfe690971a6fae367e3aaca70ffe697afb9",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertStaticCallReverts(address,bytes,string)",
+          "functionKind": "function",
+          "id": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:_assertStaticCallReverts(address,bytes,string)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "data",
+              "storageLocation": "memory",
+              "type": "bytes"
+            },
+            {
+              "index": 2,
+              "name": "message",
+              "storageLocation": "memory",
+              "type": "string"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlQnVybi50LnNvbDpTdHJlYW1Db3JlQnVyblRlc3QjZnVuY3Rpb246X2Fzc2VydFN0YXRpY0NhbGxSZXZlcnRzKGFkZHJlc3MsYnl0ZXMsc3RyaW5nKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertStaticCallReverts",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 274,
+            "byteStart": 13079,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L308-L315",
+            "lineEnd": 315,
+            "lineStart": 308,
+            "snippetSha256": "sha256:a130b6161257fd2b23dd46a441bd39138610f03d661d55621b5205b70122e09b",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertTransferToZero(Vm.Log[],address,address,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:_assertTransferToZero(Vm.Log[],address,address,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "emitter",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "index": 3,
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlQnVybi50LnNvbDpTdHJlYW1Db3JlQnVyblRlc3QjZnVuY3Rpb246X2Fzc2VydFRyYW5zZmVyVG9aZXJvKFZtLkxvZ1tdLGFkZHJlc3MsYWRkcmVzcyx1aW50MjU2KQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertTransferToZero",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 705,
+            "byteStart": 13359,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L317-L336",
+            "lineEnd": 336,
+            "lineStart": 317,
+            "snippetSha256": "sha256:da24f03eb0b138ef249008d6c0e4f658427c8ede7b083e15db6b4257af0d541a",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertTokenBurned(Vm.Log[],address,uint256,uint256,address,address)",
+          "functionKind": "function",
+          "id": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:_assertTokenBurned(Vm.Log[],address,uint256,uint256,address,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "emitter",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "index": 5,
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlQnVybi50LnNvbDpTdHJlYW1Db3JlQnVyblRlc3QjZnVuY3Rpb246X2Fzc2VydFRva2VuQnVybmVkKFZtLkxvZ1tdLGFkZHJlc3MsdWludDI1Nix1aW50MjU2LGFkZHJlc3MsYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertTokenBurned",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 850,
+            "byteStart": 14070,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L338-L360",
+            "lineEnd": 360,
+            "lineStart": 338,
+            "snippetSha256": "sha256:148a7b651fba09b579106c3d31d33a15391b4d275c0aef53f48060920c51bec8",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertBurnedTokenRandomnessRecorded(Vm.Log[],address,uint256,uint256,uint256,address,uint256,bytes32,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:_assertBurnedTokenRandomnessRecorded(Vm.Log[],address,uint256,uint256,uint256,address,uint256,bytes32,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "emitter",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "index": 6,
+              "name": "randomizerEpoch",
+              "type": "uint256"
+            },
+            {
+              "index": 7,
+              "name": "derivedSeed",
+              "type": "bytes32"
+            },
+            {
+              "index": 8,
+              "name": "rawOutputHash",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlQnVybi50LnNvbDpTdHJlYW1Db3JlQnVyblRlc3QjZnVuY3Rpb246X2Fzc2VydEJ1cm5lZFRva2VuUmFuZG9tbmVzc1JlY29yZGVkKFZtLkxvZ1tdLGFkZHJlc3MsdWludDI1Nix1aW50MjU2LHVpbnQyNTYsYWRkcmVzcyx1aW50MjU2LGJ5dGVzMzIsYnl0ZXMzMik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertBurnedTokenRandomnessRecorded",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1320,
+            "byteStart": 14926,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L362-L393",
+            "lineEnd": 393,
+            "lineStart": 362,
+            "snippetSha256": "sha256:565b2fac57d857a77b8348ac76d32cb1a50aef59ef0fae6fee0b13f8c05842af",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_assertStreamTokenBurned(Vm.Log[],address,uint256,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:_assertStreamTokenBurned(Vm.Log[],address,uint256,uint256,uint256)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "emitter",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "collectionSerial",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlQnVybi50LnNvbDpTdHJlYW1Db3JlQnVyblRlc3QjZnVuY3Rpb246X2Fzc2VydFN0cmVhbVRva2VuQnVybmVkKFZtLkxvZ1tdLGFkZHJlc3MsdWludDI1Nix1aW50MjU2LHVpbnQyNTYp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_assertStreamTokenBurned",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 874,
+            "byteStart": 16252,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L395-L416",
+            "lineEnd": 416,
+            "lineStart": 395,
+            "snippetSha256": "sha256:c01af1dbbf87e5d14958ec86b5ffb1a683eed6e66d79e0ca35b8147b20f28f49",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_countTopic(Vm.Log[],bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:_countTopic(Vm.Log[],bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "logs",
+              "storageLocation": "memory",
+              "type": "Vm.Log[]"
+            },
+            {
+              "index": 1,
+              "name": "topic",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlQnVybi50LnNvbDpTdHJlYW1Db3JlQnVyblRlc3QjZnVuY3Rpb246X2NvdW50VG9waWMoVm0uTG9nW10sYnl0ZXMzMik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_countTopic",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "count",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 278,
+            "byteStart": 17132,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L418-L424",
+            "lineEnd": 424,
+            "lineStart": 418,
+            "snippetSha256": "sha256:04f769c4de94a6a1ec988fd10f94987b5a4ee4e0908c2270b5865d5d533bfb15",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_topicAddress(bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:_topicAddress(bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "topic",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1Db3JlQnVybi50LnNvbDpTdHJlYW1Db3JlQnVyblRlc3QjZnVuY3Rpb246X3RvcGljQWRkcmVzcyhieXRlczMyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_topicAddress",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 125,
+            "byteStart": 17416,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L426-L428",
+            "lineEnd": 428,
+            "lineStart": 426,
+            "snippetSha256": "sha256:8ee3300b1cf3909e1927193b0a597765e03e7cad27f7426125be0c7aa0f88be0",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "COLLECTION_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 545,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:cba8ff5a3b4148cc54bed7e4899604a5bc39c7815d1a23162a647a4813b0e087",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 586,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L17",
+            "lineEnd": 17,
+            "lineStart": 17,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TOKEN_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 37,
+            "byteStart": 593,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:c73d15ab01ba31af3abe0a3398754b34011adc910a4aba23a00a8a747263c4fa",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 629,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L18",
+            "lineEnd": 18,
+            "lineStart": 18,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 53,
+            "byteStart": 636,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:9ad3cd03bccb87616377ded5a696e0eb9dcbd4debf5aabca58a379ad81e19501",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 16,
+            "byteStart": 673,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:ff90295fee849d58a9a67d401763bcdf9a2e87e84bdeb02ce3ca102c5621224f",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "valueSource": "address(0xA11CE)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PAYOUT",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 695,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:803a39f1361ab23ee3ddb60593da0dc70cf520c291b5650707ed25924b88960b",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 729,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:232bf03a006714cd847ebe09f2aa6212dd2bfe3a1035b0e131a0075cb9b4ca68",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "valueSource": "address(0xBEEF)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "CURATORS_POOL",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 750,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:867a8abc86c7882569645b555c50612a95f4f005be14f838cc838d3d500698c8",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 791,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:2d44ddd299cd1c2368b014c114a488c6dca935a0acb614242b1b7e8aef907fff",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "valueSource": "address(0xCAFE)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RANDOMNESS_SEED_TYPEHASH",
+          "natspec": "",
+          "range": {
+            "byteLength": 222,
+            "byteStart": 812,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L22-L24",
+            "lineEnd": 24,
+            "lineStart": 22,
+            "snippetSha256": "sha256:4b8afb9e13e39343c91a17ac2d52a6c8cd68207384bfddc9f4a82ed25084df86",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 170,
+            "byteStart": 864,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L22-L24",
+            "lineEnd": 24,
+            "lineStart": 22,
+            "snippetSha256": "sha256:66a4b794c26192e8ab011adf04443fc22cfc01ca8e9468b8313b0430f2c80cca",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "valueSource": "keccak256(\n        \"6529StreamRandomnessSeed(address provider,uint256 requestId,uint256 collectionId,uint256 tokenId,uint256 randomizerEpoch,bytes32 rawOutputHash)\"\n    )",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TRANSFER_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 88,
+            "byteStart": 1040,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:6f9adb72a69408ba856038d4573e590eca9b692bf2788d4284bfb209b547e2dc",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 46,
+            "byteStart": 1082,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:3c4b3f42f2a17d7e382cf215ad60cfbde10335af99090dd07b51b3e2563c8869",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "valueSource": "keccak256(\"Transfer(address,address,uint256)\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "TOKEN_BURNED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 111,
+            "byteStart": 1134,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L26-L27",
+            "lineEnd": 27,
+            "lineStart": 26,
+            "snippetSha256": "sha256:1b60e2a5f0d7f0dc8a9ddd1263c596c298492304aa54ac19b2fda37390756276",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 57,
+            "byteStart": 1188,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:ee4cf6e69542cdf9e7f93b68665ce62a8a69a30839320373f97a6a249c688917",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "valueSource": "keccak256(\"TokenBurned(uint256,uint256,address,address)\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "STREAM_TOKEN_BURNED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 123,
+            "byteStart": 1251,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L28-L29",
+            "lineEnd": 29,
+            "lineStart": 28,
+            "snippetSha256": "sha256:ce6ef6a111a9b93f5aa8408f226b09b4001fea41de9abadaeedb8d033b7469c3",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 62,
+            "byteStart": 1312,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:c2dbdcffd3c1c86855543e3462d503118ee32a0cb523e430be975a9fd19f33d8",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "valueSource": "keccak256(\"StreamTokenBurned(uint256,uint256,uint256,uint16)\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "METADATA_UPDATE_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 85,
+            "byteStart": 1380,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:bed32f9fe7984bc07db2c5f9ec8d9ba88c5fb3db95d8bd8e8aef91d02393de7e",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 36,
+            "byteStart": 1429,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L30",
+            "lineEnd": 30,
+            "lineStart": 30,
+            "snippetSha256": "sha256:2826f0dbf8eb545c8c9b7de48ad0ba4b2e55328e87a7f33b0b2c75ad9ccbd0ee",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "valueSource": "keccak256(\"MetadataUpdate(uint256)\")",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "BURNED_TOKEN_RANDOMNESS_RECORDED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 179,
+            "byteStart": 1471,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L31-L33",
+            "lineEnd": 33,
+            "lineStart": 31,
+            "snippetSha256": "sha256:c39370e2519a8c9c163ff821dc9f4d13ef525ad0b3ea2b20481a4d31ae69785c",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 113,
+            "byteStart": 1537,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L31-L33",
+            "lineEnd": 33,
+            "lineStart": 31,
+            "snippetSha256": "sha256:79d950919161235f7a2c6c3a6f996b11057b40acc39c944b20829343200c0f1b",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "valueSource": "keccak256(\n        \"BurnedTokenRandomnessRecorded(uint256,uint256,uint256,address,uint256,bytes32,bytes32)\"\n    )",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RANDOMNESS_FULFILLED_TOPIC",
+          "natspec": "",
+          "range": {
+            "byteLength": 151,
+            "byteStart": 1656,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L34-L35",
+            "lineEnd": 35,
+            "lineStart": 34,
+            "snippetSha256": "sha256:5df8556d4e8437be4633a9674c410b83b2f1cb1a5d70c0edc1d460ffe370cb3e",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 89,
+            "byteStart": 1718,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L35",
+            "lineEnd": 35,
+            "lineStart": 35,
+            "snippetSha256": "sha256:30bdab029d766f0a14552be6367ea7120c977e74fbbf73b35c9a2af0e5b21056",
+            "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+          },
+          "valueSource": "keccak256(\"RandomnessFulfilled(uint256,uint256,uint256,address,uint256,bytes32,bytes32)\")",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase",
+        "name": "CharacterizationTestBase"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Db3JlQnVybi50LnNvbDpTdHJlYW1Db3JlQnVyblRlc3Q",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamCoreBurn.t.sol:StreamCoreBurnTest",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamCoreBurnTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 17209,
+      "byteStart": 334,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamCoreBurn.t.sol#L11-L429",
+      "lineEnd": 429,
+      "lineStart": 11,
+      "snippetSha256": "sha256:356ce54a541b3a9d8033a3295f7e65770a89c9aeaa07153ac9a18ee3a52b43ef",
+      "sourceSha256": "sha256:330d9a8c4b661533a06b902f00b580ab375eb5ebec5faf7d8a19164eb0ced0b6"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamCoreBurn.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-28.2",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 5
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 4
+    },
+    "totalCount": 5
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:0x235047c2",
+      "definitionId": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:0x2988656a",
+      "definitionId": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:0x59f3feaa",
+      "definitionId": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest#function:0xdd45874a",
+      "definitionId": "test/StreamCoreBurn.t.sol:StreamCoreBurnTest",
+      "severity": "advisory"
+    }
+  ]
+}

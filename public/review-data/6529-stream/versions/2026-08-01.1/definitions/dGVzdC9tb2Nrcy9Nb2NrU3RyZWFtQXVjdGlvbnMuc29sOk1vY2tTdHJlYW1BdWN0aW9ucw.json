@@ -1,0 +1,743 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0x38d4f6f6",
+          "declaringDefinitionId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions",
+          "inherited": false,
+          "inputs": [],
+          "name": "isStreamAuctionsContract",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "selector": "0x38d4f6f6",
+          "signature": "isStreamAuctionsContract()",
+          "stateMutability": "pure"
+        },
+        {
+          "declarationId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0xc3eafb05",
+          "declaringDefinitionId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions",
+          "inherited": false,
+          "inputs": [],
+          "name": "lastAuctionEndTime",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xc3eafb05",
+          "signature": "lastAuctionEndTime()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0x46eb6d9e",
+          "declaringDefinitionId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions",
+          "inherited": false,
+          "inputs": [],
+          "name": "lastCollectionId",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x46eb6d9e",
+          "signature": "lastCollectionId()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0x41f4bbfe",
+          "declaringDefinitionId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions",
+          "inherited": false,
+          "inputs": [],
+          "name": "lastDropId",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "selector": "0x41f4bbfe",
+          "signature": "lastDropId()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0xb087ea6b",
+          "declaringDefinitionId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions",
+          "inherited": false,
+          "inputs": [],
+          "name": "lastPoster",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0xb087ea6b",
+          "signature": "lastPoster()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0xa0cb7d30",
+          "declaringDefinitionId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions",
+          "inherited": false,
+          "inputs": [],
+          "name": "lastReservePrice",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xa0cb7d30",
+          "signature": "lastReservePrice()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0xf84ddf0b",
+          "declaringDefinitionId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions",
+          "inherited": false,
+          "inputs": [],
+          "name": "lastTokenId",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xf84ddf0b",
+          "signature": "lastTokenId()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0x89dd4dc6",
+          "declaringDefinitionId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "_dropId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "_tokenid",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "_collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "address",
+              "name": "_poster",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "internalType": "uint256",
+              "name": "_reservePrice",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "internalType": "uint256",
+              "name": "_auctionEndTime",
+              "type": "uint256"
+            }
+          ],
+          "name": "registerAuction",
+          "outputs": [],
+          "selector": "0x89dd4dc6",
+          "signature": "registerAuction(bytes32,uint256,uint256,address,uint256,uint256)",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "lastDropId()",
+          "displaySignature": "lastDropId()",
+          "functionKind": "getter",
+          "id": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0x41f4bbfe",
+          "inputs": [],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrU3RyZWFtQXVjdGlvbnMuc29sOk1vY2tTdHJlYW1BdWN0aW9ucyNmdW5jdGlvbjoweDQxZjRiYmZl",
+          "kind": "function",
+          "modifiers": [],
+          "name": "lastDropId",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "range": {
+            "byteLength": 25,
+            "byteStart": 164,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamAuctions.sol#L7",
+            "lineEnd": 7,
+            "lineStart": 7,
+            "snippetSha256": "sha256:d3ee068deccf01ffddf453e0dd5ca0d251dc2edeeb7ed291bfe33488d46f47da",
+            "sourceSha256": "sha256:684341c865c7a202898743647021ff4df7202620d3414b3f6d796af48a874923"
+          },
+          "selector": "0x41f4bbfe",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "lastTokenId()",
+          "displaySignature": "lastTokenId()",
+          "functionKind": "getter",
+          "id": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0xf84ddf0b",
+          "inputs": [],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrU3RyZWFtQXVjdGlvbnMuc29sOk1vY2tTdHJlYW1BdWN0aW9ucyNmdW5jdGlvbjoweGY4NGRkZjBi",
+          "kind": "function",
+          "modifiers": [],
+          "name": "lastTokenId",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 26,
+            "byteStart": 195,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamAuctions.sol#L8",
+            "lineEnd": 8,
+            "lineStart": 8,
+            "snippetSha256": "sha256:f2abfdb61b37e4be016ce39fbde59f61fde021a74db68200c9da589d92884c01",
+            "sourceSha256": "sha256:684341c865c7a202898743647021ff4df7202620d3414b3f6d796af48a874923"
+          },
+          "selector": "0xf84ddf0b",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "lastCollectionId()",
+          "displaySignature": "lastCollectionId()",
+          "functionKind": "getter",
+          "id": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0x46eb6d9e",
+          "inputs": [],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrU3RyZWFtQXVjdGlvbnMuc29sOk1vY2tTdHJlYW1BdWN0aW9ucyNmdW5jdGlvbjoweDQ2ZWI2ZDll",
+          "kind": "function",
+          "modifiers": [],
+          "name": "lastCollectionId",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 31,
+            "byteStart": 227,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamAuctions.sol#L9",
+            "lineEnd": 9,
+            "lineStart": 9,
+            "snippetSha256": "sha256:46fcc045e47acdb78e50990cd159ee39e78a4e3e66bb04d79036c8c5683e3466",
+            "sourceSha256": "sha256:684341c865c7a202898743647021ff4df7202620d3414b3f6d796af48a874923"
+          },
+          "selector": "0x46eb6d9e",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "lastPoster()",
+          "displaySignature": "lastPoster()",
+          "functionKind": "getter",
+          "id": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0xb087ea6b",
+          "inputs": [],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrU3RyZWFtQXVjdGlvbnMuc29sOk1vY2tTdHJlYW1BdWN0aW9ucyNmdW5jdGlvbjoweGIwODdlYTZi",
+          "kind": "function",
+          "modifiers": [],
+          "name": "lastPoster",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 25,
+            "byteStart": 264,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamAuctions.sol#L10",
+            "lineEnd": 10,
+            "lineStart": 10,
+            "snippetSha256": "sha256:c178908ae251141c492d33ff0ce1d655cda7026f8113bf47e966f3a873fbeca8",
+            "sourceSha256": "sha256:684341c865c7a202898743647021ff4df7202620d3414b3f6d796af48a874923"
+          },
+          "selector": "0xb087ea6b",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "lastReservePrice()",
+          "displaySignature": "lastReservePrice()",
+          "functionKind": "getter",
+          "id": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0xa0cb7d30",
+          "inputs": [],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrU3RyZWFtQXVjdGlvbnMuc29sOk1vY2tTdHJlYW1BdWN0aW9ucyNmdW5jdGlvbjoweGEwY2I3ZDMw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "lastReservePrice",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 31,
+            "byteStart": 295,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamAuctions.sol#L11",
+            "lineEnd": 11,
+            "lineStart": 11,
+            "snippetSha256": "sha256:632a8ed5fe3407fdfed77d184131ffeb90bfaf776e42eb2a42b6bfd686b7a040",
+            "sourceSha256": "sha256:684341c865c7a202898743647021ff4df7202620d3414b3f6d796af48a874923"
+          },
+          "selector": "0xa0cb7d30",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "lastAuctionEndTime()",
+          "displaySignature": "lastAuctionEndTime()",
+          "functionKind": "getter",
+          "id": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0xc3eafb05",
+          "inputs": [],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrU3RyZWFtQXVjdGlvbnMuc29sOk1vY2tTdHJlYW1BdWN0aW9ucyNmdW5jdGlvbjoweGMzZWFmYjA1",
+          "kind": "function",
+          "modifiers": [],
+          "name": "lastAuctionEndTime",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 33,
+            "byteStart": 332,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamAuctions.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:c1ba8f0c8a9d4c7965cbfefad75eb08c7e48dab56d3279e341bafe9fb900744a",
+            "sourceSha256": "sha256:684341c865c7a202898743647021ff4df7202620d3414b3f6d796af48a874923"
+          },
+          "selector": "0xc3eafb05",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "isStreamAuctionsContract()",
+          "displaySignature": "isStreamAuctionsContract()",
+          "functionKind": "function",
+          "id": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0x38d4f6f6",
+          "inputs": [],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrU3RyZWFtQXVjdGlvbnMuc29sOk1vY2tTdHJlYW1BdWN0aW9ucyNmdW5jdGlvbjoweDM4ZDRmNmY2",
+          "kind": "function",
+          "modifiers": [],
+          "name": "isStreamAuctionsContract",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "range": {
+            "byteLength": 93,
+            "byteStart": 372,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamAuctions.sol#L14-L16",
+            "lineEnd": 16,
+            "lineStart": 14,
+            "snippetSha256": "sha256:d60996e18af836043634c97d63629ff64bad6d12f7db7db7452a1390d4866fdf",
+            "sourceSha256": "sha256:684341c865c7a202898743647021ff4df7202620d3414b3f6d796af48a874923"
+          },
+          "selector": "0x38d4f6f6",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "registerAuction(bytes32,uint256,uint256,address,uint256,uint256)",
+          "displaySignature": "registerAuction(bytes32,uint256,uint256,address,uint256,uint256)",
+          "functionKind": "function",
+          "id": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0x89dd4dc6",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "_dropId",
+              "type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "_tokenid",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "_collectionId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "_poster",
+              "type": "address"
+            },
+            {
+              "index": 4,
+              "name": "_reservePrice",
+              "type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "_auctionEndTime",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9tb2Nrcy9Nb2NrU3RyZWFtQXVjdGlvbnMuc29sOk1vY2tTdHJlYW1BdWN0aW9ucyNmdW5jdGlvbjoweDg5ZGQ0ZGM2",
+          "kind": "function",
+          "modifiers": [],
+          "name": "registerAuction",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 440,
+            "byteStart": 471,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamAuctions.sol#L18-L32",
+            "lineEnd": 32,
+            "lineStart": 18,
+            "snippetSha256": "sha256:0399b7405b8efcfee6860f579349b93b4e95b5613e29960eca4d5d0cb7ed4b31",
+            "sourceSha256": "sha256:684341c865c7a202898743647021ff4df7202620d3414b3f6d796af48a874923"
+          },
+          "selector": "0x89dd4dc6",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0x41f4bbfe",
+          "immutable": false,
+          "name": "lastDropId",
+          "natspec": "",
+          "range": {
+            "byteLength": 25,
+            "byteStart": 164,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamAuctions.sol#L7",
+            "lineEnd": 7,
+            "lineStart": 7,
+            "snippetSha256": "sha256:d3ee068deccf01ffddf453e0dd5ca0d251dc2edeeb7ed291bfe33488d46f47da",
+            "sourceSha256": "sha256:684341c865c7a202898743647021ff4df7202620d3414b3f6d796af48a874923"
+          },
+          "selector": "0x41f4bbfe",
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0xf84ddf0b",
+          "immutable": false,
+          "name": "lastTokenId",
+          "natspec": "",
+          "range": {
+            "byteLength": 26,
+            "byteStart": 195,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamAuctions.sol#L8",
+            "lineEnd": 8,
+            "lineStart": 8,
+            "snippetSha256": "sha256:f2abfdb61b37e4be016ce39fbde59f61fde021a74db68200c9da589d92884c01",
+            "sourceSha256": "sha256:684341c865c7a202898743647021ff4df7202620d3414b3f6d796af48a874923"
+          },
+          "selector": "0xf84ddf0b",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0x46eb6d9e",
+          "immutable": false,
+          "name": "lastCollectionId",
+          "natspec": "",
+          "range": {
+            "byteLength": 31,
+            "byteStart": 227,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamAuctions.sol#L9",
+            "lineEnd": 9,
+            "lineStart": 9,
+            "snippetSha256": "sha256:46fcc045e47acdb78e50990cd159ee39e78a4e3e66bb04d79036c8c5683e3466",
+            "sourceSha256": "sha256:684341c865c7a202898743647021ff4df7202620d3414b3f6d796af48a874923"
+          },
+          "selector": "0x46eb6d9e",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0xb087ea6b",
+          "immutable": false,
+          "name": "lastPoster",
+          "natspec": "",
+          "range": {
+            "byteLength": 25,
+            "byteStart": 264,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamAuctions.sol#L10",
+            "lineEnd": 10,
+            "lineStart": 10,
+            "snippetSha256": "sha256:c178908ae251141c492d33ff0ce1d655cda7026f8113bf47e966f3a873fbeca8",
+            "sourceSha256": "sha256:684341c865c7a202898743647021ff4df7202620d3414b3f6d796af48a874923"
+          },
+          "selector": "0xb087ea6b",
+          "type": "address",
+          "typeString": "address",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0xa0cb7d30",
+          "immutable": false,
+          "name": "lastReservePrice",
+          "natspec": "",
+          "range": {
+            "byteLength": 31,
+            "byteStart": 295,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamAuctions.sol#L11",
+            "lineEnd": 11,
+            "lineStart": 11,
+            "snippetSha256": "sha256:632a8ed5fe3407fdfed77d184131ffeb90bfaf776e42eb2a42b6bfd686b7a040",
+            "sourceSha256": "sha256:684341c865c7a202898743647021ff4df7202620d3414b3f6d796af48a874923"
+          },
+          "selector": "0xa0cb7d30",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0xc3eafb05",
+          "immutable": false,
+          "name": "lastAuctionEndTime",
+          "natspec": "",
+          "range": {
+            "byteLength": 33,
+            "byteStart": 332,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamAuctions.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:c1ba8f0c8a9d4c7965cbfefad75eb08c7e48dab56d3279e341bafe9fb900744a",
+            "sourceSha256": "sha256:684341c865c7a202898743647021ff4df7202620d3414b3f6d796af48a874923"
+          },
+          "selector": "0xc3eafb05",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/IStreamAuctions.sol:IStreamAuctions",
+        "name": "IStreamAuctions"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9tb2Nrcy9Nb2NrU3RyZWFtQXVjdGlvbnMuc29sOk1vY2tTdHJlYW1BdWN0aW9ucw",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/mocks/MockStreamAuctions.sol:MockStreamAuctions",
+      "smart-contracts/IStreamAuctions.sol:IStreamAuctions"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "MockStreamAuctions",
+    "natspec": "",
+    "range": {
+      "byteLength": 802,
+      "byteStart": 111,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/mocks/MockStreamAuctions.sol#L6-L33",
+      "lineEnd": 33,
+      "lineStart": 6,
+      "snippetSha256": "sha256:84a1abdcb8822a8bb275a8c3acb6117956e11259f57c54ee04634913159b18bb",
+      "sourceSha256": "sha256:684341c865c7a202898743647021ff4df7202620d3414b3f6d796af48a874923"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/mocks/MockStreamAuctions.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 9
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 8
+    },
+    "totalCount": 9
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0x38d4f6f6",
+      "definitionId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0x41f4bbfe",
+      "definitionId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0x46eb6d9e",
+      "definitionId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0x89dd4dc6",
+      "definitionId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0xa0cb7d30",
+      "definitionId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0xb087ea6b",
+      "definitionId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0xc3eafb05",
+      "definitionId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions#function:0xf84ddf0b",
+      "definitionId": "test/mocks/MockStreamAuctions.sol:MockStreamAuctions",
+      "severity": "advisory"
+    }
+  ]
+}

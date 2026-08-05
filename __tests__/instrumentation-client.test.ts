@@ -14,8 +14,10 @@ jest.mock("@sentry/nextjs", () => ({
 describe("instrumentation-client", () => {
   const wrappedNetworkMessage =
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
+  const syntheticAutomaticWaveId = `${"1".repeat(8)}-${"2".repeat(4)}-4${"3".repeat(3)}-8${"4".repeat(3)}-${"5".repeat(12)}`;
   const objectCapturedPromiseRejectionMessage =
     "Object captured as promise rejection with keys: code, message, stack";
+  const indexedDBUserDeleteMessage = "Database deleted by request of the user";
   const talismanOnboardingMessage =
     "Talisman extension has not been configured yet. Please continue with onboarding.";
   const disconnectedProviderStack =
@@ -26,6 +28,8 @@ describe("instrumentation-client", () => {
     "undefined is not an object (evaluating 'e.tags')";
   const gifPickerTenorUndefinedResultsMapMessage =
     "undefined is not an object (evaluating 'e.results.map')";
+  const instagramPageHideBridgeErrorMessage =
+    "undefined is not an object (evaluating 'window.webkit.messageHandlers')";
   const reactDomRemoveChildMessage =
     "Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.";
   const reactDomFrame = {
@@ -61,8 +65,194 @@ describe("instrumentation-client", () => {
     "JSON.stringify cannot serialize cyclic structures.";
   const sentryRouteParameterizationMechanismType =
     "auto.browser.browserapierrors.setTimeout";
-  const rabbyMobileUserAgent =
-    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 RabbyMobile/1.0 Mobile/15E148";
+  const browserUnhandledRejectionMechanismType =
+    "auto.browser.global_handlers.onunhandledrejection";
+  const expectedWaveAbortErrorValue =
+    "AbortError: The user aborted a request.";
+  const poperBlockerNetworkErrorMessage =
+    "Network request failed. Please check your connection and try again. (/api/dm-drops/unread)";
+  const poperBlockerInjectedFetchFrames = [
+    {
+      filename: "app:///injectScriptAdjust.js",
+      abs_path: "app:///injectScriptAdjust.js",
+      function: "window.fetch",
+      lineno: 1,
+      colno: 4520,
+      in_app: true,
+    },
+    {
+      filename: "app:///injectScriptAdjust.js",
+      abs_path: "app:///injectScriptAdjust.js",
+      function: "VihJ",
+      lineno: 1,
+      colno: 3159,
+      in_app: true,
+    },
+  ];
+  const poperBlockerProcessedFrames = [
+    {
+      filename:
+        "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/dispatch/FetchHttpHandler.js",
+      function: "e.prototype.handle",
+      in_app: false,
+    },
+    ...poperBlockerInjectedFetchFrames,
+  ];
+  const poperBlockerCurrentProcessedFrames = [
+    {
+      filename:
+        "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/dispatch/FetchHttpHandler.js",
+      function: "e.prototype.handle",
+      in_app: false,
+    },
+    {
+      filename: "app:///injectScriptAdjust.js",
+      abs_path: "app:///injectScriptAdjust.js",
+      function: null,
+      lineno: 1,
+      colno: 4520,
+      in_app: true,
+    },
+    {
+      filename: "app:///injectScriptAdjust.js",
+      abs_path: "app:///injectScriptAdjust.js",
+      function: "VihJ",
+      lineno: 1,
+      colno: 3159,
+      in_app: true,
+    },
+  ];
+  const poperBlockerLatestRawFrames = [
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "a",
+      lineno: 11,
+      colno: 9819,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "Object.next",
+      lineno: 11,
+      colno: 10983,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "e.<anonymous>",
+      lineno: 11,
+      colno: 11456,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "e.handle",
+      lineno: 11,
+      colno: 6396,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0_6tmws~mg4aj.js",
+      abs_path: "app:///_next/static/chunks/0_6tmws~mg4aj.js",
+      lineno: 10,
+      colno: 1824,
+      in_app: true,
+    },
+    ...poperBlockerInjectedFetchFrames,
+  ];
+  const poperBlockerRecommendedRawFrames = [
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "a",
+      lineno: 11,
+      colno: 1231,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "Object.next",
+      lineno: 11,
+      colno: 2395,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "ts.<anonymous>",
+      lineno: 11,
+      colno: 2889,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "e.handle",
+      lineno: 11,
+      colno: 11269,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "tW",
+      lineno: 11,
+      colno: 9763,
+      in_app: true,
+    },
+    {
+      filename: "<anonymous>",
+      abs_path: "<anonymous>",
+      function: "new Promise",
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      lineno: 11,
+      colno: 10014,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "Object.next",
+      lineno: 11,
+      colno: 10983,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "e.<anonymous>",
+      lineno: 11,
+      colno: 11456,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      abs_path: "app:///_next/static/chunks/0f73v56w55r2u.js",
+      function: "e.handle",
+      lineno: 11,
+      colno: 6396,
+      in_app: true,
+    },
+    {
+      filename: "app:///_next/static/chunks/0l0_44jw8k0xa.js",
+      abs_path: "app:///_next/static/chunks/0l0_44jw8k0xa.js",
+      lineno: 10,
+      colno: 1824,
+      in_app: true,
+    },
+    ...poperBlockerInjectedFetchFrames,
+  ];
+  const webkitExtensionMessagingTabNotFoundMessage =
+    "Invalid call to runtime.sendMessage(). Tab not found.";
   const rainbowKitNotFoundMessage = "not found rainbowkit";
   const nativeJsonStringifyFrame = {
     filename: "[native code]",
@@ -71,11 +261,23 @@ describe("instrumentation-client", () => {
   };
 
   type BeforeSendResult = {
+    level?: string | undefined;
     tags?: Record<string, unknown> | undefined;
     fingerprint?: string[] | undefined;
     exception?:
       | {
-          values?: Array<{ value?: string | undefined } | undefined>;
+          values?: Array<
+            | {
+                value?: string | undefined;
+                mechanism?:
+                  | {
+                      type?: string | undefined;
+                      handled?: boolean | undefined;
+                    }
+                  | undefined;
+              }
+            | undefined
+          >;
         }
       | undefined;
     message?: string | undefined;
@@ -115,6 +317,176 @@ describe("instrumentation-client", () => {
       extra?: Record<string, unknown>;
     };
   };
+
+  const loadBeforeSendSpan = () => {
+    const config = loadSentryConfig();
+    expect(typeof config.beforeSendSpan).toBe("function");
+
+    return config.beforeSendSpan as (
+      span: Record<string, unknown>
+    ) => Record<string, unknown>;
+  };
+
+  const createUnhandledRejectionEvent = (message: string) => ({
+    level: "error",
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: message,
+          mechanism: {
+            type: browserUnhandledRejectionMechanismType,
+            handled: false,
+          },
+        },
+      ],
+    },
+  });
+
+  const createExpectedWaveReplacementAbortEvent = () => ({
+    ...createUnhandledRejectionEvent(expectedWaveAbortErrorValue),
+    timestamp: 1_785_689_742.621,
+    tags: {
+      "DOMException.code": "20",
+    },
+    breadcrumbs: [
+      {
+        category: "wave.request",
+        message: "wave_request_aborted",
+        timestamp: 1_785_689_742.5,
+        data: {
+          request_kind: "background_sync",
+          trigger: "request_replaced",
+        },
+      },
+    ],
+  });
+
+  const createPoperBlockerOrphanFetchRejectionEvent = (
+    value = poperBlockerNetworkErrorMessage,
+    frames: Array<Record<string, unknown>> = poperBlockerProcessedFrames
+  ) => ({
+    level: "warning",
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value,
+          mechanism: {
+            type: browserUnhandledRejectionMechanismType,
+            handled: false,
+          },
+          stacktrace: {
+            frames,
+          },
+        },
+      ],
+    },
+  });
+
+  const createWebKitExtensionMessagingTabNotFoundEvent = (
+    valueOverrides: Record<string, unknown> = {},
+    eventOverrides: Record<string, unknown> = {}
+  ) => {
+    const event = createUnhandledRejectionEvent(
+      webkitExtensionMessagingTabNotFoundMessage
+    );
+
+    return {
+      ...event,
+      ...eventOverrides,
+      exception: {
+        values: [
+          {
+            ...event.exception.values[0],
+            ...valueOverrides,
+          },
+        ],
+      },
+    };
+  };
+
+  const createAppleWebKitSortedTrackListEvent = (
+    frames: Array<Record<string, unknown>> = [
+      {
+        filename: "[native code]",
+        abs_path: "[native code]",
+        function: "sortedTrackListForMenu",
+      },
+    ]
+  ) => ({
+    transaction: "/notifications",
+    contexts: {
+      browser: {
+        name: "Apple Mail",
+      },
+    },
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value: "Type error",
+          mechanism: {
+            type: "auto.browser.global_handlers.onerror",
+            handled: false,
+          },
+          stacktrace: {
+            frames,
+          },
+        },
+      ],
+    },
+  });
+
+  const createInstagramPageHideBridgeEvent = (
+    columns: readonly [number, number, number] = [5517, 3808, 1208],
+    documentPath = "app:///example-profile/rep"
+  ) => ({
+    contexts: {
+      browser: { name: "Instagram" },
+      os: { name: "iOS" },
+    },
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value: instagramPageHideBridgeErrorMessage,
+          mechanism: {
+            type: "auto.browser.global_handlers.onerror",
+            handled: false,
+          },
+          stacktrace: {
+            frames: [
+              {
+                filename: documentPath,
+                abs_path: documentPath,
+                function: "?",
+                lineno: 1,
+                colno: columns[0],
+                in_app: true,
+              },
+              {
+                filename: documentPath,
+                abs_path: documentPath,
+                function: "sendPageHideMessage",
+                lineno: 1,
+                colno: columns[1],
+                in_app: true,
+              },
+              {
+                filename: documentPath,
+                abs_path: documentPath,
+                function: "sendDataToNative",
+                lineno: 1,
+                colno: columns[2],
+                in_app: true,
+              },
+            ],
+          },
+        },
+      ],
+    },
+  });
 
   const createSentryRouteParameterizationEvent = (
     frames: Array<Record<string, unknown>> = [nativeJsonStringifyFrame],
@@ -214,27 +586,36 @@ describe("instrumentation-client", () => {
     },
   ];
 
+  const createObservedRabbyRainbowKitRawFrames = () => [
+    {
+      filename: "app:///_next/static/chunks/observed-rabby-webview.js",
+      abs_path: "app:///_next/static/chunks/observed-rabby-webview.js",
+      function: "n",
+      in_app: true,
+    },
+    {
+      filename: "[native code]",
+      abs_path: "[native code]",
+      function: "Promise",
+      in_app: true,
+    },
+  ];
+
   const createRabbyMobileRainbowKitNotFoundEvent = (
     overrides: Record<string, unknown> = {}
   ) => ({
     event_id: "rabby-mobile-rainbowkit-not-found",
-    request: {
-      headers: {
-        "User-Agent": rabbyMobileUserAgent,
-      },
-    },
     exception: {
       values: [
         {
           type: "Error",
           value: rainbowKitNotFoundMessage,
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: false,
+          },
           stacktrace: {
-            frames: [
-              {
-                filename: "https://static.rabby.io/mobile-shell.js",
-                in_app: false,
-              },
-            ],
+            frames: createObservedRabbyRainbowKitRawFrames(),
           },
         },
       ],
@@ -248,6 +629,71 @@ describe("instrumentation-client", () => {
     mockReplayIntegration.mockReset();
     mockReplayIntegration.mockImplementation(() => ({ name: "replay" }));
     mockCaptureRouterTransitionStart.mockReset();
+  });
+
+  it.each([
+    {
+      description: "raw WebKit user-delete message",
+      message: indexedDBUserDeleteMessage,
+    },
+    {
+      description: "Sentry-prefixed WebKit user-delete value",
+      message: `UnknownError: ${indexedDBUserDeleteMessage}`,
+    },
+    {
+      description: "raw WebKit open-failure message",
+      message: "Unable to open database file on disk",
+    },
+    {
+      description: "Sentry-prefixed WebKit open-failure value",
+      message: "UnknownError: Unable to open database file on disk",
+    },
+  ])(
+    "classifies the $description as a handled IndexedDB warning",
+    ({ message }) => {
+      const beforeSend = loadBeforeSend();
+
+      const result = beforeSend(createUnhandledRejectionEvent(message));
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          level: "warning",
+          tags: expect.objectContaining({
+            errorType: "indexeddb",
+            handled: true,
+          }),
+          fingerprint: ["indexeddb-connection-lost"],
+          exception: expect.objectContaining({
+            values: [
+              expect.objectContaining({
+                mechanism: {
+                  type: browserUnhandledRejectionMechanismType,
+                  handled: true,
+                },
+              }),
+            ],
+          }),
+        })
+      );
+    }
+  );
+
+  it.each([
+    "UnknownError: Database deleted by request of the administrator",
+    "UnknownError: Database deleted by request of the user during migration",
+    "UnknownError: Unable to open database file on disk because it is locked",
+  ])("preserves the near-miss database failure %s", (message) => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(createUnhandledRejectionEvent(message));
+
+    expect(result).toEqual(expect.objectContaining({ level: "error" }));
+    expect(result?.tags).toBeUndefined();
+    expect(result?.fingerprint).toBeUndefined();
+    expect(result?.exception?.values?.[0]?.mechanism).toEqual({
+      type: browserUnhandledRejectionMechanismType,
+      handled: false,
+    });
   });
 
   it("drops disconnected wallet-provider object promise rejections", () => {
@@ -325,6 +771,36 @@ describe("instrumentation-client", () => {
       tags: {
         transaction: "/6529-gradient",
         url: "/6529-gradient",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops production-shaped React DOM removeChild NotFoundError events on the parameterized profile transaction", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "profile-react-dom-remove-child-event",
+      transaction: "/:user",
+      request: {
+        url: "https://6529.io/profile-name",
+      },
+      exception: {
+        values: [
+          {
+            type: "NotFoundError",
+            value: reactDomRemoveChildMessage,
+            stacktrace: {
+              frames: [reactDomFrame],
+            },
+          },
+        ],
+      },
+      tags: {
+        transaction: "/:user",
+        url: "/profile-name",
       },
     };
 
@@ -460,6 +936,79 @@ describe("instrumentation-client", () => {
 
     expect(result).toBeNull();
   });
+
+  it.each([3, 7])(
+    "drops the observed raw anonymous EvalError wrapper at line %i",
+    (wrapperLine) => {
+      const beforeSend = loadBeforeSend();
+      const event = {
+        transaction: "/waves/:wave",
+        exception: {
+          values: [
+            {
+              type: "EvalError",
+              value: anonymousUnsafeEvalCspMessage,
+              mechanism: {
+                type: "auto.browser.global_handlers.onunhandledrejection",
+                handled: false,
+              },
+              stacktrace: {
+                frames: [
+                  {
+                    filename: "app:///_next/static/chunks/0example-chunk.js",
+                    abs_path: "app:///_next/static/chunks/0example-chunk.js",
+                    function: "n",
+                    in_app: true,
+                    lineno: wrapperLine,
+                    colno: 4853,
+                  },
+                  {
+                    filename: "<anonymous>",
+                    abs_path: "<anonymous>",
+                    function: "next",
+                    in_app: true,
+                    lineno: 234,
+                    colno: 30,
+                  },
+                  {
+                    filename: "<anonymous>",
+                    abs_path: "<anonymous>",
+                    function: "predicate",
+                    in_app: true,
+                    lineno: 234,
+                    colno: 30,
+                  },
+                  {
+                    filename: "<anonymous>",
+                    abs_path: "<anonymous>",
+                    function: "eval",
+                    in_app: true,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        tags: {
+          environment: "production",
+          transaction: "/waves/:wave",
+          url: "/waves/example",
+        },
+      };
+      const error = new EvalError(anonymousUnsafeEvalCspMessage);
+      error.stack = [
+        `EvalError: ${anonymousUnsafeEvalCspMessage}`,
+        "    at eval (<anonymous>)",
+        "    at predicate (<anonymous>:234:30)",
+        "    at next (<anonymous>:234:30)",
+        `    at n (app:///_next/static/chunks/0example-chunk.js:${wrapperLine}:4853)`,
+      ].join("\n");
+
+      const result = beforeSend(event, { originalException: error });
+
+      expect(result).toBeNull();
+    }
+  );
 
   it("drops gif-picker Tenor category errors with no app frames", () => {
     const beforeSend = loadBeforeSend();
@@ -911,16 +1460,111 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
-  it("drops Sentry route parameterization cyclic JSON errors", () => {
+  it("drops the exact Apple WebKit native track-list TypeError", () => {
     const beforeSend = loadBeforeSend();
-    const event = createSentryRouteParameterizationEvent();
+    const event = createAppleWebKitSortedTrackListEvent();
 
     const result = beforeSend(event);
 
     expect(result).toBeNull();
   });
 
-  it("drops iOS WKWebView route parameterization cyclic JSON errors without app context", () => {
+  it("keeps the Apple WebKit-shaped TypeError when an application frame is present", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createAppleWebKitSortedTrackListEvent([
+      {
+        filename: "[native code]",
+        abs_path: "[native code]",
+        function: "sortedTrackListForMenu",
+      },
+      {
+        filename: "webpack-internal:///(app-pages-browser)/./app/page.tsx",
+        function: "renderPage",
+        in_app: true,
+      },
+    ]);
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it.each([
+    ["Instagram 439.x", [5421, 3712, 1142] as const, "app:///"],
+    ["Instagram 438.x", [5517, 3808, 1208] as const, "app:///profile/rep"],
+    ["Instagram 436.x/437.x", [6257, 4139, 1325] as const, "app:///waves/id"],
+  ])(
+    "drops the %s raw iOS page-hide bridge signature",
+    (_cohort, columns, documentPath) => {
+      const beforeSend = loadBeforeSend();
+      const event = createInstagramPageHideBridgeEvent(columns, documentPath);
+
+      const result = beforeSend(event);
+
+      expect(result).toBeNull();
+    }
+  );
+
+  it("keeps the Instagram 439.x bridge shape with a changed coordinate", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createInstagramPageHideBridgeEvent(
+      [5422, 3712, 1142],
+      "app:///"
+    );
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps an Instagram page-hide bridge error with changed coordinates", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createInstagramPageHideBridgeEvent([5518, 3808, 1208]);
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps the exact bridge shape outside Instagram", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      ...createInstagramPageHideBridgeEvent(),
+      contexts: {
+        browser: { name: "Twitter" },
+        os: { name: "iOS" },
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps the exact bridge shape with an app-owned original stack", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createInstagramPageHideBridgeEvent();
+    const error = new Error(instagramPageHideBridgeErrorMessage);
+    error.stack = [
+      `TypeError: ${instagramPageHideBridgeErrorMessage}`,
+      "    at sendDataToNative (webpack-internal:///(app-pages-browser)/./utils/instagram-bridge.ts:10:1)",
+    ].join("\n");
+
+    const result = beforeSend(event, { originalException: error });
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps cyclic JSON timer errors for origin diagnostics", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createSentryRouteParameterizationEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps iOS WKWebView cyclic JSON timer errors without app context", () => {
     const beforeSend = loadBeforeSend();
     const event = createSentryRouteParameterizationEvent(
       [
@@ -966,7 +1610,7 @@ describe("instrumentation-client", () => {
 
     const result = beforeSend(event);
 
-    expect(result).toBeNull();
+    expect(result).not.toBeNull();
   });
 
   it("keeps route parameterization cyclic JSON errors without MetaMaskMobile WKWebView context", () => {
@@ -1036,12 +1680,12 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
-  it("drops the raw CP route-parameterization event before browser context enrichment", () => {
+  it("keeps the raw CP event before browser context enrichment", () => {
     const beforeSend = loadBeforeSend();
 
     const result = beforeSend(noiseFilterFixtures.cp);
 
-    expect(result).toBeNull();
+    expect(result).not.toBeNull();
   });
 
   it("drops the raw B9 Twitter CONFIG event with a Sentry wrapper frame", () => {
@@ -1085,6 +1729,127 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
+  it("drops the exact frame-less WebKit extension tab-not-found rejection", () => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(createWebKitExtensionMessagingTabNotFoundEvent());
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps mixed WebKit and app-owned exceptions", () => {
+    const beforeSend = loadBeforeSend();
+    const baseEvent = createWebKitExtensionMessagingTabNotFoundEvent();
+    const event = {
+      ...baseEvent,
+      exception: {
+        values: [
+          ...baseEvent.exception.values,
+          {
+            type: "TypeError",
+            value: "App-owned failure",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./services/messaging/sendMessage.ts",
+                  function: "sendMessage",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it.each([
+    [
+      "an altered message",
+      { value: "Invalid call to runtime.sendMessage(). No tab found." },
+      {},
+    ],
+    ["a different exception type", { type: "TypeError" }, {}],
+    [
+      "a different mechanism",
+      {
+        mechanism: {
+          type: "auto.browser.global_handlers.onerror",
+          handled: false,
+        },
+      },
+      {},
+    ],
+    [
+      "a handled mechanism",
+      {
+        mechanism: {
+          type: browserUnhandledRejectionMechanismType,
+          handled: true,
+        },
+      },
+      {},
+    ],
+    [
+      "an app-owned frame",
+      {
+        stacktrace: {
+          frames: [
+            {
+              filename:
+                "webpack-internal:///(app-pages-browser)/./services/messaging/sendMessage.ts",
+              function: "sendMessage",
+              in_app: true,
+            },
+          ],
+        },
+      },
+      {},
+    ],
+    [
+      "an app-owned serialized stack",
+      {},
+      {
+        extra: {
+          __serialized__: {
+            message: webkitExtensionMessagingTabNotFoundMessage,
+            stack:
+              "Error: Invalid call to runtime.sendMessage(). Tab not found.\n    at sendMessage (app:///services/messaging/sendMessage.ts:10:1)",
+          },
+        },
+      },
+    ],
+  ])("keeps the WebKit tab-not-found near miss with %s", (_, value, event) => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(
+      createWebKitExtensionMessagingTabNotFoundEvent(value, event)
+    );
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps WebKit tab-not-found rejections with app-owned original stacks", () => {
+    const beforeSend = loadBeforeSend();
+    const error = new Error(webkitExtensionMessagingTabNotFoundMessage);
+    error.stack = [
+      `Error: ${webkitExtensionMessagingTabNotFoundMessage}`,
+      "    at sendMessage (webpack-internal:///(app-pages-browser)/./services/messaging/sendMessage.ts:10:1)",
+    ].join("\n");
+
+    const result = beforeSend(
+      createWebKitExtensionMessagingTabNotFoundEvent(),
+      { originalException: error }
+    );
+
+    expect(result).not.toBeNull();
+  });
+
   it("drops the raw DK Coinbase request-relay websocket event", () => {
     const beforeSend = loadBeforeSend();
 
@@ -1100,6 +1865,163 @@ describe("instrumentation-client", () => {
 
     expect(result).not.toBeNull();
     expect(result?.tags?.["network_noise_sampled"]).toBe("true");
+  });
+
+  it("drops the exact expected Wave background-sync replacement abort", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createExpectedWaveReplacementAbortEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps the Wave AbortError without the replacement breadcrumb", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      ...createExpectedWaveReplacementAbortEvent(),
+      breadcrumbs: [],
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("drops the normalized Poper Blocker orphan fetch rejection", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createPoperBlockerOrphanFetchRejectionEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops the current Poper Blocker rejection with an unsymbolicated fetch frame", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createPoperBlockerOrphanFetchRejectionEvent(
+      poperBlockerNetworkErrorMessage,
+      poperBlockerCurrentProcessedFrames
+    );
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops the latest raw Poper Blocker orphan fetch rejection", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createPoperBlockerOrphanFetchRejectionEvent(
+      poperBlockerNetworkErrorMessage,
+      poperBlockerLatestRawFrames
+    );
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops the recommended raw Poper Blocker orphan fetch rejection", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createPoperBlockerOrphanFetchRejectionEvent(
+      "Failed to fetch",
+      poperBlockerRecommendedRawFrames
+    );
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps mixed-exception events with a Poper Blocker rejection first", () => {
+    const beforeSend = loadBeforeSend();
+    const poperBlockerEvent = createPoperBlockerOrphanFetchRejectionEvent();
+    const event = {
+      ...poperBlockerEvent,
+      exception: {
+        values: [
+          ...poperBlockerEvent.exception.values,
+          {
+            type: "Error",
+            value: "Application request validation failed.",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./services/api/common-api.ts",
+                  function: "executeApiRequest",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps first-party unread-DM network failures without the extension signature", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      level: "warning",
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: poperBlockerNetworkErrorMessage,
+            mechanism: {
+              type: browserUnhandledRejectionMechanismType,
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./services/api/common-api.ts",
+                  function: "executeApiRequest",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps handled frame-less network failures grouped with Poper Blocker noise", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      level: "warning",
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Network request failed. Please check your connection and try again. (/track/)",
+            mechanism: {
+              type: "generic",
+              handled: true,
+            },
+            stacktrace: {
+              frames: [],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("keeps app-owned Twitter currentInset errors", () => {
@@ -1186,7 +2108,7 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
-  it("drops exact RabbyMobile RainbowKit lookup errors with no app frames", () => {
+  it("drops the observed raw RainbowKit lookup error without wallet context", () => {
     const beforeSend = loadBeforeSend();
     const event = createRabbyMobileRainbowKitNotFoundEvent();
 
@@ -1203,6 +2125,10 @@ describe("instrumentation-client", () => {
           {
             type: "Error",
             value: rainbowKitNotFoundMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
             stacktrace: {
               frames: [
                 {
@@ -1222,14 +2148,35 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
-  it("keeps exact RainbowKit lookup errors outside RabbyMobile", () => {
+  it("keeps exact RainbowKit lookup errors without the observed raw frames", () => {
     const beforeSend = loadBeforeSend();
     const event = createRabbyMobileRainbowKitNotFoundEvent({
-      request: {
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Mobile Safari/605.1.15",
-        },
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: rainbowKitNotFoundMessage,
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "node_modules/@sentry/nextjs/src/client/routing/parameterization.ts",
+                  function: "n",
+                  in_app: false,
+                },
+                {
+                  filename: "[native code]",
+                  function: "Promise",
+                  in_app: false,
+                },
+              ],
+            },
+          },
+        ],
       },
     });
 
@@ -1238,7 +2185,7 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
-  it("keeps non-exact RainbowKit lookup messages in RabbyMobile", () => {
+  it("keeps non-exact RainbowKit lookup messages", () => {
     const beforeSend = loadBeforeSend();
     const event = createRabbyMobileRainbowKitNotFoundEvent({
       exception: {
@@ -1246,8 +2193,12 @@ describe("instrumentation-client", () => {
           {
             type: "Error",
             value: "Error: not found rainbowkit",
+            mechanism: {
+              type: "auto.browser.global_handlers.onunhandledrejection",
+              handled: false,
+            },
             stacktrace: {
-              frames: [],
+              frames: createObservedRabbyRainbowKitRawFrames(),
             },
           },
         ],
@@ -2340,11 +3291,9 @@ describe("instrumentation-client", () => {
         },
         {
           op: "http.client",
-          description:
-            "GET https://api.6529.io/api/waves/b6128077-ea78-4dd9-b381-52c4eadb2077",
+          description: `GET https://api.6529.io/api/waves/${syntheticAutomaticWaveId}`,
           data: {
-            "http.url":
-              "https://api.6529.io/api/waves/b6128077-ea78-4dd9-b381-52c4eadb2077",
+            "http.url": `https://api.6529.io/api/waves/${syntheticAutomaticWaveId}`,
             "http.response.status_code": 200,
             "url.same_origin": false,
           },
@@ -2394,8 +3343,8 @@ describe("instrumentation-client", () => {
 
     expect(remainingDescriptions).toEqual(
       expect.arrayContaining([
-        "GET https://6529.io/waves",
-        "GET https://api.6529.io/api/waves/b6128077-ea78-4dd9-b381-52c4eadb2077",
+        "GET /waves",
+        "GET /api/waves/:uuid",
         "Main UI thread blocked",
       ])
     );
@@ -2421,6 +3370,43 @@ describe("instrumentation-client", () => {
         ],
       })
     );
+    expect(JSON.stringify(result)).not.toContain(syntheticAutomaticWaveId);
+  });
+
+  it("registers a non-dropping sanitizer for standalone automatic spans", () => {
+    const beforeSendSpan = loadBeforeSendSpan();
+    const span = {
+      op: "http.client",
+      description: `GET https://api.6529.io/api/waves/${syntheticAutomaticWaveId}?access_token=synthetic#private`,
+      start_timestamp: 10,
+      timestamp: 10.5,
+      data: {
+        "http.method": "GET",
+        "http.response.status_code": 502,
+        "http.url": `https://api.6529.io/api/waves/${syntheticAutomaticWaveId}?access_token=synthetic#private`,
+        "url.same_origin": false,
+      },
+    };
+
+    const result = beforeSendSpan(span);
+    const payload = JSON.stringify(result);
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        description: "GET /api/waves/:uuid",
+        start_timestamp: 10,
+        timestamp: 10.5,
+        data: expect.objectContaining({
+          "http.method": "GET",
+          "http.response.status_code": 502,
+          "http.url": "/api/waves/:uuid",
+          "url.same_origin": false,
+        }),
+      })
+    );
+    expect(payload).not.toContain(syntheticAutomaticWaveId);
+    expect(payload).not.toContain("access_token");
+    expect(payload).not.toContain("#private");
   });
 
   it("does not add audit metadata when no spans were filtered", () => {

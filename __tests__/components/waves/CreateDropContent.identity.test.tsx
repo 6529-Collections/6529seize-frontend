@@ -124,6 +124,10 @@ jest.mock("@/components/waves/CreateDropInput", () => {
       const typedContentCountRef = ReactLib.useRef(0);
       ReactLib.useImperativeHandle(ref, () => ({
         clearEditorState: () => undefined,
+        expandMentionAliases: async () => ({
+          completed: true,
+          editorState: undefined,
+        }),
         focus: () => undefined,
       }));
 
@@ -174,6 +178,45 @@ jest.mock(
   "@/components/drops/create/lexical/utils/groupMentionDetection",
   () => ({
     getMentionedGroupsFromEditorState: jest.fn(() => []),
+  })
+);
+// This suite feeds a stub editor state, so the editor-derived mention reader is
+// stubbed alongside the group one. Its real behaviour is covered in
+// __tests__/components/drops/create/lexical/utils/userMentionDetection.test.ts.
+jest.mock(
+  "@/components/drops/create/lexical/utils/userMentionDetection",
+  () => ({
+    getMentionedUsersFromEditorState: jest.fn(() => []),
+    mergeMentionedUsers: jest.fn(
+      (editorMentions: unknown[], registryMentions: unknown[]) => [
+        ...registryMentions,
+        ...editorMentions,
+      ]
+    ),
+  })
+);
+jest.mock(
+  "@/components/drops/create/lexical/utils/nftReferenceDetection",
+  () => ({
+    getReferencedNftsFromEditorState: jest.fn(() => []),
+    mergeReferencedNfts: jest.fn(
+      (editorReferences: unknown[], registryReferences: unknown[]) => [
+        ...registryReferences,
+        ...editorReferences,
+      ]
+    ),
+  })
+);
+jest.mock(
+  "@/components/drops/create/lexical/utils/waveMentionDetection",
+  () => ({
+    getMentionedWavesFromEditorState: jest.fn(() => []),
+    mergeMentionedWaves: jest.fn(
+      (editorMentions: unknown[], registryMentions: unknown[]) => [
+        ...registryMentions,
+        ...editorMentions,
+      ]
+    ),
   })
 );
 jest.mock("@/components/waves/CreateDropContentRequirements", () => () => (
@@ -310,6 +353,11 @@ describe("CreateDropContent identity picker flow", () => {
     mockSetToast.mockClear();
     mockRequestAuth.mockClear();
     resizeObserverCallback = null;
+    Object.defineProperty(window, "innerWidth", {
+      configurable: true,
+      value: 1024,
+      writable: true,
+    });
     (global as any).ResizeObserver = jest
       .fn()
       .mockImplementation((callback: ResizeObserverCallback) => {
@@ -696,7 +744,7 @@ describe("CreateDropContent identity picker flow", () => {
     }
   });
 
-  it("collapses wide composer options when content is typed", async () => {
+  it("keeps wide composer options visible when content is typed", async () => {
     const rectSpy = mockComposerWidth(501);
 
     try {
@@ -713,7 +761,7 @@ describe("CreateDropContent identity picker flow", () => {
       await waitFor(() => {
         expect(screen.getByTestId("actions")).toHaveAttribute(
           "data-show-options",
-          "false"
+          "true"
         );
         expect(screen.getByTestId("actions")).toHaveAttribute(
           "data-animate-options",
@@ -726,7 +774,7 @@ describe("CreateDropContent identity picker flow", () => {
     }
   });
 
-  it("reopens wide composer options and collapses them on the next content change", async () => {
+  it("ignores the collapsed options state in a wide desktop composer", async () => {
     const rectSpy = mockComposerWidth(501);
 
     try {
@@ -737,7 +785,7 @@ describe("CreateDropContent identity picker flow", () => {
       await waitFor(() => {
         expect(screen.getByTestId("actions")).toHaveAttribute(
           "data-show-options",
-          "false"
+          "true"
         );
       });
 
@@ -757,7 +805,7 @@ describe("CreateDropContent identity picker flow", () => {
       await waitFor(() => {
         expect(screen.getByTestId("actions")).toHaveAttribute(
           "data-show-options",
-          "false"
+          "true"
         );
       });
     } finally {
@@ -776,7 +824,7 @@ describe("CreateDropContent identity picker flow", () => {
       await waitFor(() => {
         expect(screen.getByTestId("actions")).toHaveAttribute(
           "data-show-options",
-          "false"
+          "true"
         );
       });
 
@@ -811,7 +859,7 @@ describe("CreateDropContent identity picker flow", () => {
       await waitFor(() => {
         expect(screen.getByTestId("actions")).toHaveAttribute(
           "data-show-options",
-          "false"
+          "true"
         );
       });
 
@@ -825,6 +873,66 @@ describe("CreateDropContent identity picker flow", () => {
       emitComposerResize(499);
 
       await userEvent.click(screen.getByText("type content"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-show-options",
+          "false"
+        );
+      });
+    } finally {
+      rectSpy.mockRestore();
+    }
+  });
+
+  it("switches cleanly at the mobile viewport breakpoint", async () => {
+    const rectSpy = mockComposerWidth(501);
+
+    try {
+      Object.defineProperty(window, "innerWidth", {
+        configurable: true,
+        value: 750,
+        writable: true,
+      });
+      renderSubject();
+
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "false"
+      );
+
+      await userEvent.click(screen.getByText("open options"));
+
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "true"
+      );
+
+      await userEvent.click(screen.getByText("type content"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-show-options",
+          "false"
+        );
+      });
+
+      act(() => {
+        window.innerWidth = 751;
+        window.dispatchEvent(new Event("resize"));
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-show-options",
+          "true"
+        );
+      });
+
+      act(() => {
+        window.innerWidth = 750;
+        window.dispatchEvent(new Event("resize"));
+      });
 
       await waitFor(() => {
         expect(screen.getByTestId("actions")).toHaveAttribute(
@@ -879,7 +987,7 @@ describe("CreateDropContent identity picker flow", () => {
       await waitFor(() => {
         expect(screen.getByTestId("actions")).toHaveAttribute(
           "data-show-options",
-          "false"
+          "true"
         );
       });
 

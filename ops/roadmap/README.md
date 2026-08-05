@@ -7,6 +7,12 @@ repository operations but should not appear in user-facing product docs.
 Keep roadmap pages current-state oriented. Archive or replace stale plans
 instead of leaving conflicting guidance in place.
 
+## Product Architecture Roadmaps
+
+- [Waves as Multi-Competition Hubs](./waves-multi-competition/README.md):
+  staged separation of durable wave hubs from sequential and parallel
+  competitions, including compatibility, migration, rollout, and retirement.
+
 ## Agent Release Railway Roadmap
 
 Last reviewed: 2026-06-18 against `origin/main` at `97bb30914`.
@@ -83,9 +89,8 @@ Triggers:
 - PR merged to `main`.
 - Manual dispatch.
 - Applying a staging queue label.
-- A scheduled bus that follows the cadence in
-  `ops/docs/developer/deployment-bus-process.md` so the process doc stays the
-  source of truth when the team tunes the batching window.
+- A scheduled bus that follows the current release authority documented in
+  `ops/docs/developer/simple-release-bus-v2.md`.
 
 Behavior:
 

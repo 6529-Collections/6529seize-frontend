@@ -1,6 +1,6 @@
 "use client";
 
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import {
@@ -222,11 +222,11 @@ export const PriceActions: React.FC<PriceActionsProps> = ({
       )}
     </button>
     {showCreateAction && (
-      <PrimaryButton
-        loading={false}
-        disabled={false}
-        onClicked={() => onCreateDrop?.()}
-        padding={isCompactActions ? "tw-px-2.5 tw-py-2" : "tw-px-3.5 tw-py-2"}
+      <Button
+        onClick={() => onCreateDrop?.()}
+        variant="primary"
+        size="sm"
+        className={isCompactActions ? "tw-w-9 tw-px-0" : "tw-px-3.5"}
       >
         {isCompactActions ? (
           <>
@@ -239,7 +239,7 @@ export const PriceActions: React.FC<PriceActionsProps> = ({
             <span>{createLabel}</span>
           </>
         )}
-      </PrimaryButton>
+      </Button>
     )}
   </>
 );

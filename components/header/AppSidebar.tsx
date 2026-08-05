@@ -6,6 +6,7 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import { Fragment, useCallback, useEffect, useMemo } from "react";
+import { BuildingLibraryIcon } from "@heroicons/react/24/outline";
 import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
 import {
   DROP_FORGE_PATH,
@@ -86,6 +87,11 @@ export default function AppSidebar({
 
     return [
       sectionMap.get("nfts"),
+      {
+        label: t(DEFAULT_LOCALE, "navigation.primary.museum"),
+        path: "/museum/network",
+        icon: BuildingLibraryIcon,
+      },
       sectionMap.get("waves"),
       {
         label: t(DEFAULT_LOCALE, "navigation.primary.dms"),

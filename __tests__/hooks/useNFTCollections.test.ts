@@ -36,6 +36,16 @@ const mockMemes: NFT[] = [
   } as NFT,
 ];
 
+const mockMemeLab: NFT[] = [
+  {
+    id: 8,
+    contract: "0x4D7fD5A31A56d93fFDEBCc8A1C33c56f9f76d50d",
+    token_id: "8",
+    name: "Test MemeLab",
+    image: "memelab-8.jpg",
+  } as NFT,
+];
+
 const mockGradients: NFT[] = [
   {
     id: 101,
@@ -66,10 +76,19 @@ describe("useNFTCollections", () => {
     jest.clearAllMocks();
 
     // Default mock implementations
-    mockFetchUrl.mockResolvedValue({
-      count: mockMemes.length,
-      data: mockMemes,
-    } as DBResponse);
+    mockFetchUrl.mockImplementation(async (url) => {
+      if (url.includes("memelab_lite")) {
+        return {
+          count: mockMemeLab.length,
+          data: mockMemeLab,
+        } as DBResponse;
+      }
+
+      return {
+        count: mockMemes.length,
+        data: mockMemes,
+      } as DBResponse;
+    });
 
     mockFetchAllPages.mockResolvedValue(mockGradients);
 
@@ -117,8 +136,8 @@ describe("useNFTCollections", () => {
     });
   });
 
-  describe("NFT Collections Fetching (Memes + Gradients)", () => {
-    it("fetches memes and gradients when no initial data provided", async () => {
+  describe("NFT Collections Fetching", () => {
+    it("fetches Memes, MemeLab, and Gradients when no initial data provided", async () => {
       const { result } = renderHook(() => useNFTCollections());
 
       expect(result.current.loading).toBe(true);
@@ -130,12 +149,19 @@ describe("useNFTCollections", () => {
       expect(mockFetchUrl).toHaveBeenCalledWith(
         "https://api.test.6529.io/api/memes_lite"
       );
+      expect(mockFetchUrl).toHaveBeenCalledWith(
+        "https://api.test.6529.io/api/memelab_lite"
+      );
 
       expect(mockFetchAllPages).toHaveBeenCalledWith(
         "https://api.test.6529.io/api/nfts/gradients?&page_size=101"
       );
 
-      expect(result.current.nfts).toEqual([...mockMemes, ...mockGradients]);
+      expect(result.current.nfts).toEqual([
+        ...mockMemes,
+        ...mockMemeLab,
+        ...mockGradients,
+      ]);
     });
 
     it("does not fetch NFTs when initial NFTs are provided", async () => {
@@ -168,7 +194,7 @@ describe("useNFTCollections", () => {
       expect(mockFetchAllPages).toHaveBeenCalled();
     });
 
-    it("combines memes and gradients correctly", async () => {
+    it("combines all three collections correctly", async () => {
       const { result } = renderHook(() => useNFTCollections());
 
       await waitFor(() => {
@@ -176,16 +202,26 @@ describe("useNFTCollections", () => {
       });
 
       expect(result.current.nfts).toHaveLength(
-        mockMemes.length + mockGradients.length
+        mockMemes.length + mockMemeLab.length + mockGradients.length
       );
-      expect(result.current.nfts).toEqual([...mockMemes, ...mockGradients]);
+      expect(result.current.nfts).toEqual([
+        ...mockMemes,
+        ...mockMemeLab,
+        ...mockGradients,
+      ]);
 
       // Verify memes come first
       expect(result.current.nfts.slice(0, mockMemes.length)).toEqual(mockMemes);
-      // Verify gradients come after
-      expect(result.current.nfts.slice(mockMemes.length)).toEqual(
-        mockGradients
-      );
+      // Verify MemeLab and Gradients follow The Memes
+      expect(
+        result.current.nfts.slice(
+          mockMemes.length,
+          mockMemes.length + mockMemeLab.length
+        )
+      ).toEqual(mockMemeLab);
+      expect(
+        result.current.nfts.slice(mockMemes.length + mockMemeLab.length)
+      ).toEqual(mockGradients);
     });
   });
 
@@ -235,7 +271,7 @@ describe("useNFTCollections", () => {
   });
 
   describe("Loading State Management", () => {
-    it("sets loading to false only after NFTs are fetched (both memes and gradients)", async () => {
+    it("sets loading to false only after all NFT collections settle", async () => {
       const { result } = renderHook(() => useNFTCollections());
 
       expect(result.current.loading).toBe(true);
@@ -277,7 +313,7 @@ describe("useNFTCollections", () => {
       consoleErrorSpy.mockRestore();
     });
 
-    it("clears loading and NFT data when the memes API fails", async () => {
+    it("keeps other NFT metadata when The Memes API fails", async () => {
       mockFetchUrl.mockRejectedValueOnce(new Error("memes failed"));
 
       const { result } = renderHook(() => useNFTCollections());
@@ -286,14 +322,35 @@ describe("useNFTCollections", () => {
         expect(result.current.loading).toBe(false);
       });
 
-      expect(result.current.nfts).toEqual([]);
+      expect(result.current.nfts).toEqual([...mockMemeLab, ...mockGradients]);
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "Failed to fetch NFT collections",
+        "Failed to fetch The Memes collection",
         expect.any(Error)
       );
     });
 
-    it("clears loading and NFT data when the gradients API fails", async () => {
+    it("keeps other NFT metadata when the MemeLab API fails", async () => {
+      mockFetchUrl
+        .mockResolvedValueOnce({
+          count: mockMemes.length,
+          data: mockMemes,
+        } as DBResponse)
+        .mockRejectedValueOnce(new Error("memelab failed"));
+
+      const { result } = renderHook(() => useNFTCollections());
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.nfts).toEqual([...mockMemes, ...mockGradients]);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Failed to fetch MemeLab collection",
+        expect.any(Error)
+      );
+    });
+
+    it("keeps other NFT metadata when the Gradients API fails", async () => {
       mockFetchAllPages.mockRejectedValueOnce(new Error("gradients failed"));
 
       const { result } = renderHook(() => useNFTCollections());
@@ -302,9 +359,9 @@ describe("useNFTCollections", () => {
         expect(result.current.loading).toBe(false);
       });
 
-      expect(result.current.nfts).toEqual([]);
+      expect(result.current.nfts).toEqual([...mockMemes, ...mockMemeLab]);
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "Failed to fetch NFT collections",
+        "Failed to fetch 6529 Gradient collection",
         expect.any(Error)
       );
     });
@@ -329,6 +386,26 @@ describe("useNFTCollections", () => {
   });
 
   describe("Hook Behavior with Initial Collections", () => {
+    it("does not refetch when only the initial-collections wrapper is recreated", async () => {
+      const initialNfts: NFT[] = [];
+      const initialNextgenCollections: NextGenCollection[] = [];
+
+      const { result } = renderHook(() =>
+        useNFTCollections({
+          nfts: initialNfts,
+          nextgenCollections: initialNextgenCollections,
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(mockFetchUrl).toHaveBeenCalledTimes(2);
+      expect(mockFetchAllPages).toHaveBeenCalledTimes(1);
+      expect(mockCommonApiFetch).toHaveBeenCalledTimes(1);
+    });
+
     it("does not refetch when initialCollections prop changes (by design)", () => {
       // The hook only reads initialCollections on mount - it doesn't watch for changes
       // This is correct behavior as initialCollections is meant to be SSR data
@@ -382,6 +459,9 @@ describe("useNFTCollections", () => {
       await waitFor(() => {
         expect(mockFetchUrl).toHaveBeenCalledWith(
           "https://custom-api.example.com/api/memes_lite"
+        );
+        expect(mockFetchUrl).toHaveBeenCalledWith(
+          "https://custom-api.example.com/api/memelab_lite"
         );
         expect(mockFetchAllPages).toHaveBeenCalledWith(
           "https://custom-api.example.com/api/nfts/gradients?&page_size=101"

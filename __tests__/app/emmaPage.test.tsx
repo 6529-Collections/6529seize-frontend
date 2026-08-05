@@ -1,6 +1,9 @@
 import DistributionPlanTool, { generateMetadata } from "@/app/emma/page";
+import { publicEnv } from "@/config/env";
 import { TitleProvider } from "@/contexts/TitleContext";
 import { render, screen } from "@testing-library/react";
+
+const domain = new URL(publicEnv.BASE_ENDPOINT).hostname;
 
 jest.mock(
   "@/components/distribution-plan-tool/connect/distribution-plan-tool-connect",
@@ -29,6 +32,6 @@ describe("EMMA page", () => {
   it("exports metadata", async () => {
     const metadata = await generateMetadata();
     expect(metadata.title).toBe("EMMA | Tools");
-    expect(metadata.description).toBe("Tools | 6529.io");
+    expect(metadata.description).toBe(`Tools | ${domain}`);
   });
 });

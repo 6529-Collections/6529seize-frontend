@@ -56,7 +56,7 @@ export default function LatestActivity(props: Readonly<Props>) {
   const showViewAll = !pathname.includes("nft-activity");
 
   return (
-    <section className="tw-p-0 tw-pt-4">
+    <section className={`tw-p-0 ${showViewAll ? "tw-pt-4" : ""}`}>
       <div className="tw-flex tw-flex-wrap tw-items-center">
         <ActivityHeader showViewAll={showViewAll} fetching={fetching} />
         <ActivityFilters

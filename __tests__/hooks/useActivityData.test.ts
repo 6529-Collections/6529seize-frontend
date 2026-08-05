@@ -567,6 +567,23 @@ describe("useActivityData", () => {
   });
 
   describe("Effect Dependencies", () => {
+    it("does not refetch when only the initial-data wrapper is recreated", async () => {
+      const initialActivity = [{ transaction: "0xinitial" } as Transaction];
+
+      const { result } = renderHook(() =>
+        useActivityData(1, 20, TypeFilter.SALES, ContractFilter.ALL, {
+          activity: initialActivity,
+          totalResults: 1,
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.fetching).toBe(false);
+      });
+
+      expect(mockFetchUrl).toHaveBeenCalledTimes(1);
+    });
+
     it("refetches when typeFilter changes", async () => {
       const { rerender } = renderHook(
         ({ typeFilter }) => useActivityData(1, 20, typeFilter, "All" as any),
@@ -636,6 +653,55 @@ describe("useActivityData", () => {
           "https://api.test.6529.io/api/transactions?page_size=50&page=1"
         );
       });
+    });
+
+    it("ignores a stale response after filters change", async () => {
+      let resolveFirst: (value: DBResponse) => void = () => {};
+      let resolveSecond: (value: DBResponse) => void = () => {};
+      mockFetchUrl
+        .mockReturnValueOnce(
+          new Promise<DBResponse>((resolve) => {
+            resolveFirst = resolve;
+          })
+        )
+        .mockReturnValueOnce(
+          new Promise<DBResponse>((resolve) => {
+            resolveSecond = resolve;
+          })
+        );
+
+      const { result, rerender } = renderHook(
+        ({ typeFilter }) =>
+          useActivityData(1, 20, typeFilter, ContractFilter.ALL),
+        { initialProps: { typeFilter: TypeFilter.ALL } }
+      );
+
+      rerender({ typeFilter: TypeFilter.SALES });
+
+      await act(async () => {
+        resolveSecond({
+          count: 1,
+          page: 1,
+          next: null,
+          data: [{ transaction: "0xnew" } as Transaction],
+        });
+      });
+      await waitFor(() => {
+        expect(result.current.activity[0]?.transaction).toBe("0xnew");
+        expect(result.current.fetching).toBe(false);
+      });
+
+      await act(async () => {
+        resolveFirst({
+          count: 1,
+          page: 1,
+          next: null,
+          data: [{ transaction: "0xstale" } as Transaction],
+        });
+      });
+
+      expect(result.current.activity[0]?.transaction).toBe("0xnew");
+      expect(result.current.totalResults).toBe(1);
     });
   });
 

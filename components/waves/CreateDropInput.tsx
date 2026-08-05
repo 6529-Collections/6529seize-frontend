@@ -11,8 +11,9 @@ import {
   useEffect,
   useRef,
 } from "react";
-import type { EditorState } from "lexical";
+import type { EditorState, LexicalEditor } from "lexical";
 import { $getRoot, COMMAND_PRIORITY_CRITICAL, createCommand } from "lexical";
+import { clearWaveDraft } from "@/helpers/waves/wave-draft.helpers";
 
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -45,7 +46,10 @@ import ExampleTheme from "../drops/create/lexical/ExampleTheme";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import type { ClearEditorPluginHandles } from "../drops/create/lexical/plugins/ClearEditorPlugin";
 import ClearEditorPlugin from "../drops/create/lexical/plugins/ClearEditorPlugin";
-import type { NewMentionsPluginHandles } from "../drops/create/lexical/plugins/mentions/MentionsPlugin";
+import type {
+  MentionAliasExpansionResult,
+  NewMentionsPluginHandles,
+} from "../drops/create/lexical/plugins/mentions/MentionsPlugin";
 import NewMentionsPlugin from "../drops/create/lexical/plugins/mentions/MentionsPlugin";
 import type { NewHastagsPluginHandles } from "../drops/create/lexical/plugins/hashtags/HashtagsPlugin";
 import NewHashtagsPlugin from "../drops/create/lexical/plugins/hashtags/HashtagsPlugin";
@@ -59,21 +63,18 @@ import CreateDropEmojiPicker from "./CreateDropEmojiPicker";
 import useCapacitor from "@/hooks/useCapacitor";
 import EmojiPlugin from "../drops/create/lexical/plugins/emoji/EmojiPlugin";
 import { EmojiNode } from "../drops/create/lexical/nodes/EmojiNode";
-import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
-import { EMOJI_TRANSFORMER } from "../drops/create/lexical/transformers/EmojiTransformer";
-import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
-import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
-import { MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/MentionTransformer";
-import { WAVE_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/WaveMentionTransformer";
-import { GROUP_MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/GroupMentionTransformer";
+import { CREATE_DROP_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/createDropMarkdownTransformers";
 import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
 import EditLastDropArrowUpPlugin from "./EditLastDropArrowUpPlugin";
 import RootBlockGuardPlugin from "@/components/drops/create/lexical/plugins/RootBlockGuardPlugin";
 import { $selectEndOfRootBlock } from "@/components/drops/create/lexical/utils/rootContent";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
   setMarkdown: (markdown: string) => void;
+  expandMentionAliases: () => Promise<MentionAliasExpansionResult>;
   focus: () => void;
   blur: () => void;
 }
@@ -107,37 +108,57 @@ interface EditorCommandsPluginHandles {
   blur: () => void;
 }
 
-const EditorCommandsPlugin = forwardRef<
-  EditorCommandsPluginHandles,
-  { readonly canMentionAll: boolean }
->(({ canMentionAll }, ref) => {
-  const [editor] = useLexicalComposerContext();
+const EditorCommandsPlugin = forwardRef<EditorCommandsPluginHandles>(
+  (_props, ref) => {
+    const [editor] = useLexicalComposerContext();
 
-  useImperativeHandle(
-    ref,
-    () => ({
-      focus: () => editor.focus(),
-      blur: () => editor.blur(),
-      setMarkdown: (markdown: string) => {
-        editor.update(() => {
-          $convertFromMarkdownString(markdown, [
-            ...SAFE_MARKDOWN_TRANSFORMERS,
-            MENTION_TRANSFORMER,
-            ...(canMentionAll ? [GROUP_MENTION_TRANSFORMER] : []),
-            HASHTAG_TRANSFORMER,
-            WAVE_MENTION_TRANSFORMER,
-            IMAGE_TRANSFORMER,
-            EMOJI_TRANSFORMER,
-          ]);
-        });
-      },
-    }),
-    [canMentionAll, editor]
-  );
+    useImperativeHandle(
+      ref,
+      () => ({
+        focus: () => editor.focus(),
+        blur: () => editor.blur(),
+        setMarkdown: (markdown: string) => {
+          editor.update(() => {
+            $convertFromMarkdownString(
+              markdown,
+              CREATE_DROP_MARKDOWN_TRANSFORMERS
+            );
+          });
+        },
+      }),
+      [editor]
+    );
+
+    return null;
+  }
+);
+EditorCommandsPlugin.displayName = "EditorCommandsPlugin";
+
+/**
+ * Pushes the editor's mount-time state up to the parent once. A draft
+ * restored through initialConfig.editorState never fires OnChangePlugin (it
+ * is the initial state, not an update), so without this the parent still
+ * believes the composer is empty — submit stays disabled until the user
+ * types. Rendered only when a restored draft seeded the editor.
+ */
+function NotifyInitialEditorStatePlugin({
+  onEditorState,
+}: {
+  readonly onEditorState: (editorState: EditorState) => void;
+}) {
+  const [editor] = useLexicalComposerContext();
+  const notifiedRef = useRef(false);
+
+  useEffect(() => {
+    if (notifiedRef.current) {
+      return;
+    }
+    notifiedRef.current = true;
+    onEditorState(editor.getEditorState());
+  }, [editor, onEditorState]);
 
   return null;
-});
-EditorCommandsPlugin.displayName = "EditorCommandsPlugin";
+}
 
 function InitialMarkdownPlugin({
   initialMarkdown,
@@ -162,7 +183,10 @@ function InitialMarkdownPlugin({
     editor.update(() => {
       const root = $getRoot();
       root.clear();
-      $convertFromMarkdownString(initialMarkdown, SAFE_MARKDOWN_TRANSFORMERS);
+      $convertFromMarkdownString(
+        initialMarkdown,
+        CREATE_DROP_MARKDOWN_TRANSFORMERS
+      );
       $selectEndOfRootBlock(root);
     });
     editor.focus();
@@ -176,9 +200,16 @@ const CreateDropInput = forwardRef<
   {
     readonly waveId: string;
     readonly editorState: EditorState | null;
+    /**
+     * Serialized editor state (JSON) to seed a fresh editor with — a restored
+     * draft. Lexical reads initialConfig.editorState once at creation, so this
+     * only takes effect on mount; live edits flow through `editorState`.
+     */
+    readonly initialEditorStateJson?: string | null | undefined;
     readonly type: ActiveDropAction | null;
     readonly canSubmit: boolean;
     readonly isStormMode: boolean;
+    readonly stormPartNumber?: number | undefined;
     readonly submitting: boolean;
     readonly isDropMode: boolean;
     readonly canMentionAll?: boolean | undefined;
@@ -203,9 +234,11 @@ const CreateDropInput = forwardRef<
     {
       waveId,
       editorState,
+      initialEditorStateJson,
       type,
       canSubmit,
       isStormMode,
+      stormPartNumber = 1,
       isDropMode,
       canMentionAll = false,
       submitting,
@@ -226,6 +259,7 @@ const CreateDropInput = forwardRef<
     ref
   ) => {
     const { isCapacitor } = useCapacitor();
+    const locale = useBrowserLocale();
     const editorConfig: InitialConfigType = {
       namespace: "User Drop",
       nodes: [
@@ -248,7 +282,27 @@ const CreateDropInput = forwardRef<
         ImageNode,
         EmojiNode,
       ],
-      editorState,
+      // A restored draft (JSON string) wins at creation; otherwise the live
+      // editorState object. The draft is parsed inside a try/catch because a
+      // malformed or schema-incompatible draft (e.g. saved by an older app
+      // version whose node types have since changed) would otherwise throw
+      // through onError — which re-throws — and crash the composer mount. On
+      // failure the broken draft is removed from storage so it is not retried
+      // on every mount, and we silently fall back to an empty editor.
+      editorState:
+        typeof initialEditorStateJson === "string"
+          ? (editor: LexicalEditor) => {
+              try {
+                editor.setEditorState(
+                  editor.parseEditorState(initialEditorStateJson)
+                );
+              } catch {
+                // Unrestorable draft — clear it and start empty rather than
+                // crash or retry the same broken payload forever.
+                clearWaveDraft(waveId);
+              }
+            }
+          : editorState,
       editable: !submitting,
       onError(error: Error): void {
         throw error;
@@ -270,7 +324,11 @@ const CreateDropInput = forwardRef<
     const onHashtagAdded = (hashtag: ReferencedNft) => onReferencedNft(hashtag);
 
     const getPlaceHolderText = () => {
-      if (isStormMode) return "Add to the storm";
+      if (isStormMode) {
+        return t(locale, "waves.stormComposer.writePart", {
+          number: stormPartNumber,
+        });
+      }
       if (type === null) {
         return isDropMode ? "Create a drop" : "Write a chat message";
       }
@@ -294,6 +352,7 @@ const CreateDropInput = forwardRef<
 
     const clearEditorRef = useRef<ClearEditorPluginHandles | null>(null);
     const editorCommandsRef = useRef<EditorCommandsPluginHandles | null>(null);
+    const mentionsPluginRef = useRef<NewMentionsPluginHandles | null>(null);
     const clearEditorState = useCallback(() => {
       clearEditorRef.current?.clearEditorState();
     }, []);
@@ -304,13 +363,19 @@ const CreateDropInput = forwardRef<
         clearEditorState,
         setMarkdown: (markdown: string) =>
           editorCommandsRef.current?.setMarkdown(markdown),
+        expandMentionAliases: async () => {
+          const mentionsPlugin = mentionsPluginRef.current;
+          if (!mentionsPlugin) {
+            throw new Error("Quick Tags are not ready yet.");
+          }
+          return mentionsPlugin.expandMentionAliases();
+        },
         focus: () => editorCommandsRef.current?.focus(),
         blur: () => editorCommandsRef.current?.blur(),
       }),
       [clearEditorState]
     );
 
-    const mentionsPluginRef = useRef<NewMentionsPluginHandles | null>(null);
     const hashtagPluginRef = useRef<NewHastagsPluginHandles | null>(null);
     const waveMentionsPluginRef = useRef<NewWaveMentionsPluginHandles | null>(
       null
@@ -379,6 +444,11 @@ const CreateDropInput = forwardRef<
               />
               <HistoryPlugin />
               <OnChangePlugin onChange={onEditorStateChange} />
+              {typeof initialEditorStateJson === "string" && (
+                <NotifyInitialEditorStatePlugin
+                  onEditorState={onEditorStateChange}
+                />
+              )}
               <RootBlockGuardPlugin />
               <NewMentionsPlugin
                 waveId={waveId}
@@ -399,15 +469,12 @@ const CreateDropInput = forwardRef<
               <ListPlugin />
               <PlainTextPastePlugin />
               <MarkdownShortcutPlugin
-                transformers={SAFE_MARKDOWN_TRANSFORMERS}
+                transformers={CREATE_DROP_MARKDOWN_TRANSFORMERS}
               />
               <TabIndentationPlugin />
               <LinkPlugin validateUrl={validateUrl} />
               <ClearEditorPlugin ref={clearEditorRef} />
-              <EditorCommandsPlugin
-                ref={editorCommandsRef}
-                canMentionAll={canMentionAll}
-              />
+              <EditorCommandsPlugin ref={editorCommandsRef} />
               <DisableEditPlugin disabled={submitting} />
               <InitialMarkdownPlugin
                 initialMarkdown={initialMarkdown}

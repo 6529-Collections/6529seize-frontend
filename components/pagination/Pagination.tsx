@@ -31,9 +31,9 @@ const ICON_BUTTON_CLASS =
 const ICON_ENABLED_CLASS = "tw-cursor-pointer";
 const ICON_DISABLED_CLASS = "tw-cursor-default tw-opacity-60";
 const GO_TO_LAST_CLASS =
-  "tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-inherit tw-[font:inherit] hover:tw-text-[rgb(179,179,179)] hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-[#528bff] disabled:tw-cursor-default disabled:tw-text-inherit disabled:tw-no-underline";
+  "tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-base tw-text-inherit tw-[font:inherit] hover:tw-text-[rgb(179,179,179)] hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-[#528bff] disabled:tw-cursor-default disabled:tw-text-inherit disabled:tw-no-underline";
 const PAGE_INPUT_CLASS =
-  "tw-w-[60px] tw-border-0 tw-border-b tw-border-solid tw-border-white tw-bg-transparent tw-text-center";
+  "tw-w-[60px] tw-border-0 tw-border-b tw-border-solid tw-border-white tw-bg-transparent tw-text-center tw-text-base tw-[font:inherit]";
 const CURRENT_PAGE_TOKEN = "__CURRENT_PAGE__";
 const TOTAL_PAGE_TOKEN = "__TOTAL_PAGE__";
 const PAGE_TOKEN_PATTERN = /(__CURRENT_PAGE__|__TOTAL_PAGE__)/;
@@ -112,7 +112,7 @@ export default function Pagination(props: Readonly<Props>) {
   return (
     <>
       {props.totalResults > props.pageSize && (
-        <span className="tw-inline-flex tw-items-center tw-gap-1">
+        <span className="tw-inline-flex tw-items-center tw-gap-2 tw-text-base">
           <button
             type="button"
             onClick={pagePrevious}
@@ -166,7 +166,11 @@ export default function Pagination(props: Readonly<Props>) {
               );
             }
 
-            return <span key={`${part}-${index}`}>{part}</span>;
+            return (
+              <span key={`${part}-${index}`} className="tw-text-base">
+                {part}
+              </span>
+            );
           })}
           <button
             type="button"

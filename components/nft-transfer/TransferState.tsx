@@ -5,8 +5,11 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 
 type TransferItem = {
@@ -42,6 +45,31 @@ type TransferContextShape = {
 };
 
 const TransferContext = createContext<TransferContextShape | null>(null);
+const activeTransferProviders = new Set<symbol>();
+const transferModeListeners = new Set<() => void>();
+
+function getIsTransferModeActive() {
+  return activeTransferProviders.size > 0;
+}
+
+function subscribeToTransferMode(onStoreChange: () => void) {
+  transferModeListeners.add(onStoreChange);
+  return () => transferModeListeners.delete(onStoreChange);
+}
+
+function setProviderTransferMode(owner: symbol, active: boolean) {
+  const wasActive = getIsTransferModeActive();
+
+  if (active) {
+    activeTransferProviders.add(owner);
+  } else {
+    activeTransferProviders.delete(owner);
+  }
+
+  if (wasActive !== getIsTransferModeActive()) {
+    transferModeListeners.forEach((listener) => listener());
+  }
+}
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
@@ -52,6 +80,7 @@ export function TransferProvider({
 }: {
   readonly children: React.ReactNode;
 }) {
+  const visibilityOwnerRef = useRef(Symbol("transfer-provider"));
   const [enabled, setEnabled] = useState(false);
   const [selected, setSelected] = useState<Map<string, TransferItem>>(
     () => new Map()
@@ -155,6 +184,13 @@ export function TransferProvider({
     0
   );
 
+  useEffect(() => {
+    const owner = visibilityOwnerRef.current;
+    setProviderTransferMode(owner, enabled);
+
+    return () => setProviderTransferMode(owner, false);
+  }, [enabled]);
+
   const api = useMemo<TransferContextShape>(
     () => ({
       enabled,
@@ -202,6 +238,14 @@ export function useTransfer() {
   const ctx = useContext(TransferContext);
   if (!ctx) throw new Error("useTransfer must be used within TransferProvider");
   return ctx;
+}
+
+export function useIsTransferModeActive() {
+  return useSyncExternalStore(
+    subscribeToTransferMode,
+    getIsTransferModeActive,
+    () => false
+  );
 }
 
 export function buildTransferKey(args: {

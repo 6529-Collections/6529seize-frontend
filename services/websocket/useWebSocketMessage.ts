@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect, useEffectEvent } from "react";
 import { useWebSocket } from "./useWebSocket";
 import { WebSocketStatus } from "./WebSocketTypes";
 import type { WsMessageType } from "@/helpers/Types";
@@ -21,25 +21,14 @@ export function useWebSocketMessage<T = any>(
   // Get WebSocket context
   const { subscribe, status } = useWebSocket();
 
-  // Memoize the callback to prevent unnecessary resubscriptions
-  const stableCallback = useCallback(callback, [callback]);
+  const onMessage = useEffectEvent(callback);
 
   // Is the WebSocket connected?
   const isConnected = status === WebSocketStatus.CONNECTED;
 
-  // Subscribe to the message type
   useEffect(() => {
-    // Only subscribe if connected
-    if (status !== WebSocketStatus.CONNECTED) {
-      return;
-    }
-
-    // Subscribe and get unsubscribe function
-    const unsubscribe = subscribe<T>(messageType, stableCallback);
-
-    // Clean up subscription on unmount or type change
-    return unsubscribe;
-  }, [messageType, subscribe, status, stableCallback]);
+    return subscribe<T>(messageType, onMessage);
+  }, [messageType, subscribe]);
 
   return {
     isConnected,
