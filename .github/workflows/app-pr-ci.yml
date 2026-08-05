@@ -311,6 +311,7 @@ jobs:
             __tests__/scripts/e2e-packs.test.ts \
             __tests__/scripts/manual-deploy-routing-guard.test.ts \
             __tests__/scripts/museum-release-tier.test.ts \
+            __tests__/scripts/museum-surface-registry.test.ts \
             __tests__/scripts/package-public-review-artifacts.test.ts \
             __tests__/scripts/production-build-artifact.test.ts \
             __tests__/scripts/production-e2e-dispatch.test.ts \
@@ -509,6 +510,41 @@ jobs:
           fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join("\n")}\n`);
           NODE
 
+      - name: Verify Museum surface registry and corpus (shadow only)
+        if: matrix.lane == 'quality'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set +e
+          mkdir -p test-results/app-pr-ci/museum-surface-registry
+          base_sha="$(git rev-parse --verify "origin/${BASE_REF}^{commit}")"
+          head_sha="$(git rev-parse --verify "HEAD^{commit}")"
+          ./bin/6529 run museum:surface-registry -- \
+            --changed-from "$base_sha" \
+            --changed-to "$head_sha" \
+            --output test-results/app-pr-ci/museum-surface-registry/registry.json \
+            > test-results/app-pr-ci/museum-surface-registry/registry.log 2>&1
+          registry_status=$?
+          ./bin/6529 run test:no-coverage --runInBand --runTestsByPath \
+            __tests__/lib/museum/publication/corpusContracts.test.ts \
+            > test-results/app-pr-ci/museum-surface-registry/corpus.log 2>&1
+          corpus_status=$?
+          {
+            echo "## Museum surface registry (shadow)"
+            echo
+            echo "Registry status: $registry_status"
+            echo "Corpus contract status: $corpus_status"
+            echo
+            tail -n 200 test-results/app-pr-ci/museum-surface-registry/registry.log | sed 's/^/    /'
+            tail -n 200 test-results/app-pr-ci/museum-surface-registry/corpus.log | sed 's/^/    /'
+            echo
+            echo "Complete logs are retained in the App PR CI artifact."
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$registry_status" -ne 0 ] || [ "$corpus_status" -ne 0 ]; then
+            echo "::warning::Museum surface registry shadow evidence reported a failure; existing PR checks remain unchanged."
+          fi
+          exit 0
+
       - name: Restore Next.js build cache
         id: nextjs_build_cache
         if: matrix.lane == 'build'
@@ -676,9 +712,14 @@ jobs:
           PLAYWRIGHT_READONLY: "1"
           MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.commit }}
         run: |
-          ./bin/6529 run test:e2e:museum-data-architecture
-          ./bin/6529 run test:e2e:museum-inside-system
-          ./bin/6529 run test:e2e:museum-rights
+          ./bin/6529 exec playwright test \
+            tests/museum/data-architecture-readonly.spec.ts \
+            tests/museum/about-readonly.spec.ts \
+            tests/museum/inside-system-readonly.spec.ts \
+            tests/museum/rights-readonly.spec.ts \
+            --project=web-desktop-chromium \
+            --project=web-mobile-chromium \
+            --workers=1
 
       - name: Upload app check artifacts
         if: always()

@@ -76,8 +76,14 @@ describe("Release Bus frontend performance contract", () => {
     expect(appPrCi).toContain("playwright install --with-deps chromium");
     expect(appPrCi).toContain("test:e2e:smoke");
     expect(appPrCi).toContain("test:e2e:critical-shell");
-    expect(appPrCi).toContain("test:e2e:museum-data-architecture");
-    expect(appPrCi).toContain("test:e2e:museum-inside-system");
+    expect(appPrCi).toContain("./bin/6529 exec playwright test");
+    expect(appPrCi).toContain(
+      "tests/museum/data-architecture-readonly.spec.ts"
+    );
+    expect(appPrCi).toContain("tests/museum/about-readonly.spec.ts");
+    expect(appPrCi).toContain("tests/museum/inside-system-readonly.spec.ts");
+    expect(appPrCi).toContain("tests/museum/rights-readonly.spec.ts");
+    expect(appPrCi).not.toContain("./bin/6529 run test:e2e:museum-");
     expect(appPrCi).toContain("matrix.lane == 'playwright-museum'");
     expect(appPrCi).toContain("Restore Playwright browser");
     if (appPrCi.includes("exact-merge-tree-pr-ci-v1")) {
@@ -542,14 +548,17 @@ describe("Release Bus frontend performance contract", () => {
     const museumPacks = E2E_PACKS.filter(
       (pack) => pack.changeScope === "museum"
     );
-    expect(museumPacks).toHaveLength(12);
+    expect(museumPacks).toHaveLength(15);
     for (const pack of museumPacks.filter((candidate) =>
       candidate.environments.includes("local")
     )) {
       expect(stagingSource).not.toContain(`./bin/6529 run ${pack.scriptKey}`);
       const appPrCiSource = read(".github/workflows/app-pr-ci.yml");
       if (pack.triggers.includes("pr-ci")) {
-        expect(appPrCiSource).toContain(`./bin/6529 run ${pack.scriptKey}`);
+        expect(pack.specs?.length).toBeGreaterThan(0);
+        for (const spec of pack.specs ?? []) {
+          expect(appPrCiSource).toContain(spec);
+        }
       } else {
         expect(appPrCiSource).not.toContain(`./bin/6529 run ${pack.scriptKey}`);
       }
