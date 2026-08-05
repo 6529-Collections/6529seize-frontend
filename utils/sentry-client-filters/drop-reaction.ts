@@ -26,7 +26,7 @@ const dropReactionActions = new Set(["add", "remove", "replace"]);
 const dropReactionSources = new Set(["chip", "picker", "quick-react"]);
 const dropReactionRequestPath = /^\/api\/drops\/[^/]+\/reaction\/?$/;
 const redactedUrlValue = "[Filtered]";
-const breadcrumbUrlKeys: readonly string[] = ["from", "to", "url"];
+const breadcrumbUrlKeys = new Set(["from", "to", "url"]);
 const uuidShapePattern =
   /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i;
 const walletAddressPattern = /\b0x[a-f0-9]{40}\b/i;
@@ -456,7 +456,7 @@ export function hasDropReactionFailure(event: SentryClientEvent): boolean {
 }
 
 function isBreadcrumbUrlKey(key: string): boolean {
-  return breadcrumbUrlKeys.includes(key);
+  return breadcrumbUrlKeys.has(key);
 }
 
 function isPathPrefixBoundary(character: string | undefined): boolean {
