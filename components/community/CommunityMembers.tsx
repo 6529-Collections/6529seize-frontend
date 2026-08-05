@@ -363,7 +363,7 @@ export default function CommunityMembers() {
     <div>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
         <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-2">
-          <h1 className="tw-m-0 tw-flex-shrink-0 tw-text-xl tw-font-semibold tw-text-iron-50">
+          <h1 className="tw-m-0 tw-flex-shrink-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
             Network
           </h1>
           <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-rounded-xl tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur">

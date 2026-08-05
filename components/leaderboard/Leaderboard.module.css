@@ -24,15 +24,6 @@
   min-width: 0;
 }
 
-.networkTitle {
-  color: rgb(209, 209, 214);
-  font-size: 1.875rem;
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  line-height: 1.2;
-  margin-bottom: 0;
-}
-
 .networkHeaderMain {
   align-items: center;
   display: flex;

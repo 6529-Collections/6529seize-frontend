@@ -314,7 +314,7 @@ export default function Leaderboard(
     <div className={styles["networkPage"]}>
       <section className={styles["networkHeader"]}>
         <div className={styles["networkTitleBlock"]}>
-          <h1 className={styles["networkTitle"]}>
+          <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
             Network Nerd{" "}
             {showViewAll && (
               <Link href="/network/nerd">
