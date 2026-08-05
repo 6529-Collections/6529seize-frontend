@@ -80,6 +80,7 @@ describe("effective App PR CI plan", () => {
   it.each([
     ".github/workflows/deploy-staging.yml",
     "ops/scripts/deploy-staging-artifact.sh",
+    "scripts/museum-release-tier.cjs",
     "tests/packs.manifest.cjs",
   ])("requires Release Bus contracts for %s", (file) => {
     expect(executePlan([file]).checks.release_bus_contract.required).toBe(true);

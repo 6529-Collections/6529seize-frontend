@@ -457,7 +457,9 @@ jobs:
             configure_profile "$profile"
             ./bin/6529 run help-index:sync
             ./bin/6529 run agent-files:sync
-            rm -rf .next
+            if [ -d .next ]; then
+              find .next -mindepth 1 -maxdepth 1 ! -name cache -exec rm -rf {} +
+            fi
             ./bin/6529 run base-build
             package_profile "$profile" "$destination"
           }

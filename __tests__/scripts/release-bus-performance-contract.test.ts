@@ -116,6 +116,13 @@ describe("Release Bus frontend performance contract", () => {
     expect(packageJson.scripts["format:changed"]).not.toContain("main...HEAD");
   });
 
+  it("preserves the restored Release Bus Next.js cache while cleaning build output", () => {
+    expect(preflightSource).toContain(
+      "find .next -mindepth 1 -maxdepth 1 ! -name cache -exec rm -rf {} +"
+    );
+    expect(preflightSource).not.toMatch(/^\s*rm -rf \.next\s*$/mu);
+  });
+
   it("pins the build and E2E runtime to an exact Node patch", () => {
     for (const workflowPath of [
       ".github/workflows/release-bus-v2-preflight.yml",
