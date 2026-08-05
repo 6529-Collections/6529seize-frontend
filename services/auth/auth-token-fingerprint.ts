@@ -19,8 +19,6 @@ export const getAuthStateFingerprint = ({
   readonly walletAddress: string | null | undefined;
   readonly jwt: string | null | undefined;
 }): string =>
-  getAuthTokenFingerprint(
-    [walletAddress?.toLowerCase() ?? "none", getAuthTokenFingerprint(jwt)].join(
-      ":"
-    )
+  [walletAddress?.toLowerCase() ?? "none", getAuthTokenFingerprint(jwt)].join(
+    ":"
   );

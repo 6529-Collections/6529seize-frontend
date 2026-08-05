@@ -299,6 +299,7 @@ describe("session-v2.utils", () => {
       TokenRefreshCancelledError
     );
     expect(setAuthJwt).not.toHaveBeenCalled();
+    expect(removeNativeRefreshToken).toHaveBeenCalledWith("0xabc");
   });
 
   it("marks persisted web auth as session v2", async () => {

@@ -279,16 +279,18 @@ async function rollbackUnpersistedSession(
   didPersistNativeRefreshToken: boolean
 ): Promise<void> {
   try {
-    if (didPersistNativeRefreshToken) {
-      await logoutSessionV2({ address: response.address });
-      return;
-    }
-
-    if (response.client_type === "web") {
+    if (didPersistNativeRefreshToken || response.client_type === "web") {
       await logoutSessionV2({ address: response.address });
     }
   } catch {
     // Best-effort cleanup: preserve the original persistence result/error.
+  }
+  if (didPersistNativeRefreshToken) {
+    try {
+      await removeNativeRefreshToken(response.address);
+    } catch {
+      // Preserve the original persistence result/error.
+    }
   }
 }
 
@@ -586,10 +588,9 @@ export async function persistSessionResponse(
   }
   const didPersistNativeRefreshToken = nativeRefreshTokenResult === "persisted";
 
-  assertSessionPersistenceIsCurrent(options);
-
   let didPersistAuth = false;
   try {
+    assertSessionPersistenceIsCurrent(options);
     didPersistAuth = setAuthJwt(
       response.address,
       response.access_token,

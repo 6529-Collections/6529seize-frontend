@@ -10,6 +10,7 @@ import React from "react";
 import Auth, { AuthContext, useAuth } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { mockTitleContextModule } from "@/__tests__/utils/titleTestUtils";
+import { createDeferredPromise } from "@/__tests__/utils/deferredPromise";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import type * as AuthUtilsModule from "@/services/auth/auth.utils";
 import type * as SessionV2Module from "@/services/auth/session-v2.utils";
@@ -298,17 +299,6 @@ const enableAuthMigrationDeadline = (deadline = "2999-01-01T00:00:00.000Z") => {
     session_v2_migration_deadline: deadline,
   };
 };
-
-function createDeferredPromise<T>(): {
-  readonly promise: Promise<T>;
-  readonly resolve: (value: T) => void;
-} {
-  let resolvePromise!: (value: T) => void;
-  const promise = new Promise<T>((resolve) => {
-    resolvePromise = resolve;
-  });
-  return { promise, resolve: resolvePromise };
-}
 
 // Test helper components
 function ShowWaves() {

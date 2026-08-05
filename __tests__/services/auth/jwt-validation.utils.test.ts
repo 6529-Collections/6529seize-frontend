@@ -19,6 +19,7 @@ import {
   TokenRefreshCancelledError,
 } from "@/errors/authentication";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { createDeferredPromise as createDeferred } from "@/__tests__/utils/deferredPromise";
 
 jest.mock("jwt-decode");
 jest.mock("@/services/auth/auth.utils");
@@ -54,14 +55,6 @@ const mockedAreEqualAddresses = areEqualAddresses as jest.MockedFunction<
 >;
 const TEST_REFRESHED_SESSION_VALUE = "fresh-access-token";
 const TEST_OTHER_ACCOUNT_SESSION_VALUE = "other-account-access-token";
-
-const createDeferred = <T>() => {
-  let resolve!: (value: T) => void;
-  const promise = new Promise<T>((resolvePromise) => {
-    resolve = resolvePromise;
-  });
-  return { promise, resolve };
-};
 
 const validParams = {
   jwt: "jwt-token",
@@ -159,7 +152,24 @@ describe("jwt-validation.utils", () => {
       address: "0x123",
       abortSignal: validParams.abortSignal,
     });
-    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(refreshedSession);
+    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(
+      refreshedSession,
+      { shouldPersist: undefined }
+    );
+  });
+
+  it("reports a failed refresh after the server rejects the session", async () => {
+    mockedJwtDecode.mockReturnValue(validPayload);
+    mockedHasActiveSessionV2Auth.mockReturnValue(true);
+    mockedRefreshSessionV2.mockRejectedValue(new Error("Failed to fetch"));
+
+    await expect(
+      validateJwt({ ...validParams, serverRejected: true })
+    ).resolves.toEqual({
+      isValid: false,
+      refreshOutcome: "failed",
+      wasCancelled: false,
+    });
   });
 
   it("does not trust the same local JWT after forced refresh is rejected", async () => {
@@ -264,7 +274,10 @@ describe("jwt-validation.utils", () => {
       refreshOutcome: "success",
       wasCancelled: false,
     });
-    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(refreshedSession);
+    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(
+      refreshedSession,
+      { shouldPersist: undefined }
+    );
     expect(mockedTrackAuthImpactEvent).not.toHaveBeenCalled();
   });
 
@@ -290,7 +303,10 @@ describe("jwt-validation.utils", () => {
       address: "0x123",
       abortSignal: validParams.abortSignal,
     });
-    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(refreshedSession);
+    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(
+      refreshedSession,
+      { shouldPersist: undefined }
+    );
     expect(syncWalletRoleWithServer).toHaveBeenCalledWith(null, "0x123");
     expect(mockedTrackAuthImpactEvent).toHaveBeenCalledWith(
       "Auth Session Refresh Recovered",
@@ -405,7 +421,10 @@ describe("jwt-validation.utils", () => {
       address: "0x123",
       abortSignal: validParams.abortSignal,
     });
-    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(refreshedSession);
+    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(
+      refreshedSession,
+      { shouldPersist: undefined }
+    );
   });
 
   it("decodes the refreshed access token before persisting a rotated session", async () => {
@@ -432,7 +451,10 @@ describe("jwt-validation.utils", () => {
       2,
       TEST_REFRESHED_SESSION_VALUE
     );
-    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(refreshedSession);
+    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(
+      refreshedSession,
+      { shouldPersist: undefined }
+    );
     expect(syncWalletRoleWithServer).toHaveBeenCalledWith(
       "fresh-role",
       "0x123"
@@ -460,7 +482,8 @@ describe("jwt-validation.utils", () => {
       expect.objectContaining({
         client_type: "native",
         native_refresh_token: "new-native-refresh-token",
-      })
+      }),
+      { shouldPersist: undefined }
     );
   });
 

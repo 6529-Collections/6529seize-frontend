@@ -12,6 +12,7 @@ import * as dropReactionMonitoring from "@/utils/monitoring/dropReactionMonitori
 import { getAuthJwt, getWalletAddress } from "@/services/auth/auth.utils";
 import { __resetDropReactionAuthRecoveryForTests } from "@/hooks/drops/useDropReactionAuthRecovery";
 import { act, renderHook, waitFor } from "@testing-library/react";
+import { createDeferredPromise as createDeferred } from "@/__tests__/utils/deferredPromise";
 
 const setToastMock = jest.fn();
 const rollbackMock = jest.fn();
@@ -129,17 +130,6 @@ const mockLatestOnlyMonitoringResults = () => {
   ).mockImplementation((mutation: { mutationId: string }) =>
     mutationResultFor(mutation.mutationId)
   );
-};
-
-const createDeferred = <T>() => {
-  let resolve!: (value: T) => void;
-  let reject!: (reason?: unknown) => void;
-  const promise = new Promise<T>((promiseResolve, promiseReject) => {
-    resolve = promiseResolve;
-    reject = promiseReject;
-  });
-
-  return { promise, resolve, reject };
 };
 
 const createStructuredReactionError = ({

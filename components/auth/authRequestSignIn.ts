@@ -153,11 +153,9 @@ export const createAuthRequestSignIn =
         return { success: false };
       }
 
-      const isPersisted = authRequestGuard
-        ? await persistSessionResponse(sessionResponse, {
-            shouldPersist: authRequestGuard.isCurrent,
-          })
-        : await persistSessionResponse(sessionResponse);
+      const isPersisted = await persistSessionResponse(sessionResponse, {
+        shouldPersist: authRequestGuard?.isCurrent,
+      });
       if (!isPersisted) {
         setToast({
           message: "Couldn't save this connected profile. Please try again.",

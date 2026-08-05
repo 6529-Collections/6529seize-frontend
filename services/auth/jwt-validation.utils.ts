@@ -238,11 +238,9 @@ const persistValidatedRefreshedSession = async ({
     });
   }
 
-  const didPersist = shouldPersistRefreshedSession
-    ? await persistSessionResponse(refreshedSession, {
-        shouldPersist: shouldPersistRefreshedSession,
-      })
-    : await persistSessionResponse(refreshedSession);
+  const didPersist = await persistSessionResponse(refreshedSession, {
+    shouldPersist: shouldPersistRefreshedSession,
+  });
   if (!didPersist) {
     throw new Error("Failed to persist refreshed session");
   }
@@ -364,7 +362,7 @@ export const validateJwt = async ({
     });
   } catch (error: unknown) {
     if (serverRejected) {
-      throw error;
+      return createInvalidJwtResult("failed");
     }
     if (hasValidLocalJwt && hasActiveSessionV2Auth({ address: wallet })) {
       return createValidJwtResult("local_valid_after_failure");
