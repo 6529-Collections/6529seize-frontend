@@ -89,8 +89,9 @@ describe("LatestActivityRow", () => {
 
     expect(container.querySelector("tr")).toHaveClass(
       "odd:tw-bg-transparent",
-      "even:tw-bg-iron-900/45",
-      "hover:tw-bg-iron-900/70"
+      "even:tw-bg-iron-900/70",
+      "hover:tw-bg-iron-900",
+      "focus-within:tw-bg-iron-900"
     );
   });
 
