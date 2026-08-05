@@ -910,14 +910,6 @@ const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
     ["allMentions.ariaLabel", "Receive ALL mention notifications"],
     ["allMessages.label", "All messages"],
     ["allMessages.ariaLabel", "Receive notifications for all messages"],
-    [
-      "allMessages.limit.unavailableDescription",
-      "Below {count} followers only.",
-    ],
-    [
-      "allMessages.limit.reenableDescription",
-      "Re-enable below {count} followers.",
-    ],
     ["mute.label", "Mute"],
     ["mute.activeLabel", "Muted"],
     ["mute.ariaLabel", "Mute wave"],
