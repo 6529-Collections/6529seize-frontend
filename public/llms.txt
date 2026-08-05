@@ -14,7 +14,10 @@ Site data such as TDH, REP, and Wave activity changes continuously. Fetch the fi
 
 ## API
 
-- [Swagger docs](https://api.6529.io/docs): the 6529 REST API for identities, profiles, waves, drops, NFTs, and TDH. Respect the documented rate limits, cache responses where possible, and do not hammer endpoints.
+- [Swagger docs](https://api.6529.io/docs): browsable reference for the 6529 REST API (identities, profiles, waves, drops, NFTs, TDH).
+- [OpenAPI spec](https://api.6529.io/openapi.yaml): the raw, machine-readable contract ([JSON](https://api.6529.io/openapi.json)). Prefer this for tooling and codegen.
+- [API guide](https://6529.io/tools/api): terminology plus the signature-based authentication walkthrough with runnable code examples.
+- Respect documented rate limits, cache responses where possible, and do not hammer endpoints.
 
 ## Source code
 
