@@ -126,7 +126,13 @@ export default async function MuseumProgramDetailPage({
             <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-success">
               {t(
                 DEFAULT_LOCALE,
-                "museum.network.programs.detail.stageSelectedStatus"
+                "museum.network.programs.detail.stageSelectedStatus",
+                {
+                  count: formatInteger(
+                    DEFAULT_LOCALE,
+                    program.selectedWorks.length
+                  ),
+                }
               )}
             </p>
           </li>

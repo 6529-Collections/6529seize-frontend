@@ -137,7 +137,7 @@
   "museum.network.programs.detail.winnersTitle": "{count} winning photographs",
   "museum.network.programs.detail.winnersDescription": "TDH holders chose these works for Keys and Gates. They won. The Museum is now waiting for the 6529Stream contract to be finalized before the program mint can proceed.",
   "museum.network.programs.detail.stageSelected": "Chosen by TDH",
-  "museum.network.programs.detail.stageSelectedStatus": "Complete · 16 winners",
+  "museum.network.programs.detail.stageSelectedStatus": "Complete · {count} winners",
   "museum.network.programs.detail.stageMint": "Mint on 6529Stream",
   "museum.network.programs.detail.stageMintStatus": "Waiting for contract finalization",
   "museum.network.programs.detail.stageAccession": "Acquire and accession",

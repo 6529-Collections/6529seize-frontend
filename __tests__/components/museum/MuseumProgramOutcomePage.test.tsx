@@ -38,6 +38,14 @@ const outcome: MuseumObjectRecord = {
         sha256: `sha256:${"c".repeat(64)}`,
         byteSize: 110000,
       },
+      {
+        url: "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/work-2400.webp",
+        width: 2400,
+        height: 1600,
+        mimeType: "image/webp",
+        sha256: `sha256:${"d".repeat(64)}`,
+        byteSize: 410000,
+      },
     ],
   },
   selectionPlace: 1,
@@ -62,11 +70,17 @@ describe("MuseumProgramOutcomePage", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "Take the Key!" })
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("img", {
-        name: "A figure stands before a bright gate in a dark stone hall.",
-      })
-    ).toHaveAttribute("srcset", expect.stringContaining("work-640.webp 640w"));
+    const image = screen.getByRole("img", {
+      name: "A figure stands before a bright gate in a dark stone hall.",
+    });
+    expect(image).toHaveAttribute(
+      "src",
+      "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/work-640.webp"
+    );
+    expect(image).toHaveAttribute(
+      "srcset",
+      expect.stringContaining("work-2400.webp 2400w")
+    );
     expect(
       screen.getByRole("link", {
         name: "Open submitted high-resolution image",

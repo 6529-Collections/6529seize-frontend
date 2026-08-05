@@ -15,8 +15,9 @@ export function MuseumProgramImage({
   const variants = [...media.variants].sort(
     (left, right) => left.width - right.width
   );
+  const smallest = variants.at(0);
   const largest = variants.at(-1);
-  const sourceUrl = largest?.url ?? media.sourceUrl;
+  const sourceUrl = smallest?.url ?? media.sourceUrl;
   const sourceWidth = largest?.width ?? media.sourceWidth ?? undefined;
   const sourceHeight = largest?.height ?? media.sourceHeight ?? undefined;
   const srcSet =

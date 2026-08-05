@@ -142,6 +142,14 @@ describe("Museum domain mapping", () => {
                       sha256: `sha256:${"d".repeat(64)}`,
                       byte_size: 110000,
                     },
+                    {
+                      url: "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/6529NM-AP-01/work/2400.webp",
+                      width: 2400,
+                      height: 1600,
+                      mime_type: "image/webp",
+                      sha256: `sha256:${"e".repeat(64)}`,
+                      byte_size: 410000,
+                    },
                   ],
                 },
               },
@@ -223,6 +231,7 @@ describe("Museum domain mapping", () => {
             sourceUrl: "https://d3lqz0a4bldqgf.cloudfront.net/drops/work.jpg",
             variants: expect.arrayContaining([
               expect.objectContaining({ width: 1280, height: 853 }),
+              expect.objectContaining({ width: 2400, height: 1600 }),
             ]),
           }),
           selectionPlace: 1,
@@ -232,6 +241,42 @@ describe("Museum domain mapping", () => {
           rightsStatus: "unverified until acquisition",
         }),
       ])
+    );
+
+    const mediaManifestPath =
+      "records/programs/6529NM-AP-01/media-manifest.json";
+    const duplicateWidthManifest = JSON.parse(
+      corpus.documents[mediaManifestPath]!.text
+    ) as {
+      items: Array<{
+        presentation: {
+          derivatives: Array<Record<string, unknown>>;
+        };
+      }>;
+    };
+    const firstDerivative =
+      duplicateWidthManifest.items[0]!.presentation.derivatives[0]!;
+    duplicateWidthManifest.items[0]!.presentation.derivatives.push({
+      ...firstDerivative,
+      url: "https://d3lqz0a4bldqgf.cloudfront.net/museum/programs/6529NM-AP-01/work/conflicting-640.webp",
+      sha256: `sha256:${"f".repeat(64)}`,
+    });
+    const duplicateWidthView = normalizeMuseumCorpus({
+      ...corpus,
+      documents: {
+        ...corpus.documents,
+        [mediaManifestPath]: jsonDocument(
+          mediaManifestPath,
+          duplicateWidthManifest
+        ),
+      },
+    });
+    expect(duplicateWidthView.programs[0]?.selectedWorks[0]?.media).toEqual(
+      expect.objectContaining({
+        altText: "Selected work by Artist",
+        altTextStatus: "identification_only_fallback",
+        variants: [],
+      })
     );
   });
 });
