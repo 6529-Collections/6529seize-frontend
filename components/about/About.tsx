@@ -35,18 +35,11 @@ import { AboutContentsDropdown } from "./AboutContentsDropdown";
 import {
   getAboutSectionDocumentTitle,
   isAboutFeatureSection,
+  isAboutLegalSection,
 } from "./about.routes";
 
-const ABOUT_LEGAL_SECTIONS = new Set<AboutSection>([
-  AboutSection.LICENSE,
-  AboutSection.TERMS_OF_SERVICE,
-  AboutSection.PRIVACY_POLICY,
-  AboutSection.COOKIE_POLICY,
-  AboutSection.COPYRIGHT,
-]);
-
 const ABOUT_LEGAL_CONTENT_CLASS = [
-  "tw-w-full tw-max-w-4xl tw-break-words tw-pb-12 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300",
+  "tw-w-full tw-max-w-4xl tw-break-words tw-px-1 tw-pb-12 tw-pt-4 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300 sm:tw-px-0 sm:tw-pt-8 lg:tw-px-2",
   "[&_a]:tw-break-words [&_a]:tw-font-medium [&_a]:tw-text-primary-300 [&_a]:tw-underline [&_a]:tw-decoration-primary-400/50 [&_a]:tw-underline-offset-4 hover:[&_a]:tw-text-primary-200 focus-visible:[&_a]:tw-rounded-sm focus-visible:[&_a]:tw-outline-none focus-visible:[&_a]:tw-ring-2 focus-visible:[&_a]:tw-ring-primary-400",
   "[&_b]:tw-font-semibold [&_b]:tw-text-iron-100 [&_strong]:tw-font-semibold [&_strong]:tw-text-iron-100",
   "[&_h1]:tw-m-0 [&_h1]:tw-text-[22px] [&_h1]:tw-font-semibold [&_h1]:tw-leading-tight [&_h1]:tw-tracking-tight [&_h1]:tw-text-iron-50 sm:[&_h1]:tw-text-[26px]",
@@ -61,6 +54,8 @@ export default function About({ section }: { readonly section: AboutSection }) {
   const locale = DEFAULT_LOCALE;
   const sectionTitle = getAboutSectionDocumentTitle(section, locale);
   const usesFeatureLayout = isAboutFeatureSection(section);
+  const usesLegalLayout = isAboutLegalSection(section);
+  const usesFullWidthLayout = usesFeatureLayout || usesLegalLayout;
   useSetTitle(
     t(locale, "about.contents.documentTitle", { section: sectionTitle })
   );
@@ -80,23 +75,23 @@ export default function About({ section }: { readonly section: AboutSection }) {
 
   return (
     <Container
-      fluid={section === AboutSection.TECH || usesFeatureLayout}
+      fluid={section === AboutSection.TECH || usesFullWidthLayout}
       className="tw-pt-2"
     >
       <Row>
         <Col>
           <AboutContentsDropdown
             className={
-              usesFeatureLayout
+              usesFullWidthLayout
                 ? "-tw-mx-6 -tw-mt-6 tw-w-[calc(100%+3rem)] tw-px-6"
                 : undefined
             }
             currentSection={section}
-            withDivider={usesFeatureLayout}
+            withDivider={usesFullWidthLayout}
           />
           <div
             className={
-              ABOUT_LEGAL_SECTIONS.has(section)
+              usesLegalLayout
                 ? ABOUT_LEGAL_CONTENT_CLASS
                 : "tw-w-full"
             }

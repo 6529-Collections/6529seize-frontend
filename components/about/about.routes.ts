@@ -253,8 +253,20 @@ const ABOUT_FEATURE_SECTIONS = new Set<AboutSection>([
   AboutSection.GDRC1,
 ]);
 
+const ABOUT_LEGAL_SECTIONS = new Set<AboutSection>([
+  AboutSection.LICENSE,
+  AboutSection.TERMS_OF_SERVICE,
+  AboutSection.PRIVACY_POLICY,
+  AboutSection.COOKIE_POLICY,
+  AboutSection.COPYRIGHT,
+]);
+
 export function isAboutFeatureSection(section: AboutSection): boolean {
   return ABOUT_FEATURE_SECTIONS.has(section);
+}
+
+export function isAboutLegalSection(section: AboutSection): boolean {
+  return ABOUT_LEGAL_SECTIONS.has(section);
 }
 
 function normalizeVisibilityOptions(

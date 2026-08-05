@@ -4,6 +4,7 @@ import About from "@/components/about/About";
 import {
   getAboutSectionDocumentTitle,
   isAboutFeatureSection,
+  isAboutLegalSection,
 } from "@/components/about/about.routes";
 import {
   AboutCol as Col,
@@ -35,13 +36,14 @@ export default async function AboutPage(props: Readonly<Props>) {
   const aboutSection = section as AboutSection;
   const isMemes = aboutSection === AboutSection.MEMES;
   const usesFeatureLayout = isAboutFeatureSection(aboutSection);
+  const usesLegalLayout = isAboutLegalSection(aboutSection);
 
   return (
     <main
       className={clsx(
         styles["main"],
         "tailwind-scope",
-        usesFeatureLayout &&
+        (usesFeatureLayout || usesLegalLayout) &&
           "tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F]"
       )}
     >

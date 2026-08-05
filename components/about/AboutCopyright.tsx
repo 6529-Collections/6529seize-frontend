@@ -14,7 +14,7 @@ export default function AboutCopyright() {
       </Row>
       <Row>
         <Col
-          className="tw-pb-3 tw-pt-3 tw-text-right tw-text-sm tw-leading-6 tw-text-iron-500"
+          className="tw-pb-3 tw-pt-2 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-500"
         >
           Last Updated: April 23, 2024
         </Col>
