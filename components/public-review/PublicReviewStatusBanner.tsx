@@ -97,8 +97,8 @@ export function PublicReviewStatusBanner({
       aria-label={t(DEFAULT_LOCALE, "publicReview.status.heading")}
       className="tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.1] tw-py-4 tw-@container"
     >
-      <div className="tw-flex tw-w-full tw-flex-col tw-gap-3 @[720px]:tw-flex-row @[720px]:tw-items-start @[720px]:tw-justify-between @[720px]:tw-gap-8">
-        <div className="tw-min-w-0 @[720px]:tw-max-w-2xl">
+      <div className="tw-flex tw-w-full tw-flex-col tw-gap-3 @[860px]:tw-flex-row @[860px]:tw-items-start @[860px]:tw-justify-between @[860px]:tw-gap-8">
+        <div className="tw-min-w-0 @[860px]:tw-max-w-2xl">
           <p className="tw-m-0 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-amber-300">
             {t(DEFAULT_LOCALE, lifecycleCopy.label)}
           </p>
@@ -106,7 +106,7 @@ export function PublicReviewStatusBanner({
             {t(DEFAULT_LOCALE, lifecycleCopy.explanation)}
           </p>
         </div>
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-1 @[720px]:tw-flex-none @[720px]:tw-justify-end">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-1 @[860px]:tw-flex-none @[860px]:tw-justify-end">
           <span className={`${STATUS_ITEM} tw-text-sky-300`}>
             {t(
               DEFAULT_LOCALE,

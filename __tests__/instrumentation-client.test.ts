@@ -25,6 +25,14 @@ describe("instrumentation-client", () => {
   const syntheticAutomaticWaveId = `${"1".repeat(8)}-${"2".repeat(4)}-4${"3".repeat(3)}-8${"4".repeat(3)}-${"5".repeat(12)}`;
   const objectCapturedPromiseRejectionMessage =
     "Object captured as promise rejection with keys: code, message, stack";
+  const objectCapturedPromiseRejectionWithoutStackMessage =
+    "Object captured as promise rejection with keys: code, message";
+  const unsupportedWalletRevokePermissionsMessage =
+    "the method wallet_revokePermissions does not exist/is not available";
+  const backpackWalletCollisionBreadcrumbMessage =
+    "Backpack was unable to override window.ethereum. If you're having issues connecting to a dapp, disable any other wallets and try again.";
+  const readOnlyEthereumProxyBreadcrumbMessage =
+    "[2026-08-04T04:00:10.853Z] [[WagmiSetup] Skipping safe ethereum proxy install for read-only window.ethereum] Error: Signature request failed. Please try again.";
   const indexedDBUserDeleteMessage = "Database deleted by request of the user";
   const talismanOnboardingMessage =
     "Talisman extension has not been configured yet. Please continue with onboarding.";
@@ -851,6 +859,85 @@ describe("instrumentation-client", () => {
       tags: {
         mechanism: "auto.browser.global_handlers.onunhandledrejection",
       },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops unsupported wallet_revokePermissions provider rejections", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "wallet-revoke-permissions-unsupported",
+      exception: {
+        values: [
+          {
+            type: "UnhandledRejection",
+            value: objectCapturedPromiseRejectionWithoutStackMessage,
+            mechanism: {
+              type: browserUnhandledRejectionMechanismType,
+              handled: false,
+            },
+          },
+        ],
+      },
+      extra: {
+        __serialized__: {
+          code: -32601,
+          message: unsupportedWalletRevokePermissionsMessage,
+        },
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops Backpack internal provider rejections during a recent window.ethereum collision", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "backpack-window-ethereum-collision",
+      timestamp: 1000.475,
+      exception: {
+        values: [
+          {
+            type: "UnhandledRejection",
+            value: objectCapturedPromiseRejectionWithoutStackMessage,
+            mechanism: {
+              type: browserUnhandledRejectionMechanismType,
+              handled: false,
+            },
+          },
+        ],
+      },
+      extra: {
+        __serialized__: {
+          code: -32603,
+          message: "Internal JSON-RPC error.",
+        },
+      },
+      breadcrumbs: [
+        {
+          timestamp: 1000,
+          category: "console",
+          level: "error",
+          message: readOnlyEthereumProxyBreadcrumbMessage,
+        },
+        {
+          timestamp: 1000.458,
+          category: "console",
+          level: "info",
+          message: backpackWalletCollisionBreadcrumbMessage,
+        },
+        {
+          timestamp: 1000.462,
+          type: "http",
+          category: "fetch",
+          level: "info",
+        },
+      ],
     };
 
     const result = beforeSend(event);

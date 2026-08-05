@@ -168,13 +168,68 @@ describe("PublicReviewFeedbackComposer", () => {
   });
 
   it("keeps primary feedback text and actions on AA-contrast tokens", async () => {
+    const user = userEvent.setup();
     renderComposer(jest.fn());
 
     const comment = await screen.findByLabelText("Comment (required)", {
       selector: "textarea",
     });
     expect(comment).toHaveClass("placeholder:tw-text-iron-400");
-    expect(comment).toHaveClass("tw-ring-white/[0.08]");
+    expect(comment).toHaveClass("tw-bg-transparent");
+    expect(comment).toHaveClass("tw-text-base", "sm:tw-text-sm");
+    const technicalDetails = screen
+      .getByText("Add technical detail")
+      .closest("details");
+    expect(technicalDetails?.parentElement).toContainElement(comment);
+    expect(technicalDetails).toHaveClass("tw-group/technical");
+    expect(
+      technicalDetails?.querySelector(":scope > summary > svg:last-child")
+    ).toHaveClass("tw-ml-auto", "group-open/technical:tw-rotate-180");
+    expect(screen.getByLabelText("Feedback type")).toHaveClass(
+      "!tw-text-base",
+      "tw-appearance-none",
+      "tw-text-base",
+      "sm:tw-text-sm",
+      "sm:!tw-text-sm"
+    );
+    expect(screen.getByLabelText("Suspected severity")).toHaveClass(
+      "!tw-text-base",
+      "tw-appearance-none",
+      "tw-text-base",
+      "sm:tw-text-sm",
+      "sm:!tw-text-sm"
+    );
+    expect(screen.getByLabelText("Why this matters")).toHaveClass(
+      "tw-text-base",
+      "sm:tw-text-sm"
+    );
+    expect(technicalDetails?.parentElement).toHaveClass(
+      "tw-rounded-xl",
+      "tw-bg-iron-900",
+      "tw-ring-white/[0.08]"
+    );
+    expect(comment.closest("form")).toHaveClass("tw-space-y-4");
+    expect(comment.closest("form")).not.toHaveClass("tw-border-white/[0.12]");
+    expect(
+      screen.queryByRole("button", { name: "Preview Wave message" })
+    ).not.toBeInTheDocument();
+    await user.type(comment, "Check this feedback.");
+    const previewButton = screen.getByRole("button", {
+      name: "Preview Wave message",
+    });
+    expect(previewButton).toHaveClass(
+      "tw-border-0",
+      "tw-bg-white/[0.035]",
+      "tw-text-iron-300"
+    );
+    expect(previewButton.querySelector("svg")).toHaveClass(
+      "tw-size-4",
+      "tw-text-iron-500"
+    );
+    await user.clear(comment);
+    expect(
+      screen.queryByRole("button", { name: "Preview Wave message" })
+    ).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Post to review Wave" })
     ).toHaveClass("tw-bg-primary-600", "hover:tw-ring-primary-300/60");
@@ -375,6 +430,18 @@ describe("PublicReviewFeedbackComposer", () => {
     expect(fetchWaveByIdMock).not.toHaveBeenCalled();
   });
 
+  it("keeps the unavailable discussion Wave message visually secondary", async () => {
+    fetchWaveByIdMock.mockRejectedValue(new Error("Wave unavailable"));
+
+    renderComposer(jest.fn());
+
+    expect(
+      await screen.findByText(
+        "The configured discussion Wave is not available for feedback."
+      )
+    ).toHaveClass("tw-text-[10px]", "tw-text-center", "tw-text-iron-600");
+  });
+
   it("hides a preview when the attached source selection changes", async () => {
     const user = userEvent.setup();
     const submitter = jest.fn();
@@ -495,7 +562,11 @@ describe("PublicReviewFeedbackComposer", () => {
     expect(requiredMessage).toHaveAttribute("aria-live", "polite");
     expect(requiredMessage).toHaveClass("tw-text-red-300");
     expect(requiredMessage).not.toHaveClass("tw-sr-only");
-    expect(comment).toHaveClass("aria-[invalid=true]:tw-ring-red-400");
+    expect(comment).toHaveAttribute("aria-invalid", "true");
+    expect(comment.parentElement?.parentElement).toHaveClass(
+      "tw-ring-red-400",
+      "focus-within:tw-ring-red-400"
+    );
   });
 
   it("explains how to recover when the rendered Wave message is too long", async () => {

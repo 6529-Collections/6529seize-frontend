@@ -18,6 +18,7 @@ import {
   shouldFilterInstagramPageHideBridgeError,
   shouldFilterInjectedProviderProxyStartsWithError,
   shouldFilterInjectedWalletCollision,
+  shouldFilterKnownWalletProviderObjectRejection,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
@@ -77,6 +78,18 @@ type TwitterCurrentInsetEventOptions = {
   request?: TestSentryClientEvent["request"];
   mechanismType?: string;
   handled?: boolean;
+};
+type KnownWalletProviderObjectRejectionOptions = {
+  eventTimestamp?: number;
+  code?: number;
+  rpcMessage?: string;
+  wrapperMessage?: string;
+  mechanismType?: string;
+  handled?: boolean;
+  frames?: SentryStackFrame[] | undefined;
+  additionalException?: SentryExceptionValue | undefined;
+  breadcrumbs?: TestSentryClientEvent["breadcrumbs"];
+  serializedStack?: string | undefined;
 };
 type AppleWebKitSortedTrackListOverrides = {
   type?: string | undefined;
@@ -169,6 +182,13 @@ describe("sentry-client-filters", () => {
     "Object captured as promise rejection with keys: code, message, stack";
   const objectCapturedPromiseRejectionWithoutStackMessage =
     "Object captured as promise rejection with keys: code, message";
+  const unsupportedWalletRevokePermissionsMessage =
+    "the method wallet_revokePermissions does not exist/is not available";
+  const backpackInternalJsonRpcErrorMessage = "Internal JSON-RPC error.";
+  const backpackWalletCollisionBreadcrumbMessage =
+    "Backpack was unable to override window.ethereum. If you're having issues connecting to a dapp, disable any other wallets and try again.";
+  const readOnlyEthereumProxyBreadcrumbMessage =
+    "[2026-08-04T04:00:10.853Z] [[WagmiSetup] Skipping safe ethereum proxy install for read-only window.ethereum] Error: Signature request failed. Please try again.";
   const coinbaseMetricsNetworkMessage =
     "Network request failed. Please check your connection and try again. (/metrics)";
   const talismanOnboardingMessage =
@@ -527,6 +547,64 @@ describe("sentry-client-filters", () => {
       ],
     },
     ...overrides,
+  });
+
+  const createBackpackWalletCollisionBreadcrumbs = () => [
+    {
+      timestamp: 1000,
+      category: "console",
+      level: "error",
+      message: readOnlyEthereumProxyBreadcrumbMessage,
+    },
+    {
+      timestamp: 1000.458,
+      category: "console",
+      level: "info",
+      message: backpackWalletCollisionBreadcrumbMessage,
+    },
+    {
+      timestamp: 1000.462,
+      type: "http",
+      category: "fetch",
+      level: "info",
+    },
+  ];
+
+  const createKnownWalletProviderObjectRejectionEvent = ({
+    eventTimestamp = 1000.475,
+    code = -32601,
+    rpcMessage = unsupportedWalletRevokePermissionsMessage,
+    wrapperMessage = objectCapturedPromiseRejectionWithoutStackMessage,
+    mechanismType = "auto.browser.global_handlers.onunhandledrejection",
+    handled = false,
+    frames,
+    additionalException,
+    breadcrumbs = [],
+    serializedStack,
+  }: KnownWalletProviderObjectRejectionOptions = {}): TestSentryClientEvent => ({
+    timestamp: eventTimestamp,
+    exception: {
+      values: [
+        {
+          type: "UnhandledRejection",
+          value: wrapperMessage,
+          mechanism: {
+            type: mechanismType,
+            handled,
+          },
+          ...(frames === undefined ? {} : { stacktrace: { frames } }),
+        },
+        ...(additionalException ? [additionalException] : []),
+      ],
+    },
+    extra: {
+      __serialized__: {
+        code,
+        message: rpcMessage,
+        ...(serializedStack === undefined ? {} : { stack: serializedStack }),
+      },
+    },
+    breadcrumbs,
   });
 
   const createInjectedKeplrWalletCollisionEvent = (
@@ -7615,6 +7693,218 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toBe(true);
+  });
+
+  it("filters unsupported wallet_revokePermissions provider rejections", () => {
+    // Arrange
+    const event = createKnownWalletProviderObjectRejectionEvent();
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters Backpack internal provider rejections during a recent window.ethereum collision", () => {
+    // Arrange
+    const event = createKnownWalletProviderObjectRejectionEvent({
+      code: -32603,
+      rpcMessage: backpackInternalJsonRpcErrorMessage,
+      breadcrumbs: createBackpackWalletCollisionBreadcrumbs(),
+    });
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it.each([
+    [
+      "a different wallet_revokePermissions code",
+      -32602,
+      unsupportedWalletRevokePermissionsMessage,
+    ],
+    [
+      "a different wallet_revokePermissions message",
+      -32601,
+      "the method wallet_revokePermissions is temporarily unavailable",
+    ],
+    [
+      "a different Backpack provider code",
+      -32602,
+      backpackInternalJsonRpcErrorMessage,
+    ],
+    [
+      "a different Backpack provider message",
+      -32603,
+      "Internal JSON-RPC error",
+    ],
+  ])("does not filter %s", (_caseName, code, rpcMessage) => {
+    // Arrange
+    const event = createKnownWalletProviderObjectRejectionEvent({
+      code,
+      rpcMessage,
+      breadcrumbs: createBackpackWalletCollisionBreadcrumbs(),
+    });
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter Backpack internal provider rejections without its collision breadcrumb", () => {
+    // Arrange
+    const breadcrumbs = createBackpackWalletCollisionBreadcrumbs().filter(
+      (breadcrumb) =>
+        breadcrumb.message !== backpackWalletCollisionBreadcrumbMessage
+    );
+    const event = createKnownWalletProviderObjectRejectionEvent({
+      code: -32603,
+      rpcMessage: backpackInternalJsonRpcErrorMessage,
+      breadcrumbs,
+    });
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter Backpack internal provider rejections without the read-only ethereum breadcrumb", () => {
+    // Arrange
+    const breadcrumbs = createBackpackWalletCollisionBreadcrumbs().filter(
+      (breadcrumb) =>
+        breadcrumb.message !== readOnlyEthereumProxyBreadcrumbMessage
+    );
+    const event = createKnownWalletProviderObjectRejectionEvent({
+      code: -32603,
+      rpcMessage: backpackInternalJsonRpcErrorMessage,
+      breadcrumbs,
+    });
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter Backpack internal provider rejections with stale collision breadcrumbs", () => {
+    // Arrange
+    const event = createKnownWalletProviderObjectRejectionEvent({
+      eventTimestamp: 1002,
+      code: -32603,
+      rpcMessage: backpackInternalJsonRpcErrorMessage,
+      breadcrumbs: createBackpackWalletCollisionBreadcrumbs(),
+    });
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter known wallet-provider object rejections with app-owned frames", () => {
+    // Arrange
+    const event = createKnownWalletProviderObjectRejectionEvent({
+      frames: [
+        {
+          filename: "components/providers/WagmiSetup.tsx",
+          abs_path: "components/providers/WagmiSetup.tsx",
+          in_app: true,
+        },
+      ],
+    });
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter known wallet-provider object rejections with serialized stacks", () => {
+    // Arrange
+    const event = createKnownWalletProviderObjectRejectionEvent({
+      serializedStack:
+        "Error: app failure at components/providers/WagmiSetup.tsx:1:1",
+    });
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter mixed known wallet-provider and app-owned exceptions", () => {
+    // Arrange
+    const event = createKnownWalletProviderObjectRejectionEvent({
+      additionalException: {
+        type: "Error",
+        value: "Application wallet request failed",
+        stacktrace: {
+          frames: [
+            {
+              filename: "components/providers/WagmiSetup.tsx",
+              in_app: true,
+            },
+          ],
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter known wallet-provider object rejections from another mechanism", () => {
+    // Arrange
+    const event = createKnownWalletProviderObjectRejectionEvent({
+      mechanismType: "generic",
+    });
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter handled known wallet-provider object rejections", () => {
+    // Arrange
+    const event = createKnownWalletProviderObjectRejectionEvent({
+      handled: true,
+    });
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter known wallet-provider rejections with another object wrapper", () => {
+    // Arrange
+    const event = createKnownWalletProviderObjectRejectionEvent({
+      wrapperMessage: objectCapturedPromiseRejectionMessage,
+    });
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
   });
 
   it("filters RabbyMobile 4001 user-rejected object rejections without app frames", () => {
