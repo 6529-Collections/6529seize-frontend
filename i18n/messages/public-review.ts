@@ -90,54 +90,64 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "A map of the full protocol, its present review state, and the decisions the community is being asked to examine.",
   "publicReview.overviewGuide.whatIs.heading": "What is Stream?",
   "publicReview.overviewGuide.whatIs.description":
-    "Stream is a proposed system for publishing and selling digital art. It gives each artwork a traceable record: what the artist approved, how many editions can exist, how a sale should work, who gets paid, and when the work becomes final.",
+    "Stream is a proposed system for publishing and selling digital art. It keeps the artwork, its history, and its important rules connected over time—from launch and sales to long-term preservation.",
   "publicReview.overviewGuide.whatIs.reviewContext":
     "This site is the public review of the smart contracts behind Stream. It explains what the code can enforce and what still depends on people or outside systems.",
   "publicReview.overviewGuide.artworkParts.heading":
-    "What makes up a Stream artwork?",
+    "A Stream artwork is more than the media you see",
   "publicReview.overviewGuide.artworkParts.description":
-    "Stream treats a serious digital artwork as more than an image or token. It connects the work to records describing what it is, what the artist approved, how it can be sold, and how it can be preserved.",
+    "Here are five important parts of a Stream artwork:",
   "publicReview.overviewGuide.artworkParts.identity.title": "Identity",
   "publicReview.overviewGuide.artworkParts.identity.description":
-    "A stable token and collection record identifies the artwork.",
-  "publicReview.overviewGuide.artworkParts.materials.title": "Materials",
+    "Each artwork collection gets a permanent identity record. Every minted token also gets its own record, so both can be identified over time.",
+  "publicReview.overviewGuide.artworkParts.materials.title": "Media",
   "publicReview.overviewGuide.artworkParts.materials.description":
-    "Files, scripts, images, and required software can be recorded or referenced.",
-  "publicReview.overviewGuide.artworkParts.approval.title": "Artist approval",
+    "The artwork may include images, video, audio, code, or other files. For example, Stream can keep artwork code and descriptions directly in the contract. Larger files, such as videos or high-resolution images, can live on IPFS or another storage service, with Stream keeping the link.",
+  "publicReview.overviewGuide.artworkParts.approval.title": "Artist control",
   "publicReview.overviewGuide.artworkParts.approval.description":
-    "The record shows which important choices the artist approved.",
+    "Addresses with the right permission prepare the artwork and minting plan. Before minting begins, the artist's wallet approves the exact content and rules. Important later changes need fresh approval; without it, the change is rejected and the current setup remains active. The artist can also permanently prevent selected artwork files or code from being changed.",
   "publicReview.overviewGuide.artworkParts.rules.title":
-    "Rules and payments",
+    "Sales and payments",
   "publicReview.overviewGuide.artworkParts.rules.description":
-    "Supply, sale rules, collaborators, and payment splits are made explicit.",
+    "The smart contracts store the rules for a specific sale—for example, whether it uses a fixed price or auction, its price or reserve price, and which configured recipients should receive the primary-sale money. For later marketplace sales, the contracts only report royalty information; the marketplace decides whether to pay it.",
   "publicReview.overviewGuide.artworkParts.preservation.title":
-    "Preservation",
+    "Locked core details",
   "publicReview.overviewGuide.artworkParts.preservation.description":
-    "Digital fingerprints and final records help future viewers check what became permanent.",
+    "When no more tokens should be created, Stream governance can close the collection. It can then permanently disable burning, so owners can no longer remove its tokens from circulation, and lock the collection's main settings. Existing tokens can still be transferred, and preservation records can still be added. A separate delayed process can later record the complete artwork as final.",
+  "publicReview.overviewGuide.control.heading":
+    "Artist control is part of the intended design",
+  "publicReview.overviewGuide.control.description":
+    "For artwork linked to an artist, Stream is designed to require the artist to approve important steps. This includes confirming that the collection represents their work and may publicly name them as its artist, confirming the exact content of the artwork before its first token is minted, and approving mint or sale rules where required. Each approval covers exact information. If that information changes, a new approval is needed.",
   "publicReview.overviewGuide.journey.heading":
     "How one artwork moves through Stream",
   "publicReview.overviewGuide.journey.description":
-    "The exact route can vary, but this is the basic flow from an artist's idea to a finished artwork.",
-  "publicReview.overviewGuide.journey.prepare.title": "Prepare the artwork",
+    "See the main steps an artwork follows in Stream, from the artist's plan to sales, payments, preservation, and its final record.",
+  "publicReview.overviewGuide.journey.prepare.title": "Plan the artwork",
   "publicReview.overviewGuide.journey.prepare.description":
-    "The artist chooses the files or scripts, edition size, collaborators, and sale plan.",
-  "publicReview.overviewGuide.journey.approve.title": "Approve the exact plan",
+    "The artist chooses what the artwork is, how many editions to make, and how to sell it. This happens before the artwork is added to Stream.",
+  "publicReview.overviewGuide.journey.approve.title":
+    "Create the artwork records",
   "publicReview.overviewGuide.journey.approve.description":
-    "The artist approves the collection settings and the choices that will become hard or impossible to change.",
+    "Stream creates a record for the artwork. The record includes its description, file links, and other details.",
   "publicReview.overviewGuide.journey.authorize.title":
-    "Receive permission to launch",
+    "Authorize a specific sale",
   "publicReview.overviewGuide.journey.authorize.description":
-    "After the community accepts the artwork, a wallet that Stream is configured to trust signs a digital approval containing the exact artwork and launch terms. Stream checks this approval before allowing the launch.",
+    "Stream's contract administrators register a specific wallet as the wallet allowed to approve sales. For each sale, that wallet signs the token, recipient, price or auction rules, and deadline. The contract rejects the sale if another wallet signed it or if any signed detail has changed.",
   "publicReview.overviewGuide.journey.sell.title": "Mint and sell",
   "publicReview.overviewGuide.journey.sell.description":
-    "A collector mints at a fixed price or bids in an auction. The contracts apply the chosen sale rules.",
-  "publicReview.overviewGuide.journey.pay.title": "Split the money",
+    "At a fixed price, the sale specifies which wallet pays the set price and which wallet receives the token. It can be the same wallet. In an auction, people bid and the winner claims the token.",
+  "publicReview.overviewGuide.journey.pay.title":
+    "Distribute the payment",
   "publicReview.overviewGuide.journey.pay.description":
-    "The contracts record how primary-sale money is divided between the artist and other named recipients.",
+    "The contract divides the sale money between the people listed for that sale, using shares chosen beforehand.",
   "publicReview.overviewGuide.journey.preserve.title":
-    "Freeze and preserve",
+    "Close and lock the collection",
   "publicReview.overviewGuide.journey.preserve.description":
-    "Editable settings are closed, and recorded hashes help future viewers check that the artwork files did not change.",
+    "When no more tokens should be created, Stream's contract administrators can close the collection. This stops new minting, prevents existing tokens from being destroyed, and permanently locks the collection's main rules. Existing tokens can still be transferred, and new preservation records can still be added.",
+  "publicReview.overviewGuide.journey.finality.title":
+    "Mark the artwork as complete",
+  "publicReview.overviewGuide.journey.finality.description":
+    "Later, Stream can record that the artwork is complete and its protected parts should no longer change. Before this record becomes permanent, there is a waiting period so a safety guardian can stop it if something looks wrong. For artwork linked to an artist, Stream's ADRs also require the artist's approval.",
   "publicReview.overviewGuide.readPage": "Read {page}",
   "publicReview.overviewGuide.audiences.heading": "Choose what matters to you",
   "publicReview.overviewGuide.audiences.description":
@@ -278,7 +288,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "Continue to the detailed contract review",
   "publicReview.pages.overviewNarrative.title": "Overview",
   "publicReview.pages.overviewNarrative.summary":
-    "How Stream protects artist consent, artwork identity, sales, preservation, and long-term operation.",
+    "How Stream is designed to help artists publish and sell digital art while keeping each artwork's identity, sale rules, and history clear over time.",
   "publicReview.pages.artworkLifecycle.title": "Artwork Lifecycle",
   "publicReview.pages.artworkLifecycle.summary":
     "How an artwork moves from preparation through minting, preservation, and finality.",

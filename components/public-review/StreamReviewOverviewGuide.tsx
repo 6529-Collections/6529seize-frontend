@@ -48,12 +48,12 @@ const ARTWORK_PARTS = [
 
 const ARTWORK_JOURNEY = [
   {
-    pageId: "artwork-lifecycle",
+    pageId: "for-artists",
     titleKey: "publicReview.overviewGuide.journey.prepare.title",
     descriptionKey: "publicReview.overviewGuide.journey.prepare.description",
   },
   {
-    pageId: "for-artists",
+    pageId: "metadata-scripts-and-dependencies",
     titleKey: "publicReview.overviewGuide.journey.approve.title",
     descriptionKey: "publicReview.overviewGuide.journey.approve.description",
   },
@@ -76,6 +76,11 @@ const ARTWORK_JOURNEY = [
     pageId: "freezing-preservation-and-artwork-finality",
     titleKey: "publicReview.overviewGuide.journey.preserve.title",
     descriptionKey: "publicReview.overviewGuide.journey.preserve.description",
+  },
+  {
+    pageId: "freezing-preservation-and-artwork-finality",
+    titleKey: "publicReview.overviewGuide.journey.finality.title",
+    descriptionKey: "publicReview.overviewGuide.journey.finality.description",
   },
 ] as const satisfies readonly LinkedOverviewItem[];
 
@@ -141,7 +146,7 @@ export function StreamReviewOverviewGuide({
             "publicReview.overviewGuide.artworkParts.description"
           )}
         </p>
-        <ul className="tw-mb-0 tw-mt-7 tw-grid tw-list-none tw-gap-x-8 tw-gap-y-5 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08] tw-px-0 tw-py-6 sm:tw-grid-cols-2">
+        <ul className="tw-mb-0 tw-mt-7 tw-grid tw-list-none tw-gap-y-5 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08] tw-px-0 tw-py-6">
           {ARTWORK_PARTS.map((part) => (
             <li
               key={part.titleKey}
@@ -165,6 +170,21 @@ export function StreamReviewOverviewGuide({
       </section>
 
       <section
+        aria-labelledby="stream-artist-control-heading"
+        className="tw-mt-8 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/20 tw-bg-primary-500/[0.06] tw-p-5 sm:tw-p-7"
+      >
+        <h2
+          id="stream-artist-control-heading"
+          className="tw-m-0 tw-text-lg tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-xl"
+        >
+          {t(DEFAULT_LOCALE, "publicReview.overviewGuide.control.heading")}
+        </h2>
+        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+          {t(DEFAULT_LOCALE, "publicReview.overviewGuide.control.description")}
+        </p>
+      </section>
+
+      <section
         aria-labelledby="stream-artwork-journey-heading"
         className="tw-mt-14"
       >
@@ -185,7 +205,7 @@ export function StreamReviewOverviewGuide({
             }
             return (
               <li
-                key={step.pageId}
+                key={step.titleKey}
                 className="tw-grid tw-grid-cols-[2rem_minmax(0,1fr)] tw-gap-3 tw-py-5 sm:tw-grid-cols-[2.5rem_minmax(0,1fr)_auto] sm:tw-items-center sm:tw-gap-5"
               >
                 <span className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-400/10 tw-font-mono tw-text-xs tw-font-semibold tw-text-primary-300">
