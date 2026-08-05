@@ -34,10 +34,10 @@ describe("Museum rights handbook publication boundary", () => {
     if (result.status !== "current") return;
 
     expect(result.publication.rightsHandbook.expressions).toHaveLength(22);
-    expect(
-      result.publication.rightsHandbook.museumPracticeStatusDefinitions.ordinary
-    ).toBe("Ordinary museum practice.");
     expect(result.publication.rightsHandbook.objectAssignments).toHaveLength(7);
+    expect(
+      result.publication.rightsHandbook.practiceStatusDefinitions.ordinary
+    ).toBe("Ordinary Museum practice.");
     expect(
       result.publication.rightsHandbook.objectAssignments.every(
         ({ expressionId }) => expressionId === "cc-by-nc-4.0"
@@ -60,46 +60,8 @@ describe("Museum rights handbook publication boundary", () => {
       )?.museumPracticeMatrix.display_the_work
     ).toEqual({
       status: "ordinary",
-      note: "Ordinary museum practice for the recorded work.",
+      note: "Museum practice reading for display_the_work in the governed fixture.",
     });
-  });
-
-  it("rejects malformed museum-practice definitions and matrices", async () => {
-    const missingDefinition = mutatedRegistry((registry) => {
-      const definitions = registry[
-        "museum_practice_status_definitions"
-      ] as Record<string, unknown>;
-      delete definitions["ordinary"];
-    });
-    expect(
-      await loadFixture({
-        documentOverrides: {
-          [MUSEUM_RIGHTS_REGISTRY_PATH]: missingDefinition,
-        },
-      })
-    ).toEqual(expect.objectContaining({ status: "unavailable" }));
-
-    const malformedMatrix = mutatedRegistry((registry) => {
-      const expression = (
-        registry["expressions"] as Array<Record<string, unknown>>
-      )[0];
-      const matrix = expression?.["museum_practice_matrix"] as
-        | Record<string, unknown>
-        | undefined;
-      if (matrix !== undefined) {
-        matrix["display_the_work"] = {
-          status: "ordinary",
-          note: "",
-        };
-      }
-    });
-    expect(
-      await loadFixture({
-        documentOverrides: {
-          [MUSEUM_RIGHTS_REGISTRY_PATH]: malformedMatrix,
-        },
-      })
-    ).toEqual(expect.objectContaining({ status: "unavailable" }));
   });
 
   it("fails the publication closed when a required guide is absent", async () => {
@@ -132,6 +94,28 @@ describe("Museum rights handbook publication boundary", () => {
         documentOverrides: {
           [MUSEUM_RIGHTS_REGISTRY_PATH]: reorderedActions,
         },
+      })
+    ).toEqual(expect.objectContaining({ status: "unavailable" }));
+  });
+
+  it("rejects incomplete or unknown Museum-practice readings", async () => {
+    const registryText = mutatedRegistry((registry) => {
+      const expression = (
+        registry["expressions"] as Array<Record<string, unknown>>
+      )[0];
+      const matrix = expression?.["museum_practice_matrix"] as
+        | Record<string, Record<string, unknown>>
+        | undefined;
+      if (matrix !== undefined) {
+        matrix["display_the_work"] = {
+          status: "invented_status",
+          note: "A malformed fixture reading that must fail closed.",
+        };
+      }
+    });
+    expect(
+      await loadFixture({
+        documentOverrides: { [MUSEUM_RIGHTS_REGISTRY_PATH]: registryText },
       })
     ).toEqual(expect.objectContaining({ status: "unavailable" }));
   });

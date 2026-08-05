@@ -110,3 +110,23 @@
   recorded nightly mechanism.
 - Focused classifier/effective-plan validation passed: 44 tests. Changed lint,
   changed TypeScript ratchet (1,358 files), and scoped whitespace checks passed.
+
+## 2026-08-05 — PR 1 current-main reconciliation
+
+- The final pre-merge App PR CI run on head `0d6142bccff9` passed every
+  substantive lane. The unconditional Network Museum browser lane took
+  24m20s, versus 11m41s for the production build, 4m24s for the critical shell,
+  4m03s for quality/contracts, and 3m03s for smoke. This is the measured
+  before-state for the surface-selection work.
+- While that lane ran, PR #3629 merged to main as
+  `a888054589e7311848278c53b187033d96b1f5fb`, adding the Museum data-
+  architecture reading room and a second independently reviewed implementation
+  of the rights-registry v1.1 adapter.
+- Reconciled PR #3632 with exact current main. The current-main rights types,
+  parser, fixture, and tests were retained because they include the new data-
+  architecture contract and supersede the parallel names introduced in this
+  branch. The report-only classifier, cache isolation, and workstream evidence
+  remain intact.
+- Post-merge local validation passed: 69 focused tests across data architecture,
+  rights, classifier, CI plan, and Release Bus performance; changed TypeScript
+  passed for 1,358 files.
