@@ -1,0 +1,724 @@
+{
+  "handle": "6529museum",
+  "siteTitle": "6529 Museum",
+  "siteDescription": "The 6529 Museum digital collection, migrated from static WordPress export pages.",
+  "themeAccent": "#444444",
+  "legacyRouteRoot": "/museum",
+  "pages": [
+    {
+      "slug": "1-of-1-art",
+      "sourceFile": "app/museum/1-of-1-art/page.tsx",
+      "navigationLabel": "1 Of 1 Art"
+    },
+    {
+      "slug": "6529-fam-2021",
+      "sourceFile": "app/museum/6529-fam-2021/page.tsx",
+      "navigationLabel": "6529 Fam 2021"
+    },
+    {
+      "slug": "6529-fam",
+      "sourceFile": "app/museum/6529-fam/page.tsx",
+      "navigationLabel": "6529 Fam"
+    },
+    {
+      "slug": "6529-fund-szn1/act-of-kindness",
+      "sourceFile": "app/museum/6529-fund-szn1/act-of-kindness/page.tsx",
+      "navigationLabel": "Act Of Kindness"
+    },
+    {
+      "slug": "6529-fund-szn1/an-incomparable-love",
+      "sourceFile": "app/museum/6529-fund-szn1/an-incomparable-love/page.tsx",
+      "navigationLabel": "An Incomparable Love"
+    },
+    {
+      "slug": "6529-fund-szn1/archeology-of-the-future",
+      "sourceFile": "app/museum/6529-fund-szn1/archeology-of-the-future/page.tsx",
+      "navigationLabel": "Archeology Of The Future"
+    },
+    {
+      "slug": "6529-fund-szn1/azuki",
+      "sourceFile": "app/museum/6529-fund-szn1/azuki/page.tsx",
+      "navigationLabel": "Azuki"
+    },
+    {
+      "slug": "6529-fund-szn1/ballad-of-ghosts",
+      "sourceFile": "app/museum/6529-fund-szn1/ballad-of-ghosts/page.tsx",
+      "navigationLabel": "Ballad Of Ghosts"
+    },
+    {
+      "slug": "6529-fund-szn1/bored-ape-yacht-club",
+      "sourceFile": "app/museum/6529-fund-szn1/bored-ape-yacht-club/page.tsx",
+      "navigationLabel": "Bored Ape Yacht Club"
+    },
+    {
+      "slug": "6529-fund-szn1/capsule-house",
+      "sourceFile": "app/museum/6529-fund-szn1/capsule-house/page.tsx",
+      "navigationLabel": "Capsule House"
+    },
+    {
+      "slug": "6529-fund-szn1/chromie-squiggle",
+      "sourceFile": "app/museum/6529-fund-szn1/chromie-squiggle/page.tsx",
+      "navigationLabel": "Chromie Squiggle"
+    },
+    {
+      "slug": "6529-fund-szn1/clonex",
+      "sourceFile": "app/museum/6529-fund-szn1/clonex/page.tsx",
+      "navigationLabel": "Clonex"
+    },
+    {
+      "slug": "6529-fund-szn1/cod",
+      "sourceFile": "app/museum/6529-fund-szn1/cod/page.tsx",
+      "navigationLabel": "Cod"
+    },
+    {
+      "slug": "6529-fund-szn1/conflicting-metaphysics",
+      "sourceFile": "app/museum/6529-fund-szn1/conflicting-metaphysics/page.tsx",
+      "navigationLabel": "Conflicting Metaphysics"
+    },
+    {
+      "slug": "6529-fund-szn1/construction-token",
+      "sourceFile": "app/museum/6529-fund-szn1/construction-token/page.tsx",
+      "navigationLabel": "Construction Token"
+    },
+    {
+      "slug": "6529-fund-szn1/cryptoad-punks",
+      "sourceFile": "app/museum/6529-fund-szn1/cryptoad-punks/page.tsx",
+      "navigationLabel": "Cryptoad Punks"
+    },
+    {
+      "slug": "6529-fund-szn1/cryptoadz",
+      "sourceFile": "app/museum/6529-fund-szn1/cryptoadz/page.tsx",
+      "navigationLabel": "Cryptoadz"
+    },
+    {
+      "slug": "6529-fund-szn1/cryptocubes",
+      "sourceFile": "app/museum/6529-fund-szn1/cryptocubes/page.tsx",
+      "navigationLabel": "Cryptocubes"
+    },
+    {
+      "slug": "6529-fund-szn1/cryptopunks",
+      "sourceFile": "app/museum/6529-fund-szn1/cryptopunks/page.tsx",
+      "navigationLabel": "Cryptopunks"
+    },
+    {
+      "slug": "6529-fund-szn1/dead-ringers",
+      "sourceFile": "app/museum/6529-fund-szn1/dead-ringers/page.tsx",
+      "navigationLabel": "Dead Ringers"
+    },
+    {
+      "slug": "6529-fund-szn1/entretiempos",
+      "sourceFile": "app/museum/6529-fund-szn1/entretiempos/page.tsx",
+      "navigationLabel": "Entretiempos"
+    },
+    {
+      "slug": "6529-fund-szn1/fakerares",
+      "sourceFile": "app/museum/6529-fund-szn1/fakerares/page.tsx",
+      "navigationLabel": "Fakerares"
+    },
+    {
+      "slug": "6529-fund-szn1/faraway",
+      "sourceFile": "app/museum/6529-fund-szn1/faraway/page.tsx",
+      "navigationLabel": "Faraway"
+    },
+    {
+      "slug": "6529-fund-szn1/fidenza",
+      "sourceFile": "app/museum/6529-fund-szn1/fidenza/page.tsx",
+      "navigationLabel": "Fidenza"
+    },
+    {
+      "slug": "6529-fund-szn1/gazers",
+      "sourceFile": "app/museum/6529-fund-szn1/gazers/page.tsx",
+      "navigationLabel": "Gazers"
+    },
+    {
+      "slug": "6529-fund-szn1/genesis",
+      "sourceFile": "app/museum/6529-fund-szn1/genesis/page.tsx",
+      "navigationLabel": "Genesis"
+    },
+    {
+      "slug": "6529-fund-szn1/grifters",
+      "sourceFile": "app/museum/6529-fund-szn1/grifters/page.tsx",
+      "navigationLabel": "Grifters"
+    },
+    {
+      "slug": "6529-fund-szn1/image-with-arrow",
+      "sourceFile": "app/museum/6529-fund-szn1/image-with-arrow/page.tsx",
+      "navigationLabel": "Image With Arrow"
+    },
+    {
+      "slug": "6529-fund-szn1/incomplete-control",
+      "sourceFile": "app/museum/6529-fund-szn1/incomplete-control/page.tsx",
+      "navigationLabel": "Incomplete Control"
+    },
+    {
+      "slug": "6529-fund-szn1/intensify-modeling",
+      "sourceFile": "app/museum/6529-fund-szn1/intensify-modeling/page.tsx",
+      "navigationLabel": "Intensify Modeling"
+    },
+    {
+      "slug": "6529-fund-szn1/invisible-friends",
+      "sourceFile": "app/museum/6529-fund-szn1/invisible-friends/page.tsx",
+      "navigationLabel": "Invisible Friends"
+    },
+    {
+      "slug": "6529-fund-szn1/jiometory-no-compute",
+      "sourceFile": "app/museum/6529-fund-szn1/jiometory-no-compute/page.tsx",
+      "navigationLabel": "Jiometory No Compute"
+    },
+    {
+      "slug": "6529-fund-szn1/madhouse",
+      "sourceFile": "app/museum/6529-fund-szn1/madhouse/page.tsx",
+      "navigationLabel": "Madhouse"
+    },
+    {
+      "slug": "6529-fund-szn1/meridian",
+      "sourceFile": "app/museum/6529-fund-szn1/meridian/page.tsx",
+      "navigationLabel": "Meridian"
+    },
+    {
+      "slug": "6529-fund-szn1/mfers",
+      "sourceFile": "app/museum/6529-fund-szn1/mfers/page.tsx",
+      "navigationLabel": "Mfers"
+    },
+    {
+      "slug": "6529-fund-szn1/non-either",
+      "sourceFile": "app/museum/6529-fund-szn1/non-either/page.tsx",
+      "navigationLabel": "Non Either"
+    },
+    {
+      "slug": "6529-fund-szn1/nouns",
+      "sourceFile": "app/museum/6529-fund-szn1/nouns/page.tsx",
+      "navigationLabel": "Nouns"
+    },
+    {
+      "slug": "6529-fund-szn1/nuclear-nerds",
+      "sourceFile": "app/museum/6529-fund-szn1/nuclear-nerds/page.tsx",
+      "navigationLabel": "Nuclear Nerds"
+    },
+    {
+      "slug": "6529-fund-szn1",
+      "sourceFile": "app/museum/6529-fund-szn1/page.tsx",
+      "navigationLabel": "6529 Fund Szn1"
+    },
+    {
+      "slug": "6529-fund-szn1/primary-colors-of-neural-bricolage",
+      "sourceFile": "app/museum/6529-fund-szn1/primary-colors-of-neural-bricolage/page.tsx",
+      "navigationLabel": "Primary Colors Of Neural Bricolage"
+    },
+    {
+      "slug": "6529-fund-szn1/proof-grails-protoglyph",
+      "sourceFile": "app/museum/6529-fund-szn1/proof-grails-protoglyph/page.tsx",
+      "navigationLabel": "Proof Grails Protoglyph"
+    },
+    {
+      "slug": "6529-fund-szn1/proof-grails-wall",
+      "sourceFile": "app/museum/6529-fund-szn1/proof-grails-wall/page.tsx",
+      "navigationLabel": "Proof Grails Wall"
+    },
+    {
+      "slug": "6529-fund-szn1/queens-kings",
+      "sourceFile": "app/museum/6529-fund-szn1/queens-kings/page.tsx",
+      "navigationLabel": "Queens Kings"
+    },
+    {
+      "slug": "6529-fund-szn1/rarepepe",
+      "sourceFile": "app/museum/6529-fund-szn1/rarepepe/page.tsx",
+      "navigationLabel": "Rarepepe"
+    },
+    {
+      "slug": "6529-fund-szn1/ringers",
+      "sourceFile": "app/museum/6529-fund-szn1/ringers/page.tsx",
+      "navigationLabel": "Ringers"
+    },
+    {
+      "slug": "6529-fund-szn1/screens",
+      "sourceFile": "app/museum/6529-fund-szn1/screens/page.tsx",
+      "navigationLabel": "Screens"
+    },
+    {
+      "slug": "6529-fund-szn1/subscapes",
+      "sourceFile": "app/museum/6529-fund-szn1/subscapes/page.tsx",
+      "navigationLabel": "Subscapes"
+    },
+    {
+      "slug": "6529-fund-szn1/the-key-the-trial",
+      "sourceFile": "app/museum/6529-fund-szn1/the-key-the-trial/page.tsx",
+      "navigationLabel": "The Key The Trial"
+    },
+    {
+      "slug": "6529-fund-szn1/twin-flames",
+      "sourceFile": "app/museum/6529-fund-szn1/twin-flames/page.tsx",
+      "navigationLabel": "Twin Flames"
+    },
+    {
+      "slug": "6529-fund-szn1/videodrome",
+      "sourceFile": "app/museum/6529-fund-szn1/videodrome/page.tsx",
+      "navigationLabel": "Videodrome"
+    },
+    {
+      "slug": "6529-fund-szn1/where-my-vans-go",
+      "sourceFile": "app/museum/6529-fund-szn1/where-my-vans-go/page.tsx",
+      "navigationLabel": "Where My Vans Go"
+    },
+    {
+      "slug": "6529-fund-szn1/wild-child-2022",
+      "sourceFile": "app/museum/6529-fund-szn1/wild-child-2022/page.tsx",
+      "navigationLabel": "Wild Child 2022"
+    },
+    {
+      "slug": "6529-fund-szn1/xcopy",
+      "sourceFile": "app/museum/6529-fund-szn1/xcopy/page.tsx",
+      "navigationLabel": "Xcopy"
+    },
+    {
+      "slug": "6529-fund-szn2",
+      "sourceFile": "app/museum/6529-fund-szn2/page.tsx",
+      "navigationLabel": "6529 Fund Szn2"
+    },
+    {
+      "slug": "6529-general-assembly",
+      "sourceFile": "app/museum/6529-general-assembly/page.tsx",
+      "navigationLabel": "6529 General Assembly"
+    },
+    {
+      "slug": "6529-gradient-collector-curated",
+      "sourceFile": "app/museum/6529-gradient-collector-curated/page.tsx",
+      "navigationLabel": "6529 Gradient Collector Curated"
+    },
+    {
+      "slug": "6529-photo-a",
+      "sourceFile": "app/museum/6529-photo-a/page.tsx",
+      "navigationLabel": "6529 Photo A"
+    },
+    {
+      "slug": "6529-photo-b",
+      "sourceFile": "app/museum/6529-photo-b/page.tsx",
+      "navigationLabel": "6529 Photo B"
+    },
+    {
+      "slug": "6529-public-domain",
+      "sourceFile": "app/museum/6529-public-domain/page.tsx",
+      "navigationLabel": "6529 Public Domain"
+    },
+    {
+      "slug": "ac-museum",
+      "sourceFile": "app/museum/ac-museum/page.tsx",
+      "navigationLabel": "Ac Museum"
+    },
+    {
+      "slug": "ack-bar",
+      "sourceFile": "app/museum/ack-bar/page.tsx",
+      "navigationLabel": "Ack Bar"
+    },
+    {
+      "slug": "batsoupyum-museum-1",
+      "sourceFile": "app/museum/batsoupyum-museum-1/page.tsx",
+      "navigationLabel": "Batsoupyum Museum 1"
+    },
+    {
+      "slug": "batsoupyum-museum-2",
+      "sourceFile": "app/museum/batsoupyum-museum-2/page.tsx",
+      "navigationLabel": "Batsoupyum Museum 2"
+    },
+    {
+      "slug": "bharat-krymo-museum-1",
+      "sourceFile": "app/museum/bharat-krymo-museum-1/page.tsx",
+      "navigationLabel": "Bharat Krymo Museum 1"
+    },
+    {
+      "slug": "bharat-krymo-museum-2",
+      "sourceFile": "app/museum/bharat-krymo-museum-2/page.tsx",
+      "navigationLabel": "Bharat Krymo Museum 2"
+    },
+    {
+      "slug": "bharat-krymo-museum-3",
+      "sourceFile": "app/museum/bharat-krymo-museum-3/page.tsx",
+      "navigationLabel": "Bharat Krymo Museum 3"
+    },
+    {
+      "slug": "bonafidehan-museum",
+      "sourceFile": "app/museum/bonafidehan-museum/page.tsx",
+      "navigationLabel": "Bonafidehan Museum"
+    },
+    {
+      "slug": "early-nft-art",
+      "sourceFile": "app/museum/early-nft-art/page.tsx",
+      "navigationLabel": "Early Nft Art"
+    },
+    {
+      "slug": "general-assembly",
+      "sourceFile": "app/museum/general-assembly/page.tsx",
+      "navigationLabel": "General Assembly"
+    },
+    {
+      "slug": "generative-art",
+      "sourceFile": "app/museum/generative-art/page.tsx",
+      "navigationLabel": "Generative Art"
+    },
+    {
+      "slug": "genesis/27-bit-digital",
+      "sourceFile": "app/museum/genesis/27-bit-digital/page.tsx",
+      "navigationLabel": "27 Bit Digital"
+    },
+    {
+      "slug": "genesis/720-minutes",
+      "sourceFile": "app/museum/genesis/720-minutes/page.tsx",
+      "navigationLabel": "720 Minutes"
+    },
+    {
+      "slug": "genesis/aerial-view",
+      "sourceFile": "app/museum/genesis/aerial-view/page.tsx",
+      "navigationLabel": "Aerial View"
+    },
+    {
+      "slug": "genesis/algobots",
+      "sourceFile": "app/museum/genesis/algobots/page.tsx",
+      "navigationLabel": "Algobots"
+    },
+    {
+      "slug": "genesis/algorhythms",
+      "sourceFile": "app/museum/genesis/algorhythms/page.tsx",
+      "navigationLabel": "Algorhythms"
+    },
+    {
+      "slug": "genesis/apparitions",
+      "sourceFile": "app/museum/genesis/apparitions/page.tsx",
+      "navigationLabel": "Apparitions"
+    },
+    {
+      "slug": "genesis/archetype",
+      "sourceFile": "app/museum/genesis/archetype/page.tsx",
+      "navigationLabel": "Archetype"
+    },
+    {
+      "slug": "genesis/asemica",
+      "sourceFile": "app/museum/genesis/asemica/page.tsx",
+      "navigationLabel": "Asemica"
+    },
+    {
+      "slug": "genesis/autoglyphs",
+      "sourceFile": "app/museum/genesis/autoglyphs/page.tsx",
+      "navigationLabel": "Autoglyphs"
+    },
+    {
+      "slug": "genesis/autology",
+      "sourceFile": "app/museum/genesis/autology/page.tsx",
+      "navigationLabel": "Autology"
+    },
+    {
+      "slug": "genesis/bent",
+      "sourceFile": "app/museum/genesis/bent/page.tsx",
+      "navigationLabel": "Bent"
+    },
+    {
+      "slug": "genesis/bubble-bobbly",
+      "sourceFile": "app/museum/genesis/bubble-bobbly/page.tsx",
+      "navigationLabel": "Bubble Bobbly"
+    },
+    {
+      "slug": "genesis/century",
+      "sourceFile": "app/museum/genesis/century/page.tsx",
+      "navigationLabel": "Century"
+    },
+    {
+      "slug": "genesis/chimera",
+      "sourceFile": "app/museum/genesis/chimera/page.tsx",
+      "navigationLabel": "Chimera"
+    },
+    {
+      "slug": "genesis/chromie-squiggle",
+      "sourceFile": "app/museum/genesis/chromie-squiggle/page.tsx",
+      "navigationLabel": "Chromie Squiggle"
+    },
+    {
+      "slug": "genesis/construction-token",
+      "sourceFile": "app/museum/genesis/construction-token/page.tsx",
+      "navigationLabel": "Construction Token"
+    },
+    {
+      "slug": "genesis/cosmic-reef",
+      "sourceFile": "app/museum/genesis/cosmic-reef/page.tsx",
+      "navigationLabel": "Cosmic Reef"
+    },
+    {
+      "slug": "genesis/cryptoarte",
+      "sourceFile": "app/museum/genesis/cryptoarte/page.tsx",
+      "navigationLabel": "Cryptoarte"
+    },
+    {
+      "slug": "genesis/cryptoblots",
+      "sourceFile": "app/museum/genesis/cryptoblots/page.tsx",
+      "navigationLabel": "Cryptoblots"
+    },
+    {
+      "slug": "genesis/cryptocube",
+      "sourceFile": "app/museum/genesis/cryptocube/page.tsx",
+      "navigationLabel": "Cryptocube"
+    },
+    {
+      "slug": "genesis/dreams",
+      "sourceFile": "app/museum/genesis/dreams/page.tsx",
+      "navigationLabel": "Dreams"
+    },
+    {
+      "slug": "genesis/dynamic-slices",
+      "sourceFile": "app/museum/genesis/dynamic-slices/page.tsx",
+      "navigationLabel": "Dynamic Slices"
+    },
+    {
+      "slug": "genesis/edifice",
+      "sourceFile": "app/museum/genesis/edifice/page.tsx",
+      "navigationLabel": "Edifice"
+    },
+    {
+      "slug": "genesis/elementals",
+      "sourceFile": "app/museum/genesis/elementals/page.tsx",
+      "navigationLabel": "Elementals"
+    },
+    {
+      "slug": "genesis/elevated-deconstructions",
+      "sourceFile": "app/museum/genesis/elevated-deconstructions/page.tsx",
+      "navigationLabel": "Elevated Deconstructions"
+    },
+    {
+      "slug": "genesis/endless-nameless",
+      "sourceFile": "app/museum/genesis/endless-nameless/page.tsx",
+      "navigationLabel": "Endless Nameless"
+    },
+    {
+      "slug": "genesis/entretiempos",
+      "sourceFile": "app/museum/genesis/entretiempos/page.tsx",
+      "navigationLabel": "Entretiempos"
+    },
+    {
+      "slug": "genesis/fidenza",
+      "sourceFile": "app/museum/genesis/fidenza/page.tsx",
+      "navigationLabel": "Fidenza"
+    },
+    {
+      "slug": "genesis/fragments-of-an-infinite-field",
+      "sourceFile": "app/museum/genesis/fragments-of-an-infinite-field/page.tsx",
+      "navigationLabel": "Fragments Of An Infinite Field"
+    },
+    {
+      "slug": "genesis/frammenti",
+      "sourceFile": "app/museum/genesis/frammenti/page.tsx",
+      "navigationLabel": "Frammenti"
+    },
+    {
+      "slug": "genesis/gazers",
+      "sourceFile": "app/museum/genesis/gazers/page.tsx",
+      "navigationLabel": "Gazers"
+    },
+    {
+      "slug": "genesis/genesis-dca",
+      "sourceFile": "app/museum/genesis/genesis-dca/page.tsx",
+      "navigationLabel": "Genesis Dca"
+    },
+    {
+      "slug": "genesis/geometry-runners",
+      "sourceFile": "app/museum/genesis/geometry-runners/page.tsx",
+      "navigationLabel": "Geometry Runners"
+    },
+    {
+      "slug": "genesis/glitch-crystal-monsters",
+      "sourceFile": "app/museum/genesis/glitch-crystal-monsters/page.tsx",
+      "navigationLabel": "Glitch Crystal Monsters"
+    },
+    {
+      "slug": "genesis/great-hall-of-generative-art",
+      "sourceFile": "app/museum/genesis/great-hall-of-generative-art/page.tsx",
+      "navigationLabel": "Great Hall Of Generative Art"
+    },
+    {
+      "slug": "genesis/hyperhash",
+      "sourceFile": "app/museum/genesis/hyperhash/page.tsx",
+      "navigationLabel": "Hyperhash"
+    },
+    {
+      "slug": "genesis/ignition",
+      "sourceFile": "app/museum/genesis/ignition/page.tsx",
+      "navigationLabel": "Ignition"
+    },
+    {
+      "slug": "genesis/incomplete-control",
+      "sourceFile": "app/museum/genesis/incomplete-control/page.tsx",
+      "navigationLabel": "Incomplete Control"
+    },
+    {
+      "slug": "genesis/inspirals",
+      "sourceFile": "app/museum/genesis/inspirals/page.tsx",
+      "navigationLabel": "Inspirals"
+    },
+    {
+      "slug": "genesis/jiometory-no-compute",
+      "sourceFile": "app/museum/genesis/jiometory-no-compute/page.tsx",
+      "navigationLabel": "Jiometory No Compute"
+    },
+    {
+      "slug": "genesis/kai-gen",
+      "sourceFile": "app/museum/genesis/kai-gen/page.tsx",
+      "navigationLabel": "Kai Gen"
+    },
+    {
+      "slug": "genesis/labios",
+      "sourceFile": "app/museum/genesis/labios/page.tsx",
+      "navigationLabel": "Labios"
+    },
+    {
+      "slug": "genesis/lost-robbies",
+      "sourceFile": "app/museum/genesis/lost-robbies/page.tsx",
+      "navigationLabel": "Lost Robbies"
+    },
+    {
+      "slug": "genesis/meridian",
+      "sourceFile": "app/museum/genesis/meridian/page.tsx",
+      "navigationLabel": "Meridian"
+    },
+    {
+      "slug": "genesis/nimbuds",
+      "sourceFile": "app/museum/genesis/nimbuds/page.tsx",
+      "navigationLabel": "Nimbuds"
+    },
+    {
+      "slug": "genesis",
+      "sourceFile": "app/museum/genesis/page.tsx",
+      "navigationLabel": "Genesis"
+    },
+    {
+      "slug": "genesis/para-bellum",
+      "sourceFile": "app/museum/genesis/para-bellum/page.tsx",
+      "navigationLabel": "Para Bellum"
+    },
+    {
+      "slug": "genesis/phase",
+      "sourceFile": "app/museum/genesis/phase/page.tsx",
+      "navigationLabel": "Phase"
+    },
+    {
+      "slug": "genesis/pigments",
+      "sourceFile": "app/museum/genesis/pigments/page.tsx",
+      "navigationLabel": "Pigments"
+    },
+    {
+      "slug": "genesis/ringers",
+      "sourceFile": "app/museum/genesis/ringers/page.tsx",
+      "navigationLabel": "Ringers"
+    },
+    {
+      "slug": "genesis/screens",
+      "sourceFile": "app/museum/genesis/screens/page.tsx",
+      "navigationLabel": "Screens"
+    },
+    {
+      "slug": "genesis/scribbled-boundaries",
+      "sourceFile": "app/museum/genesis/scribbled-boundaries/page.tsx",
+      "navigationLabel": "Scribbled Boundaries"
+    },
+    {
+      "slug": "genesis/secret-surprise",
+      "sourceFile": "app/museum/genesis/secret-surprise/page.tsx",
+      "navigationLabel": "Secret Surprise"
+    },
+    {
+      "slug": "genesis/singularity",
+      "sourceFile": "app/museum/genesis/singularity/page.tsx",
+      "navigationLabel": "Singularity"
+    },
+    {
+      "slug": "genesis/skulptuur",
+      "sourceFile": "app/museum/genesis/skulptuur/page.tsx",
+      "navigationLabel": "Skulptuur"
+    },
+    {
+      "slug": "genesis/spectron",
+      "sourceFile": "app/museum/genesis/spectron/page.tsx",
+      "navigationLabel": "Spectron"
+    },
+    {
+      "slug": "genesis/squiggly-wtf",
+      "sourceFile": "app/museum/genesis/squiggly-wtf/page.tsx",
+      "navigationLabel": "Squiggly Wtf"
+    },
+    {
+      "slug": "genesis/subscapes",
+      "sourceFile": "app/museum/genesis/subscapes/page.tsx",
+      "navigationLabel": "Subscapes"
+    },
+    {
+      "slug": "genesis/synapses",
+      "sourceFile": "app/museum/genesis/synapses/page.tsx",
+      "navigationLabel": "Synapses"
+    },
+    {
+      "slug": "genesis/the-blocks-of-art",
+      "sourceFile": "app/museum/genesis/the-blocks-of-art/page.tsx",
+      "navigationLabel": "The Blocks Of Art"
+    },
+    {
+      "slug": "genesis/trossets",
+      "sourceFile": "app/museum/genesis/trossets/page.tsx",
+      "navigationLabel": "Trossets"
+    },
+    {
+      "slug": "genesis/unigrids",
+      "sourceFile": "app/museum/genesis/unigrids/page.tsx",
+      "navigationLabel": "Unigrids"
+    },
+    {
+      "slug": "genesis/vortex",
+      "sourceFile": "app/museum/genesis/vortex/page.tsx",
+      "navigationLabel": "Vortex"
+    },
+    {
+      "slug": "genesis/watercolor-dreams",
+      "sourceFile": "app/museum/genesis/watercolor-dreams/page.tsx",
+      "navigationLabel": "Watercolor Dreams"
+    },
+    {
+      "slug": "genesis/willow-shield",
+      "sourceFile": "app/museum/genesis/willow-shield/page.tsx",
+      "navigationLabel": "Willow Shield"
+    },
+    {
+      "slug": "imagined-worlds",
+      "sourceFile": "app/museum/imagined-worlds/page.tsx",
+      "navigationLabel": "Imagined Worlds"
+    },
+    {
+      "slug": "nft-photography",
+      "sourceFile": "app/museum/nft-photography/page.tsx",
+      "navigationLabel": "Nft Photography"
+    },
+    {
+      "slug": "",
+      "sourceFile": "app/museum/page.tsx",
+      "navigationLabel": "Museum"
+    },
+    {
+      "slug": "sozet-lounge",
+      "sourceFile": "app/museum/sozet-lounge/page.tsx",
+      "navigationLabel": "Sozet Lounge"
+    },
+    {
+      "slug": "sunshine-square",
+      "sourceFile": "app/museum/sunshine-square/page.tsx",
+      "navigationLabel": "Sunshine Square"
+    },
+    {
+      "slug": "temple-of-gm",
+      "sourceFile": "app/museum/temple-of-gm/page.tsx",
+      "navigationLabel": "Temple Of Gm"
+    },
+    {
+      "slug": "the-institutions",
+      "sourceFile": "app/museum/the-institutions/page.tsx",
+      "navigationLabel": "The Institutions"
+    },
+    {
+      "slug": "yongoh-kim",
+      "sourceFile": "app/museum/yongoh-kim/page.tsx",
+      "navigationLabel": "Yongoh Kim"
+    }
+  ]
+}

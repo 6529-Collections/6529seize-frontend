@@ -1,0 +1,24 @@
+{
+  "handle": "6529capital",
+  "siteTitle": "6529 Capital",
+  "siteDescription": "6529 Capital helps larger, more traditional investors invest in NFTs, in an NFT-native manner.",
+  "themeAccent": "#1f6feb",
+  "legacyRouteRoot": "/capital",
+  "pages": [
+    {
+      "slug": "",
+      "sourceFile": "app/capital/page.tsx",
+      "navigationLabel": "Home"
+    },
+    {
+      "slug": "fund",
+      "sourceFile": "app/capital/fund/page.tsx",
+      "navigationLabel": "Fund"
+    },
+    {
+      "slug": "company-portfolio",
+      "sourceFile": "app/capital/company-portfolio/page.tsx",
+      "navigationLabel": "Company Portfolio"
+    }
+  ]
+}
