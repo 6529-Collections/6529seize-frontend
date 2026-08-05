@@ -70,3 +70,42 @@
   checkout as dubious ownership. The hotfix runs every repository operation as
   the configured checkout owner and deliberately avoids a global
   `safe.directory` exception.
+- PR #3597 merged the checkout-owner hotfix as
+  `8cfb1d53d2b56d78f49821260d15fe10dc1b9783`. Its exact App CI completed in
+  11m38s and omitted the Museum lane. Staging retry `30961248107` built the
+  exact artifact in 9m35s and promoted it in 1m33s; the complete deploy took
+  about 11m30s. Production prebuild `30961224309` ran concurrently and
+  completed in 13m17s.
+- Automatic staging E2E run `30961887383` proved the sparse immutable tooling
+  checkout in one second and ran twelve packs at a maximum concurrency of
+  three. Ten packs passed; the broad shell pack caught transient staging API
+  fetch failures, and the public groups/tools pack exposed a stale assertion:
+  Meme Calendar now presents SZN, Year, and Epoch as table rows rather than
+  buttons. The retained accessibility snapshot proved the rows and their date
+  ranges rendered correctly on desktop and mobile. The assertion now follows
+  those row roles; browser console failures remain release-blocking.
+- A local exact replay of the broad staging pack passed 38 routes before a
+  mobile open-data/block-finder case logged Coinbase Wallet SDK's same-origin
+  header probe as `Failed to fetch`. Source inspection showed the SDK performs
+  an asynchronous `HEAD` against the current route; the test then navigated the
+  same page to its second route and aborted that request. The earlier
+  notifications/messages failures had the same cross-navigation shape. Each
+  route now runs as an isolated Playwright test, keeping console errors strict
+  while removing navigation-induced errors and giving every route its own
+  failure boundary.
+- The shared staging fixture also performed an eager home-page navigation for
+  every test even though the browser context already receives the staging
+  access cookie. That duplicated a full route load, then abandoned its
+  background SDK requests when the test opened its actual route. The wrapper
+  now starts at the requested route and retains its existing gate detection,
+  credential submission, exact-route retry, and non-staging guard. This removes
+  one unnecessary application navigation per staging test and its associated
+  false console noise. The strict broad pack then passed 44/44 applicable
+  cases in 1m51s; the calendar pack passed 10/10 in 36s.
+- Local validation exposed a related formatter defect: `format:changed` used a
+  potentially stale local `main...HEAD` range, ignored the working-tree side of
+  tracked edits, and selected 552 unrelated files in an isolated worktree. The
+  accidental formatter output was discarded. The command now uses the exact
+  `origin/main` merge base and diffs that commit against the current index and
+  working tree, matching the changed-lint boundary. A contract test rejects a
+  return to the local-main range.
