@@ -32,6 +32,9 @@ import {
 } from "./value-utils";
 
 const reactDomInsertBeforeRawFrameCount = 50;
+// These pre-symbolication minified names are intentionally separate from
+// REACT_DOM_INSERT_BEFORE_RUNTIME_FUNCTIONS, which contains source-mapped
+// semantic React DOM function names.
 const reactDomInsertBeforeRawRuntimeFunctions = new Set([
   "sN",
   "sR",
@@ -143,7 +146,8 @@ function hasRawReactDomInsertBeforeFrameSignature(
       reactDomInsertBeforeRawRequiredFunctions.length + 1 &&
     reactDomInsertBeforeRawRequiredFunctions.every((functionName) =>
       functionNames.has(functionName)
-    ) && hasOnlyOneNextStaticChunk(frames)
+    ) &&
+    hasOnlyOneNextStaticChunk(frames)
   );
 }
 
@@ -471,8 +475,7 @@ export function hasSentryRouteParameterizationFrame(
   frames: SentryStackFrame[] | undefined
 ): boolean {
   return (
-    Array.isArray(frames) &&
-    frames.some(isSentryRouteParameterizationFrame)
+    Array.isArray(frames) && frames.some(isSentryRouteParameterizationFrame)
   );
 }
 
