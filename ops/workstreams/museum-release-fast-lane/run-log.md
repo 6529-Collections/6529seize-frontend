@@ -130,3 +130,8 @@
 - Post-merge local validation passed: 69 focused tests across data architecture,
   rights, classifier, CI plan, and Release Bus performance; changed TypeScript
   passed for 1,358 files.
+- Removed the incidental `MuseumGiftPage` React-key cleanup and its route-test
+  assertion from PR #3632 after current-main reconciliation. They were
+  unrelated to the fast-lane contract and were the only remaining Museum
+  runtime paths in the diff; keeping them would have forced another 24-minute
+  exhaustive lane and obscured the policy-only validation boundary.

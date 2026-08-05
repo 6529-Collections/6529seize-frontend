@@ -225,27 +225,6 @@ describe("Museum finished publication routes", () => {
     ).toHaveAttribute("href", "/museum/network/projects/century/system");
   });
 
-  it("keys each dynamic gift-dossier child", async () => {
-    const consoleError = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => undefined);
-    try {
-      render(await MuseumGiftPage({ accessionId: "6529NM.2026.001" }));
-
-      expect(
-        consoleError.mock.calls.some((arguments_) =>
-          arguments_.some((argument) =>
-            String(argument).includes(
-              'Each child in a list should have a unique "key" prop.'
-            )
-          )
-        )
-      ).toBe(false);
-    } finally {
-      consoleError.mockRestore();
-    }
-  });
-
   it("renders the source matrix onsite with an accessible table region", async () => {
     render(await MuseumSourceAndChronologyPage());
 

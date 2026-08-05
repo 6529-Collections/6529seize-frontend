@@ -219,10 +219,7 @@ export async function MuseumGiftPage({
                 key={descriptor.path}
                 anchor={anchor}
                 summary={
-                  <summary
-                    key={`${descriptor.path}-summary`}
-                    className="hover:tw-text-primary-200 tw-flex tw-min-h-16 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-py-4 tw-text-base tw-font-semibold tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-                  >
+                  <summary className="hover:tw-text-primary-200 tw-flex tw-min-h-16 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-py-4 tw-text-base tw-font-semibold tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400">
                     <span>{descriptor.title}</span>
                     <span className="tw-text-sm tw-font-normal tw-text-iron-500 group-open:tw-text-primary-300">
                       {t(DEFAULT_LOCALE, "museum.network.gift.readDocument")}
@@ -230,10 +227,7 @@ export async function MuseumGiftPage({
                   </summary>
                 }
               >
-                <div
-                  key={`${descriptor.path}-content`}
-                  className="tw-max-w-4xl tw-pb-10 tw-pt-2"
-                >
+                <div className="tw-max-w-4xl tw-pb-10 tw-pt-2">
                   {document ? (
                     <MuseumMarkdown
                       sourceCommit={publication.identity.commit}
