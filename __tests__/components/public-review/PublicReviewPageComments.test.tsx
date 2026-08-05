@@ -119,6 +119,14 @@ describe("PublicReviewPageComments", () => {
     expect(
       screen.getByText("How does the permanent Core constrain successors?")
     ).toBeInTheDocument();
+    const commentArticle = screen
+      .getByText("How does the permanent Core constrain successors?")
+      .closest("article");
+    expect(commentArticle).toHaveClass("tw-py-4");
+    expect(commentArticle).not.toHaveClass(
+      "tw-rounded-lg",
+      "tw-border-white/[0.12]"
+    );
     expect(
       screen.queryByText(/Wave messages could not be included/)
     ).not.toBeInTheDocument();
