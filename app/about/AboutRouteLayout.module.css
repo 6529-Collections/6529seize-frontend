@@ -6,6 +6,12 @@
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    transition: none;
+  }
+}
+
 :global(
   .layout-root[data-mobile="false"][data-narrow="true"][data-offcanvas="true"][data-right-open="false"]
 ) {
