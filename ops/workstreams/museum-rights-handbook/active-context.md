@@ -165,3 +165,8 @@ final copy/visual sweep.
   with the rights handbook; the Casey assembler is 795 lines and the debt
   ratchet returns to zero oversized files. The exact hosted-failure set now
   passes locally: five suites / 58 tests plus the complete debt ratchet.
+- CodeRabbit identified one bilateral route inconsistency: page-source routes
+  encoded governed expression IDs while Casey object links interpolated the
+  same ID raw. The resolved effective ID now supplies both fields and is URL
+  encoded for the route. The current closed expression inventory makes unsafe
+  characters unreachable, but both projections now enforce the same rule.

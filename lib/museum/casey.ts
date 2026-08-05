@@ -397,6 +397,8 @@ export function caseyArtworksFromPublication(
       governed.rightsCredit.licenseLabel === null
         ? "Rights basis recorded in the accession dossier."
         : `Licensed ${governed.rightsCredit.licenseLabel}.`;
+    const rightsExpressionId =
+      governed.rightsCredit.rightsExpressionId ?? overlay.rightsExpressionId;
 
     return {
       ...overlay,
@@ -409,12 +411,11 @@ export function caseyArtworksFromPublication(
         rightsLabel
       ),
       rightsLabel,
-      rightsExpressionId:
-        governed.rightsCredit.rightsExpressionId ?? overlay.rightsExpressionId,
+      rightsExpressionId,
       rightsUrl:
         governed.rightsCredit.rightsExpressionId === null
           ? undefined
-          : `/museum/network/rights/${governed.rightsCredit.rightsExpressionId}`,
+          : `/museum/network/rights/${encodeURIComponent(rightsExpressionId)}`,
     };
   });
 }
