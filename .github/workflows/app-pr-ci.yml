@@ -620,7 +620,6 @@ jobs:
           MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.commit }}
         run: |
           ./bin/6529 run test:e2e:museum-data-architecture
-          ./bin/6529 run test:e2e:museum-institutional-practice
           ./bin/6529 run test:e2e:museum-inside-system
 
       - name: Upload app check artifacts

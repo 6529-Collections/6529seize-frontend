@@ -92,3 +92,13 @@
   isolated test `PATH` cannot locate the Windows `gh` wrapper. Hosted Ubuntu
   remains authoritative for those two suites; no product or release assertion
   introduced by this change failed.
+- Exact-head App PR CI run `31042662245` proved the new ontology browser pack
+  green: 6/6 tests passed across desktop and mobile in 2.9 minutes. The same
+  job then spent the rest of its 60-minute ceiling in the legacy
+  institutional-practice sweep, which declares itself `manual` rather than
+  `pr-ci`; that sweep reached 179 executions after retries and the Inside the
+  System pack never started. The Museum PR lane now follows each local pack's
+  manifest trigger: ontology and Inside the System remain required, while the
+  manual-only institutional sweep is excluded. A contract test enforces both
+  inclusion and exclusion from the manifest rather than assuming every Museum
+  pack belongs in PR CI.
