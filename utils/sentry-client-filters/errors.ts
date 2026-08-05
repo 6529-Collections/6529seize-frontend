@@ -6,8 +6,6 @@ import {
   gifPickerTenorUndefinedTagsMessage,
   metaMaskMobileContextTokens,
   mobileSafariWebViewContextTokens,
-  REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE,
-  REACT_DOM_REMOVE_CHILD_NOT_FOUND_ERROR_MESSAGE,
   sentryRouteParameterizationMechanismType,
   sentryRouteParameterizationMessage,
   tenorCategoriesPath,
@@ -33,7 +31,6 @@ import {
   getRoutePathFromString,
   getRuntimeUserAgentString,
   getStringValue,
-  hasReactDomRemoveChildRoute,
   hasRouteParameterizationRoute,
   hasWavesRoute,
   isRecord,
@@ -56,7 +53,6 @@ import {
   hasInjectedWasmCspFrameSignature,
   hasLikelyAppOwnedFrame,
   hasNativeJsonStringifyFrame,
-  hasReactDomNotFoundErrorSignature,
   hasSentryRouteParameterizationFrame,
   isSentryRouteParameterizationFrame,
 } from "./app-frame-utils";
@@ -610,32 +606,6 @@ export function shouldFilterTwitterCurrentInsetReferenceError(
   }
 
   return hasOnlyTwitterInjectedWaveDocumentFrames(value.stacktrace?.frames);
-}
-
-export function shouldFilterReactDomInsertBeforeNotFoundError(
-  event: SentryClientEvent
-): boolean {
-  if (!hasWavesRoute(event)) {
-    return false;
-  }
-
-  return hasReactDomNotFoundErrorSignature(
-    event,
-    REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE
-  );
-}
-
-export function shouldFilterReactDomRemoveChildNotFoundError(
-  event: SentryClientEvent
-): boolean {
-  if (!hasReactDomRemoveChildRoute(event)) {
-    return false;
-  }
-
-  return hasReactDomNotFoundErrorSignature(
-    event,
-    REACT_DOM_REMOVE_CHILD_NOT_FOUND_ERROR_MESSAGE
-  );
 }
 
 export function shouldFilterGifPickerTenorCategoriesError(
