@@ -168,10 +168,10 @@ export default function UserFollowBtn({
       return;
     }
     if (following) {
-      await unFollowMutation.mutateAsync();
+      unFollowMutation.mutate();
       return;
     }
-    await followMutation.mutateAsync();
+    followMutation.mutate();
   };
 
   const isDirectMessagePending =
