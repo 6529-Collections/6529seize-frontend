@@ -150,3 +150,74 @@
   the release. Focused runner and performance contracts pass 31/31; changed
   lint, application/test/Playwright typechecks, manifest sync, and Debt Ratchet
   are green.
+- PR #3603 merged as `852b43fd9dc5af86aaf75c2942aea6e490544e25`.
+  Its App CI completed in 11m32s; quality/contracts took 2m36s, smoke 3m14s,
+  critical shell 4m23s, and Museum PR CI was omitted.
+- Staging composition `474a04f67701028807fb49747d5aa0e548f7a3a4`
+  deployed successfully in run 30975793722. Production prebuild 30975744759
+  completed concurrently in 13m28s. Automatic staging E2E 30976430422 passed
+  in 7m23s with three workers and the new retry evidence contract.
+- Retained evidence showed 13 packs: institutional-practice was correctly
+  absent, but the newly added Inside the System Museum pack was still present.
+  Production promotion was stopped. Replaced literal single-pack exclusion
+  with manifest-owned Museum scope selection plus a validator ratchet and
+  rollback-compatible `museum-*` fallback.
+- PR #3604 first head `cb658f7c8e6af83af438ab61a1c368ac964eaf0b`
+  failed the quality lane because one compatibility test still expected a
+  single literal Museum alias. The 6529 reviewer also required a contract that
+  the run-step and evidence-step predicates cannot drift. Updated the mock to
+  enumerate both scoped aliases, asserted both exclusions in staging and
+  production, and added byte-identical predicate plus local-pack-count
+  ratchets. Product lanes were cancelled immediately after the quality failure.
+- The follow-up review also added executable coverage for the legacy
+  `museum-*` rollback classifier, locked both selector snippets to the correct
+  deployed environment and `post-deploy` trigger, and rejected mixed Museum and
+  non-Museum specs in every automatic post-deploy pack. The intentionally mixed
+  production aggregate remains available only as a manual operator diagnostic.
+  The release-bus compatibility fixture now writes checksums with the same
+  platform tool used by the workflow and normalizes its Bash-facing temporary
+  path, eliminating a Windows-only false failure without weakening evidence
+  validation.
+- A full `__tests__/scripts` sweep found and replaced one more stale literal
+  single-pack assertion in `testing-strategy.test.ts`. The same Windows run also
+  reported the repository's existing POSIX-only security-test baseline:
+  `O_NOFOLLOW` is unavailable and directory-descriptor `fchmod` returns `EPERM`.
+  Those twelve platform failures are unrelated; hosted Linux remains the
+  authoritative environment for those fail-closed controls.
+- PR #3604 final head `8aee301944e9140515cd6b07a2bac7e10621e0d2`
+  passed all 17 hosted checks. App CI run 30979078634 completed in 12m23s;
+  quality/contracts took 2m56s, smoke 3m33s, critical shell 4m39s, production
+  build 11m23s, and Museum was omitted. Zero review threads remained. The
+  controlled merge audit is PR comment 5188141004. PR #3604 merged as
+  `2edfb2610c0cca9f49d45c5465c43bba8a20077e` at 05:58:51 UTC.
+- Staging composition `12b40bd96de7f3769c4738a8796e7f915d34db0f`
+  deployed in run 30979848612. Concurrent production prebuild 30979804039
+  produced artifact `production-frontend-2edfb2610c0cca9f49d45c5465c43bba8a20077e`
+  with SHA-256
+  `5006419d86d2ab7faad723896a22590fac69b40caddf277f295bf6cd3e96c0d9`.
+- Automatic staging E2E 30980599423 passed. Retained evidence contains 12
+  packs, three workers, zero Museum packs, and zero final failures. Collections
+  alone used attempt 2 and passed in 55.7s; all other packs remained on attempt
+  1. Reviewer evidence is the `staging-e2e-artifacts-30980599423` artifact on
+     [run 30980599423](https://github.com/6529-Collections/6529seize-frontend/actions/runs/30980599423),
+     retained by GitHub through 2026-09-04.
+- Production run 30981038834 promoted the exact prebuilt artifact in 5m58s.
+  Three consecutive live version requests returned exact main
+  `2edfb2610c0cca9f49d45c5465c43bba8a20077e` for both served and announced
+  versions with `stale:false`.
+- Automatic production E2E 30981386269 passed in 2m53s. Retained evidence
+  contains 11 packs, three workers, zero Museum packs, zero retries, and zero
+  failures. Reviewer evidence is the `production-e2e-artifacts-30981038834`
+  artifact on
+  [run 30981386269](https://github.com/6529-Collections/6529seize-frontend/actions/runs/30981386269),
+  retained by GitHub through 2026-09-04. Machine-local mirrors remain under
+  `C:\Users\Administrator\.codex\artifacts\ci-release-final` for operator
+  convenience only.
+- Final timing: merge-to-production 27m47s; merge-to-qualified-production
+  30m47s. The workstream is complete.
+- Closeout PR #3605 review replaced machine-local-only evidence references with
+  GitHub run/artifact references, corrected the PR comparison to total elapsed
+  time on both sides, and added a tested `ops/**` staging path exclusion. The
+  exclusion is deliberately narrow: public or build-input Markdown remains
+  deployment-triggering. Focused workflow tests pass 62/62 and the Jest type,
+  changed-lint, Bash-parse, formatting, and whitespace ratchets are green.
