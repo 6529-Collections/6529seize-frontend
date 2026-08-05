@@ -283,10 +283,11 @@ is available, use it; otherwise read the relevant files in
   distinct browser risk.
 - Keep exhaustive route inventories, static content, metadata, source mapping,
   link, and fail-closed invariants in fast Jest or other static contract tests.
-  The existing Museum institutional-practice sweep is a release-scoped
-  exception: retain its complete desktop/mobile deployed-route coverage, but
-  run it automatically only when the exact staging change set touches
-  Museum-owned app, component, library, locale, public-asset, or E2E paths.
+  The existing Museum institutional-practice sweep is a scoped exception:
+  retain its complete desktop/mobile route coverage, but schedule its isolated
+  PR and staging lanes only when the exact change set touches the Network
+  Museum route, component, publication, locale, environment-adapter, or E2E
+  paths declared by the CI classifier.
 - Before adding or expanding an E2E pack, identify the browser-specific failure
   it catches and check that a lower test layer does not already cover it.
 

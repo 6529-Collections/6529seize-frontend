@@ -12,6 +12,7 @@ const appPrCi = workflow("app-pr-ci.yml");
 const releaseBusPreflight = workflow("release-bus-v2-preflight.yml");
 const stagingWorkflow = workflow("deploy-staging.yml");
 const legacyProduction = workflow("build-upload-deploy-prod.yml");
+const productionBuild = workflow("production-build-artifact.yml");
 const stagingArtifactDeployScript = fs.readFileSync(
   path.join(process.cwd(), "ops", "scripts", "deploy-staging-artifact.sh"),
   "utf8"
@@ -71,24 +72,26 @@ describe("public-review artifact workflow contract", () => {
     expect(releaseBusPreflight).not.toMatch(/\bcp -r public\b/);
   });
 
-  it("fails closed around the legacy production artifact constructor", () => {
+  it("fails closed around the production prebuild artifact constructor", () => {
     expect(
-      legacyProduction.match(new RegExp(`${helper} prepare`, "g"))
+      productionBuild.match(new RegExp(`${helper} prepare`, "g"))
     ).toHaveLength(1);
     expect(
-      legacyProduction.match(new RegExp(`${helper} assert-zip`, "g"))
+      productionBuild.match(new RegExp(`${helper} assert-zip`, "g"))
     ).toHaveLength(1);
     expect(
-      legacyProduction.match(new RegExp(`${helper} assert-listing`, "g"))
+      productionBuild.match(new RegExp(`${helper} assert-listing`, "g"))
     ).toHaveLength(1);
-    expect(legacyProduction.match(/--profile production/g)).toHaveLength(3);
-    expect(legacyProduction).toContain("unzip -Z1 target/package.zip");
-    expect(legacyProduction).toContain(sourceCleanGuard);
-    expect(legacyProduction).toContain(
-      'test -z "$(find target/_next -type l -print -quit)"'
+    expect(productionBuild.match(/--profile production/g)).toHaveLength(3);
+    expect(productionBuild).toContain(
+      "unzip -Z1 production-artifact/target/package.zip"
     );
-    expect(legacyProduction).toContain('--extracted-root "$zip_extract"');
-    expect(legacyProduction).not.toMatch(/\bcp -r public\b/);
+    expect(productionBuild).toContain(sourceCleanGuard);
+    expect(productionBuild).toContain(
+      'test -z "$(find production-artifact/target/_next -type l -print -quit)"'
+    );
+    expect(productionBuild).toContain('--extracted-root "$zip_extract"');
+    expect(productionBuild).not.toMatch(/\bcp -r public\b/);
   });
 
   it("injects a validated production-only public-review destination", () => {
@@ -214,7 +217,7 @@ describe("public-review artifact workflow contract", () => {
     expect(releaseBusPreflight).toContain(
       "GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY }}"
     );
-    expect(legacyProduction).toContain(
+    expect(productionBuild).toContain(
       "GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY || secrets.GIPHY_API_KEY }}"
     );
   });

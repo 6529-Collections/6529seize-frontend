@@ -1,5 +1,6 @@
 import { compareLocalized } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { cache } from "react";
 import { getMuseumCorpus } from "./source";
 import type {
@@ -9,10 +10,12 @@ import type {
   MuseumGovernanceDecision,
   MuseumObjectRecord,
   MuseumProgram,
+  MuseumProgramMedia,
   MuseumSelectedWork,
   MuseumTextDocument,
   MuseumView,
 } from "./types";
+import { KEYS_AND_GATES_PROGRAM_ID } from "./constants";
 
 interface JsonObject {
   readonly [key: string]: unknown;
@@ -78,6 +81,28 @@ interface JsonObject {
   readonly text?: unknown;
   readonly classification?: unknown;
   readonly record_scope?: unknown;
+  readonly media?: unknown;
+  readonly mime_type?: unknown;
+  readonly url?: unknown;
+  readonly retrieval_status?: unknown;
+  readonly selection_evidence?: unknown;
+  readonly rights_and_consent?: unknown;
+  readonly as_of?: unknown;
+  readonly decision_at?: unknown;
+  readonly wave_url?: unknown;
+  readonly rights_effective_status?: unknown;
+  readonly items?: unknown;
+  readonly source?: unknown;
+  readonly presentation?: unknown;
+  readonly alt_text?: unknown;
+  readonly alt_text_status?: unknown;
+  readonly derivatives?: unknown;
+  readonly width?: unknown;
+  readonly height?: unknown;
+  readonly sha256?: unknown;
+  readonly byte_size?: unknown;
+  readonly pixel_width?: unknown;
+  readonly pixel_height?: unknown;
 }
 
 function isObject(value: unknown): value is JsonObject {
@@ -93,6 +118,75 @@ function nullableString(value: unknown): string | null {
   return result.length > 0 ? result : null;
 }
 
+const PROGRAM_MEDIA_HOSTS = new Set(["d3lqz0a4bldqgf.cloudfront.net"]);
+const PROGRAM_MEDIA_MANIFEST_PATH = `records/programs/${KEYS_AND_GATES_PROGRAM_ID}/media-manifest.json`;
+
+function approvedProgramMediaUrl(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(value);
+    if (
+      parsed.protocol !== "https:" ||
+      !PROGRAM_MEDIA_HOSTS.has(parsed.hostname) ||
+      parsed.username.length > 0 ||
+      parsed.password.length > 0 ||
+      parsed.port.length > 0 ||
+      parsed.pathname === "/"
+    ) {
+      return null;
+    }
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
+
+function approvedProgramDerivativeUrl(value: unknown): string | null {
+  const url = approvedProgramMediaUrl(value);
+  if (url === null) {
+    return null;
+  }
+  return new URL(url).pathname.startsWith("/museum/programs/") ? url : null;
+}
+
+function approvedProgramWaveUrl(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(value);
+    if (
+      parsed.protocol !== "https:" ||
+      parsed.hostname !== "6529.io" ||
+      parsed.username.length > 0 ||
+      parsed.password.length > 0 ||
+      parsed.port.length > 0 ||
+      !parsed.pathname.startsWith("/waves/")
+    ) {
+      return null;
+    }
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
+
+function resolveProgramOutcomePath(
+  programDirectory: string,
+  outcomeReference: string | null
+): string | null {
+  if (outcomeReference === null) {
+    return null;
+  }
+  return outcomeReference.startsWith("records/")
+    ? outcomeReference
+    : `${programDirectory}/${outcomeReference}`;
+}
+
 function textValue(value: unknown): string {
   if (typeof value === "string") {
     return value;
@@ -103,6 +197,12 @@ function textValue(value: unknown): string {
 
 function numberValue(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function positiveInteger(value: unknown): number | null {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0
+    ? value
+    : null;
 }
 
 function stringArray(value: unknown): string[] {
@@ -122,6 +222,134 @@ function jsonObject(document: MuseumDocument | undefined): JsonObject | null {
   } catch {
     return null;
   }
+}
+
+function legacyProgramMedia(
+  outcome: JsonObject | null,
+  title: string,
+  artist: string
+): MuseumProgramMedia | null {
+  const media = Array.isArray(outcome?.media)
+    ? outcome.media.find(isObject)
+    : undefined;
+  const sourceUrl = approvedProgramMediaUrl(media?.url);
+  if (sourceUrl === null) {
+    return null;
+  }
+  return {
+    sourceUrl,
+    sourceMimeType: stringValue(media?.mime_type),
+    sourceSha256: nullableString(media?.sha256),
+    sourceByteSize: null,
+    sourceWidth: null,
+    sourceHeight: null,
+    altText: t(DEFAULT_LOCALE, "museum.network.objects.mediaAltFallback", {
+      title,
+      artist,
+    }),
+    altTextStatus: "identification_only_fallback",
+    variants: [],
+  };
+}
+
+function normalizeProgramMediaManifestItem(item: JsonObject): {
+  readonly recordId: string;
+  readonly media: MuseumProgramMedia;
+} | null {
+  const recordId = stringValue(item.record_id);
+  const source = isObject(item.source) ? item.source : null;
+  const presentation = isObject(item.presentation) ? item.presentation : null;
+  const sourceUrl = approvedProgramMediaUrl(source?.url);
+  const altText = nullableString(presentation?.alt_text);
+  const derivatives = Array.isArray(presentation?.derivatives)
+    ? presentation.derivatives
+        .filter(isObject)
+        .flatMap((derivative) => {
+          const url = approvedProgramDerivativeUrl(derivative.url);
+          const width = positiveInteger(derivative.width);
+          const height = positiveInteger(derivative.height);
+          const sha256 = nullableString(derivative.sha256);
+          const byteSize = positiveInteger(derivative.byte_size);
+          if (
+            url === null ||
+            width === null ||
+            height === null ||
+            sha256 === null ||
+            byteSize === null ||
+            derivative.mime_type !== "image/webp"
+          ) {
+            return [];
+          }
+          return [
+            {
+              url,
+              width,
+              height,
+              mimeType: "image/webp" as const,
+              sha256,
+              byteSize,
+            },
+          ];
+        })
+        .sort((left, right) => left.width - right.width)
+    : [];
+
+  if (
+    recordId.length === 0 ||
+    source === null ||
+    presentation === null ||
+    sourceUrl === null ||
+    altText === null ||
+    derivatives.length === 0 ||
+    new Set(derivatives.map((derivative) => derivative.width)).size !==
+      derivatives.length
+  ) {
+    return null;
+  }
+
+  return {
+    recordId,
+    media: {
+      sourceUrl,
+      sourceMimeType: stringValue(source.mime_type),
+      sourceSha256: nullableString(source.sha256),
+      sourceByteSize: positiveInteger(source.byte_size),
+      sourceWidth: positiveInteger(source.pixel_width),
+      sourceHeight: positiveInteger(source.pixel_height),
+      altText,
+      altTextStatus: stringValue(presentation.alt_text_status),
+      variants: derivatives,
+    },
+  };
+}
+
+function programMediaIndex(
+  documents: Readonly<Record<string, MuseumDocument>>
+): ReadonlyMap<string, MuseumProgramMedia> {
+  const root = jsonObject(documents[PROGRAM_MEDIA_MANIFEST_PATH]);
+  const items = root?.items;
+  const result = new Map<string, MuseumProgramMedia>();
+  const seenRecordIds = new Set<string>();
+
+  for (const item of Array.isArray(items) ? items : []) {
+    if (!isObject(item)) {
+      continue;
+    }
+    const recordId = stringValue(item.record_id);
+    if (recordId.length > 0 && seenRecordIds.has(recordId)) {
+      result.delete(recordId);
+      continue;
+    }
+    if (recordId.length > 0) {
+      seenRecordIds.add(recordId);
+    }
+    const normalized = normalizeProgramMediaManifestItem(item);
+    if (normalized !== null) {
+      result.set(normalized.recordId, normalized.media);
+    }
+  }
+
+  return result;
 }
 
 function firstMarkdownParagraph(markdown: string): string {
@@ -221,24 +449,42 @@ function approvedCollections(
 
 function selectedWorks(
   documents: Readonly<Record<string, MuseumDocument>>,
-  path: string
+  path: string,
+  mediaIndex: ReadonlyMap<string, MuseumProgramMedia>
 ): MuseumSelectedWork[] {
   const root = jsonObject(documents[path]);
   const works = root?.works;
+  const programDirectory = path.slice(0, path.lastIndexOf("/"));
 
   return (Array.isArray(works) ? works : [])
     .filter(isObject)
-    .map((work) => ({
-      recordId: stringValue(work.record_id),
-      outcomePath: nullableString(work.outcome_record),
-      status: stringValue(work.status, "unknown"),
-      artist: stringValue(work.artist, "Unknown artist"),
-      title: stringValue(work.title, "Untitled work"),
-      submissionDropId: nullableString(work.submission_drop_id),
-      winnerPlace: numberValue(work.winner_place),
-      voteTotal: numberValue(work.vote_total),
-      voterCount: numberValue(work.voter_count),
-    }))
+    .map((work) => {
+      const outcomeReference = nullableString(work.outcome_record);
+      const outcomePath = resolveProgramOutcomePath(
+        programDirectory,
+        outcomeReference
+      );
+      const outcome =
+        outcomePath === null ? null : jsonObject(documents[outcomePath]);
+      const recordId = stringValue(work.record_id);
+      const title = stringValue(work.title, "Untitled work");
+      const artist = stringValue(work.artist, "Unknown artist");
+
+      return {
+        recordId,
+        outcomePath,
+        status: stringValue(work.status, "unknown"),
+        artist,
+        title,
+        submissionDropId: nullableString(work.submission_drop_id),
+        winnerPlace: numberValue(work.winner_place),
+        voteTotal: numberValue(work.vote_total),
+        voterCount: numberValue(work.voter_count),
+        media:
+          mediaIndex.get(recordId) ??
+          legacyProgramMedia(outcome, title, artist),
+      };
+    })
     .filter((work) => work.recordId.length > 0);
 }
 
@@ -259,7 +505,8 @@ function programRules(value: unknown): string[] {
 }
 
 function programs(
-  documents: Readonly<Record<string, MuseumDocument>>
+  documents: Readonly<Record<string, MuseumDocument>>,
+  mediaIndex: ReadonlyMap<string, MuseumProgramMedia>
 ): MuseumProgram[] {
   return Object.entries(documents)
     .filter(([path]) => /^records\/programs\/[^/]+\/program\.json$/u.test(path))
@@ -279,9 +526,7 @@ function programs(
         "selected-works.json"
       );
       const frame = isObject(root.curatorial_frame)
-        ? Object.values(root.curatorial_frame)
-            .filter((value): value is string => typeof value === "string")
-            .join(" ")
+        ? stringValue(root.curatorial_frame["premise"])
         : "";
 
       return [
@@ -294,7 +539,7 @@ function programs(
           curatorialFrame: frame,
           rules: programRules(root.rules),
           nonClaims: stringArray(root.non_claims),
-          selectedWorks: selectedWorks(documents, selectedPath),
+          selectedWorks: selectedWorks(documents, selectedPath, mediaIndex),
           sourcePath: path,
           selectedWorksPath:
             documents[selectedPath] === undefined ? null : selectedPath,
@@ -340,7 +585,8 @@ function accessions(
 }
 
 function objectRecords(
-  documents: Readonly<Record<string, MuseumDocument>>
+  documents: Readonly<Record<string, MuseumDocument>>,
+  mediaIndex: ReadonlyMap<string, MuseumProgramMedia>
 ): MuseumObjectRecord[] {
   return Object.entries(documents)
     .filter(
@@ -372,17 +618,25 @@ function objectRecords(
           "")
         : stringValue(artistValue);
       const claims = isObject(root.claims) ? root.claims : {};
+      const selectionEvidence = isObject(root.selection_evidence)
+        ? root.selection_evidence
+        : {};
+      const rightsAndConsent = isObject(root.rights_and_consent)
+        ? root.rights_and_consent
+        : {};
       const objectId = stringValue(root.object_id, stringValue(root.record_id));
       if (objectId.length === 0) {
         return [];
       }
+      const title = stringValue(root.title, objectId);
+      const resolvedArtist = artist || "Unknown artist";
 
       return [
         {
           objectId,
           accessionLotId: nullableString(root.accession_lot_id),
-          title: stringValue(root.title, objectId),
-          artist: artist || "Unknown artist",
+          title,
+          artist: resolvedArtist,
           artistStatement:
             nullableString(textValue(root.artist_statement)) ??
             nullableString(textValue(claims.artist_statement)),
@@ -396,6 +650,19 @@ function objectRecords(
               root.current_state,
               stringValue(root.record_status, "unknown")
             )
+          ),
+          statusAsOf: nullableString(root.as_of),
+          programId: nullableString(root.program_id),
+          media:
+            mediaIndex.get(objectId) ??
+            legacyProgramMedia(root, title, resolvedArtist),
+          selectionPlace: numberValue(selectionEvidence.winner_place),
+          selectionDate: nullableString(selectionEvidence.decision_at),
+          selectionSourceUrl: approvedProgramWaveUrl(
+            selectionEvidence.wave_url
+          ),
+          rightsStatus: nullableString(
+            rightsAndConsent.rights_effective_status
           ),
           scope: stringValue(
             root.record_scope,
@@ -412,6 +679,7 @@ export function normalizeMuseumCorpus(
   corpus: Awaited<ReturnType<typeof getMuseumCorpus>>
 ): MuseumView {
   const documents = corpus.documents;
+  const mediaIndex = programMediaIndex(documents);
   const mission = markdownDocument(
     documents,
     "policies/founding-and-operating-principles.md"
@@ -439,9 +707,9 @@ export function normalizeMuseumCorpus(
     methodology,
     governance: governanceDecisions(documents),
     approvedCollections: approvedCollections(documents),
-    programs: programs(documents),
+    programs: programs(documents, mediaIndex),
     accessions: accessions(documents),
-    objects: objectRecords(documents),
+    objects: objectRecords(documents, mediaIndex),
     errorCode: corpus.errorCode,
   };
 }

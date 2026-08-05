@@ -428,13 +428,17 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.install.required).toBe(false);
   });
 
-  it("keeps Museum browser coverage out of PR CI and scopes it after deployment", () => {
+  it("runs Museum browser coverage only for Museum-impacting PRs and deployed changes", () => {
     const workflow = fs.readFileSync(
       path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),
       "utf8"
     );
     const stagingWorkflow = fs.readFileSync(
       path.join(process.cwd(), ".github/workflows/staging-e2e.yml"),
+      "utf8"
+    );
+    const museumChangeSetClassifier = fs.readFileSync(
+      path.join(process.cwd(), "scripts/museum-e2e-change-set.cjs"),
       "utf8"
     );
     const museumSpec = fs.readFileSync(
@@ -448,24 +452,39 @@ describe("testing strategy CI plan", () => {
     expect(workflow).toContain("playwright install --with-deps chromium");
     expect(workflow).toContain("test:e2e:smoke");
     expect(workflow).toContain("test:e2e:critical-shell");
-    expect(workflow).not.toContain("test:e2e:museum-institutional-practice");
+    expect(workflow).toContain("test:e2e:museum-institutional-practice");
     expect(workflow).toContain("PLAYWRIGHT_WEB_SERVER_COMMAND");
     expect(stagingWorkflow).toContain("--trigger post-deploy");
     expect(stagingWorkflow).toContain("SELECTED_PACK");
     expect(stagingWorkflow).toContain(
       "--exclude-pack museum-institutional-practice"
     );
-    expect(stagingWorkflow).toContain("git diff --no-renames --name-only -z");
+    expect(stagingWorkflow).toContain("scripts/museum-e2e-change-set.cjs");
+    expect(museumChangeSetClassifier).toContain(
+      '["diff", "--no-renames", "--name-only", "-z"'
+    );
     for (const ownedPath of [
-      "app/museum/*",
-      "components/museum/*",
-      "lib/museum/*",
-      "i18n/messages/museum.*",
-      "public/museum*",
-      "tests/museum/*",
+      '"app/museum/network/"',
+      '"components/museum/"',
+      '"lib/museum/"',
+      "config/museumPublicationEnv.server.ts",
+      "i18n/messages/museum.en-US.json",
+      '"tests/museum/"',
     ]) {
-      expect(stagingWorkflow).toContain(ownedPath);
+      expect(museumChangeSetClassifier).toContain(ownedPath);
     }
+    expect(workflow).toContain(
+      "playwright_museum_required: ${{ steps.plan_outputs.outputs.playwright_museum_required }}"
+    );
+    expect(workflow).toContain(
+      "Resolve exact Museum publication for Playwright"
+    );
+    expect(workflow).toContain(
+      "MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.commit }}"
+    );
+    expect(workflow).toContain(
+      "./bin/6529 run test:e2e:museum-institutional-practice"
+    );
     expect(stagingWorkflow).toContain(
       "Unable to prove the deployed change range; retaining the Museum E2E pack."
     );
@@ -496,12 +515,14 @@ describe("testing strategy CI plan", () => {
           name?: string;
           needs?: string | string[];
           strategy?: { matrix?: string };
+          "runs-on"?: string;
           steps?: Array<{ name?: string; if?: string }>;
         }
       >;
     };
     expect(parsed.jobs["app-checks"]).toMatchObject({
       if: "needs.plan.outputs.install_required == 'true'",
+      "runs-on": "${{ matrix.runner }}",
       strategy: {
         matrix: "${{ fromJSON(needs.plan.outputs.app_check_matrix) }}",
       },
@@ -520,6 +541,10 @@ describe("testing strategy CI plan", () => {
           name: "Run critical route-shell Playwright pack",
           if: "matrix.lane == 'playwright-critical-shell'",
         }),
+        expect.objectContaining({
+          name: "Run Network Museum Playwright packs",
+          if: "matrix.lane == 'playwright-museum'",
+        }),
       ])
     );
     expect(parsed.jobs["installed-checks"]).toMatchObject({
@@ -530,6 +555,25 @@ describe("testing strategy CI plan", () => {
     expect(workflow).toContain(
       'write("app_check_matrix", JSON.stringify({ include: appCheckLanes }))'
     );
+    expect(workflow).toContain("BUILD_CI_RUNNER");
+    expect(workflow).toContain("Restore Playwright browser");
+    expect(workflow).toContain("node22-pr-production-nextjs");
+  });
+
+  it("keeps full-history CI checkouts blobless", () => {
+    const appPrCi = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/app-pr-ci.yml"),
+      "utf8"
+    );
+    const pushSecretScan = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/push-secret-scan.yml"),
+      "utf8"
+    );
+
+    expect(appPrCi.match(/filter: blob:none/gu)).toHaveLength(2);
+    expect(appPrCi.match(/fetch-depth: 0/gu)).toHaveLength(2);
+    expect(pushSecretScan).toContain("filter: blob:none");
+    expect(pushSecretScan).toContain("fetch-depth: 0");
   });
 });
 

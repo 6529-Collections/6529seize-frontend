@@ -237,10 +237,16 @@ prune_release_cache
 install -d -o "$RUN_AS" -g "$RUN_AS" "$release_dir"
 artifact_tmp="$(mktemp "$release_dir/package.XXXXXX.zip")"
 staging_app=""
+destinations_file=""
+retain_destinations_file=false
 cleanup() {
+  unset review_destinations PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64
   rm -f "$artifact_tmp"
   if [[ -n "$staging_app" && -d "$staging_app" ]]; then
     rm -rf -- "$staging_app"
+  fi
+  if [[ "$retain_destinations_file" != true && -n "$destinations_file" ]]; then
+    rm -f -- "$destinations_file"
   fi
 }
 trap cleanup EXIT HUP INT TERM
@@ -280,6 +286,7 @@ printf '%s\n' "$review_destinations" \
   > "$destinations_file"
 chown "$RUN_AS:$RUN_AS" "$destinations_file"
 unset review_destinations PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64
+retain_destinations_file=true
 
 ln -sfn "$release_app" "$current_link"
 cat > "$release_root/ecosystem.config.cjs" <<'PM2_CONFIG'

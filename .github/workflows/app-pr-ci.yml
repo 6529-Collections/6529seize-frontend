@@ -29,6 +29,7 @@ jobs:
       build_required: ${{ steps.plan_outputs.outputs.build_required }}
       playwright_smoke_required: ${{ steps.plan_outputs.outputs.playwright_smoke_required }}
       playwright_critical_shell_required: ${{ steps.plan_outputs.outputs.playwright_critical_shell_required }}
+      playwright_museum_required: ${{ steps.plan_outputs.outputs.playwright_museum_required }}
       deadcode_required: ${{ steps.plan_outputs.outputs.deadcode_required }}
       release_bus_contract_required: ${{ steps.plan_outputs.outputs.release_bus_contract_required }}
       dependency_governance_required: ${{ steps.plan_outputs.outputs.dependency_governance_required }}
@@ -40,6 +41,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
+          # Preserve complete history for the risk plan without transferring
+          # blobs that are reachable only from unrelated refs.
+          filter: blob:none
           fetch-depth: 0
           persist-credentials: false
 
@@ -81,6 +85,9 @@ jobs:
 
       - name: Publish CI plan outputs
         id: plan_outputs
+        env:
+          DEFAULT_CI_RUNNER: ${{ vars.CI_LINUX_RUNNER || 'ubuntu-latest' }}
+          BUILD_CI_RUNNER: ${{ vars.CI_BUILD_RUNNER || vars.CI_LINUX_RUNNER || 'ubuntu-latest' }}
         run: |
           set -euo pipefail
 
@@ -91,23 +98,39 @@ jobs:
           const write = (key, value) => {
             fs.appendFileSync(output, `${key}=${value}\n`);
           };
+          const runner = (value, label) => {
+            if (!/^[A-Za-z0-9._-]{1,100}$/.test(value || "")) {
+              throw new Error(`${label} is not a valid GitHub runner label.`);
+            }
+            return value;
+          };
+          const defaultRunner = runner(process.env.DEFAULT_CI_RUNNER, "DEFAULT_CI_RUNNER");
+          const buildRunner = runner(process.env.BUILD_CI_RUNNER, "BUILD_CI_RUNNER");
           write("risk_floor", plan.risk.computed_floor);
           for (const [name, check] of Object.entries(plan.checks)) {
             write(`${name}_required`, String(Boolean(check.required)));
           }
           const appCheckLanes = [
-            { lane: "quality", label: "Quality and contracts" },
+            { lane: "quality", label: "Quality and contracts", runner: defaultRunner },
           ];
           if (plan.checks.build.required) {
-            appCheckLanes.push({ lane: "build", label: "Production build" });
+            appCheckLanes.push({ lane: "build", label: "Production build", runner: buildRunner });
           }
           if (plan.checks.playwright_smoke.required) {
-            appCheckLanes.push({ lane: "playwright-smoke", label: "Playwright smoke" });
+            appCheckLanes.push({ lane: "playwright-smoke", label: "Playwright smoke", runner: defaultRunner });
           }
           if (plan.checks.playwright_critical_shell.required) {
             appCheckLanes.push({
               lane: "playwright-critical-shell",
               label: "Playwright critical shell",
+              runner: defaultRunner,
+            });
+          }
+          if (plan.checks.playwright_museum.required) {
+            appCheckLanes.push({
+              lane: "playwright-museum",
+              label: "Network Museum",
+              runner: defaultRunner,
             });
           }
           write("app_check_matrix", JSON.stringify({ include: appCheckLanes }));
@@ -172,7 +195,7 @@ jobs:
     name: App check / ${{ matrix.label }}
     needs: plan
     if: needs.plan.outputs.install_required == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     permissions:
       contents: read
@@ -200,6 +223,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
+          # The reviewed tree is materialized during checkout; historical
+          # blobs from unrelated refs are not needed by the installed gates.
+          filter: blob:none
           fetch-depth: 0
           persist-credentials: false
 
@@ -285,6 +311,8 @@ jobs:
             __tests__/scripts/e2e-packs.test.ts \
             __tests__/scripts/manual-deploy-routing-guard.test.ts \
             __tests__/scripts/package-public-review-artifacts.test.ts \
+            __tests__/scripts/production-build-artifact.test.ts \
+            __tests__/scripts/production-e2e-dispatch.test.ts \
             __tests__/scripts/public-review-artifact-workflows.test.ts \
             __tests__/scripts/release-bus-artifact-compatibility.test.ts \
             __tests__/scripts/release-bus-performance-contract.test.ts \
@@ -430,10 +458,10 @@ jobs:
         uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: ${{ github.workspace }}/.next/cache
-          key: ${{ runner.os }}-node22-nextjs-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'next.config.ts', 'tsconfig*.json', 'postcss.config.*', 'tailwind.config.*') }}-${{ github.event.pull_request.head.sha }}
+          key: ${{ runner.os }}-node22-pr-production-nextjs-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'next.config.ts', 'tsconfig*.json', 'postcss.config.*', 'tailwind.config.*') }}-${{ github.event.pull_request.head.sha }}
           restore-keys: |
-            ${{ runner.os }}-node22-nextjs-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'next.config.ts', 'tsconfig*.json', 'postcss.config.*', 'tailwind.config.*') }}-
-            ${{ runner.os }}-node22-nextjs-
+            ${{ runner.os }}-node22-pr-production-nextjs-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'next.config.ts', 'tsconfig*.json', 'postcss.config.*', 'tailwind.config.*') }}-
+            ${{ runner.os }}-node22-pr-production-nextjs-
 
       - name: Build production profile
         if: matrix.lane == 'build'
@@ -533,9 +561,42 @@ jobs:
           path: ${{ github.workspace }}/.next/cache
           key: ${{ steps.nextjs_build_cache.outputs.cache-primary-key }}
 
+      - name: Restore Playwright browser
+        if: startsWith(matrix.lane, 'playwright-')
+        id: playwright_browser_cache
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-node22-playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
+
       - name: Install Playwright browser
         if: startsWith(matrix.lane, 'playwright-')
-        run: ./bin/6529 exec playwright install --with-deps chromium
+        env:
+          PLAYWRIGHT_CACHE_HIT: ${{ steps.playwright_browser_cache.outputs.cache-hit }}
+        run: |
+          if [ "$PLAYWRIGHT_CACHE_HIT" = true ]; then
+            ./bin/6529 exec playwright install-deps chromium
+          else
+            ./bin/6529 exec playwright install --with-deps chromium
+          fi
+
+      - name: Resolve exact Museum publication for Playwright
+        id: museum_publication
+        if: matrix.lane == 'playwright-museum'
+        run: |
+          set -euo pipefail
+          mapfile -t museum_refs < <(
+            git ls-remote --refs \
+              https://github.com/6529-Collections/6529networkmuseum.git \
+              refs/heads/main
+          )
+          test "${#museum_refs[@]}" -eq 1
+          read -r museum_commit museum_ref extra <<< "${museum_refs[0]}"
+          test -z "${extra:-}"
+          test "$museum_ref" = "refs/heads/main"
+          [[ "$museum_commit" =~ ^[a-f0-9]{40}$ ]]
+          echo "commit=$museum_commit" >> "$GITHUB_OUTPUT"
+          echo "Museum Playwright source: $museum_commit"
 
       - name: Run small Playwright smoke pack
         if: matrix.lane == 'playwright-smoke'
@@ -550,6 +611,16 @@ jobs:
           NEXT_DEV_DIST_DIR: ".next-playwright-critical-shell"
           PLAYWRIGHT_READONLY: "1"
         run: ./bin/6529 run test:e2e:critical-shell
+
+      - name: Run Network Museum Playwright packs
+        if: matrix.lane == 'playwright-museum'
+        env:
+          NEXT_DEV_DIST_DIR: ".next-playwright-museum"
+          PLAYWRIGHT_READONLY: "1"
+          MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.commit }}
+        run: |
+          ./bin/6529 run test:e2e:museum-institutional-practice
+          ./bin/6529 run test:e2e:museum-inside-system
 
       - name: Upload app check artifacts
         if: always()

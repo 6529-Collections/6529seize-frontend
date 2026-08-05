@@ -731,7 +731,9 @@ describe("Release Bus artifact rollout compatibility", () => {
       const evidence = findStep(
         workflow,
         environment === "staging" ? "staging-packs" : "readonly",
-        "Validate exact manifest-bound E2E evidence"
+        environment === "staging"
+          ? "Validate exact manifest-bound E2E evidence"
+          : "Validate exact production E2E evidence"
       );
       const root = fs.mkdtempSync(
         path.join(os.tmpdir(), `release-bus-${environment}-runner-`)
@@ -755,10 +757,7 @@ describe("Release Bus artifact rollout compatibility", () => {
         ).toBe(0);
         const currentArgs = fs.readFileSync(invocation, "utf8").split("\n");
         expect(currentArgs).toEqual(
-          expect.arrayContaining([
-            "--parallel",
-            environment === "staging" ? "4" : "3",
-          ])
+          expect.arrayContaining(["--parallel", "3"])
         );
         expect(currentArgs).toEqual(
           expect.arrayContaining(["--trigger", "post-deploy"])

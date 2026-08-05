@@ -75,6 +75,7 @@ const READONLY_SPECS = {
   museumInstitutionalPractice: [
     "tests/museum/institutional-practice-readonly.spec.ts",
   ],
+  museumInsideSystem: ["tests/museum/inside-system-readonly.spec.ts"],
 };
 
 function localPack(scriptKey, description, specs, tweaks = {}) {
@@ -83,7 +84,7 @@ function localPack(scriptKey, description, specs, tweaks = {}) {
     description,
     safety: "local",
     environments: ["local"],
-    triggers: ["manual"],
+    triggers: ["pr-ci", "manual"],
     ...(specs ? { specs } : {}),
     ...tweaks,
     projects: tweaks.projects ?? [DESKTOP, MOBILE],
@@ -283,6 +284,15 @@ const PACKS = [
     ),
     triggers: ["manual"],
   },
+  {
+    ...localReadonlyPack(
+      "test:e2e:museum-inside-system",
+      "Network Museum Inside the System project and comparison sweep.",
+      READONLY_SPECS.museumInsideSystem,
+      { timeoutMinutes: 30 }
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
 
   sandboxPack(
     "test:e2e:composer-sandbox",
@@ -470,6 +480,13 @@ const PACKS = [
     "Staging Network Museum institutional-practice deployed route smoke.",
     READONLY_SPECS.museumInstitutionalPractice
   ),
+  stagingPack(
+    "museum-inside-system",
+    "museum-inside-system",
+    "Staging Network Museum Inside the System project and comparison sweep.",
+    READONLY_SPECS.museumInsideSystem,
+    { timeoutMinutes: 30 }
+  ),
 
   productionPack(
     "home-readonly",
@@ -536,6 +553,14 @@ const PACKS = [
     [DESKTOP, MOBILE]
   ),
   productionPack(
+    "museum-inside-system",
+    "Production Network Museum Inside the System project and comparison sweep.",
+    READONLY_SPECS.museumInsideSystem,
+    ["post-deploy", "manual"],
+    30,
+    [DESKTOP, MOBILE]
+  ),
+  productionPack(
     "readonly",
     "Combined production-safe release validation.",
     [
@@ -551,6 +576,7 @@ const PACKS = [
       ...READONLY_SPECS.profileDeepLinks,
       ...READONLY_SPECS.searchWaves,
       ...READONLY_SPECS.museumInstitutionalPractice,
+      ...READONLY_SPECS.museumInsideSystem,
     ],
     // The disjoint post-deploy packs above cover this exact spec union and may
     // run concurrently. Retain the aggregate only as an operator diagnostic.

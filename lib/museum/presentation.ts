@@ -46,6 +46,13 @@ export function isAdoptedGovernanceEffect(governanceEffect: string): boolean {
 }
 
 export function displayMuseumStatus(value: string): string {
+  if (value === "selection_complete_acquisition_and_accession_unverified") {
+    return "Selection complete; acquisition and accession unverified";
+  }
+  if (value === "selected_unminted") {
+    return "Selected; unminted";
+  }
+
   return value
     .replace(/[_-]+/gu, " ")
     .replace(/\b\w/gu, (letter) => letter.toLocaleUpperCase());
@@ -56,19 +63,21 @@ export function statusTone(
 ): "neutral" | "success" | "warning" | "danger" {
   const normalized = value.toLocaleLowerCase();
   if (
-    normalized.includes("complete") ||
-    normalized.includes("accepted") ||
-    normalized.includes("adopted")
-  ) {
-    return "success";
-  }
-  if (
+    normalized.includes("unverified") ||
     normalized.includes("progress") ||
     normalized.includes("selected") ||
     normalized.includes("pending") ||
     normalized.includes("conditional")
   ) {
     return "warning";
+  }
+  if (
+    normalized.includes("complete") ||
+    normalized.includes("accepted") ||
+    normalized.includes("adopted") ||
+    normalized.includes("accessioned")
+  ) {
+    return "success";
   }
   if (normalized.includes("rejected") || normalized.includes("invalid")) {
     return "danger";

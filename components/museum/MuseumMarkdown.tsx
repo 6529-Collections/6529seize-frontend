@@ -68,13 +68,42 @@ const INSTITUTIONAL_PRACTICE_PROFILE_ROUTE_BY_PATH = new Map([
   ],
   ["records/institutional-practice/profiles/v-and-a.md", "v-and-a"],
   ["records/institutional-practice/profiles/lacma.md", "lacma"],
+  ["records/institutional-practice/profiles/hek-basel.md", "hek-basel"],
+  ["records/institutional-practice/profiles/li-ma.md", "li-ma"],
+  ["records/institutional-practice/profiles/v2.md", "v2"],
+  ["records/institutional-practice/profiles/transmediale.md", "transmediale"],
+  ["records/institutional-practice/profiles/acmi.md", "acmi"],
+  ["records/institutional-practice/profiles/m-plus.md", "m-plus"],
+  [
+    "records/institutional-practice/profiles/nam-june-paik-art-center.md",
+    "nam-june-paik-art-center",
+  ],
+  ["records/institutional-practice/profiles/ntt-icc.md", "ntt-icc"],
+  [
+    "records/institutional-practice/profiles/centro-multimedia.md",
+    "centro-multimedia",
+  ],
+  [
+    "records/institutional-practice/profiles/laboratorio-arte-alameda.md",
+    "laboratorio-arte-alameda",
+  ],
+  ["records/institutional-practice/profiles/dia.md", "dia"],
+  [
+    "records/institutional-practice/profiles/walker-art-center.md",
+    "walker-art-center",
+  ],
+  ["records/institutional-practice/profiles/mca-chicago.md", "mca-chicago"],
 ]);
 const INSTITUTIONAL_PRACTICE_STUDY_PATH =
   "records/institutional-practice/a-field-of-practice.md";
 const INSTITUTIONAL_PRACTICE_SOURCE_REGISTER_PATH =
   "records/institutional-practice/source-register.md";
+const INSTITUTIONAL_PRACTICE_ADJACENT_PATH =
+  "records/institutional-practice/adjacent-chain-native-practice.md";
 const CURATORIAL_PUBLICATION_STANDARD_PATH =
   "docs/curatorial-publication-standard.md";
+const INSTITUTIONAL_SOURCE_INVENTORY_PATH =
+  "docs/institutional-source-inventory.json";
 
 function institutionalPracticeRoute(repositoryPath: string): string | null {
   if (repositoryPath === INSTITUTIONAL_PRACTICE_STUDY_PATH) {
@@ -82,6 +111,12 @@ function institutionalPracticeRoute(repositoryPath: string): string | null {
   }
   if (repositoryPath === INSTITUTIONAL_PRACTICE_SOURCE_REGISTER_PATH) {
     return `${INSTITUTIONAL_PRACTICE_ROUTE}/sources`;
+  }
+  if (repositoryPath === INSTITUTIONAL_PRACTICE_ADJACENT_PATH) {
+    return `${INSTITUTIONAL_PRACTICE_ROUTE}/adjacent-practice`;
+  }
+  if (repositoryPath === CURATORIAL_PUBLICATION_STANDARD_PATH) {
+    return "/museum/network/stories/scholarship-and-writing";
   }
   const profileSlug =
     INSTITUTIONAL_PRACTICE_PROFILE_ROUTE_BY_PATH.get(repositoryPath);
@@ -169,15 +204,21 @@ function resolveRepositoryPath(url: string, sourcePath: string): string | null {
     const withinInstitutionalPractice = sourcePath.startsWith(
       "records/institutional-practice/"
     );
-    const isInstitutionalStandard =
+    const isInstitutionalResearchDocument =
       withinInstitutionalPractice &&
-      normalizedPath === CURATORIAL_PUBLICATION_STANDARD_PATH;
+      (normalizedPath === CURATORIAL_PUBLICATION_STANDARD_PATH ||
+        normalizedPath === INSTITUTIONAL_SOURCE_INVENTORY_PATH);
+    const isStandardRelatedPath =
+      sourcePath === CURATORIAL_PUBLICATION_STANDARD_PATH &&
+      (normalizedPath.startsWith("records/institutional-practice/") ||
+        normalizedPath === "CONTRIBUTING.md");
     if (
       normalizedPath.length === 0 ||
       normalizedPath.includes("\\") ||
       normalizedPath.split("/").includes("..") ||
       (!normalizedPath.startsWith(sourceBoundary(sourcePath)) &&
-        !isInstitutionalStandard)
+        !isInstitutionalResearchDocument &&
+        !isStandardRelatedPath)
     ) {
       return null;
     }

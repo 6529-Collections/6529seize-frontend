@@ -10,6 +10,8 @@ type EffectivePlan = {
     test_typecheck: { required: boolean };
     playwright_smoke?: { required: boolean };
     playwright_critical_shell?: { required: boolean };
+    playwright_museum: { required: boolean };
+    install: { required: boolean };
   };
 };
 
@@ -81,6 +83,33 @@ describe("effective App PR CI plan", () => {
     "tests/packs.manifest.cjs",
   ])("requires Release Bus contracts for %s", (file) => {
     expect(executePlan([file]).checks.release_bus_contract.required).toBe(true);
+  });
+
+  it.each([
+    "app/museum/network/page.tsx",
+    "components/museum/MuseumShell.tsx",
+    "lib/museum/publication/load.ts",
+    "config/museumPublicationEnv.server.ts",
+    "tests/museum/institutional-practice-readonly.spec.ts",
+    "i18n/messages/museum.en-US.json",
+  ])("requires the isolated Museum browser lane for %s", (file) => {
+    const effective = executePlan([file]);
+
+    expect(effective.checks.playwright_museum.required).toBe(true);
+    expect(effective.checks.install.required).toBe(true);
+  });
+
+  it.each([
+    "app/about/page.tsx",
+    "components/header/AppHeader.tsx",
+    "tests/pages/about.spec.ts",
+    "ops/docs/developer/release.md",
+    "ops/docs/museum/release.md",
+    "ops/help/help-index.json",
+    "public/museum.png",
+    "README.md",
+  ])("does not run Museum browser coverage for unrelated change %s", (file) => {
+    expect(executePlan([file]).checks.playwright_museum.required).toBe(false);
   });
 
   it("requires dead-code analysis for dependency changes or deleted runtime source", () => {

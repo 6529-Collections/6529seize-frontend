@@ -106,8 +106,20 @@ describe("Museum page source projection", () => {
       "records/institutional-practice/profiles/met.md",
     ],
     [
+      "/museum/network/stories/a-field-of-practice/mca-chicago",
+      "records/institutional-practice/profiles/mca-chicago.md",
+    ],
+    [
+      "/museum/network/stories/a-field-of-practice/adjacent-practice",
+      "records/institutional-practice/adjacent-chain-native-practice.md",
+    ],
+    [
       "/museum/network/stories/a-field-of-practice/sources",
       "records/institutional-practice/source-register.md",
+    ],
+    [
+      "/museum/network/stories/scholarship-and-writing",
+      "docs/curatorial-publication-standard.md",
     ],
     ["/museum/network/methodology", "policies/donation-acceptance.md"],
   ])("maps %s to an admitted exact source", (pathname, expectedPath) => {
@@ -147,6 +159,30 @@ describe("Museum page source projection", () => {
     ]);
   });
 
+  it("grounds each Casey system study in its dossier and project essay", () => {
+    const catalog = buildMuseumPageSourceCatalog(publication);
+    const essayBySlug = {
+      century: "century.md",
+      "pre-process": "process-and-pre-process.md",
+      phototaxis: "microimage-and-phototaxis.md",
+      "923-empty-rooms": "atomism-and-923-empty-rooms.md",
+      "ex-nihilo-cosmos": "still-life-and-ex-nihilo.md",
+    } as const;
+    for (const [slug, essay] of Object.entries(essayBySlug)) {
+      const source = resolveMuseumPageSource(
+        `/museum/network/projects/${slug}/system`,
+        catalog
+      );
+      expect(source?.primaryPath).toBe(
+        `notes/research/generative-systems/casey-reas/${slug}.md`
+      );
+      expect(source?.relatedSources).toContainEqual({
+        path: `records/accessions/6529NM.2026.001/public/projects/${essay}`,
+        label: "projectEssay",
+      });
+    }
+  });
+
   it("names the institutional study's research apparatus precisely", () => {
     const catalog = buildMuseumPageSourceCatalog(publication);
 
@@ -180,6 +216,21 @@ describe("Museum page source projection", () => {
         label: "primarySourceRegister",
       },
     ]);
+    expect(
+      resolveMuseumPageSource(
+        "/museum/network/stories/scholarship-and-writing",
+        catalog
+      )?.relatedSources
+    ).toEqual([
+      {
+        path: "records/institutional-practice/a-field-of-practice.md",
+        label: "institutionalStudy",
+      },
+      {
+        path: "records/institutional-practice/source-register.md",
+        label: "primarySourceRegister",
+      },
+    ]);
   });
 
   it("covers every rendered static route and every current dynamic route", () => {
@@ -196,7 +247,9 @@ describe("Museum page source projection", () => {
       "/museum/network/stories",
       "/museum/network/stories/source-and-chronology",
       "/museum/network/stories/a-field-of-practice",
+      "/museum/network/stories/a-field-of-practice/adjacent-practice",
       "/museum/network/stories/a-field-of-practice/sources",
+      "/museum/network/stories/scholarship-and-writing",
     ];
     const dynamicRoutes = [
       ...publication.artists.map(
@@ -205,6 +258,10 @@ describe("Museum page source projection", () => {
       ...publication.projects.map(
         (project) =>
           `/museum/network/projects/${encodeURIComponent(project.slug)}`
+      ),
+      ...publication.projects.map(
+        (project) =>
+          `/museum/network/projects/${encodeURIComponent(project.slug)}/system`
       ),
       ...publication.institutionalPractice.profiles.map(
         (profile) =>

@@ -6,6 +6,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { resolveWaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { useWaveSubmissionButtonLabel } from "@/hooks/waves/useWaveMetadata";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useWave } from "@/hooks/useWave";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { AnimatePresence, motion } from "framer-motion";
@@ -288,6 +289,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   maxPrice,
   onPriceRangeChange,
 }) => {
+  const isLargeScreen = useMediaQuery("(min-width: 1024px)");
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { isMemesWave, isCurationWave, isQuorumWave, participation } =
     useWave(wave);
@@ -381,6 +383,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
       }),
     [measurements, showPriceActions]
   );
+  const sortMode = isLargeScreen ? "tabs" : "dropdown";
 
   const onTogglePriceFilters = () => {
     if (hasActivePriceFilters) {
@@ -443,7 +446,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             <WaveleaderboardSort
               sort={sort}
               onSortChange={onSortChange}
-              mode={layout.sortMode}
+              mode={sortMode}
               items={sortItems}
             />
           </div>

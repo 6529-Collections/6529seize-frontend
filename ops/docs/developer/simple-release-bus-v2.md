@@ -214,6 +214,28 @@ then the trusted decision client makes one authenticated lookup:
 - unavailable, stale, moved, expired, malformed, ambiguous or
   identity-mismatched evidence fails closed and cannot validate or adopt.
 
+The manual production fallback follows the same build-once principle. Every
+trusted `main` commit starts `production-build-artifact.yml`, which builds the
+production profile without AWS or deployment authority and publishes one
+30-day, exact-SHA artifact with a manifest, package digest, and checksums for
+every file. The production deploy waits briefly for that exact successful
+artifact, reads its originating workflow run back through GitHub, verifies the
+workflow path, event, branch, conclusion, source SHA, manifest contract,
+checksums, package digest, and size, and only then obtains AWS credentials. It
+does not install dependencies or rebuild the application. A missing, expired,
+foreign, unsuccessful, mismatched, or malformed artifact fails before
+production mutation.
+
+After a successful manual production fallback,
+`production-e2e-dispatch.yml` carries only the completed deploy run ID into
+`production-e2e.yml`. The E2E workflow independently reads that run back,
+requires the exact same-repository `main` deployment contract, checks out its
+deployed SHA, and runs the complete production-safe read-only inventory. Its
+evidence deliberately has no Release Bus manifest binding. Release Bus
+production operations continue to use their authenticated manifest-bound
+inputs and report through the existing operation identity; the two identities
+cannot be mixed.
+
 The last exact required frontend/backend deployment event revalidates the state
 version, refs, runtimes, candidate membership, OFF controls, drain and staging
 lock. Only then does one transaction create the real

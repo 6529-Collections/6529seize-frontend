@@ -45,12 +45,12 @@
     "consumes_preflight_artifact": true
   },
   "e2e": {
-    "staging_parallelism": 4,
+    "staging_parallelism": 3,
     "production_parallelism": 3,
     "parallel_safety": "readonly",
     "post_deploy_packs": {
-      "staging": 13,
-      "production": 12,
+      "staging": 14,
+      "production": 13,
       "duplicate_spec_entries": 0
     },
     "staging_concurrency_group": "staging-e2e",

@@ -6,6 +6,7 @@ import { MuseumDossierDocument } from "./MuseumDossierDocument";
 import { MuseumMarkdown } from "./MuseumMarkdown";
 import { MuseumPublicationUnavailable } from "./MuseumPublicationUnavailable";
 import { MuseumSourceMatrixLink } from "./MuseumSourceMatrixLink";
+import { MuseumInsideSystemDirectory } from "./MuseumInsideSystem";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -18,6 +19,7 @@ import {
   hasCompleteCaseyPublicationDossier,
 } from "@/lib/museum/casey";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
+import { CASEY_GENERATIVE_STUDIES } from "@/lib/museum/generative-studies";
 
 export function getMuseumGiftMetadata(accessionId: string): Metadata {
   return getAppMetadata({
@@ -134,6 +136,29 @@ export async function MuseumGiftPage({
               sizes="(min-width: 1280px) 30vw, (min-width: 640px) 50vw, 100vw"
             />
           ))}
+        </div>
+      </section>
+
+      <section
+        className="tw-mt-16 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
+        aria-labelledby="gift-systems-title"
+      >
+        <div className="tw-max-w-4xl">
+          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
+            {t(DEFAULT_LOCALE, "museum.network.insideSystem.eyebrow")}
+          </p>
+          <h2
+            id="gift-systems-title"
+            className="tw-m-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50"
+          >
+            {t(DEFAULT_LOCALE, "museum.network.insideSystem.giftTitle")}
+          </h2>
+          <p className="tw-m-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">
+            {t(DEFAULT_LOCALE, "museum.network.insideSystem.giftDescription")}
+          </p>
+        </div>
+        <div className="tw-mt-8">
+          <MuseumInsideSystemDirectory studies={CASEY_GENERATIVE_STUDIES} />
         </div>
       </section>
 

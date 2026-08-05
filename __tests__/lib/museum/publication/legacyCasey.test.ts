@@ -28,7 +28,7 @@ describe("legacy Casey publication projection", () => {
       }),
     ]);
     expect(publication.projects).toHaveLength(5);
-    expect(publication.documents).toHaveLength(42);
+    expect(publication.documents).toHaveLength(57);
     expect(publication.institutionalPractice).toEqual(
       expect.objectContaining({
         id: "institutional-practice:a-field-of-practice",
@@ -50,6 +50,13 @@ describe("legacy Casey publication projection", () => {
         ]),
         sourceRegister: expect.objectContaining({
           title: "Source register: A field of practice",
+        }),
+        adjacentPractice: expect.objectContaining({
+          title:
+            "Adjacent practice: platforms, archives, festivals, and chain-native systems",
+        }),
+        editorialStandard: expect.objectContaining({
+          title: "Writing the 6529 Network Museum",
         }),
       })
     );

@@ -75,7 +75,9 @@ describe("Release Bus frontend performance contract", () => {
     expect(appPrCi).toContain("playwright install --with-deps chromium");
     expect(appPrCi).toContain("test:e2e:smoke");
     expect(appPrCi).toContain("test:e2e:critical-shell");
-    expect(appPrCi).not.toContain("test:e2e:museum-institutional-practice");
+    expect(appPrCi).toContain("test:e2e:museum-institutional-practice");
+    expect(appPrCi).toContain("matrix.lane == 'playwright-museum'");
+    expect(appPrCi).toContain("Restore Playwright browser");
     if (appPrCi.includes("exact-merge-tree-pr-ci-v1")) {
       expect(appPrCi).toContain(
         "sha256sum ./manifest.json ./policy-bundle.txt > SHA256SUMS"
@@ -104,6 +106,13 @@ describe("Release Bus frontend performance contract", () => {
     const packageJson = JSON.parse(read("package.json"));
     expect(packageJson.scripts["lint:changed"]).toContain('"*.cjs"');
     expect(packageJson.scripts["lint:changed"]).toContain('"*.mjs"');
+    expect(packageJson.scripts["format:changed"]).toContain(
+      "git merge-base origin/main HEAD"
+    );
+    expect(packageJson.scripts["format:changed"]).toContain(
+      'git diff --name-only -z --diff-filter=ACMR "$FORMAT_DIFF_COMMIT"'
+    );
+    expect(packageJson.scripts["format:changed"]).not.toContain("main...HEAD");
   });
 
   it("pins the build and E2E runtime to an exact Node patch", () => {
@@ -111,6 +120,7 @@ describe("Release Bus frontend performance contract", () => {
       ".github/workflows/release-bus-v2-preflight.yml",
       ".github/workflows/staging-e2e.yml",
       ".github/workflows/production-e2e.yml",
+      ".github/workflows/production-build-artifact.yml",
     ]) {
       const source = read(workflowPath);
       expect(source).toContain('node-version: "22.17.1"');
@@ -460,6 +470,10 @@ describe("Release Bus frontend performance contract", () => {
     expect(productionSource).toContain(
       "exec node scripts/e2e-packs.cjs --capabilities"
     );
+    expect(stagingSource).toContain("args+=(--retry-failed-packs 1)");
+    expect(productionSource).toContain("args+=(--retry-failed-packs 1)");
+    expect(stagingSource).toContain("serial_failed_pack_retry");
+    expect(productionSource).toContain("serial_failed_pack_retry");
     expect(stagingSource).toContain(
       '.contract == "release-bus-e2e-runner-capabilities.v1"'
     );
@@ -487,13 +501,21 @@ describe("Release Bus frontend performance contract", () => {
       expect(packs).toHaveLength(contract.e2e.post_deploy_packs[environment]);
     }
     expect(contract.e2e.post_deploy_packs.duplicate_spec_entries).toBe(0);
+    expect(stagingSource).toContain(
+      "Validate exact manifest-bound E2E evidence"
+    );
+    expect(productionSource).toContain(
+      "Validate exact production E2E evidence"
+    );
     for (const source of [stagingSource, productionSource]) {
-      expect(source).toContain("Validate exact manifest-bound E2E evidence");
       expect(source).toContain('.schema_version == "release-bus-e2e-packs.v1"');
       expect(source).toContain(
         "(.results | map(.script_key) | unique | length) == .pack_count"
       );
       expect(source).toContain('(.results | all(.safety == "readonly"))');
+      expect(source).toContain("SERIAL_FAILED_PACK_RETRY");
+      expect(source).toContain(".attempt_count == (.attempts | length)");
+      expect(source).toContain(".status == .attempts[-1].status");
       expect(source).toContain(
         '.results | all(.status == "passed" and .failure_class == null)'
       );

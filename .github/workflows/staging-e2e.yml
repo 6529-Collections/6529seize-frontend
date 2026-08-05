@@ -23,6 +23,7 @@ on:
           - media-readonly
           - network-open-data-readonly
           - museum-institutional-practice
+          - museum-inside-system
       release_train_id:
         description: Release Bus train id
         type: string
@@ -298,20 +299,37 @@ jobs:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
 
+      - name: Check out immutable Release Bus tooling
+        # This sparse helper is trusted orchestration from the dispatch ref.
+        # The application, tests, pack manifest, and dependency lock remain in
+        # the workspace checkout above at the exact deployed SHA.
+        timeout-minutes: 2
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.sha }}
+          path: .release-bus-control
+          filter: blob:none
+          fetch-depth: 1
+          persist-credentials: false
+          sparse-checkout: |
+            scripts/release-bus-install-dependencies.cjs
+          sparse-checkout-cone-mode: false
+
       - name: Stage immutable Release Bus E2E tooling
         env:
           WORKFLOW_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
           [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
-          git cat-file -e "$WORKFLOW_SHA^{commit}" 2>/dev/null || \
-            git fetch --no-tags origin "$WORKFLOW_SHA"
+          control_root="$GITHUB_WORKSPACE/.release-bus-control"
+          test "$(git -C "$control_root" rev-parse HEAD)" = "$WORKFLOW_SHA"
           tooling="$RUNNER_TEMP/release-bus-tooling/scripts"
           mkdir -p "$tooling" "$RUNNER_TEMP/release-bus-evidence"
           for file in \
             scripts/release-bus-install-dependencies.cjs
           do
-            git show "$WORKFLOW_SHA:$file" > "$RUNNER_TEMP/release-bus-tooling/$file"
+            test -f "$control_root/$file"
+            install -m 0644 "$control_root/$file" "$RUNNER_TEMP/release-bus-tooling/$file"
           done
           {
             echo "RELEASE_BUS_INSTALL_TOOL=$tooling/release-bus-install-dependencies.cjs"
@@ -338,21 +356,13 @@ jobs:
           set -euo pipefail
           museum_required=true
           if [ "$SELECTED_PACK" = all ] && [ -n "$DEPLOYED_SHA" ]; then
-            changed_files="$(mktemp)"
-            trap 'rm -f "$changed_files"' EXIT
-            if base_sha="$(git rev-parse "${DEPLOYED_SHA}^1" 2>/dev/null)" &&
-              git diff --no-renames --name-only -z \
-                "$base_sha" "$DEPLOYED_SHA" -- > "$changed_files"
-            then
-              museum_required=false
-              while IFS= read -r -d '' file; do
-                case "$file" in
-                  app/museum/*|components/museum/*|lib/museum/*|i18n/messages/museum.*|public/museum*|tests/museum/*)
-                    museum_required=true
-                    break
-                    ;;
-                esac
-              done < "$changed_files"
+            if base_sha="$(git rev-parse "${DEPLOYED_SHA}^1" 2>/dev/null)"; then
+              candidate="$(node scripts/museum-e2e-change-set.cjs \
+                --base "$base_sha" --head "$DEPLOYED_SHA")"
+              case "$candidate" in
+                true|false) museum_required="$candidate" ;;
+                *) echo "::warning::Museum classifier returned an invalid value; retaining Museum E2E." ;;
+              esac
             else
               echo "::warning::Unable to prove the deployed change range; retaining the Museum E2E pack."
             fi
@@ -436,7 +446,7 @@ jobs:
               }
             ' <<< "$runner_capabilities" >/dev/null
           then
-            args+=(--parallel 4)
+            args+=(--parallel 3)
           fi
           if [ -n "${runner_capabilities:-}" ] &&
             jq -e '
@@ -445,6 +455,20 @@ jobs:
             ' <<< "$runner_capabilities" >/dev/null
           then
             pack_exclusion_supported=true
+          fi
+          if [ -n "${runner_capabilities:-}" ] &&
+            jq -e '
+              .contract == "release-bus-e2e-runner-capabilities.v1" and
+              .features.serial_failed_pack_retry == {
+                version: 1,
+                max_retries: 1
+              }
+            ' <<< "$runner_capabilities" >/dev/null
+          then
+            args+=(--retry-failed-packs 1)
+            echo "SERIAL_FAILED_PACK_RETRY=true" >> "$GITHUB_ENV"
+          else
+            echo "SERIAL_FAILED_PACK_RETRY=false" >> "$GITHUB_ENV"
           fi
           if [ "${SELECTED_PACK:-all}" != all ]; then
             args+=(--pack "$SELECTED_PACK")
@@ -484,15 +508,30 @@ jobs:
           process.stdout.write(JSON.stringify(keys));
           NODE
           )"
-          jq -e --argjson expected "$expected_inventory" '
+          jq -e --argjson expected "$expected_inventory" --argjson retry "$SERIAL_FAILED_PACK_RETRY" '
             .schema_version == "release-bus-e2e-packs.v1" and
             .environment == "staging" and
             .trigger == "post-deploy" and
-            (.worker_count | type == "number" and . >= 1 and . <= 4) and
+            (.worker_count | type == "number" and . >= 1 and . <= 3) and
             .pack_count == ($expected | length) and
             (.results | map(.script_key)) == $expected and
             (.results | map(.script_key) | unique | length) == .pack_count and
             (.results | all(.safety == "readonly")) and
+            (if $retry then
+              .serial_retry_limit == 1 and
+              (.results | all(
+                .attempt_count == (.attempts | length) and
+                .attempt_count >= 1 and .attempt_count <= 2 and
+                (.attempts | to_entries | all(.value.attempt == (.key + 1))) and
+                .status == .attempts[-1].status and
+                .failure_class == .attempts[-1].failure_class and
+                .detail == .attempts[-1].detail and
+                .artifact_path == .attempts[-1].artifact_path and
+                .duration_ms == ([.attempts[].duration_ms] | add)
+              ))
+            else
+              (.serial_retry_limit // 0) == 0
+            end) and
             .failed_count == ([.results[] | select(.status == "failed")] | length) and
             .infrastructure_failure_count == ([.results[] | select(.failure_class == "infrastructure")] | length)
           ' staging-e2e-artifacts/evidence.json >/dev/null

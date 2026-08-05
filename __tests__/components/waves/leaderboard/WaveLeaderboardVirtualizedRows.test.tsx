@@ -319,6 +319,107 @@ describe("WaveLeaderboardVirtualizedRows", () => {
     getBoundingClientRectSpy.mockRestore();
   });
 
+  it("measures loaded multi-column gallery rows at their natural height", () => {
+    const getBoundingClientRectSpy = jest
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockReturnValue({
+        x: 0,
+        y: 0,
+        top: 0,
+        left: 0,
+        bottom: 100,
+        right: 600,
+        width: 600,
+        height: 100,
+        toJSON: () => ({}),
+      } as DOMRect);
+
+    function Harness() {
+      const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+      return (
+        <div ref={scrollContainerRef}>
+          <WaveLeaderboardVirtualizedRows
+            items={["drop-1", "drop-2", "drop-3", "drop-4"]}
+            getItemId={(item) => item}
+            leadingItemCount={0}
+            windowKey="wave-1:gallery"
+            layout="gallery"
+            scrollContainerRef={scrollContainerRef}
+            renderItem={(item) => <div>{item}</div>}
+            fetchNextPage={jest.fn().mockResolvedValue(undefined)}
+            fetchPreviousPage={jest.fn().mockResolvedValue(undefined)}
+            hasNextPage={false}
+            hasPreviousPage={false}
+            isFetchingNextPage={false}
+            isFetchingPreviousPage={false}
+            isFetchNextPageError={false}
+            isFetchPreviousPageError={false}
+          />
+        </div>
+      );
+    }
+
+    const { container } = render(<Harness />);
+    const firstRow = container.querySelector<HTMLElement>("[data-index='0']");
+
+    expect(firstRow).not.toBeNull();
+    expect(firstRow?.className).toContain("tw-grid-cols-2");
+    expect(firstRow?.style.minHeight).toBe("");
+    expect(mockMeasureElement).toHaveBeenCalled();
+
+    getBoundingClientRectSpy.mockRestore();
+  });
+
+  it("keeps estimated height for unloaded gallery placeholders", () => {
+    const getBoundingClientRectSpy = jest
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockReturnValue({
+        x: 0,
+        y: 0,
+        top: 0,
+        left: 0,
+        bottom: 100,
+        right: 600,
+        width: 600,
+        height: 100,
+        toJSON: () => ({}),
+      } as DOMRect);
+
+    function Harness() {
+      const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+      return (
+        <div ref={scrollContainerRef}>
+          <WaveLeaderboardVirtualizedRows
+            items={["drop-1", "drop-2"]}
+            getItemId={(item) => item}
+            leadingItemCount={2}
+            windowKey="wave-1:gallery"
+            layout="gallery"
+            scrollContainerRef={scrollContainerRef}
+            renderItem={(item) => <div>{item}</div>}
+            fetchNextPage={jest.fn().mockResolvedValue(undefined)}
+            fetchPreviousPage={jest.fn().mockResolvedValue(undefined)}
+            hasNextPage={false}
+            hasPreviousPage={true}
+            isFetchingNextPage={false}
+            isFetchingPreviousPage={false}
+            isFetchNextPageError={false}
+            isFetchPreviousPageError={false}
+          />
+        </div>
+      );
+    }
+
+    const { container } = render(<Harness />);
+    const firstRow = container.querySelector<HTMLElement>("[data-index='0']");
+
+    expect(firstRow).not.toBeNull();
+    expect(firstRow?.className).toContain("tw-grid-cols-2");
+    expect(firstRow?.style.minHeight).toBe("100px");
+
+    getBoundingClientRectSpy.mockRestore();
+  });
+
   it("prefetches each newly available previous page", () => {
     const fetchPreviousPage = jest.fn().mockResolvedValue(undefined);
 

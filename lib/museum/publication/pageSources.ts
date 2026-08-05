@@ -1,5 +1,6 @@
 import { assertGovernedMuseumPath } from "./security";
 import type {
+  MuseumInstitutionalPractice,
   MuseumPublication,
   MuseumPublicDocument,
   MuseumPublicDocumentKind,
@@ -15,12 +16,25 @@ const KEYS_AND_GATES_SELECTION_PATH =
   "records/programs/6529NM-AP-01/selected-works.json";
 const DONATION_POLICY_PATH = "policies/donation-acceptance.md";
 const INSTITUTIONAL_PRACTICE_ROUTE = `${MUSEUM_ROOT}/stories/a-field-of-practice`;
+const INSTITUTIONAL_PRACTICE_ADJACENT_ROUTE = `${INSTITUTIONAL_PRACTICE_ROUTE}/adjacent-practice`;
+const SCHOLARSHIP_EDITORIAL_STANDARD_ROUTE = `${MUSEUM_ROOT}/stories/scholarship-and-writing`;
 const INSTITUTIONAL_PRACTICE_STUDY_PATH =
   "records/institutional-practice/a-field-of-practice.md";
+const INSTITUTIONAL_PRACTICE_ADJACENT_PATH =
+  "records/institutional-practice/adjacent-chain-native-practice.md";
 const INSTITUTIONAL_PRACTICE_SOURCE_REGISTER_PATH =
   "records/institutional-practice/source-register.md";
 const CURATORIAL_PUBLICATION_STANDARD_PATH =
   "docs/curatorial-publication-standard.md";
+const CASEY_GENERATIVE_DOSSIER_ROOT =
+  "notes/research/generative-systems/casey-reas";
+const CASEY_GENERATIVE_DOSSIER_SLUGS = new Set([
+  "century",
+  "pre-process",
+  "phototaxis",
+  "923-empty-rooms",
+  "ex-nihilo-cosmos",
+]);
 const INSTITUTIONAL_PRACTICE_PROFILE_SLUGS = [
   "met",
   "getty",
@@ -36,6 +50,19 @@ const INSTITUTIONAL_PRACTICE_PROFILE_SLUGS = [
   "serpentine-arts-technologies",
   "v-and-a",
   "lacma",
+  "hek-basel",
+  "li-ma",
+  "v2",
+  "transmediale",
+  "acmi",
+  "m-plus",
+  "nam-june-paik-art-center",
+  "ntt-icc",
+  "centro-multimedia",
+  "laboratorio-arte-alameda",
+  "dia",
+  "walker-art-center",
+  "mca-chicago",
 ] as const;
 
 const GOVERNANCE_DECISION_IDS = [
@@ -70,6 +97,7 @@ export type MuseumRelatedPageSourceLabel =
   | "institutionalStudy"
   | "onchainTransition"
   | "primarySourceRegister"
+  | "projectEssay"
   | "programRecord"
   | "scholarshipStandard"
   | "selectedWorks"
@@ -172,6 +200,53 @@ function admittedRelatedSources(
   }, []);
 }
 
+function addMuseumPageSource(
+  routes: Map<string, MuseumPageSourceProjection>,
+  admittedPaths: ReadonlySet<string>,
+  pathname: string,
+  primaryCandidate: string | null | undefined,
+  relatedCandidates: readonly MuseumRelatedPageSourceCandidate[] = []
+): void {
+  const normalized = normalizedMuseumPathname(pathname);
+  const primaryPath = admittedPath(admittedPaths, primaryCandidate);
+  if (normalized === null || primaryPath === null || routes.has(normalized)) {
+    return;
+  }
+  routes.set(normalized, {
+    primaryPath,
+    relatedSources: admittedRelatedSources(
+      admittedPaths,
+      primaryPath,
+      relatedCandidates
+    ),
+  });
+}
+
+function hasCompleteInstitutionalPractice(
+  practice: MuseumInstitutionalPractice | undefined
+): practice is MuseumInstitutionalPractice {
+  if (practice === undefined) return false;
+  const sourcePathsMatch =
+    practice.introduction.sourcePath === INSTITUTIONAL_PRACTICE_STUDY_PATH &&
+    practice.adjacentPractice.sourcePath ===
+      INSTITUTIONAL_PRACTICE_ADJACENT_PATH &&
+    practice.editorialStandard.sourcePath ===
+      CURATORIAL_PUBLICATION_STANDARD_PATH &&
+    practice.sourceRegister.sourcePath ===
+      INSTITUTIONAL_PRACTICE_SOURCE_REGISTER_PATH;
+  const profileCountMatches =
+    practice.profiles.length === INSTITUTIONAL_PRACTICE_PROFILE_SLUGS.length;
+  const profilesMatch = practice.profiles.every(
+    (profile, index) =>
+      profile.slug === INSTITUTIONAL_PRACTICE_PROFILE_SLUGS[index] &&
+      profile.id === `institutional-practice:${profile.slug}` &&
+      profile.document.id === profile.id &&
+      profile.document.sourcePath ===
+        `records/institutional-practice/profiles/${profile.slug}.md`
+  );
+  return sourcePathsMatch && profileCountMatches && profilesMatch;
+}
+
 export function buildMuseumPageSourceCatalog(
   publication: MuseumPublication
 ): MuseumPageSourceCatalog {
@@ -182,19 +257,14 @@ export function buildMuseumPageSourceCatalog(
     pathname: string,
     primaryCandidate: string | null | undefined,
     relatedCandidates: readonly MuseumRelatedPageSourceCandidate[] = []
-  ) => {
-    const normalized = normalizedMuseumPathname(pathname);
-    const primaryPath = admittedPath(admittedPaths, primaryCandidate);
-    if (normalized === null || primaryPath === null || routes.has(normalized)) {
-      return;
-    }
-    const relatedSources = admittedRelatedSources(
+  ) =>
+    addMuseumPageSource(
+      routes,
       admittedPaths,
-      primaryPath,
+      pathname,
+      primaryCandidate,
       relatedCandidates
     );
-    routes.set(normalized, { primaryPath, relatedSources });
-  };
 
   const openMuseum = firstDocument(publication, "open_museum_statement");
   const transition = firstDocument(publication, "onchain_transition");
@@ -218,22 +288,7 @@ export function buildMuseumPageSourceCatalog(
   add(`${MUSEUM_ROOT}/stories/source-and-chronology`, sourceMatrix?.sourcePath);
   const institutionalPractice = (publication as Partial<MuseumPublication>)
     .institutionalPractice;
-  if (
-    institutionalPractice?.introduction.sourcePath ===
-      INSTITUTIONAL_PRACTICE_STUDY_PATH &&
-    institutionalPractice.sourceRegister.sourcePath ===
-      INSTITUTIONAL_PRACTICE_SOURCE_REGISTER_PATH &&
-    institutionalPractice.profiles.length ===
-      INSTITUTIONAL_PRACTICE_PROFILE_SLUGS.length &&
-    institutionalPractice.profiles.every(
-      (profile, index) =>
-        profile.slug === INSTITUTIONAL_PRACTICE_PROFILE_SLUGS[index] &&
-        profile.id === `institutional-practice:${profile.slug}` &&
-        profile.document.id === profile.id &&
-        profile.document.sourcePath ===
-          `records/institutional-practice/profiles/${profile.slug}.md`
-    )
-  ) {
+  if (hasCompleteInstitutionalPractice(institutionalPractice)) {
     add(
       INSTITUTIONAL_PRACTICE_ROUTE,
       institutionalPractice.introduction.sourcePath,
@@ -259,6 +314,34 @@ export function buildMuseumPageSourceCatalog(
         {
           path: CURATORIAL_PUBLICATION_STANDARD_PATH,
           label: "scholarshipStandard",
+        },
+      ]
+    );
+    add(
+      INSTITUTIONAL_PRACTICE_ADJACENT_ROUTE,
+      institutionalPractice.adjacentPractice.sourcePath,
+      [
+        {
+          path: institutionalPractice.introduction.sourcePath,
+          label: "institutionalStudy",
+        },
+        {
+          path: institutionalPractice.sourceRegister.sourcePath,
+          label: "primarySourceRegister",
+        },
+      ]
+    );
+    add(
+      SCHOLARSHIP_EDITORIAL_STANDARD_ROUTE,
+      institutionalPractice.editorialStandard.sourcePath,
+      [
+        {
+          path: institutionalPractice.introduction.sourcePath,
+          label: "institutionalStudy",
+        },
+        {
+          path: institutionalPractice.sourceRegister.sourcePath,
+          label: "primarySourceRegister",
         },
       ]
     );
@@ -332,6 +415,13 @@ export function buildMuseumPageSourceCatalog(
       document?.sourcePath,
       project.sourcePaths.map((path) => ({ path, label: "machineRecord" }))
     );
+    if (CASEY_GENERATIVE_DOSSIER_SLUGS.has(project.slug)) {
+      add(
+        `${MUSEUM_ROOT}/projects/${encodeURIComponent(project.slug)}/system`,
+        `${CASEY_GENERATIVE_DOSSIER_ROOT}/${project.slug}.md`,
+        [{ path: document?.sourcePath, label: "projectEssay" }]
+      );
+    }
   }
 
   for (const gift of publication.gifts) {
