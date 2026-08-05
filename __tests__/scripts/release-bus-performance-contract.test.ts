@@ -470,6 +470,10 @@ describe("Release Bus frontend performance contract", () => {
     expect(productionSource).toContain(
       "exec node scripts/e2e-packs.cjs --capabilities"
     );
+    expect(stagingSource).toContain("args+=(--retry-failed-packs 1)");
+    expect(productionSource).toContain("args+=(--retry-failed-packs 1)");
+    expect(stagingSource).toContain("serial_failed_pack_retry");
+    expect(productionSource).toContain("serial_failed_pack_retry");
     expect(stagingSource).toContain(
       '.contract == "release-bus-e2e-runner-capabilities.v1"'
     );
@@ -509,6 +513,9 @@ describe("Release Bus frontend performance contract", () => {
         "(.results | map(.script_key) | unique | length) == .pack_count"
       );
       expect(source).toContain('(.results | all(.safety == "readonly"))');
+      expect(source).toContain("SERIAL_FAILED_PACK_RETRY");
+      expect(source).toContain(".attempt_count == (.attempts | length)");
+      expect(source).toContain(".status == .attempts[-1].status");
       expect(source).toContain(
         '.results | all(.status == "passed" and .failure_class == null)'
       );
