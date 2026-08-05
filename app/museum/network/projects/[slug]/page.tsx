@@ -13,6 +13,7 @@ import {
   tryCaseyArtworksFromPublication,
 } from "@/lib/museum/casey";
 import { getGenerativeStudyByProjectSlug } from "@/lib/museum/generative-studies";
+import { getMintedProjectIndex } from "@/lib/museum/generative-studies/minted";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 
 interface MuseumProjectPageProps {
@@ -76,6 +77,8 @@ export default async function MuseumProjectPage({
   const editorialArtistName =
     artist.slug === "casey-reas" ? CASEY_ARTIST_NAME : artist.preferredName;
   const generativeStudy = getGenerativeStudyByProjectSlug(project.slug);
+  const hasGenerativeExplorer =
+    generativeStudy !== null && getMintedProjectIndex(project.slug) !== null;
 
   return (
     <article>
@@ -110,7 +113,7 @@ export default async function MuseumProjectPage({
           />
         ))}
       </div>
-      {generativeStudy === null ? null : (
+      {!hasGenerativeExplorer ? null : (
         <section
           className="tw-mt-16 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/60 tw-p-6 sm:tw-p-8"
           aria-labelledby="project-system-title"
