@@ -160,6 +160,13 @@ function productionPack(
   };
 }
 
+function museumPack(pack) {
+  return {
+    ...pack,
+    changeScope: "museum",
+  };
+}
+
 const PACKS = [
   {
     scriptKey: "test:e2e",
@@ -275,7 +282,7 @@ const PACKS = [
     "Global and wave-local search coverage.",
     READONLY_SPECS.searchWaves
   ),
-  {
+  museumPack({
     ...localReadonlyPack(
       "test:e2e:museum-institutional-practice",
       "Network Museum institutional-practice study route sweep.",
@@ -283,8 +290,8 @@ const PACKS = [
       { timeoutMinutes: 30 }
     ),
     triggers: ["manual"],
-  },
-  {
+  }),
+  museumPack({
     ...localReadonlyPack(
       "test:e2e:museum-inside-system",
       "Network Museum Inside the System project and comparison sweep.",
@@ -292,7 +299,7 @@ const PACKS = [
       { timeoutMinutes: 30 }
     ),
     triggers: ["pr-ci", "manual"],
-  },
+  }),
 
   sandboxPack(
     "test:e2e:composer-sandbox",
@@ -474,18 +481,22 @@ const PACKS = [
     "Staging network and open-data read-only pack.",
     READONLY_SPECS.networkOpenData
   ),
-  stagingPack(
-    "museum-institutional-practice",
-    "museum-institutional-practice",
-    "Staging Network Museum institutional-practice deployed route smoke.",
-    READONLY_SPECS.museumInstitutionalPractice
+  museumPack(
+    stagingPack(
+      "museum-institutional-practice",
+      "museum-institutional-practice",
+      "Staging Network Museum institutional-practice deployed route smoke.",
+      READONLY_SPECS.museumInstitutionalPractice
+    )
   ),
-  stagingPack(
-    "museum-inside-system",
-    "museum-inside-system",
-    "Staging Network Museum Inside the System project and comparison sweep.",
-    READONLY_SPECS.museumInsideSystem,
-    { timeoutMinutes: 30 }
+  museumPack(
+    stagingPack(
+      "museum-inside-system",
+      "museum-inside-system",
+      "Staging Network Museum Inside the System project and comparison sweep.",
+      READONLY_SPECS.museumInsideSystem,
+      { timeoutMinutes: 30 }
+    )
   ),
 
   productionPack(
@@ -544,21 +555,25 @@ const PACKS = [
     "Production search canary.",
     READONLY_SPECS.searchWaves
   ),
-  productionPack(
-    "museum-institutional-practice",
-    "Production Network Museum institutional-practice deployed route smoke.",
-    READONLY_SPECS.museumInstitutionalPractice,
-    ["post-deploy", "manual"],
-    30,
-    [DESKTOP, MOBILE]
+  museumPack(
+    productionPack(
+      "museum-institutional-practice",
+      "Production Network Museum institutional-practice deployed route smoke.",
+      READONLY_SPECS.museumInstitutionalPractice,
+      ["post-deploy", "manual"],
+      30,
+      [DESKTOP, MOBILE]
+    )
   ),
-  productionPack(
-    "museum-inside-system",
-    "Production Network Museum Inside the System project and comparison sweep.",
-    READONLY_SPECS.museumInsideSystem,
-    ["post-deploy", "manual"],
-    30,
-    [DESKTOP, MOBILE]
+  museumPack(
+    productionPack(
+      "museum-inside-system",
+      "Production Network Museum Inside the System project and comparison sweep.",
+      READONLY_SPECS.museumInsideSystem,
+      ["post-deploy", "manual"],
+      30,
+      [DESKTOP, MOBILE]
+    )
   ),
   productionPack(
     "readonly",

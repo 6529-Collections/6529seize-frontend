@@ -14,6 +14,7 @@ type Pack = {
   specs?: string[];
   projects?: string[];
   timeoutMinutes: number;
+  changeScope?: "museum";
 };
 
 type SpawnResult = {
@@ -896,5 +897,27 @@ describe("E2E runner CLI resolution", () => {
     expect(museumPacks[0]?.triggers).toEqual(["manual"]);
     expect(museumPacks[1]?.triggers).toEqual(["post-deploy", "manual"]);
     expect(museumPacks[2]?.triggers).toEqual(["post-deploy", "manual"]);
+  });
+
+  it("classifies every dedicated Museum pack across local and deployed environments", () => {
+    const museumPacks = PACKS.filter((pack) => pack.changeScope === "museum");
+
+    expect(museumPacks).toHaveLength(6);
+    expect(
+      museumPacks.every(
+        (pack) =>
+          (pack.specs?.length ?? 0) > 0 &&
+          pack.specs?.every((spec) => spec.startsWith("tests/museum/"))
+      )
+    ).toBe(true);
+    expect(
+      museumPacks.filter((pack) => pack.environments[0] === "local")
+    ).toHaveLength(2);
+    expect(
+      museumPacks.filter((pack) => pack.environments[0] === "staging")
+    ).toHaveLength(2);
+    expect(
+      museumPacks.filter((pack) => pack.environments[0] === "production")
+    ).toHaveLength(2);
   });
 });
