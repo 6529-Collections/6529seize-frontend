@@ -1,4 +1,8 @@
 import noiseFilterFixtures from "@/__tests__/fixtures/sentry-noise-filter-hardening.json";
+import {
+  createLatestReactDomRawFrames,
+  createObservedReactDomRawInsertBeforeFrames,
+} from "@/__tests__/fixtures/reactDomRawInsertBeforeFixtures";
 
 const mockInit = jest.fn();
 const mockReplayIntegration = jest.fn(() => ({ name: "replay" }));
@@ -75,8 +79,7 @@ describe("instrumentation-client", () => {
     "auto.browser.browserapierrors.setTimeout";
   const browserUnhandledRejectionMechanismType =
     "auto.browser.global_handlers.onunhandledrejection";
-  const expectedWaveAbortErrorValue =
-    "AbortError: The user aborted a request.";
+  const expectedWaveAbortErrorValue = "AbortError: The user aborted a request.";
   const poperBlockerNetworkErrorMessage =
     "Network request failed. Please check your connection and try again. (/api/dm-drops/unread)";
   const poperBlockerInjectedFetchFrames = [
@@ -837,6 +840,87 @@ describe("instrumentation-client", () => {
     const result = beforeSend(event);
 
     expect(result).toBeNull();
+  });
+
+  it.each([
+    {
+      name: "ending in sN",
+      getFrames: () => createObservedReactDomRawInsertBeforeFrames("sN"),
+      transaction: "/waves",
+    },
+    {
+      name: "ending in sR",
+      getFrames: () => createObservedReactDomRawInsertBeforeFrames("sR"),
+      transaction: "/waves",
+    },
+    {
+      name: "with repeated sN placement frames on join-6529",
+      getFrames: createLatestReactDomRawFrames,
+      transaction: "/join-6529",
+    },
+  ])(
+    "drops the production-shaped raw React DOM stack $name",
+    ({ getFrames, transaction }) => {
+      const beforeSend = loadBeforeSend();
+      const event = {
+        event_id: "raw-react-dom-insert-before-event",
+        transaction,
+        exception: {
+          values: [
+            {
+              type: "NotFoundError",
+              value: reactDomInsertBeforeMessage,
+              mechanism: {
+                type: "generic",
+                handled: true,
+              },
+              stacktrace: {
+                frames: getFrames(),
+              },
+            },
+          ],
+        },
+        tags: {
+          transaction,
+          url: transaction,
+        },
+      };
+
+      const result = beforeSend(event);
+
+      expect(result).toBeNull();
+    }
+  );
+
+  it("keeps the production-shaped raw React DOM stack on an unobserved route", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "raw-react-dom-insert-before-unobserved-route",
+      transaction: "/about",
+      exception: {
+        values: [
+          {
+            type: "NotFoundError",
+            value: reactDomInsertBeforeMessage,
+            mechanism: {
+              type: "generic",
+              handled: true,
+            },
+            stacktrace: {
+              frames: createLatestReactDomRawFrames(),
+            },
+          },
+        ],
+      },
+      tags: {
+        transaction: "/about",
+        url: "/about",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toEqual(event);
   });
 
   it("drops exact React DOM removeChild NotFoundError events on affected routes with no app frames", () => {

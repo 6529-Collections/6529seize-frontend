@@ -1,6 +1,7 @@
 import {
   FILTERED_URL_TOKENS,
   GRADIENT_ROUTE_PATH,
+  JOIN_6529_ROUTE_PATH,
   objectCapturedPromiseRejectionMessages,
   THE_MEMES_MINT_ROUTE_PATH,
   USER_PROFILE_ROUTE_TRANSACTION,
@@ -124,6 +125,19 @@ function hasMatchingRoute(
 
 export function hasWavesRoute(event: SentryClientEvent): boolean {
   return hasMatchingRoute(event, isWavesRoutePath);
+}
+
+export function hasReactDomInsertBeforeRawRoute(
+  event: SentryClientEvent
+): boolean {
+  return hasMatchingRoute(
+    event,
+    (path) =>
+      isWavesRoutePath(path) ||
+      isExactRoutePath(path, JOIN_6529_ROUTE_PATH) ||
+      path === USER_PROFILE_ROUTE_TRANSACTION ||
+      path === "/"
+  );
 }
 
 export function isRouteParameterizationRoutePath(path: string | null): boolean {
