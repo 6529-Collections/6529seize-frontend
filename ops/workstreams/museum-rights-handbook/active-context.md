@@ -142,8 +142,10 @@ final copy/visual sweep.
   for all five statuses produce text contrast ratios of 18.29:1, 16.82:1,
   16.51:1, 14.38:1, and 17.07:1 after alpha compositing on their rendered
   backgrounds. The visible status words carry the meaning; border color is
-  decorative. The complete legal-code region is now focusable, labeled, and
-  ringed on keyboard focus, with a component assertion covering the contract.
+  decorative. The complete legal code no longer sits inside a nested scroll
+  box: when expanded, it follows document flow and uses ordinary page
+  scrolling. A component assertion prevents the inner overflow trap from
+  returning.
 - Sonar's four exact issues were addressed: deterministic `localeCompare`
   sorting, `TypeError` for array-shape violations, and extraction of the
   institutional-practice and rights route builders from the page-source

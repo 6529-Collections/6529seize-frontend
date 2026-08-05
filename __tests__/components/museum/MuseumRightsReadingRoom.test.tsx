@@ -81,9 +81,9 @@ describe("Museum rights reading room", () => {
     expect(
       screen.getByText("Exact English legal code", { exact: true })
     ).toBeVisible();
-    const legalCode = screen.getByLabelText("Complete English legal code");
+    const legalCode = container.querySelector("details pre");
     expect(legalCode).toHaveTextContent("Exact official fixture text");
-    expect(legalCode).toHaveAttribute("tabindex", "0");
+    expect(legalCode).not.toHaveClass("tw-overflow-auto");
     expect(
       screen.getByRole("link", { name: "Open the pinned source snapshot" })
     ).toHaveAttribute(
