@@ -21,6 +21,7 @@ import { Time } from "@/helpers/time";
 
 interface WaveLeaderboardTimeProps {
   readonly wave: ApiWave;
+  readonly className?: string | undefined;
 }
 
 const AUTO_EXPAND_LIMIT = 5;
@@ -33,6 +34,7 @@ const EMPTY_TIME_LEFT: TimeLeft = {
 
 export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   wave,
+  className,
 }) => {
   const {
     allDecisions,
@@ -171,9 +173,13 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   }, []);
 
   return (
-    <div>
+    <div
+      className={`${className ?? ""} ${
+        isDecisionDetailsOpen ? "tw-mb-3" : ""
+      }`}
+    >
       {multiDecision ? (
-        <div className="tw-mt-2 tw-overflow-hidden tw-rounded-lg tw-bg-iron-950 md:tw-mt-4">
+        <div className="tw-mt-2 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/70 tw-@container/timeline sm:tw-mt-4">
           {(() => {
             const currentPause = showPause(nextDecisionTime);
 

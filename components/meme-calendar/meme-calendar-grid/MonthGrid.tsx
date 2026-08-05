@@ -119,11 +119,11 @@ function getHistoricalTooltipHtml(
     historical.length > 1 ? { mints: items } : { mint: items }
   );
 
-  return `<div style="min-width:220px">
-    <div style="font-weight:600; margin-bottom:3px; font-size:larger">
+  return `<div class="tw-min-w-[13.75rem]">
+    <div class="tw-mb-1 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-50">
       ${escapeHtml(tooltipTitle)}
     </div>
-    <div style="margin-bottom:12px">${formatFullDate(
+    <div class="tw-mb-3 tw-text-sm tw-leading-5 tw-text-iron-300">${formatFullDate(
       firstInstant,
       displayTz,
       locale
@@ -146,8 +146,8 @@ function getScheduledMintTooltip({
   readonly mintNumber: number | undefined;
   readonly noteTooltipContent: string;
 }): MintTooltip {
-  if (!mintInstantUtc || !mintNumber) {
-    return { className: "!tw-bg-[#dcc]", html: "" };
+  if (mintInstantUtc === undefined || mintNumber === undefined) {
+    return { className: "!tw-border-iron-700", html: "" };
   }
 
   const now = new Date();
@@ -156,14 +156,14 @@ function getScheduledMintTooltip({
     ? formatFullDateTime(mintInstantUtc, displayTz, locale)
     : formatFullDate(mintInstantUtc, displayTz, locale);
   const oneLineDivWithNote = noteTooltipContent
-    ? `<div style="margin-bottom:12px">${oneLine}<br />
-      <span style="font-size:11px; color: #666;">*${noteTooltipContent}</span></div>`
-    : `<div style="margin-bottom:12px">${oneLine}</div>`;
+    ? `<div class="tw-mb-3 tw-text-sm tw-leading-5 tw-text-iron-300">${oneLine}<br />
+      <span class="tw-text-sm tw-leading-5 tw-text-iron-400">*${noteTooltipContent}</span></div>`
+    : `<div class="tw-mb-3 tw-text-sm tw-leading-5 tw-text-iron-300">${oneLine}</div>`;
   const invites = isFutureMint
     ? printCalendarInvites(
         mintInstantUtc,
         mintNumber,
-        "#000",
+        "currentColor",
         22,
         getCalendarInviteLabels(locale),
         locale
@@ -174,10 +174,12 @@ function getScheduledMintTooltip({
   });
 
   return {
-    className: isFutureMint ? "!tw-bg-[#eee]" : "!tw-bg-[#dcc]",
+    className: isFutureMint
+      ? "!tw-border-primary-400/50"
+      : "!tw-border-iron-700",
     html: `
-      <div style="min-width:220px">
-        <div style="font-weight:600; margin-bottom:3px; font-size:larger">${escapeHtml(tooltipTitle)}</div>
+      <div class="tw-min-w-[13.75rem]">
+        <div class="tw-mb-1 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-50">${escapeHtml(tooltipTitle)}</div>
         ${oneLineDivWithNote}
         ${invites}
       </div>`,
@@ -192,7 +194,7 @@ function getMintTooltip(
 ): MintTooltip {
   if (details.historical.length > 0) {
     return {
-      className: "!tw-bg-[#dcc]",
+      className: "!tw-border-iron-700",
       html: getHistoricalTooltipHtml(details.historical, displayTz, locale),
     };
   }
@@ -215,7 +217,7 @@ function EmptyMonthCell({ keyDate }: { readonly keyDate: Date }) {
   return (
     <div
       key={`empty-${ymd(keyDate)}`}
-      className="tw-pointer-events-none tw-invisible"
+      className="tw-pointer-events-none tw-invisible max-[429px]:tw-hidden"
     ></div>
   );
 }
@@ -231,24 +233,52 @@ function MonthDayCell({
 }: MonthDayCellProps) {
   const cellDateUtcDay = new Date(Date.UTC(year, month, day));
   const isToday = ymd(cellDateUtcDay) === ymd(new Date());
+  const isWeekend = cellOffset % 7 >= 5;
   const details = getMintCellDetails(cellDateUtcDay, locale);
+  let dayTextClass = "tw-text-iron-300";
+
+  if (isToday) {
+    dayTextClass = "tw-font-semibold tw-text-iron-950";
+  } else if (isWeekend) {
+    dayTextClass = "tw-text-iron-500";
+  }
+
+  const dayLabel = (
+    <>
+      <span
+        className={`tw-inline-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full max-[429px]:tw-hidden ${
+          isToday ? "tw-bg-emerald-400 tw-ring-2 tw-ring-emerald-400/20" : ""
+        }`}
+      >
+        {day}
+      </span>
+      <span
+        className={`tw-hidden tw-max-w-full tw-truncate max-[429px]:tw-inline-flex ${
+          isToday
+            ? "tw-items-center tw-justify-center tw-rounded-full tw-bg-emerald-400 tw-px-2.5 tw-py-1 tw-ring-2 tw-ring-emerald-400/20"
+            : ""
+        }`}
+      >
+        {formatFullDate(cellDateUtcDay, "utc", locale)}
+      </span>
+    </>
+  );
 
   if (!details.isMintDay) {
     return (
       <div
-        className="tw-flex tw-min-h-[2.5rem] tw-flex-col tw-items-center tw-justify-start tw-border-b-2 tw-py-2 tw-text-gray-400"
-        style={{ borderColor: "#222222", borderBottomStyle: "solid" }}
+        className={`tw-min-h-11 tw-py-1.5 min-[430px]:tw-flex min-[430px]:tw-min-h-12 min-[430px]:tw-flex-col min-[430px]:tw-items-center min-[430px]:tw-justify-start ${
+          isToday
+            ? "max-[429px]:tw-flex max-[429px]:tw-items-center max-[429px]:tw-px-3"
+            : "max-[429px]:tw-hidden"
+        }`}
+        aria-current={isToday ? "date" : undefined}
       >
         <span
-          className={`tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full tw-text-xs ${
-            isToday
-              ? "tw-bg-[#20fa59] tw-font-semibold tw-text-black"
-              : "tw-text-gray-400"
-          }`}
+          className={`tw-flex tw-items-center tw-text-xs tw-leading-4 min-[430px]:tw-justify-center ${dayTextClass}`}
         >
-          {day}
+          {dayLabel}
         </span>
-        <span className="tw-mt-0.5 tw-text-xs tw-font-medium">&nbsp;</span>
       </div>
     );
   }
@@ -259,11 +289,7 @@ function MonthDayCell({
     <button
       type="button"
       id={`meme-cell-${ymd(cellDateUtcDay)}`}
-      className="tw-flex tw-min-h-[2.5rem] tw-cursor-pointer tw-flex-col tw-items-center tw-justify-start tw-border-b-2 tw-border-none tw-bg-transparent tw-py-2 hover:tw-bg-[#eee] hover:tw-text-black focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-      style={{
-        borderColor: "#222222",
-        borderBottomStyle: "solid",
-      }}
+      className="tw-grid tw-min-h-11 tw-w-full tw-cursor-pointer tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/30 tw-px-3 tw-py-1.5 tw-text-left tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-iron-700/70 desktop-hover:hover:tw-bg-iron-900/60 min-[430px]:tw-flex min-[430px]:tw-min-h-12 min-[430px]:tw-flex-col min-[430px]:tw-justify-start min-[430px]:tw-gap-0 min-[430px]:tw-rounded-md min-[430px]:tw-px-0"
       data-tooltip-id="meme-tooltip"
       data-tooltip-html={tooltip.html}
       data-tooltip-class-name={tooltip.className}
@@ -273,16 +299,17 @@ function MonthDayCell({
         mint: details.mintLabel ?? "",
       })}
       onClick={() => onSelectDay?.(cellDateUtcDay)}
+      aria-current={isToday ? "date" : undefined}
     >
       <span
-        className={`tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full tw-text-xs ${
-          isToday ? "tw-bg-[#20fa59] tw-font-semibold tw-text-black" : ""
+        className={`tw-flex tw-min-w-0 tw-items-center tw-text-xs tw-leading-4 min-[430px]:tw-justify-center ${
+          isToday ? "tw-font-semibold tw-text-iron-950" : "tw-text-iron-200"
         }`}
       >
-        {day}
+        {dayLabel}
       </span>
       {details.mintLabel && (
-        <span className="tw-mt-0.5 tw-text-xs tw-font-medium tw-text-blue-600">
+        <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-leading-5 tw-text-primary-300 min-[430px]:tw-text-xs min-[430px]:tw-leading-4">
           {details.mintLabel}
         </span>
       )}
@@ -335,35 +362,28 @@ export function Month({
           inline: "center",
         });
       } catch {}
-      const t = setTimeout(() => {
-        el.dispatchEvent(
-          new MouseEvent("mouseenter", { bubbles: true, view: window })
-        );
+      const timeoutId = setTimeout(() => {
         el.dispatchEvent(
           new MouseEvent("click", { bubbles: true, view: window })
         );
       }, 60);
-      return () => clearTimeout(t);
+      return () => clearTimeout(timeoutId);
     }
     return undefined;
   }, [autoOpenYmd, year, month]);
 
   return (
-    <div className="tw-flex tw-flex-col tw-space-y-1 tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-2">
+    <div className="tw-flex tw-min-w-0 tw-flex-col tw-rounded-2xl tw-bg-iron-950 tw-p-3 tw-shadow-lg tw-ring-1 tw-ring-iron-800 sm:tw-p-4">
       {/* Month title */}
-      <div className="tw-text-center tw-text-sm tw-font-semibold">
+      <div className="tw-mb-2 tw-text-center tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
         {monthName} {year}
       </div>
       {/* Weekday header */}
-      <div className="tw-mt-1 tw-grid tw-grid-cols-7 tw-text-center tw-text-xs tw-font-medium">
+      <div className="tw-grid tw-grid-cols-7 tw-gap-x-1 tw-gap-y-1.5 tw-text-center tw-text-xs tw-font-medium max-[429px]:tw-grid-cols-1 max-[429px]:tw-gap-1.5">
         {weekdays.map((wd) => (
           <div
             key={wd}
-            className="tw-border-b-2 tw-p-1"
-            style={{
-              borderColor: "#888888",
-              borderBottomStyle: "solid",
-            }}
+            className="tw-pb-1.5 tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-400 max-[429px]:tw-hidden"
           >
             {t(locale, wd)}
           </div>

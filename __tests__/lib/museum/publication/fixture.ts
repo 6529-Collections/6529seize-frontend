@@ -1,5 +1,8 @@
 import { createHash } from "node:crypto";
-import { LEGACY_CASEY_REQUIRED_PATHS } from "@/lib/museum/publication";
+import {
+  INSTITUTIONAL_PRACTICE_DOCUMENT_CONTRACTS,
+  LEGACY_CASEY_REQUIRED_PATHS,
+} from "@/lib/museum/publication";
 
 export const EXACT_COMMIT = "a".repeat(40);
 
@@ -79,6 +82,16 @@ function objectPath(id: string): string {
 
 function buildBaseDocuments(): Record<string, string> {
   const documents: Record<string, string> = {};
+  for (const slug of [
+    "century",
+    "pre-process",
+    "phototaxis",
+    "923-empty-rooms",
+    "ex-nihilo-cosmos",
+  ]) {
+    documents[`notes/research/generative-systems/casey-reas/${slug}.md`] =
+      `# ${slug}\n\nGoverned technical study.`;
+  }
   for (const artwork of CASEY_OBJECTS) {
     documents[objectPath(artwork.id)] = JSON.stringify({
       envelope: { event_type: "MUSEUM_RECORD_COMMITTED" },
@@ -151,12 +164,17 @@ function buildBaseDocuments(): Record<string, string> {
       documents[path] = `# ${heading}\n\nGoverned public writing.`;
     }
   }
+  for (const contract of INSTITUTIONAL_PRACTICE_DOCUMENT_CONTRACTS) {
+    documents[contract.path] =
+      `# ${contract.title}\n\nGoverned institutional research.`;
+  }
   return documents;
 }
 
 export interface CaseyFixtureOptions {
   readonly documentOverrides?: Readonly<Record<string, string>>;
   readonly responseOverrides?: Readonly<Record<string, string>>;
+  readonly manifestSizeOverrides?: Readonly<Record<string, number>>;
   readonly omittedManifestPath?: string;
   readonly commit?: string;
 }
@@ -198,7 +216,9 @@ export function createCaseyFixture(
     .map(([path, text]) => ({
       path,
       sha256: sha256(text),
-      size: Buffer.byteLength(text, "utf8"),
+      size:
+        options.manifestSizeOverrides?.[path] ??
+        Buffer.byteLength(text, "utf8"),
     }));
   entries.push({
     path: ".gitattributes",

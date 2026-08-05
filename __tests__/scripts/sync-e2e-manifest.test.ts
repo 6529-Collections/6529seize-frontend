@@ -15,6 +15,7 @@ type Pack = {
   projects?: string[];
   workers?: number;
   timeoutMinutes: number;
+  changeScope?: "museum";
 };
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -43,7 +44,7 @@ describe("E2E pack manifest", () => {
 
   it("defines every package pack once and satisfies the safety contract", () => {
     expect(manifestTools.validateManifest(packs, { root: ROOT })).toEqual([]);
-    expect(packs).toHaveLength(56);
+    expect(packs).toHaveLength(62);
 
     const rendered = manifestTools.renderPackageJsonScripts(packs);
     const packageScripts = JSON.parse(
@@ -57,23 +58,98 @@ describe("E2E pack manifest", () => {
     expect(checkedInE2eScripts).toEqual(rendered);
   });
 
+  it("marks every dedicated Museum pack for change-set selection", () => {
+    const museumOnlyPacks = packs.filter(
+      (pack) =>
+        (pack.specs?.length ?? 0) > 0 &&
+        pack.specs?.every((spec) => spec.startsWith("tests/museum/"))
+    );
+
+    expect(museumOnlyPacks).toHaveLength(6);
+    expect(museumOnlyPacks.every((pack) => pack.changeScope === "museum")).toBe(
+      true
+    );
+    expect(
+      museumOnlyPacks
+        .map((pack) => `${pack.environments[0]}:${pack.scriptKey}`)
+        .sort()
+    ).toEqual(
+      [
+        "local:test:e2e:museum-institutional-practice",
+        "local:test:e2e:museum-inside-system",
+        "production:test:e2e:production:museum-institutional-practice",
+        "production:test:e2e:production:museum-inside-system",
+        "staging:test:e2e:staging:museum-institutional-practice",
+        "staging:test:e2e:staging:museum-inside-system",
+      ].sort()
+    );
+  });
+
+  it("rejects missing, unknown, or overbroad Museum change scopes", () => {
+    const museumPack = clonePack(
+      packs.find(
+        (pack) => pack.scriptKey === "test:e2e:staging:museum-inside-system"
+      ) as Pack
+    );
+    delete museumPack.changeScope;
+    expect(manifestTools.validateManifest([museumPack])).toContain(
+      'pack "test:e2e:staging:museum-inside-system": Museum-only packs must set changeScope "museum".'
+    );
+
+    const unknownScope = clonePack(museumPack);
+    Object.defineProperty(unknownScope, "changeScope", {
+      value: "other",
+      enumerable: true,
+    });
+    expect(manifestTools.validateManifest([unknownScope])).toContain(
+      'pack "test:e2e:staging:museum-inside-system": unknown changeScope "other".'
+    );
+
+    const nonMuseumPack = clonePack(
+      packs.find((pack) => pack.scriptKey === "test:e2e:staging") as Pack
+    );
+    nonMuseumPack.changeScope = "museum";
+    expect(manifestTools.validateManifest([nonMuseumPack])).toContain(
+      'pack "test:e2e:staging": changeScope "museum" requires only tests/museum specs.'
+    );
+
+    const mixedPostDeployPack = clonePack(museumPack);
+    delete mixedPostDeployPack.changeScope;
+    mixedPostDeployPack.specs?.push("tests/home/home.spec.ts");
+    expect(manifestTools.validateManifest([mixedPostDeployPack])).toContain(
+      'pack "test:e2e:staging:museum-inside-system": post-deploy packs must not mix Museum and non-Museum specs.'
+    );
+
+    const mutatedManifest = packs.map(clonePack);
+    delete (
+      mutatedManifest.find(
+        (pack) => pack.scriptKey === "test:e2e:staging:museum-inside-system"
+      ) as Pack
+    ).changeScope;
+    expect(
+      manifestTools.validateManifest(mutatedManifest, { root: ROOT })
+    ).toContain(
+      'pack "test:e2e:staging:museum-inside-system": Museum-only packs must set changeScope "museum".'
+    );
+  });
+
   it("makes deployed packs explicitly read-only and non-empty", () => {
     const staging = packs.filter((pack) => pack.environments[0] === "staging");
     const production = packs.filter(
       (pack) => pack.environments[0] === "production"
     );
 
-    expect(staging).toHaveLength(13);
+    expect(staging).toHaveLength(15);
     expect(
       staging.filter((pack) => pack.triggers.includes("post-deploy"))
-    ).toHaveLength(12);
-    expect(production).toHaveLength(12);
+    ).toHaveLength(14);
+    expect(production).toHaveLength(14);
     expect(
       production.filter((pack) => pack.triggers.includes("cron"))
     ).toHaveLength(10);
     expect(
       production.filter((pack) => pack.triggers.includes("post-deploy"))
-    ).toHaveLength(11);
+    ).toHaveLength(13);
 
     for (const environmentPacks of [staging, production]) {
       const specs = environmentPacks
@@ -89,6 +165,22 @@ describe("E2E pack manifest", () => {
         PLAYWRIGHT_ENV: pack.environments[0],
         PLAYWRIGHT_READONLY: "1",
         PLAYWRIGHT_SKIP_WEB_SERVER: "1",
+      });
+    }
+
+    for (const environment of ["local", "staging", "production"]) {
+      const museumPack = packs.find(
+        (pack) =>
+          pack.environments[0] === environment &&
+          pack.specs?.includes(
+            "tests/museum/institutional-practice-readonly.spec.ts"
+          ) &&
+          pack.scriptKey !== "test:e2e:production:readonly"
+      );
+      expect(museumPack).toMatchObject({
+        safety: "readonly",
+        projects: ["web-desktop-chromium", "web-mobile-chromium"],
+        workers: 1,
       });
     }
   });

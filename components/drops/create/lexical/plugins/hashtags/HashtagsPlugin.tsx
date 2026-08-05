@@ -10,7 +10,6 @@ import type { TextNode } from "lexical";
 import {
   forwardRef,
   useCallback,
-  useEffect,
   useImperativeHandle,
   useMemo,
   useState,
@@ -21,44 +20,81 @@ import { $createHashtagNode } from "@/components/drops/create/lexical/nodes/Hash
 import HashtagsTypeaheadMenu from "./HashtagsTypeaheadMenu";
 import { isEthereumAddress } from "@/helpers/AllowlistToolHelpers";
 import type { ReferencedNft } from "@/entities/IDrop";
-import type { ReservoirTokensResponseTokenElement } from "@/entities/IReservoir";
+import { useTokenMetadataQuery } from "@/hooks/useAlchemyNftQueries";
+import type { TokenMetadata } from "@/types/nft";
 import { isInCodeContext } from "@/components/drops/create/lexical/utils/codeContextDetection";
 import { getPossibleQueryMatch } from "./getPossibleQueryMatch";
 
 // At most, 5 suggestions are shown in the popup.
 const SUGGESTION_LIST_LENGTH_LIMIT = 5;
 
+type NftReferenceLookup = {
+  readonly contract: string;
+  readonly tokenId: string;
+};
+
+const parseNftReferenceLookup = (
+  query: string | null
+): NftReferenceLookup | null => {
+  if (!query) {
+    return null;
+  }
+  const parts = query.split(":");
+  if (parts.length !== 2) {
+    return null;
+  }
+  const [contract, tokenId] = parts;
+  if (
+    !contract ||
+    !tokenId ||
+    !isEthereumAddress(contract) ||
+    !/^\d+$/.test(tokenId)
+  ) {
+    return null;
+  }
+  return { contract, tokenId };
+};
+
+const getNftDisplayName = (
+  token: TokenMetadata,
+  lookup: NftReferenceLookup
+): string => {
+  const name = token.name?.trim();
+  if (name) {
+    return name;
+  }
+  const collectionName = token.collectionName?.trim() ?? "NFT";
+  return `${collectionName} #${lookup.tokenId}`;
+};
+
 function useHashtagLookupService(hashtagString: string | null) {
-  const [results, setResults] = useState<
-    Array<ReservoirTokensResponseTokenElement>
-  >([]);
+  const lookup = useMemo(
+    () => parseNftReferenceLookup(hashtagString),
+    [hashtagString]
+  );
+  const tokens = useMemo(
+    () =>
+      lookup ? [{ contract: lookup.contract, tokenId: lookup.tokenId }] : [],
+    [lookup]
+  );
+  const { data = [] } = useTokenMetadataQuery({
+    tokens,
+    enabled: lookup !== null,
+  });
 
-  const getResults = async (query: string): Promise<void> => {
-    const [contract, tokenId] = query.split(":");
-    const isContract = isEthereumAddress(contract!);
-    const isTokenId = !isNaN(Number(tokenId));
-    if (!isContract || !isTokenId) {
-      setResults([]);
-      return;
-    }
-    const url = `https://api.reservoir.tools/tokens/v7?tokens=${contract}%3A${tokenId}`;
-    const response = await fetch(url);
-    if (response.ok) {
-      const data = await response.json();
-      setResults(data.tokens);
-    }
-  };
-
-  useEffect(() => {
-    if (hashtagString == null) {
-      setResults([]);
-      return;
-    }
-
-    getResults(hashtagString);
-  }, [hashtagString]);
-
-  return results;
+  return useMemo(
+    () =>
+      lookup
+        ? data.map((token) => ({
+            contract: token.contract ?? lookup.contract,
+            tokenId: token.tokenIdRaw || lookup.tokenId,
+            name: getNftDisplayName(token, lookup),
+            picture: token.imageUrl,
+            collectionName: token.collectionName,
+          }))
+        : [],
+    [data, lookup]
+  );
 }
 
 export class HashtagsTypeaheadOption extends MenuOption {
@@ -66,25 +102,41 @@ export class HashtagsTypeaheadOption extends MenuOption {
   tokenId: string;
   name: string;
   picture: string | null;
+  collectionName: string | null;
 
   constructor({
     contract,
     tokenId,
     name,
     picture,
+    collectionName,
   }: {
     contract: string;
     tokenId: string;
     name: string;
     picture: string | null;
+    collectionName: string | null;
   }) {
     super(name);
     this.contract = contract;
     this.tokenId = tokenId;
     this.name = name;
     this.picture = picture;
+    this.collectionName = collectionName;
   }
 }
+
+const createNftReferenceNode = (selectedOption: HashtagsTypeaheadOption) => {
+  const referencedNft: ReferencedNft = {
+    contract: selectedOption.contract,
+    token: selectedOption.tokenId,
+    name: selectedOption.name,
+  };
+  return {
+    hashtagNode: $createHashtagNode(`$${selectedOption.name}`, referencedNft),
+    referencedNft,
+  };
+};
 
 export interface NewHastagsPluginHandles {
   readonly isHashtagsOpen: () => boolean;
@@ -113,10 +165,11 @@ const NewHashtagsPlugin = forwardRef<
         .map(
           (result) =>
             new HashtagsTypeaheadOption({
-              contract: result.token.contract,
-              tokenId: result.token.tokenId,
-              name: result.token.name,
-              picture: result.token.imageSmall,
+              contract: result.contract,
+              tokenId: result.tokenId,
+              name: result.name,
+              picture: result.picture,
+              collectionName: result.collectionName,
             })
         )
         .slice(0, SUGGESTION_LIST_LENGTH_LIMIT),
@@ -130,16 +183,13 @@ const NewHashtagsPlugin = forwardRef<
       closeMenu: () => void
     ) => {
       editor.update(() => {
-        const hashtagNode = $createHashtagNode(`$${selectedOption.name}`);
+        const { hashtagNode, referencedNft } =
+          createNftReferenceNode(selectedOption);
         if (nodeToReplace) {
           nodeToReplace.replace(hashtagNode);
         }
         hashtagNode.select();
-        onSelect({
-          contract: selectedOption.contract,
-          token: selectedOption.tokenId,
-          name: selectedOption.name,
-        });
+        onSelect(referencedNft);
         closeMenu();
       });
     },

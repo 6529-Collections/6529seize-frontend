@@ -6,15 +6,30 @@ import type { CaseyArtwork } from "@/lib/museum/casey";
 
 export function MuseumArtworkFigure({
   artwork,
+  artistName,
+  captionVariant = "default",
   eager = false,
   href,
   sizes = "(min-width: 1024px) 50vw, 100vw",
 }: {
   readonly artwork: CaseyArtwork;
+  readonly artistName?: string;
+  readonly captionVariant?: "default" | "hero";
   readonly eager?: boolean;
   readonly href?: string;
   readonly sizes?: string;
 }) {
+  const isHeroCaption = captionVariant === "hero";
+  const secondaryCaption =
+    isHeroCaption && artistName
+      ? t(DEFAULT_LOCALE, "museum.network.artwork.artistYear", {
+          artist: artistName,
+          year: artwork.year,
+        })
+      : t(DEFAULT_LOCALE, "museum.network.artwork.projectYear", {
+          project: artwork.project,
+          year: artwork.year,
+        });
   const image = (
     <div className="tw-relative tw-aspect-square tw-w-full tw-overflow-hidden tw-bg-black">
       <Image
@@ -30,7 +45,13 @@ export function MuseumArtworkFigure({
   );
 
   return (
-    <figure className="tw-group tw-m-0 tw-min-w-0">
+    <figure
+      className={`tw-group tw-m-0 tw-min-w-0 ${
+        isHeroCaption
+          ? "lg:tw-col-start-2 lg:tw-row-span-2 lg:tw-row-start-1 lg:tw-grid lg:tw-grid-rows-subgrid"
+          : ""
+      }`}
+    >
       {href ? (
         <>
           <Link
@@ -41,18 +62,23 @@ export function MuseumArtworkFigure({
           </Link>
           <figcaption className="tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-4 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4">
             <span className="tw-min-w-0">
-              <span className="tw-block tw-truncate tw-text-base tw-font-semibold tw-text-iron-50">
+              <span
+                className={`tw-block tw-truncate tw-text-base tw-font-semibold tw-text-iron-50 ${isHeroCaption ? "tw-tracking-[-0.01em]" : ""}`}
+              >
                 {artwork.title}
               </span>
               <span className="tw-mt-1 tw-block tw-text-sm tw-text-iron-400">
-                {artwork.project}, {artwork.year}
+                {secondaryCaption}
               </span>
             </span>
             <Link
               href={href}
-              className="group-hover:tw-text-primary-200 tw-shrink-0 tw-text-sm tw-font-medium tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+              className={`group-hover:tw-text-primary-200 tw-inline-flex tw-min-h-6 tw-shrink-0 tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${isHeroCaption ? "tw-mt-px" : "tw-underline tw-underline-offset-4"}`}
             >
-              {t(DEFAULT_LOCALE, "museum.network.artwork.viewWork")}
+              <span>
+                {t(DEFAULT_LOCALE, "museum.network.artwork.viewWork")}
+              </span>
+              {isHeroCaption ? <span aria-hidden="true">→</span> : null}
             </Link>
           </figcaption>
         </>

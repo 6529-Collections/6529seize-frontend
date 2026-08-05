@@ -1,5 +1,10 @@
+import {
+  getMuseumPublicationEnvironment,
+  type MuseumPublicationEnvironment,
+} from "@/config/museumPublicationEnv.server";
 import { GitHubMuseumPublicationSource } from "./github";
 import { legacyCaseyPublicationAssembler } from "./legacyCasey";
+import { isExactGitCommit } from "./security";
 import type {
   MuseumLastValidPublication,
   MuseumPublicationLoadState,
@@ -10,6 +15,8 @@ const CURRENT_TTL_MS = 10 * 60 * 1000;
 const FAILURE_BASE_TTL_MS = 30 * 1000;
 const FAILURE_MAX_TTL_MS = 10 * 60 * 1000;
 const STALE_TTL_MS = 24 * 60 * 60 * 1000;
+const DEFAULT_PUBLICATION_REF = "main";
+const PLAYWRIGHT_READONLY_VALUE = "1";
 
 interface RuntimeCacheEntry {
   readonly loadedAt: number;
@@ -19,6 +26,22 @@ interface RuntimeCacheEntry {
 
 interface MuseumPublicationRuntime {
   load(): Promise<MuseumPublicationLoadState>;
+}
+
+export function resolveMuseumPublicationRef(
+  environment: MuseumPublicationEnvironment = getMuseumPublicationEnvironment()
+): string {
+  const testCommit = environment["MUSEUM_PUBLICATION_TEST_COMMIT"];
+  if (testCommit === undefined) {
+    return DEFAULT_PUBLICATION_REF;
+  }
+  if (environment["PLAYWRIGHT_READONLY"] !== PLAYWRIGHT_READONLY_VALUE) {
+    throw new Error("publication_test_commit_requires_readonly");
+  }
+  if (!isExactGitCommit(testCommit)) {
+    throw new Error("publication_test_commit_not_exact");
+  }
+  return testCommit;
 }
 
 export function createMuseumPublicationRuntime(
@@ -88,7 +111,7 @@ export function createMuseumPublicationRuntime(
 }
 
 const githubPublicationSource = new GitHubMuseumPublicationSource({
-  ref: "main",
+  ref: resolveMuseumPublicationRef(),
   assembler: legacyCaseyPublicationAssembler,
 });
 

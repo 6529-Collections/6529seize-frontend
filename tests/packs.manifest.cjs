@@ -72,6 +72,10 @@ const READONLY_SPECS = {
   publicContent: ["tests/content/public-content-readonly.spec.ts"],
   profileDeepLinks: ["tests/social/profile-deep-links-readonly.spec.ts"],
   searchWaves: ["tests/social/search-waves-readonly.spec.ts"],
+  museumInstitutionalPractice: [
+    "tests/museum/institutional-practice-readonly.spec.ts",
+  ],
+  museumInsideSystem: ["tests/museum/inside-system-readonly.spec.ts"],
 };
 
 function localPack(scriptKey, description, specs, tweaks = {}) {
@@ -80,7 +84,7 @@ function localPack(scriptKey, description, specs, tweaks = {}) {
     description,
     safety: "local",
     environments: ["local"],
-    triggers: ["manual"],
+    triggers: ["pr-ci", "manual"],
     ...(specs ? { specs } : {}),
     ...tweaks,
     projects: tweaks.projects ?? [DESKTOP, MOBILE],
@@ -138,7 +142,8 @@ function productionPack(
   description,
   specs,
   triggers = ["cron", "manual", "post-deploy"],
-  timeoutMinutes = 15
+  timeoutMinutes = 15,
+  projects = [DESKTOP]
 ) {
   return {
     scriptKey: `test:e2e:production:${suffix}`,
@@ -149,9 +154,16 @@ function productionPack(
     triggers,
     env: PRODUCTION_READONLY_ENV,
     specs,
-    projects: [DESKTOP],
+    projects,
     workers: 1,
     timeoutMinutes,
+  };
+}
+
+function museumPack(pack) {
+  return {
+    ...pack,
+    changeScope: "museum",
   };
 }
 
@@ -270,6 +282,24 @@ const PACKS = [
     "Global and wave-local search coverage.",
     READONLY_SPECS.searchWaves
   ),
+  museumPack({
+    ...localReadonlyPack(
+      "test:e2e:museum-institutional-practice",
+      "Network Museum institutional-practice study route sweep.",
+      READONLY_SPECS.museumInstitutionalPractice,
+      { timeoutMinutes: 30 }
+    ),
+    triggers: ["manual"],
+  }),
+  museumPack({
+    ...localReadonlyPack(
+      "test:e2e:museum-inside-system",
+      "Network Museum Inside the System project and comparison sweep.",
+      READONLY_SPECS.museumInsideSystem,
+      { timeoutMinutes: 30 }
+    ),
+    triggers: ["pr-ci", "manual"],
+  }),
 
   sandboxPack(
     "test:e2e:composer-sandbox",
@@ -381,6 +411,7 @@ const PACKS = [
   ),
   stagingPack("core", "", "Staging core surfaces on both web shells.", [
     "tests/surfaces",
+    "tests/critical-shell",
     ...SMOKE_SPECS,
   ]),
   stagingPack(
@@ -450,6 +481,23 @@ const PACKS = [
     "Staging network and open-data read-only pack.",
     READONLY_SPECS.networkOpenData
   ),
+  museumPack(
+    stagingPack(
+      "museum-institutional-practice",
+      "museum-institutional-practice",
+      "Staging Network Museum institutional-practice deployed route smoke.",
+      READONLY_SPECS.museumInstitutionalPractice
+    )
+  ),
+  museumPack(
+    stagingPack(
+      "museum-inside-system",
+      "museum-inside-system",
+      "Staging Network Museum Inside the System project and comparison sweep.",
+      READONLY_SPECS.museumInsideSystem,
+      { timeoutMinutes: 30 }
+    )
+  ),
 
   productionPack(
     "home-readonly",
@@ -507,6 +555,26 @@ const PACKS = [
     "Production search canary.",
     READONLY_SPECS.searchWaves
   ),
+  museumPack(
+    productionPack(
+      "museum-institutional-practice",
+      "Production Network Museum institutional-practice deployed route smoke.",
+      READONLY_SPECS.museumInstitutionalPractice,
+      ["post-deploy", "manual"],
+      30,
+      [DESKTOP, MOBILE]
+    )
+  ),
+  museumPack(
+    productionPack(
+      "museum-inside-system",
+      "Production Network Museum Inside the System project and comparison sweep.",
+      READONLY_SPECS.museumInsideSystem,
+      ["post-deploy", "manual"],
+      30,
+      [DESKTOP, MOBILE]
+    )
+  ),
   productionPack(
     "readonly",
     "Combined production-safe release validation.",
@@ -522,6 +590,8 @@ const PACKS = [
       ...READONLY_SPECS.publicContent,
       ...READONLY_SPECS.profileDeepLinks,
       ...READONLY_SPECS.searchWaves,
+      ...READONLY_SPECS.museumInstitutionalPractice,
+      ...READONLY_SPECS.museumInsideSystem,
     ],
     // The disjoint post-deploy packs above cover this exact spec union and may
     // run concurrently. Retain the aggregate only as an operator diagnostic.

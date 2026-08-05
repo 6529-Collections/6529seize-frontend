@@ -49,9 +49,19 @@ export default function WaveRepButton({
         data-tooltip-content={tooltipContent}
         onClick={() => setIsModalOpen(true)}
         variant="tertiary"
-        size={variant === "compact" ? "xs" : "sm"}
+        size={variant === "compact" ? null : "sm"}
+        className={
+          variant === "compact"
+            ? "tw-h-7 tw-rounded-md tw-px-2 tw-text-[11px] tw-leading-4"
+            : undefined
+        }
       >
-        <ScaleIcon className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
+        <ScaleIcon
+          className={`${
+            variant === "compact" ? "tw-size-3.5" : "tw-size-4"
+          } tw-flex-shrink-0`}
+          aria-hidden="true"
+        />
         <span>{actionText}</span>
       </Button>
       <MyStreamActionTooltip id={tooltipId} />

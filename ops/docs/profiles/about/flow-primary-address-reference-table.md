@@ -27,13 +27,13 @@ content, and open a profile route from a table row.
 1. Open `/about/primary-address`.
 2. If no cached rows exist, the page shows `Loading...` while it fetches
    `"/primary_address.csv"`.
-3. On success, review the heading, rule notes, dated summary text, and table
-   columns:
-   `Profile Handle`, `Current Selected Primary Address`, and
-   `Primary Address Changed to`.
-4. Table rows are sorted alphabetically by `Profile Handle`.
-5. Every CSV row is rendered as table data, including a CSV header row if one
-   exists.
+3. On success, review the heading, rule notes, dated summary text, and the
+   full-width table columns `Profile Handle`,
+   `Current Selected Primary Address`, and `Primary Address Changed to`.
+4. Scroll vertically inside the table region to review the complete data set.
+   Desktop column headings remain visible; smaller screens stack the same
+   fields without horizontal scrolling.
+5. Table rows are sorted alphabetically by `Profile Handle`.
 6. Select a `Profile Handle` link to open `/{current_primary}`.
    Links do not use the handle value.
 7. If loading fails, the query retries automatically before it shows a final
