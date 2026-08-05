@@ -144,6 +144,18 @@ export type MuseumRightsUseStatus =
   | "status_only"
   | "case_by_case";
 
+export type MuseumPracticeUseStatus =
+  | "ordinary"
+  | "ordinary_with_terms"
+  | "purpose_limited"
+  | "contextual"
+  | "separate_basis";
+
+export interface MuseumPracticeUse {
+  readonly status: MuseumPracticeUseStatus;
+  readonly note: string;
+}
+
 export type MuseumRightsAction =
   | "display_the_work"
   | "publish_online"
@@ -188,6 +200,9 @@ export interface MuseumRightsExpression {
   readonly useMatrix: Readonly<
     Record<MuseumRightsAction, MuseumRightsUseStatus>
   >;
+  readonly museumPracticeMatrix: Readonly<
+    Record<MuseumRightsAction, MuseumPracticeUse>
+  >;
   readonly legalCode: MuseumRightsLegalCode | null;
 }
 
@@ -205,6 +220,9 @@ export interface MuseumRightsHandbook {
   readonly expressions: readonly MuseumRightsExpression[];
   readonly useStatusDefinitions: Readonly<
     Record<MuseumRightsUseStatus, string>
+  >;
+  readonly museumPracticeStatusDefinitions: Readonly<
+    Record<MuseumPracticeUseStatus, string>
   >;
   readonly objectAssignments: readonly MuseumRightsObjectAssignment[];
   readonly sourcePaths: readonly string[];

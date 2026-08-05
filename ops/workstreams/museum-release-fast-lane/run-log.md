@@ -69,3 +69,20 @@
   the workflow reject malformed report shapes before rendering its summary.
 - Added regression coverage for unreadable registered blobs, option parsing,
   and digest identity. No release selection is active in this PR.
+
+## 2026-08-05 — bilateral Museum-source compatibility repair
+
+- Frontend PR CI resolved canonical Museum commit
+  `42236950a8976825861b6785613e3837405f486c` while testing PR #3632.
+- The source commit passed the Museum validator on Ubuntu and Windows, but the
+  frontend rejected its newly added museum-practice rights matrix because the
+  bilateral adapter contract did not yet include those fields.
+- Extended the strict frontend projection with exact museum-practice status and
+  per-action matrix shapes. The parser retains the legal-license matrix and
+  records the new ordinary-practice matrix as a distinct fact; it does not
+  collapse legal permission into museum practice.
+- Bound registry version 1.1.0 and its six new primary-source references to
+  exact HTTPS locations; unreviewed source-key drift still fails closed.
+- Added malformed-definition and malformed-matrix rejection tests. This defect
+  establishes a permanent requirement for cross-repository compatibility
+  evidence before a canonical Museum source change is considered releasable.

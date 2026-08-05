@@ -34,6 +34,9 @@ describe("Museum rights handbook publication boundary", () => {
     if (result.status !== "current") return;
 
     expect(result.publication.rightsHandbook.expressions).toHaveLength(22);
+    expect(
+      result.publication.rightsHandbook.museumPracticeStatusDefinitions.ordinary
+    ).toBe("Ordinary museum practice.");
     expect(result.publication.rightsHandbook.objectAssignments).toHaveLength(7);
     expect(
       result.publication.rightsHandbook.objectAssignments.every(
@@ -51,6 +54,52 @@ describe("Museum rights handbook publication boundary", () => {
         ({ id }) => id === "cc-by-nc-4.0"
       )?.legalCode?.text
     ).toContain("Exact official fixture text");
+    expect(
+      result.publication.rightsHandbook.expressions.find(
+        ({ id }) => id === "cc-by-nc-4.0"
+      )?.museumPracticeMatrix.display_the_work
+    ).toEqual({
+      status: "ordinary",
+      note: "Ordinary museum practice for the recorded work.",
+    });
+  });
+
+  it("rejects malformed museum-practice definitions and matrices", async () => {
+    const missingDefinition = mutatedRegistry((registry) => {
+      const definitions = registry[
+        "museum_practice_status_definitions"
+      ] as Record<string, unknown>;
+      delete definitions["ordinary"];
+    });
+    expect(
+      await loadFixture({
+        documentOverrides: {
+          [MUSEUM_RIGHTS_REGISTRY_PATH]: missingDefinition,
+        },
+      })
+    ).toEqual(expect.objectContaining({ status: "unavailable" }));
+
+    const malformedMatrix = mutatedRegistry((registry) => {
+      const expression = (
+        registry["expressions"] as Array<Record<string, unknown>>
+      )[0];
+      const matrix = expression?.["museum_practice_matrix"] as
+        | Record<string, unknown>
+        | undefined;
+      if (matrix !== undefined) {
+        matrix["display_the_work"] = {
+          status: "ordinary",
+          note: "",
+        };
+      }
+    });
+    expect(
+      await loadFixture({
+        documentOverrides: {
+          [MUSEUM_RIGHTS_REGISTRY_PATH]: malformedMatrix,
+        },
+      })
+    ).toEqual(expect.objectContaining({ status: "unavailable" }));
   });
 
   it("fails the publication closed when a required guide is absent", async () => {

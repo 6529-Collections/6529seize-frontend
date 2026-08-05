@@ -1,6 +1,8 @@
 import { parseHeading } from "./legacyCaseyMarkdown";
 import type {
   MuseumPublicDocument,
+  MuseumPracticeUse,
+  MuseumPracticeUseStatus,
   MuseumRightsAction,
   MuseumRightsCredit,
   MuseumRightsExpression,
@@ -51,6 +53,14 @@ const USE_STATUSES = [
   "case_by_case",
 ] as const satisfies readonly MuseumRightsUseStatus[];
 
+const MUSEUM_PRACTICE_STATUSES = [
+  "ordinary",
+  "ordinary_with_terms",
+  "purpose_limited",
+  "contextual",
+  "separate_basis",
+] as const satisfies readonly MuseumPracticeUseStatus[];
+
 const EXPECTED_EXPRESSION_IDS = new Set([
   "in-copyright-no-public-license",
   "cc0-1.0",
@@ -94,6 +104,7 @@ const REGISTRY_KEYS = [
   "expressions",
   "object_assignments",
   "program_notes",
+  "museum_practice_status_definitions",
 ] as const;
 
 const REGISTRY_SOURCE_KEYS = [
@@ -103,6 +114,12 @@ const REGISTRY_SOURCE_KEYS = [
   "rightsstatements_documentation",
   "rightsstatements_usage_guidelines",
   "observed_at",
+  "college_art_association_fair_use",
+  "us_public_display_law",
+  "uk_public_exhibition_guidance",
+  "us_nft_intellectual_property_study",
+  "creative_commons_noncommercial_guidance",
+  "rightsstatements_layer_guidance",
 ] as const;
 
 const CREATIVE_COMMONS_DATA_COMMIT = "22fc2c31d0297a1feb8a257c0e6f84e95c9a38ae";
@@ -201,6 +218,38 @@ function parseUseMatrix(
   >;
 }
 
+function parseMuseumPracticeMatrix(
+  value: unknown
+): Readonly<Record<MuseumRightsAction, MuseumPracticeUse>> {
+  if (!isRecord(value) || !exactKeys(value, EXPECTED_ACTIONS)) {
+    throw new Error("publication_rights_museum_practice_matrix_invalid");
+  }
+  return Object.fromEntries(
+    EXPECTED_ACTIONS.map((action) => {
+      const practice = value[action];
+      if (
+        !isRecord(practice) ||
+        !exactKeys(practice, ["status", "note"]) ||
+        !MUSEUM_PRACTICE_STATUSES.includes(
+          practice["status"] as MuseumPracticeUseStatus
+        )
+      ) {
+        throw new Error("publication_rights_museum_practice_matrix_invalid");
+      }
+      return [
+        action,
+        {
+          status: practice["status"] as MuseumPracticeUseStatus,
+          note: requiredString(
+            practice["note"],
+            "publication_rights_museum_practice_matrix_invalid"
+          ),
+        },
+      ] as const;
+    })
+  ) as Record<MuseumRightsAction, MuseumPracticeUse>;
+}
+
 function parseExpression(
   value: unknown,
   documents: ReadonlyMap<string, MuseumSourceDocument>
@@ -221,6 +270,7 @@ function parseExpression(
     "boundaries",
     "visitor_note",
     "use_matrix",
+    "museum_practice_matrix",
   ] as const;
   if (!isRecord(value) || !exactKeys(value, keys)) {
     throw new Error("publication_rights_expression_shape_invalid");
@@ -346,6 +396,9 @@ function parseExpression(
       "publication_rights_expression_invalid"
     ),
     useMatrix: parseUseMatrix(value["use_matrix"]),
+    museumPracticeMatrix: parseMuseumPracticeMatrix(
+      value["museum_practice_matrix"]
+    ),
     legalCode,
   };
 }
@@ -390,6 +443,8 @@ export function assembleRightsHandbook(
   const expressions = parseExpressions(registry, documents);
   const expressionIds = new Set(expressions.map((expression) => expression.id));
   const useStatusDefinitions = parseStatusDefinitions(registry);
+  const museumPracticeStatusDefinitions =
+    parseMuseumPracticeStatusDefinitions(registry);
   const assignments = parseAssignments(registry, expressionIds);
   validateProgramNote(registry);
 
@@ -418,6 +473,7 @@ export function assembleRightsHandbook(
     collectorGuide,
     expressions,
     useStatusDefinitions,
+    museumPracticeStatusDefinitions,
     objectAssignments: assignments,
     sourcePaths: [
       MUSEUM_RIGHTS_REGISTRY_PATH,
@@ -445,7 +501,7 @@ function parseRegistry(
     registry["$schema"] !==
       "../../schemas/rights-expression-registry.schema.json" ||
     registry["registry_type"] !== "6529NM_RIGHTS_EXPRESSION_REGISTRY" ||
-    registry["registry_version"] !== "1.0.0" ||
+    registry["registry_version"] !== "1.1.0" ||
     typeof registry["published_at"] !== "string" ||
     !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/u.test(registry["published_at"]) ||
     !Array.isArray(registry["actions"]) ||
@@ -457,6 +513,7 @@ function parseRegistry(
     !Array.isArray(registry["object_assignments"]) ||
     !Array.isArray(registry["program_notes"]) ||
     !isRecord(registry["use_status_definitions"]) ||
+    !isRecord(registry["museum_practice_status_definitions"]) ||
     !isRecord(registry["sources"])
   ) {
     throw new Error("publication_rights_registry_shape_invalid");
@@ -474,6 +531,18 @@ function parseRegistry(
       "https://rightsstatements.org/en/documentation/" ||
     sources["rightsstatements_usage_guidelines"] !==
       "https://rightsstatements.org/en/documentation/usage_guidelines" ||
+    sources["college_art_association_fair_use"] !==
+      "https://www.collegeart.org/programs/caa-fair-use/best-practices" ||
+    sources["us_public_display_law"] !==
+      "https://www.copyright.gov/title17/92chap1.html" ||
+    sources["uk_public_exhibition_guidance"] !==
+      "https://www.gov.uk/government/publications/copyright-notice-public-exhibition-of-copyright-works" ||
+    sources["us_nft_intellectual_property_study"] !==
+      "https://www.copyright.gov/policy/nft-study/Joint-USPTO-USCO-Report-on-NFTs-and-Intellectual-Property.pdf" ||
+    sources["creative_commons_noncommercial_guidance"] !==
+      "https://wiki.creativecommons.org/wiki/NonCommercial_interpretation" ||
+    sources["rightsstatements_layer_guidance"] !==
+      "https://rightsstatements.org/en/2018/12/where-statements-apply.html" ||
     typeof sources["observed_at"] !== "string" ||
     !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/u.test(sources["observed_at"])
   ) {
@@ -481,6 +550,29 @@ function parseRegistry(
   }
 
   return registry;
+}
+
+function parseMuseumPracticeStatusDefinitions(
+  registry: JsonRecord
+): Readonly<Record<MuseumPracticeUseStatus, string>> {
+  const definitions = registry["museum_practice_status_definitions"];
+  if (
+    !isRecord(definitions) ||
+    !exactKeys(definitions, MUSEUM_PRACTICE_STATUSES)
+  ) {
+    throw new Error(
+      "publication_rights_museum_practice_status_definitions_invalid"
+    );
+  }
+  return Object.fromEntries(
+    MUSEUM_PRACTICE_STATUSES.map((status) => [
+      status,
+      requiredString(
+        definitions[status],
+        "publication_rights_museum_practice_status_definitions_invalid"
+      ),
+    ])
+  ) as Record<MuseumPracticeUseStatus, string>;
 }
 
 function parseExpressions(
