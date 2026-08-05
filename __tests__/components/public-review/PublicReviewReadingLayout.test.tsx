@@ -51,7 +51,6 @@ describe("PublicReviewReadingLayout", () => {
         dispatchEvent: jest.fn(),
       })),
     });
-    window.localStorage.setItem("public-review-comment-panel-open", "true");
     window.history.replaceState({}, "", "#public-review-feedback");
 
     render(
@@ -84,7 +83,6 @@ describe("PublicReviewReadingLayout", () => {
   });
 
   it("reveals the feedback hash target as an overlay on narrow layouts", async () => {
-    window.localStorage.setItem("public-review-comment-panel-open", "false");
     window.history.replaceState({}, "", "#public-review-feedback");
 
     render(
@@ -113,8 +111,6 @@ describe("PublicReviewReadingLayout", () => {
 
   it("keeps the controlled panel mounted and restores focus after Escape", async () => {
     const user = userEvent.setup();
-    window.localStorage.setItem("public-review-comment-panel-open", "false");
-
     render(
       <PublicReviewReadingLayout
         content={<div>Review content</div>}
@@ -149,7 +145,6 @@ describe("PublicReviewReadingLayout", () => {
 
   it("starts observing the layout when feedback becomes available", async () => {
     const user = userEvent.setup();
-    window.localStorage.setItem("public-review-comment-panel-open", "false");
     jest.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
       bottom: 800,
       height: 800,
@@ -184,5 +179,25 @@ describe("PublicReviewReadingLayout", () => {
     expect(
       screen.queryByRole("dialog", { name: "Page comments" })
     ).not.toBeInTheDocument();
+  });
+
+  it("does not restore a previous browser-storage panel preference", () => {
+    window.localStorage.setItem("public-review-comment-panel-open", "true");
+
+    render(
+      <PublicReviewReadingLayout
+        content={<div>Review content</div>}
+        feedbackAvailable
+        panel={<div>Feedback panel</div>}
+        toolbar={<div>Page 1</div>}
+      />
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Show feedback" })
+    ).toHaveAttribute("aria-expanded", "false");
+    expect(document.getElementById("public-review-feedback")).toHaveAttribute(
+      "hidden"
+    );
   });
 });

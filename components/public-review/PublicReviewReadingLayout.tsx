@@ -19,7 +19,6 @@ import {
   useLayoutEffect,
   useRef,
   useState,
-  useSyncExternalStore,
 } from "react";
 
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -28,58 +27,10 @@ import { t } from "@/i18n/messages";
 const COMMENT_PANEL_ID = "public-review-feedback";
 const COMMENT_PANEL_HEADING_ID = "public-review-feedback-heading";
 const COMMENT_PANEL_INLINE_MIN_WIDTH = 760;
-const COMMENT_PANEL_STORAGE_KEY = "public-review-comment-panel-open";
-const COMMENT_PANEL_PREFERENCE_EVENT = "public-review-comment-panel-preference";
 const PublicReviewCommentPanelOpenContext = createContext(true);
-let inMemoryPanelPreference: boolean | null = null;
 
 export function usePublicReviewCommentPanelOpen(): boolean {
   return useContext(PublicReviewCommentPanelOpenContext);
-}
-
-function getPanelPreferenceSnapshot(): boolean {
-  if (typeof window === "undefined") {
-    return false;
-  }
-  try {
-    const storedPreference = window.localStorage.getItem(
-      COMMENT_PANEL_STORAGE_KEY
-    );
-    if (storedPreference !== null) {
-      return storedPreference === "true";
-    }
-  } catch {
-    // Storage can be unavailable in privacy-restricted browser contexts.
-  }
-  if (inMemoryPanelPreference !== null) {
-    return inMemoryPanelPreference;
-  }
-  return false;
-}
-
-function subscribeToPanelPreference(onStoreChange: () => void): () => void {
-  const handleStorage = (event: StorageEvent): void => {
-    if (event.key === COMMENT_PANEL_STORAGE_KEY) {
-      onStoreChange();
-    }
-  };
-
-  window.addEventListener("storage", handleStorage);
-  window.addEventListener(COMMENT_PANEL_PREFERENCE_EVENT, onStoreChange);
-  return () => {
-    window.removeEventListener("storage", handleStorage);
-    window.removeEventListener(COMMENT_PANEL_PREFERENCE_EVENT, onStoreChange);
-  };
-}
-
-function updatePanelPreference(isOpen: boolean): void {
-  inMemoryPanelPreference = isOpen;
-  try {
-    window.localStorage.setItem(COMMENT_PANEL_STORAGE_KEY, String(isOpen));
-  } catch {
-    // Keep the in-memory preference when storage is unavailable.
-  }
-  window.dispatchEvent(new Event(COMMENT_PANEL_PREFERENCE_EVENT));
 }
 
 export function PublicReviewReadingLayout({
@@ -93,18 +44,14 @@ export function PublicReviewReadingLayout({
   readonly panel: ReactNode;
   readonly toolbar: ReactNode;
 }) {
-  const isPanelOpen = useSyncExternalStore(
-    subscribeToPanelPreference,
-    getPanelPreferenceSnapshot,
-    () => false
-  );
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [focusRequest, setFocusRequest] = useState(0);
   const [isOverlayLayout, setIsOverlayLayout] = useState<boolean | null>(null);
   const handledFocusRequestRef = useRef(0);
   const layoutRef = useRef<HTMLElement>(null);
 
   const closePanel = (): void => {
-    updatePanelPreference(false);
+    setIsPanelOpen(false);
   };
 
   useLayoutEffect(() => {
@@ -169,7 +116,7 @@ export function PublicReviewReadingLayout({
         return;
       }
       setFocusRequest((request) => request + 1);
-      updatePanelPreference(true);
+      setIsPanelOpen(true);
     };
 
     const revealTimer = window.setTimeout(revealHashTarget, 0);
@@ -269,9 +216,7 @@ export function PublicReviewReadingLayout({
             aria-controls={COMMENT_PANEL_ID}
             aria-expanded={isPanelOpen}
             className="tw-group/feedback-toggle tw-inline-flex tw-min-h-11 tw-flex-none tw-items-center tw-gap-2 tw-border-0 tw-bg-transparent tw-px-0 tw-text-xs tw-font-semibold tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-white"
-            onClick={() =>
-              isPanelOpen ? closePanel() : updatePanelPreference(true)
-            }
+            onClick={() => (isPanelOpen ? closePanel() : setIsPanelOpen(true))}
             type="button"
           >
             {isPanelOpen ? (

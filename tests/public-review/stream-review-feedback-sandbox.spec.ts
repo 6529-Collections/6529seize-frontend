@@ -52,7 +52,10 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
       insets: { top: 44, right: 8, bottom: 34, left: 0 },
     });
     await page.addInitScript(() => {
-      globalThis.localStorage.removeItem("public-review-comment-panel-open");
+      globalThis.localStorage.setItem(
+        "public-review-comment-panel-open",
+        "true"
+      );
     });
     await gotoStreamReview(page);
 

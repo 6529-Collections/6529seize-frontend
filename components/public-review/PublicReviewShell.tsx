@@ -136,6 +136,7 @@ export function PublicReviewShell({
 
         <div className="tw-min-h-screen tw-min-w-0 tw-border-y-0 tw-border-b-0 tw-border-l-0 tw-border-r tw-border-t-0 tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F]">
           <PublicReviewReadingLayout
+            key={page.id}
             feedbackAvailable={review.feedbackAvailable}
             panel={feedbackSlot}
             toolbar={
