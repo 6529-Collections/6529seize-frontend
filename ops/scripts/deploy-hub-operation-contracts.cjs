@@ -164,7 +164,6 @@ module.exports = {
   assertAuthority,
   assertExactPulls,
   OPERATION_ID_PATTERN,
-  OPERATION_ID_SOURCE,
   assertProductionPreflight,
   assertProductionRequestPreflight,
   assertRequestAuthorities,

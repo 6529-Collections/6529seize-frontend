@@ -143,6 +143,8 @@ describe("Deploy Hub live workflow contracts", () => {
       const steps = parsed.jobs["manual-deployment-guard"].steps;
       expect(steps[0]).toMatchObject({
         env: expect.objectContaining({
+          DEPLOY_HUB_CONTROLLER_OPERATION_ID:
+            "${{ inputs.deploy_hub_controller_operation_id }}",
           DEPLOY_HUB_OPERATION_ID: "${{ inputs.deploy_hub_operation_id }}",
         }),
       });
@@ -152,9 +154,15 @@ describe("Deploy Hub live workflow contracts", () => {
       expect(steps[0].run).toContain("manual-deployment-readiness");
       expect(parsed.jobs["manual-deployment-guard"].permissions).toEqual({
         actions: "read",
+        contents: "read",
       });
       expect(steps[0].run).toContain("gh api");
       expect(steps[0].run).toContain(".head_repository.full_name");
+      expect(steps[0].run).toContain(".display_title == $display_title");
+      expect(steps[0].run).toContain("commits/$GITHUB_SHA");
+      expect(steps[0].run).toContain(
+        'startswith("Deploy Hub " + $operation + ":")'
+      );
     }
   );
 
@@ -173,29 +181,42 @@ describe("Deploy Hub live workflow contracts", () => {
     expect(preflight.run).not.toContain("git fetch");
   });
 
-  it("keeps automatic staging E2E out of correlated Deploy Hub deploys", () => {
+  it("binds Deploy Hub E2E to the successful canonical deploy run", () => {
     const staging = workflow("staging-e2e.yml");
-    expect(staging.jobs["baseline-adoption-decision"].if).toContain(
-      "!startsWith(github.event.workflow_run.display_title, 'Deploy Hub ')"
-    );
-    expect(staging.jobs["staging-packs"].if).toContain(
-      "!startsWith(github.event.workflow_run.display_title, 'Deploy Hub ')"
+    expect(staging.jobs["baseline-adoption-decision"].if).toBe(
+      "inputs.automatic_deploy_run_id != ''"
     );
     expect(staging.jobs["staging-packs"].steps[0].run).toContain(
       'test "$GITHUB_ACTOR" = "github-actions[bot]"'
     );
     expect(staging.jobs["staging-packs"].permissions.actions).toBe("read");
     expect(staging.jobs["staging-packs"].steps[0].run).toContain(
-      ".github/workflows/deploy-hub.yml"
+      '[[ "$AUTOMATIC_DEPLOY_RUN_ID" =~'
     );
     const production = workflow("production-e2e.yml");
-    expect(production.jobs.readonly.steps[0].run).toContain(
-      'test "$GITHUB_ACTOR" = "github-actions[bot]"'
-    );
     expect(production.jobs.readonly.permissions.actions).toBe("read");
-    expect(production.jobs.readonly.steps[0].run).toContain(
-      ".github/workflows/deploy-hub-production.yml"
+    const productionPublish = production.jobs.readonly.steps.find(
+      ({ name }: { name?: string }) => name === "Publish Deploy Hub E2E result"
     );
+    expect(productionPublish.env.EXPECTED_SHA).toBe(
+      "${{ inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha }}"
+    );
+
+    for (const file of [
+      "staging-e2e-dispatch.yml",
+      "production-e2e-dispatch.yml",
+    ]) {
+      const source = fs.readFileSync(
+        path.join(process.cwd(), ".github/workflows", file),
+        "utf8"
+      );
+      expect(source).toContain("DEPLOY_DISPLAY_TITLE");
+      expect(source).toContain(
+        "deploy_hub_operation_id:$deploy_hub_operation_id"
+      );
+    }
+    expect(staging["run-name"]).toContain("inputs.deploy_hub_operation_id");
+    expect(production["run-name"]).toContain("inputs.deploy_hub_operation_id");
   });
 });
 

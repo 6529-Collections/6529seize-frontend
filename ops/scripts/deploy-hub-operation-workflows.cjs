@@ -33,7 +33,7 @@ function e2eContext(correlation) {
 
 function latestMatchingStatus(statuses, predicate) {
   return [...(statuses ?? [])]
-    .filter(predicate)
+    .filter((status) => predicate(status))
     .sort(
       (left, right) =>
         Date.parse(right.created_at ?? "") - Date.parse(left.created_at ?? "")
@@ -244,6 +244,7 @@ function classifyE2eStatus(combined, correlation) {
 async function validateStagingSnapshot({
   github,
   sha,
+  operationId,
   correlation,
   sleep,
   now,
@@ -252,7 +253,10 @@ async function validateStagingSnapshot({
     github,
     workflow: "deploy-staging.yml",
     ref: STAGING_REF,
-    inputs: { deploy_hub_operation_id: correlation },
+    inputs: {
+      deploy_hub_operation_id: correlation,
+      deploy_hub_controller_operation_id: operationId,
+    },
     displayTitle: `Deploy Hub ${correlation} — staging`,
     expectedSha: sha,
     sleep,
@@ -261,19 +265,14 @@ async function validateStagingSnapshot({
   if (deploy.conclusion !== "success") {
     return { conclusion: "infrastructure", runUrl: deploy.html_url };
   }
-  const e2e = await dispatchAndWait({
+  const e2e = await waitForWorkflow({
     github,
     workflow: "staging-e2e.yml",
-    ref: "main",
-    inputs: {
-      pack: "all",
-      deploy_hub_operation_id: correlation,
-      source_ref: STAGING_REF,
-      expected_sha: sha,
-    },
+    branch: "main",
     displayTitle: `Staging E2E [${correlation}]`,
     sleep,
     now,
+    notBefore: Date.parse(deploy.created_at ?? ""),
   });
   return {
     conclusion: classifyE2eStatus(
@@ -296,6 +295,7 @@ async function validateWithRetry(options) {
     const result = await validateStagingSnapshot({
       github: options.github,
       sha: options.sha,
+      operationId: options.operationId,
       correlation,
       sleep: options.sleep,
       now: options.now,

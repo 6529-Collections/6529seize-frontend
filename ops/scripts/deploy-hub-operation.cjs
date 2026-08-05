@@ -145,7 +145,10 @@ async function validateProductionDeployment({
       github,
       workflow: "build-upload-deploy-prod.yml",
       ref: baseRef,
-      inputs: { deploy_hub_operation_id: correlation },
+      inputs: {
+        deploy_hub_operation_id: correlation,
+        deploy_hub_controller_operation_id: operationId,
+      },
       displayTitle: `Deploy Hub ${correlation} — production`,
       expectedSha: mainSha,
       sleep,
@@ -153,18 +156,14 @@ async function validateProductionDeployment({
     });
     finalResult = { conclusion: "infrastructure", runUrl: deploy.html_url };
     if (deploy.conclusion === "success") {
-      const e2e = await dispatchAndWait({
+      const e2e = await waitForWorkflow({
         github,
         workflow: "production-e2e.yml",
-        ref: baseRef,
-        inputs: {
-          deploy_hub_operation_id: correlation,
-          source_ref: baseRef,
-          expected_sha: mainSha,
-        },
+        branch: baseRef,
         displayTitle: `Production E2E [${correlation}]`,
         sleep,
         now,
+        notBefore: Date.parse(deploy.created_at ?? ""),
       });
       finalResult = {
         conclusion: classifyE2eStatus(

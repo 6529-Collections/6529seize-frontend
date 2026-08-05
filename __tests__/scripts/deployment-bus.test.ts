@@ -429,6 +429,12 @@ describe("release bus v2 E2E callbacks", () => {
   });
 
   it("classifies staging setup transport separately from E2E failures", () => {
+    expect(stagingE2E).toContain("Check out immutable Release Bus tooling");
+    expect(stagingE2E).toContain("timeout-minutes: 2");
+    expect(stagingE2E).toContain("path: .release-bus-control");
+    expect(stagingE2E).not.toContain(
+      'git fetch --no-tags origin "$WORKFLOW_SHA"'
+    );
     expect(stagingE2E).toContain(
       "scripts/release-bus-install-dependencies.cjs"
     );
