@@ -42,7 +42,10 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { WalletValidationError } from "@/errors/wallet";
 import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
 import { hasPendingInlineImageUploadMarkdown } from "@/helpers/waves/inline-image-upload.helpers";
-import { MAX_DROP_STORM_CHARACTERS } from "@/helpers/Helpers";
+import {
+  MAX_DROP_PART_CHARACTERS,
+  MAX_DROP_STORM_CHARACTERS,
+} from "@/helpers/Helpers";
 
 export enum CreateDropScreenType {
   DESKTOP = "DESKTOP",
@@ -416,13 +419,8 @@ const CreateDropWrapper = forwardRef<
         getMarkdown()?.length ?? 0
       ) ?? 0) > MAX_DROP_STORM_CHARACTERS;
 
-    const getIsCharsLimit = () => {
-      const markDown = getMarkdown();
-      if (!!markDown?.length && markDown.length > 240) {
-        return true;
-      }
-      return false;
-    };
+    const getIsCharsLimit = () =>
+      (getMarkdown()?.length ?? 0) > MAX_DROP_PART_CHARACTERS;
 
     const getCanAddPart = () =>
       getHaveMarkdownOrFile() &&

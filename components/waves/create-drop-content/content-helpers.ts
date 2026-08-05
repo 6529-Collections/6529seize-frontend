@@ -13,6 +13,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import {
+  MAX_DROP_PART_CHARACTERS,
   MAX_DROP_STORM_CHARACTERS,
   MAX_DROP_UPLOAD_FILES,
 } from "@/helpers/Helpers";
@@ -160,6 +161,7 @@ export const canAddDropPart = ({
   readonly hasPendingInlineImageUpload: boolean;
 }): boolean =>
   ((markdown?.trim().length ?? 0) > 0 || files.length > 0) &&
+  (markdown?.length ?? 0) <= MAX_DROP_PART_CHARACTERS &&
   !hasPendingInlineImageUpload &&
   !getIsDropLimit(drop, markdown);
 

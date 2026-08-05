@@ -687,6 +687,43 @@ describe("CreateDropWrapper Authentication Validation", () => {
       });
     });
 
+    it("allows a 25,000-character Storm part and rejects the next character", async () => {
+      mockUseSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
+        address: "0x1234567890123456789012345678901234567890",
+        isSafeWallet: false,
+      });
+
+      const { getByTestId } = render(
+        <QueryClientProvider client={queryClient}>
+          <CreateDropWrapper
+            {...defaultProps}
+            viewType={CreateDropViewType.FULL}
+          />
+        </QueryClientProvider>
+      );
+
+      mockMarkdown = "a".repeat(25_000);
+      fireEvent.click(getByTestId("set-full-editor-state"));
+
+      await waitFor(() => {
+        expect(getByTestId("create-drop-full")).toHaveAttribute(
+          "data-can-add-part",
+          "true"
+        );
+      });
+
+      mockMarkdown = "a".repeat(25_001);
+      fireEvent.click(getByTestId("set-full-editor-state"));
+
+      await waitFor(() => {
+        expect(getByTestId("create-drop-full")).toHaveAttribute(
+          "data-can-add-part",
+          "false"
+        );
+      });
+    });
+
     it("does not save a storm part while inline image upload markdown is pending", () => {
       mockMarkdown = "pending ![Seize](loading)";
       mockUseSeizeConnectContext.mockReturnValue({

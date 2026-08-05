@@ -272,6 +272,39 @@ describe("CreateDropContent utilities", () => {
       ).toBe(false);
     });
 
+    it("allows the former 24,000-character Storm boundary", () => {
+      expect(
+        canAddDropPart({
+          markdown: "b".repeat(9_000),
+          files: [],
+          drop: {
+            parts: [{ ...existingPart, content: "a".repeat(15_000) }],
+          } as CreateDropConfig,
+          hasPendingInlineImageUpload: false,
+        })
+      ).toBe(true);
+    });
+
+    it("enforces the 25,000-character limit for each Storm part", () => {
+      expect(
+        canAddDropPart({
+          markdown: "a".repeat(25_000),
+          files: [],
+          drop: null,
+          hasPendingInlineImageUpload: false,
+        })
+      ).toBe(true);
+
+      expect(
+        canAddDropPart({
+          markdown: "a".repeat(25_001),
+          files: [],
+          drop: null,
+          hasPendingInlineImageUpload: false,
+        })
+      ).toBe(false);
+    });
+
     it("rejects whitespace-only storm parts", () => {
       expect(
         canAddDropPart({
