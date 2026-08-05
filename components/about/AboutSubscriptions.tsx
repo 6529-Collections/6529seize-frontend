@@ -92,7 +92,7 @@ function SubscriptionHeader({ locale }: { readonly locale: SupportedLocale }) {
         </div>
         <div className="tw-mt-3">
           <Link
-            className="tw-group/report -tw-ml-1 tw-inline-flex tw-max-w-full tw-items-start tw-gap-2 tw-rounded-md tw-px-1 tw-py-1 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-iron-300 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 sm:tw-items-center lg:tw-whitespace-nowrap"
+            className="tw-group/report -tw-ml-1 tw-inline-flex tw-max-w-full tw-items-start tw-gap-2 tw-rounded-md tw-px-1 tw-py-1 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-iron-300 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#00f0ff]/50 sm:tw-items-center"
             href="/tools/subscriptions-report"
           >
             <FontAwesomeIcon
