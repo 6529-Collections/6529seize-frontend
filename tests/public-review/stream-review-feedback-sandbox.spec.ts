@@ -43,13 +43,20 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
     baseURL,
     page,
   }, testInfo) => {
+    const isDesktop = testInfo.project.name === "web-desktop-chromium";
+    const emulatesSafeArea = testInfo.project.name === "web-mobile-chromium";
+    const safeAreaSession = emulatesSafeArea
+      ? await page.context().newCDPSession(page)
+      : null;
+    await safeAreaSession?.send("Emulation.setSafeAreaInsetsOverride", {
+      insets: { top: 44, right: 8, bottom: 34, left: 0 },
+    });
     await page.addInitScript(() => {
       globalThis.localStorage.removeItem("public-review-comment-panel-open");
     });
     await gotoStreamReview(page);
 
     const feedbackPanel = page.locator("#public-review-feedback");
-    const isDesktop = testInfo.project.name === "web-desktop-chromium";
     const feedbackToggle = page.getByRole("button", {
       name: isDesktop ? "Hide feedback" : "Show feedback",
     });
@@ -64,6 +71,33 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
       await expect(
         page.getByRole("button", { name: "Hide feedback" })
       ).toHaveAttribute("aria-expanded", "true");
+
+      const closeButton = feedbackPanel.getByRole("button", {
+        name: "Hide feedback",
+      });
+      const closeButtonBounds = await closeButton.boundingBox();
+      expect(closeButtonBounds).not.toBeNull();
+      expect(closeButtonBounds!.width).toBeGreaterThanOrEqual(40);
+      expect(closeButtonBounds!.height).toBeGreaterThanOrEqual(40);
+
+      if (emulatesSafeArea) {
+        const safeAreaGeometry = await feedbackPanel.evaluate((panel) => {
+          const styles = getComputedStyle(panel);
+          const header = panel.querySelector("header");
+          return {
+            headerTop: header?.getBoundingClientRect().top ?? -1,
+            paddingBottom: styles.paddingBottom,
+            paddingRight: styles.paddingRight,
+            paddingTop: styles.paddingTop,
+          };
+        });
+        expect(safeAreaGeometry).toEqual({
+          headerTop: 44,
+          paddingBottom: "34px",
+          paddingRight: "8px",
+          paddingTop: "44px",
+        });
+      }
     }
 
     await expect(feedbackPanel).toBeVisible();
@@ -93,6 +127,7 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
     await expect(comment).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
+    await expect(comment).toHaveCSS("background-color", "rgb(28, 28, 33)");
     await expect(
       feedbackPanel.getByRole("button", {
         name: "Connect wallet to comment",
@@ -120,6 +155,10 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
     const previewButton = feedbackPanel.getByRole("button", {
       name: "Preview Wave message",
     });
+    await expect(previewButton).toHaveCSS(
+      "background-color",
+      "rgb(28, 28, 33)"
+    );
     await previewButton.click();
     await expect(
       feedbackPanel.getByRole("heading", { name: "Wave message preview" })
@@ -135,6 +174,13 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
     await expect(submitButton).toBeEnabled({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
+    if (isDesktop) {
+      await expect(
+        page.getByRole("button", { name: /Open quick direct messages/ })
+      ).toHaveCSS("pointer-events", "none", {
+        timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+      });
+    }
     await submitButton.click();
 
     await expect(
@@ -185,6 +231,7 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
 
     await expectNoHorizontalOverflow(page);
     await expectNoUnsafeSandboxMutations(baseURL);
+    await safeAreaSession?.detach();
   });
 });
 

@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import { PublicReviewEditorialFeedback } from "@/components/public-review/PublicReviewEditorialFeedback";
+import { getWaveComposerDockElements } from "@/components/waves/WaveComposerDockVisibility";
 import type {
   PublicReviewDiscussionDestination,
   PublicReviewFeedbackConfig,
@@ -49,7 +50,7 @@ describe("PublicReviewEditorialFeedback", () => {
     window.history.replaceState({}, "", window.location.pathname);
   });
 
-  it("fills the feedback rail and reveals the composer on demand", () => {
+  it("fills the feedback rail and registers the open composer for overlay clearance", async () => {
     render(
       <PublicReviewEditorialFeedback
         config={config}
@@ -70,8 +71,17 @@ describe("PublicReviewEditorialFeedback", () => {
     fireEvent.click(screen.getByText("Send feedback", { exact: true }));
 
     expect(disclosure).toHaveAttribute("open");
-    expect(screen.getByRole("combobox")).toHaveClass("tw-ring-white/[0.08]");
+    await waitFor(() =>
+      expect(getWaveComposerDockElements()).toContain(disclosure)
+    );
+    expect(screen.getByRole("combobox")).toHaveClass(
+      "tw-bg-iron-900",
+      "tw-ring-white/[0.09]"
+    );
     expect(screen.getByTestId("composer")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("Send feedback", { exact: true }));
+    await waitFor(() => expect(getWaveComposerDockElements()).toEqual([]));
   });
 
   it("reveals the composer for the feedback hash target", async () => {
@@ -90,5 +100,8 @@ describe("PublicReviewEditorialFeedback", () => {
       .getByText("Send feedback", { exact: true })
       .closest("details");
     await waitFor(() => expect(disclosure).toHaveAttribute("open"));
+    await waitFor(() =>
+      expect(getWaveComposerDockElements()).toContain(disclosure)
+    );
   });
 });

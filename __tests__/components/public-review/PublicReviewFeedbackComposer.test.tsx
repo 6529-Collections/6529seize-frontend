@@ -174,7 +174,19 @@ describe("PublicReviewFeedbackComposer", () => {
       selector: "textarea",
     });
     expect(comment).toHaveClass("placeholder:tw-text-iron-400");
-    expect(comment).toHaveClass("tw-ring-white/[0.08]");
+    expect(comment).toHaveClass("tw-bg-iron-900", "tw-ring-iron-500/80");
+    expect(comment.closest("form")).toHaveClass(
+      "tw-rounded-xl",
+      "tw-border-white/[0.12]",
+      "tw-bg-iron-950/70"
+    );
+    expect(
+      screen.getByRole("button", { name: "Preview Wave message" })
+    ).toHaveClass(
+      "tw-border-iron-500/80",
+      "tw-bg-iron-900",
+      "tw-text-iron-100"
+    );
     expect(
       screen.getByRole("button", { name: "Post to review Wave" })
     ).toHaveClass("tw-bg-primary-600", "hover:tw-ring-primary-300/60");

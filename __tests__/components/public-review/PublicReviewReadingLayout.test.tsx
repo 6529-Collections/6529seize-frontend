@@ -22,19 +22,17 @@ describe("PublicReviewReadingLayout", () => {
   });
 
   it("reveals the feedback hash target without smooth motion when requested", async () => {
-    jest
-      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
-      .mockReturnValue({
-        bottom: 800,
-        height: 800,
-        left: 0,
-        right: 760,
-        top: 0,
-        width: 760,
-        x: 0,
-        y: 0,
-        toJSON: () => ({}),
-      });
+    jest.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
+      bottom: 800,
+      height: 800,
+      left: 0,
+      right: 760,
+      top: 0,
+      width: 760,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    });
     const scrollIntoView = jest.fn();
     Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
       configurable: true,
@@ -76,7 +74,12 @@ describe("PublicReviewReadingLayout", () => {
     ).toHaveClass(
       "focus:tw-ring-2",
       "focus:tw-ring-inset",
-      "focus:tw-ring-primary-400"
+      "focus:tw-ring-primary-400",
+      "@[760px]:tw-top-[calc(4rem+env(safe-area-inset-top,0px))]",
+      "@[760px]:tw-h-[calc(100dvh-4rem-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px))]"
+    );
+    expect(screen.getByText("Page 1").parentElement?.parentElement).toHaveClass(
+      "tw-top-[env(safe-area-inset-top,0px)]"
     );
   });
 
@@ -96,7 +99,12 @@ describe("PublicReviewReadingLayout", () => {
     const dialog = await screen.findByRole("dialog", {
       name: "Page comments",
     });
-    expect(dialog).toBeInTheDocument();
+    expect(dialog).toHaveClass(
+      "tw-box-border",
+      "tw-pt-[env(safe-area-inset-top,0px)]",
+      "tw-pr-[env(safe-area-inset-right,0px)]",
+      "tw-pb-[env(safe-area-inset-bottom,0px)]"
+    );
     await waitFor(() =>
       expect(document.getElementById("public-review-feedback")).toHaveFocus()
     );
@@ -141,19 +149,17 @@ describe("PublicReviewReadingLayout", () => {
   it("starts observing the layout when feedback becomes available", async () => {
     const user = userEvent.setup();
     window.localStorage.setItem("public-review-comment-panel-open", "false");
-    jest
-      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
-      .mockReturnValue({
-        bottom: 800,
-        height: 800,
-        left: 0,
-        right: 760,
-        top: 0,
-        width: 760,
-        x: 0,
-        y: 0,
-        toJSON: () => ({}),
-      });
+    jest.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
+      bottom: 800,
+      height: 800,
+      left: 0,
+      right: 760,
+      top: 0,
+      width: 760,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    });
     const layout = (feedbackAvailable: boolean) => (
       <PublicReviewReadingLayout
         content={<div>Review content</div>}

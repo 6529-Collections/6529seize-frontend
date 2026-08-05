@@ -183,7 +183,7 @@ export function PublicReviewReadingLayout({
   if (!feedbackAvailable) {
     return (
       <section className="tw-min-w-0">
-        <div className="tw-sticky tw-top-0 tw-z-30 tw-flex tw-min-h-16 tw-items-center tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.07] tw-bg-[#0D0D0F]/95 tw-px-4 tw-backdrop-blur-xl sm:tw-px-7 lg:tw-px-10">
+        <div className="tw-sticky tw-top-[env(safe-area-inset-top,0px)] tw-z-30 tw-flex tw-min-h-16 tw-items-center tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.07] tw-bg-[#0D0D0F]/95 tw-px-4 tw-backdrop-blur-xl sm:tw-px-7 lg:tw-px-10">
           {toolbar}
         </div>
         {content}
@@ -194,7 +194,7 @@ export function PublicReviewReadingLayout({
   const panelContents = (showCloseButton: boolean) => (
     <PublicReviewCommentPanelOpenContext.Provider value={isPanelOpen}>
       <div className="tw-flex tw-h-full tw-min-h-0 tw-flex-col tw-bg-iron-950">
-        <header className="tw-flex tw-min-h-16 tw-flex-none tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-px-5">
+        <header className="tw-flex tw-min-h-16 tw-flex-none tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.12] tw-bg-iron-900/70 tw-px-5">
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2.5">
             <ChatBubbleLeftRightIcon
               className="tw-size-4 tw-flex-none tw-text-iron-400"
@@ -248,7 +248,7 @@ export function PublicReviewReadingLayout({
             <DialogBackdrop className="tw-fixed tw-inset-0 tw-bg-black/55" />
             <div className="tw-fixed tw-inset-0 tw-flex tw-justify-end tw-overflow-hidden">
               <DialogPanel
-                className="tw-relative tw-h-[100dvh] tw-w-96 tw-max-w-[calc(100vw-1rem)] tw-border-y-0 tw-border-b-0 tw-border-l tw-border-r-0 tw-border-solid tw-border-white/[0.1] tw-bg-iron-950 tw-shadow-2xl tw-shadow-black/60"
+                className="tw-relative tw-box-border tw-h-[100dvh] tw-w-96 tw-max-w-[calc(100vw-1rem)] tw-border-y-0 tw-border-b-0 tw-border-l tw-border-r-0 tw-border-solid tw-border-white/[0.1] tw-bg-iron-950 tw-pb-[env(safe-area-inset-bottom,0px)] tw-pr-[env(safe-area-inset-right,0px)] tw-pt-[env(safe-area-inset-top,0px)] tw-shadow-2xl tw-shadow-black/60"
                 id={COMMENT_PANEL_ID}
                 tabIndex={-1}
               >
@@ -262,7 +262,7 @@ export function PublicReviewReadingLayout({
 
   return (
     <section className="tw-min-w-0 tw-@container" ref={layoutRef}>
-      <div className="tw-sticky tw-top-0 tw-z-30 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.07] tw-bg-[#0D0D0F]/95 tw-backdrop-blur-xl">
+      <div className="tw-sticky tw-top-[env(safe-area-inset-top,0px)] tw-z-30 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.07] tw-bg-[#0D0D0F]/95 tw-backdrop-blur-xl">
         <div className="tw-flex tw-min-h-16 tw-items-center tw-justify-between tw-gap-4 tw-px-4 sm:tw-px-7 lg:tw-px-10">
           {toolbar}
           <button
@@ -310,7 +310,7 @@ export function PublicReviewReadingLayout({
           <aside
             id={COMMENT_PANEL_ID}
             aria-labelledby={COMMENT_PANEL_HEADING_ID}
-            className={`tw-order-1 tw-scroll-mt-20 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400 @[760px]:tw-sticky @[760px]:tw-top-16 @[760px]:tw-order-2 @[760px]:tw-h-[calc(100dvh-4rem)] @[760px]:tw-overflow-hidden @[760px]:tw-border-b-0 @[760px]:tw-border-l ${
+            className={`tw-order-1 tw-scroll-mt-[calc(5rem+env(safe-area-inset-top,0px))] tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400 @[760px]:tw-sticky @[760px]:tw-top-[calc(4rem+env(safe-area-inset-top,0px))] @[760px]:tw-order-2 @[760px]:tw-h-[calc(100dvh-4rem-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px))] @[760px]:tw-overflow-hidden @[760px]:tw-border-b-0 @[760px]:tw-border-l ${
               inlinePanelIsVisible ? "tw-block" : "tw-hidden"
             }`}
             hidden={!inlinePanelIsVisible}

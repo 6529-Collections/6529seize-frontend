@@ -121,7 +121,7 @@ function getFeedbackContextFingerprint({
 }
 
 const INPUT_CLASSES =
-  "tw-min-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-50 tw-outline-none tw-ring-1 tw-ring-inset tw-ring-white/[0.08] tw-transition hover:tw-ring-white/[0.14] focus:tw-bg-black focus:tw-ring-1 focus:tw-ring-primary-400 focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400";
+  "tw-min-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-50 tw-caret-primary-400 tw-shadow-inner tw-outline-none tw-ring-1 tw-ring-inset tw-ring-iron-500/80 tw-transition tw-duration-200 tw-ease-out hover:tw-bg-iron-800/80 hover:tw-ring-iron-400 focus:tw-bg-iron-900 focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400/80 focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400/80 disabled:tw-cursor-not-allowed disabled:tw-opacity-60";
 
 function getFeedbackGate({
   authenticated,
@@ -493,7 +493,7 @@ export default function PublicReviewFeedbackComposer({
       {authenticated && config.submissionsOpen ? (
         <form
           aria-describedby={!referenceReady ? referenceStatusId : undefined}
-          className={`tw-space-y-3 ${referenceReady ? "tw-mt-0" : "tw-mt-4"}`}
+          className={`tw-space-y-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.12] tw-bg-iron-950/70 tw-p-3 tw-shadow-inner sm:tw-p-4 ${referenceReady ? "tw-mt-0" : "tw-mt-4"}`}
           noValidate
           onSubmit={(event) => {
             event.preventDefault();
@@ -533,16 +533,16 @@ export default function PublicReviewFeedbackComposer({
             ) : null}
           </div>
 
-          <details className="tw-group tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.025] tw-transition-colors open:tw-border-white/[0.11]">
-            <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-3 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-200 hover:tw-bg-white/[0.025] hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
+          <details className="tw-group tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-500/80 tw-bg-iron-900/80 tw-transition-colors open:tw-border-primary-400/60">
+            <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-3 tw-text-xs tw-font-semibold tw-text-iron-200 tw-transition-colors tw-duration-200 hover:tw-bg-iron-800/80 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
               {t(locale, "publicReview.feedback.advanced")}
               <ChevronDownIcon
-                className="tw-size-3.5 tw-flex-none tw-text-iron-500 tw-transition-transform tw-duration-200 group-open:tw-rotate-180 motion-reduce:tw-transition-none"
+                className="tw-size-3.5 tw-flex-none tw-text-iron-400 tw-transition-transform tw-duration-200 group-open:tw-rotate-180 motion-reduce:tw-transition-none"
                 aria-hidden="true"
               />
             </summary>
 
-            <div className="tw-max-h-[30vh] tw-space-y-4 tw-overflow-y-auto tw-overscroll-contain tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-bg-white/[0.012] tw-px-3 tw-pb-3 tw-pt-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
+            <div className="tw-max-h-[30vh] tw-space-y-4 tw-overflow-y-auto tw-overscroll-contain tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.1] tw-bg-black/20 tw-px-3 tw-pb-3 tw-pt-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
               {contextControl}
 
               <div className="tw-grid tw-gap-3 @[340px]:tw-grid-cols-2">
@@ -650,7 +650,7 @@ export default function PublicReviewFeedbackComposer({
               type="button"
               disabled={busy || !referenceReady}
               onClick={previewAndFocusError}
-              className="tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-200 hover:tw-bg-white/[0.025] hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 disabled:tw-opacity-60"
+              className="tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-500/80 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-100 tw-transition-colors hover:tw-border-primary-400/70 hover:tw-bg-iron-800 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-opacity-60"
             >
               {t(locale, "publicReview.feedback.preview")}
             </button>
@@ -663,7 +663,7 @@ export default function PublicReviewFeedbackComposer({
             />
           </div>
 
-          <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-[#050506] tw-pb-3 tw-pt-3">
+          <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.12] tw-bg-black/40 tw-p-2">
             <button
               type="submit"
               disabled={busy || !referenceReady || Boolean(feedbackGate)}

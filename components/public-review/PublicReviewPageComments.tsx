@@ -101,7 +101,7 @@ export function PublicReviewPageComments({
 
       {ledgerQuery.isError ? (
         <div
-          className="tw-mt-3 tw-rounded-lg tw-bg-primary-400/[0.025] tw-px-3 tw-py-2.5"
+          className="tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-400/[0.06] tw-px-3 tw-py-2.5"
           role="alert"
         >
           <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-300">
@@ -124,7 +124,7 @@ export function PublicReviewPageComments({
       {!ledgerQuery.isLoading &&
       !ledgerQuery.isError &&
       records.length === 0 ? (
-        <p className="tw-mb-0 tw-mt-4 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08] tw-py-5 tw-text-sm tw-leading-6 tw-text-iron-400">
+        <p className="tw-mb-0 tw-mt-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.12] tw-bg-iron-900/70 tw-p-4 tw-text-sm tw-leading-6 tw-text-iron-300">
           {t(
             locale,
             ledgerQuery.hasNextPage
@@ -135,7 +135,7 @@ export function PublicReviewPageComments({
       ) : null}
 
       {records.length > 0 ? (
-        <ol className="tw-mb-0 tw-mt-3 tw-list-none tw-divide-y tw-divide-white/[0.08] tw-p-0">
+        <ol className="tw-mb-0 tw-mt-3 tw-list-none tw-space-y-3 tw-p-0">
           {records.map((record) => {
             const author =
               record.author.handle ??
@@ -162,7 +162,7 @@ export function PublicReviewPageComments({
                   aria-label={t(locale, "publicReview.ledger.itemLabel", {
                     author,
                   })}
-                  className="tw-py-4"
+                  className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.12] tw-bg-iron-900/70 tw-p-3 tw-shadow-sm tw-shadow-black/20"
                 >
                   <div className="tw-flex tw-items-start tw-gap-2.5">
                     <ProfileAvatar
