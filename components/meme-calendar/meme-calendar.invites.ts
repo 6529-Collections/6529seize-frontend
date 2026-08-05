@@ -75,6 +75,7 @@ function createIcsDataUrl(
 type CalendarInviteLabels = {
   readonly addToCalendar: string;
   readonly addToGoogleCalendar: string;
+  readonly tooltipId?: string | undefined;
 };
 
 const DEFAULT_CALENDAR_INVITE_LABELS: CalendarInviteLabels = {
@@ -95,7 +96,7 @@ function escapeHtmlAttribute(value: string): string {
 export function printCalendarInvites(
   dateOrInstant: Date,
   mintNumber: number,
-  fontColor: string = "#fff",
+  fontColor: string = "currentColor",
   size: number = 22,
   labels: CalendarInviteLabels = DEFAULT_CALENDAR_INVITE_LABELS,
   locale = "en-US"
@@ -120,14 +121,24 @@ export function printCalendarInvites(
     labels.addToGoogleCalendar
   );
   const safeFontColor = escapeHtmlAttribute(fontColor);
+  const iconStyle = `width:${size}px;height:${size}px`;
+  const tooltipId = labels.tooltipId
+    ? escapeHtmlAttribute(labels.tooltipId)
+    : null;
+  const addToCalendarTooltipAttributes = tooltipId
+    ? `data-tooltip-id="${tooltipId}" data-tooltip-content="${addToCalendarLabel}"`
+    : `title="${addToCalendarLabel}"`;
+  const addToGoogleCalendarTooltipAttributes = tooltipId
+    ? `data-tooltip-id="${tooltipId}" data-tooltip-content="${addToGoogleCalendarLabel}"`
+    : `title="${addToGoogleCalendarLabel}"`;
 
   return `
-    <div style="display:flex; gap:15px; align-items:center;">
-      <a href="${icsUrl}" download="meme-${mintNumber}-minting.ics" aria-label="${addToCalendarLabel}" title="${addToCalendarLabel}" style="display:flex; align-items:center; gap:5px; text-decoration:none; color:${safeFontColor};">
-        <img src="/calendar-ics.png" alt="" aria-hidden="true" style="width:${size}px;height:${size}px" />
+    <div style="display:flex; gap:4px; align-items:center;">
+      <a href="${icsUrl}" download="meme-${mintNumber}-minting.ics" aria-label="${addToCalendarLabel}" ${addToCalendarTooltipAttributes} class="tw-text-iron-300 tw-transition-colors desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400" style="display:inline-flex; min-width:32px; min-height:32px; align-items:center; justify-content:center; border-radius:7px; text-decoration:none; color:${safeFontColor};">
+        <img src="/calendar-ics.png" alt="" aria-hidden="true" style="${iconStyle}" />
       </a>
-      <a href="${gUrl}" target="_blank" rel="noopener noreferrer" aria-label="${addToGoogleCalendarLabel}" title="${addToGoogleCalendarLabel}" style="display:flex; align-items:center; gap:5px; text-decoration:none; color:${safeFontColor};">
-        <img src="/calendar-google.png" alt="" aria-hidden="true" style="width:${size}px;height:${size}px" />
+      <a href="${gUrl}" target="_blank" rel="noopener noreferrer" aria-label="${addToGoogleCalendarLabel}" ${addToGoogleCalendarTooltipAttributes} class="tw-text-iron-300 tw-transition-colors desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400" style="display:inline-flex; min-width:32px; min-height:32px; align-items:center; justify-content:center; border-radius:7px; text-decoration:none; color:${safeFontColor};">
+        <img src="/calendar-google.png" alt="" aria-hidden="true" style="${iconStyle}" />
       </a>
     </div>`;
 }

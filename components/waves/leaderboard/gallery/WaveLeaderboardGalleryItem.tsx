@@ -21,6 +21,8 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { startDropOpen } from "@/utils/monitoring/dropOpenTiming";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { WaveLeaderboardIdentity } from "../identity/WaveLeaderboardIdentity";
@@ -28,6 +30,8 @@ import WaveLeaderboardGalleryItemVotes from "./WaveLeaderboardGalleryItemVotes";
 import ApprovalStatusBadge from "@/components/waves/approval/ApprovalStatusBadge";
 import { isOfficiallyApprovedDrop } from "@/helpers/waves/approve-wave.helpers";
 import { AdditionalActionPromiseBadge } from "@/components/waves/drops/AdditionalActionPromiseBadge";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface WaveLeaderboardGalleryItemProps {
   readonly drop: ExtendedDrop;
@@ -89,6 +93,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     const [isHighlighting, setIsHighlighting] = useState(false);
     const isMobileScreen = useIsMobileScreen();
     const isTabletOrSmaller = useMediaQuery("(max-width: 1023px)");
+    const locale = useBrowserLocale();
     const { hasTouchScreen } = useDeviceInfo();
     const { canShowVote } = useDropInteractionRules(drop);
     const canShowVotingAction = canShowVote && !isVotingActionLocked;
@@ -101,6 +106,9 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
       () => getDropPreviewImageUrl(drop.metadata),
       [drop.metadata]
     );
+    const hasStaticMediaPreview =
+      primaryMedia?.mime_type.includes("image") === true ||
+      Boolean(previewImageUrl);
 
     const isFirstRenderRef = useRef(true);
     const previousSortRef = useRef(activeSort);
@@ -184,34 +192,58 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
       isHighlighting && !hasTouchScreen ? "tw-animate-gallery-reveal" : "";
 
     const baseImageClasses =
-      "tw-aspect-square tw-relative tw-flex-shrink-0 tw-cursor-pointer tw-touch-pan-y tw-overflow-hidden tw-bg-iron-900 tw-group/image";
+      "tw-aspect-square tw-relative tw-flex-shrink-0 tw-touch-pan-y tw-overflow-hidden tw-bg-iron-900 tw-group/image";
 
-    const imageScaleClasses = hasTouchScreen
+    const imageScaleClasses = hasTouchScreen || !hasStaticMediaPreview
       ? ""
       : `tw-transform tw-duration-700 tw-ease-out group-hover/image:tw-scale-105 ${highlightAnimation}`;
 
     const imageContainerClass = baseImageClasses;
+    const mediaContent = (
+      <div
+        className={`tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center ${imageScaleClasses}`}
+      >
+        <MediaDisplay
+          media_mime_type={primaryMedia?.mime_type ?? "image/jpeg"}
+          media_url={primaryMedia?.url ?? ""}
+          disableMediaInteraction={true}
+          fillVideoContainer={true}
+          imageScale={mediaImageScale}
+          previewImageUrl={previewImageUrl}
+        />
+      </div>
+    );
 
     return (
       <div className={containerClass}>
-        <button
-          className={`${imageContainerClass} tw-m-0 tw-w-full tw-overflow-hidden tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-text-left`}
-          onClick={handleImageClick}
-          type="button"
-        >
-          <div
-            className={`tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center ${imageScaleClasses}`}
+        {hasStaticMediaPreview ? (
+          <button
+            className={`${imageContainerClass} tw-m-0 tw-w-full tw-cursor-pointer tw-overflow-hidden tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-text-left`}
+            onClick={handleImageClick}
+            type="button"
           >
-            <MediaDisplay
-              media_mime_type={primaryMedia?.mime_type ?? "image/jpeg"}
-              media_url={primaryMedia?.url ?? ""}
-              disableMediaInteraction={true}
-              fillVideoContainer={true}
-              imageScale={mediaImageScale}
-              previewImageUrl={previewImageUrl}
-            />
+            {mediaContent}
+          </button>
+        ) : (
+          <div
+            className={`${imageContainerClass} tw-m-0 tw-w-full tw-overflow-hidden tw-rounded-lg`}
+          >
+            {mediaContent}
+            <button
+              type="button"
+              onClick={handleImageClick}
+              aria-label={t(locale, "drop.media.openMedia")}
+              title={t(locale, "drop.media.openMedia")}
+              className="tw-absolute tw-right-2 tw-top-2 tw-z-20 tw-flex tw-size-8 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/70 tw-p-0 tw-text-iron-300 tw-shadow-md tw-backdrop-blur-sm tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100"
+            >
+              <FontAwesomeIcon
+                icon={faArrowUpRightFromSquare}
+                className="tw-size-3.5"
+                aria-hidden="true"
+              />
+            </button>
           </div>
-        </button>
+        )}
         <div className="tw-flex tw-flex-1 tw-flex-col tw-rounded-b-lg tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-3">
           <div className="tw-mb-3 tw-min-w-0">
             <div className="tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-2">

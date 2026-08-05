@@ -1,7 +1,16 @@
 import {
   sanitizeSentryBreadcrumb,
   sanitizeSentryEvent,
+  sanitizeSentrySpan,
+  sanitizeUrlString,
 } from "@/utils/sentry-sanitizer";
+
+const SYNTHETIC_WAVE_ID = `${"1".repeat(8)}-${"2".repeat(4)}-4${"3".repeat(3)}-8${"4".repeat(3)}-${"5".repeat(12)}`;
+const SYNTHETIC_DROP_ID = `${"6".repeat(8)}-${"7".repeat(4)}-4${"8".repeat(3)}-8${"9".repeat(3)}-${"a".repeat(12)}`;
+const SYNTHETIC_AUTHOR_ID = `${"a".repeat(8)}-${"b".repeat(4)}-4${"c".repeat(3)}-8${"d".repeat(3)}-${"e".repeat(12)}`;
+const SYNTHETIC_WALLET = `0x${"f".repeat(40)}`;
+const SYNTHETIC_PROFILE = "synthetic-public-profile";
+const SYNTHETIC_MEDIA_ID = "synthetic-media-file";
 
 describe("sentry-sanitizer", () => {
   it("redacts secrets from breadcrumb text fields", () => {
@@ -35,6 +44,7 @@ describe("sentry-sanitizer", () => {
         "url.is_first_party": false,
       })
     );
+    expect(breadcrumb?.data).not.toHaveProperty("url.host_family");
   });
 
   it("marks first-party absolute breadcrumb URLs before stripping the host", () => {
@@ -329,6 +339,429 @@ describe("sentry-sanitizer", () => {
         "url.is_first_party": true,
         "url.is_first_party_api": true,
       })
+    );
+  });
+
+  it("normalizes automatic API breadcrumbs without losing request outcome fields", () => {
+    const breadcrumb = sanitizeSentryBreadcrumb({
+      type: "http",
+      category: "fetch",
+      data: {
+        method: "GET",
+        status_code: 503,
+        duration: 321,
+        url: `https://api.6529.io/api/v2/waves/${SYNTHETIC_WAVE_ID}/drops/${SYNTHETIC_DROP_ID}?access_token=synthetic#private`,
+      },
+    });
+    const payload = JSON.stringify(breadcrumb);
+
+    expect(breadcrumb?.data).toEqual(
+      expect.objectContaining({
+        method: "GET",
+        status_code: 503,
+        duration: 321,
+        url: "/api/v2/waves/:uuid/drops/:uuid",
+        "url.is_first_party": true,
+        "url.is_first_party_api": true,
+      })
+    );
+    expect(payload).not.toContain(SYNTHETIC_WAVE_ID);
+    expect(payload).not.toContain(SYNTHETIC_DROP_ID);
+    expect(payload).not.toContain("access_token");
+    expect(payload).not.toContain("#private");
+  });
+
+  it("normalizes automatic HTTP spans while preserving method, status, origin, and timing", () => {
+    const span = sanitizeSentrySpan({
+      op: "http.client",
+      description: `GET https://api.6529.io/api/v2/waves/${SYNTHETIC_WAVE_ID}/drops?access_token=synthetic#private`,
+      start_timestamp: 10,
+      timestamp: 10.25,
+      exclusive_time: 250,
+      data: {
+        url: `/api/v2/waves/${SYNTHETIC_WAVE_ID}/drops?access_token=synthetic#private`,
+        "http.url": `https://api.6529.io/api/v2/waves/${SYNTHETIC_WAVE_ID}/drops?access_token=synthetic#private`,
+        "http.method": "GET",
+        "http.response.status_code": 503,
+        "http.query": "?access_token=synthetic",
+        "http.fragment": "#private",
+        "http.host": "api.6529.io:443",
+        "server.address": "api.6529.io",
+        "sentry.origin": "auto.http.browser",
+        "url.domain": "6529.io",
+        "url.same_origin": false,
+      },
+    });
+    const payload = JSON.stringify(span);
+
+    expect(span).toEqual(
+      expect.objectContaining({
+        description: "GET /api/v2/waves/:uuid/drops",
+        start_timestamp: 10,
+        timestamp: 10.25,
+        exclusive_time: 250,
+      })
+    );
+    expect(span.data).toEqual(
+      expect.objectContaining({
+        url: "/api/v2/waves/:uuid/drops",
+        "http.url": "/api/v2/waves/:uuid/drops",
+        "http.host": "first-party-api",
+        "http.method": "GET",
+        "http.response.status_code": 503,
+        "server.address": "first-party-api",
+        "sentry.origin": "auto.http.browser",
+        "url.domain": "first-party-app",
+        "url.same_origin": false,
+      })
+    );
+    expect(span.data).not.toHaveProperty("http.query");
+    expect(span.data).not.toHaveProperty("http.fragment");
+    expect(payload).not.toContain(SYNTHETIC_WAVE_ID);
+    expect(payload).not.toContain("access_token");
+    expect(payload).not.toContain("#private");
+  });
+
+  it("keeps automatic span sanitization idempotent across SDK hooks", () => {
+    const once = sanitizeSentrySpan({
+      op: "http.client",
+      description: `GET https://api.6529.io/api/v2/waves/${SYNTHETIC_WAVE_ID}`,
+      data: {
+        "http.host": "api.6529.io:443",
+        "http.method": "GET",
+        "server.address": "api.6529.io",
+        url: `https://api.6529.io/api/v2/waves/${SYNTHETIC_WAVE_ID}`,
+        "url.domain": "6529.io",
+        "url.same_origin": false,
+      },
+    });
+
+    expect(sanitizeSentrySpan(once)).toEqual(once);
+    expect(once.data).toEqual(
+      expect.objectContaining({
+        "http.host": "first-party-api",
+        "server.address": "first-party-api",
+        "url.domain": "first-party-app",
+      })
+    );
+  });
+
+  it("normalizes author and media identifiers in resource span paths", () => {
+    const span = sanitizeSentrySpan({
+      op: "resource.video",
+      description: `https://media.example.invalid/renditions/drops/author_${SYNTHETIC_AUTHOR_ID}/${SYNTHETIC_MEDIA_ID}/hls/file.m3u8?token=synthetic#private`,
+      data: {
+        "http.response.status_code": 404,
+        "url.same_origin": false,
+      },
+    });
+    const payload = JSON.stringify(span);
+
+    expect(span.description).toBe("/renditions/drops/:id/:id/hls/file.m3u8");
+    expect(span.data).toEqual(
+      expect.objectContaining({
+        "http.response.status_code": 404,
+        "url.same_origin": false,
+      })
+    );
+    expect(payload).not.toContain(SYNTHETIC_AUTHOR_ID);
+    expect(payload).not.toContain(SYNTHETIC_MEDIA_ID);
+    expect(payload).not.toContain("token=");
+  });
+
+  it.each([
+    ["authors", SYNTHETIC_PROFILE],
+    ["entries", "synthetic-entry"],
+    ["profile-cms", "synthetic-page"],
+    ["uploads", SYNTHETIC_MEDIA_ID],
+  ])(
+    "normalizes identifiers after the exact %s endpoint segment",
+    (parent, identifier) => {
+      const sanitized = sanitizeUrlString(
+        `https://example.invalid/${parent}/${identifier}`
+      );
+
+      expect(sanitized).toBe(`/${parent}/:id`);
+      expect(JSON.stringify(sanitized)).not.toContain(identifier);
+    }
+  );
+
+  it.each(["authorship", "entries-list", "mediafiles", "uploads-state"])(
+    "does not treat the near-miss %s endpoint segment as an identifier parent",
+    (parent) => {
+      expect(
+        sanitizeUrlString(`https://example.invalid/${parent}/synthetic-action`)
+      ).toBe(`/${parent}/synthetic-action`);
+    }
+  );
+
+  it("omits third-party hosts while retaining sanitized path families", () => {
+    const breadcrumb = sanitizeSentryBreadcrumb({
+      type: "http",
+      category: "fetch",
+      data: {
+        url: `https://media.example.invalid/renditions/drops/author_${SYNTHETIC_AUTHOR_ID}/${SYNTHETIC_MEDIA_ID}?token=synthetic`,
+      },
+    });
+    const payload = JSON.stringify(breadcrumb);
+
+    expect(breadcrumb?.data).toEqual(
+      expect.objectContaining({
+        url: "/renditions/drops/:id/:id",
+        "url.is_first_party": false,
+      })
+    );
+    expect(breadcrumb?.data).not.toHaveProperty("url.host_family");
+    expect(payload).not.toContain(SYNTHETIC_AUTHOR_ID);
+    expect(payload).not.toContain(SYNTHETIC_MEDIA_ID);
+    expect(payload).not.toContain("token=");
+  });
+
+  it.each([
+    [
+      "https://synthetic-profile.example.invalid/assets/app.js?token=synthetic",
+      "synthetic-profile",
+    ],
+    [
+      "https://synthetic-profile.example.co.uk/assets/app.js?token=synthetic",
+      "synthetic-profile.example.co.uk",
+    ],
+    ["https://192.0.2.10/assets/app.js?token=synthetic", "192.0.2.10"],
+    ["http://localhost:8080/assets/app.js?token=synthetic", "localhost"],
+  ])("does not retain the raw host from %s", (url, rawHost) => {
+    const breadcrumb = sanitizeSentryBreadcrumb({
+      type: "http",
+      category: "fetch",
+      data: { url },
+    });
+    const payload = JSON.stringify(breadcrumb);
+
+    expect(breadcrumb?.data).toEqual(
+      expect.objectContaining({
+        url: "/assets/app.js",
+        "url.is_first_party": false,
+      })
+    );
+    expect(breadcrumb?.data).not.toHaveProperty("url.host_family");
+    expect(payload).not.toContain(rawHost);
+    expect(payload).not.toContain("token=");
+  });
+
+  it("generalizes arbitrary automatic span host fields", () => {
+    const span = sanitizeSentrySpan({
+      op: "http.client",
+      description:
+        "GET https://synthetic-profile.example.invalid/assets/app.js?token=synthetic",
+      data: {
+        duration: 125,
+        "http.host": "192.0.2.10:443",
+        "http.method": "GET",
+        "http.response.status_code": 502,
+        "server.address": "synthetic-profile.example.invalid",
+        "url.domain": "synthetic-profile.example.co.uk",
+      },
+    });
+    const payload = JSON.stringify(span);
+
+    expect(span).toEqual(
+      expect.objectContaining({
+        description: "GET /assets/app.js",
+        data: expect.objectContaining({
+          duration: 125,
+          "http.host": "third-party",
+          "http.method": "GET",
+          "http.response.status_code": 502,
+          "server.address": "third-party",
+          "url.domain": "third-party",
+        }),
+      })
+    );
+    expect(payload).not.toContain("synthetic-profile");
+    expect(payload).not.toContain("example.co.uk");
+    expect(payload).not.toContain("192.0.2.10");
+    expect(payload).not.toContain("token=");
+  });
+
+  it.each([
+    ["api.6529.io:443", "first-party-api"],
+    ["app.6529.io", "first-party-app"],
+    ["media.6529.io", "first-party"],
+    ["api.6529.io.example.invalid", "third-party"],
+    ["api.6529.io@synthetic.invalid", "third-party"],
+    ["FIRST-PARTY-API", "first-party-api"],
+  ])(
+    "classifies the span host value %s as %s idempotently",
+    (host, expected) => {
+      const once = sanitizeSentrySpan({
+        data: { "server.address": host },
+      });
+
+      expect(once.data?.["server.address"]).toBe(expected);
+      expect(sanitizeSentrySpan(once)).toEqual(once);
+    }
+  );
+
+  it("keeps static resource spans as static endpoint families", () => {
+    const span = sanitizeSentrySpan({
+      op: "resource.script",
+      description:
+        "https://6529.io/_next/static/chunks/app.js?cache=synthetic#private",
+      data: {
+        "server.address": "6529.io",
+        "url.same_origin": true,
+      },
+    });
+
+    expect(span).toEqual(
+      expect.objectContaining({
+        description: "/_next/static/chunks/app.js",
+        data: expect.objectContaining({
+          "server.address": "first-party-app",
+          "url.same_origin": true,
+        }),
+      })
+    );
+  });
+
+  it("keeps absolute same-origin API and static URLs as endpoint families", () => {
+    const apiSpan = sanitizeSentrySpan({
+      op: "http.client",
+      description: `GET https://6529.io/api/v2/waves/${SYNTHETIC_WAVE_ID}`,
+      data: {
+        url: `https://6529.io/api/v2/waves/${SYNTHETIC_WAVE_ID}`,
+        "url.same_origin": true,
+      },
+    });
+    const staticSpan = sanitizeSentrySpan({
+      op: "resource.script",
+      description: "https://6529.io/_next/static/chunks/app.js",
+      data: {
+        url: "https://6529.io/_next/static/chunks/app.js",
+        "url.same_origin": true,
+      },
+    });
+
+    expect(apiSpan).toEqual(
+      expect.objectContaining({
+        description: "GET /api/v2/waves/:uuid",
+        data: expect.objectContaining({
+          url: "/api/v2/waves/:uuid",
+          "url.same_origin": true,
+        }),
+      })
+    );
+    expect(staticSpan).toEqual(
+      expect.objectContaining({
+        description: "/_next/static/chunks/app.js",
+        data: expect.objectContaining({
+          url: "/_next/static/chunks/app.js",
+          "url.same_origin": true,
+        }),
+      })
+    );
+    expect(JSON.stringify(apiSpan)).not.toContain(SYNTHETIC_WAVE_ID);
+  });
+
+  it.each(["apiary", "assets-v2", "images.example", "staticity"])(
+    "keeps the static-root near-miss %s in the application route family",
+    (root) => {
+      const sanitized = sanitizeUrlString(
+        `https://6529.io/${root}/${SYNTHETIC_PROFILE}?token=synthetic`
+      );
+
+      expect(sanitized).toBe("/[user]/[...cmsPath]");
+      expect(JSON.stringify(sanitized)).not.toContain(SYNTHETIC_PROFILE);
+      expect(JSON.stringify(sanitized)).not.toContain("token=");
+    }
+  );
+
+  it("normalizes profile transactions and wallet endpoint requests in events", () => {
+    const event = sanitizeSentryEvent({
+      transaction: `/${SYNTHETIC_PROFILE}/collected?access_token=synthetic`,
+      request: {
+        method: "GET",
+        url: `https://api.6529.io/identities/by-wallet/${SYNTHETIC_WALLET}?access_token=synthetic#private`,
+      },
+    });
+    const payload = JSON.stringify(event);
+
+    expect(event.transaction).toBe("/[user]/collected");
+    expect(event.request).toEqual(
+      expect.objectContaining({
+        method: "GET",
+        url: "/identities/by-wallet/:wallet",
+      })
+    );
+    expect(payload).not.toContain(SYNTHETIC_PROFILE);
+    expect(payload).not.toContain(SYNTHETIC_WALLET);
+    expect(payload).not.toContain("access_token");
+    expect(payload).not.toContain("#private");
+  });
+
+  it("preserves useful non-path and method-prefixed transaction names", () => {
+    const componentEvent = sanitizeSentryEvent({
+      transaction: "SyntheticComponent",
+    });
+    const httpEvent = sanitizeSentryEvent({
+      transaction: `GET /api/v2/waves/${SYNTHETIC_WAVE_ID}?token=synthetic`,
+    });
+    const whitespaceEvent = sanitizeSentryEvent({
+      transaction: `GET\t/api/v2/waves/${SYNTHETIC_WAVE_ID}?token=synthetic`,
+    });
+    const newlineEvent = sanitizeSentryEvent({
+      transaction: `GET\n/api/v2/waves/${SYNTHETIC_WAVE_ID}?token=synthetic`,
+    });
+    const nearMissEvent = sanitizeSentryEvent({ transaction: "GET" });
+
+    expect(componentEvent.transaction).toBe("SyntheticComponent");
+    expect(httpEvent.transaction).toBe("GET /api/v2/waves/:uuid");
+    expect(whitespaceEvent.transaction).toBe("GET /api/v2/waves/:uuid");
+    expect(newlineEvent.transaction).toBe("GET /api/v2/waves/:uuid");
+    expect(nearMissEvent.transaction).toBe("GET");
+    expect(JSON.stringify(httpEvent)).not.toContain(SYNTHETIC_WAVE_ID);
+    expect(JSON.stringify(httpEvent)).not.toContain("token=");
+    expect(JSON.stringify(whitespaceEvent)).not.toContain(SYNTHETIC_WAVE_ID);
+    expect(JSON.stringify(newlineEvent)).not.toContain(SYNTHETIC_WAVE_ID);
+  });
+
+  it("treats relative application URLs as route families", () => {
+    const sanitized = sanitizeUrlString(
+      `/${SYNTHETIC_PROFILE}/collected?token=synthetic#private`
+    );
+
+    expect(sanitized).toBe("/[user]/collected");
+    expect(JSON.stringify(sanitized)).not.toContain(SYNTHETIC_PROFILE);
+    expect(JSON.stringify(sanitized)).not.toContain("token=");
+  });
+
+  it.each([
+    [
+      "https://api.6529.io/api/waves-overview?cache=synthetic#private",
+      "/api/waves-overview",
+    ],
+    [
+      "https://api.6529.io/drop-media/multipart-upload/completion?cache=synthetic",
+      "/drop-media/multipart-upload/completion",
+    ],
+    ["https://6529.io/about/media?cache=synthetic", "/about/media"],
+    ["https://6529.io/waves/create?cache=synthetic", "/waves/create"],
+    [
+      "https://6529.io/_next/static/chunks/app.js?cache=synthetic",
+      "/_next/static/chunks/app.js",
+    ],
+  ])("keeps the public static or API family for %s", (url, expected) => {
+    expect(sanitizeUrlString(url)).toBe(expected);
+  });
+
+  it("is idempotent for already-normalized route and endpoint placeholders", () => {
+    const endpoint = "/api/v2/waves/:uuid/drops/:uuid";
+    const route = "/[user]/collected";
+    const mixedCaseRoute = "/[waveId]/drops";
+
+    expect(sanitizeUrlString(sanitizeUrlString(endpoint))).toBe(endpoint);
+    expect(sanitizeSentryEvent({ transaction: route }).transaction).toBe(route);
+    expect(sanitizeUrlString(sanitizeUrlString(mixedCaseRoute))).toBe(
+      "/[waveid]/drops"
     );
   });
 });

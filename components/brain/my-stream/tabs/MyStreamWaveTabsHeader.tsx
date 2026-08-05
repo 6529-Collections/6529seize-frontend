@@ -53,7 +53,6 @@ interface MyStreamWaveTabsHeaderProps {
   readonly headerActionsTooltipId: string;
   readonly headerClassName: string;
   readonly actionsClassName: string;
-  readonly rightSidebarButtonBackgroundClassName?: string | undefined;
   readonly renderLeadingActions?:
     | ((context: MyStreamWaveTabsHeaderActionContext) => React.ReactNode)
     | undefined;
@@ -136,8 +135,8 @@ function MyStreamWaveHeaderIdentity({
   waveScoreLearnMoreHref,
   showWaveRepAction,
 }: MyStreamWaveHeaderIdentityProps) {
-  const scoreActions = (
-    <span className="-tw-ml-1.5 tw-mt-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-1.5">
+  const scoreActions = !isCompact ? (
+    <span className="tw-mt-1.5 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-1.5 tw-self-start">
       <WaveTrustSignals
         waveRep={wave.wave_rep}
         waveScore={wave.wave_score}
@@ -145,11 +144,11 @@ function MyStreamWaveHeaderIdentity({
         mode="summary"
         learnMoreHref={waveScoreLearnMoreHref}
       />
-      {showWaveRepAction && !isCompact && (
+      {showWaveRepAction && (
         <WaveRepButton wave={wave} variant="compact" />
       )}
     </span>
-  );
+  ) : null;
 
   if (directMessageProfileHref) {
     return (
@@ -174,7 +173,7 @@ function MyStreamWaveHeaderIdentity({
 
   return (
     <>
-      <div className="tw-size-9 tw-flex-shrink-0 tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950">
+      <div className="tw-size-9 tw-flex-shrink-0 tw-self-start tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950">
         <WavePicture
           name={wave.name}
           picture={wave.picture}
@@ -224,10 +223,7 @@ function MyStreamWaveHeaderIdentity({
                 </>
               )}
             </WaveDescriptionPopover>
-            {!isCompact && (
-              <span className="tw-self-start">{scoreActions}</span>
-            )}
-            {isCompact && scoreActions}
+            {scoreActions}
           </>
         ) : (
           <>
@@ -252,7 +248,6 @@ export default function MyStreamWaveTabsHeader({
   headerActionsTooltipId,
   headerClassName,
   actionsClassName,
-  rightSidebarButtonBackgroundClassName = "tw-bg-iron-800",
   renderLeadingActions,
   renderOverflowMenuItems,
 }: MyStreamWaveTabsHeaderProps) {
@@ -476,7 +471,7 @@ export default function MyStreamWaveTabsHeader({
               data-tooltip-id={headerActionsTooltipId}
               data-tooltip-content={waveLinkActionLabel}
               data-wave-link-action-mode={waveLinkActionMode}
-              className={`tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white ${waveLinkActionIconColor}`}
+              className={`tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.05] tw-transition-colors tw-duration-150 hover:tw-border-white/10 hover:tw-bg-white/[0.08] hover:tw-text-white ${waveLinkActionIconColor}`}
             >
               {renderWaveLinkActionIcon()}
             </button>
@@ -487,7 +482,7 @@ export default function MyStreamWaveTabsHeader({
             aria-label={searchMessagesLabel}
             data-tooltip-id={headerActionsTooltipId}
             data-tooltip-content={searchMessagesLabel}
-            className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.05] tw-text-iron-200 tw-transition-colors tw-duration-150 hover:tw-border-white/10 hover:tw-bg-white/[0.08] hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
           >
             <MagnifyingGlassIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
           </button>
@@ -497,7 +492,7 @@ export default function MyStreamWaveTabsHeader({
               onClick={toggleRightSidebar}
               data-tooltip-id={headerActionsTooltipId}
               data-tooltip-content={rightSidebarActionLabel}
-              className={`tw-group tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 ${rightSidebarButtonBackgroundClassName} tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] tw-backdrop-blur-sm tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-iron-500/80 desktop-hover:hover:tw-bg-iron-700/85 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)]`}
+              className="tw-group tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.05] tw-transition-colors tw-duration-150 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-white/[0.08]"
               aria-label={rightSidebarActionLabel}
             >
               <ChevronDoubleLeftIcon
@@ -514,7 +509,7 @@ export default function MyStreamWaveTabsHeader({
             <CompactMenu
               aria-label="More wave actions"
               unstyledTrigger
-              triggerClassName="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
+              triggerClassName="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.05] tw-text-iron-200 tw-transition-colors tw-duration-150 hover:tw-border-white/10 hover:tw-bg-white/[0.08] hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
               trigger={
                 <>
                   <span className="tw-sr-only">More wave actions</span>

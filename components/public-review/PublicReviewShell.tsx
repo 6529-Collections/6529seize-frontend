@@ -8,7 +8,6 @@ import { PublicReviewMarkdown } from "@/components/public-review/PublicReviewMar
 import { PublicReviewNavigation } from "@/components/public-review/PublicReviewNavigation";
 import { PublicReviewReadingLayout } from "@/components/public-review/PublicReviewReadingLayout";
 import { PublicReviewStatusBanner } from "@/components/public-review/PublicReviewStatusBanner";
-import { PublicReviewSurfaceNavigation } from "@/components/public-review/PublicReviewSurfaceNavigation";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -124,7 +123,12 @@ export function PublicReviewShell({
       <div className="tw-w-full lg:tw-grid lg:tw-grid-cols-[17.5rem_minmax(0,1fr)] lg:tw-items-stretch">
         <PublicReviewNavigation
           currentPage={page}
+          feedbackHref={routes.getFeedbackHref(routeVersion)}
           pages={reviewVersion.pages}
+          referenceHref={getSolidityReferenceRootHref({
+            reviewSlug: review.slug,
+            version: routeVersion,
+          })}
           routes={routes}
           sections={sections}
           version={routeVersion}
@@ -158,15 +162,6 @@ export function PublicReviewShell({
                     review={review}
                     displayedVersion={displayedVersion}
                     source={source}
-                  />
-                  <PublicReviewSurfaceNavigation
-                    activeSurface="review"
-                    feedbackHref={routes.getFeedbackHref(routeVersion)}
-                    referenceHref={getSolidityReferenceRootHref({
-                      reviewSlug: review.slug,
-                      version: routeVersion,
-                    })}
-                    reviewHref={routes.getRootHref(routeVersion)}
                   />
                 </div>
 

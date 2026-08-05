@@ -44,10 +44,11 @@ export default function HashtagsTypeaheadMenu({
   return (
     <div
       ref={menuRef}
-      className={`tailwind-scope tw-absolute tw-z-50 tw-min-w-[17.4rem] tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5 tw-p-2 ${
+      className={`tailwind-scope tw-absolute tw-z-50 tw-min-w-[17.4rem] tw-rounded-lg tw-bg-iron-800 tw-p-2 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5 ${
         position === "top" ? "tw-bottom-full tw-mb-1" : "tw-top-full tw-mt-1"
-      }`}>
-      <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
+      }`}
+    >
+      <ul className="tw-mx-0 tw-mb-0 tw-flex tw-list-none tw-flex-col tw-px-2">
         {options.map((option, i: number) => (
           <HashtagsTypeaheadMenuItem
             index={i}
@@ -60,7 +61,13 @@ export default function HashtagsTypeaheadMenu({
               setHighlightedIndex(i);
             }}
             key={option.key}
-            option={option}
+            name={option.name}
+            picture={option.picture}
+            collectionName={option.collectionName}
+            tokenId={option.tokenId}
+            setRefElement={(element) => {
+              option.setRefElement(element);
+            }}
           />
         ))}
       </ul>

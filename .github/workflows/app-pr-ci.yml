@@ -29,14 +29,21 @@ jobs:
       build_required: ${{ steps.plan_outputs.outputs.build_required }}
       playwright_smoke_required: ${{ steps.plan_outputs.outputs.playwright_smoke_required }}
       playwright_critical_shell_required: ${{ steps.plan_outputs.outputs.playwright_critical_shell_required }}
+      playwright_museum_required: ${{ steps.plan_outputs.outputs.playwright_museum_required }}
+      deadcode_required: ${{ steps.plan_outputs.outputs.deadcode_required }}
+      release_bus_contract_required: ${{ steps.plan_outputs.outputs.release_bus_contract_required }}
       dependency_governance_required: ${{ steps.plan_outputs.outputs.dependency_governance_required }}
       reviewbot_contract_required: ${{ steps.plan_outputs.outputs.reviewbot_contract_required }}
       agent_files_sync_required: ${{ steps.plan_outputs.outputs.agent_files_sync_required }}
+      app_check_matrix: ${{ steps.plan_outputs.outputs.app_check_matrix }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
+          # Preserve complete history for the risk plan without transferring
+          # blobs that are reachable only from unrelated refs.
+          filter: blob:none
           fetch-depth: 0
           persist-credentials: false
 
@@ -67,6 +74,8 @@ jobs:
             --changed-from "origin/${BASE_REF}" \
             --untrusted-pr="${UNTRUSTED_PR}" \
             --output test-results/app-pr-ci/ci-plan.json
+          ./bin/6529 exec node scripts/app-pr-ci-effective-plan.cjs \
+            --plan test-results/app-pr-ci/ci-plan.json
           ./bin/6529 run testing-strategy -- scan-changed-secrets \
             --changed-from "origin/${BASE_REF}" \
             --output test-results/app-pr-ci/secret-scan.json
@@ -76,6 +85,9 @@ jobs:
 
       - name: Publish CI plan outputs
         id: plan_outputs
+        env:
+          DEFAULT_CI_RUNNER: ${{ vars.CI_LINUX_RUNNER || 'ubuntu-latest' }}
+          BUILD_CI_RUNNER: ${{ vars.CI_BUILD_RUNNER || vars.CI_LINUX_RUNNER || 'ubuntu-latest' }}
         run: |
           set -euo pipefail
 
@@ -86,10 +98,42 @@ jobs:
           const write = (key, value) => {
             fs.appendFileSync(output, `${key}=${value}\n`);
           };
+          const runner = (value, label) => {
+            if (!/^[A-Za-z0-9._-]{1,100}$/.test(value || "")) {
+              throw new Error(`${label} is not a valid GitHub runner label.`);
+            }
+            return value;
+          };
+          const defaultRunner = runner(process.env.DEFAULT_CI_RUNNER, "DEFAULT_CI_RUNNER");
+          const buildRunner = runner(process.env.BUILD_CI_RUNNER, "BUILD_CI_RUNNER");
           write("risk_floor", plan.risk.computed_floor);
           for (const [name, check] of Object.entries(plan.checks)) {
             write(`${name}_required`, String(Boolean(check.required)));
           }
+          const appCheckLanes = [
+            { lane: "quality", label: "Quality and contracts", runner: defaultRunner },
+          ];
+          if (plan.checks.build.required) {
+            appCheckLanes.push({ lane: "build", label: "Production build", runner: buildRunner });
+          }
+          if (plan.checks.playwright_smoke.required) {
+            appCheckLanes.push({ lane: "playwright-smoke", label: "Playwright smoke", runner: defaultRunner });
+          }
+          if (plan.checks.playwright_critical_shell.required) {
+            appCheckLanes.push({
+              lane: "playwright-critical-shell",
+              label: "Playwright critical shell",
+              runner: defaultRunner,
+            });
+          }
+          if (plan.checks.playwright_museum.required) {
+            appCheckLanes.push({
+              lane: "playwright-museum",
+              label: "Network Museum",
+              runner: defaultRunner,
+            });
+          }
+          write("app_check_matrix", JSON.stringify({ include: appCheckLanes }));
           NODE
 
       - name: Summarize CI plan
@@ -147,14 +191,17 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-  installed-checks:
-    name: Installed app checks
+  app-checks:
+    name: App check / ${{ matrix.label }}
     needs: plan
     if: needs.plan.outputs.install_required == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     permissions:
       contents: read
+    strategy:
+      fail-fast: true
+      matrix: ${{ fromJSON(needs.plan.outputs.app_check_matrix) }}
 
     env:
       API_ENDPOINT: "https://api.6529.io"
@@ -176,10 +223,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
+          # The reviewed tree is materialized during checkout; historical
+          # blobs from unrelated refs are not needed by the installed gates.
+          filter: blob:none
           fetch-depth: 0
           persist-credentials: false
 
       - name: Fetch base ref
+        if: matrix.lane == 'quality'
         env:
           BASE_REF: ${{ github.base_ref }}
         run: |
@@ -198,6 +249,17 @@ jobs:
           corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
           pnpm --version
 
+      - name: Restore pnpm store
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-node22-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node22-pnpm-
+
+      - name: Use cached pnpm store
+        run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
+
       - name: Install Socket Firewall
         id: socket_firewall
         uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
@@ -213,60 +275,67 @@ jobs:
         run: ./bin/6529 install:frozen
 
       - name: Run Knip dead-code check
+        if: matrix.lane == 'quality' && needs.plan.outputs.deadcode_required == 'true'
         run: ./bin/6529 run deadcode:knip
 
       - name: Lint package.json versions
-        if: needs.plan.outputs.dependency_governance_required == 'true'
+        if: matrix.lane == 'quality' && needs.plan.outputs.dependency_governance_required == 'true'
         run: ./bin/6529 lint:package-json
 
       - name: Classify dependency risk
-        if: needs.plan.outputs.dependency_governance_required == 'true'
+        if: matrix.lane == 'quality' && needs.plan.outputs.dependency_governance_required == 'true'
         env:
           DEPENDENCY_RISK_BASE_REF: origin/${{ github.base_ref }}
         run: ./bin/6529 run dependency:risk-gate
 
       - name: Verify reviewbot contract
-        if: needs.plan.outputs.reviewbot_contract_required == 'true'
+        if: matrix.lane == 'quality' && needs.plan.outputs.reviewbot_contract_required == 'true'
         run: ./bin/6529 run test:no-coverage -- __tests__/scripts/testing-strategy.test.ts
 
       # jest --findRelatedTests follows the module import graph, so it cannot
       # see this suite's fs reads of the help corpus and committed artifacts.
       # The plan requests it by path whenever those files change.
       - name: Verify agent files sync
-        if: needs.plan.outputs.agent_files_sync_required == 'true'
+        if: matrix.lane == 'quality' && needs.plan.outputs.agent_files_sync_required == 'true'
         run: ./bin/6529 run test:no-coverage -- __tests__/scripts/sync-agent-files.test.ts
 
       - name: Verify Release Bus v2 workflow contract
+        if: matrix.lane == 'quality' && needs.plan.outputs.release_bus_contract_required == 'true'
         run: |
           set -euo pipefail
           ./bin/6529 run test:no-coverage --runInBand --runTestsByPath \
+            __tests__/scripts/app-pr-ci-effective-plan.test.ts \
             __tests__/scripts/pr-ci-policy-bundle.test.ts \
+            __tests__/scripts/deploy-staging-artifact.test.ts \
             __tests__/scripts/deployment-bus.test.ts \
-                __tests__/scripts/e2e-packs.test.ts \
-                __tests__/scripts/package-public-review-artifacts.test.ts \
-                __tests__/scripts/public-review-artifact-workflows.test.ts \
-                __tests__/scripts/release-bus-artifact-compatibility.test.ts \
-                __tests__/scripts/release-bus-performance-contract.test.ts \
-                __tests__/scripts/release-bus-v2-advance-staging-ref-workflow.test.ts \
-                __tests__/scripts/release-bus-v2-compose-workflow.test.ts \
+            __tests__/scripts/e2e-packs.test.ts \
+            __tests__/scripts/manual-deploy-routing-guard.test.ts \
+            __tests__/scripts/package-public-review-artifacts.test.ts \
+            __tests__/scripts/production-build-artifact.test.ts \
+            __tests__/scripts/production-e2e-dispatch.test.ts \
+            __tests__/scripts/public-review-artifact-workflows.test.ts \
+            __tests__/scripts/release-bus-artifact-compatibility.test.ts \
+            __tests__/scripts/release-bus-performance-contract.test.ts \
+            __tests__/scripts/release-bus-v2-advance-staging-ref-workflow.test.ts \
+            __tests__/scripts/release-bus-v2-compose-workflow.test.ts \
             __tests__/scripts/sync-e2e-manifest.test.ts \
             __tests__/scripts/release-bus-install-dependencies.test.ts \
             ops/scripts/release-bus-status.test.ts
 
       - name: Lint changed source
-        if: needs.plan.outputs.lint_changed_required == 'true'
+        if: matrix.lane == 'quality' && needs.plan.outputs.lint_changed_required == 'true'
         run: ./bin/6529 run lint:changed
 
       - name: Typecheck changed source
-        if: needs.plan.outputs.typecheck_changed_required == 'true'
+        if: matrix.lane == 'quality' && needs.plan.outputs.typecheck_changed_required == 'true'
         run: ./bin/6529 run typecheck:changed
 
       - name: Typecheck Jest, Playwright, and test helpers
-        if: needs.plan.outputs.test_typecheck_required == 'true'
+        if: matrix.lane == 'quality' && needs.plan.outputs.test_typecheck_required == 'true'
         run: ./bin/6529 run typecheck:tests
 
       - name: Run related Jest tests
-        if: needs.plan.outputs.jest_changed_required == 'true'
+        if: matrix.lane == 'quality' && needs.plan.outputs.jest_changed_required == 'true'
         env:
           BASE_REF: ${{ github.base_ref }}
         run: |
@@ -385,35 +454,43 @@ jobs:
 
       - name: Restore Next.js build cache
         id: nextjs_build_cache
-        if: needs.plan.outputs.build_required == 'true'
+        if: matrix.lane == 'build'
         uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: ${{ github.workspace }}/.next/cache
-          key: ${{ runner.os }}-node22-nextjs-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'next.config.ts', 'tsconfig*.json', 'postcss.config.*', 'tailwind.config.*') }}-${{ github.event.pull_request.head.sha }}
+          key: ${{ runner.os }}-node22-pr-production-nextjs-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'next.config.ts', 'tsconfig*.json', 'postcss.config.*', 'tailwind.config.*') }}-${{ github.event.pull_request.head.sha }}
           restore-keys: |
-            ${{ runner.os }}-node22-nextjs-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'next.config.ts', 'tsconfig*.json', 'postcss.config.*', 'tailwind.config.*') }}-
-            ${{ runner.os }}-node22-nextjs-
+            ${{ runner.os }}-node22-pr-production-nextjs-${{ hashFiles('pnpm-lock.yaml', 'package.json', 'next.config.ts', 'tsconfig*.json', 'postcss.config.*', 'tailwind.config.*') }}-
+            ${{ runner.os }}-node22-pr-production-nextjs-
 
       - name: Build production profile
-        if: needs.plan.outputs.build_required == 'true'
+        if: matrix.lane == 'build'
         env:
           NODE_ENV: "production"
           BASE_ENDPOINT: "https://6529.io"
-        # `build` runs prebuild, which regenerates both public agent artifacts.
+        # The CI build runs the generators explicitly without repeating the
+        # full-repository lint already covered by changed-file lint.
         run: |
           set -euo pipefail
-          ./bin/6529 run build
+          ./bin/6529 run build:ci
 
       - name: Create exact PR merge-tree CI evidence
+        if: matrix.lane == 'quality'
         env:
           EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           EXPECTED_MERGE_SHA: ${{ github.sha }}
           BUILD_REQUIRED: ${{ needs.plan.outputs.build_required }}
+          DEADCODE_REQUIRED: ${{ needs.plan.outputs.deadcode_required }}
+          RELEASE_BUS_CONTRACT_REQUIRED: ${{ needs.plan.outputs.release_bus_contract_required }}
+          TEST_TYPECHECK_REQUIRED: ${{ needs.plan.outputs.test_typecheck_required }}
         run: |
           set -euo pipefail
           [[ "$EXPECTED_MERGE_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$EXPECTED_HEAD_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$BUILD_REQUIRED" =~ ^(true|false)$ ]]
+          [[ "$DEADCODE_REQUIRED" =~ ^(true|false)$ ]]
+          [[ "$RELEASE_BUS_CONTRACT_REQUIRED" =~ ^(true|false)$ ]]
+          [[ "$TEST_TYPECHECK_REQUIRED" =~ ^(true|false)$ ]]
           test "$(git rev-parse HEAD)" = "$EXPECTED_MERGE_SHA"
           rm -rf release-bus-v2-pr-evidence
           mkdir -p release-bus-v2-pr-evidence
@@ -433,6 +510,9 @@ jobs:
             --arg policy_bundle_digest "$policy_bundle_digest" \
             --argjson policy_bundle_line_count "$policy_bundle_line_count" \
             --argjson build_required "$BUILD_REQUIRED" \
+            --argjson deadcode_required "$DEADCODE_REQUIRED" \
+            --argjson release_bus_contract_required "$RELEASE_BUS_CONTRACT_REQUIRED" \
+            --argjson test_typecheck_required "$TEST_TYPECHECK_REQUIRED" \
             '{
               schema_version:1,
               evidence_contract:"exact-merge-tree-pr-ci-v1",
@@ -442,18 +522,21 @@ jobs:
               merge_sha:$merge_sha,
               head_sha:$head_sha,
               production_build_required:$build_required,
+              dependency_analysis_required:$deadcode_required,
+              release_bus_contract_required:$release_bus_contract_required,
+              test_typecheck_required:$test_typecheck_required,
               policy_bundle_contract:$policy_bundle_contract,
               policy_bundle_digest:$policy_bundle_digest,
               policy_bundle_line_count:$policy_bundle_line_count,
               required_gates:[
                 "package-manager-discipline",
-                "dependency-analysis",
+                "dependency-analysis-or-plan-not-required",
                 "reviewbot-contract",
                 "generated-agent-files",
-                "release-bus-workflow-contract",
+                "release-bus-workflow-contract-or-plan-not-required",
                 "changed-lint",
                 "changed-typecheck",
-                "test-typecheck",
+                "test-typecheck-or-plan-not-required",
                 "related-jest-selection",
                 "production-build-or-plan-not-required",
                 "pr-ci-policy-bundle"
@@ -463,6 +546,7 @@ jobs:
             sha256sum ./manifest.json ./policy-bundle.txt > SHA256SUMS)
 
       - name: Upload exact PR merge-tree CI evidence
+        if: matrix.lane == 'quality'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: release-bus-v2-pr-${{ github.sha }}
@@ -471,39 +555,97 @@ jobs:
           retention-days: 30
 
       - name: Save Next.js build cache
-        if: needs.plan.outputs.build_required == 'true' && steps.nextjs_build_cache.outputs.cache-hit != 'true'
+        if: matrix.lane == 'build' && steps.nextjs_build_cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: ${{ github.workspace }}/.next/cache
           key: ${{ steps.nextjs_build_cache.outputs.cache-primary-key }}
 
+      - name: Restore Playwright browser
+        if: startsWith(matrix.lane, 'playwright-')
+        id: playwright_browser_cache
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-node22-playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
+
       - name: Install Playwright browser
-        if: needs.plan.outputs.playwright_smoke_required == 'true' || needs.plan.outputs.playwright_critical_shell_required == 'true'
-        run: ./bin/6529 exec playwright install --with-deps chromium
+        if: startsWith(matrix.lane, 'playwright-')
+        env:
+          PLAYWRIGHT_CACHE_HIT: ${{ steps.playwright_browser_cache.outputs.cache-hit }}
+        run: |
+          if [ "$PLAYWRIGHT_CACHE_HIT" = true ]; then
+            ./bin/6529 exec playwright install-deps chromium
+          else
+            ./bin/6529 exec playwright install --with-deps chromium
+          fi
+
+      - name: Resolve exact Museum publication for Playwright
+        id: museum_publication
+        if: matrix.lane == 'playwright-museum'
+        run: |
+          set -euo pipefail
+          mapfile -t museum_refs < <(
+            git ls-remote --refs \
+              https://github.com/6529-Collections/6529networkmuseum.git \
+              refs/heads/main
+          )
+          test "${#museum_refs[@]}" -eq 1
+          read -r museum_commit museum_ref extra <<< "${museum_refs[0]}"
+          test -z "${extra:-}"
+          test "$museum_ref" = "refs/heads/main"
+          [[ "$museum_commit" =~ ^[a-f0-9]{40}$ ]]
+          echo "commit=$museum_commit" >> "$GITHUB_OUTPUT"
+          echo "Museum Playwright source: $museum_commit"
 
       - name: Run small Playwright smoke pack
-        if: needs.plan.outputs.playwright_smoke_required == 'true'
+        if: matrix.lane == 'playwright-smoke'
         env:
-          # Do not reuse the production build output or another Playwright
-          # server's Turbopack route state.
           NEXT_DEV_DIST_DIR: ".next-playwright-smoke"
           PLAYWRIGHT_READONLY: "1"
         run: ./bin/6529 run test:e2e:smoke
 
       - name: Run critical route-shell Playwright pack
-        if: needs.plan.outputs.playwright_critical_shell_required == 'true'
+        if: matrix.lane == 'playwright-critical-shell'
         env:
           NEXT_DEV_DIST_DIR: ".next-playwright-critical-shell"
           PLAYWRIGHT_READONLY: "1"
         run: ./bin/6529 run test:e2e:critical-shell
 
+      - name: Run Network Museum Playwright packs
+        if: matrix.lane == 'playwright-museum'
+        env:
+          NEXT_DEV_DIST_DIR: ".next-playwright-museum"
+          PLAYWRIGHT_READONLY: "1"
+          MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.commit }}
+        run: |
+          ./bin/6529 run test:e2e:museum-institutional-practice
+          ./bin/6529 run test:e2e:museum-inside-system
+
       - name: Upload app check artifacts
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: app-pr-ci-results-${{ github.event.pull_request.number || github.run_id }}
+          name: app-pr-ci-results-${{ matrix.lane }}-${{ github.event.pull_request.number || github.run_id }}
           path: |
             test-results/**
             playwright-report/**
           if-no-files-found: ignore
           retention-days: 14
+
+  installed-checks:
+    name: Installed app checks
+    needs:
+      - plan
+      - app-checks
+    if: always() && needs.plan.result == 'success' && needs.plan.outputs.install_required == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+
+    steps:
+      - name: Require successful parallel app checks
+        env:
+          APP_CHECKS_RESULT: ${{ needs.app-checks.result }}
+        run: test "$APP_CHECKS_RESULT" = "success"

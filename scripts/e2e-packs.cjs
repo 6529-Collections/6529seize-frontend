@@ -28,6 +28,13 @@ const RUNNER_CAPABILITIES = Object.freeze({
       version: 1,
       max_parallel: MAX_PARALLEL_PACKS,
     }),
+    pack_exclusion: Object.freeze({
+      version: 1,
+    }),
+    serial_failed_pack_retry: Object.freeze({
+      version: 1,
+      max_retries: 1,
+    }),
   }),
 });
 
@@ -36,8 +43,10 @@ function parseArgs(argv) {
     env: null,
     trigger: null,
     pack: null,
+    excludePacks: [],
     artifactRoot: null,
     parallel: 1,
+    retryFailedPacks: 0,
     capabilities: false,
     list: false,
     forward: [],
@@ -49,8 +58,10 @@ function parseArgs(argv) {
       arg === "--env" ||
       arg === "--trigger" ||
       arg === "--pack" ||
+      arg === "--exclude-pack" ||
       arg === "--artifact-root" ||
-      arg === "--parallel"
+      arg === "--parallel" ||
+      arg === "--retry-failed-packs"
     ) {
       const value = argv[index + 1];
       if (!value || value.startsWith("--")) {
@@ -63,6 +74,13 @@ function parseArgs(argv) {
           );
         }
         options.parallel = Number(value);
+      } else if (arg === "--retry-failed-packs") {
+        if (!/^[01]$/.test(value)) {
+          throw new Error("--retry-failed-packs must be 0 or 1.");
+        }
+        options.retryFailedPacks = Number(value);
+      } else if (arg === "--exclude-pack") {
+        options.excludePacks.push(value);
       } else {
         const key =
           arg === "--artifact-root" ? "artifactRoot" : arg.replace(/^--/, "");
@@ -110,7 +128,7 @@ function isValidShard(value) {
   return Boolean(match && Number(match[1]) <= Number(match[2]));
 }
 
-function resolvePacks(packs, { env, trigger, pack }) {
+function resolvePacks(packs, { env, trigger, pack, excludePacks = [] }) {
   const requestedPack = pack === "all" ? null : pack;
   return packs.filter((candidate) => {
     if (env && !candidate.environments.includes(env)) {
@@ -123,6 +141,12 @@ function resolvePacks(packs, { env, trigger, pack }) {
       requestedPack &&
       candidate.scriptKey !== requestedPack &&
       candidate.alias !== requestedPack
+    ) {
+      return false;
+    }
+    if (
+      excludePacks.includes(candidate.scriptKey) ||
+      (candidate.alias && excludePacks.includes(candidate.alias))
     ) {
       return false;
     }
@@ -207,9 +231,10 @@ function resolveArtifactRoot(relativePath) {
   return resolveInsideRoot(relativePath, "--artifact-root");
 }
 
-function outputPathsForPack(pack) {
+function outputPathsForPack(pack, attempt = 1) {
+  const suffix = attempt === 1 ? "" : `-attempt-${attempt}`;
   const root = resolveInsideRoot(
-    `${TRANSIENT_ROOT}/${packSlug(pack.scriptKey)}`,
+    `${TRANSIENT_ROOT}/${packSlug(pack.scriptKey)}${suffix}`,
     "pack output root"
   );
   return {
@@ -234,11 +259,21 @@ function cleanupPackOutputs(pack, outputPaths = outputPathsForPack(pack)) {
   fs.mkdirSync(outputPaths.root, { recursive: true });
 }
 
-function preserveArtifacts(artifactRoot, pack, output, outputPaths) {
+function preserveArtifacts(
+  artifactRoot,
+  pack,
+  output,
+  outputPaths,
+  attempt = 1
+) {
   if (!artifactRoot) {
     return null;
   }
-  const packRoot = path.join(artifactRoot, packSlug(pack.scriptKey));
+  const packRoot = path.join(
+    artifactRoot,
+    packSlug(pack.scriptKey),
+    ...(attempt === 1 ? [] : [`attempt-${attempt}`])
+  );
   fs.mkdirSync(packRoot, { recursive: true });
   fs.writeFileSync(path.join(packRoot, "output.log"), output);
   if (fs.existsSync(outputPaths.testResults)) {
@@ -476,10 +511,10 @@ function releaseBindingFromEnvironment() {
 
 async function runOnePack(
   pack,
-  { artifactRoot, forward, spawn, cleanup, preserve }
+  { artifactRoot, forward, spawn, cleanup, preserve, attempt = 1 }
 ) {
   const startedAt = new Date();
-  const outputPaths = outputPathsForPack(pack);
+  const outputPaths = outputPathsForPack(pack, attempt);
   let cleanupError = null;
   try {
     await cleanup(pack, outputPaths);
@@ -512,7 +547,13 @@ async function runOnePack(
 
   let artifactPath = null;
   try {
-    artifactPath = await preserve(artifactRoot, pack, output, outputPaths);
+    artifactPath = await preserve(
+      artifactRoot,
+      pack,
+      output,
+      outputPaths,
+      attempt
+    );
   } catch (error) {
     const artifactError =
       error instanceof Error ? error : new Error(String(error));
@@ -528,6 +569,7 @@ async function runOnePack(
     output,
     artifactPath,
     classification,
+    attempt,
     startedAt: startedAt.toISOString(),
     durationMs: Date.now() - startedAt.getTime(),
   };
@@ -540,6 +582,7 @@ async function runPacks(
     environment = null,
     trigger = null,
     parallel = 1,
+    retryFailedPacks = 0,
     forward = [],
     spawn = defaultSpawn,
     cleanup = cleanupPackOutputs,
@@ -548,6 +591,13 @@ async function runPacks(
   } = {}
 ) {
   assertParallelSafe(resolved, parallel);
+  if (
+    !Number.isInteger(retryFailedPacks) ||
+    retryFailedPacks < 0 ||
+    retryFailedPacks > 1
+  ) {
+    throw new Error("retryFailedPacks must be 0 or 1.");
+  }
   const releaseBinding = releaseBindingFromEnvironment();
   prepare(artifactRoot);
   const startedAt = new Date();
@@ -564,6 +614,7 @@ async function runPacks(
         spawn,
         cleanup,
         preserve,
+        attempt: 1,
       });
     }
   }
@@ -571,19 +622,65 @@ async function runPacks(
   const workerCount = Math.min(parallel, resolved.length);
   await Promise.all(Array.from({ length: workerCount }, () => worker()));
 
+  for (let index = 0; index < records.length; index += 1) {
+    const attempts = [records[index]];
+    for (
+      let retry = 1;
+      attempts.at(-1).classification.failed && retry <= retryFailedPacks;
+      retry += 1
+    ) {
+      const attempt = retry + 1;
+      console.warn(
+        `e2e-packs: serial retry ${retry}/${retryFailedPacks} for ${resolved[index].scriptKey}.`
+      );
+      attempts.push(
+        await runOnePack(resolved[index], {
+          artifactRoot,
+          forward,
+          spawn,
+          cleanup,
+          preserve,
+          attempt,
+        })
+      );
+    }
+    const finalAttempt = attempts.at(-1);
+    records[index] = {
+      ...finalAttempt,
+      durationMs: attempts.reduce(
+        (sum, attempt) => sum + attempt.durationMs,
+        0
+      ),
+      attempts,
+    };
+  }
+
   appendSummary(["## E2E packs", ""]);
   let failedCount = 0;
   let infrastructureFailureCount = 0;
   for (const record of records) {
-    const { pack, output, artifactPath, classification } = record;
+    const { pack, output, classification } = record;
     console.log(`\n=== ${pack.scriptKey} ===`);
-    if (output) {
-      process.stdout.write(output.endsWith("\n") ? output : `${output}\n`);
+    for (const attempt of record.attempts) {
+      if (record.attempts.length > 1) {
+        console.log(
+          `--- attempt ${attempt.attempt}/${record.attempts.length} ---`
+        );
+      }
+      if (attempt.output) {
+        process.stdout.write(
+          attempt.output.endsWith("\n") ? attempt.output : `${attempt.output}\n`
+        );
+      }
     }
     if (!classification.failed) {
       appendSummary([
-        `- :white_check_mark: \`${pack.scriptKey}\` (${record.durationMs} ms)`,
-        ...(artifactPath ? [`  - Artifacts: \`${artifactPath}/\``] : []),
+        `- :white_check_mark: \`${pack.scriptKey}\` (${record.durationMs} ms; ${record.attempts.length} attempt${record.attempts.length === 1 ? "" : "s"})`,
+        ...record.attempts.flatMap((attempt) =>
+          attempt.artifactPath
+            ? [`  - Attempt ${attempt.attempt}: \`${attempt.artifactPath}/\``]
+            : []
+        ),
       ]);
       continue;
     }
@@ -593,8 +690,12 @@ async function runPacks(
     }
     const tail = outputTail(output);
     appendSummary([
-      `- :x: \`${pack.scriptKey}\` (${classification.label}; ${record.durationMs} ms)`,
-      ...(artifactPath ? [`  - Artifacts: \`${artifactPath}/\``] : []),
+      `- :x: \`${pack.scriptKey}\` (${classification.label}; ${record.durationMs} ms; ${record.attempts.length} attempt${record.attempts.length === 1 ? "" : "s"})`,
+      ...record.attempts.flatMap((attempt) =>
+        attempt.artifactPath
+          ? [`  - Attempt ${attempt.attempt}: \`${attempt.artifactPath}/\``]
+          : []
+      ),
       ...(tail
         ? [
             "",
@@ -617,6 +718,7 @@ async function runPacks(
     trigger,
     parallelism_requested: parallel,
     worker_count: workerCount,
+    serial_retry_limit: retryFailedPacks,
     started_at: startedAt.toISOString(),
     completed_at: new Date().toISOString(),
     release_binding: releaseBinding,
@@ -635,6 +737,19 @@ async function runPacks(
       detail: record.classification.label,
       duration_ms: record.durationMs,
       artifact_path: record.artifactPath,
+      attempt_count: record.attempts.length,
+      attempts: record.attempts.map((attempt) => ({
+        attempt: attempt.attempt,
+        status: attempt.classification.failed ? "failed" : "passed",
+        failure_class: attempt.classification.failed
+          ? attempt.classification.infrastructure
+            ? "infrastructure"
+            : "e2e"
+          : null,
+        detail: attempt.classification.label,
+        duration_ms: attempt.durationMs,
+        artifact_path: attempt.artifactPath,
+      })),
     })),
   };
   if (artifactRoot) {
@@ -650,8 +765,10 @@ function printUsage() {
   console.error(
     "usage: e2e:packs -- --env <local|staging|production> " +
       "[--trigger <manual|pr-ci|post-deploy|cron>] " +
-      "[--pack <scriptKey|alias|all>] [--artifact-root <path>] " +
+      "[--pack <scriptKey|alias|all>] [--exclude-pack <scriptKey|alias>] " +
+      "[--artifact-root <path>] " +
       `[--parallel <1-${MAX_PARALLEL_PACKS}>] [--shard i/N] [--list] ` +
+      "[--retry-failed-packs <0|1>] " +
       "[--capabilities]"
   );
 }
@@ -722,6 +839,7 @@ async function main() {
       environment: options.env,
       trigger: options.trigger,
       parallel: options.parallel,
+      retryFailedPacks: options.retryFailedPacks,
       forward: options.forward,
     });
     if (result.failedCount > 0) {

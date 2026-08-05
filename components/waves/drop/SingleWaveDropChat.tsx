@@ -51,9 +51,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   const nativeKeyboard = useNativeKeyboard();
   const { updateEligibility } = useWaveEligibility();
   const isKeyboardOccupyingViewport =
-    nativeKeyboard.isVisible ||
-    nativeKeyboard.phase === "hiding" ||
-    nativeKeyboard.keyboardHeight > 0;
+    nativeKeyboard.isVisible || nativeKeyboard.keyboardHeight > 0;
   const { setToast } = useAuth();
   const locale = useBrowserLocale();
   const rootDropAvailableRef = useRef(true);
