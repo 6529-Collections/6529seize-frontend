@@ -117,6 +117,16 @@ describe("Release Bus frontend performance contract", () => {
     expect(packageJson.scripts["format:changed"]).not.toContain("main...HEAD");
   });
 
+  it("preserves the restored Release Bus Next.js cache while cleaning build output", () => {
+    expect(preflightSource).toContain(
+      "find .next -mindepth 1 -maxdepth 1 ! -name cache -exec rm -rf {} +"
+    );
+    expect(preflightSource).not.toMatch(/^\s*rm -rf \.next\s*$/mu);
+    expect(preflightSource).toContain(
+      "build_profile staging release-bus-artifact/profiles/staging\n            # Profile-specific endpoints and PUBLIC_RUNTIME are build inputs.\n            # The legacy bridge builds both profiles in one workspace, so its\n            # second build must not reuse staging's Next.js cache.\n            rm -rf .next/cache\n            build_profile production release-bus-artifact/profiles/production"
+    );
+  });
+
   it("pins the build and E2E runtime to an exact Node patch", () => {
     for (const workflowPath of [
       ".github/workflows/release-bus-v2-preflight.yml",
