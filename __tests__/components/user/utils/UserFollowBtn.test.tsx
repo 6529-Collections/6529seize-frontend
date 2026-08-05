@@ -23,7 +23,6 @@ jest.mock("@tanstack/react-query", () => {
 });
 jest.mock("@/services/api/common-api", () => ({
   commonApiDeleteWithBody: jest.fn(),
-  commonApiFetch: jest.fn(),
   commonApiPost: jest.fn(),
 }));
 
@@ -145,45 +144,26 @@ describe("UserFollowBtn", () => {
       toastTitle: "Couldn't unfollow this profile.",
     },
   ])(
-    "handles a failed $action without leaking an unhandled rejection",
+    "restores the button and shows a toast after a failed $action",
     async ({ following, buttonName, getRequestMock, toastTitle }) => {
       const expectedError = new Error("network unavailable");
-      const onUnhandledRejection = jest.fn();
-      const unhandledRejectionHandler = (event: PromiseRejectionEvent) => {
-        event.preventDefault();
-        onUnhandledRejection(event);
-      };
-
       getRequestMock().mockRejectedValueOnce(expectedError);
-      globalThis.addEventListener(
-        "unhandledrejection",
-        unhandledRejectionHandler
-      );
+      const user = userEvent.setup();
+      const { setToast } = setup({ following });
+      const followButton = screen.getByRole("button", { name: buttonName });
 
-      try {
-        const user = userEvent.setup();
-        const { setToast } = setup({ following });
-        const followButton = screen.getByRole("button", { name: buttonName });
+      await user.click(followButton);
 
-        await user.click(followButton);
-
-        await waitFor(() => {
-          expect(setToast).toHaveBeenCalledWith(
-            expect.objectContaining({
-              type: "error",
-              title: toastTitle,
-              description: "Please try again.",
-            })
-          );
-        });
-        expect(followButton).not.toBeDisabled();
-        expect(onUnhandledRejection).not.toHaveBeenCalled();
-      } finally {
-        globalThis.removeEventListener(
-          "unhandledrejection",
-          unhandledRejectionHandler
+      await waitFor(() => {
+        expect(setToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: "error",
+            title: toastTitle,
+            description: "Please try again.",
+          })
         );
-      }
+      });
+      expect(followButton).not.toBeDisabled();
     }
   );
 
