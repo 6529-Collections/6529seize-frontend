@@ -42,5 +42,6 @@
   disclosures, and one shared standard registry; the i18n lane requested an
   explicit fallback-debt record. Those corrections pass focused and full
   Museum regression, and the new pack is included in the combined manual
-  production-safe read-only suite. A signed follow-up and fresh exact-head
-  hosted review remain.
+  production-safe read-only suite. The exact release-pack counts, workflow
+  choice input, and Museum PR-lane ownership now agree and pass their 32-test
+  contract suite. A signed follow-up and fresh exact-head hosted review remain.

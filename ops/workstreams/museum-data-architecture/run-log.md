@@ -74,3 +74,21 @@
   when the separately governed source repository advances. This moving-source,
   exact-edition boundary is an explicit product invariant rather than an
   omitted deployment pin.
+- After merging frontend `main` commit `67068d87c` into the candidate, the
+  optimized production build passed in 590.6 seconds; the About-page copy
+  change merged without conflict. Four focused post-merge suites passed 27
+  tests before the build.
+- The superseded initial-head App PR CI exposed four release-contract
+  assertions that still described the six-pack Museum inventory. The release
+  manifests now declare nine Museum packs across local, staging, and
+  production; staging and production post-deploy counts are 15 and 14; the
+  staging workflow offers the new pack; the Museum PR lane runs it; and the
+  manual production aggregate contains it. Both affected contract suites now
+  pass all 32 tests.
+- The complete 17-suite release-contract replay passed 15 suites / 259 tests.
+  Its two local failures are unrelated Windows capability boundaries already
+  enforced by the repository: the policy-bundle suite fails closed where
+  Node does not provide POSIX `O_NOFOLLOW`, and the status-helper suite's
+  isolated test `PATH` cannot locate the Windows `gh` wrapper. Hosted Ubuntu
+  remains authoritative for those two suites; no product or release assertion
+  introduced by this change failed.
