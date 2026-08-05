@@ -12,6 +12,10 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { t } from "@/i18n/messages";
+import {
+  useDmUnreadConversation,
+  useDmUnreadSummary,
+} from "@/services/dm-unread/DmUnreadStateProvider";
 import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
 import {
   Suspense,
@@ -28,7 +32,6 @@ import { QuickDmListPanel } from "./QuickDmListPanel";
 import { QuickDmLoadingRows } from "./QuickDmPanelPieces";
 import {
   CLOSED_STATE,
-  getUnreadCount,
   isQuickDmState,
   LIST_STATE,
   QUICK_DM_STORAGE_KEY,
@@ -99,6 +102,8 @@ export default function QuickDirectMessages() {
   const [state, setState] = useState<QuickDmState>(() => readStoredState());
   const [isCreateDirectMessageOpen, setIsCreateDirectMessageOpen] =
     useState(false);
+  const { totalUnreadMessages } = useDmUnreadSummary();
+  const currentConversationUnread = useDmUnreadConversation(state.waveId ?? "");
   const launcherButtonRef = useRef<HTMLButtonElement | null>(null);
   const panelRef = useRef<HTMLElement | null>(null);
   const restoreFocusElementRef = useRef<HTMLElement | null>(null);
@@ -113,22 +118,14 @@ export default function QuickDirectMessages() {
     state.view === "chat" &&
     state.waveId !== null &&
     (directMessages.isFetching || selectedWave !== null);
-  const totalUnreadCount = useMemo(
-    () => waves.reduce((count, wave) => count + getUnreadCount(wave), 0),
-    [waves]
-  );
+  const totalUnreadCount = totalUnreadMessages;
   const hasUnread = totalUnreadCount > 0;
   const displayUnreadCount =
     totalUnreadCount > 99 ? "99+" : `${totalUnreadCount}`;
-  const hasUnreadOutsideCurrentChat = useMemo(
-    () =>
-      state.view === "chat" &&
-      state.waveId !== null &&
-      waves.some(
-        (wave) => wave.id !== state.waveId && getUnreadCount(wave) > 0
-      ),
-    [state.view, state.waveId, waves]
-  );
+  const hasUnreadOutsideCurrentChat =
+    state.view === "chat" &&
+    state.waveId !== null &&
+    totalUnreadCount - (currentConversationUnread?.unread_count ?? 0) > 0;
 
   useEffect(() => requestDirectMessagesList(), [requestDirectMessagesList]);
 

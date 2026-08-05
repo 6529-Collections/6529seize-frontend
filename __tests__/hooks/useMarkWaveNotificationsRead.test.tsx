@@ -20,11 +20,18 @@ import {
   markWaveReadIdentityCleared,
 } from "@/hooks/useMarkWaveNotificationsRead.requests";
 import type { WaveReadAddressEpoch } from "@/hooks/useMarkWaveNotificationsRead.types";
-import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
+import {
+  commonApiPost,
+  commonApiPostWithoutBodyAndResponse,
+} from "@/services/api/common-api";
 import { getAuthJwt } from "@/services/auth/auth.utils";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { jwtDecode } from "jwt-decode";
 import type { ReactNode } from "react";
+
+const mockApplyDmServerState = jest.fn();
+const mockBeginDmRead = jest.fn();
+const mockReconcileFailedDmRead = jest.fn();
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
@@ -34,7 +41,16 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 
+jest.mock("@/services/dm-unread/DmUnreadStateProvider", () => ({
+  useDmUnreadActions: () => ({
+    applyServerState: mockApplyDmServerState,
+    beginRead: mockBeginDmRead,
+    reconcileFailedRead: mockReconcileFailedDmRead,
+  }),
+}));
+
 jest.mock("@/services/api/common-api", () => ({
+  commonApiPost: jest.fn().mockResolvedValue({ dm_unread_state: null }),
   commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue(undefined),
 }));
 
@@ -103,6 +119,9 @@ const trackPromiseSettlement = (
 
 const apiPostMock = commonApiPostWithoutBodyAndResponse as jest.MockedFunction<
   typeof commonApiPostWithoutBodyAndResponse
+>;
+const apiPostWithBodyMock = commonApiPost as jest.MockedFunction<
+  typeof commonApiPost
 >;
 const useAuthMock = useAuth as jest.MockedFunction<typeof useAuth>;
 const useSeizeConnectContextMock =
@@ -201,6 +220,13 @@ const createVerifiedIdentity = ({
 describe("useMarkWaveNotificationsRead", () => {
   beforeEach(() => {
     apiPostMock.mockReset();
+    apiPostWithBodyMock.mockReset();
+    apiPostWithBodyMock.mockResolvedValue({ dm_unread_state: null });
+    mockApplyDmServerState.mockReset();
+    mockBeginDmRead.mockReset();
+    mockBeginDmRead.mockReturnValue(null);
+    mockReconcileFailedDmRead.mockReset();
+    mockReconcileFailedDmRead.mockResolvedValue(undefined);
     jwtPayloadsByToken.clear();
     jwtDecodeMock.mockReset();
     jwtDecodeMock.mockImplementation((token) => {
@@ -215,6 +241,76 @@ describe("useMarkWaveNotificationsRead", () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  it("sends the explicit DM serial and applies the authoritative response", async () => {
+    const invalidateNotifications = jest.fn();
+    const operation = {
+      id: 1,
+      profileId: "profile-1",
+      waveId: "wave-1",
+      readThroughSerialNo: 42,
+    };
+    const dmUnreadState = {
+      profile_id: "profile-1",
+      wave_id: "wave-1",
+      unread_count: 0,
+      first_unread_drop_serial_no: null,
+      latest_drop_serial_no: 42,
+      latest_read_serial_no: 42,
+      version: 3,
+    };
+    mockBeginDmRead.mockReturnValue(operation);
+    apiPostWithBodyMock.mockResolvedValueOnce({
+      dm_unread_state: dmUnreadState,
+    });
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-a",
+      connectedProfileId: "profile-1",
+    });
+    const { result } = renderHook(() => useMarkWaveNotificationsRead(), {
+      wrapper: createWrapper(invalidateNotifications),
+    });
+
+    await expect(
+      result.current("wave-1", { readThroughSerialNo: 40 })
+    ).resolves.toBe("sent");
+
+    expect(mockBeginDmRead).toHaveBeenCalledWith("wave-1", 40);
+    expect(apiPostWithBodyMock).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave-1/read",
+      headers: { Authorization: "Bearer jwt-a" },
+      body: { read_through_serial_no: 42 },
+    });
+    expect(mockApplyDmServerState).toHaveBeenCalledWith(dmUnreadState);
+    expect(mockReconcileFailedDmRead).not.toHaveBeenCalled();
+  });
+
+  it("reconciles and rolls back the matching optimistic DM read after failure", async () => {
+    const invalidateNotifications = jest.fn();
+    const operation = {
+      id: 7,
+      profileId: "profile-1",
+      waveId: "wave-1",
+      readThroughSerialNo: 42,
+    };
+    const error = new Error("read failed");
+    mockBeginDmRead.mockReturnValue(operation);
+    apiPostWithBodyMock.mockRejectedValueOnce(error);
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-a",
+      connectedProfileId: "profile-1",
+    });
+    const { result } = renderHook(() => useMarkWaveNotificationsRead(), {
+      wrapper: createWrapper(invalidateNotifications),
+    });
+
+    await expect(result.current("wave-1")).rejects.toBe(error);
+
+    expect(mockReconcileFailedDmRead).toHaveBeenCalledWith(operation);
+    expect(mockApplyDmServerState).not.toHaveBeenCalled();
   });
 
   it("treats a missing active profile proxy as no proxy", async () => {

@@ -7,7 +7,6 @@ import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { getMessagePathRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
 import { useWaveData } from "@/hooks/useWaveData";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -56,7 +55,6 @@ export const QuickDmChat = ({
   const { directMessages, registerWave } = useMyStream();
   const markDirectMessageRead = directMessages.markWaveRead;
   const { updateEligibility } = useWaveEligibility();
-  const markWaveNotificationsRead = useMarkWaveNotificationsRead();
   const { data: wave, isFetching, isError } = useWaveData({ waveId });
   const title = getFormattedWaveName({
     name: wave?.name ?? listWave?.name ?? "",
@@ -75,8 +73,7 @@ export const QuickDmChat = ({
     }
 
     markDirectMessageRead(waveId);
-    void markWaveNotificationsRead(waveId).catch(() => undefined);
-  }, [markDirectMessageRead, markWaveNotificationsRead, waveId]);
+  }, [markDirectMessageRead, waveId]);
 
   useEffect(() => {
     const shouldMarkRead =

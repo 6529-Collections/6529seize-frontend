@@ -17,6 +17,11 @@ jest.mock("@/services/websocket/MarketplacePreviewWebSocketSync", () => ({
 jest.mock("@/services/websocket/NotificationWebSocketSync", () => ({
   NotificationWebSocketSync: () => null,
 }));
+jest.mock("@/services/dm-unread/DmUnreadStateProvider", () => ({
+  DmUnreadStateProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
 jest.mock("@/services/auth/auth.utils");
 
 // Mock implementations - create fresh mock functions

@@ -150,7 +150,7 @@ const useActiveWaveReadMarker = ({
   removeWaveDeliveredNotifications,
 }: Pick<UseWaveRealtimeUpdaterProps, "removeWaveDeliveredNotifications"> & {
   readonly activeWaveIdRef: RefObject<string | null>;
-}): ((waveId: string) => void) => {
+}): ((waveId: string, readThroughSerialNo?: number) => void) => {
   const pendingDeliveredNotificationsRef = useRef<Promise<void> | null>(null);
   const pendingReadNotificationsRef = useRef<Promise<void> | null>(null);
 
@@ -177,10 +177,11 @@ const useActiveWaveReadMarker = ({
   );
 
   const markNotificationsRead = useCallback(
-    async (waveId: string) => {
+    async (waveId: string, readThroughSerialNo?: number) => {
       try {
         await markWaveNotificationsRead(waveId, {
           shouldSend: () => canSendReadForWave(waveId),
+          readThroughSerialNo,
         });
       } catch (error) {
         reportBackgroundTaskError("Failed to mark wave as read:", error);
@@ -190,7 +191,7 @@ const useActiveWaveReadMarker = ({
   );
 
   return useCallback(
-    (waveId: string) => {
+    (waveId: string, readThroughSerialNo?: number) => {
       if (
         activeWaveIdRef.current !== waveId ||
         document.visibilityState !== "visible"
@@ -200,7 +201,10 @@ const useActiveWaveReadMarker = ({
 
       pendingDeliveredNotificationsRef.current =
         removeDeliveredNotifications(waveId);
-      pendingReadNotificationsRef.current = markNotificationsRead(waveId);
+      pendingReadNotificationsRef.current = markNotificationsRead(
+        waveId,
+        readThroughSerialNo
+      );
     },
     [activeWaveIdRef, removeDeliveredNotifications, markNotificationsRead]
   );
@@ -400,7 +404,7 @@ const useProcessIncomingDrop = ({
               }),
             ],
           });
-          markActiveWaveAsRead(waveId);
+          markActiveWaveAsRead(waveId, drop.serial_no);
           return;
         }
         registerWave(waveId);
@@ -440,7 +444,7 @@ const useProcessIncomingDrop = ({
           type === ProcessIncomingDropType.DROP_REACTION_UPDATE &&
           isWaveDropNearViewport(waveId, drop.id)
         ) {
-          markActiveWaveAsRead(waveId);
+          markActiveWaveAsRead(waveId, drop.serial_no);
         }
         return;
       }
@@ -462,7 +466,7 @@ const useProcessIncomingDrop = ({
         optimisticDrop.id
       );
 
-      markActiveWaveAsRead(waveId);
+      markActiveWaveAsRead(waveId, drop.serial_no);
     },
     [
       activeWaveIdRef,

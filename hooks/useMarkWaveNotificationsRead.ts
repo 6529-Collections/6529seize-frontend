@@ -10,7 +10,8 @@ import {
   type WaveNotificationsReadMarkerState,
 } from "@/hooks/useMarkWaveNotificationsRead.helpers";
 import { getAuthJwt } from "@/services/auth/auth.utils";
-import { useContext } from "react";
+import { useCallback, useContext } from "react";
+import { useDmUnreadActions } from "@/services/dm-unread/DmUnreadStateProvider";
 
 export function useWaveNotificationsReadMarkerState(): WaveNotificationsReadMarkerState {
   const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
@@ -36,5 +37,48 @@ export function useMarkWaveNotificationsRead(): (
   waveId: string,
   options?: MarkWaveNotificationsReadOptions
 ) => Promise<MarkWaveNotificationsReadResult> {
-  return useWaveNotificationsReadMarkerState().markWaveNotificationsRead;
+  const { markWaveNotificationsRead } = useWaveNotificationsReadMarkerState();
+  const { applyServerState, beginRead, reconcileFailedRead } =
+    useDmUnreadActions();
+
+  return useCallback(
+    async (
+      waveId: string,
+      options?: MarkWaveNotificationsReadOptions
+    ): Promise<MarkWaveNotificationsReadResult> => {
+      const readOperation = beginRead(waveId, options?.readThroughSerialNo);
+      try {
+        const result = await markWaveNotificationsRead(
+          waveId,
+          readOperation
+            ? {
+                ...options,
+                readThroughSerialNo: readOperation.readThroughSerialNo,
+                onReadResponse: (response) => {
+                  options?.onReadResponse?.(response);
+                  if (response.dm_unread_state) {
+                    applyServerState(response.dm_unread_state);
+                  }
+                },
+              }
+            : options
+        );
+        if (readOperation && result === "skipped") {
+          await reconcileFailedRead(readOperation);
+        }
+        return result;
+      } catch (error) {
+        if (readOperation) {
+          await reconcileFailedRead(readOperation);
+        }
+        throw error;
+      }
+    },
+    [
+      applyServerState,
+      beginRead,
+      markWaveNotificationsRead,
+      reconcileFailedRead,
+    ]
+  );
 }
