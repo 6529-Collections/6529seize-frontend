@@ -43,7 +43,7 @@ describe("E2E pack manifest", () => {
 
   it("defines every package pack once and satisfies the safety contract", () => {
     expect(manifestTools.validateManifest(packs, { root: ROOT })).toEqual([]);
-    expect(packs).toHaveLength(59);
+    expect(packs).toHaveLength(62);
 
     const rendered = manifestTools.renderPackageJsonScripts(packs);
     const packageScripts = JSON.parse(
@@ -63,17 +63,17 @@ describe("E2E pack manifest", () => {
       (pack) => pack.environments[0] === "production"
     );
 
-    expect(staging).toHaveLength(14);
+    expect(staging).toHaveLength(15);
     expect(
       staging.filter((pack) => pack.triggers.includes("post-deploy"))
-    ).toHaveLength(13);
-    expect(production).toHaveLength(13);
+    ).toHaveLength(14);
+    expect(production).toHaveLength(14);
     expect(
       production.filter((pack) => pack.triggers.includes("cron"))
     ).toHaveLength(10);
     expect(
       production.filter((pack) => pack.triggers.includes("post-deploy"))
-    ).toHaveLength(12);
+    ).toHaveLength(13);
 
     for (const environmentPacks of [staging, production]) {
       const specs = environmentPacks

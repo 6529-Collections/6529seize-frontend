@@ -71,6 +71,7 @@ const RELATED_SOURCE_LABEL_KEYS = {
     "museum.network.openMuseum.strip.relatedLabels.onchainTransition",
   primarySourceRegister:
     "museum.network.openMuseum.strip.relatedLabels.primarySourceRegister",
+  projectEssay: "museum.network.openMuseum.strip.relatedLabels.projectEssay",
   programRecord: "museum.network.openMuseum.strip.relatedLabels.programRecord",
   scholarshipStandard:
     "museum.network.openMuseum.strip.relatedLabels.scholarshipStandard",

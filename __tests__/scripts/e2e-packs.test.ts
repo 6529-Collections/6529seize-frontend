@@ -694,9 +694,9 @@ describe("E2E runner CLI resolution", () => {
   });
 
   it.each([
-    ["staging", "post-deploy", 13],
+    ["staging", "post-deploy", 14],
     ["production", "cron", 10],
-    ["production", "post-deploy", 12],
+    ["production", "post-deploy", 13],
   ])(
     "lists %s/%s as a non-empty deterministic pack set",
     (env, trigger, count) => {
