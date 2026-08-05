@@ -184,3 +184,52 @@
   `O_NOFOLLOW` is unavailable and directory-descriptor `fchmod` returns `EPERM`.
   Those twelve platform failures are unrelated; hosted Linux remains the
   authoritative environment for those fail-closed controls.
+- PR #3604 final head `8aee301944e9140515cd6b07a2bac7e10621e0d2`
+  passed all 17 hosted checks. App CI run 30979078634 completed in 12m23s;
+  quality/contracts took 2m56s, smoke 3m33s, critical shell 4m39s, production
+  build 11m23s, and Museum was omitted. Zero review threads remained. The
+  controlled merge audit is PR comment 5188141004. PR #3604 merged as
+  `2edfb2610c0cca9f49d45c5465c43bba8a20077e` at 05:58:51 UTC.
+- Staging composition `12b40bd96de7f3769c4738a8796e7f915d34db0f`
+  deployed in run 30979848612. Concurrent production prebuild 30979804039
+  produced artifact `production-frontend-2edfb2610c0cca9f49d45c5465c43bba8a20077e`
+  with SHA-256
+  `5006419d86d2ab7faad723896a22590fac69b40caddf277f295bf6cd3e96c0d9`.
+- Automatic staging E2E 30980599423 passed. Retained evidence contains 12
+  packs, three workers, zero Museum packs, and zero final failures. Collections
+  alone used attempt 2 and passed in 55.7s; all other packs remained on attempt
+  1. Reviewer evidence is the `staging-e2e-artifacts-30980599423` artifact on
+     [run 30980599423](https://github.com/6529-Collections/6529seize-frontend/actions/runs/30980599423),
+     retained by GitHub through 2026-09-04.
+- Production run 30981038834 promoted the exact prebuilt artifact in 5m58s.
+  Three consecutive live version requests returned exact main
+  `2edfb2610c0cca9f49d45c5465c43bba8a20077e` for both served and announced
+  versions with `stale:false`.
+- Automatic production E2E 30981386269 passed in 2m53s. Retained evidence
+  contains 11 packs, three workers, zero Museum packs, zero retries, and zero
+  failures. Reviewer evidence is the `production-e2e-artifacts-30981038834`
+  artifact on
+  [run 30981386269](https://github.com/6529-Collections/6529seize-frontend/actions/runs/30981386269),
+  retained by GitHub through 2026-09-04. Machine-local mirrors remain under
+  `C:\Users\Administrator\.codex\artifacts\ci-release-final` for operator
+  convenience only.
+- Final timing: merge-to-production 27m47s; merge-to-qualified-production
+  30m47s. The workstream is complete.
+- Closeout PR #3605 review replaced machine-local-only evidence references with
+  GitHub run/artifact references, corrected the PR comparison to total elapsed
+  time on both sides, and added a tested `ops/**` staging path exclusion. The
+  exclusion is deliberately narrow: public or build-input Markdown remains
+  deployment-triggering. Focused workflow tests pass 62/62 and the Jest type,
+  changed-lint, Bash-parse, formatting, and whitespace ratchets are green.
+- The post-merge sweep observed production-prebuild run 30983293737 start for
+  the closeout's `.github`, `__tests__`, and `ops`-only delta. The run was
+  cancelled because it could not produce deployable application changes.
+  Production prebuild now ignores `.github/**`, `__tests__/**`, `ops/**`, and
+  `tests/**`-only pushes; any application source, application configuration,
+  dependency, script, or public-content change still triggers the fail-closed
+  exact prebuild. An ignored-only main SHA deliberately has no automatic
+  deployable artifact. If an operator intentionally promotes that SHA, the
+  existing manual dispatch must first build its exact artifact; production
+  deployment otherwise fails closed. The contract also proves that the build
+  workflow consumes no ignored local `.github` action; introducing one must
+  first narrow the trigger exclusion.

@@ -28,10 +28,12 @@ import {
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
   shouldFilterPoperBlockerOrphanFetchRejection,
+  shouldFilterExpectedWaveRequestReplacementAbort,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterInjectedProviderProxyStartsWithError,
   shouldFilterInjectedWalletCollision,
+  shouldFilterInstagramPageHideBridgeError,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
@@ -169,6 +171,10 @@ function shouldFilterEvent(
     return true;
   }
 
+  if (shouldFilterExpectedWaveRequestReplacementAbort(event)) {
+    return true;
+  }
+
   if (shouldFilterCoinbaseWalletLinkWebSocket1006(event, hint)) {
     return true;
   }
@@ -186,6 +192,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterTwitterCurrentInsetReferenceError(event)) {
+    return true;
+  }
+
+  if (shouldFilterInstagramPageHideBridgeError(event, hint)) {
     return true;
   }
 
