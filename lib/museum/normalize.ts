@@ -252,6 +252,77 @@ function legacyProgramMedia(
   };
 }
 
+function normalizeProgramMediaManifestItem(item: JsonObject): {
+  readonly recordId: string;
+  readonly media: MuseumProgramMedia;
+} | null {
+  const recordId = stringValue(item.record_id);
+  const source = isObject(item.source) ? item.source : null;
+  const presentation = isObject(item.presentation) ? item.presentation : null;
+  const sourceUrl = approvedProgramMediaUrl(source?.url);
+  const altText = nullableString(presentation?.alt_text);
+  const derivatives = Array.isArray(presentation?.derivatives)
+    ? presentation.derivatives
+        .filter(isObject)
+        .flatMap((derivative) => {
+          const url = approvedProgramDerivativeUrl(derivative.url);
+          const width = positiveInteger(derivative.width);
+          const height = positiveInteger(derivative.height);
+          const sha256 = nullableString(derivative.sha256);
+          const byteSize = positiveInteger(derivative.byte_size);
+          if (
+            url === null ||
+            width === null ||
+            height === null ||
+            sha256 === null ||
+            byteSize === null ||
+            derivative.mime_type !== "image/webp"
+          ) {
+            return [];
+          }
+          return [
+            {
+              url,
+              width,
+              height,
+              mimeType: "image/webp" as const,
+              sha256,
+              byteSize,
+            },
+          ];
+        })
+        .sort((left, right) => left.width - right.width)
+    : [];
+
+  if (
+    recordId.length === 0 ||
+    source === null ||
+    presentation === null ||
+    sourceUrl === null ||
+    altText === null ||
+    derivatives.length === 0 ||
+    new Set(derivatives.map((derivative) => derivative.width)).size !==
+      derivatives.length
+  ) {
+    return null;
+  }
+
+  return {
+    recordId,
+    media: {
+      sourceUrl,
+      sourceMimeType: stringValue(source.mime_type),
+      sourceSha256: nullableString(source.sha256),
+      sourceByteSize: positiveInteger(source.byte_size),
+      sourceWidth: positiveInteger(source.pixel_width),
+      sourceHeight: positiveInteger(source.pixel_height),
+      altText,
+      altTextStatus: stringValue(presentation.alt_text_status),
+      variants: derivatives,
+    },
+  };
+}
+
 function programMediaIndex(
   documents: Readonly<Record<string, MuseumDocument>>
 ): ReadonlyMap<string, MuseumProgramMedia> {
@@ -272,66 +343,10 @@ function programMediaIndex(
     if (recordId.length > 0) {
       seenRecordIds.add(recordId);
     }
-    const source = isObject(item.source) ? item.source : null;
-    const presentation = isObject(item.presentation) ? item.presentation : null;
-    const sourceUrl = approvedProgramMediaUrl(source?.url);
-    const altText = nullableString(presentation?.alt_text);
-    const derivatives = Array.isArray(presentation?.derivatives)
-      ? presentation.derivatives
-          .filter(isObject)
-          .flatMap((derivative) => {
-            const url = approvedProgramDerivativeUrl(derivative.url);
-            const width = positiveInteger(derivative.width);
-            const height = positiveInteger(derivative.height);
-            const sha256 = nullableString(derivative.sha256);
-            const byteSize = positiveInteger(derivative.byte_size);
-            if (
-              url === null ||
-              width === null ||
-              height === null ||
-              sha256 === null ||
-              byteSize === null ||
-              derivative.mime_type !== "image/webp"
-            ) {
-              return [];
-            }
-            return [
-              {
-                url,
-                width,
-                height,
-                mimeType: "image/webp" as const,
-                sha256,
-                byteSize,
-              },
-            ];
-          })
-          .sort((left, right) => left.width - right.width)
-      : [];
-
-    if (
-      recordId.length === 0 ||
-      source === null ||
-      presentation === null ||
-      sourceUrl === null ||
-      altText === null ||
-      derivatives.length === 0 ||
-      new Set(derivatives.map((derivative) => derivative.width)).size !==
-        derivatives.length
-    ) {
-      continue;
+    const normalized = normalizeProgramMediaManifestItem(item);
+    if (normalized !== null) {
+      result.set(normalized.recordId, normalized.media);
     }
-    result.set(recordId, {
-      sourceUrl,
-      sourceMimeType: stringValue(source.mime_type),
-      sourceSha256: nullableString(source.sha256),
-      sourceByteSize: positiveInteger(source.byte_size),
-      sourceWidth: positiveInteger(source.pixel_width),
-      sourceHeight: positiveInteger(source.pixel_height),
-      altText,
-      altTextStatus: stringValue(presentation.alt_text_status),
-      variants: derivatives,
-    });
   }
 
   return result;
