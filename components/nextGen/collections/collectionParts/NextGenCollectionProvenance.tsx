@@ -19,7 +19,7 @@ import {
   getTransactionLink,
 } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
-import { DATA_TABLE_INTERACTIVE_ROW_CLASS_NAME } from "@/components/utils/table/tableRowStyles";
+import { DATA_TABLE_INTERACTIVE_ROW_CLASS_NAME } from "@/components/utils/table/tableStyles";
 import {
   faChevronRight,
   faExternalLinkSquare,

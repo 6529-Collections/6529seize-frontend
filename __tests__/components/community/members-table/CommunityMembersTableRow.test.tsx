@@ -36,11 +36,17 @@ jest.mock("next/link", () => ({
   __esModule: true,
   default: ({
     children,
+    className,
     href,
   }: {
     href: string;
+    className?: string;
     children: React.ReactNode;
-  }) => <a href={href}>{children}</a>,
+  }) => (
+    <a href={href} className={className}>
+      {children}
+    </a>
+  ),
 }));
 
 const baseMember: ApiCommunityMemberOverview = {
@@ -72,6 +78,10 @@ describe("CommunityMembersTableRow", () => {
 
     expect(screen.getByRole("link")).toHaveAttribute("href", "/alice");
     expect(screen.getByRole("link")).toHaveTextContent("Alice");
+    expect(screen.getByRole("link")).toHaveClass(
+      "group-focus-within:tw-text-iron-400",
+      "group-focus-within:tw-no-underline"
+    );
     expect(screen.getByText("10M")).toBeInTheDocument();
     expect(screen.getByText("5M")).toBeInTheDocument();
     expect(screen.getByText("#5")).toBeInTheDocument();

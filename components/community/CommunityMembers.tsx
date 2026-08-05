@@ -39,6 +39,9 @@ const SEARCH_PARAMS_FIELDS = {
   group: "group",
 } as const;
 
+const NETWORK_DIALOG_HEADER_CLASS_NAME =
+  "tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-3.5 tw-pt-4";
+
 function NetworkHeaderActionButton({
   active = false,
   children,
@@ -415,7 +418,7 @@ export default function CommunityMembers() {
         showHeaderCloseButton
         surfaceClassName="tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-shadow-2xl tw-shadow-black/60"
         titleClassName="tw-text-base !tw-font-bold !tw-text-white tw-tracking-tight"
-        headerClassName="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-3.5"
+        headerClassName={NETWORK_DIALOG_HEADER_CLASS_NAME}
         headerCloseButtonClassName="-tw-mt-1"
       >
         <GroupsSidebar variant="mobile-sheet" />
@@ -430,7 +433,7 @@ export default function CommunityMembers() {
         showHeaderCloseButton
         surfaceClassName="tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-shadow-2xl tw-shadow-black/60"
         titleClassName="tw-text-base !tw-font-bold !tw-text-white tw-tracking-tight"
-        headerClassName="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-3.5"
+        headerClassName={NETWORK_DIALOG_HEADER_CLASS_NAME}
         headerCloseButtonClassName="-tw-mt-1"
       >
         <CommunityMembersMobileSortContent

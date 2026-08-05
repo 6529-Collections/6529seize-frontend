@@ -16,6 +16,7 @@ export default function CommunityMembersTableSkeleton({
       <div className="tw-hidden tw-overflow-hidden sm:tw-block">
         <div className="tw-animate-pulse">
           <div className="tw-h-10 tw-border-b tw-border-iron-800" />
+          {/* The header above is the first sibling, so odd children are even-numbered data placeholders. */}
           {rowKeys.map((key) => (
             <div
               key={key}

@@ -19,7 +19,7 @@ import Button from "@/components/utils/button/Button";
 import {
   DATA_TABLE_HEADER_TEXT_CLASS_NAME,
   DATA_TABLE_INTERACTIVE_ROW_CLASS_NAME,
-} from "@/components/utils/table/tableRowStyles";
+} from "@/components/utils/table/tableStyles";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "@/entities/ISort";
 import type { CICType } from "@/entities/IProfile";

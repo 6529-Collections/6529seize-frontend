@@ -2,7 +2,7 @@
 
 import { SortDirection } from "@/entities/ISort";
 import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
-import { DATA_TABLE_HEADER_TEXT_CLASS_NAME } from "@/components/utils/table/tableRowStyles";
+import { DATA_TABLE_HEADER_TEXT_CLASS_NAME } from "@/components/utils/table/tableStyles";
 import { useState } from "react";
 import CommunityMembersTableHeaderSortableContent from "./CommunityMembersTableHeaderSortableContent";
 

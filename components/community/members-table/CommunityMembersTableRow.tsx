@@ -10,7 +10,7 @@ import {
   getTimeAgoShort,
 } from "@/helpers/Helpers";
 import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
-import { DATA_TABLE_INTERACTIVE_ROW_CLASS_NAME } from "@/components/utils/table/tableRowStyles";
+import { DATA_TABLE_INTERACTIVE_ROW_CLASS_NAME } from "@/components/utils/table/tableStyles";
 import Link from "next/link";
 import { Tooltip } from "react-tooltip";
 
@@ -56,7 +56,7 @@ export default function CommunityMembersTableRow({
           >
             <Link
               href={path}
-              className={`tw-text-[13px] tw-font-medium tw-leading-5 tw-no-underline tw-transition tw-duration-300 tw-ease-out group-hover:tw-text-iron-400 group-hover:tw-no-underline md:tw-text-sm ${textColorClass}`}
+              className={`tw-text-[13px] tw-font-medium tw-leading-5 tw-no-underline tw-transition tw-duration-300 tw-ease-out group-focus-within:tw-text-iron-400 group-focus-within:tw-no-underline group-hover:tw-text-iron-400 group-hover:tw-no-underline md:tw-text-sm ${textColorClass}`}
             >
               {member.display}
             </Link>

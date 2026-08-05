@@ -29,7 +29,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
 import { Tooltip } from "react-tooltip";
-import { DATA_TABLE_INTERACTIVE_ROW_CLASS_NAME } from "@/components/utils/table/tableRowStyles";
+import { DATA_TABLE_INTERACTIVE_ROW_CLASS_NAME } from "@/components/utils/table/tableStyles";
 import Address from "../address/Address";
 import {
   getNextGenIconUrl,
