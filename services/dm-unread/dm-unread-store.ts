@@ -169,7 +169,7 @@ export class DmUnreadStore {
         ...this.snapshot.profiles,
         [normalized.profile_id]: {
           conversations: {
-            ...(profile?.conversations ?? {}),
+            ...profile?.conversations,
             [normalized.wave_id]: nextConversation,
           },
         },

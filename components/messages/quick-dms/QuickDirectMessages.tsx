@@ -90,6 +90,15 @@ const useIsQuickDmDesktop = (): boolean => {
   return !isApp && !isMobileDevice && isDesktopViewport;
 };
 
+const hasUnreadOutsideChat = (
+  state: QuickDmState,
+  totalUnreadCount: number,
+  currentConversationUnreadCount: number
+): boolean =>
+  state.view === "chat" &&
+  state.waveId !== null &&
+  totalUnreadCount - currentConversationUnreadCount > 0;
+
 export default function QuickDirectMessages() {
   const { connectedProfile, showWaves } = useAuth();
   const isDesktop = useIsQuickDmDesktop();
@@ -122,10 +131,11 @@ export default function QuickDirectMessages() {
   const hasUnread = totalUnreadCount > 0;
   const displayUnreadCount =
     totalUnreadCount > 99 ? "99+" : `${totalUnreadCount}`;
-  const hasUnreadOutsideCurrentChat =
-    state.view === "chat" &&
-    state.waveId !== null &&
-    totalUnreadCount - (currentConversationUnread?.unread_count ?? 0) > 0;
+  const hasUnreadOutsideCurrentChat = hasUnreadOutsideChat(
+    state,
+    totalUnreadCount,
+    currentConversationUnread?.unread_count ?? 0
+  );
 
   useEffect(() => requestDirectMessagesList(), [requestDirectMessagesList]);
 

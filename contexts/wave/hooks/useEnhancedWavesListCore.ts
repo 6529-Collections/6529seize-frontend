@@ -157,10 +157,18 @@ function useEnhancedWavesListCore(
 
   const markWaveRead = useCallback(
     (waveId: string) => {
+      if (!isEnabled || usesCanonicalUnread) {
+        return;
+      }
       resetWaveNewDropsCount(waveId);
       resetWaveUnreadCount(waveId);
     },
-    [resetWaveNewDropsCount, resetWaveUnreadCount]
+    [
+      isEnabled,
+      resetWaveNewDropsCount,
+      resetWaveUnreadCount,
+      usesCanonicalUnread,
+    ]
   );
 
   useEffect(() => {
