@@ -4,7 +4,6 @@ import {
   AboutContainer as Container,
   AboutRow as Row,
 } from "./AboutLayout";
-import styles from "./About.module.css";
 
 export default function AboutLicense() {
   return (
@@ -16,16 +15,14 @@ export default function AboutLicense() {
       </Row>
       <Row>
         <Col
-          className={`${styles["lastUpdateText"]} tw-pb-3 tw-pt-3 tw-text-right`}
+          className="tw-pb-3 tw-pt-3 tw-text-right tw-text-sm tw-leading-6 tw-text-iron-500"
         >
           Last Updated: February 23, 2023
         </Col>
       </Row>
       <Row className="tw-pb-3 tw-pt-3">
         <Col>
-          <p>
-            <b>The Memes and Meme Lab</b>
-          </p>
+          <h2>The Memes and Meme Lab</h2>
           <p>
             The Memes and Meme Lab NFTs are released by the artists under a
             Creative Commons 0 (CC0) license, which is a public domain license.
@@ -82,10 +79,7 @@ export default function AboutLicense() {
             damages you may suffer for infringement on the rights of third
             parties.
           </p>
-          <br />
-          <p>
-            <b>6529 Gradient</b>
-          </p>
+          <h2>6529 Gradient</h2>
           <p>
             In general, we do not mind if people use the Gradient NFTs as we
             have seen them used in some art and memes, but we are concerned

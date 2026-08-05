@@ -3,7 +3,6 @@ import {
   AboutContainer as Container,
   AboutRow as Row,
 } from "./AboutLayout";
-import styles from "./About.module.css";
 
 export default function AboutCopyright() {
   return (
@@ -15,14 +14,14 @@ export default function AboutCopyright() {
       </Row>
       <Row>
         <Col
-          className={`${styles["lastUpdateText"]} tw-pb-3 tw-pt-3 tw-text-right`}
+          className="tw-pb-3 tw-pt-3 tw-text-right tw-text-sm tw-leading-6 tw-text-iron-500"
         >
           Last Updated: April 23, 2024
         </Col>
       </Row>
       <Row className="tw-pb-3 tw-pt-3">
         <Col>
-          <p className="tw-text-lg tw-font-bold">Introduction</p>
+          <h2>Introduction</h2>
           <p>
             6529.io, a platform of 6529 Collection LLC, respects the
             intellectual property rights of others and expects its users to do
@@ -34,9 +33,9 @@ export default function AboutCopyright() {
       </Row>
       <Row className="tw-pb-3 tw-pt-3">
         <Col>
-          <p className="tw-text-lg tw-font-bold">
+          <h2>
             Copyright Infringement Notification
-          </p>
+          </h2>
           <p>
             If you believe that your copyrighted work has been copied in a way
             that constitutes copyright infringement and is accessible through
@@ -92,7 +91,7 @@ export default function AboutCopyright() {
       </Row>
       <Row className="tw-pb-3 tw-pt-3">
         <Col>
-          <p className="tw-text-lg tw-font-bold">Counter-Notification</p>
+          <h2>Counter-Notification</h2>
           <p>
             If you believe that your content that was removed (or to which
             access was disabled) is not infringing, or that you have the
@@ -145,7 +144,7 @@ export default function AboutCopyright() {
       </Row>
       <Row className="tw-pb-3 tw-pt-3">
         <Col>
-          <p className="tw-text-lg tw-font-bold">Repeat Infringer Policy</p>
+          <h2>Repeat Infringer Policy</h2>
           <p>
             In accordance with the DMCA and other applicable law, 6529
             Collection LLC has adopted a policy of terminating, in appropriate
@@ -160,7 +159,7 @@ export default function AboutCopyright() {
       </Row>
       <Row className="tw-pb-3 tw-pt-3">
         <Col>
-          <p className="tw-text-lg tw-font-bold">Modifications to the Policy</p>
+          <h2>Modifications to the Policy</h2>
           <p>
             6529 Collection LLC reserves the right to modify the terms of this
             DMCA Policy at any time and for any reason. By continuing to access
@@ -171,7 +170,7 @@ export default function AboutCopyright() {
       </Row>
       <Row className="tw-pb-3 tw-pt-3">
         <Col>
-          <p className="tw-text-lg tw-font-bold">Contact Information</p>
+          <h2>Contact Information</h2>
           <p>
             For any questions regarding this DMCA Policy, please contact our
             Copyright Agent&apos;s as follows:

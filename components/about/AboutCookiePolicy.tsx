@@ -11,13 +11,18 @@ import {
   getCookieConsentByName,
   useCookieConsent,
 } from "../cookies/CookieConsentContext";
-import styles from "./About.module.css";
 import {
   AboutCol as Col,
   AboutContainer as Container,
   AboutRow as Row,
   AboutTable as Table,
 } from "./AboutLayout";
+
+const COOKIE_POLICY_TABLE_CLASS = [
+  "tw-min-w-[42rem] tw-border-separate tw-border-spacing-0 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-300",
+  "[&_th]:tw-bg-iron-950/60 [&_th]:tw-p-3 [&_th]:tw-font-semibold [&_th]:tw-text-iron-100",
+  "[&_td]:tw-border-0 [&_td]:tw-border-t [&_td]:tw-border-solid [&_td]:tw-border-white/[0.07] [&_td]:tw-p-3 [&_td]:tw-align-top",
+].join(" ");
 
 export default function AboutCookiePolicy() {
   const { showCookieConsent, consent, reject } = useCookieConsent();
@@ -43,7 +48,7 @@ export default function AboutCookiePolicy() {
       </Row>
       <Row>
         <Col
-          className={`${styles["lastUpdateText"]} tw-pb-3 tw-pt-3 tw-text-right`}
+          className="tw-pb-3 tw-pt-3 tw-text-right tw-text-sm tw-leading-6 tw-text-iron-500"
         >
           Last Updated: June 04, 2024
         </Col>
@@ -53,7 +58,7 @@ export default function AboutCookiePolicy() {
           <Container className="!tw-px-0">
             <Row className="tw-pb-3">
               <Col>
-                <h3 className="tw-mb-0">Cookie List</h3>
+                <h2 className="tw-mb-0">Cookie List</h2>
               </Col>
             </Row>
             <Row className="tw-pb-2 tw-pt-2">
@@ -76,7 +81,7 @@ export default function AboutCookiePolicy() {
           <Container className="!tw-px-0">
             <Row className="tw-pb-3">
               <Col>
-                <h4 className="tw-mb-0">Strictly Necessary Cookies</h4>
+                <h3 className="tw-mb-0">Strictly Necessary Cookies</h3>
               </Col>
             </Row>
             <Row className="tw-pt-2">
@@ -91,8 +96,8 @@ export default function AboutCookiePolicy() {
               </Col>
             </Row>
             <Row>
-              <Col>
-                <Table className={styles["cookiePolicyTable"]}>
+              <Col className="tw-overflow-x-auto">
+                <Table className={COOKIE_POLICY_TABLE_CLASS}>
                   <thead>
                     <tr>
                       <th>Domain</th>
@@ -162,11 +167,11 @@ export default function AboutCookiePolicy() {
           <Container className="!tw-px-0">
             <Row className="tw-pb-3">
               <Col className="tw-flex tw-items-center tw-justify-between">
-                <h4 className="tw-mb-0">Performance Cookies</h4>
+                <h3 className="tw-mb-0">Performance Cookies</h3>
                 <span className="tw-flex tw-items-center tw-gap-2">
                   <label
                     htmlFor={"performance-cookies-toggle"}
-                    className="tw-text-white"
+                    className="tw-text-iron-100"
                   >
                     <b>
                       {isPerformanceCookiesEnabled ? "Enabled" : "Disabled"}
@@ -195,8 +200,8 @@ export default function AboutCookiePolicy() {
               </Col>
             </Row>
             <Row>
-              <Col>
-                <Table className={styles["cookiePolicyTable"]}>
+              <Col className="tw-overflow-x-auto">
+                <Table className={COOKIE_POLICY_TABLE_CLASS}>
                   <thead>
                     <tr>
                       <th>Domain</th>
@@ -266,7 +271,7 @@ export default function AboutCookiePolicy() {
                 <Container className="!tw-px-0">
                   <Row className="tw-pb-3">
                     <Col>
-                      <h5 className="tw-mb-0">Retention Policy</h5>
+                      <h4 className="tw-mb-0">Retention Policy</h4>
                     </Col>
                   </Row>
                   <Row>
