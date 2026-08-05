@@ -19,6 +19,7 @@ import {
   getTransactionLink,
 } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
+import { DATA_TABLE_INTERACTIVE_ROW_CLASS_NAME } from "@/components/utils/table/tableRowStyles";
 import {
   faChevronRight,
   faExternalLinkSquare,
@@ -384,7 +385,7 @@ export function NextGenCollectionProvenanceRow(
   };
 
   return (
-    <tr className="tw-h-16 odd:tw-bg-transparent even:tw-bg-iron-900/45 hover:tw-bg-iron-900/70">
+    <tr className={`tw-h-16 ${DATA_TABLE_INTERACTIVE_ROW_CLASS_NAME}`}>
       <td
         className={`${CELL_CLASSES} tw-w-px tw-whitespace-nowrap tw-text-iron-300`}
       >
