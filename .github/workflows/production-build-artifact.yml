@@ -3,6 +3,11 @@ name: Build Production Artifact
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - ".github/**"
+      - "__tests__/**"
+      - "ops/**"
+      - "tests/**"
   workflow_dispatch:
 
 permissions:

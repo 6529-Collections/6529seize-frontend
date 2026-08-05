@@ -16,6 +16,12 @@ describe("production prebuild and promotion contract", () => {
 
   it("builds exact main bytes without deployment authority", () => {
     expect(build.on.push.branches).toEqual(["main"]);
+    expect(build.on.push["paths-ignore"]).toEqual([
+      ".github/**",
+      "__tests__/**",
+      "ops/**",
+      "tests/**",
+    ]);
     const job = build.jobs["build-production-artifact"];
     const serialized = JSON.stringify(job);
     const verifyIndex = job.steps.findIndex(
