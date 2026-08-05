@@ -1,11 +1,11 @@
 import { parseHeading } from "./legacyCaseyMarkdown";
+import { MUSEUM_DATA_ARCHITECTURE_STANDARDS } from "./dataArchitectureContract";
 import type {
   MuseumDataArchitecture,
   MuseumDataArchitectureCaseStudy,
   MuseumDataArchitectureCaseyObject,
   MuseumDataArchitectureImplementationState,
   MuseumDataArchitectureStandard,
-  MuseumDataArchitectureStandardSlug,
   MuseumPublicDocument,
   MuseumSourceDocument,
   MuseumSha256,
@@ -18,28 +18,11 @@ const CASEY_IMPLEMENTATION_PATH =
 const CASEY_SCHEDULE_PATH =
   "docs/data-architecture/casey-reas-machine-schedule.json";
 
-const STANDARD_CONTRACTS = [
-  ["spectrum", "Spectrum 5.1: the work of running a collection"],
-  ["cidoc-crm", "CIDOC CRM: a history made of events"],
-  ["lido", "LIDO: a public catalogue record that can travel"],
-  ["premis", "PREMIS: keeping a digital artwork usable"],
-  ["prov-o", "PROV-O: following the evidence"],
-  ["getty-aat-ulan", "Getty AAT and ULAN: shared names for art and artists"],
-  ["iiif", "IIIF: a shared plan for presenting digital objects"],
-  ["c2pa", "C2PA: signed claims about media"],
-  ["bagit", "BagIt: a package that can be checked on arrival"],
-  ["ocfl", "OCFL: preserving every version"],
-  ["caip-19", "CAIP-19: an address for a chain asset"],
-] as const satisfies readonly (readonly [
-  MuseumDataArchitectureStandardSlug,
-  string,
-])[];
-
 export const DATA_ARCHITECTURE_REQUIRED_PATHS = [
   PROFILE_PATH,
   OVERVIEW_PATH,
-  ...STANDARD_CONTRACTS.map(
-    ([slug]) => `docs/data-architecture/${slug}.md` as const
+  ...MUSEUM_DATA_ARCHITECTURE_STANDARDS.map(
+    ({ slug }) => `docs/data-architecture/${slug}.md` as const
   ),
   CASEY_IMPLEMENTATION_PATH,
   CASEY_SCHEDULE_PATH,
@@ -210,6 +193,7 @@ function parseCaseySchedule(
     metadataDigestScope: requiredString(value["metadata_digest_scope"]),
     generatorDigestScope: requiredString(value["generator_digest_scope"]),
     objects,
+    sourceJson: document.text,
     sourcePath: CASEY_SCHEDULE_PATH,
     sha256: document.sha256,
   };
@@ -237,7 +221,7 @@ export function assembleDataArchitecture(
     streamConvergence["status"] !== "deferred_until_museum_profile_release" ||
     streamConvergence["document_path"] !== "docs/stream-interoperability.md" ||
     !Array.isArray(standardsValue) ||
-    standardsValue.length !== STANDARD_CONTRACTS.length
+    standardsValue.length !== MUSEUM_DATA_ARCHITECTURE_STANDARDS.length
   ) {
     throw new Error("publication_data_architecture_invalid");
   }
@@ -252,11 +236,11 @@ export function assembleDataArchitecture(
   );
   const standards = standardsValue.map(
     (candidate, index): MuseumDataArchitectureStandard => {
-      const contract = STANDARD_CONTRACTS[index];
+      const contract = MUSEUM_DATA_ARCHITECTURE_STANDARDS[index];
       if (contract === undefined) {
         throw new Error("publication_data_architecture_invalid");
       }
-      const [slug, documentTitle] = contract;
+      const { slug, title: documentTitle } = contract;
       const item = requiredRecord(candidate);
       const documentPath = `docs/data-architecture/${slug}.md`;
       if (item["slug"] !== slug || item["document_path"] !== documentPath) {
@@ -304,6 +288,7 @@ export function assembleDataArchitecture(
     standards,
     caseyImplementation,
     caseySchedule: parseCaseySchedule(documents, expectedArtworks),
+    profileJson: profileDocument.text,
     profileSourcePath: PROFILE_PATH,
     profileSha256: profileDocument.sha256,
   };

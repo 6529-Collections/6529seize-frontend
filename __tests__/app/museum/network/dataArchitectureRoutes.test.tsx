@@ -87,6 +87,12 @@ describe("Museum data architecture routes", () => {
       screen.getByText("Read the machine application profile")
     ).toBeInTheDocument();
     expect(
+      screen
+        .getByText("Read the machine application profile")
+        .closest("details")
+        ?.querySelector("pre")?.textContent
+    ).toBe(publication.dataArchitecture.profileJson);
+    expect(
       screen.getByRole("link", { name: "Back to methods and provenance" })
     ).toHaveAttribute("data-prefetch", "false");
   });
@@ -128,6 +134,12 @@ describe("Museum data architecture routes", () => {
     expect(
       screen.getByText("Read the seven-object machine schedule")
     ).toBeInTheDocument();
+    expect(
+      screen
+        .getByText("Read the seven-object machine schedule")
+        .closest("details")
+        ?.querySelector("pre")?.textContent
+    ).toBe(publication.dataArchitecture.caseySchedule.sourceJson);
   });
 
   it("uses the governed document title in metadata", async () => {
@@ -140,6 +152,15 @@ describe("Museum data architecture routes", () => {
   it("returns a 404 for an unknown standards slug", async () => {
     await expect(
       MuseumDataArchitectureProfilePage({
+        params: Promise.resolve({ slug: "unknown" }),
+      })
+    ).rejects.toThrow("not_found");
+    expect(mockedNotFound).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns a 404 metadata boundary for an unknown standards slug", async () => {
+    await expect(
+      generateMetadata({
         params: Promise.resolve({ slug: "unknown" }),
       })
     ).rejects.toThrow("not_found");

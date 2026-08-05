@@ -10,10 +10,11 @@ const SCHEDULE_PATH = "docs/data-architecture/casey-reas-machine-schedule.json";
 
 describe("Museum data architecture publication", () => {
   it("assembles the exact eleven-standard profile and seven-object schedule", async () => {
+    const fixture = createCaseyFixture();
     const state = await new GitHubMuseumPublicationSource({
       ref: "main",
       assembler: legacyCaseyPublicationAssembler,
-      fetch: createCaseyFixture().fetch,
+      fetch: fixture.fetch,
     }).load();
 
     expect(state.status).toBe("current");
@@ -41,6 +42,12 @@ describe("Museum data architecture publication", () => {
     expect(
       state.publication.dataArchitecture.caseySchedule.objects
     ).toHaveLength(7);
+    expect(state.publication.dataArchitecture.profileJson).toBe(
+      fixture.documents[PROFILE_PATH]
+    );
+    expect(state.publication.dataArchitecture.caseySchedule.sourceJson).toBe(
+      fixture.documents[SCHEDULE_PATH]
+    );
     expect(
       state.publication.dataArchitecture.caseySchedule.objects.map(
         ({ objectId, title }) => [objectId, title]

@@ -52,3 +52,25 @@
   29.3 seconds. Local-only shell allowances cover the known production-API
   cross-origin and rate-limit noise; staging and production retain zero such
   allowances.
+- Frontend PR #3629 opened at exact signed head
+  `eebd8a48fda872a89b16373654bbcdef3225c91a`. Exact-head 6529bot review found no
+  security or i18n defect, and raised two valid publication concerns: unknown
+  profile metadata did not share the page's 404 boundary, and the machine
+  disclosures reconstructed governed JSON instead of presenting the verified
+  source bytes. The correction shares one standards contract across assembly,
+  Markdown routing, completeness, source mapping, and E2E; makes metadata fail
+  unknown slugs closed; retains the validated profile and schedule source JSON;
+  renders those exact strings; and tests source-byte identity. The requested
+  Museum data-architecture locale fallback record is also added.
+- The full Museum regression after these corrections passed 74 suites / 249
+  tests. The dedicated pack remains in pull-request CI by design: its
+  `changeScope: "museum"` trigger limits the 29-second browser suite to changes
+  that touch Museum surfaces. It is also included in the combined manual
+  production-safe read-only pack, so the aggregate and the parallel
+  post-deployment release packs cover the same Museum surface.
+- The public adapter deliberately follows canonical Museum `main`. Every
+  architecture route must expose the same verified, immutable source commit,
+  while the release test does not hard-code a commit that would become stale
+  when the separately governed source repository advances. This moving-source,
+  exact-edition boundary is an explicit product invariant rather than an
+  omitted deployment pin.

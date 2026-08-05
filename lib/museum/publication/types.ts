@@ -1,3 +1,5 @@
+import type { MuseumDataArchitectureStandardSlug as DataArchitectureStandardSlug } from "./dataArchitectureContract";
+
 export type MuseumSha256 = `sha256:${string}`;
 
 export interface MuseumPublicationIdentity {
@@ -136,18 +138,7 @@ export interface MuseumInstitutionalPractice {
   readonly sourceRegister: MuseumPublicDocument;
 }
 
-export type MuseumDataArchitectureStandardSlug =
-  | "spectrum"
-  | "cidoc-crm"
-  | "lido"
-  | "premis"
-  | "prov-o"
-  | "getty-aat-ulan"
-  | "iiif"
-  | "c2pa"
-  | "bagit"
-  | "ocfl"
-  | "caip-19";
+export type MuseumDataArchitectureStandardSlug = DataArchitectureStandardSlug;
 
 export type MuseumDataArchitectureImplementationState =
   | "conceptual_mapping"
@@ -190,6 +181,7 @@ export interface MuseumDataArchitectureCaseStudy {
   readonly metadataDigestScope: string;
   readonly generatorDigestScope: string;
   readonly objects: readonly MuseumDataArchitectureCaseyObject[];
+  readonly sourceJson: string;
   readonly sourcePath: string;
   readonly sha256: MuseumSha256 | null;
 }
@@ -204,6 +196,7 @@ export interface MuseumDataArchitecture {
   readonly standards: readonly MuseumDataArchitectureStandard[];
   readonly caseyImplementation: MuseumPublicDocument;
   readonly caseySchedule: MuseumDataArchitectureCaseStudy;
+  readonly profileJson: string;
   readonly profileSourcePath: string;
   readonly profileSha256: MuseumSha256 | null;
 }

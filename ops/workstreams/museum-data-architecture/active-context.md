@@ -29,10 +29,18 @@
   Windows capability skip; full semantic and manifest validation passed on
   Windows and hosted Ubuntu/Windows. Exact-head 6529bot follow-up reported no
   findings.
-- Frontend validation: 74 Museum suites / 248 tests, the focused final 30-test
+- Frontend validation: 74 Museum suites / 249 tests, the focused final 48-test
   publication/route/pack run, changed lint and typecheck, React Doctor 100/100,
   help-index sync (202), and the exact-source optimized production build passed.
   The dedicated read-only browser pack passed all six desktop/mobile cases,
   including all eleven standard routes, both machine disclosures, exact-source
   links, and 390 px overflow checks. PR review, staging, and production
   qualification remain in progress.
+- Frontend PR #3629 opened at initial exact head
+  `eebd8a48fda872a89b16373654bbcdef3225c91a`. The first 6529bot general review
+  requested consistent unknown-slug metadata, source-exact machine
+  disclosures, and one shared standard registry; the i18n lane requested an
+  explicit fallback-debt record. Those corrections pass focused and full
+  Museum regression, and the new pack is included in the combined manual
+  production-safe read-only suite. A signed follow-up and fresh exact-head
+  hosted review remain.

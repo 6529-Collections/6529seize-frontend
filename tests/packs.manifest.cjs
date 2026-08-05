@@ -619,6 +619,7 @@ const PACKS = [
       ...READONLY_SPECS.publicContent,
       ...READONLY_SPECS.profileDeepLinks,
       ...READONLY_SPECS.searchWaves,
+      ...READONLY_SPECS.museumDataArchitecture,
       ...READONLY_SPECS.museumInstitutionalPractice,
       ...READONLY_SPECS.museumInsideSystem,
     ],

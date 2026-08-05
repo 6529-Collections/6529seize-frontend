@@ -11,9 +11,24 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
+import type {
+  MuseumPublication,
+  MuseumPublicDocument,
+} from "@/lib/museum/publication/types";
 
 interface DataArchitectureProfilePageProps {
   readonly params: Promise<{ slug: string }>;
+}
+
+function architectureDocument(
+  publication: MuseumPublication,
+  slug: string
+): MuseumPublicDocument | undefined {
+  return slug === "casey-reas-implementation"
+    ? publication.dataArchitecture.caseyImplementation
+    : publication.dataArchitecture.standards.find(
+        (standard) => standard.slug === slug
+      )?.document;
 }
 
 export async function generateMetadata({
@@ -31,16 +46,10 @@ export async function generateMetadata({
       ),
     });
   }
-  const document =
-    slug === "casey-reas-implementation"
-      ? publication.dataArchitecture.caseyImplementation
-      : publication.dataArchitecture.standards.find(
-          (standard) => standard.slug === slug
-        )?.document;
+  const document = architectureDocument(publication, slug);
+  if (document === undefined) notFound();
   return getAppMetadata({
-    title:
-      document?.title ??
-      t(DEFAULT_LOCALE, "museum.network.dataArchitecture.shortTitle"),
+    title: document.title,
     description: t(
       DEFAULT_LOCALE,
       "museum.network.dataArchitecture.profilePageDescription"
@@ -61,9 +70,7 @@ export default async function MuseumDataArchitectureProfilePage({
   const standard = publication.dataArchitecture.standards.find(
     (candidate) => candidate.slug === slug
   );
-  const document = isCasey
-    ? publication.dataArchitecture.caseyImplementation
-    : standard?.document;
+  const document = architectureDocument(publication, slug);
   if (document === undefined) notFound();
 
   return (

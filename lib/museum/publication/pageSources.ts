@@ -1,4 +1,5 @@
 import { assertGovernedMuseumPath } from "./security";
+import { MUSEUM_DATA_ARCHITECTURE_STANDARD_COUNT } from "./dataArchitectureContract";
 import type {
   MuseumInstitutionalPractice,
   MuseumPublication,
@@ -369,7 +370,8 @@ export function buildMuseumPageSourceCatalog(
     .dataArchitecture;
   if (
     dataArchitecture?.id === "6529NM_DATA_ARCHITECTURE_V1" &&
-    dataArchitecture.standards.length === 11
+    dataArchitecture.standards.length ===
+      MUSEUM_DATA_ARCHITECTURE_STANDARD_COUNT
   ) {
     const route = `${MUSEUM_ROOT}/methodology/data-architecture`;
     add(route, dataArchitecture.introduction.sourcePath, [

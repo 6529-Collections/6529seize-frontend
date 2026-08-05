@@ -12,6 +12,7 @@ import {
   attachPageDiagnostics,
 } from "../support/pageAssertions";
 import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
+import { MUSEUM_DATA_ARCHITECTURE_STANDARDS } from "@/lib/museum/publication/dataArchitectureContract";
 
 const BASE_PATH = "/museum/network/methodology/data-architecture";
 const SOURCE_REPOSITORY = "6529-Collections/6529networkmuseum";
@@ -45,27 +46,12 @@ const OVERVIEW: ArchitectureRoute = {
   title: "How the Museum knows and cares for art",
 };
 
-const STANDARDS = [
-  ["spectrum", "Spectrum 5.1: the work of running a collection"],
-  ["cidoc-crm", "CIDOC CRM: a history made of events"],
-  ["lido", "LIDO: a public catalogue record that can travel"],
-  ["premis", "PREMIS: keeping a digital artwork usable"],
-  ["prov-o", "PROV-O: following the evidence"],
-  ["getty-aat-ulan", "Getty AAT and ULAN: shared names for art and artists"],
-  ["iiif", "IIIF: a shared plan for presenting digital objects"],
-  ["c2pa", "C2PA: signed claims about media"],
-  ["bagit", "BagIt: a package that can be checked on arrival"],
-  ["ocfl", "OCFL: preserving every version"],
-  ["caip-19", "CAIP-19: an address for a chain asset"],
-] as const;
-
-const STANDARD_ROUTES: readonly ArchitectureRoute[] = STANDARDS.map(
-  ([slug, title]) => ({
+const STANDARD_ROUTES: readonly ArchitectureRoute[] =
+  MUSEUM_DATA_ARCHITECTURE_STANDARDS.map(({ slug, title }) => ({
     path: `${BASE_PATH}/${slug}`,
     sourcePath: `docs/data-architecture/${slug}.md`,
     title,
-  })
-);
+  }));
 
 const CASEY: ArchitectureRoute = {
   path: `${BASE_PATH}/casey-reas-implementation`,
