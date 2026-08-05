@@ -185,7 +185,7 @@ export const QuickDmListPanel = ({
   }
 
   return (
-    <div className="tw-flex tw-h-[560px] tw-max-h-[calc(100dvh-8rem)] tw-w-[380px] tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-shadow-[0_24px_80px_rgba(0,0,0,0.55)]">
+    <div className="tw-flex tw-max-h-[min(640px,calc(100dvh-8rem))] tw-w-[380px] tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-shadow-[0_24px_80px_rgba(0,0,0,0.55)]">
       <QuickDmPanelHeader
         locale={locale}
         title={t(locale, "quickDm.listTitle")}
@@ -194,7 +194,7 @@ export const QuickDmListPanel = ({
       />
       <div
         ref={scrollContainerRef}
-        className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-p-2 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700 desktop-hover:hover:tw-scrollbar-thumb-iron-600"
+        className="tw-min-h-0 tw-overflow-y-auto tw-p-2 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700 desktop-hover:hover:tw-scrollbar-thumb-iron-600"
       >
         {content}
       </div>

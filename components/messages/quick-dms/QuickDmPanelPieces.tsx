@@ -108,7 +108,7 @@ export const QuickDmPanelHeader = ({
       >
         <span className="tw-flex tw-size-[18px] tw-items-center tw-justify-center">
           <PaperAirplaneIcon
-            className="tw-size-3.5 -tw-rotate-45"
+            className="tw-size-3.5 -tw-translate-y-px -tw-rotate-45"
             aria-hidden="true"
           />
         </span>

@@ -140,6 +140,7 @@ export const QuickDmChat = ({
         viewMode="chat"
         onDropClick={openDropInMessages}
         waveViewStyleOverride={CHAT_PANEL_STYLE}
+        composerDensity="compact"
       />
     );
   } else if (isFetching) {

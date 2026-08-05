@@ -3,6 +3,7 @@
 import { type FocusEvent, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import GroupCreateIdentitiesSearchItems, {
+  GROUP_IDENTITY_MIN_SEARCH_LENGTH,
   type GroupCreateIdentitiesSearchAppearance,
   type GroupCreateIdentitiesSearchResultsLayout,
 } from "./GroupCreateIdentitiesSearchItems";
@@ -32,16 +33,22 @@ export default function GroupCreateIdentitiesSearch({
 }) {
   const isModal = appearance === "modal";
   const [isOpen, setIsOpen] = useState(false);
+  const [searchCriteria, setSearchCriteria] = useState<string | null>(null);
+
   const onFocusChange = (newV: boolean) => {
     if (newV) {
-      setIsOpen(true);
+      setIsOpen(
+        (searchCriteria?.trim().length ?? 0) >=
+          GROUP_IDENTITY_MIN_SEARCH_LENGTH
+      );
     }
   };
 
-  const [searchCriteria, setSearchCriteria] = useState<string | null>(null);
-
   const onSearchCriteriaChange = (newV: string | null) => {
     setSearchCriteria(newV);
+    setIsOpen(
+      (newV?.trim().length ?? 0) >= GROUP_IDENTITY_MIN_SEARCH_LENGTH
+    );
   };
 
   const wrapperRef = useRef<HTMLDivElement>(null);
