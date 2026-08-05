@@ -33,6 +33,7 @@ import {
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterInjectedProviderProxyStartsWithError,
   shouldFilterInjectedWalletCollision,
+  shouldFilterInstagramPageHideBridgeError,
   shouldFilterKnownWalletProviderObjectRejection,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
@@ -196,6 +197,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterTwitterCurrentInsetReferenceError(event)) {
+    return true;
+  }
+
+  if (shouldFilterInstagramPageHideBridgeError(event, hint)) {
     return true;
   }
 

@@ -11,6 +11,7 @@ import {
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterGifPickerTenorCategoriesError,
+  shouldFilterInstagramPageHideBridgeError,
   shouldFilterInjectedProviderProxyStartsWithError,
   shouldFilterInjectedWalletCollision,
   shouldFilterKnownWalletProviderObjectRejection,
@@ -81,6 +82,17 @@ type AppleWebKitSortedTrackListOverrides = {
   includeBrowserContext?: boolean | undefined;
   browserName?: string | undefined;
   transaction?: string | undefined;
+};
+type InstagramPageHideBridgeEventOptions = {
+  type?: string | undefined;
+  value?: string | undefined;
+  mechanismType?: string | undefined;
+  handled?: boolean | undefined;
+  frames?: SentryStackFrame[] | undefined;
+  browserName?: string | undefined;
+  osName?: string | undefined;
+  includeAdditionalException?: boolean | undefined;
+  extra?: Record<string, unknown> | undefined;
 };
 
 type ExpectedWaveReplacementAbortOverrides = {
@@ -177,6 +189,8 @@ describe("sentry-client-filters", () => {
     __testing.REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE;
   const gifPickerTenorUndefinedTagsMessage =
     __testing.gifPickerTenorUndefinedTagsMessage;
+  const instagramPageHideBridgeErrorMessage =
+    "undefined is not an object (evaluating 'window.webkit.messageHandlers')";
   const reactDomRemoveChildMessage =
     __testing.REACT_DOM_REMOVE_CHILD_NOT_FOUND_ERROR_MESSAGE;
   const reactDomFrame = {
@@ -1270,6 +1284,175 @@ describe("sentry-client-filters", () => {
         },
       },
     ],
+  ];
+
+  const createInstagramPageHideBridgeFrames = (
+    columns: readonly [number, number, number] = [5517, 3808, 1208],
+    documentPath = "app:///example-profile/rep"
+  ): SentryStackFrame[] => [
+    {
+      filename: documentPath,
+      abs_path: documentPath,
+      lineno: 1,
+      colno: columns[0],
+      in_app: true,
+    },
+    {
+      filename: documentPath,
+      abs_path: documentPath,
+      function: "sendPageHideMessage",
+      lineno: 1,
+      colno: columns[1],
+      in_app: true,
+    },
+    {
+      filename: documentPath,
+      abs_path: documentPath,
+      function: "sendDataToNative",
+      lineno: 1,
+      colno: columns[2],
+      in_app: true,
+    },
+  ];
+
+  const overrideInstagramPageHideBridgeFrame = (
+    frameIndex: number,
+    frameOverrides: Partial<SentryStackFrame>
+  ): SentryStackFrame[] =>
+    createInstagramPageHideBridgeFrames().map((frame, index) =>
+      index === frameIndex ? { ...frame, ...frameOverrides } : frame
+    );
+
+  const createInstagramPageHideBridgeEvent = ({
+    type = "TypeError",
+    value = instagramPageHideBridgeErrorMessage,
+    mechanismType = "auto.browser.global_handlers.onerror",
+    handled = false,
+    frames = createInstagramPageHideBridgeFrames(),
+    browserName = "Instagram",
+    osName = "iOS",
+    includeAdditionalException = false,
+    extra,
+  }: InstagramPageHideBridgeEventOptions = {}): TestSentryClientEvent => ({
+    contexts: {
+      browser: { name: browserName },
+      os: { name: osName },
+    },
+    ...(extra ? { extra } : {}),
+    exception: {
+      values: [
+        {
+          type,
+          value,
+          mechanism: {
+            type: mechanismType,
+            handled,
+          },
+          stacktrace: { frames },
+        },
+        ...(includeAdditionalException
+          ? [
+              {
+                type: "Error",
+                value: "Application request validation failed.",
+              },
+            ]
+          : []),
+      ],
+    },
+  });
+
+  const instagramPageHideBridgeNearMisses: Array<
+    [string, InstagramPageHideBridgeEventOptions]
+  > = [
+    ["a changed exception type", { type: "Error" }],
+    [
+      "a changed exception value",
+      {
+        value:
+          "undefined is not an object (evaluating 'window.webkit.messageHandlers.bridge')",
+      },
+    ],
+    ["a changed mechanism", { mechanismType: "onerror" }],
+    ["a handled exception", { handled: true }],
+    ["a non-Instagram browser", { browserName: "Mobile Safari" }],
+    ["a non-iOS operating system", { osName: "Android" }],
+    [
+      "a changed first-frame function",
+      {
+        frames: overrideInstagramPageHideBridgeFrame(0, {
+          function: "global code",
+        }),
+      },
+    ],
+    [
+      "a changed page-hide function",
+      {
+        frames: overrideInstagramPageHideBridgeFrame(1, {
+          function: "sendPageHiddenMessage",
+        }),
+      },
+    ],
+    [
+      "a changed native-send function",
+      {
+        frames: overrideInstagramPageHideBridgeFrame(2, {
+          function: "sendMessageToNative",
+        }),
+      },
+    ],
+    [
+      "a changed first column",
+      { frames: overrideInstagramPageHideBridgeFrame(0, { colno: 5518 }) },
+    ],
+    [
+      "a changed page-hide column",
+      { frames: overrideInstagramPageHideBridgeFrame(1, { colno: 3809 }) },
+    ],
+    [
+      "a changed native-send column",
+      { frames: overrideInstagramPageHideBridgeFrame(2, { colno: 1209 }) },
+    ],
+    [
+      "a changed line",
+      { frames: overrideInstagramPageHideBridgeFrame(1, { lineno: 2 }) },
+    ],
+    [
+      "a different document path",
+      {
+        frames: overrideInstagramPageHideBridgeFrame(1, {
+          filename: "app:///another-profile/rep",
+          abs_path: "app:///another-profile/rep",
+        }),
+      },
+    ],
+    [
+      "conflicting frame paths",
+      {
+        frames: overrideInstagramPageHideBridgeFrame(1, {
+          abs_path: "app:///another-profile/rep",
+        }),
+      },
+    ],
+    [
+      "a missing frame",
+      { frames: createInstagramPageHideBridgeFrames().slice(0, 2) },
+    ],
+    [
+      "an extra frame",
+      {
+        frames: [
+          ...createInstagramPageHideBridgeFrames(),
+          {
+            filename: "app:///example-profile/rep",
+            function: "pagehide",
+            lineno: 1,
+            colno: 1,
+          },
+        ],
+      },
+    ],
+    ["an additional exception", { includeAdditionalException: true }],
   ];
 
   const createSentryRouteParameterizationEvent = (
@@ -4311,6 +4494,140 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toBe(true);
+  });
+
+  it.each([
+    ["Instagram 439.x", [5421, 3712, 1142] as const, "app:///"],
+    ["Instagram 438.x", [5517, 3808, 1208] as const, "app:///profile/rep"],
+    ["Instagram 436.x/437.x", [6257, 4139, 1325] as const, "app:///waves/id"],
+  ])(
+    "filters the %s iOS page-hide bridge signature",
+    (_cohort, columns, documentPath) => {
+      const event = createInstagramPageHideBridgeEvent({
+        frames: createInstagramPageHideBridgeFrames(columns, documentPath),
+      });
+
+      const result = shouldFilterInstagramPageHideBridgeError(event);
+
+      expect(result).toBe(true);
+    }
+  );
+
+  it("keeps the Instagram 439.x bridge shape with a changed coordinate", () => {
+    const event = createInstagramPageHideBridgeEvent({
+      frames: createInstagramPageHideBridgeFrames(
+        [5422, 3712, 1142],
+        "app:///"
+      ),
+    });
+
+    const result = shouldFilterInstagramPageHideBridgeError(event);
+
+    expect(result).toBe(false);
+  });
+
+  it.each(instagramPageHideBridgeNearMisses)(
+    "keeps an Instagram page-hide bridge near-miss with %s",
+    (_caseName, options) => {
+      const event = createInstagramPageHideBridgeEvent(options);
+
+      const result = shouldFilterInstagramPageHideBridgeError(event);
+
+      expect(result).toBe(false);
+    }
+  );
+
+  it("filters the exact page-hide signature from an Instagram iOS user agent", () => {
+    const event = {
+      ...createInstagramPageHideBridgeEvent(),
+      contexts: {},
+      request: {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Instagram 438.0.0 Safari/604.1",
+        },
+      },
+    };
+
+    const result = shouldFilterInstagramPageHideBridgeError(event);
+
+    expect(result).toBe(true);
+  });
+
+  it("keeps the related Twitter iOS native-bridge error cohort", () => {
+    const documentPath = "app:///waves/example";
+    const event = createInstagramPageHideBridgeEvent({
+      browserName: "Twitter",
+      frames: [
+        {
+          filename: documentPath,
+          lineno: 1,
+          colno: 6257,
+        },
+        {
+          filename: documentPath,
+          function: "sendScrollEvent",
+          lineno: 1,
+          colno: 4139,
+        },
+        {
+          filename: documentPath,
+          function: "sendDataToNative",
+          lineno: 1,
+          colno: 1325,
+        },
+      ],
+      mechanismType: "auto.browser.browserapierrors.setTimeout",
+    });
+
+    const result = shouldFilterInstagramPageHideBridgeError(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps the exact bridge shape from an application-owned source path", () => {
+    const event = createInstagramPageHideBridgeEvent({
+      frames: createInstagramPageHideBridgeFrames(
+        [5517, 3808, 1208],
+        "app:///utils/instagram-bridge.ts"
+      ),
+    });
+
+    const result = shouldFilterInstagramPageHideBridgeError(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps the exact bridge shape with an app-owned original stack", () => {
+    const event = createInstagramPageHideBridgeEvent();
+    const error = new Error(instagramPageHideBridgeErrorMessage);
+    error.stack = [
+      `TypeError: ${instagramPageHideBridgeErrorMessage}`,
+      "    at sendDataToNative (webpack-internal:///(app-pages-browser)/./utils/instagram-bridge.ts:10:1)",
+    ].join("\n");
+
+    const result = shouldFilterInstagramPageHideBridgeError(event, {
+      originalException: error,
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps the exact bridge shape with an app-owned serialized stack", () => {
+    const event = createInstagramPageHideBridgeEvent({
+      extra: {
+        __serialized__: {
+          stack: [
+            `TypeError: ${instagramPageHideBridgeErrorMessage}`,
+            "    at sendDataToNative (webpack-internal:///(app-pages-browser)/./utils/instagram-bridge.ts:10:1)",
+          ].join("\n"),
+        },
+      },
+    });
+
+    const result = shouldFilterInstagramPageHideBridgeError(event);
+
+    expect(result).toBe(false);
   });
 
   it("filters the observed WKWebView native track-list TypeError before abs_path normalization", () => {
@@ -8979,5 +9296,59 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toBe(true);
+  });
+
+  describe("Poper Blocker pre-ingest function normalization", () => {
+    it("filters the anonymous fetch sentinel", () => {
+      const event = createPoperBlockerOrphanFetchRejectionEvent({
+        frames: [
+          {
+            filename:
+              "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/dispatch/FetchHttpHandler.js",
+            function: "e.prototype.handle",
+            in_app: false,
+          },
+          {
+            filename: "app:///injectScriptAdjust.js",
+            abs_path: "app:///injectScriptAdjust.js",
+            function: "?",
+            lineno: 1,
+            colno: 4520,
+            in_app: true,
+          },
+          {
+            filename: "app:///injectScriptAdjust.js",
+            abs_path: "app:///injectScriptAdjust.js",
+            function: "VihJ",
+            lineno: 1,
+            colno: 3159,
+            in_app: true,
+          },
+        ],
+      });
+
+      expect(shouldFilterPoperBlockerOrphanFetchRejection(event)).toBe(true);
+    });
+
+    it("keeps the anonymous sentinel on the second signature frame", () => {
+      const event = createPoperBlockerOrphanFetchRejectionEvent({
+        frames: [
+          {
+            filename: "app:///injectScriptAdjust.js",
+            function: "window.fetch",
+            lineno: 1,
+            colno: 4520,
+          },
+          {
+            filename: "app:///injectScriptAdjust.js",
+            function: "?",
+            lineno: 1,
+            colno: 3159,
+          },
+        ],
+      });
+
+      expect(shouldFilterPoperBlockerOrphanFetchRejection(event)).toBe(false);
+    });
   });
 });

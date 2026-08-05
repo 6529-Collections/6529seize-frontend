@@ -47,6 +47,16 @@ function isExactPoperBlockerInjectedFetchFrame(
   );
 }
 
+function normalizeSentryUnknownPoperBlockerFunction(
+  frame: SentryStackFrame,
+  signature: (typeof poperBlockerInjectedFetchFrameSignatures)[number]
+): SentryStackFrame {
+  if (signature.allowMissingFunction && frame.function === "?") {
+    return { ...frame, function: undefined };
+  }
+  return frame;
+}
+
 function hasExactPoperBlockerInjectedFetchFramePair(
   frames: SentryStackFrame[] | undefined
 ): boolean {
@@ -62,7 +72,10 @@ function hasExactPoperBlockerInjectedFetchFramePair(
       poperBlockerInjectedFetchFrameSignatures.length &&
     poperBlockerInjectedFetchFrameSignatures.every((signature) =>
       injectedFetchFrames.some((frame) =>
-        isExactPoperBlockerInjectedFetchFrame(frame, signature)
+        isExactPoperBlockerInjectedFetchFrame(
+          normalizeSentryUnknownPoperBlockerFunction(frame, signature),
+          signature
+        )
       )
     )
   );
