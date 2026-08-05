@@ -23,8 +23,8 @@
 - Trust boundary: every architecture document is required atomically from one
   verified source commit. Missing documents, profile drift, malformed official
   references, incorrect implementation states, Stream becoming normative, or
-  any mismatch among the Casey schedule and accession objects fails the
-  publication closed.
+  any mismatch between the Casey schedule and accession objects causes
+  publication to fail closed.
 - Canonical source qualification: 141 repository tests passed with one expected
   Windows capability skip; full semantic and manifest validation passed on
   Windows and hosted Ubuntu/Windows. Exact-head 6529bot follow-up reported no
