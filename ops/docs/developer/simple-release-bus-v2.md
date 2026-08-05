@@ -98,9 +98,13 @@ register backend first and declare it as the frontend prerequisite.
    artifact bytes are freshly built for the exact staging composition. Backend
    preparation installs dependencies once and builds/packages only selected
    deploy units. Frontend builds only the staging profile and records one
-   immutable environment-bound manifest/digest. Repository-wide lint,
-   typecheck, test inventory, and full test matrices remain PR CI gates and do
-   not run in a normal train. For an affected repository, the staging release
+   immutable environment-bound manifest/digest. Focused lint, typecheck, Jest,
+   policy, and build checks remain PR CI gates and do not rerun in a normal
+   train. The baseline read-only browser inventory runs once against the exact
+   deployed staging SHA. The complete Museum institutional-practice pack joins
+   that inventory only when the release commit's first-parent diff touches a
+   Museum-owned path; an unknown diff fails safe by retaining the pack. For an
+   affected repository, the staging release
    commit has the recorded current `1a-staging` SHA as its first parent. When
    the dependency-closed composition adds commits beyond that parent, it is the
    second parent; a fully current empty-cumulative composition intentionally
@@ -181,9 +185,26 @@ unchanged. Only the exact API event can advance an intent; a different service
 during the held freeze fails that intent closed. Its additive callback step is
 non-blocking for the ordinary deploy job: unavailable evidence prevents
 adoption freeze without failing an unrelated manual deploy.
-The normal frontend `Web Deploy - STAGING` success still triggers
-`staging-e2e.yml`. For that `workflow_run`, the trusted decision client makes
-one authenticated lookup:
+
+The guarded manual frontend fallback builds one exact-SHA staging artifact on
+GitHub without deployment credentials,
+reconfirms fallback readiness, and uploads the digest-bound bundle temporarily
+to `s3://<artifact-bucket>/manual-staging/<run-id>/<sha>.zip`. EC2 receives a
+40-minute presigned URL through SSM. The workflow always attempts to remove the
+object afterward and emits a job-summary warning if cleanup fails so an
+operator can remove the leftover object. The instance verifies, activates, and
+version-checks those bytes with rollback; it no longer reinstalls dependencies,
+lints, or rebuilds the app.
+
+The small `staging-e2e-dispatch.yml` post-completion listener has no concurrency
+group and dispatches `staging-e2e.yml` only when `Web Deploy - STAGING`
+concludes successfully on the repository's `1a-staging` branch. GitHub still
+records an unavoidable skipped dispatcher wrapper for other conclusions, but
+failed, cancelled, timed-out and skipped deployments create no Staging E2E run
+and never enter the shared staging E2E concurrency lane. The automatic dispatch
+carries the deploy run ID; the E2E workflow resolves that run through GitHub,
+requires the exact completed-success same-repository workflow/ref contract,
+then the trusted decision client makes one authenticated lookup:
 
 - `LEGACY` means there is no active intent, and the existing expensive
   automatic E2E runs unchanged;
@@ -192,6 +213,28 @@ one authenticated lookup:
   recorded idempotently, and the expensive packs are skipped;
 - unavailable, stale, moved, expired, malformed, ambiguous or
   identity-mismatched evidence fails closed and cannot validate or adopt.
+
+The manual production fallback follows the same build-once principle. Every
+trusted `main` commit starts `production-build-artifact.yml`, which builds the
+production profile without AWS or deployment authority and publishes one
+30-day, exact-SHA artifact with a manifest, package digest, and checksums for
+every file. The production deploy waits briefly for that exact successful
+artifact, reads its originating workflow run back through GitHub, verifies the
+workflow path, event, branch, conclusion, source SHA, manifest contract,
+checksums, package digest, and size, and only then obtains AWS credentials. It
+does not install dependencies or rebuild the application. A missing, expired,
+foreign, unsuccessful, mismatched, or malformed artifact fails before
+production mutation.
+
+After a successful manual production fallback,
+`production-e2e-dispatch.yml` carries only the completed deploy run ID into
+`production-e2e.yml`. The E2E workflow independently reads that run back,
+requires the exact same-repository `main` deployment contract, checks out its
+deployed SHA, and runs the complete production-safe read-only inventory. Its
+evidence deliberately has no Release Bus manifest binding. Release Bus
+production operations continue to use their authenticated manifest-bound
+inputs and report through the existing operation identity; the two identities
+cannot be mixed.
 
 The last exact required frontend/backend deployment event revalidates the state
 version, refs, runtimes, candidate membership, OFF controls, drain and staging

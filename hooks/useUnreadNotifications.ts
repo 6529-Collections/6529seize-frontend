@@ -61,7 +61,7 @@ export function useUnreadNotifications(
         version: "v2",
       },
     ],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const requestAuthJwt = getAuthJwt();
       if (!requestAuthJwt || !isAuthJwtUsable(requestAuthJwt)) {
         throw createMissingAuthPollingError();
@@ -77,6 +77,7 @@ export function useUnreadNotifications(
         },
         cache: "no-store",
         errorMode: "structured",
+        signal,
       });
     },
     enabled: isEnabled,

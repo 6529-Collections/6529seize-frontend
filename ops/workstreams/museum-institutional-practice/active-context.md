@@ -1,9 +1,92 @@
 # Active context
 
+## Current living-study expansion
+
+- Goal: expand the same living institutional-practice study to twenty-seven
+  profiles; publish adjacent digital-art and chain-native research; publish
+  _Writing the 6529 Network Museum_ as a public scholarship and editorial
+  standard; apply that standard across the complete public Museum corpus; and
+  qualify one atomic source/frontend release through staging and production.
+- Museum source PRs: expansion PR #23, rendered-copy correction PR #24, and
+  final terminology correction PR #25 are merged. Exact canonical main is
+  `66c9eb9fa8c1512ca9450108151d2d7a037c4f31`.
+- Canonical source release: 247 manifest entries;
+  `sha256:71458b77d145bd3592e4f0ee0a2d8c1c49c96a71782ab200d9430f36b4dcad8b`;
+  Keccak-256
+  `0xcdab557dacba52ab6752096436c01bba3b6c0c0afcd0c7e94a904ba1d492b5e3`.
+  Post-merge source run `30922946613` passed the full Museum validator and the
+  deterministic Ubuntu and Windows suites.
+- Frontend PR #3588 merged as `aa77ddf8`; the staging-contract correction PR
+  #3591 produced exact release/runtime
+  `11c91ab0576dd69ee3bc4dec671702dbc0d0bf69`.
+- Publication boundary: one comparative overview, twenty-seven profiles, one
+  adjacent-practice study, the public scholarship and editorial standard, and
+  one source register—thirty-one manuscripts from one exact source release.
+- Presentation boundary: comparator research remains a restrained part of
+  Stories & Research. The overview provides four thematic reading paths; the
+  Stories page links only the study, adjacent practice, and writing standard.
+- Source/contribution boundary: every new page inherits the exact-commit source
+  panel, editable main-branch path, and contributor guide. Invalid or partial
+  publication state suppresses exact-source and edit claims.
+- Local frontend validation: 70 Museum suites / 220 tests and the 104 focused
+  publication/route tests pass; changed lint, changed typecheck, Playwright
+  typecheck, help-index sync (202 records), and React Doctor 100/100 pass.
+  The exact canonical-main probe resolves source commit `66c9eb9fa8c1...`, 57
+  public documents, 27 institutional profiles, all 31 institutional-practice
+  manuscripts, and the canonical commitments above. Visible production labels
+  are absent from the Casey artist and collection manuscripts, and the public
+  source title is _Casey Reas: Sources and chronology_.
+- Final rendered-product correction: Keys and Gates now uses the governed
+  submission images, links every selected work to a complete object page, and
+  presents artist statement, selection evidence, rights status, and source
+  media without implying mint, acquisition, custody, or accession. The exact
+  optimized production build passed in 463 seconds. The strict sequential
+  desktop/mobile acceptance replay passed 70/70 routes, including all 27
+  institutional profiles and all 16 Keys and Gates selected-work images.
+  The post-merge exact-head production build passed in 442.8 seconds. Retained
+  1,440 x 1,000 and 390 x 844 evidence resolves exact source
+  `66c9eb9fa8c1...`, has no console errors or horizontal overflow, and was
+  reviewed at the top of each route. GitHub's full-history checkout attempted
+  to transfer blobs from every ref and exhausted the ten-minute secret-scan
+  job before the scanner ran. PR #3588 now keeps complete history while using
+  `blob:none` for its three security/installed-gate checkouts; a regression
+  test and workflow-security validator preserve that boundary. Exact-head bot
+  review then identified that the grouped institutional directory had no
+  public render site and that one record-card transition omitted the configured
+  Tailwind prefix. The corrected study renders the four-group directory after
+  its essay; all 27 links are asserted. Knip, 72 focused cases, lint,
+  typechecking, and the exact optimized build pass. Desktop and mobile captures
+  show the directory without overflow. A later exact-merge-tree run passed the
+  build, smoke, and critical-shell packs but correctly failed closed when its
+  unauthenticated GitHub moving-ref lookup could not verify the source release.
+  The Museum browser gate now resolves one exact source commit before starting
+  its read-only server; the failed desktop/mobile case passes against canonical
+  commit `66c9eb9fa8c1512ca9450108151d2d7a037c4f31`.
+- Staging qualification: the first deploy run `30941026460` exposed two stale
+  Waves assertions in automatic E2E run `30942280799`. PR #3591 corrected the
+  test contract; exact release `11c91ab0576...` reached staging in run
+  `30945380394`. The next automatic run `30946407128` was cancelled before any
+  pack executed when an immutable-tooling Git fetch stalled; no successful
+  hosted staging qualification is claimed for that second run.
+- Production deployment: run `30948172792` completed successfully at
+  20:52:44 UTC. Three consecutive `/api/version` probes served and announced
+  exact `11c91ab0576dd69ee3bc4dec671702dbc0d0bf69` with `stale:false`.
+- Retained production qualification: the Museum pack passed 70/70; core smoke
+  passed 16/16; all 28 applicable surface cases passed with 22 intentional
+  native-project skips; and WCAG/i18n passed 6/6. The broad aggregate was
+  107/108 because its Meme Calendar test still named replaced timezone
+  buttons; a direct controlled replay confirmed the current tab interface.
+- Status: complete. The release-duration and pipeline follow-up is tracked in
+  `ops/workstreams/ci-release-acceleration/`.
+
+## Previous qualified release
+
 - Goal: publish the Museum's institutional-practice study on 6529.io and carry
   it through source and frontend review, staging, production, and retained E2E.
-- Frontend branch: `codex/museum-institutional-practice`.
-- Frontend base: `33f057f5003ed62269f2c6cca03dd1fdd40278e1`.
+- Frontend release PR: `6529-Collections/6529seize-frontend#3569`, merged.
+- Reliability follow-up PR: `6529-Collections/6529seize-frontend#3573`, merged.
+- Qualified production runtime:
+  `88a4f19885f9ff70a1632bda7255b8091263ee86`.
 - Museum source PR: `6529-Collections/6529networkmuseum#22`, merged.
 - Canonical Museum source commit:
   `f5080e1873a3b86280c5a92e1fbe6cbd7fea38a4`.
@@ -36,6 +119,22 @@
   Final desktop and mobile captures cover the study, long-name profile, source
   register, and the mobile Stories & Research directory at their layout
   extremes.
-- Immediate next actions: commit the exact candidate; open and iterate the
-  frontend PR; then qualify staging and production with retained browser
-  evidence and exact runtime-version readback.
+- Staging qualification: composition
+  `bc9f46cd52e2437595a3d1131371525f9cb28b3c`, deploy run `30894880378`,
+  automatic E2E run `30896314276`, and independent Museum 32/32 all passed.
+- Production deployment: run `30897509037`; runtime and announced version both
+  read exact `88a4f19885f` with `stale:false`; rendered desktop/mobile review
+  passed.
+- Production qualification: strict Museum 32/32, full read-only inventory
+  89/89, applicable surface matrix 28/28 with 22 intentional native-project
+  skips, WCAG/i18n 3/3, and final endpoint/version watch 60/60 all passed.
+- Hardening disposition: speculative Museum prefetch is disabled, silent
+  first-party 5xx responses fail the acceptance pack independently of console
+  output, and only the exact known blocked Coinbase analytics transport is
+  classified as benign. The original first-party prefetch failure did not
+  recur in staging or production qualification.
+- Manual-fallback Production E2E: no sanctioned workflow run exists; none is
+  claimed.
+- Status: complete. Future scholarship, source, or presentation changes begin
+  as new governed source and frontend revisions; this workstream has no open
+  release action.

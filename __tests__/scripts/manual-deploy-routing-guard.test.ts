@@ -10,18 +10,24 @@ type WorkflowStep = {
   readonly run?: string;
   readonly env?: Readonly<Record<string, string>>;
   readonly with?: Readonly<Record<string, unknown>>;
+  readonly if?: string;
+  readonly "continue-on-error"?: boolean;
 };
 
 type WorkflowJob = {
   readonly needs?: string | readonly string[];
+  readonly if?: string;
   readonly permissions?: Readonly<Record<string, unknown>>;
   readonly steps: readonly WorkflowStep[];
 };
+
+type JobResult = "success" | "failure" | "skipped";
 
 type Workflow = {
   readonly on: {
     readonly push?: {
       readonly branches?: readonly string[];
+      readonly "paths-ignore"?: readonly string[];
     };
     readonly workflow_dispatch?: {
       readonly inputs?: Readonly<Record<string, unknown>>;
@@ -150,6 +156,37 @@ printf '%s' "$FAKE_HTTP_STATUS"
 
 function commandOutput(result: childProcess.SpawnSyncReturns<string>): string {
   return `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
+}
+
+function normalizeExpression(expression: string | undefined): string {
+  return expression?.replace(/\s+/gu, " ").trim() ?? "";
+}
+
+function ciWaveSteps(job: WorkflowJob): readonly WorkflowStep[] {
+  return job.steps.filter(
+    (step) => step.run?.endsWith("scripts/notify-ci-wave.mjs") === true
+  );
+}
+
+function terminalNotificationRuns(
+  environment: "staging" | "production",
+  results: Readonly<Record<string, JobResult>>
+): boolean {
+  if (environment === "staging") {
+    return (
+      results["manual-deployment-guard"] === "failure" &&
+      results["deploy-staging"] === "skipped"
+    );
+  }
+  return (
+    results["build-upload-deploy"] === "skipped" &&
+    (results["manual-deployment-guard"] === "failure" ||
+      results["assert-main-ref"] === "failure")
+  );
+}
+
+function deploymentFailureNotificationRuns(result: JobResult): boolean {
+  return result === "failure";
 }
 
 describe("frontend manual deployment routing guards", () => {
@@ -294,12 +331,14 @@ describe("frontend manual deployment routing guards", () => {
     const production = workflow("build-upload-deploy-prod.yml");
 
     expect(staging.on.push?.branches).toEqual(["1a-staging"]);
+    expect(staging.on.push?.["paths-ignore"]).toEqual(["ops/**"]);
     expect(staging.on.workflow_dispatch).toBeDefined();
     expect(production.on.push).toBeUndefined();
     expect(production.on.workflow_dispatch).toBeDefined();
-    expect(workflowJob(staging, "deploy-staging").needs).toBe(
-      "manual-deployment-guard"
-    );
+    expect(workflowJob(staging, "deploy-staging").needs).toEqual([
+      "manual-deployment-guard",
+      "build-staging-artifact",
+    ]);
   });
 
   it("pins manual staging deployment to the SHA authorized by its guard", () => {
@@ -313,6 +352,145 @@ describe("frontend manual deployment routing guards", () => {
 
     expect(checkout?.with?.["ref"]).toBe("${{ github.sha }}");
     expect(checkout?.with?.["ref"]).not.toBe("${{ env.STAGING_BRANCH }}");
+  });
+
+  it.each([
+    {
+      file: "deploy-staging.yml",
+      deploy: "deploy-staging",
+      terminal: "notify-staging-prerequisite-failure",
+      needs: ["manual-deployment-guard", "deploy-staging"],
+      condition:
+        "${{ always() && needs.manual-deployment-guard.result == 'failure' && needs.deploy-staging.result == 'skipped' }}",
+      environment: "staging",
+    },
+    {
+      file: "build-upload-deploy-prod.yml",
+      deploy: "build-upload-deploy",
+      terminal: "notify-production-prerequisite-failure",
+      needs: [
+        "manual-deployment-guard",
+        "assert-main-ref",
+        "build-upload-deploy",
+      ],
+      condition:
+        "${{ always() && needs.build-upload-deploy.result == 'skipped' && ( needs.manual-deployment-guard.result == 'failure' || needs.assert-main-ref.result == 'failure' ) }}",
+      environment: "production",
+    },
+  ])(
+    "defines one exact-SHA terminal notifier for $file",
+    ({ condition, deploy, environment, file, needs, terminal }) => {
+      const parsed = workflow(file);
+      const deployJob = workflowJob(parsed, deploy);
+      const terminalJob = workflowJob(parsed, terminal);
+
+      expect(terminalJob.needs).toEqual(needs);
+      expect(normalizeExpression(terminalJob.if)).toBe(condition);
+      expect(
+        ciWaveSteps(deployJob).map((step) => step.env?.["CI_PIPELINES_STATUS"])
+      ).toEqual(["failure", "success"]);
+      expect(ciWaveSteps(terminalJob)).toHaveLength(1);
+      expect(ciWaveSteps(terminalJob)[0]).toMatchObject({
+        if: "always() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''",
+        "continue-on-error": true,
+        env: {
+          CI_PIPELINES_ENVIRONMENT: environment,
+          CI_PIPELINES_SERVICE: "web",
+          CI_PIPELINES_SHA: "${{ github.sha }}",
+          CI_PIPELINES_STATUS: "failure",
+          CI_PIPELINES_TARGET_ENV: environment,
+          CI_PIPELINES_TITLE: `Seize ${environment === "staging" ? "STAGING" : "PROD"} WEB DEPLOY: CI pipeline is broken!!!`,
+        },
+      });
+      for (const job of [deployJob, terminalJob]) {
+        expect(
+          job.steps.find(({ name }) => name === "Check out CI wave notifier")
+        ).toMatchObject({
+          "continue-on-error": true,
+          with: {
+            ref: "${{ github.workflow_sha }}",
+            path: ".ci-wave-notifier",
+            "persist-credentials": false,
+            "sparse-checkout": "scripts/notify-ci-wave.mjs",
+            "sparse-checkout-cone-mode": false,
+          },
+        });
+      }
+    }
+  );
+
+  it.each([
+    ["staging guard failure", "staging", "failure", "success", "skipped", true],
+    [
+      "production guard failure",
+      "production",
+      "failure",
+      "success",
+      "skipped",
+      true,
+    ],
+    [
+      "production main-ref failure",
+      "production",
+      "success",
+      "failure",
+      "skipped",
+      true,
+    ],
+    [
+      "ordinary staging failure",
+      "staging",
+      "success",
+      "success",
+      "failure",
+      false,
+    ],
+    [
+      "ordinary production failure",
+      "production",
+      "success",
+      "success",
+      "failure",
+      false,
+    ],
+    ["staging success", "staging", "success", "success", "success", false],
+    [
+      "production success",
+      "production",
+      "success",
+      "success",
+      "success",
+      false,
+    ],
+  ] as const)(
+    "routes $path without duplicating the deployment-job notifier",
+    (_path, environment, guard, mainRef, deployment, expected) => {
+      expect(
+        terminalNotificationRuns(environment, {
+          "manual-deployment-guard": guard,
+          "assert-main-ref": mainRef,
+          "deploy-staging": deployment,
+          "build-upload-deploy": deployment,
+        })
+      ).toBe(expected);
+    }
+  );
+
+  it("suppresses the deployment-job notifier when the job is skipped", () => {
+    expect(deploymentFailureNotificationRuns("skipped")).toBe(false);
+  });
+
+  it("keeps the production prerequisite Discord alert singular and non-blocking", () => {
+    const terminal = workflowJob(
+      workflow("build-upload-deploy-prod.yml"),
+      "notify-production-prerequisite-failure"
+    );
+    const discord = terminal.steps.filter(({ uses }) =>
+      uses?.startsWith("sarisia/actions-status-discord@")
+    );
+
+    expect(discord).toHaveLength(1);
+    expect(discord[0]?.["continue-on-error"]).toBe(true);
   });
 
   it.each([

@@ -73,11 +73,11 @@ export const ExpandedTimelineContent: React.FC<
       exit={{ height: 0, opacity: 0 }}
       transition={{ duration: 0.3 }}
       onAnimationComplete={() => setAnimationComplete(true)}
-      className="tw-bg-iron-950"
+      className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-bg-black/15"
     >
-      <div className="tw-px-3 tw-py-4">
+      <div className="tw-px-3 tw-py-3">
         {(hasMorePast || hasMoreFuture) && (
-          <div className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-pb-3 tw-text-xs tw-text-iron-300">
+          <div className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-pb-3 tw-text-xs tw-text-iron-400">
             <div className="tw-flex tw-items-center tw-gap-2">
               {hasMorePast && onLoadMorePast && (
                 <Button
@@ -85,10 +85,11 @@ export const ExpandedTimelineContent: React.FC<
                   onClick={onLoadMorePast}
                   variant="tertiary"
                   size="xs"
+                  className="!tw-h-7 !tw-rounded-md !tw-border-white/[0.06] !tw-bg-white/[0.025] !tw-px-2.5 !tw-text-[11px] !tw-font-medium !tw-text-iron-400 !tw-shadow-none desktop-hover:hover:!tw-border-white/10 desktop-hover:hover:!tw-bg-white/[0.05] desktop-hover:hover:!tw-text-iron-200"
                 >
                   <FontAwesomeIcon
                     icon={faChevronLeft}
-                    className="tw-size-4 tw-flex-shrink-0"
+                    className="tw-size-3 tw-flex-shrink-0"
                   />
                   <span className="tw-whitespace-nowrap">
                     {formatLabel(pastCountToDisplay, "earlier")}
@@ -103,13 +104,14 @@ export const ExpandedTimelineContent: React.FC<
                   onClick={onLoadMoreFuture}
                   variant="tertiary"
                   size="xs"
+                  className="!tw-h-7 !tw-rounded-md !tw-border-white/[0.06] !tw-bg-white/[0.025] !tw-px-2.5 !tw-text-[11px] !tw-font-medium !tw-text-iron-400 !tw-shadow-none desktop-hover:hover:!tw-border-white/10 desktop-hover:hover:!tw-bg-white/[0.05] desktop-hover:hover:!tw-text-iron-200"
                 >
                   <span className="tw-whitespace-nowrap">
                     {formatLabel(remainingFutureCount, "later")}
                   </span>
                   <FontAwesomeIcon
                     icon={faChevronRight}
-                    className="tw-size-4 tw-flex-shrink-0"
+                    className="tw-size-3 tw-flex-shrink-0"
                   />
                 </Button>
               )}

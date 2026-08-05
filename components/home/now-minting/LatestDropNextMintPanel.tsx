@@ -227,7 +227,6 @@ export default function LatestDropNextMintPanel({
               {nextMintCardId && (
                 <div className="tw-mt-8">
                   <LatestDropNextMintSubscribe
-                    appearance="featured"
                     tokenId={nextMintCardId}
                   />
                 </div>

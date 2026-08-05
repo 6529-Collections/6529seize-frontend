@@ -2,6 +2,7 @@ import {
   createMuseumPublicationRuntime,
   GitHubMuseumPublicationSource,
   legacyCaseyPublicationAssembler,
+  resolveMuseumPublicationRef,
   type MuseumLastValidPublication,
   type MuseumPublication,
   type MuseumPublicationLoadState,
@@ -268,5 +269,40 @@ describe("Museum publication runtime", () => {
       2,
       expect.objectContaining({ publication })
     );
+  });
+});
+
+describe("Museum publication runtime source ref", () => {
+  it("uses the moving canonical ref outside the read-only browser harness", () => {
+    expect(resolveMuseumPublicationRef({})).toBe("main");
+  });
+
+  it("accepts an exact immutable commit in the read-only browser harness", () => {
+    const commit = "66c9eb9fa8c1512ca9450108151d2d7a037c4f31";
+
+    expect(
+      resolveMuseumPublicationRef({
+        PLAYWRIGHT_READONLY: "1",
+        MUSEUM_PUBLICATION_TEST_COMMIT: commit,
+      })
+    ).toBe(commit);
+  });
+
+  it("rejects a test commit outside the read-only browser harness", () => {
+    expect(() =>
+      resolveMuseumPublicationRef({
+        MUSEUM_PUBLICATION_TEST_COMMIT:
+          "66c9eb9fa8c1512ca9450108151d2d7a037c4f31",
+      })
+    ).toThrow("publication_test_commit_requires_readonly");
+  });
+
+  it("rejects a mutable or malformed test ref", () => {
+    expect(() =>
+      resolveMuseumPublicationRef({
+        PLAYWRIGHT_READONLY: "1",
+        MUSEUM_PUBLICATION_TEST_COMMIT: "main",
+      })
+    ).toThrow("publication_test_commit_not_exact");
   });
 });
