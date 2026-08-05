@@ -47,8 +47,8 @@ function getLatestRecentWaveAbortBreadcrumb(
   );
 
   for (let index = recentBreadcrumbs.length - 1; index >= 0; index -= 1) {
-    const breadcrumb = recentBreadcrumbs[index];
-    if (breadcrumb && isWaveAbortBreadcrumb(breadcrumb)) {
+    const breadcrumb = recentBreadcrumbs[index]!;
+    if (isWaveAbortBreadcrumb(breadcrumb)) {
       return breadcrumb;
     }
   }
