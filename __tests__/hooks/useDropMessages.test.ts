@@ -205,6 +205,7 @@ it('ignores websocket messages when dropId is null', () => {
 
   wsCallbacks.get(WsMessageType.DROP_UPDATE)?.({ wave: { id: 'wave-1' } });
   wsCallbacks.get(WsMessageType.DROP_UPDATE_REF)?.({
+    author_id: 'author-1',
     drop_id: 'drop-1',
     wave_id: 'wave-1',
     serial_no: 1,

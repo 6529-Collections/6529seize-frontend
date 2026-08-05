@@ -293,16 +293,18 @@ function useNewDropCounter(
         const { serial_no: serialNo, wave_id: waveId } = message;
         const now = Date.now();
         const wave = waves.find((candidate) => candidate.id === waveId);
+        const isOwnDrop = connectedProfile?.id === message.author_id;
+        const shouldOnlyUpdateTimestamp =
+          isOwnDrop ||
+          (waveId === activeWaveId &&
+            document.visibilityState === "visible");
 
         if (!wave) {
           if (otherListWaveIds.has(waveId)) {
             return;
           }
 
-          if (
-            waveId === activeWaveId &&
-            document.visibilityState === "visible"
-          ) {
+          if (shouldOnlyUpdateTimestamp) {
             setNewDropsCounts((prev) =>
               updateLatestDropTimestamp({
                 createdAt: now,
@@ -346,7 +348,7 @@ function useNewDropCounter(
           return;
         }
 
-        if (waveId === activeWaveId && document.visibilityState === "visible") {
+        if (shouldOnlyUpdateTimestamp) {
           setNewDropsCounts((prev) =>
             updateLatestDropTimestamp({
               createdAt: now,
@@ -368,6 +370,7 @@ function useNewDropCounter(
       },
       [
         activeWaveId,
+        connectedProfile?.id,
         enabled,
         otherListWaveIds,
         refetchWaves,

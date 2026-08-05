@@ -378,6 +378,7 @@ export interface WsDropUpdateMessage {
 export interface WsDropUpdateRefData {
   readonly drop_id: string;
   readonly wave_id: string;
+  readonly author_id: string;
   readonly serial_no: number;
   readonly update_type: WsDropUpdateRefUpdateType;
   readonly reason?: string;
@@ -419,6 +420,7 @@ export const isWsDropUpdateRefData = (
   return (
     isNonEmptyWebSocketId(candidate.drop_id) &&
     isNonEmptyWebSocketId(candidate.wave_id) &&
+    isNonEmptyWebSocketId(candidate.author_id) &&
     typeof candidate.serial_no === "number" &&
     Number.isSafeInteger(candidate.serial_no) &&
     candidate.serial_no >= 0 &&

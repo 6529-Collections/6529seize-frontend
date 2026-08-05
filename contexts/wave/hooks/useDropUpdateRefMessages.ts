@@ -43,6 +43,8 @@ const getProcessType = (
   }
 };
 
+// The canonical refetch always returns the latest drop. Serial number is
+// therefore observability metadata, not part of the coalescing identity.
 const getStateKey = (data: WsDropUpdateRefData): string =>
   JSON.stringify([data.wave_id, data.drop_id, data.update_type]);
 
@@ -131,6 +133,11 @@ const useRetryWaiters = (): {
   const waitBeforeRetry = useCallback(
     (stateKey: string, delayMs: number): Promise<boolean> =>
       new Promise((resolve) => {
+        const previousWaiter = waitersRef.current[stateKey];
+        if (previousWaiter) {
+          clearTimeout(previousWaiter.timer);
+          previousWaiter.resolve(false);
+        }
         const timer = setTimeout(() => {
           delete waitersRef.current[stateKey];
           resolve(isMountedRef.current);

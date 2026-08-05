@@ -70,6 +70,7 @@ test("clears typing status when a compact content update arrives", () => {
       data: JSON.stringify({
         type: WsMessageType.DROP_UPDATE_REF,
         data: {
+          author_id: "author-1",
           drop_id: "drop-1",
           wave_id: "wave",
           serial_no: 1,

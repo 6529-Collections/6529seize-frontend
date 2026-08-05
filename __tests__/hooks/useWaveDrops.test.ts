@@ -187,6 +187,7 @@ describe("useWaveDrops", () => {
 
     renderHook(() => useWaveDrops({ waveId: "wave-1", enabled: false }));
     socketCallbacks.get(WsMessageType.DROP_UPDATE_REF)?.({
+      author_id: "author-1",
       drop_id: "drop-1",
       wave_id: "wave-1",
       serial_no: 1,

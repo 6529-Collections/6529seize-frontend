@@ -106,7 +106,14 @@ const emitWebSocketMessage = (
   if (!callback) {
     throw new Error(`No callback registered for ${messageType}`);
   }
-  act(() => callback(messageData));
+  const normalizedMessageData =
+    messageType === WsMessageType.DROP_UPDATE_REF &&
+    typeof messageData === "object" &&
+    messageData !== null &&
+    !Array.isArray(messageData)
+      ? { author_id: "author-1", ...messageData }
+      : messageData;
+  act(() => callback(normalizedMessageData));
 };
 
 let documentVisibilityState: DocumentVisibilityState = "visible";
@@ -252,7 +259,14 @@ describe("useWaveRealtimeUpdater", () => {
   it("coalesces duplicate compact references into one follow-up sync", async () => {
     const store = { wave1: { drops: [], latestFetchedSerialNo: 10 } };
     const props = baseProps(store);
-    const resolveDrop: Array<(value: any) => void> = [];
+    const resolveDrop: Array<
+      (value: {
+        readonly id: string;
+        readonly serial_no: number;
+        readonly wave: { readonly id: string };
+        readonly author: Record<string, never>;
+      }) => void
+    > = [];
     fetchDropByIdBatched.mockImplementation(
       () => new Promise((resolve) => resolveDrop.push(resolve))
     );
@@ -480,6 +494,13 @@ describe("useWaveRealtimeUpdater", () => {
       {
         drop_id: "drop",
         wave_id: "",
+        serial_no: 11,
+        update_type: WsMessageType.DROP_UPDATE,
+      },
+      {
+        drop_id: "drop",
+        wave_id: "wave1",
+        author_id: null,
         serial_no: 11,
         update_type: WsMessageType.DROP_UPDATE,
       },

@@ -22,7 +22,9 @@ const waves = [
 
 let wsCallback: any;
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <AuthContext.Provider value={{ connectedProfile: { handle: "me" } } as any}>
+  <AuthContext.Provider
+    value={{ connectedProfile: { id: "me-id", handle: "me" } } as any}
+  >
     {children}
   </AuthContext.Provider>
 );
@@ -68,7 +70,7 @@ const emitDropUpdateRef = (message: Record<string, unknown>) => {
   }
 
   act(() => {
-    compactCallback(message);
+    compactCallback({ author_id: "other-id", ...message });
   });
 };
 
@@ -179,6 +181,30 @@ describe("useNewDropCounter", () => {
       firstUnreadSerialNo: 23,
     });
     expect(refetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not count the connected profile's compact content ref", () => {
+    const refetch = jest.fn();
+    jest.spyOn(Date, "now").mockReturnValue(3456);
+    const { result } = renderHook(
+      () => useNewDropCounter(null, waves, refetch),
+      { wrapper }
+    );
+
+    emitDropUpdateRef({
+      author_id: "me-id",
+      drop_id: "own-drop",
+      wave_id: "wave2",
+      serial_no: 24,
+      update_type: WsMessageType.DROP_UPDATE,
+    });
+
+    expect(result.current.newDropsCounts["wave2"]).toEqual({
+      count: 0,
+      latestDropTimestamp: 3456,
+      firstUnreadSerialNo: null,
+    });
+    expect(refetch).not.toHaveBeenCalled();
   });
 
   it("does not process websocket updates or resets while disabled", () => {
