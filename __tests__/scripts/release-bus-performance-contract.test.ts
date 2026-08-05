@@ -106,6 +106,13 @@ describe("Release Bus frontend performance contract", () => {
     const packageJson = JSON.parse(read("package.json"));
     expect(packageJson.scripts["lint:changed"]).toContain('"*.cjs"');
     expect(packageJson.scripts["lint:changed"]).toContain('"*.mjs"');
+    expect(packageJson.scripts["format:changed"]).toContain(
+      "git merge-base origin/main HEAD"
+    );
+    expect(packageJson.scripts["format:changed"]).toContain(
+      'git diff --name-only -z --diff-filter=ACMR "$FORMAT_DIFF_COMMIT"'
+    );
+    expect(packageJson.scripts["format:changed"]).not.toContain("main...HEAD");
   });
 
   it("pins the build and E2E runtime to an exact Node patch", () => {
