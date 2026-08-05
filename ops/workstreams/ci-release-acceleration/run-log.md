@@ -131,3 +131,10 @@
   successful production deployment rather than assuming the new commit's first
   parent. Missing history, invalid SHAs, Git failures, and older runners all
   retain Museum E2E fail-closed.
+- Keys and Gates staging E2E 30967900031 proved the full Museum pack green in
+  9m14s. Its only failed pack was unrelated collections coverage: staging
+  returned HTTP 200 documents containing the `6529 Error` shell for `/nextgen`
+  and `/nextgen/about`. A direct replay found those routes healthy, then hit a
+  second HTTP 200 soft failure (`404 | PAGE NOT FOUND`) on the collection-art
+  route. The existing retry recognized only HTTP 502/503/504. Route readiness
+  now retries either soft failure document once, then blocks on persistence.
