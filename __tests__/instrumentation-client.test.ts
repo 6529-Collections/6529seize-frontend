@@ -1,4 +1,8 @@
 import noiseFilterFixtures from "@/__tests__/fixtures/sentry-noise-filter-hardening.json";
+import {
+  createLatestReactDomRawFrames,
+  createObservedReactDomRawInsertBeforeFrames,
+} from "@/__tests__/fixtures/reactDomRawInsertBeforeFixtures";
 
 const mockInit = jest.fn();
 const mockReplayIntegration = jest.fn(() => ({ name: "replay" }));
@@ -28,6 +32,8 @@ describe("instrumentation-client", () => {
     "undefined is not an object (evaluating 'e.tags')";
   const gifPickerTenorUndefinedResultsMapMessage =
     "undefined is not an object (evaluating 'e.results.map')";
+  const instagramPageHideBridgeErrorMessage =
+    "undefined is not an object (evaluating 'window.webkit.messageHandlers')";
   const reactDomRemoveChildMessage =
     "Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.";
   const reactDomFrame = {
@@ -65,8 +71,7 @@ describe("instrumentation-client", () => {
     "auto.browser.browserapierrors.setTimeout";
   const browserUnhandledRejectionMechanismType =
     "auto.browser.global_handlers.onunhandledrejection";
-  const expectedWaveAbortErrorValue =
-    "AbortError: The user aborted a request.";
+  const expectedWaveAbortErrorValue = "AbortError: The user aborted a request.";
   const poperBlockerNetworkErrorMessage =
     "Network request failed. Please check your connection and try again. (/api/dm-drops/unread)";
   const poperBlockerInjectedFetchFrames = [
@@ -436,6 +441,56 @@ describe("instrumentation-client", () => {
     },
   });
 
+  const createInstagramPageHideBridgeEvent = (
+    columns: readonly [number, number, number] = [5517, 3808, 1208],
+    documentPath = "app:///example-profile/rep"
+  ) => ({
+    contexts: {
+      browser: { name: "Instagram" },
+      os: { name: "iOS" },
+    },
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value: instagramPageHideBridgeErrorMessage,
+          mechanism: {
+            type: "auto.browser.global_handlers.onerror",
+            handled: false,
+          },
+          stacktrace: {
+            frames: [
+              {
+                filename: documentPath,
+                abs_path: documentPath,
+                function: "?",
+                lineno: 1,
+                colno: columns[0],
+                in_app: true,
+              },
+              {
+                filename: documentPath,
+                abs_path: documentPath,
+                function: "sendPageHideMessage",
+                lineno: 1,
+                colno: columns[1],
+                in_app: true,
+              },
+              {
+                filename: documentPath,
+                abs_path: documentPath,
+                function: "sendDataToNative",
+                lineno: 1,
+                colno: columns[2],
+                in_app: true,
+              },
+            ],
+          },
+        },
+      ],
+    },
+  });
+
   const createSentryRouteParameterizationEvent = (
     frames: Array<Record<string, unknown>> = [nativeJsonStringifyFrame],
     overrides: Record<string, unknown> = {}
@@ -698,6 +753,87 @@ describe("instrumentation-client", () => {
     const result = beforeSend(event);
 
     expect(result).toBeNull();
+  });
+
+  it.each([
+    {
+      name: "ending in sN",
+      getFrames: () => createObservedReactDomRawInsertBeforeFrames("sN"),
+      transaction: "/waves",
+    },
+    {
+      name: "ending in sR",
+      getFrames: () => createObservedReactDomRawInsertBeforeFrames("sR"),
+      transaction: "/waves",
+    },
+    {
+      name: "with repeated sN placement frames on join-6529",
+      getFrames: createLatestReactDomRawFrames,
+      transaction: "/join-6529",
+    },
+  ])(
+    "drops the production-shaped raw React DOM stack $name",
+    ({ getFrames, transaction }) => {
+      const beforeSend = loadBeforeSend();
+      const event = {
+        event_id: "raw-react-dom-insert-before-event",
+        transaction,
+        exception: {
+          values: [
+            {
+              type: "NotFoundError",
+              value: reactDomInsertBeforeMessage,
+              mechanism: {
+                type: "generic",
+                handled: true,
+              },
+              stacktrace: {
+                frames: getFrames(),
+              },
+            },
+          ],
+        },
+        tags: {
+          transaction,
+          url: transaction,
+        },
+      };
+
+      const result = beforeSend(event);
+
+      expect(result).toBeNull();
+    }
+  );
+
+  it("keeps the production-shaped raw React DOM stack on an unobserved route", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "raw-react-dom-insert-before-unobserved-route",
+      transaction: "/about",
+      exception: {
+        values: [
+          {
+            type: "NotFoundError",
+            value: reactDomInsertBeforeMessage,
+            mechanism: {
+              type: "generic",
+              handled: true,
+            },
+            stacktrace: {
+              frames: createLatestReactDomRawFrames(),
+            },
+          },
+        ],
+      },
+      tags: {
+        transaction: "/about",
+        url: "/about",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toEqual(event);
   });
 
   it("drops exact React DOM removeChild NotFoundError events on affected routes with no app frames", () => {
@@ -1433,6 +1569,72 @@ describe("instrumentation-client", () => {
     ]);
 
     const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it.each([
+    ["Instagram 439.x", [5421, 3712, 1142] as const, "app:///"],
+    ["Instagram 438.x", [5517, 3808, 1208] as const, "app:///profile/rep"],
+    ["Instagram 436.x/437.x", [6257, 4139, 1325] as const, "app:///waves/id"],
+  ])(
+    "drops the %s raw iOS page-hide bridge signature",
+    (_cohort, columns, documentPath) => {
+      const beforeSend = loadBeforeSend();
+      const event = createInstagramPageHideBridgeEvent(columns, documentPath);
+
+      const result = beforeSend(event);
+
+      expect(result).toBeNull();
+    }
+  );
+
+  it("keeps the Instagram 439.x bridge shape with a changed coordinate", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createInstagramPageHideBridgeEvent(
+      [5422, 3712, 1142],
+      "app:///"
+    );
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps an Instagram page-hide bridge error with changed coordinates", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createInstagramPageHideBridgeEvent([5518, 3808, 1208]);
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps the exact bridge shape outside Instagram", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      ...createInstagramPageHideBridgeEvent(),
+      contexts: {
+        browser: { name: "Twitter" },
+        os: { name: "iOS" },
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps the exact bridge shape with an app-owned original stack", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createInstagramPageHideBridgeEvent();
+    const error = new Error(instagramPageHideBridgeErrorMessage);
+    error.stack = [
+      `TypeError: ${instagramPageHideBridgeErrorMessage}`,
+      "    at sendDataToNative (webpack-internal:///(app-pages-browser)/./utils/instagram-bridge.ts:10:1)",
+    ].join("\n");
+
+    const result = beforeSend(event, { originalException: error });
 
     expect(result).not.toBeNull();
   });
