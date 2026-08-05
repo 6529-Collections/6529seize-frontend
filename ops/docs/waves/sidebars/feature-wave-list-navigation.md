@@ -77,8 +77,9 @@ Wave and DM rows in the left list control which thread is open.
 - Non-touch devices can prefetch an inactive row on hover.
 - Touch devices do not use hover prefetch.
 - `Worth Checking Out` keeps the avatar and overlaid score in one keyboard and
-  touch target, so the score cannot intercept wave navigation. Keyboard users
-  can open the score details card from the focused link with Arrow Down.
+  touch target, so the score cannot intercept wave navigation. The link's
+  accessible name includes the score; hover or keyboard focus exposes the score
+  details card, while touch activation opens the wave.
 - Edge-swipe navigation applies only to native-app standard wave details. It is
   disabled on web, direct messages, list routes, create overlays, and focused
   drop views.

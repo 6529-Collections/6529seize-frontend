@@ -463,7 +463,7 @@ it("keeps the overlaid score inside the wave link and opens details on hover", a
   expect(
     screen.queryByRole("dialog", { name: "Wave score details" })
   ).not.toBeInTheDocument();
-  fireEvent.mouseEnter(scoreBadgeText);
+  fireEvent.mouseEnter(waveLink);
   expect(
     await screen.findByRole("dialog", { name: "Wave score details" })
   ).toBeInTheDocument();
@@ -526,8 +526,7 @@ it("uses no-message copy in the combined highly rated score card", async () => {
   expect(screen.getByText("No messages yet")).toBeInTheDocument();
 });
 
-it("opens the combined highly rated score card from the focused wave link", async () => {
-  const user = userEvent.setup();
+it("opens the combined highly rated score card when the wave link receives focus", async () => {
   render(
     <UnifiedWavesListWaves
       waves={[
@@ -554,7 +553,6 @@ it("opens the combined highly rated score card from the focused wave link", asyn
       name: "Open Keyboard Discovery, score 86",
     })
     .focus();
-  await user.keyboard("{ArrowDown}");
 
   expect(
     await screen.findByRole("dialog", { name: "Wave score details" })
