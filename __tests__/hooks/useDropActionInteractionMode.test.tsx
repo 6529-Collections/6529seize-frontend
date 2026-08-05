@@ -2,11 +2,16 @@ import { renderHook } from "@testing-library/react";
 import React from "react";
 import { renderToString } from "react-dom/server";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useCapacitor from "@/hooks/useCapacitor";
 import useHasTouchInput from "@/hooks/useHasTouchInput";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 
 jest.mock("@/hooks/isMobileDevice");
+jest.mock("@/hooks/useCapacitor", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
 jest.mock("@/hooks/useHasTouchInput", () => ({
   __esModule: true,
   default: jest.fn(),
@@ -17,6 +22,7 @@ jest.mock("@/hooks/useIsTouchDevice", () => ({
 }));
 
 const isMobileMock = useIsMobileDevice as jest.Mock;
+const useCapacitorMock = useCapacitor as jest.Mock;
 const hasTouchInputMock = useHasTouchInput as jest.Mock;
 const isTouchDeviceMock = useIsTouchDevice as jest.Mock;
 
@@ -55,6 +61,7 @@ const setHoverSupport = (hasHover: boolean) => {
 
 describe("useDropActionInteractionMode", () => {
   beforeEach(() => {
+    useCapacitorMock.mockReturnValue({ isCapacitor: false });
     isMobileMock.mockReturnValue(false);
     hasTouchInputMock.mockReturnValue(false);
     isTouchDeviceMock.mockReturnValue(false);
@@ -71,6 +78,23 @@ describe("useDropActionInteractionMode", () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
+        canUseDesktopHoverActions: false,
+        canUseTouchActionSheet: true,
+      })
+    );
+  });
+
+  it("keeps touch actions reachable in the native app at iPad width when hover is reported", () => {
+    useCapacitorMock.mockReturnValue({ isCapacitor: true });
+    hasTouchInputMock.mockReturnValue(true);
+    setViewportWidth(1194);
+    setHoverSupport(true);
+
+    const { result } = renderHook(() => useDropActionInteractionMode());
+
+    expect(result.current).toEqual(
+      expect.objectContaining({
+        hasTouchActionInput: true,
         canUseDesktopHoverActions: false,
         canUseTouchActionSheet: true,
       })
