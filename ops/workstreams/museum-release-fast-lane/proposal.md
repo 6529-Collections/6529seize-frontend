@@ -132,11 +132,13 @@ flowchart TD
   M --> V["Verify final tree and artifact binding"]
   V --> S["Deploy exact staging artifact"]
   S --> SE["Generic smoke plus affected surfaces"]
-  SE --> P["Promote exact production artifact"]
+  SE --> H{"Museum release hold clear?"}
+  H -- "yes" --> P["Promote exact production artifact"]
+  H -- "no" --> X["Block promotion"]
   P --> PE["Production version plus affected surfaces"]
   PE --> W["Post-deploy watch"]
-  N["Nightly exhaustive corpus sweep"] --> H["Museum release hold if red"]
-  H --> P
+  N["Nightly exhaustive corpus sweep"] --> HS["Set or clear Museum release hold"]
+  HS --> H
 ```
 
 Review bots, quality checks, focused browser evidence, and artifact preparation

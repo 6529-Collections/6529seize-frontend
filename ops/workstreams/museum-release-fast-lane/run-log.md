@@ -101,5 +101,12 @@
   Without that evidence, Next typechecking remains enabled.
 - Fixed two Markdown PR-reference warnings and added this run log to the
   workstream's current-status index.
+- The legacy dual-profile bridge now clears `.next/cache` between staging and
+  production builds, preventing profile-specific runtime inputs from crossing
+  that boundary. The normal v3 single-environment path still reuses its
+  environment-keyed cache.
+- The release flow now routes staging qualification through an explicit
+  Museum-hold-clear decision; a red hold blocks promotion until cleared by the
+  recorded nightly mechanism.
 - Focused classifier/effective-plan validation passed: 44 tests. Changed lint,
   changed TypeScript ratchet (1,358 files), and scoped whitespace checks passed.
