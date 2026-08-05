@@ -4,6 +4,7 @@
 /* eslint-disable no-nested-ternary, sonarjs/cognitive-complexity, sonarjs/no-nested-conditional */
 
 import { useMemo } from "react";
+import { formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { MuseumDynamicStateVisualization } from "@/lib/museum/generative-studies";
@@ -82,6 +83,7 @@ function phototaxisPalette(facade: string): readonly string[] {
 
 function PhototaxisField({
   id,
+  locale,
   label,
   lights,
   population,
@@ -95,6 +97,7 @@ function PhototaxisField({
   seed,
 }: {
   readonly id: string;
+  readonly locale: SupportedLocale;
   readonly label: string;
   readonly lights: readonly PhototaxisLight[];
   readonly population: number;
@@ -243,8 +246,18 @@ function PhototaxisField({
         />
       ) : null}
       <text x="18" y="402" fill="#60606c" fontSize="10">
-        {facade} · {population} machines · {lights.length} lights · {size} ·{" "}
-        {sensors} sensors · {alignment} · {magnification.toFixed(2)}×
+        {t(locale, "museum.network.insideSystem.phototaxisSpecimenSummary", {
+          facade,
+          population,
+          lights: lights.length,
+          size,
+          sensors,
+          alignment,
+          magnification: formatNumber(locale, magnification, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }),
+        })}
       </text>
     </svg>
   );
@@ -404,7 +417,12 @@ export function PhototaxisCausalTrace({
             </p>
             <PhototaxisField
               id="museum"
-              label="Museum model of Phototaxis #308 conditions"
+              locale={locale}
+              label={t(
+                locale,
+                "museum.network.insideSystem.phototaxisSpecimenLabel",
+                { subject: "#308" }
+              )}
               lights={referenceLights}
               population={200}
               speed={12}
@@ -428,7 +446,19 @@ export function PhototaxisCausalTrace({
           </p>
           <PhototaxisField
             id="candidate"
-            label="Museum model of Phototaxis comparison conditions"
+            locale={locale}
+            label={t(
+              locale,
+              "museum.network.insideSystem.phototaxisSpecimenLabel",
+              {
+                subject: t(
+                  locale,
+                  candidateMode === "minted"
+                    ? "museum.network.insideSystem.mintedComparison"
+                    : "museum.network.insideSystem.counterfactualTitle"
+                ),
+              }
+            )}
             lights={candidateLights}
             population={candidatePopulation}
             speed={candidateSpeed}

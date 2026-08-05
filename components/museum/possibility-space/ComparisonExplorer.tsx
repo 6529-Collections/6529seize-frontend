@@ -4,6 +4,7 @@
 /* eslint-disable security/detect-possible-timing-attacks */
 
 import { useMemo, useState } from "react";
+import { compareLocalized } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type {
@@ -128,9 +129,7 @@ function MintedMediaComparison({
       ...Object.keys(museumToken.traits),
       ...Object.keys(candidateToken.traits),
     ])
-  ).sort((first, second) =>
-    first.localeCompare(second, undefined, { numeric: true })
-  );
+  ).sort((first, second) => compareLocalized(locale, first, second));
   const shared = sharedTraitCount(museumToken, candidateToken);
   return (
     <div className="tw-mt-7">
@@ -259,10 +258,8 @@ export function ComparisonSelector({
     () =>
       Array.from(
         new Set(index.tokens.flatMap((token) => Object.keys(token.traits)))
-      ).sort((first, second) =>
-        first.localeCompare(second, undefined, { numeric: true })
-      ),
-    [index]
+      ).sort((first, second) => compareLocalized(locale, first, second)),
+    [index, locale]
   );
   const [lookup, setLookup] = useState(`${candidateToken.invocation}`);
   const [filterTrait, setFilterTrait] = useUrlStringState(
@@ -278,10 +275,8 @@ export function ComparisonSelector({
             .map((token) => token.traits[filterTrait])
             .filter((value): value is string => value !== undefined)
         )
-      ).sort((first, second) =>
-        first.localeCompare(second, undefined, { numeric: true })
-      ),
-    [filterTrait, index]
+      ).sort((first, second) => compareLocalized(locale, first, second)),
+    [filterTrait, index, locale]
   );
   const [filterValue, setFilterValue] = useUrlStringState(
     "value",
@@ -508,7 +503,7 @@ export function ComparisonSelector({
                         .filter((value): value is string => value !== undefined)
                     )
                   ).sort((first, second) =>
-                    first.localeCompare(second, undefined, { numeric: true })
+                    compareLocalized(locale, first, second)
                   );
                   setFilterTrait(nextTrait);
                   setFilterValue(nextValues[0] ?? "");

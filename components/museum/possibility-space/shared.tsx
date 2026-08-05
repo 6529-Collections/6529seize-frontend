@@ -55,12 +55,32 @@ function getServerUrlSnapshot(): string {
   return "";
 }
 
+function subscribeToHydration(): () => void {
+  return () => undefined;
+}
+
+function getHydratedSnapshot(): boolean {
+  return true;
+}
+
+function getServerHydratedSnapshot(): boolean {
+  return false;
+}
+
 export function useUrlSnapshot(): string {
-  return useSyncExternalStore(
+  const hydrated = useSyncExternalStore(
+    subscribeToHydration,
+    getHydratedSnapshot,
+    getServerHydratedSnapshot
+  );
+  const href = useSyncExternalStore(
     subscribeToUrlState,
     getUrlSnapshot,
     getServerUrlSnapshot
   );
+  // Keep the server and hydration render on deterministic fallbacks. Shared
+  // deep-link state is applied immediately after hydration from the live URL.
+  return hydrated ? href : "";
 }
 
 export function replaceBrowserUrl(url: URL): void {

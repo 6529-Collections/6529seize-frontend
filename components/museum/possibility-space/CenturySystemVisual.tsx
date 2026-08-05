@@ -97,11 +97,13 @@ function counterfactualCenturyConfig(
 
 function CenturyGlyph({
   position,
+  locale,
   selected,
   museumHeld = false,
   renderConfig,
 }: {
   readonly position: MuseumHeldPosition;
+  readonly locale: MuseumProjectSystemVisualProps["locale"];
   readonly selected: boolean;
   readonly museumHeld?: boolean | undefined;
   readonly renderConfig?: CenturyRenderConfig | undefined;
@@ -123,7 +125,22 @@ function CenturyGlyph({
     <svg
       viewBox="0 0 240 280"
       className="tw-w-full"
-      aria-label={`${position.title}: ${slices} slices${janky ? ", Janky displacement" : ""}${alpha ? ", alpha" : ""}`}
+      aria-label={t(locale, "museum.network.insideSystem.centuryGlyphLabel", {
+        title: position.title,
+        slices,
+        alignment: t(
+          locale,
+          janky
+            ? "museum.network.insideSystem.displaced"
+            : "museum.network.insideSystem.aligned"
+        ),
+        alpha: t(
+          locale,
+          alpha
+            ? "museum.network.insideSystem.enabled"
+            : "museum.network.insideSystem.disabled"
+        ),
+      })}
     >
       <defs>
         <clipPath id={`century-circle-${safeId}`}>
@@ -284,9 +301,19 @@ function CenturyGlyph({
         {position.title}
       </text>
       <text x="120" y="276" textAnchor="middle" fill="#93939f" fontSize="10">
-        {bands} bands · {slices} slices
-        {janky ? " · displaced" : " · aligned"}
-        {alpha ? " · alpha" : ""}
+        {t(locale, "museum.network.insideSystem.centuryGlyphSummary", {
+          bands,
+          slices,
+          alignment: t(
+            locale,
+            janky
+              ? "museum.network.insideSystem.displaced"
+              : "museum.network.insideSystem.aligned"
+          ),
+          alpha: alpha
+            ? ` · ${t(locale, "museum.network.insideSystem.alphaControl")}`
+            : "",
+        })}
       </text>
     </svg>
   );
@@ -434,7 +461,12 @@ export function CenturyAdjacencyLoom({
             <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-400">
               {t(locale, "museum.network.insideSystem.museumModelHeld")}
             </p>
-            <CenturyGlyph position={selectedPosition} selected museumHeld />
+            <CenturyGlyph
+              position={selectedPosition}
+              locale={locale}
+              selected
+              museumHeld
+            />
           </div>
         ) : null}
         <div className="tw-min-w-0">
@@ -447,6 +479,7 @@ export function CenturyAdjacencyLoom({
           </p>
           <CenturyGlyph
             position={comparisonPosition}
+            locale={locale}
             selected
             renderConfig={counterfactualCenturyConfig(
               comparisonPosition,
@@ -465,10 +498,13 @@ export function CenturyAdjacencyLoom({
                 onChange={(event) => setPalette(event.target.value)}
                 className="tw-mt-2 tw-min-h-11 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-text-iron-100"
               >
-                <option>A</option>
-                <option>B</option>
-                <option>C</option>
-                <option>D</option>
+                {["A", "B", "C", "D"].map((value) => (
+                  <option key={value} value={value}>
+                    {t(locale, "museum.network.insideSystem.paletteOption", {
+                      value,
+                    })}
+                  </option>
+                ))}
               </select>
             </label>
             <label className="tw-text-sm tw-text-iron-300">
@@ -504,7 +540,7 @@ export function CenturyAdjacencyLoom({
                 onChange={(event) => setJanky(event.target.checked)}
                 className="tw-size-5"
               />
-              <span>Janky</span>
+              <span>{t(locale, "museum.network.insideSystem.jankyControl")}</span>
             </label>
             <label className="tw-flex tw-min-h-11 tw-items-center tw-gap-3 tw-self-end tw-text-sm tw-text-iron-200">
               <input
@@ -513,7 +549,7 @@ export function CenturyAdjacencyLoom({
                 onChange={(event) => setAlpha(event.target.checked)}
                 className="tw-size-5"
               />
-              <span>Alpha</span>
+              <span>{t(locale, "museum.network.insideSystem.alphaControl")}</span>
             </label>
             <label className="tw-flex tw-min-h-11 tw-items-center tw-gap-3 tw-self-end tw-text-sm tw-text-iron-200">
               <input
@@ -522,7 +558,7 @@ export function CenturyAdjacencyLoom({
                 onChange={(event) => setOculi(event.target.checked)}
                 className="tw-size-5"
               />
-              <span>Oculi</span>
+              <span>{t(locale, "museum.network.insideSystem.oculiControl")}</span>
             </label>
             <label className="tw-text-sm tw-text-iron-300">
               {t(locale, "museum.network.insideSystem.initialOrderControl")}
@@ -531,8 +567,12 @@ export function CenturyAdjacencyLoom({
                 onChange={(event) => setInitialOrder(event.target.value)}
                 className="tw-mt-2 tw-min-h-11 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-text-iron-100"
               >
-                <option>Chaos</option>
-                <option>Cosmos</option>
+                <option value={CHAOS_ORDER}>
+                  {t(locale, "museum.network.insideSystem.chaosOrder")}
+                </option>
+                <option value={COSMOS_ORDER}>
+                  {t(locale, "museum.network.insideSystem.cosmosOrder")}
+                </option>
               </select>
             </label>
           </div>

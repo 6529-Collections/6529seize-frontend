@@ -83,9 +83,11 @@ function GrowthGlyph({
 
 function CollisionChamber({
   cell,
+  locale,
   museumHeld = false,
 }: {
   readonly cell: LatticeCell;
+  readonly locale: SupportedLocale;
   readonly museumHeld?: boolean | undefined;
 }) {
   const growth = cell.valueIndex + 1;
@@ -127,7 +129,11 @@ function CollisionChamber({
   return (
     <svg
       viewBox="0 0 280 300"
-      aria-label={`${cell.row}, ${cell.group}, ${cell.value} collision chamber`}
+      aria-label={t(locale, "museum.network.insideSystem.collisionChamberLabel", {
+        row: cell.row,
+        group: cell.group,
+        value: cell.value,
+      })}
       className="tw-w-full"
     >
       <defs>
@@ -438,6 +444,7 @@ export function PreProcessCollisionLattice({
               </p>
               <CollisionChamber
                 cell={cells[initialIndex] ?? selected}
+                locale={locale}
                 museumHeld
               />
             </figure>
@@ -450,7 +457,7 @@ export function PreProcessCollisionLattice({
                   })
                 : t(locale, "museum.network.insideSystem.sessionComparison")}
             </p>
-            <CollisionChamber cell={comparisonCell} />
+            <CollisionChamber cell={comparisonCell} locale={locale} />
           </figure>
         </div>
         {candidateMode === "counterfactual" ? (

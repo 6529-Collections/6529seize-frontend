@@ -274,7 +274,7 @@ export function EmptyRoomsAmphitheater({
             fontSize="11"
             fontWeight="600"
           >
-            ◆ #713 · 555536
+            {t(locale, "museum.network.insideSystem.emptyRoomsHeldMarker")}
           </text>
           <circle
             cx="24"
@@ -285,7 +285,7 @@ export function EmptyRoomsAmphitheater({
             strokeWidth="1"
           />
           <text x="36" y="370" fill="#93939f" fontSize="9">
-            invocation 0 · outside the 923-node grammar
+            {t(locale, "museum.network.insideSystem.emptyRoomsZeroInvocation")}
           </text>
         </svg>
         <div
@@ -376,10 +376,13 @@ export function EmptyRoomsAmphitheater({
           <ComparisonMarker x={260} y={142} />
         </svg>
         <figcaption className="tw-text-sm tw-leading-6 tw-text-iron-400">
-          {comparisonCode} →
-          {decodedForms.map((form) => form.label).join(" · ") ||
-            "gradient only"}{" "}
-          → {comparisonChannelLabel} depth field → line-built room.
+          {t(locale, "museum.network.insideSystem.emptyRoomsPipelineSummary", {
+            code: comparisonCode,
+            forms:
+              decodedForms.map((form) => form.label).join(" · ") ||
+              t(locale, "museum.network.insideSystem.gradientOnly"),
+            channel: comparisonChannelLabel,
+          })}
         </figcaption>
         {candidateMode === "counterfactual" ? (
           <div className="tw-mt-5 tw-grid tw-gap-4 sm:tw-grid-cols-3">

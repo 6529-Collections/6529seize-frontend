@@ -52,6 +52,7 @@ function cosmosDisplay(token: MuseumMintedToken): string {
 
 function CosmosSpecimen({
   id,
+  locale,
   cosmosCount,
   display,
   chunk,
@@ -61,6 +62,7 @@ function CosmosSpecimen({
   museumHeld = false,
 }: {
   readonly id: string;
+  readonly locale: SupportedLocale;
   readonly cosmosCount: number;
   readonly display: string;
   readonly chunk: number;
@@ -155,7 +157,12 @@ function CosmosSpecimen({
         <ComparisonMarker x={200} y={200} />
       )}
       <text x="18" y="382" fill="#93939f" fontSize="10">
-        {cosmosCount} Cosmos · {display} · CHUNK {chunk} · memory {memory}
+        {t(locale, "museum.network.insideSystem.cosmosSpecimenSummary", {
+          count: cosmosCount,
+          display,
+          chunk,
+          memory,
+        })}
       </text>
     </svg>
   );
@@ -407,7 +414,9 @@ export function CosmosStateAtlas({
             fill="#ceced4"
             fontSize="11"
           >
-            ◆ Ex Nihilo (Cosmos) #248 · {heldValue}
+            {t(locale, "museum.network.insideSystem.cosmosHeldMarker", {
+              value: heldValue,
+            })}
           </text>
         </svg>
       </div>
@@ -421,12 +430,17 @@ export function CosmosStateAtlas({
             </p>
             <CosmosSpecimen
               id="cosmos-museum"
+              locale={locale}
               cosmosCount={3}
               display="White"
               chunk={3}
               memory={72}
               seed={248}
-              label="Museum model of Ex Nihilo Cosmos #248 conditions"
+              label={t(
+                locale,
+                "museum.network.insideSystem.cosmosSpecimenLabel",
+                { subject: "#248" }
+              )}
               museumHeld
             />
           </figure>
@@ -441,12 +455,24 @@ export function CosmosStateAtlas({
           </p>
           <CosmosSpecimen
             id="cosmos-candidate"
+            locale={locale}
             cosmosCount={comparisonCosmos}
             display={comparisonDisplay}
             chunk={comparisonChunk}
             memory={memory}
             seed={comparisonSeed}
-            label="Museum model of Ex Nihilo Cosmos comparison conditions"
+            label={t(
+              locale,
+              "museum.network.insideSystem.cosmosSpecimenLabel",
+              {
+                subject: t(
+                  locale,
+                  candidateMode === "minted"
+                    ? "museum.network.insideSystem.mintedComparison"
+                    : "museum.network.insideSystem.counterfactualTitle"
+                ),
+              }
+            )}
           />
         </figure>
       </div>
