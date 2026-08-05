@@ -119,12 +119,13 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
     await expectRouteShellHealthy(page, diagnostics);
   });
 
-  test("keeps authenticated content shells behind wallet connection", async ({
-    page,
-  }) => {
-    const diagnostics = attachConsoleDiagnostics(page);
+  for (const { label, path } of [
+    { label: "notifications", path: "/notifications" },
+    { label: "messages", path: "/messages" },
+  ]) {
+    test(`keeps ${label} behind wallet connection`, async ({ page }) => {
+      const diagnostics = attachConsoleDiagnostics(page);
 
-    for (const path of ["/notifications", "/messages"]) {
       await page.goto(path, { waitUntil: "domcontentloaded" });
       await waitForRouteReady(page, { readySelector: "h1" });
 
@@ -138,8 +139,8 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
         page.getByText("Connect your wallet to continue.")
       ).toBeVisible();
       await expectRouteShellHealthy(page, diagnostics);
-    }
-  });
+    });
+  }
 
   test("keeps the public waves shell mountable", async ({ page }) => {
     const diagnostics = attachConsoleDiagnostics(page);
@@ -181,7 +182,7 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
     });
   });
 
-  test("keeps open data and block finder tools usable", async ({ page }) => {
+  test("keeps open data usable", async ({ page }) => {
     const diagnostics = attachConsoleDiagnostics(page);
 
     await page.goto("/open-data", { waitUntil: "domcontentloaded" });
@@ -193,6 +194,10 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
       page.getByRole("link", { name: "6529bot Usage" })
     ).toHaveAttribute("href", "/open-data/6529bot");
     await expectRouteShellHealthy(page, diagnostics);
+  });
+
+  test("keeps the block finder usable", async ({ page }) => {
+    const diagnostics = attachConsoleDiagnostics(page);
 
     await page.goto("/tools/block-finder", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page, { readySelector: "h1" });

@@ -269,13 +269,13 @@ test.describe("Public groups, tools, and calendar read-only coverage @surface @m
       page.getByRole("button", { name: "Screenshot" })
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /^SZN / }).first()
+      page.getByRole("row", { name: /^SZN \d+ / }).first()
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /^Year / }).first()
+      page.getByRole("row", { name: /^Year \d+ / }).first()
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /^Epoch / }).first()
+      page.getByRole("row", { name: /^Epoch \d+ / }).first()
     ).toBeVisible();
 
     const calendarLink = page
