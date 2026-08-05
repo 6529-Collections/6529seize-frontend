@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import { PublicReviewEditorialFeedback } from "@/components/public-review/PublicReviewEditorialFeedback";
+import { getWaveComposerDockElements } from "@/components/waves/WaveComposerDockVisibility";
 import type {
   PublicReviewDiscussionDestination,
   PublicReviewFeedbackConfig,
@@ -49,8 +50,8 @@ describe("PublicReviewEditorialFeedback", () => {
     window.history.replaceState({}, "", window.location.pathname);
   });
 
-  it("fills the feedback rail and reveals the composer on demand", () => {
-    render(
+  it("fills the feedback rail and registers its bottom action for overlay clearance", async () => {
+    const { unmount } = render(
       <PublicReviewEditorialFeedback
         config={config}
         destination={destination}
@@ -65,13 +66,25 @@ describe("PublicReviewEditorialFeedback", () => {
     const disclosure = screen
       .getByText("Send feedback", { exact: true })
       .closest("details");
+    await waitFor(() =>
+      expect(getWaveComposerDockElements()).toContain(disclosure)
+    );
     expect(disclosure).not.toHaveAttribute("open");
 
     fireEvent.click(screen.getByText("Send feedback", { exact: true }));
 
     expect(disclosure).toHaveAttribute("open");
-    expect(screen.getByRole("combobox")).toHaveClass("tw-ring-white/[0.08]");
+    expect(screen.getByRole("combobox")).toHaveClass(
+      "tw-bg-iron-900",
+      "tw-ring-white/[0.09]"
+    );
     expect(screen.getByTestId("composer")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("Send feedback", { exact: true }));
+    expect(getWaveComposerDockElements()).toContain(disclosure);
+
+    unmount();
+    await waitFor(() => expect(getWaveComposerDockElements()).toEqual([]));
   });
 
   it("reveals the composer for the feedback hash target", async () => {
@@ -90,5 +103,8 @@ describe("PublicReviewEditorialFeedback", () => {
       .getByText("Send feedback", { exact: true })
       .closest("details");
     await waitFor(() => expect(disclosure).toHaveAttribute("open"));
+    await waitFor(() =>
+      expect(getWaveComposerDockElements()).toContain(disclosure)
+    );
   });
 });

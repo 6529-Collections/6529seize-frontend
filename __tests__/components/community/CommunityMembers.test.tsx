@@ -48,8 +48,16 @@ jest.mock("@/components/groups/sidebar/GroupsSidebar", () => () => (
 jest.mock(
   "@/components/mobile-wrapper-dialog/MobileWrapperDialog",
   () =>
-    ({ children, isOpen }: any) =>
-      isOpen ? <div data-testid="mobile-dialog">{children}</div> : null
+    ({ children, headerClassName, isOpen, title }: any) =>
+      isOpen ? (
+        <div
+          data-testid="mobile-dialog"
+          data-header-class={headerClassName}
+          data-title={title}
+        >
+          {children}
+        </div>
+      ) : null
 );
 
 const push = jest.fn();
@@ -119,5 +127,25 @@ describe("CommunityMembers", () => {
     renderComponent();
     fireEvent.click(screen.getByText("Nerd view"));
     expect(push).toHaveBeenCalledWith("/network/nerd");
+  });
+
+  it("opens group filters with top-padded dialog header", () => {
+    (useQuery as jest.Mock).mockReturnValue({
+      isLoading: false,
+      isFetching: false,
+      data: { page: 1, next: null, count: 0, data: [] },
+    });
+    renderComponent();
+
+    fireEvent.click(screen.getByRole("button", { name: /Open group filters/ }));
+
+    expect(screen.getByTestId("mobile-dialog")).toHaveAttribute(
+      "data-header-class",
+      expect.stringContaining("tw-pt-4")
+    );
+    expect(screen.getByTestId("mobile-dialog")).toHaveAttribute(
+      "data-title",
+      "Groups"
+    );
   });
 });

@@ -1,0 +1,31 @@
+.root {
+  min-width: 0;
+  width: var(--about-route-width, 100%);
+  transition-duration: 300ms;
+  transition-property: width;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    transition: none;
+  }
+}
+
+:global(
+  .layout-root[data-mobile="false"][data-narrow="true"][data-offcanvas="true"][data-right-open="false"]
+) {
+  overflow-x: clip;
+}
+
+@media (min-width: 1024px) {
+  /* Mirror WebLayout.tsx and styles/globals.css: match the narrow desktop
+     sidebar shift so the route's right edge stays anchored during transition. */
+  :global(
+    .layout-root[data-mobile="false"][data-narrow="true"][data-offcanvas="true"][data-right-open="false"]
+  ) {
+    --about-route-width: calc(
+      100% - (var(--expanded-width) - var(--collapsed-width))
+    );
+  }
+}
