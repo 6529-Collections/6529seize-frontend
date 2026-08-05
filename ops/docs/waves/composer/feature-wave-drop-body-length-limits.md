@@ -5,7 +5,7 @@
 The standard thread composer enforces three text-length rules:
 
 - Body input is capped at `25,000` characters.
-- Storm add is blocked when `existing storm text + current draft text >= 24,000`.
+- A Storm may contain up to `50,000` characters across all of its parts.
 - When a storm already has at least one part, submit is blocked if current
   draft text is over `240` characters.
 
@@ -28,7 +28,7 @@ These rules apply to non-curation thread composer flows in both `Post` and
 ## Rules in Practice
 
 - A single-part post/drop can submit above `240` chars, up to `25,000`.
-- Storm add uses the `24,000` total-text rule, not the `240` submit rule.
+- Storm add uses the `50,000` total-text rule, not the `240` submit rule.
 - With existing storm parts, submit can only finalize when current draft text is
   `240` chars or less.
 - When current content is eligible, the primary action is `Add part`; it saves
@@ -39,9 +39,9 @@ These rules apply to non-curation thread composer flows in both `Post` and
 
 ## Common Scenarios
 
-- A `24,500`-char draft can submit as one part, but cannot be split into storm.
-- In storm mode, a `500`-char draft can still be added with `Add part`
-  (if total text stays under `24,000`), but submit stays blocked until the
+- Two `25,000`-character parts can form one Storm at the total limit.
+- In storm mode, a `500`-character draft can still be added with `Add part`
+  (if total text stays at or below `50,000`), but submit stays blocked until the
   draft is shortened or cleared.
 - In `Drop` mode, required media/metadata can still block submit even when
   length checks pass.

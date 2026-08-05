@@ -12,7 +12,10 @@ import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUs
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
-import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
+import {
+  MAX_DROP_STORM_CHARACTERS,
+  MAX_DROP_UPLOAD_FILES,
+} from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { getMentionedGroupsFromParts } from "@/helpers/waves/drop-group-mentions";
 import {
@@ -143,7 +146,7 @@ const getIsDropLimit = (
   (drop?.parts.reduce(
     (acc, part) => acc + (part.content?.length ?? 0),
     markdown?.length ?? 0
-  ) ?? 0) >= 24000;
+  ) ?? 0) > MAX_DROP_STORM_CHARACTERS;
 
 export const canAddDropPart = ({
   markdown,

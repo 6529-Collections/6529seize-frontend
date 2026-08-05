@@ -42,6 +42,7 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { WalletValidationError } from "@/errors/wallet";
 import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
 import { hasPendingInlineImageUploadMarkdown } from "@/helpers/waves/inline-image-upload.helpers";
+import { MAX_DROP_STORM_CHARACTERS } from "@/helpers/Helpers";
 
 export enum CreateDropScreenType {
   DESKTOP = "DESKTOP",
@@ -413,7 +414,7 @@ const CreateDropWrapper = forwardRef<
       (drop?.parts.reduce(
         (acc, part) => acc + (part.content?.length ?? 0),
         getMarkdown()?.length ?? 0
-      ) ?? 0) >= 24000;
+      ) ?? 0) > MAX_DROP_STORM_CHARACTERS;
 
     const getIsCharsLimit = () => {
       const markDown = getMarkdown();

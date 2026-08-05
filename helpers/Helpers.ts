@@ -39,6 +39,7 @@ export {
 export { getMetadataForUserPage } from "./userPageMetadataHelpers";
 
 export const MAX_DROP_UPLOAD_FILES = 8;
+export const MAX_DROP_STORM_CHARACTERS = 50_000;
 
 const unicodeEmojiRegex = emojiRegex();
 const codePointRegex = /U\+([\dA-Fa-f]{1,6})/g;

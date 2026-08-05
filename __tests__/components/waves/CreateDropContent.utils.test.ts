@@ -17,7 +17,7 @@ import type { SelectableIdentityOption } from "@/components/utils/input/profile-
 import { IDENTITY_SUBMISSION_RESERVED_METADATA_ERROR } from "@/helpers/waves/identity-submission-metadata";
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
-import type { CreateDropPart } from "@/entities/IDrop";
+import type { CreateDropConfig, CreateDropPart } from "@/entities/IDrop";
 import type { CreateDropMetadataType } from "@/components/waves/create-drop-content/types";
 
 describe("CreateDropContent utilities", () => {
@@ -241,6 +241,33 @@ describe("CreateDropContent utilities", () => {
           ...baseCanSubmitParams,
           markdown: "x".repeat(241),
           parts: [existingPart],
+        })
+      ).toBe(false);
+    });
+
+    it("allows 50,000 storm characters and rejects the next character", () => {
+      const drop = {
+        parts: [
+          { ...existingPart, content: "a".repeat(15_000) },
+          { ...existingPart, content: "b".repeat(15_000) },
+        ],
+      } as CreateDropConfig;
+
+      expect(
+        canAddDropPart({
+          markdown: "c".repeat(20_000),
+          files: [],
+          drop,
+          hasPendingInlineImageUpload: false,
+        })
+      ).toBe(true);
+
+      expect(
+        canAddDropPart({
+          markdown: "c".repeat(20_001),
+          files: [],
+          drop,
+          hasPendingInlineImageUpload: false,
         })
       ).toBe(false);
     });

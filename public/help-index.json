@@ -4979,7 +4979,7 @@
       ],
       "keywords": ["waves", "composer", "length", "limit", "storm", "drop"],
       "facts": [
-        "Wave drop body length limits and storm rules are documented under composer features.",
+        "A Wave drop part is limited to 25,000 characters, and a complete Storm is limited to 50,000 characters across all parts.",
         "The composer should give feedback when content exceeds supported rules.",
         "Limits can affect submission even before backend posting succeeds."
       ],
