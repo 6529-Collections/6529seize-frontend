@@ -1,6 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { MuseumProgramImage } from "./MuseumProgramImage";
+import type { MuseumProgramMedia } from "@/lib/museum/types";
 
 interface MuseumRecordCardProps {
   readonly href: string;
@@ -8,8 +9,7 @@ interface MuseumRecordCardProps {
   readonly title: string;
   readonly description?: string | undefined;
   readonly meta?: string | undefined;
-  readonly imageUrl?: string | undefined;
-  readonly imageAlt?: string | undefined;
+  readonly media?: MuseumProgramMedia | undefined;
   readonly children?: ReactNode;
 }
 
@@ -19,24 +19,20 @@ export function MuseumRecordCard({
   title,
   description,
   meta,
-  imageUrl,
-  imageAlt,
+  media,
   children,
 }: MuseumRecordCardProps) {
   return (
     <article className="tw-flex tw-h-full tw-flex-col tw-rounded-2xl tw-border tw-border-white/10 tw-bg-iron-900/60 tw-p-5 tw-transition-colors hover:tw-border-primary-400/40">
-      {imageUrl && imageAlt && (
+      {media && (
         <Link
           href={href}
           className="tw-relative -tw-mx-5 -tw-mt-5 tw-mb-5 tw-block tw-aspect-[4/3] tw-overflow-hidden tw-rounded-t-2xl tw-bg-black focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-4 focus-visible:tw-ring-offset-black"
         >
-          <Image
-            src={imageUrl}
-            alt={imageAlt}
-            fill
+          <MuseumProgramImage
+            media={media}
             sizes="(min-width: 1280px) 30vw, (min-width: 768px) 45vw, 100vw"
-            className="tw-object-cover tw-transition-transform tw-duration-300 hover:tw-scale-[1.01] motion-reduce:tw-transition-none"
-            unoptimized
+            className="tw-absolute tw-inset-0 tw-h-full tw-w-full tw-object-contain tw-transition-transform tw-duration-300 hover:tw-scale-[1.01] motion-reduce:tw-transition-none"
           />
         </Link>
       )}
