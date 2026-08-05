@@ -27,8 +27,14 @@ const selectedControlClass =
 function PossibilitySpaceTable({
   study,
   locale,
-}: Pick<MuseumPossibilitySpaceProps, "study" | "locale">) {
+  selectedWorkId,
+}: Pick<MuseumPossibilitySpaceProps, "study" | "locale"> & {
+  readonly selectedWorkId: string;
+}) {
   const visualization = study.visualization;
+  const selectedWork = study.heldPositions.find(
+    (position) => position.objectId === selectedWorkId
+  );
   const latticeRows =
     visualization.kind === "exhaustive_lattice"
       ? visualization.rows.flatMap((row, rowIndex) =>
@@ -90,32 +96,53 @@ function PossibilitySpaceTable({
                   <td className="tw-p-3 tw-text-iron-300">{row.value}</td>
                   <td className="tw-p-3 tw-text-iron-300">
                     {row.held
-                      ? `◆ ${study.heldPositions[0]?.title ?? ""}`
+                      ? `◆ ${selectedWork?.title ?? ""}`
                       : "—"}
                   </td>
                 </tr>
               ))
             : study.axes.flatMap((axis) =>
-                axis.values.map((value) => (
-                  <tr
-                    key={`${axis.id}-${value.label}`}
-                    className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800"
-                  >
-                    <th
-                      scope="row"
-                      className="tw-p-3 tw-font-medium tw-text-iron-200"
+                axis.values.map((value) => {
+                  const worksAtValue = study.heldPositions.filter((position) =>
+                    position.coordinates.some(
+                      (coordinate) =>
+                        coordinate.label === axis.label &&
+                        coordinate.value === value.label
+                    )
+                  );
+                  return (
+                    <tr
+                      key={`${axis.id}-${value.label}`}
+                      className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800"
                     >
-                      {axis.label}
-                    </th>
-                    <td className="tw-p-3 tw-text-iron-300">{value.label}</td>
-                    <td className="tw-p-3 tw-tabular-nums tw-text-iron-300">
-                      {value.count === undefined
-                        ? "—"
-                        : formatInteger(locale, value.count)}
-                    </td>
-                    <td className="tw-p-3 tw-text-iron-300">—</td>
-                  </tr>
-                ))
+                      <th
+                        scope="row"
+                        className="tw-p-3 tw-font-medium tw-text-iron-200"
+                      >
+                        {axis.label}
+                      </th>
+                      <td className="tw-p-3 tw-text-iron-300">
+                        {value.label}
+                      </td>
+                      <td className="tw-p-3 tw-tabular-nums tw-text-iron-300">
+                        {value.count === undefined
+                          ? "—"
+                          : formatInteger(locale, value.count)}
+                      </td>
+                      <td className="tw-p-3 tw-text-iron-300">
+                        {worksAtValue.length === 0
+                          ? "—"
+                          : worksAtValue
+                              .map((position) =>
+                                position.objectId === selectedWorkId
+                                  ? `◆ ${position.title}`
+                                  : position.title
+                              )
+                              .join(", ")}
+                      </td>
+                    </tr>
+                  );
+                })
               )}
         </tbody>
       </table>
@@ -226,7 +253,11 @@ export function MuseumPossibilitySpace({
 
       {view === "table" ? (
         <div className="tw-mt-6">
-          <PossibilitySpaceTable study={study} locale={locale} />
+          <PossibilitySpaceTable
+            study={study}
+            locale={locale}
+            selectedWorkId={selectedWorkId}
+          />
         </div>
       ) : null}
     </section>
