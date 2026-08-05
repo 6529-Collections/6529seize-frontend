@@ -54,6 +54,10 @@ describe("automatic production E2E dispatch", () => {
       (step: { name?: string }) =>
         step.name === "Run production-safe read-only packs"
     );
+    const selectionIndex = job.steps.findIndex(
+      (step: { name?: string }) =>
+        step.name === "Select Museum pack for the deployed change set"
+    );
 
     expect(
       e2e.on.workflow_dispatch.inputs.automatic_deploy_run_id.required
@@ -64,6 +68,8 @@ describe("automatic production E2E dispatch", () => {
     );
     expect(resolve.run).toContain('.conclusion == "success"');
     expect(resolve.run).toContain('.head_branch == "main"');
+    expect(resolve.run).toContain("previous_deployed_sha=$previous_sha");
+    expect(resolve.run).toContain(".run_started_at < $started_at");
     expect(e2eSource).toContain(
       "inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha"
     );
@@ -71,6 +77,17 @@ describe("automatic production E2E dispatch", () => {
       "${{ inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha }}"
     );
     expect(packsIndex).toBeGreaterThan(checkoutIndex);
+    expect(selectionIndex).toBeGreaterThan(checkoutIndex);
+    expect(packsIndex).toBeGreaterThan(selectionIndex);
+    expect(job.steps[selectionIndex].run).toContain(
+      "scripts/museum-e2e-change-set.cjs"
+    );
+    expect(job.steps[packsIndex].run).toContain(
+      "--exclude-pack museum-institutional-practice"
+    );
+    expect(evidence.run).toContain(
+      'pack.alias !== "museum-institutional-practice"'
+    );
     expect(evidence.run).toContain(".release_binding == null");
     expect(e2eSource).toContain("args+=(--parallel 3)");
     expect(e2eSource).toContain("Restore Playwright browser");
