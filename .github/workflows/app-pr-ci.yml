@@ -488,6 +488,15 @@ jobs:
               "utf8"
             )
           );
+          if (
+            !Array.isArray(report.affected_surfaces) ||
+            typeof report.mode !== "string" ||
+            typeof report.tier !== "string" ||
+            typeof report.reason !== "string" ||
+            !/^[a-f0-9]{64}$/.test(report.classification_digest)
+          ) {
+            throw new Error("Museum release classification report is malformed.");
+          }
           const lines = [
             "## Museum release classification",
             "",

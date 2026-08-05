@@ -56,3 +56,16 @@
 - A local production build is deferred to hosted CI because the reversible
   local dependency junction required after two Windows linker stalls is
   rejected by Turbopack. No tracked source depends on the junction.
+
+## 2026-08-05 — PR 1 exact-head review
+
+- Opened frontend PR #3632 at signed head
+  `11f536d6a2d23c5d4f9eb936a4401d78712bb0c2`.
+- The first 6529bot review identified an eager blob-read exception that could
+  report P3 instead of the intended P2 fallback, and two inconsistent digest
+  definitions. Both findings were valid.
+- Moved the read into an explicit fail-closed boundary, defined the digest once
+  over the unsigned report, rejected option flags as missing values, and made
+  the workflow reject malformed report shapes before rendering its summary.
+- Added regression coverage for unreadable registered blobs, option parsing,
+  and digest identity. No release selection is active in this PR.

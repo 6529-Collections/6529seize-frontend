@@ -240,6 +240,13 @@ function maxTier(left, right) {
   return TIER_ORDER[right] > TIER_ORDER[left] ? right : left;
 }
 
+function withClassificationDigest(classification) {
+  return {
+    ...classification,
+    classification_digest: sha256(JSON.stringify(classification)),
+  };
+}
+
 function classifyEntries(entries, { readFileAt }) {
   if (!Array.isArray(entries)) {
     throw new Error("Changed entries must be an array.");
@@ -283,11 +290,22 @@ function classifyEntries(entries, { readFileAt }) {
       allowed.has(file)
     );
     if (onlyAllowedFiles && componentEntry.status === "M") {
-      const proof = presentationComponentProof(
-        readFileAt("base", componentEntry.file),
-        readFileAt("head", componentEntry.file),
-        componentEntry.file
-      );
+      let proof;
+      try {
+        proof = presentationComponentProof(
+          readFileAt("base", componentEntry.file),
+          readFileAt("head", componentEntry.file),
+          componentEntry.file
+        );
+      } catch (error) {
+        proof = {
+          eligible: false,
+          reason:
+            error instanceof Error
+              ? error.message
+              : "presentation source could not be read",
+        };
+      }
       if (proof.eligible) {
         return {
           affected_surfaces: [...policy.surface_ids],
@@ -325,13 +343,10 @@ function classifyRange(root, baseRef, headRef) {
     readFileAt: (side, file) =>
       readBlob(root, side === "base" ? base_sha : head_sha, file),
   });
-  return {
+  return withClassificationDigest({
     affected_surfaces: result.affected_surfaces,
     base_sha,
     changed_files: entries.map(({ file, status }) => ({ file, status })),
-    classification_digest: sha256(
-      JSON.stringify({ base_sha, entries, head_sha, result })
-    ),
     contract: CONTRACT,
     head_sha,
     mode: MODE,
@@ -340,12 +355,13 @@ function classifyRange(root, baseRef, headRef) {
       ? { presentation_proof: result.presentation_proof }
       : {}),
     tier: result.tier,
-  };
+  });
 }
 
 function readOption(argv, name) {
   const index = argv.indexOf(name);
-  return index === -1 ? "" : (argv[index + 1] ?? "");
+  const value = index === -1 ? "" : (argv[index + 1] ?? "");
+  return value.startsWith("--") ? "" : value;
 }
 
 function main(argv = process.argv.slice(2)) {
@@ -370,21 +386,17 @@ function main(argv = process.argv.slice(2)) {
     } catch {
       // Exact identities remain empty and the report fails closed.
     }
-    classification = {
+    classification = withClassificationDigest({
       affected_surfaces: [],
       base_sha,
       changed_files: [],
-      classification_digest: "",
       contract: CONTRACT,
       head_sha,
       mode: MODE,
       reason: error instanceof Error ? error.message : "Classification failed.",
       tier: "P3",
-    };
+    });
   }
-  classification.classification_digest = sha256(
-    JSON.stringify({ ...classification, classification_digest: undefined })
-  );
   const outputPath = path.resolve(output);
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   fs.writeFileSync(outputPath, `${JSON.stringify(classification, null, 2)}\n`);
@@ -411,4 +423,6 @@ module.exports = {
   isMuseumPath,
   isPolicyPath,
   presentationComponentProof,
+  readOption,
+  withClassificationDigest,
 };

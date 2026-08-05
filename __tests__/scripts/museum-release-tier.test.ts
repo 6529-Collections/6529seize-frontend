@@ -79,6 +79,25 @@ describe("Museum release report-only classifier", () => {
     expect(classify([{ file: componentPath, status: "D" }]).tier).toBe("P2");
   });
 
+  it("falls back to P2 when a registered presentation blob is unreadable", () => {
+    const result = classifier.classifyEntries(
+      [{ file: componentPath, status: "M" }],
+      {
+        readFileAt: () => {
+          throw new Error("missing blob");
+        },
+      }
+    );
+
+    expect(result.tier).toBe("P2");
+  });
+
+  it("rejects a missing option value instead of consuming the next flag", () => {
+    expect(classifier.readOption(["--base", "--head", "HEAD"], "--base")).toBe(
+      ""
+    );
+  });
+
   it("classifies an exact committed Git range and binds its identity", () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "museum-tier-"));
     try {
@@ -121,6 +140,10 @@ describe("Museum release report-only classifier", () => {
         tier: "P0",
       });
       expect(result.classification_digest).toMatch(/^[a-f0-9]{64}$/u);
+      const { classification_digest: digest, ...unsigned } = result;
+      expect(digest).toBe(
+        classifier.withClassificationDigest(unsigned).classification_digest
+      );
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }
