@@ -144,6 +144,13 @@ export type MuseumRightsUseStatus =
   | "status_only"
   | "case_by_case";
 
+export type MuseumRightsMuseumPracticeStatus =
+  | "ordinary"
+  | "ordinary_with_terms"
+  | "purpose_limited"
+  | "contextual"
+  | "separate_basis";
+
 export type MuseumRightsAction =
   | "display_the_work"
   | "publish_online"
@@ -158,6 +165,11 @@ export interface MuseumRightsLegalCode {
   readonly publicationUri: string;
   readonly sha256: MuseumSha256;
   readonly text: string;
+}
+
+export interface MuseumRightsMuseumPracticeReading {
+  readonly status: MuseumRightsMuseumPracticeStatus;
+  readonly note: string;
 }
 
 export interface MuseumRightsExpression {
@@ -188,6 +200,9 @@ export interface MuseumRightsExpression {
   readonly useMatrix: Readonly<
     Record<MuseumRightsAction, MuseumRightsUseStatus>
   >;
+  readonly museumPracticeMatrix: Readonly<
+    Record<MuseumRightsAction, MuseumRightsMuseumPracticeReading>
+  >;
   readonly legalCode: MuseumRightsLegalCode | null;
 }
 
@@ -205,6 +220,9 @@ export interface MuseumRightsHandbook {
   readonly expressions: readonly MuseumRightsExpression[];
   readonly useStatusDefinitions: Readonly<
     Record<MuseumRightsUseStatus, string>
+  >;
+  readonly museumPracticeStatusDefinitions: Readonly<
+    Record<MuseumRightsMuseumPracticeStatus, string>
   >;
   readonly objectAssignments: readonly MuseumRightsObjectAssignment[];
   readonly sourcePaths: readonly string[];

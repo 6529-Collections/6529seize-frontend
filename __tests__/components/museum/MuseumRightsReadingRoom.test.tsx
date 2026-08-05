@@ -66,18 +66,21 @@ describe("Museum rights reading room", () => {
     const { container } = render(
       <MuseumRightsExpressionPage
         expression={expression}
-        handbook={publication.rightsHandbook}
         sourceCommit={publication.identity.commit}
       />
     );
     expect(
       screen.getByRole("heading", { level: 1, name: expression.label })
     ).toBeVisible();
-    expect(screen.getByText("Uses at a glance")).toBeVisible();
+    expect(screen.getByText("Museum practice")).toBeVisible();
     expect(
       screen.getByText("Make preservation copies", { exact: true })
     ).toBeVisible();
     expect(container.querySelectorAll("dl > div")).toHaveLength(6);
+    expect(container.querySelectorAll("dl dt")).toHaveLength(6);
+    expect(container.querySelectorAll("dl dd")).toHaveLength(6);
+    expect(screen.getAllByText("Ordinary with recorded terms")).toHaveLength(6);
+    expect(container.querySelector("dl [class*='rounded-full']")).toBeNull();
     expect(
       screen.getByText("Exact English legal code", { exact: true })
     ).toBeVisible();
