@@ -16,7 +16,7 @@ import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
 const MOBILE_PROJECT = "web-mobile-chromium";
 const MOBILE_VIEWPORT = { width: 390, height: 844 } as const;
 const SHELL_ALLOWED_CONSOLE_ERROR_PATTERNS = [
-  /^Error checking Cross-Origin-Opener-Policy: Failed to fetch$/,
+  /^Error checking Cross-Origin-Opener-Policy: Failed to fetch(?: \((?:staging\.)?6529\.io\))?$/,
   /^Failed to fetch cookie consent status Error: Network request failed\. Please check your connection and try again\. \(https:\/\/api(?:\.staging)?\.6529\.io\/api\/policies\/country-check\)(?:\n|$)/,
 ];
 
