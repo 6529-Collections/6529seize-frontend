@@ -8,6 +8,8 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 export type GroupCreateIdentitiesSearchResultsLayout = "popover" | "inline";
 export type GroupCreateIdentitiesSearchAppearance = "default" | "modal";
 
+export const GROUP_IDENTITY_MIN_SEARCH_LENGTH = 3;
+
 function GroupCreateIdentitiesSearchItems({
   open,
   searchCriteria,
@@ -23,11 +25,12 @@ function GroupCreateIdentitiesSearchItems({
   readonly appearance?: GroupCreateIdentitiesSearchAppearance | undefined;
   readonly onSelect: (item: CommunityMemberMinimal) => void;
 }) {
+  const normalizedSearchCriteria = searchCriteria?.trim() ?? "";
   const { data, isFetching } = useQuery<CommunityMemberMinimal[]>({
     queryKey: [
       QueryKey.PROFILE_SEARCH,
       {
-        param: searchCriteria,
+        param: normalizedSearchCriteria,
         only_profile_owners: "true",
       },
     ],
@@ -35,11 +38,12 @@ function GroupCreateIdentitiesSearchItems({
       await commonApiFetch<CommunityMemberMinimal[]>({
         endpoint: "community-members",
         params: {
-          param: searchCriteria ?? "",
+          param: normalizedSearchCriteria,
           only_profile_owners: "true",
         },
       }),
-    enabled: !!searchCriteria && searchCriteria.length >= 3,
+    enabled:
+      normalizedSearchCriteria.length >= GROUP_IDENTITY_MIN_SEARCH_LENGTH,
   });
 
   const isModal = appearance === "modal";
@@ -55,34 +59,40 @@ function GroupCreateIdentitiesSearchItems({
     ? "tw-flow-root tw-max-h-52 tw-overflow-x-hidden tw-overflow-y-auto tw-py-1 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700 desktop-hover:hover:tw-scrollbar-thumb-iron-500"
     : "tw-flow-root tw-max-h-64 tw-overflow-x-hidden tw-overflow-y-auto tw-p-1.5 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 desktop-hover:hover:tw-scrollbar-thumb-iron-400";
 
+  const results = open ? (
+    <motion.div
+      className={wrapperClasses}
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -6 }}
+      transition={{ duration: 0.15 }}
+    >
+      <div className={panelClasses}>
+        <div className={scrollClasses}>
+          <ul
+            className={`tw-m-0 tw-flex tw-list-none tw-flex-col tw-p-0 ${
+              isModal ? "" : "tw-gap-y-1"
+            }`}
+          >
+            <GroupCreateIdentitiesSearchItemsContent
+              selectedWallets={selectedWallets}
+              loading={isFetching}
+              items={data ?? []}
+              onSelect={onSelect}
+            />
+          </ul>
+        </div>
+      </div>
+    </motion.div>
+  ) : null;
+
+  if (resultsLayout === "inline") {
+    return results;
+  }
+
   return (
     <AnimatePresence mode="wait" initial={false}>
-      {open && (
-        <motion.div
-          className={wrapperClasses}
-          initial={{ opacity: 0, y: -6 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -6 }}
-          transition={{ duration: 0.15 }}
-        >
-          <div className={panelClasses}>
-            <div className={scrollClasses}>
-              <ul
-                className={`tw-m-0 tw-flex tw-list-none tw-flex-col tw-p-0 ${
-                  isModal ? "" : "tw-gap-y-1"
-                }`}
-              >
-                <GroupCreateIdentitiesSearchItemsContent
-                  selectedWallets={selectedWallets}
-                  loading={isFetching}
-                  items={data ?? []}
-                  onSelect={onSelect}
-                />
-              </ul>
-            </div>
-          </div>
-        </motion.div>
-      )}
+      {results}
     </AnimatePresence>
   );
 }

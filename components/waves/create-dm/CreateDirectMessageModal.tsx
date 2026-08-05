@@ -121,7 +121,7 @@ export default function CreateDirectMessageModal({
                   <div className="tw-flex tw-items-center tw-justify-between tw-p-5 tw-pb-4">
                     <h2
                       id={titleId}
-                      className="tw-m-0 tw-text-base tw-font-bold tw-tracking-wide tw-text-iron-50"
+                      className="tw-m-0 tw-text-base tw-font-bold tw-text-iron-50"
                     >
                       {t(locale, "quickDm.createModalTitle")}
                     </h2>
