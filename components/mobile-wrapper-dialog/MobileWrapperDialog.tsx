@@ -45,6 +45,7 @@ type MobileWrapperDialogProps = {
   readonly maxWidthClass?: string | undefined;
   readonly zIndexClassName?: string | undefined;
   readonly headerClassName?: string | undefined;
+  readonly titleActions?: ReactNode;
   readonly headerActions?: ReactNode;
   readonly mobileCloseButtonClassName?: string | undefined;
   readonly showDragHandle?: boolean | undefined;
@@ -112,6 +113,7 @@ function DialogHeader({
   showDesktopCloseButton,
   onClose,
   className,
+  titleActions,
   headerActions,
   showHeaderCloseButton,
   headerCloseButtonClassName,
@@ -121,6 +123,7 @@ function DialogHeader({
   readonly showDesktopCloseButton: boolean;
   readonly onClose: () => void;
   readonly className?: string | undefined;
+  readonly titleActions?: ReactNode;
   readonly headerActions?: ReactNode;
   readonly showHeaderCloseButton?: boolean | undefined;
   readonly headerCloseButtonClassName?: string | undefined;
@@ -130,16 +133,23 @@ function DialogHeader({
     <div className={clsx("tw-px-4 sm:tw-px-6", className)}>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
         <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-2">
-          {title && (
-            <DialogTitle
-              className={clsx(
-                "tw-text-base tw-font-semibold tw-text-iron-50",
-                titleClassName
-              )}
-            >
-              {title}
-            </DialogTitle>
-          )}
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
+            {title && (
+              <DialogTitle
+                className={clsx(
+                  "tw-text-base tw-font-semibold tw-text-iron-50",
+                  titleClassName
+                )}
+              >
+                {title}
+              </DialogTitle>
+            )}
+            {titleActions !== undefined && titleActions !== null && (
+              <div className="tw-flex tw-shrink-0 tw-items-center">
+                {titleActions}
+              </div>
+            )}
+          </div>
           {headerActions !== undefined && headerActions !== null && (
             <div className="tw-flex tw-items-center">{headerActions}</div>
           )}
@@ -147,7 +157,10 @@ function DialogHeader({
         {showDesktopCloseButton && (
           <DialogCloseButton
             onClick={onClose}
-            className="tw-hidden md:tw-inline-flex"
+            className={clsx(
+              "tw-hidden md:tw-inline-flex",
+              headerCloseButtonClassName
+            )}
           />
         )}
         {showHeaderCloseButton && (
@@ -633,6 +646,7 @@ export default function MobileWrapperDialog({
   maxWidthClass,
   zIndexClassName = "tw-z-[1010]",
   headerClassName,
+  titleActions,
   headerActions,
   mobileCloseButtonClassName,
   showDragHandle,
@@ -746,6 +760,7 @@ export default function MobileWrapperDialog({
                         showDesktopCloseButton={showDesktopHeaderCloseButton}
                         onClose={handleClose}
                         className={headerClassName}
+                        titleActions={titleActions}
                         headerActions={headerActions}
                         showHeaderCloseButton={showInlineHeaderCloseButton}
                         headerCloseButtonClassName={headerCloseButtonClassName}

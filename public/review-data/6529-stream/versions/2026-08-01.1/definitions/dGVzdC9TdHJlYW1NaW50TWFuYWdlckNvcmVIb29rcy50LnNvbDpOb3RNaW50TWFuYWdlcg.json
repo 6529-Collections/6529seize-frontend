@@ -1,0 +1,76 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamMintManagerCoreHooks.t.sol:NotMintManager",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1NaW50TWFuYWdlckNvcmVIb29rcy50LnNvbDpOb3RNaW50TWFuYWdlcg",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamMintManagerCoreHooks.t.sol:NotMintManager"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "NotMintManager",
+    "natspec": "",
+    "range": {
+      "byteLength": 27,
+      "byteStart": 2049,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintManagerCoreHooks.t.sol#L68",
+      "lineEnd": 68,
+      "lineStart": 68,
+      "snippetSha256": "sha256:2bdef2e5a731d45db26a0d6b2196cce157184ae2f486265021b48e5cf54c8194",
+      "sourceSha256": "sha256:fd26e691f1aa2c0b5806ff7a34abdfa444924055f07fae646eb59f3931e277a6"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamMintManagerCoreHooks.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 1
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1
+    },
+    "totalCount": 1
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamMintManagerCoreHooks.t.sol:NotMintManager",
+      "severity": "advisory"
+    }
+  ]
+}

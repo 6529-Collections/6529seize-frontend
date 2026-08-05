@@ -11,6 +11,7 @@ import {
   getLargeSocialCardMetadata,
   getNftSocialCardImagePath,
 } from "@/components/providers/metadata";
+import { publicEnv } from "@/config/env";
 
 describe("Metadata functionality (migrated from _document.tsx)", () => {
   describe("Version Meta Tag (core functionality from _document.tsx)", () => {
@@ -55,11 +56,19 @@ describe("Metadata functionality (migrated from _document.tsx)", () => {
   });
 
   describe("Standard Metadata Structure", () => {
-    it("includes favicon icon", () => {
+    const originalBaseEndpoint = publicEnv.BASE_ENDPOINT;
+
+    beforeEach(() => {
+      publicEnv.BASE_ENDPOINT = "https://6529.io";
+    });
+
+    afterEach(() => {
+      publicEnv.BASE_ENDPOINT = originalBaseEndpoint;
+    });
+
+    it("leaves favicon ownership to the browser runtime controller", () => {
       const metadata = getAppMetadata();
-      expect(metadata.icons).toEqual({
-        icon: "/favicon.ico",
-      });
+      expect(metadata.icons).toBeUndefined();
     });
 
     it("includes open graph metadata with proper structure", () => {
@@ -89,6 +98,26 @@ describe("Metadata functionality (migrated from _document.tsx)", () => {
       expect(metadata.title).toBe("6529.io");
       expect(metadata.openGraph?.title).toBe("6529.io");
     });
+
+    it.each([
+      ["https://staging.6529.io", "6529 Staging"],
+      ["https://prxtstaging.6529.io", "6529 PRXTStaging"],
+      ["http://localhost:3001", "6529 Localhost"],
+    ])(
+      "keeps server metadata derived from BASE_ENDPOINT %s",
+      (baseEndpoint, expectedTitle) => {
+        publicEnv.BASE_ENDPOINT = baseEndpoint;
+        const metadata = getAppMetadata({ description: "Environment test" });
+        const hostname = new URL(baseEndpoint).hostname;
+
+        expect(metadata.title).toBe(expectedTitle);
+        expect(metadata.description).toBe(`Environment test | ${hostname}`);
+        expect(metadata.icons).toBeUndefined();
+        expect(metadata.openGraph?.description).toBe(
+          `Environment test | ${hostname}`
+        );
+      }
+    );
 
     it("accepts custom metadata overrides", () => {
       const customMetadata = {

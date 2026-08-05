@@ -1,41 +1,46 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
-import type { CommonSelectProps } from "../CommonSelect";
-import CommonTabsTab from "./CommonTabsTab";
+import type { CommonSelectItem, CommonSelectProps } from "../CommonSelect";
+import CommonTabsTab, { type CommonTabsActiveTone } from "./CommonTabsTab";
+
+type CommonTabsProps<T, U> = CommonSelectProps<T, U> & {
+  readonly isItemDisabled?:
+    | ((item: CommonSelectItem<T, U>) => boolean)
+    | undefined;
+  readonly activeTone?: CommonTabsActiveTone | undefined;
+};
 
 export default function CommonTabs<T, U = unknown>(
-  props: Readonly<CommonSelectProps<T, U>>
+  props: Readonly<CommonTabsProps<T, U>>
 ) {
-  const { items, activeItem, setSelected, filterLabel } = props;
+  const {
+    items,
+    activeItem,
+    setSelected,
+    filterLabel,
+    fill = true,
+    isItemDisabled: isItemDisabledProp,
+  } = props;
   const sortDirection =
     "sortDirection" in props ? props.sortDirection : undefined;
   const disabled = "disabled" in props ? (props.disabled ?? false) : false;
   const size = "size" in props ? props.size : undefined;
+  const activeTone = props.activeTone ?? "neutral";
+  const isItemDisabled = useCallback(
+    (item: CommonSelectItem<T, U>) =>
+      disabled || isItemDisabledProp?.(item) === true,
+    [disabled, isItemDisabledProp]
+  );
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const tabRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
   const [showStartFade, setShowStartFade] = useState(false);
   const [showEndFade, setShowEndFade] = useState(false);
 
-  useEffect(() => {
-    const keysToKeep = new Set(items.map((item) => item.key));
-    const staleKeys: string[] = [];
-
-    tabRefs.current.forEach((_, key) => {
-      if (!keysToKeep.has(key)) {
-        staleKeys.push(key);
-      }
-    });
-
-    staleKeys.forEach((key) => tabRefs.current.delete(key));
-  }, [items]);
-
   const updateFadeIndicators = useCallback(() => {
     const node = scrollContainerRef.current;
-    if (!node) {
-      setShowStartFade(false);
-      setShowEndFade(false);
+    if (node === null) {
       return;
     }
     const { scrollLeft, scrollWidth, clientWidth } = node;
@@ -44,55 +49,55 @@ export default function CommonTabs<T, U = unknown>(
   }, []);
 
   useEffect(() => {
-    updateFadeIndicators();
+    const frameId = globalThis.requestAnimationFrame(updateFadeIndicators);
+    return () => globalThis.cancelAnimationFrame(frameId);
   }, [updateFadeIndicators, activeItem, items]);
 
   useEffect(() => {
     const node = scrollContainerRef.current;
-    if (!node) {
-      return;
+    if (node === null) {
+      return undefined;
     }
 
-    updateFadeIndicators();
-
-    node.addEventListener("scroll", updateFadeIndicators);
-    if (globalThis.window !== undefined) {
-      globalThis.window.addEventListener("resize", updateFadeIndicators);
-    }
+    const frameId = globalThis.requestAnimationFrame(updateFadeIndicators);
+    node.addEventListener("scroll", updateFadeIndicators, { passive: true });
+    globalThis.window.addEventListener("resize", updateFadeIndicators);
 
     return () => {
-      if (node) {
-        node.removeEventListener("scroll", updateFadeIndicators);
-      }
-      if (globalThis.window !== undefined) {
-        globalThis.window.removeEventListener("resize", updateFadeIndicators);
-      }
+      globalThis.cancelAnimationFrame(frameId);
+      node.removeEventListener("scroll", updateFadeIndicators);
+      globalThis.window.removeEventListener("resize", updateFadeIndicators);
     };
   }, [updateFadeIndicators]);
 
   const focusTab = useCallback(
-    (index: number) => {
+    (index: number, step: 1 | -1) => {
       const total = items.length;
-      if (!total) {
+      if (total === 0 || disabled) {
         return undefined;
       }
 
-      const normalizedIndex = ((index % total) + total) % total;
-      const targetItem = items[normalizedIndex];
-      if (!targetItem) {
-        return undefined;
+      for (let offset = 0; offset < total; offset += 1) {
+        const candidateIndex = index + offset * step;
+        const normalizedIndex = ((candidateIndex % total) + total) % total;
+        const targetItem = items[normalizedIndex];
+        if (!targetItem || isItemDisabled(targetItem)) {
+          continue;
+        }
+
+        const tab = tabRefs.current.get(targetItem.key);
+        tab?.focus();
+        return targetItem;
       }
 
-      const tab = tabRefs.current.get(targetItem.key);
-      tab?.focus();
-      return targetItem;
+      return undefined;
     },
-    [items]
+    [disabled, isItemDisabled, items]
   );
 
   const focusAndSelectTab = useCallback(
-    (index: number) => {
-      const targetItem = focusTab(index);
+    (index: number, step: 1 | -1) => {
+      const targetItem = focusTab(index, step);
       if (!targetItem || targetItem.value === activeItem) {
         return;
       }
@@ -108,23 +113,23 @@ export default function CommonTabs<T, U = unknown>(
         case "ArrowRight":
         case "Right": {
           event.preventDefault();
-          focusAndSelectTab(currentIndex + 1);
+          focusAndSelectTab(currentIndex + 1, 1);
           break;
         }
         case "ArrowLeft":
         case "Left": {
           event.preventDefault();
-          focusAndSelectTab(currentIndex - 1);
+          focusAndSelectTab(currentIndex - 1, -1);
           break;
         }
         case "Home": {
           event.preventDefault();
-          focusAndSelectTab(0);
+          focusAndSelectTab(0, 1);
           break;
         }
         case "End": {
           event.preventDefault();
-          focusAndSelectTab(items.length - 1);
+          focusAndSelectTab(items.length - 1, -1);
           break;
         }
         default:
@@ -139,14 +144,14 @@ export default function CommonTabs<T, U = unknown>(
       <div
         ref={scrollContainerRef}
         role="tablist"
-        aria-label={filterLabel ?? "Filter options"}
+        aria-label={filterLabel}
         aria-orientation="horizontal"
         className="tw-no-scrollbar tw-overflow-x-auto tw-scroll-smooth tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60"
       >
         <div
           className={clsx(
             "tw-flex tw-flex-nowrap tw-gap-x-1 tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-iron-800",
-            (props.fill ?? true) ? "tw-min-w-full" : "tw-w-fit"
+            fill ? "tw-min-w-full" : "tw-w-fit"
           )}
         >
           {items.map((item, i) => (
@@ -168,9 +173,10 @@ export default function CommonTabs<T, U = unknown>(
 
                 tabRefs.current.set(item.key, node);
               }}
-              disabled={disabled}
-              fill={props.fill ?? true}
+              disabled={isItemDisabled(item)}
+              fill={fill}
               size={size}
+              activeTone={activeTone}
             />
           ))}
         </div>

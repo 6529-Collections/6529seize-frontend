@@ -221,8 +221,6 @@ export function MemePageActivity(
                 <LatestActivityRow
                   tr={tr}
                   nft={props.nft}
-                  variant="tailwind"
-                  rowStyle="striped"
                   key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
                 />
               ))}

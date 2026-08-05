@@ -1,0 +1,388 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamMintAccounting.t.sol:RandomizerRotatingReceiver#function:0x150b7a02",
+          "declaringDefinitionId": "test/StreamMintAccounting.t.sol:RandomizerRotatingReceiver",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "internalType": "bytes",
+              "name": "",
+              "type": "bytes"
+            }
+          ],
+          "name": "onERC721Received",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "bytes4",
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "selector": "0x150b7a02",
+          "signature": "onERC721Received(address,address,uint256,bytes)",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamMintAccounting.t.sol:RandomizerRotatingReceiver#function:0x38cc6071",
+          "declaringDefinitionId": "test/StreamMintAccounting.t.sol:RandomizerRotatingReceiver",
+          "inherited": false,
+          "inputs": [],
+          "name": "receivedTokenId",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x38cc6071",
+          "signature": "receivedTokenId()",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "receivedTokenId()",
+          "displaySignature": "receivedTokenId()",
+          "functionKind": "getter",
+          "id": "test/StreamMintAccounting.t.sol:RandomizerRotatingReceiver#function:0x38cc6071",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1NaW50QWNjb3VudGluZy50LnNvbDpSYW5kb21pemVyUm90YXRpbmdSZWNlaXZlciNmdW5jdGlvbjoweDM4Y2M2MDcx",
+          "kind": "function",
+          "modifiers": [],
+          "name": "receivedTokenId",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 30,
+            "byteStart": 1567,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L53",
+            "lineEnd": 53,
+            "lineStart": 53,
+            "snippetSha256": "sha256:a087085857d31004fb8b1e2b2290b2b5eb0b8384320b20f95f661286c44ad5f8",
+            "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+          },
+          "selector": "0x38cc6071",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "constructor(StreamCore,uint256,address)",
+          "functionKind": "constructor",
+          "id": "test/StreamMintAccounting.t.sol:RandomizerRotatingReceiver#function:constructor(StreamCore,uint256,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "core_",
+              "type": "StreamCore"
+            },
+            {
+              "index": 1,
+              "name": "collectionId_",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "replacementRandomizer_",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50QWNjb3VudGluZy50LnNvbDpSYW5kb21pemVyUm90YXRpbmdSZWNlaXZlciNmdW5jdGlvbjpjb25zdHJ1Y3RvcihTdHJlYW1Db3JlLHVpbnQyNTYsYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "constructor",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 208,
+            "byteStart": 1604,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L55-L59",
+            "lineEnd": 59,
+            "lineStart": 55,
+            "snippetSha256": "sha256:0c908948ec2bfb1c80786425e935cf505bf94df6973a75ae84b7f2b5344760a1",
+            "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "onERC721Received(address,address,uint256,bytes)",
+          "displaySignature": "onERC721Received(address,address,uint256,bytes)",
+          "functionKind": "function",
+          "id": "test/StreamMintAccounting.t.sol:RandomizerRotatingReceiver#function:0x150b7a02",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "",
+              "storageLocation": "calldata",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1NaW50QWNjb3VudGluZy50LnNvbDpSYW5kb21pemVyUm90YXRpbmdSZWNlaXZlciNmdW5jdGlvbjoweDE1MGI3YTAy",
+          "kind": "function",
+          "modifiers": [],
+          "name": "onERC721Received",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "range": {
+            "byteLength": 288,
+            "byteStart": 1818,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L61-L68",
+            "lineEnd": 68,
+            "lineStart": 61,
+            "snippetSha256": "sha256:4e67183bfbad917c189f83e2c8730d0a965e9401aaa42d711d461af9ef5c2d70",
+            "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+          },
+          "selector": "0x150b7a02",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "core",
+          "natspec": "",
+          "range": {
+            "byteLength": 33,
+            "byteStart": 1430,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L49",
+            "lineEnd": 49,
+            "lineStart": 49,
+            "snippetSha256": "sha256:2b14220f29190203ab179f5428596ea06c839e1f1cb4201c23b16a14c8c52d2d",
+            "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+          },
+          "selector": null,
+          "type": "StreamCore",
+          "typeString": "contract StreamCore",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "collectionId",
+          "natspec": "",
+          "range": {
+            "byteLength": 38,
+            "byteStart": 1469,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L50",
+            "lineEnd": 50,
+            "lineStart": 50,
+            "snippetSha256": "sha256:a2bcdd8fe090c3b0599e14f53cc3fcb2c79fb50dca06d9f7b458e3b7736105f8",
+            "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": null,
+          "immutable": true,
+          "name": "replacementRandomizer",
+          "natspec": "",
+          "range": {
+            "byteLength": 47,
+            "byteStart": 1513,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L51",
+            "lineEnd": 51,
+            "lineStart": 51,
+            "snippetSha256": "sha256:6c3ed38d8d9b69b315c0ae64681bb67765e1544f238119b46c78960562a5f603",
+            "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "private"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamMintAccounting.t.sol:RandomizerRotatingReceiver#function:0x38cc6071",
+          "immutable": false,
+          "name": "receivedTokenId",
+          "natspec": "",
+          "range": {
+            "byteLength": 30,
+            "byteStart": 1567,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L53",
+            "lineEnd": 53,
+            "lineStart": 53,
+            "snippetSha256": "sha256:a087085857d31004fb8b1e2b2290b2b5eb0b8384320b20f95f661286c44ad5f8",
+            "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+          },
+          "selector": "0x38cc6071",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamMintAccounting.t.sol:RandomizerRotatingReceiver",
+    "inheritance": [
+      {
+        "definitionId": "smart-contracts/IERC721Receiver.sol:IERC721Receiver",
+        "name": "IERC721Receiver"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1NaW50QWNjb3VudGluZy50LnNvbDpSYW5kb21pemVyUm90YXRpbmdSZWNlaXZlcg",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamMintAccounting.t.sol:RandomizerRotatingReceiver",
+      "smart-contracts/IERC721Receiver.sol:IERC721Receiver"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "RandomizerRotatingReceiver",
+    "natspec": "",
+    "range": {
+      "byteLength": 739,
+      "byteStart": 1369,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamMintAccounting.t.sol#L48-L69",
+      "lineEnd": 69,
+      "lineStart": 48,
+      "snippetSha256": "sha256:27e0d3c8c9680d0d332b890331e2dcfdfcb78f2f5c65b0ae9d82e969da87963e",
+      "sourceSha256": "sha256:a7130b03e087d0dc321b4a15cdab5b78f7d4c9d3feb62bc67f4592538167c4b5"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamMintAccounting.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 4
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 3
+    },
+    "totalCount": 4
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamMintAccounting.t.sol:RandomizerRotatingReceiver",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintAccounting.t.sol:RandomizerRotatingReceiver#function:0x150b7a02",
+      "definitionId": "test/StreamMintAccounting.t.sol:RandomizerRotatingReceiver",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintAccounting.t.sol:RandomizerRotatingReceiver#function:0x38cc6071",
+      "definitionId": "test/StreamMintAccounting.t.sol:RandomizerRotatingReceiver",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamMintAccounting.t.sol:RandomizerRotatingReceiver#function:constructor(StreamCore,uint256,address)",
+      "definitionId": "test/StreamMintAccounting.t.sol:RandomizerRotatingReceiver",
+      "severity": "advisory"
+    }
+  ]
+}

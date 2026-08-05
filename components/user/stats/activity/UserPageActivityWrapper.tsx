@@ -88,7 +88,7 @@ function UserPageActivityContent({
   };
 
   return (
-    <div className="tw-mt-7 lg:tw-mt-9">
+    <div>
       <UserPageActivityTabs
         activeTab={activeTab}
         setActiveTab={onActiveTab}
@@ -101,6 +101,7 @@ function UserPageActivityContent({
           aria-labelledby={getActivityTabId(
             USER_PAGE_ACTIVITY_TAB.WALLET_ACTIVITY
           )}
+          className="focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
           tabIndex={0}
         >
           <UserPageStatsActivityWallet
@@ -117,6 +118,7 @@ function UserPageActivityContent({
           aria-labelledby={getActivityTabId(
             USER_PAGE_ACTIVITY_TAB.DISTRIBUTIONS
           )}
+          className="focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
           tabIndex={0}
         >
           <UserPageStatsActivityDistributions
@@ -131,6 +133,7 @@ function UserPageActivityContent({
           role="tabpanel"
           id={getActivityPanelId(USER_PAGE_ACTIVITY_TAB.TDH_HISTORY)}
           aria-labelledby={getActivityTabId(USER_PAGE_ACTIVITY_TAB.TDH_HISTORY)}
+          className="focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
           tabIndex={0}
         >
           <UserPageStatsActivityTDHHistory profile={profile} locale={locale} />

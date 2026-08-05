@@ -52,6 +52,9 @@ updates. When auth is missing, the session disconnects and push updates pause.
   available, with broadcast-channel fallback (`auth-token-updates`) when not.
 - Temporary disconnects retry automatically while auth is still valid, using
   deterministic exponential backoff (`2s`, `3s`, `4.5s`, capped at `30s`).
+- Live-update listeners remain ready while the connection recovers, so Waves
+  and Messages resume receiving supported events as soon as reconnection and
+  authentication finish.
 
 ## Edge Cases
 
@@ -81,7 +84,8 @@ updates. When auth is missing, the session disconnects and push updates pause.
 
 - This behavior governs authenticated websocket session health, not guaranteed
   delivery of every individual event.
-- Subscribers attach only while status is `connected`; missed messages during a
+- Live-update listeners stay registered across connection changes, but messages
+  can only arrive while status is `connected`; missed messages during a
   disconnect window are not guaranteed to replay. Notification queries use
   their normal 30-second/15-second REST fallback until subscription
   acknowledgement, then retain a five-minute reconciliation poll.

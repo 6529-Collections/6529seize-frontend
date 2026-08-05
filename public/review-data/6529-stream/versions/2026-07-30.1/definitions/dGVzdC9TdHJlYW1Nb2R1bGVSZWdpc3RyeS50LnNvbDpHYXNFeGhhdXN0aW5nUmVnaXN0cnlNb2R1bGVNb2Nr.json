@@ -1,0 +1,105 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "fallback()",
+          "functionKind": "fallback",
+          "id": "test/StreamModuleRegistry.t.sol:GasExhaustingRegistryModuleMock#function:fallback()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpHYXNFeGhhdXN0aW5nUmVnaXN0cnlNb2R1bGVNb2NrI2Z1bmN0aW9uOmZhbGxiYWNrKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "fallback",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 102,
+            "byteStart": 6450,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L207-L211",
+            "lineEnd": 211,
+            "lineStart": 207,
+            "snippetSha256": "sha256:d912e5ab2c2fa19101f7132a8702b493ddd050519a8c79042e8f1674292ca3f0",
+            "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamModuleRegistry.t.sol:GasExhaustingRegistryModuleMock",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1Nb2R1bGVSZWdpc3RyeS50LnNvbDpHYXNFeGhhdXN0aW5nUmVnaXN0cnlNb2R1bGVNb2Nr",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamModuleRegistry.t.sol:GasExhaustingRegistryModuleMock"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "GasExhaustingRegistryModuleMock",
+    "natspec": "@notice Consumes every unit of gas forwarded to the ERC-165 probe.",
+    "range": {
+      "byteLength": 151,
+      "byteStart": 6403,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamModuleRegistry.t.sol#L206-L212",
+      "lineEnd": 212,
+      "lineStart": 206,
+      "snippetSha256": "sha256:634634f471838b3827cc56c08e5f6785f5c5b4c9ad5f754825cf38e48f2aba2f",
+      "sourceSha256": "sha256:3d28b26109582217631938240d34f0bf20efd28c231772a1d08c6e8f47e886aa"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamModuleRegistry.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-30.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 1
+    },
+    "byCode": {
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 1
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamModuleRegistry.t.sol:GasExhaustingRegistryModuleMock#function:fallback()",
+      "definitionId": "test/StreamModuleRegistry.t.sol:GasExhaustingRegistryModuleMock",
+      "severity": "advisory"
+    }
+  ]
+}

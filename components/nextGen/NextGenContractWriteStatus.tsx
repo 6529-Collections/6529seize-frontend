@@ -94,7 +94,7 @@ export default function NextGenContractWriteStatus(props: Readonly<Props>) {
           Confirm in your wallet
         </span>
       )}
-      {props.error && <span className="text-danger">{getError()}</span>}
+      {props.error && <span className="tw-text-error">{getError()}</span>}
       {!props.isLoading && props.hash && (
         <span>
           Transaction {getStatusMessage()}{" "}
@@ -114,7 +114,7 @@ export default function NextGenContractWriteStatus(props: Readonly<Props>) {
         </span>
       )}
       {!props.isLoading && mintedTokens.length > 0 && (
-        <div className="pt-2">
+        <div className="tw-pt-2">
           Token{mintedTokens.length > 1 ? "s" : ""} Minted:{" "}
           <ul>
             {mintedTokens.map((t) => (

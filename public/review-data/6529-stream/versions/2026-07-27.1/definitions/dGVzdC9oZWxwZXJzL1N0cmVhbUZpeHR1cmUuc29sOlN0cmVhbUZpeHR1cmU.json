@@ -1,0 +1,354 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": []
+    },
+    "abstract": true,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": null,
+          "displaySignature": "deployStream(address,address)",
+          "functionKind": "function",
+          "id": "test/helpers/StreamFixture.sol:StreamFixture#function:deployStream(address,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "payout",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "curatorsPool",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUZpeHR1cmUuc29sOlN0cmVhbUZpeHR1cmUjZnVuY3Rpb246ZGVwbG95U3RyZWFtKGFkZHJlc3MsYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "deployStream",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "DeployedStream"
+            }
+          ],
+          "range": {
+            "byteLength": 217,
+            "byteStart": 686,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamFixture.sol#L23-L28",
+            "lineEnd": 28,
+            "lineStart": 23,
+            "snippetSha256": "sha256:f4124bf653449411841d586f61a80e9bc3e268186002038a06fd6a644f9cea3a",
+            "sourceSha256": "sha256:1c5f70de0985d11932e59601231d35da10d678a84df2e804fbb105c353b0d7de"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "deployStreamWithSigner(address,address,address)",
+          "functionKind": "function",
+          "id": "test/helpers/StreamFixture.sol:StreamFixture#function:deployStreamWithSigner(address,address,address)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "payout",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "name": "curatorsPool",
+              "type": "address"
+            },
+            {
+              "index": 2,
+              "name": "signer",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUZpeHR1cmUuc29sOlN0cmVhbUZpeHR1cmUjZnVuY3Rpb246ZGVwbG95U3RyZWFtV2l0aFNpZ25lcihhZGRyZXNzLGFkZHJlc3MsYWRkcmVzcyk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "deployStreamWithSigner",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "DeployedStream"
+            }
+          ],
+          "range": {
+            "byteLength": 1676,
+            "byteStart": 909,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamFixture.sol#L30-L67",
+            "lineEnd": 67,
+            "lineStart": 30,
+            "snippetSha256": "sha256:338566e03db36b31311f7436cdb396c98d763cddc225f48bde4b261e6a4c762e",
+            "sourceSha256": "sha256:1c5f70de0985d11932e59601231d35da10d678a84df2e804fbb105c353b0d7de"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "_pinCollectionDependency(DeployedStream,bytes32)",
+          "functionKind": "function",
+          "id": "test/helpers/StreamFixture.sol:StreamFixture#function:_pinCollectionDependency(DeployedStream,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "DeployedStream"
+            },
+            {
+              "index": 1,
+              "name": "dependencyKey",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUZpeHR1cmUuc29sOlN0cmVhbUZpeHR1cmUjZnVuY3Rpb246X3BpbkNvbGxlY3Rpb25EZXBlbmRlbmN5KERlcGxveWVkU3RyZWFtLGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "_pinCollectionDependency",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 623,
+            "byteStart": 2591,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamFixture.sol#L69-L88",
+            "lineEnd": 88,
+            "lineStart": 69,
+            "snippetSha256": "sha256:c8ad356a6471161aee6d79932dfb3029eb11ed209d001d6fc49d28abafad65f4",
+            "sourceSha256": "sha256:1c5f70de0985d11932e59601231d35da10d678a84df2e804fbb105c353b0d7de"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "internal"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "FULL_COLLECTION_UPDATE_INDEX",
+          "natspec": "",
+          "range": {
+            "byteLength": 64,
+            "byteStart": 383,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamFixture.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:a2e2fe8bd41de84c7010d810fa8a115faf314faf0532ee5a039602af8383aa8d",
+            "sourceSha256": "sha256:1c5f70de0985d11932e59601231d35da10d678a84df2e804fbb105c353b0d7de"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 7,
+            "byteStart": 440,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamFixture.sol#L12",
+            "lineEnd": 12,
+            "lineStart": 12,
+            "snippetSha256": "sha256:0dd58ab09df7a2de97d584a768de027b9fffef2fc7a55c34b136163ad130104e",
+            "sourceSha256": "sha256:1c5f70de0985d11932e59601231d35da10d678a84df2e804fbb105c353b0d7de"
+          },
+          "valueSource": "10 ** 6",
+          "visibility": "internal"
+        }
+      ],
+      "structs": [
+        {
+          "members": [
+            {
+              "index": 0,
+              "name": "admins",
+              "natspec": "",
+              "range": {
+                "byteLength": 19,
+                "byteStart": 486,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamFixture.sol#L15",
+                "lineEnd": 15,
+                "lineStart": 15,
+                "snippetSha256": "sha256:e9ae2d566c449a5a012c231b2dc96a19e64555e35905ef0dbc258709dcc444b9",
+                "sourceSha256": "sha256:1c5f70de0985d11932e59601231d35da10d678a84df2e804fbb105c353b0d7de"
+              },
+              "type": "StreamAdmins",
+              "typeString": "contract StreamAdmins"
+            },
+            {
+              "index": 1,
+              "name": "dependencyRegistry",
+              "natspec": "",
+              "range": {
+                "byteLength": 37,
+                "byteStart": 515,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamFixture.sol#L16",
+                "lineEnd": 16,
+                "lineStart": 16,
+                "snippetSha256": "sha256:7a6607663094c830657a8c6e77775c9f73d01c1eb1d28db475396055ed3b1e5e",
+                "sourceSha256": "sha256:1c5f70de0985d11932e59601231d35da10d678a84df2e804fbb105c353b0d7de"
+              },
+              "type": "DependencyRegistry",
+              "typeString": "contract DependencyRegistry"
+            },
+            {
+              "index": 2,
+              "name": "core",
+              "natspec": "",
+              "range": {
+                "byteLength": 15,
+                "byteStart": 562,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamFixture.sol#L17",
+                "lineEnd": 17,
+                "lineStart": 17,
+                "snippetSha256": "sha256:04d5938083c02d6c2b8bf75bd042c0fae27642cf86fa892e2cad6f1f8c0e91cd",
+                "sourceSha256": "sha256:1c5f70de0985d11932e59601231d35da10d678a84df2e804fbb105c353b0d7de"
+              },
+              "type": "StreamCore",
+              "typeString": "contract StreamCore"
+            },
+            {
+              "index": 3,
+              "name": "minter",
+              "natspec": "",
+              "range": {
+                "byteLength": 19,
+                "byteStart": 587,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamFixture.sol#L18",
+                "lineEnd": 18,
+                "lineStart": 18,
+                "snippetSha256": "sha256:c462ffd8a3a2cd72289c67f8379d1ccca23d3366eb5ef8da7de59e8c02ebeb24",
+                "sourceSha256": "sha256:1c5f70de0985d11932e59601231d35da10d678a84df2e804fbb105c353b0d7de"
+              },
+              "type": "StreamMinter",
+              "typeString": "contract StreamMinter"
+            },
+            {
+              "index": 4,
+              "name": "drops",
+              "natspec": "",
+              "range": {
+                "byteLength": 17,
+                "byteStart": 616,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamFixture.sol#L19",
+                "lineEnd": 19,
+                "lineStart": 19,
+                "snippetSha256": "sha256:a62b9a548e89feb7bc585cd236b9dffe7c46d4638f57fde4012fa00cfd06a0ef",
+                "sourceSha256": "sha256:1c5f70de0985d11932e59601231d35da10d678a84df2e804fbb105c353b0d7de"
+              },
+              "type": "StreamDrops",
+              "typeString": "contract StreamDrops"
+            },
+            {
+              "index": 5,
+              "name": "randomizer",
+              "natspec": "",
+              "range": {
+                "byteLength": 30,
+                "byteStart": 643,
+                "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamFixture.sol#L20",
+                "lineEnd": 20,
+                "lineStart": 20,
+                "snippetSha256": "sha256:e91546214305838212c4b3f473dc6eb045198450b8b748d7dd05f1504e081ab4",
+                "sourceSha256": "sha256:1c5f70de0985d11932e59601231d35da10d678a84df2e804fbb105c353b0d7de"
+              },
+              "type": "ImmediateRandomizer",
+              "typeString": "contract ImmediateRandomizer"
+            }
+          ],
+          "name": "DeployedStream",
+          "natspec": "",
+          "range": {
+            "byteLength": 226,
+            "byteStart": 454,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamFixture.sol#L14-L21",
+            "lineEnd": 21,
+            "lineStart": 14,
+            "snippetSha256": "sha256:61003ecfac340859cd99697d78384dd5111bcda638b8d6bb35a929fbc63d7339",
+            "sourceSha256": "sha256:1c5f70de0985d11932e59601231d35da10d678a84df2e804fbb105c353b0d7de"
+          }
+        }
+      ],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/helpers/StreamFixture.sol:StreamFixture",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9oZWxwZXJzL1N0cmVhbUZpeHR1cmUuc29sOlN0cmVhbUZpeHR1cmU",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/helpers/StreamFixture.sol:StreamFixture"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamFixture",
+    "natspec": "",
+    "range": {
+      "byteLength": 2871,
+      "byteStart": 345,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/helpers/StreamFixture.sol#L11-L89",
+      "lineEnd": 89,
+      "lineStart": 11,
+      "snippetSha256": "sha256:d78782e7c726a09066b1e8ab0e01f7ac595b11f6fdc6a3b9f785897d3c01dceb",
+      "sourceSha256": "sha256:1c5f70de0985d11932e59601231d35da10d678a84df2e804fbb105c353b0d7de"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/helpers/StreamFixture.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 1
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1
+    },
+    "totalCount": 1
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+      "severity": "advisory"
+    }
+  ]
+}

@@ -2,6 +2,7 @@ import React from "react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import UserPageBrainSidebar from "@/components/user/brain/UserPageBrainSidebar";
 import { useFavouriteWavesOfIdentity } from "@/hooks/useFavouriteWavesOfIdentity";
+import { useProfileWaveActivity } from "@/hooks/useProfileWaveActivity";
 import { useWaves } from "@/hooks/useWaves";
 
 jest.mock("next/image", () => ({
@@ -23,6 +24,9 @@ jest.mock("@/hooks/useWaves", () => ({
 jest.mock("@/hooks/useFavouriteWavesOfIdentity", () => ({
   useFavouriteWavesOfIdentity: jest.fn(),
 }));
+jest.mock("@/hooks/useProfileWaveActivity", () => ({
+  useProfileWaveActivity: jest.fn(),
+}));
 jest.mock("@/components/waves/drops/WaveCreatorPreviewModal", () => ({
   WaveCreatorPreviewModal: ({ isOpen, user }: any) =>
     isOpen ? (
@@ -32,12 +36,13 @@ jest.mock("@/components/waves/drops/WaveCreatorPreviewModal", () => ({
       />
     ) : null,
 }));
-
 const mockedUseWaves = useWaves as jest.MockedFunction<typeof useWaves>;
 const mockedUseFavouriteWavesOfIdentity =
   useFavouriteWavesOfIdentity as jest.MockedFunction<
     typeof useFavouriteWavesOfIdentity
   >;
+const mockedUseProfileWaveActivity =
+  useProfileWaveActivity as jest.MockedFunction<typeof useProfileWaveActivity>;
 
 const baseProfile = {
   handle: "kanetix",
@@ -75,6 +80,7 @@ describe("UserPageBrainSidebar", () => {
   beforeEach(() => {
     mockedUseWaves.mockReset();
     mockedUseFavouriteWavesOfIdentity.mockReset();
+    mockedUseProfileWaveActivity.mockReset();
     mockedUseWaves.mockReturnValue({
       waves: [],
       isFetching: false,
@@ -92,6 +98,7 @@ describe("UserPageBrainSidebar", () => {
       refetch: jest.fn(),
       isFetching: false,
     });
+    mockedUseProfileWaveActivity.mockReturnValue(new Map());
   });
 
   it("renders created waves and most active waves", () => {
@@ -131,11 +138,13 @@ describe("UserPageBrainSidebar", () => {
     expect(
       within(desktopSidebar).getByText("Most Active In")
     ).toBeInTheDocument();
+    expect(within(desktopSidebar).getByText(/All time/)).toBeInTheDocument();
     expect(
       within(desktopSidebar).getByText("Meme Card Curation")
     ).toBeInTheDocument();
     expect(within(mobileStrip).getByText("Created")).toBeInTheDocument();
-    expect(within(mobileStrip).getByText("Active In")).toBeInTheDocument();
+    expect(within(mobileStrip).getByText("Most Active In")).toBeInTheDocument();
+    expect(within(mobileStrip).getByText(/All time/)).toBeInTheDocument();
     expect(mockedUseWaves).toHaveBeenCalledTimes(1);
     expect(mockedUseWaves).toHaveBeenCalledWith({
       identity: "kanetix",
@@ -146,7 +155,12 @@ describe("UserPageBrainSidebar", () => {
     });
     expect(mockedUseFavouriteWavesOfIdentity).toHaveBeenCalledWith({
       identityKey: "kanetix",
-      limit: 3,
+      limit: 5,
+      enabled: true,
+    });
+    expect(mockedUseProfileWaveActivity).toHaveBeenCalledWith({
+      identity: "kanetix",
+      waveIds: ["wave-2"],
       enabled: true,
     });
   });
@@ -199,7 +213,7 @@ describe("UserPageBrainSidebar", () => {
     });
     expect(mockedUseFavouriteWavesOfIdentity).toHaveBeenCalledWith({
       identityKey: "0xdef",
-      limit: 3,
+      limit: 5,
       enabled: true,
     });
   });

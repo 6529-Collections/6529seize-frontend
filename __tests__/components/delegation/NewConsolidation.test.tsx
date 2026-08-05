@@ -62,7 +62,7 @@ beforeEach(() => {
 describe("NewConsolidationComponent", () => {
   it("renders without subdelegation", () => {
     render(<NewConsolidationComponent {...baseProps} />);
-    expect(screen.getByRole("heading", { level: 4 })).toHaveTextContent(
+    expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent(
       "Register Consolidation"
     );
     expect(screen.queryByTestId("original")).toBeNull();
@@ -84,7 +84,7 @@ describe("NewConsolidationComponent", () => {
         subdelegation={{ originalDelegator: "0xdef", collection }}
       />
     );
-    expect(screen.getByRole("heading", { level: 4 })).toHaveTextContent(
+    expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent(
       "Register Consolidation as Delegation Manager"
     );
     expect(screen.getByTestId("original")).toHaveTextContent("0xdef");

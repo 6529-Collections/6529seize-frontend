@@ -16,12 +16,17 @@ import {
 import aboutMessages from "@/i18n/messages/about.en-US.json";
 import homeNewcomerMessages from "@/i18n/messages/homeNewcomer.en-US.json";
 import join6529Messages from "@/i18n/messages/join6529.en-US.json";
+import museumMessages from "@/i18n/messages/museum.en-US.json";
+import networkMetricsMessages from "@/i18n/messages/networkMetrics.en-US.json";
+import networkTdhMessages from "@/i18n/messages/networkTdh.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { EN_US_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
 import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
+import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
+import { PUBLIC_REVIEW_MESSAGES } from "@/i18n/messages/public-review";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -117,23 +122,47 @@ const USER_COLLECTED_STATS_MESSAGES = namespaceMessages(
   ] as const
 );
 
+const USER_BRAIN_SIDEBAR_MESSAGES = objectMessages("user.brain.sidebar", {
+  createdHeading: "Created Waves",
+  createdMobileHeading: "Created",
+  createdScope: "Wave posts",
+  mostActiveHeading: "Most Active In",
+  rankingBasis: "All time",
+  waveLastActivityShort: "Last activity {time}",
+  identityLastPostShort: "Last post {time}",
+  latestWavePost: "Last wave post {time} ago",
+  lastPosted: "Last posted {time} ago",
+  loadingWaveContext: "Loading profile wave context",
+  mobileStripLabel: "Brain waves",
+  noDropsYet: "No drops yet",
+  showLess: "Show less",
+  "showMore.one": "Show {count} more",
+  "showMore.other": "Show {count} more",
+  viewAllCreatedWaves: "View all created waves",
+  waveImageAlt: "Wave {waveName}",
+  wavePictureAlt: "Wave picture",
+} as const);
+
 const USER_COLLECTED_STATS_DETAILS_MESSAGES = objectMessages(
   "user.collected.stats.details",
   {
     "collected.title": "Collected",
     overview: "Overview",
     "tables.overviewCaption": "Collected holdings summary by collection",
+    "tables.column.metric": "Metric",
     "tables.column.total": "Total",
     "tables.column.memes": "Memes",
     "tables.column.nextGen": "NextGen",
     "tables.column.gradient": "Gradient",
     "tables.column.memeLab": "Meme Lab",
+    "tables.column.season": "Season",
     "rows.cards": "Cards",
     "rows.rank": "Rank",
     "rows.tdh": "TDH",
     "rows.noTdh": "* No TDH",
     memesBySeason: "Memes Breakdown By Season",
     "tables.memesBySeasonCaption": "Collected Memes breakdown by season",
+    "tables.memesBySeasonEmpty": "No Meme holdings by season yet.",
     "tables.column.unique": "Unique",
     "tables.column.sets": "Sets",
     seasonLabel: "Season {seasonNumber}",
@@ -180,6 +209,24 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "search.placeholder": "Type a category name",
   "search.resultsLabel": "REP category search results",
   "helpBotReserved.error": "{category} is managed by help6529.",
+  "grant.searchPlaceholder": "Category to grant REP for",
+  "grant.minimumCharacters": "Type at least {min} characters.",
+  "grant.maximumCharacters": "Type at most {max} characters.",
+  "grant.searching": "Finding existing categories...",
+  "grant.submissionBadge": "Counts for submissions",
+  "grant.submissionHint":
+    "Memes submissions require {amount} REP in {category}.",
+  "grant.submissionLookalikeInfo":
+    '"{category}" is a separate category. Only {submissionCategory} counts for submissions.',
+  "grant.availableRep": "Your available REP: {amount}",
+  "grant.assignedRep": "Your REP assigned to {name}: {amount}",
+  "grant.actions.grant": "Grant REP",
+  "grant.actions.cancel": "Cancel",
+  "grant.toast.updated": "REP updated.",
+  "grant.toast.updateFailed": "Couldn't update this REP rating.",
+  "grant.toast.tryAgain": "Please try again.",
+  "grant.toast.loginRequired": "Log in to continue.",
+  "grant.errors.generic": "Couldn't complete this request. Please try again.",
   "suggested.loading": "Loading active REP categories",
   "suggested.error": "Could not load active REP categories.",
   "suggested.empty": "No active REP categories found yet.",
@@ -187,6 +234,8 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "suggested.ratings": "Ratings",
   "suggested.title": "Active REP categories",
   "suggested.description": "Categories with the most profile REP activity.",
+  "activity.direction": "gave REP to",
+  "activity.value": "{value} REP",
   "wave.tabs.waves": "Waves",
   "wave.tabs.contributors": "Contributors",
   "wave.sort.repDesc": "REP impact high",
@@ -230,16 +279,27 @@ const REP_CATEGORY_VALIDATION_MESSAGES = objectMessages(
   "rep.categories.validation",
   {
     errorTitle: "That category name won't work",
+    required: "Rep category is required.",
     tooShort: "Use at least {min} characters.",
     tooLong: "It's {length} characters long — the maximum is {max}.",
-    leadingDash: "A category can't start with a dash.",
     disallowedChars:
-      "These characters can't be used: {chars}. Stick to letters, numbers, spaces, dashes and , . ? ! ' ( )",
+      "These characters can't be used: {chars}. Stick to letters, numbers, spaces and , . ? ! ' ( )",
     aiFilterDetails:
       "Rep isn't meant for insults or doxxing, so proposed categories run through an AI filter. If you think it got yours wrong, hop into Brain on 6529.io and let us know — or try rephrasing what you want to say.",
     closeErrorLabel: "Dismiss error",
   } as const
 );
+
+const CREATE_WAVE_DRAFTS_MESSAGES = objectMessages("wave.create.drafts", {
+  heading: "Saved Drafts",
+  description:
+    "Saved on this device as you work. Tap one to pick up where you left off — the wave picture and description aren't kept, everything else is.",
+  savedAt: "Saved {timeAgo}",
+  untitled: "Untitled wave",
+  deleteLabel: 'Delete draft "{name}"',
+  newWave: "Create a Wave",
+  count: "{count} saved drafts",
+} as const);
 
 const USER_COLLECTED_STATS_ACTIVITY_MESSAGES = objectMessages(
   "user.collected.stats.activityOverview",
@@ -347,6 +407,14 @@ const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
   fallbackCuration: "Curation",
 } as const);
 
+const MY_STREAM_CURATION_MESSAGES = objectMessages("waves.myStream.curation", {
+  remove: "Remove",
+  removing: "Removing",
+  removeAriaLabel: "Remove drop from this curation",
+  removingAriaLabel: "Removing drop from this curation",
+  removeTitle: "Remove from curation",
+} as const);
+
 const WAVE_SCORE_NAVIGATION_MESSAGES = objectMessages("waveScore.navigation", {
   "back.wave": "Back to wave",
   "back.previous": "Back to previous page",
@@ -407,6 +475,26 @@ const WAVE_LEADERBOARD_MESSAGES = objectMessages("waves.leaderboard", {
   retryMore: "Retry loading more drops",
   loadMore: "Load more drops",
   loadingMoreButton: "Loading more…",
+  "timeline.toggle": "Toggle decision timeline",
+  "timeline.decisionTimeline": "Decision Timeline",
+  "timeline.announcementHistory": "Announcement history",
+  "timeline.paused": "Paused",
+  "timeline.nextDecisionAfter": "Next decision after {date}",
+  "timeline.noDecisionScheduled": "No decision scheduled",
+  "timeline.noUpcomingEvents": "No upcoming events",
+  "timeline.nextWinner": "Next winner",
+  "timeline.nextWinnerIn": "Next winner in {countdown}",
+  "timeline.unit.day.one": "{count} day",
+  "timeline.unit.day.other": "{count} days",
+  "timeline.unit.hour.one": "{count} hour",
+  "timeline.unit.hour.other": "{count} hours",
+  "timeline.unit.minute.one": "{count} minute",
+  "timeline.unit.minute.other": "{count} minutes",
+  "timeline.unit.second.one": "{count} second",
+  "timeline.unit.second.other": "{count} seconds",
+  "timeline.status.next": "Next",
+  "timeline.status.done": "Done",
+  "timeline.status.completed": "Completed",
 } as const);
 
 const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
@@ -460,6 +548,24 @@ const WAVE_VOTE_RATIONALE_MESSAGES = objectMessages("waves.voteRationale", {
     "Vote rationale ({voteTotal} total, {voteChange} change at time of posting):\n\n",
 } as const);
 
+const WAVE_VOTE_MODE_MESSAGES = objectMessages("waves.voteMode", {
+  groupLabel: "Vote input mode",
+  slider: "Slider",
+  numeric: "Numeric",
+  switchTitle: "Switch mode",
+  switchToNumeric: "Switch to numeric",
+  switchToSlider: "Switch to slider",
+  switchToNumericAriaLabel: "Switch to numeric input",
+  switchToSliderAriaLabel: "Switch to slider input",
+} as const);
+
+const WAVE_VOTE_MESSAGES = objectMessages("waves.vote", {
+  controlsLegend: "Vote controls",
+  modalTitle: "Vote for this artwork",
+  decreaseLabel: "Decrease vote",
+  increaseLabel: "Increase vote",
+} as const);
+
 const WAVE_POLL_MESSAGES = objectMessages("waves.poll", {
   "actions.viewResults": "View results",
   "actions.vote": "Vote",
@@ -496,6 +602,13 @@ const USER_COLLECTED_STATS_WALLET_ACTIVITY_MESSAGES = objectMessages(
     filterOptionsLabel: "Wallet activity filter options",
     optionAriaLabel: "Show {filter} wallet activity",
     tableCaption: "Wallet activity transactions",
+    etherscanLinkLabel: "Go to Etherscan",
+    gasLabel: "Gas",
+    gasGweiLabel: "GWEI",
+    gasInformationLabel: "Gas Information",
+    gasPriceLabel: "Gas Price",
+    royaltiesInformationLabel: "Royalties information",
+    royaltiesValue: "Royalties: {amount}ETH ({percentage}%)",
     "filters.all": "All",
     "filters.airdrops": "Airdrops",
     "filters.mints": "Mints",
@@ -566,6 +679,76 @@ const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
   proxy: "Proxy",
   "badges.beta": "Beta",
 } as const);
+
+const MENTION_SHORTCUT_COMPOSER_MESSAGES = objectMessages(
+  "waves.composer.mentionShortcuts",
+  {
+    optionOne: "Quick tag · 1 profile",
+    optionMany: "Quick tag · {count} profiles",
+    loadErrorTitle: "Quick Tags couldn't be loaded.",
+    loadErrorMessage: "Try again before sending this message.",
+  } as const
+);
+
+const GROUP_MENTION_COMPOSER_MESSAGES = objectMessages(
+  "waves.composer.groupMentions",
+  {
+    all: "All Wave followers",
+    contributors: "Can post in this Wave",
+    admins: "Wave creator and admins",
+    devs6529: "6529 developers",
+  } as const
+);
+
+const MENTION_SHORTCUT_SETTINGS_MESSAGES = objectMessages(
+  "user.mentionShortcuts",
+  {
+    title: "Quick Tags",
+    description:
+      "Create private tags such as @frens. In a Wave composer, each Quick Tag expands into the profile handles you choose.",
+    summaryDescription: "Mention several profiles with one shortcut.",
+    manage: "Manage",
+    more: "+{count} more",
+    memberCount: "{count} member",
+    memberCountMany: "{count} members",
+    new: "New Quick Tag",
+    newShort: "+ New",
+    create: "Create Quick Tag",
+    edit: "Edit Quick Tag",
+    editorDescription:
+      "It expands into ordinary profile mentions before your message is sent.",
+    cancel: "Cancel",
+    name: "Quick Tag name",
+    nameError: "Use 3–15 letters, numbers, or underscores.",
+    reservedError:
+      "That tag name is reserved. Try something a little more creative.",
+    addProfiles: "Add profiles ({count}/{max})",
+    searchLabel: "Search profiles by handle",
+    searchPlaceholder: "Search by handle",
+    searchPrompt: "Enter at least 3 characters to search profiles.",
+    searchResults: "{count} profiles available.",
+    searchResult: "1 profile available.",
+    removeProfile: "Remove @{handle}",
+    save: "Save Quick Tag",
+    saving: "Saving…",
+    created: "Quick Tag created.",
+    updated: "Quick Tag updated.",
+    saveErrorTitle: "Couldn't save Quick Tag.",
+    saveErrorDetails: "Unable to save Quick Tag",
+    deleteTitle: "Delete @{alias}?",
+    deleteWarning: "This cannot be undone.",
+    delete: "Delete Quick Tag",
+    deleting: "Deleting Quick Tag.",
+    deleted: "Quick Tag deleted.",
+    deleteErrorTitle: "Couldn't delete Quick Tag.",
+    deleteErrorDetails: "Unable to delete Quick Tag",
+    loading: "Loading…",
+    loadError: "Quick Tags could not be loaded.",
+    empty: "You have no Quick Tags yet.",
+    editAction: "Edit",
+    deleteAction: "Delete",
+  } as const
+);
 
 const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "name.edit": "Edit {name}'s profile name",
@@ -781,6 +964,14 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
     "Warning: You are not included in this group. If it controls who can view the wave, you may not be able to access the wave after creating it.",
 } as const);
 
+const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
+  cancel: "Cancel",
+  complete: "Complete",
+  next: "Next",
+  previous: "Previous",
+  save: "Save",
+} as const);
+
 const WAVE_CREATE_RANK_MODE_MESSAGES = objectMessages(
   "waves.create.rank.mode",
   {
@@ -805,7 +996,22 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
   "perpetual.title": "Outcome is leaderboard position",
   "perpetual.description":
     "This wave ranks continuously — no winners are announced and the wave never ends, so there are no outcome awards to configure or show. The outcomes tab stays hidden; the live leaderboard is the outcome.",
+  "empty.title": "No outcomes yet — add at least one to continue",
+  "empty.description":
+    "Outcomes define what winners receive when results are announced: a manual award you fulfill yourself, or automatic Rep or NIC distributed by the platform. Pick a type above to configure one.",
 } as const);
+
+const WAVE_CREATE_PROGRESS_MESSAGES = objectMessages("waves.create.progress", {
+  step: "Step {current} of {total}",
+  label: "Wave setup progress",
+} as const);
+
+const WAVE_CREATE_DESCRIPTION_MESSAGES = objectMessages(
+  "waves.create.description",
+  {
+    placeholder: "Describe your wave",
+  } as const
+);
 
 const WAVE_LEADERBOARD_PHASE_MESSAGES = objectMessages(
   "waves.leaderboard.phase",
@@ -950,6 +1156,7 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
 );
 
 const WAVE_GIF_PICKER_MESSAGES = objectMessages("waves.gifPicker", {
+  open: "Add GIF",
   dialogTitle: "GIF search",
   searchPlaceholder: "Search GIFs",
   noResults: "No GIFs found.",
@@ -1180,6 +1387,135 @@ const XTDH_COLLECTION_MESSAGES = objectMessages("xtdh.collections", {
   "search.emptyTitle": "No collections found for “{query}”",
 } as const);
 
+const COLLECTION_DELEGATION_MESSAGES = objectMessages("delegation.collection", {
+  "readError.message": "Unable to load delegation records for {collection}.",
+  "readError.retry": "Try Again",
+  "scope.all":
+    "Records here apply across every supported delegation collection.",
+  "scope.memes": "Records here apply only to The Memes collection.",
+  "scope.memeLab": "Records here apply only to Meme Lab.",
+  "scope.gradient": "Records here apply only to 6529 Gradient.",
+  "scope.selected": "Records here apply to the selected collection scope.",
+  "navigation.back": "Back to Delegation Center",
+  "connect.title": "Connect Wallet to Manage {collection}",
+  "connect.description":
+    "Connect the wallet whose outgoing and incoming records you want to review.",
+  "connect.button": "Connect Wallet",
+  "network.switch": "Switch to {network}",
+  "network.ethereumMainnet": "Ethereum Mainnet",
+  "network.sepolia": "Sepolia Network",
+  "sections.delegations.title": "Delegations",
+  "sections.delegations.description":
+    "Delegations let another wallet use NFT utility for this collection scope without moving the NFT.",
+  "sections.delegations.outgoing": "Outgoing Delegations",
+  "sections.delegations.incoming": "Incoming Delegations",
+  "sections.managers.title": "Delegation Managers",
+  "sections.managers.description":
+    "Manager rights let another wallet maintain delegations or consolidations for this collection scope.",
+  "sections.managers.outgoing": "Outgoing Manager Rights",
+  "sections.managers.incoming": "Incoming Manager Rights",
+  "sections.consolidations.title": "Consolidations",
+  "sections.consolidations.description":
+    "Consolidations link wallets you control so 6529 can treat them together for collection metrics.",
+  "sections.consolidations.outgoing": "Outgoing Consolidations",
+  "sections.consolidations.incoming": "Incoming Consolidations",
+  "scopeLabel.delegations": "delegations",
+  "scopeLabel.managers": "Delegation Managers",
+  "scopeLabel.consolidations": "consolidations",
+  "direction.outgoing": "outgoing",
+  "direction.incoming": "incoming",
+  "records.empty": "No {direction} {scope} found for {collection}",
+  "records.fetching": "Fetching {direction} {scope} for {collection}",
+  "row.allTokens": "all tokens",
+  "row.tokenId": " - token ID: {tokens}",
+  "row.status.active": "consolidation active",
+  "row.status.incomplete": "consolidation incomplete",
+  "row.status.unavailable": "consolidation status unavailable",
+  "row.consolidationMissing": "{label} consolidation missing",
+  "row.label.incoming": "Incoming",
+  "row.label.outgoing": "Outgoing",
+  "outgoing.selectBulk": "Select {wallet} for bulk revoke",
+  "outgoing.editAriaLabel": "Edit delegation for {wallet}",
+  "outgoing.edit": "Edit",
+  "outgoing.revokeAriaLabel": "Revoke delegation for {wallet}",
+  "outgoing.revoke": "Revoke",
+  "outgoing.selected": "Selected: {count}",
+  "outgoing.selectedMax": "{count} (max)",
+  "outgoing.batchRevoke": "Batch Revoke",
+  "incoming.selectOriginal": "Select {wallet} as original delegator",
+  "incoming.actionsDescription":
+    "Select a delegator above, then choose an action to perform on their behalf.",
+  "incoming.registerDelegation": "Register Delegation",
+  "incoming.registerManager": "Register Delegation Manager",
+  "incoming.registerConsolidation": "Register Consolidation",
+  "incoming.assignPrimary": "Assign Primary Address",
+  "incoming.revoke": "Revoke",
+  "transaction.pending": "Transaction pending",
+  "toast.revokingDelegation": "Revoking Delegation",
+  "toast.revokingDelegationFailed": "Revoking Delegation Failed",
+  "toast.revokingDelegationsFailed": "Revoking Delegations Failed",
+  "toast.batchRevoking": "Batch Revoking Delegations",
+  "toast.revokeStartFailed": "Failed to start revoking delegation.",
+  "toast.batchRevokeStartFailed": "Failed to start revoking delegations.",
+  "toast.confirmationFailed":
+    "Transaction failed while waiting for confirmation.",
+  "toast.lockingWallet": "Locking Wallet",
+  "toast.unlockingWallet": "Unlocking Wallet",
+  "toast.lockFailed": "{title} Failed",
+  "toast.walletLockStartFailed": "Failed to start wallet lock update.",
+  "toast.useCaseLockStartFailed": "Failed to start use-case lock update.",
+  "toast.lockingUseCase":
+    "Locking Wallet on Use Case\n#{useCase} {useCaseName}",
+  "toast.unlockingUseCase":
+    "Unlocking Wallet on Use Case\n#{useCase} {useCaseName}",
+  "locks.title": "Locks",
+  "locks.tooltip":
+    "Locks only block incoming delegations for this collection scope. They do not revoke outgoing records.",
+  "locks.description":
+    "Locks block incoming delegations for this collection scope. They do not stop delegations you already made to other wallets.",
+  "locks.wallet.lock": "Lock Wallet",
+  "locks.wallet.unlock": "Unlock Wallet",
+  "locks.useCase.ariaLabel": "Lock or unlock use case",
+  "locks.useCase.placeholder": "Lock/Unlock Use Case",
+  "locks.useCase.lock": "Lock Use Case",
+  "locks.useCase.unlock": "Unlock Use Case",
+  "locks.useCase.unavailable":
+    "This use case is unavailable. Select another use case and try again.",
+  "locks.note.label": "Note:",
+  "locks.useCase.globalNotePrefix": "Unlock use case in",
+  "locks.allCollections": "All Collections",
+  "locks.option.locked": "#{useCase} - {name} - LOCKED{globalMarker}",
+  "locks.option.unlocked": "#{useCase} - {name} - UNLOCKED",
+  "locks.note.local": "Unlock Wallet to lock/unlock specific use cases",
+  "locks.note.globalPrefix": "Unlock Wallet on",
+  "locks.note.globalSuffix":
+    "to lock/unlock specific collections and use cases",
+  "walletChecker.never": "Never",
+  "walletChecker.all": "All",
+  "walletChecker.delegations.title": "Delegations ({count})",
+  "walletChecker.managers.title": "Delegation Managers ({count})",
+  "walletChecker.consolidations.title": "Consolidations ({count})",
+  "walletChecker.columns.from": "From",
+  "walletChecker.columns.to": "To",
+  "walletChecker.columns.collection": "Collection",
+  "walletChecker.columns.useCase": "Use Case",
+  "walletChecker.columns.tokens": "Tokens",
+  "walletChecker.columns.expiry": "Expiry",
+  "walletChecker.delegations.empty": "No delegations found",
+  "walletChecker.managers.empty": "No delegation managers found",
+  "walletChecker.consolidations.empty": "No consolidations found",
+  "walletChecker.activeDelegation": "Active Minting Delegation for The Memes",
+  "walletChecker.activeConsolidation": "Active Consolidation",
+  "walletChecker.labels.to": "To:",
+  "walletChecker.labels.collection": "Collection:",
+  "walletChecker.labels.useCase": "Use Case:",
+  "walletChecker.labels.expiry": "Expiry:",
+  "walletChecker.incompleteConsolidation": "Incomplete Consolidation",
+  "walletChecker.recommendedActions": "Recommended Actions:",
+  "walletChecker.registerConsolidation":
+    "Register Consolidation from {from} to {to}",
+} as const);
+
 const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   "category.all": "All",
   "category.nfts": "NFTs",
@@ -1235,9 +1571,43 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
 } as const);
 
 export const EN_US_MESSAGES = {
+  "linkPreview.twitter.kind.article": "Article",
+  "linkPreview.twitter.kind.post": "Post",
+  "linkPreview.twitter.article.provider": "Article on X",
+  "linkPreview.twitter.article.read": "Read article: {title}",
   ...IDENTITY_FILTER_MESSAGES,
   ...XTDH_COLLECTION_MESSAGES,
+  ...COLLECTION_DELEGATION_MESSAGES,
   ...join6529Messages,
+  "nextgen.brand": "NextGen",
+  "nextgen.navigation.featured": "Featured",
+  "nextgen.navigation.collections": "Collections",
+  "nextgen.navigation.artists": "Artists",
+  "nextgen.navigation.about": "About",
+  "nextgen.navigation.featuredAriaLabel": "NextGen featured",
+  "nextgen.navigation.sectionsAriaLabel": "NextGen sections",
+  "nextgen.home.byArtist": "by {artist}",
+  "nextgen.home.exploreCollection": "Explore Collection",
+  "nextgen.home.summary":
+    "NextGen is an on-chain generative art NFT contract. It is also a tool to support the ambitious aspirations of the 6529 community in the areas of art experimentation and decentralized social organization.",
+  "nextgen.home.learnMore": "Learn More",
+  "nextgen.home.exploreNamedCollection": "Explore {collectionName}",
+  "nextgen.home.featuredArtist": "Featured Artist",
+  "nextgen.home.distributionPlan": "Distribution Plan",
+  "nextgen.about.title": "About NextGen",
+  "nextgen.about.sections.overallApproach": "Overall Approach",
+  "nextgen.about.sections.nativeAllowlists": "Native Allowlists",
+  "nextgen.about.sections.nativeDelegation": "Native Delegation",
+  "nextgen.about.sections.personalization":
+    "Personalization, Customization and Collector Provenance",
+  "nextgen.about.sections.extraOnChain": "Extra On-Chain™",
+  "nextgen.about.sections.artistProvenance": "Artist Provenance",
+  "nextgen.about.sections.randomization": "Multiple Randomization Methods",
+  "nextgen.about.sections.phases": "Phases / Periodicity",
+  "nextgen.about.sections.mintingSales": "Minting Sales Models",
+  "nextgen.about.sections.libraries": "On-Chain Libraries",
+  "nextgen.about.sections.moreInformation": "More Information",
+  "nextgen.about.sections.collectionsModel": "NextGen Collections Model",
   "auth.sessionUpgrade.action": "Upgrade Authentication",
   "auth.signModal.connectionUpdateRequired": "Connection Update Required",
   "auth.signModal.upgradeAuthentication": "Upgrade Authentication",
@@ -1420,6 +1790,115 @@ export const EN_US_MESSAGES = {
     "You are not subscribed for this drop.",
   "home.mintSubscriptions.tooltip.proxy":
     "Manage subscriptions from your own profile, not a proxy session.",
+  "subscriptions.coverage.title": "Subscription coverage",
+  "subscriptions.coverage.loading": "Loading subscription coverage",
+  "subscriptions.coverage.unavailable":
+    "Coverage is temporarily unavailable. Your subscription settings have not changed.",
+  "subscriptions.coverage.stale":
+    "Last known coverage is shown and may be out of date.",
+  "subscriptions.coverage.refresh": "Refresh coverage",
+  "subscriptions.coverage.status.covered": "Covered",
+  "subscriptions.coverage.status.planTopUp": "Plan a top up",
+  "subscriptions.coverage.status.runningLow": "Running low",
+  "subscriptions.coverage.status.actionRequired": "Action required",
+  "subscriptions.coverage.status.notSetUp": "Not set up",
+  "subscriptions.coverage.status.noEligibility": "No current eligibility",
+  "subscriptions.coverage.status.noSelections": "No upcoming drops selected",
+  "subscriptions.coverage.status.unknown": "Coverage unavailable",
+  "subscriptions.coverage.action.setUp": "Set up",
+  "subscriptions.coverage.action.chooseDrops": "Choose drops",
+  "subscriptions.coverage.action.topUp": "Top up",
+  "subscriptions.coverage.action.topUpSubscriptions": "Top up subscriptions",
+  "subscriptions.coverage.action.manage": "Manage",
+  "subscriptions.coverage.action.reviewSettings": "Review settings",
+  "subscriptions.coverage.mode.automatic": "Automatic",
+  "subscriptions.coverage.mode.manual": "Manual",
+  "subscriptions.coverage.mode.notConfigured": "Not configured",
+  "subscriptions.coverage.balanceEth": "{amount} ETH",
+  "subscriptions.coverage.dropsFunded.one": "{count} drop funded",
+  "subscriptions.coverage.dropsFunded.many": "{count} drops funded",
+  "subscriptions.coverage.eligibility": "Eligibility ×{count}",
+  "subscriptions.coverage.eligibilityUnknown": "Eligibility unavailable",
+  "subscriptions.coverage.editions.one": "One edition",
+  "subscriptions.coverage.editions.all": "All eligible editions",
+  "subscriptions.coverage.capacity": "Balance capacity",
+  "subscriptions.coverage.capacityUnit": "mints",
+  "subscriptions.coverage.allocated": "Forecast use",
+  "subscriptions.coverage.allocatedUnit": "allocated",
+  "subscriptions.coverage.basis":
+    "Projected from current eligibility, settings, balance, and the published Meme schedule.",
+  "subscriptions.coverage.fundedThrough": "Funded through",
+  "subscriptions.coverage.nextUnfunded": "Next unfunded",
+  "subscriptions.coverage.projected": "Projected",
+  "subscriptions.coverage.memeToken": "The Memes #{token}",
+  "subscriptions.coverage.topUpBy":
+    "Top up by {deadline} to receive The Memes #{token}.",
+  "subscriptions.coverage.noDeadline":
+    "No authoritative top-up deadline is available yet.",
+  "subscriptions.coverage.recommended":
+    "Recommended: add {amount} ETH for {count} funded drops.",
+  "subscriptions.coverage.recommendedThrough":
+    "Recommended: add {amount} ETH for {count} funded drops through The Memes #{token}.",
+  "subscriptions.coverage.notSetUp.description":
+    "Set up subscription minting so eligible Meme drops can be handled automatically or one at a time.",
+  "subscriptions.coverage.noEligibility.description":
+    "This profile is not currently eligible for an upcoming Meme mint. Subscription balance does not create eligibility.",
+  "subscriptions.coverage.noSelections.description":
+    "Manual mode has no upcoming drops selected. Choose a drop to see how long the balance will last.",
+  "subscriptions.coverage.unknown.description":
+    "The forecast inputs are incomplete. Review settings or refresh when the schedule is available.",
+  "subscriptions.coverage.covered.description":
+    "Your immediate intended drops are fully funded.",
+  "subscriptions.coverage.earlyWarning.description":
+    "You are covered for now. Plan a top up before the funded runway ends.",
+  "subscriptions.coverage.runningLow.description":
+    "Only a few intended drops remain fully funded.",
+  "subscriptions.coverage.actionRequired.description":
+    "The immediate next intended drop is not fully funded.",
+  "subscriptions.coverage.header.through":
+    "{status} · through The Memes #{token}, {date}",
+  "subscriptions.coverage.header.noFundedThrough": "{status}",
+  "subscriptions.page.title": "Subscription minting",
+  "subscriptions.page.settingsTitle": "Minting settings",
+  "subscriptions.page.learnMore": "Learn more",
+  "subscriptions.page.topUpTitle": "Top up",
+  "subscriptions.balance.title": "Subscription balance",
+  "subscriptions.balance.ethUnit": "ETH",
+  "subscriptions.balance.mintCapacity.one": "{count} mint available",
+  "subscriptions.balance.mintCapacity.many": "{count} mints available",
+  "subscriptions.balance.mintCapacity.unknown": "mint capacity unavailable",
+  "subscriptions.topUp.recommended": "Recommended",
+  "subscriptions.topUp.minimum": "Minimum for next drop",
+  "subscriptions.topUp.coversDrops.one":
+    "Funds {count} intended drop through The Memes #{token}",
+  "subscriptions.topUp.coversDrops.many":
+    "Funds {count} intended drops through The Memes #{token}",
+  "subscriptions.topUp.chooseAmount": "Choose a top-up amount",
+  "subscriptions.topUp.submit": "Top up {amount} ETH",
+  "subscriptions.topUp.cardCount.one": "{count} Card",
+  "subscriptions.topUp.cardCount.many": "{count} Cards",
+  "subscriptions.topUp.cardOption.one": "{label} - {count} Card",
+  "subscriptions.topUp.cardOption.many": "{label} - {count} Cards",
+  "subscriptions.topUp.modalSubtitle.one": "{count} Card - {amount} ETH",
+  "subscriptions.topUp.modalSubtitle.many": "{count} Cards - {amount} ETH",
+  "subscriptions.topUp.validation.selectOption": "Select a top-up option",
+  "subscriptions.topUp.validation.wallet":
+    "You must have an active wallet connection to top up",
+  "subscriptions.topUp.sendingTo": "Sending to",
+  "subscriptions.notification.title": "Subscription coverage",
+  "subscriptions.notification.earlyWarning":
+    "Your subscription balance is getting low.",
+  "subscriptions.notification.runningLow":
+    "Only a few intended drops remain fully funded.",
+  "subscriptions.notification.actionRequired":
+    "Your immediate next intended drop is not fully funded.",
+  "subscriptions.notification.through":
+    "{count} · funded through The Memes #{token}, {date}",
+  "subscriptions.notification.noRunway": "{count}",
+  "subscriptions.notification.topUpBy":
+    "Top up by {deadline} to receive The Memes #{token}.",
+  "subscriptions.notification.nextUnfunded":
+    "Next unfunded: The Memes #{token}, {date}.",
   "home.nextMint.status": "Next mint",
   "home.nextMint.noImage": "No image",
   "home.nextMint.untitled": "Untitled",
@@ -1454,6 +1933,13 @@ export const EN_US_MESSAGES = {
   "theMemes.loading.fetching": "Fetching",
   "theMemes.empty.title": "No memes found",
   "theMemes.empty.description": "Try a different season or sort option.",
+  "theMemes.mint.transaction.title": "Mint The Memes",
+  "theMemes.mint.transaction.titleWithTokenId": "Mint: The Memes #{tokenId}",
+  "theMemes.mint.transaction.confirmWallet": "Confirm in your wallet",
+  "theMemes.mint.transaction.submitted": "Transaction Submitted - SEIZING",
+  "theMemes.mint.transaction.success": "SEIZED!",
+  "theMemes.mint.transaction.error": "Transaction failed",
+  "theMemes.mint.transaction.errorDetails": "{message}",
   "theMemes.card.linkAriaLabel": "View {name}, card #{tokenId}",
   "theMemes.card.metric.unavailable": "-",
   "theMemes.card.metric.editionSize": "Edition Size: {value}",
@@ -1892,6 +2378,7 @@ export const EN_US_MESSAGES = {
     "Server validation completed.",
   "profileCms.builder.api.draftSaved": "Draft saved.",
   ...USER_COLLECTED_STATS_MESSAGES,
+  ...USER_BRAIN_SIDEBAR_MESSAGES,
   ...USER_COLLECTED_STATS_DETAILS_MESSAGES,
   ...USER_COLLECTED_STATS_BOOST_MESSAGES,
   ...USER_COLLECTED_STATS_ACTIVITY_MESSAGES,
@@ -1945,6 +2432,9 @@ export const EN_US_MESSAGES = {
   "drops.additionalActionBadge.tooltip":
     "The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable.",
   ...USER_PROFILE_TABS_MESSAGES,
+  ...MENTION_SHORTCUT_COMPOSER_MESSAGES,
+  ...GROUP_MENTION_COMPOSER_MESSAGES,
+  ...MENTION_SHORTCUT_SETTINGS_MESSAGES,
   ...USER_PROFILE_HEADER_MESSAGES,
   ...USER_CIC_TYPE_MESSAGES,
   ...FOLLOWERS_MESSAGES,
@@ -1962,10 +2452,13 @@ export const EN_US_MESSAGES = {
   ...WAVE_GIF_PICKER_MESSAGES,
   ...WAVE_HEADER_MESSAGES,
   ...WAVE_NOTIFICATION_SETTINGS_MESSAGES,
+  ...WAVE_CREATE_ACTIONS_MESSAGES,
   ...WAVE_CREATE_GROUPS_MESSAGES,
   ...WAVE_CREATE_RANK_MODE_MESSAGES,
   ...WAVE_CREATE_DROPS_MESSAGES,
   ...WAVE_CREATE_OUTCOMES_MESSAGES,
+  ...WAVE_CREATE_PROGRESS_MESSAGES,
+  ...WAVE_CREATE_DESCRIPTION_MESSAGES,
   ...WAVE_LEADERBOARD_PHASE_MESSAGES,
   ...WAVE_RULES_SCHEDULE_MESSAGES,
   ...GROUP_NFT_OWNERSHIP_MESSAGES,
@@ -1978,11 +2471,15 @@ export const EN_US_MESSAGES = {
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
   ...USER_RATE_MESSAGES,
   ...aboutMessages,
+  ...museumMessages,
+  ...networkMetricsMessages,
+  ...networkTdhMessages,
   ...toolsMessages,
   ...ABOUT_TECH_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
   ...REP_CATEGORY_MESSAGES,
   ...REP_CATEGORY_VALIDATION_MESSAGES,
+  ...CREATE_WAVE_DRAFTS_MESSAGES,
   ...MEDIA_VIDEO_MESSAGES,
   ...ATTACHMENT_MESSAGES,
   ...LINK_PREVIEW_MESSAGES,
@@ -1991,8 +2488,10 @@ export const EN_US_MESSAGES = {
   ...HEADER_SEARCH_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,
+  ...PUBLIC_REVIEW_MESSAGES,
   ...TITLE_CONTEXT_MESSAGES,
   ...WAVE_NAVIGATION_MESSAGES,
+  ...MY_STREAM_CURATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
   ...MEMES_WAVE_FOOTER_MESSAGES,
@@ -2002,8 +2501,11 @@ export const EN_US_MESSAGES = {
   ...WAVE_DROP_ACTIONS_MESSAGES,
   ...WAVE_COMPETITION_BADGE_MESSAGES,
   ...WAVE_VOTE_RATIONALE_MESSAGES,
+  ...WAVE_VOTE_MODE_MESSAGES,
+  ...WAVE_VOTE_MESSAGES,
   ...WAVE_POLL_MESSAGES,
   ...WAVE_SUBMISSION_BUTTON_LABEL_MESSAGES,
+  ...TRANSFER_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;

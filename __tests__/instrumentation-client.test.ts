@@ -18,10 +18,10 @@ describe("instrumentation-client", () => {
   const privateBareWaveId = "2c5e0761-6de2-4e1f-9c23-a8c93ff1158f";
   const privateNonRfcUuid = "00000000-0000-0000-0000-000000000000";
   const privateRelativeDropId = "5651cd9a-1852-42fc-b213-5f8d871f96bf";
+  const syntheticAutomaticWaveId = `${"1".repeat(8)}-${"2".repeat(4)}-4${"3".repeat(3)}-8${"4".repeat(3)}-${"5".repeat(12)}`;
   const objectCapturedPromiseRejectionMessage =
     "Object captured as promise rejection with keys: code, message, stack";
-  const indexedDBUserDeleteMessage =
-    "Database deleted by request of the user";
+  const indexedDBUserDeleteMessage = "Database deleted by request of the user";
   const talismanOnboardingMessage =
     "Talisman extension has not been configured yet. Please continue with onboarding.";
   const disconnectedProviderStack =
@@ -69,6 +69,8 @@ describe("instrumentation-client", () => {
     "auto.browser.browserapierrors.setTimeout";
   const browserUnhandledRejectionMechanismType =
     "auto.browser.global_handlers.onunhandledrejection";
+  const expectedWaveAbortErrorValue =
+    "AbortError: The user aborted a request.";
   const poperBlockerNetworkErrorMessage =
     "Network request failed. Please check your connection and try again. (/api/dm-drops/unread)";
   const poperBlockerInjectedFetchFrames = [
@@ -97,6 +99,30 @@ describe("instrumentation-client", () => {
       in_app: false,
     },
     ...poperBlockerInjectedFetchFrames,
+  ];
+  const poperBlockerCurrentProcessedFrames = [
+    {
+      filename:
+        "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/dispatch/FetchHttpHandler.js",
+      function: "e.prototype.handle",
+      in_app: false,
+    },
+    {
+      filename: "app:///injectScriptAdjust.js",
+      abs_path: "app:///injectScriptAdjust.js",
+      function: null,
+      lineno: 1,
+      colno: 4520,
+      in_app: true,
+    },
+    {
+      filename: "app:///injectScriptAdjust.js",
+      abs_path: "app:///injectScriptAdjust.js",
+      function: "VihJ",
+      lineno: 1,
+      colno: 3159,
+      in_app: true,
+    },
   ];
   const poperBlockerLatestRawFrames = [
     {
@@ -302,6 +328,15 @@ describe("instrumentation-client", () => {
     };
   };
 
+  const loadBeforeSendSpan = () => {
+    const config = loadSentryConfig();
+    expect(typeof config.beforeSendSpan).toBe("function");
+
+    return config.beforeSendSpan as (
+      span: Record<string, unknown>
+    ) => Record<string, unknown>;
+  };
+
   const createUnhandledRejectionEvent = (message: string) => ({
     level: "error",
     exception: {
@@ -431,6 +466,25 @@ describe("instrumentation-client", () => {
           mutation_sequence: 1,
           route_family: "/waves/[wave]",
           source: "chip",
+        },
+      },
+    ],
+  });
+
+  const createExpectedWaveReplacementAbortEvent = () => ({
+    ...createUnhandledRejectionEvent(expectedWaveAbortErrorValue),
+    timestamp: 1_785_689_742.621,
+    tags: {
+      "DOMException.code": "20",
+    },
+    breadcrumbs: [
+      {
+        category: "wave.request",
+        message: "wave_request_aborted",
+        timestamp: 1_785_689_742.5,
+        data: {
+          request_kind: "background_sync",
+          trigger: "request_replaced",
         },
       },
     ],
@@ -979,10 +1033,8 @@ describe("instrumentation-client", () => {
               stacktrace: {
                 frames: [
                   {
-                    filename:
-                      "app:///_next/static/chunks/0example-chunk.js",
-                    abs_path:
-                      "app:///_next/static/chunks/0example-chunk.js",
+                    filename: "app:///_next/static/chunks/0example-chunk.js",
+                    abs_path: "app:///_next/static/chunks/0example-chunk.js",
                     function: "n",
                     in_app: true,
                     lineno: wrapperLine,
@@ -1692,9 +1744,7 @@ describe("instrumentation-client", () => {
   it("drops the exact frame-less WebKit extension tab-not-found rejection", () => {
     const beforeSend = loadBeforeSend();
 
-    const result = beforeSend(
-      createWebKitExtensionMessagingTabNotFoundEvent()
-    );
+    const result = beforeSend(createWebKitExtensionMessagingTabNotFoundEvent());
 
     expect(result).toBeNull();
   });
@@ -1829,9 +1879,42 @@ describe("instrumentation-client", () => {
     expect(result?.tags?.["network_noise_sampled"]).toBe("true");
   });
 
+  it("drops the exact expected Wave background-sync replacement abort", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createExpectedWaveReplacementAbortEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps the Wave AbortError without the replacement breadcrumb", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      ...createExpectedWaveReplacementAbortEvent(),
+      breadcrumbs: [],
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
   it("drops the normalized Poper Blocker orphan fetch rejection", () => {
     const beforeSend = loadBeforeSend();
     const event = createPoperBlockerOrphanFetchRejectionEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops the current Poper Blocker rejection with an unsymbolicated fetch frame", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createPoperBlockerOrphanFetchRejectionEvent(
+      poperBlockerNetworkErrorMessage,
+      poperBlockerCurrentProcessedFrames
+    );
 
     const result = beforeSend(event);
 
@@ -1915,6 +1998,33 @@ describe("instrumentation-client", () => {
                   in_app: true,
                 },
               ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps handled frame-less network failures grouped with Poper Blocker noise", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      level: "warning",
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Network request failed. Please check your connection and try again. (/track/)",
+            mechanism: {
+              type: "generic",
+              handled: true,
+            },
+            stacktrace: {
+              frames: [],
             },
           },
         ],
@@ -3290,11 +3400,9 @@ describe("instrumentation-client", () => {
         },
         {
           op: "http.client",
-          description:
-            "GET https://api.6529.io/api/waves/b6128077-ea78-4dd9-b381-52c4eadb2077",
+          description: `GET https://api.6529.io/api/waves/${syntheticAutomaticWaveId}`,
           data: {
-            "http.url":
-              "https://api.6529.io/api/waves/b6128077-ea78-4dd9-b381-52c4eadb2077",
+            "http.url": `https://api.6529.io/api/waves/${syntheticAutomaticWaveId}`,
             "http.response.status_code": 200,
             "url.same_origin": false,
           },
@@ -3344,8 +3452,8 @@ describe("instrumentation-client", () => {
 
     expect(remainingDescriptions).toEqual(
       expect.arrayContaining([
-        "GET https://6529.io/waves",
-        "GET https://api.6529.io/api/waves/b6128077-ea78-4dd9-b381-52c4eadb2077",
+        "GET /waves",
+        "GET /api/waves/:uuid",
         "Main UI thread blocked",
       ])
     );
@@ -3371,6 +3479,43 @@ describe("instrumentation-client", () => {
         ],
       })
     );
+    expect(JSON.stringify(result)).not.toContain(syntheticAutomaticWaveId);
+  });
+
+  it("registers a non-dropping sanitizer for standalone automatic spans", () => {
+    const beforeSendSpan = loadBeforeSendSpan();
+    const span = {
+      op: "http.client",
+      description: `GET https://api.6529.io/api/waves/${syntheticAutomaticWaveId}?access_token=synthetic#private`,
+      start_timestamp: 10,
+      timestamp: 10.5,
+      data: {
+        "http.method": "GET",
+        "http.response.status_code": 502,
+        "http.url": `https://api.6529.io/api/waves/${syntheticAutomaticWaveId}?access_token=synthetic#private`,
+        "url.same_origin": false,
+      },
+    };
+
+    const result = beforeSendSpan(span);
+    const payload = JSON.stringify(result);
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        description: "GET /api/waves/:uuid",
+        start_timestamp: 10,
+        timestamp: 10.5,
+        data: expect.objectContaining({
+          "http.method": "GET",
+          "http.response.status_code": 502,
+          "http.url": "/api/waves/:uuid",
+          "url.same_origin": false,
+        }),
+      })
+    );
+    expect(payload).not.toContain(syntheticAutomaticWaveId);
+    expect(payload).not.toContain("access_token");
+    expect(payload).not.toContain("#private");
   });
 
   it("does not add audit metadata when no spans were filtered", () => {

@@ -1,15 +1,66 @@
 "use client";
 
-import { useMemo } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useFavouriteWavesOfIdentity } from "@/hooks/useFavouriteWavesOfIdentity";
+import { useProfileWaveActivity } from "@/hooks/useProfileWaveActivity";
 import { useWaves } from "@/hooks/useWaves";
 import { useWaveCreatorPreviewModal } from "@/hooks/useWaveCreatorPreviewModal";
 import { WaveCreatorPreviewModal } from "@/components/waves/drops/WaveCreatorPreviewModal";
+import { useMemo } from "react";
 import UserPageBrainSidebarCreated from "./UserPageBrainSidebarCreated";
 import UserPageBrainSidebarMobileStrip from "./UserPageBrainSidebarMobileStrip";
 import UserPageBrainSidebarMostActive from "./UserPageBrainSidebarMostActive";
 import { getProfileWaveIdentity } from "./userPageBrainSidebar.helpers";
+import { getUserPageBrainSidebarMessage } from "./userPageBrainSidebar.messages";
+
+const SIDEBAR_SKELETON_ITEMS = [0, 1, 2, 3, 4] as const;
+
+function UserPageBrainSidebarLoading() {
+  const loadingLabel = getUserPageBrainSidebarMessage(
+    "user.brain.sidebar.loadingWaveContext"
+  );
+
+  return (
+    <>
+      <output className="tw-sr-only" aria-live="polite">
+        {loadingLabel}
+      </output>
+
+      <div className="tw-mb-4 lg:tw-hidden">
+        <div className="tw-mb-2 tw-h-2.5 tw-w-24 tw-animate-pulse tw-rounded tw-bg-white/[0.06] motion-reduce:tw-animate-none" />
+        <div className="tw-flex tw-gap-2 tw-overflow-hidden">
+          {SIDEBAR_SKELETON_ITEMS.map((key) => (
+            <div
+              key={key}
+              className="tw-flex tw-h-9 tw-w-32 tw-shrink-0 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/70 tw-p-1 tw-pr-3"
+            >
+              <div className="tw-h-7 tw-w-7 tw-shrink-0 tw-animate-pulse tw-rounded-full tw-bg-white/[0.07] motion-reduce:tw-animate-none" />
+              <div className="tw-h-3 tw-flex-1 tw-animate-pulse tw-rounded tw-bg-white/[0.07] motion-reduce:tw-animate-none" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="tw-hidden lg:tw-block">
+        <div className="tw-mb-3 tw-h-3 tw-w-28 tw-animate-pulse tw-rounded tw-bg-white/[0.06] motion-reduce:tw-animate-none" />
+        <div className="tw-space-y-2.5">
+          {SIDEBAR_SKELETON_ITEMS.map((key) => (
+            <div
+              key={key}
+              className="tw-flex tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-white/5 tw-p-3 tw-shadow-inner"
+            >
+              <div className="tw-h-10 tw-w-10 tw-shrink-0 tw-animate-pulse tw-rounded-full tw-bg-white/[0.06] motion-reduce:tw-animate-none" />
+              <div className="tw-min-w-0 tw-flex-1 tw-space-y-1.5">
+                <div className="tw-h-3 tw-w-2/3 tw-animate-pulse tw-rounded tw-bg-white/[0.06] motion-reduce:tw-animate-none" />
+                <div className="tw-h-2.5 tw-w-1/2 tw-animate-pulse tw-rounded tw-bg-white/[0.05] motion-reduce:tw-animate-none" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
 
 export default function UserPageBrainSidebar({
   profile,
@@ -28,9 +79,18 @@ export default function UserPageBrainSidebar({
   const { waves: mostActiveWaves, status: mostActiveStatus } =
     useFavouriteWavesOfIdentity({
       identityKey: identity,
-      limit: 3,
+      limit: 5,
       enabled: hasIdentity,
     });
+  const mostActiveWaveIds = useMemo(
+    () => mostActiveWaves.map((wave) => wave.id),
+    [mostActiveWaves]
+  );
+  const latestProfileActivityByWaveId = useProfileWaveActivity({
+    identity,
+    waveIds: mostActiveWaveIds,
+    enabled: hasIdentity && mostActiveStatus === "success",
+  });
   const { isModalOpen, handleBadgeClick, handleModalClose } =
     useWaveCreatorPreviewModal();
   const modalUser = useMemo(
@@ -40,12 +100,13 @@ export default function UserPageBrainSidebar({
     }),
     [profile.handle, profile.primary_wallet]
   );
-  const shouldShowCreated =
-    createdStatus === "pending" || createdWaves.length > 0;
-  const shouldShowMostActive =
-    mostActiveStatus === "pending" || mostActiveWaves.length > 0;
+  const hasCreatedWaves = createdWaves.length > 0;
+  const hasMostActiveWaves = mostActiveWaves.length > 0;
+  const isLoading =
+    hasIdentity &&
+    (createdStatus === "pending" || mostActiveStatus === "pending");
 
-  if (!shouldShowCreated && !shouldShowMostActive) {
+  if (!isLoading && !hasCreatedWaves && !hasMostActiveWaves) {
     return null;
   }
 
@@ -54,28 +115,31 @@ export default function UserPageBrainSidebar({
       className="tw-order-1 tw-min-w-0 tw-self-start lg:tw-sticky lg:tw-top-8 lg:tw-order-2"
       data-testid="brain-sidebar"
     >
-      <UserPageBrainSidebarMobileStrip
-        createdWaves={createdWaves}
-        createdStatus={createdStatus}
-        mostActiveWaves={mostActiveWaves}
-        mostActiveStatus={mostActiveStatus}
-        onOpenCreatedWaves={handleBadgeClick}
-      />
+      {isLoading ? (
+        <UserPageBrainSidebarLoading />
+      ) : (
+        <>
+          <UserPageBrainSidebarMobileStrip
+            createdWaves={createdWaves}
+            mostActiveWaves={mostActiveWaves}
+            onOpenCreatedWaves={handleBadgeClick}
+          />
 
-      <div
-        className="tw-hidden tw-space-y-6 lg:tw-block"
-        data-testid="brain-sidebar-desktop"
-      >
-        <UserPageBrainSidebarCreated
-          identity={identity}
-          waves={createdWaves}
-          status={createdStatus}
-        />
-        <UserPageBrainSidebarMostActive
-          waves={mostActiveWaves}
-          status={mostActiveStatus}
-        />
-      </div>
+          <div
+            className="tw-hidden tw-space-y-6 lg:tw-block"
+            data-testid="brain-sidebar-desktop"
+          >
+            <UserPageBrainSidebarCreated
+              identity={identity}
+              waves={createdWaves}
+            />
+            <UserPageBrainSidebarMostActive
+              latestProfileActivityByWaveId={latestProfileActivityByWaveId}
+              waves={mostActiveWaves}
+            />
+          </div>
+        </>
+      )}
 
       <WaveCreatorPreviewModal
         isOpen={isModalOpen}

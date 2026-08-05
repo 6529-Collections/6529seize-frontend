@@ -1,0 +1,161 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamRandomizerLifecycle.t.sol:ZeroRequestIdArrngLifecycleController#function:0xd4e0f337",
+          "declaringDefinitionId": "test/StreamRandomizerLifecycle.t.sol:ZeroRequestIdArrngLifecycleController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "requestRandomWords",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xd4e0f337",
+          "signature": "requestRandomWords(uint256,address)",
+          "stateMutability": "pure"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "requestRandomWords(uint256,address)",
+          "displaySignature": "requestRandomWords(uint256,address)",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerLifecycle.t.sol:ZeroRequestIdArrngLifecycleController#function:0xd4e0f337",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlplcm9SZXF1ZXN0SWRBcnJuZ0xpZmVjeWNsZUNvbnRyb2xsZXIjZnVuY3Rpb246MHhkNGUwZjMzNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestRandomWords",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 113,
+            "byteStart": 43098,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerLifecycle.t.sol#L1015-L1017",
+            "lineEnd": 1017,
+            "lineStart": 1015,
+            "snippetSha256": "sha256:6679c582cca0cbc8726cc5308981a3961655d8847ae8855920e02ca9e42bceec",
+            "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          },
+          "selector": "0xd4e0f337",
+          "stateMutability": "pure",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamRandomizerLifecycle.t.sol:ZeroRequestIdArrngLifecycleController",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyTGlmZWN5Y2xlLnQuc29sOlplcm9SZXF1ZXN0SWRBcnJuZ0xpZmVjeWNsZUNvbnRyb2xsZXI",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamRandomizerLifecycle.t.sol:ZeroRequestIdArrngLifecycleController"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "ZeroRequestIdArrngLifecycleController",
+    "natspec": "",
+    "range": {
+      "byteLength": 168,
+      "byteStart": 43045,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerLifecycle.t.sol#L1014-L1018",
+      "lineEnd": 1018,
+      "lineStart": 1014,
+      "snippetSha256": "sha256:7014262abbe170f3b78bcfc75db3ea1b8cdadd3bee10761d4c0eff6b6e2c9e16",
+      "sourceSha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamRandomizerLifecycle.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 2
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 1
+    },
+    "totalCount": 2
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:ZeroRequestIdArrngLifecycleController",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerLifecycle.t.sol:ZeroRequestIdArrngLifecycleController#function:0xd4e0f337",
+      "definitionId": "test/StreamRandomizerLifecycle.t.sol:ZeroRequestIdArrngLifecycleController",
+      "severity": "advisory"
+    }
+  ]
+}

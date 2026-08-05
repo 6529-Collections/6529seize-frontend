@@ -1,7 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateWaveDatesRank from "@/components/waves/create-wave/dates/CreateWaveDatesRank";
-import { adjustDatesAfterSubmissionChange } from "@/components/waves/create-wave/services/waveDecisionService";
+import {
+  adjustDatesAfterSubmissionChange,
+  getDefaultFirstDecisionTime,
+} from "@/components/waves/create-wave/services/waveDecisionService";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { CreateWaveDatesConfig } from "@/types/waves.types";
@@ -46,9 +49,6 @@ jest.mock(
             "RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE"
           )
         )}
-        onClick={() => {
-          props.onInteraction();
-        }}
       >
         decisions
       </button>
@@ -148,7 +148,9 @@ describe("CreateWaveDatesRank", () => {
       ...baseDates,
       submissionStartDate: 50,
       votingStartDate: 50,
-      firstDecisionTime: 50,
+      // Voting start caught up to the first decision (both 50), so it is
+      // reseeded to the safe one-week-out default rather than left flush.
+      firstDecisionTime: getDefaultFirstDecisionTime(50),
       endDate: 123,
     });
   });
@@ -352,7 +354,7 @@ describe("CreateWaveDatesRank", () => {
     );
   });
 
-  it("auto collapses start section after decisions interaction", async () => {
+  it("keeps the start section expanded during decisions interaction", async () => {
     const user = userEvent.setup();
     render(
       <CreateWaveDatesRank
@@ -367,10 +369,13 @@ describe("CreateWaveDatesRank", () => {
       "data-expanded",
       "true"
     );
+    // Auto-collapsing the section above the one being edited shifts the
+    // whole page mid-tap (reported as the calendar "jumping around" on
+    // mobile) — interacting with decisions must not touch the start section.
     await user.click(screen.getByTestId("decisions"));
     expect(screen.getByTestId("start")).toHaveAttribute(
       "data-expanded",
-      "false"
+      "true"
     );
   });
 

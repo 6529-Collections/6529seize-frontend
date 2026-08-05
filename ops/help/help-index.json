@@ -48,6 +48,178 @@
       ]
     },
     {
+      "id": "museum.network",
+      "kind": "route",
+      "title": "6529 Network Museum",
+      "aliases": [
+        "museum",
+        "network museum",
+        "museum collection",
+        "open museum",
+        "contribute to museum",
+        "museum source",
+        "Inside the System",
+        "generative art analysis",
+        "possibility space",
+        "compare minted works",
+        "generative art randomizer",
+        "Keys and Gates"
+      ],
+      "keywords": [
+        "museum",
+        "collection",
+        "accession",
+        "governance",
+        "Keys and Gates",
+        "Casey Reas",
+        "algorithm",
+        "generative system",
+        "possibility space",
+        "provenance",
+        "methodology"
+      ],
+      "facts": [
+        "The 6529 Network Museum presents itself at /museum/network as the public art museum of the 6529 Network: a permanent digital-art collection held by the Network on Ethereum, governed through TDH, and open worldwide.",
+        "The homepage establishes one institutional proposition, then leads with a featured accessioned artwork, the seven-work Casey Reas presentation, collection paths, programs, stories and research, and quiet public-record links.",
+        "The complete institutional proposition is at /museum/network/about. It explains what Network holding means, the absence of fractional or economic claims for members, the Museum's present delegated operating boundaries, the on-chain direction, and the permanence objective.",
+        "Keys and Gates is published at /museum/network/programs/6529NM-AP-01 with all sixteen TDH-selected winning photographs and a clear three-stage journey from selection to future mint and then Museum acquisition and accession checks.",
+        "The sixteen Keys and Gates winners remain selected and unminted while the 6529Stream contract is finalized; they are not yet purchased, in Museum custody, or accessioned.",
+        "Keys and Gates uses uncropped responsive CloudFront presentation images for browsing, while each artwork page offers a separate link to the submitted high-resolution source; neither file is represented as a Museum preservation master.",
+        "Collection means accessioned holdings: visitors can browse artworks at /museum/network/collection and open an artwork dossier at /museum/network/collection/[object-id].",
+        "Artist, project, and gift routes connect the art to onsite curatorial writing, provenance, rights, and collection care without making raw records the primary experience.",
+        "The Museum adapter resolves canonical 6529-Collections/6529networkmuseum main to one exact commit, validates the release inventory, and activates the complete public publication atomically.",
+        "The governed Gift into Public Trust narrative and all five Casey Reas project essays are readable onsite from the same atomic publication snapshot.",
+        "Inside the System publishes project-level studies for CENTURY, Pre-Process, Phototaxis, 923 EMPTY ROOMS, and Ex Nihilo (Cosmos) at /museum/network/projects/[project-slug]/system.",
+        "Each study keeps the Museum artwork fixed and lets visitors compare any minted work by edition number, token ID, random selection, or published-trait filter.",
+        "Try a variation changes selected conditions in a clearly labeled Museum model. It does not generate or claim a new Casey Reas artwork.",
+        "Copy comparison link preserves the selected work and the complete versioned Museum-model or restaged-session settings, so the same view opens after reload.",
+        "Suggested comparisons use published traits and the Museum's reviewed NextGen-compatible descriptor for the pinned edition snapshot. They are not judgments of quality or value and use no marketplace data.",
+        "Every project also provides a visual map and semantic data table, traces the causal algorithm, and locates the Museum's held works without ranking quality, price, or desirability.",
+        "Generative studies belong to projects rather than gifts, so later accessions from the same project can be added to the same analysis.",
+        "Casey Reas: Sources and chronology is published at /museum/network/stories/source-and-chronology as a public research record spanning canonical accession facts through the collection's required omissions; the complete canonical source manuscript remains linked on GitHub.",
+        "A field of practice is published at /museum/network/stories/a-field-of-practice with a comparative essay, twenty-seven institutional profiles, an adjacent-practice study, the public scholarship and editorial standard, and a primary-source register admitted from one exact Museum source release.",
+        "Casey Reas: seven works is an accepted and accessioned gift; Keys and Gates remains a separate program whose selected_unminted works are not Museum holdings.",
+        "Official Art Blocks still and live URLs are labeled upstream presentation sources; the site does not claim retained Museum media or IIIF completion until governed assets are published.",
+        "The public release is the source of truth for current status; the website does not infer accession, rights, ownership, or preservation completion from a transfer or selected outcome.",
+        "The Museum repository is the transitional public working record: visitors can inspect exact source commits, fork the repository, and propose reviewed changes through pull requests.",
+        "Every Museum page carries a quiet source and contribution strip. Exact inspection links stay bound to the verified release commit; the actionable contributor guide points to canonical main so its instructions remain current.",
+        "The Open Museum operating statement is working public guidance rather than adopted policy. The on-chain transition statement is a working migration statement rather than deployment evidence.",
+        "The Museum exists with an accessioned collection, adopted collecting policies, TDH-weighted decisions, dedicated Ethereum custody, and a public machine-readable record, but it is not presented as fully decentralized.",
+        "The planned on-chain system is intended to connect independently verifiable decisions, decision-constrained custody, and execution without giving operators authority beyond a valid decision. It has not been deployed or activated.",
+        "The permanence objective requires Ethereum state, content-addressed records, preserved media and software, rights and provenance evidence, migration paths, and replaceable interfaces; token ownership alone is not presented as preservation."
+      ],
+      "canonical_path": "/museum/network",
+      "related_paths": [
+        "/museum/network/collection",
+        "/museum/network/collection/6529NM.2026.001.01",
+        "/museum/network/artists",
+        "/museum/network/artists/casey-reas",
+        "/museum/network/projects/century",
+        "/museum/network/projects/pre-process",
+        "/museum/network/projects/phototaxis",
+        "/museum/network/projects/923-empty-rooms",
+        "/museum/network/projects/ex-nihilo-cosmos",
+        "/museum/network/projects/century/system",
+        "/museum/network/projects/pre-process/system",
+        "/museum/network/projects/phototaxis/system",
+        "/museum/network/projects/923-empty-rooms/system",
+        "/museum/network/projects/ex-nihilo-cosmos/system",
+        "/museum/network/gifts/6529NM.2026.001",
+        "/museum/network/programs",
+        "/museum/network/programs/6529NM-AP-01",
+        "/museum/network/objects/6529NM-AP-01-OUT-001",
+        "/museum/network/stories",
+        "/museum/network/stories/source-and-chronology",
+        "/museum/network/stories/a-field-of-practice",
+        "/museum/network/stories/a-field-of-practice/adjacent-practice",
+        "/museum/network/stories/scholarship-and-writing",
+        "/museum/network/about",
+        "/museum"
+      ],
+      "tags": ["museum", "art", "collection", "artists", "provenance"],
+      "source_refs": [
+        "app/museum/network/page.tsx",
+        "app/museum/network/collection/page.tsx",
+        "components/museum/MuseumArtworkViewer.tsx",
+        "components/museum/MuseumPossibilitySpace.tsx",
+        "components/museum/MuseumGenerativeSystemStudyPage.tsx",
+        "ops/docs/museum/feature-inside-the-system.md",
+        "components/museum/MuseumGiftPage.tsx",
+        "components/museum/MuseumProgramImage.tsx",
+        "components/museum/MuseumProgramOutcomePage.tsx",
+        "components/museum/MuseumMarkdown.tsx",
+        "app/museum/network/programs/[programId]/page.tsx",
+        "app/museum/network/stories/source-and-chronology/page.tsx",
+        "app/museum/network/about/page.tsx",
+        "components/museum/MuseumSourceContribution.tsx",
+        "components/museum/MuseumNetworkProposition.tsx",
+        "lib/museum/publication/legacyCasey.ts",
+        "lib/museum/publication/openMuseum.ts",
+        "lib/museum/publication/runtime.ts",
+        "lib/museum/normalize.ts",
+        "ops/docs/museum/feature-keys-and-gates.md",
+        "__tests__/lib/museum/publication/runtime.test.ts"
+      ]
+    },
+    {
+      "id": "museum.institutional-practice",
+      "kind": "route",
+      "title": "A field of practice",
+      "aliases": [
+        "museums to learn from",
+        "institutions we study",
+        "museum research",
+        "museum benchmarks",
+        "field of practice",
+        "institutional profiles"
+      ],
+      "keywords": [
+        "museum",
+        "institutional practice",
+        "scholarship",
+        "digital art",
+        "conservation",
+        "collections",
+        "research",
+        "sources"
+      ],
+      "facts": [
+        "A field of practice is the Network Museum's comparative study of twenty-seven contemporary-art, digital-art, conservation, and research institutions.",
+        "The study is at /museum/network/stories/a-field-of-practice; each institution has its own profile, adjacent chain-native practice is at /museum/network/stories/a-field-of-practice/adjacent-practice, the public writing standard is at /museum/network/stories/scholarship-and-writing, and the primary-source register is at /museum/network/stories/a-field-of-practice/sources.",
+        "The twenty-seven profiles are organized into four reading paths: software, networks, and technical culture; media art across regions; collection and conservation; and scholarship, archives, and long duration.",
+        "Each profile presents demonstrated practices, what the Network Museum should adopt, the limits of the comparison, and its sources.",
+        "The study is a research instrument rather than a ranking; the profiles keep lessons and analytical limits attached to their institutional context.",
+        "The comparative essay, all twenty-seven profiles, the adjacent-practice study, the scholarship and editorial standard, and the source register must validate from the same exact Museum repository commit before the site publishes the study.",
+        "Read the source opens the immutable manuscript used for the page. Propose an edit opens the maintained manuscript on main, and Contributor guide explains the reviewed pull-request process.",
+        "The source register records each primary source, its displayed date, its source type, and the evidence drawn from it.",
+        "If the current source cannot be verified, the Museum may serve a clearly identified last complete release; it never combines manuscripts from different source releases."
+      ],
+      "canonical_path": "/museum/network/stories/a-field-of-practice",
+      "link_label": "Read A field of practice",
+      "related_paths": [
+        "/museum/network/stories",
+        "/museum/network/stories/a-field-of-practice/adjacent-practice",
+        "/museum/network/stories/a-field-of-practice/sources",
+        "/museum/network/stories/scholarship-and-writing",
+        "/museum/network/stories/a-field-of-practice/centre-pompidou",
+        "/museum/network/stories/a-field-of-practice/serpentine-arts-technologies"
+      ],
+      "tags": [
+        "museum",
+        "research",
+        "scholarship",
+        "conservation",
+        "digital art"
+      ],
+      "source_refs": [
+        "ops/docs/museum/README.md",
+        "ops/docs/museum/feature-institutional-practice.md",
+        "app/museum/network/stories/a-field-of-practice/adjacent-practice/page.tsx",
+        "app/museum/network/stories/scholarship-and-writing/page.tsx",
+        "tests/museum/institutional-practice-readonly.spec.ts"
+      ]
+    },
+    {
       "id": "navigation.sidebar",
       "kind": "ui_affordance",
       "title": "Sidebar navigation",
@@ -61,7 +233,8 @@
         "expand"
       ],
       "facts": [
-        "The primary navigation concepts are NFTs, Waves, DMs, Join 6529, and About.",
+        "The sidebar orders primary navigation as NFTs, Museum, Waves, DMs, Join 6529, and About, with gated Drop Forge after About.",
+        "Museum is a standalone web and app sidebar row linking to /museum/network; historical /museum gallery routes remain available from the Museum entry point.",
         "Home remains available through the 6529 logo link to /.",
         "The web sidebar Waves row opens /waves directly; Discover Waves remains secondary inside the Waves experience and searchable, while Network, Delegation, Tools, Open Data, and reference material live under About.",
         "Drop Forge appears as a standalone sidebar row after About only when the connected wallet can access /drop-forge.",
@@ -73,6 +246,7 @@
       "related_paths": [
         "/the-memes",
         "/waves",
+        "/museum/network",
         "/messages",
         "/join-6529",
         "/about",
@@ -85,6 +259,138 @@
       "source_refs": [
         "ops/docs/navigation/feature-sidebar-navigation.md",
         "ops/docs/navigation/feature-app-sidebar-menu.md"
+      ]
+    },
+    {
+      "id": "public-reviews.stream",
+      "environments": ["local", "staging", "production"],
+      "public_review_id": "6529-stream",
+      "kind": "route",
+      "title": "6529 Stream contract review",
+      "aliases": [
+        "stream",
+        "stream review",
+        "stream contract",
+        "6529 stream",
+        "contract review",
+        "public contract review"
+      ],
+      "keywords": [
+        "stream",
+        "contract",
+        "review",
+        "solidity",
+        "artist",
+        "audit",
+        "security",
+        "audit planned",
+        "development status"
+      ],
+      "facts": [
+        "The 6529 Stream public review is published at /reviews/6529-stream in local development, shared staging, and production while its lifecycle permits public routes.",
+        "The review explains how Stream supports serious one-of-one digital art and artist-chosen editions.",
+        "The overview explains how each major mechanism protects artist consent, artwork identity, sales, preservation, and long-term operation.",
+        "The current Overview includes a separately dated, source-pinned development update covering recent work, work in progress, launch requirements, and the latest evidence counts. Daily figures come from that update.",
+        "Fourteen editorial pages explain artwork lifecycle, artist controls, responsibilities, curation and TDH authorization, minting, sales, revenue, randomness, metadata, freezing, contract changes, current development, and community review.",
+        "Every page shows the review version, exact source link, page navigation, on-page contents, and a collapsible feedback rail; snapshot evidence is collected on Where Development Stands.",
+        "Review chapters stay in the review contents navigation. Technical reference and All public feedback are separate review-wide destinations; each standalone destination links back to the review contents and to the other destination. Page comments and sending feedback remain page-specific actions.",
+        "Active and historical routes read immutable versioned editorial content and validate its manifest before rendering.",
+        "Each immutable version has its own lifecycle, deployment status, and audit status: superseded versions can remain readable as REVIEW_CLOSED, stop accepting submissions, link back to the current review, and avoid inheriting newer deployment or audit claims.",
+        "The generated technical reference exposes the exact versioned Solidity source, definitions, functions, events, errors, and other declarations.",
+        "The all-declarations explorer applies its text, kind, scope, and location filters on the server and returns at most 100 matches per page instead of sending the complete declaration inventory to the browser.",
+        "Every editorial page combines its version-scoped comments and structured feedback composer in a collapsible rail that docks beside wide documents and opens as a dismissible right-side overlay on narrower layouts.",
+        "The reusable lifecycle map supports draft, scheduled, public review, review closed, remediation, audit, final candidate, deployed, and archived states; only public review accepts new feedback.",
+        "While the lifecycle is DRAFT, navigation and all editorial, technical-reference, source, declaration-search, and feedback-ledger routes are unavailable, and raw generated evidence plus editorial content are omitted from staging packages.",
+        "When enabled, NFTs > 6529 Stream — Review appears after ReMemes and before NFT Activity."
+      ],
+      "canonical_path": "/reviews/6529-stream",
+      "related_paths": [
+        "/stream",
+        "/reviews/6529-stream/artwork-lifecycle",
+        "/reviews/6529-stream/for-artists",
+        "/reviews/6529-stream/roles-and-trust",
+        "/reviews/6529-stream/curation-and-tdh-authorization",
+        "/reviews/6529-stream/tokens-collections-and-minting",
+        "/reviews/6529-stream/fixed-price-sales-and-auctions",
+        "/reviews/6529-stream/revenue-splits-and-royalties",
+        "/reviews/6529-stream/randomness",
+        "/reviews/6529-stream/metadata-scripts-and-dependencies",
+        "/reviews/6529-stream/freezing-preservation-and-artwork-finality",
+        "/reviews/6529-stream/governance-pausing-and-successors",
+        "/reviews/6529-stream/security-testing-and-known-limitations",
+        "/reviews/6529-stream/community-review",
+        "/reviews/6529-stream/reference",
+        "/reviews/6529-stream/feedback"
+      ],
+      "tags": ["stream", "contract", "review", "security"],
+      "source_refs": [
+        "app/reviews/[review]/page.tsx",
+        "components/public-review/PublicReviewShell.tsx",
+        "components/public-review/StreamReviewDevelopmentStatus.tsx",
+        "config/public-reviews/6529-stream.development-status.json",
+        "ops/docs/public-reviews/README.md"
+      ]
+    },
+    {
+      "id": "public-reviews.stream.feedback-status",
+      "environments": ["local", "staging", "production"],
+      "public_review_id": "6529-stream",
+      "kind": "ui_affordance",
+      "title": "Stream review feedback and public ledger",
+      "aliases": [
+        "stream feedback",
+        "comment on stream",
+        "report stream issue",
+        "stream review wave"
+      ],
+      "keywords": [
+        "stream",
+        "feedback",
+        "comment",
+        "security",
+        "vulnerability",
+        "source"
+      ],
+      "facts": [
+        "Every Stream editorial and technical reference page has one structured feedback composer connected to the server-resolved Stream review Wave destination.",
+        "Editorial pages place the current page's loaded comments and composer in one collapsible rail; closing and reopening it preserves the current draft, and the browser remembers the open or closed preference.",
+        "The page-comments rail reads the most recent 50 Wave messages for the exact review version, shows entries attached to the current page, and can load older 50-message pages on request.",
+        "Editorial feedback can reference a stable page section; technical feedback can reference an exact Solidity file and line range.",
+        "A code-reference submission remains unavailable until the browser computes the exact selected snippet checksum; changing the selection invalidates any earlier preview but preserves the written draft.",
+        "If a reviewer edits the draft or changes its attached page, section, or source range while a post is in flight, a successful response preserves the newer work and the next post uses a fresh submission ID.",
+        "A successful feedback post uses the standard app toast; Open discussion in the Wave remains the single route from the review back to the posted discussion.",
+        "Every submission carries the immutable review version, page or section, category, suspected severity, and exact source provenance when code is selected.",
+        "Possible exploitable security vulnerabilities are intentionally submitted to the same public review during Stream's predeployment lifecycle.",
+        "The review records a source-confirmed limitation in which finalizing an unfrozen collection before any token is minted writes zero, which setCollectionData can later treat as uninitialized and replace with a nonzero cap; the candidate needs a monotonic finalization guard or equivalent before this promise is irreversible.",
+        "Public vulnerability submission is available only during the PUBLIC_REVIEW lifecycle state; deployed reviews use their configured post-deployment disclosure policy.",
+        "The public feedback ledger supports category, page, contract, severity, disposition, and text filters plus CSV and Markdown auditor exports.",
+        "Ledger entries are identified and deduplicated by immutable Wave drop ID rather than the client-supplied submission UUID.",
+        "Ledger metadata for a 50-drop page is hydrated in batches of no more than eight concurrent requests.",
+        "A feedback section is accepted only when that exact section is explicitly allowed for the selected page; pages without a section allow-list accept no section IDs.",
+        "Immutable review-version routes have their own version-filtered feedback ledger and exact source-commit banner; review versions 2026-07-26.1, 2026-07-27.1, and 2026-07-30.1 are retained with feedback closed while 2026-08-01.1 is the active writing revision.",
+        "Every Stream editorial page includes a visible authorship note explaining that bots wrote the review under punk6529's mission and standards.",
+        "Ledger code links open the immutable in-site versioned source and also provide the pinned GitHub source."
+      ],
+      "canonical_path": "/reviews/6529-stream/feedback",
+      "related_paths": [
+        "/reviews/6529-stream",
+        "/reviews/6529-stream/community-review",
+        "/reviews/6529-stream/security-testing-and-known-limitations",
+        "/reviews/6529-stream/reference",
+        "/reviews/6529-stream/versions/2026-08-01.1/feedback",
+        "/reviews/6529-stream/versions/2026-07-30.1/feedback",
+        "/reviews/6529-stream/versions/2026-07-27.1/feedback",
+        "/reviews/6529-stream/versions/2026-07-26.1/feedback"
+      ],
+      "tags": ["stream", "review", "feedback", "security"],
+      "source_refs": [
+        "app/reviews/[review]/feedback/page.tsx",
+        "app/reviews/[review]/versions/[version]/feedback/page.tsx",
+        "components/public-review/PublicReviewFeedbackComposer.tsx",
+        "components/public-review/PublicReviewLedger.tsx",
+        "components/public-review/PublicReviewShell.tsx",
+        "lib/public-review/streamReviewFeedback.server.ts",
+        "ops/docs/public-reviews/README.md"
       ]
     },
     {
@@ -295,6 +601,51 @@
       "source_refs": ["components/about/AboutFAQ.tsx"]
     },
     {
+      "id": "about.the-memes",
+      "kind": "route",
+      "title": "About The Memes",
+      "aliases": [
+        "about the memes",
+        "what are the memes",
+        "the memes collection",
+        "why memes matter",
+        "memes are intersubjective myths",
+        "open metaverse memes",
+        "cc0 meme cards"
+      ],
+      "keywords": [
+        "memes",
+        "meme cards",
+        "collection",
+        "art",
+        "decentralization",
+        "cc0",
+        "public domain",
+        "open metaverse",
+        "remix",
+        "rememe"
+      ],
+      "facts": [
+        "The About The Memes page lives at /about/the-memes.",
+        "The page explains why memes coordinate societies and how The Memes uses art NFTs to spread the message of decentralization.",
+        "The Memes are large-edition CC0 public-domain NFTs intended to be shared, remixed, rememed, and reinterpreted.",
+        "The page presents The Memes collection artwork as a single combined image.",
+        "Its Learn More section links to the full collection at /the-memes, the network at /network, the FAQ at /about/faq, Memes-Chat, and minting information at /about/minting."
+      ],
+      "canonical_path": "/about/the-memes",
+      "related_paths": [
+        "/the-memes",
+        "/network",
+        "/about/faq",
+        "/about/minting"
+      ],
+      "tags": ["about", "memes", "collection", "cc0", "open-metaverse"],
+      "source_refs": [
+        "app/about/[section]/page.tsx",
+        "components/about/AboutMemes.tsx"
+      ]
+    },
+    {
       "id": "about.terms-of-service",
       "kind": "route",
       "title": "Terms of Service",
@@ -442,12 +793,16 @@
         "The Memes minting website is /the-memes/mint; there is no other official minting website for The Memes.",
         "The page says Meme Cards are minted when the art for the next Meme Card is ready, currently about three times per week, though frequency and timing can vary.",
         "The page says The Memes generally use an allowlist model to avoid gas wars and bot wars and to give a broad range of people a chance to mint.",
+        "The page has horizontal section navigation for its summary, minting philosophy, allowlist background and current practices, provability, improvements, tools, and technical issues.",
         "Users should follow @6529collections for current mint dates and times."
       ],
       "canonical_path": "/about/minting",
       "related_paths": ["/the-memes/mint", "/the-memes", "/about/the-memes"],
       "tags": ["about", "memes", "minting"],
-      "source_refs": ["components/about/AboutMinting.tsx"]
+      "source_refs": [
+        "components/about/AboutMinting.tsx",
+        "components/about/AboutMintingReference.tsx"
+      ]
     },
     {
       "id": "about.license",
@@ -823,7 +1178,10 @@
         "update airdrop address",
         "update my airdrop address",
         "subscription airdrop address",
-        "change subscription settings"
+        "change subscription settings",
+        "how long is my subscription funded",
+        "when do i need to top up",
+        "subscription running low"
       ],
       "keywords": [
         "profile",
@@ -834,12 +1192,17 @@
         "top",
         "up",
         "history",
-        "upcoming"
+        "upcoming",
+        "coverage",
+        "runway",
+        "funded"
       ],
       "facts": [
         "A user's Meme Card subscription controls and history live under /{user}/subscriptions.",
-        "The tab shows balance, airdrop address, manual or automatic mode, edition preference, upcoming drops, and history when subscriptions are available.",
+        "The tab leads with subscription coverage: status, consecutive intended drops funded, funded-through and next-unfunded Meme context, and an authoritative top-up deadline only when one is available.",
+        "The tab also shows exact ETH balance, raw mint capacity, airdrop address, manual or automatic mode, edition preference, upcoming drops, and history when subscriptions are available.",
         "Owners can update settings, including airdrop address and mode, and top up; read-only viewers can inspect visible subscription information.",
+        "The owner profile header and connected Home subscription row show a compact coverage status with a contextual setup, manage, choose-drops, or top-up action.",
         "The tab keeps loading and empty states distinct, and its subscription controls, upcoming rows, and history panels adapt to narrow screens."
       ],
       "canonical_path": "/{user}/subscriptions",
@@ -914,6 +1277,9 @@
       "facts": [
         "The Profile Brain tab surfaces Brain-related profile activity and wave context.",
         "Brain views include activity and wave sidebar surfaces where available.",
+        "Created Waves is labeled Wave posts, and each row's Last activity time refers to the newest post by anyone in that wave.",
+        "Most Active In is labeled All time and ranks accessible non-direct-message waves by how many posts the identity has written in them across all time.",
+        "Most Active In shows up to five ranked waves and labels each desktop row Last post with when the viewed identity last posted in that specific wave.",
         "Use /{user}/brain for profile-specific Brain context."
       ],
       "canonical_path": "/{user}/brain",
@@ -921,7 +1287,34 @@
       "tags": ["profiles", "brain", "glossary"],
       "source_refs": [
         "ops/docs/profiles/tabs/feature-brain-tab.md",
-        "ops/docs/profiles/tabs/feature-brain-activity-heatmap.md"
+        "ops/docs/profiles/tabs/feature-brain-activity-heatmap.md",
+        "ops/docs/profiles/tabs/feature-brain-wave-sidebar.md"
+      ]
+    },
+    {
+      "id": "profiles.quick-tags",
+      "kind": "ui_affordance",
+      "title": "Profile Quick Tags",
+      "aliases": [
+        "quick tags",
+        "quick tag settings",
+        "mention shortcuts",
+        "personal mention aliases"
+      ],
+      "keywords": ["profile", "quick tags", "mentions", "aliases", "shortcuts"],
+      "facts": [
+        "Quick Tags are managed from the compact owner-only section beneath Activity on the Profile Brain tab.",
+        "The section shows up to three tags in one row and uses a +N more chip when additional tags exist.",
+        "Manage, a visible Quick Tag, and +N more open the Quick Tags manager.",
+        "The section is hidden on other profiles and while acting through a proxy.",
+        "Quick Tags do not have a dedicated profile tab or route."
+      ],
+      "canonical_path": "/{user}/brain",
+      "related_paths": ["/{user}/brain", "/waves"],
+      "tags": ["profiles", "waves", "mentions", "glossary"],
+      "source_refs": [
+        "ops/docs/profiles/navigation/feature-tabs.md",
+        "ops/docs/waves/composer/feature-personal-mention-shortcuts.md"
       ]
     },
     {
@@ -972,6 +1365,7 @@
         "Category A is the complete Meme Card set boost, with diminishing additional-set boosts.",
         "Category B covers season, genesis, and nakamoto set boosts.",
         "Category C is the Gradient boost, up to 5 Gradients.",
+        "The current TDH guide presents the Category A or Category B comparison before Category C, then groups formulas, examples, season boosts, limits, and related destinations for quick reference.",
         "TDH is calculated daily at 00:00 UTC and is used throughout the network: profiles, leaderboards, Levels, groups, Network views, Waves voting and eligibility, and public data."
       ],
       "canonical_path": "/network/tdh",
@@ -1014,6 +1408,7 @@
       ],
       "facts": [
         "Network definitions explain Cards Collected, Unique Memes, Meme Sets, TDH variants, purchases, sales, transfers, and related Network metrics.",
+        "The glossary groups terms into Collection metrics, Activity metrics, and TDH metrics.",
         "Genesis Sets are complete sets of the first three Meme NFTs.",
         "Use the definitions page when users ask what a Network metric means.",
         "For a single TDH explanation, point users to the TDH page."
@@ -1751,6 +2146,7 @@
         "Inline identity groups warn when the connected creator is excluded, because excluding yourself from a view group can prevent you from opening the created wave.",
         "All wave types include a Rules step; Rank and Approve waves also include Dates, Drops, Voting, and Outcomes steps.",
         "The Rules step previews automatic rules generated from wave setup and lets creators add optional custom creator rules.",
+        "In Description, individual @ mention suggestions follow the draft wave's Who can view group; private drafts suggest only eligible profiles.",
         "The docs for wave creation live under ops/docs/waves/create; on web, use /waves?create=wave to open create-wave mode."
       ],
       "canonical_path": "/waves?create=wave",
@@ -1760,7 +2156,8 @@
         "ops/docs/waves/create/README.md",
         "ops/docs/waves/create/feature-overview-step.md",
         "ops/docs/waves/create/feature-groups-step.md",
-        "ops/docs/waves/create/feature-rules-step.md"
+        "ops/docs/waves/create/feature-rules-step.md",
+        "ops/docs/waves/create/feature-description-step.md"
       ]
     },
     {
@@ -2959,6 +3356,10 @@
         "The /about/subscriptions primary action says Connect to Subscribe when a wallet or profile handoff is needed and Manage when the user can continue to their profile subscription settings.",
         "Users manage their subscription mode, balance, airdrop address, top-ups, upcoming drops, and history under their profile Subscriptions tab.",
         "Automatic mode mints eligible cards until the balance is used unless the user opts out; Manual mode only mints cards the user opts into.",
+        "Automatic mode does not expire when the balance is insufficient; coverage describes what the current balance funds, not an expiration date for the mode.",
+        "Coverage counts consecutive fully funded intended drops from the immediate next intended drop and accounts for mode, eligibility, edition preference, selections, opt-outs, balance, and the published schedule.",
+        "Coverage is green at 7 or more funded drops, gives an early plan-a-top-up warning at 4 to 6, shows running low at 2 to 3, and requires action at 0 to 1.",
+        "When available, Funded through and Next unfunded identify the Meme card and date; Top up by is shown only for an authoritative backend deadline.",
         "If an eligible card is unavailable, no card is airdropped and the unused balance stays available.",
         "The About Subscriptions overview links to the Subscriptions Report for aggregate subscribed and redeemed subscription counts."
       ],
@@ -3058,7 +3459,8 @@
       ],
       "facts": [
         "Subscription top-ups send ETH to the configured subscriptions address on the configured chain.",
-        "The Profile Subscriptions tab shows Current Balance, a refresh balance control, pending or successful top-up transaction links, and Top Up History.",
+        "The Profile Subscriptions tab shows Subscription balance, a refresh balance control, pending or successful top-up transaction links, and Top Up History.",
+        "When coverage supplies them, Recommended restores the healthy funded runway and Minimum for next drop covers the immediate at-risk intended drop using the exact required ETH, including a partial shortfall.",
         "If the wallet transaction is still pending, wait for confirmation; if it is confirmed and the balance or Top Up History still does not update after refreshing, share the transaction hash with the tech team."
       ],
       "canonical_path": "/about/subscriptions",
@@ -3240,12 +3642,16 @@
       "facts": [
         "Meme Lab is a collection area separate from The Memes.",
         "Meme Lab has collection, individual card, and distribution routes.",
+        "The /about/meme-lab overview explains the experimental CC0 artist contract.",
         "Use /meme-lab when users ask where Meme Lab cards live."
       ],
       "canonical_path": "/meme-lab",
-      "related_paths": ["/the-memes"],
+      "related_paths": ["/the-memes", "/about/meme-lab"],
       "tags": ["collections", "meme-lab"],
-      "source_refs": ["ops/docs/media/README.md"]
+      "source_refs": [
+        "components/about/AboutMemeLab.tsx",
+        "ops/docs/media/README.md"
+      ]
     },
     {
       "id": "nextgen.overview",
@@ -3672,7 +4078,9 @@
         "drop reacted notification",
         "drop boosted notification",
         "rep notification",
-        "nic notification"
+        "nic notification",
+        "subscription coverage notification",
+        "subscription running low notification"
       ],
       "keywords": [
         "notifications",
@@ -3685,15 +4093,18 @@
         "replies",
         "identity",
         "reactions",
-        "boosts"
+        "boosts",
+        "subscriptions",
+        "coverage"
       ],
       "facts": [
         "The notifications feed lives at /notifications.",
         "It supports feed filters, row actions, read state, paging, and navigation to related app content.",
-        "Cause filters include Mentions, Replies, Identity, Reactions, and Invites.",
+        "Cause filters include Mentions, Replies, Identity, Reactions, Invites, and Subscriptions.",
         "The Invites filter includes wave-created notifications: standard waves the user can access and direct-message waves started with the user.",
         "Standard wave-created rows can offer Join wave and Follow creator controls; direct-message wave-created rows offer Open DM instead of joining the wave.",
         "The Reactions filter includes voted, reacted, and boosted drop notifications; the Identity filter includes new follows and REP/NIC updates.",
+        "The Subscriptions filter includes transition-based coverage alerts with runway, Meme context, authoritative deadline when available, and exact minimum top-up action.",
         "Notification rows may be missing or stale if loading, permissions, or realtime connectivity are disrupted."
       ],
       "canonical_path": "/notifications",
@@ -3719,7 +4130,9 @@
         "drop reacted push",
         "drop boosted push",
         "identity rep push",
-        "identity nic push"
+        "identity nic push",
+        "subscription coverage push",
+        "subscription balance alert"
       ],
       "keywords": [
         "mobile",
@@ -3732,12 +4145,16 @@
         "react",
         "boost",
         "rep",
-        "nic"
+        "nic",
+        "subscriptions",
+        "coverage"
       ],
       "facts": [
         "Mobile push notifications are documented under the Notifications area.",
         "Push notification behavior depends on mobile app support and notification permissions.",
-        "Push settings include toggles for Identity - REP, Identity - NIC, New Follows, Mentions, Drops - Quoted, Drops - Replied, Drops - Voted, Drops - Reacted, Drops - Boosted, and Wave Invites.",
+        "Push settings include toggles for Identity - REP, Identity - NIC, New Follows, Mentions, Drops - Quoted, Drops - Replied, Drops - Voted, Drops - Reacted, Drops - Boosted, Wave Invites, and Subscription Coverage.",
+        "Running-low and action-required subscription coverage can send mobile push; the earlier plan-a-top-up alert remains in the in-app feed without a push.",
+        "Tapping a subscription coverage push opens the matching profile's Subscriptions tab.",
         "Use the notifications feed when a user wants to inspect in-app notification history."
       ],
       "canonical_path": "/notifications",
@@ -3865,6 +4282,9 @@
         "network identity check",
         "rate nic",
         "rep dialog",
+        "grant rep",
+        "rep category spelling",
+        "memesnominee rep",
         "activity log"
       ],
       "keywords": [
@@ -3884,6 +4304,8 @@
         "NIC is the 6529 network identity trust signal shown on profile identity surfaces.",
         "App copy refers to NIC as Network Identity Credits in the FAQ and Network Identity Check in the profile identity header.",
         "The Identity tab surfaces profile identity, REP behavior, NIC ratings, NIC statements, and activity log behavior where available.",
+        "Grant REP keeps its compact category pills and existing search and selection behavior, including similarly named categories remaining separate and selectable.",
+        "The exact MemesNominee category pill is marked as counting toward the 50,000 REP submission requirement and is surfaced first when the typed value differs only by capitalization, spacing, punctuation, or Unicode width; search guidance stays neutral until a category is selected, selecting exact MemesNominee confirms the requirement in green, and selecting a subdued look-alike shows an amber note explaining that it remains a separate category.",
         "Owner and permission rules affect which identity actions are visible."
       ],
       "canonical_path": "/{user}",
@@ -3951,7 +4373,8 @@
       ],
       "facts": [
         "/about/primary-address is a public, read-only primary-address reference table.",
-        "The table shows Profile Handle, Current Selected Primary Address, and Primary Address Changed To columns loaded from /primary_address.csv.",
+        "The full-width table shows Profile Handle, Current Selected Primary Address, and Primary Address Changed to columns loaded from /primary_address.csv; it scrolls vertically and stacks the same fields on smaller screens.",
+        "Each profile handle links to /{current_primary}.",
         "Non-primary consolidated wallet rows on profile identity statements can expose Set Primary when the connected wallet owns the profile and no proxy profile is active."
       ],
       "canonical_path": "/about/primary-address",
@@ -4032,6 +4455,7 @@
         "The Collected tab lives at /{user}/collected.",
         "It shows collected NFT context, owner balances, stats summary, and transfer-mode behavior where available.",
         "The expandable Details panel can show holdings totals, wallet activity, distributions, TDH history, and boost breakdown.",
+        "Wide tables in Details scroll horizontally on narrow screens while their first label column stays visible.",
         "Native view covers The Memes, Gradients, NextGen, and Meme Lab holdings; Network view covers xTDH token holdings by contract.",
         "Use collection route records for collection-level browsing and profile collected for a user's holdings."
       ],
@@ -4041,7 +4465,8 @@
       "source_refs": [
         "app/[user]/collected/page.tsx",
         "ops/docs/profiles/tabs/feature-collected-tab.md",
-        "components/user/collected/stats/useCollectedStatsData.ts"
+        "components/user/collected/stats/useCollectedStatsData.ts",
+        "components/user/stats/UserPageStatsTableShared.tsx"
       ]
     },
     {
@@ -4339,7 +4764,15 @@
         "@all",
         "mention all",
         "mentioned groups",
-        "mentioned waves"
+        "@contributors",
+        "@admins",
+        "@devs6529",
+        "mentioned waves",
+        "mention shortcut",
+        "personal mention alias",
+        "quick tag",
+        "quick tags",
+        "@frens"
       ],
       "keywords": [
         "waves",
@@ -4353,14 +4786,25 @@
       "facts": [
         "Wave-name mentions are typed with # plus at least 2 characters and submit as tracked mentioned_waves metadata.",
         "The special @all group mention can submit mentioned_groups metadata when the current wave/drop context allows mentioning all.",
+        "The case-insensitive @contributors mention targets profiles with Chat access, while @admins targets the Wave creator and profiles with Admin access.",
+        "When Wave Chat access is Anyone, Wave followers are the bounded @contributors audience because there is no finite Chat-access group; muted followers and the author are excluded.",
+        "The @devs6529 mention targets configured 6529 developer profiles that can view the Wave.",
+        "Any profile with Chat access can invoke @contributors, @admins, or @devs6529 by typing the complete token directly or selecting it from suggestions; the backend filters recipients by Wave access.",
+        "Global mention text inside links or inline and fenced code remains literal and does not notify a Wave audience.",
+        "Editing stored global-mention tokens does not resend permission-group notifications; mentioned_groups describes tokens in the current displayed content, not historical notification delivery.",
+        "Global mentions stay visible in posted content; personal Quick Tags expand into individual profile mentions before submission.",
+        "Profiles can create private Quick Tags from the owner-only section beneath Activity on their Profile Brain tab; a Quick Tag such as @frens expands inline into ordinary profile mentions.",
+        "Quick Tags are case-insensitive, cannot use reserved global mention names, and are not stored in the posted drop after expansion.",
         "Mention behavior depends on composer state, supported metadata, and the user's eligibility in the current wave.",
         "The @help6529 helper bot trigger also uses mention detection, but the bot runtime is implemented in the backend."
       ],
       "canonical_path": "/waves",
-      "related_paths": ["/waves"],
+      "related_paths": ["/waves", "/{user}/brain"],
       "tags": ["waves", "composer", "mentions"],
       "source_refs": [
         "ops/docs/waves/composer/feature-wave-mentions.md",
+        "ops/docs/waves/composer/feature-global-mentions.md",
+        "ops/docs/waves/composer/feature-personal-mention-shortcuts.md",
         "helpers/waves/drop-group-mentions.ts",
         "components/waves/CreateDropContent.tsx"
       ]
@@ -4825,6 +5269,44 @@
       "source_refs": ["ops/docs/waves/drop-actions/feature-quote-link-cards.md"]
     },
     {
+      "id": "waves.link-previews.etherscan",
+      "kind": "ui_affordance",
+      "title": "Etherscan link preview cards",
+      "aliases": [
+        "Etherscan card",
+        "Ethereum explorer preview",
+        "transaction preview",
+        "address preview",
+        "block explorer card"
+      ],
+      "keywords": [
+        "waves",
+        "link",
+        "preview",
+        "etherscan",
+        "ethereum",
+        "transaction",
+        "address",
+        "token",
+        "nft",
+        "block"
+      ],
+      "facts": [
+        "Supported Etherscan links in Waves and DMs render dedicated cards for transactions, addresses, tokens, NFTs, blocks, explorer lists, analytics, and tools.",
+        "Transaction cards can show status, action, participants, fee, block/finality context, and timestamp; recognized Compound events add Compound action context inside the Etherscan card.",
+        "Address, token, NFT, and block cards show bounded on-chain summaries when live RPC data is available.",
+        "Partial data, route-only pages, and retired explorer networks are labeled explicitly; the original canonical Etherscan link remains available.",
+        "Only exact approved HTTPS Etherscan hosts receive structured cards. Unknown subdomains and lookalike domains use the ordinary external-link behavior.",
+        "Bare .eth names and app.ens.domains URLs remain ENS previews rather than Etherscan previews."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves", "/messages"],
+      "tags": ["waves", "links", "etherscan", "ethereum"],
+      "source_refs": [
+        "ops/docs/waves/link-previews/feature-web3-preview-cards.md"
+      ]
+    },
+    {
       "id": "waves.drop.selection-copy",
       "kind": "ui_affordance",
       "title": "Wave drop selection copy",
@@ -5101,7 +5583,8 @@
       "keywords": ["tdh", "historic", "boosts", "rules", "versions"],
       "facts": [
         "Historic TDH boost rules live at /network/tdh/historic-boosts.",
-        "The page documents archived rule models and version differences.",
+        "The page compares archived versions in a table on tablet and desktop and in summary cards on mobile.",
+        "Use the row details control or Show rules button to expand the complete Category A, B, and C rules for a version.",
         "Use the main TDH page for the current TDH explanation."
       ],
       "canonical_path": "/network/tdh/historic-boosts",
@@ -5114,6 +5597,7 @@
       "tags": ["network", "tdh", "historic"],
       "source_refs": [
         "app/network/tdh/historic-boosts/page.tsx",
+        "app/network/tdh/historic-boosts/page.client.tsx",
         "ops/docs/network/feature-tdh-historic-boosts.md"
       ]
     },
@@ -5242,6 +5726,10 @@
       "facts": [
         "The Memes mint route lives at /the-memes/mint.",
         "Mint flow docs explain entry points, common scenarios, and recovery.",
+        "If a remembered profile's authorized wallet is disconnected, the mint page hides the duplicate Connect control; selecting SEIZE opens wallet connection and continues when the same wallet reconnects and transaction details are unchanged.",
+        "Selecting a different already-authenticated wallet switches the active profile and cancels the old pending mint so refreshed recipient, eligibility, price, and transaction details can be reviewed before selecting SEIZE again; an unauthenticated wallet must complete normal authentication first.",
+        "Wallet confirmation, submitted, successful, and on-chain error states appear in the shared transaction modal; local recipient and mint-count validation stays inline.",
+        "The shared transaction modal identifies the current card as Mint: The Memes #{id} when a valid token ID is available, and otherwise keeps the generic Mint The Memes title.",
         "Mint eligibility is separate from subscription mode and allowlist rules."
       ],
       "canonical_path": "/the-memes/mint",
@@ -5249,6 +5737,7 @@
       "tags": ["memes", "minting"],
       "source_refs": [
         "app/the-memes/mint/page.tsx",
+        "components/manifold-minting/ManifoldMintingWidget.tsx",
         "ops/docs/media/memes/feature-mint-flow.md"
       ]
     },
@@ -5517,7 +6006,8 @@
       "facts": [
         "NextGen mint and distribution-plan behavior is documented under NextGen docs.",
         "Mint routes live under /nextgen/collection/{collection}/mint.",
-        "Distribution plan routes live under /nextgen/collection/{collection}/distribution-plan."
+        "Distribution plan routes live under /nextgen/collection/{collection}/distribution-plan.",
+        "The distribution-plan allowlist shows a loading state while entries are fetched and a no-match state when active filters return no entries."
       ],
       "canonical_path": "/nextgen/collection/{collection}/mint",
       "related_paths": [
@@ -5540,7 +6030,11 @@
       "facts": [
         "NextGen token pages live at /nextgen/token/{token}.",
         "Token media rendering behavior is documented under NextGen docs.",
-        "Use collection pages for collection-level art browsing and token pages for token-specific media."
+        "Use collection pages for collection-level art browsing and token pages for token-specific media.",
+        "Token download options show Loading while availability is checked, a file size when available, and Coming Soon only when an output is missing.",
+        "Token lightbox and blackbox viewers fill the viewport, center the artwork, and lock page scrolling until closed.",
+        "Token and collection provenance sections show explicit loading and no-entry states.",
+        "When indexed token data is unavailable, the on-chain fallback keeps the standard token-page frame and shows fetching, not-found, or indexing-in-progress status."
       ],
       "canonical_path": "/nextgen/token/{token}",
       "related_paths": ["/nextgen/collection/{collection}"],
@@ -5985,6 +6479,7 @@
       "facts": [
         "Drop Forge launch claims live under /drop-forge/launch.",
         "Launch claim detail pages use /drop-forge/launch/{id}.",
+        "If the authorized wallet is disconnected, a launch on-chain action opens wallet connection and continues after connection succeeds when its transaction details are unchanged; refreshed details cancel the pending action so the user can review and retry.",
         "Launch claim pages can include mint stats and subscription airdrop sections when configured."
       ],
       "canonical_path": "/drop-forge/launch",
@@ -6009,12 +6504,14 @@
       "facts": [
         "The 6529 Gradient collection route lives at /6529-gradient.",
         "Individual Gradient detail routes use /6529-gradient/{id}.",
+        "The /about/6529-gradient overview explains the grayscale design system, animated #50, museum-held pieces, and community purpose.",
         "Use this route when users ask where to view the 6529 Gradient collection."
       ],
       "canonical_path": "/6529-gradient",
-      "related_paths": ["/6529-gradient/{id}"],
+      "related_paths": ["/6529-gradient/{id}", "/about/6529-gradient"],
       "tags": ["gradient", "collection"],
       "source_refs": [
+        "components/about/AboutGradients.tsx",
         "app/6529-gradient/page.tsx",
         "app/6529-gradient/[id]/page.tsx"
       ]

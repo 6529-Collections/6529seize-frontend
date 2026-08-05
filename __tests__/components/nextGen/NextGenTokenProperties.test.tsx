@@ -71,7 +71,7 @@ describe("NextgenRarityToggle", () => {
     const checkbox = screen.getByRole("checkbox");
     expect(checkbox).toBeDisabled();
     const label = screen.getByText("Dis");
-    expect(label.parentElement).toHaveClass("tw-text-[#9a9a9a]");
+    expect(label).toHaveClass("tw-text-iron-500");
   });
 });
 

@@ -2,11 +2,6 @@ name: Web Deploy - PROD
 
 on:
   workflow_dispatch:
-    inputs:
-      break_glass_reason:
-        type: string
-        description: Operator-only reason for a manual production deploy after bus enforcement
-        required: false
 
 permissions:
   contents: read
@@ -35,6 +30,103 @@ env:
   ANNOUNCED_VERSION_ENDPOINT: "https://dnclu2fna0b2b.cloudfront.net/web_build/current-production-version.json"
 
 jobs:
+  manual-deployment-guard:
+    name: Authorize manual production fallback
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+
+    steps:
+      - name: Require authoritative production fallback readiness
+        env:
+          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          TARGET_ENVIRONMENT: prod
+          TARGET_LANE: PRODUCTION
+        run: |
+          set -euo pipefail
+
+          test -n "$RELEASE_BUS_API_URL" || {
+            echo "::error::Release Bus API URL is unavailable; refusing manual production deployment."
+            exit 1
+          }
+          test -n "$RELEASE_BUS_WORKFLOW_AUTH_TOKEN" || {
+            echo "::error::Release Bus workflow credential is unavailable; refusing manual production deployment."
+            exit 1
+          }
+          [[ "$GITHUB_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]] || {
+            echo "::error::GitHub run identity is malformed; refusing manual production deployment."
+            exit 1
+          }
+          [[ "$GITHUB_RUN_ATTEMPT" =~ ^[1-9][0-9]{0,8}$ ]] || {
+            echo "::error::GitHub run attempt is malformed; refusing manual production deployment."
+            exit 1
+          }
+          [[ "$GITHUB_REF_NAME" =~ ^[A-Za-z0-9._/-]{1,255}$ ]] || {
+            echo "::error::GitHub source ref is malformed; refusing manual production deployment."
+            exit 1
+          }
+          [[ "$GITHUB_SHA" =~ ^[a-f0-9]{40}$ ]] || {
+            echo "::error::GitHub source SHA is malformed; refusing manual production deployment."
+            exit 1
+          }
+
+          payload="$(
+            jq -n \
+              --arg repository frontend \
+              --arg environment "$TARGET_ENVIRONMENT" \
+              --arg service frontend \
+              --arg workflow_run_id "$GITHUB_RUN_ID" \
+              --argjson workflow_run_attempt "$GITHUB_RUN_ATTEMPT" \
+              --arg source_ref "$GITHUB_REF_NAME" \
+              --arg source_sha "$GITHUB_SHA" \
+              '{repository:$repository,environment:$environment,service:$service,workflow_run_id:$workflow_run_id,workflow_run_attempt:$workflow_run_attempt,source_ref:$source_ref,source_sha:$source_sha}'
+          )"
+          response_file="$(mktemp)"
+          trap 'rm -f "$response_file"' EXIT
+          if ! http_status="$(
+            curl --silent --show-error \
+              --connect-timeout 10 \
+              --max-time 30 \
+              --output "$response_file" \
+              --write-out '%{http_code}' \
+              -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
+              -H 'Content-Type: application/json' \
+              --data "$payload" \
+              "$RELEASE_BUS_API_URL/deploy/release-bus-v2/manual-deployment-readiness"
+          )"; then
+            echo "::error::Release Bus readiness is unavailable; refusing manual production deployment."
+            exit 1
+          fi
+          if [ "$http_status" != 200 ]; then
+            echo "::error::Manual production fallback readiness was rejected with HTTP $http_status."
+            exit 1
+          fi
+          if ! jq -e \
+            --arg repository frontend \
+            --arg environment "$TARGET_ENVIRONMENT" \
+            --arg service frontend \
+            --arg workflow_run_id "$GITHUB_RUN_ID" \
+            --arg workflow_run_attempt "$GITHUB_RUN_ATTEMPT" \
+            --arg source_ref "$GITHUB_REF_NAME" \
+            --arg source_sha "$GITHUB_SHA" \
+            --arg lane "$TARGET_LANE" \
+            'type == "object" and
+             .ready == true and
+             .mode == "manual" and
+             .lane == $lane and
+             .repository == $repository and
+             .environment == $environment and
+             .service == $service and
+             (.workflow_run_id | tostring) == $workflow_run_id and
+             (.workflow_run_attempt | tostring) == $workflow_run_attempt and
+             .source_ref == $source_ref and
+             .source_sha == $source_sha' \
+            "$response_file" >/dev/null; then
+            echo "::error::Release Bus returned malformed or mismatched readiness evidence; refusing manual production deployment."
+            exit 1
+          fi
+
   assert-main-ref:
     name: Assert main ref
     runs-on: ubuntu-latest
@@ -48,37 +140,11 @@ jobs:
             exit 1
           fi
 
-      - name: Authorize operator break glass
-        if: vars.RELEASE_BUS_ENFORCEMENT == 'true'
-        env:
-          BREAK_GLASS_REASON: ${{ inputs.break_glass_reason }}
-          RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
-          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
-        run: |
-          set -euo pipefail
-          test -n "$RELEASE_BUS_API_URL"
-          test -n "$RELEASE_BUS_WORKFLOW_AUTH_TOKEN"
-          test -n "$BREAK_GLASS_REASON" || {
-            echo 'A break-glass reason is required while Release Bus enforcement is enabled.' >&2
-            exit 1
-          }
-          payload="$(jq -n \
-            --arg workflow_run_id "$GITHUB_RUN_ID" \
-            --arg repository frontend \
-            --arg environment prod \
-            --arg expected_sha "$GITHUB_SHA" \
-            --arg reason "$BREAK_GLASS_REASON" \
-            '{workflow_run_id:$workflow_run_id,repository:$repository,environment:$environment,service:null,expected_sha:$expected_sha,reason:$reason}')"
-          curl --fail-with-body --silent --show-error \
-            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
-            -H 'Content-Type: application/json' \
-            --data "$payload" \
-            "$RELEASE_BUS_API_URL/deploy/release-bus/authorize-break-glass"
-
   build-upload-deploy:
-    needs: assert-main-ref
-    runs-on: ubuntu-latest
+    needs: [assert-main-ref, manual-deployment-guard]
+    runs-on: ${{ vars.PRODUCTION_BUILD_RUNNER || vars.CI_BUILD_RUNNER || 'ubuntu-latest' }}
     permissions:
+      actions: read
       contents: read
       deployments: write
     environment: production
@@ -131,99 +197,82 @@ jobs:
             --environment-url "https://6529.io" \
             --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-      - name: Install Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
-        with:
-          node-version: "22"
-
-      - name: Activate pinned pnpm
-        run: |
-          corepack enable pnpm
-          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
-          pnpm --version
-
-      - name: Install Socket Firewall
-        id: socket_firewall
-        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
-        with:
-          mode: firewall
-
-      - name: Assert npm lockfile is absent
-        run: ./bin/6529 guard:no-package-lock
-
-      - name: Install dependencies
+      - name: Locate successful exact production prebuild
+        id: production-artifact
+        timeout-minutes: 5
         env:
-          SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
-        run: ./bin/6529 install:frozen
-
-      - name: Lint package.json versions
-        run: ./bin/6529 lint:package-json
-
-      - name: Capture production build timestamp
-        run: printf 'VERSION_BUILD_TIMESTAMP=%s\n' "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> "$GITHUB_ENV"
-
-      - name: Build App
-        env:
-          NODE_ENV: "production"
-          API_ENDPOINT: ${{ env.API_ENDPOINT }}
-          ALLOWLIST_API_ENDPOINT: ${{ env.ALLOWLIST_API_ENDPOINT }}
-          BASE_ENDPOINT: ${{ env.BASE_ENDPOINT }}
-          VERSION: ${{ env.COMMIT_SHA }}
-          VERSION_BUILD_TIMESTAMP: ${{ env.VERSION_BUILD_TIMESTAMP }}
-          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
-          NEXTGEN_CHAIN_ID: ${{ env.NEXTGEN_CHAIN_ID }}
-          GIPHY_API_KEY: ${{ secrets.GIPHY_API_KEY }}
-          AWS_RUM_APP_ID: ${{ secrets.AWS_RUM_APP_ID }}
-          AWS_RUM_REGION: ${{ secrets.AWS_RUM_REGION }}
-          AWS_RUM_SAMPLE_RATE: ${{ secrets.AWS_RUM_SAMPLE_RATE }}
-          NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }}
-          ASSETS_FROM_S3: ${{ env.ASSETS_FROM_S3 }}
-          ANNOUNCED_VERSION_ENDPOINT: ${{ env.ANNOUNCED_VERSION_ENDPOINT }}
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: ./bin/6529 run build
-
-      - name: Build Target
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_SHA: ${{ env.COMMIT_SHA }}
         run: |
-          rm -rf target .deploy-bundle
-          mkdir -p target/_next .deploy-bundle/.next
-
-          test -f .next/standalone/server.js
-          cp -r .next/standalone/. .deploy-bundle/
-          cp -r .next/static target/_next/
-          cp -r .next/static .deploy-bundle/.next/
-          cp -r public .deploy-bundle/
-          cp Procfile .deploy-bundle/
-          cp -r .ebextensions .deploy-bundle/
-          if [ -d .platform ]; then
-            cp -r .platform .deploy-bundle/
-          fi
-
-          # Next standalone can include dangling pnpm symlinks that Elastic
-          # Beanstalk trips over during StageApplication ownership fixes.
-          find .deploy-bundle -xtype l -delete
-
-          for file in BUILD_ID PUBLIC_RUNTIME.json ASSETS_FROM_S3; do
-            if [ -f ".next/$file" ]; then
-              cp ".next/$file" ".deploy-bundle/.next/$file"
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          artifact_name="production-frontend-${EXPECTED_SHA}"
+          artifact_json=''
+          for attempt in $(seq 1 12); do
+            artifact_json="$(gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=${artifact_name}&per_page=100")"
+            run_id="$(jq -er --arg sha "$EXPECTED_SHA" '
+              [.artifacts[] |
+                select(.expired == false and .workflow_run.head_sha == $sha)] |
+              sort_by(.created_at) | last | .workflow_run.id // empty
+            ' <<< "$artifact_json" 2>/dev/null || true)"
+            if [[ "$run_id" =~ ^[1-9][0-9]{0,19}$ ]]; then
+              run_json="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}")"
+              if jq -e --arg sha "$EXPECTED_SHA" '
+                .path == ".github/workflows/production-build-artifact.yml" and
+                (.event == "push" or .event == "workflow_dispatch") and
+                .conclusion == "success" and
+                .head_branch == "main" and
+                .head_sha == $sha
+              ' <<< "$run_json" >/dev/null; then
+                artifact_id="$(jq -er --arg sha "$EXPECTED_SHA" '
+                  [.artifacts[] |
+                    select(.expired == false and .workflow_run.head_sha == $sha)] |
+                  sort_by(.created_at) | last | .id
+                ' <<< "$artifact_json")"
+                [[ "$artifact_id" =~ ^[1-9][0-9]{0,19}$ ]]
+                echo "name=$artifact_name" >> "$GITHUB_OUTPUT"
+                echo "run-id=$run_id" >> "$GITHUB_OUTPUT"
+                echo "artifact-id=$artifact_id" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
             fi
+            if [ "$attempt" -lt 12 ]; then sleep 20; fi
           done
+          echo "::error::No successful exact production prebuild is available for $EXPECTED_SHA."
+          exit 1
 
-          (
-            cd .deploy-bundle
-            zip -yr ../target/package.zip .
-          )
+      - name: Download exact production artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: ${{ steps.production-artifact.outputs.name }}
+          path: production-artifact
+          run-id: ${{ steps.production-artifact.outputs.run-id }}
+          github-token: ${{ github.token }}
 
-      - name: Verify package bundle size
+      - name: Verify exact production artifact
+        env:
+          EXPECTED_SHA: ${{ env.COMMIT_SHA }}
         run: |
-          PACKAGE_SIZE_BYTES=$(stat -c%s target/package.zip)
-          PACKAGE_SIZE_MB=$((PACKAGE_SIZE_BYTES / 1024 / 1024))
-          MAX_SIZE_BYTES=$((500 * 1024 * 1024))
-          echo "package.zip size: ${PACKAGE_SIZE_MB} MB (${PACKAGE_SIZE_BYTES} bytes)"
-          if [ "$PACKAGE_SIZE_BYTES" -gt "$MAX_SIZE_BYTES" ]; then
-            echo "Elastic Beanstalk source bundle exceeds the 500 MB limit."
-            exit 1
-          fi
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test -f production-artifact/manifest.json
+          test -f production-artifact/SHA256SUMS
+          test -f production-artifact/target/package.zip
+          (cd production-artifact && sha256sum -c SHA256SUMS)
+          jq -e --arg source_sha "$EXPECTED_SHA" '
+            .schema_version == 1 and
+            .artifact_contract == "production-prebuild-v1" and
+            .repository == "frontend" and
+            .source_sha == $source_sha and
+            .environment == "production" and
+            (.package_sha256 | test("^[a-f0-9]{64}$")) and
+            (.build_timestamp | type == "string" and length >= 20)
+          ' production-artifact/manifest.json >/dev/null
+          package_digest="$(sha256sum production-artifact/target/package.zip | cut -d' ' -f1)"
+          test "$package_digest" = "$(jq -r .package_sha256 production-artifact/manifest.json)"
+          package_size="$(stat -c%s production-artifact/target/package.zip)"
+          test "$package_size" -le $((500 * 1024 * 1024))
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
@@ -245,7 +294,7 @@ jobs:
             --branch main
 
       - name: Upload assets to S3
-        run: aws s3 sync target "s3://${AWS_BUCKET}/web_build/${COMMIT_SHA}/"
+        run: aws s3 sync production-artifact/target "s3://${AWS_BUCKET}/web_build/${COMMIT_SHA}/"
 
       - name: Get commit message
         run: printf 'COMMIT_MESSAGE=%s\n' "$(git show -s --format=%s)" >> "$GITHUB_ENV"
@@ -311,17 +360,39 @@ jobs:
           SSR_CLIENT_SECRET: ${{ secrets.SSR_CLIENT_SECRET }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           GITHUB_LINK_STATUS_PREVIEW_TOKEN: ${{ secrets.LINK_STATUS_PREVIEW_GITHUB_TOKEN }}
+          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_PRODUCTION_DISCUSSION_DESTINATIONS }}
         run: |
+          set -euo pipefail
+
+          jq -e '
+            type == "object" and
+            keys == ["production"] and
+            (.production | type == "object") and
+            (.production["stream-review"] | type == "string" and test("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"))
+          ' <<<"$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" >/dev/null
+
+          option_settings="$(
+            jq -cn \
+              --arg ssr_client_id "$SSR_CLIENT_ID" \
+              --arg ssr_client_secret "$SSR_CLIENT_SECRET" \
+              --arg alchemy_api_key "$ALCHEMY_API_KEY" \
+              --arg github_link_status_preview_token "$GITHUB_LINK_STATUS_PREVIEW_TOKEN" \
+              --arg public_review_discussion_destinations "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" \
+              '[
+                {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"SSR_CLIENT_ID",Value:$ssr_client_id},
+                {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"SSR_CLIENT_SECRET",Value:$ssr_client_secret},
+                {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"ALCHEMY_API_KEY",Value:$alchemy_api_key},
+                {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"GITHUB_LINK_STATUS_PREVIEW_TOKEN",Value:$github_link_status_preview_token},
+                {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"PUBLIC_REVIEW_DISCUSSION_DESTINATIONS",Value:$public_review_discussion_destinations},
+                {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"SENTRY_SERVER_INSTRUMENTATION",Value:"false"}
+              ]'
+          )"
+
           aws elasticbeanstalk update-environment \
             --application-name "${{ env.BEANSTALK_APP_NAME }}" \
             --environment-name "${{ env.BEANSTALK_ENV_NAME }}" \
             --version-label "${{ env.COMMIT_SHA }}" \
-            --option-settings \
-              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=SSR_CLIENT_ID,Value=${SSR_CLIENT_ID}" \
-              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=SSR_CLIENT_SECRET,Value=${SSR_CLIENT_SECRET}" \
-              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=ALCHEMY_API_KEY,Value=${ALCHEMY_API_KEY}" \
-              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=GITHUB_LINK_STATUS_PREVIEW_TOKEN,Value=${GITHUB_LINK_STATUS_PREVIEW_TOKEN}" \
-              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=SENTRY_SERVER_INSTRUMENTATION,Value=false"
+            --option-settings "$option_settings"
 
       - name: Check Elastic Beanstalk health and readiness (120s warmup then 20 retries with 60s delay)
         env:
@@ -553,15 +624,21 @@ jobs:
           if-no-files-found: ignore
           retention-days: 90
 
-      - name: Checkout notification script
+      - name: Check out CI wave notifier
         if: always()
+        continue-on-error: true
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
+          ref: ${{ github.workflow_sha }}
           persist-credentials: false
+          path: .ci-wave-notifier
+          sparse-checkout: scripts/notify-ci-wave.mjs
+          sparse-checkout-cone-mode: false
 
       - name: Notify about failure
-        uses: sarisia/actions-status-discord@v1
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1
         if: failure()
+        continue-on-error: true
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
@@ -571,7 +648,7 @@ jobs:
           color: 0xff0000
 
       - name: Notify CI wave about failure
-        if: failure()
+        if: failure() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
         continue-on-error: true
         env:
           CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
@@ -582,11 +659,13 @@ jobs:
           CI_PIPELINES_TITLE: "Seize PROD WEB DEPLOY: CI pipeline is broken!!!"
           CI_PIPELINES_ENVIRONMENT: production
           CI_PIPELINES_SERVICE: web
-        run: node scripts/notify-ci-wave.mjs
+          CI_PIPELINES_SHA: ${{ github.sha }}
+        run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs
 
       - name: Notify about success
-        uses: sarisia/actions-status-discord@v1
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1
         if: success()
+        continue-on-error: true
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
@@ -595,7 +674,7 @@ jobs:
           color: 0x00ff00
 
       - name: Notify CI wave about success
-        if: success()
+        if: success() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
         continue-on-error: true
         env:
           CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
@@ -606,5 +685,59 @@ jobs:
           CI_PIPELINES_TITLE: "Seize PROD WEB DEPLOY: CI pipeline complete"
           CI_PIPELINES_ENVIRONMENT: production
           CI_PIPELINES_SERVICE: web
+          CI_PIPELINES_SHA: ${{ github.sha }}
           CI_RELEASE_NOTES_PROMPT_PATH: ops/release-notes/release-notes.prompt.md
-        run: node scripts/notify-ci-wave.mjs
+        run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs
+
+  notify-production-prerequisite-failure:
+    name: Notify about production prerequisite failure
+    needs: [manual-deployment-guard, assert-main-ref, build-upload-deploy]
+    if: >-
+      ${{
+        always() &&
+        needs.build-upload-deploy.result == 'skipped' &&
+        (
+          needs.manual-deployment-guard.result == 'failure' ||
+          needs.assert-main-ref.result == 'failure'
+        )
+      }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Notify about prerequisite failure
+        continue-on-error: true
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          title: "Seize PROD WEB DEPLOY: CI pipeline is broken!!!"
+          description: ${{ github.sha }} - A production deployment prerequisite failed before build/upload/deploy.
+          content: "<@&1162355330798325861>"
+          color: 0xff0000
+
+      - name: Check out CI wave notifier
+        continue-on-error: true
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          path: .ci-wave-notifier
+          sparse-checkout: scripts/notify-ci-wave.mjs
+          sparse-checkout-cone-mode: false
+
+      - name: Notify CI wave about prerequisite failure
+        if: always() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
+        continue-on-error: true
+        env:
+          CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
+          CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
+          CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
+          CI_PIPELINES_TARGET_ENV: production
+          CI_PIPELINES_STATUS: failure
+          CI_PIPELINES_TITLE: "Seize PROD WEB DEPLOY: CI pipeline is broken!!!"
+          CI_PIPELINES_ENVIRONMENT: production
+          CI_PIPELINES_SERVICE: web
+          CI_PIPELINES_SHA: ${{ github.sha }}
+        run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs

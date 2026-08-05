@@ -1,0 +1,903 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest#function:0xf3d1bf99",
+          "declaringDefinitionId": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSafeApprovedHashAuctionSmokeOnForkChainId",
+          "outputs": [],
+          "selector": "0xf3d1bf99",
+          "signature": "testSafeApprovedHashAuctionSmokeOnForkChainId()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest#function:0x3a0d25ea",
+          "declaringDefinitionId": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSafeApprovedHashFailsAfterChainSwitch",
+          "outputs": [],
+          "selector": "0x3a0d25ea",
+          "signature": "testSafeApprovedHashFailsAfterChainSwitch()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest#function:0x286bec2a",
+          "declaringDefinitionId": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSafeApprovedHashFailsForWrongVerifyingContract",
+          "outputs": [],
+          "selector": "0x286bec2a",
+          "signature": "testSafeApprovedHashFailsForWrongVerifyingContract()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest#function:0x7235fa07",
+          "declaringDefinitionId": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSafeApprovedHashFixedPriceSmokeOnForkChainId",
+          "outputs": [],
+          "selector": "0x7235fa07",
+          "signature": "testSafeApprovedHashFixedPriceSmokeOnForkChainId()",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest#function:0xd60b1f84",
+          "declaringDefinitionId": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest",
+          "inherited": false,
+          "inputs": [],
+          "name": "testSafeApprovedHashRequiresThreshold",
+          "outputs": [],
+          "selector": "0xd60b1f84",
+          "signature": "testSafeApprovedHashRequiresThreshold()",
+          "stateMutability": "nonpayable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "testSafeApprovedHashFixedPriceSmokeOnForkChainId()",
+          "displaySignature": "testSafeApprovedHashFixedPriceSmokeOnForkChainId()",
+          "functionKind": "function",
+          "id": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest#function:0x7235fa07",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZS50LnNvbDpTdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZVRlc3QjZnVuY3Rpb246MHg3MjM1ZmEwNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSafeApprovedHashFixedPriceSmokeOnForkChainId",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1922,
+            "byteStart": 1276,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L31-L70",
+            "lineEnd": 70,
+            "lineStart": 31,
+            "snippetSha256": "sha256:fbf97c2a37a75af4529a0c15eca5495b7955084c89cee109b2e443e1825f65ac",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "selector": "0x7235fa07",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSafeApprovedHashAuctionSmokeOnForkChainId()",
+          "displaySignature": "testSafeApprovedHashAuctionSmokeOnForkChainId()",
+          "functionKind": "function",
+          "id": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest#function:0xf3d1bf99",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZS50LnNvbDpTdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZVRlc3QjZnVuY3Rpb246MHhmM2QxYmY5OQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSafeApprovedHashAuctionSmokeOnForkChainId",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1772,
+            "byteStart": 3204,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L72-L111",
+            "lineEnd": 111,
+            "lineStart": 72,
+            "snippetSha256": "sha256:38b1ebc88a2122651bdc1a81d6f5920fa03e2e9a0a7a8fc7610bb47f3b70c797",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "selector": "0xf3d1bf99",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSafeApprovedHashRequiresThreshold()",
+          "displaySignature": "testSafeApprovedHashRequiresThreshold()",
+          "functionKind": "function",
+          "id": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest#function:0xd60b1f84",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZS50LnNvbDpTdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZVRlc3QjZnVuY3Rpb246MHhkNjBiMWY4NA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSafeApprovedHashRequiresThreshold",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 836,
+            "byteStart": 4982,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L113-L129",
+            "lineEnd": 129,
+            "lineStart": 113,
+            "snippetSha256": "sha256:84bcb1e81afb9233bf8631e21d345a865022bdfa505ec0fcdf886d34af887308",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "selector": "0xd60b1f84",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSafeApprovedHashFailsAfterChainSwitch()",
+          "displaySignature": "testSafeApprovedHashFailsAfterChainSwitch()",
+          "functionKind": "function",
+          "id": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest#function:0x3a0d25ea",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZS50LnNvbDpTdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZVRlc3QjZnVuY3Rpb246MHgzYTBkMjVlYQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSafeApprovedHashFailsAfterChainSwitch",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 836,
+            "byteStart": 5824,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L131-L145",
+            "lineEnd": 145,
+            "lineStart": 131,
+            "snippetSha256": "sha256:e1632308723e3c4235f3b63e2ab7322deb101d3a250d11ab35cee3fdb9c499a6",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "selector": "0x3a0d25ea",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "testSafeApprovedHashFailsForWrongVerifyingContract()",
+          "displaySignature": "testSafeApprovedHashFailsForWrongVerifyingContract()",
+          "functionKind": "function",
+          "id": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest#function:0x286bec2a",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZS50LnNvbDpTdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZVRlc3QjZnVuY3Rpb246MHgyODZiZWMyYQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "testSafeApprovedHashFailsForWrongVerifyingContract",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 1286,
+            "byteStart": 6666,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L147-L178",
+            "lineEnd": 178,
+            "lineStart": 147,
+            "snippetSha256": "sha256:f74ea2d452529369979fd044882b7e404ccd909feb65acaac0f5aa246c30b055",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "selector": "0x286bec2a",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "deploySafeSignerStack()",
+          "functionKind": "function",
+          "id": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest#function:deploySafeSignerStack()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZS50LnNvbDpTdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZVRlc3QjZnVuY3Rpb246ZGVwbG95U2FmZVNpZ25lclN0YWNrKCk",
+          "kind": "function",
+          "modifiers": [],
+          "name": "deploySafeSignerStack",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "deployed",
+              "storageLocation": "memory",
+              "type": "DeployedStream"
+            },
+            {
+              "index": 1,
+              "name": "safeSigner",
+              "type": "MockSafeERC1271Signer"
+            }
+          ],
+          "range": {
+            "byteLength": 313,
+            "byteStart": 7958,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L180-L186",
+            "lineEnd": 186,
+            "lineStart": 180,
+            "snippetSha256": "sha256:748ed07d91d27463b00b81c6008d1ec0d682efb5b7abcde90d7c660aa7332918",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "deployLightweightSafeSignerDrops()",
+          "functionKind": "function",
+          "id": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest#function:deployLightweightSafeSignerDrops()",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZS50LnNvbDpTdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZVRlc3QjZnVuY3Rpb246ZGVwbG95TGlnaHR3ZWlnaHRTYWZlU2lnbmVyRHJvcHMoKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "deployLightweightSafeSignerDrops",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "drops",
+              "type": "StreamDrops"
+            },
+            {
+              "index": 1,
+              "name": "safeSigner",
+              "type": "MockSafeERC1271Signer"
+            }
+          ],
+          "range": {
+            "byteLength": 289,
+            "byteStart": 8277,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L188-L194",
+            "lineEnd": 194,
+            "lineStart": 188,
+            "snippetSha256": "sha256:cb7f8657c141f100966cff4ef8231b67d1d1fc0dfc6feb465424f4249c11128c",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "deployLightweightSafeSignerDrops(MockSafeERC1271Signer)",
+          "functionKind": "function",
+          "id": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest#function:deployLightweightSafeSignerDrops(MockSafeERC1271Signer)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "safeSigner",
+              "type": "MockSafeERC1271Signer"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZS50LnNvbDpTdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZVRlc3QjZnVuY3Rpb246ZGVwbG95TGlnaHR3ZWlnaHRTYWZlU2lnbmVyRHJvcHMoTW9ja1NhZmVFUkMxMjcxU2lnbmVyKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "deployLightweightSafeSignerDrops",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "drops",
+              "type": "StreamDrops"
+            },
+            {
+              "index": 1,
+              "name": "auctions",
+              "type": "MockStreamAuctions"
+            }
+          ],
+          "range": {
+            "byteLength": 658,
+            "byteStart": 8572,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L196-L210",
+            "lineEnd": 210,
+            "lineStart": 196,
+            "snippetSha256": "sha256:a67550f421c8bf1f8fe62043cf0ac407ee74f7c408124ba5bfca0e059f9df05d",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "approveSafeDigest(MockSafeERC1271Signer,bytes32)",
+          "functionKind": "function",
+          "id": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest#function:approveSafeDigest(MockSafeERC1271Signer,bytes32)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "safeSigner",
+              "type": "MockSafeERC1271Signer"
+            },
+            {
+              "index": 1,
+              "name": "digest",
+              "type": "bytes32"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZS50LnNvbDpTdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZVRlc3QjZnVuY3Rpb246YXBwcm92ZVNhZmVEaWdlc3QoTW9ja1NhZmVFUkMxMjcxU2lnbmVyLGJ5dGVzMzIp",
+          "kind": "function",
+          "modifiers": [],
+          "name": "approveSafeDigest",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 240,
+            "byteStart": 9236,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L212-L217",
+            "lineEnd": 217,
+            "lineStart": 212,
+            "snippetSha256": "sha256:5fc7c5b8ed81829786c217b0ced09b5eb36ce13c494bc9ec0a18a46ab2286b35",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "safeApprovedHashSignature(StreamDrops,StreamDrops.DropAuthorization)",
+          "functionKind": "function",
+          "id": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest#function:safeApprovedHashSignature(StreamDrops,StreamDrops.DropAuthorization)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "drops",
+              "type": "StreamDrops"
+            },
+            {
+              "index": 1,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZS50LnNvbDpTdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZVRlc3QjZnVuY3Rpb246c2FmZUFwcHJvdmVkSGFzaFNpZ25hdHVyZShTdHJlYW1Ecm9wcyxTdHJlYW1Ecm9wcy5Ecm9wQXV0aG9yaXphdGlvbik",
+          "kind": "function",
+          "modifiers": [],
+          "name": "safeApprovedHashSignature",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "range": {
+            "byteLength": 297,
+            "byteStart": 9482,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L219-L226",
+            "lineEnd": 226,
+            "lineStart": 219,
+            "snippetSha256": "sha256:5ec65bc63f09fbc22406aeee197ef0d710deb17ba95a0f6722ef5b39f1472781",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "selector": null,
+          "stateMutability": "view",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        },
+        {
+          "canonicalSignature": null,
+          "displaySignature": "expectBadContractSignature(StreamDrops,StreamDrops.DropAuthorization,string,bytes)",
+          "functionKind": "function",
+          "id": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest#function:expectBadContractSignature(StreamDrops,StreamDrops.DropAuthorization,string,bytes)",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "drops",
+              "type": "StreamDrops"
+            },
+            {
+              "index": 1,
+              "name": "authorization",
+              "storageLocation": "memory",
+              "type": "StreamDrops.DropAuthorization"
+            },
+            {
+              "index": 2,
+              "name": "tokenData",
+              "storageLocation": "memory",
+              "type": "string"
+            },
+            {
+              "index": 3,
+              "name": "signature",
+              "storageLocation": "memory",
+              "type": "bytes"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZS50LnNvbDpTdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZVRlc3QjZnVuY3Rpb246ZXhwZWN0QmFkQ29udHJhY3RTaWduYXR1cmUoU3RyZWFtRHJvcHMsU3RyZWFtRHJvcHMuRHJvcEF1dGhvcml6YXRpb24sc3RyaW5nLGJ5dGVzKQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "expectBadContractSignature",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 322,
+            "byteStart": 9785,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L228-L236",
+            "lineEnd": 236,
+            "lineStart": 228,
+            "snippetSha256": "sha256:6a86e6c8d1f7f8a18f4d3792a78b7315101bee561f0e289cc24b47716005aff4",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "selector": null,
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "private"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "FORK_CHAIN_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 42,
+            "byteStart": 612,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:c5ce3ba6c5f6031ea8318696a07c3b95fa0bbc253ed534397a95cbe87f6a1838",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 653,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L19",
+            "lineEnd": 19,
+            "lineStart": 19,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "valueSource": "1",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "LOCAL_CHAIN_ID",
+          "natspec": "",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 660,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:1a4c43b8efb72715ea4b11869a28e4876607a8ce35788e5c971d318772ab76ce",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 6,
+            "byteStart": 702,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L20",
+            "lineEnd": 20,
+            "lineStart": 20,
+            "snippetSha256": "sha256:cae8402514ec1547790f090a64f5c459cbc1926837e3b8d09b60f956454d861a",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "valueSource": "31_337",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SAFE_OWNER_ONE",
+          "natspec": "",
+          "range": {
+            "byteLength": 57,
+            "byteStart": 714,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:02c033515999937403c423e67e877985266744eb0ff374769cd434b3fb50d8fa",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 756,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L21",
+            "lineEnd": 21,
+            "lineStart": 21,
+            "snippetSha256": "sha256:9aa88dd8f3b969def84c016bf5a71d9b0ca8d1fdcf8f6fd910c4c2c4bb6e3a77",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "valueSource": "address(0xA001)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SAFE_OWNER_TWO",
+          "natspec": "",
+          "range": {
+            "byteLength": 57,
+            "byteStart": 777,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:2ead1169bb3ac09d488096a2b7f09e3e4856615108736ca659d77793dcfd4106",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 819,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L22",
+            "lineEnd": 22,
+            "lineStart": 22,
+            "snippetSha256": "sha256:8e26704e078fb1ed8806b6bf11bed99df75ea520377e4f5e4a06ebe8a1e45bf3",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "valueSource": "address(0xA002)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "POSTER",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 840,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:695a59e12d896c6e13bf8a41a7b87f2dbedaa0e769d3f48d88cfb58046e19145",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 874,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L23",
+            "lineEnd": 23,
+            "lineStart": 23,
+            "snippetSha256": "sha256:0ab9e750f7c6ea7ca35cb67c84e1deac4cd43cc2a6a45b284817308c28bdf2a2",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "valueSource": "address(0x1001)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "RECIPIENT",
+          "natspec": "",
+          "range": {
+            "byteLength": 52,
+            "byteStart": 895,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:3e651fdfebdcfe0dd0fdc57a7c7e95dcc88555bb618ed67eaaae88bb2f03bb11",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 932,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L24",
+            "lineEnd": 24,
+            "lineStart": 24,
+            "snippetSha256": "sha256:1e80055498f115d09b966c83a4320475410b3488cc2e25d7bd51229b835b3e62",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "valueSource": "address(0x5005)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PAYER",
+          "natspec": "",
+          "range": {
+            "byteLength": 48,
+            "byteStart": 953,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:2c8cfd02cfc3a513a42bbd0c7250232d92b1d663d0b2a74693bbcdff2e5470a0",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 986,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L25",
+            "lineEnd": 25,
+            "lineStart": 25,
+            "snippetSha256": "sha256:2b313e967de5483796211fbd6b58e26c0e1d5832d8be24b0b4b1d2ad4809a902",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "valueSource": "address(0x6006)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "PAYOUT",
+          "natspec": "",
+          "range": {
+            "byteLength": 49,
+            "byteStart": 1007,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:6de2ca19a7b0e6342b9c731f9156dbb66238022542868c0f1d32ade32ca072b7",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1041,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L26",
+            "lineEnd": 26,
+            "lineStart": 26,
+            "snippetSha256": "sha256:f459905761015e37605475907d05df689f55b238aec15260d4f0510e5e363c1f",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "valueSource": "address(0x2002)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "CURATORS_POOL",
+          "natspec": "",
+          "range": {
+            "byteLength": 56,
+            "byteStart": 1062,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:c7bb6fdd9819faf3c363c0c7247b0cfebcb63e2077a5c446bc0035b0e17c4018",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "selector": null,
+          "type": "address",
+          "typeString": "address",
+          "valueRange": {
+            "byteLength": 15,
+            "byteStart": 1103,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L27",
+            "lineEnd": 27,
+            "lineStart": 27,
+            "snippetSha256": "sha256:59382625991cd4bee04dd9942857caa65309d0e0d4b1f91c186b3b9845797e29",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "valueSource": "address(0x3003)",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "FIXED_PRICE",
+          "natspec": "",
+          "range": {
+            "byteLength": 46,
+            "byteStart": 1124,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:421a2cb4993ccc5b399a7f94cc5b99932c42d119afa28165066afc3a829b06b0",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "selector": null,
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 7,
+            "byteStart": 1163,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L28",
+            "lineEnd": 28,
+            "lineStart": 28,
+            "snippetSha256": "sha256:8ed26c817150283c6738520cd1cbcd9ab2444d660b342386f69edccb0a98e575",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "valueSource": "4 ether",
+          "visibility": "private"
+        },
+        {
+          "constant": true,
+          "getterDeclarationId": null,
+          "immutable": false,
+          "name": "SAFE_APPROVED_HASH_TAG",
+          "natspec": "",
+          "range": {
+            "byteLength": 93,
+            "byteStart": 1176,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:1d06e8996e0e0235fa367edc1cf5f59654bec12e86464e3709519e67e5874583",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "selector": null,
+          "type": "bytes32",
+          "typeString": "bytes32",
+          "valueRange": {
+            "byteLength": 43,
+            "byteStart": 1226,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L29",
+            "lineEnd": 29,
+            "lineStart": 29,
+            "snippetSha256": "sha256:77966956e3f7edfb8e6edb642647e1d93752714453a17b2644ca91da98f8d410",
+            "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+          },
+          "valueSource": "keccak256(\"6529Stream.SafeApprovedHash.v1\")",
+          "visibility": "private"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest",
+    "inheritance": [
+      {
+        "definitionId": "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+        "name": "DropAuthTestHelper"
+      },
+      {
+        "definitionId": "test/helpers/StreamFixture.sol:StreamFixture",
+        "name": "StreamFixture"
+      }
+    ],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZS50LnNvbDpTdHJlYW1TYWZlRVJDMTI3MUZvcmtTbW9rZVRlc3Q",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest",
+      "test/helpers/StreamFixture.sol:StreamFixture",
+      "test/helpers/DropAuthTestHelper.sol:DropAuthTestHelper",
+      "test/helpers/CharacterizationTestBase.sol:CharacterizationTestBase"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "StreamSafeERC1271ForkSmokeTest",
+    "natspec": "",
+    "range": {
+      "byteLength": 9714,
+      "byteStart": 395,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamSafeERC1271ForkSmoke.t.sol#L13-L237",
+      "lineEnd": 237,
+      "lineStart": 13,
+      "snippetSha256": "sha256:78facbb7571893870119254c8f54e84df0befabed673c62e917e47d67075faea",
+      "sourceSha256": "sha256:a37c28f407c0728d8b4d915c1525e00ed7a8fab3676825142ee2eaf2b703e737"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamSafeERC1271ForkSmoke.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 6
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 5
+    },
+    "totalCount": 6
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest#function:0x286bec2a",
+      "definitionId": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest#function:0x3a0d25ea",
+      "definitionId": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest#function:0x7235fa07",
+      "definitionId": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest#function:0xd60b1f84",
+      "definitionId": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest#function:0xf3d1bf99",
+      "definitionId": "test/StreamSafeERC1271ForkSmoke.t.sol:StreamSafeERC1271ForkSmokeTest",
+      "severity": "advisory"
+    }
+  ]
+}

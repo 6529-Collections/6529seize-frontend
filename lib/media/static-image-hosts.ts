@@ -3,6 +3,7 @@ export const STATIC_ALLOWED_IMAGE_HOSTNAMES = [
   "seize.io",
   "staging.6529.io",
   "media.generator.seize.io",
+  "media-proxy.artblocks.io",
   "d3lqz0a4bldqgf.cloudfront.net",
   "img.youtube.com",
   "i.seadn.io",

@@ -5,7 +5,7 @@ export default function GlobalRepCategoryLoading() {
   const loadingLabel = t(DEFAULT_LOCALE, "rep.categories.loading.details");
 
   return (
-    <main className="tailwind-scope tw-min-h-screen tw-bg-[#050506] tw-px-4 tw-py-10 sm:tw-px-6 lg:tw-px-8">
+    <main className="tailwind-scope tw-min-h-screen tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-[#050506] tw-px-4 tw-py-10 sm:tw-px-6 lg:tw-px-8">
       <div
         aria-live="polite"
         aria-label={loadingLabel}

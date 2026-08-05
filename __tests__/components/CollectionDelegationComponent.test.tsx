@@ -8,9 +8,12 @@ jest.mock("react", () => {
 });
 
 import CollectionDelegationComponent from "@/components/delegation/CollectionDelegation";
-import { MEMES_COLLECTION } from "@/components/delegation/delegation-constants";
+import {
+  ALL_USE_CASES,
+  MEMES_COLLECTION,
+} from "@/components/delegation/delegation-constants";
 import { DelegationCenterSection } from "@/types/enums";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
   useReadContract,
   useReadContracts,
@@ -37,8 +40,25 @@ jest.mock("wagmi", () => {
   };
 });
 
+let mockAccountAddress: string | undefined = "0x0";
+let mockAccountIsConnected = true;
+const mockSeizeConnect = jest.fn();
+
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: () => ({ address: "0x0", isConnected: true }),
+  useSeizeConnectContext: () => ({
+    address: mockAccountAddress,
+    isConnected: mockAccountIsConnected,
+    seizeConnect: mockSeizeConnect,
+  }),
+}));
+
+jest.mock("@/components/delegation/UpdateDelegation", () => ({
+  __esModule: true,
+  default: (props: { onHide: () => void }) => (
+    <button type="button" onClick={props.onHide}>
+      Cancel Update
+    </button>
+  ),
 }));
 
 const mockUseReadContract = useReadContract as jest.Mock;
@@ -77,8 +97,43 @@ describe("CollectionDelegationComponent", () => {
     }));
   }
 
+  function mockUseCaseLockState(options: {
+    readonly localLockedIndex?: number;
+    readonly globalLockedIndex?: number;
+  }) {
+    mockUseReadContracts.mockImplementation(
+      (params?: {
+        contracts?: {
+          functionName?: string;
+          args?: readonly (string | number | undefined)[];
+        }[];
+      }) => {
+        const firstContract = params?.contracts?.[0];
+        if (
+          firstContract?.functionName !== "retrieveCollectionUseCaseLockStatus"
+        ) {
+          return { data: undefined, refetch: jest.fn() };
+        }
+
+        const isLocalScope = firstContract.args?.[0] === collection.contract;
+        const lockedIndex = isLocalScope
+          ? options.localLockedIndex
+          : options.globalLockedIndex;
+
+        return {
+          data: ALL_USE_CASES.map((_, index) => ({
+            result: index === lockedIndex,
+          })),
+          refetch: jest.fn(),
+        };
+      }
+    );
+  }
+
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAccountAddress = "0x0";
+    mockAccountIsConnected = true;
     mockUseReadContract.mockReturnValue({});
     mockUseReadContracts.mockReturnValue({
       data: undefined,
@@ -135,6 +190,205 @@ describe("CollectionDelegationComponent", () => {
       screen.getByRole("button", { name: /Outgoing Delegations/i })
     );
     expect(screen.getAllByText(/Fetching outgoing/i)[0]).toBeInTheDocument();
+  });
+
+  it("shows an actionable error when the initial delegation read fails", () => {
+    const retryOutgoing = jest.fn();
+    const outgoingRead = {
+      data: undefined,
+      isError: true,
+      refetch: retryOutgoing,
+    };
+    const incomingRead = {
+      data: [],
+      isError: false,
+      refetch: jest.fn(),
+    };
+    const emptyRead = {
+      data: undefined,
+      isError: false,
+      refetch: jest.fn(),
+    };
+    mockUseReadContracts.mockImplementation(
+      (params?: { contracts?: { functionName?: string }[] }) => {
+        const functionName = params?.contracts?.[0]?.functionName;
+        if (
+          functionName === "retrieveDelegationAddressesTokensIDsandExpiredDates"
+        ) {
+          return outgoingRead;
+        }
+        if (functionName === "retrieveDelegatorsTokensIDsandExpiredDates") {
+          return incomingRead;
+        }
+        return emptyRead;
+      }
+    );
+
+    render(
+      <CollectionDelegationComponent
+        collection={collection}
+        setSection={setSection}
+      />
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: /Outgoing Delegations/i })
+    );
+
+    expect(
+      screen.getByText("Unable to load delegation records for Test Collection.")
+    ).toBeInTheDocument();
+    const retryCallsBeforeClick = retryOutgoing.mock.calls.length;
+    fireEvent.click(screen.getByRole("button", { name: "Try Again" }));
+    expect(retryOutgoing).toHaveBeenCalledTimes(retryCallsBeforeClick + 1);
+  });
+
+  it("preserves disclosure state across the update form transition", async () => {
+    const outgoingRead: {
+      data: undefined | { result: [string[], number[], boolean[], number[]] }[];
+      refetch: jest.Mock;
+    } = {
+      data: undefined,
+      refetch: jest.fn(),
+    };
+    const incomingRead = { data: [], refetch: jest.fn() };
+    const emptyRead = { data: undefined, refetch: jest.fn() };
+
+    mockUseReadContracts.mockImplementation(
+      (params?: { contracts?: { functionName?: string }[] }) => {
+        const functionName = params?.contracts?.[0]?.functionName;
+        if (
+          functionName === "retrieveDelegationAddressesTokensIDsandExpiredDates"
+        ) {
+          return outgoingRead;
+        }
+        if (functionName === "retrieveDelegatorsTokensIDsandExpiredDates") {
+          return incomingRead;
+        }
+        return emptyRead;
+      }
+    );
+
+    const { container, rerender } = render(
+      <CollectionDelegationComponent
+        collection={collection}
+        setSection={setSection}
+      />
+    );
+
+    outgoingRead.data = [
+      {
+        result: [["0x2"], [0], [true], [0]],
+      },
+    ];
+    rerender(
+      <CollectionDelegationComponent
+        collection={collection}
+        setSection={setSection}
+      />
+    );
+
+    const outgoingDisclosure = screen.getByRole("button", {
+      name: /Outgoing Delegations/i,
+    });
+    const incomingDisclosure = screen.getByRole("button", {
+      name: /Incoming Delegations/i,
+    });
+
+    await waitFor(() =>
+      expect(outgoingDisclosure).toHaveAttribute("aria-expanded", "true")
+    );
+    fireEvent.click(incomingDisclosure);
+    expect(incomingDisclosure).toHaveAttribute("aria-expanded", "true");
+
+    const editAction = container.querySelector<SVGElement>(
+      '[data-tooltip-id^="edit-"]'
+    );
+    if (!editAction) {
+      throw new Error("Expected an edit action for the outgoing delegation");
+    }
+    fireEvent.click(editAction);
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancel Update" }));
+
+    expect(
+      screen.getByRole("button", { name: /Incoming Delegations/i })
+    ).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("closes an open action form when the connected account changes", async () => {
+    const outgoingRead: {
+      data: undefined | { result: [string[], number[], boolean[], number[]] }[];
+      refetch: jest.Mock;
+    } = {
+      data: undefined,
+      refetch: jest.fn(),
+    };
+    const incomingRead = { data: [], refetch: jest.fn() };
+    const emptyRead = { data: undefined, refetch: jest.fn() };
+
+    mockUseReadContracts.mockImplementation(
+      (params?: { contracts?: { functionName?: string }[] }) => {
+        const functionName = params?.contracts?.[0]?.functionName;
+        if (
+          functionName === "retrieveDelegationAddressesTokensIDsandExpiredDates"
+        ) {
+          return outgoingRead;
+        }
+        if (functionName === "retrieveDelegatorsTokensIDsandExpiredDates") {
+          return incomingRead;
+        }
+        return emptyRead;
+      }
+    );
+
+    const { container, rerender } = render(
+      <CollectionDelegationComponent
+        collection={collection}
+        setSection={setSection}
+      />
+    );
+
+    outgoingRead.data = [
+      {
+        result: [["0x2"], [0], [true], [0]],
+      },
+    ];
+    rerender(
+      <CollectionDelegationComponent
+        collection={collection}
+        setSection={setSection}
+      />
+    );
+
+    await waitFor(() =>
+      expect(
+        container.querySelector('[data-tooltip-id^="edit-"]')
+      ).not.toBeNull()
+    );
+    const editAction = container.querySelector<SVGElement>(
+      '[data-tooltip-id^="edit-"]'
+    );
+    if (!editAction) {
+      throw new Error("Expected an edit action for the outgoing delegation");
+    }
+    fireEvent.click(editAction);
+    expect(
+      screen.getByRole("button", { name: "Cancel Update" })
+    ).toBeInTheDocument();
+
+    mockAccountAddress = "0x9";
+    rerender(
+      <CollectionDelegationComponent
+        collection={collection}
+        setSection={setSection}
+      />
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("button", { name: "Cancel Update" })
+      ).not.toBeInTheDocument()
+    );
   });
 
   it("keys collection scope descriptions from the contract address", () => {
@@ -195,6 +449,121 @@ describe("CollectionDelegationComponent", () => {
     );
   });
 
+  it.each([
+    { useCase: 997, index: 17, label: "Primary Address" },
+    {
+      useCase: 998,
+      index: 18,
+      label: "Delegation Management (Sub-Delegation)",
+    },
+    { useCase: 999, index: 19, label: "Consolidation" },
+  ])(
+    "unlocks special use case $useCase using its actual multicall slot",
+    ({ useCase, index, label }) => {
+      mockUseCaseLockState({ localLockedIndex: index });
+
+      render(
+        <CollectionDelegationComponent
+          collection={collection}
+          setSection={setSection}
+        />
+      );
+
+      fireEvent.change(
+        screen.getByRole("combobox", { name: "Lock or unlock use case" }),
+        { target: { value: String(useCase) } }
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Unlock Use Case" }));
+
+      const expectedTitle = `Unlocking Wallet on Use Case\n#${useCase} ${label}`;
+      const title = screen
+        .getAllByRole("heading", { level: 2 })
+        .find((heading) => heading.textContent === expectedTitle);
+      if (!title) {
+        throw new Error(`Expected transaction title: ${expectedTitle}`);
+      }
+      expect(title.textContent).toBe(expectedTitle);
+      expect(mockWriteContract).toHaveBeenCalledWith(
+        expect.objectContaining({
+          args: [collection.contract, useCase, false],
+          functionName: "setCollectionUsecaseLock",
+        })
+      );
+    }
+  );
+
+  it("blocks a collection-specific use-case update when the global lock is set", () => {
+    mockUseCaseLockState({ globalLockedIndex: 19 });
+
+    render(
+      <CollectionDelegationComponent
+        collection={collection}
+        setSection={setSection}
+      />
+    );
+
+    fireEvent.change(
+      screen.getByRole("combobox", { name: "Lock or unlock use case" }),
+      { target: { value: "999" } }
+    );
+
+    expect(
+      screen.queryByRole("button", { name: /^(Lock|Unlock) Use Case$/ })
+    ).not.toBeInTheDocument();
+    expect(screen.getByText(/Unlock use case in/i)).toBeInTheDocument();
+  });
+
+  it.each([
+    { lockScope: "collection", globalLocked: false },
+    { lockScope: "all collections", globalLocked: true },
+  ])(
+    "removes a selected use-case action when the $lockScope wallet lock activates",
+    ({ globalLocked }) => {
+      let collectionLocked = false;
+      let allCollectionsLocked = false;
+      mockUseReadContract.mockImplementation(
+        (params?: { args?: readonly (string | undefined)[] }) => ({
+          data:
+            params?.args?.[0] === collection.contract
+              ? collectionLocked
+              : allCollectionsLocked,
+        })
+      );
+
+      const { rerender } = render(
+        <CollectionDelegationComponent
+          collection={collection}
+          setSection={setSection}
+        />
+      );
+      const select = screen.getByRole("combobox", {
+        name: "Lock or unlock use case",
+      });
+      fireEvent.change(select, { target: { value: "3" } });
+      expect(
+        screen.getByRole("button", { name: "Lock Use Case" })
+      ).toBeInTheDocument();
+
+      if (globalLocked) {
+        allCollectionsLocked = true;
+      } else {
+        collectionLocked = true;
+      }
+      rerender(
+        <CollectionDelegationComponent
+          collection={collection}
+          setSection={setSection}
+        />
+      );
+
+      expect(select).toBeDisabled();
+      expect(
+        screen.queryByRole("button", { name: "Lock Use Case" })
+      ).not.toBeInTheDocument();
+      expect(mockWriteContract).not.toHaveBeenCalled();
+    }
+  );
+
   it("shows collection lock receipt failures instead of success", () => {
     mockCollectionLockState(false);
     mockUseWriteContract
@@ -224,7 +593,7 @@ describe("CollectionDelegationComponent", () => {
     );
 
     expect(screen.getByText("Locking Wallet Failed")).toBeInTheDocument();
-    expect(screen.getByText("receipt failed")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("receipt failed")).toBeInTheDocument();
     expect(
       screen.queryByText(/Transaction Successful!/i)
     ).not.toBeInTheDocument();

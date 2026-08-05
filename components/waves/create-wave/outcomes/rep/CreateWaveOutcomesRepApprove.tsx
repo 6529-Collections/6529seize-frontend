@@ -3,8 +3,11 @@
 import { useState } from "react";
 import type { CreateWaveOutcomeConfig } from "@/types/waves.types";
 import { CreateWaveOutcomeType } from "@/types/waves.types";
-import RepCategorySearch from "@/components/utils/input/rep-category/RepCategorySearch";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import Button from "@/components/utils/button/Button";
+import { getRepCategoryViolation } from "@/components/utils/input/rep-category/repCategoryValidation";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import CreateWaveOutcomesRepCategoryField from "./CreateWaveOutcomesRepCategoryField";
 
 export default function CreateWaveOutcomesRepApprove({
   onOutcome,
@@ -22,11 +25,27 @@ export default function CreateWaveOutcomesRepApprove({
     winnersConfig: null,
   });
 
-  const [categoryError, setCategoryError] = useState<boolean>(false);
+  const locale = useBrowserLocale();
+  const [showCategoryRequired, setShowCategoryRequired] =
+    useState<boolean>(false);
   const [creditError, setCreditError] = useState<boolean>(false);
 
+  // Same category rules the rep-assignment flow enforces (mirrors the
+  // backend); named live so an invalid category never survives to submit.
+  const categoryViolation = outcome.category
+    ? getRepCategoryViolation(outcome.category)
+    : null;
+  let categoryErrorMessage: string | null = null;
+  if (categoryViolation) {
+    categoryErrorMessage = t(locale, categoryViolation.key, {
+      ...categoryViolation.params,
+    });
+  } else if (showCategoryRequired) {
+    categoryErrorMessage = t(locale, "rep.categories.validation.required");
+  }
+
   const setCategory = (category: string | null) => {
-    setCategoryError(false);
+    setShowCategoryRequired(false);
     setOutcome({ ...outcome, category });
   };
 
@@ -40,10 +59,14 @@ export default function CreateWaveOutcomesRepApprove({
   const onSubmit = () => {
     const dontHaveCategorySet = !outcome.category;
     const dontHaveCreditSet = !outcome.credit;
-    setCategoryError(dontHaveCategorySet);
+    setShowCategoryRequired(dontHaveCategorySet);
     setCreditError(dontHaveCreditSet);
 
-    if (dontHaveCategorySet || dontHaveCreditSet) {
+    if (
+      dontHaveCategorySet ||
+      categoryViolation !== null ||
+      dontHaveCreditSet
+    ) {
       return;
     }
     onOutcome(outcome);
@@ -53,9 +76,9 @@ export default function CreateWaveOutcomesRepApprove({
     <div className="tw-col-span-full">
       <div className="tw-flex tw-flex-col tw-gap-y-5">
         <div className="tw-flex tw-w-full tw-flex-col tw-gap-4 tw-pt-[0.5px] sm:tw-flex-row">
-          <RepCategorySearch
-            error={categoryError}
+          <CreateWaveOutcomesRepCategoryField
             category={outcome.category}
+            errorMessage={categoryErrorMessage}
             setCategory={setCategory}
           />
         </div>
@@ -65,6 +88,7 @@ export default function CreateWaveOutcomesRepApprove({
             <div className="tw-group tw-relative tw-w-full">
               <input
                 type="text"
+                inputMode="decimal"
                 value={outcome.credit !== null ? outcome.credit.toString() : ""}
                 onChange={setCredit}
                 id="outcome-rep-credit"
@@ -117,21 +141,20 @@ export default function CreateWaveOutcomesRepApprove({
         </div>
 
         <div className="tw-flex tw-justify-end tw-gap-x-3">
-          <button
+          <Button
+            variant="secondary"
+            size="lg"
             onClick={onCancel}
-            type="button"
-            className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-border-iron-700 hover:tw-bg-iron-700"
           >
             Cancel
-          </button>
-          <PrimaryButton
-            onClicked={onSubmit}
-            disabled={false}
-            loading={false}
-            padding="tw-px-4 tw-py-3"
+          </Button>
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={onSubmit}
           >
             Save
-          </PrimaryButton>
+          </Button>
         </div>
       </div>
     </div>

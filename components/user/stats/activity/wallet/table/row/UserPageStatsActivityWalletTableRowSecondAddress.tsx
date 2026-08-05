@@ -80,7 +80,7 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
       <span className="tw-text-iron-400">{TYPE_TO_ACTION[type]}</span>
       <Link
         href={path}
-        className="tw-text-iron-100 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-400"
+        className="tw-text-iron-300 tw-transition-colors tw-duration-200 hover:tw-text-iron-100"
       >
         {display}
       </Link>

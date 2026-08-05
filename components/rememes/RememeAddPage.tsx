@@ -1,6 +1,7 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
+import Button from "@/components/utils/button/Button";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { useSetTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
@@ -34,11 +35,6 @@ interface CheckList {
   status: boolean;
   note: string;
 }
-
-const PRIMARY_BUTTON_CLASS =
-  "tw-rounded-none tw-border-0 tw-bg-[#267c93] tw-px-5 tw-py-[0.375rem] tw-font-bold tw-leading-6 tw-text-white tw-transition-colors disabled:tw-pointer-events-none disabled:tw-opacity-65 desktop-hover:hover:tw-bg-[#2b8aa3]";
-const WHITE_BUTTON_CLASS =
-  "tw-rounded-none tw-border-0 tw-bg-white tw-px-5 tw-py-[0.375rem] tw-font-bold tw-leading-6 tw-text-black disabled:tw-pointer-events-none disabled:tw-opacity-65 desktop-hover:hover:tw-bg-[#d7d7d7]";
 
 function getSubmissionErrorMessage(error: unknown): string {
   if (error instanceof Error && error.message) {
@@ -352,9 +348,10 @@ export default function RememeAddPage() {
                 </span>
                 {isConnected ? (
                   <span className="tw-flex tw-flex-col tw-gap-2">
-                    <button
+                    <Button
                       type="button"
-                      className={PRIMARY_BUTTON_CLASS}
+                      variant="action"
+                      size="md"
                       disabled={
                         !addRememe ||
                         !addRememe.valid ||
@@ -399,19 +396,20 @@ export default function RememeAddPage() {
                       }}
                     >
                       Add Rememe
-                    </button>
+                    </Button>
                   </span>
                 ) : (
-                  <button
+                  <Button
                     type="button"
-                    className={WHITE_BUTTON_CLASS}
+                    variant="primary"
+                    size="md"
                     disabled={seizeConnectOpen}
                     onClick={() => {
                       seizeConnect();
                     }}
                   >
                     {seizeConnectOpen ? `Connecting...` : `Connect Wallet`}
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
@@ -487,15 +485,16 @@ export default function RememeAddPage() {
                     </div>
                     <div className="tw-pt-4">
                       <div>
-                        <button
+                        <Button
                           type="button"
-                          className={WHITE_BUTTON_CLASS}
+                          variant="primary"
+                          size="md"
                           onClick={() => {
                             location.reload();
                           }}
                         >
                           Add Another
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </>

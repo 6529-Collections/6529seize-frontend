@@ -72,7 +72,10 @@ export interface FetchPublicUrlOptions extends UrlGuardOptions {
   readonly timeoutMs?: number | undefined;
   readonly redirectStatusCodes?: ReadonlySet<number> | undefined;
   readonly userAgent?: string | undefined;
-  readonly fetchImpl?: typeof fetch | undefined;
+  /** Builds standard request options per hop; fetchPublicUrl always owns the pinned dispatcher. */
+  readonly buildRequestInit?:
+    | ((url: URL, init: RequestInit) => RequestInit)
+    | undefined;
   readonly revalidateFinalUrl?: boolean | undefined;
 }
 
@@ -545,16 +548,8 @@ function toUndiciRequestInit(init: RequestInit): UndiciRequestInit {
 function fetchWithValidatedAddresses(
   url: URL,
   init: RequestInit,
-  validated: ValidatedPublicUrl,
-  fetchImpl?: typeof fetch | undefined
+  validated: ValidatedPublicUrl
 ): Promise<Response> {
-  // SECURITY: custom fetch implementations bypass the pinned DNS dispatcher.
-  // Keep fetchImpl limited to tests or trusted callers that do not need SSRF
-  // rebinding protection.
-  if (fetchImpl) {
-    return fetchImpl(url.toString(), init);
-  }
-
   return pinnedLookupContext.run(
     validated,
     () =>
@@ -570,7 +565,6 @@ export async function fetchPublicUrl(
   init: RequestInit = {},
   options: FetchPublicUrlOptions = {}
 ): Promise<Response> {
-  const fetchImpl = options.fetchImpl;
   const maxRedirects = options.maxRedirects ?? 5;
   const redirectStatusCodes =
     options.redirectStatusCodes ?? DEFAULT_REDIRECT_STATUS_CODES;
@@ -626,16 +620,24 @@ export async function fetchPublicUrl(
 
     let response: Response;
     try {
+      const baseRequestInit: RequestInit = {
+        ...init,
+        headers,
+      };
+      const requestInit = options.buildRequestInit
+        ? options.buildRequestInit(
+            new URL(currentUrl.toString()),
+            baseRequestInit
+          )
+        : baseRequestInit;
       response = await fetchWithValidatedAddresses(
         currentUrl,
         {
-          ...init,
+          ...requestInit,
           redirect: "manual",
-          headers,
           signal: controller.signal,
         },
-        validatedUrl,
-        fetchImpl
+        validatedUrl
       );
     } catch (error) {
       if (abortedByTimeout) {

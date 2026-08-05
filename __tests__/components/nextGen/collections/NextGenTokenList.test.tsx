@@ -20,15 +20,11 @@ jest.mock(
   })
 );
 
-jest.mock(
-  "@/components/pagination/Pagination",
-  () => (props: any) =>
-    (
-      <div data-testid="pagination">
-        <button onClick={() => props.setPage(props.page + 1)}>next</button>
-      </div>
-    )
-);
+jest.mock("@/components/pagination/Pagination", () => (props: any) => (
+  <div data-testid="pagination">
+    <button onClick={() => props.setPage(props.page + 1)}>next</button>
+  </div>
+));
 
 jest.mock("@/components/dotLoader/DotLoader", () => () => (
   <div data-testid="loader" />
@@ -67,6 +63,13 @@ it("shows message when no results found", async () => {
   (commonApiFetch as jest.Mock).mockResolvedValue({ count: 0, data: [] });
   render(<NextGenTokenList collection={collection} />);
   await screen.findByText("No results found");
+});
+
+it("announces the token loading state", () => {
+  (commonApiFetch as jest.Mock).mockReturnValue(new Promise(() => {}));
+  render(<NextGenTokenList collection={collection} />);
+
+  expect(screen.getByLabelText("Loading tokens").tagName).toBe("OUTPUT");
 });
 
 it("requests next page with pagination", async () => {

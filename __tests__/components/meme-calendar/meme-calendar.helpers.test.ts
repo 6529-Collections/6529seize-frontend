@@ -165,7 +165,8 @@ describe("printCalendarInvites", () => {
     expect(html).toContain("DTEND%3A20240704T140000Z");
     expect(html).toContain('aria-label="Add to Calendar"');
     expect(html).toContain('aria-label="Add to Google Calendar"');
-    expect(html).toContain('alt="" aria-hidden="true"');
+    expect(html).toContain('src="/calendar-ics.png"');
+    expect(html).toContain('src="/calendar-google.png"');
   });
 
   it("sets a 15:00 UTC end time for winter mints", () => {
@@ -236,6 +237,18 @@ describe("printCalendarInvites", () => {
     );
 
     expect(decodeURIComponent(html)).toContain("SUMMARY:Meme #1.234 Minting");
+  });
+
+  it("escapes RFC 5545 special characters in ICS text values", () => {
+    const mintDay = nextMintDateOnOrAfter(new Date(Date.UTC(2026, 0, 2)));
+    const mintInstant = mintStartInstantUtcForMintDay(mintDay);
+    const html = decodeURIComponent(
+      printCalendarInvites(mintInstant, 1234, "#fff", 22, undefined, "en-US")
+    );
+
+    expect(html).toContain("SUMMARY:Meme #1\\,234 Minting");
+    expect(html).toContain("DESCRIPTION:Meme #1\\,234 —");
+    expect(html).toContain(String.raw`\n\nhttps://6529.io/the-memes/mint`);
   });
 });
 

@@ -43,7 +43,7 @@ describe("UserPageActivityTab", () => {
       "de-DE",
       "user.collected.stats.activityTabs.distributions"
     );
-    expect(btn).toHaveClass("tw-bg-iron-950", { exact: false });
+    expect(btn).toHaveClass("tw-bg-transparent", { exact: false });
     expect(btn).toHaveAttribute("aria-selected", "false");
     expect(btn).toHaveAttribute(
       "aria-controls",
@@ -77,7 +77,7 @@ describe("UserPageActivityTab", () => {
       "fr-FR",
       "user.collected.stats.activityTabs.walletActivity"
     );
-    expect(btn.className).toContain("tw-bg-iron-800");
+    expect(btn.className).toContain("tw-bg-white/[0.08]");
     expect(btn).toHaveAttribute("aria-selected", "true");
     expect(btn).toHaveAttribute("tabIndex", "0");
   });

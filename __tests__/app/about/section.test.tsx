@@ -3,6 +3,7 @@
  */
 
 import AboutPage, { generateMetadata } from "@/app/about/[section]/page";
+import { publicEnv } from "@/config/env";
 import { AboutSection } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 import { notFound, redirect } from "next/navigation";
@@ -16,6 +17,8 @@ jest.mock("@/components/about/About", () => ({
   __esModule: true,
   default: jest.fn(() => <div data-testid="about-component" />),
 }));
+
+const domain = new URL(publicEnv.BASE_ENDPOINT).hostname;
 
 describe("AboutPage", () => {
   beforeEach(() => {
@@ -69,7 +72,7 @@ describe("generateMetadata", () => {
     } as any);
 
     expect(meta.title).toBe("About");
-    expect(meta.description).toBe("About | 6529.io");
+    expect(meta.description).toBe(`About | ${domain}`);
   });
 
   it("returns correct metadata for valid section", async () => {
@@ -78,6 +81,6 @@ describe("generateMetadata", () => {
     } as any);
 
     expect(meta.title).toContain("Memes");
-    expect(meta.description).toBe("About | 6529.io");
+    expect(meta.description).toBe(`About | ${domain}`);
   });
 });

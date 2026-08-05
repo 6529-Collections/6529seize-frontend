@@ -7,7 +7,7 @@ interface UseSlideshowConfigReturn {
 export function useSlideshowConfig(): UseSlideshowConfigReturn {
   const getSlidesPerView = useCallback(() => {
     if (window.innerWidth > 1200) {
-      return 4;
+      return 3.5;
     } else if (window.innerWidth > 500) {
       return 2;
     }

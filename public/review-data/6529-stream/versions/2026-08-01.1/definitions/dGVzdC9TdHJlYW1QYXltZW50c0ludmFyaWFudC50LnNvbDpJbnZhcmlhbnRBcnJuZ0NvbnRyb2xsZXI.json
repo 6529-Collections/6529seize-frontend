@@ -1,0 +1,251 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamPaymentsInvariant.t.sol:InvariantArrngController#function:0x6a84a985",
+          "declaringDefinitionId": "test/StreamPaymentsInvariant.t.sol:InvariantArrngController",
+          "inherited": false,
+          "inputs": [],
+          "name": "nextRequestId",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x6a84a985",
+          "signature": "nextRequestId()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamPaymentsInvariant.t.sol:InvariantArrngController#function:0xd4e0f337",
+          "declaringDefinitionId": "test/StreamPaymentsInvariant.t.sol:InvariantArrngController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "requestRandomWords",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xd4e0f337",
+          "signature": "requestRandomWords(uint256,address)",
+          "stateMutability": "payable"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "nextRequestId()",
+          "displaySignature": "nextRequestId()",
+          "functionKind": "getter",
+          "id": "test/StreamPaymentsInvariant.t.sol:InvariantArrngController#function:0x6a84a985",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1QYXltZW50c0ludmFyaWFudC50LnNvbDpJbnZhcmlhbnRBcnJuZ0NvbnRyb2xsZXIjZnVuY3Rpb246MHg2YTg0YTk4NQ",
+          "kind": "function",
+          "modifiers": [],
+          "name": "nextRequestId",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 32,
+            "byteStart": 31459,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPaymentsInvariant.t.sol#L755",
+            "lineEnd": 755,
+            "lineStart": 755,
+            "snippetSha256": "sha256:c7015688cea9d50a6e063a7567b715d0c68802cb091f77014a5213efc709c785",
+            "sourceSha256": "sha256:5d98b9adfd5444f5188b7ed3c4e67153f8fba9f4db059c31768809edf681175c"
+          },
+          "selector": "0x6a84a985",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "requestRandomWords(uint256,address)",
+          "displaySignature": "requestRandomWords(uint256,address)",
+          "functionKind": "function",
+          "id": "test/StreamPaymentsInvariant.t.sol:InvariantArrngController#function:0xd4e0f337",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1QYXltZW50c0ludmFyaWFudC50LnNvbDpJbnZhcmlhbnRBcnJuZ0NvbnRyb2xsZXIjZnVuY3Rpb246MHhkNGUwZjMzNw",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestRandomWords",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 158,
+            "byteStart": 31498,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPaymentsInvariant.t.sol#L757-L760",
+            "lineEnd": 760,
+            "lineStart": 757,
+            "snippetSha256": "sha256:ea89a75baefb691d0e44d959a8f724a8419b46b54d13c1c47b8f3b8f93b41a4f",
+            "sourceSha256": "sha256:5d98b9adfd5444f5188b7ed3c4e67153f8fba9f4db059c31768809edf681175c"
+          },
+          "selector": "0xd4e0f337",
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamPaymentsInvariant.t.sol:InvariantArrngController#function:0x6a84a985",
+          "immutable": false,
+          "name": "nextRequestId",
+          "natspec": "",
+          "range": {
+            "byteLength": 32,
+            "byteStart": 31459,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPaymentsInvariant.t.sol#L755",
+            "lineEnd": 755,
+            "lineStart": 755,
+            "snippetSha256": "sha256:c7015688cea9d50a6e063a7567b715d0c68802cb091f77014a5213efc709c785",
+            "sourceSha256": "sha256:5d98b9adfd5444f5188b7ed3c4e67153f8fba9f4db059c31768809edf681175c"
+          },
+          "selector": "0x6a84a985",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 31490,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPaymentsInvariant.t.sol#L755",
+            "lineEnd": 755,
+            "lineStart": 755,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:5d98b9adfd5444f5188b7ed3c4e67153f8fba9f4db059c31768809edf681175c"
+          },
+          "valueSource": "1",
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamPaymentsInvariant.t.sol:InvariantArrngController",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1QYXltZW50c0ludmFyaWFudC50LnNvbDpJbnZhcmlhbnRBcnJuZ0NvbnRyb2xsZXI",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamPaymentsInvariant.t.sol:InvariantArrngController"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "InvariantArrngController",
+    "natspec": "",
+    "range": {
+      "byteLength": 239,
+      "byteStart": 31419,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamPaymentsInvariant.t.sol#L754-L761",
+      "lineEnd": 761,
+      "lineStart": 754,
+      "snippetSha256": "sha256:24c3817459bbf6bf4897b7606d81591bdeace8036b857b8c333ebc0c29744ea3",
+      "sourceSha256": "sha256:5d98b9adfd5444f5188b7ed3c4e67153f8fba9f4db059c31768809edf681175c"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamPaymentsInvariant.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-08-01.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 3
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 2
+    },
+    "totalCount": 3
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamPaymentsInvariant.t.sol:InvariantArrngController",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPaymentsInvariant.t.sol:InvariantArrngController#function:0x6a84a985",
+      "definitionId": "test/StreamPaymentsInvariant.t.sol:InvariantArrngController",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamPaymentsInvariant.t.sol:InvariantArrngController#function:0xd4e0f337",
+      "definitionId": "test/StreamPaymentsInvariant.t.sol:InvariantArrngController",
+      "severity": "advisory"
+    }
+  ]
+}

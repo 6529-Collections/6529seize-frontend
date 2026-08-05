@@ -1,0 +1,698 @@
+{
+  "definition": {
+    "abiSurface": {
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "declarationId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0x55c7bfb1",
+          "declaringDefinitionId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "contract NextGenRandomizerRNG",
+              "name": "randomizer",
+              "type": "address"
+            },
+            {
+              "index": 1,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "internalType": "uint256[]",
+              "name": "words",
+              "type": "uint256[]"
+            }
+          ],
+          "name": "fulfill",
+          "outputs": [],
+          "selector": "0x55c7bfb1",
+          "signature": "fulfill(address,uint256,uint256[])",
+          "stateMutability": "nonpayable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0x6a84a985",
+          "declaringDefinitionId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController",
+          "inherited": false,
+          "inputs": [],
+          "name": "nextRequestId",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x6a84a985",
+          "signature": "nextRequestId()",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0x27903977",
+          "declaringDefinitionId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "requestNumberOfNumbers",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x27903977",
+          "signature": "requestNumberOfNumbers(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0xd4e0f337",
+          "declaringDefinitionId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "numberOfNumbers",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "internalType": "address",
+              "name": "refundAddress",
+              "type": "address"
+            }
+          ],
+          "name": "requestRandomWords",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xd4e0f337",
+          "signature": "requestRandomWords(uint256,address)",
+          "stateMutability": "payable"
+        },
+        {
+          "declarationId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0xd434d73f",
+          "declaringDefinitionId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "requestRefundAddress",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "selector": "0xd434d73f",
+          "signature": "requestRefundAddress(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0x3a0d6881",
+          "declaringDefinitionId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController",
+          "inherited": false,
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "name": "requestValue",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0x3a0d6881",
+          "signature": "requestValue(uint256)",
+          "stateMutability": "view"
+        },
+        {
+          "declarationId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0xd4c3eea0",
+          "declaringDefinitionId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController",
+          "inherited": false,
+          "inputs": [],
+          "name": "totalValue",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "selector": "0xd4c3eea0",
+          "signature": "totalValue()",
+          "stateMutability": "view"
+        }
+      ]
+    },
+    "abstract": false,
+    "classification": "test_or_harness_source",
+    "classificationReason": "Declared under the pinned test/harness source root.",
+    "declarations": {
+      "enums": [],
+      "errors": [],
+      "events": [],
+      "functions": [
+        {
+          "canonicalSignature": "nextRequestId()",
+          "displaySignature": "nextRequestId()",
+          "functionKind": "getter",
+          "id": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0x6a84a985",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUGF5bWVudHMudC5zb2w6UmFuZG9taXplclBheW1lbnRDb250cm9sbGVyI2Z1bmN0aW9uOjB4NmE4NGE5ODU",
+          "kind": "function",
+          "modifiers": [],
+          "name": "nextRequestId",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 32,
+            "byteStart": 11321,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L246",
+            "lineEnd": 246,
+            "lineStart": 246,
+            "snippetSha256": "sha256:c7015688cea9d50a6e063a7567b715d0c68802cb091f77014a5213efc709c785",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": "0x6a84a985",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "totalValue()",
+          "displaySignature": "totalValue()",
+          "functionKind": "getter",
+          "id": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0xd4c3eea0",
+          "inputs": [],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUGF5bWVudHMudC5zb2w6UmFuZG9taXplclBheW1lbnRDb250cm9sbGVyI2Z1bmN0aW9uOjB4ZDRjM2VlYTA",
+          "kind": "function",
+          "modifiers": [],
+          "name": "totalValue",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 25,
+            "byteStart": 11359,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L247",
+            "lineEnd": 247,
+            "lineStart": 247,
+            "snippetSha256": "sha256:f9d31e1113614e644dba8f45edfbd6e55525b2a1546c3187f87d36465351ccea",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": "0xd4c3eea0",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "requestValue(uint256)",
+          "displaySignature": "requestValue(uint256)",
+          "functionKind": "getter",
+          "id": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0x3a0d6881",
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUGF5bWVudHMudC5zb2w6UmFuZG9taXplclBheW1lbnRDb250cm9sbGVyI2Z1bmN0aW9uOjB4M2EwZDY4ODE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestValue",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 47,
+            "byteStart": 11390,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L248",
+            "lineEnd": 248,
+            "lineStart": 248,
+            "snippetSha256": "sha256:0e719a9f40a13944fd6c5db2414f11f570eeef06089a6b3dcabfd53d95e68a7b",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": "0x3a0d6881",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "requestNumberOfNumbers(uint256)",
+          "displaySignature": "requestNumberOfNumbers(uint256)",
+          "functionKind": "getter",
+          "id": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0x27903977",
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUGF5bWVudHMudC5zb2w6UmFuZG9taXplclBheW1lbnRDb250cm9sbGVyI2Z1bmN0aW9uOjB4Mjc5MDM5Nzc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestNumberOfNumbers",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 57,
+            "byteStart": 11443,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L249",
+            "lineEnd": 249,
+            "lineStart": 249,
+            "snippetSha256": "sha256:87bac1bf96717cf194ca65c63579c58cb18c8545f84c7641527aac4ec994a316",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": "0x27903977",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "requestRefundAddress(uint256)",
+          "displaySignature": "requestRefundAddress(uint256)",
+          "functionKind": "getter",
+          "id": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0xd434d73f",
+          "inputs": [
+            {
+              "index": 0,
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUGF5bWVudHMudC5zb2w6UmFuZG9taXplclBheW1lbnRDb250cm9sbGVyI2Z1bmN0aW9uOjB4ZDQzNGQ3M2Y",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestRefundAddress",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "range": {
+            "byteLength": 55,
+            "byteStart": 11506,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L250",
+            "lineEnd": 250,
+            "lineStart": 250,
+            "snippetSha256": "sha256:69726ff241ec0c81bb640e3b42e40fa4ac220265ebd8d161aea630385cdc4cb5",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": "0xd434d73f",
+          "stateMutability": "view",
+          "syntheticGetter": true,
+          "virtual": false,
+          "visibility": "public"
+        },
+        {
+          "canonicalSignature": "requestRandomWords(uint256,address)",
+          "displaySignature": "requestRandomWords(uint256,address)",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0xd4e0f337",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "numberOfNumbers",
+              "type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "refundAddress",
+              "type": "address"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUGF5bWVudHMudC5zb2w6UmFuZG9taXplclBheW1lbnRDb250cm9sbGVyI2Z1bmN0aW9uOjB4ZDRlMGYzMzc",
+          "kind": "function",
+          "modifiers": [],
+          "name": "requestRandomWords",
+          "natspec": "",
+          "outputs": [
+            {
+              "index": 0,
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "range": {
+            "byteLength": 412,
+            "byteStart": 11568,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L252-L263",
+            "lineEnd": 263,
+            "lineStart": 252,
+            "snippetSha256": "sha256:0eb4eca43f95a5f76f371abe5f643fc24fb291f2a1a4ded76a8f9f612c2fb55c",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": "0xd4e0f337",
+          "stateMutability": "payable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        },
+        {
+          "canonicalSignature": "fulfill(address,uint256,uint256[])",
+          "displaySignature": "fulfill(NextGenRandomizerRNG,uint256,uint256[])",
+          "functionKind": "function",
+          "id": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0x55c7bfb1",
+          "inputs": [
+            {
+              "index": 0,
+              "name": "randomizer",
+              "type": "NextGenRandomizerRNG"
+            },
+            {
+              "index": 1,
+              "name": "requestId",
+              "type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "words",
+              "storageLocation": "memory",
+              "type": "uint256[]"
+            }
+          ],
+          "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUGF5bWVudHMudC5zb2w6UmFuZG9taXplclBheW1lbnRDb250cm9sbGVyI2Z1bmN0aW9uOjB4NTVjN2JmYjE",
+          "kind": "function",
+          "modifiers": [],
+          "name": "fulfill",
+          "natspec": "",
+          "outputs": [],
+          "range": {
+            "byteLength": 177,
+            "byteStart": 11986,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L265-L269",
+            "lineEnd": 269,
+            "lineStart": 265,
+            "snippetSha256": "sha256:b427db1601976c229056c0e3d59c7d637b3134d320431ab47e244034f8dbe0cf",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": "0x55c7bfb1",
+          "stateMutability": "nonpayable",
+          "syntheticGetter": false,
+          "virtual": false,
+          "visibility": "external"
+        }
+      ],
+      "modifiers": [],
+      "stateVariables": [
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0x6a84a985",
+          "immutable": false,
+          "name": "nextRequestId",
+          "natspec": "",
+          "range": {
+            "byteLength": 32,
+            "byteStart": 11321,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L246",
+            "lineEnd": 246,
+            "lineStart": 246,
+            "snippetSha256": "sha256:c7015688cea9d50a6e063a7567b715d0c68802cb091f77014a5213efc709c785",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": "0x6a84a985",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": {
+            "byteLength": 1,
+            "byteStart": 11352,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L246",
+            "lineEnd": 246,
+            "lineStart": 246,
+            "snippetSha256": "sha256:6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "valueSource": "1",
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0xd4c3eea0",
+          "immutable": false,
+          "name": "totalValue",
+          "natspec": "",
+          "range": {
+            "byteLength": 25,
+            "byteStart": 11359,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L247",
+            "lineEnd": 247,
+            "lineStart": 247,
+            "snippetSha256": "sha256:f9d31e1113614e644dba8f45edfbd6e55525b2a1546c3187f87d36465351ccea",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": "0xd4c3eea0",
+          "type": "uint256",
+          "typeString": "uint256",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0x3a0d6881",
+          "immutable": false,
+          "name": "requestValue",
+          "natspec": "",
+          "range": {
+            "byteLength": 47,
+            "byteStart": 11390,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L248",
+            "lineEnd": 248,
+            "lineStart": 248,
+            "snippetSha256": "sha256:0e719a9f40a13944fd6c5db2414f11f570eeef06089a6b3dcabfd53d95e68a7b",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": "0x3a0d6881",
+          "type": "mapping(uint256 => uint256)",
+          "typeString": "mapping(uint256 => uint256)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0x27903977",
+          "immutable": false,
+          "name": "requestNumberOfNumbers",
+          "natspec": "",
+          "range": {
+            "byteLength": 57,
+            "byteStart": 11443,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L249",
+            "lineEnd": 249,
+            "lineStart": 249,
+            "snippetSha256": "sha256:87bac1bf96717cf194ca65c63579c58cb18c8545f84c7641527aac4ec994a316",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": "0x27903977",
+          "type": "mapping(uint256 => uint256)",
+          "typeString": "mapping(uint256 => uint256)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        },
+        {
+          "constant": false,
+          "getterDeclarationId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0xd434d73f",
+          "immutable": false,
+          "name": "requestRefundAddress",
+          "natspec": "",
+          "range": {
+            "byteLength": 55,
+            "byteStart": 11506,
+            "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L250",
+            "lineEnd": 250,
+            "lineStart": 250,
+            "snippetSha256": "sha256:69726ff241ec0c81bb640e3b42e40fa4ac220265ebd8d161aea630385cdc4cb5",
+            "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          },
+          "selector": "0xd434d73f",
+          "type": "mapping(uint256 => address)",
+          "typeString": "mapping(uint256 => address)",
+          "valueRange": null,
+          "valueSource": null,
+          "visibility": "public"
+        }
+      ],
+      "structs": [],
+      "userDefinedValueTypes": []
+    },
+    "id": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController",
+    "inheritance": [],
+    "interface": {
+      "published": false
+    },
+    "key": "dGVzdC9TdHJlYW1SYW5kb21pemVyUGF5bWVudHMudC5zb2w6UmFuZG9taXplclBheW1lbnRDb250cm9sbGVy",
+    "kind": "contract",
+    "linearizedDefinitionIds": [
+      "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController"
+    ],
+    "membership": {
+      "deployment": {
+        "address": null,
+        "status": "not_deployed"
+      },
+      "genesisTarget": false,
+      "releaseCatalog": null
+    },
+    "name": "RandomizerPaymentController",
+    "natspec": "",
+    "range": {
+      "byteLength": 887,
+      "byteStart": 11278,
+      "githubUrl": "https://github.com/6529-Collections/6529Stream/blob/513bd7e079eafe109df6ae1ae21bfbca6fec6786/test/StreamRandomizerPayments.t.sol#L245-L270",
+      "lineEnd": 270,
+      "lineStart": 245,
+      "snippetSha256": "sha256:e69157be45cc39c1ece41f6ac19c2e96fdcf740ae2de033704a9d7072c420d0b",
+      "sourceSha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+    },
+    "release": {
+      "tracked": false
+    },
+    "scope": "test",
+    "sourcePath": "test/StreamRandomizerPayments.t.sol"
+  },
+  "reviewId": "6529-stream",
+  "reviewVersion": "2026-07-27.1",
+  "shardSchemaVersion": "public-review.solidity-definition-shard.v1",
+  "warningSummary": {
+    "byCategory": {
+      "documentation": 8
+    },
+    "byCode": {
+      "MISSING_DEFINITION_NATSPEC": 1,
+      "MISSING_FUNCTION_NATSPEC": 7
+    },
+    "totalCount": 8
+  },
+  "warnings": [
+    {
+      "category": "documentation",
+      "code": "MISSING_DEFINITION_NATSPEC",
+      "definitionId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0x27903977",
+      "definitionId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0x3a0d6881",
+      "definitionId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0x55c7bfb1",
+      "definitionId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0x6a84a985",
+      "definitionId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0xd434d73f",
+      "definitionId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0xd4c3eea0",
+      "definitionId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController",
+      "severity": "advisory"
+    },
+    {
+      "category": "documentation",
+      "code": "MISSING_FUNCTION_NATSPEC",
+      "declarationId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController#function:0xd4e0f337",
+      "definitionId": "test/StreamRandomizerPayments.t.sol:RandomizerPaymentController",
+      "severity": "advisory"
+    }
+  ]
+}

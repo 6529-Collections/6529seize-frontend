@@ -10,7 +10,12 @@ import {
 } from "@/components/about/about.routes";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { DocumentTextIcon } from "@heroicons/react/24/outline";
+import { publicEnv } from "@/config/env";
+import { isStreamReviewPubliclyAvailable } from "@/lib/public-review/streamReviewRoutes";
+import {
+  BuildingLibraryIcon,
+  DocumentTextIcon,
+} from "@heroicons/react/24/outline";
 import { useMemo, type ComponentType } from "react";
 
 type SidebarSubsection = NonNullable<SidebarSection["subsections"]>[number];
@@ -59,39 +64,72 @@ function getWavesSection(): SidebarSection {
   };
 }
 
-function getNftsSection(): SidebarSection {
+function getMuseumSection(): SidebarSection {
+  return {
+    key: "museum",
+    name: t(DEFAULT_LOCALE, "navigation.primary.museum"),
+    icon: BuildingLibraryIcon,
+    items: [
+      {
+        name: t(DEFAULT_LOCALE, "navigation.primary.museum"),
+        href: "/museum/network",
+        activePathPrefixes: ["/museum/network/"],
+      },
+    ],
+    subsections: [],
+  };
+}
+
+function getNftsSection(publicReviewsEnabled: boolean): SidebarSection {
+  const streamReviewItem: SidebarNavItem[] = publicReviewsEnabled
+    ? [
+        {
+          name: t(DEFAULT_LOCALE, "navigation.nfts.streamReview"),
+          href: "/reviews/6529-stream",
+          activePathPrefixes: ["/reviews/6529-stream/"],
+        },
+      ]
+    : [];
+
   return {
     key: "nfts",
     name: t(DEFAULT_LOCALE, "navigation.primary.nfts"),
     icon: CollectionsMenuIcon,
     items: [
       {
-        name: "The Memes",
+        name: t(DEFAULT_LOCALE, "navigation.nfts.theMemes"),
         href: "/the-memes",
         activePathPrefixes: ["/the-memes/"],
       },
       {
-        name: "6529 Gradient",
+        name: t(DEFAULT_LOCALE, "navigation.nfts.gradient"),
         href: "/6529-gradient",
         activePathPrefixes: ["/6529-gradient/"],
       },
       {
-        name: "NextGen",
+        name: t(DEFAULT_LOCALE, "navigation.nfts.nextGen"),
         href: "/nextgen",
         activePathPrefixes: ["/nextgen/"],
       },
       {
-        name: "Meme Lab",
+        name: t(DEFAULT_LOCALE, "navigation.nfts.memeLab"),
         href: "/meme-lab",
         activePathPrefixes: ["/meme-lab/"],
       },
       {
-        name: "ReMemes",
+        name: t(DEFAULT_LOCALE, "navigation.nfts.rememes"),
         href: "/rememes",
         activePathPrefixes: ["/rememes/"],
       },
-      { name: "NFT Activity", href: "/nft-activity" },
-      { name: "Memes Calendar", href: "/meme-calendar" },
+      ...streamReviewItem,
+      {
+        name: t(DEFAULT_LOCALE, "navigation.nfts.activity"),
+        href: "/nft-activity",
+      },
+      {
+        name: t(DEFAULT_LOCALE, "navigation.nfts.memesCalendar"),
+        href: "/meme-calendar",
+      },
     ],
     subsections: [],
   };
@@ -123,10 +161,12 @@ function getAboutSection(
 
 function buildSidebarSections(
   appWalletsSupported: boolean,
-  hideSubscriptions: boolean
+  hideSubscriptions: boolean,
+  publicReviewsEnabled: boolean
 ): SidebarSection[] {
   return [
-    getNftsSection(),
+    getNftsSection(publicReviewsEnabled),
+    getMuseumSection(),
     getWavesSection(),
     getAboutSection(appWalletsSupported, hideSubscriptions),
   ];
@@ -135,7 +175,10 @@ function buildSidebarSections(
 export function useSidebarSections(
   appWalletsSupported: boolean,
   isIos: boolean,
-  country: string | null
+  country: string | null,
+  publicReviewsEnabled = isStreamReviewPubliclyAvailable(
+    publicEnv.BASE_ENDPOINT
+  )
 ): SidebarSection[] {
   const hideSubscriptions = shouldHideSubscriptions({
     capacitorIsIos: isIos,
@@ -143,8 +186,13 @@ export function useSidebarSections(
   });
 
   return useMemo(
-    () => buildSidebarSections(appWalletsSupported, hideSubscriptions),
-    [appWalletsSupported, hideSubscriptions]
+    () =>
+      buildSidebarSections(
+        appWalletsSupported,
+        hideSubscriptions,
+        publicReviewsEnabled
+      ),
+    [appWalletsSupported, hideSubscriptions, publicReviewsEnabled]
   );
 }
 

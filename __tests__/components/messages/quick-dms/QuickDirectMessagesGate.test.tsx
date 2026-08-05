@@ -16,8 +16,15 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
   default: jest.fn(),
 }));
 
+jest.mock("@/components/nft-transfer/TransferState", () => ({
+  useIsTransferModeActive: jest.fn(),
+}));
+
 const useAuthMock = require("@/components/auth/Auth").useAuth as jest.Mock;
 const useDeviceInfoMock = require("@/hooks/useDeviceInfo").default as jest.Mock;
+const useIsTransferModeActiveMock =
+  require("@/components/nft-transfer/TransferState")
+    .useIsTransferModeActive as jest.Mock;
 
 const QuickDirectMessagesGate =
   require("@/components/messages/quick-dms/QuickDirectMessagesGate").default;
@@ -52,12 +59,21 @@ describe("QuickDirectMessagesGate", () => {
       isApp: false,
       isMobileDevice: false,
     });
+    useIsTransferModeActiveMock.mockReturnValue(false);
   });
 
   it("mounts Quick Direct Messages only for eligible desktop sessions", () => {
     renderGate();
 
     expect(screen.getByTestId("quick-dm-runtime")).toBeInTheDocument();
+  });
+
+  it("does not mount Quick Direct Messages while transfer mode is active", () => {
+    useIsTransferModeActiveMock.mockReturnValue(true);
+
+    renderGate();
+
+    expect(screen.queryByTestId("quick-dm-runtime")).not.toBeInTheDocument();
   });
 
   it.each([

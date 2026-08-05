@@ -166,6 +166,8 @@ describe("useSingleWaveDropVoteRationale", () => {
       }
     );
 
+    expect(result.current.isUsingGeneratedRationale).toBe(true);
+
     act(() => {
       result.current.handleRationaleTextChange(
         `${result.current.rationaleText}A concrete reason`
@@ -177,6 +179,7 @@ describe("useSingleWaveDropVoteRationale", () => {
       "Vote rationale (+8 total, +3 change at time of posting):\n\n" +
         "A concrete reason"
     );
+    expect(result.current.isUsingGeneratedRationale).toBe(false);
     expect(result.current.shouldPostRationale).toBe(true);
   });
 

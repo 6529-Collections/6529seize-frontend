@@ -26,14 +26,21 @@ export default function SwiperAutoplayButton({
   }, [manuallyPaused, isInViewport, swiper.autoplay]);
 
   return (
-    <div className="tw-text-center">
-      <FontAwesomeIcon
-        style={{ height: "24px", cursor: "pointer" }}
+    <div className="tw-flex tw-h-11 tw-items-center tw-justify-center tw-text-center">
+      <button
+        type="button"
+        aria-label={manuallyPaused ? "Play slideshow" : "Pause slideshow"}
+        className="tw-inline-flex tw-min-h-11 tw-min-w-11 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-100 tw-transition hover:tw-bg-white/10 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
         onClick={() => {
           setManuallyPaused(!manuallyPaused);
         }}
-        icon={manuallyPaused ? faPlayCircle : faPauseCircle}
-      />
+      >
+        <FontAwesomeIcon
+          className="tw-h-8 tw-w-8"
+          icon={manuallyPaused ? faPlayCircle : faPauseCircle}
+          aria-hidden="true"
+        />
+      </button>
     </div>
   );
 }

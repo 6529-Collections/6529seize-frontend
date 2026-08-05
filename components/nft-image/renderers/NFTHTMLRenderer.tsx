@@ -10,6 +10,7 @@ import {
   getMediaGatewayFallbackUrls,
   shouldUseIframeFallbackTimeout,
 } from "@/components/nft-image/utils/gateway-fallback";
+import { getNFTMediaRendererAttributes } from "@/components/nft-image/media-renderer-marker";
 
 const IFRAME_FALLBACK_TIMEOUT_MS = 8000;
 
@@ -84,6 +85,7 @@ export default function NFTHTMLRenderer(props: Readonly<BaseRendererProps>) {
       )}
       {activeUrl ? (
         <iframe
+          {...getNFTMediaRendererAttributes("html")}
           title={props.id}
           src={activeUrl}
           id={props.id ?? `iframe-${props.nft.id}`}

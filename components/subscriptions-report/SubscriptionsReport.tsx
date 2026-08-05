@@ -23,11 +23,13 @@ import type { MemeSeason } from "@/entities/ISeason";
 import type { SeasonMintRow } from "@/components/meme-calendar/meme-calendar.helpers";
 import {
   getCardsRemainingUntilEndOf,
+  getMintTimelineDetails,
   getUpcomingMintsAcrossSeasons,
 } from "@/components/meme-calendar/meme-calendar.helpers";
 import type { Paginated } from "@/components/pagination/Pagination";
 import Pagination from "@/components/pagination/Pagination";
 import ShowMoreButton from "@/components/show-more-button/ShowMoreButton";
+import Button from "@/components/utils/button/Button";
 import type { RedeemedSubscriptionCounts } from "@/generated/models/RedeemedSubscriptionCounts";
 import type { SubscriptionCounts } from "@/generated/models/SubscriptionCounts";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -49,19 +51,47 @@ type MemeCalendarCurrentResponse = {
   readonly current: {
     readonly mint_number: number;
   } | null;
+  readonly next?: {
+    readonly mint_number: number;
+    readonly mint_date: string;
+  };
 };
 
-function getCurrentLiveMintNumber(
-  currentMint: MemeCalendarCurrentResponse
+function getUtcDateKey(value: string): string | null {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString().slice(0, 10);
+}
+
+function getReportActiveMintNumber(
+  currentMint: MemeCalendarCurrentResponse,
+  now: Date = new Date()
 ): number | null {
-  if (currentMint.status !== "live") {
+  if (currentMint.status === "live") {
+    return normalizeMemeTokenId(currentMint.current?.mint_number);
+  }
+
+  const nextMint = currentMint.next;
+  const todayUtc = now.toISOString().slice(0, 10);
+  return currentMint.status === "none" &&
+    nextMint &&
+    getUtcDateKey(nextMint.mint_date) === todayUtc
+    ? normalizeMemeTokenId(nextMint.mint_number)
+    : null;
+}
+
+function getMintRowForTokenId(tokenId: unknown): SeasonMintRow | null {
+  const normalizedTokenId = normalizeMemeTokenId(tokenId);
+  if (normalizedTokenId === null) {
     return null;
   }
 
-  const mintNumber = currentMint.current?.mint_number;
-  return typeof mintNumber === "number" && Number.isSafeInteger(mintNumber)
-    ? mintNumber
-    : null;
+  const timeline = getMintTimelineDetails(normalizedTokenId);
+  return {
+    meme: timeline.mintNumber,
+    utcDay: timeline.mintDayUtc,
+    instantUtc: timeline.instantUtc,
+    seasonIndex: timeline.seasonIndex,
+  };
 }
 
 function getActiveRedeemedDrop(
@@ -101,7 +131,7 @@ function getDisplayedRedeemedTotal(
   return Math.max(totalRedeemed - 1, 0);
 }
 
-async function fetchCurrentLiveMintNumber() {
+async function fetchReportActiveMintNumber(now: Date) {
   const response = await fetch("/api/meme-calendar/current");
 
   if (!response.ok) {
@@ -111,7 +141,7 @@ async function fetchCurrentLiveMintNumber() {
   }
 
   const currentMint = (await response.json()) as MemeCalendarCurrentResponse;
-  return getCurrentLiveMintNumber(currentMint);
+  return getReportActiveMintNumber(currentMint, now);
 }
 
 export default function SubscriptionsReportComponent() {
@@ -159,6 +189,23 @@ export default function SubscriptionsReportComponent() {
     () => getUpcomingMintsAcrossSeasons(upcomingCounts.length || 50, now),
     [now, upcomingCounts.length]
   );
+  const rowsByMeme = useMemo(
+    () => new Map(rows.map((row) => [row.meme, row])),
+    [rows]
+  );
+  const upcomingRows = useMemo(
+    () =>
+      upcomingCounts.flatMap((count, index) => {
+        const tokenId = normalizeMemeTokenId(count.token_id);
+        const date =
+          (tokenId === null ? null : rowsByMeme.get(tokenId)) ??
+          getMintRowForTokenId(count.token_id) ??
+          rows[index];
+
+        return date ? [{ count, date }] : [];
+      }),
+    [rows, rowsByMeme, upcomingCounts]
+  );
 
   async function fetchUpcomingCounts(count: number) {
     return await commonApiFetch<SubscriptionCounts[]>({
@@ -193,23 +240,23 @@ export default function SubscriptionsReportComponent() {
       let remainingCountForSeason = getCardsRemainingUntilEndOf("szn");
       let activeRedeemedDrop: RedeemedSubscriptionCounts | null = null;
       let activeTokenId: number | null = null;
-      let currentLiveMintNumber: number | null = null;
-      const currentLiveMintNumberPromise = fetchCurrentLiveMintNumber().catch(
-        (error: unknown) => {
-          console.error("Failed to fetch current meme calendar mint:", error);
-          return null;
-        }
-      );
+      let reportActiveMintNumber: number | null = null;
+      const reportActiveMintNumberPromise = fetchReportActiveMintNumber(
+        now
+      ).catch((error: unknown) => {
+        console.error("Failed to fetch current meme calendar mint:", error);
+        return null;
+      });
 
       try {
-        const [redeemed, liveMintNumber] = await Promise.all([
+        const [redeemed, activeMintNumber] = await Promise.all([
           fetchRedeemedCounts(1),
-          currentLiveMintNumberPromise,
+          reportActiveMintNumberPromise,
         ]);
-        currentLiveMintNumber = liveMintNumber;
+        reportActiveMintNumber = activeMintNumber;
         activeRedeemedDrop = getActiveRedeemedDrop(
           redeemed.data,
-          currentLiveMintNumber
+          reportActiveMintNumber
         );
         activeTokenId = activeRedeemedDrop
           ? normalizeMemeTokenId(activeRedeemedDrop.token_id)
@@ -229,7 +276,7 @@ export default function SubscriptionsReportComponent() {
         setTotalRedeemed(0);
       }
 
-      if (currentLiveMintNumber !== null && !activeRedeemedDrop) {
+      if (reportActiveMintNumber !== null && !activeRedeemedDrop) {
         remainingCountForSeason += 1;
       }
 
@@ -446,7 +493,7 @@ export default function SubscriptionsReportComponent() {
         data-testid="subscriptions-report-upcoming-drops"
       >
         <div>
-          {upcomingCounts?.length > 0 ? (
+          {upcomingRows.length > 0 ? (
             <>
               <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-900">
                 <span className="tw-sr-only">
@@ -460,9 +507,9 @@ export default function SubscriptionsReportComponent() {
                   <span className="tw-text-center">Subscriptions</span>
                 </div>
                 <div>
-                  {upcomingCounts
+                  {upcomingRows
                     .slice(0, upcomingVisible)
-                    .map((count, index) => {
+                    .map(({ count, date }, index) => {
                       const isNew =
                         animateFromIndex !== null && index >= animateFromIndex;
                       return (
@@ -477,16 +524,16 @@ export default function SubscriptionsReportComponent() {
                               : "tw-bg-iron-900",
                             isNew ? styles["upcomingRowNew"] : "",
                           ].join(" ")}
-                          date={rows[index]!}
+                          date={date}
                           count={count}
                         />
                       );
                     })}
                 </div>
               </div>
-              {upcomingCounts.length > UPCOMING_PAGE_SIZE && (
+              {upcomingRows.length > UPCOMING_PAGE_SIZE && (
                 <div ref={upcomingToggleRef} className="tw-pt-3 tw-text-center">
-                  {upcomingVisible < upcomingCounts.length ? (
+                  {upcomingVisible < upcomingRows.length ? (
                     <ShowMoreButton
                       expanded={false}
                       setExpanded={() => {
@@ -494,7 +541,7 @@ export default function SubscriptionsReportComponent() {
                         setUpcomingVisible((prev) =>
                           Math.min(
                             prev + UPCOMING_PAGE_SIZE,
-                            upcomingCounts.length
+                            upcomingRows.length
                           )
                         );
                       }}
@@ -613,37 +660,17 @@ export default function SubscriptionsReportComponent() {
                       />
                     </div>
                   )}
-                  <button
+                  <Button
                     type="button"
                     onClick={onDownloadCsv}
-                    disabled={isDownloadingCsv}
-                    className="tw-flex tw-h-11 tw-min-w-[190px] tw-items-center tw-justify-center tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-5 tw-text-sm tw-font-semibold tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-bg-primary-600 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black disabled:tw-cursor-not-allowed disabled:tw-opacity-60 sm:tw-w-52"
+                    loading={isDownloadingCsv}
+                    variant="action"
+                    size="lg"
+                    fullWidth
+                    className="tw-min-w-[190px] sm:tw-w-52"
                   >
                     {isDownloadingCsv ? (
-                      <>
-                        <svg
-                          className="tw-h-4 tw-w-4 tw-animate-spin"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          aria-hidden="true"
-                        >
-                          <circle
-                            className="tw-opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          />
-                          <path
-                            className="tw-opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                          />
-                        </svg>
-                        Downloading
-                      </>
+                      "Downloading"
                     ) : (
                       <>
                         <ArrowDownTrayIcon
@@ -653,7 +680,7 @@ export default function SubscriptionsReportComponent() {
                         Download
                       </>
                     )}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>

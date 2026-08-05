@@ -15,6 +15,7 @@ import {
   type ComponentProps,
   type RefObject,
 } from "react";
+import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
@@ -123,14 +124,15 @@ function GifPickerUnavailable({
         </p>
         <p className="tw-mb-0 tw-text-sm tw-text-iron-400">{hint}</p>
       </div>
-      <button
+      <Button
         ref={closeButtonRef}
         type="button"
         onClick={onClose}
-        className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-white/10 tw-bg-iron-800 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition tw-duration-200 hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
+        variant="secondary"
+        size="md"
       >
         {closeLabel}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -224,7 +226,7 @@ function GiphyResults({
   return (
     <div
       ref={containerRef}
-      className="tw-min-h-0 tw-flex-1 tw-overflow-x-hidden tw-overflow-y-auto tw-p-3"
+      className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overflow-x-hidden tw-p-3"
     >
       <Grid
         key={searchKey}
@@ -253,11 +255,12 @@ function GifPickerDialog({
   onSelect,
   onClose,
 }: {
-  readonly giphyApiKey: string;
+  readonly giphyApiKey?: string | undefined;
   readonly onSelect: (gif: string) => void;
   readonly onClose: () => void;
 }) {
   const locale = useBrowserLocale();
+  const normalizedGiphyApiKey = giphyApiKey?.trim();
   const dialogTitle = t(locale, "waves.gifPicker.dialogTitle");
   const poweredByLabel = t(locale, "waves.gifPicker.poweredBy", {
     brandName: GIPHY_BRAND_NAME,
@@ -278,6 +281,25 @@ function GifPickerDialog({
     setStatusMessage(t(locale, "waves.gifPicker.status.ready"));
   }, [locale]);
 
+  if (!normalizedGiphyApiKey) {
+    return (
+      <MobileWrapperDialog
+        title={dialogTitle}
+        isOpen={true}
+        onClose={onClose}
+        noPadding={true}
+        headerClassName="tw-sr-only"
+      >
+        <GifPickerUnavailable
+          title={t(locale, "waves.gifPicker.unavailable.title")}
+          hint={t(locale, "waves.gifPicker.unavailable.hint")}
+          closeLabel={t(locale, "common.close")}
+          onClose={onClose}
+        />
+      </MobileWrapperDialog>
+    );
+  }
+
   return (
     <MobileWrapperDialog
       title={dialogTitle}
@@ -295,7 +317,7 @@ function GifPickerDialog({
         {statusMessage}
       </div>
       <SearchContextManager
-        apiKey={giphyApiKey}
+        apiKey={normalizedGiphyApiKey}
         shouldDefaultToTrending={true}
         shouldFetchChannels={false}
         options={{ rating: GIPHY_RATING, type: "gifs" }}
@@ -345,7 +367,7 @@ export default function CreateDropGifPicker({
   setShow,
   onSelect,
 }: {
-  readonly giphyApiKey: string;
+  readonly giphyApiKey?: string | undefined;
   readonly show: boolean;
   readonly setShow: (show: boolean) => void;
   readonly onSelect: (gif: string) => void;

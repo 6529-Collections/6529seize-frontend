@@ -3,8 +3,9 @@
 import type { CreateDropConfig } from "@/entities/IDrop";
 import { getMentionedGroupsFromParts } from "@/helpers/waves/drop-group-mentions";
 import type { EditorState } from "lexical";
-import { useCallback, type Dispatch, type SetStateAction } from "react";
+import { useCallback, useRef, type Dispatch, type SetStateAction } from "react";
 import type { CreateDropInputHandles } from "../CreateDropInput";
+import { exportComposerMarkdown } from "./exportComposerMarkdown";
 import type { MutableCurrentRef } from "./types";
 
 interface UseStormPartActionsParams {
@@ -15,9 +16,11 @@ interface UseStormPartActionsParams {
   readonly drop: CreateDropConfig | null;
   readonly editingPartIndex: number | null;
   readonly finalizeAndAddDropPartDraft: (
+    markdownOverride?: string | null,
     replacePartIndex?: number | null
   ) => CreateDropConfig;
   readonly keepOptionsVisible: boolean;
+  readonly onMentionAliasExpansionError: () => void;
   readonly refreshState: () => void;
   readonly setDrop: Dispatch<SetStateAction<CreateDropConfig | null>>;
   readonly setEditingPartIndex: Dispatch<SetStateAction<number | null>>;
@@ -36,6 +39,7 @@ export const useStormPartActions = ({
   editingPartIndex,
   finalizeAndAddDropPartDraft,
   keepOptionsVisible,
+  onMentionAliasExpansionError,
   refreshState,
   setDrop,
   setEditingPartIndex,
@@ -44,11 +48,53 @@ export const useStormPartActions = ({
   setIsStormMode,
   submitting,
 }: UseStormPartActionsParams) => {
-  const finalizeAndAddDropPart = useCallback(() => {
-    const updatedDrop = finalizeAndAddDropPartDraft(editingPartIndex);
-    setEditingPartIndex(null);
-    return updatedDrop;
-  }, [editingPartIndex, finalizeAndAddDropPartDraft, setEditingPartIndex]);
+  const isFinalizingPartRef = useRef(false);
+
+  const finalizeResolvedDropPart = useCallback(
+    (resolvedMarkdown: string | null) => {
+      const updatedDrop = finalizeAndAddDropPartDraft(
+        resolvedMarkdown,
+        editingPartIndex
+      );
+      setEditingPartIndex(null);
+      return updatedDrop;
+    },
+    [editingPartIndex, finalizeAndAddDropPartDraft, setEditingPartIndex]
+  );
+
+  const finalizeCurrentDropPart = useCallback(async () => {
+    if (isFinalizingPartRef.current) {
+      return null;
+    }
+
+    isFinalizingPartRef.current = true;
+    try {
+      const expandMentionAliases =
+        createDropInputRef.current?.expandMentionAliases;
+      if (!expandMentionAliases) {
+        onMentionAliasExpansionError();
+        return null;
+      }
+
+      const expansion = await expandMentionAliases();
+      if (!expansion.completed) {
+        return null;
+      }
+
+      return finalizeResolvedDropPart(
+        exportComposerMarkdown(expansion.editorState)
+      );
+    } catch {
+      onMentionAliasExpansionError();
+      return null;
+    } finally {
+      isFinalizingPartRef.current = false;
+    }
+  }, [
+    createDropInputRef,
+    finalizeResolvedDropPart,
+    onMentionAliasExpansionError,
+  ]);
 
   const onEditPart = useCallback(
     (partIndex: number) => {
@@ -158,22 +204,26 @@ export const useStormPartActions = ({
     setIsStormMode(false);
   }, [refreshState, setEditingPartIndex, setIsStormMode]);
 
-  const breakIntoStorm = useCallback(() => {
-    finalizeAndAddDropPart();
+  const breakIntoStorm = useCallback(async () => {
+    const updatedDrop = await finalizeCurrentDropPart();
+    if (!updatedDrop) {
+      return;
+    }
+
     setIsStormMode(true);
     if (!keepOptionsVisible) {
       collapseOptions();
     }
   }, [
     collapseOptions,
-    finalizeAndAddDropPart,
+    finalizeCurrentDropPart,
     keepOptionsVisible,
     setIsStormMode,
   ]);
 
   return {
     breakIntoStorm,
-    finalizeAndAddDropPart,
+    finalizeResolvedDropPart,
     onCancelPartEdit,
     onDiscardStorm,
     onEditPart,

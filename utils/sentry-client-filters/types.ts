@@ -22,6 +22,7 @@ export type SentryBreadcrumb = {
   level?: string | undefined;
   message?: string | undefined;
   data?: Record<string, unknown> | undefined;
+  timestamp?: number | undefined;
 };
 
 export type NetworkTargetCandidate = {
@@ -58,6 +59,7 @@ export type SentryTags = Record<string, unknown>;
 export type SentryClientEvent = {
   event_id?: string | undefined;
   level?: string | undefined;
+  timestamp?: number | undefined;
   transaction?: string | undefined;
   message?: string | undefined;
   exception?:
