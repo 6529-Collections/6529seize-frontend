@@ -18,13 +18,13 @@ import { ApiDropSearchStrategy } from "@/generated/models/ApiDropSearchStrategy"
 import type { ApiDropType } from "@/generated/models/ApiDropType";
 import { DropSize, type ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
-  isWsDropUpdateRefData,
   WsMessageType,
   type WsDropUpdateMessage,
 } from "@/helpers/Types";
 import { fetchWaveDropsFeedV2 } from "@/services/api/wave-drops-v2-api";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { useDebouncedQueryRefetch } from "./useDebouncedQueryRefetch";
+import { useWaveDropUpdateRefetch } from "./useWaveDropUpdateRefetch";
 
 const DEFAULT_WAVE_DROPS_LIMIT = 20;
 
@@ -174,23 +174,7 @@ export function useWaveDrops({
     isFetchingNextPage,
   });
 
-  useWebSocketMessage<unknown>(
-    WsMessageType.DROP_UPDATE_REF,
-    useCallback(
-      (message) => {
-        if (
-          !enabled ||
-          !isWsDropUpdateRefData(message) ||
-          waveId !== message.wave_id
-        ) {
-          return;
-        }
-
-        requestRefetch();
-      },
-      [enabled, requestRefetch, waveId]
-    )
-  );
+  useWaveDropUpdateRefetch({ enabled, waveId, requestRefetch });
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,

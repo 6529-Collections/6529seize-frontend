@@ -9,7 +9,7 @@ import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { WsDropUpdateMessage } from "@/helpers/Types";
-import { isWsDropUpdateRefData, WsMessageType } from "@/helpers/Types";
+import { WsMessageType } from "@/helpers/Types";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { toApiWaveMin } from "@/helpers/waves/wave.helpers";
 import {
@@ -25,6 +25,7 @@ import {
 } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import { useDebouncedQueryRefetch } from "./useDebouncedQueryRefetch";
+import { useWaveDropUpdateRefetch } from "./useWaveDropUpdateRefetch";
 
 const DEFAULT_WAVE_CURATION_DROPS_PAGE_SIZE = 20;
 
@@ -121,23 +122,7 @@ export function useWaveCurationDrops({
     isFetchingNextPage,
   });
 
-  useWebSocketMessage<unknown>(
-    WsMessageType.DROP_UPDATE_REF,
-    useCallback(
-      (message) => {
-        if (
-          !enabled ||
-          !isWsDropUpdateRefData(message) ||
-          waveId !== message.wave_id
-        ) {
-          return;
-        }
-
-        requestRefetch();
-      },
-      [enabled, requestRefetch, waveId]
-    )
-  );
+  useWaveDropUpdateRefetch({ enabled, waveId, requestRefetch });
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,
