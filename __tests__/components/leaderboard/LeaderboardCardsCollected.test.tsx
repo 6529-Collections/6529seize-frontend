@@ -131,7 +131,7 @@ describe("LeaderboardCardsCollectedComponent", () => {
     const rows = screen.getAllByRole("row");
     // First row corresponds to table header, others to data
     expect(rows).toHaveLength(5);
-    expect(rows[0].querySelectorAll("th")[2]).toHaveClass(
+    expect(rows[0]!.querySelectorAll("th")[2]).toHaveClass(
       "tw-border-iron-800",
       "tw-text-iron-400",
       "md:tw-text-sm"

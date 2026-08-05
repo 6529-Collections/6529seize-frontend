@@ -96,18 +96,16 @@ test("renders seasons and switches focus", async () => {
 
   // Change collector to MEMES to enable seasons dropdown
   await user.click(
-    screen.getByRole("button", { name: "Collectors: All", exact: true })
+    screen.getByRole("button", { name: "Collectors: All" })
   );
   await user.click(
-    await screen.findByRole("menuitem", { name: "Memes", exact: true })
+    await screen.findByRole("menuitem", { name: "Memes" })
   );
 
   // Now seasons dropdown should be enabled and we can find S1
-  await user.click(
-    screen.getByRole("button", { name: "SZN: All", exact: true })
-  );
+  await user.click(screen.getByRole("button", { name: "SZN: All" }));
   expect(
-    await screen.findByRole("menuitem", { name: "S1", exact: true })
+    await screen.findByRole("menuitem", { name: "S1" })
   ).toBeInTheDocument();
 });
 

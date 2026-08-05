@@ -88,12 +88,12 @@ describe("LeaderboardInteractionsComponent", () => {
     const rows = screen.getAllByRole("row");
     // two header rows plus one data row
     expect(rows).toHaveLength(3);
-    expect(rows[0].querySelectorAll("th")[1]).toHaveClass(
+    expect(rows[0]!.querySelectorAll("th")[1]).toHaveClass(
       "tw-border-iron-800",
       "tw-text-iron-300",
       "md:tw-text-sm"
     );
-    expect(rows[1].querySelectorAll("th")[2]).toHaveClass(
+    expect(rows[1]!.querySelectorAll("th")[2]).toHaveClass(
       "tw-border-iron-800",
       "tw-text-iron-400",
       "md:tw-text-sm"
