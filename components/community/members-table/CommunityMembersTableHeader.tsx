@@ -2,13 +2,12 @@
 
 import { SortDirection } from "@/entities/ISort";
 import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
+import { DATA_TABLE_HEADER_TEXT_CLASS_NAME } from "@/components/utils/table/tableStyles";
 import { useState } from "react";
 import CommunityMembersTableHeaderSortableContent from "./CommunityMembersTableHeaderSortableContent";
 
-const HEADER_CELL_CLASS_NAME =
-  "tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400 md:tw-px-4 md:tw-py-3";
-const SORT_BUTTON_CLASS_NAME =
-  "tw-group tw-flex tw-min-h-6 tw-w-full tw-cursor-pointer tw-appearance-none tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-leading-4 tw-text-inherit focus-visible:tw-rounded-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+const HEADER_CELL_CLASS_NAME = `tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-font-semibold tw-text-iron-400 md:tw-px-4 md:tw-py-3 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`;
+const SORT_BUTTON_CLASS_NAME = `tw-group tw-flex tw-min-h-6 tw-w-full tw-cursor-pointer tw-appearance-none tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-font-semibold tw-text-inherit focus-visible:tw-rounded-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`;
 const SORTABLE_COLUMNS = [
   { sort: ApiCommunityMembersSortOption.Level, centered: true },
   { sort: ApiCommunityMembersSortOption.Tdh, centered: false },

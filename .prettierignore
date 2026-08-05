@@ -10,6 +10,7 @@ build
 # Generated files
 generated
 *.generated.*
+lib/museum/generative-studies/minted-indexes/*.json
 coverage
 content/delegation
 public/delegation-content

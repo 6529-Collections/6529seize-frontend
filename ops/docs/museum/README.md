@@ -2,9 +2,13 @@
 
 ## Overview
 
-The 6529 Network Museum presents accessioned art, collection scholarship, and
-institutional records at `/museum/network`. Its public pages are assembled from
-one verified release of the
+The 6529 Network Museum is the public art museum of the 6529 Network. Its
+homepage at `/museum/network` presents the institution as a public museum for a
+network state, then moves directly into accessioned art, collection pathways,
+programs, scholarship, and the public record. The complete institutional
+proposition is available at `/museum/network/about`.
+
+Public pages are assembled from one verified edition of the
 [`6529networkmuseum`](https://github.com/6529-Collections/6529networkmuseum)
 repository. Each page identifies its source release and offers a route for
 proposing corrections or additions.
@@ -16,18 +20,39 @@ records.
 
 ## Features
 
+- [Public Museum proposition](feature-public-museum-proposition.md): the
+  homepage hierarchy, Network ownership and TDH governance, present operating
+  boundaries, on-chain direction, permanence objective, and public-record
+  links.
+- [Inside the System](feature-inside-the-system.md): project-level generative
+  system studies, possibility-space maps, causal stages, and the positions of
+  works held by the Museum.
+- [Keys and Gates winners](feature-keys-and-gates.md): the sixteen works
+  selected by TDH, their current unminted state, responsive artwork viewing,
+  and access to each submitted high-resolution source.
 - [Institutional practice](feature-institutional-practice.md): the comparative
   essay, twenty-seven profiles, an adjacent-practice study, the Museum's public
   scholarship and editorial standard, and the primary-source register.
 
 ## Flows
 
+- The [public Museum guide](feature-public-museum-proposition.md#user-journey)
+  follows the route from the homepage proposition and featured artwork to the
+  complete institutional page and public record.
+- The [Inside the System guide](feature-inside-the-system.md#user-journey)
+  follows the route from a project or object to its analytical map, causal
+  sequence, held-work positions, and research limits.
+- The [Keys and Gates guide](feature-keys-and-gates.md#user-journey) follows a
+  winner from the program page to its artwork page and high-resolution source.
 - The [institutional-practice guide](feature-institutional-practice.md#user-journey)
   follows the route from the study index to a profile, its citations, the
   source register, and the public contribution links.
 
 ## Troubleshooting
 
+- The [Keys and Gates recovery guidance](feature-keys-and-gates.md#failure-and-recovery)
+  explains delayed images, unavailable high-resolution sources, and source
+  publication failures.
 - The [failure and recovery section](feature-institutional-practice.md#failure-and-recovery)
   explains source refreshes, unavailable publications, and external source
   failures.

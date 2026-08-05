@@ -159,6 +159,30 @@ describe("Museum page source projection", () => {
     ]);
   });
 
+  it("grounds each Casey system study in its dossier and project essay", () => {
+    const catalog = buildMuseumPageSourceCatalog(publication);
+    const essayBySlug = {
+      century: "century.md",
+      "pre-process": "process-and-pre-process.md",
+      phototaxis: "microimage-and-phototaxis.md",
+      "923-empty-rooms": "atomism-and-923-empty-rooms.md",
+      "ex-nihilo-cosmos": "still-life-and-ex-nihilo.md",
+    } as const;
+    for (const [slug, essay] of Object.entries(essayBySlug)) {
+      const source = resolveMuseumPageSource(
+        `/museum/network/projects/${slug}/system`,
+        catalog
+      );
+      expect(source?.primaryPath).toBe(
+        `notes/research/generative-systems/casey-reas/${slug}.md`
+      );
+      expect(source?.relatedSources).toContainEqual({
+        path: `records/accessions/6529NM.2026.001/public/projects/${essay}`,
+        label: "projectEssay",
+      });
+    }
+  });
+
   it("names the institutional study's research apparatus precisely", () => {
     const catalog = buildMuseumPageSourceCatalog(publication);
 
@@ -234,6 +258,10 @@ describe("Museum page source projection", () => {
       ...publication.projects.map(
         (project) =>
           `/museum/network/projects/${encodeURIComponent(project.slug)}`
+      ),
+      ...publication.projects.map(
+        (project) =>
+          `/museum/network/projects/${encodeURIComponent(project.slug)}/system`
       ),
       ...publication.institutionalPractice.profiles.map(
         (profile) =>

@@ -3,6 +3,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { DATA_TABLE_HEADER_TEXT_CLASS_NAME } from "@/components/utils/table/tableStyles";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "@/entities/ISort";
 import type { NftTDHRanked } from "./NFTLeaderboard";
@@ -16,8 +17,7 @@ import {
   faSquareCaretDown,
 } from "@fortawesome/free-solid-svg-icons";
 
-const tableHeaderClassName =
-  "tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400 md:tw-px-4 md:tw-py-3";
+const tableHeaderClassName = `tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-font-semibold tw-text-iron-400 md:tw-px-4 md:tw-py-3 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`;
 
 const MEME_LAB_BALANCE_SORT = "balance";
 
@@ -131,13 +131,13 @@ export default function MemeLabLeaderboard(props: Readonly<Props>) {
             <tr>
               <th
                 scope="col"
-                className="tw-w-12 tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400 md:tw-w-20 md:tw-px-4 md:tw-py-3"
+                className={`tw-w-12 tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-font-semibold tw-text-iron-400 md:tw-w-20 md:tw-px-4 md:tw-py-3 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`}
               >
                 Rank
               </th>
               <th
                 scope="col"
-                className="tw-min-w-[11rem] tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-left tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400 md:tw-min-w-[18rem] md:tw-px-4 md:tw-py-3"
+                className={`tw-min-w-[11rem] tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-left tw-font-semibold tw-text-iron-400 md:tw-min-w-[18rem] md:tw-px-4 md:tw-py-3 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`}
               >
                 Collector{" "}
                 {totalResults > 0 && `x${totalResults.toLocaleString()}`}

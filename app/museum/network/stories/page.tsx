@@ -4,6 +4,7 @@ import { MuseumArtworkFigure } from "@/components/museum/MuseumArtworkFigure";
 import { institutionalPracticePublicationIsComplete } from "@/components/museum/InstitutionalPracticeReadingRoom";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
 import { MuseumSectionHeading } from "@/components/museum/MuseumShell";
+import { MuseumInsideSystemDirectory } from "@/components/museum/MuseumInsideSystem";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -12,6 +13,7 @@ import {
   tryCaseyArtworksFromPublication,
 } from "@/lib/museum/casey";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
+import { CASEY_GENERATIVE_STUDIES } from "@/lib/museum/generative-studies";
 
 const FEATURED_STORY_OBJECT_ID = "6529NM.2026.001.07";
 
@@ -98,6 +100,31 @@ export default async function MuseumStoriesPage() {
           </Link>
         </article>
       </div>
+      <section
+        className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-10"
+        aria-labelledby="inside-system-directory-title"
+      >
+        <div className="tw-max-w-4xl">
+          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
+            {t(DEFAULT_LOCALE, "museum.network.insideSystem.eyebrow")}
+          </p>
+          <h2
+            id="inside-system-directory-title"
+            className="tw-m-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50"
+          >
+            {t(DEFAULT_LOCALE, "museum.network.insideSystem.directoryTitle")}
+          </h2>
+          <p className="tw-m-0 tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-300">
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.insideSystem.directoryDescription"
+            )}
+          </p>
+        </div>
+        <div className="tw-mt-8">
+          <MuseumInsideSystemDirectory studies={CASEY_GENERATIVE_STUDIES} />
+        </div>
+      </section>
       <section
         className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-10"
         aria-labelledby="institutional-practice-directory-title"

@@ -3,6 +3,10 @@ export const MUSEUM_BRANCH = "main";
 const MUSEUM_MANIFEST_PATH = "release-artifacts/latest/record-manifest.json";
 export const MUSEUM_MANIFEST_URL = `https://raw.githubusercontent.com/${MUSEUM_REPOSITORY}/${MUSEUM_BRANCH}/${MUSEUM_MANIFEST_PATH}`;
 export const MUSEUM_REPOSITORY_URL = `https://github.com/${MUSEUM_REPOSITORY}`;
+const MUSEUM_SAFE_ADDRESS =
+  "0xbECfa2bA5a782D11E1a0e821E8F2e30b6684178c" as const;
+export const MUSEUM_SAFE_ETHERSCAN_URL =
+  `https://etherscan.io/address/${MUSEUM_SAFE_ADDRESS}` as const;
 
 export type MuseumSourceState =
   | "fresh"
@@ -74,6 +78,27 @@ export interface MuseumApprovedCollection {
   readonly sourcePath: string;
 }
 
+export interface MuseumProgramImageVariant {
+  readonly url: string;
+  readonly width: number;
+  readonly height: number;
+  readonly mimeType: "image/webp";
+  readonly sha256: string;
+  readonly byteSize: number;
+}
+
+export interface MuseumProgramMedia {
+  readonly sourceUrl: string;
+  readonly sourceMimeType: string;
+  readonly sourceSha256: string | null;
+  readonly sourceByteSize: number | null;
+  readonly sourceWidth: number | null;
+  readonly sourceHeight: number | null;
+  readonly altText: string;
+  readonly altTextStatus: string;
+  readonly variants: readonly MuseumProgramImageVariant[];
+}
+
 export interface MuseumSelectedWork {
   readonly recordId: string;
   readonly outcomePath: string | null;
@@ -84,8 +109,7 @@ export interface MuseumSelectedWork {
   readonly winnerPlace: number | null;
   readonly voteTotal: number | null;
   readonly voterCount: number | null;
-  readonly imageUrl: string | null;
-  readonly imageMimeType: string | null;
+  readonly media: MuseumProgramMedia | null;
 }
 
 export interface MuseumProgram {
@@ -129,9 +153,7 @@ export interface MuseumObjectRecord {
   readonly status: string;
   readonly statusAsOf: string | null;
   readonly programId: string | null;
-  readonly imageUrl: string | null;
-  readonly imageMimeType: string | null;
-  readonly imageRetrievalStatus: string | null;
+  readonly media: MuseumProgramMedia | null;
   readonly selectionPlace: number | null;
   readonly selectionDate: string | null;
   readonly selectionSourceUrl: string | null;

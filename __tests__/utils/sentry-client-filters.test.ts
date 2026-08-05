@@ -1,4 +1,8 @@
 import {
+  createLatestReactDomRawFrames,
+  createObservedReactDomRawInsertBeforeFrames,
+} from "@/__tests__/fixtures/reactDomRawInsertBeforeFixtures";
+import {
   __testing,
   getLowValueNetworkErrorDecision,
   getLowValueNetworkErrorTargetUrl,
@@ -11,12 +15,15 @@ import {
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterGifPickerTenorCategoriesError,
+  shouldFilterInstagramPageHideBridgeError,
   shouldFilterInjectedProviderProxyStartsWithError,
   shouldFilterInjectedWalletCollision,
+  shouldFilterKnownWalletProviderObjectRejection,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
   shouldFilterPoperBlockerOrphanFetchRejection,
+  shouldFilterExpectedWaveRequestReplacementAbort,
   shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterSentryRouteParameterizationError,
@@ -35,7 +42,29 @@ import {
 
 type TestSentryClientEvent = SentryClientEvent;
 type TestSentryClientEventOverrides = Partial<TestSentryClientEvent>;
+type TestSentryBreadcrumb = Extract<
+  NonNullable<TestSentryClientEvent["breadcrumbs"]>,
+  unknown[]
+>[number];
 type TestSentryTransactionSpanOverrides = Partial<SentryTransactionSpan>;
+type DropReactionRequestMethod = "DELETE" | "POST";
+type DropReactionAction = "add" | "remove" | "replace";
+type DropReactionSource = "chip" | "picker" | "quick-react";
+type DropReactionHttpBreadcrumbOptions = {
+  readonly category?: string;
+  readonly firstParty?: boolean;
+  readonly firstPartyApi?: boolean;
+  readonly level?: string;
+  readonly method?: string;
+  readonly statusCode?: number;
+  readonly type?: string;
+  readonly url?: string;
+};
+type DropReactionLifecycleBreadcrumbOptions = {
+  readonly action?: DropReactionAction;
+  readonly mutationSequence?: number;
+  readonly source?: DropReactionSource;
+};
 type TwitterConfigRawEventOptions = {
   exceptionType?: string | undefined;
   exceptionValue?: string | undefined;
@@ -49,6 +78,18 @@ type TwitterCurrentInsetEventOptions = {
   request?: TestSentryClientEvent["request"];
   mechanismType?: string;
   handled?: boolean;
+};
+type KnownWalletProviderObjectRejectionOptions = {
+  eventTimestamp?: number;
+  code?: number;
+  rpcMessage?: string;
+  wrapperMessage?: string;
+  mechanismType?: string;
+  handled?: boolean;
+  frames?: SentryStackFrame[] | undefined;
+  additionalException?: SentryExceptionValue | undefined;
+  breadcrumbs?: TestSentryClientEvent["breadcrumbs"];
+  serializedStack?: string | undefined;
 };
 type AppleWebKitSortedTrackListOverrides = {
   type?: string | undefined;
@@ -68,6 +109,71 @@ type AppleWebKitSortedTrackListOverrides = {
   browserName?: string | undefined;
   transaction?: string | undefined;
 };
+type InstagramPageHideBridgeEventOptions = {
+  type?: string | undefined;
+  value?: string | undefined;
+  mechanismType?: string | undefined;
+  handled?: boolean | undefined;
+  frames?: SentryStackFrame[] | undefined;
+  browserName?: string | undefined;
+  osName?: string | undefined;
+  includeAdditionalException?: boolean | undefined;
+  extra?: Record<string, unknown> | undefined;
+};
+
+type ExpectedWaveReplacementAbortOverrides = {
+  exception?: Partial<SentryExceptionValue> | undefined;
+  domExceptionCode?: unknown;
+  includeDomExceptionCode?: boolean | undefined;
+  eventTimestamp?: number | undefined;
+  includeEventTimestamp?: boolean | undefined;
+  breadcrumbs?: SentryClientEvent["breadcrumbs"];
+  additionalException?: SentryExceptionValue | undefined;
+};
+
+const expectedWaveAbortErrorValue = "AbortError: The user aborted a request.";
+const expectedWaveAbortEventTimestamp = 1_785_689_742.621;
+const expectedWaveAbortBreadcrumbTimestamp = 1_785_689_742.5;
+
+const createExpectedWaveReplacementAbortEvent = ({
+  exception = {},
+  domExceptionCode = "20",
+  includeDomExceptionCode = true,
+  eventTimestamp = expectedWaveAbortEventTimestamp,
+  includeEventTimestamp = true,
+  breadcrumbs = [
+    {
+      category: "wave.request",
+      message: "wave_request_aborted",
+      timestamp: expectedWaveAbortBreadcrumbTimestamp,
+      data: {
+        request_kind: "background_sync",
+        trigger: "request_replaced",
+      },
+    },
+  ],
+  additionalException,
+}: ExpectedWaveReplacementAbortOverrides = {}): TestSentryClientEvent => ({
+  ...(includeEventTimestamp ? { timestamp: eventTimestamp } : {}),
+  exception: {
+    values: [
+      {
+        type: "Error",
+        value: expectedWaveAbortErrorValue,
+        mechanism: {
+          type: "auto.browser.global_handlers.onunhandledrejection",
+          handled: false,
+        },
+        ...exception,
+      },
+      ...(additionalException ? [additionalException] : []),
+    ],
+  },
+  tags: includeDomExceptionCode
+    ? { "DOMException.code": domExceptionCode }
+    : {},
+  breadcrumbs,
+});
 
 describe("sentry-client-filters", () => {
   const wrappedNetworkMessage =
@@ -76,6 +182,13 @@ describe("sentry-client-filters", () => {
     "Object captured as promise rejection with keys: code, message, stack";
   const objectCapturedPromiseRejectionWithoutStackMessage =
     "Object captured as promise rejection with keys: code, message";
+  const unsupportedWalletRevokePermissionsMessage =
+    "the method wallet_revokePermissions does not exist/is not available";
+  const backpackInternalJsonRpcErrorMessage = "Internal JSON-RPC error.";
+  const backpackWalletCollisionBreadcrumbMessage =
+    "Backpack was unable to override window.ethereum. If you're having issues connecting to a dapp, disable any other wallets and try again.";
+  const readOnlyEthereumProxyBreadcrumbMessage =
+    "[2026-08-04T04:00:10.853Z] [[WagmiSetup] Skipping safe ethereum proxy install for read-only window.ethereum] Error: Signature request failed. Please try again.";
   const coinbaseMetricsNetworkMessage =
     "Network request failed. Please check your connection and try again. (/metrics)";
   const talismanOnboardingMessage =
@@ -101,6 +214,8 @@ describe("sentry-client-filters", () => {
     __testing.REACT_DOM_INSERT_BEFORE_NOT_FOUND_ERROR_MESSAGE;
   const gifPickerTenorUndefinedTagsMessage =
     __testing.gifPickerTenorUndefinedTagsMessage;
+  const instagramPageHideBridgeErrorMessage =
+    "undefined is not an object (evaluating 'window.webkit.messageHandlers')";
   const reactDomRemoveChildMessage =
     __testing.REACT_DOM_REMOVE_CHILD_NOT_FOUND_ERROR_MESSAGE;
   const reactDomFrame = {
@@ -125,6 +240,17 @@ describe("sentry-client-filters", () => {
     filename:
       "https://6529.io/_next/static/webpack/1234567890abcdef.webpack.js",
     function: functionName,
+  });
+  const reactDomRawChunkPath =
+    "app:///_next/static/chunks/0example-react-dom-runtime.js";
+  const reactDomRawStaticChunkFrame = (
+    functionName: string,
+    chunkPath: string = reactDomRawChunkPath
+  ): SentryStackFrame => ({
+    filename: chunkPath,
+    abs_path: chunkPath,
+    function: functionName,
+    in_app: true,
   });
   const metaMaskCircularMetaElementMessage =
     "Converting circular structure to JSON --> starting at object with constructor 'HTMLMetaElement' | property '__reactFiber$nkfb4ziusym' -> object with constructor 'ry' --- property 'stateNode' closes the circle";
@@ -203,16 +329,12 @@ describe("sentry-client-filters", () => {
           stacktrace: {
             frames: [
               {
-                filename:
-                  "app:///waves/00000000-0000-4000-8000-000000000002",
-                abs_path:
-                  "app:///waves/00000000-0000-4000-8000-000000000002",
+                filename: "app:///waves/00000000-0000-4000-8000-000000000002",
+                abs_path: "app:///waves/00000000-0000-4000-8000-000000000002",
               },
               {
-                filename:
-                  "app:///waves/00000000-0000-4000-8000-000000000002",
-                abs_path:
-                  "app:///waves/00000000-0000-4000-8000-000000000002",
+                filename: "app:///waves/00000000-0000-4000-8000-000000000002",
+                abs_path: "app:///waves/00000000-0000-4000-8000-000000000002",
               },
             ],
           },
@@ -335,10 +457,7 @@ describe("sentry-client-filters", () => {
       "a missing injected frame",
       { frames: createTwitterConfigRawFrames().slice(0, 3) },
     ],
-    [
-      "reordered injected frames",
-      { frames: reorderTwitterConfigRawFrames() },
-    ],
+    ["reordered injected frames", { frames: reorderTwitterConfigRawFrames() }],
     [
       "an application-owned frame",
       {
@@ -383,8 +502,7 @@ describe("sentry-client-filters", () => {
           stacktrace: {
             frames: [
               {
-                filename:
-                  "app:///waves/00000000-0000-4000-8000-000000000002",
+                filename: "app:///waves/00000000-0000-4000-8000-000000000002",
               },
             ],
           },
@@ -429,6 +547,64 @@ describe("sentry-client-filters", () => {
       ],
     },
     ...overrides,
+  });
+
+  const createBackpackWalletCollisionBreadcrumbs = () => [
+    {
+      timestamp: 1000,
+      category: "console",
+      level: "error",
+      message: readOnlyEthereumProxyBreadcrumbMessage,
+    },
+    {
+      timestamp: 1000.458,
+      category: "console",
+      level: "info",
+      message: backpackWalletCollisionBreadcrumbMessage,
+    },
+    {
+      timestamp: 1000.462,
+      type: "http",
+      category: "fetch",
+      level: "info",
+    },
+  ];
+
+  const createKnownWalletProviderObjectRejectionEvent = ({
+    eventTimestamp = 1000.475,
+    code = -32601,
+    rpcMessage = unsupportedWalletRevokePermissionsMessage,
+    wrapperMessage = objectCapturedPromiseRejectionWithoutStackMessage,
+    mechanismType = "auto.browser.global_handlers.onunhandledrejection",
+    handled = false,
+    frames,
+    additionalException,
+    breadcrumbs = [],
+    serializedStack,
+  }: KnownWalletProviderObjectRejectionOptions = {}): TestSentryClientEvent => ({
+    timestamp: eventTimestamp,
+    exception: {
+      values: [
+        {
+          type: "UnhandledRejection",
+          value: wrapperMessage,
+          mechanism: {
+            type: mechanismType,
+            handled,
+          },
+          ...(frames === undefined ? {} : { stacktrace: { frames } }),
+        },
+        ...(additionalException ? [additionalException] : []),
+      ],
+    },
+    extra: {
+      __serialized__: {
+        code,
+        message: rpcMessage,
+        ...(serializedStack === undefined ? {} : { stack: serializedStack }),
+      },
+    },
+    breadcrumbs,
   });
 
   const createInjectedKeplrWalletCollisionEvent = (
@@ -1138,6 +1314,175 @@ describe("sentry-client-filters", () => {
     ],
   ];
 
+  const createInstagramPageHideBridgeFrames = (
+    columns: readonly [number, number, number] = [5517, 3808, 1208],
+    documentPath = "app:///example-profile/rep"
+  ): SentryStackFrame[] => [
+    {
+      filename: documentPath,
+      abs_path: documentPath,
+      lineno: 1,
+      colno: columns[0],
+      in_app: true,
+    },
+    {
+      filename: documentPath,
+      abs_path: documentPath,
+      function: "sendPageHideMessage",
+      lineno: 1,
+      colno: columns[1],
+      in_app: true,
+    },
+    {
+      filename: documentPath,
+      abs_path: documentPath,
+      function: "sendDataToNative",
+      lineno: 1,
+      colno: columns[2],
+      in_app: true,
+    },
+  ];
+
+  const overrideInstagramPageHideBridgeFrame = (
+    frameIndex: number,
+    frameOverrides: Partial<SentryStackFrame>
+  ): SentryStackFrame[] =>
+    createInstagramPageHideBridgeFrames().map((frame, index) =>
+      index === frameIndex ? { ...frame, ...frameOverrides } : frame
+    );
+
+  const createInstagramPageHideBridgeEvent = ({
+    type = "TypeError",
+    value = instagramPageHideBridgeErrorMessage,
+    mechanismType = "auto.browser.global_handlers.onerror",
+    handled = false,
+    frames = createInstagramPageHideBridgeFrames(),
+    browserName = "Instagram",
+    osName = "iOS",
+    includeAdditionalException = false,
+    extra,
+  }: InstagramPageHideBridgeEventOptions = {}): TestSentryClientEvent => ({
+    contexts: {
+      browser: { name: browserName },
+      os: { name: osName },
+    },
+    ...(extra ? { extra } : {}),
+    exception: {
+      values: [
+        {
+          type,
+          value,
+          mechanism: {
+            type: mechanismType,
+            handled,
+          },
+          stacktrace: { frames },
+        },
+        ...(includeAdditionalException
+          ? [
+              {
+                type: "Error",
+                value: "Application request validation failed.",
+              },
+            ]
+          : []),
+      ],
+    },
+  });
+
+  const instagramPageHideBridgeNearMisses: Array<
+    [string, InstagramPageHideBridgeEventOptions]
+  > = [
+    ["a changed exception type", { type: "Error" }],
+    [
+      "a changed exception value",
+      {
+        value:
+          "undefined is not an object (evaluating 'window.webkit.messageHandlers.bridge')",
+      },
+    ],
+    ["a changed mechanism", { mechanismType: "onerror" }],
+    ["a handled exception", { handled: true }],
+    ["a non-Instagram browser", { browserName: "Mobile Safari" }],
+    ["a non-iOS operating system", { osName: "Android" }],
+    [
+      "a changed first-frame function",
+      {
+        frames: overrideInstagramPageHideBridgeFrame(0, {
+          function: "global code",
+        }),
+      },
+    ],
+    [
+      "a changed page-hide function",
+      {
+        frames: overrideInstagramPageHideBridgeFrame(1, {
+          function: "sendPageHiddenMessage",
+        }),
+      },
+    ],
+    [
+      "a changed native-send function",
+      {
+        frames: overrideInstagramPageHideBridgeFrame(2, {
+          function: "sendMessageToNative",
+        }),
+      },
+    ],
+    [
+      "a changed first column",
+      { frames: overrideInstagramPageHideBridgeFrame(0, { colno: 5518 }) },
+    ],
+    [
+      "a changed page-hide column",
+      { frames: overrideInstagramPageHideBridgeFrame(1, { colno: 3809 }) },
+    ],
+    [
+      "a changed native-send column",
+      { frames: overrideInstagramPageHideBridgeFrame(2, { colno: 1209 }) },
+    ],
+    [
+      "a changed line",
+      { frames: overrideInstagramPageHideBridgeFrame(1, { lineno: 2 }) },
+    ],
+    [
+      "a different document path",
+      {
+        frames: overrideInstagramPageHideBridgeFrame(1, {
+          filename: "app:///another-profile/rep",
+          abs_path: "app:///another-profile/rep",
+        }),
+      },
+    ],
+    [
+      "conflicting frame paths",
+      {
+        frames: overrideInstagramPageHideBridgeFrame(1, {
+          abs_path: "app:///another-profile/rep",
+        }),
+      },
+    ],
+    [
+      "a missing frame",
+      { frames: createInstagramPageHideBridgeFrames().slice(0, 2) },
+    ],
+    [
+      "an extra frame",
+      {
+        frames: [
+          ...createInstagramPageHideBridgeFrames(),
+          {
+            filename: "app:///example-profile/rep",
+            function: "pagehide",
+            lineno: 1,
+            colno: 1,
+          },
+        ],
+      },
+    ],
+    ["an additional exception", { includeAdditionalException: true }],
+  ];
+
   const createSentryRouteParameterizationEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent => ({
@@ -1681,6 +2026,100 @@ describe("sentry-client-filters", () => {
     ...overrides,
   });
 
+  const createDropReactionHttpBreadcrumb = (
+    options: DropReactionHttpBreadcrumbOptions = {}
+  ): TestSentryBreadcrumb => {
+    const data: Record<string, unknown> = {
+      method: options.method ?? "POST",
+      url: options.url ?? "/api/drops/drop-id/reaction",
+      "url.is_first_party": options.firstParty ?? true,
+      "url.is_first_party_api": options.firstPartyApi ?? true,
+    };
+    if (options.statusCode !== undefined) {
+      data["status_code"] = options.statusCode;
+    }
+
+    return {
+      type: options.type ?? "http",
+      category: options.category ?? "fetch",
+      level: options.level ?? "error",
+      data,
+    };
+  };
+
+  const createDropReactionLifecycleBreadcrumb = (
+    message:
+      | "reaction.request_failed"
+      | "reaction.request_sent"
+      | "reaction.request_succeeded",
+    method: DropReactionRequestMethod,
+    options: DropReactionLifecycleBreadcrumbOptions = {}
+  ): TestSentryBreadcrumb => {
+    const data: Record<string, unknown> = {
+      action: options.action ?? (method === "DELETE" ? "remove" : "add"),
+      endpoint_family: "drop_reaction",
+      method,
+      mutation_sequence: options.mutationSequence ?? 1,
+      source: options.source ?? "chip",
+    };
+    if (message === "reaction.request_failed") {
+      data["error_kind"] = "network";
+    }
+
+    return {
+      category: "reactions",
+      level: message === "reaction.request_failed" ? "warning" : "info",
+      message,
+      data,
+    };
+  };
+
+  const createDropReactionRequestBreadcrumbs = (
+    requestBreadcrumbs: TestSentryBreadcrumb[],
+    method: DropReactionRequestMethod = "POST",
+    options: DropReactionLifecycleBreadcrumbOptions = {}
+  ): TestSentryBreadcrumb[] => [
+    createDropReactionLifecycleBreadcrumb(
+      "reaction.request_sent",
+      method,
+      options
+    ),
+    ...requestBreadcrumbs,
+    createDropReactionLifecycleBreadcrumb(
+      "reaction.request_failed",
+      method,
+      options
+    ),
+  ];
+
+  const createDropReactionNetworkEvent = (
+    overrides: TestSentryClientEventOverrides = {}
+  ): TestSentryClientEvent => ({
+    event_id: "network-drop-event",
+    level: "warning",
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: "Drop reaction request failed",
+          mechanism: {
+            type: "generic",
+            handled: true,
+          },
+        },
+      ],
+    },
+    tags: {
+      feature: "drop-reaction",
+      operation: "reaction-request",
+      error_kind: "network",
+    },
+    breadcrumbs: createDropReactionRequestBreadcrumbs([
+      createDropReactionHttpBreadcrumb(),
+    ]),
+    ...overrides,
+  });
+
   const setNavigatorUserAgent = (userAgent: string): void => {
     Object.defineProperty(globalThis.navigator, "userAgent", {
       value: userAgent,
@@ -1737,6 +2176,61 @@ describe("sentry-client-filters", () => {
       url: "/waves",
     },
     ...overrides,
+  });
+
+  const createReactDomRawInsertBeforeEvent = (
+    options: {
+      exceptionType?: string;
+      exceptionValue?: string;
+      frames?: SentryStackFrame[];
+      transaction?: string;
+      includeAdditionalException?: boolean;
+      includeMechanism?: boolean;
+      mechanismType?: string;
+      mechanismHandled?: boolean;
+    } = {}
+  ): SentryClientEvent => ({
+    transaction: options.transaction ?? "/waves",
+    exception: {
+      values: [
+        {
+          type: options.exceptionType ?? "NotFoundError",
+          value: options.exceptionValue ?? reactDomInsertBeforeMessage,
+          ...(options.includeMechanism === false
+            ? {}
+            : {
+                mechanism: {
+                  type: options.mechanismType ?? "generic",
+                  handled: options.mechanismHandled ?? true,
+                },
+              }),
+          stacktrace: {
+            frames: options.frames ?? createLatestReactDomRawFrames(),
+          },
+        },
+        ...(options.includeAdditionalException
+          ? [
+              {
+                type: "Error",
+                value: "Independent application failure",
+                stacktrace: {
+                  frames: [
+                    {
+                      filename: "app:///components/waves/Wave.tsx",
+                      function: "Wave",
+                      in_app: true,
+                    },
+                  ],
+                },
+              },
+            ]
+          : []),
+      ],
+    },
+    tags: {
+      transaction: options.transaction ?? "/waves",
+      url: options.transaction ?? "/waves",
+    },
   });
 
   const createGifPickerTenorCategoriesEvent = (
@@ -1930,6 +2424,152 @@ describe("sentry-client-filters", () => {
     );
 
     expect(result).toBe(true);
+  });
+
+  it.each(["sN", "sR"] as const)(
+    "filters the observed 50-frame raw React DOM stack ending in %s",
+    (terminalFunction) => {
+      const frames =
+        createObservedReactDomRawInsertBeforeFrames(terminalFunction);
+      expect(frames).toHaveLength(50);
+
+      const result = shouldFilterReactDomInsertBeforeNotFoundError(
+        createReactDomRawInsertBeforeEvent({ frames })
+      );
+
+      expect(result).toBe(true);
+    }
+  );
+
+  it("keeps the latest captured raw fixture at 50 frames", () => {
+    expect(createLatestReactDomRawFrames()).toHaveLength(50);
+  });
+
+  it.each(["/waves", "/waves/:wave", "/join-6529", "/:user", "/"])(
+    "filters the latest observed 50-frame raw stack on %s",
+    (transaction) => {
+      const result = shouldFilterReactDomInsertBeforeNotFoundError(
+        createReactDomRawInsertBeforeEvent({ transaction })
+      );
+
+      expect(result).toBe(true);
+    }
+  );
+
+  it.each([
+    {
+      name: "a changed frame count",
+      getFrames: () => createObservedReactDomRawInsertBeforeFrames().slice(1),
+    },
+    {
+      name: "an unknown function",
+      getFrames: () => [
+        reactDomRawStaticChunkFrame("WaveDrop"),
+        ...createObservedReactDomRawInsertBeforeFrames().slice(1),
+      ],
+    },
+    {
+      name: "multiple chunk files",
+      getFrames: () => [
+        reactDomRawStaticChunkFrame(
+          "lr",
+          "app:///_next/static/chunks/0different-runtime.js"
+        ),
+        ...createObservedReactDomRawInsertBeforeFrames().slice(1),
+      ],
+    },
+    {
+      name: "a missing required function",
+      getFrames: () =>
+        createObservedReactDomRawInsertBeforeFrames().map((frame) =>
+          frame.function === "lr" ? reactDomRawStaticChunkFrame("li") : frame
+        ),
+    },
+    {
+      name: "mixed sN and sR function variants",
+      getFrames: () => [
+        reactDomRawStaticChunkFrame("sR"),
+        ...createObservedReactDomRawInsertBeforeFrames().slice(1),
+      ],
+    },
+    {
+      name: "an allowed non-placement frame after an sR placement frame",
+      getFrames: () => [
+        reactDomRawStaticChunkFrame("lr"),
+        reactDomRawStaticChunkFrame("sR"),
+        ...createObservedReactDomRawInsertBeforeFrames("sR").slice(2, -1),
+        reactDomRawStaticChunkFrame("li"),
+      ],
+    },
+    {
+      name: "the production frame order reversed",
+      getFrames: () => createObservedReactDomRawInsertBeforeFrames().reverse(),
+    },
+  ])("keeps raw insertBefore events with $name", ({ getFrames }) => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomRawInsertBeforeEvent({ frames: getFrames() })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    {
+      name: "a different exception type",
+      options: { exceptionType: "TypeError" },
+    },
+    {
+      name: "a different exception message",
+      options: { exceptionValue: "The requested node was not found." },
+    },
+    {
+      name: "an unobserved route",
+      options: { transaction: "/about" },
+    },
+    {
+      name: "a different mechanism",
+      options: {
+        mechanismType: "auto.browser.global_handlers.onerror",
+      },
+    },
+    {
+      name: "an unhandled mechanism",
+      options: { mechanismHandled: false },
+    },
+    {
+      name: "no mechanism",
+      options: { includeMechanism: false },
+    },
+  ])("keeps the observed raw stack with $name", ({ options }) => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomRawInsertBeforeEvent(options)
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps the broader source-mapped React DOM signature outside waves routes", () => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomInsertBeforeEvent({
+        transaction: "/join-6529",
+        tags: {
+          transaction: "/join-6529",
+          url: "/join-6529",
+        },
+      })
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps mixed-exception events containing the observed raw stack", () => {
+    const result = shouldFilterReactDomInsertBeforeNotFoundError(
+      createReactDomRawInsertBeforeEvent({
+        includeAdditionalException: true,
+      })
+    );
+
+    expect(result).toBe(false);
   });
 
   it("filters React DOM insertBefore NotFoundError events from webpack static chunks", () => {
@@ -2726,6 +3366,449 @@ describe("sentry-client-filters", () => {
     );
 
     expect(result).toBe("drop");
+  });
+
+  it("samples the exact synthetic drop-reaction transport warning", () => {
+    const event = createDropReactionNetworkEvent();
+
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+    expect(getLowValueNetworkErrorDecision(event, 1)).toBe("keep_sampled");
+  });
+
+  it.each([
+    {
+      name: "message",
+      overrides: {
+        exception: {
+          values: [
+            {
+              type: "Error",
+              value: "Drop reaction request timed out",
+            },
+          ],
+        },
+      },
+    },
+    {
+      name: "event level",
+      overrides: { level: "error" },
+    },
+    {
+      name: "unhandled mechanism",
+      overrides: {
+        exception: {
+          values: [
+            {
+              type: "Error",
+              value: "Drop reaction request failed",
+              mechanism: {
+                type: "generic",
+                handled: false,
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      name: "additional exception after the synthetic warning",
+      overrides: {
+        exception: {
+          values: [
+            {
+              type: "Error",
+              value: "Drop reaction request failed",
+            },
+            {
+              type: "Error",
+              value: "Additional application failure",
+            },
+          ],
+        },
+      },
+    },
+    {
+      name: "serious exception before the synthetic warning",
+      overrides: {
+        exception: {
+          values: [
+            {
+              type: "Error",
+              value: "Additional application failure",
+            },
+            {
+              type: "Error",
+              value: "Drop reaction request failed",
+            },
+          ],
+        },
+      },
+    },
+    {
+      name: "feature",
+      overrides: {
+        tags: {
+          feature: "wave-reaction",
+          operation: "reaction-request",
+          error_kind: "network",
+        },
+      },
+    },
+    {
+      name: "operation",
+      overrides: {
+        tags: {
+          feature: "drop-reaction",
+          operation: "reaction-sync",
+          error_kind: "network",
+        },
+      },
+    },
+    {
+      name: "missing error kind",
+      overrides: {
+        tags: {
+          feature: "drop-reaction",
+          operation: "reaction-request",
+        },
+      },
+    },
+    ...["auth", "rate-limit", "endpoint-contract", "server"].map(
+      (errorKind) => ({
+        name: `${errorKind} error kind`,
+        overrides: {
+          tags: {
+            feature: "drop-reaction",
+            operation: "reaction-request",
+            error_kind: errorKind,
+          },
+        },
+      })
+    ),
+    {
+      name: "unrelated first-party API transport target",
+      overrides: {
+        breadcrumbs: createDropReactionRequestBreadcrumbs([
+          createDropReactionHttpBreadcrumb({
+            method: "GET",
+            url: "/api/waves/wave-id",
+          }),
+        ]),
+      },
+    },
+    {
+      name: "reaction request method",
+      overrides: {
+        breadcrumbs: createDropReactionRequestBreadcrumbs([
+          createDropReactionHttpBreadcrumb({ method: "GET" }),
+        ]),
+      },
+    },
+    {
+      name: "reaction request endpoint",
+      overrides: {
+        breadcrumbs: createDropReactionRequestBreadcrumbs([
+          createDropReactionHttpBreadcrumb({
+            url: "/api/v2/drops/drop-id/reactions",
+          }),
+        ]),
+      },
+    },
+    {
+      name: "HTTP response status",
+      overrides: {
+        breadcrumbs: createDropReactionRequestBreadcrumbs([
+          createDropReactionHttpBreadcrumb({ statusCode: 500 }),
+        ]),
+      },
+    },
+    {
+      name: "third-party target",
+      overrides: {
+        breadcrumbs: createDropReactionRequestBreadcrumbs([
+          createDropReactionHttpBreadcrumb({
+            firstParty: false,
+            firstPartyApi: false,
+            url: "https://example.com/reaction",
+          }),
+        ]),
+      },
+    },
+    {
+      name: "failed transport breadcrumb",
+      overrides: { breadcrumbs: createDropReactionRequestBreadcrumbs([]) },
+    },
+    {
+      name: "HTTP breadcrumb type",
+      overrides: {
+        breadcrumbs: createDropReactionRequestBreadcrumbs([
+          createDropReactionHttpBreadcrumb({ type: "default" }),
+        ]),
+      },
+    },
+    {
+      name: "HTTP breadcrumb category",
+      overrides: {
+        breadcrumbs: createDropReactionRequestBreadcrumbs([
+          createDropReactionHttpBreadcrumb({ category: "navigation" }),
+        ]),
+      },
+    },
+  ])(
+    "keeps a synthetic drop-reaction near miss with different $name",
+    ({ overrides }) => {
+      expect(
+        getLowValueNetworkErrorDecision(
+          createDropReactionNetworkEvent(overrides),
+          0
+        )
+      ).toBe("not_applicable");
+    }
+  );
+
+  it("samples the exact synthetic warning with an explicit status code of zero", () => {
+    const event = createDropReactionNetworkEvent({
+      breadcrumbs: createDropReactionRequestBreadcrumbs(
+        [
+          createDropReactionHttpBreadcrumb({
+            method: "DELETE",
+            statusCode: 0,
+          }),
+        ],
+        "DELETE"
+      ),
+    });
+
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+    expect(getLowValueNetworkErrorDecision(event, 1)).toBe("keep_sampled");
+  });
+
+  it.each([
+    {
+      name: "first-party API",
+      laterFailure: createDropReactionHttpBreadcrumb({
+        method: "GET",
+        url: "/api/waves/wave-id",
+      }),
+    },
+    {
+      name: "non-API",
+      laterFailure: createDropReactionHttpBreadcrumb({
+        firstPartyApi: false,
+        method: "GET",
+        url: "/profile",
+      }),
+    },
+  ])(
+    "samples the current reaction failure when a later unrelated $name request also fails",
+    ({ laterFailure }) => {
+      const event = createDropReactionNetworkEvent({
+        breadcrumbs: createDropReactionRequestBreadcrumbs([
+          createDropReactionHttpBreadcrumb(),
+          laterFailure,
+        ]),
+      });
+
+      expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+      expect(getLowValueNetworkErrorDecision(event, 1)).toBe("keep_sampled");
+    }
+  );
+
+  it("samples a matching request across an interleaved opposite-method reaction", () => {
+    const currentRequest = { mutationSequence: 2 } as const;
+    const event = createDropReactionNetworkEvent({
+      breadcrumbs: [
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_sent",
+          "POST",
+          currentRequest
+        ),
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_sent",
+          "DELETE",
+          {
+            mutationSequence: 1,
+            source: "picker",
+          }
+        ),
+        createDropReactionHttpBreadcrumb(),
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_failed",
+          "POST",
+          currentRequest
+        ),
+      ],
+    });
+
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+    expect(getLowValueNetworkErrorDecision(event, 1)).toBe("keep_sampled");
+  });
+
+  it("keeps an ambiguous failure across concurrent same-tuple reactions", () => {
+    const event = createDropReactionNetworkEvent({
+      breadcrumbs: [
+        createDropReactionLifecycleBreadcrumb("reaction.request_sent", "POST"),
+        createDropReactionHttpBreadcrumb(),
+        createDropReactionLifecycleBreadcrumb("reaction.request_sent", "POST"),
+        createDropReactionHttpBreadcrumb(),
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_failed",
+          "POST"
+        ),
+      ],
+    });
+
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
+  });
+
+  it("keeps an ambiguous failure across concurrent different-tuple same-method reactions", () => {
+    const currentRequest = { mutationSequence: 1 } as const;
+    const otherRequest = { mutationSequence: 2, source: "picker" } as const;
+    const event = createDropReactionNetworkEvent({
+      breadcrumbs: [
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_sent",
+          "POST",
+          currentRequest
+        ),
+        createDropReactionHttpBreadcrumb({ statusCode: 500 }),
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_sent",
+          "POST",
+          otherRequest
+        ),
+        createDropReactionHttpBreadcrumb(),
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_failed",
+          "POST",
+          currentRequest
+        ),
+      ],
+    });
+
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
+  });
+
+  it("samples after a different-tuple same-method reaction completed before the transport failure", () => {
+    const currentRequest = { mutationSequence: 1 } as const;
+    const completedRequest = {
+      mutationSequence: 2,
+      source: "picker",
+    } as const;
+    const event = createDropReactionNetworkEvent({
+      breadcrumbs: [
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_sent",
+          "POST",
+          currentRequest
+        ),
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_sent",
+          "POST",
+          completedRequest
+        ),
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_succeeded",
+          "POST",
+          completedRequest
+        ),
+        createDropReactionHttpBreadcrumb(),
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_failed",
+          "POST",
+          currentRequest
+        ),
+      ],
+    });
+
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+    expect(getLowValueNetworkErrorDecision(event, 1)).toBe("keep_sampled");
+  });
+
+  it("keeps a warning when a completed concurrent request owns the only transport failure", () => {
+    const currentRequest = { mutationSequence: 1 } as const;
+    const completedRequest = {
+      mutationSequence: 2,
+      source: "picker",
+    } as const;
+    const event = createDropReactionNetworkEvent({
+      breadcrumbs: [
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_sent",
+          "POST",
+          currentRequest
+        ),
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_sent",
+          "POST",
+          completedRequest
+        ),
+        createDropReactionHttpBreadcrumb(),
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_failed",
+          "POST",
+          completedRequest
+        ),
+        createDropReactionLifecycleBreadcrumb(
+          "reaction.request_failed",
+          "POST",
+          currentRequest
+        ),
+      ],
+    });
+
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
+  });
+
+  it.each([
+    {
+      name: "mutation sequence",
+      failedOptions: { mutationSequence: 2 },
+    },
+    {
+      name: "source",
+      failedOptions: { source: "picker" as const },
+    },
+    {
+      name: "action",
+      failedOptions: { action: "replace" as const },
+    },
+  ])(
+    "keeps a synthetic warning when lifecycle breadcrumbs have a different $name",
+    ({ failedOptions }) => {
+      const event = createDropReactionNetworkEvent({
+        breadcrumbs: [
+          createDropReactionLifecycleBreadcrumb(
+            "reaction.request_sent",
+            "POST"
+          ),
+          createDropReactionHttpBreadcrumb(),
+          createDropReactionLifecycleBreadcrumb(
+            "reaction.request_failed",
+            "POST",
+            failedOptions
+          ),
+        ],
+      });
+
+      expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
+    }
+  );
+
+  it("keeps a synthetic warning when the only reaction failure predates the current request", () => {
+    const event = createDropReactionNetworkEvent({
+      breadcrumbs: [
+        createDropReactionHttpBreadcrumb(),
+        ...createDropReactionRequestBreadcrumbs([
+          createDropReactionHttpBreadcrumb({
+            method: "GET",
+            url: "/api/waves/wave-id",
+          }),
+        ]),
+      ],
+    });
+
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
   });
 
   it("drops sampled-out status 0 network errors from API environment subdomains", () => {
@@ -4084,16 +5167,19 @@ describe("sentry-client-filters", () => {
   it.each([
     ["a different capture mechanism", { mechanismType: "generic" }],
     ["a handled error", { handled: true }],
-  ])("does not filter Twitter currentInset errors from %s", (_label, options) => {
-    // Arrange
-    const event = createTwitterCurrentInsetEvent(options);
+  ])(
+    "does not filter Twitter currentInset errors from %s",
+    (_label, options) => {
+      // Arrange
+      const event = createTwitterCurrentInsetEvent(options);
 
-    // Act
-    const result = shouldFilterTwitterCurrentInsetReferenceError(event);
+      // Act
+      const result = shouldFilterTwitterCurrentInsetReferenceError(event);
 
-    // Assert
-    expect(result).toBe(false);
-  });
+      // Assert
+      expect(result).toBe(false);
+    }
+  );
 
   it("filters Twitter CONFIG reference errors with injected wave document frames", () => {
     // Arrange
@@ -4177,6 +5263,140 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toBe(true);
+  });
+
+  it.each([
+    ["Instagram 439.x", [5421, 3712, 1142] as const, "app:///"],
+    ["Instagram 438.x", [5517, 3808, 1208] as const, "app:///profile/rep"],
+    ["Instagram 436.x/437.x", [6257, 4139, 1325] as const, "app:///waves/id"],
+  ])(
+    "filters the %s iOS page-hide bridge signature",
+    (_cohort, columns, documentPath) => {
+      const event = createInstagramPageHideBridgeEvent({
+        frames: createInstagramPageHideBridgeFrames(columns, documentPath),
+      });
+
+      const result = shouldFilterInstagramPageHideBridgeError(event);
+
+      expect(result).toBe(true);
+    }
+  );
+
+  it("keeps the Instagram 439.x bridge shape with a changed coordinate", () => {
+    const event = createInstagramPageHideBridgeEvent({
+      frames: createInstagramPageHideBridgeFrames(
+        [5422, 3712, 1142],
+        "app:///"
+      ),
+    });
+
+    const result = shouldFilterInstagramPageHideBridgeError(event);
+
+    expect(result).toBe(false);
+  });
+
+  it.each(instagramPageHideBridgeNearMisses)(
+    "keeps an Instagram page-hide bridge near-miss with %s",
+    (_caseName, options) => {
+      const event = createInstagramPageHideBridgeEvent(options);
+
+      const result = shouldFilterInstagramPageHideBridgeError(event);
+
+      expect(result).toBe(false);
+    }
+  );
+
+  it("filters the exact page-hide signature from an Instagram iOS user agent", () => {
+    const event = {
+      ...createInstagramPageHideBridgeEvent(),
+      contexts: {},
+      request: {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Instagram 438.0.0 Safari/604.1",
+        },
+      },
+    };
+
+    const result = shouldFilterInstagramPageHideBridgeError(event);
+
+    expect(result).toBe(true);
+  });
+
+  it("keeps the related Twitter iOS native-bridge error cohort", () => {
+    const documentPath = "app:///waves/example";
+    const event = createInstagramPageHideBridgeEvent({
+      browserName: "Twitter",
+      frames: [
+        {
+          filename: documentPath,
+          lineno: 1,
+          colno: 6257,
+        },
+        {
+          filename: documentPath,
+          function: "sendScrollEvent",
+          lineno: 1,
+          colno: 4139,
+        },
+        {
+          filename: documentPath,
+          function: "sendDataToNative",
+          lineno: 1,
+          colno: 1325,
+        },
+      ],
+      mechanismType: "auto.browser.browserapierrors.setTimeout",
+    });
+
+    const result = shouldFilterInstagramPageHideBridgeError(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps the exact bridge shape from an application-owned source path", () => {
+    const event = createInstagramPageHideBridgeEvent({
+      frames: createInstagramPageHideBridgeFrames(
+        [5517, 3808, 1208],
+        "app:///utils/instagram-bridge.ts"
+      ),
+    });
+
+    const result = shouldFilterInstagramPageHideBridgeError(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps the exact bridge shape with an app-owned original stack", () => {
+    const event = createInstagramPageHideBridgeEvent();
+    const error = new Error(instagramPageHideBridgeErrorMessage);
+    error.stack = [
+      `TypeError: ${instagramPageHideBridgeErrorMessage}`,
+      "    at sendDataToNative (webpack-internal:///(app-pages-browser)/./utils/instagram-bridge.ts:10:1)",
+    ].join("\n");
+
+    const result = shouldFilterInstagramPageHideBridgeError(event, {
+      originalException: error,
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps the exact bridge shape with an app-owned serialized stack", () => {
+    const event = createInstagramPageHideBridgeEvent({
+      extra: {
+        __serialized__: {
+          stack: [
+            `TypeError: ${instagramPageHideBridgeErrorMessage}`,
+            "    at sendDataToNative (webpack-internal:///(app-pages-browser)/./utils/instagram-bridge.ts:10:1)",
+          ].join("\n"),
+        },
+      },
+    });
+
+    const result = shouldFilterInstagramPageHideBridgeError(event);
+
+    expect(result).toBe(false);
   });
 
   it("filters the observed WKWebView native track-list TypeError before abs_path normalization", () => {
@@ -6475,6 +7695,218 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters unsupported wallet_revokePermissions provider rejections", () => {
+    // Arrange
+    const event = createKnownWalletProviderObjectRejectionEvent();
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters Backpack internal provider rejections during a recent window.ethereum collision", () => {
+    // Arrange
+    const event = createKnownWalletProviderObjectRejectionEvent({
+      code: -32603,
+      rpcMessage: backpackInternalJsonRpcErrorMessage,
+      breadcrumbs: createBackpackWalletCollisionBreadcrumbs(),
+    });
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it.each([
+    [
+      "a different wallet_revokePermissions code",
+      -32602,
+      unsupportedWalletRevokePermissionsMessage,
+    ],
+    [
+      "a different wallet_revokePermissions message",
+      -32601,
+      "the method wallet_revokePermissions is temporarily unavailable",
+    ],
+    [
+      "a different Backpack provider code",
+      -32602,
+      backpackInternalJsonRpcErrorMessage,
+    ],
+    [
+      "a different Backpack provider message",
+      -32603,
+      "Internal JSON-RPC error",
+    ],
+  ])("does not filter %s", (_caseName, code, rpcMessage) => {
+    // Arrange
+    const event = createKnownWalletProviderObjectRejectionEvent({
+      code,
+      rpcMessage,
+      breadcrumbs: createBackpackWalletCollisionBreadcrumbs(),
+    });
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter Backpack internal provider rejections without its collision breadcrumb", () => {
+    // Arrange
+    const breadcrumbs = createBackpackWalletCollisionBreadcrumbs().filter(
+      (breadcrumb) =>
+        breadcrumb.message !== backpackWalletCollisionBreadcrumbMessage
+    );
+    const event = createKnownWalletProviderObjectRejectionEvent({
+      code: -32603,
+      rpcMessage: backpackInternalJsonRpcErrorMessage,
+      breadcrumbs,
+    });
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter Backpack internal provider rejections without the read-only ethereum breadcrumb", () => {
+    // Arrange
+    const breadcrumbs = createBackpackWalletCollisionBreadcrumbs().filter(
+      (breadcrumb) =>
+        breadcrumb.message !== readOnlyEthereumProxyBreadcrumbMessage
+    );
+    const event = createKnownWalletProviderObjectRejectionEvent({
+      code: -32603,
+      rpcMessage: backpackInternalJsonRpcErrorMessage,
+      breadcrumbs,
+    });
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter Backpack internal provider rejections with stale collision breadcrumbs", () => {
+    // Arrange
+    const event = createKnownWalletProviderObjectRejectionEvent({
+      eventTimestamp: 1002,
+      code: -32603,
+      rpcMessage: backpackInternalJsonRpcErrorMessage,
+      breadcrumbs: createBackpackWalletCollisionBreadcrumbs(),
+    });
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter known wallet-provider object rejections with app-owned frames", () => {
+    // Arrange
+    const event = createKnownWalletProviderObjectRejectionEvent({
+      frames: [
+        {
+          filename: "components/providers/WagmiSetup.tsx",
+          abs_path: "components/providers/WagmiSetup.tsx",
+          in_app: true,
+        },
+      ],
+    });
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter known wallet-provider object rejections with serialized stacks", () => {
+    // Arrange
+    const event = createKnownWalletProviderObjectRejectionEvent({
+      serializedStack:
+        "Error: app failure at components/providers/WagmiSetup.tsx:1:1",
+    });
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter mixed known wallet-provider and app-owned exceptions", () => {
+    // Arrange
+    const event = createKnownWalletProviderObjectRejectionEvent({
+      additionalException: {
+        type: "Error",
+        value: "Application wallet request failed",
+        stacktrace: {
+          frames: [
+            {
+              filename: "components/providers/WagmiSetup.tsx",
+              in_app: true,
+            },
+          ],
+        },
+      },
+    });
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter known wallet-provider object rejections from another mechanism", () => {
+    // Arrange
+    const event = createKnownWalletProviderObjectRejectionEvent({
+      mechanismType: "generic",
+    });
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter handled known wallet-provider object rejections", () => {
+    // Arrange
+    const event = createKnownWalletProviderObjectRejectionEvent({
+      handled: true,
+    });
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
+  it("does not filter known wallet-provider rejections with another object wrapper", () => {
+    // Arrange
+    const event = createKnownWalletProviderObjectRejectionEvent({
+      wrapperMessage: objectCapturedPromiseRejectionMessage,
+    });
+
+    // Act
+    const result = shouldFilterKnownWalletProviderObjectRejection(event);
+
+    // Assert
+    expect(result).toBe(false);
+  });
+
   it("filters RabbyMobile 4001 user-rejected object rejections without app frames", () => {
     // Arrange
     const event = createRabbyMobileUserRejectedRequestEvent();
@@ -7151,10 +8583,7 @@ describe("sentry-client-filters", () => {
 
   it.each([
     ["unrelated error", { value: "Application request validation failed." }],
-    [
-      "AbortError",
-      { type: "AbortError", value: "The operation was aborted" },
-    ],
+    ["AbortError", { type: "AbortError", value: "The operation was aborted" }],
     ["HTTP error", { value: "Request failed with status code 503" }],
     ["timeout", { value: "Request timed out after 30000 ms" }],
     ["non-TypeError", { type: "Error" }],
@@ -7593,8 +9022,7 @@ describe("sentry-client-filters", () => {
             stacktrace: {
               frames: [
                 {
-                  filename:
-                    "app:///_next/static/chunks/application-wallet.js",
+                  filename: "app:///_next/static/chunks/application-wallet.js",
                   function: "initializeWallet",
                   in_app: true,
                 },
@@ -7987,24 +9415,24 @@ describe("sentry-client-filters", () => {
       "wrapper function",
       createObservedRawAnonymousUnsafeEvalFrames({ function: "runTemplate" }),
     ],
-    [
-      "wrapper line",
-      createObservedRawAnonymousUnsafeEvalFrames({ lineno: 8 }),
-    ],
+    ["wrapper line", createObservedRawAnonymousUnsafeEvalFrames({ lineno: 8 })],
     [
       "wrapper column",
       createObservedRawAnonymousUnsafeEvalFrames({ colno: 4854 }),
     ],
-  ])("does not filter raw unsafe-eval frames with a changed %s", (_, frames) => {
-    // Arrange
-    const event = createObservedRawAnonymousUnsafeEvalCspEvent({ frames });
+  ])(
+    "does not filter raw unsafe-eval frames with a changed %s",
+    (_, frames) => {
+      // Arrange
+      const event = createObservedRawAnonymousUnsafeEvalCspEvent({ frames });
 
-    // Act
-    const result = shouldFilterAnonymousUnsafeEvalCspError(event);
+      // Act
+      const result = shouldFilterAnonymousUnsafeEvalCspError(event);
 
-    // Assert
-    expect(result).toBe(false);
-  });
+      // Assert
+      expect(result).toBe(false);
+    }
+  );
 
   it("does not filter incomplete raw anonymous unsafe-eval frame sequences", () => {
     // Arrange
@@ -8337,6 +9765,270 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
+  it("filters the exact expected Wave background-sync replacement abort", () => {
+    const event = createExpectedWaveReplacementAbortEvent();
+
+    const result = shouldFilterExpectedWaveRequestReplacementAbort(event);
+
+    expect(result).toBe(true);
+  });
+
+  it("filters a Wave replacement abort at the observed breadcrumb boundary", () => {
+    const event = createExpectedWaveReplacementAbortEvent({
+      breadcrumbs: [
+        {
+          category: "wave.request",
+          message: "wave_request_aborted",
+          timestamp: expectedWaveAbortBreadcrumbTimestamp,
+          data: {
+            request_kind: "background_sync",
+            trigger: "request_replaced",
+          },
+        },
+        ...Array.from({ length: 14 }, (_, index) => ({
+          category: "fetch",
+          message: `later request ${index}`,
+        })),
+      ],
+    });
+
+    const result = shouldFilterExpectedWaveRequestReplacementAbort(event);
+
+    expect(result).toBe(true);
+  });
+
+  it("keeps an AbortError when the matching Wave breadcrumb is count-stale", () => {
+    const event = createExpectedWaveReplacementAbortEvent({
+      breadcrumbs: [
+        {
+          category: "wave.request",
+          message: "wave_request_aborted",
+          timestamp: expectedWaveAbortBreadcrumbTimestamp,
+          data: {
+            request_kind: "background_sync",
+            trigger: "request_replaced",
+          },
+        },
+        ...Array.from({ length: 15 }, (_, index) => ({
+          category: "fetch",
+          message: `later request ${index}`,
+        })),
+      ],
+    });
+
+    const result = shouldFilterExpectedWaveRequestReplacementAbort(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps an AbortError when the matching Wave breadcrumb is time-stale", () => {
+    const event = createExpectedWaveReplacementAbortEvent({
+      eventTimestamp: expectedWaveAbortBreadcrumbTimestamp + 1.001,
+    });
+
+    const result = shouldFilterExpectedWaveRequestReplacementAbort(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("filters a Wave replacement abort at the causal time boundary", () => {
+    const event = createExpectedWaveReplacementAbortEvent({
+      eventTimestamp: expectedWaveAbortBreadcrumbTimestamp + 1,
+    });
+
+    const result = shouldFilterExpectedWaveRequestReplacementAbort(event);
+
+    expect(result).toBe(true);
+  });
+
+  it("keeps an AbortError when a newer Wave cancellation supersedes the match", () => {
+    const event = createExpectedWaveReplacementAbortEvent({
+      breadcrumbs: [
+        {
+          category: "wave.request",
+          message: "wave_request_aborted",
+          timestamp: expectedWaveAbortBreadcrumbTimestamp,
+          data: {
+            request_kind: "background_sync",
+            trigger: "request_replaced",
+          },
+        },
+        {
+          category: "wave.request",
+          message: "wave_request_aborted",
+          data: {
+            request_kind: "background_sync",
+            trigger: "hook_unmounted",
+          },
+        },
+      ],
+    });
+
+    const result = shouldFilterExpectedWaveRequestReplacementAbort(event);
+
+    expect(result).toBe(false);
+  });
+
+  it.each([
+    [
+      "an altered exception message",
+      { exception: { value: "AbortError: The request was aborted." } },
+    ],
+    ["a missing exception message", { exception: { value: undefined } }],
+    ["a different exception type", { exception: { type: "AbortError" } }],
+    ["a different DOMException code", { domExceptionCode: "19" }],
+    ["a numeric DOMException code", { domExceptionCode: 20 }],
+    ["a missing DOMException code", { includeDomExceptionCode: false }],
+    ["a missing event timestamp", { includeEventTimestamp: false }],
+    ["an invalid event timestamp", { eventTimestamp: Number.NaN }],
+    [
+      "a different mechanism",
+      {
+        exception: {
+          mechanism: {
+            type: "auto.browser.global_handlers.onerror",
+            handled: false,
+          },
+        },
+      },
+    ],
+    [
+      "a handled mechanism",
+      {
+        exception: {
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: true,
+          },
+        },
+      },
+    ],
+    [
+      "an exception frame",
+      {
+        exception: {
+          stacktrace: {
+            frames: [{ filename: "app:///services/api/common-api.ts" }],
+          },
+        },
+      },
+    ],
+    [
+      "a different breadcrumb category",
+      {
+        breadcrumbs: [
+          {
+            category: "wave.sync",
+            message: "wave_request_aborted",
+            timestamp: expectedWaveAbortBreadcrumbTimestamp,
+            data: {
+              request_kind: "background_sync",
+              trigger: "request_replaced",
+            },
+          },
+        ],
+      },
+    ],
+    [
+      "a different breadcrumb message",
+      {
+        breadcrumbs: [
+          {
+            category: "wave.request",
+            message: "wave_request_cancelled",
+            timestamp: expectedWaveAbortBreadcrumbTimestamp,
+            data: {
+              request_kind: "background_sync",
+              trigger: "request_replaced",
+            },
+          },
+        ],
+      },
+    ],
+    [
+      "a different request kind",
+      {
+        breadcrumbs: [
+          {
+            category: "wave.request",
+            message: "wave_request_aborted",
+            timestamp: expectedWaveAbortBreadcrumbTimestamp,
+            data: {
+              request_kind: "initial_visible",
+              trigger: "request_replaced",
+            },
+          },
+        ],
+      },
+    ],
+    [
+      "a different abort trigger",
+      {
+        breadcrumbs: [
+          {
+            category: "wave.request",
+            message: "wave_request_aborted",
+            timestamp: expectedWaveAbortBreadcrumbTimestamp,
+            data: {
+              request_kind: "background_sync",
+              trigger: "hook_unmounted",
+            },
+          },
+        ],
+      },
+    ],
+    [
+      "a missing breadcrumb timestamp",
+      {
+        breadcrumbs: [
+          {
+            category: "wave.request",
+            message: "wave_request_aborted",
+            data: {
+              request_kind: "background_sync",
+              trigger: "request_replaced",
+            },
+          },
+        ],
+      },
+    ],
+    [
+      "a breadcrumb timestamp after the event",
+      {
+        breadcrumbs: [
+          {
+            category: "wave.request",
+            message: "wave_request_aborted",
+            timestamp: expectedWaveAbortEventTimestamp + 0.001,
+            data: {
+              request_kind: "background_sync",
+              trigger: "request_replaced",
+            },
+          },
+        ],
+      },
+    ],
+    ["a missing Wave abort breadcrumb", { breadcrumbs: [] }],
+    [
+      "an additional exception",
+      {
+        additionalException: {
+          type: "TypeError",
+          value: "A nearby application failure",
+        },
+      },
+    ],
+  ] satisfies Array<[string, ExpectedWaveReplacementAbortOverrides]>)(
+    "keeps the expected Wave abort near miss with %s",
+    (_, overrides) => {
+      const event = createExpectedWaveReplacementAbortEvent(overrides);
+
+      const result = shouldFilterExpectedWaveRequestReplacementAbort(event);
+
+      expect(result).toBe(false);
+    }
+  );
+
   it("detects app URI-only frame stacks in testing helpers", () => {
     // Arrange
     const frames: SentryStackFrame[] = [
@@ -8369,5 +10061,59 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toBe(true);
+  });
+
+  describe("Poper Blocker pre-ingest function normalization", () => {
+    it("filters the anonymous fetch sentinel", () => {
+      const event = createPoperBlockerOrphanFetchRejectionEvent({
+        frames: [
+          {
+            filename:
+              "node_modules/.pnpm/aws-rum-web@1.25.0/node_modules/aws-rum-web/dist/es/dispatch/FetchHttpHandler.js",
+            function: "e.prototype.handle",
+            in_app: false,
+          },
+          {
+            filename: "app:///injectScriptAdjust.js",
+            abs_path: "app:///injectScriptAdjust.js",
+            function: "?",
+            lineno: 1,
+            colno: 4520,
+            in_app: true,
+          },
+          {
+            filename: "app:///injectScriptAdjust.js",
+            abs_path: "app:///injectScriptAdjust.js",
+            function: "VihJ",
+            lineno: 1,
+            colno: 3159,
+            in_app: true,
+          },
+        ],
+      });
+
+      expect(shouldFilterPoperBlockerOrphanFetchRejection(event)).toBe(true);
+    });
+
+    it("keeps the anonymous sentinel on the second signature frame", () => {
+      const event = createPoperBlockerOrphanFetchRejectionEvent({
+        frames: [
+          {
+            filename: "app:///injectScriptAdjust.js",
+            function: "window.fetch",
+            lineno: 1,
+            colno: 4520,
+          },
+          {
+            filename: "app:///injectScriptAdjust.js",
+            function: "?",
+            lineno: 1,
+            colno: 3159,
+          },
+        ],
+      });
+
+      expect(shouldFilterPoperBlockerOrphanFetchRejection(event)).toBe(false);
+    });
   });
 });
