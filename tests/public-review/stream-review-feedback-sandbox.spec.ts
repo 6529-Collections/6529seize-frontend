@@ -64,6 +64,71 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
       'button[aria-controls="public-review-feedback"]'
     );
     await expect(feedbackToggle).toBeVisible();
+    if (!isDesktop) {
+      const mobileNavigationToggle = page
+        .locator("summary")
+        .filter({ hasText: "Review navigation" });
+      const pagePosition = page.getByText("Page 1 of 14", { exact: true });
+      const [navigationBounds, pagePositionBounds, feedbackBounds] =
+        await Promise.all([
+          mobileNavigationToggle.boundingBox(),
+          pagePosition.boundingBox(),
+          feedbackToggle.boundingBox(),
+        ]);
+      expect(navigationBounds).not.toBeNull();
+      expect(pagePositionBounds).not.toBeNull();
+      expect(feedbackBounds).not.toBeNull();
+      expect(
+        Math.abs(navigationBounds!.y - feedbackBounds!.y)
+      ).toBeLessThanOrEqual(1);
+      expect(
+        Math.abs(
+          pagePositionBounds!.y +
+            pagePositionBounds!.height / 2 -
+            (feedbackBounds!.y + feedbackBounds!.height / 2)
+        )
+      ).toBeLessThanOrEqual(1);
+
+      const reviewHeading = page.getByRole("heading", { name: "Overview" });
+      const reviewHeadingTop = await reviewHeading.evaluate(
+        (element) => element.getBoundingClientRect().top
+      );
+      await mobileNavigationToggle.click();
+      const mobileNavigationOverlay = mobileNavigationToggle
+        .locator("xpath=..")
+        .locator(":scope > div");
+      await expect(mobileNavigationOverlay).toBeVisible();
+      await expect(mobileNavigationOverlay).toHaveCSS(
+        "background-color",
+        "rgb(13, 13, 15)"
+      );
+      await expect
+        .poll(async () => {
+          const openReviewHeadingTop = await reviewHeading.evaluate(
+            (element) => element.getBoundingClientRect().top
+          );
+          return Math.abs(openReviewHeadingTop - reviewHeadingTop);
+        })
+        .toBeLessThanOrEqual(1);
+      const mobileViewport = page.viewportSize();
+      expect(mobileViewport).not.toBeNull();
+      await page.setViewportSize({
+        width: 1100,
+        height: mobileViewport!.height,
+      });
+      await page.setViewportSize({
+        width: 900,
+        height: mobileViewport!.height,
+      });
+      await expect(
+        page.locator('section[aria-label="Review status"] > div')
+      ).toHaveCSS("flex-direction", "column");
+      await page.setViewportSize(mobileViewport!);
+      await expect(mobileNavigationToggle).toBeVisible();
+      await expect(
+        mobileNavigationToggle.locator("xpath=..")
+      ).not.toHaveAttribute("open", "");
+    }
     if ((await feedbackToggle.getAttribute("aria-expanded")) !== "true") {
       await feedbackToggle.click();
     }
@@ -149,11 +214,29 @@ test.describe("Stream review feedback local sandbox @auth @medium @local-only", 
         name: "Connect wallet to comment",
       })
     ).toBeHidden();
+    await expect(
+      feedbackPanel.getByRole("button", {
+        name: "Preview Wave message",
+      })
+    ).toHaveCount(0);
     await comment.fill(PUBLIC_REVIEW_COMMENT);
 
+    const commentTopBeforeTechnicalDetails = await comment.evaluate(
+      (element) => element.getBoundingClientRect().top
+    );
     await feedbackPanel
       .getByText("Add technical detail", { exact: true })
       .click();
+    await expect
+      .poll(async () => {
+        const commentTopAfterTechnicalDetails = await comment.evaluate(
+          (element) => element.getBoundingClientRect().top
+        );
+        return Math.abs(
+          commentTopAfterTechnicalDetails - commentTopBeforeTechnicalDetails
+        );
+      })
+      .toBeLessThanOrEqual(1);
     const commentOnSelect = feedbackPanel.getByLabel("Comment on");
     const feedbackTypeSelect = feedbackPanel.getByLabel("Feedback type");
     const severitySelect = feedbackPanel.getByLabel("Suspected severity");

@@ -77,9 +77,9 @@ describe("PublicReviewReadingLayout", () => {
       "@[760px]:tw-top-[calc(4rem+env(safe-area-inset-top,0px))]",
       "@[760px]:tw-h-[calc(100dvh-4rem-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px))]"
     );
-    expect(screen.getByText("Page 1").parentElement?.parentElement).toHaveClass(
-      "tw-top-[env(safe-area-inset-top,0px)]"
-    );
+    expect(
+      screen.getByText("Page 1").closest("section")?.firstElementChild
+    ).toHaveClass("tw-top-[env(safe-area-inset-top,0px)]");
   });
 
   it("reveals the feedback hash target as an overlay on narrow layouts", async () => {
@@ -98,6 +98,9 @@ describe("PublicReviewReadingLayout", () => {
       name: "Page comments",
     });
     expect(dialog).toBeInTheDocument();
+    expect(
+      document.querySelector('[class~="tw-bg-iron-600/60"]')
+    ).toBeInTheDocument();
     expect(document.getElementById("public-review-feedback")).toHaveClass(
       "tw-box-border",
       "tw-pt-[env(safe-area-inset-top,0px)]",

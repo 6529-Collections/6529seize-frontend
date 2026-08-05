@@ -1,9 +1,11 @@
 import {
   ChatBubbleLeftRightIcon,
+  ChevronRightIcon,
   CodeBracketIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
+import { PublicReviewMobileNavigationDisclosure } from "@/components/public-review/PublicReviewMobileNavigationDisclosure";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type {
@@ -144,15 +146,7 @@ function ReviewWideDestinationNavigation({
   );
 }
 
-export function PublicReviewNavigation({
-  currentPage,
-  feedbackHref,
-  pages,
-  referenceHref,
-  routes,
-  sections,
-  version,
-}: {
+type PublicReviewNavigationProps = {
   readonly currentPage: PublicReviewPageDefinition;
   readonly feedbackHref: string;
   readonly pages: readonly PublicReviewPageDefinition[];
@@ -160,18 +154,34 @@ export function PublicReviewNavigation({
   readonly routes: PublicReviewRouteBuilder;
   readonly sections: readonly PublicReviewSectionDefinition[];
   readonly version?: string | undefined;
-}) {
+};
+
+export function PublicReviewMobileNavigation({
+  currentPage,
+  feedbackHref,
+  pages,
+  referenceHref,
+  routes,
+  sections,
+  version,
+}: PublicReviewNavigationProps) {
   const onThisPageLabel = t(
     DEFAULT_LOCALE,
     "publicReview.navigation.onThisPage"
   );
   return (
-    <>
-      <details className="tw-mx-4 tw-mt-4 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/10 tw-py-2 sm:tw-mx-7 lg:tw-hidden">
-        <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2 tw-text-sm tw-font-semibold tw-text-white marker:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white">
+    <PublicReviewMobileNavigationDisclosure resetKey={currentPage.id}>
+      <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-gap-1.5 tw-text-xs tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white [&::-webkit-details-marker]:tw-hidden">
+        <ChevronRightIcon
+          aria-hidden="true"
+          className="tw-size-3.5 tw-flex-none tw-text-iron-500 tw-transition-transform tw-duration-200 group-open/navigation:tw-rotate-90 motion-reduce:tw-transition-none"
+        />
+        <span className="tw-whitespace-nowrap">
           {t(DEFAULT_LOCALE, "publicReview.navigation.menu")}
-        </summary>
-        <div className="tw-mt-4">
+        </span>
+      </summary>
+      <div className="tw-absolute tw-inset-x-0 tw-top-full tw-z-40 tw-max-h-[calc(100dvh-4rem-env(safe-area-inset-top,0px))] tw-overflow-y-auto tw-overscroll-contain tw-border-x-0 tw-border-b tw-border-t tw-border-solid tw-border-white/10 tw-bg-[#0D0D0F] tw-px-4 tw-pb-6 tw-pt-4 tw-shadow-2xl tw-shadow-black/50 sm:tw-px-7">
+        <div>
           <ReviewWideDestinationNavigation
             feedbackHref={feedbackHref}
             headingId="public-review-wide-destinations-mobile"
@@ -198,40 +208,56 @@ export function PublicReviewNavigation({
             version={version}
           />
         </nav>
-      </details>
+      </div>
+    </PublicReviewMobileNavigationDisclosure>
+  );
+}
 
-      <aside className="tw-hidden tw-min-w-0 tw-border-y-0 tw-border-b-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-white/[0.08] tw-bg-[#050506] lg:tw-block">
-        <div className="tw-[scrollbar-gutter:stable] tw-sticky tw-top-0 tw-h-[100dvh] tw-overflow-y-auto tw-overscroll-contain tw-px-5 tw-pb-8 tw-pt-7 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
-          <ReviewWideDestinationNavigation
-            feedbackHref={feedbackHref}
-            headingId="public-review-wide-destinations-sidebar"
-            landmarkContext={t(
-              DEFAULT_LOCALE,
-              "publicReview.surface.navigationSidebarContext"
-            )}
-            referenceHref={referenceHref}
+export function PublicReviewNavigation({
+  currentPage,
+  feedbackHref,
+  pages,
+  referenceHref,
+  routes,
+  sections,
+  version,
+}: PublicReviewNavigationProps) {
+  const onThisPageLabel = t(
+    DEFAULT_LOCALE,
+    "publicReview.navigation.onThisPage"
+  );
+  return (
+    <aside className="tw-hidden tw-min-w-0 tw-border-y-0 tw-border-b-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-white/[0.08] tw-bg-[#050506] lg:tw-block">
+      <div className="tw-[scrollbar-gutter:stable] tw-sticky tw-top-0 tw-h-[100dvh] tw-overflow-y-auto tw-overscroll-contain tw-px-5 tw-pb-8 tw-pt-7 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500">
+        <ReviewWideDestinationNavigation
+          feedbackHref={feedbackHref}
+          headingId="public-review-wide-destinations-sidebar"
+          landmarkContext={t(
+            DEFAULT_LOCALE,
+            "publicReview.surface.navigationSidebarContext"
+          )}
+          referenceHref={referenceHref}
+        />
+        <nav
+          aria-label={t(
+            DEFAULT_LOCALE,
+            "publicReview.navigation.contentsLabel"
+          )}
+          className="tw-mt-5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-5"
+        >
+          <p className="tw-mb-4 tw-mt-0 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-400">
+            {t(DEFAULT_LOCALE, "publicReview.navigation.contents")}
+          </p>
+          <ReviewPageLinks
+            currentPage={currentPage}
+            onThisPageLabel={onThisPageLabel}
+            pages={pages}
+            routes={routes}
+            sections={sections}
+            version={version}
           />
-          <nav
-            aria-label={t(
-              DEFAULT_LOCALE,
-              "publicReview.navigation.contentsLabel"
-            )}
-            className="tw-mt-5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-5"
-          >
-            <p className="tw-mb-4 tw-mt-0 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-400">
-              {t(DEFAULT_LOCALE, "publicReview.navigation.contents")}
-            </p>
-            <ReviewPageLinks
-              currentPage={currentPage}
-              onThisPageLabel={onThisPageLabel}
-              pages={pages}
-              routes={routes}
-              sections={sections}
-              version={version}
-            />
-          </nav>
-        </div>
-      </aside>
-    </>
+        </nav>
+      </div>
+    </aside>
   );
 }

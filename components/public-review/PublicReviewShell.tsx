@@ -5,7 +5,10 @@ import type { ReactNode } from "react";
 import { PublicReviewAudiencePaths } from "@/components/public-review/PublicReviewAudiencePaths";
 import { PublicReviewEvidenceLegend } from "@/components/public-review/PublicReviewEvidence";
 import { PublicReviewMarkdown } from "@/components/public-review/PublicReviewMarkdown";
-import { PublicReviewNavigation } from "@/components/public-review/PublicReviewNavigation";
+import {
+  PublicReviewMobileNavigation,
+  PublicReviewNavigation,
+} from "@/components/public-review/PublicReviewNavigation";
 import { PublicReviewReadingLayout } from "@/components/public-review/PublicReviewReadingLayout";
 import { PublicReviewStatusBanner } from "@/components/public-review/PublicReviewStatusBanner";
 import { formatInteger } from "@/i18n/format";
@@ -138,6 +141,20 @@ export function PublicReviewShell({
           <PublicReviewReadingLayout
             key={page.id}
             feedbackAvailable={review.feedbackAvailable}
+            mobileNavigation={
+              <PublicReviewMobileNavigation
+                currentPage={page}
+                feedbackHref={routes.getFeedbackHref(routeVersion)}
+                pages={reviewVersion.pages}
+                referenceHref={getSolidityReferenceRootHref({
+                  reviewSlug: review.slug,
+                  version: routeVersion,
+                })}
+                routes={routes}
+                sections={sections}
+                version={routeVersion}
+              />
+            }
             panel={feedbackSlot}
             toolbar={
               <p

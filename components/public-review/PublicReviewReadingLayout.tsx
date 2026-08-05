@@ -36,11 +36,13 @@ export function usePublicReviewCommentPanelOpen(): boolean {
 export function PublicReviewReadingLayout({
   content,
   feedbackAvailable,
+  mobileNavigation,
   panel,
   toolbar,
 }: {
   readonly content: ReactNode;
   readonly feedbackAvailable: boolean;
+  readonly mobileNavigation?: ReactNode | undefined;
   readonly panel: ReactNode;
   readonly toolbar: ReactNode;
 }) {
@@ -49,6 +51,8 @@ export function PublicReviewReadingLayout({
   const [isOverlayLayout, setIsOverlayLayout] = useState<boolean | null>(null);
   const handledFocusRequestRef = useRef(0);
   const layoutRef = useRef<HTMLElement>(null);
+  const hasMobileNavigation =
+    mobileNavigation !== null && mobileNavigation !== undefined;
 
   const closePanel = (): void => {
     setIsPanelOpen(false);
@@ -192,7 +196,7 @@ export function PublicReviewReadingLayout({
             onClose={closePanel}
             open
           >
-            <DialogBackdrop className="tw-fixed tw-inset-0 tw-bg-black/55" />
+            <DialogBackdrop className="tw-fixed tw-inset-0 tw-bg-iron-600/60" />
             <div className="tw-fixed tw-inset-0 tw-flex tw-justify-end tw-overflow-hidden">
               <DialogPanel
                 className="tw-relative tw-box-border tw-h-[100dvh] tw-w-96 tw-max-w-[calc(100vw-1rem)] tw-border-y-0 tw-border-b-0 tw-border-l tw-border-r-0 tw-border-solid tw-border-white/[0.1] tw-bg-iron-950 tw-pb-[env(safe-area-inset-bottom,0px)] tw-pr-[env(safe-area-inset-right,0px)] tw-pt-[env(safe-area-inset-top,0px)] tw-shadow-2xl tw-shadow-black/60"
@@ -210,12 +214,25 @@ export function PublicReviewReadingLayout({
   return (
     <section className="tw-min-w-0 tw-@container" ref={layoutRef}>
       <div className="tw-sticky tw-top-[env(safe-area-inset-top,0px)] tw-z-30 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.07] tw-bg-[#0D0D0F]/95 tw-backdrop-blur-xl">
-        <div className="tw-flex tw-min-h-16 tw-items-center tw-justify-between tw-gap-4 tw-px-4 sm:tw-px-7 lg:tw-px-10">
-          {toolbar}
+        <div className="tw-relative tw-flex tw-min-h-16 tw-items-center tw-gap-2 tw-px-3 sm:tw-gap-4 sm:tw-px-7 lg:tw-px-10">
+          {hasMobileNavigation ? (
+            <div className="tw-min-w-0 tw-flex-none lg:tw-hidden">
+              {mobileNavigation}
+            </div>
+          ) : null}
+          <div
+            className={
+              hasMobileNavigation
+                ? "tw-min-w-0 tw-flex-1 tw-text-center max-[359px]:tw-sr-only lg:tw-text-left"
+                : "tw-min-w-0 tw-flex-1"
+            }
+          >
+            {toolbar}
+          </div>
           <button
             aria-controls={COMMENT_PANEL_ID}
             aria-expanded={isPanelOpen}
-            className="tw-group/feedback-toggle tw-inline-flex tw-min-h-11 tw-flex-none tw-items-center tw-gap-2 tw-border-0 tw-bg-transparent tw-px-0 tw-text-xs tw-font-semibold tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-white"
+            className="tw-group/feedback-toggle tw-inline-flex tw-min-h-11 tw-flex-none tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-px-0 tw-text-xs tw-font-semibold tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-white sm:tw-gap-2"
             onClick={() => (isPanelOpen ? closePanel() : setIsPanelOpen(true))}
             type="button"
           >
