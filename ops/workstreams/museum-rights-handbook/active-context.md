@@ -170,3 +170,10 @@ final copy/visual sweep.
   same ID raw. The resolved effective ID now supplies both fields and is URL
   encoded for the route. The current closed expression inventory makes unsafe
   characters unreachable, but both projections now enforce the same rule.
+- During final readiness, frontend main advanced to
+  `67068d87cdc78252d2d48d172f8386ceb1df82e7` through PR #3628, refining the
+  Museum About paragraph hierarchy in `MuseumNetworkProposition`. It was
+  merged conflict-free into this branch at signed merge head
+  `7a369851d70fe6e01da90f8621efdb1d919892bf`; the rights education card and
+  the new paragraph structure are both retained. Exact-head checks must bind
+  to the integrated tree before merge.
