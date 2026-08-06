@@ -1632,6 +1632,76 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   viewAllCategory: "View all {category}",
 } as const);
 
+const OPEN_DATA_DOWNLOAD_MESSAGES = objectMessages("openData.downloads", {
+  pageTitle: "{title} Downloads",
+  loading: "Loading downloads...",
+  loadError: "Failed to load community downloads. Please try again.",
+  "columns.date": "Date",
+  "columns.link": "Link",
+  "columns.tokenId": "Token ID",
+} as const);
+
+const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
+  "heading.gas": "Meme Gas",
+  "heading.accounting": "Meme Accounting",
+  "collection.label": "Collection",
+  "collection.theMemes": "The Memes",
+  "collection.memeLab": "Meme Lab",
+  "filters.artist": "Artist",
+  "filters.period": "Period",
+  "filters.all": "All",
+  "filters.primarySales": "Primary Sales",
+  "filters.customBlocks": "Custom Blocks",
+  "filters.date.today": "Today",
+  "filters.date.yesterday": "Yesterday",
+  "filters.date.lastSevenDays": "Last 7 Days",
+  "filters.date.monthToDate": "Month to Date",
+  "filters.date.lastMonth": "Last Month",
+  "filters.date.yearToDate": "Year to Date",
+  "filters.date.lastYear": "Last Year",
+  "filters.date.all": "All",
+  "filters.date.customDates": "Custom Dates",
+  "filters.blocks.both": "from block: {from} to block: {to}",
+  "filters.blocks.from": "from block: {from}",
+  "filters.blocks.to": "to block: {to}",
+  "filters.dates.both": "from: {from} to: {to}",
+  "filters.dates.from": "from: {from}",
+  "filters.dates.to": "to: {to}",
+  download: "Download",
+  "columns.memeCardCount": "Meme Card (x{count})",
+  "columns.memeLabCardCount": "Meme Lab Card (x{count})",
+  "columns.artist": "Artist",
+  "columns.gasEth": "Gas (ETH)",
+  "columns.volume": "Volume",
+  "columns.primaryProceeds": "Primary Proceeds",
+  "columns.royalties": "Royalties",
+  "columns.effectiveRoyalty": "Effective Royalty %",
+  "columns.artistSplit": "Artist Split",
+  total: "TOTAL",
+  "gas.loadError": "Error: Failed to load gas data. Please try again.",
+  "gas.empty": "No gas info found for selected dates",
+  "royalties.loadError":
+    "Error: Failed to load royalties data. Please try again.",
+  "royalties.empty": "No royalties found for selected dates",
+  ethFootnote: "All values are in ETH",
+  "tooltip.primaryProceeds.label": "About primary proceeds",
+  "tooltip.primaryProceeds.description":
+    "Total Minter payments less the Manifold fee",
+  "tooltip.artistSplit.label": "About the artist split",
+  "tooltip.artistSplit.primaryMemeLab":
+    "Primary mint revenues in Meme Lab are split between the artist and the collection solely at the artist's discretion.",
+  "tooltip.artistSplit.secondaryMemeLab":
+    "Secondary royalties in Meme Lab are split between the artist and the collection solely at the artist's discretion.",
+  "tooltip.artistSplit.primaryMemes":
+    "Primary mint revenues in The Memes are split 50:50 between the artist and the collection.",
+  "tooltip.artistSplit.secondaryMemes":
+    "Secondary royalties in The Memes are split 50:50 between the artist and the collection.",
+  "tooltip.artistSplit.customArrangements":
+    "6529 and 6529er have custom arrangements not reflected here for simplicity.",
+  "token.manualSaleNote":
+    "Figures not easily calculable as card was sold manually",
+} as const);
+
 export const EN_US_MESSAGES = {
   "linkPreview.twitter.kind.article": "Article",
   "linkPreview.twitter.kind.post": "Post",
@@ -2548,6 +2618,8 @@ export const EN_US_MESSAGES = {
   ...LINK_PREVIEW_MESSAGES,
   ...COMMON_MESSAGES,
   ...EN_US_PAGINATION_MESSAGES,
+  ...OPEN_DATA_DOWNLOAD_MESSAGES,
+  ...MEME_DATA_TABLE_MESSAGES,
   ...HEADER_SEARCH_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,
