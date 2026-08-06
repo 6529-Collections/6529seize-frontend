@@ -843,10 +843,10 @@ describe("Release Bus artifact rollout compatibility", () => {
       );
       const evidence = findStep(
         workflow,
-        environment === "staging" ? "staging-packs" : "readonly",
+        environment === "staging" ? "staging-packs" : "verify-evidence",
         environment === "staging"
           ? "Validate exact manifest-bound E2E evidence"
-          : "Validate exact production E2E evidence"
+          : "Validate production E2E evidence on isolated runner"
       );
       const root = fs.mkdtempSync(
         path.join(os.tmpdir(), `release-bus-${environment}-runner-`)
