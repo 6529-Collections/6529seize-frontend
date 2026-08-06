@@ -233,9 +233,7 @@ describe("Museum finished publication routes", () => {
     try {
       render(await MuseumGiftPage({ accessionId: "6529NM.2026.001" }));
 
-      expect(consoleError.mock.calls.flat().join(" ")).not.toContain(
-        'unique "key"'
-      );
+      expect(consoleError).not.toHaveBeenCalled();
     } finally {
       consoleError.mockRestore();
     }

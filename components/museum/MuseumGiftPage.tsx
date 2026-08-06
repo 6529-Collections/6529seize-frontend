@@ -214,6 +214,8 @@ export async function MuseumGiftPage({
               publication,
               descriptor.path
             );
+            // React re-lists these server-rendered slots at the client boundary.
+            // Stable keys keep their identity explicit across that handoff.
             return (
               <MuseumDossierDocument
                 key={descriptor.path}

@@ -524,7 +524,7 @@ describe("testing strategy CI plan", () => {
           needs?: string | string[];
           strategy?: { matrix?: string };
           "runs-on"?: string;
-          steps?: Array<{ name?: string; if?: string }>;
+          steps?: Array<{ name?: string; if?: string; run?: string }>;
         }
       >;
     };
@@ -555,6 +555,22 @@ describe("testing strategy CI plan", () => {
         }),
       ])
     );
+    const museumBrowserStep = parsed.jobs["app-checks"]?.steps?.find(
+      (step) => step.name === "Run Network Museum Playwright packs"
+    );
+    const museumBrowserRun = museumBrowserStep?.run ?? "";
+    expect(
+      museumBrowserRun.match(/tests\/museum\/[a-z-]+\.spec\.ts/gu) ?? []
+    ).toEqual([
+      "tests/museum/data-architecture-readonly.spec.ts",
+      "tests/museum/institutional-practice-readonly.spec.ts",
+      "tests/museum/about-readonly.spec.ts",
+      "tests/museum/inside-system-readonly.spec.ts",
+      "tests/museum/rights-readonly.spec.ts",
+    ]);
+    expect(museumBrowserRun).toContain("--project=web-desktop-chromium");
+    expect(museumBrowserRun).toContain("--project=web-mobile-chromium");
+    expect(museumBrowserRun).toContain("--workers=1");
     expect(parsed.jobs["installed-checks"]).toMatchObject({
       name: "Installed app checks",
       needs: ["plan", "app-checks"],
