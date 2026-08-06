@@ -114,6 +114,29 @@ export function buildRouterPath(
   return routerPath;
 }
 
+export function getCurrentFullUrl(): string {
+  return globalThis.window?.location.href ?? "";
+}
+
+export function buildSocialShareUrls({
+  url,
+  title,
+}: {
+  readonly url: string;
+  readonly title: string;
+}): {
+  readonly x: string;
+  readonly farcaster: string;
+} {
+  const encodedUrl = encodeURIComponent(url);
+  const encodedTitle = encodeURIComponent(title);
+
+  return {
+    x: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
+    farcaster: `https://farcaster.xyz/~/compose?text=${encodedTitle}&embeds%5B%5D=${encodedUrl}`,
+  };
+}
+
 export function buildConnectionShareFailureKey({
   addressKey,
   routerPath,
@@ -203,7 +226,14 @@ export function generateQrCodeSource({
   readonly signal?: AbortSignal | undefined;
   readonly errorMessage: string;
 }): void {
-  QRCode.toDataURL(url, { width: 500, margin: 0 })
+  QRCode.toDataURL(url, {
+    width: 500,
+    margin: 4,
+    color: {
+      dark: "#000000",
+      light: "#ffffff",
+    },
+  })
     .then((dataUrl: string) => {
       if (staleGeneration()) {
         return;

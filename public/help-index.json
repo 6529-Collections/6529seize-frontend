@@ -240,7 +240,7 @@
         "Drop Forge appears as a standalone sidebar row after About only when the connected wallet can access /drop-forge.",
         "The sidebar can be collapsed or expanded depending on viewport and layout state.",
         "In the collapsed web rail, NFTs and About open on intentional mouse hover while tap, click, and keyboard activation remain available; the flyout stays open while crossing into it and closes after leaving both surfaces or pressing Escape.",
-        "Search, Share, Connect Wallet, Notifications, and Profile are utility or account controls rather than product menu items."
+        "Search, Share, Connect Wallet, and Notifications are utility controls; My Profile and Connect another device live in the connected account menu."
       ],
       "canonical_path": "/waves",
       "related_paths": [
@@ -1082,13 +1082,13 @@
         "page"
       ],
       "facts": [
-        "Use the profile or account menu in the header to open the Share menu.",
-        "Choose Connection when you want to share your authenticated connection to another 6529 client.",
-        "Connection sharing can show a QR code for 6529 Mobile or a deep link for 6529 Desktop.",
+        "Use the desktop profile or account menu and select Connect another device.",
+        "The connection dialog contains only Mobile and Desktop targets and defaults to Mobile.",
+        "Connection sharing can show a QR code for Mobile or a deep link for Desktop.",
         "Connection sharing creates an additional session on the target client; it does not transfer, move, or disconnect the current session.",
-        "If the Share menu says Sign In Required, connect and authenticate your wallet first; if it says Update Authentication, sign again with the active wallet.",
-        "The desktop Share menu also has Current Page sharing for sending the page you are viewing to mobile or desktop instead of sharing your authenticated connection.",
-        "In the native app, supported non-wave pages use the header Share page button for current-page sharing."
+        "If the connection dialog says Sign In Required, connect and authenticate your wallet first; if it says Update Authentication, sign again with the active wallet.",
+        "Page sharing is a separate sidebar action and never appears in the connection dialog.",
+        "In the native app, supported pages keep using the header Share page button and platform share sheet."
       ],
       "canonical_path": "/",
       "suppress_source_links": true,
@@ -3930,8 +3930,11 @@
       "aliases": ["share", "share modal", "copy link", "share page"],
       "keywords": ["share", "copy", "link", "modal", "url", "native"],
       "facts": [
-        "Desktop web surfaces can open a share modal for copying or sharing links.",
-        "Native app pages outside home, Waves, Messages, and Notifications use a direct Share page header button instead of the desktop share modal.",
+        "Supported desktop-web pages show a persistent sidebar Share icon that opens a page-sharing-only modal.",
+        "Share actions copy the exact current full URL, create its QR code, compose on X or Farcaster, or open the system share sheet when navigator.share is available.",
+        "Desktop web and the native app share the same unsupported-page rules: home, Waves, Messages, Notifications, and Waves or Messages query views.",
+        "Native app sharing keeps its existing header placement and platform share-sheet behavior.",
+        "The profile menu contains My Profile and Connect another device; connection targets never appear in the Share modal.",
         "Wave-specific link sharing also exists in the wave header.",
         "Use share controls when users ask how to copy a route or send someone a page."
       ],
@@ -3940,6 +3943,7 @@
       "tags": ["navigation", "share"],
       "source_refs": [
         "components/header/share/HeaderPageShareButton.tsx",
+        "components/header/share/page-share-support.ts",
         "ops/docs/navigation/feature-app-header-context.md",
         "ops/docs/navigation/feature-share-modal.md",
         "ops/docs/waves/header/feature-wave-link-share-copy.md"

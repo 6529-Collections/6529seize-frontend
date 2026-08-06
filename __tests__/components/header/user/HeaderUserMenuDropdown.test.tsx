@@ -83,6 +83,7 @@ function renderDropdown(options: any) {
         isOpen
         profile={options.profile}
         onClose={onClose}
+        onOpenConnect={options.onOpenConnect}
       />
     </AuthContext.Provider>
   );
@@ -99,6 +100,35 @@ describe("HeaderUserMenuDropdown", () => {
       isConnected: true,
     });
     expect(screen.getByText("alice")).toBeInTheDocument();
+  });
+
+  it("links My Profile to the active profile and closes the menu", () => {
+    const { onClose } = renderDropdown({
+      profile: profileBase,
+      address: "0xabc",
+      isConnected: true,
+    });
+
+    const profileLink = screen.getByRole("link", { name: "My Profile" });
+    expect(profileLink).toHaveAttribute("href", "/alice");
+    fireEvent.click(profileLink);
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it("opens device connection without exposing Share in the profile menu", () => {
+    const onOpenConnect = jest.fn();
+    renderDropdown({
+      profile: profileBase,
+      address: "0xabc",
+      isConnected: true,
+      onOpenConnect,
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Connect another device" })
+    );
+    expect(onOpenConnect).toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: "Share" })).toBeNull();
   });
 
   it("connects wallet when not connected", async () => {

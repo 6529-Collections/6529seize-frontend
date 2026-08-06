@@ -1,6 +1,12 @@
-import { faCopy, faExternalLink } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCopy,
+  faExternalLink,
+  faQrcode,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { EllipsisHorizontalIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
 
 import Button from "@/components/utils/button/Button";
@@ -12,6 +18,8 @@ import type {
   DisplayContent,
   TerminalConnectionShareStatus,
 } from "./shareUtils";
+import { buildSocialShareUrls } from "./shareUtils";
+import { FarcasterLogo, XLogo } from "./SocialShareIcons";
 
 type MutableRef<T> = { current: T };
 
@@ -21,15 +29,11 @@ interface HeaderShareModalViewProps {
   readonly isVisible: boolean;
   readonly onClose: () => void;
   readonly dialogRef: MutableRef<HTMLDialogElement | null>;
-  readonly activeTab: Mode;
+  readonly mode: Mode;
   readonly activeSubTab: SubMode;
-  readonly setActiveTab: (tab: Mode) => void;
   readonly setActiveSubTab: (subTab: SubMode) => void;
   readonly navigateBrowserSrc: string;
   readonly navigateBrowserUrl: string;
-  readonly navigateAppSrc: string;
-  readonly navigateAppUrl: string;
-  readonly navigateCoreUrl: string;
   readonly shareConnectionSrc: string;
   readonly shareConnectionAppUrl: string;
   readonly shareConnectionCoreUrl: string;
@@ -52,15 +56,11 @@ export function HeaderShareModalView({
   isVisible,
   onClose,
   dialogRef,
-  activeTab,
+  mode,
   activeSubTab,
-  setActiveTab,
   setActiveSubTab,
   navigateBrowserSrc,
   navigateBrowserUrl,
-  navigateAppSrc,
-  navigateAppUrl,
-  navigateCoreUrl,
   shareConnectionSrc,
   shareConnectionAppUrl,
   shareConnectionCoreUrl,
@@ -74,11 +74,38 @@ export function HeaderShareModalView({
   copyTimeoutRef,
   isMobile,
 }: HeaderShareModalViewProps) {
+  const isConnectMode = mode === Mode.CONNECT;
+  const [isShareQrVisible, setIsShareQrVisible] = useState(false);
+
+  useEffect(() => {
+    if (!show) {
+      setIsShareQrVisible(false);
+    }
+  }, [show]);
+  const modalTitle = t(
+    HEADER_SHARE_LOCALE,
+    isConnectMode
+      ? "headerShare.connectModal.title"
+      : "headerShare.shareModal.title"
+  );
+  const closeAriaLabel = t(
+    HEADER_SHARE_LOCALE,
+    isConnectMode
+      ? "headerShare.connectModal.closeAriaLabel"
+      : "headerShare.shareModal.closeAriaLabel"
+  );
+  const backdropAriaLabel = t(
+    HEADER_SHARE_LOCALE,
+    isConnectMode
+      ? "headerShare.connectModal.backdropAriaLabel"
+      : "headerShare.shareModal.backdropAriaLabel"
+  );
+
   const renderQRCodeImage = (src: string, alt: string) => {
     const normalizedSrc = src?.trim();
 
     return (
-      <div className="tw-relative tw-h-full tw-w-full">
+      <div className="tw-relative tw-h-full tw-w-full tw-bg-white">
         {normalizedSrc ? (
           <Image
             unoptimized
@@ -88,7 +115,8 @@ export function HeaderShareModalView({
             alt={alt}
             fill
             sizes="(max-width: 768px) 92vw, 28rem"
-            className="tw-unselectable tw-object-contain"
+            className="tw-unselectable tw-bg-white tw-object-contain"
+            style={{ imageRendering: "pixelated" }}
           />
         ) : (
           <div className="tw-h-full tw-w-full tw-animate-pulse tw-rounded-md tw-bg-iron-900/40" />
@@ -126,35 +154,18 @@ export function HeaderShareModalView({
   };
 
   const getNavigateContent = () => {
-    if (activeSubTab === SubMode.BROWSER) {
-      return {
-        content: renderQRCodeImage(
-          navigateBrowserSrc,
-          t(HEADER_SHARE_LOCALE, "headerShare.qr.browserAlt")
-        ),
-        url: navigateBrowserUrl,
-      };
-    }
-
-    if (activeSubTab === SubMode.CORE) {
-      return {
-        content: renderCoreLink(navigateCoreUrl),
-        url: navigateCoreUrl,
-      };
-    }
-
     return {
       content: renderQRCodeImage(
-        navigateAppSrc,
-        t(HEADER_SHARE_LOCALE, "headerShare.qr.mobileAlt")
+        navigateBrowserSrc,
+        t(HEADER_SHARE_LOCALE, "headerShare.qr.browserAlt")
       ),
-      url: navigateAppUrl,
+      url: navigateBrowserUrl,
     };
   };
 
   const getShareContent = () => {
     const activeConnectionShareStatus =
-      activeSubTab === SubMode.CORE
+      activeSubTab === SubMode.DESKTOP
         ? desktopConnectionShareStatus
         : mobileConnectionShareStatus;
     if (activeConnectionShareStatus !== "ready") {
@@ -164,14 +175,14 @@ export function HeaderShareModalView({
       };
     }
 
-    if (activeSubTab === SubMode.CORE) {
+    if (activeSubTab === SubMode.DESKTOP) {
       return {
         content: renderCoreLink(shareConnectionCoreUrl),
         url: shareConnectionCoreUrl,
       };
     }
 
-    if (activeSubTab === SubMode.APP) {
+    if (activeSubTab === SubMode.MOBILE) {
       return {
         content: renderQRCodeImage(
           shareConnectionSrc,
@@ -286,7 +297,7 @@ export function HeaderShareModalView({
   };
 
   const getCurrentDisplayContent = (): DisplayContent => {
-    if (activeTab === Mode.NAVIGATE) {
+    if (mode === Mode.PAGE_SHARE) {
       return getNavigateContent();
     }
 
@@ -305,17 +316,48 @@ export function HeaderShareModalView({
     return displayContent;
   };
 
-  function printImage() {
+  const copyUrl = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setUrlCopied(true);
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+      copyTimeoutRef.current = setTimeout(() => {
+        setUrlCopied(false);
+        copyTimeoutRef.current = null;
+      }, 500);
+    } catch (error) {
+      console.error("Failed to copy share URL to clipboard", error);
+    }
+  };
+
+  function renderActiveContent() {
     const { content, url } = getDisplayContent();
+    const shareTitle = globalThis.document?.title?.trim() || "6529";
+    const socialShareUrls = buildSocialShareUrls({
+      url,
+      title: shareTitle,
+    });
+    const canUseSystemShare =
+      mode === Mode.PAGE_SHARE &&
+      typeof globalThis.navigator?.share === "function";
+    const shareActionClassName =
+      "tw-inline-flex tw-size-12 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
 
     return (
       <div className="tw-flex tw-flex-col tw-gap-2">
-        <div className="tw-relative tw-aspect-square tw-w-full tw-overflow-hidden">
-          <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center">
-            {content}
+        {(isConnectMode || isShareQrVisible) && (
+          <div
+            id="header-share-content"
+            className="tw-relative tw-aspect-square tw-w-full tw-overflow-hidden tw-rounded-lg"
+          >
+            <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center">
+              {content}
+            </div>
           </div>
-        </div>
-        {url ? (
+        )}
+        {isConnectMode && url ? (
           <div className="tw-flex tw-h-10 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-px-3">
             <div
               className="tw-min-w-0 tw-flex-1 tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap tw-text-sm tw-text-iron-400"
@@ -328,21 +370,7 @@ export function HeaderShareModalView({
               aria-label={t(HEADER_SHARE_LOCALE, "headerShare.copy.ariaLabel")}
               className="tw-inline-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-100"
               data-tooltip-id="copy-url-tooltip"
-              onClick={async () => {
-                try {
-                  await navigator.clipboard.writeText(url);
-                  setUrlCopied(true);
-                  if (copyTimeoutRef.current) {
-                    clearTimeout(copyTimeoutRef.current);
-                  }
-                  copyTimeoutRef.current = setTimeout(() => {
-                    setUrlCopied(false);
-                    copyTimeoutRef.current = null;
-                  }, 500);
-                } catch (error) {
-                  console.error("Failed to copy share URL to clipboard", error);
-                }
-              }}
+              onClick={() => void copyUrl(url)}
             >
               <FontAwesomeIcon
                 icon={faCopy}
@@ -369,8 +397,90 @@ export function HeaderShareModalView({
               }}
             />
           </div>
-        ) : (
+        ) : isConnectMode ? (
           <div className="tw-h-10" />
+        ) : null}
+        {mode === Mode.PAGE_SHARE && url && (
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-2">
+            <button
+              type="button"
+              aria-label={t(HEADER_SHARE_LOCALE, "headerShare.copy.ariaLabel")}
+              title={
+                urlCopied
+                  ? t(HEADER_SHARE_LOCALE, "headerShare.copy.copied")
+                  : t(HEADER_SHARE_LOCALE, "headerShare.copy.default")
+              }
+              onClick={() => void copyUrl(url)}
+              className={shareActionClassName}
+            >
+              <FontAwesomeIcon
+                icon={faCopy}
+                className={`tw-size-5 ${urlCopied ? "tw-text-green-500" : ""}`}
+              />
+            </button>
+            <button
+              type="button"
+              aria-label={t(
+                HEADER_SHARE_LOCALE,
+                "headerShare.qr.createAriaLabel"
+              )}
+              title={t(HEADER_SHARE_LOCALE, "headerShare.qr.createAriaLabel")}
+              aria-pressed={isShareQrVisible}
+              onClick={() => setIsShareQrVisible((current) => !current)}
+              className={`${shareActionClassName} ${
+                isShareQrVisible
+                  ? "tw-border-primary-400 tw-text-primary-300"
+                  : ""
+              }`}
+            >
+              <FontAwesomeIcon icon={faQrcode} className="tw-size-5" />
+            </button>
+            <a
+              href={socialShareUrls.x}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t(HEADER_SHARE_LOCALE, "headerShare.social.x")}
+              title={t(HEADER_SHARE_LOCALE, "headerShare.social.x")}
+              className={shareActionClassName}
+            >
+              <XLogo className="tw-size-5" />
+            </a>
+            <a
+              href={socialShareUrls.farcaster}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={t(
+                HEADER_SHARE_LOCALE,
+                "headerShare.social.farcaster"
+              )}
+              title={t(HEADER_SHARE_LOCALE, "headerShare.social.farcaster")}
+              className={shareActionClassName}
+            >
+              <FarcasterLogo className="tw-size-5" />
+            </a>
+            {canUseSystemShare && (
+              <button
+                type="button"
+                aria-label={t(HEADER_SHARE_LOCALE, "headerShare.social.more")}
+                title={t(HEADER_SHARE_LOCALE, "headerShare.social.more")}
+                onClick={() => {
+                  void globalThis.navigator
+                    .share({ title: shareTitle, url })
+                    .catch((error: unknown) => {
+                      if (
+                        !(error instanceof DOMException) ||
+                        error.name !== "AbortError"
+                      ) {
+                        console.error("Failed to share current page", error);
+                      }
+                    });
+                }}
+                className={shareActionClassName}
+              >
+                <EllipsisHorizontalIcon className="tw-size-6" />
+              </button>
+            )}
+          </div>
         )}
       </div>
     );
@@ -388,7 +498,7 @@ export function HeaderShareModalView({
     >
       <button
         type="button"
-        aria-label={t(HEADER_SHARE_LOCALE, "headerShare.modal.closeAriaLabel")}
+        aria-label={backdropAriaLabel}
         className="tw-absolute tw-inset-0 tw-border-0 tw-bg-transparent"
         onClick={onClose}
       />
@@ -405,19 +515,31 @@ export function HeaderShareModalView({
             : "tw-translate-y-1 tw-scale-95 tw-opacity-0"
         }`}
       >
-        <div className="tw-flex tw-flex-col tw-gap-2">
-          <h2 id="header-share-title" className="tw-sr-only">
-            {t(HEADER_SHARE_LOCALE, "headerShare.modal.title")}
-          </h2>
-          <ModalMenu
-            activeTab={activeTab}
-            activeSubTab={activeSubTab}
-            onTabChange={(tab, subTab) => {
-              setActiveTab(tab);
-              setActiveSubTab(subTab);
-            }}
-          />
-          {printImage()}
+        <div className="tw-flex tw-flex-col tw-gap-3 tw-p-4">
+          <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
+            <h2
+              id="header-share-title"
+              className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50"
+            >
+              {modalTitle}
+            </h2>
+            <button
+              type="button"
+              aria-label={closeAriaLabel}
+              title={closeAriaLabel}
+              onClick={onClose}
+              className="tw-inline-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            >
+              <XMarkIcon className="tw-size-5" aria-hidden="true" />
+            </button>
+          </div>
+          {isConnectMode && (
+            <ModalMenu
+              activeSubTab={activeSubTab}
+              onSubTabChange={setActiveSubTab}
+            />
+          )}
+          {renderActiveContent()}
         </div>
       </dialog>
     </div>

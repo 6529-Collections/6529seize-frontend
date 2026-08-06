@@ -33,6 +33,7 @@ import Spinner from "../utils/Spinner";
 import AppSidebar from "./AppSidebar";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import HeaderPageShareButton from "./share/HeaderPageShareButton";
+import { isPageShareSupported } from "./share/page-share-support";
 import HeaderActionButtons from "./HeaderActionButtons";
 import NetworkHealthCTA from "./NetworkHealthCTA";
 import Button from "../utils/button/Button";
@@ -130,34 +131,6 @@ const getDropForgeTitle = (pathSegments: string[]): string | null => {
   }
 
   return null;
-};
-
-const shouldShowHeaderPageShareAction = ({
-  activeView,
-  isCapacitor,
-  pathname,
-}: {
-  readonly activeView: string | null;
-  readonly isCapacitor: boolean;
-  readonly pathname: string;
-}): boolean => {
-  if (!isCapacitor) {
-    return false;
-  }
-
-  if (
-    pathname === "/" ||
-    pathname === "/waves" ||
-    pathname.startsWith("/waves/") ||
-    pathname === "/messages" ||
-    pathname.startsWith("/messages/") ||
-    pathname === "/notifications" ||
-    pathname.startsWith("/notifications/")
-  ) {
-    return false;
-  }
-
-  return activeView !== "waves" && activeView !== "messages";
 };
 
 const getHeaderTitle = ({
@@ -612,11 +585,8 @@ export default function AppHeader() {
     activeWaveId: waveParam,
     searchParams,
   });
-  const showPageShareAction = shouldShowHeaderPageShareAction({
-    activeView,
-    isCapacitor,
-    pathname,
-  });
+  const showPageShareAction =
+    isCapacitor && isPageShareSupported({ activeView, pathname });
 
   const isProfilePage = typeof params["user"] === "string";
 

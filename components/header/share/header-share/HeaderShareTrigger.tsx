@@ -2,14 +2,17 @@
 
 import { useState } from "react";
 
-import { ShareIcon } from "@heroicons/react/24/outline";
-
+import ShareArrowIcon from "@/components/common/icons/ShareArrowIcon";
+import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
 import { t } from "@/i18n/messages";
+import { getActiveViewFromUrl } from "@/components/navigation/ViewContext";
+import { usePathname, useSearchParams } from "next/navigation";
+import { isPageShareSupported } from "../page-share-support";
 
 import { HEADER_SHARE_LOCALE } from "./constants";
-import { HeaderQRModal } from "./HeaderQRModal";
+import { HeaderPageShareModal } from "./HeaderQRModal";
 
 export default function HeaderShare({
   isCollapsed = false,
@@ -18,9 +21,20 @@ export default function HeaderShare({
 }) {
   const capacitor = useCapacitor();
   const isMobileDevice = useIsMobileDevice();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [showQRModal, setShowQRModal] = useState<boolean>(false);
+  const activeWaveId = getActiveWaveIdFromUrl({ pathname, searchParams });
+  const activeView = getActiveViewFromUrl({
+    activeWaveId,
+    searchParams,
+  });
 
-  if (capacitor.isCapacitor || isMobileDevice) {
+  if (
+    capacitor.isCapacitor ||
+    isMobileDevice ||
+    !isPageShareSupported({ activeView, pathname })
+  ) {
     return <></>;
   }
 
@@ -37,7 +51,10 @@ export default function HeaderShare({
             : "desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
         } active:tw-bg-transparent`}
         data-tooltip-id="sidebar-tooltip"
-        data-tooltip-content="Share"
+        data-tooltip-content={t(
+          HEADER_SHARE_LOCALE,
+          "headerShare.trigger.text"
+        )}
         data-tooltip-hidden={!isCollapsed}
       >
         <div
@@ -46,7 +63,7 @@ export default function HeaderShare({
           }`}
         >
           <div className="tw-flex tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center">
-            <ShareIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
+            <ShareArrowIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
           </div>
           <span
             className={`tw-block tw-overflow-hidden tw-whitespace-nowrap tw-transition-all tw-duration-300 ${
@@ -57,7 +74,10 @@ export default function HeaderShare({
           </span>
         </div>
       </button>
-      <HeaderQRModal show={showQRModal} onClose={() => setShowQRModal(false)} />
+      <HeaderPageShareModal
+        show={showQRModal}
+        onClose={() => setShowQRModal(false)}
+      />
     </div>
   );
 }
