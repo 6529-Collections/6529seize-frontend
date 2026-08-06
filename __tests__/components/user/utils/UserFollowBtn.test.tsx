@@ -3,18 +3,38 @@ import userEvent from "@testing-library/user-event";
 import UserFollowBtn, {
   UserFollowBtnSize,
 } from "@/components/user/utils/UserFollowBtn";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  commonApiDeleteWithBody,
+  commonApiPost,
+} from "@/services/api/common-api";
 
-jest.mock("@tanstack/react-query");
+jest.mock("@tanstack/react-query", () => {
+  const actual = jest.requireActual<typeof import("@tanstack/react-query")>(
+    "@tanstack/react-query"
+  );
+  return { ...actual, useQuery: jest.fn() };
+});
+jest.mock("@/services/api/common-api", () => ({
+  commonApiDeleteWithBody: jest.fn(),
+  commonApiPost: jest.fn(),
+}));
 
 const useQueryMock = useQuery as jest.Mock;
-const useMutationMock = useMutation as jest.Mock;
+const commonApiPostMock = commonApiPost as jest.Mock;
+const commonApiDeleteWithBodyMock = commonApiDeleteWithBody as jest.Mock;
 
 describe("UserFollowBtn", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    commonApiPostMock.mockResolvedValue(undefined);
+    commonApiDeleteWithBodyMock.mockResolvedValue(undefined);
   });
 
   function setup({
@@ -34,41 +54,118 @@ describe("UserFollowBtn", () => {
       data: following ? { actions: [1] } : { actions: [] },
       isFetching: false,
     });
-    const mutateFollow = jest.fn();
-    const mutateUnfollow = jest.fn();
-    useMutationMock
-      .mockReturnValueOnce({ mutateAsync: mutateFollow })
-      .mockReturnValueOnce({ mutateAsync: mutateUnfollow });
     const requestAuth = jest
       .fn()
       .mockResolvedValue({ success: requestSuccess });
+    const setToast = jest.fn();
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
+    });
     render(
-      <AuthContext.Provider value={{ setToast: jest.fn(), requestAuth } as any}>
-        <ReactQueryWrapperContext.Provider
-          value={{ onIdentityFollowChange: jest.fn() } as any}
-        >
-          <UserFollowBtn
-            handle="bob"
-            size={size}
-            onDirectMessage={onDirectMessage}
-            directMessageLoading={directMessageLoading}
-            showMuteButton={false}
-          />
-        </ReactQueryWrapperContext.Provider>
-      </AuthContext.Provider>
+      <QueryClientProvider client={queryClient}>
+        <AuthContext.Provider value={{ setToast, requestAuth } as any}>
+          <ReactQueryWrapperContext.Provider
+            value={{ onIdentityFollowChange: jest.fn() } as any}
+          >
+            <UserFollowBtn
+              handle="bob"
+              size={size}
+              onDirectMessage={onDirectMessage}
+              directMessageLoading={directMessageLoading}
+              showMuteButton={false}
+            />
+          </ReactQueryWrapperContext.Provider>
+        </AuthContext.Provider>
+      </QueryClientProvider>
     );
-    return { mutateFollow, mutateUnfollow, requestAuth };
+    return { requestAuth, setToast };
   }
 
   it("follows when not following", async () => {
     const user = userEvent.setup();
-    const { mutateFollow, requestAuth } = setup({ following: false });
+    const { requestAuth } = setup({ following: false });
     const followButton = screen.getByRole("button", { name: "Follow" });
     expect(followButton).toHaveClass("tw-font-semibold");
     await user.click(followButton);
     expect(requestAuth).toHaveBeenCalled();
-    expect(mutateFollow).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(commonApiPostMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endpoint: "identities/bob/subscriptions",
+        })
+      );
+    });
+    expect(commonApiDeleteWithBodyMock).not.toHaveBeenCalled();
   });
+
+  it("unfollows when already following", async () => {
+    const user = userEvent.setup();
+    setup({ following: true });
+    await user.click(screen.getByRole("button", { name: "Unfollow" }));
+
+    await waitFor(() => {
+      expect(commonApiDeleteWithBodyMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endpoint: "identities/bob/subscriptions",
+        })
+      );
+    });
+    expect(commonApiPostMock).not.toHaveBeenCalled();
+  });
+
+  it("does not mutate when authentication fails", async () => {
+    const user = userEvent.setup();
+    setup({ following: false, requestSuccess: false });
+    const followButton = screen.getByRole("button", { name: "Follow" });
+
+    await user.click(followButton);
+
+    expect(commonApiPostMock).not.toHaveBeenCalled();
+    expect(commonApiDeleteWithBodyMock).not.toHaveBeenCalled();
+    expect(followButton).not.toBeDisabled();
+  });
+
+  it.each([
+    {
+      action: "follow",
+      following: false,
+      buttonName: "Follow",
+      getRequestMock: () => commonApiPostMock,
+      toastTitle: "Couldn't follow this profile.",
+    },
+    {
+      action: "unfollow",
+      following: true,
+      buttonName: "Unfollow",
+      getRequestMock: () => commonApiDeleteWithBodyMock,
+      toastTitle: "Couldn't unfollow this profile.",
+    },
+  ])(
+    "restores the button and shows a toast after a failed $action",
+    async ({ following, buttonName, getRequestMock, toastTitle }) => {
+      const expectedError = new Error("network unavailable");
+      getRequestMock().mockRejectedValueOnce(expectedError);
+      const user = userEvent.setup();
+      const { setToast } = setup({ following });
+      const followButton = screen.getByRole("button", { name: buttonName });
+
+      await user.click(followButton);
+
+      await waitFor(() => {
+        expect(setToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: "error",
+            title: toastTitle,
+            description: "Please try again.",
+          })
+        );
+      });
+      expect(followButton).not.toBeDisabled();
+    }
+  );
 
   it("shows DM button when not following", () => {
     setup({ following: false, onDirectMessage: jest.fn() });
