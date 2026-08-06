@@ -88,7 +88,7 @@ const KNOWN_RUNTIME_KEYS = new Set([
 
 const BAKED_INPUTS = Object.freeze(
   [...new Set([...KNOWN_RUNTIME_KEYS, ...EXPLICIT_INPUT_CATEGORIES.keys()])]
-    .sort()
+    .sort(compareStrings)
     .map((name) =>
       Object.freeze({
         name,
@@ -107,14 +107,18 @@ function invariant(condition, message) {
   }
 }
 
+function compareStrings(left, right) {
+  return left.localeCompare(right, "en");
+}
+
 function isPlainObject(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
 function assertExactKeys(value, expectedKeys, label) {
   invariant(isPlainObject(value), `${label} must be an object`);
-  const actual = Object.keys(value).sort();
-  const expected = [...expectedKeys].sort();
+  const actual = Object.keys(value).sort(compareStrings);
+  const expected = [...expectedKeys].sort(compareStrings);
   invariant(
     actual.length === expected.length &&
       actual.every((key, index) => key === expected[index]),
@@ -347,10 +351,11 @@ function validateBakedInputs(inventory) {
       (input) => input.classification === "unclassified_runtime_fail_closed"
     )
     .map((input) => input.name)
-    .sort();
+    .sort(compareStrings);
   invariant(
-    JSON.stringify([...inventory.unclassified_runtime_keys].sort()) ===
-      JSON.stringify(expectedUnknown),
+    JSON.stringify(
+      [...inventory.unclassified_runtime_keys].sort(compareStrings)
+    ) === JSON.stringify(expectedUnknown),
     "inventory unclassified runtime keys do not match classifications"
   );
   return byName;

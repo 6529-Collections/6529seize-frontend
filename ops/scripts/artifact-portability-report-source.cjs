@@ -15,7 +15,7 @@ const RELEASE_BUS_PRODUCER = Object.freeze({
   events: Object.freeze(["workflow_dispatch"]),
   branches: Object.freeze(["main"]),
   artifactPattern:
-    /^release-bus-frontend-[A-Za-z0-9._-]{1,100}-r(?:[1-9][0-9]{0,8}|rollback-[1-9][0-9]{0,8})$/,
+    /^release-bus-frontend-[A-Za-z\d._-]{1,100}-r(?:[1-9]\d{0,8}|rollback-[1-9]\d{0,8})$/,
   artifactContracts: Object.freeze({
     "environment-bound-v3": "environment-bound-v1",
   }),
@@ -26,7 +26,7 @@ const TRUSTED_REPORT_PRODUCERS = Object.freeze({
     [STAGING_WORKFLOW]: Object.freeze({
       events: Object.freeze(["push", "workflow_dispatch"]),
       branches: Object.freeze(["1a-staging"]),
-      artifactPattern: /^manual-staging-frontend-[1-9][0-9]{0,19}$/,
+      artifactPattern: /^manual-staging-frontend-[1-9]\d{0,19}$/,
       artifactContracts: Object.freeze({
         "manual-staging-v1": "manual-staging-v1",
       }),
@@ -150,7 +150,7 @@ function verifyChecksumMembership(root) {
   invariant(lines.length > 0, "SHA256SUMS must contain at least one entry");
   const claimed = new Map();
   for (const line of lines) {
-    const match = /^([a-f0-9]{64})  (.+)$/.exec(line);
+    const match = /^([a-f0-9]{64}) {2}(.+)$/.exec(line);
     invariant(match, `SHA256SUMS contains an invalid entry: ${line}`);
     const relativePath = normalizeChecksumPath(match[2]);
     invariant(
@@ -214,7 +214,7 @@ function trustedProducer(role, workflowPath) {
   );
   const producers = TRUSTED_REPORT_PRODUCERS[role];
   invariant(
-    Object.prototype.hasOwnProperty.call(producers, workflowPath),
+    Object.hasOwn(producers, workflowPath),
     "report source workflow is not trusted for this environment"
   );
   return producers[workflowPath];
@@ -241,7 +241,7 @@ function verifyArtifactMetadata(options) {
     "report source GitHub artifact expiry state is missing or expired"
   );
   invariant(
-    /^[1-9][0-9]*$/.test(String(artifact.id || "")),
+    /^[1-9]\d*$/.test(String(artifact.id || "")),
     "report source GitHub artifact ID is invalid"
   );
   invariant(
@@ -276,7 +276,7 @@ function verifyReportRun(options, context) {
     "report source repository is invalid"
   );
   invariant(
-    /^[1-9][0-9]{0,19}$/.test(String(options.expectedRunId || "")),
+    /^[1-9]\d{0,19}$/.test(String(options.expectedRunId || "")),
     "report source run ID is invalid"
   );
   invariant(
@@ -431,7 +431,7 @@ function verifyReportSource(options, context) {
   );
   const producer = trustedProducer(options.role, options.expectedWorkflowPath);
   invariant(
-    Object.prototype.hasOwnProperty.call(
+    Object.hasOwn(
       producer.artifactContracts,
       inventory.artifact.contract_version
     ),

@@ -420,7 +420,7 @@ jobs:
         with:
           name: production-elastic-beanstalk-readiness-${{ github.run_id }}
           path: elastic-beanstalk-readiness.json
-          if-no-files-found: ignore
+          if-no-files-found: error
           retention-days: 90
 
       - name: Validate Deployment

@@ -876,3 +876,21 @@ disabled pending the migration proof in the implementation document.
   requires an explicit unexpired state and exact source workflow-run identity.
 - The portability decision remains `NOT_PORTABLE`; these changes strengthen
   report provenance and do not authorize reuse, promotion, or deployment.
+
+## 2026-08-06 - PR 6 stacked review hardening
+
+- PR #3643 was opened against the PR 5 branch to parallelize review while the
+  Storm production lane remained serialized. The current PR 6 commit was then
+  rebased onto the exact PR 5 head, signed again, and made conflict-free.
+- The 6529 follow-up review confirmed that canonical source-root containment
+  and the prior provenance findings are resolved. Security, WCAG, and i18n
+  reported no findings.
+- The advisory swarm identified missing workflow-level regression coverage.
+  Tests now bind the exact staging and production inventory predicates across
+  Release Bus and manual fallback workflows, the Release Bus verifier's sparse
+  checkout, the poller invocation path, and required readiness-evidence uploads.
+- Sonar's deterministic-sort findings are corrected with explicit fixed-locale
+  comparators in every canonicalization path. The remaining reported regex and
+  ownership idioms were updated without changing accepted input boundaries.
+- These changes do not alter the release authorization boundary: inventory
+  status remains `NOT_PORTABLE`, and reuse and promotion remain disabled.

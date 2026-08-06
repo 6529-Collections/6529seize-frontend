@@ -1044,8 +1044,16 @@ describe("artifact-portability.v1", () => {
       path.join(root, ".github/workflows/release-bus-deploy-production.yml"),
       "utf8"
     );
+    const stagingDeploy = fs.readFileSync(
+      path.join(root, ".github/workflows/release-bus-deploy-staging.yml"),
+      "utf8"
+    );
     const fallbackDeploy = fs.readFileSync(
       path.join(root, ".github/workflows/build-upload-deploy-prod.yml"),
+      "utf8"
+    );
+    const manualStagingDeploy = fs.readFileSync(
+      path.join(root, ".github/workflows/deploy-staging.yml"),
       "utf8"
     );
     const schema = JSON.parse(
@@ -1056,6 +1064,35 @@ describe("artifact-portability.v1", () => {
     ) as { properties: Record<string, unknown> };
     const parsedWorkflow = YAML.parse(reportWorkflow) as {
       jobs: Record<string, { steps: Array<Record<string, unknown>> }>;
+    };
+    const parsedProductionDeploy = YAML.parse(productionDeploy) as {
+      jobs: Record<
+        string,
+        {
+          steps: Array<{
+            name?: string;
+            run?: string;
+            with?: Record<string, unknown>;
+          }>;
+        }
+      >;
+    };
+
+    const expectPortabilityGuard = (
+      workflow: string,
+      environment: "staging" | "production",
+      inventoryPath: string
+    ) => {
+      expect(workflow).toContain(`.environment == "${environment}" and`);
+      expect(workflow).toContain(".source.git_sha == $source_sha and");
+      expect(workflow).toContain(
+        ".digests.package_sha256 == $package_sha256 and"
+      );
+      expect(workflow).toContain('.portability.status == "NOT_PORTABLE" and');
+      expect(workflow).toContain(".portability.portable == false and");
+      expect(workflow).toContain(".portability.reuse_authorized == false and");
+      expect(workflow).toContain(".portability.promotion_authorized == false");
+      expect(workflow).toContain(inventoryPath);
     };
 
     expect(schema.properties).toEqual(
@@ -1088,10 +1125,54 @@ describe("artifact-portability.v1", () => {
     expect(reportWorkflow).not.toContain("update-environment");
     expect(productionDeploy).toContain("elastic-beanstalk-readiness.cjs");
     expect(fallbackDeploy).toContain("elastic-beanstalk-readiness.cjs");
+    expectPortabilityGuard(
+      productionDeploy,
+      "production",
+      '"$portability_inventory"'
+    );
+    expectPortabilityGuard(
+      stagingDeploy,
+      "staging",
+      '"$portability_inventory"'
+    );
+    expectPortabilityGuard(
+      fallbackDeploy,
+      "production",
+      "production-artifact/artifact-portability.json"
+    );
+    expectPortabilityGuard(
+      manualStagingDeploy,
+      "staging",
+      "staging-artifact/artifact-portability.json"
+    );
     expect(productionDeploy).not.toContain("sleep 120");
     expect(productionDeploy).not.toContain("sleep 60");
     expect(fallbackDeploy).not.toContain("sleep 120");
     expect(fallbackDeploy).not.toContain("sleep 60");
+    const productionSteps = Object.values(parsedProductionDeploy.jobs).flatMap(
+      (job) => job.steps
+    );
+    const verifierCheckout = productionSteps.find(
+      (step) => step.with?.["path"] === ".release-bus-verifier"
+    );
+    expect(String(verifierCheckout?.with?.["sparse-checkout"] ?? "")).toContain(
+      "ops/scripts/elastic-beanstalk-readiness.cjs"
+    );
+    expect(
+      productionSteps.find(
+        (step) =>
+          step.name ===
+          "Check Elastic Beanstalk health and readiness (adaptive exact-version poll)"
+      )?.run
+    ).toContain(
+      ".release-bus-verifier/ops/scripts/elastic-beanstalk-readiness.cjs"
+    );
+    expect(productionDeploy).toMatch(
+      /elastic-beanstalk-readiness\.json[\s\S]*if-no-files-found: error/
+    );
+    expect(fallbackDeploy).toMatch(
+      /elastic-beanstalk-readiness\.json[\s\S]*if-no-files-found: error/
+    );
     const compareJob = parsedWorkflow.jobs["compare"];
     if (!compareJob) {
       throw new Error("Expected the artifact portability compare job");

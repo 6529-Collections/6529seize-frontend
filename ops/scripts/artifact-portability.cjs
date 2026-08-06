@@ -26,6 +26,10 @@ function invariant(condition, message) {
   }
 }
 
+function compareStrings(left, right) {
+  return left.localeCompare(right, "en");
+}
+
 function sha256(value) {
   return crypto.createHash("sha256").update(value).digest("hex");
 }
@@ -36,7 +40,7 @@ function canonicalize(value) {
   }
   if (value && typeof value === "object") {
     return `{${Object.keys(value)
-      .sort()
+      .sort(compareStrings)
       .map((key) => `${JSON.stringify(key)}:${canonicalize(value[key])}`)
       .join(",")}}`;
   }
@@ -173,7 +177,9 @@ function scanExtractedPackage(extractedRoot, baked) {
   }
 
   const inputs = baked.entries.map((entry) => {
-    const matchedPaths = [...matchesByName.get(entry.name)].sort();
+    const matchedPaths = [...matchesByName.get(entry.name)].sort(
+      compareStrings
+    );
     return {
       name: entry.name,
       present: entry.present,
@@ -267,7 +273,7 @@ function getArtifactContractVersion(manifest) {
 function buildBakedInputs({ runtimeConfig, assetsFromS3, environment }) {
   const unknownRuntimeKeys = Object.keys(runtimeConfig)
     .filter((key) => !KNOWN_RUNTIME_KEYS.has(key))
-    .sort();
+    .sort(compareStrings);
   const descriptors = [
     ...BAKED_INPUTS,
     ...unknownRuntimeKeys.map((name) => ({
@@ -500,7 +506,7 @@ function compareInventories(staging, production) {
     ])
   );
   const bakedInputDifferences = [...inputByName.keys()]
-    .sort()
+    .sort(compareStrings)
     .flatMap((name) => {
       const stagingInput =
         staging.baked_inputs.find((input) => input.name === name) || null;

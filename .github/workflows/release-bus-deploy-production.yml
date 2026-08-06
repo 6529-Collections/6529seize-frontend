@@ -387,7 +387,7 @@ jobs:
           path: |
             deployment-version-evidence.json
             elastic-beanstalk-readiness.json
-          if-no-files-found: ignore
+          if-no-files-found: error
           retention-days: 90
       - name: Report structured Release Bus deployment result
         if: always()
