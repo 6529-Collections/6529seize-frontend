@@ -150,15 +150,17 @@
   ontology pack recorded shared-shell settings and browser-policy fetch
   diagnostics. A strict rerun against the unchanged staging deployment then
   passed all six desktop and mobile ontology cases.
-- Production replay exposed one test-only inconsistency: the exact
-  Cross-Origin-Opener-Policy fetch diagnostic was already classified as
-  non-actionable in the Museum's Inside the System suite, but the ontology
-  suite permitted it only outside deployed environments. The ontology suite
-  now applies that one narrow classification in every environment. It still
-  fails on all other production console errors, every page error, and every
-  failed 5xx response.
+- Production replay exposed a test-only inconsistency: three exact shared-shell
+  transport diagnostics were already classified as non-actionable in the
+  Museum's Inside the System suite, but the ontology suite permitted them only
+  outside deployed environments. Frontend PR #3636 aligned those bounded
+  classifications. It still fails on all other production console errors,
+  every page error, and every failed 5xx response.
 - The corrected strict production pack passed all six desktop and mobile cases
   against `https://6529.io` in 24.9 seconds. It verified the overview, all
   eleven standard pages, the Casey seven-object schedule, exact-source links,
   and mobile overflow while retaining the remaining browser and HTTP failure
   gates.
+- Manifest-bound production E2E workflow `31061460637` also passed on exact
+  deployed SHA `81ddbf2a6dce7df785c87d9a3192d3ed7a74f1cf`, including evidence
+  validation and upload.

@@ -26,14 +26,16 @@ const DEPLOYED_ENVIRONMENT =
   process.env["PLAYWRIGHT_ENV"] === "staging" ||
   process.env["PLAYWRIGHT_ENV"] === "production";
 const SHELL_ALLOWED_CONSOLE_ERROR_PATTERNS = [
+  // These exact shell transport diagnostics are unrelated to Museum content;
+  // HTTP 5xx responses and every other console error still fail.
   /^Error checking Cross-Origin-Opener-Policy: Failed to fetch(?: \(6529\.io\))?(?:\n|$)/,
+  /^Failed to fetch seize settings TypeError: Failed to fetch(?:\n|$)/,
+  /^Failed to fetch cookie consent status Error: Network request failed\. Please check your connection and try again\. \(https:\/\/api(?:\.staging)?\.6529\.io\/api\/policies\/country-check\)(?:\n|$)/,
   ...(DEPLOYED_ENVIRONMENT
     ? []
     : [
         /^Analytics SDK: TypeError: Failed to fetch(?:\n|$)/,
-        /^Failed to fetch seize settings TypeError: Failed to fetch(?:\n|$)/,
         /^Failed to fetch seize settings Error: HTTP error! status: 429(?:\n|$)/,
-        /^Failed to fetch cookie consent status Error: Network request failed\. Please check your connection and try again\. \(https:\/\/api(?:\.staging)?\.6529\.io\/api\/policies\/country-check\)(?:\n|$)/,
         /^Failed to fetch cookie consent status Rate limit exceeded(?:\n|$)/,
         /^Failed to load resource: the server responded with a status of 429 \(\)$/,
       ]),

@@ -50,10 +50,10 @@
   contract suite. The adapter now accepts the canonical rights registry v1.1
   that merged independently during this release; an exact-source probe returns
   73 documents, 11 architecture standards, and 22 rights expressions.
-- Production qualification found one harness-only discrepancy: the ontology
-  pack treated a known Cross-Origin-Opener-Policy browser fetch diagnostic as
-  actionable in deployed environments even though another Museum pack already
-  classifies that exact message as non-actionable. The narrow classification
-  is aligned without suppressing any other console, page, or HTTP error. The
+- Production qualification found a harness-only discrepancy: the ontology pack
+  treated three exact shared-shell transport diagnostics as Museum failures,
+  although the sibling Museum pack already classifies them as non-actionable.
+  Frontend PR #3636 aligned those bounded classifications. Every other console
+  error, every page error, and every HTTP 5xx response remains actionable. The
   corrected production replay passed all six desktop and mobile cases against
   live `https://6529.io`.
