@@ -533,7 +533,9 @@ export default function SubscriptionsReportComponent() {
                           ref={
                             index === animateFromIndex ? firstNewRowRef : null
                           }
-                          className={isNew ? styles["upcomingRowNew"] : ""}
+                          className={
+                            isNew ? (styles["upcomingRowNew"] ?? "") : ""
+                          }
                           date={date}
                           count={count}
                         />
