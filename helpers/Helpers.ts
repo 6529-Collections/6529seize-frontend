@@ -37,6 +37,10 @@ export {
   getTimeUntil,
 } from "./timeDisplayHelpers";
 export { getMetadataForUserPage } from "./userPageMetadataHelpers";
+export {
+  MAX_DROP_PART_UTF16_UNITS as MAX_DROP_PART_CHARACTERS,
+  MAX_DROP_STORM_UTF16_UNITS as MAX_DROP_STORM_CHARACTERS,
+} from "./waves/drop-content-limits";
 
 export const MAX_DROP_UPLOAD_FILES = 8;
 
