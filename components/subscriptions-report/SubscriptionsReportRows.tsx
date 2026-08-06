@@ -25,7 +25,7 @@ const REPORT_ROW_LINK_CLASS_NAME =
   "tw-grid tw-w-full tw-items-center tw-gap-3 tw-border-t tw-border-iron-700 tw-px-4 tw-py-4 tw-text-white tw-no-underline tw-transition hover:tw-bg-iron-700 hover:tw-text-white hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-300 sm:tw-gap-4 sm:tw-px-6";
 const REPORT_ROW_TITLE_CLASS_NAME =
   "tw-text-sm tw-leading-5 tw-text-white sm:tw-text-base";
-const REPORT_ROW_META_CLASS_NAME = "tw-text-sm tw-leading-5 tw-text-gray-400";
+const REPORT_ROW_META_CLASS_NAME = "tw-text-sm tw-leading-5 tw-text-iron-400";
 
 function formatVisibleSubscriptionCount(count: number): string {
   return `x${count > 0 ? count.toLocaleString() : "0"}`;
@@ -132,7 +132,7 @@ function ReportCountStat(
       </span>
       {showMobileLabel ? (
         <span
-          className="tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wide tw-text-gray-400 sm:tw-hidden"
+          className="tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wide tw-text-iron-400 sm:tw-hidden"
           aria-hidden="true"
         >
           {props.label}
