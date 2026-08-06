@@ -166,30 +166,6 @@ jobs:
         env:
           EXPECTED_SHA: ${{ inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
-      # The exact-source checkout cleans the workspace. Stage trusted control
-      # tooling only after it, otherwise checkout removes .release-bus-control
-      # before Museum pack selection executes.
-      - name: Check out immutable Release Bus Museum selection tooling
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-        with:
-          ref: ${{ github.workflow_sha }}
-          path: .release-bus-control
-          filter: blob:none
-          fetch-depth: 1
-          persist-credentials: false
-          sparse-checkout: |
-            scripts/museum-release-tier.cjs
-            scripts/museum-release-selection.cjs
-          sparse-checkout-cone-mode: false
-      - name: Verify immutable Museum selection tooling
-        env:
-          WORKFLOW_SHA: ${{ github.workflow_sha }}
-        run: |
-          set -euo pipefail
-          [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
-          test "$(git -C .release-bus-control rev-parse HEAD)" = "$WORKFLOW_SHA"
-          test -f .release-bus-control/scripts/museum-release-tier.cjs
-          test -f .release-bus-control/scripts/museum-release-selection.cjs
       - name: Install Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with: { node-version: "22.17.1" }
@@ -218,6 +194,36 @@ jobs:
         env:
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 install:frozen
+      # The deployed tree and its dependency lifecycle run before trusted
+      # control tooling is staged. This keeps untrusted install code from
+      # mutating the Museum selector after its immutable-source verification.
+      - name: Require an unused Museum selection control path
+        if: steps.dependencies.outcome == 'success'
+        run: test ! -e .release-bus-control
+      - name: Check out immutable Release Bus Museum selection tooling
+        if: steps.dependencies.outcome == 'success'
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: .release-bus-control
+          filter: blob:none
+          fetch-depth: 1
+          persist-credentials: false
+          sparse-checkout: |
+            scripts/museum-release-tier.cjs
+            scripts/museum-release-selection.cjs
+          sparse-checkout-cone-mode: false
+      - name: Verify immutable Museum selection tooling
+        if: steps.dependencies.outcome == 'success'
+        env:
+          WORKFLOW_SHA: ${{ github.workflow_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git -C .release-bus-control rev-parse HEAD)" = "$WORKFLOW_SHA"
+          test -z "$(git -C .release-bus-control status --porcelain=v1 --untracked-files=all)"
+          test -f .release-bus-control/scripts/museum-release-tier.cjs
+          test -f .release-bus-control/scripts/museum-release-selection.cjs
       - name: Select fail-closed Museum packs for the exact deployed range
         id: museum-selection
         if: steps.dependencies.outcome == 'success'
@@ -412,6 +418,36 @@ jobs:
           fi
           echo "MUSEUM_SELECTED_PACKS_JSON=$MUSEUM_SELECTED_PACKS_JSON" >> "$GITHUB_ENV"
           ./bin/6529 run e2e:packs -- "${args[@]}"
+      # The deployed E2E runner has now completed. Stage a second, fresh,
+      # workflow-SHA-bound copy for evidence verification so tested app code
+      # cannot alter the verifier used to qualify its own output.
+      - name: Require an unused Museum evidence control path
+        if: always() && steps.dependencies.outcome == 'success' && steps.playwright.outcome == 'success'
+        run: test ! -e .release-bus-evidence-control
+      - name: Check out immutable Release Bus Museum evidence tooling
+        if: always() && steps.dependencies.outcome == 'success' && steps.playwright.outcome == 'success'
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: .release-bus-evidence-control
+          filter: blob:none
+          fetch-depth: 1
+          persist-credentials: false
+          sparse-checkout: |
+            scripts/museum-release-tier.cjs
+            scripts/museum-release-selection.cjs
+          sparse-checkout-cone-mode: false
+      - name: Verify immutable Museum evidence tooling
+        if: always() && steps.dependencies.outcome == 'success' && steps.playwright.outcome == 'success'
+        env:
+          WORKFLOW_SHA: ${{ github.workflow_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git -C .release-bus-evidence-control rev-parse HEAD)" = "$WORKFLOW_SHA"
+          test -z "$(git -C .release-bus-evidence-control status --porcelain=v1 --untracked-files=all)"
+          test -f .release-bus-evidence-control/scripts/museum-release-tier.cjs
+          test -f .release-bus-evidence-control/scripts/museum-release-selection.cjs
       - name: Validate exact production E2E evidence
         id: evidence
         if: always() && steps.dependencies.outcome == 'success' && steps.playwright.outcome == 'success'
@@ -423,7 +459,7 @@ jobs:
           MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
           MUSEUM_SOURCE_COMMIT: ${{ steps.museum-selection.outputs.source_commit }}
           MUSEUM_SELECTION_FILE: ${{ steps.museum-selection.outputs.file }}
-          MUSEUM_RELEASE_SELECTION_TOOL: .release-bus-control/scripts/museum-release-selection.cjs
+          MUSEUM_RELEASE_SELECTION_TOOL: .release-bus-evidence-control/scripts/museum-release-selection.cjs
         run: |
           set -euo pipefail
           test -f production-e2e-artifacts/evidence.json
@@ -436,7 +472,7 @@ jobs:
             (.selected_packs | type == "array") and
             (.selection_digest | test("^[a-f0-9]{64}$"))
           ' "$MUSEUM_SELECTION_FILE" >/dev/null
-          ./bin/6529 exec node - "$MUSEUM_SELECTION_FILE" <<'NODE'
+          node - "$MUSEUM_SELECTION_FILE" <<'NODE'
           const fs = require("node:fs");
           const path = require("node:path");
           const selection = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
