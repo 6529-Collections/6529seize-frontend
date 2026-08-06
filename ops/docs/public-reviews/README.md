@@ -69,21 +69,29 @@ Every page includes:
 - a collapsible page-feedback rail that reads existing comments and includes a
   structured feedback form bound to the immutable displayed review version
 
-The current overview also provides a dated development update, six
-plain-language questions, and reading paths for community members, artists,
-technical reviewers, and auditors. The generated technical reference lets
-reviewers inspect Solidity files, definitions, functions, events, errors, and
-other declarations within the review. Its all-declarations explorer queries
-the server with the active text, kind, scope, and location filters and loads up
-to 100 matching records at a time.
+The current overview begins with a plain definition of Stream, five important
+parts of a Stream artwork, a seven-step artwork journey, and focused
+starting points for artists, collectors and minters, and auditors. A dated
+development update and six plain-language review questions follow that
+introduction. The current **For Artists** page starts with a plain artist guide
+covering the artwork package, approval journey, change boundaries, other actors,
+sales, payments, and finality. Its detailed versioned editorial remains below
+as the technical evidence. The generated technical reference lets reviewers
+inspect Solidity files, definitions, functions, events, errors, and other
+declarations within the review. Its all-declarations explorer queries the server
+with the active text, kind, scope, and location filters and loads up to 100
+matching records at a time.
 
 ## Implementation and Evidence Status
 
-The current Overview begins with a separately dated development update. It
-summarizes recent work, active work, launch requirements, evidence counts, and
-the source commit checked for that update. The update is shown only on the
-unversioned Overview. Immutable version routes continue to describe their
-exact review snapshot.
+After the plain-language introduction, the current Overview shows a separately
+dated development update. It summarizes recent work, active work, launch
+requirements, evidence counts, and the source commit checked for that update.
+The introduction and update are shown only on the unversioned Overview.
+Immutable version routes continue to describe their exact review snapshot.
+The plain artist guide follows the same rule: it appears only on the current,
+unversioned **For Artists** route, while immutable version routes continue to
+render their exact editorial snapshot without the guide.
 
 The active review centralizes snapshot implementation and evidence status on
 **Where Development Stands**. It separates five implementation states:
