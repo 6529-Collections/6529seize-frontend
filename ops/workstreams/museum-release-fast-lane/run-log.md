@@ -929,3 +929,22 @@ disabled pending the migration proof in the implementation document.
   volume identifier, so cross-platform identity comparison treats only that
   documented zero as unavailable while still requiring the inode match. The
   two corrected suites pass 57/57 with changed-source lint clean.
+
+## 2026-08-06 - Live readiness adapter defect
+
+- PR #3656 merged as `ee156caa5b2a9ed2efaee34659f098e916badcb9`.
+  Staging deployment 31110364640 and automatic staging E2E 31111224279
+  passed. Production run 31113392584 deployed that exact version and live
+  readback reached Green/Ready with three exact `/api/version` responses.
+- The production qualification step then exposed a real adapter-boundary bug:
+  `describeEnvironmentWithAws` returned the normalized `version_label` field,
+  while the outer readiness loop normalized that value again but recognized
+  only AWS `VersionLabel` and camel-case `versionLabel`. Every valid sample was
+  therefore discarded as `Elastic Beanstalk VersionLabel is missing`.
+- The correction makes normalization idempotent by accepting the closed
+  normalized field. A regression test passes the actual AWS adapter output
+  through the readiness loop. The focused suite passes 25/25, and a live
+  read-only reproduction now accepts two consecutive Green/Ready exact-version
+  observations in 7.3 seconds.
+- No additional environment mutation was used to diagnose or prove the fix.
+  Production E2E remains required after this correction is merged and released.

@@ -394,3 +394,19 @@ publication status.
 - No staging or production environment has been mutated by this six-PR train.
   Final staging, E2E, production, E2E, retained qualification, and developer
   Wave closeout remain required.
+
+## 2026-08-06 live qualification correction
+
+- The six-PR train is now merged through PR #3656 at exact main
+  `ee156caa5b2a9ed2efaee34659f098e916badcb9`.
+- Exact staging deployment and automatic staging E2E passed. Production run
+  31113392584 deployed the exact version; live Elastic Beanstalk and HTTP
+  readbacks are healthy.
+- Final production qualification is blocked by the readiness adapter's
+  double-normalization defect, not by the deployed application. The focused
+  correction and real-adapter regression are the only active hotfix scope.
+- After the hotfix completes its governed release and production E2E, the next
+  workstream is the separately reviewed one-click production operation agreed
+  with the Dev Team. It must use authoritative pre-dispatch drain/acquisition,
+  a bounded cross-repository lane lease and control epoch, an isolated builder
+  without deployment credentials, and a fresh artifact verifier before AWS.
