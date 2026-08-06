@@ -45,6 +45,18 @@ const common = {
   workflow_run_id: "123456",
 };
 
+const failureInput = (
+  selection_digest: string | null,
+  reason_code: string
+) => ({
+  ...common,
+  evidence_digest: EVIDENCE_DIGEST,
+  qualifier_workflow_run_attempt: 3,
+  qualifier_workflow_run_id: "789012",
+  reason_code,
+  selection_digest,
+});
+
 function bindResponse(request: Record<string, unknown>) {
   return {
     controller_identity: "frontend-production-workflow",
@@ -147,16 +159,12 @@ describe("one-click production authority client", () => {
       qualifier_workflow_run_id: "789012",
       selection_digest: SELECTION_DIGEST,
     });
-    const beforeSelection = authority.buildFailPayload({
-      ...common,
-      reason_code: "ABORTED",
-      selection_digest: null,
-    });
-    const afterSelection = authority.buildFailPayload({
-      ...common,
-      reason_code: "AWS_MUTATION_FAILED",
-      selection_digest: SELECTION_DIGEST,
-    });
+    const beforeSelection = authority.buildFailPayload(
+      failureInput(null, "ABORTED")
+    );
+    const afterSelection = authority.buildFailPayload(
+      failureInput(SELECTION_DIGEST, "AWS_MUTATION_FAILED")
+    );
     expect(reauthorize.selection_digest).toBe(SELECTION_DIGEST);
     expect(complete).toMatchObject({
       evidence_digest: EVIDENCE_DIGEST,
@@ -335,11 +343,7 @@ describe("one-click production authority client", () => {
   });
 
   it("rejects a null-selection failure response that claims a selection", () => {
-    const request = authority.buildFailPayload({
-      ...common,
-      reason_code: "ABORTED",
-      selection_digest: null,
-    });
+    const request = authority.buildFailPayload(failureInput(null, "ABORTED"));
     expect(() =>
       authority.validateResponse(
         "fail",
@@ -347,8 +351,11 @@ describe("one-click production authority client", () => {
         completionResponse(request.operation_id, "failed"),
         {
           failed: true,
+          evidence_digest: EVIDENCE_DIGEST,
           lock_row_version: 20,
           parent_run_id: common.parent_run_id,
+          qualifier_workflow_run_attempt: 3,
+          qualifier_workflow_run_id: "789012",
           reason_code: "ABORTED",
           selection_digest: SELECTION_DIGEST,
           status: "FAILED",
@@ -361,11 +368,9 @@ describe("one-click production authority client", () => {
   });
 
   it("requires the exact post-selection digest for a failure request", () => {
-    const request = authority.buildFailPayload({
-      ...common,
-      reason_code: "AWS_MUTATION_FAILED",
-      selection_digest: SELECTION_DIGEST,
-    });
+    const request = authority.buildFailPayload(
+      failureInput(SELECTION_DIGEST, "AWS_MUTATION_FAILED")
+    );
     expect(() =>
       authority.validateResponse(
         "fail",
@@ -373,8 +378,11 @@ describe("one-click production authority client", () => {
         completionResponse(request.operation_id, "failed"),
         {
           failed: true,
+          evidence_digest: EVIDENCE_DIGEST,
           lock_row_version: 20,
           parent_run_id: common.parent_run_id,
+          qualifier_workflow_run_attempt: 3,
+          qualifier_workflow_run_id: "789012",
           reason_code: "AWS_MUTATION_FAILED",
           selection_digest: "d".repeat(64),
           status: "FAILED",

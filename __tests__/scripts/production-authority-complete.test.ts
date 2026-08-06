@@ -15,7 +15,7 @@ describe("one-click production authority completion", () => {
   const completionJob = completion.jobs["complete-production-authority"];
   const proof = completionJob.steps.find(
     (step: { readonly name?: string }) =>
-      step.name === "Read exact automatic E2E and immutable evidence"
+      step.name === "Read exact terminal workflow and immutable evidence"
   );
   const complete = completionJob.steps.find(
     (step: { readonly name?: string }) =>
@@ -42,9 +42,9 @@ describe("one-click production authority completion", () => {
     expect(e2e["run-name"]).toContain("'manual'");
   });
 
-  it("listens only to same-repository main Production E2E completions on an isolated runner", () => {
+  it("listens only to same-repository main terminal workflows on an isolated runner", () => {
     expect(completion.on.workflow_run).toEqual({
-      workflows: ["Production E2E"],
+      workflows: ["Production E2E", "Web Deploy - PROD"],
       types: ["completed"],
       branches: ["main"],
     });
@@ -59,8 +59,19 @@ describe("one-click production authority completion", () => {
       actions: "read",
       contents: "read",
     });
+    expect(completionSource).toContain("ref: ${{ github.workflow_sha }}");
+    expect(completionSource).toContain("path: .authority-listener");
+    expect(completionSource).toContain(
+      ".authority-listener/ops/scripts/production-authority-failure-evidence.cjs"
+    );
+    expect(completionSource).not.toContain(
+      "ref: ${{ github.event.workflow_run.head_sha }}"
+    );
+    expect(completionSource).toContain(
+      "uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10"
+    );
     expect(completionSource).not.toMatch(
-      /actions\/(?:checkout|setup-node)|(?:npm|pnpm|yarn)\s+(?:install|ci)|configure-aws-credentials|AWS_(?:ACCESS|SECRET)/i
+      /actions\/setup-node|(?:npm|pnpm|yarn)\s+(?:install|ci)|configure-aws-credentials|AWS_(?:ACCESS|SECRET)/i
     );
   });
 
@@ -80,6 +91,7 @@ describe("one-click production authority completion", () => {
     expect(completionSource).toContain(
       '.path == ".github/workflows/build-upload-deploy-prod.yml"'
     );
+    expect(completionSource).toContain('.display_title == "Web Deploy - PROD"');
     expect(completionSource).toContain(
       '"one-click-production-operation-${deploy_run_id}"'
     );
@@ -143,8 +155,9 @@ describe("one-click production authority completion", () => {
     );
     expect(completionSource).toContain("Return isolated production E2E result");
     expect(completionSource).toContain('e2e_conclusion\" != success');
-    expect(completionSource).not.toContain(
-      'test "$e2e_head_sha" = "$target_sha"'
+    expect(completionSource).toContain('.actor.login == "github-actions[bot]"');
+    expect(completionSource).toContain(
+      '.triggering_actor.login == "github-actions[bot]"'
     );
     expect(completionSource).toContain(
       'qualification_file="$proof_dir/qualification.json"'
@@ -152,17 +165,12 @@ describe("one-click production authority completion", () => {
     expect(completionSource).toContain(".target_sha == $target_sha");
   });
 
-  it("binds the deployed target through deploy evidence, not the E2E head", () => {
+  it("binds failed automatic E2E evidence to the deployed target SHA", () => {
     expect(completionSource).toContain(
       'target_sha="$(jq -er \'.head_sha\' "$deploy_file")"'
     );
     expect(completionSource).toContain("target_sha == $target_sha");
-    expect(completionSource).not.toContain(
-      'e2e_head_sha="$(jq -er \'.head_sha\' "$e2e_file")"'
-    );
-    expect(completionSource).not.toContain(
-      'test "$e2e_head_sha" = "$target_sha"'
-    );
+    expect(completionSource).not.toContain("e2e_head_sha");
     expect(completionSource).toContain(
       ".e2e_run_id | tostring) == $e2e_run_id"
     );
@@ -193,6 +201,9 @@ describe("one-click production authority completion", () => {
     expect(complete.run).toContain("qualifier_workflow_run_id");
     expect(complete.run).toContain("qualifier_workflow_run_attempt");
     expect(complete.run).toContain("evidence_digest");
+    expect(complete.run).toContain(
+      '[[ "$SELECTION_DIGEST" =~ ^[a-f0-9]{64}$ ]]'
+    );
     expect(complete.run).toContain('.status == "COMPLETED"');
     expect(complete.run).toContain(".completed == true");
     expect(complete.run).toContain(
@@ -203,14 +214,21 @@ describe("one-click production authority completion", () => {
     expect(fail.run).toContain(
       "/deploy/release-bus-v2/production-authority/fail"
     );
-    expect(fail.run).toContain('reason_code:"WORKFLOW_FAILED"');
+    expect(fail.run).toContain('--argjson selection_digest "$selection_json"');
+    expect(fail.run).toContain("qualifier_workflow_run_id");
+    expect(fail.run).toContain("qualifier_workflow_run_attempt");
+    expect(fail.run).toContain("evidence_digest");
+    expect(fail.run).toContain('--arg reason_code "$REASON_CODE"');
     expect(fail.run).toContain('.status == "FAILED"');
     expect(fail.run).toContain(".failed == true");
     expect(fail.run).toContain(
       'keys == ["failed","lock_row_version","operation_id","reused","status"]'
     );
     expect(completionSource).toContain(
-      "failure|cancelled|timed_out|action_required|neutral|skipped|stale"
+      "failure|cancelled|timed_out|action_required|startup_failure|stale"
+    );
+    expect(completionSource).not.toContain(
+      'IN("failure", "cancelled", "timed_out", "action_required", "neutral", "skipped", "stale")'
     );
     expect(completionSource).toContain('test "$http_status" = 200');
   });

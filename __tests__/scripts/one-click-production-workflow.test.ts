@@ -73,7 +73,7 @@ describe("one-click production operation", () => {
     );
   });
 
-  it("reverifies exact immutable selection and package before just-in-time AWS authority", () => {
+  it("uploads operation evidence before reauthorization and keeps reauthorization immediately before AWS", () => {
     const job = deploy.jobs["build-upload-deploy"];
     const serialized = JSON.stringify(job);
     const verifySelection = stepIndex(
@@ -84,6 +84,14 @@ describe("one-click production operation", () => {
       (step: { readonly name?: string }) => step.name === "Checkout code"
     );
     const verifyPackage = stepIndex(job, "Verify selected production artifact");
+    const operationCreate = stepIndex(
+      job,
+      "Create production operation evidence"
+    );
+    const operationUpload = stepIndex(
+      job,
+      "Upload production operation evidence"
+    );
     const reauthorize = stepIndex(job, "Reauthorize exact production mutation");
     const aws = stepIndex(job, "Configure AWS Credentials");
 
@@ -97,8 +105,24 @@ describe("one-click production operation", () => {
     });
     expect(verifySelection).toBeGreaterThan(-1);
     expect(verifyPackage).toBeGreaterThan(verifySelection);
+    expect(operationCreate).toBeGreaterThan(verifyPackage);
+    expect(operationUpload).toBe(operationCreate + 1);
     expect(reauthorize).toBeGreaterThan(verifyPackage);
+    expect(operationUpload).toBeLessThan(reauthorize);
+    expect(reauthorize).toBe(aws - 1);
     expect(aws).toBeGreaterThan(reauthorize);
+    expect(
+      job.steps.filter(
+        (step: { readonly name?: string }) =>
+          step.name === "Create production operation evidence"
+      )
+    ).toHaveLength(1);
+    expect(
+      job.steps.filter(
+        (step: { readonly name?: string }) =>
+          step.name === "Upload production operation evidence"
+      )
+    ).toHaveLength(1);
     expect(serialized).toContain("verify-selection");
     expect(serialized).toContain(
       "/deploy/release-bus-v2/production-authority/reauthorize"
@@ -109,23 +133,17 @@ describe("one-click production operation", () => {
     expect(serialized).not.toContain("latest_main_sha");
   });
 
-  it("holds authority through exact automatic E2E and releases failures explicitly", () => {
+  it("delegates terminal failure release to the isolated listener", () => {
     const deployJob = deploy.jobs["build-upload-deploy"];
-    const fail = deploy.jobs["fail-production-authority"];
     const operationEvidence = deployJob.steps.find(
       (step: { readonly name?: string }) =>
         step.name === "Upload production operation evidence"
     );
 
     expect(operationEvidence).toBeDefined();
-    expect(JSON.stringify(fail)).toContain(
+    expect(deploy.jobs["fail-production-authority"]).toBeUndefined();
+    expect(deploySource).not.toContain(
       "/deploy/release-bus-v2/production-authority/fail"
-    );
-    expect(fail.steps[0].run).toContain(
-      'keys == ["failed","lock_row_version","operation_id","reused","status"]'
-    );
-    expect(fail.if.replace(/\s+/gu, " ")).toContain(
-      "needs.build-upload-deploy.result != 'success'"
     );
     expect(deploySource).not.toContain(
       "/deploy/release-bus-v2/production-authority/complete"
@@ -140,12 +158,19 @@ describe("one-click production operation", () => {
     expect(e2eSource).toContain(
       "format('automatic {0}', inputs.automatic_deploy_run_id)"
     );
-    expect(completion.on.workflow_run.workflows).toEqual(["Production E2E"]);
+    expect(completion.on.workflow_run.workflows).toEqual([
+      "Production E2E",
+      "Web Deploy - PROD",
+    ]);
     expect(completionSource).toContain(
       "/deploy/release-bus-v2/production-authority/complete"
     );
     expect(completionSource).toContain(
       "/deploy/release-bus-v2/production-authority/fail"
+    );
+    expect(completionSource).toContain("ref: ${{ github.workflow_sha }}");
+    expect(completionSource).toContain(
+      ".authority-listener/ops/scripts/production-authority-failure-evidence.cjs"
     );
     expect(completionSource).toContain(
       "^Production\\ E2E\\ automatic\\ ([1-9][0-9]{0,19})$"

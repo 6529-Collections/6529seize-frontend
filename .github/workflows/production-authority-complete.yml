@@ -2,7 +2,7 @@ name: Complete one-click production authority
 
 on:
   workflow_run:
-    workflows: ["Production E2E"]
+    workflows: ["Production E2E", "Web Deploy - PROD"]
     types: [completed]
     branches: [main]
 
@@ -15,27 +15,218 @@ jobs:
     name: Complete exact production authority
     if: >-
       github.event.workflow_run.head_repository.full_name == github.repository &&
-      github.event.workflow_run.head_branch == 'main'
+      github.event.workflow_run.head_branch == 'main' &&
+      (github.event.workflow_run.name == 'Production E2E' ||
+      github.event.workflow_run.name == 'Web Deploy - PROD')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       actions: read
       contents: read
     steps:
-      - name: Read exact automatic E2E and immutable evidence
+      - name: Check out immutable terminal-evidence helper
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.workflow_sha }}
+          clean: true
+          persist-credentials: false
+          path: .authority-listener
+          sparse-checkout: ops/scripts/production-authority-failure-evidence.cjs
+          sparse-checkout-cone-mode: false
+      - name: Read exact terminal workflow and immutable evidence
         id: proof
         env:
-          E2E_RUN_ID: ${{ github.event.workflow_run.id }}
+          WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
 
           proof_dir="$(mktemp -d)"
           trap 'rm -rf "$proof_dir"' EXIT
-          [[ "$E2E_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
+          [[ "$WORKFLOW_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
 
-          e2e_file="$proof_dir/e2e.json"
-          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${E2E_RUN_ID}" > "$e2e_file"
+          workflow_file="$proof_dir/workflow.json"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${WORKFLOW_RUN_ID}" > "$workflow_file"
+          workflow_name="$(jq -er '.name | strings' "$workflow_file")"
+
+          if [[ "$workflow_name" != "Web Deploy - PROD" && "$workflow_name" != "Production E2E" ]]; then
+            echo "Ignoring an unrelated workflow completion."
+            echo "action=ignore" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          artifact_record() {
+            local listing_file="$1"
+            local artifact_name="$2"
+            local workflow_run_id="$3"
+            local maximum_size="$4"
+            local output_file="$5"
+            jq -e \
+              --arg name "$artifact_name" \
+              --arg run_id "$workflow_run_id" \
+              --argjson maximum_size "$maximum_size" '
+                type == "object" and
+                (.total_count | type == "number" and . <= 100) and
+                (.artifacts | type == "array") and
+                ([.artifacts[] | select(.name == $name)] | length == 1) and
+                ([.artifacts[] | select(.name == $name)][0] |
+                  .expired == false and
+                  (.id | tostring | test("^[1-9][0-9]{0,19}$")) and
+                  ((.workflow_run.id | tostring) == $run_id) and
+                  (.size_in_bytes | type == "number" and . > 0 and . <= $maximum_size) and
+                  (.digest == null or (.digest | type == "string" and test("^sha256:[a-f0-9]{64}$"))))
+              ' "$listing_file" >/dev/null
+            jq -e --arg name "$artifact_name" \
+              '[.artifacts[] | select(.name == $name)][0]' \
+              "$listing_file" > "$output_file"
+          }
+
+          download_artifact() {
+            local record_file="$1"
+            local archive_file="$2"
+            local maximum_size="$3"
+            local artifact_id
+            local declared_digest
+            local declared_size
+            artifact_id="$(jq -er '.id | tostring' "$record_file")"
+            declared_digest="$(jq -r '.digest // empty' "$record_file")"
+            declared_size="$(jq -er '.size_in_bytes | numbers' "$record_file")"
+            gh api \
+              --header 'Accept: application/octet-stream' \
+              "repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}/zip" > "$archive_file"
+            test "$(stat -c %s "$archive_file")" -gt 0
+            test "$(stat -c %s "$archive_file")" -le "$maximum_size"
+            test "$(stat -c %s "$archive_file")" = "$declared_size"
+            if [ -n "$declared_digest" ]; then
+              test "$declared_digest" = "sha256:$(sha256sum "$archive_file" | cut -d' ' -f1)"
+            fi
+          }
+
+          extract_exact_archive() {
+            local archive_file="$1"
+            local expected_member="$2"
+            local output_file="$3"
+            local maximum_member_size="$4"
+            python3 - "$archive_file" "$expected_member" "$output_file" "$maximum_member_size" <<'PY'
+          import os
+          import stat
+          import sys
+          import zipfile
+          from pathlib import Path
+
+          archive_path = Path(sys.argv[1])
+          expected_member = sys.argv[2]
+          output_path = Path(sys.argv[3])
+          maximum_member_size = int(sys.argv[4])
+
+          if archive_path.stat().st_size > 1024 * 1024:
+              raise SystemExit("artifact archive exceeds the bounded size")
+          with zipfile.ZipFile(archive_path) as archive:
+              members = archive.infolist()
+              if len(members) != 1 or members[0].filename != expected_member:
+                  raise SystemExit("artifact archive has an unexpected member set")
+              member = members[0]
+              if member.is_dir() or member.file_size > maximum_member_size:
+                  raise SystemExit("artifact member is invalid or too large")
+              file_type = stat.S_IFMT(member.external_attr >> 16)
+              if file_type in (stat.S_IFLNK, stat.S_IFDIR):
+                  raise SystemExit("artifact member is a link or directory")
+              data = archive.read(member)
+
+          output_path.parent.mkdir(parents=True, exist_ok=True)
+          flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+          with os.fdopen(os.open(output_path, flags, 0o600), "wb") as output:
+              output.write(data)
+          PY
+            test -f "$output_file"
+            test ! -L "$output_file"
+          }
+
+          if [[ "$workflow_name" == "Web Deploy - PROD" ]]; then
+            jq -e \
+              --arg repository "$GITHUB_REPOSITORY" \
+              --arg run_id "$WORKFLOW_RUN_ID" '
+                type == "object" and
+                (.id | tostring) == $run_id and
+                .name == "Web Deploy - PROD" and
+                .path == ".github/workflows/build-upload-deploy-prod.yml" and
+                .display_title == "Web Deploy - PROD" and
+                .event == "workflow_dispatch" and
+                .head_branch == "main" and
+               .repository.full_name == $repository and
+               .head_repository.full_name == $repository and
+               .status == "completed" and
+                 (.conclusion | IN("failure", "cancelled", "timed_out", "action_required", "startup_failure", "stale")) and
+                (.head_sha | test("^[a-f0-9]{40}$")) and
+                (.run_attempt | type == "number" and . >= 1 and . <= 1000000)
+              ' "$workflow_file" >/dev/null
+
+            target_sha="$(jq -er '.head_sha' "$workflow_file")"
+            deploy_attempt="$(jq -er '.run_attempt | numbers' "$workflow_file")"
+            jobs_file="$proof_dir/failure-jobs.json"
+            gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/runs/${WORKFLOW_RUN_ID}/attempts/${deploy_attempt}/jobs?per_page=100" \
+              > "$jobs_file"
+            test "$(stat -c %s "$jobs_file")" -le 1048576
+            evidence_digest="$(node .authority-listener/ops/scripts/production-authority-failure-evidence.cjs \
+              --kind deploy \
+              --run-file "$workflow_file" \
+              --jobs-file "$jobs_file" \
+              --run-id "$WORKFLOW_RUN_ID" \
+              --run-attempt "$deploy_attempt" \
+              --target-sha "$target_sha" \
+              --output "$proof_dir/failure-evidence.json")"
+
+            operation_listing="$proof_dir/operation-listing.json"
+            gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/runs/${WORKFLOW_RUN_ID}/artifacts?per_page=100" \
+              > "$operation_listing"
+            operation_count="$(jq -er --arg name "one-click-production-operation-${WORKFLOW_RUN_ID}" '[.artifacts[] | select(.name == $name)] | length' "$operation_listing")"
+            selection_digest=null
+            if [ "$operation_count" = 1 ]; then
+              operation_record="$proof_dir/operation-record.json"
+              artifact_record "$operation_listing" "one-click-production-operation-${WORKFLOW_RUN_ID}" "$WORKFLOW_RUN_ID" 1048576 "$operation_record"
+              operation_archive="$proof_dir/operation.zip"
+              download_artifact "$operation_record" "$operation_archive" 1048576
+              operation_file="$proof_dir/operation.json"
+              extract_exact_archive "$operation_archive" operation.json "$operation_file" 65536
+              jq -e \
+                --arg run_id "$WORKFLOW_RUN_ID" \
+                --arg target_sha "$target_sha" '
+                  type == "object" and
+                  (keys == ["artifact","contract","controller_identity","environment","operation_id","repository","selection_artifact","selection_digest","service","target_sha","workflow_run_attempt","workflow_run_id"]) and
+                  .contract == "one-click-production-operation-v1" and
+                  .operation_id == ("frontend-prod-" + $run_id) and
+                  .controller_identity == "frontend-production-workflow" and
+                  .repository == "frontend" and .environment == "prod" and .service == "frontend" and
+                  .target_sha == $target_sha and
+                  (.selection_digest | type == "string" and test("^[a-f0-9]{64}$")) and
+                  (.workflow_run_id | tostring) == $run_id and
+                  (.workflow_run_attempt | type == "number" and . >= 1 and . <= 1000000)
+                ' "$operation_file" >/dev/null
+              selection_digest="$(jq -er '.selection_digest' "$operation_file")"
+            elif [ "$operation_count" != 0 ]; then
+              echo "::error::Production operation evidence is ambiguous; refusing failure release."
+              exit 1
+            fi
+
+            {
+              echo "action=fail"
+              echo "operation_id=frontend-prod-${WORKFLOW_RUN_ID}"
+              echo "controller_identity=frontend-production-workflow"
+              echo "target_sha=$target_sha"
+              echo "deploy_run_id=$WORKFLOW_RUN_ID"
+              echo "deploy_attempt=$deploy_attempt"
+              echo "selection_digest=$selection_digest"
+              echo "qualifier_workflow_run_id=$WORKFLOW_RUN_ID"
+              echo "qualifier_workflow_run_attempt=$deploy_attempt"
+              echo "evidence_digest=$evidence_digest"
+              echo "reason_code=WORKFLOW_FAILED"
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          e2e_file="$workflow_file"
           e2e_title="$(jq -er '.display_title | strings' "$e2e_file")"
           if [[ "$e2e_title" != "Production E2E automatic "* ]]; then
             echo "Ignoring a non-automatic Production E2E run."
@@ -50,19 +241,21 @@ jobs:
 
           jq -e \
             --arg repository "$GITHUB_REPOSITORY" \
-            --arg run_id "$E2E_RUN_ID" \
+            --arg run_id "$WORKFLOW_RUN_ID" \
             --arg title "$e2e_title" '
               type == "object" and
-              (.id | tostring) == $run_id and
-              .name == "Production E2E" and
-              .display_title == $title and
-              .path == ".github/workflows/production-e2e.yml" and
-              .event == "workflow_dispatch" and
-              .head_branch == "main" and
-              .repository.full_name == $repository and
-              .head_repository.full_name == $repository and
-              .status == "completed" and
-              (.conclusion | IN("success", "failure", "cancelled", "timed_out", "action_required", "neutral", "skipped", "stale")) and
+               (.id | tostring) == $run_id and
+               .name == "Production E2E" and
+               .display_title == $title and
+               .path == ".github/workflows/production-e2e.yml" and
+               .event == "workflow_dispatch" and
+               .head_branch == "main" and
+               .repository.full_name == $repository and
+               .head_repository.full_name == $repository and
+               .actor.login == "github-actions[bot]" and
+               .triggering_actor.login == "github-actions[bot]" and
+               .status == "completed" and
+              (.conclusion | IN("success", "failure", "cancelled", "timed_out", "action_required", "startup_failure", "stale")) and
               (.head_sha | test("^[a-f0-9]{40}$")) and
               (.run_attempt | type == "number" and . >= 1 and . <= 1000000)
             ' "$e2e_file" >/dev/null
@@ -238,12 +431,26 @@ jobs:
 
           if [ "$e2e_conclusion" != success ]; then
             case "$e2e_conclusion" in
-              failure|cancelled|timed_out|action_required|neutral|skipped|stale) ;;
+              failure|cancelled|timed_out|action_required|startup_failure|stale) ;;
               *)
                 echo "::error::Automatic Production E2E has an unsupported terminal conclusion."
                 exit 1
                 ;;
             esac
+            jobs_file="$proof_dir/e2e-failure-jobs.json"
+            gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/runs/${WORKFLOW_RUN_ID}/attempts/${e2e_attempt}/jobs?per_page=100" \
+              > "$jobs_file"
+            test "$(stat -c %s "$jobs_file")" -le 1048576
+            evidence_digest="$(node .authority-listener/ops/scripts/production-authority-failure-evidence.cjs \
+              --kind e2e \
+              --run-file "$e2e_file" \
+              --jobs-file "$jobs_file" \
+              --run-id "$WORKFLOW_RUN_ID" \
+              --run-attempt "$e2e_attempt" \
+              --deploy-run-id "$deploy_run_id" \
+              --target-sha "$target_sha" \
+              --output "$proof_dir/failure-evidence.json")"
             {
               echo "action=fail"
               echo "operation_id=$operation_id"
@@ -252,15 +459,17 @@ jobs:
               echo "deploy_run_id=$deploy_run_id"
               echo "deploy_attempt=$deploy_attempt"
               echo "selection_digest=$artifact_selection_digest"
-              echo "e2e_run_id=$E2E_RUN_ID"
-              echo "e2e_attempt=$e2e_attempt"
+              echo "qualifier_workflow_run_id=$WORKFLOW_RUN_ID"
+              echo "qualifier_workflow_run_attempt=$e2e_attempt"
+              echo "evidence_digest=$evidence_digest"
+              echo "reason_code=WORKFLOW_FAILED"
             } >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           jobs_file="$proof_dir/e2e-jobs.json"
           gh api \
-            "repos/${GITHUB_REPOSITORY}/actions/runs/${E2E_RUN_ID}/attempts/${e2e_attempt}/jobs?per_page=100" \
+            "repos/${GITHUB_REPOSITORY}/actions/runs/${WORKFLOW_RUN_ID}/attempts/${e2e_attempt}/jobs?per_page=100" \
             > "$jobs_file"
           jq -e '
             type == "object" and
@@ -276,27 +485,27 @@ jobs:
 
           e2e_listing="$proof_dir/e2e-artifacts.json"
           gh api \
-            "repos/${GITHUB_REPOSITORY}/actions/runs/${E2E_RUN_ID}/artifacts?per_page=100" \
+            "repos/${GITHUB_REPOSITORY}/actions/runs/${WORKFLOW_RUN_ID}/artifacts?per_page=100" \
             > "$e2e_listing"
           evidence_record="$proof_dir/evidence-record.json"
           artifact_record \
             "$e2e_listing" \
             "production-authority-evidence-${deploy_run_id}" \
-            "$E2E_RUN_ID" \
+            "$WORKFLOW_RUN_ID" \
             4194304 \
             "$evidence_record"
           selection_record="$proof_dir/selection-record.json"
           artifact_record \
             "$e2e_listing" \
             "production-e2e-selection-${deploy_run_id}" \
-            "$E2E_RUN_ID" \
+            "$WORKFLOW_RUN_ID" \
             1048576 \
             "$selection_record"
           qualification_record="$proof_dir/qualification-record.json"
           artifact_record \
             "$e2e_listing" \
             "production-e2e-qualification-${deploy_run_id}-a${e2e_attempt}" \
-            "$E2E_RUN_ID" \
+            "$WORKFLOW_RUN_ID" \
             262144 \
             "$qualification_record"
 
@@ -365,7 +574,7 @@ jobs:
             --argjson expected_keys "$qualification_keys" \
             --arg deploy_run_id "$deploy_run_id" \
             --argjson deploy_attempt "$deploy_attempt" \
-            --arg e2e_run_id "$E2E_RUN_ID" \
+            --arg e2e_run_id "$WORKFLOW_RUN_ID" \
             --argjson e2e_attempt "$e2e_attempt" \
             --arg target_sha "$target_sha" \
             --arg artifact_selection_digest "$artifact_selection_digest" \
@@ -390,7 +599,7 @@ jobs:
             echo "deploy_run_id=$deploy_run_id"
             echo "deploy_attempt=$deploy_attempt"
             echo "selection_digest=$artifact_selection_digest"
-            echo "e2e_run_id=$E2E_RUN_ID"
+            echo "e2e_run_id=$WORKFLOW_RUN_ID"
             echo "e2e_attempt=$e2e_attempt"
             echo "evidence_digest=$evidence_digest"
           } >> "$GITHUB_OUTPUT"
@@ -454,8 +663,10 @@ jobs:
       - name: Fail exact production authority after E2E failure
         if: always() && steps.proof.outcome == 'success' && steps.proof.outputs.action == 'fail'
         env:
-          E2E_RUN_ID: ${{ steps.proof.outputs.e2e_run_id }}
-          E2E_RUN_ATTEMPT: ${{ steps.proof.outputs.e2e_attempt }}
+          QUALIFIER_WORKFLOW_RUN_ID: ${{ steps.proof.outputs.qualifier_workflow_run_id }}
+          QUALIFIER_WORKFLOW_RUN_ATTEMPT: ${{ steps.proof.outputs.qualifier_workflow_run_attempt }}
+          EVIDENCE_DIGEST: ${{ steps.proof.outputs.evidence_digest }}
+          REASON_CODE: ${{ steps.proof.outputs.reason_code }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
           OPERATION_ID: ${{ steps.proof.outputs.operation_id }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
@@ -465,20 +676,31 @@ jobs:
           DEPLOY_RUN_ATTEMPT: ${{ steps.proof.outputs.deploy_attempt }}
         run: |
           set -euo pipefail
-          [[ "$E2E_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
-          [[ "$E2E_RUN_ATTEMPT" =~ ^[1-9][0-9]{0,6}$ ]]
+          [[ "$QUALIFIER_WORKFLOW_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
+          [[ "$QUALIFIER_WORKFLOW_RUN_ATTEMPT" =~ ^[1-9][0-9]{0,6}$ ]]
           [[ "$DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
           [[ "$DEPLOY_RUN_ATTEMPT" =~ ^[1-9][0-9]{0,6}$ ]]
           [[ "$TARGET_SHA" =~ ^[a-f0-9]{40}$ ]]
-          [[ "$SELECTION_DIGEST" =~ ^[a-f0-9]{64}$ ]]
+          [[ "$EVIDENCE_DIGEST" =~ ^[a-f0-9]{64}$ ]]
+          [[ "$REASON_CODE" =~ ^(AWS_MUTATION_FAILED|WORKFLOW_FAILED|ABORTED|CONTROL_REVOKED|LEASE_EXPIRED|LEASE_LOST)$ ]]
+          selection_json=null
+          if [[ "$SELECTION_DIGEST" =~ ^[a-f0-9]{64}$ ]]; then
+            selection_json="$(jq -cn --arg digest "$SELECTION_DIGEST" '$digest')"
+          else
+            test "$SELECTION_DIGEST" = null
+          fi
           payload="$(jq -cn \
             --arg operation_id "$OPERATION_ID" \
             --arg controller_identity "frontend-production-workflow" \
             --arg target_sha "$TARGET_SHA" \
-            --arg selection_digest "$SELECTION_DIGEST" \
+            --argjson selection_digest "$selection_json" \
             --arg workflow_run_id "$DEPLOY_RUN_ID" \
             --argjson workflow_run_attempt "$DEPLOY_RUN_ATTEMPT" \
-            '{operation_id:$operation_id,controller_identity:$controller_identity,repository:"frontend",environment:"prod",service:"frontend",target_sha:$target_sha,selection_digest:$selection_digest,workflow_run_id:$workflow_run_id,workflow_run_attempt:$workflow_run_attempt,reason_code:"WORKFLOW_FAILED"}')"
+            --arg qualifier_workflow_run_id "$QUALIFIER_WORKFLOW_RUN_ID" \
+            --argjson qualifier_workflow_run_attempt "$QUALIFIER_WORKFLOW_RUN_ATTEMPT" \
+            --arg evidence_digest "$EVIDENCE_DIGEST" \
+            --arg reason_code "$REASON_CODE" \
+            '{operation_id:$operation_id,controller_identity:$controller_identity,repository:"frontend",environment:"prod",service:"frontend",target_sha:$target_sha,selection_digest:$selection_digest,workflow_run_id:$workflow_run_id,workflow_run_attempt:$workflow_run_attempt,qualifier_workflow_run_id:$qualifier_workflow_run_id,qualifier_workflow_run_attempt:$qualifier_workflow_run_attempt,evidence_digest:$evidence_digest,reason_code:$reason_code}')"
           response_file="$(mktemp)"
           trap 'rm -f "$response_file"' EXIT
           http_status="$(curl --silent --show-error \

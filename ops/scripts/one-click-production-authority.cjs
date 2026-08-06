@@ -78,6 +78,9 @@ const FAILURE_CODES = new Set([
 const POSITIVE_RUN = /^[1-9][0-9]{0,19}$/u;
 const SHA = /^[a-f0-9]{40}$/u;
 const DIGEST = /^[a-f0-9]{64}$/u;
+const EVIDENCE_DIGEST_OPTION = "--evidence-digest";
+const QUALIFIER_ATTEMPT_OPTION = "--qualifier-workflow-run-attempt";
+const QUALIFIER_ID_OPTION = "--qualifier-workflow-run-id";
 const OPERATION = /^frontend-prod-[1-9][0-9]{0,19}$/u;
 const SENSITIVE_KEY =
   /(?:secret|token|password|authorization|credential|private[_-]?key|api[_-]?key)/iu;
@@ -259,14 +262,30 @@ function buildCompletePayload(input) {
 function buildFailPayload(input) {
   exact(
     input,
-    [...COMMON_INPUT_KEYS, "reason_code", "selection_digest"],
+    [
+      ...COMMON_INPUT_KEYS,
+      "evidence_digest",
+      "qualifier_workflow_run_attempt",
+      "qualifier_workflow_run_id",
+      "reason_code",
+      "selection_digest",
+    ],
     [],
     "INVALID_FAIL_INPUT"
   );
   failure(input.reason_code);
   nullableDigest(input.selection_digest, "INVALID_SELECTION_DIGEST");
+  digest(input.evidence_digest, "INVALID_EVIDENCE_DIGEST");
+  runId(input.qualifier_workflow_run_id, "INVALID_QUALIFIER_WORKFLOW_RUN_ID");
+  attempt(
+    input.qualifier_workflow_run_attempt,
+    "INVALID_QUALIFIER_WORKFLOW_RUN_ATTEMPT"
+  );
   return {
     ...identity(input, input.selection_digest),
+    evidence_digest: input.evidence_digest,
+    qualifier_workflow_run_attempt: input.qualifier_workflow_run_attempt,
+    qualifier_workflow_run_id: input.qualifier_workflow_run_id,
     reason_code: input.reason_code,
   };
 }
@@ -288,7 +307,12 @@ function requestExtras(command) {
       "qualifier_workflow_run_id",
     ];
   } else if (command === FAIL) {
-    extra = ["reason_code"];
+    extra = [
+      "evidence_digest",
+      "qualifier_workflow_run_attempt",
+      "qualifier_workflow_run_id",
+      "reason_code",
+    ];
   }
   return extra;
 }
@@ -328,7 +352,18 @@ function validateRequest(command, request) {
     );
     digest(request.evidence_digest, "INVALID_EVIDENCE_DIGEST");
   }
-  if (command === FAIL) failure(request.reason_code);
+  if (command === FAIL) {
+    failure(request.reason_code);
+    runId(
+      request.qualifier_workflow_run_id,
+      "INVALID_QUALIFIER_WORKFLOW_RUN_ID"
+    );
+    attempt(
+      request.qualifier_workflow_run_attempt,
+      "INVALID_QUALIFIER_WORKFLOW_RUN_ATTEMPT"
+    );
+    digest(request.evidence_digest, "INVALID_EVIDENCE_DIGEST");
+  }
   return request;
 }
 
@@ -665,8 +700,11 @@ const EXPECTED_KEYS = {
   ],
   [FAIL]: [
     "failed",
+    "evidence_digest",
     "lock_row_version",
     "parent_run_id",
+    "qualifier_workflow_run_attempt",
+    "qualifier_workflow_run_id",
     "reason_code",
     "selection_digest",
     "status",
@@ -716,6 +754,15 @@ function validateExpected(command, expected) {
   }
   if (command === FAIL) {
     bool(expected.failed, "INVALID_EXPECTED_FAILED");
+    runId(
+      expected.qualifier_workflow_run_id,
+      "INVALID_QUALIFIER_WORKFLOW_RUN_ID"
+    );
+    attempt(
+      expected.qualifier_workflow_run_attempt,
+      "INVALID_QUALIFIER_WORKFLOW_RUN_ATTEMPT"
+    );
+    digest(expected.evidence_digest, "INVALID_EVIDENCE_DIGEST");
     failure(expected.reason_code);
   }
 }
@@ -736,6 +783,9 @@ function expectedRequest(command, expected) {
   if (command === FAIL) {
     return buildFailPayload({
       ...common,
+      evidence_digest: expected.evidence_digest,
+      qualifier_workflow_run_attempt: expected.qualifier_workflow_run_attempt,
+      qualifier_workflow_run_id: expected.qualifier_workflow_run_id,
       reason_code: expected.reason_code,
       selection_digest: expected.selection_digest,
     });
@@ -797,9 +847,14 @@ const BUILD_OPTIONS = {
     "qualifier_workflow_run_id",
     "selection_digest",
   ].map((key) => `--${key.replaceAll("_", "-")}`),
-  [FAIL]: [...COMMON_INPUT_KEYS, "reason_code", "selection_digest"].map(
-    (key) => `--${key.replaceAll("_", "-")}`
-  ),
+  [FAIL]: [
+    ...COMMON_INPUT_KEYS,
+    "evidence_digest",
+    "qualifier_workflow_run_attempt",
+    "qualifier_workflow_run_id",
+    "reason_code",
+    "selection_digest",
+  ].map((key) => `--${key.replaceAll("_", "-")}`),
 };
 
 function validationOptions(command) {
@@ -818,13 +873,16 @@ function validationOptions(command) {
   if (BINDING_COMMANDS.has(command)) allowed.add("--expected-authorized");
   if (BINDING_COMMANDS.has(command)) allowed.add("--expected-bound");
   if (command === COMPLETE) {
-    allowed.add("--evidence-digest");
+    allowed.add(EVIDENCE_DIGEST_OPTION);
     allowed.add("--expected-completed");
-    allowed.add("--qualifier-workflow-run-attempt");
-    allowed.add("--qualifier-workflow-run-id");
+    allowed.add(QUALIFIER_ATTEMPT_OPTION);
+    allowed.add(QUALIFIER_ID_OPTION);
   }
   if (command === FAIL) {
     allowed.add("--expected-failed");
+    allowed.add(EVIDENCE_DIGEST_OPTION);
+    allowed.add(QUALIFIER_ATTEMPT_OPTION);
+    allowed.add(QUALIFIER_ID_OPTION);
     allowed.add("--reason-code");
   }
   return allowed;
@@ -871,17 +929,23 @@ function requestFromOptions(command, o) {
   if (command === FAIL)
     return {
       ...common,
+      evidence_digest: required(o, EVIDENCE_DIGEST_OPTION),
+      qualifier_workflow_run_attempt: cliInteger(
+        required(o, QUALIFIER_ATTEMPT_OPTION),
+        "INVALID_QUALIFIER_WORKFLOW_RUN_ATTEMPT"
+      ),
+      qualifier_workflow_run_id: required(o, QUALIFIER_ID_OPTION),
       reason_code: required(o, "--reason-code"),
       selection_digest,
     };
   return {
     ...common,
-    evidence_digest: required(o, "--evidence-digest"),
+    evidence_digest: required(o, EVIDENCE_DIGEST_OPTION),
     qualifier_workflow_run_attempt: cliInteger(
-      required(o, "--qualifier-workflow-run-attempt"),
+      required(o, QUALIFIER_ATTEMPT_OPTION),
       "INVALID_QUALIFIER_WORKFLOW_RUN_ATTEMPT"
     ),
-    qualifier_workflow_run_id: required(o, "--qualifier-workflow-run-id"),
+    qualifier_workflow_run_id: required(o, QUALIFIER_ID_OPTION),
     selection_digest,
   };
 }
@@ -929,21 +993,24 @@ function expectedFromOptions(command, o) {
       required(o, "--expected-completed"),
       "INVALID_EXPECTED_COMPLETED"
     );
-    expected.evidence_digest = required(o, "--evidence-digest");
+    expected.evidence_digest = required(o, EVIDENCE_DIGEST_OPTION);
     expected.qualifier_workflow_run_attempt = cliInteger(
-      required(o, "--qualifier-workflow-run-attempt"),
+      required(o, QUALIFIER_ATTEMPT_OPTION),
       "INVALID_QUALIFIER_WORKFLOW_RUN_ATTEMPT"
     );
-    expected.qualifier_workflow_run_id = required(
-      o,
-      "--qualifier-workflow-run-id"
-    );
+    expected.qualifier_workflow_run_id = required(o, QUALIFIER_ID_OPTION);
   }
   if (command === FAIL) {
     expected.failed = cliBoolean(
       required(o, "--expected-failed"),
       "INVALID_EXPECTED_FAILED"
     );
+    expected.evidence_digest = required(o, EVIDENCE_DIGEST_OPTION);
+    expected.qualifier_workflow_run_attempt = cliInteger(
+      required(o, QUALIFIER_ATTEMPT_OPTION),
+      "INVALID_QUALIFIER_WORKFLOW_RUN_ATTEMPT"
+    );
+    expected.qualifier_workflow_run_id = required(o, QUALIFIER_ID_OPTION);
     expected.reason_code = required(o, "--reason-code");
   }
   return expected;
