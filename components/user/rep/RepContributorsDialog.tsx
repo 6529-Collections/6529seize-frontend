@@ -161,7 +161,7 @@ function RepContributorRow({
             )}
           </div>
         )}
-        <p className="tw-mb-0 tw-whitespace-nowrap tw-text-left tw-text-sm tw-font-medium tw-text-white">
+        <p className="tw-mb-0 tw-mt-0 tw-whitespace-nowrap tw-text-left tw-text-sm tw-font-medium tw-text-white">
           {contributor.display}
         </p>
       </div>

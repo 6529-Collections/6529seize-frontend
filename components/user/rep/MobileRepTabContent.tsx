@@ -148,15 +148,18 @@ export default function MobileRepTabContent({
         )}
 
       <div className="tw-mt-4">
-        <div className="tw-mb-4 tw-flex tw-items-center tw-justify-between tw-gap-3">
+        <div className="tw-mb-4">
           <div className="tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
             Rep Categories
           </div>
-          <RepDirectionToggle
-            repDirection={repDirection}
-            onRepDirectionChange={onRepDirectionChange}
-            compact
-          />
+          <div className="tw-mt-3 tw-w-full sm:tw-w-fit">
+            <RepDirectionToggle
+              repDirection={repDirection}
+              onRepDirectionChange={onRepDirectionChange}
+              variant="tabs"
+              fill
+            />
+          </div>
         </div>
       </div>
 

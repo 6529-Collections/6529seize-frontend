@@ -84,6 +84,9 @@ export default function UserPageIdentityStatements({
     );
   }, [statements]);
 
+  const shouldShowStatementGroup = (group: CicStatement[]) =>
+    isLoading || group.length > 0;
+
   return (
     <div className="tw-px-4 tw-pt-4 lg:tw-border-x-0 lg:tw-border-b-0 lg:tw-border-t lg:tw-border-solid lg:tw-border-white/10 lg:tw-px-6 lg:tw-pt-6">
       <div>
@@ -97,35 +100,43 @@ export default function UserPageIdentityStatements({
                     profile={profile}
                   />
                 </div>
-                <div>
-                  <UserPageIdentityStatementsSocialMediaAccounts
-                    statements={socialMediaAccounts}
-                    profile={profile}
-                    loading={isLoading}
-                  />
-                </div>
-                <div>
-                  <UserPageIdentityStatementsNFTAccounts
-                    statements={nftAccounts}
-                    profile={profile}
-                    loading={isLoading}
-                  />
-                </div>
+                {shouldShowStatementGroup(socialMediaAccounts) && (
+                  <div>
+                    <UserPageIdentityStatementsSocialMediaAccounts
+                      statements={socialMediaAccounts}
+                      profile={profile}
+                      loading={isLoading}
+                    />
+                  </div>
+                )}
+                {shouldShowStatementGroup(nftAccounts) && (
+                  <div>
+                    <UserPageIdentityStatementsNFTAccounts
+                      statements={nftAccounts}
+                      profile={profile}
+                      loading={isLoading}
+                    />
+                  </div>
+                )}
 
-                <div>
-                  <UserPageIdentityStatementsContacts
-                    statements={contacts}
-                    profile={profile}
-                    loading={isLoading}
-                  />
-                </div>
-                <div>
-                  <UserPageIdentityStatementsSocialMediaVerificationPosts
-                    statements={socialMediaVerificationPosts}
-                    profile={profile}
-                    loading={isLoading}
-                  />
-                </div>
+                {shouldShowStatementGroup(contacts) && (
+                  <div>
+                    <UserPageIdentityStatementsContacts
+                      statements={contacts}
+                      profile={profile}
+                      loading={isLoading}
+                    />
+                  </div>
+                )}
+                {shouldShowStatementGroup(socialMediaVerificationPosts) && (
+                  <div>
+                    <UserPageIdentityStatementsSocialMediaVerificationPosts
+                      statements={socialMediaVerificationPosts}
+                      profile={profile}
+                      loading={isLoading}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>

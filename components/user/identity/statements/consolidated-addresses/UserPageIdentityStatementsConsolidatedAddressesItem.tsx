@@ -205,7 +205,11 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   return (
     <li>
       <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/40">
-        <div className="tw-flex tw-items-start tw-justify-between tw-gap-2 tw-px-3 tw-py-2">
+        <div
+          className={`tw-flex tw-justify-between tw-gap-2 tw-px-3 tw-py-2 ${
+            ensName ? "tw-items-start" : "tw-items-center"
+          }`}
+        >
           <div className="tw-min-w-0 tw-flex-1">
             <div className="tw-flex tw-items-center tw-gap-1">
               <button
