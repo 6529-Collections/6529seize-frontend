@@ -471,7 +471,7 @@ export default function SubscriptionsReportComponent() {
             className="tw-pt-3"
             data-testid="subscriptions-report-active-drop"
           >
-            <div>
+            <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800">
               <span className="tw-sr-only">
                 Active meme card subscribed and airdropped subscription counts
               </span>
@@ -505,7 +505,7 @@ export default function SubscriptionsReportComponent() {
         <div>
           {upcomingRows.length > 0 ? (
             <>
-              <div>
+              <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800">
                 <span className="tw-sr-only">
                   Upcoming meme card subscription counts
                 </span>
@@ -583,7 +583,7 @@ export default function SubscriptionsReportComponent() {
       <div className="tw-pt-3" data-testid="subscriptions-report-past-drops">
         <div>
           {redeemedCounts?.length > 0 ? (
-            <div>
+            <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800">
               <span className="tw-sr-only">
                 Past meme card subscription redemptions
               </span>
