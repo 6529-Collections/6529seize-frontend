@@ -225,6 +225,22 @@ describe("Museum finished publication routes", () => {
     ).toHaveAttribute("href", "/museum/network/projects/century/system");
   });
 
+  it("renders the gift dossier slots without React list-key warnings", async () => {
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    try {
+      render(await MuseumGiftPage({ accessionId: "6529NM.2026.001" }));
+
+      expect(consoleError.mock.calls.flat().join(" ")).not.toContain(
+        'unique "key"'
+      );
+    } finally {
+      consoleError.mockRestore();
+    }
+  });
+
   it("renders the source matrix onsite with an accessible table region", async () => {
     render(await MuseumSourceAndChronologyPage());
 

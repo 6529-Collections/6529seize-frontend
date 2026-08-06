@@ -452,7 +452,15 @@ describe("testing strategy CI plan", () => {
     expect(workflow).toContain("playwright install --with-deps chromium");
     expect(workflow).toContain("test:e2e:smoke");
     expect(workflow).toContain("test:e2e:critical-shell");
-    expect(workflow).toContain("test:e2e:museum-institutional-practice");
+    for (const museumBrowserSpec of [
+      "tests/museum/data-architecture-readonly.spec.ts",
+      "tests/museum/institutional-practice-readonly.spec.ts",
+      "tests/museum/about-readonly.spec.ts",
+      "tests/museum/inside-system-readonly.spec.ts",
+      "tests/museum/rights-readonly.spec.ts",
+    ]) {
+      expect(workflow).toContain(museumBrowserSpec);
+    }
     expect(workflow).toContain("PLAYWRIGHT_WEB_SERVER_COMMAND");
     expect(stagingWorkflow).toContain("--trigger post-deploy");
     expect(stagingWorkflow).toContain("SELECTED_PACK");
@@ -483,9 +491,8 @@ describe("testing strategy CI plan", () => {
     expect(workflow).toContain(
       "MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.commit }}"
     );
-    expect(workflow).toContain(
-      "./bin/6529 run test:e2e:museum-institutional-practice"
-    );
+    expect(workflow).toContain("./bin/6529 exec playwright test");
+    expect(workflow).toContain("--workers=1");
     expect(stagingWorkflow).toContain(
       "Unable to prove the deployed change range; retaining the Museum E2E pack."
     );
