@@ -17,6 +17,9 @@ import { ApiQuotedDrop } from '../models/ApiQuotedDrop';
 import { HttpFile } from '../http/http';
 
 export class ApiCreateDropPart {
+    /**
+    * Runtime validation allows at most 25,000 JavaScript UTF-16 code units and 65,535 UTF-8 bytes for this part. The byte limit is enforced independently by the API.
+    */
     'content'?: string | null;
     'quoted_drop'?: ApiQuotedDrop | null;
     'media': Array<ApiCreateDropMedia>;
