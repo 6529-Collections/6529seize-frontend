@@ -53,7 +53,7 @@ export enum CreateDropScreenType {
 }
 
 export interface CreateDropWrapperHandles {
-  requestDrop: () => CreateDropConfig;
+  requestDrop: () => CreateDropConfig | null;
   getDropSnapshot: () => CreateDropConfig;
 }
 
@@ -403,9 +403,21 @@ const CreateDropWrapper = forwardRef<
       return true;
     };
 
+    const getIsDropLimit = () =>
+      (drop?.parts.reduce(
+        (acc, part) => acc + (part.content?.length ?? 0),
+        getMarkdown()?.length ?? 0
+      ) ?? 0) > MAX_DROP_STORM_UTF16_UNITS;
+
+    const getIsPartLimit = () =>
+      !isDropPartWithinLimits(getMarkdown() ?? "") ||
+      !!drop?.parts.some((part) => !isDropPartWithinLimits(part.content ?? ""));
+
     const getCanSubmit = () =>
       !!(!!getMarkdown() || !!files.length || !!drop?.parts.length) &&
       !getHasPendingInlineImageUpload() &&
+      !getIsDropLimit() &&
+      !getIsPartLimit() &&
       !missingMedia.length &&
       !missingMetadata.length &&
       !!(drop?.parts.length ? getCanSubmitStorm() : true);
@@ -413,14 +425,6 @@ const CreateDropWrapper = forwardRef<
     const [canSubmit, setCanSubmit] = useState(getCanSubmit());
 
     const getHaveMarkdownOrFile = () => !!getMarkdown() || !!files.length;
-    const getIsDropLimit = () =>
-      (drop?.parts.reduce(
-        (acc, part) => acc + (part.content?.length ?? 0),
-        getMarkdown()?.length ?? 0
-      ) ?? 0) > MAX_DROP_STORM_UTF16_UNITS;
-
-    const getIsPartLimit = () => !isDropPartWithinLimits(getMarkdown() ?? "");
-
     const getCanAddPart = () =>
       getHaveMarkdownOrFile() &&
       !getHasPendingInlineImageUpload() &&
@@ -558,12 +562,15 @@ const CreateDropWrapper = forwardRef<
       };
     };
 
-    const onDropPart = (): CreateDropConfig => {
+    const onDropPart = (): CreateDropConfig | null => {
       if (loading) {
         return getDropSnapshot();
       }
       if (getHasPendingInlineImageUpload()) {
         return getDropSnapshot();
+      }
+      if (getIsDropLimit() || getIsPartLimit()) {
+        return null;
       }
       const currentDrop = getDropSnapshot();
       setDrop(currentDrop);
@@ -578,6 +585,9 @@ const CreateDropWrapper = forwardRef<
         return;
       }
       const currentDrop = onDropPart();
+      if (!currentDrop) {
+        return;
+      }
       onSubmitDrop(currentDrop);
     };
 
@@ -588,11 +598,14 @@ const CreateDropWrapper = forwardRef<
       if (getHasPendingInlineImageUpload()) {
         return getDropSnapshot();
       }
+      if (getIsDropLimit() || getIsPartLimit()) {
+        return null;
+      }
       setIsStormMode(true);
       return onDropPart();
     };
 
-    const requestDrop = (): CreateDropConfig => onDropPart();
+    const requestDrop = (): CreateDropConfig | null => onDropPart();
 
     useImperativeHandle(ref, () => ({
       getDropSnapshot,
