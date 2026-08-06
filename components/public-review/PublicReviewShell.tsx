@@ -184,6 +184,11 @@ export function PublicReviewShell({
                     review={review}
                     displayedVersion={displayedVersion}
                     source={source}
+                    versionHref={
+                      routeVersion === undefined
+                        ? routes.getPageHref(page, displayedVersion)
+                        : undefined
+                    }
                   />
                 </div>
 

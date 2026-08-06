@@ -75,10 +75,12 @@ export function PublicReviewStatusBanner({
   review,
   displayedVersion,
   source,
+  versionHref,
 }: {
   readonly review: PublicReviewDefinition;
   readonly displayedVersion: string;
   readonly source?: PublicReviewSource | undefined;
+  readonly versionHref?: string | undefined;
 }) {
   const displayedReviewVersion = review.versions.find(
     (candidate) => candidate.version === displayedVersion
@@ -119,11 +121,22 @@ export function PublicReviewStatusBanner({
               AUDIT_LABELS[displayedReviewVersion.auditStatus]
             )}
           </span>
-          <span className={`${STATUS_ITEM} tw-text-iron-400`}>
-            {t(DEFAULT_LOCALE, "publicReview.status.version", {
-              version: displayedVersion,
-            })}
-          </span>
+          {versionHref ? (
+            <Link
+              href={versionHref}
+              className={`${STATUS_ITEM} tw-text-violet-300 tw-no-underline hover:tw-text-violet-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white`}
+            >
+              {t(DEFAULT_LOCALE, "publicReview.status.version", {
+                version: displayedVersion,
+              })}
+            </Link>
+          ) : (
+            <span className={`${STATUS_ITEM} tw-text-iron-400`}>
+              {t(DEFAULT_LOCALE, "publicReview.status.version", {
+                version: displayedVersion,
+              })}
+            </span>
+          )}
           {isHistoricalVersion ? (
             <Link
               href={`/reviews/${review.slug}`}

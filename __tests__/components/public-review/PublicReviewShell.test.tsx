@@ -40,6 +40,14 @@ describe("PublicReviewShell", () => {
     expect(screen.getByText("Public review")).toBeInTheDocument();
     expect(screen.getByText("Preparing for launch")).toBeInTheDocument();
     expect(screen.getByText("Audit planned")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {
+        name: `Review version ${STREAM_REVIEW_DEFINITION.activeVersion}`,
+      })
+    ).toHaveAttribute(
+      "href",
+      `/reviews/6529-stream/versions/${STREAM_REVIEW_DEFINITION.activeVersion}`
+    );
     expect(screen.getByText("Page 1 of 14")).toBeInTheDocument();
     expect(
       screen.getByRole("complementary", { name: "A small human disclosure" })
@@ -252,6 +260,11 @@ describe("PublicReviewShell", () => {
       "href",
       `https://github.com/6529-Collections/6529Stream/tree/${historicalCommit}`
     );
+    expect(
+      screen.queryByRole("link", {
+        name: "Review version 2026-07-25.1",
+      })
+    ).not.toBeInTheDocument();
     const historicalFeedbackLinks = screen.getAllByRole("link", {
       name: "All public feedback",
     });

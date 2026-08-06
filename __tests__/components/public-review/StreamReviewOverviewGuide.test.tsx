@@ -10,12 +10,7 @@ if (!ACTIVE_REVIEW_VERSION) {
 
 describe("StreamReviewOverviewGuide", () => {
   it("explains Stream through its artwork parts, journey, and audience paths", () => {
-    render(
-      <StreamReviewOverviewGuide
-        pages={ACTIVE_REVIEW_VERSION.pages}
-        technicalOverviewHref="/reviews/6529-stream/versions/2026-08-01.1"
-      />
-    );
+    render(<StreamReviewOverviewGuide pages={ACTIVE_REVIEW_VERSION.pages} />);
 
     expect(
       screen.getByRole("heading", { name: "What is Stream?" })
@@ -194,10 +189,6 @@ describe("StreamReviewOverviewGuide", () => {
       .getByRole("heading", { name: "Auditors" })
       .closest("article");
     expect(auditorCard).not.toBeNull();
-    expect(
-      within(auditorCard!).getByRole("link", {
-        name: "Read the detailed technical review",
-      })
-    ).toHaveAttribute("href", "/reviews/6529-stream/versions/2026-08-01.1");
+    expect(within(auditorCard!).getAllByRole("link")).toHaveLength(1);
   });
 });

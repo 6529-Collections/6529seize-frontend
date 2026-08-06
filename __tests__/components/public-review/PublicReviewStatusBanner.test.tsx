@@ -40,6 +40,7 @@ describe("PublicReviewStatusBanner", () => {
       <PublicReviewStatusBanner
         review={STREAM_REVIEW_DEFINITION}
         displayedVersion={STREAM_REVIEW_DEFINITION.activeVersion}
+        versionHref={`/reviews/6529-stream/versions/${STREAM_REVIEW_DEFINITION.activeVersion}`}
       />
     );
 
@@ -48,6 +49,14 @@ describe("PublicReviewStatusBanner", () => {
     );
     expect(container.querySelector("section > div")).not.toHaveClass(
       "@[720px]:tw-flex-row"
+    );
+    expect(
+      screen.getByRole("link", {
+        name: `Review version ${STREAM_REVIEW_DEFINITION.activeVersion}`,
+      })
+    ).toHaveAttribute(
+      "href",
+      `/reviews/6529-stream/versions/${STREAM_REVIEW_DEFINITION.activeVersion}`
     );
   });
 
@@ -113,6 +122,10 @@ describe("PublicReviewStatusBanner", () => {
     expect(
       screen.getByRole("link", { name: "View current review" })
     ).toHaveAttribute("href", "/reviews/6529-stream");
+    expect(
+      screen.queryByRole("link", { name: "Review version review-v1" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("Review version review-v1")).toBeInTheDocument();
     expect(screen.getByText("Preparing for launch")).toBeInTheDocument();
     expect(screen.getByText("Audit planned")).toBeInTheDocument();
     expect(screen.queryByText("Deployed")).not.toBeInTheDocument();

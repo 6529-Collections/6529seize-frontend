@@ -73,9 +73,9 @@ Every page includes:
 The current overview contains a plain definition of Stream, five important
 parts of a Stream artwork, a seven-step artwork journey, and focused
 starting points for artists, collectors and minters, and auditors. It ends
-after those audience paths. The auditor path includes a secondary link to the
-immutable technical Overview for the active review version. The current **For
-Artists** page starts with a plain artist guide
+after those audience paths. On current review pages, the review-version label in
+the status area opens the matching page in the immutable active snapshot. The
+current **For Artists** page starts with a plain artist guide
 covering the artwork package, approval journey, change boundaries, other actors,
 sales, payments, and finality. Its detailed versioned editorial remains below
 as the technical evidence. The generated technical reference lets reviewers
@@ -96,8 +96,8 @@ unversioned routes.
 The plain Overview guide appears only on the unversioned Overview and replaces
 the versioned technical Overview there. Its on-page section navigation and
 feedback section choices therefore omit the hidden technical headings. A link
-inside the auditor audience card opens the complete immutable technical
-Overview. Immutable version routes continue to describe their exact review snapshot.
+from the current page's review-version label opens its immutable technical
+editorial. Immutable version routes continue to describe their exact review snapshot.
 The plain artist guide follows the same rule: it appears only on the current,
 unversioned **For Artists** route, while immutable version routes continue to
 render their exact editorial snapshot without the guide.

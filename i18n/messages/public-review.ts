@@ -157,8 +157,6 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.overviewGuide.audiences.heading": "Choose what matters to you",
   "publicReview.overviewGuide.audiences.description":
     "You do not need to read all fourteen pages. Start with the path closest to your role.",
-  "publicReview.overviewGuide.technicalOverviewLink":
-    "Read the detailed technical review",
   "publicReview.overviewGuide.audiences.artists.title": "Artists",
   "publicReview.overviewGuide.audiences.artists.description":
     "See what you approve, what can still change, and when your choices become permanent.",

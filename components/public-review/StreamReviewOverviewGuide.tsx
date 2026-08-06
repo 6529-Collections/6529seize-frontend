@@ -115,10 +115,8 @@ const AUDIENCE_PATHS = [
 
 export function StreamReviewOverviewGuide({
   pages,
-  technicalOverviewHref,
 }: {
   readonly pages: readonly PublicReviewPageDefinition[];
-  readonly technicalOverviewHref: string;
 }) {
   return (
     <div className="tw-mt-12 tw-w-full tw-max-w-[52rem] sm:tw-mt-16">
@@ -285,36 +283,18 @@ export function StreamReviewOverviewGuide({
                 <p className="tw-mb-0 tw-mt-2 tw-flex-1 tw-text-sm tw-leading-6 tw-text-iron-400">
                   {t(DEFAULT_LOCALE, audience.descriptionKey)}
                 </p>
-                <div className="tw-mt-4 tw-flex tw-flex-col tw-items-start">
-                  <Link
-                    href={getStreamReviewPageHref({ page })}
-                    className="tw-group tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-text-xs tw-font-semibold tw-text-primary-300 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-                  >
-                    {t(DEFAULT_LOCALE, "publicReview.overviewGuide.startPage", {
-                      page: t(DEFAULT_LOCALE, page.titleKey),
-                    })}
-                    <ArrowRightIcon
-                      aria-hidden="true"
-                      className="tw-size-3.5 tw-flex-none tw-transition-transform group-hover:tw-translate-x-0.5"
-                    />
-                  </Link>
-                  {audience.pageId ===
-                  "security-testing-and-known-limitations" ? (
-                    <Link
-                      href={technicalOverviewHref}
-                      className="tw-group tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-                    >
-                      {t(
-                        DEFAULT_LOCALE,
-                        "publicReview.overviewGuide.technicalOverviewLink"
-                      )}
-                      <ArrowRightIcon
-                        aria-hidden="true"
-                        className="tw-size-3.5 tw-flex-none tw-transition-transform group-hover:tw-translate-x-0.5"
-                      />
-                    </Link>
-                  ) : null}
-                </div>
+                <Link
+                  href={getStreamReviewPageHref({ page })}
+                  className="tw-group tw-mt-4 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-self-start tw-text-xs tw-font-semibold tw-text-primary-300 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                >
+                  {t(DEFAULT_LOCALE, "publicReview.overviewGuide.startPage", {
+                    page: t(DEFAULT_LOCALE, page.titleKey),
+                  })}
+                  <ArrowRightIcon
+                    aria-hidden="true"
+                    className="tw-size-3.5 tw-flex-none tw-transition-transform group-hover:tw-translate-x-0.5"
+                  />
+                </Link>
               </article>
             );
           })}

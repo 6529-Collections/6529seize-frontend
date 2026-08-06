@@ -32,7 +32,6 @@ import {
   type StreamReviewRouteParams,
 } from "@/lib/public-review/streamReviewRoutes";
 import {
-  getStreamReviewPageHref,
   getStreamReviewVersion,
   STREAM_REVIEW_DEFINITION,
 } from "@/lib/public-review/streamReviewDefinition";
@@ -114,10 +113,6 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
       )
     : editorialMarkdown;
   const displayedSections = isCurrentOverview ? [] : sections;
-  const technicalOverviewHref = getStreamReviewPageHref({
-    page: reviewVersion.pages[0] ?? route.page,
-    version: contentVersion,
-  });
 
   return (
     <PublicReviewShell
@@ -131,10 +126,7 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
       introNotice={
         <>
           {isCurrentOverview ? (
-            <StreamReviewOverviewGuide
-              pages={reviewVersion.pages}
-              technicalOverviewHref={technicalOverviewHref}
-            />
+            <StreamReviewOverviewGuide pages={reviewVersion.pages} />
           ) : null}
           {isCurrentDevelopmentStatus ? (
             <StreamReviewDevelopmentStatus
