@@ -164,3 +164,12 @@
 - Manifest-bound production E2E workflow `31061460637` also passed on exact
   deployed SHA `81ddbf2a6dce7df785c87d9a3192d3ed7a74f1cf`, including evidence
   validation and upload.
+- Post-merge Coverage Floor run `31062582473` passed 2,173 of 2,174 suites and
+  exposed one stale CI contract. The combined Museum PR browser invocation had
+  omitted the institutional-practice spec when the ontology pack was added.
+  The follow-up restores all five Museum specs in one shared Playwright process
+  and makes the contract assert every exact spec path.
+- The restored local institutional-practice pack then exposed a React child-key
+  warning in the gift dossier. `MuseumGiftPage` now keys the summary and body
+  slots that cross its client-component boundary. A focused route regression
+  test covers the warning contract.

@@ -714,6 +714,7 @@ jobs:
         run: |
           ./bin/6529 exec playwright test \
             tests/museum/data-architecture-readonly.spec.ts \
+            tests/museum/institutional-practice-readonly.spec.ts \
             tests/museum/about-readonly.spec.ts \
             tests/museum/inside-system-readonly.spec.ts \
             tests/museum/rights-readonly.spec.ts \
