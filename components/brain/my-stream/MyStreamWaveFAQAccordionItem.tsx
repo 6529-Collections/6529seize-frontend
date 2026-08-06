@@ -96,12 +96,13 @@ export default function MyStreamWaveFAQAccordionItem({
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
+            layout
             id={panelId}
             role="region"
             aria-labelledby={buttonId}
-            initial={{ height: 0, opacity: 0, y: -4 }}
-            animate={{ height: "auto", opacity: 1, y: 0 }}
-            exit={{ height: 0, opacity: 0, y: -2 }}
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -2 }}
             transition={
               shouldReduceMotion ? { duration: 0 } : FAQ_PANEL_TRANSITION
             }

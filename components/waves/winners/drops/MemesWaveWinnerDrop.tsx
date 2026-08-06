@@ -281,7 +281,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
           )}
 
           {/* Footer Section: Traits + Vote Summary */}
-          <div className="tw-space-y-[13px] tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-bg-black/10 tw-px-[13px] tw-py-[13px]">
+          <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-bg-black/10 tw-px-[13px] tw-py-[13px] lg:tw-space-y-[13px]">
             <MemeDropTraits drop={winner.drop} />
 
             <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-[13px] tw-gap-y-[8px]">
