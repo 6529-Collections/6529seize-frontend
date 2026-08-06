@@ -31,6 +31,15 @@ jobs:
   readonly:
     runs-on: ${{ vars.E2E_RUNNER || vars.CI_LINUX_RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 90
+    outputs:
+      dependencies-outcome: ${{ steps.dependencies.outcome }}
+      e2e-outcome: ${{ steps.e2e.outcome }}
+      evidence-upload-outcome: ${{ steps.evidence-upload.outcome }}
+      expected-sha: ${{ inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha }}
+      playwright-outcome: ${{ steps.playwright.outcome }}
+      selection-outcome: ${{ steps.museum-selection.outcome }}
+      selection-upload-outcome: ${{ steps.museum-selection-upload.outcome }}
+      socket-outcome: ${{ steps.socket-firewall.outcome }}
     permissions:
       actions: read
       contents: read
@@ -169,39 +178,12 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with: { node-version: "22.17.1" }
-      - name: Activate pinned pnpm
-        run: |
-          corepack enable pnpm
-          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
-      - name: Restore pnpm store
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-node22-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node22-pnpm-
-      - name: Use cached pnpm store
-        run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
-      - name: Install Socket Firewall
-        id: socket-firewall
-        continue-on-error: true
-        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
-        with: { mode: firewall }
-      - name: Install frozen dependencies
-        id: dependencies
-        if: steps.socket-firewall.outcome == 'success'
-        continue-on-error: true
-        env:
-          SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
-        run: ./bin/6529 install:frozen
-      # The deployed tree and its dependency lifecycle run before trusted
-      # control tooling is staged. This keeps untrusted install code from
-      # mutating the Museum selector after its immutable-source verification.
+      # Select and upload the Museum control record before any deployed
+      # package manager, dependency lifecycle, or E2E process executes. The
+      # v4 artifact is immutable and is independently verified on a new runner.
       - name: Require an unused Museum selection control path
-        if: steps.dependencies.outcome == 'success'
         run: test ! -e .release-bus-control
       - name: Check out immutable Release Bus Museum selection tooling
-        if: steps.dependencies.outcome == 'success'
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           ref: ${{ github.workflow_sha }}
@@ -214,7 +196,6 @@ jobs:
             scripts/museum-release-selection.cjs
           sparse-checkout-cone-mode: false
       - name: Verify immutable Museum selection tooling
-        if: steps.dependencies.outcome == 'success'
         env:
           WORKFLOW_SHA: ${{ github.workflow_sha }}
         run: |
@@ -230,7 +211,6 @@ jobs:
           test -f .release-bus-control/scripts/museum-release-selection.cjs
       - name: Select fail-closed Museum packs for the exact deployed range
         id: museum-selection
-        if: steps.dependencies.outcome == 'success'
         env:
           BASE_SHA: ${{ steps.automatic-deploy.outputs.previous_deployed_sha }}
           DEPLOYED_SHA: ${{ inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha }}
@@ -291,16 +271,15 @@ jobs:
           [[ "$source_commit" =~ ^[a-f0-9]{40}$ ]]
 
           selection_file="$RUNNER_TEMP/museum-release-selection.json"
-          NODE_PATH="$GITHUB_WORKSPACE/node_modules${NODE_PATH:+:$NODE_PATH}" \
-            node .release-bus-control/scripts/museum-release-selection.cjs \
-              --base "$base_sha" \
-              --head "$head_sha" \
-              --environment production \
-              --activation-mode "$MUSEUM_RELEASE_TIER_MODE" \
-              --hold-state "$hold_state" \
-              --repository-root "$GITHUB_WORKSPACE" \
-              --source-commit "$source_commit" \
-              --output "$selection_file"
+          node .release-bus-control/scripts/museum-release-selection.cjs \
+            --base "$base_sha" \
+            --head "$head_sha" \
+            --environment production \
+            --activation-mode "$MUSEUM_RELEASE_TIER_MODE" \
+            --hold-state "$hold_state" \
+            --repository-root "$GITHUB_WORKSPACE" \
+            --source-commit "$source_commit" \
+            --output "$selection_file"
           jq -e --arg source_commit "$source_commit" '
             .contract == "museum-release-selection-v1" and
             .environment == "production" and
@@ -329,6 +308,39 @@ jobs:
             echo "Source: $source_commit"
             echo "Packs: $(jq -r '.selected_packs | join(", ") // "none"' "$selection_file")"
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload immutable Museum selection evidence
+        id: museum-selection-upload
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: production-e2e-selection-${{ inputs.release_train_id || inputs.automatic_deploy_run_id || github.run_id }}
+          path: ${{ steps.museum-selection.outputs.file }}
+          retention-days: 30
+          if-no-files-found: error
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable pnpm
+          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+      - name: Restore pnpm store
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-node22-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node22-pnpm-
+      - name: Use cached pnpm store
+        run: ./bin/6529 exec pnpm config set store-dir ~/.pnpm-store
+      - name: Install Socket Firewall
+        id: socket-firewall
+        continue-on-error: true
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
+        with: { mode: firewall }
+      - name: Install frozen dependencies
+        id: dependencies
+        if: steps.socket-firewall.outcome == 'success'
+        continue-on-error: true
+        env:
+          SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
+        run: ./bin/6529 install:frozen
       - name: Restore Playwright browser
         if: steps.dependencies.outcome == 'success'
         id: playwright-cache
@@ -422,68 +434,178 @@ jobs:
           fi
           echo "MUSEUM_SELECTED_PACKS_JSON=$MUSEUM_SELECTED_PACKS_JSON" >> "$GITHUB_ENV"
           ./bin/6529 run e2e:packs -- "${args[@]}"
-      # The deployed E2E runner has now completed. Stage a second, fresh,
-      # workflow-SHA-bound copy for evidence verification so tested app code
-      # cannot alter the verifier used to qualify its own output.
-      - name: Require an unused Museum evidence control path
-        id: museum-evidence-path
-        if: always() && steps.dependencies.outcome == 'success' && steps.playwright.outcome == 'success'
-        run: test ! -e .release-bus-evidence-control
-      - name: Check out immutable Release Bus Museum evidence tooling
-        id: museum-evidence-checkout
-        if: always() && steps.museum-evidence-path.outcome == 'success'
+      - name: Upload manifest-bound Playwright evidence
+        id: evidence-upload
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: production-e2e-artifacts-${{ inputs.release_train_id || inputs.automatic_deploy_run_id || github.run_id }}
+          path: production-e2e-artifacts/
+          retention-days: 30
+          if-no-files-found: ignore
+      - name: Return production E2E result
+        if: always()
+        env:
+          SOCKET_OUTCOME: ${{ steps.socket-firewall.outcome }}
+          DEPENDENCIES_OUTCOME: ${{ steps.dependencies.outcome }}
+          PLAYWRIGHT_OUTCOME: ${{ steps.playwright.outcome }}
+          E2E_OUTCOME: ${{ steps.e2e.outcome }}
+        run: |
+          test "$SOCKET_OUTCOME" = success
+          test "$DEPENDENCIES_OUTCOME" = success
+          test "$PLAYWRIGHT_OUTCOME" = success
+          test "$E2E_OUTCOME" = success
+
+  verify-evidence:
+    name: Verify production evidence on isolated runner
+    if: always()
+    needs: readonly
+    # This job intentionally ignores configurable/self-hosted runner labels.
+    # No deployed source, dependency lifecycle, or E2E process runs here.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - name: Resolve isolated verifier release identity
+        id: release-identity
+        continue-on-error: true
+        env:
+          AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          GH_TOKEN: ${{ github.token }}
+          MANIFEST_ID: ${{ inputs.release_manifest_id }}
+          MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
+          READONLY_EXPECTED_SHA: ${{ needs.readonly.outputs.expected-sha }}
+        run: |
+          set -euo pipefail
+          if [ -n "$AUTOMATIC_DEPLOY_RUN_ID" ]; then
+            [[ "$AUTOMATIC_DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
+            test -z "$EXPECTED_SHA$MANIFEST_ID$MANIFEST_IDENTITY"
+            response_file="$(mktemp)"
+            trap 'rm -f "$response_file"' EXIT
+            gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}" \
+              > "$response_file"
+            jq -e \
+              --arg repository "$GITHUB_REPOSITORY" \
+              --argjson run_id "$AUTOMATIC_DEPLOY_RUN_ID" '
+                .id == $run_id and
+                .name == "Web Deploy - PROD" and
+                .path == ".github/workflows/build-upload-deploy-prod.yml" and
+                .event == "workflow_dispatch" and
+                .status == "completed" and
+                .conclusion == "success" and
+                .head_branch == "main" and
+                .repository.full_name == $repository and
+                (.head_sha | test("^[a-f0-9]{40}$"))
+              ' "$response_file" >/dev/null
+            resolved_sha="$(jq -r .head_sha "$response_file")"
+          else
+            [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+            [[ "$MANIFEST_ID" =~ ^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$ ]]
+            [[ "$MANIFEST_IDENTITY" =~ ^[a-f0-9]{64}$ ]]
+            resolved_sha="$EXPECTED_SHA"
+          fi
+          test "$resolved_sha" = "$READONLY_EXPECTED_SHA"
+          echo "expected-sha=$resolved_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Install trusted verifier Node.js
+        id: verifier-node
+        if: always() && steps.release-identity.outcome == 'success'
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with: { node-version: "22.17.1" }
+
+      - name: Require an unused isolated verifier path
+        id: verifier-path
+        if: always() && steps.verifier-node.outcome == 'success'
+        run: test ! -e .release-bus-verifier
+
+      - name: Check out immutable isolated verifier tooling
+        id: verifier-checkout
+        if: always() && steps.verifier-path.outcome == 'success'
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           ref: ${{ github.workflow_sha }}
-          path: .release-bus-evidence-control
+          path: .release-bus-verifier
           filter: blob:none
           fetch-depth: 1
           persist-credentials: false
           sparse-checkout: |
             scripts/museum-release-tier.cjs
             scripts/museum-release-selection.cjs
+            tests/packs.manifest.cjs
           sparse-checkout-cone-mode: false
-      - name: Verify immutable Museum evidence tooling
-        id: museum-evidence-tooling
-        if: always() && steps.museum-evidence-checkout.outcome == 'success'
+
+      - name: Verify immutable isolated verifier tooling
+        id: verifier-tooling
+        if: always() && steps.verifier-checkout.outcome == 'success'
         env:
           WORKFLOW_SHA: ${{ github.workflow_sha }}
         run: |
           set -euo pipefail
           [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
-          test "$(git -C .release-bus-evidence-control rev-parse HEAD)" = "$WORKFLOW_SHA"
-          if ! control_status="$(git -C .release-bus-evidence-control status --porcelain=v1 --untracked-files=all)"; then
-            echo "::error::Unable to verify the Museum evidence control working tree."
+          test "$(git -C .release-bus-verifier rev-parse HEAD)" = "$WORKFLOW_SHA"
+          if ! control_status="$(git -C .release-bus-verifier status --porcelain=v1 --untracked-files=all)"; then
+            echo "::error::Unable to verify the isolated E2E verifier working tree."
             exit 1
           fi
           test -z "$control_status"
-          test -f .release-bus-evidence-control/scripts/museum-release-tier.cjs
-          test -f .release-bus-evidence-control/scripts/museum-release-selection.cjs
-      - name: Validate exact production E2E evidence
-        id: evidence
-        if: always() && steps.museum-evidence-tooling.outcome == 'success'
+          test -f .release-bus-verifier/scripts/museum-release-tier.cjs
+          test -f .release-bus-verifier/scripts/museum-release-selection.cjs
+          test -f .release-bus-verifier/tests/packs.manifest.cjs
+
+      - name: Download untrusted production E2E evidence
+        id: evidence-download
+        if: always()
+        continue-on-error: true
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: production-e2e-artifacts-${{ inputs.release_train_id || inputs.automatic_deploy_run_id || github.run_id }}
+          path: isolated-production-e2e-artifacts
+
+      - name: Download immutable Museum selection evidence
+        id: selection-download
+        if: always()
+        continue-on-error: true
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: production-e2e-selection-${{ inputs.release_train_id || inputs.automatic_deploy_run_id || github.run_id }}
+          path: isolated-production-e2e-selection
+
+      - name: Validate production E2E evidence on isolated runner
+        id: isolated-evidence
+        if: always() && needs.readonly.result == 'success' && steps.release-identity.outcome == 'success' && steps.verifier-tooling.outcome == 'success' && steps.evidence-download.outcome == 'success' && steps.selection-download.outcome == 'success'
+        continue-on-error: true
         env:
-          E2E_OUTCOME: ${{ steps.e2e.outcome }}
           AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
-          EXPECTED_SHA: ${{ inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha }}
+          EXPECTED_SHA: ${{ steps.release-identity.outputs.expected-sha }}
           MANIFEST_ID: ${{ inputs.release_manifest_id }}
           MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
-          MUSEUM_SOURCE_COMMIT: ${{ steps.museum-selection.outputs.source_commit }}
-          MUSEUM_SELECTION_FILE: ${{ steps.museum-selection.outputs.file }}
-          MUSEUM_RELEASE_SELECTION_TOOL: .release-bus-evidence-control/scripts/museum-release-selection.cjs
+          MUSEUM_RELEASE_SELECTION_TOOL: .release-bus-verifier/scripts/museum-release-selection.cjs
+          PACK_MANIFEST: .release-bus-verifier/tests/packs.manifest.cjs
         run: |
           set -euo pipefail
-          test -f production-e2e-artifacts/evidence.json
-          test -f "$MUSEUM_SELECTION_FILE"
-          jq -e --arg source_commit "$MUSEUM_SOURCE_COMMIT" '
+          evidence_file='isolated-production-e2e-artifacts/evidence.json'
+          selection_file='isolated-production-e2e-selection/museum-release-selection.json'
+          test -f "$evidence_file"
+          test ! -L "$evidence_file"
+          test -f "$selection_file"
+          test ! -L "$selection_file"
+          test "$(find isolated-production-e2e-selection -mindepth 1 | wc -l)" -eq 1
+          test "$(stat -c %s "$selection_file")" -le 1048576
+          test "$(stat -c %s "$evidence_file")" -le 16777216
+          jq -e '
             .contract == "museum-release-selection-v1" and
             .environment == "production" and
-            .source_commit == $source_commit and
             (.source_commit | test("^[a-f0-9]{40}$")) and
             (.selected_packs | type == "array") and
+            (.selected_packs | all(IN("museum-data-architecture", "museum-institutional-practice", "museum-about", "museum-inside-system", "museum-rights"))) and
+            (.selected_packs | unique | length) == (.selected_packs | length) and
             (.selection_digest | test("^[a-f0-9]{64}$"))
-          ' "$MUSEUM_SELECTION_FILE" >/dev/null
-          node - "$MUSEUM_SELECTION_FILE" <<'NODE'
+          ' "$selection_file" >/dev/null
+          node - "$selection_file" <<'NODE'
           const fs = require("node:fs");
           const path = require("node:path");
           const selection = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
@@ -494,148 +616,149 @@ jobs:
             throw new Error("Museum selection digest verification failed.");
           }
           NODE
-          validated_museum_packs="$(jq -c .selected_packs "$MUSEUM_SELECTION_FILE")"
-          complete_museum_packs='["museum-data-architecture","museum-institutional-practice","museum-about","museum-inside-system","museum-rights"]'
-          effective_museum_packs="${MUSEUM_SELECTED_PACKS_JSON:-}"
-          if [ "$effective_museum_packs" != "$validated_museum_packs" ] && \
-            [ "$effective_museum_packs" != "$complete_museum_packs" ]
-          then
-            echo "Museum pack inventory is not bound to the validated selection." >&2
-            exit 1
-          fi
-          export MUSEUM_SELECTED_PACKS_JSON="$effective_museum_packs"
-          expected_inventory="$(./bin/6529 exec node - <<'NODE'
-          const { PACKS } = require("./tests/packs.manifest.cjs");
-          const selectedMuseumPacks = JSON.parse(
-            process.env.MUSEUM_SELECTED_PACKS_JSON || "null"
+          inventories="$(node - "$selection_file" <<'NODE'
+          const fs = require("node:fs");
+          const path = require("node:path");
+          const selection = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+          const { PACKS } = require(path.resolve(process.env.PACK_MANIFEST));
+          const eligible = PACKS.filter(
+            (pack) =>
+              pack.environments.includes("production") &&
+              pack.triggers.includes("post-deploy")
           );
-          if (!Array.isArray(selectedMuseumPacks)) {
-            throw new Error("Museum selection evidence is missing.");
-          }
           const isMuseumPack = (pack) =>
             pack.changeScope === "museum" || /^museum-/.test(pack.alias ?? "");
-          const keys = PACKS.filter((pack) =>
-            pack.environments.includes("production") &&
-            pack.triggers.includes("post-deploy") &&
-            (!isMuseumPack(pack) || selectedMuseumPacks.includes(pack.alias ?? pack.scriptKey))
-          ).map((pack) => pack.scriptKey);
-          process.stdout.write(JSON.stringify(keys));
+          const inventory = (selectedMuseumPacks) =>
+            eligible
+              .filter(
+                (pack) =>
+                  !isMuseumPack(pack) ||
+                  selectedMuseumPacks.includes(pack.alias ?? pack.scriptKey)
+              )
+              .map((pack) => pack.scriptKey);
+          const completeMuseumPacks = eligible
+            .filter(isMuseumPack)
+            .map((pack) => pack.alias ?? pack.scriptKey);
+          process.stdout.write(
+            JSON.stringify({
+              complete: inventory(completeMuseumPacks),
+              selected: inventory(selection.selected_packs),
+            })
+          );
           NODE
           )"
-          jq -e --argjson expected "$expected_inventory" --argjson retry "$SERIAL_FAILED_PACK_RETRY" '
-            .schema_version == "release-bus-e2e-packs.v1" and
-            .environment == "production" and
-            .trigger == "post-deploy" and
-            (.worker_count | type == "number" and . >= 1 and . <= 3) and
-            .pack_count == ($expected | length) and
-            (.results | map(.script_key)) == $expected and
-            (.results | map(.script_key) | unique | length) == .pack_count and
-            (.results | all(.safety == "readonly")) and
-            (if $retry then
-              .serial_retry_limit == 1 and
+          selected_inventory="$(jq -c .selected <<< "$inventories")"
+          complete_inventory="$(jq -c .complete <<< "$inventories")"
+          jq -e \
+            --argjson selected "$selected_inventory" \
+            --argjson complete "$complete_inventory" '
+              (.results | map(.script_key)) as $actual |
+              (.serial_retry_limit // 0) as $retry_limit |
+              .schema_version == "release-bus-e2e-packs.v1" and
+              .environment == "production" and
+              .trigger == "post-deploy" and
+              (.worker_count | type == "number" and . >= 1 and . <= 3) and
+              ($retry_limit == 0 or $retry_limit == 1) and
+              .pack_count == ($actual | length) and
+              ($actual == $selected or $actual == $complete) and
+              ($actual | unique | length) == .pack_count and
+              (.results | all(.safety == "readonly")) and
               (.results | all(
                 .attempt_count == (.attempts | length) and
-                .attempt_count >= 1 and .attempt_count <= 2 and
+                .attempt_count >= 1 and .attempt_count <= ($retry_limit + 1) and
                 (.attempts | to_entries | all(.value.attempt == (.key + 1))) and
                 .status == .attempts[-1].status and
                 .failure_class == .attempts[-1].failure_class and
                 .detail == .attempts[-1].detail and
                 .artifact_path == .attempts[-1].artifact_path and
                 .duration_ms == ([.attempts[].duration_ms] | add)
-              ))
-            else
-              (.serial_retry_limit // 0) == 0
-            end) and
-            .failed_count == ([.results[] | select(.status == "failed")] | length) and
-            .infrastructure_failure_count == ([.results[] | select(.failure_class == "infrastructure")] | length)
-          ' production-e2e-artifacts/evidence.json >/dev/null
-          if [ -n "$AUTOMATIC_DEPLOY_RUN_ID" ]; then
-            test -z "$MANIFEST_ID$MANIFEST_IDENTITY"
-            jq -e '.release_binding == null' \
-              production-e2e-artifacts/evidence.json >/dev/null
-          else
-            jq -e --arg manifest_id "$MANIFEST_ID" --arg identity "$MANIFEST_IDENTITY" --arg source_sha "$EXPECTED_SHA" '
-              .release_binding == {
-                manifest_id:$manifest_id,
-                manifest_identity_sha256:$identity,
-                source_sha:$source_sha
-              }
-            ' production-e2e-artifacts/evidence.json >/dev/null
-          fi
-          if [ "$E2E_OUTCOME" = success ]; then
-            jq -e '
+              )) and
               .failed_count == 0 and
               .infrastructure_failure_count == 0 and
               (.results | all(.status == "passed" and .failure_class == null))
-            ' production-e2e-artifacts/evidence.json >/dev/null
+            ' "$evidence_file" >/dev/null
+          if [ -n "$AUTOMATIC_DEPLOY_RUN_ID" ]; then
+            test -z "$MANIFEST_ID$MANIFEST_IDENTITY"
+            jq -e '.release_binding == null' "$evidence_file" >/dev/null
+          else
+            jq -e \
+              --arg manifest_id "$MANIFEST_ID" \
+              --arg identity "$MANIFEST_IDENTITY" \
+              --arg source_sha "$EXPECTED_SHA" '
+                .release_binding == {
+                  manifest_id:$manifest_id,
+                  manifest_identity_sha256:$identity,
+                  source_sha:$source_sha
+                }
+              ' "$evidence_file" >/dev/null
           fi
-      - name: Stage Museum selection with production evidence
-        if: always()
-        env:
-          MUSEUM_SELECTION_FILE: ${{ steps.museum-selection.outputs.file }}
-        run: |
-          set -euo pipefail
-          mkdir -p production-e2e-artifacts
-          if [ -n "$MUSEUM_SELECTION_FILE" ] && [ -f "$MUSEUM_SELECTION_FILE" ]; then
-            install -m 0644 \
-              "$MUSEUM_SELECTION_FILE" \
-              production-e2e-artifacts/museum-release-selection.json
-          fi
-      - name: Upload manifest-bound Playwright evidence
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: production-e2e-artifacts-${{ inputs.release_train_id || inputs.automatic_deploy_run_id || github.run_id }}
-          path: production-e2e-artifacts/
-          retention-days: 30
-          if-no-files-found: ignore
+
       - name: Report structured Release Bus E2E result
         if: always() && inputs.operation_key != ''
         env:
+          EVIDENCE_DOWNLOAD_OUTCOME: ${{ steps.evidence-download.outcome }}
+          IDENTITY_OUTCOME: ${{ steps.release-identity.outcome }}
+          ISOLATED_EVIDENCE_OUTCOME: ${{ steps.isolated-evidence.outcome }}
+          OPERATION_KEY: ${{ inputs.operation_key }}
+          READONLY_DEPENDENCIES_OUTCOME: ${{ needs.readonly.outputs.dependencies-outcome }}
+          READONLY_E2E_OUTCOME: ${{ needs.readonly.outputs.e2e-outcome }}
+          READONLY_EVIDENCE_UPLOAD_OUTCOME: ${{ needs.readonly.outputs.evidence-upload-outcome }}
+          READONLY_PLAYWRIGHT_OUTCOME: ${{ needs.readonly.outputs.playwright-outcome }}
+          READONLY_RESULT: ${{ needs.readonly.result }}
+          READONLY_SELECTION_OUTCOME: ${{ needs.readonly.outputs.selection-outcome }}
+          READONLY_SELECTION_UPLOAD_OUTCOME: ${{ needs.readonly.outputs.selection-upload-outcome }}
+          READONLY_SOCKET_OUTCOME: ${{ needs.readonly.outputs.socket-outcome }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
-          SOCKET_OUTCOME: ${{ steps.socket-firewall.outcome }}
-          DEPENDENCIES_OUTCOME: ${{ steps.dependencies.outcome }}
-          PLAYWRIGHT_OUTCOME: ${{ steps.playwright.outcome }}
-          E2E_OUTCOME: ${{ steps.e2e.outcome }}
-          MUSEUM_EVIDENCE_PATH_OUTCOME: ${{ steps.museum-evidence-path.outcome }}
-          MUSEUM_EVIDENCE_CHECKOUT_OUTCOME: ${{ steps.museum-evidence-checkout.outcome }}
-          MUSEUM_EVIDENCE_TOOLING_OUTCOME: ${{ steps.museum-evidence-tooling.outcome }}
-          EVIDENCE_OUTCOME: ${{ steps.evidence.outcome }}
+          SELECTION_DOWNLOAD_OUTCOME: ${{ steps.selection-download.outcome }}
           TRAIN_ID: ${{ inputs.release_train_id }}
-          OPERATION_KEY: ${{ inputs.operation_key }}
+          VERIFIER_TOOLING_OUTCOME: ${{ steps.verifier-tooling.outcome }}
         run: |
           set -euo pipefail
           status=SUCCEEDED
           failure_class=null
           failure_phase=null
           retryable=false
-          if [ "$SOCKET_OUTCOME" != success ] || [ "$DEPENDENCIES_OUTCOME" != success ] || [ "$PLAYWRIGHT_OUTCOME" != success ]; then
+          evidence_file='isolated-production-e2e-artifacts/evidence.json'
+          if [ "$READONLY_RESULT" != success ]; then
             status=FAILED
-            failure_class=INFRASTRUCTURE
-            failure_phase=production_e2e_setup
-            retryable=true
-          elif [ "$MUSEUM_EVIDENCE_PATH_OUTCOME" != success ] || \
-            [ "$MUSEUM_EVIDENCE_CHECKOUT_OUTCOME" != success ] || \
-            [ "$MUSEUM_EVIDENCE_TOOLING_OUTCOME" != success ] || \
-            [ "$EVIDENCE_OUTCOME" != success ]; then
-            status=FAILED
-            failure_class=CONTROL_PLANE
-            failure_phase=production_e2e_evidence
-          elif [ "$E2E_OUTCOME" != success ]; then
-            status=FAILED
-            if [ -f production-e2e-artifacts/evidence.json ] && \
-              [ "$(jq -r '.infrastructure_failure_count // 0' production-e2e-artifacts/evidence.json)" -gt 0 ]; then
+            if [ "$READONLY_SELECTION_OUTCOME" != success ] || \
+              [ "$READONLY_SELECTION_UPLOAD_OUTCOME" != success ]; then
+              failure_class=CONTROL_PLANE
+              failure_phase=production_e2e_selection
+            elif [ "$READONLY_SOCKET_OUTCOME" != success ] || \
+              [ "$READONLY_DEPENDENCIES_OUTCOME" != success ] || \
+              [ "$READONLY_PLAYWRIGHT_OUTCOME" != success ]; then
+              failure_class=INFRASTRUCTURE
+              failure_phase=production_e2e_setup
+              retryable=true
+            elif [ "$READONLY_E2E_OUTCOME" != success ] && \
+              [ -f "$evidence_file" ] && \
+              [ "$(jq -r '.infrastructure_failure_count // 0' "$evidence_file")" -gt 0 ]; then
               failure_class=INFRASTRUCTURE
               failure_phase=production_e2e_infrastructure
               retryable=true
-            else
+            elif [ "$READONLY_E2E_OUTCOME" != success ]; then
               failure_class=E2E
               failure_phase=production_e2e
+            elif [ "$READONLY_EVIDENCE_UPLOAD_OUTCOME" != success ]; then
+              failure_class=CONTROL_PLANE
+              failure_phase=production_e2e_evidence
+            else
+              failure_class=CONTROL_PLANE
+              failure_phase=production_e2e_control
             fi
+          elif [ "$IDENTITY_OUTCOME" != success ] || \
+            [ "$VERIFIER_TOOLING_OUTCOME" != success ] || \
+            [ "$EVIDENCE_DOWNLOAD_OUTCOME" != success ] || \
+            [ "$SELECTION_DOWNLOAD_OUTCOME" != success ] || \
+            [ "$ISOLATED_EVIDENCE_OUTCOME" != success ]; then
+            status=FAILED
+            failure_class=CONTROL_PLANE
+            failure_phase=production_e2e_evidence
           fi
-          if [ -f production-e2e-artifacts/evidence.json ]; then
-            evidence_digest="$(sha256sum production-e2e-artifacts/evidence.json | cut -d' ' -f1)"
+          if [ -f "$evidence_file" ]; then
+            evidence_digest="$(sha256sum "$evidence_file" | cut -d' ' -f1)"
           else
             evidence_digest=''
           fi
@@ -645,23 +768,20 @@ jobs:
             -H 'Content-Type: application/json' \
             --data "$payload" \
             "$RELEASE_BUS_API_URL/deploy/release-bus-v2/report-progress"
-      - name: Return production E2E result
+
+      - name: Return isolated production E2E result
         if: always()
         env:
-          SOCKET_OUTCOME: ${{ steps.socket-firewall.outcome }}
-          DEPENDENCIES_OUTCOME: ${{ steps.dependencies.outcome }}
-          PLAYWRIGHT_OUTCOME: ${{ steps.playwright.outcome }}
-          E2E_OUTCOME: ${{ steps.e2e.outcome }}
-          MUSEUM_EVIDENCE_PATH_OUTCOME: ${{ steps.museum-evidence-path.outcome }}
-          MUSEUM_EVIDENCE_CHECKOUT_OUTCOME: ${{ steps.museum-evidence-checkout.outcome }}
-          MUSEUM_EVIDENCE_TOOLING_OUTCOME: ${{ steps.museum-evidence-tooling.outcome }}
-          EVIDENCE_OUTCOME: ${{ steps.evidence.outcome }}
+          EVIDENCE_DOWNLOAD_OUTCOME: ${{ steps.evidence-download.outcome }}
+          IDENTITY_OUTCOME: ${{ steps.release-identity.outcome }}
+          ISOLATED_EVIDENCE_OUTCOME: ${{ steps.isolated-evidence.outcome }}
+          READONLY_RESULT: ${{ needs.readonly.result }}
+          SELECTION_DOWNLOAD_OUTCOME: ${{ steps.selection-download.outcome }}
+          VERIFIER_TOOLING_OUTCOME: ${{ steps.verifier-tooling.outcome }}
         run: |
-          test "$SOCKET_OUTCOME" = success
-          test "$DEPENDENCIES_OUTCOME" = success
-          test "$PLAYWRIGHT_OUTCOME" = success
-          test "$MUSEUM_EVIDENCE_PATH_OUTCOME" = success
-          test "$MUSEUM_EVIDENCE_CHECKOUT_OUTCOME" = success
-          test "$MUSEUM_EVIDENCE_TOOLING_OUTCOME" = success
-          test "$EVIDENCE_OUTCOME" = success
-          test "$E2E_OUTCOME" = success
+          test "$READONLY_RESULT" = success
+          test "$IDENTITY_OUTCOME" = success
+          test "$VERIFIER_TOOLING_OUTCOME" = success
+          test "$EVIDENCE_DOWNLOAD_OUTCOME" = success
+          test "$SELECTION_DOWNLOAD_OUTCOME" = success
+          test "$ISOLATED_EVIDENCE_OUTCOME" = success
