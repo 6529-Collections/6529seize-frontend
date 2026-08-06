@@ -103,9 +103,12 @@ describe("one-click production authority completion", () => {
     expect(completionSource).toContain(
       'select(.name == "Reauthorize exact production mutation" and .conclusion == "success")'
     );
+    expect(completionSource).toContain('if [ "$operation_count" = 1 ]; then');
+    expect(completionSource).toContain('created=">=${deploy_created_at}"');
     expect(completionSource).toContain(
-      'if [ "$reauthorization_count" = 1 ]; then'
+      'if [ "$WORKFLOW_RUN_ID" != "$canonical_e2e_run_id" ]; then'
     );
+    expect(completionSource).toContain("[.workflow_runs[] |");
     expect(completionSource).toContain(
       '"one-click-production-operation-${deploy_run_id}"'
     );
@@ -126,7 +129,7 @@ describe("one-click production authority completion", () => {
     expect(completionSource).toContain("artifact_selection_digest");
     expect(completionSource).toContain(".workflow_run.id");
     expect(completionSource).not.toContain("filter=latest");
-    expect(completionSource).not.toContain("created_at");
+    expect(completionSource).toContain("unique | sort | .[0] | numbers");
     expect(completionSource).not.toMatch(/\bnewest\b/i);
     expect(completionSource).not.toMatch(/sort_by\(|\|\s*last\b/);
   });

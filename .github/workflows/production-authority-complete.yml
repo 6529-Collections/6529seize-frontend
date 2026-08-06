@@ -198,8 +198,7 @@ jobs:
               echo "::error::Production reauthorization evidence is ambiguous; refusing failure release."
               exit 1
             fi
-            if [ "$reauthorization_count" = 1 ]; then
-              test "$operation_count" = 1
+            if [ "$operation_count" = 1 ]; then
               operation_record="$proof_dir/operation-record.json"
               artifact_record "$operation_listing" "one-click-production-operation-${WORKFLOW_RUN_ID}" "$WORKFLOW_RUN_ID" 1048576 "$operation_record"
               operation_archive="$proof_dir/operation.zip"
@@ -298,6 +297,40 @@ jobs:
 
           target_sha="$(jq -er '.head_sha' "$deploy_file")"
           deploy_attempt="$(jq -er '.run_attempt | numbers' "$deploy_file")"
+          deploy_created_at="$(jq -er '.created_at | strings' "$deploy_file")"
+
+          canonical_runs_file="$proof_dir/canonical-e2e-runs.json"
+          gh api --method GET \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/production-e2e.yml/runs" \
+            -f branch=main \
+            -f event=workflow_dispatch \
+            -f created=">=${deploy_created_at}" \
+            -f per_page=100 > "$canonical_runs_file"
+          test "$(stat -c %s "$canonical_runs_file")" -le 1048576
+          jq -e '.total_count <= 100 and (.workflow_runs | type == "array")' \
+            "$canonical_runs_file" >/dev/null
+          canonical_e2e_run_id="$(jq -er \
+            --arg repository "$GITHUB_REPOSITORY" \
+            --arg title "$e2e_title" '
+              [.workflow_runs[] |
+                select(
+                  .name == "Production E2E" and
+                  .path == ".github/workflows/production-e2e.yml" and
+                  .display_title == $title and
+                  .event == "workflow_dispatch" and
+                  .head_branch == "main" and
+                  .repository.full_name == $repository and
+                  .head_repository.full_name == $repository and
+                  .actor.login == "github-actions[bot]"
+                ) |
+                .id] |
+              unique | sort | .[0] | numbers
+            ' "$canonical_runs_file")"
+          if [ "$WORKFLOW_RUN_ID" != "$canonical_e2e_run_id" ]; then
+            echo "Ignoring duplicate automatic Production E2E run ${WORKFLOW_RUN_ID}; canonical run is ${canonical_e2e_run_id}."
+            echo "action=ignore" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
 
           artifact_record() {
             local listing_file="$1"

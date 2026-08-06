@@ -30,7 +30,7 @@ const EXPECTED_ARTIFACT_DIRECTORIES = new Set(["target"]);
 const SHA_RE = /^[a-f0-9]{40}$/u;
 const DIGEST_RE = /^sha256:[a-f0-9]{64}$/u;
 const HEX_DIGEST_RE = /^[a-f0-9]{64}$/u;
-const ID_RE = /^[1-9][0-9]{0,19}$/u;
+const ID_RE = /^[1-9]\d{0,19}$/u;
 const OPERATION_ID_RE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/u;
 const REPOSITORY_RE = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/u;
 
@@ -138,10 +138,10 @@ function artifactOperationIdFromName(artifactName, targetSha) {
 }
 
 function requirePositiveInteger(value, label) {
-  let normalized = NaN;
+  let normalized = Number.NaN;
   if (typeof value === "number" && Number.isSafeInteger(value)) {
     normalized = value;
-  } else if (typeof value === "string" && /^[1-9][0-9]*$/u.test(value)) {
+  } else if (typeof value === "string" && /^[1-9]\d*$/u.test(value)) {
     normalized = Number(value);
   }
   assert(
@@ -152,10 +152,10 @@ function requirePositiveInteger(value, label) {
 }
 
 function requireNonNegativeInteger(value, label) {
-  let normalized = NaN;
+  let normalized = Number.NaN;
   if (typeof value === "number" && Number.isSafeInteger(value)) {
     normalized = value;
-  } else if (typeof value === "string" && /^[0-9]+$/u.test(value)) {
+  } else if (typeof value === "string" && /^\d+$/u.test(value)) {
     normalized = Number(value);
   }
   assert(
@@ -230,7 +230,7 @@ function canonicalize(value) {
   if (isRecord(value)) {
     return Object.fromEntries(
       Object.keys(value)
-        .sort()
+        .sort((left, right) => left.localeCompare(right, "en"))
         .map((key) => [key, canonicalize(value[key])])
     );
   }
@@ -766,7 +766,7 @@ function verifyChecksums(root, requiredFiles) {
 
   const entries = new Map();
   for (const line of lines) {
-    const match = /^([a-f0-9]{64})  (.+)$/u.exec(line);
+    const match = /^([a-f0-9]{64}) {2}(.+)$/u.exec(line);
     assert(match, `malformed SHA256SUMS entry: ${line}`);
     const relativePath = assertSafeRelativePath(match[2]);
     assert(

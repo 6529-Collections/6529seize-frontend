@@ -9,7 +9,7 @@ const MAX_INPUT_BYTES = 1024 * 1024;
 const MAX_STRING_LENGTH = 512;
 const MAX_JOBS = 100;
 const MAX_STEPS = 100;
-const RUN_ID = /^[1-9][0-9]{0,19}$/u;
+const RUN_ID = /^[1-9]\d{0,19}$/u;
 const SHA = /^[a-f0-9]{40}$/u;
 const FAILURE_CONCLUSIONS = new Set([
   "failure",
@@ -180,7 +180,7 @@ function stable(value) {
   if (plain(value)) {
     return Object.fromEntries(
       Object.keys(value)
-        .sort()
+        .sort((left, right) => left.localeCompare(right, "en"))
         .map((key) => [key, stable(value[key])])
     );
   }

@@ -75,13 +75,13 @@ const FAILURE_CODES = new Set([
   "LEASE_EXPIRED",
   "LEASE_LOST",
 ]);
-const POSITIVE_RUN = /^[1-9][0-9]{0,19}$/u;
+const POSITIVE_RUN = /^[1-9]\d{0,19}$/u;
 const SHA = /^[a-f0-9]{40}$/u;
 const DIGEST = /^[a-f0-9]{64}$/u;
 const EVIDENCE_DIGEST_OPTION = "--evidence-digest";
 const QUALIFIER_ATTEMPT_OPTION = "--qualifier-workflow-run-attempt";
 const QUALIFIER_ID_OPTION = "--qualifier-workflow-run-id";
-const OPERATION = /^frontend-prod-[1-9][0-9]{0,19}$/u;
+const OPERATION = /^frontend-prod-[1-9]\d{0,19}$/u;
 const SENSITIVE_KEY =
   /(?:secret|token|password|authorization|credential|private[_-]?key|api[_-]?key)/iu;
 const UNSAFE_KEY = /^(?:__proto__|prototype|constructor)$/u;
@@ -99,7 +99,7 @@ function fail(code) {
 }
 
 function own(value, key) {
-  return Object.prototype.hasOwnProperty.call(value, key);
+  return Object.hasOwn(value, key);
 }
 
 function plain(value) {
@@ -379,7 +379,9 @@ function canonicalize(value, depth = 0) {
     return value.map((item) => canonicalize(item, depth + 1));
   if (!plain(value)) fail("INVALID_JSON_VALUE");
   const sorted = {};
-  for (const key of Object.keys(value).sort()) {
+  for (const key of Object.keys(value).sort((left, right) =>
+    left.localeCompare(right, "en")
+  )) {
     if (UNSAFE_KEY.test(key)) fail("UNSAFE_JSON_KEY");
     if (SENSITIVE_KEY.test(key)) fail("SENSITIVE_FIELD");
     sorted[key] = canonicalize(value[key], depth + 1);
@@ -396,7 +398,7 @@ function canonicalJson(value) {
 function whitespace(text, index) {
   let cursor = index;
   while (cursor < text.length) {
-    const code = text.charCodeAt(cursor);
+    const code = text.codePointAt(cursor);
     if (code !== 9 && code !== 10 && code !== 13 && code !== 32) break;
     cursor += 1;
   }
@@ -814,8 +816,7 @@ function validateResponse(command, request, response, expected) {
 }
 
 function cliInteger(value, code) {
-  if (typeof value !== "string" || !/^[1-9][0-9]{0,6}$/u.test(value))
-    fail(code);
+  if (typeof value !== "string" || !/^[1-9]\d{0,6}$/u.test(value)) fail(code);
   const parsed = Number(value);
   attempt(parsed, code);
   return parsed;

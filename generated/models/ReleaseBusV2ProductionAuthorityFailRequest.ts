@@ -29,7 +29,7 @@ export class ReleaseBusV2ProductionAuthorityFailRequest {
     */
     'evidence_digest': string;
     /**
-    * Null before selection discovery; otherwise the exact frozen selection digest.
+    * Null before selection discovery when no candidate evidence exists; otherwise the exact candidate digest. If selection was frozen, the value must match it.
     */
     'selection_digest'?: string | null;
     'reason_code': ReleaseBusV2ProductionAuthorityFailRequestReasonCodeEnum;

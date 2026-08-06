@@ -7873,9 +7873,9 @@ paths:
                 $ref: >-
                   #/components/schemas/ReleaseBusV2ProductionAuthorityPrepareResponse
         "400":
-          description: Invalid operation identity
+          description: Invalid request payload
         "409":
-          description: Bounded persisted production denial
+          description: Persisted denial or immutable operation identity conflict
           content:
             application/json:
               schema:
@@ -7906,9 +7906,9 @@ paths:
                 $ref: >-
                   #/components/schemas/ReleaseBusV2ProductionAuthorityBindResponse
         "400":
-          description: Invalid operation or workflow identity
+          description: Invalid request payload
         "409":
-          description: Bounded persisted production denial
+          description: Persisted denial or immutable workflow identity conflict
           content:
             application/json:
               schema:
@@ -7939,9 +7939,9 @@ paths:
                 $ref: >-
                   #/components/schemas/ReleaseBusV2ProductionAuthorityBindResponse
         "400":
-          description: Invalid operation or workflow identity
+          description: Invalid request payload
         "409":
-          description: Bounded persisted production denial
+          description: Persisted denial or immutable workflow identity conflict
           content:
             application/json:
               schema:
@@ -7973,9 +7973,9 @@ paths:
                 $ref: >-
                   #/components/schemas/ReleaseBusV2ProductionAuthorityBindResponse
         "400":
-          description: Invalid selection or workflow identity
+          description: Invalid request payload
         "409":
-          description: Bounded persisted production denial
+          description: Persisted denial, selection, or workflow identity conflict
           content:
             application/json:
               schema:
@@ -8007,9 +8007,9 @@ paths:
                 $ref: >-
                   #/components/schemas/ReleaseBusV2ProductionAuthorityCompletionResponse
         "400":
-          description: Missing selection, repository-specific qualifier, or evidence digest
+          description: Invalid request payload
         "409":
-          description: Deploy-only completion or immutable evidence mismatch
+          description: Deploy-only completion, workflow identity, terminal state, or immutable evidence conflict
           content:
             application/json:
               schema:
@@ -8040,9 +8040,9 @@ paths:
                 $ref: >-
                   #/components/schemas/ReleaseBusV2ProductionAuthorityCompletionResponse
         "400":
-          description: Invalid failure identity
+          description: Invalid request payload
         "409":
-          description: Bounded persisted production denial
+          description: Persisted denial, workflow identity, terminal state, or immutable evidence conflict
           content:
             application/json:
               schema:
@@ -25828,8 +25828,9 @@ components:
               nullable: true
               pattern: ^[a-f0-9]{64}$
               description: >-
-                Null before selection discovery; otherwise the exact frozen
-                selection digest.
+                Null before selection discovery when no candidate evidence
+                exists; otherwise the exact candidate digest. If selection was
+                frozen, the value must match it.
             reason_code:
               type: string
               enum:

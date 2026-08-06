@@ -67,7 +67,7 @@ function canonicalize(value) {
   if (isPlainObject(value)) {
     return Object.fromEntries(
       Object.keys(value)
-        .sort()
+        .sort((left, right) => left.localeCompare(right, "en"))
         .map((key) => [key, canonicalize(value[key])])
     );
   }
@@ -195,7 +195,11 @@ function computeDisplayTitles({ operationId, targetSha }) {
   });
 }
 
-function expectedVerifierDisplayTitle({ operationId, targetSha, sourceArtifact }) {
+function expectedVerifierDisplayTitle({
+  operationId,
+  targetSha,
+  sourceArtifact,
+}) {
   const binding = validateOperationBinding({ operationId, targetSha });
   const source = requirePlainObject(
     sourceArtifact,
@@ -361,7 +365,7 @@ function workflowRunsFromJson(value) {
   const parsed = parseBoundedJson(value, "workflow run list");
   const runs = Array.isArray(parsed) ? parsed : parsed.workflow_runs;
   if (!Array.isArray(runs)) {
-    throw new Error("workflow run list must contain a workflow_runs array");
+    throw new TypeError("workflow run list must contain a workflow_runs array");
   }
   if (runs.length > MAX_WORKFLOW_RUNS) {
     throw new Error(
@@ -616,7 +620,9 @@ function validateSelectedBuilderRun(selectedRun, rawRun, request) {
 
 function validateBuilderArtifactRecord(artifacts, request, producerRun) {
   if (!Array.isArray(artifacts)) {
-    throw new Error("artifact metadata bundle must contain an artifacts array");
+    throw new TypeError(
+      "artifact metadata bundle must contain an artifacts array"
+    );
   }
   if (artifacts.length > MAX_ARTIFACTS) {
     throw new Error(
@@ -897,7 +903,7 @@ function validateSelectedVerifierRun(selectedRun, rawRun, request) {
 
 function validateSelectionArtifactRecord(artifacts, request, verifierRun) {
   if (!Array.isArray(artifacts)) {
-    throw new Error(
+    throw new TypeError(
       "selection artifact metadata bundle must contain an artifacts array"
     );
   }
@@ -1090,14 +1096,8 @@ function validateSelectionArtifactMetadata(options) {
     request,
     verifierRun
   );
-  const hasSelection = Object.prototype.hasOwnProperty.call(
-    bundle,
-    "selection"
-  );
-  const hasSelectionJson = Object.prototype.hasOwnProperty.call(
-    bundle,
-    "selection_json"
-  );
+  const hasSelection = Object.hasOwn(bundle, "selection");
+  const hasSelectionJson = Object.hasOwn(bundle, "selection_json");
   if (hasSelection && hasSelectionJson) {
     throw new Error("selection metadata must use one selection field");
   }

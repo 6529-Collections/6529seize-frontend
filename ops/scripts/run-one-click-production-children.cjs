@@ -177,7 +177,7 @@ function parseJsonBody(body, label) {
 }
 
 function responseHeaders(response) {
-  if (!response || response.headers === undefined) {
+  if (response?.headers === undefined) {
     return {};
   }
   if (response.headers instanceof Headers) {
