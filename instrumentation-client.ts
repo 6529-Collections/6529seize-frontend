@@ -28,6 +28,7 @@ import {
   shouldFilterByFilenameExceptions,
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
+  shouldFilterBrowserExtensionWalletRejection,
   shouldFilterPoperBlockerOrphanFetchRejection,
   shouldFilterExpectedWaveRequestReplacementAbort,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
@@ -171,6 +172,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterBrowserExtensionSendMessageError(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterBrowserExtensionWalletRejection(event, hint)) {
     return true;
   }
 
