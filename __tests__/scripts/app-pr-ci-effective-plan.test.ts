@@ -81,6 +81,7 @@ describe("effective App PR CI plan", () => {
     ".github/workflows/deploy-staging.yml",
     "ops/scripts/deploy-staging-artifact.sh",
     "scripts/museum-release-tier.cjs",
+    "ops/testing-strategy/museum-surface-registry.v1.json",
     "tests/packs.manifest.cjs",
     "components/museum/MuseumNetworkProposition.tsx",
     "__tests__/components/museum/MuseumNetworkProposition.test.tsx",

@@ -139,3 +139,37 @@
   Current focused validation passes 8 suites / 102 tests, changed-file lint,
   typecheck across 1,364 files, whitespace checks, and the ontology no-em-dash
   scan.
+- Frontend PR #3629 merged as
+  `a888054589e7311848278c53b187033d96b1f5fb`. The production release includes
+  that runtime at exact deployed main
+  `81ddbf2a6dce7df785c87d9a3192d3ed7a74f1cf`; production workflow
+  `31061048126` passed deployment health and exact HTTP version verification.
+- Automatic staging run `31059622531` completed its evidence contract but
+  failed the terminal result during a broader staging service incident. The
+  same interval produced unrelated NextGen server-render failures, while the
+  ontology pack recorded shared-shell settings and browser-policy fetch
+  diagnostics. A strict rerun against the unchanged staging deployment then
+  passed all six desktop and mobile ontology cases.
+- Production replay exposed a test-only inconsistency: three exact shared-shell
+  transport diagnostics were already classified as non-actionable in the
+  Museum's Inside the System suite, but the ontology suite permitted them only
+  outside deployed environments. Frontend PR #3636 aligned those bounded
+  classifications. It still fails on all other production console errors,
+  every page error, and every failed 5xx response.
+- The corrected strict production pack passed all six desktop and mobile cases
+  against `https://6529.io` in 24.9 seconds. It verified the overview, all
+  eleven standard pages, the Casey seven-object schedule, exact-source links,
+  and mobile overflow while retaining the remaining browser and HTTP failure
+  gates.
+- Manifest-bound production E2E workflow `31061460637` also passed on exact
+  deployed SHA `81ddbf2a6dce7df785c87d9a3192d3ed7a74f1cf`, including evidence
+  validation and upload.
+- Post-merge Coverage Floor run `31062582473` passed 2,173 of 2,174 suites and
+  exposed one stale CI contract. The combined Museum PR browser invocation had
+  omitted the institutional-practice spec when the ontology pack was added.
+  The follow-up restores all five Museum specs in one shared Playwright process
+  and makes the contract assert every exact spec path.
+- The restored local institutional-practice pack then exposed a React child-key
+  warning in the gift dossier. `MuseumGiftPage` now keys the summary and body
+  slots that cross its client-component boundary. A focused route regression
+  test covers the warning contract.

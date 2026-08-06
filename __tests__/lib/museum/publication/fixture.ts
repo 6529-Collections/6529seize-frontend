@@ -170,8 +170,17 @@ function buildBaseDocuments(): Record<string, string> {
     }
   }
   for (const contract of INSTITUTIONAL_PRACTICE_DOCUMENT_CONTRACTS) {
+    const profileSections =
+      contract.kind === "institution_profile"
+        ? "\n\n## What the Museum should adopt\n\nA considered institutional lesson.\n\n## Where the analogy ends\n\nA stated institutional limit."
+        : "";
+    const sourceLink =
+      contract.kind === "institution_profile" ||
+      contract.kind === "institutional_practice_source_register"
+        ? `\n\n[Research source](https://example.com/museum-research/${contract.id})`
+        : "";
     documents[contract.path] =
-      `# ${contract.title}\n\nGoverned institutional research.`;
+      `# ${contract.title}\n\nGoverned institutional research.${profileSections}${sourceLink}`;
   }
   const architectureStandards = [
     [

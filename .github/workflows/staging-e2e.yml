@@ -24,6 +24,7 @@ on:
           - network-open-data-readonly
           - museum-data-architecture
           - museum-institutional-practice
+          - museum-about
           - museum-inside-system
           - museum-rights
       release_train_id:

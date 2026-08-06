@@ -135,3 +135,118 @@
   unrelated to the fast-lane contract and were the only remaining Museum
   runtime paths in the diff; keeping them would have forced another 24-minute
   exhaustive lane and obscured the policy-only validation boundary.
+
+## 2026-08-05 — PR 2 implementation checkpoint
+
+- Implemented the Museum surface registry/schema and report-only checker. After
+  reconciling the concurrently merged data-architecture reading room, the
+  registry is complete for 32 Museum page routes, 4 support files, 32 Museum
+  components, and 5 Museum E2E specs, organized into 17 stable surfaces. The
+  checker uses the TypeScript compiler API for reverse imports and fails closed
+  on an unmapped Museum-owned path or unresolved local import.
+- Added unit tests covering the real inventory, seeded unmapped page/component/
+  spec cases, shared dependency escalation, direct mapping, and unresolved
+  local imports.
+- Added static publication corpus contracts covering the complete institutional
+  practice corpus, required section/lesson/limit/source declarations, HTTPS
+  credential-free sources, route/source coherence, Casey Reas and Keys & Gates
+  inventories/relations, and atomic exact-source activation. Updated only the
+  test fixture's publication examples to make the new semantic checks
+  substantive.
+- Added `tests/museum/about-readonly.spec.ts` for `/museum/network/about`.
+  It checks desktop/mobile typography floors, line-height and color hierarchy,
+  horizontal overflow, safe links, exact source identity, and existing
+  console/network diagnostics. The broad institutional-practice browser sweep
+  remains available for manual and deployed qualification; it is not added to
+  the PR lane in this report-only phase.
+- Added the About pack to package scripts, the E2E pack manifest, staging
+  dispatch options, generated test documentation, and the combined production
+  read-only set. Updated the current-main release-bus performance contract from
+  16/15 to 17/16 staging/production post-deploy packs.
+- Added the registry/schema/checker/tests/About spec to the complete 97-file
+  policy bundle and raised its explicit inventory ceiling from 96 to 128. Added the registry/corpus
+  quality step to App PR CI as shadow/report-only; existing checks and the
+  broad Museum lane are preserved.
+
+### Exact validation results
+
+- Registry command passed with counts: 17 surfaces, 32 routes, 4 support files,
+  32 components, 5 E2E specs.
+- Changed lint, changed TypeScript (1,358 files), Jest/Playwright test
+  typechecks, package JSON lint, and E2E manifest check all passed.
+- Focused regression run passed: 11 suites / 290 tests.
+- Release-bus performance contract passed: 7 tests.
+- `codex-diff-check` passed.
+- The Windows policy-bundle suite was attempted and exited at its existing
+  `O_NOFOLLOW` platform guard before assertions could run. This is a host
+  limitation; hosted Linux remains authoritative and the protection was not
+  relaxed.
+- No build, browser run, push, PR, merge, staging deployment, or production
+  deployment occurred in this worker boundary.
+
+### Open issues / follow-up
+
+- The new About browser contract is typechecked and included in hosted packs,
+  but its browser execution remains a hosted-CI responsibility in this
+  worktree.
+- The institutional-practice browser sweep remains broad and available for
+  manual and deployed qualification. Template-oriented splitting is deferred
+  until it can be made runtime-neutral without weakening current evidence.
+
+## 2026-08-05 — PR 2 hosted contract reconciliation
+
+- The first exact-head hosted quality run found three stale cardinality
+  assertions in `e2e-packs.test.ts`. The manifest, generated package scripts,
+  generated README, surface registry, performance contract, and their direct
+  tests were already synchronized; the umbrella E2E CLI suite still expected
+  the pre-About totals.
+- Updated only those exact assertions: 17 staging post-deploy packs, 16
+  production post-deploy packs, and 15 dedicated Museum packs split 5/5/5
+  across local, staging, and production.
+- Fail-fast correctly cancelled the concurrent build, critical-shell, and
+  Museum jobs after the quality failure. No cancelled lane is treated as
+  evidence; all lanes must rerun on the corrected exact head.
+- The next hosted Museum run proved current canonical source
+  `6f7f8b2168347cb623d53eeb6b9d7fe1242d7a73` activates far enough to pass the
+  data-architecture pack, then found a selector error in the new About
+  contract. `header p` selected the 14px uppercase eyebrow rather than the lead
+  paragraph. The contract now selects the structural adjacent sibling
+  `header h1 + p`, preserving the valid 14px label while measuring the intended
+  18px/20px lead copy. The branch must rerun every exact-head lane again.
+- A local exact-source browser replay was attempted. Windows Turbopack rejected
+  the shared dependency junction; the webpack fallback then exhausted its
+  startup window while the shared local API on port 3000 was unavailable. This
+  is recorded as local infrastructure failure, not passing product evidence;
+  the fresh hosted Linux browser run remains authoritative.
+- Independent exact-head review found that the shadow workflow passed symbolic
+  Git references to a deliberately exact-SHA-only classifier. The workflow now
+  resolves both endpoints to immutable 40-hex commits before classification;
+  the classifier's strict input boundary remains unchanged. The same review's
+  About selector finding is fixed by the adjacent-sibling selector above.
+- All valid CodeRabbit findings from the first review were incorporated: the
+  protected fixture and staging pack keys are explicit; source URLs and digests
+  have non-vacuous exact contracts; summary logs are bounded and rendered as
+  indented code; JavaScript/JSX parsing uses the correct script kinds with
+  Program syntactic diagnostics; roots compare by value; ownership lookups are
+  indexed once; CLI options fail closed; the alias resolver is exercised; the
+  About pack preserves primary and diagnostic failures together; and the pack
+  names now follow the established Museum convention. The protected policy
+  inventory ceiling increases from 96 to 128 to accommodate the complete 97-file
+  bundle without weakening the existing byte ceilings.
+- Exact hosted run `31058132630` passed the corpus contract and every blocking
+  lane, but its report-only registry emitted a warning because the Linux
+  `./bin/6529` wrapper preserved pnpm's standalone `--` delimiter. The strict
+  parser now accepts that delimiter as syntax while continuing to reject every
+  unknown option; a regression test covers the exact hosted argument shape.
+- Exact hosted run `31058952470` then proved the delimiter fix but exposed a
+  Turbopack process panic after the first Museum pack completed: a new
+  Playwright invocation restarted the development server against the same
+  dist directory, and Turbopack's aggregation backend panicked before either
+  About viewport could receive a document. The PR lane now runs all four
+  Museum specs in one Playwright process and one web-server lifecycle. This
+  preserves every desktop/mobile assertion while removing three redundant
+  server startups and the observed restart boundary.
+- Exact hosted run `31060213753` proved the consolidated lane: all four Museum
+  specs across both desktop and mobile passed in one Playwright process. The
+  browser step completed in 4m50s and the full Museum job in 6m01s, with one
+  application-server lifecycle and no Turbopack restart panic.

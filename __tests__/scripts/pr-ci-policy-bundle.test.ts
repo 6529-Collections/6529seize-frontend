@@ -297,6 +297,13 @@ describe("pr-ci-policy-bundle-v1", () => {
         "next-sitemap.build.cjs",
         "prettier.config.mjs",
         ".prettierignore",
+        "__tests__/lib/museum/publication/corpusContracts.test.ts",
+        "__tests__/lib/museum/publication/fixture.ts",
+        "__tests__/scripts/museum-surface-registry.test.ts",
+        "ops/testing-strategy/museum-surface-registry.v1.json",
+        "ops/testing-strategy/museum-surface-registry.v1.schema.json",
+        "scripts/museum-surface-registry.cjs",
+        "tests/museum/about-readonly.spec.ts",
       ])
     );
     expect(PACKAGE_SCRIPT_KEYS).toEqual(
@@ -305,10 +312,15 @@ describe("pr-ci-policy-bundle-v1", () => {
         "build:ci",
         "lint:changed",
         "museum:release-tier",
+        "museum:surface-registry",
         "typecheck:changed",
         "typecheck:tests",
         "e2e:packs",
         "test:e2e:production:home-readonly",
+        "test:e2e:production:museum-about",
+        "test:e2e:production:museum-institutional-practice",
+        "test:e2e:staging:museum-about",
+        "test:e2e:staging:museum-institutional-practice",
       ])
     );
     expect(PACKAGE_FIELD_KEYS).toEqual(

@@ -36,8 +36,9 @@
   help-index sync (202), and the exact-source optimized production build passed.
   The dedicated read-only browser pack passed all six desktop/mobile cases,
   including all eleven standard routes, both machine disclosures, exact-source
-  links, and 390 px overflow checks. PR review, staging, and production
-  qualification remain in progress.
+  links, and 390 px overflow checks. Frontend PR #3629 merged as
+  `a888054589e7311848278c53b187033d96b1f5fb`; production serves the release in
+  deployed main `81ddbf2a6dce7df785c87d9a3192d3ed7a74f1cf`.
 - Frontend PR #3629 opened at initial exact head
   `eebd8a48fda872a89b16373654bbcdef3225c91a`. The first 6529bot general review
   requested consistent unknown-slug metadata, source-exact machine
@@ -48,5 +49,11 @@
   choice input, and Museum PR-lane ownership now agree and pass their 32-test
   contract suite. The adapter now accepts the canonical rights registry v1.1
   that merged independently during this release; an exact-source probe returns
-  73 documents, 11 architecture standards, and 22 rights expressions. A signed
-  follow-up and fresh exact-head hosted review remain.
+  73 documents, 11 architecture standards, and 22 rights expressions.
+- Production qualification found a harness-only discrepancy: the ontology pack
+  treated three exact shared-shell transport diagnostics as Museum failures,
+  although the sibling Museum pack already classifies them as non-actionable.
+  Frontend PR #3636 aligned those bounded classifications. Every other console
+  error, every page error, and every HTTP 5xx response remains actionable. The
+  corrected production replay passed all six desktop and mobile cases against
+  live `https://6529.io`.
