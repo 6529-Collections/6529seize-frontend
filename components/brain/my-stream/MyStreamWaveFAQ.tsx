@@ -15,7 +15,7 @@ import {
   SparklesIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import React, { useEffect, useId, useRef, useState } from "react";
 import type { ComponentType, ReactNode, SVGProps } from "react";
@@ -75,6 +75,9 @@ const LINKS = {
 
 const CONTAINER_CLASS_NAME =
   "tw-w-full tw-flex tw-flex-col tw-pt-4 lg:tw-pr-2 tw-overflow-y-auto tw-no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-h-full";
+
+const FAQ_ALIGNMENT_GRID_CLASS_NAME =
+  "tw-grid tw-grid-cols-[1.25rem_minmax(0,1fr)_1.25rem] tw-gap-x-3";
 
 const FAQ_PANEL_ANIMATION_SECONDS = 0.32;
 
@@ -240,7 +243,7 @@ function FaqLink({
       rel="noopener noreferrer"
       aria-label={`${children} (opens in a new tab)`}
       className={cx(
-        "tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-sm tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-400",
+        "tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-md tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-400",
         className
       )}
     >
@@ -305,7 +308,7 @@ function NeatList({ items }: Readonly<{ items: readonly string[] }>) {
 
 function AttentionBox({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <div className="tw-my-6 tw-border-y-0 tw-border-l-2 tw-border-r-0 tw-border-solid tw-border-white/10 tw-py-1 tw-pl-4">
+    <div className="tw-my-6 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/20 tw-p-4">
       {children}
     </div>
   );
@@ -427,7 +430,12 @@ function GoalsContent() {
           by reading the presentation and we will quietly think a little less of
           you and nobody wants that.
         </p>
-        <FaqLink href={LINKS.artistBrief}>Read Artist Brief</FaqLink>
+        <FaqLink
+          href={LINKS.artistBrief}
+          className="tw-min-h-11 tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-3 tw-py-2 desktop-hover:hover:tw-bg-white/[0.08]"
+        >
+          Read Artist Brief
+        </FaqLink>
       </AttentionBox>
       <p className="tw-mb-0 tw-text-xs tw-leading-5 tw-text-iron-500">
         These FAQs are a summary of this presentation but not a substitute for
@@ -630,11 +638,13 @@ function FaqAccordionItem({
   section,
   sectionRef,
   isOpen,
+  shouldReduceMotion,
   onToggle,
 }: Readonly<{
   section: FaqSection;
   sectionRef: (element: HTMLElement | null) => void;
   isOpen: boolean;
+  shouldReduceMotion: boolean;
   onToggle: () => void;
 }>) {
   const panelId = useId();
@@ -645,10 +655,10 @@ function FaqAccordionItem({
     <section
       ref={sectionRef}
       className={cx(
-        "tw-group tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-backdrop-blur-xl tw-transition-all tw-duration-300 tw-ease-out",
+        "tw-group tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none",
         isOpen
-          ? "tw-border-primary-500/50 tw-bg-[#171b24] tw-shadow-[0_12px_30px_-10px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.05)]"
-          : "tw-border-iron-700/70 tw-bg-iron-900/75 tw-shadow-[0_4px_20px_-5px_rgba(0,0,0,0.42)] desktop-hover:hover:-tw-translate-y-0.5 desktop-hover:hover:tw-border-iron-600/80 desktop-hover:hover:tw-bg-iron-800/70 desktop-hover:hover:tw-shadow-[0_8px_25px_-5px_rgba(0,0,0,0.6)]"
+          ? "tw-border-primary-500/40 tw-bg-iron-900/90 tw-shadow-[inset_3px_0_0_rgba(59,130,246,0.75)]"
+          : "tw-border-white/[0.06] tw-bg-iron-950/40 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-iron-900/60"
       )}
     >
       <h3 className="tw-mb-0">
@@ -658,26 +668,27 @@ function FaqAccordionItem({
           aria-expanded={isOpen}
           aria-controls={isOpen ? panelId : undefined}
           onClick={onToggle}
-          className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-bg-transparent tw-px-4 tw-py-3 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400/80 sm:tw-px-5 sm:tw-py-4 md:tw-py-3.5"
+          className={cx(
+            FAQ_ALIGNMENT_GRID_CLASS_NAME,
+            "tw-min-h-12 tw-w-full tw-cursor-pointer tw-items-center tw-border-0 tw-bg-transparent tw-px-4 tw-py-3 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400/80 motion-reduce:tw-transition-none sm:tw-px-5 sm:tw-py-4 md:tw-py-3.5"
+          )}
         >
-          <span className="tw-flex tw-min-w-0 tw-items-center">
-            <span
-              className={cx(
-                "tw-mr-3 tw-hidden tw-size-7 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-400 tw-transition-colors tw-duration-200 sm:tw-flex",
-                isOpen
-                  ? "tw-text-primary-300"
-                  : "desktop-hover:group-hover:tw-text-iron-50"
-              )}
-            >
-              <Icon className="tw-size-4" aria-hidden="true" />
-            </span>
-            <span className="tw-min-w-0 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-50 md:tw-text-base">
-              {section.title}
-            </span>
+          <span
+            className={cx(
+              "tw-flex tw-size-5 tw-items-center tw-justify-center tw-text-iron-400 tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none",
+              isOpen
+                ? "tw-text-primary-300"
+                : "desktop-hover:group-hover:tw-text-iron-50"
+            )}
+          >
+            <Icon className="tw-size-5" aria-hidden="true" />
+          </span>
+          <span className="tw-min-w-0 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-50 md:tw-text-base">
+            {section.title}
           </span>
           <ChevronDownIcon
             className={cx(
-              "tw-size-5 tw-flex-shrink-0 tw-text-iron-600 tw-transition-all tw-duration-300",
+              "tw-size-5 tw-text-iron-600 tw-transition-all tw-duration-300 motion-reduce:tw-transition-none",
               isOpen && "tw-rotate-180 tw-text-iron-50"
             )}
             aria-hidden="true"
@@ -693,11 +704,20 @@ function FaqAccordionItem({
             initial={{ height: 0, opacity: 0, y: -4 }}
             animate={{ height: "auto", opacity: 1, y: 0 }}
             exit={{ height: 0, opacity: 0, y: -2 }}
-            transition={FAQ_PANEL_TRANSITION}
+            transition={
+              shouldReduceMotion ? { duration: 0 } : FAQ_PANEL_TRANSITION
+            }
             className="tw-overflow-hidden"
           >
-            <div className="tw-px-4 tw-pb-5 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-px-5 sm:tw-pb-6 md:tw-pl-14">
-              <Content />
+            <div
+              className={cx(
+                FAQ_ALIGNMENT_GRID_CLASS_NAME,
+                "tw-px-4 tw-pb-5 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-px-5 sm:tw-pb-6"
+              )}
+            >
+              <div className="tw-col-start-2 tw-col-end-4">
+                <Content />
+              </div>
             </div>
           </motion.div>
         )}
@@ -709,6 +729,7 @@ function FaqAccordionItem({
 const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
   const { setActiveContentTab } = useContentTab();
   const { faqViewStyle } = useLayout();
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const sectionRefs = useRef<Partial<Record<FaqSectionId, HTMLElement | null>>>(
     {}
@@ -738,15 +759,15 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
 
         scrollContainer.scrollTo({
           top: scrollContainer.scrollTop + sectionTop - containerTop,
-          behavior: "smooth",
+          behavior: shouldReduceMotion ? "auto" : "smooth",
         });
       }
 
       setPendingScrollSectionId(null);
-    }, FAQ_SCROLL_ALIGNMENT_DELAY_MS);
+    }, shouldReduceMotion ? 0 : FAQ_SCROLL_ALIGNMENT_DELAY_MS);
 
     return () => globalThis.clearTimeout(timeoutId);
-  }, [openSectionId, pendingScrollSectionId]);
+  }, [openSectionId, pendingScrollSectionId, shouldReduceMotion]);
 
   const handleSectionToggle = (sectionId: FaqSectionId) => {
     const nextOpenSectionId = openSectionId === sectionId ? null : sectionId;
@@ -771,6 +792,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
                 sectionRefs.current[section.id] = element;
               }}
               isOpen={openSectionId === section.id}
+              shouldReduceMotion={shouldReduceMotion}
               onToggle={() => handleSectionToggle(section.id)}
             />
           ))}
