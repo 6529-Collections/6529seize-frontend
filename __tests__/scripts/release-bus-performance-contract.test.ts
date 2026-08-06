@@ -367,7 +367,10 @@ describe("Release Bus frontend performance contract", () => {
         '[ "$ARTIFACT_CONTRACT_VERSION" = legacy-v2 ]'
       );
       expect(verification.run).toContain("artifact_contract=legacy-v2");
-      expect(deployReport.run).toContain("summary_environment=portable");
+      expect(deployReport.run).toContain(
+        'summary_environment="$ARTIFACT_ENVIRONMENT"'
+      );
+      expect(deployReport.run).not.toContain("summary_environment=portable");
       expect(deployReport.run).toContain(
         "deployment_environment:$deployment_environment"
       );
