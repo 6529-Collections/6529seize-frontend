@@ -2,7 +2,10 @@ jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
 
 import { render, screen } from "@testing-library/react";
 
-import { StreamReviewDevelopmentStatus } from "@/components/public-review/StreamReviewDevelopmentStatus";
+import {
+  StreamReviewDevelopmentStatus,
+  StreamReviewReviewerPrompts,
+} from "@/components/public-review/StreamReviewDevelopmentStatus";
 import {
   STREAM_REVIEW_PAGES,
   STREAM_REVIEW_SOURCE_COMMIT,
@@ -13,7 +16,6 @@ describe("StreamReviewDevelopmentStatus", () => {
   it("separates the dated development update from the pinned review snapshot", () => {
     render(
       <StreamReviewDevelopmentStatus
-        pages={STREAM_REVIEW_PAGES}
         reviewSourceCommit={STREAM_REVIEW_SOURCE_COMMIT}
         reviewVersion={STREAM_REVIEW_VERSION}
       />
@@ -27,21 +29,8 @@ describe("StreamReviewDevelopmentStatus", () => {
     ).toHaveTextContent("3 under review, and 15 remaining");
     expect(screen.getByText(/10 recorded issues/)).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Where your input would help" })
-    ).toBeInTheDocument();
-    const questionLinks = screen.getAllByRole("link", {
-      name: /^Open this question:/,
-    });
-    expect(questionLinks).toHaveLength(6);
-    expect(
-      screen.getByRole("link", {
-        name: "Open this question: Artist choices",
-      })
-    ).toBeInTheDocument();
-    expect(questionLinks[0]).toHaveAttribute(
-      "href",
-      "/reviews/6529-stream/for-artists#questions-for-artists"
-    );
+      screen.queryByRole("heading", { name: "Where your input would help" })
+    ).not.toBeInTheDocument();
     expect(
       screen.getByRole("link", {
         name: "Development source (opens in a new tab)",
@@ -65,6 +54,26 @@ describe("StreamReviewDevelopmentStatus", () => {
     expect(document.querySelector("time")).toHaveAttribute(
       "datetime",
       "2026-08-01T00:00:00.000Z"
+    );
+  });
+
+  it("renders the review questions as a separate community entry point", () => {
+    render(<StreamReviewReviewerPrompts pages={STREAM_REVIEW_PAGES} />);
+
+    expect(
+      screen.getByRole("heading", { name: "Where your input would help" })
+    ).toBeInTheDocument();
+    const questionLinks = screen.getAllByRole("link", {
+      name: /^Open this question:/,
+    });
+    expect(questionLinks).toHaveLength(6);
+    expect(
+      screen.getByRole("link", {
+        name: "Open this question: Artist choices",
+      })
+    ).toHaveAttribute(
+      "href",
+      "/reviews/6529-stream/for-artists#questions-for-artists"
     );
   });
 });

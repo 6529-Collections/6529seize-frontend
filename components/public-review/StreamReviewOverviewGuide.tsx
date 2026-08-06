@@ -38,8 +38,7 @@ const ARTWORK_PARTS = [
   },
   {
     titleKey: "publicReview.overviewGuide.artworkParts.rules.title",
-    descriptionKey:
-      "publicReview.overviewGuide.artworkParts.rules.description",
+    descriptionKey: "publicReview.overviewGuide.artworkParts.rules.description",
   },
   {
     titleKey: "publicReview.overviewGuide.artworkParts.preservation.title",
@@ -99,8 +98,7 @@ const AUDIENCE_PATHS = [
   {
     pageId: "for-artists",
     titleKey: "publicReview.overviewGuide.audiences.artists.title",
-    descriptionKey:
-      "publicReview.overviewGuide.audiences.artists.description",
+    descriptionKey: "publicReview.overviewGuide.audiences.artists.description",
   },
   {
     pageId: "artwork-lifecycle",
@@ -111,15 +109,16 @@ const AUDIENCE_PATHS = [
   {
     pageId: "security-testing-and-known-limitations",
     titleKey: "publicReview.overviewGuide.audiences.auditors.title",
-    descriptionKey:
-      "publicReview.overviewGuide.audiences.auditors.description",
+    descriptionKey: "publicReview.overviewGuide.audiences.auditors.description",
   },
 ] as const satisfies readonly LinkedOverviewItem[];
 
 export function StreamReviewOverviewGuide({
   pages,
+  technicalOverviewHref,
 }: {
   readonly pages: readonly PublicReviewPageDefinition[];
+  readonly technicalOverviewHref: string;
 }) {
   return (
     <div className="tw-mt-12 tw-w-full tw-max-w-[52rem] sm:tw-mt-16">
@@ -146,10 +145,7 @@ export function StreamReviewOverviewGuide({
           id="stream-artwork-parts-heading"
           className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-2xl"
         >
-          {t(
-            DEFAULT_LOCALE,
-            "publicReview.overviewGuide.artworkParts.heading"
-          )}
+          {t(DEFAULT_LOCALE, "publicReview.overviewGuide.artworkParts.heading")}
         </h2>
         <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
           {t(
@@ -210,7 +206,9 @@ export function StreamReviewOverviewGuide({
         </p>
         <ol className="tw-mb-0 tw-mt-7 tw-list-none tw-divide-y tw-divide-white/[0.08] tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.08] tw-p-0">
           {ARTWORK_JOURNEY.map((step, index) => {
-            const page = pages.find((candidate) => candidate.id === step.pageId);
+            const page = pages.find(
+              (candidate) => candidate.id === step.pageId
+            );
             if (!page) {
               return null;
             }
@@ -287,18 +285,36 @@ export function StreamReviewOverviewGuide({
                 <p className="tw-mb-0 tw-mt-2 tw-flex-1 tw-text-sm tw-leading-6 tw-text-iron-400">
                   {t(DEFAULT_LOCALE, audience.descriptionKey)}
                 </p>
-                <Link
-                  href={getStreamReviewPageHref({ page })}
-                  className="tw-group tw-mt-4 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-self-start tw-text-xs tw-font-semibold tw-text-primary-300 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-                >
-                  {t(DEFAULT_LOCALE, "publicReview.overviewGuide.startPage", {
-                    page: t(DEFAULT_LOCALE, page.titleKey),
-                  })}
-                  <ArrowRightIcon
-                    aria-hidden="true"
-                    className="tw-size-3.5 tw-flex-none tw-transition-transform group-hover:tw-translate-x-0.5"
-                  />
-                </Link>
+                <div className="tw-mt-4 tw-flex tw-flex-col tw-items-start">
+                  <Link
+                    href={getStreamReviewPageHref({ page })}
+                    className="tw-group tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-text-xs tw-font-semibold tw-text-primary-300 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                  >
+                    {t(DEFAULT_LOCALE, "publicReview.overviewGuide.startPage", {
+                      page: t(DEFAULT_LOCALE, page.titleKey),
+                    })}
+                    <ArrowRightIcon
+                      aria-hidden="true"
+                      className="tw-size-3.5 tw-flex-none tw-transition-transform group-hover:tw-translate-x-0.5"
+                    />
+                  </Link>
+                  {audience.pageId ===
+                  "security-testing-and-known-limitations" ? (
+                    <Link
+                      href={technicalOverviewHref}
+                      className="tw-group tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                    >
+                      {t(
+                        DEFAULT_LOCALE,
+                        "publicReview.overviewGuide.technicalOverviewLink"
+                      )}
+                      <ArrowRightIcon
+                        aria-hidden="true"
+                        className="tw-size-3.5 tw-flex-none tw-transition-transform group-hover:tw-translate-x-0.5"
+                      />
+                    </Link>
+                  ) : null}
+                </div>
               </article>
             );
           })}

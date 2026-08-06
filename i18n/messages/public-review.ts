@@ -76,8 +76,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.navigation.contents": "Review contents",
   "publicReview.navigation.onThisPage": "On this page",
   "publicReview.surface.navigation": "Review-wide destinations",
-  "publicReview.surface.navigationMobileContext":
-    "in mobile review navigation",
+  "publicReview.surface.navigationMobileContext": "in mobile review navigation",
   "publicReview.surface.navigationSidebarContext": "in review sidebar",
   "publicReview.surface.backToReview": "Back to review contents",
   "publicReview.surface.reference": "Technical reference",
@@ -106,8 +105,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.overviewGuide.artworkParts.approval.title": "Artist control",
   "publicReview.overviewGuide.artworkParts.approval.description":
     "Addresses with the right permission prepare the artwork and minting plan. Before minting begins, the artist's wallet approves the exact content and rules. Important later changes need fresh approval; without it, the change is rejected and the current setup remains active. The artist can also permanently prevent selected artwork files or code from being changed.",
-  "publicReview.overviewGuide.artworkParts.rules.title":
-    "Sales and payments",
+  "publicReview.overviewGuide.artworkParts.rules.title": "Sales and payments",
   "publicReview.overviewGuide.artworkParts.rules.description":
     "The smart contracts store the rules for a specific sale—for example, whether it uses a fixed price or auction, its price or reserve price, and which configured recipients should receive the primary-sale money. For later marketplace sales, the contracts only report royalty information; the marketplace decides whether to pay it.",
   "publicReview.overviewGuide.artworkParts.preservation.title":
@@ -128,12 +126,10 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "First, the artwork, number of editions, and sale are planned. The result may be decided by the artist, a community vote, or another review process.",
   "publicReview.overviewGuide.journey.approve.title":
     "Create the artwork records",
-  "publicReview.overviewGuide.journey.approve.linkLabel":
-    "Artwork lifecycle",
+  "publicReview.overviewGuide.journey.approve.linkLabel": "Artwork lifecycle",
   "publicReview.overviewGuide.journey.approve.description":
     "The artwork's contract records are created. These include its details and the wallets and percentages used to split sale money.",
-  "publicReview.overviewGuide.journey.authorize.title":
-    "Create the permission",
+  "publicReview.overviewGuide.journey.authorize.title": "Create the permission",
   "publicReview.overviewGuide.journey.authorize.linkLabel":
     "Permission details",
   "publicReview.overviewGuide.journey.authorize.description":
@@ -143,8 +139,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "Mint and auction details",
   "publicReview.overviewGuide.journey.sell.description":
     "The permission is submitted to the contract. If it passes the checks, the contract mints the token or starts the auction, then marks the permission as used.",
-  "publicReview.overviewGuide.journey.pay.title":
-    "Distribute the payment",
+  "publicReview.overviewGuide.journey.pay.title": "Distribute the payment",
   "publicReview.overviewGuide.journey.pay.linkLabel": "Payment details",
   "publicReview.overviewGuide.journey.pay.description":
     "The contract splits the sale money according to the artwork's recorded payment settings: which wallets receive a share and how large each share is.",
@@ -155,14 +150,15 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "An authorized wallet can close the collection when minting ends. This stops new tokens, blocks token destruction, and freezes the main settings.",
   "publicReview.overviewGuide.journey.finality.title":
     "Mark the artwork as complete",
-  "publicReview.overviewGuide.journey.finality.linkLabel":
-    "Finality details",
+  "publicReview.overviewGuide.journey.finality.linkLabel": "Finality details",
   "publicReview.overviewGuide.journey.finality.description":
     "An authorized wallet starts the final step. If no guardian stops it during the waiting period and any required artist approval exists, the protected records become permanent.",
   "publicReview.overviewGuide.readPage": "Read {page}",
   "publicReview.overviewGuide.audiences.heading": "Choose what matters to you",
   "publicReview.overviewGuide.audiences.description":
     "You do not need to read all fourteen pages. Start with the path closest to your role.",
+  "publicReview.overviewGuide.technicalOverviewLink":
+    "Read the detailed technical review",
   "publicReview.overviewGuide.audiences.artists.title": "Artists",
   "publicReview.overviewGuide.audiences.artists.description":
     "See what you approve, what can still change, and when your choices become permanent.",
@@ -180,16 +176,14 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "Stream is meant to help you describe the complete artwork, approve the important choices, sell it under clear rules, and show what later became permanent.",
   "publicReview.forArtistsGuide.reviewContext":
     "Stream is still being designed. This guide explains the intended artist experience in plain language. The detailed contract review below is the technical evidence for the current proposal.",
-  "publicReview.forArtistsGuide.artwork.heading":
-    "Your artwork in Stream",
+  "publicReview.forArtistsGuide.artwork.heading": "Your artwork in Stream",
   "publicReview.forArtistsGuide.artwork.description":
     "Stream treats the artwork as more than one image or token. It connects the creative work to the choices needed to publish, sell, and preserve it.",
   "publicReview.forArtistsGuide.artwork.identity.title":
     "Identity and materials",
   "publicReview.forArtistsGuide.artwork.identity.description":
     "A stable collection identity points to the files, scripts, images, and software that make up the work.",
-  "publicReview.forArtistsGuide.artwork.editions.title":
-    "Editions and minting",
+  "publicReview.forArtistsGuide.artwork.editions.title": "Editions and minting",
   "publicReview.forArtistsGuide.artwork.editions.description":
     "You choose whether it is a one-of-one or an edition, how many can exist, and who is allowed to mint.",
   "publicReview.forArtistsGuide.artwork.approval.title": "Your approval",
@@ -213,8 +207,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
   "publicReview.forArtistsGuide.journey.approve.title": "Approve",
   "publicReview.forArtistsGuide.journey.approve.description":
     "Use your wallet to sign the exact collection state you accept. If the plan changes, the new state needs its own approval.",
-  "publicReview.forArtistsGuide.journey.select.title":
-    "Community selection",
+  "publicReview.forArtistsGuide.journey.select.title": "Community selection",
   "publicReview.forArtistsGuide.journey.select.description":
     "The community evaluates the work outside the contracts. If it passes that process, a wallet Stream trusts signs a launch permission containing the exact artwork and launch terms.",
   "publicReview.forArtistsGuide.journey.launch.title": "Launch",
@@ -250,8 +243,7 @@ export const PUBLIC_REVIEW_MESSAGES = {
     "After minting starts",
   "publicReview.forArtistsGuide.changes.afterLaunch.description":
     "Minted history, payments, and signed actions remain recorded. Some settings or operating roles may still be active.",
-  "publicReview.forArtistsGuide.changes.afterFinality.title":
-    "After finality",
+  "publicReview.forArtistsGuide.changes.afterFinality.title": "After finality",
   "publicReview.forArtistsGuide.changes.afterFinality.description":
     "The design is meant to close the remaining artwork-affecting changes and leave a record people can verify later.",
   "publicReview.forArtistsGuide.changes.caveat":

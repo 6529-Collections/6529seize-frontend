@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 
 import { StreamReviewOverviewGuide } from "@/components/public-review/StreamReviewOverviewGuide";
 import { getStreamReviewVersion } from "@/lib/public-review/streamReviewDefinition";
@@ -10,7 +10,12 @@ if (!ACTIVE_REVIEW_VERSION) {
 
 describe("StreamReviewOverviewGuide", () => {
   it("explains Stream through its artwork parts, journey, and audience paths", () => {
-    render(<StreamReviewOverviewGuide pages={ACTIVE_REVIEW_VERSION.pages} />);
+    render(
+      <StreamReviewOverviewGuide
+        pages={ACTIVE_REVIEW_VERSION.pages}
+        technicalOverviewHref="/reviews/6529-stream/versions/2026-08-01.1"
+      />
+    );
 
     expect(
       screen.getByRole("heading", { name: "What is Stream?" })
@@ -86,9 +91,10 @@ describe("StreamReviewOverviewGuide", () => {
       "href",
       "/reviews/6529-stream/curation-and-tdh-authorization"
     );
-    expect(
-      screen.getByRole("link", { name: "Artist guide" })
-    ).toHaveAttribute("href", "/reviews/6529-stream/for-artists");
+    expect(screen.getByRole("link", { name: "Artist guide" })).toHaveAttribute(
+      "href",
+      "/reviews/6529-stream/for-artists"
+    );
     const artworkLifecycleLink = screen.getByRole("link", {
       name: "Artwork lifecycle",
     });
@@ -112,7 +118,9 @@ describe("StreamReviewOverviewGuide", () => {
       "href",
       "/reviews/6529-stream/revenue-splits-and-royalties"
     );
-    expect(screen.getByRole("link", { name: "Freeze details" })).toHaveAttribute(
+    expect(
+      screen.getByRole("link", { name: "Freeze details" })
+    ).toHaveAttribute(
       "href",
       "/reviews/6529-stream/freezing-preservation-and-artwork-finality#core-freeze-fixes-a-defined-boundary"
     );
@@ -133,9 +141,7 @@ describe("StreamReviewOverviewGuide", () => {
         "First, the artwork, number of editions, and sale are planned. The result may be decided by the artist, a community vote, or another review process."
       )
     ).toBeInTheDocument();
-    expect(
-      screen.getByText("Create the artwork records")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Create the artwork records")).toBeInTheDocument();
     expect(
       screen.getByText(
         "The artwork's contract records are created. These include its details and the wallets and percentages used to split sale money."
@@ -184,5 +190,14 @@ describe("StreamReviewOverviewGuide", () => {
       "href",
       "/reviews/6529-stream/security-testing-and-known-limitations"
     );
+    const auditorCard = screen
+      .getByRole("heading", { name: "Auditors" })
+      .closest("article");
+    expect(auditorCard).not.toBeNull();
+    expect(
+      within(auditorCard!).getByRole("link", {
+        name: "Read the detailed technical review",
+      })
+    ).toHaveAttribute("href", "/reviews/6529-stream/versions/2026-08-01.1");
   });
 });

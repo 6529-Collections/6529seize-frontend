@@ -103,6 +103,7 @@ export function PublicReviewShell({
   feedbackSlot,
   introNotice,
   showAudiencePaths = true,
+  showEditorialContent = true,
   source,
 }: {
   readonly editorialMarkdown: string;
@@ -115,6 +116,7 @@ export function PublicReviewShell({
   readonly feedbackSlot: ReactNode;
   readonly introNotice?: ReactNode;
   readonly showAudiencePaths?: boolean;
+  readonly showEditorialContent?: boolean;
   readonly source: PublicReviewSource;
 }) {
   const pageIndex = reviewVersion.pages.findIndex(
@@ -212,17 +214,27 @@ export function PublicReviewShell({
                   </div>
                 )}
 
-                <div className="tw-mt-12 tw-w-full tw-max-w-[52rem] sm:tw-mt-16">
-                  <article className="tw-pb-8">
-                    <PublicReviewMarkdown
-                      internalLinkBasePath={routes.getRootHref(routeVersion)}
-                      markdown={editorialMarkdown}
-                    />
-                  </article>
+                <div
+                  className={`tw-w-full tw-max-w-[52rem] ${
+                    showEditorialContent ? "tw-mt-12 sm:tw-mt-16" : ""
+                  }`}
+                >
+                  {showEditorialContent ? (
+                    <>
+                      <article className="tw-pb-8">
+                        <PublicReviewMarkdown
+                          internalLinkBasePath={routes.getRootHref(
+                            routeVersion
+                          )}
+                          markdown={editorialMarkdown}
+                        />
+                      </article>
 
-                  <div className="tw-mt-8">
-                    <PublicReviewEvidenceLegend />
-                  </div>
+                      <div className="tw-mt-8">
+                        <PublicReviewEvidenceLegend />
+                      </div>
+                    </>
+                  ) : null}
 
                   <PublicReviewPageStepper
                     currentPage={page}

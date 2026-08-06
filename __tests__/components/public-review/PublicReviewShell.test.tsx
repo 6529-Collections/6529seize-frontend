@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 
 import { PublicReviewShell } from "@/components/public-review/PublicReviewShell";
 import { StreamReviewBotAuthorshipNote } from "@/components/public-review/StreamReviewBotAuthorshipNote";
@@ -172,6 +172,41 @@ describe("PublicReviewShell", () => {
     expect(
       screen.queryByRole("heading", { name: "Choose a reading path" })
     ).not.toBeInTheDocument();
+  });
+
+  it("can end a current overview before the versioned editorial", () => {
+    const overview = ACTIVE_REVIEW_VERSION.pages[0];
+    if (!overview) {
+      throw new Error("Stream review overview is missing");
+    }
+
+    render(
+      <PublicReviewShell
+        editorialMarkdown="# Old technical overview"
+        page={overview}
+        review={STREAM_REVIEW_DEFINITION}
+        reviewVersion={ACTIVE_REVIEW_VERSION}
+        sections={[]}
+        displayedVersion={STREAM_REVIEW_DEFINITION.activeVersion}
+        feedbackSlot={<div>Feedback form</div>}
+        showAudiencePaths={false}
+        showEditorialContent={false}
+        source={ACTIVE_REVIEW_VERSION.source}
+      />
+    );
+
+    expect(
+      screen.queryByText("Old technical overview")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Evidence labels" })
+    ).not.toBeInTheDocument();
+    const pageStepper = screen.getByRole("navigation", {
+      name: "Previous and next contract review pages",
+    });
+    expect(
+      within(pageStepper).getByRole("link", { name: /Artwork Lifecycle/ })
+    ).toHaveAttribute("href", "/reviews/6529-stream/artwork-lifecycle");
   });
 
   it("uses the exact resolved source identity instead of the active default", () => {

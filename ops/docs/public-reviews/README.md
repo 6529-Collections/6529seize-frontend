@@ -64,16 +64,18 @@ Every page includes:
   switcher below the status area
 - the review version and a link to the exact source snapshot
 - navigation across the fourteen pages in the current version snapshot
-- an on-page contents list generated from the editorial headings
+- an on-page contents list generated from the displayed editorial headings;
+  the simplified current Overview intentionally has no technical subsection list
 - previous and next page controls
 - a collapsible page-feedback rail that reads existing comments and includes a
   structured feedback form bound to the immutable displayed review version
 
-The current overview begins with a plain definition of Stream, five important
+The current overview contains a plain definition of Stream, five important
 parts of a Stream artwork, a seven-step artwork journey, and focused
-starting points for artists, collectors and minters, and auditors. A dated
-development update and six plain-language review questions follow that
-introduction. The current **For Artists** page starts with a plain artist guide
+starting points for artists, collectors and minters, and auditors. It ends
+after those audience paths. The auditor path includes a secondary link to the
+immutable technical Overview for the active review version. The current **For
+Artists** page starts with a plain artist guide
 covering the artwork package, approval journey, change boundaries, other actors,
 sales, payments, and finality. Its detailed versioned editorial remains below
 as the technical evidence. The generated technical reference lets reviewers
@@ -84,11 +86,18 @@ matching records at a time.
 
 ## Implementation and Evidence Status
 
-After the plain-language introduction, the current Overview shows a separately
-dated development update. It summarizes recent work, active work, launch
-requirements, evidence counts, and the source commit checked for that update.
-The introduction and update are shown only on the unversioned Overview.
-Immutable version routes continue to describe their exact review snapshot.
+The current **Where Development Stands** page begins with a separately dated
+development update. It summarizes recent work, active work, launch requirements,
+evidence counts, and the source commit checked for that update. The current
+**Community Review** page begins with six plain-language review questions and
+the authorship disclosure. These additions appear only on their current,
+unversioned routes.
+
+The plain Overview guide appears only on the unversioned Overview and replaces
+the versioned technical Overview there. Its on-page section navigation and
+feedback section choices therefore omit the hidden technical headings. A link
+inside the auditor audience card opens the complete immutable technical
+Overview. Immutable version routes continue to describe their exact review snapshot.
 The plain artist guide follows the same rule: it appears only on the current,
 unversioned **For Artists** route, while immutable version routes continue to
 render their exact editorial snapshot without the guide.
@@ -217,8 +226,10 @@ page. Reviewers can load older feedback in additional 50-message pages or open
 the full ledger for cross-page filters and exports. Closing and reopening the
 rail preserves an in-progress draft.
 
-Technical-reference feedback uses the same page-scoped projection. Overview
-comments stay on the technical overview, while definition, declaration,
+Technical-reference feedback uses the same page-scoped projection. The current
+Overview accepts page-level feedback without offering its hidden technical
+sections; immutable Overview routes retain their section-specific feedback.
+Definition, declaration,
 function, event, interface, and source comments additionally match their exact
 immutable source identity instead of appearing on every page of the same type.
 
