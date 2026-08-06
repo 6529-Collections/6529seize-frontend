@@ -51,6 +51,20 @@ describe("automatic production E2E dispatch", () => {
       (step: { name?: string }) =>
         step.name === "Check out exact production SHA"
     );
+    const sourceVerificationIndex = job.steps.findIndex(
+      (step: { name?: string }) => step.name === "Verify immutable source"
+    );
+    const controlCheckoutIndex = job.steps.findIndex(
+      (step: { name?: string }) =>
+        step.name === "Check out immutable Release Bus Museum selection tooling"
+    );
+    const controlVerificationIndex = job.steps.findIndex(
+      (step: { name?: string }) =>
+        step.name === "Verify immutable Museum selection tooling"
+    );
+    const dependenciesIndex = job.steps.findIndex(
+      (step: { name?: string }) => step.name === "Install frozen dependencies"
+    );
     const packsIndex = job.steps.findIndex(
       (step: { name?: string }) =>
         step.name === "Run production-safe read-only packs"
@@ -59,6 +73,29 @@ describe("automatic production E2E dispatch", () => {
       (step: { name?: string }) =>
         step.name ===
         "Select fail-closed Museum packs for the exact deployed range"
+    );
+    const evidenceControlCheckoutIndex = job.steps.findIndex(
+      (step: { name?: string }) =>
+        step.name === "Check out immutable Release Bus Museum evidence tooling"
+    );
+    const evidenceControlVerificationIndex = job.steps.findIndex(
+      (step: { name?: string }) =>
+        step.name === "Verify immutable Museum evidence tooling"
+    );
+    const evidenceIndex = job.steps.findIndex(
+      (step: { name?: string }) =>
+        step.name === "Validate exact production E2E evidence"
+    );
+    const evidencePath = job.steps[evidenceControlCheckoutIndex - 1];
+    const evidenceControlCheckout = job.steps[evidenceControlCheckoutIndex];
+    const evidenceControlVerification =
+      job.steps[evidenceControlVerificationIndex];
+    const report = job.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Report structured Release Bus E2E result"
+    );
+    const result = job.steps.find(
+      (step: { name?: string }) => step.name === "Return production E2E result"
     );
 
     expect(
@@ -78,9 +115,37 @@ describe("automatic production E2E dispatch", () => {
     expect(job.steps[checkoutIndex].with.ref).toBe(
       "${{ inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha }}"
     );
+    expect(sourceVerificationIndex).toBeGreaterThan(checkoutIndex);
+    expect(dependenciesIndex).toBeGreaterThan(sourceVerificationIndex);
+    expect(controlCheckoutIndex).toBeGreaterThan(dependenciesIndex);
+    expect(controlVerificationIndex).toBeGreaterThan(controlCheckoutIndex);
     expect(packsIndex).toBeGreaterThan(checkoutIndex);
+    expect(selectionIndex).toBeGreaterThan(controlVerificationIndex);
     expect(selectionIndex).toBeGreaterThan(checkoutIndex);
     expect(packsIndex).toBeGreaterThan(selectionIndex);
+    expect(evidenceControlCheckoutIndex).toBeGreaterThan(packsIndex);
+    expect(evidenceControlVerificationIndex).toBeGreaterThan(
+      evidenceControlCheckoutIndex
+    );
+    expect(evidenceIndex).toBeGreaterThan(evidenceControlVerificationIndex);
+    expect(job.steps[controlCheckoutIndex].with.path).toBe(
+      ".release-bus-control"
+    );
+    expect(job.steps[evidenceControlCheckoutIndex].with.path).toBe(
+      ".release-bus-evidence-control"
+    );
+    expect(evidencePath.id).toBe("museum-evidence-path");
+    expect(evidenceControlCheckout.id).toBe("museum-evidence-checkout");
+    expect(evidenceControlCheckout.if).toContain(
+      "steps.museum-evidence-path.outcome == 'success'"
+    );
+    expect(evidenceControlVerification.id).toBe("museum-evidence-tooling");
+    expect(evidenceControlVerification.if).toContain(
+      "steps.museum-evidence-checkout.outcome == 'success'"
+    );
+    expect(job.steps[evidenceIndex].if).toContain(
+      "steps.museum-evidence-tooling.outcome == 'success'"
+    );
     expect(job.steps[selectionIndex].run).toContain(
       "scripts/museum-release-selection.cjs"
     );
@@ -95,6 +160,26 @@ describe("automatic production E2E dispatch", () => {
     );
     expect(evidence.run).toContain("!isMuseumPack(pack)");
     expect(evidence.run).toContain(".release_binding == null");
+    expect(evidence.env.MUSEUM_RELEASE_SELECTION_TOOL).toBe(
+      ".release-bus-evidence-control/scripts/museum-release-selection.cjs"
+    );
+    expect(evidence.run).toContain('node - "$MUSEUM_SELECTION_FILE"');
+    for (const outcome of [
+      "MUSEUM_EVIDENCE_PATH_OUTCOME",
+      "MUSEUM_EVIDENCE_CHECKOUT_OUTCOME",
+      "MUSEUM_EVIDENCE_TOOLING_OUTCOME",
+    ]) {
+      expect(report.env[outcome]).toContain("steps.museum-evidence-");
+      expect(report.run).toContain(`$${outcome}`);
+      expect(result.env[outcome]).toContain("steps.museum-evidence-");
+      expect(result.run).toContain(`$${outcome}`);
+    }
+    expect(e2eSource).toContain(
+      'if ! control_status="$(git -C .release-bus-control status --porcelain=v1 --untracked-files=all)"; then'
+    );
+    expect(e2eSource).toContain(
+      'if ! control_status="$(git -C .release-bus-evidence-control status --porcelain=v1 --untracked-files=all)"; then'
+    );
     expect(e2eSource).toContain("args+=(--parallel 3)");
     expect(e2eSource).toContain("Restore Playwright browser");
   });

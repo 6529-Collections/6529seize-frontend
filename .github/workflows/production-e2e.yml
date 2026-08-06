@@ -174,27 +174,6 @@ jobs:
             -H 'Content-Type: application/json' \
             --data "$payload" \
             "$RELEASE_BUS_API_URL/deploy/release-bus-v2/authorize"
-      - name: Check out immutable Release Bus Museum selection tooling
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-        with:
-          ref: ${{ github.workflow_sha }}
-          path: .release-bus-control
-          filter: blob:none
-          fetch-depth: 1
-          persist-credentials: false
-          sparse-checkout: |
-            scripts/museum-release-tier.cjs
-            scripts/museum-release-selection.cjs
-          sparse-checkout-cone-mode: false
-      - name: Verify immutable Museum selection tooling
-        env:
-          WORKFLOW_SHA: ${{ github.workflow_sha }}
-        run: |
-          set -euo pipefail
-          [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
-          test "$(git -C .release-bus-control rev-parse HEAD)" = "$WORKFLOW_SHA"
-          test -f .release-bus-control/scripts/museum-release-tier.cjs
-          test -f .release-bus-control/scripts/museum-release-selection.cjs
       - name: Check out exact production SHA
         # workflow_dispatch itself is trusted orchestration from the selected
         # default-branch ref. All pack code, the pack manifest, dependencies,
@@ -236,6 +215,40 @@ jobs:
         env:
           SFW_BIN: ${{ steps.socket-firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 install:frozen
+      # The deployed tree and its dependency lifecycle run before trusted
+      # control tooling is staged. This keeps untrusted install code from
+      # mutating the Museum selector after its immutable-source verification.
+      - name: Require an unused Museum selection control path
+        if: steps.dependencies.outcome == 'success'
+        run: test ! -e .release-bus-control
+      - name: Check out immutable Release Bus Museum selection tooling
+        if: steps.dependencies.outcome == 'success'
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: .release-bus-control
+          filter: blob:none
+          fetch-depth: 1
+          persist-credentials: false
+          sparse-checkout: |
+            scripts/museum-release-tier.cjs
+            scripts/museum-release-selection.cjs
+          sparse-checkout-cone-mode: false
+      - name: Verify immutable Museum selection tooling
+        if: steps.dependencies.outcome == 'success'
+        env:
+          WORKFLOW_SHA: ${{ github.workflow_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git -C .release-bus-control rev-parse HEAD)" = "$WORKFLOW_SHA"
+          if ! control_status="$(git -C .release-bus-control status --porcelain=v1 --untracked-files=all)"; then
+            echo "::error::Unable to verify the Museum selection control working tree."
+            exit 1
+          fi
+          test -z "$control_status"
+          test -f .release-bus-control/scripts/museum-release-tier.cjs
+          test -f .release-bus-control/scripts/museum-release-selection.cjs
       - name: Select fail-closed Museum packs for the exact deployed range
         id: museum-selection
         if: steps.dependencies.outcome == 'success'
@@ -430,9 +443,46 @@ jobs:
           fi
           echo "MUSEUM_SELECTED_PACKS_JSON=$MUSEUM_SELECTED_PACKS_JSON" >> "$GITHUB_ENV"
           ./bin/6529 run e2e:packs -- "${args[@]}"
+      # The deployed E2E runner has now completed. Stage a second, fresh,
+      # workflow-SHA-bound copy for evidence verification so tested app code
+      # cannot alter the verifier used to qualify its own output.
+      - name: Require an unused Museum evidence control path
+        id: museum-evidence-path
+        if: always() && steps.dependencies.outcome == 'success' && steps.playwright.outcome == 'success'
+        run: test ! -e .release-bus-evidence-control
+      - name: Check out immutable Release Bus Museum evidence tooling
+        id: museum-evidence-checkout
+        if: always() && steps.museum-evidence-path.outcome == 'success'
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: .release-bus-evidence-control
+          filter: blob:none
+          fetch-depth: 1
+          persist-credentials: false
+          sparse-checkout: |
+            scripts/museum-release-tier.cjs
+            scripts/museum-release-selection.cjs
+          sparse-checkout-cone-mode: false
+      - name: Verify immutable Museum evidence tooling
+        id: museum-evidence-tooling
+        if: always() && steps.museum-evidence-checkout.outcome == 'success'
+        env:
+          WORKFLOW_SHA: ${{ github.workflow_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$WORKFLOW_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$(git -C .release-bus-evidence-control rev-parse HEAD)" = "$WORKFLOW_SHA"
+          if ! control_status="$(git -C .release-bus-evidence-control status --porcelain=v1 --untracked-files=all)"; then
+            echo "::error::Unable to verify the Museum evidence control working tree."
+            exit 1
+          fi
+          test -z "$control_status"
+          test -f .release-bus-evidence-control/scripts/museum-release-tier.cjs
+          test -f .release-bus-evidence-control/scripts/museum-release-selection.cjs
       - name: Validate exact production E2E evidence
         id: evidence
-        if: always() && steps.dependencies.outcome == 'success' && steps.playwright.outcome == 'success'
+        if: always() && steps.museum-evidence-tooling.outcome == 'success'
         env:
           DEPLOY_HUB_OPERATION_ID: ${{ inputs.deploy_hub_operation_id }}
           E2E_OUTCOME: ${{ steps.e2e.outcome }}
@@ -442,7 +492,7 @@ jobs:
           MANIFEST_IDENTITY: ${{ inputs.release_manifest_identity_sha256 }}
           MUSEUM_SOURCE_COMMIT: ${{ steps.museum-selection.outputs.source_commit }}
           MUSEUM_SELECTION_FILE: ${{ steps.museum-selection.outputs.file }}
-          MUSEUM_RELEASE_SELECTION_TOOL: .release-bus-control/scripts/museum-release-selection.cjs
+          MUSEUM_RELEASE_SELECTION_TOOL: .release-bus-evidence-control/scripts/museum-release-selection.cjs
         run: |
           set -euo pipefail
           test -f production-e2e-artifacts/evidence.json
@@ -455,7 +505,7 @@ jobs:
             (.selected_packs | type == "array") and
             (.selection_digest | test("^[a-f0-9]{64}$"))
           ' "$MUSEUM_SELECTION_FILE" >/dev/null
-          ./bin/6529 exec node - "$MUSEUM_SELECTION_FILE" <<'NODE'
+          node - "$MUSEUM_SELECTION_FILE" <<'NODE'
           const fs = require("node:fs");
           const path = require("node:path");
           const selection = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
@@ -570,6 +620,9 @@ jobs:
           DEPENDENCIES_OUTCOME: ${{ steps.dependencies.outcome }}
           PLAYWRIGHT_OUTCOME: ${{ steps.playwright.outcome }}
           E2E_OUTCOME: ${{ steps.e2e.outcome }}
+          MUSEUM_EVIDENCE_PATH_OUTCOME: ${{ steps.museum-evidence-path.outcome }}
+          MUSEUM_EVIDENCE_CHECKOUT_OUTCOME: ${{ steps.museum-evidence-checkout.outcome }}
+          MUSEUM_EVIDENCE_TOOLING_OUTCOME: ${{ steps.museum-evidence-tooling.outcome }}
           EVIDENCE_OUTCOME: ${{ steps.evidence.outcome }}
           TRAIN_ID: ${{ inputs.release_train_id }}
           OPERATION_KEY: ${{ inputs.operation_key }}
@@ -584,7 +637,10 @@ jobs:
             failure_class=INFRASTRUCTURE
             failure_phase=production_e2e_setup
             retryable=true
-          elif [ "$EVIDENCE_OUTCOME" != success ]; then
+          elif [ "$MUSEUM_EVIDENCE_PATH_OUTCOME" != success ] || \
+            [ "$MUSEUM_EVIDENCE_CHECKOUT_OUTCOME" != success ] || \
+            [ "$MUSEUM_EVIDENCE_TOOLING_OUTCOME" != success ] || \
+            [ "$EVIDENCE_OUTCOME" != success ]; then
             status=FAILED
             failure_class=CONTROL_PLANE
             failure_phase=production_e2e_evidence
@@ -662,10 +718,16 @@ jobs:
           DEPENDENCIES_OUTCOME: ${{ steps.dependencies.outcome }}
           PLAYWRIGHT_OUTCOME: ${{ steps.playwright.outcome }}
           E2E_OUTCOME: ${{ steps.e2e.outcome }}
+          MUSEUM_EVIDENCE_PATH_OUTCOME: ${{ steps.museum-evidence-path.outcome }}
+          MUSEUM_EVIDENCE_CHECKOUT_OUTCOME: ${{ steps.museum-evidence-checkout.outcome }}
+          MUSEUM_EVIDENCE_TOOLING_OUTCOME: ${{ steps.museum-evidence-tooling.outcome }}
           EVIDENCE_OUTCOME: ${{ steps.evidence.outcome }}
         run: |
           test "$SOCKET_OUTCOME" = success
           test "$DEPENDENCIES_OUTCOME" = success
           test "$PLAYWRIGHT_OUTCOME" = success
+          test "$MUSEUM_EVIDENCE_PATH_OUTCOME" = success
+          test "$MUSEUM_EVIDENCE_CHECKOUT_OUTCOME" = success
+          test "$MUSEUM_EVIDENCE_TOOLING_OUTCOME" = success
           test "$EVIDENCE_OUTCOME" = success
           test "$E2E_OUTCOME" = success
