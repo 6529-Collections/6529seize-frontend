@@ -17,11 +17,20 @@ import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
 const STUDY_PATH = "/museum/network/stories/a-field-of-practice";
 const SOURCE_REPOSITORY = "6529-Collections/6529networkmuseum";
 const EXACT_COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
+const REQUIRED_SOURCE_COMMIT =
+  process.env["MUSEUM_PUBLICATION_EXPECTED_COMMIT"]?.trim() || null;
 const MOBILE_PROJECT = "web-mobile-chromium";
 const MOBILE_VIEWPORT = { width: 390, height: 844 } as const;
 const LOCAL_SHELL_ALLOWED_CONSOLE_ERROR_PATTERNS = [
   /^Analytics SDK: TypeError: Failed to fetch(?:\n|$)/,
 ];
+
+if (
+  REQUIRED_SOURCE_COMMIT !== null &&
+  !EXACT_COMMIT_PATTERN.test(REQUIRED_SOURCE_COMMIT)
+) {
+  throw new Error("museum_publication_expected_commit_not_exact");
+}
 
 type StudyRoute = {
   readonly path: string;
@@ -298,7 +307,7 @@ async function expectStudyRoute(
 test.describe("Museum institutional-practice publication @surface @large @readonly", () => {
   test.describe.configure({ mode: "serial" });
   test.setTimeout(120_000);
-  let sourceCommit: string | null = null;
+  let sourceCommit: string | null = REQUIRED_SOURCE_COMMIT;
 
   test.beforeEach(async ({ page }, testInfo) => {
     if (testInfo.project.name === MOBILE_PROJECT) {

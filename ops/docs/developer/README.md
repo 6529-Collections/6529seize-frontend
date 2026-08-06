@@ -14,6 +14,7 @@ and product-impact operations.
 ## Flows
 
 - [Simple Release Bus v2](simple-release-bus-v2.md)
+- [Build-runner benchmark and activation](runner-activation-playbook.md)
 - [Device farm QA](device-farm-qa.md)
 - [Product-impact Mixpanel runbook](product-impact-mixpanel-runbook.md)
 

@@ -10,9 +10,11 @@ import React from "react";
 import Auth, { AuthContext, useAuth } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { mockTitleContextModule } from "@/__tests__/utils/titleTestUtils";
+import { createDeferredPromise } from "@/__tests__/utils/deferredPromise";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import type * as AuthUtilsModule from "@/services/auth/auth.utils";
 import type * as SessionV2Module from "@/services/auth/session-v2.utils";
+import { getAuthStateFingerprint } from "@/services/auth/auth-token-fingerprint";
 
 const mockQueryClient = {
   getQueryData: jest.fn(),
@@ -25,6 +27,10 @@ const mockTrackAuthSessionRefreshSucceeded = jest.fn();
 const mockResetAuthSessionRefreshProductImpactDedupe = jest.fn();
 const mockTrackAuthValidationCancelled = jest.fn();
 const mockTrackAuthImpactEvent = jest.fn();
+const TEST_SESSION_VALUE = "session-access-token";
+const TEST_SECOND_SESSION_VALUE = "session-access-token-2";
+const TEST_REJECTED_SESSION_VALUE = "rejected-session-value";
+const TEST_REPLACEMENT_SESSION_VALUE = "replacement-session-value";
 
 type ReactQueryWrapperContextValue = React.ContextType<
   typeof ReactQueryWrapperContext
@@ -294,17 +300,6 @@ const enableAuthMigrationDeadline = (deadline = "2999-01-01T00:00:00.000Z") => {
   };
 };
 
-function createDeferredPromise<T>(): {
-  readonly promise: Promise<T>;
-  readonly resolve: (value: T) => void;
-} {
-  let resolvePromise!: (value: T) => void;
-  const promise = new Promise<T>((resolve) => {
-    resolvePromise = resolve;
-  });
-  return { promise, resolve: resolvePromise };
-}
-
 // Test helper components
 function ShowWaves() {
   const { showWaves } = useAuth();
@@ -556,6 +551,244 @@ describe("Auth component", () => {
       expect(toast).toHaveBeenCalled();
     });
 
+    it("force-validates an authorized session after the server rejects it", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      const authUtils =
+        require("@/services/auth/auth.utils") as typeof AuthUtilsModule;
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<
+        typeof authUtils.getAuthJwt
+      >;
+      const mockGetWalletAddress =
+        authUtils.getWalletAddress as jest.MockedFunction<
+          typeof authUtils.getWalletAddress
+        >;
+      const mockValidateJwt =
+        require("@/services/auth/jwt-validation.utils").validateJwt;
+      mockGetAuthJwt.mockReturnValue(TEST_REJECTED_SESSION_VALUE);
+      mockGetWalletAddress.mockReturnValue(validAddress);
+      const rejectedAuthStateFingerprint = getAuthStateFingerprint({
+        walletAddress: validAddress,
+        jwt: TEST_REJECTED_SESSION_VALUE,
+      });
+      const user = userEvent.setup();
+
+      const Child = () => {
+        const { requestAuth } = React.useContext(AuthContext);
+        return (
+          <button
+            type="button"
+            onClick={() =>
+              void requestAuth({
+                serverRejected: true,
+                expectedAuthStateFingerprint: rejectedAuthStateFingerprint,
+              })
+            }
+          >
+            recover auth
+          </button>
+        );
+      };
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await user.click(screen.getByRole("button", { name: "recover auth" }));
+
+      await waitFor(() => {
+        expect(mockValidateJwt).toHaveBeenCalledWith(
+          expect.objectContaining({
+            jwt: TEST_REJECTED_SESSION_VALUE,
+            wallet: validAddress,
+            serverRejected: true,
+            shouldPersistRefreshedSession: expect.any(Function),
+          })
+        );
+      });
+    });
+
+    it("cancels deferred server-rejected recovery after the token changes", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      const authUtils =
+        require("@/services/auth/auth.utils") as typeof AuthUtilsModule;
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<
+        typeof authUtils.getAuthJwt
+      >;
+      const mockGetWalletAddress =
+        authUtils.getWalletAddress as jest.MockedFunction<
+          typeof authUtils.getWalletAddress
+        >;
+      const mockRemoveAuthJwt = authUtils.removeAuthJwt as jest.MockedFunction<
+        typeof authUtils.removeAuthJwt
+      >;
+      const mockValidateJwt =
+        require("@/services/auth/jwt-validation.utils").validateJwt;
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const validation = createDeferredPromise<{
+        readonly isValid: boolean;
+        readonly wasCancelled: boolean;
+        readonly refreshOutcome: "cancelled";
+      }>();
+      let shouldPersistRefreshedSession: (() => boolean) | undefined;
+      let requestResult: Promise<{ success: boolean }> | undefined;
+
+      mockGetAuthJwt.mockReturnValue(TEST_REJECTED_SESSION_VALUE);
+      mockGetWalletAddress.mockReturnValue(validAddress);
+      const rejectedAuthStateFingerprint = getAuthStateFingerprint({
+        walletAddress: validAddress,
+        jwt: TEST_REJECTED_SESSION_VALUE,
+      });
+      mockValidateJwt.mockImplementationOnce(
+        (params: { shouldPersistRefreshedSession?: () => boolean }) => {
+          shouldPersistRefreshedSession = params.shouldPersistRefreshedSession;
+          return validation.promise;
+        }
+      );
+
+      const Child = () => {
+        const { requestAuth } = React.useContext(AuthContext);
+        return (
+          <button
+            type="button"
+            onClick={() => {
+              requestResult = requestAuth({
+                serverRejected: true,
+                expectedAuthStateFingerprint: rejectedAuthStateFingerprint,
+              });
+            }}
+          >
+            recover auth
+          </button>
+        );
+      };
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "recover auth" }));
+      await waitFor(() => expect(mockValidateJwt).toHaveBeenCalled());
+      expect(shouldPersistRefreshedSession?.()).toBe(true);
+
+      mockGetAuthJwt.mockReturnValue(TEST_REPLACEMENT_SESSION_VALUE);
+      expect(shouldPersistRefreshedSession?.()).toBe(false);
+
+      validation.resolve({
+        isValid: false,
+        wasCancelled: true,
+        refreshOutcome: "cancelled",
+      });
+      await act(async () => {
+        await requestResult;
+      });
+
+      expect(mockRemoveAuthJwt).not.toHaveBeenCalled();
+      expect(sessionV2.loginWithSessionV2).not.toHaveBeenCalled();
+      expect(sessionV2.persistSessionResponse).not.toHaveBeenCalled();
+    });
+
+    it("cancels server-rejected sign-in if auth changes during persistence", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      const authUtils =
+        require("@/services/auth/auth.utils") as typeof AuthUtilsModule;
+      const mockGetAuthJwt = authUtils.getAuthJwt as jest.MockedFunction<
+        typeof authUtils.getAuthJwt
+      >;
+      const mockGetWalletAddress =
+        authUtils.getWalletAddress as jest.MockedFunction<
+          typeof authUtils.getWalletAddress
+        >;
+      const mockValidateJwt =
+        require("@/services/auth/jwt-validation.utils").validateJwt;
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const sessionResponse = {
+        client_type: "native",
+        address: validAddress,
+        role: null,
+        access_token: TEST_SESSION_VALUE,
+        access_token_expires_at: "2026-06-10T00:00:00.000Z",
+        native_refresh_token: "native-refresh-token",
+        refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+      };
+      let requestResult: Promise<{ success: boolean }> | undefined;
+
+      mockGetAuthJwt.mockReturnValue(TEST_REJECTED_SESSION_VALUE);
+      mockGetWalletAddress.mockReturnValue(validAddress);
+      const rejectedAuthStateFingerprint = getAuthStateFingerprint({
+        walletAddress: validAddress,
+        jwt: TEST_REJECTED_SESSION_VALUE,
+      });
+      mockValidateJwt.mockResolvedValue({
+        isValid: false,
+        wasCancelled: false,
+      });
+      sessionV2.loginWithSessionV2.mockResolvedValue(sessionResponse);
+      sessionV2.persistSessionResponse.mockImplementationOnce(
+        async (
+          _response: unknown,
+          options?: { readonly shouldPersist?: () => boolean }
+        ) => {
+          expect(options?.shouldPersist?.()).toBe(true);
+          mockGetAuthJwt.mockReturnValue(TEST_REPLACEMENT_SESSION_VALUE);
+          expect(options?.shouldPersist?.()).toBe(false);
+          throw new Error("stale session persistence");
+        }
+      );
+
+      const Child = () => {
+        const { requestAuth } = React.useContext(AuthContext);
+        return (
+          <button
+            type="button"
+            onClick={() => {
+              requestResult = requestAuth({
+                serverRejected: true,
+                expectedAuthStateFingerprint: rejectedAuthStateFingerprint,
+              });
+            }}
+          >
+            recover auth
+          </button>
+        );
+      };
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <Child />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "recover auth" }));
+      await waitFor(() =>
+        expect(sessionV2.persistSessionResponse).toHaveBeenCalled()
+      );
+      await expect(requestResult).resolves.toEqual({ success: false });
+      expect(sessionV2.persistSessionResponse).toHaveBeenCalledWith(
+        sessionResponse,
+        { shouldPersist: expect.any(Function) }
+      );
+      expect(mockSeizeDisconnect).not.toHaveBeenCalled();
+    });
+
     it("allows valid legacy auth before the session-v2 deadline without forcing the upgrade modal", async () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
@@ -630,7 +863,7 @@ describe("Auth component", () => {
         client_type: "web",
         address: validAddress,
         role: null,
-        access_token: "session-access-token",
+        access_token: TEST_SESSION_VALUE,
         access_token_expires_at: "2026-06-10T00:00:00.000Z",
       };
       mockGetAuthJwt.mockReturnValue("expired-legacy-jwt");
@@ -699,7 +932,8 @@ describe("Auth component", () => {
         })
       );
       expect(sessionV2.persistSessionResponse).toHaveBeenCalledWith(
-        sessionResponse
+        sessionResponse,
+        { shouldPersist: expect.any(Function) }
       );
       expect(
         screen.queryByText("Upgrade Authentication")
@@ -719,7 +953,7 @@ describe("Auth component", () => {
         client_type: "web",
         address: validAddress,
         role: null,
-        access_token: "session-access-token",
+        access_token: TEST_SESSION_VALUE,
         access_token_expires_at: "2026-06-10T00:00:00.000Z",
       };
       sessionV2.loginWithSessionV2.mockResolvedValue(sessionResponse);
@@ -753,7 +987,8 @@ describe("Auth component", () => {
         })
       );
       expect(sessionV2.persistSessionResponse).toHaveBeenCalledWith(
-        sessionResponse
+        sessionResponse,
+        { shouldPersist: expect.any(Function) }
       );
       expect(mockCommonApiPost).not.toHaveBeenCalled();
     });
@@ -771,7 +1006,7 @@ describe("Auth component", () => {
         client_type: "native",
         address: validAddress,
         role: null,
-        access_token: "session-access-token",
+        access_token: TEST_SESSION_VALUE,
         access_token_expires_at: "2026-06-10T00:00:00.000Z",
         native_refresh_token: "native-refresh-token",
         refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
@@ -937,7 +1172,7 @@ describe("Auth component", () => {
         client_type: "web",
         address: nextAddress,
         role: null,
-        access_token: "session-access-token-2",
+        access_token: TEST_SECOND_SESSION_VALUE,
         access_token_expires_at: "2026-06-10T00:00:00.000Z",
       };
       sessionV2.loginWithSessionV2.mockResolvedValue(sessionResponse);
@@ -970,7 +1205,8 @@ describe("Auth component", () => {
         })
       );
       expect(sessionV2.persistSessionResponse).toHaveBeenCalledWith(
-        sessionResponse
+        sessionResponse,
+        { shouldPersist: expect.any(Function) }
       );
       expect(mockCommonApiPost).not.toHaveBeenCalled();
     });
@@ -2658,10 +2894,10 @@ describe("Auth component", () => {
         client_type: "web",
         address: validAddress,
         role: null,
-        access_token: "session-access-token",
+        access_token: TEST_SESSION_VALUE,
         access_token_expires_at: "2026-06-10T00:00:00.000Z",
       };
-      mockGetAuthJwt.mockReturnValue("session-access-token");
+      mockGetAuthJwt.mockReturnValue(TEST_SESSION_VALUE);
       mockValidateJwt.mockResolvedValue({
         isValid: false,
         wasCancelled: false,
@@ -2696,7 +2932,8 @@ describe("Auth component", () => {
 
       await waitFor(() => {
         expect(sessionV2.persistSessionResponse).toHaveBeenCalledWith(
-          sessionResponse
+          sessionResponse,
+          { shouldPersist: expect.any(Function) }
         );
       });
       await waitFor(() => {

@@ -151,7 +151,7 @@ test.describe("Network, Open Data, and public API read-only coverage @surface @m
   }) => {
     await gotoReady(page, "/tools/api");
 
-    await expect(page).toHaveTitle("API");
+    await expect(page).toHaveTitle("API | Tools");
     await expect(
       page.getByRole("heading", { level: 1, name: "6529.io API" })
     ).toBeVisible();
@@ -161,7 +161,9 @@ test.describe("Network, Open Data, and public API read-only coverage @surface @m
       "Authentication quickstart",
       "Creating drops with embedded media",
     ]) {
-      await expect(page.getByText(section, { exact: true })).toBeVisible();
+      await expect(
+        page.getByRole("heading", { level: 2, name: section })
+      ).toBeVisible();
     }
     await expect(
       page.getByRole("link", { name: "https://api.6529.io/docs" })

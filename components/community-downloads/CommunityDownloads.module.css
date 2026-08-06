@@ -1,31 +1,3 @@
-.downloadsScrollContainer {
-  -ms-overflow-style: none;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.downloadsScrollContainer::-webkit-scrollbar {
-  display: none;
-}
-
-.downloadsTable tr td {
-  align-items: center;
-  vertical-align: middle;
-  white-space: nowrap;
-}
-
-.downloadsTable td {
-  line-height: 40px;
-}
-
-.downloadsTable tbody tr:nth-child(odd) {
-  background-color: rgb(30, 30, 30);
-}
-
-.downloadsTable > :not(caption) > * > * {
-  padding: 0.5rem 1rem !important;
-}
-
 .downloadLink {
   display: inline-flex;
   width: 100%;

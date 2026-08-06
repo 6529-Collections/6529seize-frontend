@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { MuseumSectionHeading } from "@/components/museum/MuseumShell";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -16,6 +17,7 @@ interface MethodologyEntry {
   readonly path: string;
   readonly titleKey: MessageKey;
   readonly descriptionKey: MessageKey;
+  readonly onsitePath?: string;
 }
 
 interface MethodologySection {
@@ -53,6 +55,13 @@ const METHODOLOGY_SECTIONS: readonly MethodologySection[] = [
     titleKey: "museum.network.methodology.sections.standards.title",
     descriptionKey: "museum.network.methodology.sections.standards.description",
     entries: [
+      {
+        path: "docs/data-architecture.md",
+        onsitePath: "/museum/network/methodology/data-architecture",
+        titleKey: "museum.network.methodology.documents.dataArchitecture.title",
+        descriptionKey:
+          "museum.network.methodology.documents.dataArchitecture.description",
+      },
       {
         path: "docs/accession-standard.md",
         titleKey: "museum.network.methodology.documents.accession.title",
@@ -171,7 +180,7 @@ function MuseumMethodologyCard({
 }: {
   readonly entry: MethodologyEntry;
 }) {
-  const href = buildMuseumMainBlobUrl(entry.path);
+  const href = entry.onsitePath ?? buildMuseumMainBlobUrl(entry.path);
   if (href === null) {
     return null;
   }
@@ -188,19 +197,34 @@ function MuseumMethodologyCard({
       <p className="tw-m-0 tw-mt-5 tw-break-all tw-text-xs tw-text-iron-500">
         {entry.path}
       </p>
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="hover:tw-text-primary-200 tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-self-start tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-rounded-sm focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-        aria-label={t(
-          DEFAULT_LOCALE,
-          "museum.network.methodology.sourceAccessible",
-          { title }
-        )}
-      >
-        {t(DEFAULT_LOCALE, "museum.network.methodology.source")}
-      </a>
+      {entry.onsitePath === undefined ? (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:tw-text-primary-200 tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-self-start tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-rounded-sm focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          aria-label={t(
+            DEFAULT_LOCALE,
+            "museum.network.methodology.sourceAccessible",
+            { title }
+          )}
+        >
+          {t(DEFAULT_LOCALE, "museum.network.methodology.source")}
+        </a>
+      ) : (
+        <Link
+          href={entry.onsitePath}
+          prefetch={false}
+          className="hover:tw-text-primary-200 tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-self-start tw-text-sm tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-rounded-sm focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          aria-label={t(
+            DEFAULT_LOCALE,
+            "museum.network.methodology.sourceAccessible",
+            { title }
+          )}
+        >
+          {t(DEFAULT_LOCALE, "museum.network.methodology.readInMuseum")}
+        </Link>
+      )}
     </article>
   );
 }

@@ -1,5 +1,4 @@
 import { useAuth } from "@/components/auth/Auth";
-import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import type { ApiUpdateWaveNotificationPreferencesRequest } from "@/generated/models/ApiUpdateWaveNotificationPreferencesRequest";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveNotificationPreferences } from "@/generated/models/ApiWaveNotificationPreferences";
@@ -11,13 +10,9 @@ import {
   ALL_GROUP_MENTION,
   type NotificationLoadingTarget,
 } from "./waveNotificationSettings.helpers";
-import {
-  formatWaveNotificationSettingsInteger,
-  waveNotificationSettingsMessage,
-} from "./waveNotificationSettings.messages";
+import { waveNotificationSettingsMessage } from "./waveNotificationSettings.messages";
 
 export function useWavePreferenceSettings(wave: ApiWave) {
-  const { seizeSettings } = useSeizeSettings();
   const { setToast } = useAuth();
   const [loadingTarget, setLoadingTarget] =
     useState<NotificationLoadingTarget | null>(null);
@@ -28,11 +23,6 @@ export function useWavePreferenceSettings(wave: ApiWave) {
     isFetching: preferencesFetching = false,
     isPending: preferencesPending = false,
   } = useWaveNotificationSubscription(wave);
-
-  const allDropsNotificationsSubscribersLimit =
-    seizeSettings.all_drops_notifications_subscribers_limit;
-  const disableAllDropsSelection =
-    wave.metrics.subscribers_count >= allDropsNotificationsSubscribersLimit;
 
   const enabledGroupNotifications = useMemo(
     () => data?.enabled_group_notifications ?? [],
@@ -109,10 +99,6 @@ export function useWavePreferenceSettings(wave: ApiWave) {
   ]);
 
   const toggleAllDropsNotifications = useCallback(async () => {
-    if (!subscribedToAllDrops && disableAllDropsSelection) {
-      return;
-    }
-
     await updateNotificationPreferences({
       target: "all-drops",
       body: {
@@ -128,7 +114,6 @@ export function useWavePreferenceSettings(wave: ApiWave) {
           ),
     });
   }, [
-    disableAllDropsSelection,
     enabledGroupNotifications,
     subscribedToAllDrops,
     updateNotificationPreferences,
@@ -146,22 +131,9 @@ export function useWavePreferenceSettings(wave: ApiWave) {
     void refetch();
   }, [refetch]);
 
-  const allDropsLimitDescription = waveNotificationSettingsMessage(
-    subscribedToAllDrops
-      ? "waves.notificationSettings.allMessages.limit.reenableDescription"
-      : "waves.notificationSettings.allMessages.limit.unavailableDescription",
-    {
-      count: formatWaveNotificationSettingsInteger(
-        allDropsNotificationsSubscribersLimit
-      ),
-    }
-  );
-
   return {
     allDropsEnabled,
     allGroupNotificationsEnabled,
-    allDropsLimitDescription,
-    disableAllDropsSelection,
     loading,
     loadingTarget,
     onAllDropsNotificationsClick,
