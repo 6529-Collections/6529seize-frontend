@@ -173,6 +173,12 @@ describe("frontend telemetry registry", () => {
     });
   });
 
+  it("records the bounded drop-reaction transport sampling policy", () => {
+    expect(getSignal("reaction.*").sampling).toEqual(
+      expect.stringMatching(/60-second.*deterministic 10%.*all other reaction/)
+    );
+  });
+
   it("contains no local absolute paths or private attribute names", () => {
     const serializedRegistry = JSON.stringify(registry);
     expect(serializedRegistry).not.toMatch(/\/(?:Users|home)\//);

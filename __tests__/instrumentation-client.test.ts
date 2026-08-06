@@ -1,4 +1,8 @@
 import noiseFilterFixtures from "@/__tests__/fixtures/sentry-noise-filter-hardening.json";
+import {
+  createLatestReactDomRawFrames,
+  createObservedReactDomRawInsertBeforeFrames,
+} from "@/__tests__/fixtures/reactDomRawInsertBeforeFixtures";
 
 const mockInit = jest.fn();
 const mockReplayIntegration = jest.fn(() => ({ name: "replay" }));
@@ -14,9 +18,21 @@ jest.mock("@sentry/nextjs", () => ({
 describe("instrumentation-client", () => {
   const wrappedNetworkMessage =
     "Network request failed. Please check your connection and try again. (/api/waves-overview)";
+  const dropReactionRequestFailedMessage = "Drop reaction request failed";
+  const privateBareWaveId = "2c5e0761-6de2-4e1f-9c23-a8c93ff1158f";
+  const privateNonRfcUuid = "00000000-0000-0000-0000-000000000000";
+  const privateRelativeDropId = "5651cd9a-1852-42fc-b213-5f8d871f96bf";
   const syntheticAutomaticWaveId = `${"1".repeat(8)}-${"2".repeat(4)}-4${"3".repeat(3)}-8${"4".repeat(3)}-${"5".repeat(12)}`;
   const objectCapturedPromiseRejectionMessage =
     "Object captured as promise rejection with keys: code, message, stack";
+  const objectCapturedPromiseRejectionWithoutStackMessage =
+    "Object captured as promise rejection with keys: code, message";
+  const unsupportedWalletRevokePermissionsMessage =
+    "the method wallet_revokePermissions does not exist/is not available";
+  const backpackWalletCollisionBreadcrumbMessage =
+    "Backpack was unable to override window.ethereum. If you're having issues connecting to a dapp, disable any other wallets and try again.";
+  const readOnlyEthereumProxyBreadcrumbMessage =
+    "[2026-08-04T04:00:10.853Z] [[WagmiSetup] Skipping safe ethereum proxy install for read-only window.ethereum] Error: Signature request failed. Please try again.";
   const indexedDBUserDeleteMessage = "Database deleted by request of the user";
   const talismanOnboardingMessage =
     "Talisman extension has not been configured yet. Please continue with onboarding.";
@@ -28,6 +44,8 @@ describe("instrumentation-client", () => {
     "undefined is not an object (evaluating 'e.tags')";
   const gifPickerTenorUndefinedResultsMapMessage =
     "undefined is not an object (evaluating 'e.results.map')";
+  const instagramPageHideBridgeErrorMessage =
+    "undefined is not an object (evaluating 'window.webkit.messageHandlers')";
   const reactDomRemoveChildMessage =
     "Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.";
   const reactDomFrame = {
@@ -65,6 +83,51 @@ describe("instrumentation-client", () => {
     "auto.browser.browserapierrors.setTimeout";
   const browserUnhandledRejectionMechanismType =
     "auto.browser.global_handlers.onunhandledrejection";
+  const browserExtensionWalletRejectionMessage = "User rejected the request.";
+  const browserExtensionWalletBridgePath = "app:///content-scripts/bridge.js";
+  const browserExtensionWalletBridgeFrames = [
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "o",
+      lineno: 12,
+      colno: 50420,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "Ce.dispose",
+      lineno: 1,
+      colno: 30025,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "Ce._dispose",
+      lineno: 1,
+      colno: 28455,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "Object.userRejectedRequest",
+      lineno: 1,
+      colno: 15879,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "a",
+      lineno: 1,
+      colno: 16591,
+      in_app: true,
+    },
+  ];
+  const expectedWaveAbortErrorValue = "AbortError: The user aborted a request.";
   const poperBlockerNetworkErrorMessage =
     "Network request failed. Please check your connection and try again. (/api/dm-drops/unread)";
   const poperBlockerInjectedFetchFrames = [
@@ -249,6 +312,8 @@ describe("instrumentation-client", () => {
   ];
   const webkitExtensionMessagingTabNotFoundMessage =
     "Invalid call to runtime.sendMessage(). Tab not found.";
+  const injectedIosAutoplayNotAllowedMessage =
+    "The request is not allowed by the user agent or the platform in the current context, possibly because the user denied permission.";
   const rainbowKitNotFoundMessage = "not found rainbowkit";
   const nativeJsonStringifyFrame = {
     filename: "[native code]",
@@ -260,6 +325,14 @@ describe("instrumentation-client", () => {
     level?: string | undefined;
     tags?: Record<string, unknown> | undefined;
     fingerprint?: string[] | undefined;
+    request?: Record<string, unknown> | undefined;
+    breadcrumbs?:
+      | Array<{
+          category?: string | undefined;
+          message?: string | undefined;
+          data?: Record<string, unknown> | undefined;
+        }>
+      | undefined;
     exception?:
       | {
           values?: Array<
@@ -339,6 +412,162 @@ describe("instrumentation-client", () => {
     },
   });
 
+  const createBrowserExtensionWalletRejectionEvent = (
+    frames: Array<Record<string, unknown>> = browserExtensionWalletBridgeFrames
+  ) => ({
+    ...createUnhandledRejectionEvent(browserExtensionWalletRejectionMessage),
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: browserExtensionWalletRejectionMessage,
+          mechanism: {
+            type: browserUnhandledRejectionMechanismType,
+            handled: false,
+          },
+          stacktrace: { frames },
+        },
+      ],
+    },
+  });
+
+  const createDropReactionNetworkEvent = (eventId: string) => ({
+    event_id: eventId,
+    level: "warning",
+    message: "",
+    fingerprint: ["drop-reaction", "network"],
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: dropReactionRequestFailedMessage,
+          mechanism: {
+            type: "generic",
+            handled: true,
+          },
+        },
+      ],
+    },
+    tags: {
+      feature: "drop-reaction",
+      operation: "reaction-request",
+      error_kind: "network",
+      url: "/waves/private-wave-id",
+    },
+    request: {
+      url: "/waves/private-wave-id",
+      headers: {
+        Referer: "/waves/private-referrer-wave-id",
+      },
+    },
+    breadcrumbs: [
+      {
+        category: "navigation",
+        data: {
+          from: "/waves/private-navigation-from-wave-id",
+          to: "/private-navigation-to-profile-id",
+        },
+      },
+      {
+        category: "console",
+        level: "error",
+        message: `Retry failed for drops/${privateRelativeDropId}/reaction`,
+        data: {
+          arguments: [
+            "Retrying reaction",
+            `Retrying wave ${privateBareWaveId}`,
+            `Analytics id ${privateNonRfcUuid}`,
+            {
+              request: {
+                endpoint: `drops/${privateRelativeDropId}/reaction`,
+                state: "retrying",
+              },
+            },
+          ],
+        },
+      },
+      {
+        category: "reactions",
+        level: "info",
+        message: "reaction.request_sent",
+        data: {
+          action: "add",
+          endpoint_family: "drop_reaction",
+          method: "POST",
+          mutation_sequence: 1,
+          route_family: "/waves/[wave]",
+          source: "chip",
+        },
+      },
+      {
+        type: "http",
+        category: "fetch",
+        level: "error",
+        data: {
+          method: "POST",
+          url: "/api/drops/private-drop-id/reaction",
+          "url.is_first_party": true,
+          "url.is_first_party_api": true,
+        },
+      },
+      {
+        type: "http",
+        category: "fetch",
+        level: "error",
+        data: {
+          method: "GET",
+          url: "/api/waves/private-api-wave-id",
+          "url.is_first_party": true,
+          "url.is_first_party_api": true,
+        },
+      },
+      {
+        type: "http",
+        category: "fetch",
+        level: "error",
+        data: {
+          method: "GET",
+          url: "/private-profile-id",
+          "url.is_first_party": true,
+          "url.is_first_party_api": false,
+        },
+      },
+      {
+        category: "reactions",
+        level: "warning",
+        message: "reaction.request_failed",
+        data: {
+          action: "add",
+          endpoint_family: "drop_reaction",
+          error_kind: "network",
+          method: "POST",
+          mutation_sequence: 1,
+          route_family: "/waves/[wave]",
+          source: "chip",
+        },
+      },
+    ],
+  });
+
+  const createExpectedWaveReplacementAbortEvent = () => ({
+    ...createUnhandledRejectionEvent(expectedWaveAbortErrorValue),
+    timestamp: 1_785_689_742.621,
+    tags: {
+      "DOMException.code": "20",
+    },
+    breadcrumbs: [
+      {
+        category: "wave.request",
+        message: "wave_request_aborted",
+        timestamp: 1_785_689_742.5,
+        data: {
+          request_kind: "background_sync",
+          trigger: "request_replaced",
+        },
+      },
+    ],
+  });
+
   const createPoperBlockerOrphanFetchRejectionEvent = (
     value = poperBlockerNetworkErrorMessage,
     frames: Array<Record<string, unknown>> = poperBlockerProcessedFrames
@@ -409,6 +638,154 @@ describe("instrumentation-client", () => {
           },
           stacktrace: {
             frames,
+          },
+        },
+      ],
+    },
+  });
+
+  const createChromeMobileIosInjectedGaEvent = () => ({
+    level: "error",
+    transaction: "/nextgen/collection/:collection/art",
+    request: {
+      url: "https://6529.io/nextgen/collection/pebbles/art",
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 26_5_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/150.0.7871.1 Mobile/TEST Safari/604.1",
+      },
+    },
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: "ga",
+          mechanism: {
+            type: "auto.browser.global_handlers.onerror",
+            handled: false,
+          },
+          stacktrace: {
+            frames: [
+              {
+                filename: "app:///nextgen/collection/pebbles/art",
+                function: "?",
+                lineno: 415,
+                colno: 45,
+                in_app: true,
+              },
+            ],
+          },
+        },
+      ],
+    },
+  });
+
+  const createInjectedIosAutoplayFrames = (documentPath = "app:///") => [
+    {
+      filename: documentPath,
+      function: "global code",
+      lineno: 27,
+      colno: 5,
+    },
+    {
+      filename: documentPath,
+      function: "?",
+      lineno: 4,
+      colno: 32,
+    },
+    {
+      filename: "[native code]",
+      function: "forEach",
+    },
+    {
+      filename: documentPath,
+      function: "?",
+      lineno: 6,
+      colno: 21,
+    },
+    {
+      filename: "[native code]",
+      function: "play",
+    },
+  ];
+
+  const createInjectedIosAutoplayNotAllowedEvent = (
+    valueOverrides: Record<string, unknown> = {},
+    eventOverrides: Record<string, unknown> = {},
+    frames: Array<Record<string, unknown>> = createInjectedIosAutoplayFrames()
+  ) => ({
+    contexts: {
+      browser: {
+        name: "Mobile Safari",
+        version: "17.4.1",
+      },
+      os: {
+        name: "iOS",
+        version: "17.4.1",
+      },
+    },
+    ...eventOverrides,
+    exception: {
+      values: [
+        {
+          type: "NotAllowedError",
+          value: injectedIosAutoplayNotAllowedMessage,
+          mechanism: {
+            type: browserUnhandledRejectionMechanismType,
+            handled: false,
+          },
+          stacktrace: {
+            frames,
+          },
+          ...valueOverrides,
+        },
+      ],
+    },
+  });
+
+  const createInstagramPageHideBridgeEvent = (
+    columns: readonly [number, number, number] = [5517, 3808, 1208],
+    documentPath = "app:///example-profile/rep"
+  ) => ({
+    contexts: {
+      browser: { name: "Instagram" },
+      os: { name: "iOS" },
+    },
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value: instagramPageHideBridgeErrorMessage,
+          mechanism: {
+            type: "auto.browser.global_handlers.onerror",
+            handled: false,
+          },
+          stacktrace: {
+            frames: [
+              {
+                filename: documentPath,
+                abs_path: documentPath,
+                function: "?",
+                lineno: 1,
+                colno: columns[0],
+                in_app: true,
+              },
+              {
+                filename: documentPath,
+                abs_path: documentPath,
+                function: "sendPageHideMessage",
+                lineno: 1,
+                colno: columns[1],
+                in_app: true,
+              },
+              {
+                filename: documentPath,
+                abs_path: documentPath,
+                function: "sendDataToNative",
+                lineno: 1,
+                colno: columns[2],
+                in_app: true,
+              },
+            ],
           },
         },
       ],
@@ -652,6 +1029,85 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
+  it("drops unsupported wallet_revokePermissions provider rejections", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "wallet-revoke-permissions-unsupported",
+      exception: {
+        values: [
+          {
+            type: "UnhandledRejection",
+            value: objectCapturedPromiseRejectionWithoutStackMessage,
+            mechanism: {
+              type: browserUnhandledRejectionMechanismType,
+              handled: false,
+            },
+          },
+        ],
+      },
+      extra: {
+        __serialized__: {
+          code: -32601,
+          message: unsupportedWalletRevokePermissionsMessage,
+        },
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("drops Backpack internal provider rejections during a recent window.ethereum collision", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "backpack-window-ethereum-collision",
+      timestamp: 1000.475,
+      exception: {
+        values: [
+          {
+            type: "UnhandledRejection",
+            value: objectCapturedPromiseRejectionWithoutStackMessage,
+            mechanism: {
+              type: browserUnhandledRejectionMechanismType,
+              handled: false,
+            },
+          },
+        ],
+      },
+      extra: {
+        __serialized__: {
+          code: -32603,
+          message: "Internal JSON-RPC error.",
+        },
+      },
+      breadcrumbs: [
+        {
+          timestamp: 1000,
+          category: "console",
+          level: "error",
+          message: readOnlyEthereumProxyBreadcrumbMessage,
+        },
+        {
+          timestamp: 1000.458,
+          category: "console",
+          level: "info",
+          message: backpackWalletCollisionBreadcrumbMessage,
+        },
+        {
+          timestamp: 1000.462,
+          type: "http",
+          category: "fetch",
+          level: "info",
+        },
+      ],
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
   it("drops exact React DOM insertBefore NotFoundError events on waves routes with no app frames", () => {
     const beforeSend = loadBeforeSend();
     const event = {
@@ -677,6 +1133,87 @@ describe("instrumentation-client", () => {
     const result = beforeSend(event);
 
     expect(result).toBeNull();
+  });
+
+  it.each([
+    {
+      name: "ending in sN",
+      getFrames: () => createObservedReactDomRawInsertBeforeFrames("sN"),
+      transaction: "/waves",
+    },
+    {
+      name: "ending in sR",
+      getFrames: () => createObservedReactDomRawInsertBeforeFrames("sR"),
+      transaction: "/waves",
+    },
+    {
+      name: "with repeated sN placement frames on join-6529",
+      getFrames: createLatestReactDomRawFrames,
+      transaction: "/join-6529",
+    },
+  ])(
+    "drops the production-shaped raw React DOM stack $name",
+    ({ getFrames, transaction }) => {
+      const beforeSend = loadBeforeSend();
+      const event = {
+        event_id: "raw-react-dom-insert-before-event",
+        transaction,
+        exception: {
+          values: [
+            {
+              type: "NotFoundError",
+              value: reactDomInsertBeforeMessage,
+              mechanism: {
+                type: "generic",
+                handled: true,
+              },
+              stacktrace: {
+                frames: getFrames(),
+              },
+            },
+          ],
+        },
+        tags: {
+          transaction,
+          url: transaction,
+        },
+      };
+
+      const result = beforeSend(event);
+
+      expect(result).toBeNull();
+    }
+  );
+
+  it("keeps the production-shaped raw React DOM stack on an unobserved route", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "raw-react-dom-insert-before-unobserved-route",
+      transaction: "/about",
+      exception: {
+        values: [
+          {
+            type: "NotFoundError",
+            value: reactDomInsertBeforeMessage,
+            mechanism: {
+              type: "generic",
+              handled: true,
+            },
+            stacktrace: {
+              frames: createLatestReactDomRawFrames(),
+            },
+          },
+        ],
+      },
+      tags: {
+        transaction: "/about",
+        url: "/about",
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).toEqual(event);
   });
 
   it("drops exact React DOM removeChild NotFoundError events on affected routes with no app frames", () => {
@@ -1416,6 +1953,278 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
+  it("drops the exact Chrome Mobile iOS document ga error", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createChromeMobileIosInjectedGaEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps the Chrome Mobile iOS ga error when an application chunk frame is present", () => {
+    const beforeSend = loadBeforeSend();
+    const documentEvent = createChromeMobileIosInjectedGaEvent();
+    const [documentException] = documentEvent.exception.values;
+    if (!documentException) {
+      throw new Error("Expected the test event to contain an exception.");
+    }
+    const event = {
+      ...documentEvent,
+      exception: {
+        values: [
+          {
+            ...documentException,
+            stacktrace: {
+              frames: [
+                ...documentException.stacktrace.frames,
+                {
+                  filename: "app:///_next/static/chunks/app-owned.js",
+                  function: "renderArt",
+                  lineno: 1,
+                  colno: 1,
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it.each(["app:///", "app:///waves/11111111-2222-4333-8444-555555555555"])(
+    "drops the exact client-shaped injected iOS autoplay rejection from %s",
+    (path) => {
+      const beforeSend = loadBeforeSend();
+      const event = createInjectedIosAutoplayNotAllowedEvent(
+        {},
+        {},
+        createInjectedIosAutoplayFrames(path)
+      );
+
+      const result = beforeSend(event);
+
+      expect(result).toBeNull();
+    }
+  );
+
+  it.each([
+    ["Instagram 439.x", [5421, 3712, 1142] as const, "app:///"],
+    ["Instagram 438.x", [5517, 3808, 1208] as const, "app:///profile/rep"],
+    ["Instagram 436.x/437.x", [6257, 4139, 1325] as const, "app:///waves/id"],
+  ])(
+    "drops the %s raw iOS page-hide bridge signature",
+    (_cohort, columns, documentPath) => {
+      const beforeSend = loadBeforeSend();
+      const event = createInstagramPageHideBridgeEvent(columns, documentPath);
+
+      const result = beforeSend(event);
+
+      expect(result).toBeNull();
+    }
+  );
+
+  it.each<
+    [
+      string,
+      Record<string, unknown>,
+      Record<string, unknown>,
+      Array<Record<string, unknown>> | undefined,
+    ]
+  >([
+    [
+      "an unrelated permission message",
+      { value: "The operation is not allowed in the current context." },
+      {},
+      undefined,
+    ],
+    ["a different exception type", { type: "Error" }, {}, undefined],
+    [
+      "a different mechanism",
+      {
+        mechanism: {
+          type: "auto.browser.global_handlers.onerror",
+          handled: false,
+        },
+      },
+      {},
+      undefined,
+    ],
+    [
+      "a handled rejection",
+      {
+        mechanism: {
+          type: browserUnhandledRejectionMechanismType,
+          handled: true,
+        },
+      },
+      {},
+      undefined,
+    ],
+    [
+      "a non-iOS browser context",
+      {},
+      {
+        contexts: {
+          browser: { name: "Chrome" },
+          os: { name: "Android" },
+        },
+      },
+      undefined,
+    ],
+    [
+      "an application chunk frame",
+      {},
+      {},
+      [
+        {
+          filename:
+            "webpack-internal:///(app-pages-browser)/./components/media/VideoPlayer.tsx",
+          abs_path:
+            "webpack-internal:///(app-pages-browser)/./components/media/VideoPlayer.tsx",
+          function: "playVideo",
+          lineno: 27,
+          colno: 5,
+        },
+        ...createInjectedIosAutoplayFrames().slice(1),
+      ],
+    ],
+    [
+      "a conflicting absolute path",
+      {},
+      {},
+      createInjectedIosAutoplayFrames().map((frame, index) =>
+        index === 0
+          ? { ...frame, abs_path: "app:///components/media/VideoPlayer.tsx" }
+          : frame
+      ),
+    ],
+    [
+      "a named document callback",
+      {},
+      {},
+      createInjectedIosAutoplayFrames().map((frame, index) =>
+        index === 1 ? { ...frame, function: "playVideo" } : frame
+      ),
+    ],
+    [
+      "a changed document coordinate",
+      {},
+      {},
+      createInjectedIosAutoplayFrames().map((frame, index) =>
+        index === 1 ? { ...frame, lineno: 5 } : frame
+      ),
+    ],
+    [
+      "an extra frame",
+      {},
+      {},
+      [
+        ...createInjectedIosAutoplayFrames(),
+        { filename: "[native code]", function: "dispatchEvent" },
+      ],
+    ],
+    [
+      "a different document route",
+      {},
+      {},
+      createInjectedIosAutoplayFrames("app:///notifications"),
+    ],
+  ])("keeps the iOS autoplay near miss with %s", (_, value, event, frames) => {
+    const beforeSend = loadBeforeSend();
+    const result = beforeSend(
+      createInjectedIosAutoplayNotAllowedEvent(value, event, frames)
+    );
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps mixed events containing the injected autoplay rejection", () => {
+    const beforeSend = loadBeforeSend();
+    const autoplayEvent = createInjectedIosAutoplayNotAllowedEvent();
+    const event = {
+      ...autoplayEvent,
+      exception: {
+        values: [
+          ...autoplayEvent.exception.values,
+          {
+            type: "TypeError",
+            value: "Application media state failed.",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "webpack-internal:///(app-pages-browser)/./components/media/VideoPlayer.tsx",
+                  function: "updatePlaybackState",
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps the Instagram 439.x bridge shape with a changed coordinate", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createInstagramPageHideBridgeEvent(
+      [5422, 3712, 1142],
+      "app:///"
+    );
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps an Instagram page-hide bridge error with changed coordinates", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createInstagramPageHideBridgeEvent([5518, 3808, 1208]);
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps the exact bridge shape outside Instagram", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      ...createInstagramPageHideBridgeEvent(),
+      contexts: {
+        browser: { name: "Twitter" },
+        os: { name: "iOS" },
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("keeps the exact bridge shape with an app-owned original stack", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createInstagramPageHideBridgeEvent();
+    const error = new Error(instagramPageHideBridgeErrorMessage);
+    error.stack = [
+      `TypeError: ${instagramPageHideBridgeErrorMessage}`,
+      "    at sendDataToNative (webpack-internal:///(app-pages-browser)/./utils/instagram-bridge.ts:10:1)",
+    ].join("\n");
+
+    const result = beforeSend(event, { originalException: error });
+
+    expect(result).not.toBeNull();
+  });
+
   it("keeps cyclic JSON timer errors for origin diagnostics", () => {
     const beforeSend = loadBeforeSend();
     const event = createSentryRouteParameterizationEvent();
@@ -1590,6 +2399,27 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
+  it("drops the exact browser-extension wallet rejection bridge stack", () => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(createBrowserExtensionWalletRejectionEvent());
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps a browser-extension wallet rejection with changed coordinates", () => {
+    const beforeSend = loadBeforeSend();
+    const frames = browserExtensionWalletBridgeFrames.map((frame, index) =>
+      index === 4 ? { ...frame, colno: 16592 } : frame
+    );
+
+    const result = beforeSend(
+      createBrowserExtensionWalletRejectionEvent(frames)
+    );
+
+    expect(result).not.toBeNull();
+  });
+
   it("drops the exact frame-less WebKit extension tab-not-found rejection", () => {
     const beforeSend = loadBeforeSend();
 
@@ -1726,6 +2556,27 @@ describe("instrumentation-client", () => {
 
     expect(result).not.toBeNull();
     expect(result?.tags?.["network_noise_sampled"]).toBe("true");
+  });
+
+  it("drops the exact expected Wave background-sync replacement abort", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createExpectedWaveReplacementAbortEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps the Wave AbortError without the replacement breadcrumb", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      ...createExpectedWaveReplacementAbortEvent(),
+      breadcrumbs: [],
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
   });
 
   it("drops the normalized Poper Blocker orphan fetch rejection", () => {
@@ -2774,6 +3625,103 @@ describe("instrumentation-client", () => {
     expect(event.message).toBe(expectedMessage);
     expect(event.exception.values[0]?.value).not.toContain("token=");
     expect(event.message).not.toContain("#hash");
+  });
+
+  it("drops a sampled-out synthetic drop-reaction transport warning", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createDropReactionNetworkEvent("network-drop-event");
+
+    const result = beforeSend(event, {
+      originalException: new Error(dropReactionRequestFailedMessage),
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps and tags a sampled-in synthetic drop-reaction transport warning", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createDropReactionNetworkEvent("event-200");
+
+    const result = beforeSend(event, {
+      originalException: new Error(dropReactionRequestFailedMessage),
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.tags).toEqual(
+      expect.objectContaining({
+        feature: "drop-reaction",
+        operation: "reaction-request",
+        error_kind: "network",
+        network_failure_kind: "browser_transport",
+        network_noise_sampled: "true",
+      })
+    );
+    expect(result?.tags?.["errorType"]).toBeUndefined();
+    expect(result?.exception?.values?.[0]?.value).toBe(
+      dropReactionRequestFailedMessage
+    );
+    expect(result?.exception?.values?.[0]?.value).not.toContain("/");
+    expect(result?.fingerprint).toEqual(["drop-reaction", "network"]);
+    expect(result?.request).toBeUndefined();
+    expect(result?.tags?.["url"]).toBeUndefined();
+
+    const serializedResult = JSON.stringify(result);
+    for (const privateValue of [
+      "private-api-wave-id",
+      "private-drop-id",
+      "private-navigation-from-wave-id",
+      "private-navigation-to-profile-id",
+      "private-profile-id",
+      "private-referrer-wave-id",
+      "private-wave-id",
+      privateBareWaveId,
+      privateNonRfcUuid,
+      privateRelativeDropId,
+    ]) {
+      expect(serializedResult).not.toContain(privateValue);
+    }
+
+    const breadcrumbUrls = result?.breadcrumbs
+      ?.map((breadcrumb) => breadcrumb.data?.["url"])
+      .filter((url): url is string => typeof url === "string");
+    expect(breadcrumbUrls).toEqual(["[Filtered]", "[Filtered]", "[Filtered]"]);
+    expect(
+      result?.breadcrumbs?.find(
+        (breadcrumb) => breadcrumb.category === "navigation"
+      )?.data
+    ).toEqual(
+      expect.objectContaining({
+        from: "[Filtered]",
+        to: "[Filtered]",
+      })
+    );
+    expect(
+      result?.breadcrumbs?.find(
+        (breadcrumb) => breadcrumb.category === "console"
+      )
+    ).toEqual(
+      expect.objectContaining({
+        message: "[Filtered]",
+        data: expect.objectContaining({
+          arguments: [
+            "Retrying reaction",
+            "[Filtered]",
+            "[Filtered]",
+            {
+              request: {
+                endpoint: "[Filtered]",
+                state: "retrying",
+              },
+            },
+          ],
+        }),
+      })
+    );
+    expect(
+      result?.breadcrumbs
+        ?.filter((breadcrumb) => breadcrumb.category === "reactions")
+        .map((breadcrumb) => breadcrumb.data?.["route_family"])
+    ).toEqual(["/waves/[wave]", "/waves/[wave]"]);
   });
 
   it("keeps and tags sampled-in app-wrapped absolute API network errors using the original target", () => {

@@ -44,7 +44,9 @@ jest.mock(
 );
 jest.mock(
   "@/components/datePickerModal/DatePickerModal",
-  () => (props: any) => <div data-testid={`${props.mode}-picker`} />
+  () => (props: any) => (
+    <div data-show={props.show} data-testid={`${props.mode}-picker`} />
+  )
 );
 jest.mock("next/image", () => ({
   __esModule: true,
@@ -137,20 +139,20 @@ describe("GasRoyaltiesHeader", () => {
       />
     );
 
-    const memeLab = screen.getByText("Meme Lab");
+    const memeLab = screen.getByRole("tab", { name: "Meme Lab" });
     fireEvent.click(memeLab);
     expect(push).toHaveBeenCalledWith(
       `${pathname}?focus=${GasRoyaltiesCollectionFocus.MEMELAB}`
     );
 
-    const memes = screen.getByText("The Memes");
+    const memes = screen.getByRole("tab", { name: "The Memes" });
     fireEvent.click(memes);
     expect(push).toHaveBeenCalledWith(
       `${pathname}?focus=${GasRoyaltiesCollectionFocus.MEMES}`
     );
   });
 
-  it("renders collection controls as native buttons", () => {
+  it("renders the collection controls as an accessible tablist", () => {
     const pathname = "/meme-gas";
     const push = jest.fn();
 
@@ -179,11 +181,175 @@ describe("GasRoyaltiesHeader", () => {
     );
 
     expect(
-      screen.getByRole("button", { name: "Meme Lab" })
+      screen.getByRole("tablist", { name: "Collection" })
     ).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Meme Lab" })).toHaveAttribute(
+      "aria-selected",
+      "false"
+    );
+    expect(screen.getByRole("tab", { name: "The Memes" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
+  });
+
+  it("keeps synthetic period selections visible in the shared dropdown", () => {
+    (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
+    (usePathname as jest.Mock).mockReturnValue("/meme-gas");
+
+    const sharedProps = {
+      title: "Gas",
+      fetching: false,
+      results_count: 1,
+      date_selection: DateIntervalsSelection.TODAY,
+      selected_artist: "",
+      focus: GasRoyaltiesCollectionFocus.MEMES,
+      getUrl: () => "",
+      setSelectedArtist: jest.fn(),
+      setIsPrimary: jest.fn(),
+      setIsCustomBlocks: jest.fn(),
+      setDateSelection: jest.fn(),
+      setDates: jest.fn(),
+      setBlocks: jest.fn(),
+    };
+
+    const { rerender } = render(
+      <GasRoyaltiesHeader
+        {...sharedProps}
+        is_primary={true}
+        is_custom_blocks={false}
+      />
+    );
+
     expect(
-      screen.getByRole("button", { name: "The Memes" })
+      screen.getByRole("button", { name: "Period: Primary Sales" })
     ).toBeInTheDocument();
+
+    rerender(
+      <GasRoyaltiesHeader
+        {...sharedProps}
+        is_primary={false}
+        is_custom_blocks={true}
+      />
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Period: Custom Blocks" })
+    ).toBeInTheDocument();
+
+    rerender(
+      <GasRoyaltiesHeader
+        {...sharedProps}
+        date_selection={DateIntervalsSelection.CUSTOM_DATES}
+        is_primary={false}
+        is_custom_blocks={false}
+      />
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Period: Custom Dates" })
+    ).toBeInTheDocument();
+  });
+
+  it("selects a standard period through the shared dropdown", () => {
+    (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
+    (usePathname as jest.Mock).mockReturnValue("/meme-gas");
+    const setDateSelection = jest.fn();
+
+    render(
+      <GasRoyaltiesHeader
+        title="Gas"
+        fetching={false}
+        results_count={1}
+        date_selection={DateIntervalsSelection.TODAY}
+        selected_artist=""
+        is_primary={false}
+        is_custom_blocks={false}
+        focus={GasRoyaltiesCollectionFocus.MEMES}
+        getUrl={() => ""}
+        setSelectedArtist={jest.fn()}
+        setIsPrimary={jest.fn()}
+        setIsCustomBlocks={jest.fn()}
+        setDateSelection={setDateSelection}
+        setDates={jest.fn()}
+        setBlocks={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Period: Today" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Last 7 Days" }));
+
+    expect(setDateSelection).toHaveBeenCalledWith(
+      DateIntervalsSelection.LAST_7
+    );
+  });
+
+  it("routes Primary Sales through the shared period dropdown", () => {
+    (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
+    (usePathname as jest.Mock).mockReturnValue("/meme-gas");
+    const setIsPrimary = jest.fn();
+
+    render(
+      <GasRoyaltiesHeader
+        title="Gas"
+        fetching={false}
+        results_count={1}
+        date_selection={DateIntervalsSelection.TODAY}
+        selected_artist=""
+        is_primary={false}
+        is_custom_blocks={false}
+        focus={GasRoyaltiesCollectionFocus.MEMES}
+        getUrl={() => ""}
+        setSelectedArtist={jest.fn()}
+        setIsPrimary={setIsPrimary}
+        setIsCustomBlocks={jest.fn()}
+        setDateSelection={jest.fn()}
+        setDates={jest.fn()}
+        setBlocks={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Period: Today" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Primary Sales" }));
+
+    expect(setIsPrimary).toHaveBeenCalledWith(true);
+  });
+
+  it("opens the block picker from the shared period dropdown", () => {
+    (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
+    (usePathname as jest.Mock).mockReturnValue("/meme-gas");
+
+    render(
+      <GasRoyaltiesHeader
+        title="Gas"
+        fetching={false}
+        results_count={1}
+        date_selection={DateIntervalsSelection.TODAY}
+        selected_artist=""
+        is_primary={false}
+        is_custom_blocks={false}
+        focus={GasRoyaltiesCollectionFocus.MEMES}
+        getUrl={() => ""}
+        setSelectedArtist={jest.fn()}
+        setIsPrimary={jest.fn()}
+        setIsCustomBlocks={jest.fn()}
+        setDateSelection={jest.fn()}
+        setDates={jest.fn()}
+        setBlocks={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("block-picker")).toHaveAttribute(
+      "data-show",
+      "false"
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Period: Today" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Custom Blocks" }));
+
+    expect(screen.getByTestId("block-picker")).toHaveAttribute(
+      "data-show",
+      "true"
+    );
   });
 
   it("does not render download widget when fetching or no results", () => {
@@ -411,7 +577,7 @@ describe("useSharedState", () => {
       result.current.setSelectedArtist("Test Artist");
     });
 
-    expect(result.current.getUrl("gas")).toContain("&artist=Test Artist");
+    expect(result.current.getUrl("gas")).toContain("&artist=Test%20Artist");
   });
 
   it("returns empty url when collection focus not set", () => {

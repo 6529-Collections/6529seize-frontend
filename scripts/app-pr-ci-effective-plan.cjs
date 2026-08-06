@@ -3,9 +3,7 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
-const {
-  isMuseumOwnedPath,
-} = require("./museum-e2e-change-set.cjs");
+const { isMuseumPath, isPolicyPath } = require("./museum-release-tier.cjs");
 
 const PACKAGE_GOVERNANCE_FILES = new Set([
   ".npmrc",
@@ -34,10 +32,13 @@ const SOURCE_EXTENSION = /\.(?:cjs|js|jsx|mjs|ts|tsx)$/u;
 const RELEASE_BUS_CONTRACT_PATTERNS = [
   /^\.github\/workflows\//u,
   /^ops\/deployment-bus\//u,
-  /^ops\/scripts\/(?:deployment-bus|deploy-staging-artifact|release-bus-status|verify-deployment-version)\./u,
-  /^scripts\/(?:app-pr-ci-effective-plan|e2e-packs|museum-e2e-change-set|pr-ci-policy-bundle|release-bus-|sync-e2e-manifest)/u,
+  /^ops\/testing-strategy\/museum-/u,
+  /^ops\/scripts\/(?:artifact-portability(?:-[A-Za-z0-9]+)*|deployment-bus|deploy-staging-artifact|release-bus-status|verify-deployment-version)\./u,
+  /^scripts\/(?:app-pr-ci-effective-plan|e2e-packs|museum-|pr-ci-policy-bundle|release-bus-|sync-e2e-manifest)/u,
   /^tests\/packs\.manifest\.cjs$/u,
-  /^__tests__\/scripts\/(?:app-pr-ci-effective-plan|deployment-bus|e2e-packs|manual-deploy-routing-guard|museum-e2e-change-set|pr-ci-policy-bundle|release-bus-|sync-e2e-manifest)/u,
+  /^components\/museum\/MuseumNetworkProposition\.tsx$/u,
+  /^__tests__\/components\/museum\/MuseumNetworkProposition\.test\.tsx$/u,
+  /^__tests__\/scripts\/(?:app-pr-ci-effective-plan|deployment-bus|e2e-packs|manual-deploy-routing-guard|museum-|pr-ci-policy-bundle|release-bus-|sync-e2e-manifest)/u,
   /^(?:package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml)$/u,
 ];
 function check(required, reason) {
@@ -93,7 +94,13 @@ function applyEffectiveAppPrCiPlan(plan, { cwd = process.cwd() } = {}) {
   const releaseBusContract = files.some((file) =>
     RELEASE_BUS_CONTRACT_PATTERNS.some((pattern) => pattern.test(file))
   );
-  const playwrightMuseum = files.some(isMuseumOwnedPath);
+  // Keep App PR lane activation at least as broad as the tier classifier.
+  // P1/P2 surface work and P3 policy/control-plane work must receive the
+  // complete Museum inventory rather than being omitted by the legacy,
+  // narrower ownership helper.
+  const playwrightMuseum = files.some(
+    (file) => isMuseumPath(file) || isPolicyPath(file)
+  );
 
   const checks = {
     ...plan.checks,

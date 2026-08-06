@@ -52,6 +52,20 @@ describe("AboutPage", () => {
 
     expect(await screen.findByTestId("about-component")).toBeInTheDocument();
   });
+
+  it("uses the modern About surface for Legal sections", async () => {
+    const element = await AboutPage({
+      params: Promise.resolve({ section: AboutSection.LICENSE }),
+    });
+
+    const { container } = render(element);
+
+    expect(container.querySelector("main")).toHaveClass(
+      "tw-border-r",
+      "tw-border-iron-900",
+      "tw-bg-[#0D0D0F]"
+    );
+  });
 });
 
 describe("generateMetadata", () => {

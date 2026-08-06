@@ -162,4 +162,38 @@ describe("useWaveDrops", () => {
 
     jest.useRealTimers();
   });
+
+  it("does not refetch disabled queries for compact updates", () => {
+    const refetch = jest.fn().mockResolvedValue(undefined);
+    useInfiniteQueryMock.mockReturnValue({
+      data: { pages: [] },
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+      refetch,
+    });
+
+    const socketCallbacks = new Map<
+      WsMessageType,
+      (message: unknown) => void
+    >();
+    const {
+      useWebSocketMessage,
+    } = require("@/services/websocket/useWebSocketMessage");
+    (useWebSocketMessage as jest.Mock).mockImplementation((type, callback) => {
+      socketCallbacks.set(type, callback);
+    });
+
+    renderHook(() => useWaveDrops({ waveId: "wave-1", enabled: false }));
+    socketCallbacks.get(WsMessageType.DROP_UPDATE_REF)?.({
+      author_id: "author-1",
+      drop_id: "drop-1",
+      wave_id: "wave-1",
+      serial_no: 1,
+      update_type: WsMessageType.DROP_UPDATE,
+    });
+
+    expect(refetch).not.toHaveBeenCalled();
+  });
 });
