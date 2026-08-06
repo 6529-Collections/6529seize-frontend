@@ -5,6 +5,7 @@ import clsx from "clsx";
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 import {
   AboutCol as Col,
   AboutContainer as Container,
@@ -187,14 +188,20 @@ export default function ApiAuthenticationPage() {
       <Container fluid className={CONTENT_PAGE_CONTAINER_CLASS}>
         <Row>
           <Col>
-            <Link
-              href="/tools/api"
-              className="hover:tw-text-primary-200 tw-mb-5 tw-inline-flex tw-text-sm tw-font-semibold tw-text-primary-300 tw-no-underline"
-            >
-              {apiAuthGuideCopy.backToApi}
-            </Link>
+            <div className="tw-mb-3 tw-flex tw-items-center">
+              <Link
+                href="/tools/api"
+                className="tw-group -tw-ml-2 tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-px-2 tw-py-2 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+              >
+                <ArrowLeftIcon
+                  aria-hidden="true"
+                  className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform group-hover:-tw-translate-x-0.5"
+                />
+                <span>{apiAuthGuideCopy.backToApi}</span>
+              </Link>
+            </div>
             <header className="tw-w-full">
-              <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-50">
+              <p className="tw-mb-2 tw-text-xs tw-font-medium tw-uppercase tw-leading-4 tw-tracking-wider tw-text-iron-500">
                 {apiAuthGuideCopy.eyebrow}
               </p>
               <h1 className={CONTENT_PAGE_TITLE_CLASS}>
