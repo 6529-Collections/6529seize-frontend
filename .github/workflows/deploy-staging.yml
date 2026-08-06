@@ -293,9 +293,9 @@ jobs:
           node ops/scripts/artifact-portability.cjs inventory \
             --manifest staging-artifact/manifest.json \
             --package staging-artifact/package.zip \
-            --extracted-root .staging-bundle \
-            --runtime-config .staging-bundle/.next/PUBLIC_RUNTIME.json \
-            --assets-flag .staging-bundle/.next/ASSETS_FROM_S3 \
+            --extracted-root "$zip_extract" \
+            --runtime-config "$zip_extract/.next/PUBLIC_RUNTIME.json" \
+            --assets-flag "$zip_extract/.next/ASSETS_FROM_S3" \
             --source-root . \
             --content-roots "public,content/public-reviews,config/public-reviews,public/review-data" \
             --environment staging \
