@@ -8,12 +8,14 @@ const path = require("node:path");
 const YAML = require("yaml");
 
 const CONTRACT = "pr-ci-policy-bundle-v1";
+// Museum release controls remain within an explicit protected-file ceiling;
+// byte ceilings below continue to bound the canonical bundle independently.
 const MAX_FILE_COUNT = 128;
 const MAX_SOURCE_BYTES = 4 * 1024 * 1024;
 const MAX_CANONICAL_BYTES = 64 * 1024;
 const LEGACY_NODE_PIN_WORKFLOW_SHA256 = Object.freeze({
   ".github/workflows/app-pr-ci.yml":
-    "2e2276d51770ab2ba89fe7e5486a0662a52c3a88e82ea3dcac658e247cfc5db4",
+    "1fe5d8b652e3b54870cdf01412dbf2db6d49f89244ad0cdbfefc59e905b7c6b9",
 });
 
 const FILE_PATHS = Object.freeze([
@@ -23,6 +25,7 @@ const FILE_PATHS = Object.freeze([
   ".github/workflows/build-upload-deploy-prod.yml",
   ".github/workflows/deploy-staging.yml",
   ".github/workflows/dependency-governance.yml",
+  ".github/workflows/museum-publication-compatibility.yml",
   ".github/workflows/production-e2e.yml",
   ".github/workflows/production-e2e-dispatch.yml",
   ".github/workflows/production-build-artifact.yml",
@@ -42,6 +45,8 @@ const FILE_PATHS = Object.freeze([
   "__tests__/scripts/lint-package-json.test.ts",
   "__tests__/scripts/manual-deploy-routing-guard.test.ts",
   "__tests__/scripts/museum-release-tier.test.ts",
+  "__tests__/scripts/museum-release-selection.test.ts",
+  "__tests__/scripts/museum-publication-compatibility.test.ts",
   "__tests__/scripts/museum-surface-registry.test.ts",
   "__tests__/lib/museum/publication/fixture.ts",
   "__tests__/lib/museum/publication/corpusContracts.test.ts",
@@ -83,6 +88,7 @@ const FILE_PATHS = Object.freeze([
   "ops/testing-strategy/mutation-endpoint-registry.v1.schema.json",
   "ops/testing-strategy/museum-surface-registry.v1.json",
   "ops/testing-strategy/museum-surface-registry.v1.schema.json",
+  "ops/testing-strategy/museum-release-shadow-evidence.v1.json",
   "ops/testing-strategy/validation-manifest.v1.schema.json",
   "playwright.config.ts",
   "prettier.config.mjs",
@@ -95,6 +101,8 @@ const FILE_PATHS = Object.freeze([
   "scripts/generate-openapi.cjs",
   "scripts/lint-package-json.cjs",
   "scripts/museum-release-tier.cjs",
+  "scripts/museum-release-selection.cjs",
+  "scripts/museum-publication-compatibility.ts",
   "scripts/museum-surface-registry.cjs",
   "scripts/notify-ci-wave.mjs",
   "scripts/package-public-review-artifacts.cjs",
@@ -110,6 +118,9 @@ const FILE_PATHS = Object.freeze([
   "scripts/typecheck-test-ratchet.cjs",
   "tests/packs.manifest.cjs",
   "tests/museum/about-readonly.spec.ts",
+  "tests/museum/institutional-practice-readonly.spec.ts",
+  "tests/museum/inside-system-readonly.spec.ts",
+  "tests/museum/rights-readonly.spec.ts",
   "tsconfig.jest.json",
   "tsconfig.json",
   "tsconfig.playwright.json",
@@ -182,6 +193,7 @@ const PACKAGE_FIELD_KEYS = Object.freeze([
   "dependencies.cross-env",
   "dependencies.next",
   "dependencies.next-sitemap",
+  "dependencies.tsx",
   "devDependencies.@jest/globals",
   "devDependencies.@playwright/test",
   "devDependencies.@types/jest",
@@ -214,6 +226,7 @@ const RUNTIME_PINS = Object.freeze({ node: "22.17.1" });
 const NODE_PIN_WORKFLOWS = Object.freeze([
   ".github/workflows/app-pr-ci.yml",
   ".github/workflows/deploy-staging.yml",
+  ".github/workflows/museum-publication-compatibility.yml",
   ".github/workflows/production-e2e.yml",
   ".github/workflows/production-build-artifact.yml",
   ".github/workflows/release-bus-v2-preflight.yml",

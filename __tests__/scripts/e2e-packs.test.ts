@@ -827,7 +827,7 @@ describe("E2E runner CLI resolution", () => {
 
   it.each([
     ["staging", "post-deploy", 17],
-    ["production", "cron", 10],
+    ["production", "cron", 11],
     ["production", "post-deploy", 16],
   ])(
     "lists %s/%s as a non-empty deterministic pack set",
@@ -896,7 +896,7 @@ describe("E2E runner CLI resolution", () => {
     ).toBe(true);
     expect(museumPacks[0]?.triggers).toEqual(["manual"]);
     expect(museumPacks[1]?.triggers).toEqual(["post-deploy", "manual"]);
-    expect(museumPacks[2]?.triggers).toEqual(["post-deploy", "manual"]);
+    expect(museumPacks[2]?.triggers).toEqual(["cron", "post-deploy", "manual"]);
   });
 
   it("classifies every dedicated Museum pack across local and deployed environments", () => {

@@ -437,8 +437,8 @@ describe("testing strategy CI plan", () => {
       path.join(process.cwd(), ".github/workflows/staging-e2e.yml"),
       "utf8"
     );
-    const museumChangeSetClassifier = fs.readFileSync(
-      path.join(process.cwd(), "scripts/museum-e2e-change-set.cjs"),
+    const museumReleaseSelector = fs.readFileSync(
+      path.join(process.cwd(), "scripts/museum-release-selection.cjs"),
       "utf8"
     );
     const museumSpec = fs.readFileSync(
@@ -446,6 +446,10 @@ describe("testing strategy CI plan", () => {
         process.cwd(),
         "tests/museum/institutional-practice-readonly.spec.ts"
       ),
+      "utf8"
+    );
+    const aboutSpec = fs.readFileSync(
+      path.join(process.cwd(), "tests/museum/about-readonly.spec.ts"),
       "utf8"
     );
 
@@ -468,20 +472,10 @@ describe("testing strategy CI plan", () => {
       'args+=(--exclude-pack "$museum_pack_alias")'
     );
     expect(stagingWorkflow).toContain("const isMuseumPack = (pack) =>");
-    expect(stagingWorkflow).toContain("scripts/museum-e2e-change-set.cjs");
-    expect(museumChangeSetClassifier).toContain(
-      '["diff", "--no-renames", "--name-only", "-z"'
-    );
-    for (const ownedPath of [
-      '"app/museum/network/"',
-      '"components/museum/"',
-      '"lib/museum/"',
-      "config/museumPublicationEnv.server.ts",
-      "i18n/messages/museum.en-US.json",
-      '"tests/museum/"',
-    ]) {
-      expect(museumChangeSetClassifier).toContain(ownedPath);
-    }
+    expect(stagingWorkflow).not.toContain("scripts/museum-e2e-change-set.cjs");
+    expect(museumReleaseSelector).toContain("failClosedClassification");
+    expect(museumReleaseSelector).toContain("effectiveActivation");
+    expect(museumReleaseSelector).toContain("source commit must be an exact");
     expect(workflow).toContain(
       "playwright_museum_required: ${{ steps.plan_outputs.outputs.playwright_museum_required }}"
     );
@@ -491,13 +485,22 @@ describe("testing strategy CI plan", () => {
     expect(workflow).toContain(
       "MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.commit }}"
     );
+    expect(workflow).toContain(
+      "MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum_publication.outputs.commit }}"
+    );
+    expect(workflow).toContain('case "$selected_pack"');
+    expect(workflow).toContain("selected_specs=()");
+    expect(workflow).toContain('[ ! -f "$selected_spec" ]');
     expect(workflow).toContain("./bin/6529 exec playwright test");
+    expect(workflow).not.toContain('./bin/6529 run "$selected_pack"');
     expect(workflow).toContain("--workers=1");
     expect(stagingWorkflow).toContain(
-      "Unable to prove the deployed change range; retaining the Museum E2E pack."
+      "Unable to prove the deployed parent; retaining every Museum pack."
     );
     expect(museumSpec).toContain('test.describe.configure({ mode: "serial" })');
     expect(museumSpec).toContain("for (const profile of PROFILE_ROUTES)");
+    expect(aboutSpec).toContain("MUSEUM_PUBLICATION_EXPECTED_COMMIT");
+    expect(aboutSpec).toContain("museum_publication_expected_commit_not_exact");
     expect(
       fs.existsSync(
         path.join(

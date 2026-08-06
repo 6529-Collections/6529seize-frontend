@@ -250,3 +250,219 @@
   specs across both desktop and mobile passed in one Playwright process. The
   browser step completed in 4m50s and the full Museum job in 6m01s, with one
   application-server lifecycle and no Turbopack restart panic.
+
+## 2026-08-05 - PR 3 conservative tier-activation checkpoint
+
+- Implemented `museum-release-selection-v1` with exact range classification,
+  an auditable digest, fail-closed range/classifier handling, and explicit
+  P0/P1/P2/P3 selection. Only verified P0 selects the exact About pack; P1
+  remains broad because no trusted template-to-pack registry mapping exists;
+  P2/P3 remain broad by policy.
+- Strengthened P0 proof for the exact #3628 class: unchanged dynamic
+  `className` structure is retained, approved literal style changes are
+  constrained, and a focused test may only strengthen a static assertion
+  program after unchanged render/setup behavior; interactions or other setup
+  changes escalate. Added synthetic negative cases and exact historical
+  code-range shadows for #3628, #3625, and the control-plane change. The
+  evidence ledger expressly does not claim 20 releases.
+- Activated the selector in App PR, staging, and production workflows. Their
+  selected-pack evidence is preserved with the existing exact-SHA,
+  manifest-bound, read-only staging/production controls and exact canonical
+  source SHA. Calls with a missing range, invalid selector value, unknown hold
+  state, unavailable pack-exclude capability, source mismatch, or rollback
+  mode keep the full Museum inventory or fail before qualification.
+- Aligned App PR Museum-lane activation with the classifier's own Museum and
+  policy predicates, including P1 presentation assets and P3 control-plane
+  files. The classifier now loads its TypeScript parser only for AST proof, so
+  that trusted predicate reuse remains safe in the pre-install planning job.
+- App PR selection stages the classifier and selector from the protected base
+  SHA. During the one-time PR3 bootstrap, where that base has no selector yet,
+  it emits an explicit full-inventory selection record; it cannot execute the
+  candidate selector to obtain a narrow result. The strict-adapter workflow
+  also writes a failed-result artifact if the adapter runner itself cannot
+  start.
+- Before matrix construction, App PR independently stages the protected-base
+  classifier path predicates and forces the Museum browser lane if any changed
+  path is Museum-owned or Museum policy. A predicate/Git failure also forces
+  that lane, preventing a candidate planner or classifier change from omitting
+  its own P3 broad qualification.
+- Added the immediate Actions-variable rollback control:
+  `MUSEUM_RELEASE_TIER_MODE=full`. Invalid or absent values are full by
+  default.
+- Kept `museum-institutional-practice` broad qualification on `cron`, manual,
+  and post-deploy triggers. A scheduled failure, or a failing explicitly
+  authorized manual full sweep, creates/updates the bot-managed
+  `release-bus-museum-hold` issue. A passing authorized exact-source adapter
+  plus broad sweep clears only that managed issue; foreign hold issues stop the
+  clear operation.
+- Added `museum-publication-compatibility.yml`: a reusable exact-source
+  workflow for the canonical Museum protected-main caller, repository dispatch,
+  and a nightly exact-source check. It binds the canonical source SHA before
+  running the current frontend strict adapter and saves the adapter result as
+  evidence. Its runner and pinned `tsx` dependency are protected by the PR
+  policy bundle. The source repository still needs to invoke this workflow from
+  its protected-main policy after the frontend change is merged.
+- Local direct probe classification: immutable raw GitHub transport was
+  healthy, but the stale PR3 frontend adapter returned
+  `publication_rights_registry_shape_invalid` for source SHA
+  `6f7f8b2168347cb623d53eeb6b9d7fe1242d7a73`. This branch lacks the final
+  current-main v1.1 rights adapter/#3629 changes, so the result is recorded as
+  non-qualifying stale-adapter evidence, not a Museum source defect. Re-run the
+  exact gate after rebase onto merged PR2/current frontend main; no exception
+  was added.
+
+### Validation
+
+- Focused regression run: 10 suites / 174 tests passed (App PR plan, tier
+  classifier, selector, surface registry, synthetic adapter, E2E manifest,
+  testing strategy, Release Bus performance contract, and static corpus
+  contract).
+- `seize run lint:changed`: passed.
+- `seize run typecheck:changed`: passed for 1,359 changed TypeScript files.
+- `seize run typecheck:jest`: passed; the ratchet retained 2,125 existing
+  diagnostics across 872 files.
+- `seize run typecheck:playwright`: passed.
+- `seize run e2e-manifest:check`: passed; generated package/README targets are
+  synchronized.
+- YAML parsing passed for App PR, staging E2E, production E2E, and Museum
+  compatibility workflows; `codex-diff-check` passed.
+- The policy-bundle Jest suite remains Linux-only: Windows lacks
+  `fs.constants.O_NOFOLLOW`, so it exits at the intentional fail-closed
+  platform guard before assertions. No compatibility workaround weakened that
+  guard.
+- No build, browser run, push, pull request, merge, staging deployment,
+  production deployment, or external release mutation was performed.
+
+## 2026-08-06 - PR 3 exact-head review follow-up
+
+- Confirmed the review bot's reported identity typo at the byte boundary: the
+  foreign-hold filter closed the quoted bot login before its final bracket.
+  Corrected it to the complete `github-actions[bot]` identity and added a
+  regression contract for both managed and foreign predicates.
+- Retained the exact deployed-SHA assertion in staging and production. A
+  commit mismatch is release identity failure; a wider test selection cannot
+  qualify a tree other than the one deployed. The workflows and contract test
+  now state that boundary directly.
+- Accepted the two hardening suggestions: the exported pack selector rejects
+  unknown environments, and App PR CI proves every selected Museum spec exists
+  before starting Playwright.
+- Updated affected workflow-contract tests to the active selector name and
+  five-pack inventory. The prior hosted failure was a stale test-contract
+  expectation, not a release-workflow runtime failure.
+
+## 2026-08-06 - PR 3 current-main integration
+
+- Rebased the tier-activation commit onto exact current main
+  `68211368a099cc7a4638febbd9346336e16e8a38`, which contains merged PR 2 at
+  `fe0ad4ade31f84d6321f200bf8a0ec531e7651bb` and the later Data Architecture
+  diagnostic stabilization.
+- Reconciled the current five-pack Museum inventory. Full mode now selects Data
+  Architecture, Institutional Practice, About, Inside the System, and Rights
+  in PR, staging, and production. P0 still selects only About.
+- Preserved PR 2's one-server browser topology: selected specs are collected
+  first and run in one Playwright process, so narrowing does not reintroduce
+  redundant application restarts.
+- Exact bilateral probe passed for canonical Museum source
+  `6f7f8b2168347cb623d53eeb6b9d7fe1242d7a73`: `accepted=true`,
+  `adapter_status=current`, and `publication_commit` equals the source SHA.
+- Integrated focused validation passed: 10 suites / 182 tests. Changed lint,
+  changed TypeScript (1,371 files), Jest type ratchet (2,124 existing
+  diagnostics / 871 files), Playwright typecheck, generated E2E manifest,
+  Windows-safe diff check, and the new compatibility workflow's complete
+  actionlint pass all succeeded.
+- Synced the final review follow-up onto frontend main
+  `a2d3839479484144cd37c44433df424cfd60ae9c`; the intervening PR changed only
+  Data Architecture workstream records, so no selector, workflow, or runtime
+  reconciliation was required.
+- Hosted exact-head policy validation caught an incorrect package-field path:
+  `tsx` is pinned under `dependencies`, not `devDependencies`. Corrected the
+  protected key and its contract assertion; the gate failed before producing
+  release evidence, as designed.
+
+## 2026-08-06 - PR 3 exact-head review hardening
+
+- Applied all eight valid exact-head review findings before merge. Unset
+  `MUSEUM_RELEASE_TIER_MODE` now reaches the selector unchanged and therefore
+  retains the complete Museum inventory. This is enforced in PR, staging, and
+  production workflows.
+- Tightened P0 test-strengthening evidence to accept only bare `it(...)` and
+  `test(...)` declarations and to prove that every existing focused assertion
+  remains present. Added adversarial coverage for skipped/isolated tests,
+  assertion replacement, and setup changes that pass the count precondition.
+- A foreign hold refusal now writes durable `hold.json` evidence before the
+  workflow fails. Staging and production copy the exact selection record into
+  their environment artifact root, so upload paths cannot re-root the evidence
+  bundle through `$RUNNER_TEMP`.
+- Empty expected-source environment values are normalized to `null` in both
+  read-only Museum browser specifications, preserving exact-source discovery
+  without accepting malformed non-empty SHAs.
+- Replayed the exact historical About typography shadow under the strengthened
+  proof. Its head replaces an existing assertion, so the record now truthfully
+  expects P2 and the full five-pack inventory; the synthetic retained-assertion
+  fixture continues to prove the valid P0 path.
+- Rebased the complete reviewed slice without conflict onto exact frontend main
+  `5c1279ecd06fe7d676d67352980bf9633750ff06`, whose intervening change is the
+  documentation-only Museum Rights practice closeout. No selector inventory,
+  workflow, application, or test reconciliation was required.
+- Integrated the remaining prior-review hardening before final qualification:
+  selection digests are recomputed by consumers, effective pack inventory is
+  cross-bound to the validated selection or its conservative full fallback,
+  PR pack order matches staging and production, hold-label creation is
+  idempotent, test-source read failures remain structured and fail closed, and
+  compatibility identity/non-current branches plus selected-pack retention are
+  covered explicitly.
+- An independent exact-head integrity review found that PR jobs still fetched a
+  mutable base branch independently and that Release Bus preflight treated the
+  embedded Museum selection digest as a shape-only field. The workflow now
+  propagates the immutable pull-request base SHA through the plan output, uses
+  that SHA for every diff and protected-policy read, and records it in exact PR
+  evidence. Evidence binds the exact merge tree, Museum source commit,
+  selection digest, and whether the Museum browser lane was required.
+- Release Bus preflight now checks out its immutable selection verifier,
+  compares the evidence base to the workflow run's PR base, validates the
+  selection's base/head/source/check binding, recomputes its digest, and rejects
+  a missing, forged, or mismatched Museum selection record before any build.
+- Exact-head hosted run `31066104003` failed closed while assembling the PR
+  evidence. The protected classifier had been copied under `$RUNNER_TEMP`, so
+  its repository-root calculation resolved outside the checked-out merge tree
+  and returned an empty P3 fallback record. The immutable copy now lives one
+  directory below `$GITHUB_WORKSPACE`: it remains byte-for-byte sourced from
+  the exact protected base while its Git reads resolve against the reviewed
+  checkout. A workflow contract prevents regression to the runner-temporary
+  location.
+- A final independent trust review showed that checksum verification alone did
+  not bind the selected pack semantics to the protected selector: candidate
+  code could alter the pack list and recompute its own digest. Release Bus
+  preflight now checks out the exact candidate tree, resolves the current hold
+  and canonical Museum source independently, runs the selector from immutable
+  workflow code with a pinned-integrity parser, compares the complete expected
+  and supplied records, and cross-checks browser-lane cardinality. The
+  adversarial test now recomputes both the forged selection digest and artifact
+  checksums and is still rejected.
+- The workspace-local protected scripts are added to the checkout's local Git
+  exclude before creation. This preserves their repository-relative Git root
+  without exposing generated control copies to changed-source lint discovery.
+- Rebased onto exact current main
+  `a55c83c2ad29db7c66ef55c26f45ec645a71db35`, including PR #3640's emergency
+  full five-pack Museum browser restoration. The resolved workflow keeps its
+  one Playwright process and `--workers=1`; full/fallback selection still
+  supplies all five specs, while the validated selector array enables the
+  reviewed P0 narrowing path. The merged test contract retains both the exact
+  source binding and PR #3640's process/worker assertions.
+- Exact-head CodeQL identified the new exact-candidate checkout as an untrusted
+  checkout. The evidence job is deliberately non-privileged and secret-free,
+  runs only after the separate trusted authorization job, and parses candidate
+  files as data through immutable selector code without executing them. The
+  workflow now records that established trust disposition at the checkout so
+  CodeQL can distinguish the intended containment boundary from a privileged
+  candidate execution.
+- The next hosted contract run correctly rejected the stale assertion that
+  preflight had only one candidate checkout. The contract now covers both
+  contained boundaries: evidence needs trusted authorization and has only
+  read-only actions/contents/issues permissions; build needs successful
+  evidence and has only read-only contents. Neither job-level environment may
+  contain secrets, and both intentional CodeQL dispositions are counted.
+- Final exact-head review tightened three test/control details: authorization no
+  longer receives unused repository-content permission; the adversarial
+  evidence mutation restores its fixture in `finally`; and the hold-evidence
+  ordering contract proves both markers exist before comparing their offsets.

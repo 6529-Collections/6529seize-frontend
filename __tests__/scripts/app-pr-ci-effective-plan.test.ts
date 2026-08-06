@@ -96,6 +96,10 @@ describe("effective App PR CI plan", () => {
     "config/museumPublicationEnv.server.ts",
     "tests/museum/institutional-practice-readonly.spec.ts",
     "i18n/messages/museum.en-US.json",
+    "styles/museum.css",
+    "public/museum/about-proposition.avif",
+    ".github/workflows/staging-e2e.yml",
+    "scripts/museum-release-selection.cjs",
   ])("requires the isolated Museum browser lane for %s", (file) => {
     const effective = executePlan([file]);
 

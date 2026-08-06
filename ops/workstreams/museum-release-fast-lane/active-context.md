@@ -133,3 +133,91 @@ deployment, or production deployment has been performed.
 - No local build or browser execution was attempted. The worktree's node
   modules junction supports the requested Jest, lint, and typecheck commands
   but not Turbopack; hosted CI owns build and browser execution.
+
+## PR 3 implementation checkpoint - conservative tier activation
+
+PR 3 is implemented in the `codex/museum-release-tier-activation` worktree.
+It does not push, open a pull request, merge, deploy, or mutate a staging or
+production environment.
+
+- Added the protected `museum-release-selection-v1` decision record. It binds
+  an exact base/head range to the existing trusted classifier and records the
+  tier, selected packs, static scope, activation mode, Museum-hold state,
+  optional resolved canonical source SHA, and a digest. Any classifier, range,
+  inventory, mode, hold-state, or supplied source-SHA problem selects every
+  Museum pack or fails the workflow before qualification.
+- P0 is the only narrowed path: the exact About proposition pack runs on
+  desktop and 390px mobile, while the static source/shell corpus sentinel still
+  runs first. Hosted P0 checks bind their rendered source link and displayed
+  commit to the exact SHA in the selection evidence. The P0 AST proof now also
+  permits only a strengthened static assertion program in its focused test;
+  render/setup and interactions remain disallowed.
+- P1 remains a conservative all-pack result because the registry does not yet
+  contain a trusted template-to-pack mapping. P2 and P3 also select every
+  Museum pack. This preserves the proposal's broad fallback instead of
+  guessing a template relation.
+- `MUSEUM_RELEASE_TIER_MODE=full` is the immediate rollback switch. A missing
+  or malformed value is also full. An active or unreadable
+  `release-bus-museum-hold` GitHub issue likewise restores every pack in App
+  PR, staging, and production qualification.
+- The old broad institutional-practice pack is retained for nightly (`cron`),
+  manual, and post-deploy execution. The scheduled or explicitly authorized
+  manual broad sweep records an auditable Release Bus Museum hold on failure;
+  only a passing authorized exact-source adapter plus broad sweep can close the
+  bot-managed hold.
+- Added a reusable frontend-side bilateral compatibility workflow. It resolves
+  canonical Museum `main` once to an exact SHA, rejects any caller SHA that is
+  not that exact SHA, checks out current frontend `main`, and runs the strict
+  adapter only against immutable GitHub raw endpoints. It stores the adapter
+  result as an artifact and exposes a `workflow_call` interface for the source
+  repository's protected-main workflow. The source-repository caller remains a
+  configuration/merge step outside this PR3 worktree.
+- Added comprehensive synthetic selector/adapter coverage and an exact
+  historical shadow-evidence ledger. The ledger records code ranges only; it
+  makes no fabricated 20-release or production-performance claim.
+- App PR planning now reuses the classifier's Museum/policy predicates, so P1
+  presentation paths and P3 workflow/control-plane changes cannot omit the
+  broad Museum browser lane. The AST parser is lazy-loaded to keep that
+  predicate reuse valid before dependencies are installed.
+- App PR executes tier tooling staged from protected base `main`; because this
+  bootstrap PR predates the selector on that base, it intentionally emits a
+  full-pack decision until the merged selector becomes trusted. The adapter
+  workflow records a negative JSON result even when its runner cannot launch.
+- The plan job independently evaluates changed paths with the protected-base
+  Museum/policy predicates before building its matrix; a classification or Git
+  failure forces the broad Museum lane, so candidate policy code cannot omit
+  its own P3 qualification.
+
+### PR 3 integration status
+
+PR 3 is rebased onto exact frontend main
+`a55c83c2ad29db7c66ef55c26f45ec645a71db35`. That main includes PR 2 at
+`fe0ad4ade31f84d6321f200bf8a0ec531e7651bb` and the subsequent Data
+Architecture diagnostic stabilization. Current main contains five Museum
+packs in each local/staging/production inventory, so full-mode selection now
+includes Data Architecture alongside Institutional Practice, About, Inside the
+System, and Rights. P0 remains the single About pack.
+
+The current-main rebase includes PR #3640's emergency restoration of the full
+five-pack browser command. PR 3 preserves its one-process, one-worker execution
+and all five packs in conservative/full mode, while replacing the temporary
+hard-coded inventory with the validated selector array needed for the P0 path.
+
+Hosted run `31066104003` exposed and failed closed on a bootstrap path error:
+the immutable protected classifier was staged outside the checkout and could
+not resolve the Git tree. Its immutable copy is now staged immediately below
+the workspace root, with a regression contract. Fresh exact-head CI remains
+required before merge.
+
+The final trust review also found that a candidate could recompute the digest
+after changing its selected pack inventory. Trusted Release Bus preflight now
+recomputes the entire expected selection from the exact candidate tree using
+immutable selector code, current hold state, and the independently resolved
+canonical Museum source. Forged selection semantics fail even when every
+candidate-controlled checksum is internally consistent.
+
+Canonical Museum `main` resolved to
+`6f7f8b2168347cb623d53eeb6b9d7fe1242d7a73`. The strict adapter accepted that
+immutable source exactly, returned `adapter_status=current`, and bound the
+publication commit to the same SHA. The earlier stale-adapter result remains in
+the run log as historical evidence; it is superseded for this integrated tree.
