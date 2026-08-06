@@ -589,3 +589,41 @@
 - Exact follow-up validation passes full Knip, 36 focused tests, changed lint,
   changed TypeScript, workflow syntax/expression lint, Node syntax, and
   `codex-diff-check`. No runner or repository setting was changed.
+
+## 2026-08-06 - PR 4 exact review hardening
+
+- Raised the candidate workload ceiling to 35 minutes so the maximum
+  30-minute completion observation retains five minutes for setup, evidence
+  handoff, and cancellation; the workflow contract now derives and enforces
+  that minimum headroom.
+- Removed the runner-label fallback and re-verifies pnpm `10.33.0` immediately
+  in the frozen-install step after the second setup-node/cache action.
+- Both normalized-output bridges now admit only their closed key sets and
+  reject values containing equals signs or line breaks before writing to
+  `GITHUB_OUTPUT`.
+- Reconciliation no longer runs under `set +e`. State updates are validated as
+  JSON objects before atomic replacement, malformed state fails immediately,
+  and non-success discovery is handled explicitly without suppressing update
+  failures. The malformed unquoted jq fallback was removed.
+- Focused runner tests, changed lint/typecheck, workflow syntax/expression lint,
+  Node syntax, and the diff check pass after these corrections.
+
+## 2026-08-06 - PR 4 security-rating correction
+
+- Sonar identified workflow-level `actions: write` on the controller. The
+  workflow and validation job now hold contents-read only; Actions write is
+  granted solely to the dispatch/reconciliation job that calls the API.
+- The accompanying Sonar observations were resolved by using `Object.hasOwn`,
+  typed validation errors, and a negative splice index.
+- CodeQL alert 292 was reviewed and dismissed as a false positive. Candidate
+  source is an exact commit that immutable trusted tooling proves is a current
+  main ancestor before checkout; the measured job has no secrets, no candidate
+  token, `actions: none`, and no persisted checkout credentials, while a fresh
+  Ubuntu verifier independently binds its evidence.
+- Independent Bash review caught `event_name` missing from the new closed
+  normalized-output allowlist. The field is now admitted explicitly and the
+  workflow regression test binds that exact allowlist segment.
+- The hosted Debt Ratchet exposed two generic `any` annotations in the YAML
+  fixture. They were replaced with closed workflow-fixture test types;
+  the metric returns to its 126 baseline. The full Jest diagnostic ratchet and
+  Playwright typecheck now pass alongside the debt ratchet.

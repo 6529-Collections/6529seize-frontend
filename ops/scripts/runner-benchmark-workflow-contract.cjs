@@ -3,6 +3,7 @@ const path = require("node:path");
 const YAML = require("yaml");
 const {
   DEFAULT_COMPLETION_TIMEOUT_SECONDS,
+  MAX_COMPLETION_TIMEOUT_SECONDS,
   PINNED_PNPM_VERSION,
 } = require("./runner-benchmark-inputs.cjs");
 
@@ -35,9 +36,17 @@ function assertControllerContract(controller) {
     throw new Error("controller must be workflow_dispatch-only");
   }
   assertOnlyEvents(controller.workflow, ["workflow_dispatch"], "controller");
-  if (controller.workflow.permissions?.actions !== "write") {
+  if (controller.workflow.permissions?.actions !== undefined) {
     throw new Error(
-      "controller must retain actions: write for own-run dispatch/cancel"
+      "controller workflow must not grant global Actions API authority"
+    );
+  }
+  if (
+    controller.workflow.jobs?.validate?.permissions?.actions !== undefined ||
+    controller.workflow.jobs?.dispatch?.permissions?.actions !== "write"
+  ) {
+    throw new Error(
+      "only the dispatch job may receive Actions write authority"
     );
   }
   const inputs = controller.workflow.on.workflow_dispatch.inputs;
@@ -78,6 +87,25 @@ function assertControllerContract(controller) {
     !controller.source.includes("controller_run_attempt")
   ) {
     throw new Error("controller correlation must bind the first attempt");
+  }
+  if (
+    !controller.source.includes("Unexpected normalized output key") ||
+    !controller.source.includes('test("^[^=\\\\r\\\\n]*$")')
+  ) {
+    throw new Error("controller outputs must reject unsafe keys and values");
+  }
+  if (
+    controller.source.includes("set +e") ||
+    controller.source.includes(
+      ".failure_class // candidate_delayed_accepted"
+    ) ||
+    !controller.source.includes(
+      'jq -e \'type == "object" and (.needs_reconciliation | type == "boolean")\''
+    )
+  ) {
+    throw new Error(
+      "controller reconciliation must fail closed on state errors"
+    );
   }
 }
 
@@ -147,7 +175,8 @@ function assertCandidateContract(candidate) {
     !String(benchmark["runs-on"]).includes(
       "needs.authorize.outputs.runner_label"
     ) ||
-    String(benchmark["runs-on"]).includes("inputs.candidate_label")
+    String(benchmark["runs-on"]).includes("inputs.candidate_label") ||
+    String(benchmark["runs-on"]).includes("||")
   ) {
     throw new Error(
       "candidate label must be selected only from the authenticated authorization gate"
@@ -155,6 +184,16 @@ function assertCandidateContract(candidate) {
   }
   if (benchmark.env?.GH_TOKEN !== undefined) {
     throw new Error("candidate GH_TOKEN must not be job-scoped");
+  }
+  const minimumCandidateTimeoutMinutes =
+    Math.ceil(MAX_COMPLETION_TIMEOUT_SECONDS / 60) + 5;
+  if (
+    !Number.isInteger(benchmark["timeout-minutes"]) ||
+    benchmark["timeout-minutes"] < minimumCandidateTimeoutMinutes
+  ) {
+    throw new Error(
+      "candidate job timeout must retain setup and evidence headroom"
+    );
   }
   const source = candidate.source;
   const activation = source.indexOf(
@@ -165,6 +204,16 @@ function assertCandidateContract(candidate) {
     throw new Error(
       "candidate must activate pinned pnpm before setup-node cache"
     );
+  }
+  const pinnedPnpmCheck = `test "$(pnpm --version)" = "${PINNED_PNPM_VERSION}"`;
+  if (source.split(pinnedPnpmCheck).length - 1 < 2) {
+    throw new Error("candidate must re-verify pinned pnpm at install time");
+  }
+  if (
+    !source.includes("Unexpected normalized output key") ||
+    !source.includes('test("^[^=\\\\r\\\\n]*$")')
+  ) {
+    throw new Error("candidate outputs must reject unsafe keys and values");
   }
   if (
     !source.includes("validate-candidate") ||

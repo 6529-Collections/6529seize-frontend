@@ -245,9 +245,10 @@ jobs:
     name: Benchmark runner workload
     needs: authorize
     if: ${{ needs.authorize.result == 'success' }}
-    runs-on: ${{ needs.authorize.outputs.runner_label || 'ubuntu-latest' }}
-    # Input validation caps completion_timeout_seconds at 1,800 seconds.
-    timeout-minutes: 30
+    runs-on: ${{ needs.authorize.outputs.runner_label }}
+    # The maximum 30-minute observation budget retains five minutes for setup,
+    # evidence handoff, and orderly cancellation.
+    timeout-minutes: 35
     permissions:
       contents: read
       actions: none
@@ -313,8 +314,13 @@ jobs:
             --controller-run-id "$CONTROLLER_RUN_ID" \
             --controller-run-attempt "$CONTROLLER_RUN_ATTEMPT")"
           jq -e '(.contract == "runner-benchmark-inputs-v1") and (.source_sha | test("^[a-f0-9]{40}$")) and (.controller_nonce | test("^[a-f0-9]{32}$")) and (.controller_run_attempt == 1)' <<< "$normalized" >/dev/null
+          jq -e 'all(to_entries[]; (.key | test("^[a-z][a-z0-9_]*$")) and ((.value | tostring) | test("^[^=\\r\\n]*$")))' <<< "$normalized" >/dev/null
           while IFS='=' read -r key value; do
-            echo "$key=$value" >> "$GITHUB_OUTPUT"
+            case "$key" in
+              contract|source_sha|candidate_label|timeout_seconds|completion_timeout_seconds|profile|event_name|repeat_number|repeat_count|request_id|controller_nonce|controller_run_id|controller_run_attempt) ;;
+              *) echo "Unexpected normalized output key: $key" >&2; exit 1 ;;
+            esac
+            printf '%s=%s\n' "$key" "$value" >> "$GITHUB_OUTPUT"
           done < <(jq -r 'to_entries[] | "\(.key)=\(.value)"' <<< "$normalized")
 
       - name: Check out exact trusted source SHA
@@ -400,7 +406,10 @@ jobs:
         working-directory: source
         env:
           SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
-        run: ./bin/6529 install:frozen
+        run: |
+          set -euo pipefail
+          test "$(pnpm --version)" = "10.33.0"
+          ./bin/6529 install:frozen
 
       - name: Finish dependency timing
         if: always()

@@ -75,6 +75,64 @@ const readWorkflow = (name: string) =>
     "utf8"
   );
 
+interface WorkflowTrigger {
+  readonly inputs: Readonly<Record<string, unknown>>;
+}
+
+interface WorkflowEnvironment extends Readonly<Record<string, unknown>> {
+  readonly GH_TOKEN?: unknown;
+}
+
+interface WorkflowJob {
+  readonly "runs-on": string;
+  readonly "timeout-minutes"?: number | string;
+  readonly permissions: Readonly<Record<string, string>>;
+  readonly env?: WorkflowEnvironment;
+  readonly steps: readonly unknown[];
+  readonly [key: string]: unknown;
+}
+
+interface ControllerWorkflowDocument {
+  readonly on: {
+    readonly workflow_dispatch: WorkflowTrigger;
+  };
+  readonly permissions: Readonly<Record<string, string>>;
+  readonly jobs: {
+    readonly validate: WorkflowJob;
+    readonly dispatch: WorkflowJob;
+  };
+}
+
+interface CandidateWorkflowDocument {
+  readonly on: {
+    readonly workflow_dispatch: WorkflowTrigger;
+    readonly workflow_call: WorkflowTrigger;
+    readonly pull_request?: WorkflowTrigger;
+    readonly pull_request_target?: WorkflowTrigger;
+  };
+  readonly permissions: Readonly<Record<string, string>>;
+  readonly jobs: {
+    readonly authorize: WorkflowJob;
+    readonly benchmark: WorkflowJob;
+    readonly verify: WorkflowJob;
+  };
+}
+
+interface CandidateInputFixture {
+  readonly eventName: string;
+  readonly sourceSha: string;
+  readonly candidateLabel: string;
+  readonly timeoutSeconds: number;
+  readonly completionTimeoutSeconds: number;
+  readonly profile: string;
+  readonly repeatNumber: number;
+  readonly repeatCount: number;
+  readonly controllerRunId: string;
+  readonly controllerRunAttempt: number;
+  readonly controllerNonce: string;
+  readonly requestId?: string;
+}
+
 const SOURCE_SHA = "a".repeat(40);
 const MAIN_SHA = "b".repeat(40);
 const CONTROLLER_NONCE = "c".repeat(32);
@@ -104,8 +162,8 @@ const CONTROL_REQUEST_ID = buildRequestId({
   controllerNonce: CONTROLLER_NONCE,
 });
 
-const candidateInputs = (overrides: Record<string, unknown> = {}) => {
-  const values = {
+const candidateInputs = (overrides: Partial<CandidateInputFixture> = {}) => {
+  const values: CandidateInputFixture = {
     eventName: "workflow_dispatch",
     sourceSha: SOURCE_SHA,
     candidateLabel: "linux-16-vcpu",
@@ -145,8 +203,8 @@ const candidateInputs = (overrides: Record<string, unknown> = {}) => {
 describe("runner benchmark workflow boundary", () => {
   const controllerSource = readWorkflow("runner-benchmark.yml");
   const candidateSource = readWorkflow("runner-benchmark-candidate.yml");
-  const controller = YAML.parse(controllerSource) as Record<string, any>;
-  const candidate = YAML.parse(candidateSource) as Record<string, any>;
+  const controller = YAML.parse(controllerSource) as ControllerWorkflowDocument;
+  const candidate = YAML.parse(candidateSource) as CandidateWorkflowDocument;
 
   it("is manually dispatched from main with strict, bounded inputs", () => {
     expect(controller["on"]).toEqual({
@@ -184,7 +242,11 @@ describe("runner benchmark workflow boundary", () => {
     });
     expect(controller["jobs"].validate["runs-on"]).toBe("ubuntu-latest");
     expect(controller["jobs"].dispatch["runs-on"]).toBe("ubuntu-latest");
-    expect(controller["permissions"]).toEqual({
+    expect(controller["permissions"]).toEqual({ contents: "read" });
+    expect(controller["jobs"].validate["permissions"]).toEqual({
+      contents: "read",
+    });
+    expect(controller["jobs"].dispatch["permissions"]).toEqual({
       contents: "read",
       actions: "write",
     });
@@ -200,6 +262,15 @@ describe("runner benchmark workflow boundary", () => {
     expect(controllerSource).toContain("controller_run_attempt");
     expect(controllerSource).toContain(
       "timeout-minutes: ${{ fromJSON(needs.validate.outputs.controller_timeout_minutes) }}"
+    );
+    expect(controllerSource).toContain("Unexpected normalized output key");
+    expect(controllerSource).toContain('test("^[^=\\\\r\\\\n]*$")');
+    expect(controllerSource).toContain(
+      'jq -e \'type == "object" and (.needs_reconciliation | type == "boolean")\''
+    );
+    expect(controllerSource).not.toContain("set +e");
+    expect(controllerSource).not.toContain(
+      ".failure_class // candidate_delayed_accepted"
     );
   });
 
@@ -238,9 +309,10 @@ describe("runner benchmark workflow boundary", () => {
       contents: "read",
       actions: "read",
     });
-    expect(candidate["jobs"].benchmark["runs-on"]).toContain(
-      "needs.authorize.outputs.runner_label"
+    expect(candidate["jobs"].benchmark["runs-on"]).toBe(
+      "${{ needs.authorize.outputs.runner_label }}"
     );
+    expect(candidate["jobs"].benchmark["timeout-minutes"]).toBe(35);
     expect(candidate["jobs"].benchmark["runs-on"]).not.toContain(
       "inputs.candidate_label"
     );
@@ -267,7 +339,14 @@ describe("runner benchmark workflow boundary", () => {
     expect(candidateSource).toContain(
       "corepack prepare pnpm@10.33.0 --activate"
     );
-    expect(candidateSource).toContain('test "$(pnpm --version)" = "10.33.0"');
+    expect(
+      candidateSource.match(/test "\$\(pnpm --version\)" = "10\.33\.0"/g)
+    ).toHaveLength(2);
+    expect(candidateSource).toContain("Unexpected normalized output key");
+    expect(candidateSource).toContain('test("^[^=\\\\r\\\\n]*$")');
+    expect(candidateSource).toContain(
+      "profile|event_name|repeat_number|repeat_count"
+    );
     expect(candidateSource).toContain("actions/upload-artifact@");
     expect(candidateSource).toContain("retention-days: 30");
     expect(candidateSource).toContain("metadata_verified: false");
@@ -292,7 +371,7 @@ describe("runner benchmark workflow boundary", () => {
     expect(controller["jobs"].dispatch.env?.GH_TOKEN).toBeUndefined();
     const candidateSteps = candidate["jobs"].benchmark.steps as Array<{
       name?: string;
-      env?: Record<string, unknown>;
+      env?: WorkflowEnvironment;
     }>;
     for (const step of candidateSteps) {
       expect(step.env?.GH_TOKEN).toBeUndefined();
@@ -305,7 +384,7 @@ describe("runner benchmark workflow boundary", () => {
     }
     const verifierSteps = candidate["jobs"].verify.steps as Array<{
       name?: string;
-      env?: Record<string, unknown>;
+      env?: WorkflowEnvironment;
     }>;
     const metadataStep = verifierSteps.find((step) =>
       step.name?.includes("Verify run identity")
@@ -318,7 +397,7 @@ describe("runner benchmark workflow boundary", () => {
     );
     const controllerSteps = controller["jobs"].dispatch.steps as Array<{
       name?: string;
-      env?: Record<string, unknown>;
+      env?: WorkflowEnvironment;
     }>;
     expect(
       controllerSteps.find((step) => step.name?.includes("Write immutable"))

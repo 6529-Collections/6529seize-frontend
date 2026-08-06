@@ -39,7 +39,6 @@ run-name: Runner benchmark / ${{ inputs.profile }} / ${{ inputs.source_sha }}
 
 permissions:
   contents: read
-  actions: write
 
 concurrency:
   group: runner-benchmark-controller-${{ github.ref }}
@@ -52,7 +51,6 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: read
-      actions: write
     outputs:
       source_sha: ${{ steps.normalized.outputs.source_sha }}
       candidate_label: ${{ steps.normalized.outputs.candidate_label }}
@@ -108,8 +106,13 @@ jobs:
             --profile "$PROFILE" \
             --repeat-count "$REPEAT_COUNT")"
           jq -e '(.contract == "runner-benchmark-inputs-v1") and (.source_sha | test("^[a-f0-9]{40}$"))' <<< "$normalized" >/dev/null
+          jq -e 'all(to_entries[]; (.key | test("^[a-z][a-z0-9_]*$")) and ((.value | tostring) | test("^[^=\\r\\n]*$")))' <<< "$normalized" >/dev/null
           while IFS='=' read -r key value; do
-              echo "$key=$value" >> "$GITHUB_OUTPUT"
+            case "$key" in
+              contract|source_sha|candidate_label|timeout_seconds|completion_timeout_seconds|profile|repeat_count) ;;
+              *) echo "Unexpected normalized output key: $key" >&2; exit 1 ;;
+            esac
+            printf '%s=%s\n' "$key" "$value" >> "$GITHUB_OUTPUT"
           done < <(jq -r 'to_entries[] | "\(.key)=\(.value)"' <<< "$normalized")
           controller_timeout="$(node ops/scripts/runner-benchmark.cjs controller-timeout \
             --timeout-seconds "$TIMEOUT_SECONDS" \
@@ -196,7 +199,14 @@ jobs:
             local state_path="$1"
             shift
             local temporary_path="${state_path}.tmp"
-            jq "$@" "$state_path" > "$temporary_path"
+            if ! jq "$@" "$state_path" > "$temporary_path"; then
+              rm -f "$temporary_path"
+              return 1
+            fi
+            if ! jq -e 'type == "object"' "$temporary_path" >/dev/null; then
+              rm -f "$temporary_path"
+              return 1
+            fi
             mv "$temporary_path" "$state_path"
           }
 
@@ -296,76 +306,72 @@ jobs:
           }
 
           reconcile_pending() {
-            (
-              set +e
-              reconciliation_deadline_ms=$(( $(date +%s%3N) + 120000 ))
-              while [ "$(date +%s%3N)" -lt "$reconciliation_deadline_ms" ]; do
-                pending_any=false
-                for state_path in "$state_dir"/state-*.json; do
-                  [ -f "$state_path" ] || continue
-                  needs_reconciliation="$(jq -r '.needs_reconciliation' "$state_path")"
-                  [ "$needs_reconciliation" = true ] || continue
-                  pending_any=true
-                  repeat="$(jq -r '.repeat' "$state_path")"
-                  request_id="$(jq -r '.request_id' "$state_path")"
-                  nonce="$(jq -r '.controller_nonce' "$state_path")"
-                  title="$(jq -r '.title' "$state_path")"
-                  run_id="$(jq -r '.run_id // empty' "$state_path")"
-                  request_started_ms="$(jq -r '.request_started_ms' "$state_path")"
-                  run_path="$state_dir/reconcile-run-${repeat}.json"
-                  list_path="$state_dir/reconcile-list-${repeat}.json"
-                  if [ -z "$run_id" ]; then
-                    discovered_run="$(discover_run "$list_path" "$run_path" "$title" "$request_id" "$nonce")"
-                    discover_status=$?
-                    if [ "$discover_status" -eq 0 ]; then
-                      run_id="$discovered_run"
-                      reconciliation_now_ms="$(date +%s%3N)"
-                      dispatch_ms=$((reconciliation_now_ms - request_started_ms))
-                      update_state "$state_path" \
-                        --arg run_id "$run_id" \
-                        --argjson dispatch_ms "$dispatch_ms" \
-                        --argjson metadata_verified true \
-                        --argjson list_success_seen true \
-                        '.run_id = $run_id | .metadata_verified = $metadata_verified | .list_success_seen = $list_success_seen | .dispatch_ms = (.dispatch_ms // $dispatch_ms)'
-                    elif [ "$discover_status" -eq 1 ]; then
-                      update_state "$state_path" --argjson list_success_seen true '.list_success_seen = $list_success_seen'
-                      continue
-                    else
-                      continue
-                    fi
-                  fi
-                  if read_verified_run "$run_id" "$run_path" "$title" "$request_id" "$nonce"; then
-                    run_status="$(jq -r '.status // empty' "$run_path")"
-                    run_conclusion="$(jq -r '.conclusion // empty' "$run_path")"
-                    if [ "$run_status" = completed ]; then
-                      update_state "$state_path" \
-                        --argjson observed_ms "$(( $(date +%s%3N) - request_started_ms ))" \
-                        --argjson metadata_verified true \
-                        --argjson needs_reconciliation false \
-                        --arg failure_class "$(jq -r '.failure_class // candidate_delayed_accepted' "$state_path")" \
-                        '.observed_ms = $observed_ms | .metadata_verified = $metadata_verified | .needs_reconciliation = $needs_reconciliation | .status = "unavailable" | .failure_class = (if .timed_out or .cancellation_requested then (.failure_class // "candidate_timeout") else "candidate_delayed_accepted" end)'
-                    else
-                      if cancel_verified_run "$run_id" "$run_path" "$title" "$request_id" "$nonce"; then
-                        update_state "$state_path" \
-                          --argjson cancellation_requested true \
-                          --arg failure_class candidate_reconciliation_cancelled \
-                          --argjson metadata_verified true \
-                          '.cancellation_requested = $cancellation_requested | .failure_class = $failure_class | .metadata_verified = $metadata_verified'
-                      fi
-                    fi
+            local reconciliation_deadline_ms
+            reconciliation_deadline_ms=$(( $(date +%s%3N) + 120000 ))
+            while [ "$(date +%s%3N)" -lt "$reconciliation_deadline_ms" ]; do
+              local pending_any=false
+              for state_path in "$state_dir"/state-*.json; do
+                [ -f "$state_path" ] || continue
+                jq -e 'type == "object" and (.needs_reconciliation | type == "boolean")' "$state_path" >/dev/null
+                needs_reconciliation="$(jq -r '.needs_reconciliation' "$state_path")"
+                [ "$needs_reconciliation" = true ] || continue
+                pending_any=true
+                repeat="$(jq -r '.repeat' "$state_path")"
+                request_id="$(jq -r '.request_id' "$state_path")"
+                nonce="$(jq -r '.controller_nonce' "$state_path")"
+                title="$(jq -r '.title' "$state_path")"
+                run_id="$(jq -r '.run_id // empty' "$state_path")"
+                request_started_ms="$(jq -r '.request_started_ms' "$state_path")"
+                run_path="$state_dir/reconcile-run-${repeat}.json"
+                list_path="$state_dir/reconcile-list-${repeat}.json"
+                if [ -z "$run_id" ]; then
+                  if discovered_run="$(discover_run "$list_path" "$run_path" "$title" "$request_id" "$nonce")"; then
+                    run_id="$discovered_run"
+                    reconciliation_now_ms="$(date +%s%3N)"
+                    dispatch_ms=$((reconciliation_now_ms - request_started_ms))
+                    update_state "$state_path" \
+                      --arg run_id "$run_id" \
+                      --argjson dispatch_ms "$dispatch_ms" \
+                      --argjson metadata_verified true \
+                      --argjson list_success_seen true \
+                      '.run_id = $run_id | .metadata_verified = $metadata_verified | .list_success_seen = $list_success_seen | .dispatch_ms = (.dispatch_ms // $dispatch_ms)'
                   else
-                    verification_status=$?
-                    if [ "$verification_status" -eq 3 ]; then
+                    discover_status=$?
+                    if [ "$discover_status" -eq 1 ]; then
+                      update_state "$state_path" --argjson list_success_seen true '.list_success_seen = $list_success_seen'
+                    elif [ "$discover_status" -eq 3 ]; then
                       update_state "$state_path" --arg failure_class candidate_metadata_mismatch '.failure_class = $failure_class'
                     fi
+                    continue
                   fi
-                done
-                [ "$pending_any" = true ] || break
-                sleep 5
+                fi
+                if read_verified_run "$run_id" "$run_path" "$title" "$request_id" "$nonce"; then
+                  run_status="$(jq -r '.status // empty' "$run_path")"
+                  if [ "$run_status" = completed ]; then
+                    update_state "$state_path" \
+                      --argjson observed_ms "$(( $(date +%s%3N) - request_started_ms ))" \
+                      --argjson metadata_verified true \
+                      --argjson needs_reconciliation false \
+                      '.observed_ms = $observed_ms | .metadata_verified = $metadata_verified | .needs_reconciliation = $needs_reconciliation | .status = "unavailable" | .failure_class = (if .timed_out or .cancellation_requested then (.failure_class // "candidate_timeout") else "candidate_delayed_accepted" end)'
+                  elif cancel_verified_run "$run_id" "$run_path" "$title" "$request_id" "$nonce"; then
+                    update_state "$state_path" \
+                      --argjson cancellation_requested true \
+                      --arg failure_class candidate_reconciliation_cancelled \
+                      --argjson metadata_verified true \
+                      '.cancellation_requested = $cancellation_requested | .failure_class = $failure_class | .metadata_verified = $metadata_verified'
+                  fi
+                else
+                  verification_status=$?
+                  if [ "$verification_status" -eq 3 ]; then
+                    update_state "$state_path" --arg failure_class candidate_metadata_mismatch '.failure_class = $failure_class'
+                  fi
+                fi
               done
-              # A missing run after a successful list read is still pending:
-              # discovery can lag dispatch, so it cannot be reported complete.
-            )
+              [ "$pending_any" = true ] || break
+              sleep 5
+            done
+            # A missing run after a successful list read is still pending:
+            # discovery can lag dispatch, so it cannot be reported complete.
           }
 
           cleanup_invoked=false

@@ -87,14 +87,14 @@ function normalizeEnvironment(environment) {
   ];
   const normalized = {};
   for (const key of allowed) {
-    if (Object.prototype.hasOwnProperty.call(environment, key)) {
+    if (Object.hasOwn(environment, key)) {
       const value = environment[key];
       if (
         typeof value !== "string" &&
         typeof value !== "number" &&
         typeof value !== "boolean"
       ) {
-        throw new Error(`environment.${key} has an unsupported value`);
+        throw new TypeError(`environment.${key} has an unsupported value`);
       }
       normalized[key] = value;
     }
@@ -164,7 +164,7 @@ function normalizeCommonEvidence(raw) {
   }
   const observedAt = requireString(raw.observed_at, "observed_at");
   if (Number.isNaN(Date.parse(observedAt))) {
-    throw new Error("observed_at must be an ISO timestamp");
+    throw new TypeError("observed_at must be an ISO timestamp");
   }
   if (raw.metadata_verified !== true) {
     throw new Error("candidate evidence requires verified run metadata");
@@ -400,7 +400,7 @@ function normalizeControllerEvidence(raw) {
   }
   const observedAt = requireString(raw.observed_at, "observed_at");
   if (Number.isNaN(Date.parse(observedAt))) {
-    throw new Error("observed_at must be an ISO timestamp");
+    throw new TypeError("observed_at must be an ISO timestamp");
   }
   if (raw.reconciliation_completed !== true) {
     throw new Error("controller evidence must complete final reconciliation");
@@ -476,7 +476,7 @@ function markdownFor(document) {
   ];
   if (isController) {
     lines.splice(
-      lines.length - 2,
+      -2,
       0,
       `- Cleanup complete: **${document.cleanup_complete ? "yes" : "no"}**`,
       ""
