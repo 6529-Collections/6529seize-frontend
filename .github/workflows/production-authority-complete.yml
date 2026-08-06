@@ -121,6 +121,7 @@ jobs:
           download_artifact() {
             local record_file="$1"
             local archive_file="$2"
+            local maximum_size="$3"
             local artifact_id
             local declared_digest
             local declared_size
@@ -131,7 +132,7 @@ jobs:
               --header 'Accept: application/octet-stream' \
               "repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}/zip" > "$archive_file"
             test "$(stat -c %s "$archive_file")" -gt 0
-            test "$(stat -c %s "$archive_file")" -le 1048576
+            test "$(stat -c %s "$archive_file")" -le "$maximum_size"
             test "$(stat -c %s "$archive_file")" = "$declared_size"
             if [ -n "$declared_digest" ]; then
               test "$declared_digest" = "sha256:$(sha256sum "$archive_file" | cut -d' ' -f1)"
@@ -190,7 +191,7 @@ jobs:
             1048576 \
             "$operation_record"
           operation_archive="$proof_dir/operation.zip"
-          download_artifact "$operation_record" "$operation_archive"
+          download_artifact "$operation_record" "$operation_archive" 1048576
           operation_file="$proof_dir/operation.json"
           extract_exact_archive \
             "$operation_archive" \
@@ -302,9 +303,9 @@ jobs:
           evidence_archive="$proof_dir/evidence.zip"
           selection_archive="$proof_dir/selection.zip"
           qualification_archive="$proof_dir/qualification.zip"
-          download_artifact "$evidence_record" "$evidence_archive"
-          download_artifact "$selection_record" "$selection_archive"
-          download_artifact "$qualification_record" "$qualification_archive"
+          download_artifact "$evidence_record" "$evidence_archive" 4194304
+          download_artifact "$selection_record" "$selection_archive" 1048576
+          download_artifact "$qualification_record" "$qualification_archive" 262144
           evidence_file="$proof_dir/evidence.json"
           selection_file="$proof_dir/museum-release-selection.json"
           qualification_file="$proof_dir/qualification.json"
@@ -400,7 +401,7 @@ jobs:
           EVIDENCE_DIGEST: ${{ steps.proof.outputs.evidence_digest }}
           E2E_RUN_ID: ${{ steps.proof.outputs.e2e_run_id }}
           E2E_RUN_ATTEMPT: ${{ steps.proof.outputs.e2e_attempt }}
-          GITHUB_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
           OPERATION_ID: ${{ steps.proof.outputs.operation_id }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           SELECTION_DIGEST: ${{ steps.proof.outputs.selection_digest }}
@@ -434,14 +435,20 @@ jobs:
             --max-time 30 \
             --output "$response_file" \
             --write-out '%{http_code}' \
-            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
             -H 'Content-Type: application/json' \
             --data "$payload" \
             "$RELEASE_BUS_API_URL/deploy/release-bus-v2/production-authority/complete")"
           test "$http_status" = 200
           jq -e \
             --arg operation_id "$OPERATION_ID" \
-            '. | type == "object" and .operation_id == $operation_id and .status == "COMPLETED" and .completed == true' \
+            'type == "object" and
+             (keys == ["completed","lock_row_version","operation_id","reused","status"]) and
+             .operation_id == $operation_id and
+             .status == "COMPLETED" and
+             .completed == true and
+             (.reused | type == "boolean") and
+             (.lock_row_version | type == "number" and . >= 1)' \
             "$response_file" >/dev/null
 
       - name: Fail exact production authority after E2E failure
@@ -449,7 +456,7 @@ jobs:
         env:
           E2E_RUN_ID: ${{ steps.proof.outputs.e2e_run_id }}
           E2E_RUN_ATTEMPT: ${{ steps.proof.outputs.e2e_attempt }}
-          GITHUB_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
+          RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
           OPERATION_ID: ${{ steps.proof.outputs.operation_id }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           SELECTION_DIGEST: ${{ steps.proof.outputs.selection_digest }}
@@ -479,12 +486,18 @@ jobs:
             --max-time 30 \
             --output "$response_file" \
             --write-out '%{http_code}' \
-            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
             -H 'Content-Type: application/json' \
             --data "$payload" \
             "$RELEASE_BUS_API_URL/deploy/release-bus-v2/production-authority/fail")"
           test "$http_status" = 200
           jq -e \
             --arg operation_id "$OPERATION_ID" \
-            '. | type == "object" and .operation_id == $operation_id and .status == "FAILED" and .failed == true' \
+            'type == "object" and
+             (keys == ["failed","lock_row_version","operation_id","reused","status"]) and
+             .operation_id == $operation_id and
+             .status == "FAILED" and
+             .failed == true and
+             (.reused | type == "boolean") and
+             (.lock_row_version | type == "number" and . >= 1)' \
             "$response_file" >/dev/null

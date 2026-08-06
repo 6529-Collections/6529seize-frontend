@@ -51,6 +51,11 @@
       "conservative_p95": 72
     }
   },
+  "forecast_speedup_percent": {
+    "parallel_vs_serialized_median": 25.0,
+    "parallel_vs_comparable_observed": 10.6,
+    "parallel_vs_readiness_incident": 36.7
+  },
   "synthetic_dag": {
     "expected_critical_path_minutes": 40,
     "nodes": {
@@ -71,5 +76,5 @@
     "final_p95_minutes": 25,
     "p95_status": "not-yet-met"
   },
-  "interpretation": "The conservative p95 values are small-sample envelopes. The one-click controller removes manual idle and authorization races; reaching the final p95 target also requires faster or warm runners, parallel read-only E2E packs, and path-scoped Museum coverage."
+  "interpretation": "The percentage forecasts compare the 42-minute parallel median with the 56-minute serialized forecast, the 46.983-minute comparable observation, and the 66.3-minute readiness incident. They are planning estimates, not a production service-level claim. The conservative p95 values are small-sample envelopes. The one-click controller removes manual idle and authorization races; reaching the final p95 target also requires faster or warm runners, parallel read-only E2E packs, and path-scoped Museum coverage."
 }

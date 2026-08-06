@@ -180,7 +180,10 @@ credential authenticates the request. The backend revalidates GitHub run
 identity, protected-main ancestry, lease ownership, expiry, controls and
 revocation state. A successful response extends the lease for the bounded
 deployment/E2E window and returns an authorization record bound to the exact
-selection digest.
+selection digest. The default renewal window is 130 minutes. That covers the
+existing 22-minute Elastic Beanstalk readiness ceiling, the configured
+90-minute automatic E2E ceiling and callback margin. A 150-minute hard expiry
+still bounds a lost callback or runner.
 
 ### Complete or fail
 
@@ -192,6 +195,16 @@ identity and persists those fields before releasing the lock. Deployment
 success alone cannot complete an operation. If the callback is unavailable,
 expiry provides bounded recovery and the operation remains visibly
 unqualified.
+
+The manual backend production workflow uses the same lock and the same
+acquire/bind/reauthorize state machine. Its completion predicate is
+repository-specific: the backend verifies the exact completed-success
+`Deploy a service` run, service, source SHA and immutable deployment-evidence
+digest. It does not substitute that evidence for frontend qualification. A
+frontend operation keeps the lock through automatic production E2E; a backend
+operation keeps it through its exact service verification. Consequently,
+frontend E2E cannot overlap a backend mutation, and neither repository can win
+a race by observing an idle lane before the other acquires it.
 
 ### Denial evidence
 
@@ -353,6 +366,12 @@ minutes** best / median / conservative p95. Serializing the production build
 before staging would raise that prediction to approximately **29 / 56 / 72
 minutes**. The implementation therefore treats accidental build serialization
 as a contract failure.
+
+At the median, the parallel forecast is **25% faster** than the serialized
+forecast, **10.6% faster** than the comparable 46-minute-59-second observed
+release, and **36.7% faster** than the 66-minute-18-second incident sequence.
+These percentages are planning comparisons over the stated evidence, not a
+production service-level claim.
 
 That overlap requires the staging/release-candidate path to start the
 credentials-free production builder and persist its exact run, artifact ID and

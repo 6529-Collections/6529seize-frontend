@@ -1,5 +1,7 @@
 "use strict";
 
+/* eslint-disable max-lines -- This dependency-free CLI keeps parsing and every artifact trust check in one auditable boundary. */
+
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -937,6 +939,25 @@ function readManifest(root, expected) {
   };
 }
 
+function verifyPortabilityInventory(root, expectedTargetSha, packageSha256) {
+  const inventory = readJson(
+    safeArtifactPath(root, "artifact-portability.json"),
+    "artifact portability inventory"
+  );
+  assert(
+    inventory.schema_version === "artifact-portability.v1" &&
+      inventory.contract === "artifact-portability-v1" &&
+      inventory.environment === "production" &&
+      inventory.source?.git_sha === expectedTargetSha &&
+      inventory.digests?.package_sha256 === packageSha256 &&
+      inventory.portability?.status === "NOT_PORTABLE" &&
+      inventory.portability?.portable === false &&
+      inventory.portability?.reuse_authorized === false &&
+      inventory.portability?.promotion_authorized === false,
+    "artifact portability inventory is not the exact production-bound non-portable contract"
+  );
+}
+
 function verifyArchiveDigest(archivePath, artifact) {
   let stat;
   try {
@@ -1001,6 +1022,11 @@ function verifyArtifact(options) {
   assert(
     actualPackageSha256 === packageSha256,
     "target/package.zip does not match artifact manifest.package_sha256"
+  );
+  verifyPortabilityInventory(
+    rootPath,
+    source.expected.targetSha,
+    actualPackageSha256
   );
 
   const verifier = validateVerifierSource(options);
@@ -1138,7 +1164,7 @@ function verifySelectionRunMetadata(runMetadata, options) {
   );
 }
 
-function verifySelection(options) {
+function normalizeSelectionExpectations(options) {
   const expectedTargetSha = requireSha(
     options.expectedTargetSha,
     "expected_target_sha"
@@ -1196,6 +1222,40 @@ function verifySelection(options) {
     options.expectedArtifactApiDigest,
     "expected_artifact_api_digest"
   );
+
+  return {
+    expectedArtifactApiDigest,
+    expectedArtifactId,
+    expectedArtifactNameInput,
+    expectedArtifactOperationId,
+    expectedArtifactRunAttempt,
+    expectedArtifactRunId,
+    expectedOperationId,
+    expectedTargetSha,
+    repository,
+    selectionArtifactId,
+    selectionArtifactName,
+    selectionArtifactRunAttempt,
+    selectionArtifactRunId,
+  };
+}
+
+function verifySelection(options) {
+  const {
+    expectedArtifactApiDigest,
+    expectedArtifactId,
+    expectedArtifactNameInput,
+    expectedArtifactOperationId,
+    expectedArtifactRunAttempt,
+    expectedArtifactRunId,
+    expectedOperationId,
+    expectedTargetSha,
+    repository,
+    selectionArtifactId,
+    selectionArtifactName,
+    selectionArtifactRunAttempt,
+    selectionArtifactRunId,
+  } = normalizeSelectionExpectations(options);
 
   const artifactMetadata = readJson(
     options.artifactMetadataFile,

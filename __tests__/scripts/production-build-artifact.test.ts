@@ -18,19 +18,19 @@ describe("production artifact builder and promotion contract", () => {
     expect(build.on.push).toBeUndefined();
     expect(build.on.workflow_dispatch.inputs.target_sha).toMatchObject({
       required: true,
-      type: "string"
+      type: "string",
     });
     expect(build.on.workflow_dispatch.inputs.operation_id).toMatchObject({
       required: true,
-      type: "string"
+      type: "string",
     });
     expect(build.on.workflow_call.inputs.target_sha).toMatchObject({
       required: true,
-      type: "string"
+      type: "string",
     });
     expect(build.on.workflow_call.inputs.operation_id).toMatchObject({
       required: true,
-      type: "string"
+      type: "string",
     });
     expect(build.on.workflow_call.outputs.artifact_id).toBeDefined();
     expect(build.on.workflow_call.outputs.artifact_digest).toBeDefined();
@@ -56,8 +56,8 @@ describe("production artifact builder and promotion contract", () => {
     expect(serialized).not.toContain("configure-aws-credentials");
     expect(buildSource).toContain("ref: main");
     expect(buildSource).toContain("fetch-depth: 0");
-    expect(buildSource).toContain('AUTHORIZATION: basic ${auth_header}');
-    expect(buildSource).toContain('WORKFLOW_SHA: ${{ github.sha }}');
+    expect(buildSource).toContain("AUTHORIZATION: basic ${auth_header}");
+    expect(buildSource).toContain("WORKFLOW_SHA: ${{ github.sha }}");
     expect(buildSource).toContain(
       'git merge-base --is-ancestor "$TARGET_SHA" "$main_sha"'
     );
@@ -65,15 +65,13 @@ describe("production artifact builder and promotion contract", () => {
       'git merge-base --is-ancestor "$WORKFLOW_SHA" "$main_sha"'
     );
     expect(buildSource).toContain('git checkout --detach "$TARGET_SHA"');
-    expect(buildSource).toContain('TARGET_SHA: ${{ inputs.target_sha }}');
-    expect(buildSource).toContain('OPERATION_ID: ${{ inputs.operation_id }}');
+    expect(buildSource).toContain("TARGET_SHA: ${{ inputs.target_sha }}");
+    expect(buildSource).toContain("OPERATION_ID: ${{ inputs.operation_id }}");
     expect(verifyIndex).toBeGreaterThan(-1);
     expect(verifyIndex).toBeLessThan(installIndex);
     expect(buildSource).toContain("./bin/6529 run build:ci");
     expect(buildSource).not.toContain("./bin/6529 run build\n");
-    expect(buildSource).toContain(
-      'artifact_contract:"production-prebuild-v2"'
-    );
+    expect(buildSource).toContain('artifact_contract:"production-prebuild-v2"');
     expect(buildSource).toContain("artifact_name:$artifact_name");
     expect(buildSource).toContain("target_sha:$target_sha");
     expect(buildSource).toContain("operation_id:$operation_id");
@@ -90,23 +88,25 @@ describe("production artifact builder and promotion contract", () => {
     expect(buildSource).toContain(
       "production-frontend-${{ inputs.target_sha }}-${{ inputs.operation_id }}"
     );
-    expect(buildSource).toContain(
-      "^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$"
-    );
+    expect(buildSource).toContain("^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$");
     expect(job["runs-on"]).toContain("PRODUCTION_BUILD_RUNNER");
     expect(JSON.stringify(build.jobs)).not.toContain('"uses":"./.github/');
   });
 
-  it("promotes only a successful exact-workflow artifact and never rebuilds", () => {
+  it("promotes only the independently verified operation-bound artifact and never rebuilds", () => {
     const job = deploy.jobs["build-upload-deploy"];
     const serialized = JSON.stringify(job);
-    const locate = job.steps.find(
+    const selectionIndex = job.steps.findIndex(
       (step: { name?: string }) =>
-        step.name === "Locate successful exact production prebuild"
+        step.name === "Verify immutable production artifact selection"
     );
-    const verifyIndex = job.steps.findIndex(
+    const artifactIndex = job.steps.findIndex(
       (step: { name?: string }) =>
-        step.name === "Verify exact production artifact"
+        step.name === "Verify selected production artifact"
+    );
+    const authorizationIndex = job.steps.findIndex(
+      (step: { name?: string }) =>
+        step.name === "Reauthorize exact production mutation"
     );
     const awsIndex = job.steps.findIndex(
       (step: { name?: string }) => step.name === "Configure AWS Credentials"
@@ -116,26 +116,22 @@ describe("production artifact builder and promotion contract", () => {
       actions: "read",
       contents: "read",
     });
-    expect(locate["timeout-minutes"]).toBe(5);
-    expect(locate.run).toContain(
-      '.path == ".github/workflows/production-build-artifact.yml"'
+    expect(selectionIndex).toBeGreaterThan(-1);
+    expect(artifactIndex).toBeGreaterThan(selectionIndex);
+    expect(authorizationIndex).toBeGreaterThan(artifactIndex);
+    expect(authorizationIndex).toBeLessThan(awsIndex);
+    expect(deploySource).toContain("verify-selection");
+    expect(deploySource).toContain("validate-extracted-artifact");
+    expect(deploySource).toContain(
+      "/deploy/release-bus-v2/production-authority/reauthorize"
     );
-    expect(locate.run).toContain(".head_sha == $sha");
-    expect(locate.run).toContain('.conclusion == "success"');
-    expect(locate.run).toContain(
-      '(.event == "push" or .event == "workflow_dispatch")'
-    );
-    expect(locate.run).toContain(
-      "No successful exact production prebuild is available"
-    );
-    expect(verifyIndex).toBeGreaterThan(-1);
-    expect(verifyIndex).toBeLessThan(awsIndex);
     expect(deploySource).toContain("sha256sum -c SHA256SUMS");
-    expect(deploySource).toContain(".source_sha == $source_sha");
+    expect(deploySource).toContain(
+      '.artifact_contract == "production-prebuild-v2"'
+    );
     expect(deploySource).toContain("aws s3 sync production-artifact/target");
     expect(serialized).not.toContain("Install dependencies");
     expect(serialized).not.toContain("Build App");
     expect(serialized).not.toContain("./bin/6529 run build");
-    expect(job["runs-on"]).toContain("PRODUCTION_BUILD_RUNNER");
   });
 });

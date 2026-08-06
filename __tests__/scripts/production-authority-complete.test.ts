@@ -110,6 +110,12 @@ describe("one-click production authority completion", () => {
     expect(completionSource).toContain("length == 1");
     expect(completionSource).toContain(".expired == false");
     expect(completionSource).toContain("size_in_bytes");
+    expect(completionSource).toContain(
+      'download_artifact "$evidence_record" "$evidence_archive" 4194304'
+    );
+    expect(completionSource).toContain(
+      'test "$(stat -c %s "$archive_file")" -le "$maximum_size"'
+    );
     expect(completionSource).toContain("Accept: application/octet-stream");
     expect(completionSource).toContain("len(members) != 1");
     expect(completionSource).toContain("stat.S_IFLNK");
@@ -189,6 +195,9 @@ describe("one-click production authority completion", () => {
     expect(complete.run).toContain("evidence_digest");
     expect(complete.run).toContain('.status == "COMPLETED"');
     expect(complete.run).toContain(".completed == true");
+    expect(complete.run).toContain(
+      'keys == ["completed","lock_row_version","operation_id","reused","status"]'
+    );
 
     expect(fail.if).toContain("steps.proof.outputs.action == 'fail'");
     expect(fail.run).toContain(
@@ -197,6 +206,9 @@ describe("one-click production authority completion", () => {
     expect(fail.run).toContain('reason_code:"WORKFLOW_FAILED"');
     expect(fail.run).toContain('.status == "FAILED"');
     expect(fail.run).toContain(".failed == true");
+    expect(fail.run).toContain(
+      'keys == ["failed","lock_row_version","operation_id","reused","status"]'
+    );
     expect(completionSource).toContain(
       "failure|cancelled|timed_out|action_required|neutral|skipped|stale"
     );

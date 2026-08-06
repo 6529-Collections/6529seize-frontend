@@ -38,6 +38,7 @@ const TRUSTED_REPORT_PRODUCERS = Object.freeze({
       events: Object.freeze(["push", "workflow_dispatch"]),
       branches: Object.freeze(["main"]),
       artifactPattern:
+        // eslint-disable-next-line security/detect-unsafe-regex -- Fully anchored and bounded: the only variable suffix is capped at 80 characters.
         /^production-frontend-[a-f0-9]{40}(?:-[A-Za-z0-9][A-Za-z0-9._-]{0,79})?$/,
       artifactContracts: Object.freeze({
         "production-prebuild-v1": "production-prebuild-v1",

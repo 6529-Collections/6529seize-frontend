@@ -88,5 +88,10 @@ describe("one-click production performance contract", () => {
     expect(serialized.best - parallel.best).toBe(8);
     expect(serialized.median - parallel.median).toBe(14);
     expect(serialized.conservative_p95 - parallel.conservative_p95).toBe(14);
+    expect(contract.forecast_speedup_percent).toEqual({
+      parallel_vs_serialized_median: 25,
+      parallel_vs_comparable_observed: 10.6,
+      parallel_vs_readiness_incident: 36.7,
+    });
   });
 });

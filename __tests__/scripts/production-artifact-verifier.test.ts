@@ -169,7 +169,17 @@ describe("isolated production artifact verifier", () => {
     fs.mkdirSync(path.dirname(packagePath), { recursive: true });
     fs.writeFileSync(packagePath, packageBytes);
     writeJson(path.join(artifactRoot, "artifact-portability.json"), {
-      files: ["target/package.zip"],
+      contract: "artifact-portability-v1",
+      digests: { package_sha256: digest(packageBytes) },
+      environment: "production",
+      portability: {
+        portable: false,
+        promotion_authorized: false,
+        reuse_authorized: false,
+        status: "NOT_PORTABLE",
+      },
+      schema_version: "artifact-portability.v1",
+      source: { git_sha: targetSha },
     });
     writeJson(path.join(artifactRoot, "manifest.json"), {
       artifact_contract: "production-prebuild-v2",
