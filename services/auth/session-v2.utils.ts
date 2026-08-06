@@ -4,10 +4,13 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { getWalletAddress, setAuthJwt } from "./auth.utils";
 import {
   getNativeRefreshToken,
-  isNativeSecureStorageAvailable,
   removeNativeRefreshToken,
-  setNativeRefreshToken,
 } from "./native-refresh-token-storage";
+import {
+  assertSessionPersistenceIsCurrent,
+  persistNativeRefreshTokenIfNeeded,
+  type PersistSessionResponseOptions,
+} from "./session-persistence.utils";
 import {
   getSessionRefreshTelemetryTimestamp,
   isUnauthorizedSessionRefreshError,
@@ -276,16 +279,18 @@ async function rollbackUnpersistedSession(
   didPersistNativeRefreshToken: boolean
 ): Promise<void> {
   try {
-    if (didPersistNativeRefreshToken) {
-      await logoutSessionV2({ address: response.address });
-      return;
-    }
-
-    if (response.client_type === "web") {
+    if (didPersistNativeRefreshToken || response.client_type === "web") {
       await logoutSessionV2({ address: response.address });
     }
   } catch {
     // Best-effort cleanup: preserve the original persistence result/error.
+  }
+  if (didPersistNativeRefreshToken) {
+    try {
+      await removeNativeRefreshToken(response.address);
+    } catch {
+      // Preserve the original persistence result/error.
+    }
   }
 }
 
@@ -571,23 +576,21 @@ export function __resetSessionRefreshStateForTests(): void {
 }
 
 export async function persistSessionResponse(
-  response: SessionLoginResponse | SessionRefreshResponse
+  response: SessionLoginResponse | SessionRefreshResponse,
+  options: PersistSessionResponseOptions = {}
 ): Promise<boolean> {
-  let didPersistNativeRefreshToken = false;
-  if (response.client_type !== "web") {
-    if (!isNativeSecureStorageAvailable()) {
-      return false;
-    }
-
-    await setNativeRefreshToken({
-      address: response.address,
-      refreshToken: response.native_refresh_token,
-    });
-    didPersistNativeRefreshToken = true;
+  const nativeRefreshTokenResult = await persistNativeRefreshTokenIfNeeded(
+    response,
+    options
+  );
+  if (nativeRefreshTokenResult === "unavailable") {
+    return false;
   }
+  const didPersistNativeRefreshToken = nativeRefreshTokenResult === "persisted";
 
   let didPersistAuth = false;
   try {
+    assertSessionPersistenceIsCurrent(options);
     didPersistAuth = setAuthJwt(
       response.address,
       response.access_token,

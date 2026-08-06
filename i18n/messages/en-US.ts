@@ -1293,6 +1293,23 @@ const USER_RATE_MESSAGES = objectMessages("user.rate", {
 const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
   "metadata.title": "Tech",
   "metadata.description": "About",
+  "index.eyebrow": "About / Tech",
+  "index.title": "Tech Updates",
+  "index.intro":
+    "This is a current casual area for longer 6529 tech updates: repo work, bot notes, release context, and build reports that are too large for a single wave drop.",
+  "index.longUpdates":
+    "Long updates, repo analysis, bot context, and links back into the wave conversation.",
+  "index.liveActivity":
+    "Shorter live repo activity still belongs in {followTheRepo}. This page is the linkable longer-form shelf beside it.",
+  "index.followTheRepo": "Follow The Repo",
+  "index.activeTechnicalNotes": "Active Technical Notes",
+  "index.authChanges": "Auth changes",
+  "index.walletAuthenticationTitle": "Wallet authentication upgrade",
+  "index.walletAuthenticationDescription":
+    "What is changing with the new secure session, why users may be asked to upgrade, and what to expect during rollout.",
+  "index.reportsEyebrow": "Index",
+  "index.reportsTitle": "Reports",
+  "index.openLatestReport": "Open latest report",
   "index.prsCovered": "PRs Covered",
   "notes.walletAuthentication.ariaLabel":
     "Wallet authentication upgrade: what is changing with the new secure session",
@@ -1339,6 +1356,51 @@ const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
   "walletAuth.builders.body":
     "External clients should use the session-v2 API authentication guide instead of the user upgrade notes on this page.",
   "walletAuth.builders.link": "Open API authentication guide",
+} as const);
+
+const REVIEWBOT_USAGE_MESSAGES = objectMessages("reviewbotUsage", {
+  "header.eyebrow": "Open Data",
+  "header.title": "6529bot Usage",
+  "header.description":
+    "Public AI review activity across configured 6529 repositories.",
+  "status.loading": "Loading 6529bot usage data.",
+  "status.loaded":
+    "6529bot usage data loaded. {reviewRuns} review runs across {dailyRows} daily rows.",
+  "metrics.reviewRuns": "Review Runs",
+  "metrics.uniquePrs": "Unique PRs",
+  "metrics.estimatedSpend": "Estimated Spend",
+  "metrics.averageRun": "Avg / Run",
+  "metrics.averagePr": "Avg / PR",
+  "metrics.tokens": "Tokens",
+  "metrics.budgetSkips": "Budget Skips",
+  "analysis.title": "Cost Analysis",
+  "analysis.budgetSkipRate": "Budget Skip Rate",
+  "analysis.averageTokensRun": "Avg Tokens / Run",
+  "analysis.averageTokensPr": "Avg Tokens / PR",
+  "analysis.topRepo": "Top Repo",
+  "analysis.topProvider": "Top Provider",
+  "analysis.topReviewType": "Top Review Type",
+  "sections.dailyUsage": "Daily Usage",
+  "sections.repositories": "Repositories",
+  "sections.providersModels": "Providers and Models",
+  "sections.reviewTypes": "Review Types",
+  "columns.day": "Day",
+  "columns.repository": "Repository",
+  "columns.providerModel": "Provider and Model",
+  "columns.reviewType": "Review Type",
+  "columns.runs": "Runs",
+  "columns.spend": "Spend",
+  "columns.average": "Avg",
+  "columns.tokens": "Tokens",
+  "columns.skips": "Skips",
+  "table.rows": "{count} rows",
+  "table.scrollableLabel": "{title} table, scrollable",
+  "table.empty": "No usage recorded.",
+  window: "Window: {from} to {to}",
+  "unavailable.title": "Usage Data Unavailable",
+  "values.none": "None",
+  "values.unknown": "unknown",
+  "values.topCost": "{name} ({cost}, {percent})",
 } as const);
 
 const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
@@ -2468,6 +2530,7 @@ export const EN_US_MESSAGES = {
   ...networkTdhMessages,
   ...toolsMessages,
   ...ABOUT_TECH_MESSAGES,
+  ...REVIEWBOT_USAGE_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
   ...REP_CATEGORY_MESSAGES,
   ...REP_CATEGORY_VALIDATION_MESSAGES,
