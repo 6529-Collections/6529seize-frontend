@@ -20,6 +20,7 @@ jobs:
     permissions:
       contents: read
     outputs:
+      base_sha: ${{ github.event.pull_request.base.sha }}
       risk_floor: ${{ steps.plan_outputs.outputs.risk_floor }}
       install_required: ${{ steps.plan_outputs.outputs.install_required }}
       lint_changed_required: ${{ steps.plan_outputs.outputs.lint_changed_required }}
@@ -47,10 +48,14 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Fetch base ref
+      - name: Fetch exact base commit
         env:
-          BASE_REF: ${{ github.base_ref }}
-        run: git fetch --no-tags origin "${BASE_REF}:refs/remotes/origin/${BASE_REF}"
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          git fetch --no-tags origin "$BASE_SHA"
+          test "$(git rev-parse "${BASE_SHA}^{commit}")" = "$BASE_SHA"
 
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
@@ -65,23 +70,83 @@ jobs:
 
       - name: Create CI plan and security reports
         env:
-          BASE_REF: ${{ github.base_ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
           UNTRUSTED_PR: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
         run: |
           set -euo pipefail
 
           ./bin/6529 run testing-strategy -- ci-plan \
-            --changed-from "origin/${BASE_REF}" \
+            --changed-from "$BASE_SHA" \
             --untrusted-pr="${UNTRUSTED_PR}" \
             --output test-results/app-pr-ci/ci-plan.json
           ./bin/6529 exec node scripts/app-pr-ci-effective-plan.cjs \
             --plan test-results/app-pr-ci/ci-plan.json
           ./bin/6529 run testing-strategy -- scan-changed-secrets \
-            --changed-from "origin/${BASE_REF}" \
+            --changed-from "$BASE_SHA" \
             --output test-results/app-pr-ci/secret-scan.json
           ./bin/6529 run testing-strategy -- validate-workflow-security \
-            --changed-from "origin/${BASE_REF}" \
+            --changed-from "$BASE_SHA" \
             --output test-results/app-pr-ci/workflow-security.json
+
+      - name: Apply protected Museum browser-lane floor
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          control_sha="$(git rev-parse "${BASE_SHA}^{commit}")"
+          test "$control_sha" = "$BASE_SHA"
+          [[ "$control_sha" =~ ^[a-f0-9]{40}$ ]]
+          control_dir="$RUNNER_TEMP/museum-plan-control"
+          mkdir -p "$control_dir"
+          git show "$control_sha:scripts/museum-release-tier.cjs" \
+            > "$control_dir/museum-release-tier.cjs"
+          test -s "$control_dir/museum-release-tier.cjs"
+
+          BASE_SHA="$BASE_SHA" \
+            CONTROL_SHA="$control_sha" \
+            TIER_TOOL="$control_dir/museum-release-tier.cjs" \
+            node <<'NODE'
+          const { execFileSync } = require("node:child_process");
+          const fs = require("node:fs");
+          const planPath = "test-results/app-pr-ci/ci-plan.json";
+          const plan = JSON.parse(fs.readFileSync(planPath, "utf8"));
+          let requiresMuseumLane = true;
+          let reason = "Protected Museum policy could not classify the PR range.";
+          try {
+            const tier = require(process.env.TIER_TOOL);
+            const files = execFileSync(
+              "git",
+              [
+                "diff",
+                "--name-only",
+                "-z",
+                process.env.BASE_SHA,
+                "HEAD",
+                "--",
+              ],
+              { encoding: "buffer" }
+            )
+              .toString("utf8")
+              .split("\0")
+              .filter(Boolean);
+            requiresMuseumLane = files.some(
+              (file) => tier.isMuseumPath(file) || tier.isPolicyPath(file)
+            );
+            reason = requiresMuseumLane
+              ? `Protected Museum policy ${process.env.CONTROL_SHA} requires the broad browser lane.`
+              : "Protected Museum policy found no Museum-owned or Museum-policy path."
+          } catch {
+            requiresMuseumLane = true;
+          }
+          if (requiresMuseumLane) {
+            plan.checks.install = {
+              required: true,
+              reason: "Museum browser qualification requires installation.",
+            };
+            plan.checks.playwright_museum = { required: true, reason };
+          }
+          fs.writeFileSync(planPath, `${JSON.stringify(plan, null, 2)}\n`);
+          NODE
 
       - name: Publish CI plan outputs
         id: plan_outputs
@@ -199,11 +264,13 @@ jobs:
     timeout-minutes: 60
     permissions:
       contents: read
+      issues: read
     strategy:
       fail-fast: true
       matrix: ${{ fromJSON(needs.plan.outputs.app_check_matrix) }}
 
     env:
+      BASE_SHA: ${{ needs.plan.outputs.base_sha }}
       API_ENDPOINT: "https://api.6529.io"
       WS_ENDPOINT: "wss://ws.6529.io"
       ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io"
@@ -229,14 +296,46 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Fetch base ref
-        if: matrix.lane == 'quality'
-        env:
-          BASE_REF: ${{ github.base_ref }}
+      - name: Fetch exact base commit
+        if: matrix.lane == 'quality' || matrix.lane == 'playwright-museum'
         run: |
           set -euo pipefail
-          git fetch --no-tags origin "${BASE_REF}:refs/remotes/origin/${BASE_REF}"
-          git branch --force main "origin/${BASE_REF}"
+          [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          git fetch --no-tags origin "$BASE_SHA"
+          test "$(git rev-parse "${BASE_SHA}^{commit}")" = "$BASE_SHA"
+
+      - name: Stage protected Museum tier policy
+        if: matrix.lane == 'quality' || matrix.lane == 'playwright-museum'
+        run: |
+          set -euo pipefail
+          control_sha="$(git rev-parse "${BASE_SHA}^{commit}")"
+          test "$control_sha" = "$BASE_SHA"
+          [[ "$control_sha" =~ ^[a-f0-9]{40}$ ]]
+          # The protected classifier resolves the repository root relative to
+          # its own location. Keep the immutable copy one level below the
+          # checked-out workspace so Git reads remain bound to this merge tree.
+          control_dir="$GITHUB_WORKSPACE/.museum-release-tier-control"
+          printf '/.museum-release-tier-control/\n' >> "$GITHUB_WORKSPACE/.git/info/exclude"
+          mkdir -p "$control_dir"
+          git show "$control_sha:scripts/museum-release-tier.cjs" \
+            > "$control_dir/museum-release-tier.cjs"
+          test -s "$control_dir/museum-release-tier.cjs"
+
+          selection_available=false
+          if git cat-file -e "$control_sha:scripts/museum-release-selection.cjs"; then
+            git show "$control_sha:scripts/museum-release-selection.cjs" \
+              > "$control_dir/museum-release-selection.cjs"
+            test -s "$control_dir/museum-release-selection.cjs"
+            selection_available=true
+          fi
+
+          {
+            echo "MUSEUM_RELEASE_TIER_TOOL=$control_dir/museum-release-tier.cjs"
+            echo "MUSEUM_RELEASE_SELECTION_TOOL=$control_dir/museum-release-selection.cjs"
+            echo "MUSEUM_RELEASE_SELECTION_CONTROL_AVAILABLE=$selection_available"
+            echo "MUSEUM_RELEASE_SELECTION_CONTROL_SHA=$control_sha"
+          } >> "$GITHUB_ENV"
+          git branch --force main "$BASE_SHA"
 
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
@@ -285,7 +384,7 @@ jobs:
       - name: Classify dependency risk
         if: matrix.lane == 'quality' && needs.plan.outputs.dependency_governance_required == 'true'
         env:
-          DEPENDENCY_RISK_BASE_REF: origin/${{ github.base_ref }}
+          DEPENDENCY_RISK_BASE_REF: ${{ needs.plan.outputs.base_sha }}
         run: ./bin/6529 run dependency:risk-gate
 
       - name: Verify reviewbot contract
@@ -310,6 +409,8 @@ jobs:
             __tests__/scripts/deployment-bus.test.ts \
             __tests__/scripts/e2e-packs.test.ts \
             __tests__/scripts/manual-deploy-routing-guard.test.ts \
+            __tests__/scripts/museum-release-tier.test.ts \
+            __tests__/scripts/museum-surface-registry.test.ts \
             __tests__/scripts/package-public-review-artifacts.test.ts \
             __tests__/scripts/production-build-artifact.test.ts \
             __tests__/scripts/production-e2e-dispatch.test.ts \
@@ -336,13 +437,11 @@ jobs:
 
       - name: Run related Jest tests
         if: matrix.lane == 'quality' && needs.plan.outputs.jest_changed_required == 'true'
-        env:
-          BASE_REF: ${{ github.base_ref }}
         run: |
           set -euo pipefail
 
           mapfile -d '' changed_files < <(
-            git diff --name-only -z --diff-filter=ACMRD "origin/${BASE_REF}...HEAD" -- \
+            git diff --name-only -z --diff-filter=ACMRD "${BASE_SHA}...HEAD" -- \
               "*.js" "*.jsx" "*.cjs" "*.mjs" "*.ts" "*.tsx" ":(exclude)generated/**"
           )
           existing_files=()
@@ -426,6 +525,23 @@ jobs:
             mapfile -t related_jest_tests < "${related_tests_file}"
             rm -f "${related_tests_file}"
 
+            if [ "${#jest_test_files[@]}" -gt 0 ]; then
+              declare -A direct_jest_paths=()
+              for test_file in "${jest_test_files[@]}"; do
+                direct_jest_paths["$(realpath "$test_file")"]=1
+              done
+              filtered_related_tests=()
+              for related_test in "${related_jest_tests[@]}"; do
+                related_path="$(realpath "$related_test")"
+                if [ -n "${direct_jest_paths[$related_path]:-}" ]; then
+                  echo "Skipping related Jest duplicate already selected directly: $related_test"
+                else
+                  filtered_related_tests+=("$related_test")
+                fi
+              done
+              related_jest_tests=("${filtered_related_tests[@]}")
+            fi
+
             if [ "${#related_jest_tests[@]}" -eq 0 ]; then
               echo "No related Jest tests found."
               return 0
@@ -452,6 +568,162 @@ jobs:
             echo "No Jest-related source or test files need coverage."
           fi
 
+      - name: Classify Museum release tier and durable selection input
+        if: matrix.lane == 'quality'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MUSEUM_RELEASE_TIER_MODE: ${{ vars.MUSEUM_RELEASE_TIER_MODE }}
+        run: |
+          set -euo pipefail
+          hold_state="unknown"
+          if hold_issues="$(gh issue list \
+            --repo "$GITHUB_REPOSITORY" \
+            --state open \
+            --label "release-bus-museum-hold" \
+            --limit 100 \
+            --json number 2>/dev/null)" && \
+            jq -e 'type == "array"' <<< "$hold_issues" >/dev/null
+          then
+            if [ "$(jq 'length' <<< "$hold_issues")" -eq 0 ]; then
+              hold_state="clear"
+            else
+              hold_state="active"
+            fi
+          else
+            echo "::warning::Museum hold lookup failed; retaining every Museum pack."
+          fi
+          mapfile -t museum_refs < <(
+            git ls-remote --refs \
+              https://github.com/6529-Collections/6529networkmuseum.git \
+              refs/heads/main
+          )
+          test "${#museum_refs[@]}" -eq 1
+          read -r source_commit source_ref source_extra <<< "${museum_refs[0]}"
+          test -z "${source_extra:-}"
+          test "$source_ref" = "refs/heads/main"
+          [[ "$source_commit" =~ ^[a-f0-9]{40}$ ]]
+          NODE_PATH="$GITHUB_WORKSPACE/node_modules${NODE_PATH:+:$NODE_PATH}" \
+            node "$MUSEUM_RELEASE_TIER_TOOL" \
+            --base "$BASE_SHA" \
+            --head HEAD \
+            --output test-results/app-pr-ci/museum-release-classification.json
+          if [ "$MUSEUM_RELEASE_SELECTION_CONTROL_AVAILABLE" = true ]; then
+            NODE_PATH="$GITHUB_WORKSPACE/node_modules${NODE_PATH:+:$NODE_PATH}" \
+              node "$MUSEUM_RELEASE_SELECTION_TOOL" \
+                --base "$BASE_SHA" \
+                --head HEAD \
+                --environment pr \
+                --activation-mode "$MUSEUM_RELEASE_TIER_MODE" \
+                --hold-state "$hold_state" \
+                --source-commit "$source_commit" \
+                --output test-results/app-pr-ci/museum-release-selection.json
+          else
+            CLASSIFICATION_OUTPUT=test-results/app-pr-ci/museum-release-classification.json \
+              SELECTION_OUTPUT=test-results/app-pr-ci/museum-release-selection.json \
+              HOLD_STATE="$hold_state" \
+              ACTIVATION_MODE="$MUSEUM_RELEASE_TIER_MODE" \
+              SOURCE_COMMIT="$source_commit" \
+              node <<'NODE'
+            const crypto = require("node:crypto");
+            const fs = require("node:fs");
+            const classification = JSON.parse(
+              fs.readFileSync(process.env.CLASSIFICATION_OUTPUT, "utf8")
+            );
+            const output = {
+              activation: {
+                effective_mode: "full",
+                hold_state: process.env.HOLD_STATE,
+                requested_mode: process.env.ACTIVATION_MODE,
+                reason: `Protected policy ${process.env.MUSEUM_RELEASE_SELECTION_CONTROL_SHA} does not yet contain museum-release-selection-v1.`,
+              },
+              browser_scope: "all-museum-packs",
+              classification,
+              contract: "museum-release-selection-v1",
+              environment: "pr",
+              selected_packs: [
+                "test:e2e:museum-data-architecture",
+                "test:e2e:museum-institutional-practice",
+                "test:e2e:museum-about",
+                "test:e2e:museum-inside-system",
+                "test:e2e:museum-rights",
+              ],
+              source_commit: process.env.SOURCE_COMMIT,
+              static_contracts: [
+                "__tests__/lib/museum/publication/corpusContracts.test.ts",
+              ],
+              static_scope: "full",
+            };
+            output.selection_digest = crypto
+              .createHash("sha256")
+              .update(JSON.stringify(output))
+              .digest("hex");
+            fs.writeFileSync(
+              process.env.SELECTION_OUTPUT,
+              `${JSON.stringify(output, null, 2)}\n`
+            );
+          NODE
+          fi
+          node <<'NODE'
+          const fs = require("node:fs");
+          const report = JSON.parse(
+            fs.readFileSync(
+              "test-results/app-pr-ci/museum-release-classification.json",
+              "utf8"
+            )
+          );
+          if (
+            !Array.isArray(report.affected_surfaces) ||
+            typeof report.mode !== "string" ||
+            typeof report.tier !== "string" ||
+            typeof report.reason !== "string" ||
+            !/^[a-f0-9]{64}$/.test(report.classification_digest)
+          ) {
+            throw new Error("Museum release classification report is malformed.");
+          }
+          const lines = [
+            "## Museum release classification",
+            "",
+            `Mode: ${report.mode}`,
+            `Tier: ${report.tier}`,
+            `Affected surfaces: ${report.affected_surfaces.join(", ") || "none"}`,
+            `Reason: ${report.reason}`,
+            `Classification digest: \`${report.classification_digest}\``,
+          ];
+          const selection = JSON.parse(
+            fs.readFileSync(
+              "test-results/app-pr-ci/museum-release-selection.json",
+              "utf8"
+            )
+          );
+          lines.push(
+            `Selection activation: ${selection.activation.effective_mode}`,
+            `Selection hold: ${selection.activation.hold_state}`,
+            `Selected packs: ${selection.selected_packs.join(", ") || "none"}`,
+            `Selection digest: \`${selection.selection_digest}\``
+          );
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join("\n")}\n`);
+          NODE
+
+      - name: Verify Museum surface registry and source-shell corpus
+        if: matrix.lane == 'playwright-museum'
+        run: |
+          set -euo pipefail
+          mkdir -p test-results/app-pr-ci/museum-surface-registry
+          base_sha="$(git rev-parse --verify "${BASE_SHA}^{commit}")"
+          test "$base_sha" = "$BASE_SHA"
+          head_sha="$(git rev-parse --verify "HEAD^{commit}")"
+          ./bin/6529 run museum:surface-registry -- \
+            --changed-from "$base_sha" \
+            --changed-to "$head_sha" \
+            --output test-results/app-pr-ci/museum-surface-registry/registry.json
+          ./bin/6529 run test:no-coverage --runInBand --runTestsByPath \
+            __tests__/lib/museum/publication/corpusContracts.test.ts
+          {
+            echo "## Museum surface registry and source-shell corpus"
+            echo
+            echo "Registry and corpus sentinel passed before route-browser qualification."
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Restore Next.js build cache
         id: nextjs_build_cache
         if: matrix.lane == 'build'
@@ -477,21 +749,26 @@ jobs:
       - name: Create exact PR merge-tree CI evidence
         if: matrix.lane == 'quality'
         env:
+          EXPECTED_BASE_SHA: ${{ needs.plan.outputs.base_sha }}
           EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           EXPECTED_MERGE_SHA: ${{ github.sha }}
           BUILD_REQUIRED: ${{ needs.plan.outputs.build_required }}
           DEADCODE_REQUIRED: ${{ needs.plan.outputs.deadcode_required }}
           RELEASE_BUS_CONTRACT_REQUIRED: ${{ needs.plan.outputs.release_bus_contract_required }}
           TEST_TYPECHECK_REQUIRED: ${{ needs.plan.outputs.test_typecheck_required }}
+          MUSEUM_BROWSER_REQUIRED: ${{ needs.plan.outputs.playwright_museum_required }}
         run: |
           set -euo pipefail
+          [[ "$EXPECTED_BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$EXPECTED_MERGE_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$EXPECTED_HEAD_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$BUILD_REQUIRED" =~ ^(true|false)$ ]]
           [[ "$DEADCODE_REQUIRED" =~ ^(true|false)$ ]]
           [[ "$RELEASE_BUS_CONTRACT_REQUIRED" =~ ^(true|false)$ ]]
           [[ "$TEST_TYPECHECK_REQUIRED" =~ ^(true|false)$ ]]
+          [[ "$MUSEUM_BROWSER_REQUIRED" =~ ^(true|false)$ ]]
           test "$(git rev-parse HEAD)" = "$EXPECTED_MERGE_SHA"
+          test "$(git rev-parse HEAD^1)" = "$EXPECTED_BASE_SHA"
           rm -rf release-bus-v2-pr-evidence
           mkdir -p release-bus-v2-pr-evidence
           policy_bundle="$(node scripts/pr-ci-policy-bundle.cjs \
@@ -503,7 +780,35 @@ jobs:
           test "$policy_bundle_contract" = pr-ci-policy-bundle-v1
           [[ "$policy_bundle_digest" =~ ^[a-f0-9]{64}$ ]]
           [[ "$policy_bundle_line_count" =~ ^[1-9][0-9]{0,3}$ ]]
+          jq -e --arg base_sha "$EXPECTED_BASE_SHA" --arg head_sha "$EXPECTED_MERGE_SHA" '
+            .contract == "museum-release-selection-v1" and
+            .environment == "pr" and
+            (.classification.tier | IN("NONE", "P0", "P1", "P2", "P3")) and
+            .classification.base_sha == $base_sha and
+            .classification.head_sha == $head_sha and
+            (.activation.effective_mode | IN("tiered", "full")) and
+            (.selected_packs | type == "array") and
+            (.source_commit | test("^[a-f0-9]{40}$")) and
+            (.selection_digest | test("^[a-f0-9]{64}$"))
+          ' test-results/app-pr-ci/museum-release-selection.json >/dev/null
+          selection_verifier="$MUSEUM_RELEASE_SELECTION_TOOL"
+          if [ "$MUSEUM_RELEASE_SELECTION_CONTROL_AVAILABLE" != true ]; then
+            selection_verifier="$GITHUB_WORKSPACE/scripts/museum-release-selection.cjs"
+          fi
+          NODE_PATH="$GITHUB_WORKSPACE/node_modules${NODE_PATH:+:$NODE_PATH}" \
+            SELECTION_VERIFIER="$selection_verifier" \
+            ./bin/6529 exec node - <<'NODE'
+          const fs = require("node:fs");
+          const { verifySelectionDigest } = require(process.env.SELECTION_VERIFIER);
+          const selection = JSON.parse(
+            fs.readFileSync("test-results/app-pr-ci/museum-release-selection.json", "utf8")
+          );
+          if (!verifySelectionDigest(selection)) {
+            throw new Error("Museum PR selection digest verification failed.");
+          }
+          NODE
           jq -n \
+            --arg base_sha "$EXPECTED_BASE_SHA" \
             --arg merge_sha "$EXPECTED_MERGE_SHA" \
             --arg head_sha "$EXPECTED_HEAD_SHA" \
             --arg policy_bundle_contract "$policy_bundle_contract" \
@@ -513,22 +818,29 @@ jobs:
             --argjson deadcode_required "$DEADCODE_REQUIRED" \
             --argjson release_bus_contract_required "$RELEASE_BUS_CONTRACT_REQUIRED" \
             --argjson test_typecheck_required "$TEST_TYPECHECK_REQUIRED" \
+            --argjson museum_browser_required "$MUSEUM_BROWSER_REQUIRED" \
+            --slurpfile museum_release_selection test-results/app-pr-ci/museum-release-selection.json \
             '{
               schema_version:1,
               evidence_contract:"exact-merge-tree-pr-ci-v1",
               repository:"frontend",
               event:"pull_request",
               workflow:".github/workflows/app-pr-ci.yml",
+              base_sha:$base_sha,
               merge_sha:$merge_sha,
               head_sha:$head_sha,
               production_build_required:$build_required,
               dependency_analysis_required:$deadcode_required,
               release_bus_contract_required:$release_bus_contract_required,
               test_typecheck_required:$test_typecheck_required,
+              museum_browser_required:$museum_browser_required,
+              museum_source_commit:$museum_release_selection[0].source_commit,
+              museum_release_selection_digest:$museum_release_selection[0].selection_digest,
+              museum_release_selection:$museum_release_selection[0],
               policy_bundle_contract:$policy_bundle_contract,
               policy_bundle_digest:$policy_bundle_digest,
               policy_bundle_line_count:$policy_bundle_line_count,
-              required_gates:[
+              required_gates:([
                 "package-manager-discipline",
                 "dependency-analysis-or-plan-not-required",
                 "reviewbot-contract",
@@ -539,8 +851,9 @@ jobs:
                 "test-typecheck-or-plan-not-required",
                 "related-jest-selection",
                 "production-build-or-plan-not-required",
-                "pr-ci-policy-bundle"
-              ]
+                "pr-ci-policy-bundle",
+                "museum-release-selection"
+              ] + (if $museum_browser_required then ["museum-browser-qualification"] else [] end))
             }' > release-bus-v2-pr-evidence/manifest.json
           (cd release-bus-v2-pr-evidence && \
             sha256sum ./manifest.json ./policy-bundle.txt > SHA256SUMS)
@@ -598,6 +911,130 @@ jobs:
           echo "commit=$museum_commit" >> "$GITHUB_OUTPUT"
           echo "Museum Playwright source: $museum_commit"
 
+      - name: Select fail-closed Museum qualification packs
+        id: museum-selection
+        if: matrix.lane == 'playwright-museum'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MUSEUM_RELEASE_TIER_MODE: ${{ vars.MUSEUM_RELEASE_TIER_MODE }}
+          SOURCE_COMMIT: ${{ steps.museum_publication.outputs.commit }}
+        run: |
+          set -euo pipefail
+          hold_state="unknown"
+          if hold_issues="$(gh issue list \
+            --repo "$GITHUB_REPOSITORY" \
+            --state open \
+            --label "release-bus-museum-hold" \
+            --limit 100 \
+            --json number 2>/dev/null)" && \
+            jq -e 'type == "array"' <<< "$hold_issues" >/dev/null
+          then
+            if [ "$(jq 'length' <<< "$hold_issues")" -eq 0 ]; then
+              hold_state="clear"
+            else
+              hold_state="active"
+            fi
+          else
+            echo "::warning::Museum hold lookup failed; retaining every Museum pack."
+          fi
+          if [ "$MUSEUM_RELEASE_SELECTION_CONTROL_AVAILABLE" = true ]; then
+            NODE_PATH="$GITHUB_WORKSPACE/node_modules${NODE_PATH:+:$NODE_PATH}" \
+              node "$MUSEUM_RELEASE_SELECTION_TOOL" \
+                --base "$BASE_SHA" \
+                --head HEAD \
+                --environment pr \
+                --activation-mode "$MUSEUM_RELEASE_TIER_MODE" \
+                --hold-state "$hold_state" \
+                --source-commit "$SOURCE_COMMIT" \
+                --output test-results/app-pr-ci/museum-release-selection.json
+          else
+            NODE_PATH="$GITHUB_WORKSPACE/node_modules${NODE_PATH:+:$NODE_PATH}" \
+              node "$MUSEUM_RELEASE_TIER_TOOL" \
+                --base "$BASE_SHA" \
+                --head HEAD \
+                --output test-results/app-pr-ci/museum-release-classification.json
+            CLASSIFICATION_OUTPUT=test-results/app-pr-ci/museum-release-classification.json \
+              SELECTION_OUTPUT=test-results/app-pr-ci/museum-release-selection.json \
+              HOLD_STATE="$hold_state" \
+              ACTIVATION_MODE="$MUSEUM_RELEASE_TIER_MODE" \
+              node <<'NODE'
+            const crypto = require("node:crypto");
+            const fs = require("node:fs");
+            const classification = JSON.parse(
+              fs.readFileSync(process.env.CLASSIFICATION_OUTPUT, "utf8")
+            );
+            const output = {
+              activation: {
+                effective_mode: "full",
+                hold_state: process.env.HOLD_STATE,
+                requested_mode: process.env.ACTIVATION_MODE,
+                reason: `Protected policy ${process.env.MUSEUM_RELEASE_SELECTION_CONTROL_SHA} does not yet contain museum-release-selection-v1.`,
+              },
+              browser_scope: "all-museum-packs",
+              classification,
+              contract: "museum-release-selection-v1",
+              environment: "pr",
+              selected_packs: [
+                "test:e2e:museum-data-architecture",
+                "test:e2e:museum-institutional-practice",
+                "test:e2e:museum-about",
+                "test:e2e:museum-inside-system",
+                "test:e2e:museum-rights",
+              ],
+              source_commit: process.env.SOURCE_COMMIT,
+              static_contracts: [
+                "__tests__/lib/museum/publication/corpusContracts.test.ts",
+              ],
+              static_scope: "full",
+            };
+            output.selection_digest = crypto
+              .createHash("sha256")
+              .update(JSON.stringify(output))
+              .digest("hex");
+            fs.writeFileSync(
+              process.env.SELECTION_OUTPUT,
+              `${JSON.stringify(output, null, 2)}\n`
+            );
+          NODE
+          fi
+          node - <<'NODE'
+          const fs = require("node:fs");
+          const selection = JSON.parse(
+            fs.readFileSync("test-results/app-pr-ci/museum-release-selection.json", "utf8")
+          );
+          const allowed = new Set([
+            "test:e2e:museum-data-architecture",
+            "test:e2e:museum-institutional-practice",
+            "test:e2e:museum-about",
+            "test:e2e:museum-rights",
+            "test:e2e:museum-inside-system",
+          ]);
+          if (
+            selection.contract !== "museum-release-selection-v1" ||
+            selection.environment !== "pr" ||
+            !["NONE", "P0", "P1", "P2", "P3"].includes(selection.classification?.tier) ||
+            selection.source_commit !== process.env.SOURCE_COMMIT ||
+            !Array.isArray(selection.selected_packs) ||
+            selection.selected_packs.some((pack) => !allowed.has(pack))
+          ) {
+            throw new Error("Museum selection report is malformed.");
+          }
+          fs.appendFileSync(
+            process.env.GITHUB_STEP_SUMMARY,
+            [
+              "## Museum qualification selection",
+              "",
+              `Tier: ${selection.classification.tier}`,
+              `Activation: ${selection.activation.effective_mode}`,
+              `Hold: ${selection.activation.hold_state}`,
+              `Browser scope: ${selection.browser_scope}`,
+              `Packs: ${selection.selected_packs.join(", ") || "none"}`,
+              `Selection digest: \`${selection.selection_digest}\``,
+              "",
+            ].join("\n")
+          );
+          NODE
+
       - name: Run small Playwright smoke pack
         if: matrix.lane == 'playwright-smoke'
         env:
@@ -617,10 +1054,39 @@ jobs:
         env:
           NEXT_DEV_DIST_DIR: ".next-playwright-museum"
           PLAYWRIGHT_READONLY: "1"
+          MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum_publication.outputs.commit }}
           MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.commit }}
         run: |
-          ./bin/6529 run test:e2e:museum-institutional-practice
-          ./bin/6529 run test:e2e:museum-inside-system
+          set -euo pipefail
+          mapfile -t selected_packs < <(
+            jq -r '.selected_packs[]' test-results/app-pr-ci/museum-release-selection.json
+          )
+          test "${#selected_packs[@]}" -gt 0
+          selected_specs=()
+          for selected_pack in "${selected_packs[@]}"; do
+            case "$selected_pack" in
+              test:e2e:museum-data-architecture) selected_specs+=(tests/museum/data-architecture-readonly.spec.ts) ;;
+              test:e2e:museum-institutional-practice) selected_specs+=(tests/museum/institutional-practice-readonly.spec.ts) ;;
+              test:e2e:museum-about) selected_specs+=(tests/museum/about-readonly.spec.ts) ;;
+              test:e2e:museum-inside-system) selected_specs+=(tests/museum/inside-system-readonly.spec.ts) ;;
+              test:e2e:museum-rights) selected_specs+=(tests/museum/rights-readonly.spec.ts) ;;
+              *)
+                echo "Unexpected Museum selection pack: $selected_pack" >&2
+                exit 1
+              ;;
+            esac
+          done
+          for selected_spec in "${selected_specs[@]}"; do
+            if [ ! -f "$selected_spec" ]; then
+              echo "Selected Museum spec is missing: $selected_spec" >&2
+              exit 1
+            fi
+          done
+          ./bin/6529 exec playwright test \
+            "${selected_specs[@]}" \
+            --project=web-desktop-chromium \
+            --project=web-mobile-chromium \
+            --workers=1
 
       - name: Upload app check artifacts
         if: always()

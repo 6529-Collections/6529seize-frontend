@@ -33,6 +33,7 @@ import {
   fetchDropRepliesV2,
   type ApiWaveDropsV2PageFeed,
 } from "@/services/api/wave-drops-v2-api";
+import { useWaveDropUpdateRefetch } from "./useWaveDropUpdateRefetch";
 
 export function useDropMessages(
   waveId: string,
@@ -121,6 +122,12 @@ export function useDropMessages(
     refetch,
     isFetching,
     isFetchingNextPage,
+  });
+
+  useWaveDropUpdateRefetch({
+    enabled: !!dropId,
+    waveId,
+    requestRefetch,
   });
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(

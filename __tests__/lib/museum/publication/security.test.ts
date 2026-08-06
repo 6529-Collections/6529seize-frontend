@@ -38,6 +38,9 @@ describe("Museum publication security boundary", () => {
       assertGovernedMuseumPath("records/accessions/object.json")
     ).not.toThrow();
     expect(() =>
+      assertGovernedMuseumPath("docs/rights/legal-texts/cc-by-4.0.txt")
+    ).not.toThrow();
+    expect(() =>
       assertSafeMuseumRepositoryPath(".github/workflows/validate.yml")
     ).not.toThrow();
     expect(() => assertGovernedMuseumPath("records/../secret.json")).toThrow(

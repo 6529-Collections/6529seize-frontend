@@ -5,11 +5,10 @@ import {
   AboutContainer as Container,
   AboutRow as Row,
 } from "./AboutLayout";
-import styles from "./About.module.css";
 
 export default function AboutPrivacyPolicy() {
   return (
-    <Container>
+    <Container className="!tw-px-0">
       <Row>
         <Col>
           <h1>Privacy Policy</h1>
@@ -17,7 +16,7 @@ export default function AboutPrivacyPolicy() {
       </Row>
       <Row>
         <Col
-          className={`${styles["lastUpdateText"]} tw-pb-3 tw-pt-3 tw-text-right`}
+          className="tw-pb-3 tw-pt-2 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-500"
         >
           Last Updated: February 23, 2023
         </Col>
@@ -34,10 +33,7 @@ export default function AboutPrivacyPolicy() {
               media pages, live events and other activities described in this
               Privacy Policy (collectively, the &quot; <b>Service</b>&quot;)).
             </p>
-            <br />
-            <h3>Index</h3>
-            <br />
-            <br />
+            <h2>Index</h2>
             <ul>
               <li>Personal information we collect</li>
               <li>How we use your personal information</li>
@@ -50,10 +46,7 @@ export default function AboutPrivacyPolicy() {
               <li>Changes to this Privacy Policy</li>
               <li>How to contact us</li>
             </ul>
-            <br />
-            <h3>Personal information we collect</h3>
-            <br />
-            <br />
+            <h2>Personal information we collect</h2>
             <p>
               <b>Information you provide to us.</b> Personal information you may
               provide to us through the Service or otherwise includes:
@@ -148,10 +141,7 @@ export default function AboutPrivacyPolicy() {
               . We may also store a record of your preferences in respect of the
               use of these technologies in connection with the Service.
             </p>
-            <br />
-            <h3>How we use your personal information</h3>
-            <br />
-            <br />
+            <h2>How we use your personal information</h2>
             <p>
               We may use your personal information for the following purposes or
               as otherwise described at the time of collection:
@@ -238,10 +228,7 @@ export default function AboutPrivacyPolicy() {
               for your consent to collect, use or share your personal
               information, such as when required by law.
             </p>
-            <br />
-            <h3>How we share your personal information</h3>
-            <br />
-            <br />
+            <h2>How we share your personal information</h2>
             <p>
               We may share your personal information with the following parties
               and as otherwise described in this Privacy Policy, in other
@@ -291,10 +278,7 @@ export default function AboutPrivacyPolicy() {
               stored elsewhere by others (e.g., search engines), and we are not
               responsible for any such use of this information.
             </p>
-            <br />
-            <h3>Your choices</h3>
-            <br />
-            <br />
+            <h2>Your choices</h2>
             <p>
               <b>Cookies.</b> For information about cookies employed by the
               Service and how to control them, see our{" "}
@@ -340,10 +324,7 @@ export default function AboutPrivacyPolicy() {
               choice will not apply to information that we have already received
               from that third party.
             </p>
-            <br />
-            <h3>Other sites and services</h3>
-            <br />
-            <br />
+            <h2>Other sites and services</h2>
             <p>
               The Service may contain links to websites, mobile applications,
               and other online services operated by third parties. In addition,
@@ -356,10 +337,7 @@ export default function AboutPrivacyPolicy() {
               read the privacy policies of the other websites, mobile
               applications and online services you use.
             </p>
-            <br />
-            <h3>Security</h3>
-            <br />
-            <br />
+            <h2>Security</h2>
             <p>
               We employ a number of technical, organizational and physical
               safeguards designed to protect the personal information we
@@ -367,10 +345,7 @@ export default function AboutPrivacyPolicy() {
               information technologies, and we cannot guarantee the security of
               your personal information.
             </p>
-            <br />
-            <h3>International data transfer</h3>
-            <br />
-            <br />
+            <h2>International data transfer</h2>
             <p>
               We and our service providers may operate and process your personal
               information in various countries. Your personal information may be
@@ -378,10 +353,7 @@ export default function AboutPrivacyPolicy() {
               laws may vary and not be as protective as those in your state,
               province, or country.
             </p>
-            <br />
-            <h3>Children</h3>
-            <br />
-            <br />
+            <h2>Children</h2>
             <p>
               The Service is not intended for use by anyone under 18 years of
               age. If you are a parent or guardian of a child from whom you
@@ -393,10 +365,7 @@ export default function AboutPrivacyPolicy() {
               parent or guardian as required by law, we will comply with
               applicable legal requirements to delete the information.
             </p>
-            <br />
-            <h3>Changes to this Privacy Policy</h3>
-            <br />
-            <br />
+            <h2>Changes to this Privacy Policy</h2>
             <p>
               We reserve the right to modify this Privacy Policy at any time. If
               we make material changes to this Privacy Policy, we will notify
@@ -409,10 +378,7 @@ export default function AboutPrivacyPolicy() {
               modified Privacy Policy applies to your interactions with the
               Service and our business.
             </p>
-            <br />
-            <h3>European Union residents / Your Rights</h3>
-            <br />
-            <br />
+            <h2>European Union residents / Your Rights</h2>
             <p>
               We have taken all appropriate measures to provide any information
               relating to your rights as well as how to exercise these rights.
@@ -526,10 +492,7 @@ export default function AboutPrivacyPolicy() {
               the Ethereum blockchain and similar public blockchains, is public
               data and we may store, process or display it without limitation.
             </p>
-            <br />
-            <h3>How to contact us</h3>
-            <br />
-            <br />
+            <h2>How to contact us</h2>
             <ul>
               <li>
                 Email:{" "}

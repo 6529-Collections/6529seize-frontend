@@ -56,7 +56,8 @@ describe("automatic production E2E dispatch", () => {
     );
     const selectionIndex = job.steps.findIndex(
       (step: { name?: string }) =>
-        step.name === "Select Museum pack for the deployed change set"
+        step.name ===
+        "Select fail-closed Museum packs for the exact deployed range"
     );
 
     expect(
@@ -80,7 +81,10 @@ describe("automatic production E2E dispatch", () => {
     expect(selectionIndex).toBeGreaterThan(checkoutIndex);
     expect(packsIndex).toBeGreaterThan(selectionIndex);
     expect(job.steps[selectionIndex].run).toContain(
-      "scripts/museum-e2e-change-set.cjs"
+      "scripts/museum-release-selection.cjs"
+    );
+    expect(job.steps[selectionIndex].run).toContain(
+      'test "$head_sha" = "$DEPLOYED_SHA"'
     );
     expect(job.steps[packsIndex].run).toContain(
       'pack.changeScope === "museum"'

@@ -1,33 +1,62 @@
 import GroupCreateIdentitiesSearch from "./GroupCreateIdentitiesSearch";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import GroupCreateIdentitySelectedItems from "@/components/groups/page/create/config/GroupCreateIdentitySelectedItems";
+import type {
+  GroupCreateIdentitiesSearchAppearance,
+  GroupCreateIdentitiesSearchResultsLayout,
+} from "./GroupCreateIdentitiesSearchItems";
 
 export default function GroupCreateIdentitiesSelect({
   onIdentitySelect,
   selectedIdentities,
   selectedWallets,
   onRemove,
+  appearance = "default",
+  resultsLayout = "popover",
 }: {
   readonly onIdentitySelect: (identity: CommunityMemberMinimal) => void;
   readonly selectedIdentities: CommunityMemberMinimal[];
   readonly selectedWallets: string[];
   readonly onRemove: (wallet: string) => void;
+  readonly appearance?: GroupCreateIdentitiesSearchAppearance | undefined;
+  readonly resultsLayout?: GroupCreateIdentitiesSearchResultsLayout | undefined;
 }) {
+  const isModal = appearance === "modal";
+
   return (
-    <div className="tw-p-3 sm:tw-p-5 tw-bg-iron-950 tw-rounded-xl tw-shadow tw-border tw-border-solid tw-border-iron-800">
+    <div
+      className={
+        isModal
+          ? "tw-w-full"
+          : "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-shadow sm:tw-p-5"
+      }
+    >
       <div className="tw-flex tw-flex-col">
-        <div className="tw-space-y-2 sm:tw-space-y-3">
-          <p className="tw-mb-0 tw-text-base sm:tw-text-lg tw-font-semibold tw-text-iron-50">
+        <div
+          className={isModal ? "tw-space-y-3" : "tw-space-y-2 sm:tw-space-y-3"}
+        >
+          <p
+            className={
+              isModal
+                ? "tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100"
+                : "tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50 sm:tw-text-lg"
+            }
+          >
             Search Identity
           </p>
           <GroupCreateIdentitiesSearch
             onIdentitySelect={onIdentitySelect}
             selectedWallets={selectedWallets}
+            appearance={appearance}
+            hideLabel={isModal}
+            placeholder={isModal ? "Identity" : " "}
+            resultsLayout={resultsLayout}
           />
         </div>
         <GroupCreateIdentitySelectedItems
           selectedIdentities={selectedIdentities}
           onRemove={onRemove}
+          variant={isModal ? "inline" : "default"}
         />
       </div>
     </div>

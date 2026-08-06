@@ -83,6 +83,9 @@
       // Exact policy-bundle helpers are a testable CLI API. Knip intentionally
       // excludes their focused Jest consumers from its usage graph.
       "scripts/pr-ci-policy-bundle.cjs": ["exports"],
+      // Pure Museum change-classifier helpers are exported for their focused
+      // adversarial Jest contract; Knip intentionally excludes test consumers.
+      "scripts/museum-e2e-change-set.cjs": ["exports"],
       "services/api/public-review/feedback-codec.ts": ["exports", "types"],
       "services/api/public-review/ledger.ts": ["exports"],
       "services/**": ["files"],

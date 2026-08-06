@@ -5,12 +5,11 @@ import {
   AboutContainer as Container,
   AboutRow as Row,
 } from "./AboutLayout";
-import styles from "./About.module.css";
 import AboutTermsDefinitions from "./AboutTermsDefinitions";
 
 export default function AboutTermsOfService() {
   return (
-    <Container>
+    <Container className="!tw-px-0">
       <Row>
         <Col>
           <h1>Terms Of Service</h1>
@@ -18,7 +17,7 @@ export default function AboutTermsOfService() {
       </Row>
       <Row>
         <Col
-          className={`${styles["lastUpdateText"]} tw-pb-3 tw-pt-3 tw-text-right`}
+          className="tw-pb-3 tw-pt-2 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-500"
         >
           Last Updated: February 23, 2023
         </Col>
