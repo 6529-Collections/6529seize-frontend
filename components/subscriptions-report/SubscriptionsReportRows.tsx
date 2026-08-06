@@ -27,6 +27,10 @@ const REPORT_ROW_TITLE_CLASS_NAME =
   "tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-100 md:tw-text-sm";
 const REPORT_ROW_META_CLASS_NAME =
   "tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400 md:tw-text-sm";
+const ACTIVE_REPORT_ROW_CLASS_NAME =
+  "!tw-bg-iron-900/80 hover:!tw-bg-iron-900";
+const STANDARD_REPORT_ROW_CLASS_NAME =
+  "even:!tw-bg-black/25 hover:!tw-bg-iron-900/70 focus-within:!tw-bg-iron-900/70";
 
 function formatVisibleSubscriptionCount(count: number): string {
   return `x${count > 0 ? count.toLocaleString() : "0"}`;
@@ -171,6 +175,7 @@ export function ActiveSubscriptionRow(
     <ReportRowLink
       href={`/the-memes/${tokenId}`}
       gridClassName={`tw-grid-cols-2 ${ACTIVE_REPORT_GRID_CLASS_NAME}`}
+      className={ACTIVE_REPORT_ROW_CLASS_NAME}
       ariaLabel={getMemeCardAriaLabel(props.count)}
     >
       <MemeCardSummary
@@ -212,7 +217,7 @@ export const SubscriptionDayRow = forwardRef<
       ref={ref}
       href={`/the-memes/${tokenId}`}
       gridClassName={`tw-grid-cols-[minmax(0,1fr)_auto] ${STANDARD_REPORT_GRID_CLASS_NAME}`}
-      className={className}
+      className={`${STANDARD_REPORT_ROW_CLASS_NAME} ${className}`}
       ariaLabel={`View The Memes card #${tokenId}`}
     >
       <div className="tw-flex tw-min-w-0 tw-flex-col">
@@ -245,6 +250,7 @@ export function RedeemedSubscriptionRow(
     <ReportRowLink
       href={`/the-memes/${tokenId}`}
       gridClassName={`tw-grid-cols-[minmax(0,1fr)_auto] ${STANDARD_REPORT_GRID_CLASS_NAME}`}
+      className={STANDARD_REPORT_ROW_CLASS_NAME}
       ariaLabel={getMemeCardAriaLabel(props.count)}
     >
       <MemeCardSummary count={props.count} />

@@ -463,7 +463,11 @@ export default function SubscriptionsReportComponent() {
       {activeDrop && (
         <>
           <div className="tw-pt-3">
-            <div className="tw-flex tw-items-center tw-gap-3">
+            <div className="tw-flex tw-items-center tw-gap-2">
+              <span
+                aria-hidden="true"
+                className="tw-size-1.5 tw-shrink-0 tw-rounded-full tw-bg-emerald-500"
+              />
               <h2 className={REPORT_SECTION_HEADING_CLASS_NAME}>Active Drop</h2>
             </div>
           </div>
@@ -471,7 +475,7 @@ export default function SubscriptionsReportComponent() {
             className="tw-pt-3"
             data-testid="subscriptions-report-active-drop"
           >
-            <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800">
+            <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700">
               <span className="tw-sr-only">
                 Active meme card subscribed and airdropped subscription counts
               </span>
