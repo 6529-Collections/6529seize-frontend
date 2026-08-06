@@ -43,7 +43,7 @@ export default function CodeExample({ code }: CodeExampleProps) {
   return (
     <div className="tw-relative">
       <pre
-        className="tw-mb-4 tw-max-h-[32rem] tw-overflow-auto tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-black tw-p-4 tw-pt-14 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 sm:tw-max-h-[42rem]"
+        className="tw-mb-4 tw-max-h-[32rem] tw-overflow-auto tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-black tw-p-4 tw-pt-14 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 sm:tw-max-h-[42rem]"
         tabIndex={0}
       >
         <code

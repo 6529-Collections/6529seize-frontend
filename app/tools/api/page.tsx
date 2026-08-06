@@ -248,7 +248,7 @@ export default function AboutApi() {
                 if the user is authenticated.
               </p>
 
-              <div className="tw-mb-0 tw-flex tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-5 tw-font-medium tw-text-iron-200">
+              <div className="tw-mb-0 tw-flex tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-5 tw-font-medium tw-text-iron-200">
                 <InformationCircleIcon
                   aria-hidden="true"
                   className="tw-size-5 tw-flex-none tw-text-primary-300"
@@ -266,7 +266,7 @@ export default function AboutApi() {
           <Col>
             <section
               aria-labelledby="api-authentication-guide-heading"
-              className="tw-w-full tw-max-w-4xl tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/70 tw-p-5 tw-text-base tw-leading-7 tw-text-iron-300"
+              className="tw-w-full tw-max-w-4xl tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-5 tw-text-base tw-leading-7 tw-text-iron-300"
             >
               <h2
                 id="api-authentication-guide-heading"
