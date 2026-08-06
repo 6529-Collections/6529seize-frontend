@@ -581,6 +581,41 @@ describe("instrumentation-client", () => {
     },
   });
 
+  const createChromeMobileIosInjectedGaEvent = () => ({
+    level: "error",
+    transaction: "/nextgen/collection/:collection/art",
+    request: {
+      url: "https://6529.io/nextgen/collection/pebbles/art",
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 26_5_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/150.0.7871.1 Mobile/TEST Safari/604.1",
+      },
+    },
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: "ga",
+          mechanism: {
+            type: "auto.browser.global_handlers.onerror",
+            handled: false,
+          },
+          stacktrace: {
+            frames: [
+              {
+                filename: "app:///nextgen/collection/pebbles/art",
+                function: "?",
+                lineno: 415,
+                colno: 45,
+                in_app: true,
+              },
+            ],
+          },
+        },
+      ],
+    },
+  });
+
   const createInjectedIosAutoplayFrames = (documentPath = "app:///") => [
     {
       filename: documentPath,
@@ -1849,6 +1884,50 @@ describe("instrumentation-client", () => {
         in_app: true,
       },
     ]);
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
+  it("drops the exact Chrome Mobile iOS document ga error", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createChromeMobileIosInjectedGaEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps the Chrome Mobile iOS ga error when an application chunk frame is present", () => {
+    const beforeSend = loadBeforeSend();
+    const documentEvent = createChromeMobileIosInjectedGaEvent();
+    const [documentException] = documentEvent.exception.values;
+    if (!documentException) {
+      throw new Error("Expected the test event to contain an exception.");
+    }
+    const event = {
+      ...documentEvent,
+      exception: {
+        values: [
+          {
+            ...documentException,
+            stacktrace: {
+              frames: [
+                ...documentException.stacktrace.frames,
+                {
+                  filename: "app:///_next/static/chunks/app-owned.js",
+                  function: "renderArt",
+                  lineno: 1,
+                  colno: 1,
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
 
     const result = beforeSend(event);
 
