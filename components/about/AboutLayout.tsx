@@ -4,7 +4,7 @@ import type { HTMLAttributes, TableHTMLAttributes } from "react";
 import styles from "./AboutLayout.module.css";
 
 export const CONTENT_PAGE_MAIN_CLASS =
-  "tailwind-scope tw-min-h-[100dvh] tw-border-0 tw-border-solid tw-border-iron-800 !tw-bg-iron-950 tw-text-iron-300 md:tw-border-l";
+  "tailwind-scope tw-min-h-[100dvh] tw-border-0 tw-border-solid tw-border-iron-700 !tw-bg-iron-950 tw-text-iron-300 md:tw-border-l";
 export const CONTENT_PAGE_TITLE_CLASS =
   "tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]";
 export const CONTENT_PAGE_SECTION_HEADING_CLASS =
