@@ -3,7 +3,7 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
-const { isMuseumOwnedPath } = require("./museum-e2e-change-set.cjs");
+const { isMuseumPath, isPolicyPath } = require("./museum-release-tier.cjs");
 
 const PACKAGE_GOVERNANCE_FILES = new Set([
   ".npmrc",
@@ -94,7 +94,13 @@ function applyEffectiveAppPrCiPlan(plan, { cwd = process.cwd() } = {}) {
   const releaseBusContract = files.some((file) =>
     RELEASE_BUS_CONTRACT_PATTERNS.some((pattern) => pattern.test(file))
   );
-  const playwrightMuseum = files.some(isMuseumOwnedPath);
+  // Keep App PR lane activation at least as broad as the tier classifier.
+  // P1/P2 surface work and P3 policy/control-plane work must receive the
+  // complete Museum inventory rather than being omitted by the legacy,
+  // narrower ownership helper.
+  const playwrightMuseum = files.some(
+    (file) => isMuseumPath(file) || isPolicyPath(file)
+  );
 
   const checks = {
     ...plan.checks,

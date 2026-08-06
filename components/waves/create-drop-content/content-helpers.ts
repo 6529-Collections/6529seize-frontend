@@ -13,6 +13,10 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
+import {
+  MAX_DROP_STORM_UTF16_UNITS,
+  isDropPartWithinLimits,
+} from "@/helpers/waves/drop-content-limits";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { getMentionedGroupsFromParts } from "@/helpers/waves/drop-group-mentions";
 import {
@@ -143,7 +147,7 @@ const getIsDropLimit = (
   (drop?.parts.reduce(
     (acc, part) => acc + (part.content?.length ?? 0),
     markdown?.length ?? 0
-  ) ?? 0) >= 24000;
+  ) ?? 0) > MAX_DROP_STORM_UTF16_UNITS;
 
 export const canAddDropPart = ({
   markdown,
@@ -157,6 +161,7 @@ export const canAddDropPart = ({
   readonly hasPendingInlineImageUpload: boolean;
 }): boolean =>
   ((markdown?.trim().length ?? 0) > 0 || files.length > 0) &&
+  isDropPartWithinLimits(markdown ?? "") &&
   !hasPendingInlineImageUpload &&
   !getIsDropLimit(drop, markdown);
 

@@ -133,3 +133,153 @@ deployment, or production deployment has been performed.
 - No local build or browser execution was attempted. The worktree's node
   modules junction supports the requested Jest, lint, and typecheck commands
   but not Turbopack; hosted CI owns build and browser execution.
+
+## PR 3 implementation checkpoint - conservative tier activation
+
+PR 3 is implemented in the `codex/museum-release-tier-activation` worktree.
+It does not push, open a pull request, merge, deploy, or mutate a staging or
+production environment.
+
+- Added the protected `museum-release-selection-v1` decision record. It binds
+  an exact base/head range to the existing trusted classifier and records the
+  tier, selected packs, static scope, activation mode, Museum-hold state,
+  optional resolved canonical source SHA, and a digest. Any classifier, range,
+  inventory, mode, hold-state, or supplied source-SHA problem selects every
+  Museum pack or fails the workflow before qualification.
+- P0 is the only narrowed path: the exact About proposition pack runs on
+  desktop and 390px mobile, while the static source/shell corpus sentinel still
+  runs first. Hosted P0 checks bind their rendered source link and displayed
+  commit to the exact SHA in the selection evidence. The P0 AST proof now also
+  permits only a strengthened static assertion program in its focused test;
+  render/setup and interactions remain disallowed.
+- P1 remains a conservative all-pack result because the registry does not yet
+  contain a trusted template-to-pack mapping. P2 and P3 also select every
+  Museum pack. This preserves the proposal's broad fallback instead of
+  guessing a template relation.
+- `MUSEUM_RELEASE_TIER_MODE=full` is the immediate rollback switch. A missing
+  or malformed value is also full. An active or unreadable
+  `release-bus-museum-hold` GitHub issue likewise restores every pack in App
+  PR, staging, and production qualification.
+- The old broad institutional-practice pack is retained for nightly (`cron`),
+  manual, and post-deploy execution. The scheduled or explicitly authorized
+  manual broad sweep records an auditable Release Bus Museum hold on failure;
+  only a passing authorized exact-source adapter plus broad sweep can close the
+  bot-managed hold.
+- Added a reusable frontend-side bilateral compatibility workflow. It resolves
+  canonical Museum `main` once to an exact SHA, rejects any caller SHA that is
+  not that exact SHA, checks out current frontend `main`, and runs the strict
+  adapter only against immutable GitHub raw endpoints. It stores the adapter
+  result as an artifact and exposes a `workflow_call` interface for the source
+  repository's protected-main workflow. The source-repository caller remains a
+  configuration/merge step outside this PR3 worktree.
+- Added comprehensive synthetic selector/adapter coverage and an exact
+  historical shadow-evidence ledger. The ledger records code ranges only; it
+  makes no fabricated 20-release or production-performance claim.
+- App PR planning now reuses the classifier's Museum/policy predicates, so P1
+  presentation paths and P3 workflow/control-plane changes cannot omit the
+  broad Museum browser lane. The AST parser is lazy-loaded to keep that
+  predicate reuse valid before dependencies are installed.
+- App PR executes tier tooling staged from protected base `main`; because this
+  bootstrap PR predates the selector on that base, it intentionally emits a
+  full-pack decision until the merged selector becomes trusted. The adapter
+  workflow records a negative JSON result even when its runner cannot launch.
+- The plan job independently evaluates changed paths with the protected-base
+  Museum/policy predicates before building its matrix; a classification or Git
+  failure forces the broad Museum lane, so candidate policy code cannot omit
+  its own P3 qualification.
+
+### PR 3 integration status
+
+PR 3 is rebased onto exact frontend main
+`a55c83c2ad29db7c66ef55c26f45ec645a71db35`. That main includes PR 2 at
+`fe0ad4ade31f84d6321f200bf8a0ec531e7651bb` and the subsequent Data
+Architecture diagnostic stabilization. Current main contains five Museum
+packs in each local/staging/production inventory, so full-mode selection now
+includes Data Architecture alongside Institutional Practice, About, Inside the
+System, and Rights. P0 remains the single About pack.
+
+The current-main rebase includes PR #3640's emergency restoration of the full
+five-pack browser command. PR 3 preserves its one-process, one-worker execution
+and all five packs in conservative/full mode, while replacing the temporary
+hard-coded inventory with the validated selector array needed for the P0 path.
+
+Hosted run `31066104003` exposed and failed closed on a bootstrap path error:
+the immutable protected classifier was staged outside the checkout and could
+not resolve the Git tree. Its immutable copy is now staged immediately below
+the workspace root, with a regression contract. Fresh exact-head CI remains
+required before merge.
+
+The final trust review also found that a candidate could recompute the digest
+after changing its selected pack inventory. Trusted Release Bus preflight now
+recomputes the entire expected selection from the exact candidate tree using
+immutable selector code, current hold state, and the independently resolved
+canonical Museum source. Forged selection semantics fail even when every
+candidate-controlled checksum is internally consistent.
+
+Canonical Museum `main` resolved to
+`6f7f8b2168347cb623d53eeb6b9d7fe1242d7a73`. The strict adapter accepted that
+immutable source exactly, returned `adapter_status=current`, and bound the
+publication commit to the same SHA. The earlier stale-adapter result remains in
+the run log as historical evidence; it is superseded for this integrated tree.
+
+## PR 4 checkpoint — runner benchmark boundary
+
+The dispatch-only runner benchmark is implemented on the PR4 branch. It has a
+trusted `main`-only controller, exact main-ancestor source validation, an
+explicit `ubuntu-latest` control profile, and a candidate profile whose label
+is supplied by the maintainer rather than invented by workflow code. Candidate
+dispatch and reusable-call inputs are validated with strict cross-field rules;
+reusable calls are forced to truthful control metadata. The controller binds
+each request to a fresh nonce and verifies workflow, event, branch, SHA, title,
+and run-attempt metadata before observation, cancellation, or evidence.
+
+Queue availability and workload completion are separate budgets. The default
+90-second queue budget never cancels an accepted build; the controller derives
+a safe repeat-count-aware job timeout from the completion budget and performs a
+bounded final reconciliation for delayed runs and transient list failures.
+Unverified runs are never cancelled, and incomplete cleanup remains visible in
+controller evidence.
+
+The candidate has only read `contents`/`actions` permissions, checks out the
+benchmark tool from the trusted workflow SHA separately from the exact source
+SHA, activates exact pnpm `10.33.0` before setup-node cache/install, and runs
+without deployment credentials. `GH_TOKEN` is scoped to the final API readback
+steps and is absent from install/build. It records queue/setup, checkout,
+install, build, and package timings plus non-secret environment metadata in
+unique JSON/Markdown artifacts. The activation playbook records the current
+state: no larger-runner entitlement, no self-hosted capacity, and no runner
+variables are provisioned. No GitHub setting or runner has been activated by
+this work.
+
+## PR 4 closeout correction
+
+The source trust helper now compares exact-main requests with the declared
+trusted main SHA and accepts a distinct source only when the trusted checkout
+proves ancestry. Focused tests cover both paths. Generated benchmark evidence
+uses UTF-8 em dashes, with no mojibake in the candidate or controller Markdown
+documents. The branch is preserved in signed local commits behind the final PR3
+tree; it has not changed GitHub, runner capacity, or deployment state.
+
+## PR 4 security boundary correction
+
+- Direct human candidate dispatches can never select a supplied candidate
+  label. An Ubuntu authorization job returns `ubuntu-latest` unless the
+  dispatch is authenticated as `github-actions[bot]` and the controller/run
+  binding is valid; unsupported direct candidate runs fail before source
+  checkout.
+- Request IDs now include a deterministic digest of every intended input,
+  controller run ID, controller attempt 1, repeat number, and nonce.
+  Candidate metadata requires actor `github-actions[bot]`, run attempt 1,
+  controller identity, controller attempt 1, exact workflow/path/SHA, and the
+  same input-bound request ID. Controller reruns fail before dispatch.
+- The measured source job has no `GH_TOKEN` and no Actions API permission after
+  source execution. It writes only an explicitly untrusted raw observation.
+  A fresh Ubuntu verifier checkout independently reads run/controller metadata,
+  rebinds the raw fields, and writes the immutable evidence.
+- Delayed or undiscovered runs remain `reconciliation_pending`. The controller
+  does not clear that state merely because the list endpoint succeeded; cleanup
+  must reach terminal state or controller evidence generation fails.
+
+Focused adversarial coverage now passes 18 tests. The signed worktree is ready
+for its governed PR after PR3 lands; no runner, repository setting, deployment,
+or candidate capacity has been activated.
