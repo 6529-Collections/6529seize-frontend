@@ -839,6 +839,120 @@ describe("sentry-client-filters", () => {
     ...overrides,
   });
 
+  const metaMaskMobileIosRawChunkPath =
+    "app:///_next/static/chunks/0synthetic-monitoring.js";
+  const metaMaskMobileIosRawFrames: SentryStackFrame[] = [
+    {
+      filename: metaMaskMobileIosRawChunkPath,
+      abs_path: metaMaskMobileIosRawChunkPath,
+      function: "n",
+      lineno: 7,
+      colno: 4858,
+      in_app: true,
+    },
+    {
+      filename: "[native code]",
+      abs_path: "[native code]",
+      function: "stringify",
+      in_app: true,
+    },
+  ];
+  type MetaMaskMobileIosCyclicJsonOptions = {
+    eventTimestamp?: number | null | undefined;
+    navigationTimestamp?: number | null | undefined;
+    breadcrumbs?: TestSentryBreadcrumb[] | undefined;
+    browserName?: string | undefined;
+    osName?: string | undefined;
+    userAgent?: string | undefined;
+    exceptionType?: string | undefined;
+    exceptionValue?: string | undefined;
+    mechanismType?: string | undefined;
+    handled?: boolean | undefined;
+    frames?: SentryStackFrame[] | undefined;
+    includeAdditionalException?: boolean | undefined;
+    includeSentryContexts?: boolean | undefined;
+  };
+
+  const createMetaMaskMobileIosCyclicJsonEvent = (
+    options: MetaMaskMobileIosCyclicJsonOptions = {}
+  ): TestSentryClientEvent => {
+    const values: SentryExceptionValue[] = [
+      {
+        type: options.exceptionType ?? "TypeError",
+        value:
+          options.exceptionValue ?? __testing.sentryRouteParameterizationMessage,
+        mechanism: {
+          type:
+            options.mechanismType ??
+            __testing.sentryRouteParameterizationMechanismType,
+          handled: options.handled ?? false,
+        },
+        stacktrace: {
+          frames: options.frames ?? metaMaskMobileIosRawFrames,
+        },
+      },
+    ];
+    if (options.includeAdditionalException) {
+      values.push({
+        type: "Error",
+        value: "Independent application failure",
+        stacktrace: {
+          frames: [
+            {
+              filename: "app:///services/application-serializer.ts",
+              abs_path: "app:///services/application-serializer.ts",
+              function: "serializeApplicationState",
+              in_app: true,
+            },
+          ],
+        },
+      });
+    }
+
+    const eventTimestamp = options.eventTimestamp ?? 1000.295;
+    const navigationTimestamp = options.navigationTimestamp ?? 1000;
+    const browserName = options.browserName ?? "Mobile Safari UI/WKWebView";
+    const osName = options.osName ?? "iOS";
+    return {
+      ...(options.eventTimestamp !== null && { timestamp: eventTimestamp }),
+      transaction: "/notifications",
+      exception: { values },
+      request: {
+        url: "https://6529.io/notifications",
+        headers: {
+          "User-Agent": options.userAgent ?? metaMaskMobileWebViewUserAgent,
+        },
+      },
+      ...(options.includeSentryContexts === false
+        ? {}
+        : {
+            contexts: {
+              browser: { name: browserName },
+              os: { name: osName },
+            },
+            tags: {
+              browser: browserName,
+              "browser.name": browserName,
+              "os.name": osName,
+            },
+          }),
+      breadcrumbs:
+        options.breadcrumbs ??
+        (options.navigationTimestamp === null
+          ? []
+          : [
+              {
+                timestamp: navigationTimestamp,
+                category: "navigation",
+                data: {
+                  from: "/waves/synthetic-wave",
+                  to: "/notifications",
+                },
+              },
+            ]),
+    };
+  };
+
   const createTalismanExtensionOnboardingEvent = (
     overrides: TestSentryClientEventOverrides = {}
   ): TestSentryClientEvent => ({
@@ -7595,6 +7709,116 @@ describe("sentry-client-filters", () => {
 
     // Assert
     expect(result).toBe(true);
+  });
+
+  it("filters the exact iOS MetaMask Mobile SPA-navigation cyclic JSON signature", () => {
+    // Arrange
+    const event = createMetaMaskMobileIosCyclicJsonEvent();
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it("filters the exact iOS signature before Sentry enriches browser and OS context", () => {
+    // Arrange
+    const event = createMetaMaskMobileIosCyclicJsonEvent({
+      includeSentryContexts: false,
+    });
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(true);
+  });
+
+  it.each(
+    [
+      [
+        "ordinary Mobile Safari",
+        {
+          browserName: "Mobile Safari",
+          userAgent:
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.7 Mobile/15E148 Safari/604.1",
+        },
+      ],
+      [
+        "a generic iOS WKWebView",
+        {
+          userAgent:
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+        },
+      ],
+      ["a conflicting browser context", { browserName: "Mobile Safari" }],
+      ["a conflicting OS context", { osName: "Android" }],
+      [
+        "an altered MetaMask Mobile user-agent suffix",
+        { userAgent: `${metaMaskMobileWebViewUserAgent} Companion` },
+      ],
+      [
+        "a Rabby Mobile WebView",
+        {
+          userAgent:
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebView RabbyMobile",
+        },
+      ],
+      [
+        "a Coinbase Wallet WebView",
+        {
+          userAgent:
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 WebView CoinbaseWallet",
+        },
+      ],
+      [
+        "an altered cyclic JSON message",
+        { exceptionValue: "Converting circular structure to JSON" },
+      ],
+      [
+        "a different browser mechanism",
+        {
+          mechanismType:
+            "auto.browser.browserapierrors.requestAnimationFrame",
+        },
+      ],
+      ["a handled exception", { handled: true }],
+      ["a stale navigation breadcrumb", { navigationTimestamp: 999 }],
+      ["no navigation breadcrumb", { navigationTimestamp: null }],
+      [
+        "Sentry wrapper coordinate drift",
+        {
+          frames: metaMaskMobileIosRawFrames.map((frame, index) =>
+            index === 0 ? { ...frame, colno: 4859 } : frame
+          ),
+        },
+      ],
+      [
+        "an additional app-owned frame",
+        {
+          frames: [
+            ...metaMaskMobileIosRawFrames,
+            {
+              filename: "app:///services/application-serializer.ts",
+              abs_path: "app:///services/application-serializer.ts",
+              function: "serializeApplicationState",
+              in_app: true,
+            },
+          ],
+        },
+      ],
+      ["an additional exception", { includeAdditionalException: true }],
+    ] satisfies Array<[string, MetaMaskMobileIosCyclicJsonOptions]>
+  )("does not filter the iOS cyclic JSON near miss with %s", (_name, options) => {
+    // Arrange
+    const event = createMetaMaskMobileIosCyclicJsonEvent(options);
+
+    // Act
+    const result = shouldFilterInjectedWalletCollision(event);
+
+    // Assert
+    expect(result).toBe(false);
   });
 
   it("filters MetaMask mobile update-url circular errors from the original exception stack", () => {
