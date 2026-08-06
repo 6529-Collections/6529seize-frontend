@@ -50,6 +50,17 @@ describe("automatic production E2E dispatch", () => {
       (step: { name?: string }) =>
         step.name === "Check out exact production SHA"
     );
+    const sourceVerificationIndex = job.steps.findIndex(
+      (step: { name?: string }) => step.name === "Verify immutable source"
+    );
+    const controlCheckoutIndex = job.steps.findIndex(
+      (step: { name?: string }) =>
+        step.name === "Check out immutable Release Bus Museum selection tooling"
+    );
+    const controlVerificationIndex = job.steps.findIndex(
+      (step: { name?: string }) =>
+        step.name === "Verify immutable Museum selection tooling"
+    );
     const packsIndex = job.steps.findIndex(
       (step: { name?: string }) =>
         step.name === "Run production-safe read-only packs"
@@ -77,7 +88,11 @@ describe("automatic production E2E dispatch", () => {
     expect(job.steps[checkoutIndex].with.ref).toBe(
       "${{ inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha }}"
     );
+    expect(sourceVerificationIndex).toBeGreaterThan(checkoutIndex);
+    expect(controlCheckoutIndex).toBeGreaterThan(sourceVerificationIndex);
+    expect(controlVerificationIndex).toBeGreaterThan(controlCheckoutIndex);
     expect(packsIndex).toBeGreaterThan(checkoutIndex);
+    expect(selectionIndex).toBeGreaterThan(controlVerificationIndex);
     expect(selectionIndex).toBeGreaterThan(checkoutIndex);
     expect(packsIndex).toBeGreaterThan(selectionIndex);
     expect(job.steps[selectionIndex].run).toContain(
