@@ -545,11 +545,12 @@ export default function SubscriptionsReportComponent() {
               {upcomingRows.length > UPCOMING_PAGE_SIZE && (
                 <div
                   ref={upcomingToggleRef}
-                  className={`${REPORT_SECTION_CONTENT_GAP_CLASS_NAME} tw-text-center`}
+                  className="tw-mt-3 tw-flex tw-justify-center tw-pb-1"
                 >
                   {upcomingVisible < upcomingRows.length ? (
                     <ShowMoreButton
                       expanded={false}
+                      variant="subtle"
                       setExpanded={() => {
                         setAnimateFromIndex(upcomingVisible);
                         setUpcomingVisible((prev) =>
@@ -563,6 +564,7 @@ export default function SubscriptionsReportComponent() {
                   ) : (
                     <ShowMoreButton
                       expanded={true}
+                      variant="subtle"
                       setExpanded={() => {
                         setAnimateFromIndex(null);
                         setUpcomingVisible(UPCOMING_PAGE_SIZE);
