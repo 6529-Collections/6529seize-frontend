@@ -419,8 +419,7 @@ const CreateDropWrapper = forwardRef<
         getMarkdown()?.length ?? 0
       ) ?? 0) > MAX_DROP_STORM_UTF16_UNITS;
 
-    const getIsPartLimit = () =>
-      !isDropPartWithinLimits(getMarkdown() ?? "");
+    const getIsPartLimit = () => !isDropPartWithinLimits(getMarkdown() ?? "");
 
     const getCanAddPart = () =>
       getHaveMarkdownOrFile() &&
