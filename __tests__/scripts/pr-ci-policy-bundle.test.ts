@@ -259,6 +259,7 @@ describe("pr-ci-policy-bundle-v1", () => {
         ".github/workflows/build-upload-deploy-prod.yml",
         ".github/workflows/deploy-staging.yml",
         ".github/workflows/dependency-governance.yml",
+        ".github/workflows/museum-publication-compatibility.yml",
         ".github/workflows/release-bus-v2-advance-staging-ref.yml",
         ".github/workflows/release-bus-v2-compose.yml",
         ".github/workflows/release-bus-v2-preflight.yml",
@@ -276,6 +277,8 @@ describe("pr-ci-policy-bundle-v1", () => {
         "__tests__/scripts/production-e2e-dispatch.test.ts",
         "__tests__/scripts/manual-deploy-routing-guard.test.ts",
         "__tests__/scripts/museum-release-tier.test.ts",
+        "__tests__/scripts/museum-release-selection.test.ts",
+        "__tests__/scripts/museum-publication-compatibility.test.ts",
         "__tests__/scripts/release-bus-v2-advance-staging-ref-workflow.test.ts",
         "bin/6529",
         "eslint.config.diff.mjs",
@@ -288,6 +291,8 @@ describe("pr-ci-policy-bundle-v1", () => {
         "scripts/app-pr-ci-effective-plan.cjs",
         "scripts/e2e-packs.cjs",
         "scripts/museum-release-tier.cjs",
+        "scripts/museum-release-selection.cjs",
+        "scripts/museum-publication-compatibility.ts",
         "scripts/notify-ci-wave.mjs",
         "scripts/package-public-review-artifacts.cjs",
         "scripts/pr-ci-policy-bundle.cjs",
@@ -304,6 +309,10 @@ describe("pr-ci-policy-bundle-v1", () => {
         "ops/testing-strategy/museum-surface-registry.v1.schema.json",
         "scripts/museum-surface-registry.cjs",
         "tests/museum/about-readonly.spec.ts",
+        "tests/museum/institutional-practice-readonly.spec.ts",
+        "tests/museum/inside-system-readonly.spec.ts",
+        "tests/museum/rights-readonly.spec.ts",
+        "ops/testing-strategy/museum-release-shadow-evidence.v1.json",
       ])
     );
     expect(PACKAGE_SCRIPT_KEYS).toEqual(
@@ -330,6 +339,7 @@ describe("pr-ci-policy-bundle-v1", () => {
         "devDependencies.eslint",
         "devDependencies.jest",
         "devDependencies.@playwright/test",
+        "dependencies.tsx",
         "devDependencies.typescript",
         "devDependencies.yaml",
       ])

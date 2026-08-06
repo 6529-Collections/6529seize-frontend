@@ -622,7 +622,7 @@ const PACKS = [
       "museum-institutional-practice",
       "Production Network Museum institutional-practice deployed route smoke.",
       READONLY_SPECS.museumInstitutionalPractice,
-      ["post-deploy", "manual"],
+      ["cron", "post-deploy", "manual"],
       30,
       [DESKTOP, MOBILE]
     )

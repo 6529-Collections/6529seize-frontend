@@ -155,7 +155,7 @@ describe("E2E pack manifest", () => {
     expect(production).toHaveLength(17);
     expect(
       production.filter((pack) => pack.triggers.includes("cron"))
-    ).toHaveLength(10);
+    ).toHaveLength(11);
     expect(
       production.filter((pack) => pack.triggers.includes("post-deploy"))
     ).toHaveLength(16);

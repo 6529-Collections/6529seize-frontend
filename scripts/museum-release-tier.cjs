@@ -5,7 +5,16 @@ const { execFileSync } = require("node:child_process");
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
-const ts = require("typescript");
+
+// Path/policy consumers run in the pre-install CI planning job. Keep the
+// TypeScript parser lazy so those consumers can share the classifier's trusted
+// predicates without requiring the full dependency tree before installation.
+let ts;
+
+function typeScript() {
+  ts ??= require("typescript");
+  return ts;
+}
 
 const CONTRACT = "museum-release-classification-v1";
 const MODE = "report_only";
@@ -41,6 +50,8 @@ const POLICY_PATTERNS = Object.freeze([
   /^ops\/scripts\/(?:deployment-bus|release-bus|testing-strategy)/u,
   /^scripts\/(?:app-pr-ci-effective-plan|e2e-packs|museum-|pr-ci-policy-bundle|release-bus-|sync-e2e-manifest)/u,
   /^tests\/packs\.manifest\.cjs$/u,
+  /^tests\/museum\//u,
+  /^__tests__\/lib\/museum\/publication\/corpusContracts\.test\.ts$/u,
   /^__tests__\/scripts\/(?:app-pr-ci-effective-plan|e2e-packs|museum-|pr-ci-policy-bundle|release-bus-|sync-e2e-manifest)/u,
   /^(?:package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml)$/u,
 ]);
@@ -132,6 +143,7 @@ function readBlob(root, commit, file) {
 }
 
 function classNameRanges(source, file) {
+  typeScript();
   const sourceFile = ts.createSourceFile(
     file,
     source,
@@ -158,21 +170,461 @@ function classNameRanges(source, file) {
       ) {
         literal = initializer.expression;
       }
-      if (literal === null) {
-        throw new Error(
-          `${file} contains a non-literal className and cannot enter P0.`
-        );
+      // Existing dynamic className expressions are allowed only when they are
+      // byte-for-byte unchanged. The masked-source comparison below keeps them
+      // in the structural boundary, while letting an unrelated literal token
+      // correction remain eligible for P0.
+      if (literal !== null) {
+        ranges.push({
+          end: literal.getEnd(),
+          start: literal.getStart(sourceFile),
+          value: literal.text,
+        });
       }
-      ranges.push({
-        end: literal.getEnd(),
-        start: literal.getStart(sourceFile),
-        value: literal.text,
-      });
     }
     ts.forEachChild(node, visit);
   };
   visit(sourceFile);
   return ranges;
+}
+
+function isNamedCall(expression, names) {
+  if (ts.isIdentifier(expression)) {
+    return names.has(expression.text);
+  }
+  if (ts.isPropertyAccessExpression(expression)) {
+    return (
+      ts.isIdentifier(expression.expression) &&
+      names.has(expression.expression.text)
+    );
+  }
+  return false;
+}
+
+function isExpectationExpression(expression) {
+  const expectFunctions = new Set(["expect"]);
+  if (ts.isCallExpression(expression)) {
+    return (
+      isNamedCall(expression.expression, expectFunctions) ||
+      isExpectationExpression(expression.expression)
+    );
+  }
+  if (ts.isPropertyAccessExpression(expression)) {
+    return isExpectationExpression(expression.expression);
+  }
+  if (
+    ts.isParenthesizedExpression(expression) ||
+    ts.isAsExpression(expression) ||
+    ts.isTypeAssertionExpression(expression) ||
+    ts.isNonNullExpression(expression)
+  ) {
+    return isExpectationExpression(expression.expression);
+  }
+  return false;
+}
+
+function assertionOnlyTestRanges(source, file) {
+  typeScript();
+  const sourceFile = ts.createSourceFile(
+    file,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX
+  );
+  if (sourceFile.parseDiagnostics.length > 0) {
+    throw new Error(`TypeScript could not parse ${file}.`);
+  }
+  const assertionRanges = [];
+  const visit = (node) => {
+    if (
+      ts.isExpressionStatement(node) &&
+      isExpectationExpression(node.expression)
+    ) {
+      assertionRanges.push({
+        end: node.getEnd(),
+        start: node.getStart(sourceFile),
+      });
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return { assertionRanges };
+}
+
+function maskTestRanges(source, ranges) {
+  let result = source;
+  for (const range of [...ranges].sort(
+    (left, right) => right.start - left.start
+  )) {
+    result = `${result.slice(0, range.start)}${result.slice(range.end)}`;
+  }
+  return result.replaceAll("\r\n", "\n").replace(/\s+/gu, " ").trim();
+}
+
+function unwrapTestExpression(expression) {
+  let result = expression;
+  while (
+    ts.isParenthesizedExpression(result) ||
+    ts.isAsExpression(result) ||
+    ts.isTypeAssertionExpression(result) ||
+    ts.isNonNullExpression(result)
+  ) {
+    result = result.expression;
+  }
+  return result;
+}
+
+function isExpectationChain(expression) {
+  const normalized = unwrapTestExpression(expression);
+  if (ts.isIdentifier(normalized)) {
+    return normalized.text === "expect";
+  }
+  if (
+    ts.isCallExpression(normalized) ||
+    ts.isPropertyAccessExpression(normalized)
+  ) {
+    return isExpectationChain(normalized.expression);
+  }
+  return false;
+}
+
+function isSafeScreenLookup(expression) {
+  const normalized = unwrapTestExpression(expression);
+  return (
+    ts.isPropertyAccessExpression(normalized) &&
+    ts.isIdentifier(normalized.expression) &&
+    normalized.expression.text === "screen"
+  );
+}
+
+function isSafeAssertionValue(expression) {
+  const normalized = unwrapTestExpression(expression);
+  if (
+    ts.isIdentifier(normalized) ||
+    ts.isStringLiteral(normalized) ||
+    ts.isNoSubstitutionTemplateLiteral(normalized) ||
+    ts.isNumericLiteral(normalized) ||
+    ts.isBigIntLiteral(normalized) ||
+    normalized.kind === ts.SyntaxKind.TrueKeyword ||
+    normalized.kind === ts.SyntaxKind.FalseKeyword ||
+    normalized.kind === ts.SyntaxKind.NullKeyword
+  ) {
+    return true;
+  }
+  if (ts.isArrayLiteralExpression(normalized)) {
+    return normalized.elements.every((element) =>
+      ts.isSpreadElement(element)
+        ? isSafeAssertionValue(element.expression)
+        : isSafeAssertionValue(element)
+    );
+  }
+  if (ts.isObjectLiteralExpression(normalized)) {
+    return normalized.properties.every((property) => {
+      if (ts.isPropertyAssignment(property)) {
+        return isSafeAssertionValue(property.initializer);
+      }
+      if (ts.isShorthandPropertyAssignment(property)) {
+        return true;
+      }
+      return (
+        ts.isSpreadAssignment(property) &&
+        isSafeAssertionValue(property.expression)
+      );
+    });
+  }
+  if (ts.isPropertyAccessExpression(normalized)) {
+    return isSafeAssertionValue(normalized.expression);
+  }
+  if (ts.isElementAccessExpression(normalized)) {
+    return (
+      isSafeAssertionValue(normalized.expression) &&
+      (normalized.argumentExpression === undefined ||
+        isSafeAssertionValue(normalized.argumentExpression))
+    );
+  }
+  if (ts.isCallExpression(normalized)) {
+    const callee = unwrapTestExpression(normalized.expression);
+    const permitted =
+      isExpectationChain(normalized.expression) ||
+      isSafeScreenLookup(normalized.expression) ||
+      (ts.isIdentifier(callee) && callee.text === "t");
+    return (
+      permitted &&
+      normalized.arguments.every((argument) => isSafeAssertionValue(argument))
+    );
+  }
+  if (ts.isBinaryExpression(normalized)) {
+    return (
+      isSafeAssertionValue(normalized.left) &&
+      isSafeAssertionValue(normalized.right)
+    );
+  }
+  if (ts.isConditionalExpression(normalized)) {
+    return (
+      isSafeAssertionValue(normalized.condition) &&
+      isSafeAssertionValue(normalized.whenTrue) &&
+      isSafeAssertionValue(normalized.whenFalse)
+    );
+  }
+  if (ts.isPrefixUnaryExpression(normalized)) {
+    return isSafeAssertionValue(normalized.operand);
+  }
+  if (ts.isTemplateExpression(normalized)) {
+    return normalized.templateSpans.every((span) =>
+      isSafeAssertionValue(span.expression)
+    );
+  }
+  return false;
+}
+
+function isSafeAssertionStatement(statement) {
+  if (ts.isExpressionStatement(statement)) {
+    return (
+      isExpectationExpression(statement.expression) &&
+      isSafeAssertionValue(statement.expression)
+    );
+  }
+  if (ts.isVariableStatement(statement)) {
+    return statement.declarationList.declarations.every(
+      (declaration) =>
+        declaration.initializer !== undefined &&
+        isSafeAssertionValue(declaration.initializer)
+    );
+  }
+  if (ts.isForOfStatement(statement)) {
+    const initializer = statement.initializer;
+    if (
+      !ts.isVariableDeclarationList(initializer) ||
+      !initializer.declarations.every(
+        (declaration) =>
+          declaration.initializer === undefined ||
+          isSafeAssertionValue(declaration.initializer)
+      ) ||
+      !isSafeAssertionValue(statement.expression)
+    ) {
+      return false;
+    }
+    if (ts.isBlock(statement.statement)) {
+      return statement.statement.statements.every(isSafeAssertionStatement);
+    }
+    return isSafeAssertionStatement(statement.statement);
+  }
+  return ts.isEmptyStatement(statement);
+}
+
+function statementContainsExpectation(statement) {
+  let found = false;
+  const visit = (node) => {
+    if (
+      ts.isExpressionStatement(node) &&
+      isExpectationExpression(node.expression)
+    ) {
+      found = true;
+      return;
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(statement);
+  return found;
+}
+
+function normaliseTestNode(source, sourceFile, node) {
+  return source
+    .slice(node.getStart(sourceFile), node.getEnd())
+    .replaceAll("\r\n", "\n")
+    .replace(/\s+/gu, " ")
+    .trim();
+}
+
+function focusedTestPrograms(source, file) {
+  typeScript();
+  const sourceFile = ts.createSourceFile(
+    file,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX
+  );
+  if (sourceFile.parseDiagnostics.length > 0) {
+    throw new Error(`TypeScript could not parse ${file}.`);
+  }
+  const testFunctions = new Set(["it", "test"]);
+  const programs = [];
+  const visit = (node) => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      testFunctions.has(node.expression.text)
+    ) {
+      const title = node.arguments[0];
+      const callback = node.arguments[1];
+      if (
+        !title ||
+        (!ts.isStringLiteral(title) &&
+          !ts.isNoSubstitutionTemplateLiteral(title)) ||
+        !callback ||
+        (!ts.isArrowFunction(callback) && !ts.isFunctionExpression(callback)) ||
+        !ts.isBlock(callback.body)
+      ) {
+        throw new Error(
+          "focused test declaration is not statically analyzable"
+        );
+      }
+      programs.push({
+        callback_header: source
+          .slice(
+            callback.getStart(sourceFile),
+            callback.body.getStart(sourceFile)
+          )
+          .replaceAll("\r\n", "\n")
+          .replace(/\s+/gu, " ")
+          .trim(),
+        callee: normaliseTestNode(source, sourceFile, node.expression),
+        extra_arguments: node.arguments
+          .slice(2)
+          .map((argument) => normaliseTestNode(source, sourceFile, argument)),
+        statements: callback.body.statements.map((statement) => ({
+          contains_expectation: statementContainsExpectation(statement),
+          eligible: isSafeAssertionStatement(statement),
+          range: {
+            end: statement.getEnd(),
+            start: statement.getStart(sourceFile),
+          },
+          source: normaliseTestNode(source, sourceFile, statement),
+        })),
+        title_range: {
+          end: title.getEnd(),
+          start: title.getStart(sourceFile),
+        },
+      });
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return programs;
+}
+
+function assertionOnlyTestProof(baseSource, headSource, file) {
+  try {
+    const base = assertionOnlyTestRanges(baseSource, file);
+    const head = assertionOnlyTestRanges(headSource, file);
+    if (head.assertionRanges.length <= base.assertionRanges.length) {
+      return {
+        eligible: false,
+        reason: "focused assertion inventory was not strengthened",
+      };
+    }
+    // Only literal titles and static post-assertion statements are masked.
+    // Render/setup and every other test-file change remains byte-equivalent.
+    const basePrograms = focusedTestPrograms(baseSource, file);
+    const headPrograms = focusedTestPrograms(headSource, file);
+    if (basePrograms.length !== headPrograms.length) {
+      return { eligible: false, reason: "focused test inventory changed" };
+    }
+    const baseAllowedRanges = [];
+    const headAllowedRanges = [];
+    for (let index = 0; index < basePrograms.length; index += 1) {
+      const baseProgram = basePrograms[index];
+      const headProgram = headPrograms[index];
+      const baseFirstAssertion = baseProgram.statements.findIndex(
+        (statement) => statement.contains_expectation
+      );
+      const headFirstAssertion = headProgram.statements.findIndex(
+        (statement) => statement.contains_expectation
+      );
+      if (
+        baseFirstAssertion < 0 ||
+        baseFirstAssertion !== headFirstAssertion ||
+        baseProgram.callee !== headProgram.callee ||
+        baseProgram.callback_header !== headProgram.callback_header ||
+        JSON.stringify(baseProgram.extra_arguments) !==
+          JSON.stringify(headProgram.extra_arguments)
+      ) {
+        return {
+          eligible: false,
+          reason: "focused test setup or declaration changed",
+        };
+      }
+      for (
+        let statementIndex = 0;
+        statementIndex < baseFirstAssertion;
+        statementIndex += 1
+      ) {
+        if (
+          baseProgram.statements[statementIndex].source !==
+          headProgram.statements[statementIndex]?.source
+        ) {
+          return {
+            eligible: false,
+            reason: "test setup changed before focused assertions",
+          };
+        }
+      }
+      for (const statement of baseProgram.statements.slice(
+        baseFirstAssertion
+      )) {
+        if (statement.eligible) {
+          baseAllowedRanges.push(statement.range);
+        }
+      }
+      const headAssertionSourceCounts = new Map();
+      for (const statement of headProgram.statements.slice(
+        headFirstAssertion
+      )) {
+        if (statement.contains_expectation) {
+          headAssertionSourceCounts.set(
+            statement.source,
+            (headAssertionSourceCounts.get(statement.source) ?? 0) + 1
+          );
+        }
+      }
+      for (const statement of baseProgram.statements.slice(
+        baseFirstAssertion
+      )) {
+        if (!statement.contains_expectation) {
+          continue;
+        }
+        const retainedCount =
+          headAssertionSourceCounts.get(statement.source) ?? 0;
+        if (retainedCount === 0) {
+          return {
+            eligible: false,
+            reason: "an existing focused assertion was removed or rewritten",
+          };
+        }
+        headAssertionSourceCounts.set(statement.source, retainedCount - 1);
+      }
+      for (const statement of headProgram.statements.slice(
+        headFirstAssertion
+      )) {
+        if (statement.eligible) {
+          headAllowedRanges.push(statement.range);
+        }
+      }
+      baseAllowedRanges.push(baseProgram.title_range);
+      headAllowedRanges.push(headProgram.title_range);
+    }
+    const baseMasked = maskTestRanges(baseSource, baseAllowedRanges);
+    const headMasked = maskTestRanges(headSource, headAllowedRanges);
+    if (baseMasked !== headMasked) {
+      return {
+        eligible: false,
+        reason: "test syntax changed outside static assertion ranges",
+      };
+    }
+    return {
+      assertion_count: head.assertionRanges.length,
+      eligible: true,
+      reason: "only focused assertions changed",
+    };
+  } catch (error) {
+    return {
+      eligible: false,
+      reason:
+        error instanceof Error ? error.message : "test assertion proof failed",
+    };
+  }
 }
 
 function maskRanges(source, ranges) {
@@ -306,10 +758,46 @@ function classifyEntries(entries, { readFileAt }) {
               : "presentation source could not be read",
         };
       }
-      if (proof.eligible) {
+      const testProofs = museumEntries
+        .filter(({ file }) => policy.test_paths.includes(file))
+        .map((entry) => {
+          if (entry.status !== "M") {
+            return {
+              eligible: false,
+              file: entry.file,
+              reason: "focused test was not modified in place",
+            };
+          }
+          try {
+            return {
+              file: entry.file,
+              ...assertionOnlyTestProof(
+                readFileAt("base", entry.file),
+                readFileAt("head", entry.file),
+                entry.file
+              ),
+            };
+          } catch (error) {
+            return {
+              eligible: false,
+              file: entry.file,
+              reason:
+                error instanceof Error
+                  ? error.message
+                  : "focused test source could not be read",
+            };
+          }
+        });
+      if (
+        proof.eligible &&
+        testProofs.every((testProof) => testProof.eligible)
+      ) {
         return {
           affected_surfaces: [...policy.surface_ids],
           presentation_proof: proof,
+          ...(testProofs.length > 0
+            ? { test_assertion_proof: testProofs }
+            : {}),
           reason: "Registered leaf presentation proof passed.",
           tier: "P0",
         };
@@ -352,6 +840,9 @@ function classifyRange(root, baseRef, headRef) {
     reason: result.reason,
     ...(result.presentation_proof
       ? { presentation_proof: result.presentation_proof }
+      : {}),
+    ...(result.test_assertion_proof
+      ? { test_assertion_proof: result.test_assertion_proof }
       : {}),
     tier: result.tier,
   });
@@ -417,6 +908,7 @@ module.exports = {
   CONTRACT,
   LEAF_PRESENTATION_COMPONENTS,
   MODE,
+  assertionOnlyTestProof,
   classifyEntries,
   classifyRange,
   isMuseumPath,

@@ -17,6 +17,9 @@ const ABOUT_PATH = "/museum/network/about";
 const MOBILE_PROJECT = "web-mobile-chromium";
 const MOBILE_VIEWPORT = { width: 390, height: 844 } as const;
 const SOURCE_REPOSITORY = "6529-Collections/6529networkmuseum";
+const EXACT_COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
+const REQUIRED_SOURCE_COMMIT =
+  process.env["MUSEUM_PUBLICATION_EXPECTED_COMMIT"]?.trim() || null;
 const EXACT_SOURCE_PATTERN = new RegExp(
   `^https://github\\.com/${SOURCE_REPOSITORY}/blob/[a-f0-9]{40}/docs/open-museum\\.md$`,
   "u"
@@ -27,6 +30,13 @@ const ALLOWED_CONSOLE_ERROR_PATTERNS = [
   /^Failed to fetch seize settings TypeError: Failed to fetch(?:\n|$)/u,
   /^Failed to fetch cookie consent status Error: Network request failed\./u,
 ];
+
+if (
+  REQUIRED_SOURCE_COMMIT !== null &&
+  !EXACT_COMMIT_PATTERN.test(REQUIRED_SOURCE_COMMIT)
+) {
+  throw new Error("museum_publication_expected_commit_not_exact");
+}
 
 function parseRgb(value: string): [number, number, number] | null {
   const match = value.match(
@@ -155,11 +165,18 @@ test.describe("Museum About proposition @surface @readonly", () => {
       );
       await expect(sourcePanel).toBeVisible();
       await expect(sourcePanel).toContainText(
-        /Published from the Museum's public record at commit [a-f0-9]{12}\./u
+        REQUIRED_SOURCE_COMMIT === null
+          ? /Published from the Museum's public record at commit [a-f0-9]{12}\./u
+          : `Published from the Museum's public record at commit ${REQUIRED_SOURCE_COMMIT.slice(0, 12)}.`
       );
       await expect(
         sourcePanel.getByRole("link", { name: "Read the source", exact: true })
-      ).toHaveAttribute("href", EXACT_SOURCE_PATTERN);
+      ).toHaveAttribute(
+        "href",
+        REQUIRED_SOURCE_COMMIT === null
+          ? EXACT_SOURCE_PATTERN
+          : `https://github.com/${SOURCE_REPOSITORY}/blob/${REQUIRED_SOURCE_COMMIT}/docs/open-museum.md`
+      );
       await expect(
         sourcePanel.getByRole("link", { name: "Propose an edit", exact: true })
       ).toHaveAttribute(
