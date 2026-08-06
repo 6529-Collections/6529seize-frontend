@@ -1,7 +1,5 @@
 "use strict";
 
-/* eslint-disable max-lines, max-lines-per-function */
-
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -14,8 +12,7 @@ const ARTIFACT_NAME_PREFIX = "production-frontend-";
 const ARTIFACT_WORKFLOW_PATH =
   ".github/workflows/production-build-artifact.yml";
 const MAX_PACKAGE_BYTES = 500 * 1024 * 1024;
-const SELECTION_ARTIFACT_NAME_PREFIX =
-  "one-click-production-selection-";
+const SELECTION_ARTIFACT_NAME_PREFIX = "one-click-production-selection-";
 const SELECTION_CONTRACT = "production-artifact-selection-v1";
 const SELECTION_SCHEMA_VERSION = 1;
 const VERIFIER_WORKFLOW_PATH =
@@ -46,11 +43,7 @@ function assert(condition, message) {
 }
 
 function isRecord(value) {
-  return (
-    value !== null &&
-    typeof value === "object" &&
-    !Array.isArray(value)
-  );
+  return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
 function requireRecord(value, label) {
@@ -149,7 +142,10 @@ function requirePositiveInteger(value, label) {
   } else if (typeof value === "string" && /^[1-9][0-9]*$/u.test(value)) {
     normalized = Number(value);
   }
-  assert(Number.isSafeInteger(normalized) && normalized > 0, `${label} must be a positive integer`);
+  assert(
+    Number.isSafeInteger(normalized) && normalized > 0,
+    `${label} must be a positive integer`
+  );
   return normalized;
 }
 
@@ -261,10 +257,15 @@ function validateArchiveMemberPath(member) {
 
   const isDirectory = member.endsWith("/");
   const relativePath = isDirectory ? member.slice(0, -1) : member;
-  assert(relativePath.length > 0, "archive member path cannot be the root directory");
+  assert(
+    relativePath.length > 0,
+    "archive member path cannot be the root directory"
+  );
   const segments = relativePath.split("/");
   assert(
-    segments.every((segment) => segment.length > 0 && segment !== "." && segment !== ".."),
+    segments.every(
+      (segment) => segment.length > 0 && segment !== "." && segment !== ".."
+    ),
     `archive member path contains an empty or traversal segment: ${member}`
   );
   assert(
@@ -330,7 +331,10 @@ function validateVerifierInputs(options) {
     "artifact_api_digest"
   );
   const artifactName = requireString(options.artifactName, "artifact_name");
-  const artifactOperationId = artifactOperationIdFromName(artifactName, targetSha);
+  const artifactOperationId = artifactOperationIdFromName(
+    artifactName,
+    targetSha
+  );
 
   return {
     artifactId,
@@ -346,10 +350,7 @@ function validateVerifierInputs(options) {
 }
 
 function validateVerifierSource(options) {
-  const verifierRunId = normalizeId(
-    options.verifierRunId,
-    "verifier_run_id"
-  );
+  const verifierRunId = normalizeId(options.verifierRunId, "verifier_run_id");
   const verifierRunAttempt = requirePositiveInteger(
     options.verifierRunAttempt,
     "verifier_run_attempt"
@@ -474,8 +475,10 @@ function verifyArtifactMetadata(artifactMetadata, expected) {
     "artifact metadata source identity is incomplete"
   );
   assert(
-    requireSha(workflowRun.head_sha, "artifact metadata.workflow_run.head_sha") ===
-      expected.runHeadSha,
+    requireSha(
+      workflowRun.head_sha,
+      "artifact metadata.workflow_run.head_sha"
+    ) === expected.runHeadSha,
     "artifact metadata workflow head_sha does not match the exact run attempt"
   );
   if (workflowRun.run_attempt !== undefined) {
@@ -491,10 +494,7 @@ function verifyArtifactMetadata(artifactMetadata, expected) {
   return {
     digest,
     name: artifactName,
-    operationId: artifactOperationIdFromName(
-      artifactName,
-      expected.targetSha
-    ),
+    operationId: artifactOperationIdFromName(artifactName, expected.targetSha),
     size,
   };
 }
@@ -758,10 +758,7 @@ function verifyChecksums(root, requiredFiles) {
     fail(`unable to read artifact SHA256SUMS: ${error.message}`);
   }
   const checksumText = checksumBytes.toString("utf8");
-  assert(
-    checksumText.endsWith("\n"),
-    "SHA256SUMS must end with a newline"
-  );
+  assert(checksumText.endsWith("\n"), "SHA256SUMS must end with a newline");
   const lines = checksumText.split("\n").slice(0, -1);
   assert(lines.length > 0, "SHA256SUMS must contain at least one entry");
 
@@ -770,7 +767,10 @@ function verifyChecksums(root, requiredFiles) {
     const match = /^([a-f0-9]{64})  (.+)$/u.exec(line);
     assert(match, `malformed SHA256SUMS entry: ${line}`);
     const relativePath = assertSafeRelativePath(match[2]);
-    assert(!entries.has(relativePath), `duplicate SHA256SUMS entry: ${relativePath}`);
+    assert(
+      !entries.has(relativePath),
+      `duplicate SHA256SUMS entry: ${relativePath}`
+    );
     entries.set(relativePath, match[1]);
   }
 
@@ -788,9 +788,14 @@ function verifyChecksums(root, requiredFiles) {
       // eslint-disable-next-line security/detect-non-literal-fs-filename -- The path was validated and is confined to the extracted artifact root.
       stat = fs.lstatSync(filePath);
     } catch (error) {
-      fail(`SHA256SUMS references a missing file ${relativePath}: ${error.message}`);
+      fail(
+        `SHA256SUMS references a missing file ${relativePath}: ${error.message}`
+      );
     }
-    assert(stat.isFile(), `SHA256SUMS entry is not a regular file: ${relativePath}`);
+    assert(
+      stat.isFile(),
+      `SHA256SUMS entry is not a regular file: ${relativePath}`
+    );
     const actualDigest = sha256File(filePath);
     assert(
       actualDigest === expectedDigest,
@@ -842,7 +847,9 @@ function validateExtractedArtifact(root) {
   ]);
   assertExactRegularFiles(
     checksums.files,
-    EXPECTED_ARTIFACT_FILES.filter((relativePath) => relativePath !== "SHA256SUMS"),
+    EXPECTED_ARTIFACT_FILES.filter(
+      (relativePath) => relativePath !== "SHA256SUMS"
+    ),
     "artifact"
   );
   return checksums;
@@ -885,13 +892,17 @@ function readManifest(root, expected) {
     "artifact manifest artifact_name does not match the exact artifact name"
   );
   assert(
-    normalizeId(manifest.workflow_run_id, "artifact manifest.workflow_run_id") ===
-      expected.artifactRunId,
+    normalizeId(
+      manifest.workflow_run_id,
+      "artifact manifest.workflow_run_id"
+    ) === expected.artifactRunId,
     "artifact manifest workflow_run_id does not match artifact_run_id"
   );
   assert(
-    requirePositiveInteger(manifest.run_attempt, "artifact manifest.run_attempt") ===
-      expected.artifactRunAttempt,
+    requirePositiveInteger(
+      manifest.run_attempt,
+      "artifact manifest.run_attempt"
+    ) === expected.artifactRunAttempt,
     "artifact manifest run_attempt does not match artifact_run_attempt"
   );
   const workflowSha = requireSha(
@@ -962,10 +973,7 @@ function verifyArtifact(options) {
     packageSha256,
     protectedMainSha,
     workflowSha,
-  } = readManifest(
-    rootPath,
-    source.expected
-  );
+  } = readManifest(rootPath, source.expected);
   const protectedHistory = verifyProtectedHistory({
     protectedMainAncestryFile: options.protectedMainAncestryFile,
     protectedMainRefFile: options.protectedMainRefFile,
@@ -1032,7 +1040,9 @@ function verifyArtifact(options) {
   };
   const selection = {
     ...unsignedSelection,
-    selection_digest: sha256Buffer(Buffer.from(canonicalJson(unsignedSelection))),
+    selection_digest: sha256Buffer(
+      Buffer.from(canonicalJson(unsignedSelection))
+    ),
   };
   writeJson(options.output, selection);
   writeTextFile(
@@ -1076,8 +1086,10 @@ function verifySelectionArtifactMetadata(artifactMetadata, options) {
     "selection artifact metadata.workflow_run"
   );
   assert(
-    normalizeId(workflowRun.id, "selection artifact metadata.workflow_run.id") ===
-      options.selectionArtifactRunId,
+    normalizeId(
+      workflowRun.id,
+      "selection artifact metadata.workflow_run.id"
+    ) === options.selectionArtifactRunId,
     "selection artifact metadata is not attached to selection_artifact_run_id"
   );
   return { digest, size };
@@ -1269,7 +1281,10 @@ function verifySelection(options) {
       selection.verifier_run_attempt === selectionArtifactRunAttempt,
     "selection artifact verifier identity is invalid"
   );
-  requireSha(selection.verifier_workflow_sha, "selection.verifier_workflow_sha");
+  requireSha(
+    selection.verifier_workflow_sha,
+    "selection.verifier_workflow_sha"
+  );
   requireHexDigest(selection.manifest_sha256, "selection.manifest_sha256");
   requireHexDigest(selection.checksums_sha256, "selection.checksums_sha256");
   requireHexDigest(selection.package_sha256, "selection.package_sha256");
@@ -1352,21 +1367,27 @@ function main(argv = process.argv.slice(2)) {
     }
 
     if (command === "validate-inputs") {
-      process.stdout.write(`${JSON.stringify(validateVerifierInputs({
-        artifactApiDigest: requiredArg(args, "artifact-api-digest"),
-        artifactId: requiredArg(args, "artifact-id"),
-        artifactName: requiredArg(args, "artifact-name"),
-        artifactRunAttempt: requiredArg(args, "artifact-run-attempt"),
-        artifactRunId: requiredArg(args, "artifact-run-id"),
-        operationId: requiredArg(args, "operation-id"),
-        repository: requiredArg(args, "repository"),
-        targetSha: requiredArg(args, "target-sha"),
-      }))}\n`);
+      process.stdout.write(
+        `${JSON.stringify(
+          validateVerifierInputs({
+            artifactApiDigest: requiredArg(args, "artifact-api-digest"),
+            artifactId: requiredArg(args, "artifact-id"),
+            artifactName: requiredArg(args, "artifact-name"),
+            artifactRunAttempt: requiredArg(args, "artifact-run-attempt"),
+            artifactRunId: requiredArg(args, "artifact-run-id"),
+            operationId: requiredArg(args, "operation-id"),
+            repository: requiredArg(args, "repository"),
+            targetSha: requiredArg(args, "target-sha"),
+          })
+        )}\n`
+      );
       return;
     }
 
     if (command === "verify-metadata") {
-      process.stdout.write(`${JSON.stringify(verifyMetadata(commonVerifierOptions(args)))}\n`);
+      process.stdout.write(
+        `${JSON.stringify(verifyMetadata(commonVerifierOptions(args)))}\n`
+      );
       return;
     }
 
@@ -1377,10 +1398,7 @@ function main(argv = process.argv.slice(2)) {
         artifactRoot: requiredArg(args, "artifact-root"),
         checksumsOutput: requiredArg(args, "checksums-output"),
         output: requiredArg(args, "output"),
-        protectedMainAncestryFile: requiredArg(
-          args,
-          "protected-main-ancestry"
-        ),
+        protectedMainAncestryFile: requiredArg(args, "protected-main-ancestry"),
         protectedMainRefFile: requiredArg(args, "protected-main-ref"),
         targetAncestryFile: requiredArg(args, "target-ancestry"),
         verifierRef: requiredArg(args, "verifier-ref"),
@@ -1416,10 +1434,7 @@ function main(argv = process.argv.slice(2)) {
           args,
           "selection-artifact-run-attempt"
         ),
-        selectionArtifactRunId: requiredArg(
-          args,
-          "selection-artifact-run-id"
-        ),
+        selectionArtifactRunId: requiredArg(args, "selection-artifact-run-id"),
         selectionRunMetadataFile: requiredArg(args, "selection-run-metadata"),
         selectionRoot: requiredArg(args, "selection-root"),
         expectedSelectionArtifactDigest: args[
@@ -1437,7 +1452,9 @@ function main(argv = process.argv.slice(2)) {
 
     fail(`unknown command: ${command}`);
   } catch (error) {
-    console.error(`error: ${error instanceof Error ? error.message : String(error)}`);
+    console.error(
+      `error: ${error instanceof Error ? error.message : String(error)}`
+    );
     process.exitCode = 1;
   }
 }

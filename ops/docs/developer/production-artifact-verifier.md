@@ -17,15 +17,15 @@ starts orchestration: if no verified bundle exists, it invokes the builder once
 on demand and then calls this verifier with the resulting exact values. This
 verifier never dispatches a builder or searches for one.
 
-| Input | Contract |
-| --- | --- |
-| `target_sha` | Lowercase 40-hex production source SHA. |
-| `operation_id` | Stable operation identity using the verifier's bounded character set. |
-| `artifact_run_id` | Positive GitHub Actions run ID for the exact successful builder run. |
-| `artifact_run_attempt` | Positive attempt number for `artifact_run_id`; this is producer evidence, not a new operation. |
-| `artifact_id` | Positive GitHub artifact ID attached to `artifact_run_id`. |
-| `artifact_api_digest` | Exact `sha256:<64-hex>` digest carried by trusted staging/release-candidate evidence and compared to live artifact metadata. |
-| `artifact_name` | Exactly `production-frontend-${target_sha}-${artifact_operation_id}`. The producer operation may be the current operation or an explicitly trusted reuse source. |
+| Input                  | Contract                                                                                                                                                         |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `target_sha`           | Lowercase 40-hex production source SHA.                                                                                                                          |
+| `operation_id`         | Stable operation identity using the verifier's bounded character set.                                                                                            |
+| `artifact_run_id`      | Positive GitHub Actions run ID for the exact successful builder run.                                                                                             |
+| `artifact_run_attempt` | Positive attempt number for `artifact_run_id`; this is producer evidence, not a new operation.                                                                   |
+| `artifact_id`          | Positive GitHub artifact ID attached to `artifact_run_id`.                                                                                                       |
+| `artifact_api_digest`  | Exact `sha256:<64-hex>` digest carried by trusted staging/release-candidate evidence and compared to live artifact metadata.                                     |
+| `artifact_name`        | Exactly `production-frontend-${target_sha}-${artifact_operation_id}`. The producer operation may be the current operation or an explicitly trusted reuse source. |
 
 The verifier never lists artifacts, sorts candidates, selects the newest
 matching run, or auto-queries by recency. It reads the exact run-attempt and

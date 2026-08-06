@@ -4,22 +4,27 @@ import os from "node:os";
 import path from "node:path";
 import YAML from "yaml";
 
-const verifier = require("../../ops/scripts/verify-production-artifact-selection.cjs") as {
-  ARTIFACT_WORKFLOW_PATH: string;
-  SELECTION_CONTRACT: string;
-  VERIFIER_WORKFLOW_PATH: string;
-  canonicalJson: (value: unknown) => string;
-  expectedArtifactName: (targetSha: string, operationId: string) => string;
-  expectedSelectionArtifactName: (
-    targetSha: string,
-    verifierRunAttempt: number
-  ) => string;
-  validateArchiveMembers: (memberList: string) => unknown;
-  validateVerifierInputs: (options: Record<string, unknown>) => unknown;
-  verifyArtifact: (options: Record<string, unknown>) => Record<string, unknown>;
-  verifyMetadata: (options: Record<string, unknown>) => unknown;
-  verifySelection: (options: Record<string, unknown>) => Record<string, unknown>;
-};
+const verifier =
+  require("../../ops/scripts/verify-production-artifact-selection.cjs") as {
+    ARTIFACT_WORKFLOW_PATH: string;
+    SELECTION_CONTRACT: string;
+    VERIFIER_WORKFLOW_PATH: string;
+    canonicalJson: (value: unknown) => string;
+    expectedArtifactName: (targetSha: string, operationId: string) => string;
+    expectedSelectionArtifactName: (
+      targetSha: string,
+      verifierRunAttempt: number
+    ) => string;
+    validateArchiveMembers: (memberList: string) => unknown;
+    validateVerifierInputs: (options: Record<string, unknown>) => unknown;
+    verifyArtifact: (
+      options: Record<string, unknown>
+    ) => Record<string, unknown>;
+    verifyMetadata: (options: Record<string, unknown>) => unknown;
+    verifySelection: (
+      options: Record<string, unknown>
+    ) => Record<string, unknown>;
+  };
 
 const workflowPath = path.join(
   process.cwd(),
@@ -53,7 +58,9 @@ function writeJson(filePath: string, value: unknown): void {
 
 function writeChecksums(root: string, relativePaths: string[]): void {
   const lines = relativePaths.map((relativePath) => {
-    const contents = fs.readFileSync(path.join(root, ...relativePath.split("/")));
+    const contents = fs.readFileSync(
+      path.join(root, ...relativePath.split("/"))
+    );
     return `${digest(contents)}  ${relativePath}`;
   });
   fs.writeFileSync(path.join(root, "SHA256SUMS"), `${lines.join("\n")}\n`);
@@ -93,7 +100,10 @@ describe("isolated production artifact verifier", () => {
         workflow_call: { inputs: Record<string, { required: boolean }> };
         workflow_dispatch: { inputs: Record<string, { required: boolean }> };
       };
-      jobs: Record<string, { permissions: Record<string, string>; "runs-on": string }>;
+      jobs: Record<
+        string,
+        { permissions: Record<string, string>; "runs-on": string }
+      >;
     };
     const requiredInputs = ["target_sha", "operation_id"];
     const identityInputs = [
@@ -121,9 +131,7 @@ describe("isolated production artifact verifier", () => {
     expect(source).toContain(
       "actions/runs/${ARTIFACT_RUN_ID}/attempts/${ARTIFACT_RUN_ATTEMPT}"
     );
-    expect(source).toContain(
-      "actions/artifacts/${ARTIFACT_ID}/zip"
-    );
+    expect(source).toContain("actions/artifacts/${ARTIFACT_ID}/zip");
     expect(source).toContain("github.run_attempt");
     expect(source).toContain("sha256sum -c SHA256SUMS");
     expect(source).toContain("unzip -Z1");
@@ -135,7 +143,7 @@ describe("isolated production artifact verifier", () => {
       source.indexOf("unzip -q")
     );
     expect(source.indexOf("validate-extracted-artifact")).toBeLessThan(
-      source.indexOf("protected_main_sha=\"$(jq")
+      source.indexOf('protected_main_sha="$(jq')
     );
     expect(source).not.toContain("push");
     expect(source).not.toContain("actions/artifacts?name=");
@@ -213,10 +221,7 @@ describe("isolated production artifact verifier", () => {
         run_attempt: artifactRunAttempt,
       },
     });
-    const protectedMainRefPath = path.join(
-      tempRoot,
-      "protected-main-ref.json"
-    );
+    const protectedMainRefPath = path.join(tempRoot, "protected-main-ref.json");
     writeJson(protectedMainRefPath, {
       object: { sha: currentMainSha, type: "commit" },
       ref: "refs/heads/main",
@@ -227,10 +232,7 @@ describe("isolated production artifact verifier", () => {
       tempRoot,
       "protected-main-ancestry.json"
     );
-    writeJson(
-      protectedMainAncestryPath,
-      ancestryEvidence(protectedMainSha, 1)
-    );
+    writeJson(protectedMainAncestryPath, ancestryEvidence(protectedMainSha, 1));
 
     const common = {
       artifactApiDigest,
@@ -297,10 +299,7 @@ describe("isolated production artifact verifier", () => {
         id: verifierRunId,
       },
     });
-    const selectionRunMetadataPath = path.join(
-      tempRoot,
-      "selection-run.json"
-    );
+    const selectionRunMetadataPath = path.join(tempRoot, "selection-run.json");
     writeJson(selectionRunMetadataPath, {
       conclusion: "success",
       event: "workflow_call",
@@ -400,10 +399,9 @@ describe("isolated production artifact verifier", () => {
     ).toThrow("target_sha is not an ancestor of current protected main");
 
     const manifestPath = path.join(artifactRoot, "manifest.json");
-    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as Record<
-      string,
-      unknown
-    >;
+    const manifest = JSON.parse(
+      fs.readFileSync(manifestPath, "utf8")
+    ) as Record<string, unknown>;
     manifest.protected_main_sha = "f".repeat(40);
     writeJson(manifestPath, manifest);
     writeChecksums(artifactRoot, [
@@ -412,10 +410,7 @@ describe("isolated production artifact verifier", () => {
       "target/package.zip",
     ]);
     writeJson(targetAncestryPath, ancestryEvidence(targetSha, 2));
-    writeJson(
-      protectedMainAncestryPath,
-      ancestryEvidence("0".repeat(40), 1)
-    );
+    writeJson(protectedMainAncestryPath, ancestryEvidence("0".repeat(40), 1));
     expect(() =>
       verifier.verifyArtifact({
         ...common,
