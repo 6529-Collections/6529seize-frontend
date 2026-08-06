@@ -7,6 +7,8 @@ import { PublicReviewEditorialFeedback } from "@/components/public-review/Public
 import { PublicReviewShell } from "@/components/public-review/PublicReviewShell";
 import { StreamReviewBotAuthorshipNote } from "@/components/public-review/StreamReviewBotAuthorshipNote";
 import { StreamReviewDevelopmentStatus } from "@/components/public-review/StreamReviewDevelopmentStatus";
+import { StreamReviewForArtistsGuide } from "@/components/public-review/StreamReviewForArtistsGuide";
+import { StreamReviewOverviewGuide } from "@/components/public-review/StreamReviewOverviewGuide";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -87,6 +89,10 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
   const feedbackDestination = await resolveStreamReviewFeedbackDestination(
     route.baseEndpoint
   );
+  const isCurrentOverview =
+    route.page.id === "overview" && route.version === undefined;
+  const isCurrentForArtists =
+    route.page.id === "for-artists" && route.version === undefined;
 
   return (
     <PublicReviewShell
@@ -99,16 +105,23 @@ async function renderStreamReviewRoute(route: StreamReviewRouteModel) {
       displayedVersion={contentVersion}
       introNotice={
         <>
-          <StreamReviewBotAuthorshipNote />
-          {route.page.id === "overview" && route.version === undefined ? (
+          {isCurrentOverview ? (
+            <StreamReviewOverviewGuide pages={reviewVersion.pages} />
+          ) : null}
+          {isCurrentOverview ? (
             <StreamReviewDevelopmentStatus
               pages={reviewVersion.pages}
               reviewSourceCommit={manifest.source.commit}
               reviewVersion={contentVersion}
             />
           ) : null}
+          {isCurrentForArtists ? (
+            <StreamReviewForArtistsGuide pages={reviewVersion.pages} />
+          ) : null}
+          <StreamReviewBotAuthorshipNote />
         </>
       }
+      showAudiencePaths={!isCurrentOverview}
       source={{
         repository: manifest.source.repository,
         commit: manifest.source.commit,
