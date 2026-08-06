@@ -23,7 +23,7 @@ export class ReleaseBusV2ProductionAuthorityPrepareRequest {
     /**
     * Must be omitted or null until reauthorization.
     */
-    'selection_digest'?: string | null;
+    'selection_digest'?: ReleaseBusV2ProductionAuthorityPrepareRequestSelectionDigestEnum | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -69,7 +69,7 @@ export class ReleaseBusV2ProductionAuthorityPrepareRequest {
         {
             "name": "selection_digest",
             "baseName": "selection_digest",
-            "type": "string",
+            "type": "ReleaseBusV2ProductionAuthorityPrepareRequestSelectionDigestEnum",
             "format": ""
         }    ];
 
@@ -92,5 +92,7 @@ export enum ReleaseBusV2ProductionAuthorityPrepareRequestRepositoryEnum {
 }
 export enum ReleaseBusV2ProductionAuthorityPrepareRequestEnvironmentEnum {
     Prod = 'prod'
+}
+export enum ReleaseBusV2ProductionAuthorityPrepareRequestSelectionDigestEnum {
 }
 

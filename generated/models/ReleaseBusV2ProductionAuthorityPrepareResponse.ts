@@ -32,6 +32,11 @@ export class ReleaseBusV2ProductionAuthorityPrepareResponse {
     'prepared': boolean;
     'authorized': boolean;
     'reused': boolean;
+    /**
+    * Present on a persisted denial response.
+    */
+    'reason_code'?: string;
+    'observed_epoch'?: ReleaseBusV2ProductionAuthorityEpoch;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -138,6 +143,18 @@ export class ReleaseBusV2ProductionAuthorityPrepareResponse {
             "name": "reused",
             "baseName": "reused",
             "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "reason_code",
+            "baseName": "reason_code",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "observed_epoch",
+            "baseName": "observed_epoch",
+            "type": "ReleaseBusV2ProductionAuthorityEpoch",
             "format": ""
         }    ];
 

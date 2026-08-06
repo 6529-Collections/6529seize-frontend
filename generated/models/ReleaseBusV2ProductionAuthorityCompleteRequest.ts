@@ -20,12 +20,12 @@ export class ReleaseBusV2ProductionAuthorityCompleteRequest {
     'environment': ReleaseBusV2ProductionAuthorityCompleteRequestEnvironmentEnum;
     'service': string;
     'target_sha': string;
+    'workflow_run_id': string;
+    'workflow_run_attempt': number;
     /**
     * Immutable artifact selection digest bound before AWS mutation.
     */
     'selection_digest': string;
-    'workflow_run_id': string;
-    'workflow_run_attempt': number;
     'qualifier_workflow_run_id': string;
     'qualifier_workflow_run_attempt': number;
     /**
@@ -75,12 +75,6 @@ export class ReleaseBusV2ProductionAuthorityCompleteRequest {
             "format": ""
         },
         {
-            "name": "selection_digest",
-            "baseName": "selection_digest",
-            "type": "string",
-            "format": ""
-        },
-        {
             "name": "workflow_run_id",
             "baseName": "workflow_run_id",
             "type": "string",
@@ -90,6 +84,12 @@ export class ReleaseBusV2ProductionAuthorityCompleteRequest {
             "name": "workflow_run_attempt",
             "baseName": "workflow_run_attempt",
             "type": "number",
+            "format": ""
+        },
+        {
+            "name": "selection_digest",
+            "baseName": "selection_digest",
+            "type": "string",
             "format": ""
         },
         {

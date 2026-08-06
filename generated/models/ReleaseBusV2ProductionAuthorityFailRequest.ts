@@ -20,12 +20,18 @@ export class ReleaseBusV2ProductionAuthorityFailRequest {
     'environment': ReleaseBusV2ProductionAuthorityFailRequestEnvironmentEnum;
     'service': string;
     'target_sha': string;
+    'workflow_run_id': string;
+    'workflow_run_attempt': number;
+    'qualifier_workflow_run_id': string;
+    'qualifier_workflow_run_attempt': number;
+    /**
+    * SHA-256 digest of the exact terminal failure evidence.
+    */
+    'evidence_digest': string;
     /**
     * Null before selection discovery; otherwise the exact frozen selection digest.
     */
     'selection_digest'?: string | null;
-    'workflow_run_id': string;
-    'workflow_run_attempt': number;
     'reason_code': ReleaseBusV2ProductionAuthorityFailRequestReasonCodeEnum;
 
     static readonly discriminator: string | undefined = undefined;
@@ -70,12 +76,6 @@ export class ReleaseBusV2ProductionAuthorityFailRequest {
             "format": ""
         },
         {
-            "name": "selection_digest",
-            "baseName": "selection_digest",
-            "type": "string",
-            "format": ""
-        },
-        {
             "name": "workflow_run_id",
             "baseName": "workflow_run_id",
             "type": "string",
@@ -85,6 +85,30 @@ export class ReleaseBusV2ProductionAuthorityFailRequest {
             "name": "workflow_run_attempt",
             "baseName": "workflow_run_attempt",
             "type": "number",
+            "format": ""
+        },
+        {
+            "name": "qualifier_workflow_run_id",
+            "baseName": "qualifier_workflow_run_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "qualifier_workflow_run_attempt",
+            "baseName": "qualifier_workflow_run_attempt",
+            "type": "number",
+            "format": ""
+        },
+        {
+            "name": "evidence_digest",
+            "baseName": "evidence_digest",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "selection_digest",
+            "baseName": "selection_digest",
+            "type": "string",
             "format": ""
         },
         {

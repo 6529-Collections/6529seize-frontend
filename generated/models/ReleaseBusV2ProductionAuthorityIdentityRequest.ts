@@ -13,19 +13,13 @@
 
 import { HttpFile } from '../http/http';
 
-export class ReleaseBusV2ProductionAuthorityReauthorizeRequest {
+export class ReleaseBusV2ProductionAuthorityIdentityRequest {
     'operation_id': string;
-    'controller_identity': ReleaseBusV2ProductionAuthorityReauthorizeRequestControllerIdentityEnum;
-    'repository': ReleaseBusV2ProductionAuthorityReauthorizeRequestRepositoryEnum;
-    'environment': ReleaseBusV2ProductionAuthorityReauthorizeRequestEnvironmentEnum;
+    'controller_identity': ReleaseBusV2ProductionAuthorityIdentityRequestControllerIdentityEnum;
+    'repository': ReleaseBusV2ProductionAuthorityIdentityRequestRepositoryEnum;
+    'environment': ReleaseBusV2ProductionAuthorityIdentityRequestEnvironmentEnum;
     'service': string;
     'target_sha': string;
-    'workflow_run_id': string;
-    'workflow_run_attempt': number;
-    /**
-    * Immutable artifact selection digest bound before AWS mutation.
-    */
-    'selection_digest': string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -41,19 +35,19 @@ export class ReleaseBusV2ProductionAuthorityReauthorizeRequest {
         {
             "name": "controller_identity",
             "baseName": "controller_identity",
-            "type": "ReleaseBusV2ProductionAuthorityReauthorizeRequestControllerIdentityEnum",
+            "type": "ReleaseBusV2ProductionAuthorityIdentityRequestControllerIdentityEnum",
             "format": ""
         },
         {
             "name": "repository",
             "baseName": "repository",
-            "type": "ReleaseBusV2ProductionAuthorityReauthorizeRequestRepositoryEnum",
+            "type": "ReleaseBusV2ProductionAuthorityIdentityRequestRepositoryEnum",
             "format": ""
         },
         {
             "name": "environment",
             "baseName": "environment",
-            "type": "ReleaseBusV2ProductionAuthorityReauthorizeRequestEnvironmentEnum",
+            "type": "ReleaseBusV2ProductionAuthorityIdentityRequestEnvironmentEnum",
             "format": ""
         },
         {
@@ -67,44 +61,26 @@ export class ReleaseBusV2ProductionAuthorityReauthorizeRequest {
             "baseName": "target_sha",
             "type": "string",
             "format": ""
-        },
-        {
-            "name": "workflow_run_id",
-            "baseName": "workflow_run_id",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "workflow_run_attempt",
-            "baseName": "workflow_run_attempt",
-            "type": "number",
-            "format": ""
-        },
-        {
-            "name": "selection_digest",
-            "baseName": "selection_digest",
-            "type": "string",
-            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ReleaseBusV2ProductionAuthorityReauthorizeRequest.attributeTypeMap;
+        return ReleaseBusV2ProductionAuthorityIdentityRequest.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
 
-export enum ReleaseBusV2ProductionAuthorityReauthorizeRequestControllerIdentityEnum {
+export enum ReleaseBusV2ProductionAuthorityIdentityRequestControllerIdentityEnum {
     FrontendProductionWorkflow = 'frontend-production-workflow',
     BackendProductionWorkflow = 'backend-production-workflow',
     DeployHub = 'deploy-hub'
 }
-export enum ReleaseBusV2ProductionAuthorityReauthorizeRequestRepositoryEnum {
+export enum ReleaseBusV2ProductionAuthorityIdentityRequestRepositoryEnum {
     Frontend = 'frontend',
     Backend = 'backend'
 }
-export enum ReleaseBusV2ProductionAuthorityReauthorizeRequestEnvironmentEnum {
+export enum ReleaseBusV2ProductionAuthorityIdentityRequestEnvironmentEnum {
     Prod = 'prod'
 }
 

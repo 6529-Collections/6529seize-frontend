@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { ReleaseBusV2ProductionAuthorityEpoch } from '../models/ReleaseBusV2ProductionAuthorityEpoch';
 import { HttpFile } from '../http/http';
 
 export class ReleaseBusV2ProductionAuthorityCompletionResponse {
@@ -20,6 +21,11 @@ export class ReleaseBusV2ProductionAuthorityCompletionResponse {
     'failed'?: boolean;
     'reused': boolean;
     'lock_row_version': number | null;
+    /**
+    * Present when completion or failure did not reach the requested terminal state.
+    */
+    'reason_code'?: string;
+    'observed_epoch'?: ReleaseBusV2ProductionAuthorityEpoch;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -60,6 +66,18 @@ export class ReleaseBusV2ProductionAuthorityCompletionResponse {
             "name": "lock_row_version",
             "baseName": "lock_row_version",
             "type": "number",
+            "format": ""
+        },
+        {
+            "name": "reason_code",
+            "baseName": "reason_code",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "observed_epoch",
+            "baseName": "observed_epoch",
+            "type": "ReleaseBusV2ProductionAuthorityEpoch",
             "format": ""
         }    ];
 

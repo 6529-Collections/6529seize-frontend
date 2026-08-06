@@ -23,7 +23,7 @@ export class ReleaseBusV2ProductionAuthorityBindRequest {
     /**
     * Must be omitted or null until reauthorization.
     */
-    'selection_digest'?: string | null;
+    'selection_digest'?: ReleaseBusV2ProductionAuthorityBindRequestSelectionDigestEnum | null;
     'workflow_run_id': string;
     'workflow_run_attempt': number;
 
@@ -71,7 +71,7 @@ export class ReleaseBusV2ProductionAuthorityBindRequest {
         {
             "name": "selection_digest",
             "baseName": "selection_digest",
-            "type": "string",
+            "type": "ReleaseBusV2ProductionAuthorityBindRequestSelectionDigestEnum",
             "format": ""
         },
         {
@@ -106,5 +106,7 @@ export enum ReleaseBusV2ProductionAuthorityBindRequestRepositoryEnum {
 }
 export enum ReleaseBusV2ProductionAuthorityBindRequestEnvironmentEnum {
     Prod = 'prod'
+}
+export enum ReleaseBusV2ProductionAuthorityBindRequestSelectionDigestEnum {
 }
 
