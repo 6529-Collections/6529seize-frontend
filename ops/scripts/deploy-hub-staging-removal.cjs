@@ -7,7 +7,7 @@ const {
 } = require("./deploy-hub-operation-contracts.cjs");
 const {
   composeContent,
-  compositionAt,
+  compositionOnLatestBase,
   publishContent,
   publishStagingPresence,
   STAGING_REF,
@@ -135,11 +135,12 @@ async function executeRemoveFromStaging(options) {
     return { conclusion: "stopped", requests };
   }
 
-  const knownGoodSha = git.remoteSha(STAGING_REF);
-  git.fetchExact([knownGoodSha]);
-  const knownGoodComposition = compositionAt(git, knownGoodSha, {
-    required: true,
-  });
+  const stagingHeadSha = git.remoteSha(STAGING_REF);
+  const knownGoodComposition = compositionOnLatestBase(
+    git,
+    stagingHeadSha,
+    baseRef
+  );
   const staged = knownGoodComposition.requests.find(
     ({ pr }) => pr === request.pr
   );
@@ -147,6 +148,12 @@ async function executeRemoveFromStaging(options) {
   assert(
     staged.sha === request.sha,
     `PR #${request.pr} staged SHA does not match the removal request.`
+  );
+  const knownGoodContentSha = composeContent(
+    git,
+    knownGoodComposition,
+    operationId,
+    "remove-known-good"
   );
 
   await publishStatus(
@@ -172,7 +179,7 @@ async function executeRemoveFromStaging(options) {
   );
   const removalSha = await publishContent({
     git,
-    expectedOldSha: knownGoodSha,
+    expectedOldSha: stagingHeadSha,
     contentSha,
     message: stagingMessage(
       `Deploy Hub ${operationId}: remove frontend PR #${request.pr} from staging`,
@@ -198,7 +205,7 @@ async function executeRemoveFromStaging(options) {
       requests,
       removal,
       removalSha,
-      knownGoodSha,
+      knownGoodSha: knownGoodContentSha,
       knownGoodComposition,
       operationId,
       runId,

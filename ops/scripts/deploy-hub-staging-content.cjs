@@ -15,13 +15,20 @@ function publishContent({ git, expectedOldSha, contentSha, message }) {
   return nextSha;
 }
 
-function compositionAt(git, stagingSha, { required = false } = {}) {
+function compositionOnLatestBase(git, stagingSha, baseRef) {
+  const latestBaseSha = git.remoteSha(baseRef);
+  git.fetchExact([stagingSha, latestBaseSha]);
   const composition = parseComposition(git.readCommitMessage(stagingSha));
-  assert(
-    composition || !required,
-    "Current staging was not published with Deploy Hub composition metadata."
-  );
-  return composition ?? { baseSha: stagingSha, requests: [] };
+  if (!composition) {
+    assert(
+      git.sameTree(stagingSha, latestBaseSha),
+      `Current staging is not a Deploy Hub baseline. Align ${STAGING_REF} content with ${baseRef} before the first live operation.`
+    );
+  }
+  return {
+    baseSha: latestBaseSha,
+    requests: composition?.requests ?? [],
+  };
 }
 
 function composeContent(git, composition, operationId, phase) {
@@ -57,7 +64,7 @@ async function publishStagingPresence(
 
 module.exports = {
   composeContent,
-  compositionAt,
+  compositionOnLatestBase,
   publishContent,
   publishStagingPresence,
   STAGING_REF,

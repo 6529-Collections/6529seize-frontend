@@ -86,7 +86,8 @@ function gitPlanner() {
     fetchExact: jest.fn(),
     mergeContent,
     readCommitMessage: jest.fn().mockReturnValue("Manual staging commit"),
-    remoteSha: jest.fn().mockReturnValue(SHA_A),
+    remoteSha: jest.fn((ref: string) => (ref === "main" ? SHA_D : SHA_A)),
+    sameTree: jest.fn().mockReturnValue(true),
   };
 }
 
@@ -195,6 +196,7 @@ describe("Deploy Hub FE dry-run execution", () => {
     });
     expect(result.cohorts).toHaveLength(2);
     expect(git.mergeContent).toHaveBeenCalledTimes(2);
+    expect(git.remoteSha).toHaveBeenCalledWith("main");
     expect(github.statuses).toHaveLength(4);
     expect(github.statuses.at(-1)).toEqual({
       sha: SHA_B,

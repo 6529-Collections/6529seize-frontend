@@ -100,8 +100,13 @@ async function assertSuccessfulChecks(github, request) {
   );
   for (const requiredName of REQUIRED_PRODUCTION_CHECKS) {
     assert(
-      checkRuns.some(({ name }) => name === requiredName),
-      `PR #${request.pr} is missing required check ${requiredName}.`
+      checkRuns.some(
+        ({ name, status, conclusion }) =>
+          name === requiredName &&
+          status === "completed" &&
+          conclusion === "success"
+      ),
+      `PR #${request.pr} required check ${requiredName} is not successful.`
     );
   }
   for (const check of checkRuns) {

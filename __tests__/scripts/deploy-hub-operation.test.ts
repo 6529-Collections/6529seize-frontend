@@ -37,6 +37,9 @@ const {
   removeRequest,
 } = require("../../ops/scripts/deploy-hub-staging-composition.cjs");
 const {
+  compositionOnLatestBase,
+} = require("../../ops/scripts/deploy-hub-staging-content.cjs");
+const {
   EXPECTED_REPOSITORY,
 } = require("../../ops/scripts/deploy-hub-manifest.cjs");
 
@@ -210,12 +213,12 @@ describe("Deploy Hub live workflow contracts", () => {
     );
     const production = workflow("production-e2e.yml");
     expect(production.jobs.readonly.permissions.actions).toBe("read");
-    const productionPublish = production.jobs.readonly.steps.find(
+    const productionPublish = production.jobs["verify-evidence"].steps.find(
       ({ name }: { name?: string }) => name === "Publish Deploy Hub E2E result"
     );
     expect(productionPublish).toBeDefined();
     expect(productionPublish.env.EXPECTED_SHA).toBe(
-      "${{ inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha }}"
+      "${{ steps.release-identity.outputs.expected-sha }}"
     );
 
     for (const file of [
@@ -585,6 +588,38 @@ describe("Deploy Hub staging composition", () => {
   it("returns null when a commit has no Deploy Hub composition trailer", () => {
     expect(parseComposition("Manual staging commit")).toBeNull();
   });
+
+  it("rebuilds tracked staging content on the latest main without losing active PRs", () => {
+    const git = {
+      remoteSha: jest.fn((ref: string) => (ref === "main" ? SHA_C : SHA_B)),
+      fetchExact: jest.fn(),
+      readCommitMessage: jest.fn().mockReturnValue(
+        commitMessage("Deploy Hub prior", {
+          baseSha: SHA_A,
+          requests: [{ pr: 123, sha: SHA_D }],
+        })
+      ),
+      sameTree: jest.fn(),
+    };
+    expect(compositionOnLatestBase(git, SHA_B, "main")).toEqual({
+      baseSha: SHA_C,
+      requests: [{ pr: 123, sha: SHA_D }],
+    });
+    expect(git.fetchExact).toHaveBeenCalledWith([SHA_B, SHA_C]);
+    expect(git.sameTree).not.toHaveBeenCalled();
+  });
+
+  it("requires a clean main-equivalent baseline before the first live operation", () => {
+    const git = {
+      remoteSha: jest.fn().mockReturnValue(SHA_C),
+      fetchExact: jest.fn(),
+      readCommitMessage: jest.fn().mockReturnValue("Manual staging commit"),
+      sameTree: jest.fn().mockReturnValue(false),
+    };
+    expect(() => compositionOnLatestBase(git, SHA_B, "main")).toThrow(
+      "Current staging is not a Deploy Hub baseline."
+    );
+  });
 });
 
 describe("Deploy Hub operation clients", () => {
@@ -687,7 +722,11 @@ describe("Deploy Hub operation clients", () => {
     const sleepImpl = jest.fn().mockResolvedValue(undefined);
     const fetchImpl = jest
       .fn()
-      .mockResolvedValueOnce({ ok: false, status: 503, headers: {} })
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        headers: { get: () => "7" },
+      })
       .mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -704,7 +743,7 @@ describe("Deploy Hub operation clients", () => {
       state: "open",
     });
     expect(fetchImpl).toHaveBeenCalledTimes(2);
-    expect(sleepImpl).toHaveBeenCalledTimes(1);
+    expect(sleepImpl).toHaveBeenCalledWith(7_000);
 
     fetchImpl.mockReset().mockResolvedValue({
       ok: false,
@@ -828,6 +867,11 @@ describe("Deploy Hub production gates", () => {
         return {
           check_runs: [
             {
+              name: "Installed app checks",
+              status: "completed",
+              conclusion: "skipped",
+            },
+            {
               name: "SonarCloud Code Analysis",
               status: "completed",
               conclusion: "success",
@@ -843,7 +887,7 @@ describe("Deploy Hub production gates", () => {
     await expect(
       assertProductionPreflight(github, [request("production")], "main")
     ).rejects.toThrow(
-      "PR #123 is missing required check Installed app checks."
+      "PR #123 required check Installed app checks is not successful."
     );
   });
 
@@ -1029,6 +1073,7 @@ describe("Deploy Hub remove from staging", () => {
       remoteSha: jest
         .fn()
         .mockReturnValueOnce(SHA_B)
+        .mockReturnValueOnce(SHA_D)
         .mockReturnValueOnce(SHA_C),
       fetchExact: jest.fn(),
       readCommitMessage: jest.fn().mockReturnValue(
@@ -1061,7 +1106,7 @@ describe("Deploy Hub remove from staging", () => {
       now: () => 0,
     });
     expect(result.conclusion).toBe("success");
-    expect(harness.git.mergeContent).toHaveBeenCalledWith(
+    expect(harness.git.mergeContent).toHaveBeenLastCalledWith(
       SHA_D,
       [],
       "Deploy Hub remove-123 remove"
@@ -1105,6 +1150,7 @@ describe("Deploy Hub remove from staging", () => {
     harness.git.remoteSha
       .mockReset()
       .mockReturnValueOnce(SHA_B)
+      .mockReturnValueOnce(SHA_D)
       .mockReturnValueOnce(SHA_D);
     await expect(
       executeRemoveFromStaging({
@@ -1244,6 +1290,7 @@ describe("Deploy Hub tracked staging deploy", () => {
       remoteSha: jest.fn().mockReturnValue(SHA_B),
       fetchExact: jest.fn(),
       readCommitMessage: jest.fn().mockReturnValue("Manual staging commit"),
+      sameTree: jest.fn().mockReturnValue(true),
       mergeContent: jest.fn().mockReturnValue(SHA_D),
       forwardContent,
       pushStaging: jest.fn(),
@@ -1339,6 +1386,7 @@ describe("Deploy Hub tracked staging deploy", () => {
       remoteSha: jest.fn().mockReturnValue(SHA_B),
       fetchExact: jest.fn(),
       readCommitMessage: jest.fn().mockReturnValue("Manual staging commit"),
+      sameTree: jest.fn().mockReturnValue(true),
       mergeContent: jest.fn().mockReturnValue(SHA_D),
       forwardContent: jest.fn().mockReturnValue(SHA_C),
       pushStaging: jest.fn(),
@@ -1535,6 +1583,7 @@ describe("Deploy Hub stop boundaries", () => {
       remoteSha: jest.fn().mockReturnValue(SHA_D),
       fetchExact: jest.fn(),
       readCommitMessage: jest.fn().mockReturnValue("Manual staging commit"),
+      sameTree: jest.fn().mockReturnValue(true),
       mergeContent: jest.fn().mockReturnValue(SHA_E),
       forwardContent: jest.fn().mockReturnValue(SHA_C),
       pushStaging: jest.fn(),
@@ -1710,7 +1759,9 @@ describe("Deploy Hub stop boundaries", () => {
         runUrl: RUN_URL,
         github,
       })
-    ).rejects.toThrow("PR #123 check Installed app checks is not successful.");
+    ).rejects.toThrow(
+      "PR #123 required check Installed app checks is not successful."
+    );
     expect(mergePullRequest).not.toHaveBeenCalled();
   });
 

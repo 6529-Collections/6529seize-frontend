@@ -18,7 +18,7 @@ const {
 } = require("./deploy-hub-operation-contracts.cjs");
 const {
   composeContent,
-  compositionAt,
+  compositionOnLatestBase,
   STAGING_REF,
 } = require("./deploy-hub-staging-content.cjs");
 const { targetLabel } = require("./deploy-hub-operation-workflows.cjs");
@@ -48,13 +48,13 @@ async function publishFailure(github, requests, runUrl, reason) {
   ).catch(() => {});
 }
 
-function planStagingContent({ git, cohorts, operationId }) {
+function planStagingContent({ git, cohorts, operationId, baseRef }) {
   const stagingSha = git.remoteSha(STAGING_REF);
-  git.fetchExact([stagingSha]);
-  let composition = compositionAt(git, stagingSha);
+  let composition = compositionOnLatestBase(git, stagingSha, baseRef);
 
   return {
     stagingSha,
+    mainSha: composition.baseSha,
     cohorts: cohorts.map((cohort, index) => {
       composition = addRequests(composition, cohort.requests);
       const localContentSha = composeContent(
@@ -97,7 +97,12 @@ async function executeDryRun(options) {
     );
     await assertRequestAuthorities(github, requests);
     await assertExactPulls(github, requests, baseRef);
-    const stagingPlan = planStagingContent({ git, cohorts, operationId });
+    const stagingPlan = planStagingContent({
+      git,
+      cohorts,
+      operationId,
+      baseRef,
+    });
     const productionRequests = requests.filter(
       ({ target }) => target === "production"
     );
@@ -112,6 +117,10 @@ async function executeDryRun(options) {
     assert(
       /^[a-f0-9]{40}$/.test(mainSha ?? ""),
       "Current main SHA is unavailable."
+    );
+    assert(
+      mainSha === stagingPlan.mainSha,
+      "Main moved while the dry-run staging plan was being built."
     );
     await publishStatus(
       github,

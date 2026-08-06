@@ -11,7 +11,7 @@ const {
 } = require("./deploy-hub-operation-contracts.cjs");
 const {
   composeContent,
-  compositionAt,
+  compositionOnLatestBase,
   publishContent,
   publishStagingPresence,
   STAGING_REF,
@@ -229,6 +229,39 @@ async function finishCohort(options) {
   return "success";
 }
 
+function planStagingCohort({
+  git,
+  stagingHeadSha,
+  baseRef,
+  requests,
+  operationId,
+}) {
+  const knownGoodComposition = compositionOnLatestBase(
+    git,
+    stagingHeadSha,
+    baseRef
+  );
+  const knownGoodContentSha = composeContent(
+    git,
+    knownGoodComposition,
+    operationId,
+    "known-good"
+  );
+  const candidateComposition = addRequests(knownGoodComposition, requests);
+  const contentSha = composeContent(
+    git,
+    candidateComposition,
+    operationId,
+    "stage"
+  );
+  return {
+    candidateComposition,
+    contentSha,
+    knownGoodComposition,
+    knownGoodContentSha,
+  };
+}
+
 async function processStagingCohort(options) {
   const {
     github,
@@ -280,22 +313,22 @@ async function processStagingCohort(options) {
   if (activeRequests.length === 0) return "success";
   const activeCohort = { ...cohort, requests: activeRequests };
 
-  const knownGoodSha = git.remoteSha(STAGING_REF);
-  git.fetchExact([knownGoodSha]);
-  const knownGoodComposition = compositionAt(git, knownGoodSha);
-  const candidateComposition = addRequests(
-    knownGoodComposition,
-    activeCohort.requests
-  );
-  const contentSha = composeContent(
-    git,
+  const stagingHeadSha = git.remoteSha(STAGING_REF);
+  const {
     candidateComposition,
+    contentSha,
+    knownGoodComposition,
+    knownGoodContentSha,
+  } = planStagingCohort({
+    git,
+    stagingHeadSha,
+    baseRef,
+    requests: activeCohort.requests,
     operationId,
-    "stage"
-  );
+  });
   const stagingSha = await publishContent({
     git,
-    expectedOldSha: knownGoodSha,
+    expectedOldSha: stagingHeadSha,
     contentSha,
     message: stagingMessage(
       `Deploy Hub ${operationId}: stage cohort ${cohortIndex + 1}`,
@@ -345,7 +378,7 @@ async function processStagingCohort(options) {
     const reconciliation = await reconcileProductFailure({
       ...options,
       cohort: activeCohort,
-      knownGoodSha,
+      knownGoodSha: knownGoodContentSha,
       knownGoodComposition,
       stagingSha,
     });

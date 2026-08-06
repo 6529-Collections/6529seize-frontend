@@ -49,6 +49,19 @@ function responsePayload(response) {
   return response.status === 204 ? null : response.json();
 }
 
+function retryDelayMilliseconds(response, attempt) {
+  const retryAfter = response.headers?.get?.("retry-after")?.trim() ?? "";
+  const retryAfterSeconds = Number(retryAfter);
+  if (
+    retryAfter !== "" &&
+    Number.isFinite(retryAfterSeconds) &&
+    retryAfterSeconds >= 0
+  ) {
+    return Math.min(Math.ceil(retryAfterSeconds * 1_000), 30_000);
+  }
+  return attempt * 1_000;
+}
+
 async function githubRequest({
   apiUrl,
   repository,
@@ -84,7 +97,7 @@ async function githubRequest({
     if (!retryableResponse(response) || attempt === attempts) {
       throw new Error(`GitHub request failed with HTTP ${response.status}.`);
     }
-    await sleepImpl(attempt * 1_000);
+    await sleepImpl(retryDelayMilliseconds(response, attempt));
   }
   throw new Error("GitHub request retry budget was exhausted.");
 }
@@ -282,7 +295,7 @@ function createGitClient({ exec = execFileSync } = {}) {
   }
 
   function remoteSha(ref) {
-    assert(ref === STAGING_REF, "Unsupported remote ref.");
+    assert(ref === STAGING_REF || ref === "main", "Unsupported remote ref.");
     const output = run(["ls-remote", "--heads", "origin", `refs/heads/${ref}`]);
     const sha = output.split(/\s+/)[0] ?? "";
     assert(SHA_PATTERN.test(sha), `Unable to resolve origin/${ref}.`);
@@ -345,6 +358,11 @@ function createGitClient({ exec = execFileSync } = {}) {
     },
     readCommitMessage(sha) {
       return run(["show", "-s", "--format=%B", validGitSha(sha)]);
+    },
+    sameTree(leftSha, rightSha) {
+      const leftTree = run(["rev-parse", `${validGitSha(leftSha)}^{tree}`]);
+      const rightTree = run(["rev-parse", `${validGitSha(rightSha)}^{tree}`]);
+      return leftTree === rightTree;
     },
     remoteSha,
   };
