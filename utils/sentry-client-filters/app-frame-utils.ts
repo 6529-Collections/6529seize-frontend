@@ -44,6 +44,16 @@ const reactDomInsertBeforeRawRuntimeFunctions = new Set([
 ]);
 const reactDomInsertBeforeRawRequiredFunctions = ["lo", "li", "lr"];
 const reactDomInsertBeforeRawTerminalFunctions = new Set(["sN", "sR"]);
+const reactDomRemoveChildRawFrameCount = 50;
+const reactDomRemoveChildRawRuntimeFunctions = new Set([
+  "li",
+  "lr",
+  "s7",
+  "s9",
+]);
+const reactDomRemoveChildRawRequiredFunctions = ["li", "lr", "s7"];
+const reactDomRemoveChildRawOptionalFunction = "s9";
+const reactDomRemoveChildRawTerminalFunction = "s7";
 
 function isReactDomRuntimeFrame(frame: SentryStackFrame): boolean {
   const paths = getFramePaths(frame);
@@ -151,6 +161,47 @@ function hasRawReactDomInsertBeforeFrameSignature(
   );
 }
 
+function hasRawReactDomRemoveChildFrameSignature(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  // beforeSend sees this minified stack before Sentry applies source maps.
+  // Keep both cohort-backed function sets exact so minifier drift fails open.
+  if (
+    !Array.isArray(frames) ||
+    frames.length !== reactDomRemoveChildRawFrameCount ||
+    frames.at(-1)?.function?.trim() !== reactDomRemoveChildRawTerminalFunction
+  ) {
+    return false;
+  }
+
+  const functionNames = new Set<string>();
+  for (const frame of frames) {
+    const functionName = frame.function?.trim();
+    if (
+      !functionName ||
+      !reactDomRemoveChildRawRuntimeFunctions.has(functionName)
+    ) {
+      return false;
+    }
+    functionNames.add(functionName);
+  }
+
+  const hasRequiredFunctions = reactDomRemoveChildRawRequiredFunctions.every(
+    (functionName) => functionNames.has(functionName)
+  );
+  const hasObservedFunctionSet =
+    functionNames.size === reactDomRemoveChildRawRequiredFunctions.length ||
+    (functionNames.size ===
+      reactDomRemoveChildRawRequiredFunctions.length + 1 &&
+      functionNames.has(reactDomRemoveChildRawOptionalFunction));
+
+  return (
+    hasRequiredFunctions &&
+    hasObservedFunctionSet &&
+    hasOnlyOneNextStaticChunk(frames)
+  );
+}
+
 function getReactDomNotFoundErrorValue(
   event: SentryClientEvent,
   message: string
@@ -193,6 +244,18 @@ export function hasReactDomInsertBeforeRawNotFoundErrorSignature(
     value?.mechanism?.type === "generic" &&
     value.mechanism.handled === true &&
     hasRawReactDomInsertBeforeFrameSignature(value.stacktrace?.frames)
+  );
+}
+
+export function hasReactDomRemoveChildRawNotFoundErrorSignature(
+  event: SentryClientEvent,
+  message: string
+): boolean {
+  const value = getReactDomNotFoundErrorValue(event, message);
+  return (
+    value?.mechanism?.type === "generic" &&
+    value.mechanism.handled === true &&
+    hasRawReactDomRemoveChildFrameSignature(value.stacktrace?.frames)
   );
 }
 
