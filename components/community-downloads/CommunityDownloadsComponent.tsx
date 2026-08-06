@@ -8,6 +8,8 @@ import type { ApiUploadsPage } from "@/generated/models/ApiUploadsPage";
 import type { ApiUploadItem } from "@/generated/models/ApiUploadItem";
 
 import {
+  DOWNLOADS_TABLE_CELL_CLASS_NAME,
+  DOWNLOADS_TABLE_ROW_CLASS_NAME,
   formatDate,
   DownloadsLayout,
   DownloadsTable,
@@ -52,13 +54,11 @@ export default function CommunityDownloadsComponent(props: Readonly<Props>) {
   return (
     <DownloadsLayout title={props.title}>
       {isLoading && !data && (
-        <div className="tw-text-center tw-pb-3">
-          Loading downloads...
-        </div>
+        <div className="tw-pb-3 tw-text-center">Loading downloads...</div>
       )}
 
       {isError && (
-        <div className="tw-text-center tw-text-red-500 tw-pb-3">
+        <div className="tw-text-red-500 tw-pb-3 tw-text-center">
           Failed to load community downloads. Please try again.
         </div>
       )}
@@ -67,9 +67,14 @@ export default function CommunityDownloadsComponent(props: Readonly<Props>) {
         data={downloads}
         columns={["Date", "Link"]}
         renderRow={(download: ApiUploadItem) => (
-          <tr key={download.date.toString()}>
-            <td>{formatDate(download.date.toString())}</td>
-            <td>
+          <tr
+            className={DOWNLOADS_TABLE_ROW_CLASS_NAME}
+            key={download.date.toString()}
+          >
+            <td className={DOWNLOADS_TABLE_CELL_CLASS_NAME}>
+              {formatDate(download.date.toString())}
+            </td>
+            <td className={DOWNLOADS_TABLE_CELL_CLASS_NAME}>
               <a href={download.url} target="_blank" rel="noopener noreferrer">
                 {download.url}
               </a>
@@ -79,12 +84,13 @@ export default function CommunityDownloadsComponent(props: Readonly<Props>) {
       />
 
       {totalResults > PAGE_SIZE && (
-        <div className="tw-text-center tw-pt-2 tw-pb-3">
+        <div className="tw-pb-3 tw-pt-2 tw-text-center">
           <Pagination
             page={page}
             pageSize={PAGE_SIZE}
             totalResults={totalResults}
             setPage={handlePageChange}
+            variant="compact"
           />
         </div>
       )}

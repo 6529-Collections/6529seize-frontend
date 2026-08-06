@@ -2,6 +2,8 @@
 
 import { useSetTitle } from "@/contexts/TitleContext";
 import {
+  DOWNLOADS_TABLE_CELL_CLASS_NAME,
+  DOWNLOADS_TABLE_ROW_CLASS_NAME,
   formatDate,
   DownloadsLayout,
   DownloadsTable,
@@ -36,9 +38,14 @@ export default function CommunityDownloadsTeam() {
         data={downloads}
         columns={["Date", "Link"]}
         renderRow={(download: TeamDownload) => (
-          <tr key={download.created_at}>
-            <td>{formatDate(download.created_at)}</td>
-            <td>
+          <tr
+            className={DOWNLOADS_TABLE_ROW_CLASS_NAME}
+            key={download.created_at}
+          >
+            <td className={DOWNLOADS_TABLE_CELL_CLASS_NAME}>
+              {formatDate(download.created_at)}
+            </td>
+            <td className={DOWNLOADS_TABLE_CELL_CLASS_NAME}>
               <a href={download.url} target="_blank" rel="noopener noreferrer">
                 {download.url}
               </a>

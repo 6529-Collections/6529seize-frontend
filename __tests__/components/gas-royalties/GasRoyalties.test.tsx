@@ -137,20 +137,20 @@ describe("GasRoyaltiesHeader", () => {
       />
     );
 
-    const memeLab = screen.getByText("Meme Lab");
+    const memeLab = screen.getByRole("tab", { name: "Meme Lab" });
     fireEvent.click(memeLab);
     expect(push).toHaveBeenCalledWith(
       `${pathname}?focus=${GasRoyaltiesCollectionFocus.MEMELAB}`
     );
 
-    const memes = screen.getByText("The Memes");
+    const memes = screen.getByRole("tab", { name: "The Memes" });
     fireEvent.click(memes);
     expect(push).toHaveBeenCalledWith(
       `${pathname}?focus=${GasRoyaltiesCollectionFocus.MEMES}`
     );
   });
 
-  it("renders collection controls as native buttons", () => {
+  it("renders the collection controls as an accessible tablist", () => {
     const pathname = "/meme-gas";
     const push = jest.fn();
 
@@ -179,11 +179,16 @@ describe("GasRoyaltiesHeader", () => {
     );
 
     expect(
-      screen.getByRole("button", { name: "Meme Lab" })
+      screen.getByRole("tablist", { name: "Collection" })
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "The Memes" })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Meme Lab" })).toHaveAttribute(
+      "aria-selected",
+      "false"
+    );
+    expect(screen.getByRole("tab", { name: "The Memes" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
   });
 
   it("does not render download widget when fetching or no results", () => {

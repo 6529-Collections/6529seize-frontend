@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 
 import { useSetTitle } from "@/contexts/TitleContext";
 import {
+  DOWNLOADS_TABLE_CELL_CLASS_NAME,
+  DOWNLOADS_TABLE_ROW_CLASS_NAME,
   DownloadsLayout,
   DownloadsTable,
   formatDate,
@@ -47,10 +49,14 @@ export default function CommunityDownloadsSubscriptions() {
         data={downloads}
         columns={["Date", "Token ID", "Link"]}
         renderRow={(download: SubscriptionDownload) => (
-          <tr key={download.date}>
-            <td>{formatDate(download.date)}</td>
-            <td>#{download.token_id}</td>
-            <td>
+          <tr className={DOWNLOADS_TABLE_ROW_CLASS_NAME} key={download.date}>
+            <td className={DOWNLOADS_TABLE_CELL_CLASS_NAME}>
+              {formatDate(download.date)}
+            </td>
+            <td className={DOWNLOADS_TABLE_CELL_CLASS_NAME}>
+              #{download.token_id}
+            </td>
+            <td className={DOWNLOADS_TABLE_CELL_CLASS_NAME}>
               <a
                 href={download.upload_url}
                 target="_blank"
@@ -73,6 +79,7 @@ export default function CommunityDownloadsSubscriptions() {
               setPage(newPage);
               window.scrollTo(0, 0);
             }}
+            variant="compact"
           />
         </div>
       )}
