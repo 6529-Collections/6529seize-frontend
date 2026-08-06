@@ -542,6 +542,7 @@ jobs:
           package_profile() {
             local profile="$1"
             local destination="$2"
+            local portability_extract="$destination/portability-extract"
             rm -rf "$destination"
             mkdir -p "$destination/target/_next" "$destination/bundle/.next"
             cp -r .next/standalone/. "$destination/bundle/"
@@ -561,20 +562,20 @@ jobs:
             test -z "$(find "$destination/target/_next" -type l -print -quit)"
             (cd "$destination/bundle" && zip -qry ../target/package.zip .)
             zip_listing="$(mktemp)"
-            zip_extract="$(mktemp -d)"
+            rm -rf "$portability_extract"
+            mkdir -p "$portability_extract"
             unzip -Z1 "$destination/target/package.zip" > "$zip_listing"
             node scripts/package-public-review-artifacts.cjs assert-listing \
               --profile "$profile" \
               --bundle-root "$destination/bundle" \
               --listing-file "$zip_listing"
-            unzip -q "$destination/target/package.zip" -d "$zip_extract"
+            unzip -q "$destination/target/package.zip" -d "$portability_extract"
             node scripts/package-public-review-artifacts.cjs assert-zip \
               --profile "$profile" \
               --bundle-root "$destination/bundle" \
               --listing-file "$zip_listing" \
-              --extracted-root "$zip_extract"
+              --extracted-root "$portability_extract"
             rm -f "$zip_listing"
-            rm -rf "$zip_extract"
           }
 
           build_profile() {
@@ -626,15 +627,16 @@ jobs:
             node ops/scripts/artifact-portability.cjs inventory \
               --manifest release-bus-artifact/manifest.json \
               --package release-bus-artifact/target/package.zip \
-              --extracted-root release-bus-artifact/bundle \
-              --runtime-config release-bus-artifact/bundle/.next/PUBLIC_RUNTIME.json \
-              --assets-flag release-bus-artifact/bundle/.next/ASSETS_FROM_S3 \
+              --extracted-root release-bus-artifact/portability-extract \
+              --runtime-config release-bus-artifact/portability-extract/.next/PUBLIC_RUNTIME.json \
+              --assets-flag release-bus-artifact/portability-extract/.next/ASSETS_FROM_S3 \
               --source-root . \
               --content-roots "public,content/public-reviews,config/public-reviews,public/review-data" \
               --environment "$ARTIFACT_ENVIRONMENT" \
               --node-version "$(node --version)" \
               --pnpm-version "$(pnpm --version)" \
               --output release-bus-artifact/artifact-portability.json
+            rm -rf release-bus-artifact/portability-extract
           else
             # Bounded rollout bridge only. Old reconcilers do not send the v3
             # contract input and older deploy workflows understand only this
@@ -658,15 +660,16 @@ jobs:
               node ops/scripts/artifact-portability.cjs inventory \
                 --manifest release-bus-artifact/manifest.json \
                 --package "release-bus-artifact/profiles/$profile/target/package.zip" \
-                --extracted-root "release-bus-artifact/profiles/$profile/bundle" \
-                --runtime-config "release-bus-artifact/profiles/$profile/bundle/.next/PUBLIC_RUNTIME.json" \
-                --assets-flag "release-bus-artifact/profiles/$profile/bundle/.next/ASSETS_FROM_S3" \
+                --extracted-root "release-bus-artifact/profiles/$profile/portability-extract" \
+                --runtime-config "release-bus-artifact/profiles/$profile/portability-extract/.next/PUBLIC_RUNTIME.json" \
+                --assets-flag "release-bus-artifact/profiles/$profile/portability-extract/.next/ASSETS_FROM_S3" \
                 --source-root . \
                 --content-roots "public,content/public-reviews,config/public-reviews,public/review-data" \
                 --environment "$profile" \
                 --node-version "$(node --version)" \
                 --pnpm-version "$(pnpm --version)" \
                 --output "release-bus-artifact/profiles/$profile/artifact-portability.json"
+              rm -rf "release-bus-artifact/profiles/$profile/portability-extract"
             done
           fi
           (cd release-bus-artifact && find . -type f ! -path ./SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)
