@@ -8,50 +8,16 @@ import { getSolidityDeclarationHref } from "@/lib/public-review/solidityReferenc
 import { renderStreamSolidityDeclaration } from "@/lib/public-review/streamSolidityReference";
 import { getStreamSolidityDeclarationPageMetadata } from "@/lib/public-review/streamSolidityReferenceMetadata";
 import {
-  loadActiveStreamReferenceInventory,
-  loadVersionedStreamReferenceInventories,
   renderStreamReferenceOrNotFound,
   resolveStreamReferenceRouteOrNotFound,
 } from "@/lib/public-review/streamSolidityReferencePageAdapter";
 import type { SolidityDeclarationKind } from "@/lib/public-review/solidityReferenceTypes";
-import { STREAM_REVIEW_SLUG } from "@/lib/public-review/streamReviewDefinition";
 
 export interface StreamSolidityDeclarationParams {
   readonly declarationKey: string;
   readonly definitionKey: string;
   readonly review: string;
   readonly version?: string | undefined;
-}
-
-export async function getActiveSolidityDeclarationStaticParams(
-  kind: SolidityDeclarationKind
-) {
-  const inventory = await loadActiveStreamReferenceInventory({
-    baseEndpoint: publicEnv.BASE_ENDPOINT,
-  });
-  return (
-    inventory?.[kind].map(({ declarationKey, definitionKey }) => ({
-      declarationKey,
-      definitionKey,
-      review: STREAM_REVIEW_SLUG,
-    })) ?? []
-  );
-}
-
-export async function getVersionedSolidityDeclarationStaticParams(
-  kind: SolidityDeclarationKind
-) {
-  const versions = await loadVersionedStreamReferenceInventories({
-    baseEndpoint: publicEnv.BASE_ENDPOINT,
-  });
-  return versions.flatMap(({ inventory, version }) =>
-    inventory[kind].map(({ declarationKey, definitionKey }) => ({
-      declarationKey,
-      definitionKey,
-      review: STREAM_REVIEW_SLUG,
-      version,
-    }))
-  );
 }
 
 export async function getSolidityDeclarationMetadata({

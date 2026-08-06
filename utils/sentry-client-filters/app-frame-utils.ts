@@ -498,7 +498,7 @@ export function hasGifPickerTenorManagerFrame(
   );
 }
 
-export function hasAppOwnedStackPath(value: string | undefined): boolean {
+function hasAppOwnedStackPath(value: string | undefined): boolean {
   const normalized = value?.toLowerCase();
   return (
     !!normalized &&

@@ -47,7 +47,7 @@ const POLICY_PATTERNS = Object.freeze([
   /^\.github\/workflows\//u,
   /^ops\/deployment-bus\//u,
   /^ops\/testing-strategy\/museum-/u,
-  /^ops\/scripts\/(?:deployment-bus|release-bus|testing-strategy)/u,
+  /^ops\/scripts\/(?:artifact-portability|deployment-bus|release-bus|testing-strategy)/u,
   /^scripts\/(?:app-pr-ci-effective-plan|e2e-packs|museum-|pr-ci-policy-bundle|release-bus-|sync-e2e-manifest)/u,
   /^tests\/packs\.manifest\.cjs$/u,
   /^tests\/museum\//u,

@@ -341,14 +341,10 @@ function hasExactCodeAndMessageShape(
   serialized: Record<string, unknown>
 ): boolean {
   const keys = Object.keys(serialized);
-  return (
-    keys.length === 2 && keys.includes("code") && keys.includes("message")
-  );
+  return keys.length === 2 && keys.includes("code") && keys.includes("message");
 }
 
-function getBreadcrumbTimestamp(
-  breadcrumb: SentryBreadcrumb
-): number | null {
+function getBreadcrumbTimestamp(breadcrumb: SentryBreadcrumb): number | null {
   const timestamp = breadcrumb.timestamp;
   return typeof timestamp === "number" && Number.isFinite(timestamp)
     ? timestamp
@@ -497,8 +493,9 @@ export function shouldFilterCoinbaseWalletLinkWebSocket1006(
     return false;
   }
 
-  const hasCoinbaseRequestRelaySignature =
-    hasCoinbaseWalletRequestRelayFrame(value?.stacktrace?.frames);
+  const hasCoinbaseRequestRelaySignature = hasCoinbaseWalletRequestRelayFrame(
+    value?.stacktrace?.frames
+  );
   if (hasCoinbaseRequestRelaySignature) {
     return (
       event.exception?.values?.length === 1 &&

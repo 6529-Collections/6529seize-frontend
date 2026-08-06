@@ -108,8 +108,7 @@ export const walletRevokePermissionsUnsupportedCode = -32601;
 export const walletRevokePermissionsUnsupportedMessage =
   "the method wallet_revokePermissions does not exist/is not available";
 export const backpackInternalJsonRpcErrorCode = -32603;
-export const backpackInternalJsonRpcErrorMessage =
-  "Internal JSON-RPC error.";
+export const backpackInternalJsonRpcErrorMessage = "Internal JSON-RPC error.";
 export const backpackWalletCollisionBreadcrumbMessage =
   "Backpack was unable to override window.ethereum. If you're having issues connecting to a dapp, disable any other wallets and try again.";
 export const readOnlyEthereumProxyBreadcrumbPattern =

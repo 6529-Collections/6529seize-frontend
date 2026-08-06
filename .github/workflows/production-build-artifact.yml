@@ -168,9 +168,21 @@ jobs:
             --arg build_timestamp "$VERSION_BUILD_TIMESTAMP" \
             '{schema_version:1,artifact_contract:"production-prebuild-v1",repository:"frontend",source_sha:$source_sha,environment:"production",package_sha256:$package_digest,build_timestamp:$build_timestamp}' \
             > production-artifact/manifest.json
+          node ops/scripts/artifact-portability.cjs inventory \
+            --manifest production-artifact/manifest.json \
+            --package production-artifact/target/package.zip \
+            --extracted-root .production-bundle \
+            --runtime-config .production-bundle/.next/PUBLIC_RUNTIME.json \
+            --assets-flag .production-bundle/.next/ASSETS_FROM_S3 \
+            --source-root . \
+            --content-roots "public,content/public-reviews,config/public-reviews,public/review-data" \
+            --environment production \
+            --node-version "$(node --version)" \
+            --pnpm-version "$(pnpm --version)" \
+            --output production-artifact/artifact-portability.json
           (
             cd production-artifact
-            find manifest.json target -type f -print0 | LC_ALL=C sort -z | xargs -0 sha256sum > SHA256SUMS
+            find manifest.json artifact-portability.json target -type f -print0 | LC_ALL=C sort -z | xargs -0 sha256sum > SHA256SUMS
           )
           test -z "$(git status --porcelain=v1 --untracked-files=all -- public/help-index.json public/glossary.json public/llms.txt)"
           test -z "$(git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews)"

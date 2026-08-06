@@ -367,7 +367,10 @@ describe("Release Bus frontend performance contract", () => {
         '[ "$ARTIFACT_CONTRACT_VERSION" = legacy-v2 ]'
       );
       expect(verification.run).toContain("artifact_contract=legacy-v2");
-      expect(deployReport.run).toContain("summary_environment=portable");
+      expect(deployReport.run).toContain(
+        'summary_environment="$ARTIFACT_ENVIRONMENT"'
+      );
+      expect(deployReport.run).not.toContain("summary_environment=portable");
       expect(deployReport.run).toContain(
         "deployment_environment:$deployment_environment"
       );
@@ -520,24 +523,32 @@ describe("Release Bus frontend performance contract", () => {
       expect(source).toContain("!isMuseumPack(pack)");
       expect(source).toContain('args+=(--exclude-pack "$museum_pack_alias")');
     }
-    for (const [definition, jobName, stepName, evidenceName] of [
+    for (const [
+      definition,
+      jobName,
+      stepName,
+      evidenceJobName,
+      evidenceName,
+    ] of [
       [
         staging,
         "staging-packs",
         "Run staging packs against staging.6529.io",
+        "staging-packs",
         "Validate exact manifest-bound E2E evidence",
       ],
       [
         production,
         "readonly",
         "Run production-safe read-only packs",
-        "Validate exact production E2E evidence",
+        "verify-evidence",
+        "Validate production E2E evidence on isolated runner",
       ],
     ] as const) {
       const packStep = definition.jobs[jobName].steps.find(
         (step: { name?: string }) => step.name === stepName
       );
-      const evidenceStep = definition.jobs[jobName].steps.find(
+      const evidenceStep = definition.jobs[evidenceJobName].steps.find(
         (step: { name?: string }) => step.name === evidenceName
       );
       const predicatePattern =
@@ -643,7 +654,7 @@ describe("Release Bus frontend performance contract", () => {
       "staging-e2e-artifacts/museum-release-selection.json"
     );
     expect(productionSource).toContain(
-      "production-e2e-artifacts/museum-release-selection.json"
+      "isolated-production-e2e-selection/museum-release-selection.json"
     );
     expect(stagingSource).toContain(
       '.contract == "release-bus-e2e-runner-capabilities.v1"'
@@ -676,13 +687,11 @@ describe("Release Bus frontend performance contract", () => {
       "Validate exact manifest-bound E2E evidence"
     );
     expect(productionSource).toContain(
-      "Validate exact production E2E evidence"
+      "Validate production E2E evidence on isolated runner"
     );
     for (const source of [stagingSource, productionSource]) {
       expect(source).toContain('.schema_version == "release-bus-e2e-packs.v1"');
-      expect(source).toContain(
-        "(.results | map(.script_key) | unique | length) == .pack_count"
-      );
+      expect(source).toContain("unique | length) == .pack_count");
       expect(source).toContain('(.results | all(.safety == "readonly"))');
       expect(source).toContain("SERIAL_FAILED_PACK_RETRY");
       expect(source).toContain(".attempt_count == (.attempts | length)");
@@ -691,8 +700,11 @@ describe("Release Bus frontend performance contract", () => {
         '.results | all(.status == "passed" and .failure_class == null)'
       );
       expect(source).toContain("manifest_identity_sha256:$identity");
-      expect(source).toContain('test "$EVIDENCE_OUTCOME" = success');
     }
+    expect(stagingSource).toContain('test "$EVIDENCE_OUTCOME" = success');
+    expect(productionSource).toContain(
+      'test "$ISOLATED_EVIDENCE_OUTCOME" = success'
+    );
     const runnerSource = read("scripts/e2e-packs.cjs");
     expect(runnerSource).toContain("process.kill(-child.pid, signal)");
     expect(runnerSource).toContain('killGroup("SIGKILL")');
