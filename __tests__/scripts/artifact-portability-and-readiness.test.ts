@@ -1032,6 +1032,43 @@ describe("artifact-portability.v1", () => {
         expectedWorkflowPath: ".github/workflows/production-build-artifact.yml",
       })
     ).toThrow("workflow is not trusted");
+
+    if (process.platform !== "win32") {
+      fixture.refreshReportArtifact(fixture.build());
+      const manifestPath = path.join(fixture.reportRoot, "manifest.json");
+      const displacedPath = path.join(fixture.reportRoot, "manifest.displaced");
+      const originalOpenSync = fs.openSync;
+      let displaced = false;
+      const openSpy = jest
+        .spyOn(fs, "openSync")
+        .mockImplementation((filePath, flags, mode) => {
+          const descriptor =
+            mode === undefined
+              ? originalOpenSync(filePath, flags)
+              : originalOpenSync(filePath, flags, mode);
+          if (
+            !displaced &&
+            path.resolve(String(filePath)) === path.resolve(manifestPath)
+          ) {
+            displaced = true;
+            fs.renameSync(manifestPath, displacedPath);
+            fs.copyFileSync(displacedPath, manifestPath);
+          }
+          return descriptor;
+        });
+      try {
+        expect(() => portability.verifyReportSource(options)).toThrow(
+          "changed while opening"
+        );
+        expect(displaced).toBe(true);
+      } finally {
+        openSpy.mockRestore();
+        if (displaced) {
+          fs.rmSync(manifestPath, { force: true });
+          fs.renameSync(displacedPath, manifestPath);
+        }
+      }
+    }
   });
 
   it("protects the poller, inventory contract, migration note, and report workflow", () => {

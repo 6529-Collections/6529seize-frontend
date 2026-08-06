@@ -90,6 +90,14 @@ describe("effective App PR CI plan", () => {
     expect(executePlan([file]).checks.release_bus_contract.required).toBe(true);
   });
 
+  it("rejects malformed portability paths without ambiguous backtracking", () => {
+    const malformed = `ops/scripts/artifact-portability-${"--".repeat(5_000)}.cjs`;
+
+    expect(executePlan([malformed]).checks.release_bus_contract.required).toBe(
+      false
+    );
+  });
+
   it.each([
     "app/museum/network/page.tsx",
     "components/museum/MuseumShell.tsx",

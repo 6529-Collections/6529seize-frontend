@@ -911,3 +911,21 @@ disabled pending the migration proof in the implementation document.
   changed-source lint, changed TypeScript for 1,381 files, the complete Jest
   typecheck ratchet, and the Playwright typecheck. Fresh exact-head hosted
   review and CI remain the merge authority.
+
+## 2026-08-06 - PR 6 CodeQL correction
+
+- Exact-head CodeQL check 92594943779 reported two high-severity findings: a
+  path-check/read race in the downloaded-artifact verifier and ambiguous
+  backtracking in the portability-path CI classifier. The head was not merged.
+- Artifact files are now opened once with `O_NOFOLLOW` where available, bound
+  to their post-open path identity, read only through the descriptor, and
+  checked for descriptor-snapshot changes after the read. Parsed JSON and its
+  digest are derived from the same bytes.
+- The portability classifier now recognizes unambiguous hyphen-delimited
+  alphanumeric segments. A long malformed-path regression protects the linear
+  matcher, and the Linux test path replaces a file after it is opened to prove
+  the verifier rejects the race.
+- Windows reports a zero path-device identifier alongside the descriptor's
+  volume identifier, so cross-platform identity comparison treats only that
+  documented zero as unavailable while still requiring the inode match. The
+  two corrected suites pass 57/57 with changed-source lint clean.

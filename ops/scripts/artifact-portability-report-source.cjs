@@ -55,17 +55,67 @@ function isPlainObject(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-function sha256File(filePath, label) {
-  let stats;
+function sameFileIdentity(left, right) {
+  const sameDevice =
+    left.dev === right.dev || left.dev === 0n || right.dev === 0n;
+  return sameDevice && left.ino === right.ino;
+}
+
+function sameFileSnapshot(left, right) {
+  return (
+    sameFileIdentity(left, right) &&
+    left.size === right.size &&
+    left.mtimeNs === right.mtimeNs &&
+    left.ctimeNs === right.ctimeNs
+  );
+}
+
+function readStableRegularFile(filePath, label, encoding = null) {
+  let descriptor;
   try {
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- The report workflow supplies an exact artifact path.
-    stats = fs.lstatSync(filePath);
+    const noFollow = fs.constants.O_NOFOLLOW ?? 0;
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- The report workflow supplies an exact artifact path; O_NOFOLLOW is used where the platform exposes it.
+    descriptor = fs.openSync(filePath, fs.constants.O_RDONLY | noFollow);
   } catch {
-    throw new Error(`${label} is missing: ${filePath}`);
+    throw new Error(`${label} is missing or unsafe: ${filePath}`);
   }
-  invariant(stats.isFile(), `${label} must be a regular file`);
-  // eslint-disable-next-line security/detect-non-literal-fs-filename -- The path is a verified regular file.
-  const bytes = fs.readFileSync(filePath);
+  try {
+    const openedBefore = fs.fstatSync(descriptor, { bigint: true });
+    // This post-open path check binds the directory entry to the opened file.
+    // A later path replacement cannot change the descriptor bytes we read.
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- The opened descriptor is cross-checked against this exact path.
+    const pathStats = fs.lstatSync(filePath, { bigint: true });
+    invariant(
+      openedBefore.isFile() &&
+        pathStats.isFile() &&
+        !pathStats.isSymbolicLink(),
+      `${label} must be a regular file`
+    );
+    invariant(
+      sameFileIdentity(openedBefore, pathStats),
+      `${label} changed while opening`
+    );
+    let bytes;
+    if (encoding) {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- This is an already-opened, identity-checked file descriptor, not a path.
+      bytes = fs.readFileSync(descriptor, encoding);
+    } else {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- This is an already-opened, identity-checked file descriptor, not a path.
+      bytes = fs.readFileSync(descriptor);
+    }
+    const openedAfter = fs.fstatSync(descriptor, { bigint: true });
+    invariant(
+      sameFileSnapshot(openedBefore, openedAfter),
+      `${label} changed while reading`
+    );
+    return bytes;
+  } finally {
+    fs.closeSync(descriptor);
+  }
+}
+
+function sha256File(filePath, label) {
+  const bytes = readStableRegularFile(filePath, label);
   return crypto.createHash("sha256").update(bytes).digest("hex");
 }
 
@@ -141,9 +191,16 @@ function walkArtifactFiles(root, relativeDirectory = "") {
 
 function verifyChecksumMembership(root) {
   const checksumPath = path.join(root, "SHA256SUMS");
-  const checksumDigest = sha256File(checksumPath, "SHA256SUMS");
-  // eslint-disable-next-line security/detect-non-literal-fs-filename -- SHA256SUMS is a verified regular file.
-  const lines = fs.readFileSync(checksumPath, "utf8").split(/\r?\n/);
+  const checksumBytes = readStableRegularFile(
+    checksumPath,
+    "SHA256SUMS",
+    "utf8"
+  );
+  const checksumDigest = crypto
+    .createHash("sha256")
+    .update(checksumBytes)
+    .digest("hex");
+  const lines = checksumBytes.split(/\r?\n/);
   if (lines.at(-1) === "") {
     lines.pop();
   }
@@ -198,10 +255,12 @@ function verifyChecksumMembership(root) {
 }
 
 function readJsonFile(filePath, label) {
-  sha256File(filePath, label);
+  const bytes = readStableRegularFile(filePath, label, "utf8");
   try {
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- The path is a verified regular file.
-    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+    return {
+      value: JSON.parse(bytes),
+      sha256: crypto.createHash("sha256").update(bytes).digest("hex"),
+    };
   } catch (error) {
     throw new Error(`${label} is not valid JSON: ${error.message}`);
   }
@@ -369,21 +428,23 @@ function verifyReportSource(options, context) {
   const checksumMembership = verifyChecksumMembership(root);
   const inventoryPath = path.join(root, "artifact-portability.json");
   const manifestPath = path.join(root, "manifest.json");
-  const inventory = context.validateInventory(
-    readJsonFile(inventoryPath, "report source portability inventory")
+  const inventoryFile = readJsonFile(
+    inventoryPath,
+    "report source portability inventory"
   );
-  const manifest = readJsonFile(
+  const manifestFile = readJsonFile(
     manifestPath,
     "report source artifact manifest"
   );
+  const inventory = context.validateInventory(inventoryFile.value);
+  const manifest = manifestFile.value;
   invariant(
     inventory.environment === options.role &&
       inventory.source.git_sha === options.expectedSourceSha,
     "report source inventory provenance does not match"
   );
   invariant(
-    inventory.artifact.manifest_sha256 ===
-      sha256File(manifestPath, "report source artifact manifest"),
+    inventory.artifact.manifest_sha256 === manifestFile.sha256,
     "report source manifest digest does not match inventory"
   );
   invariant(
@@ -450,10 +511,7 @@ function verifyReportSource(options, context) {
       environment: inventory.environment,
       contract_version: inventory.artifact.contract_version,
       manifest_sha256: inventory.artifact.manifest_sha256,
-      inventory_sha256: sha256File(
-        inventoryPath,
-        "report source portability inventory"
-      ),
+      inventory_sha256: inventoryFile.sha256,
       package_sha256: inventory.digests.package_sha256,
       package_path: packageRelativePath,
       runtime_config_sha256: inventory.digests.runtime_config_sha256,
