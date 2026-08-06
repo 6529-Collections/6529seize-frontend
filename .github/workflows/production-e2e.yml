@@ -32,7 +32,14 @@ jobs:
     runs-on: ${{ vars.E2E_RUNNER || vars.CI_LINUX_RUNNER || 'ubuntu-latest' }}
     timeout-minutes: 90
     outputs:
+      dependencies-outcome: ${{ steps.dependencies.outcome }}
+      e2e-outcome: ${{ steps.e2e.outcome }}
+      evidence-upload-outcome: ${{ steps.evidence-upload.outcome }}
       expected-sha: ${{ inputs.expected_sha || steps.automatic-deploy.outputs.deployed-sha }}
+      playwright-outcome: ${{ steps.playwright.outcome }}
+      selection-outcome: ${{ steps.museum-selection.outcome }}
+      selection-upload-outcome: ${{ steps.museum-selection-upload.outcome }}
+      socket-outcome: ${{ steps.socket-firewall.outcome }}
     permissions:
       actions: read
       contents: read
@@ -302,6 +309,7 @@ jobs:
             echo "Packs: $(jq -r '.selected_packs | join(", ") // "none"' "$selection_file")"
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Upload immutable Museum selection evidence
+        id: museum-selection-upload
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: production-e2e-selection-${{ inputs.release_train_id || inputs.automatic_deploy_run_id || github.run_id }}
@@ -427,6 +435,7 @@ jobs:
           echo "MUSEUM_SELECTED_PACKS_JSON=$MUSEUM_SELECTED_PACKS_JSON" >> "$GITHUB_ENV"
           ./bin/6529 run e2e:packs -- "${args[@]}"
       - name: Upload manifest-bound Playwright evidence
+        id: evidence-upload
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -691,7 +700,14 @@ jobs:
           IDENTITY_OUTCOME: ${{ steps.release-identity.outcome }}
           ISOLATED_EVIDENCE_OUTCOME: ${{ steps.isolated-evidence.outcome }}
           OPERATION_KEY: ${{ inputs.operation_key }}
+          READONLY_DEPENDENCIES_OUTCOME: ${{ needs.readonly.outputs.dependencies-outcome }}
+          READONLY_E2E_OUTCOME: ${{ needs.readonly.outputs.e2e-outcome }}
+          READONLY_EVIDENCE_UPLOAD_OUTCOME: ${{ needs.readonly.outputs.evidence-upload-outcome }}
+          READONLY_PLAYWRIGHT_OUTCOME: ${{ needs.readonly.outputs.playwright-outcome }}
           READONLY_RESULT: ${{ needs.readonly.result }}
+          READONLY_SELECTION_OUTCOME: ${{ needs.readonly.outputs.selection-outcome }}
+          READONLY_SELECTION_UPLOAD_OUTCOME: ${{ needs.readonly.outputs.selection-upload-outcome }}
+          READONLY_SOCKET_OUTCOME: ${{ needs.readonly.outputs.socket-outcome }}
           RELEASE_BUS_API_URL: ${{ vars.RELEASE_BUS_API_URL }}
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: ${{ secrets.RELEASE_BUS_WORKFLOW_AUTH_TOKEN }}
           SELECTION_DOWNLOAD_OUTCOME: ${{ steps.selection-download.outcome }}
@@ -706,14 +722,31 @@ jobs:
           evidence_file='isolated-production-e2e-artifacts/evidence.json'
           if [ "$READONLY_RESULT" != success ]; then
             status=FAILED
-            if [ -f "$evidence_file" ] && \
+            if [ "$READONLY_SELECTION_OUTCOME" != success ] || \
+              [ "$READONLY_SELECTION_UPLOAD_OUTCOME" != success ]; then
+              failure_class=CONTROL_PLANE
+              failure_phase=production_e2e_selection
+            elif [ "$READONLY_SOCKET_OUTCOME" != success ] || \
+              [ "$READONLY_DEPENDENCIES_OUTCOME" != success ] || \
+              [ "$READONLY_PLAYWRIGHT_OUTCOME" != success ]; then
+              failure_class=INFRASTRUCTURE
+              failure_phase=production_e2e_setup
+              retryable=true
+            elif [ "$READONLY_E2E_OUTCOME" != success ] && \
+              [ -f "$evidence_file" ] && \
               [ "$(jq -r '.infrastructure_failure_count // 0' "$evidence_file")" -gt 0 ]; then
               failure_class=INFRASTRUCTURE
               failure_phase=production_e2e_infrastructure
               retryable=true
-            else
+            elif [ "$READONLY_E2E_OUTCOME" != success ]; then
               failure_class=E2E
               failure_phase=production_e2e
+            elif [ "$READONLY_EVIDENCE_UPLOAD_OUTCOME" != success ]; then
+              failure_class=CONTROL_PLANE
+              failure_phase=production_e2e_evidence
+            else
+              failure_class=CONTROL_PLANE
+              failure_phase=production_e2e_control
             fi
           elif [ "$IDENTITY_OUTCOME" != success ] || \
             [ "$VERIFIER_TOOLING_OUTCOME" != success ] || \

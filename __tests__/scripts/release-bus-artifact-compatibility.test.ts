@@ -931,6 +931,83 @@ describe("Release Bus artifact rollout compatibility", () => {
     });
   }
 
+  it("preserves retryable setup classification across the isolated production boundary", () => {
+    const workflow = readWorkflow("production-e2e.yml");
+    const report = findStep(
+      workflow,
+      "verify-evidence",
+      "Report structured Release Bus E2E result"
+    );
+    const root = fs.mkdtempSync(
+      path.join(os.tmpdir(), "release-bus-production-e2e-report-")
+    );
+    try {
+      const mockBin = path.join(root, "bin");
+      fs.mkdirSync(mockBin);
+      createMockCurl(mockBin);
+      const curlPayload = path.join(root, "report-payload.json");
+      const baseEnv = {
+        EVIDENCE_DOWNLOAD_OUTCOME: "failure",
+        GITHUB_RUN_ID: "9876",
+        IDENTITY_OUTCOME: "success",
+        ISOLATED_EVIDENCE_OUTCOME: "skipped",
+        MOCK_CURL_PAYLOAD: curlPayload,
+        OPERATION_KEY: "rb2:production:e2e:a1",
+        PATH: `${mockBin}:${process.env["PATH"]}`,
+        READONLY_EVIDENCE_UPLOAD_OUTCOME: "skipped",
+        READONLY_RESULT: "failure",
+        READONLY_SELECTION_OUTCOME: "success",
+        READONLY_SELECTION_UPLOAD_OUTCOME: "success",
+        RELEASE_BUS_API_URL: "https://release-bus.invalid",
+        RELEASE_BUS_WORKFLOW_AUTH_TOKEN: "test-token",
+        SELECTION_DOWNLOAD_OUTCOME: "success",
+        TRAIN_ID,
+        VERIFIER_TOOLING_OUTCOME: "success",
+      };
+
+      expect(
+        runShell(report.run!, {
+          cwd: root,
+          env: {
+            ...baseEnv,
+            READONLY_DEPENDENCIES_OUTCOME: "skipped",
+            READONLY_E2E_OUTCOME: "skipped",
+            READONLY_PLAYWRIGHT_OUTCOME: "skipped",
+            READONLY_SOCKET_OUTCOME: "failure",
+          },
+        }).status
+      ).toBe(0);
+      expect(JSON.parse(fs.readFileSync(curlPayload, "utf8"))).toMatchObject({
+        failure_class: "INFRASTRUCTURE",
+        failure_phase: "production_e2e_setup",
+        retryable: true,
+        status: "FAILED",
+      });
+
+      expect(
+        runShell(report.run!, {
+          cwd: root,
+          env: {
+            ...baseEnv,
+            READONLY_DEPENDENCIES_OUTCOME: "success",
+            READONLY_E2E_OUTCOME: "failure",
+            READONLY_EVIDENCE_UPLOAD_OUTCOME: "success",
+            READONLY_PLAYWRIGHT_OUTCOME: "success",
+            READONLY_SOCKET_OUTCOME: "success",
+          },
+        }).status
+      ).toBe(0);
+      expect(JSON.parse(fs.readFileSync(curlPayload, "utf8"))).toMatchObject({
+        failure_class: "E2E",
+        failure_phase: "production_e2e",
+        retryable: false,
+        status: "FAILED",
+      });
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
   it("rejects partial staging E2E operation identity before checkout", () => {
     const workflow = readWorkflow("staging-e2e.yml");
     const steps = (workflow.jobs["staging-packs"]?.steps ??

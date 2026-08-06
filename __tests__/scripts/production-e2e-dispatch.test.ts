@@ -120,6 +120,7 @@ describe("automatic production E2E dispatch", () => {
     expect(selectionUpload.uses).toBe(
       "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02"
     );
+    expect(selectionUpload.id).toBe("museum-selection-upload");
     expect(selectionUpload.with.name).toContain("production-e2e-selection-");
     expect(selectionUpload.with.path).toBe(
       "${{ steps.museum-selection.outputs.file }}"
@@ -141,6 +142,7 @@ describe("automatic production E2E dispatch", () => {
         SOCKET_OUTCOME: "${{ steps.socket-firewall.outcome }}",
       })
     );
+    expect(job.steps[evidenceUploadIndex].id).toBe("evidence-upload");
     expect(e2eSource).toContain(
       'if ! control_status="$(git -C .release-bus-control status --porcelain=v1 --untracked-files=all)"; then'
     );
@@ -181,6 +183,18 @@ describe("automatic production E2E dispatch", () => {
 
     expect(readonly.outputs["expected-sha"]).toContain(
       "steps.automatic-deploy.outputs.deployed-sha"
+    );
+    expect(readonly.outputs).toEqual(
+      expect.objectContaining({
+        "dependencies-outcome": "${{ steps.dependencies.outcome }}",
+        "e2e-outcome": "${{ steps.e2e.outcome }}",
+        "evidence-upload-outcome": "${{ steps.evidence-upload.outcome }}",
+        "playwright-outcome": "${{ steps.playwright.outcome }}",
+        "selection-outcome": "${{ steps.museum-selection.outcome }}",
+        "selection-upload-outcome":
+          "${{ steps.museum-selection-upload.outcome }}",
+        "socket-outcome": "${{ steps.socket-firewall.outcome }}",
+      })
     );
     expect(
       readonly.steps.some(
@@ -236,6 +250,14 @@ describe("automatic production E2E dispatch", () => {
     expect(evidence.run).toContain("$actual == $complete");
     expect(evidence.run).toContain(".release_binding == null");
     expect(report.env.READONLY_RESULT).toContain("needs.readonly.result");
+    expect(report.env.READONLY_SOCKET_OUTCOME).toContain(
+      "needs.readonly.outputs.socket-outcome"
+    );
+    expect(report.env.READONLY_E2E_OUTCOME).toContain(
+      "needs.readonly.outputs.e2e-outcome"
+    );
+    expect(report.run).toContain("failure_phase=production_e2e_setup");
+    expect(report.run).toContain("failure_phase=production_e2e_selection");
     expect(report.env.ISOLATED_EVIDENCE_OUTCOME).toContain(
       "steps.isolated-evidence.outcome"
     );
