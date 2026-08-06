@@ -4,12 +4,13 @@ import SubscriptionsReportComponent from "@/components/subscriptions-report/Subs
 import { CONTENT_PAGE_MAIN_CLASS } from "@/components/about/AboutLayout";
 import { useSetTitle } from "@/contexts/TitleContext";
 import styles from "@/styles/Home.module.css";
+import clsx from "clsx";
 
 export default function SubscriptionsReport() {
   useSetTitle("Subscriptions Report | Tools");
 
   return (
-    <main className={`${styles["main"]} ${CONTENT_PAGE_MAIN_CLASS}`}>
+    <main className={clsx(styles["main"], CONTENT_PAGE_MAIN_CLASS)}>
       <SubscriptionsReportComponent />
     </main>
   );

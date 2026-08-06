@@ -3,6 +3,7 @@
 import { useSetTitle } from "@/contexts/TitleContext";
 import styles from "@/styles/Home.module.css";
 import { AboutSection } from "@/types/enums";
+import clsx from "clsx";
 import Link from "next/link";
 import {
   ABOUT_TEXT_PAGE_CONTAINER_CLASS,
@@ -17,7 +18,7 @@ export default function DisputeResolutionPage() {
   useSetTitle("Dispute Resolution | 6529.io");
 
   return (
-    <main className={`${styles["main"]} ${CONTENT_PAGE_MAIN_CLASS}`}>
+    <main className={clsx(styles["main"], CONTENT_PAGE_MAIN_CLASS)}>
       <Container fluid className={ABOUT_TEXT_PAGE_CONTAINER_CLASS}>
         <Row>
           <Col className="tw-max-w-4xl">

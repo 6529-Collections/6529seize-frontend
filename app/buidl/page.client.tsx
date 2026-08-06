@@ -2,6 +2,7 @@
 
 import { useSetTitle } from "@/contexts/TitleContext";
 import styles from "@/styles/Home.module.css";
+import clsx from "clsx";
 import Image from "next/image";
 import {
   AboutCol as Col,
@@ -15,7 +16,7 @@ export default function BuidlPage() {
   useSetTitle("BUIDL");
 
   return (
-    <main className={`${styles["main"]} ${CONTENT_PAGE_MAIN_CLASS}`}>
+    <main className={clsx(styles["main"], CONTENT_PAGE_MAIN_CLASS)}>
       <Container fluid className="tw-px-5 tw-py-16 sm:tw-px-6 lg:tw-px-8">
         <Row className="tw-min-h-[calc(100vh-8rem)] tw-items-center">
           <Col className="tw-text-center">
