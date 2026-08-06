@@ -56,7 +56,7 @@ const UPCOMING_PAGE_SIZE = 5;
 const REPORT_SECTION_HEADING_CLASS_NAME =
   SUBSCRIPTIONS_SECTION_HEADING_CLASS;
 const REPORT_TABLE_HEADER_CLASS_NAME =
-  "tw-hidden tw-gap-4 tw-bg-iron-900/80 tw-px-6 tw-py-3 tw-text-left tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-grid";
+  "tw-hidden tw-gap-4 tw-bg-iron-950 tw-px-6 tw-py-3 tw-text-left tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-grid";
 
 type MemeCalendarCurrentResponse = {
   readonly status: string;
@@ -452,7 +452,7 @@ export default function SubscriptionsReportComponent() {
             <AboutSubscriptionsProfileButton />
             <Link
               href="/about/subscriptions"
-              className="hover:tw-text-primary-200 tw-whitespace-nowrap tw-font-semibold tw-text-primary-300 tw-no-underline hover:tw-underline"
+              className="hover:tw-text-primary-200 tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-leading-5 tw-text-primary-300 tw-no-underline hover:tw-underline"
               aria-label="Learn more about The Memes subscriptions"
             >
               Learn More
@@ -484,7 +484,7 @@ export default function SubscriptionsReportComponent() {
                 <span className="tw-text-center">Airdropped</span>
               </div>
               <ActiveSubscriptionRow
-                className="tw-bg-iron-800"
+                className="tw-bg-iron-900"
                 count={activeDrop}
                 subscribedCount={activeSubscribedCount}
               />
@@ -533,8 +533,8 @@ export default function SubscriptionsReportComponent() {
                           }
                           className={[
                             index % 2 === 0
-                              ? "tw-bg-iron-800"
-                              : "tw-bg-iron-900",
+                              ? "tw-bg-iron-900"
+                              : "tw-bg-iron-950",
                             isNew ? styles["upcomingRowNew"] : "",
                           ].join(" ")}
                           date={date}
@@ -609,7 +609,7 @@ export default function SubscriptionsReportComponent() {
                   <RedeemedSubscriptionRow
                     key={getMemeTokenIdKey(count.token_id)}
                     className={
-                      index % 2 === 0 ? "tw-bg-iron-800" : "tw-bg-iron-900"
+                      index % 2 === 0 ? "tw-bg-iron-900" : "tw-bg-iron-950"
                     }
                     count={count}
                   />
