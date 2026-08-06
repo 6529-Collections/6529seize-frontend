@@ -34,6 +34,8 @@ describe("instrumentation-client", () => {
   const readOnlyEthereumProxyBreadcrumbMessage =
     "[2026-08-04T04:00:10.853Z] [[WagmiSetup] Skipping safe ethereum proxy install for read-only window.ethereum] Error: Signature request failed. Please try again.";
   const indexedDBUserDeleteMessage = "Database deleted by request of the user";
+  const indexedDBGetRecordNoTransactionMessage =
+    "Attempt to get a record from database without an in-progress transaction";
   const talismanOnboardingMessage =
     "Talisman extension has not been configured yet. Please continue with onboarding.";
   const braveWalletSelectedAddressMessage =
@@ -1023,6 +1025,14 @@ describe("instrumentation-client", () => {
       description: "Sentry-prefixed WebKit open-failure value",
       message: "UnknownError: Unable to open database file on disk",
     },
+    {
+      description: "raw WebKit record-without-transaction message",
+      message: indexedDBGetRecordNoTransactionMessage,
+    },
+    {
+      description: "Sentry-prefixed WebKit record-without-transaction value",
+      message: `UnknownError: ${indexedDBGetRecordNoTransactionMessage}`,
+    },
   ])(
     "classifies the $description as a handled IndexedDB warning",
     ({ message }) => {
@@ -1057,6 +1067,10 @@ describe("instrumentation-client", () => {
     "UnknownError: Database deleted by request of the administrator",
     "UnknownError: Database deleted by request of the user during migration",
     "UnknownError: Unable to open database file on disk because it is locked",
+    `${indexedDBGetRecordNoTransactionMessage} while reopening`,
+    `UnknownError:${indexedDBGetRecordNoTransactionMessage}`,
+    "Attempt to get records from database without an in-progress transaction",
+    "Attempt to store a record in an object store without an in-progress transaction",
   ])("preserves the near-miss database failure %s", (message) => {
     const beforeSend = loadBeforeSend();
 
