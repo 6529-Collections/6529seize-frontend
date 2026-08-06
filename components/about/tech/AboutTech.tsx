@@ -2,7 +2,8 @@ import Link from "next/link";
 
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { t, tRich } from "@/i18n/messages";
+import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "../AboutLayout";
 
 import {
   FOLLOW_THE_REPO_WAVE_URL,
@@ -15,127 +16,133 @@ export default function AboutTech() {
   const locale = DEFAULT_LOCALE;
 
   return (
-    <div className="tw-flex tw-w-full tw-flex-col tw-gap-10 tw-px-4 tw-text-iron-50 sm:tw-px-6 lg:tw-px-8">
-      <section className="tw-pb-2">
-        <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-50">
-          About / Tech
+    <article
+      className={`tw-w-full tw-overflow-hidden tw-bg-[#0D0D0F] tw-pb-[55px] tw-text-iron-100 ${ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS}`}
+    >
+      <header className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-1 tw-pb-[34px] tw-pt-[21px] sm:tw-px-0 sm:tw-pb-[55px] sm:tw-pt-[34px] lg:tw-px-2">
+        <p className="tw-m-0 tw-mb-[13px] tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.1em] tw-text-primary-300">
+          {t(locale, "about.tech.index.eyebrow")}
         </p>
-        <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 md:tw-text-4xl">
-          Tech Updates
+        <h1 className="tw-m-0 tw-max-w-3xl tw-text-balance tw-text-3xl tw-font-semibold tw-leading-[1.03] tw-tracking-[-0.04em] tw-text-iron-50 md:tw-text-4xl">
+          {t(locale, "about.tech.index.title")}
         </h1>
-        <div className="tw-flex tw-w-full tw-flex-col tw-gap-5 tw-text-base tw-leading-7 tw-text-iron-50">
-          <p className="tw-mb-0">
-            This is a current casual area for longer 6529 tech updates: repo
-            work, bot notes, release context, and build reports that are too
-            large for a single wave drop.
+        <div className="tw-mt-[21px] tw-max-w-4xl">
+          <p className="tw-m-0 tw-text-pretty tw-text-lg tw-leading-7 tw-text-iron-100">
+            {t(locale, "about.tech.index.intro")}
           </p>
-          <ul className="tw-mb-0 tw-grid tw-gap-3 tw-pl-5">
+          <ul className="tw-m-0 tw-mt-[21px] tw-grid tw-gap-[13px] tw-pl-[21px] tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-iron-600">
+            <li>{t(locale, "about.tech.index.longUpdates")}</li>
             <li>
-              Long updates, repo analysis, bot context, and links back into the
-              wave conversation.
-            </li>
-            <li>
-              Shorter live repo activity still belongs in{" "}
-              <a
-                href={FOLLOW_THE_REPO_WAVE_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300"
-              >
-                Follow The Repo
-              </a>
-              . This page is the linkable longer-form shelf beside it.
+              {tRich(locale, "about.tech.index.liveActivity", {
+                followTheRepo: (
+                  <a
+                    className="hover:tw-text-primary-200 tw-rounded-sm tw-font-semibold tw-text-primary-300 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-[#0D0D0F]"
+                    href={FOLLOW_THE_REPO_WAVE_URL}
+                    key="follow-the-repo"
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    {t(locale, "about.tech.index.followTheRepo")}
+                  </a>
+                ),
+              })}
             </li>
           </ul>
         </div>
-      </section>
+      </header>
 
-      <section className="tw-w-full" aria-labelledby="tech-notes-heading">
+      <section
+        aria-labelledby="tech-notes-heading"
+        className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-1 tw-py-[34px] sm:tw-px-0 sm:tw-py-[55px] lg:tw-px-2"
+      >
         <h2
           id="tech-notes-heading"
-          className="tw-mb-5 tw-text-2xl tw-font-semibold tw-text-iron-50"
+          className="tw-m-0 tw-mb-[21px] tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl"
         >
-          Active Technical Notes
+          {t(locale, "about.tech.index.activeTechnicalNotes")}
         </h2>
         <Link
           href="/about/tech/wallet-authentication"
-          className="tw-block tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-5 tw-text-current tw-no-underline tw-transition-colors hover:tw-border-primary-500 hover:tw-bg-iron-900/60 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 focus:tw-ring-offset-2 focus:tw-ring-offset-black"
+          className="tw-group tw-block tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/55 tw-p-[21px] tw-text-current tw-no-underline tw-transition-colors tw-duration-200 hover:tw-border-primary-400/60 hover:tw-bg-iron-900/75 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none"
           aria-label={t(
             locale,
             "about.tech.notes.walletAuthentication.ariaLabel"
           )}
         >
-          <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-50">
-            Auth changes
+          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.1em] tw-text-iron-500">
+            {t(locale, "about.tech.index.authChanges")}
           </p>
-          <h3 className="tw-mb-2 tw-text-xl tw-font-semibold tw-leading-snug tw-text-iron-50">
-            Wallet authentication upgrade
+          <h3 className="tw-m-0 tw-mt-[13px] tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 tw-transition-colors group-hover:tw-text-primary-300 group-focus-visible:tw-text-primary-300 motion-reduce:tw-transition-none">
+            {t(locale, "about.tech.index.walletAuthenticationTitle")}
           </h3>
-          <p className="tw-mb-0 tw-text-sm tw-leading-6 tw-text-iron-50">
-            What is changing with the new secure session, why users may be asked
-            to upgrade, and what to expect during rollout.
+          <p className="tw-m-0 tw-mt-[13px] tw-max-w-4xl tw-text-sm tw-leading-6 tw-text-iron-400">
+            {t(locale, "about.tech.index.walletAuthenticationDescription")}
           </p>
         </Link>
       </section>
 
-      <section className="tw-w-full" aria-labelledby="tech-reports-heading">
-        <div className="tw-mb-5 tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
+      <section
+        aria-labelledby="tech-reports-heading"
+        className="tw-px-1 tw-py-[34px] sm:tw-px-0 sm:tw-py-[55px] lg:tw-px-2"
+      >
+        <div className="tw-mb-[21px] tw-flex tw-flex-col tw-gap-[13px] sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
           <div>
-            <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-50">
-              Index
+            <p className="tw-m-0 tw-mb-[13px] tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.1em] tw-text-iron-500">
+              {t(locale, "about.tech.index.reportsEyebrow")}
             </p>
             <h2
               id="tech-reports-heading"
-              className="tw-mb-0 tw-text-2xl tw-font-semibold tw-text-iron-50"
+              className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl"
             >
-              Reports
+              {t(locale, "about.tech.index.reportsTitle")}
             </h2>
           </div>
-          <p>
-            <Link
-              href={`/about/tech/${TECH_WEEKLY_PR_REPORT.slug}`}
-              className="hover:tw-text-primary-200 tw-text-sm tw-font-semibold tw-text-primary-300 tw-no-underline"
-            >
-              Open latest report
-            </Link>
-          </p>
+          <Link
+            href={`/about/tech/${TECH_WEEKLY_PR_REPORT.slug}`}
+            className="hover:tw-text-primary-200 tw-w-fit tw-rounded-sm tw-text-sm tw-font-semibold tw-text-primary-300 tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-[#0D0D0F]"
+          >
+            {t(locale, "about.tech.index.openLatestReport")}
+          </Link>
         </div>
 
-        <article className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50">
-          <ul className="tw-mb-0 tw-list-none tw-divide-y tw-divide-iron-800 tw-p-0">
+        <div className="tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-white/10">
+          <ul className="tw-m-0 tw-list-none tw-p-0">
             {TECH_PR_REPORTS.map((report) => (
-              <li key={report.slug}>
-                <div className="tw-grid tw-gap-0 md:tw-grid-cols-[minmax(0,1fr)_12rem]">
-                  <div className="tw-p-5">
-                    <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-50">
+              <li
+                className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 last:tw-border-b-0"
+                key={report.slug}
+              >
+                <article className="tw-grid tw-gap-0 md:tw-grid-cols-[minmax(0,1fr)_12rem]">
+                  <div className="tw-p-[21px]">
+                    <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.1em] tw-text-iron-500">
                       {report.dateLabel}
                     </p>
-                    <h3 className="tw-mb-2 tw-text-xl tw-font-semibold tw-leading-snug tw-text-iron-50">
+                    <h3 className="tw-m-0 tw-mt-[13px] tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 sm:tw-text-lg">
                       <Link
                         href={`/about/tech/${report.slug}`}
-                        className="hover:tw-text-primary-200 tw-text-iron-50 tw-no-underline"
+                        className="hover:tw-text-primary-200 tw-rounded-sm tw-text-iron-50 tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
                       >
                         {report.title}
                       </Link>
                     </h3>
-                    <p className="tw-mb-0 tw-text-sm tw-leading-6 tw-text-iron-50">
+                    <p className="tw-m-0 tw-mt-[13px] tw-text-sm tw-leading-6 tw-text-iron-400">
                       {report.description}
                     </p>
                   </div>
-                  <div className="tw-border-t tw-border-solid tw-border-iron-800 tw-p-5 md:tw-border-l md:tw-border-t-0">
-                    <p className="tw-mb-1 tw-text-3xl tw-font-semibold tw-leading-none tw-text-iron-50">
+                  <div className="tw-flex tw-flex-col tw-justify-center tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-iron-900/30 tw-p-[21px] md:tw-border-l md:tw-border-t-0">
+                    <p className="tw-m-0 tw-text-3xl tw-font-semibold tw-leading-none tw-text-iron-50 tw-tabular-nums">
                       {formatInteger(locale, getTechReportTotal(report))}
                     </p>
-                    <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-50">
+                    <p className="tw-m-0 tw-mt-[13px] tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.1em] tw-text-iron-500">
                       {t(locale, "about.tech.index.prsCovered")}
                     </p>
                   </div>
-                </div>
+                </article>
               </li>
             ))}
           </ul>
-        </article>
+        </div>
       </section>
-    </div>
+    </article>
   );
 }
