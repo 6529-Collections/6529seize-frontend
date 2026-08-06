@@ -34,6 +34,9 @@ export class ApiCreateDropRequest {
     */
     'hide_link_preview'?: boolean;
     'title'?: string | null;
+    /**
+    * Across all parts, runtime validation allows at most 50,000 JavaScript UTF-16 code units. Each part is also subject to the per-part UTF-16 and UTF-8 limits documented on ApiCreateDropPart.
+    */
     'parts': Array<ApiCreateDropPart>;
     'referenced_nfts': Array<ApiDropReferencedNFT>;
     'mentioned_users': Array<ApiDropMentionedUser>;

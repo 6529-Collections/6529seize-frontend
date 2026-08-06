@@ -16,7 +16,6 @@ beforeEach(() => {
 test("provides settings and helper", async () => {
   fetchUrl.mockResolvedValue({
     rememes_submission_tdh_threshold: 1,
-    all_drops_notifications_subscribers_limit: 2,
     memes_wave_id: "orig",
     curation_wave_id: "orig-curation",
     quorum_wave_id: "orig-quorum",
@@ -65,7 +64,6 @@ test("provides settings and helper", async () => {
 test("normalizes announcement wave ids before matching", async () => {
   fetchUrl.mockResolvedValue({
     rememes_submission_tdh_threshold: 1,
-    all_drops_notifications_subscribers_limit: 2,
     memes_wave_id: null,
     curation_wave_id: null,
     quorum_wave_id: null,
@@ -91,7 +89,6 @@ test("normalizes announcement wave ids before matching", async () => {
 test("defaults missing auth settings to silent rollout", async () => {
   fetchUrl.mockResolvedValue({
     rememes_submission_tdh_threshold: 1,
-    all_drops_notifications_subscribers_limit: 2,
     memes_wave_id: null,
     curation_wave_id: null,
     quorum_wave_id: null,
