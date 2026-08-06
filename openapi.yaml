@@ -8014,7 +8014,7 @@ paths:
             application/json:
               schema:
                 $ref: >-
-                  #/components/schemas/ReleaseBusV2ProductionAuthorityDenialResponse
+                  #/components/schemas/ReleaseBusV2ProductionAuthorityCompletionResponse
         "503":
           description: Authority dependencies unavailable
   /deploy/release-bus-v2/production-authority/fail:
@@ -8047,7 +8047,7 @@ paths:
             application/json:
               schema:
                 $ref: >-
-                  #/components/schemas/ReleaseBusV2ProductionAuthorityDenialResponse
+                  #/components/schemas/ReleaseBusV2ProductionAuthorityCompletionResponse
         "503":
           description: Authority dependencies unavailable
   /deploy/release-bus-v2/candidates/{id}/revoke-production-readiness:
