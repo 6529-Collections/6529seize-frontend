@@ -255,6 +255,8 @@
   package's valid internal links before deployment mutation.
 - The inventory walker now records internal package symlink paths and targets
   in the package tree digest without rescanning their already-present target
-  files. It resolves every target and fails closed on broken links, targets
-  outside the extracted artifact, and non-file/non-directory targets. Curated
-  source content roots retain their stricter no-symlink policy.
+  files. A completed-real-path index proves that each target was reached and
+  scanned through its canonical non-symlink path. The walker fails closed on
+  broken links, targets outside the extracted artifact, uncovered targets, and
+  non-file/non-directory targets. Curated source content roots retain their
+  stricter no-symlink policy.

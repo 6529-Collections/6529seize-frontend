@@ -92,11 +92,56 @@ function sha256File(filePath, label) {
   return sha256(fs.readFileSync(filePath));
 }
 
+function recordPackageSymlink({
+  absolutePath,
+  relativePath,
+  realRoot,
+  walkState,
+}) {
+  let realTarget;
+  let targetStats;
+  try {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- The candidate comes from a closed walk beneath the validated package root.
+    realTarget = fs.realpathSync(absolutePath);
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- The resolved target is constrained to the validated package root below.
+    targetStats = fs.statSync(realTarget);
+  } catch (error) {
+    throw new Error(
+      `Package symlink cannot be resolved: ${absolutePath}: ${error.message}`
+    );
+  }
+  assertRealPathWithin(realRoot, realTarget, `package symlink ${relativePath}`);
+  invariant(
+    targetStats.isDirectory() || targetStats.isFile(),
+    `Package symlink target must be a regular file or directory: ${absolutePath}`
+  );
+  walkState.symlinks.push({ absolutePath, realTarget });
+  return {
+    path: relativePath.replaceAll(path.sep, "/"),
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- The candidate comes from a closed walk beneath the validated package root.
+    symlink_target: fs.readlinkSync(absolutePath).replaceAll(path.sep, "/"),
+  };
+}
+
+function assertPackageSymlinksCovered(walkState) {
+  for (const symlink of walkState.symlinks) {
+    invariant(
+      walkState.coveredRealPaths.has(symlink.realTarget),
+      `Package symlink target is not covered by the regular package walk: ${symlink.absolutePath}`
+    );
+  }
+}
+
 function walkDirectory(root, relativeDirectory = "", options = {}) {
   const entries = [];
   const absoluteDirectory = path.join(root, relativeDirectory);
   // eslint-disable-next-line security/detect-non-literal-fs-filename -- The root is a validated package or curated content directory supplied by the caller.
   const realRoot = options.realRoot || fs.realpathSync(root);
+  const isTopLevelWalk = options.walkState === undefined;
+  const walkState = options.walkState || {
+    coveredRealPaths: new Set(),
+    symlinks: [],
+  };
   let children;
   try {
     // eslint-disable-next-line security/detect-non-literal-fs-filename -- Content roots are validated operator inputs.
@@ -114,45 +159,41 @@ function walkDirectory(root, relativeDirectory = "", options = {}) {
     const absolutePath = path.join(root, relativePath);
     if (child.isDirectory()) {
       entries.push(
-        ...walkDirectory(root, relativePath, { ...options, realRoot })
+        ...walkDirectory(root, relativePath, {
+          ...options,
+          realRoot,
+          walkState,
+        })
       );
     } else if (child.isFile()) {
       entries.push({
         path: relativePath.replaceAll(path.sep, "/"),
         sha256: sha256File(absolutePath, "content file"),
       });
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- The regular file was discovered by the closed walk beneath the validated root.
+      walkState.coveredRealPaths.add(fs.realpathSync(absolutePath));
     } else if (child.isSymbolicLink() && options.allowInternalSymlinks) {
-      let realTarget;
-      let targetStats;
-      try {
-        // eslint-disable-next-line security/detect-non-literal-fs-filename -- The candidate comes from a closed walk beneath the validated package root.
-        realTarget = fs.realpathSync(absolutePath);
-        // eslint-disable-next-line security/detect-non-literal-fs-filename -- The resolved target is constrained to the validated package root below.
-        targetStats = fs.statSync(realTarget);
-      } catch (error) {
-        throw new Error(
-          `Package symlink cannot be resolved: ${absolutePath}: ${error.message}`
-        );
-      }
-      assertRealPathWithin(
-        realRoot,
-        realTarget,
-        `package symlink ${relativePath}`
+      entries.push(
+        recordPackageSymlink({
+          absolutePath,
+          relativePath,
+          realRoot,
+          walkState,
+        })
       );
-      invariant(
-        targetStats.isDirectory() || targetStats.isFile(),
-        `Package symlink target must be a regular file or directory: ${absolutePath}`
-      );
-      entries.push({
-        path: relativePath.replaceAll(path.sep, "/"),
-        // eslint-disable-next-line security/detect-non-literal-fs-filename -- The candidate comes from a closed walk beneath the validated package root.
-        symlink_target: fs.readlinkSync(absolutePath).replaceAll(path.sep, "/"),
-      });
     } else {
       throw new Error(
         `Content root contains an unsupported entry: ${absolutePath}`
       );
     }
+  }
+
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- The directory was fully read by the closed walk beneath the validated root.
+  walkState.coveredRealPaths.add(fs.realpathSync(absoluteDirectory));
+  if (isTopLevelWalk && options.allowInternalSymlinks) {
+    // Internal targets must also exist at a canonical non-symlink path already
+    // covered by this walk. This scans each file once and cannot follow cycles.
+    assertPackageSymlinksCovered(walkState);
   }
 
   return entries;
@@ -183,6 +224,8 @@ function packageLiteralPatterns(value) {
 function scanExtractedPackage(extractedRoot, baked) {
   const root = path.resolve(extractedRoot);
   assertDirectory(root, "extracted package root");
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- The extracted package root was validated as a real directory above.
+  const realRoot = fs.realpathSync(root);
   const matchesByName = new Map(
     baked.entries.map((entry) => [entry.name, new Set()])
   );
@@ -192,7 +235,10 @@ function scanExtractedPackage(extractedRoot, baked) {
       packageLiteralPatterns(baked.values.get(entry.name)),
     ])
   );
-  const entries = walkDirectory(root, "", { allowInternalSymlinks: true });
+  const entries = walkDirectory(root, "", {
+    allowInternalSymlinks: true,
+    realRoot,
+  });
   const files = entries.filter((entry) => entry.sha256 !== undefined);
   let totalBytes = 0;
 
@@ -260,7 +306,7 @@ function digestContentRoots(sourceRoot, contentRoots) {
     );
     return {
       path: normalizedRoot,
-      files: walkDirectory(realRoot),
+      files: walkDirectory(realRoot, "", { realRoot }),
     };
   });
 

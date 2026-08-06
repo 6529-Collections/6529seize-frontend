@@ -659,6 +659,7 @@ describe("artifact-portability.v1", () => {
   it("records internal package symlinks without traversing duplicate targets", () => {
     const fixture = makeArtifactFixture("staging");
     fixtures.push(fixture);
+    const baseline = fixture.build();
     const target = path.join(fixture.extractedRoot, ".next", "server");
     const link = path.join(fixture.extractedRoot, "server-link");
     fs.symlinkSync(
@@ -674,6 +675,9 @@ describe("artifact-portability.v1", () => {
       file_count: 3,
       tree_sha256: expect.stringMatching(/^[a-f0-9]{64}$/),
     });
+    expect(inventory.package_scan.tree_sha256).not.toBe(
+      baseline.package_scan.tree_sha256
+    );
   });
 
   it("rejects package symlinks that escape the extracted artifact", () => {
