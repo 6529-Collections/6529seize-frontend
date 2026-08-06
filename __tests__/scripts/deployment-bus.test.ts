@@ -684,10 +684,19 @@ describe("release bus v2 combined preflight", () => {
     }
   });
 
-  it("authorizes before the only secretless candidate checkout", () => {
-    const job = workflow.jobs.build;
-    expect(job.permissions).toEqual({ contents: "read" });
-    expect(JSON.stringify(job.env ?? {})).not.toContain("secrets.");
+  it("authorizes before both secretless candidate checkouts", () => {
+    const evidenceJob = workflow.jobs.evidence;
+    const buildJob = workflow.jobs.build;
+    expect(evidenceJob.needs).toBe("authorize");
+    expect(evidenceJob.permissions).toEqual({
+      actions: "read",
+      contents: "read",
+      issues: "read",
+    });
+    expect(buildJob.needs).toBe("evidence");
+    expect(buildJob.permissions).toEqual({ contents: "read" });
+    expect(JSON.stringify(evidenceJob.env ?? {})).not.toContain("secrets.");
+    expect(JSON.stringify(buildJob.env ?? {})).not.toContain("secrets.");
     expect(
       workflow.jobs.authorize.steps.some((step: { uses?: string }) =>
         step.uses?.startsWith("actions/checkout@")
@@ -702,7 +711,7 @@ describe("release bus v2 combined preflight", () => {
     );
     expect(
       source.match(/codeql\[actions\/untrusted-checkout\/medium\]/g)
-    ).toHaveLength(1);
+    ).toHaveLength(2);
   });
 
   it("builds only the requested profile for v3 and keeps bounded legacy compatibility", () => {

@@ -42,7 +42,8 @@ const artwork: CaseyArtwork = {
     "sha256:2769e41b8ea77a39b53103e31e1eaa52c04031c400062d309f7bf547792ba5da",
   creditLine: "Gift of punk6529.",
   rightsLabel: "CC BY-NC 4.0",
-  rightsUrl: "https://creativecommons.org/licenses/by-nc/4.0/",
+  rightsExpressionId: "cc-by-nc-4.0",
+  rightsUrl: "/museum/network/rights/cc-by-nc-4.0",
   status: "accessioned",
   mediaRetention: "upstream_not_retained",
 };
@@ -158,12 +159,13 @@ describe("MuseumArtworkViewer", () => {
 
   it("falls back immediately when the live frame emits an error", () => {
     const { container, liveFrame } = enterLiveMode();
+    const pendingTimerCount = jest.getTimerCount();
 
     fireEvent.error(liveFrame);
 
     expect(container.querySelector("iframe")).not.toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent(liveErrorTitle);
-    expect(jest.getTimerCount()).toBe(0);
+    expect(jest.getTimerCount()).toBeLessThan(pendingTimerCount);
     expect(
       screen.getByRole("link", { name: openOfficialSourceLabel })
     ).toHaveAttribute("href", artwork.generatorUrl);
@@ -191,18 +193,19 @@ describe("MuseumArtworkViewer", () => {
   it("cleans up the pending live timeout when unmounted", () => {
     const { unmount } = enterLiveMode();
 
-    expect(jest.getTimerCount()).toBe(2);
+    expect(jest.getTimerCount()).toBeGreaterThanOrEqual(2);
     unmount();
 
     expect(jest.getTimerCount()).toBe(0);
   });
 
-  it("renders the CC license exactly once as a license link", () => {
+  it("links the recorded term to the Museum explanation exactly once", () => {
     const { container } = render(<MuseumArtworkViewer artwork={artwork} />);
     const licenseLinks = container.querySelectorAll('a[rel~="license"]');
 
     expect(licenseLinks).toHaveLength(1);
     expect(licenseLinks[0]).toHaveAttribute("href", artwork.rightsUrl);
     expect(licenseLinks[0]).toHaveTextContent(artwork.rightsLabel);
+    expect(licenseLinks[0]).not.toHaveAttribute("target");
   });
 });

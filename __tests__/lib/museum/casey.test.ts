@@ -42,9 +42,8 @@ describe("Casey publication overlay", () => {
       expect(governed).toBeDefined();
       expect(governed?.rightsCredit.licenseLabel).toBe("CC BY-NC 4.0");
       expect(artwork.rightsLabel).toBe("Licensed CC BY-NC 4.0.");
-      expect(artwork.rightsUrl).toBe(
-        "https://creativecommons.org/licenses/by-nc/4.0/"
-      );
+      expect(artwork.rightsExpressionId).toBe("cc-by-nc-4.0");
+      expect(artwork.rightsUrl).toBe("/museum/network/rights/cc-by-nc-4.0");
     }
   });
 

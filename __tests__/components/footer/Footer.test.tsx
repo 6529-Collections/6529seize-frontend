@@ -3,6 +3,12 @@ import { AboutSection } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 
 describe("Footer", () => {
+  it("uses the subdued page-shell border", () => {
+    render(<Footer />);
+
+    expect(screen.getByRole("contentinfo")).toHaveClass("tw-border-iron-900");
+  });
+
   it("renders social links with images", () => {
     render(<Footer />);
     const punk = screen.getByRole("link", { name: /@punk6529/i });

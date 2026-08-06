@@ -28,7 +28,27 @@ describe("legacy Casey publication projection", () => {
       }),
     ]);
     expect(publication.projects).toHaveLength(5);
-    expect(publication.documents).toHaveLength(57);
+    expect(publication.documents).toHaveLength(73);
+    expect(publication.rightsHandbook).toEqual(
+      expect.objectContaining({
+        introduction: expect.objectContaining({
+          title: "Rights in digital art",
+        }),
+        artistGuide: expect.objectContaining({ title: "Rights for artists" }),
+        collectorGuide: expect.objectContaining({
+          title: "Rights for collectors",
+        }),
+        expressions: expect.arrayContaining([
+          expect.objectContaining({
+            id: "cc-by-nc-4.0",
+            shortLabel: "CC BY-NC 4.0",
+            legalCode: expect.objectContaining({
+              path: "docs/rights/legal-texts/cc-by-nc-4.0.txt",
+            }),
+          }),
+        ]),
+      })
+    );
     expect(publication.institutionalPractice).toEqual(
       expect.objectContaining({
         id: "institutional-practice:a-field-of-practice",
@@ -170,6 +190,7 @@ describe("legacy Casey publication projection", () => {
         expect.objectContaining({
           licenseLabel: "CC BY-NC 4.0",
           licenseUrl: null,
+          rightsExpressionId: "cc-by-nc-4.0",
         })
       );
     }
@@ -195,6 +216,7 @@ describe("legacy Casey publication projection", () => {
         creditLine: "Program selection record",
         licenseLabel: null,
         licenseUrl: null,
+        rightsExpressionId: null,
         sourcePath: "records/programs/6529NM-AP-01/selected-works.json",
       },
       media: [],
