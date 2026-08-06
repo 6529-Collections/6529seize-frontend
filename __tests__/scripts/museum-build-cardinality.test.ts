@@ -14,6 +14,7 @@ const {
   REVIEWED_HIGH_CARDINALITY_EXPORTS,
   REVIEWED_REDUCTION,
   analyze,
+  assertCardinalityBaseline,
   assertReviewedExportsAbsent,
   readBuildEvidence,
 } = require("../../scripts/museum-build-cardinality.cjs") as {
@@ -51,6 +52,10 @@ const {
       path: string;
     }[];
   };
+  assertCardinalityBaseline: (observed: {
+    observedGeneratedParams: number;
+    observedReviewedReduction: number;
+  }) => void;
   assertReviewedExportsAbsent: (discoveredPaths: readonly string[]) => void;
   readBuildEvidence: (options: { root: string; buildDirectory?: string }) => {
     applicationRouteEntries: number;
@@ -125,6 +130,25 @@ describe("Museum build cardinality contract", () => {
     const reviewedPath = reviewedExport.path;
     expect(() => assertReviewedExportsAbsent([reviewedPath])).toThrow(
       reviewedPath
+    );
+  });
+
+  it("fails closed when either source-cardinality estimate drifts", () => {
+    expect(() =>
+      assertCardinalityBaseline({
+        observedGeneratedParams: EXPECTED_REMAINING_GENERATED_PARAMS + 1,
+        observedReviewedReduction: REVIEWED_REDUCTION,
+      })
+    ).toThrow(
+      `remaining generateStaticParams expected ${EXPECTED_REMAINING_GENERATED_PARAMS}, observed ${EXPECTED_REMAINING_GENERATED_PARAMS + 1}`
+    );
+    expect(() =>
+      assertCardinalityBaseline({
+        observedGeneratedParams: EXPECTED_REMAINING_GENERATED_PARAMS,
+        observedReviewedReduction: REVIEWED_REDUCTION - 1,
+      })
+    ).toThrow(
+      `reviewed reduction expected ${REVIEWED_REDUCTION}, observed ${REVIEWED_REDUCTION - 1}`
     );
   });
 

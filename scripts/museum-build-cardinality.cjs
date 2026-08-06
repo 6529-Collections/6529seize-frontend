@@ -608,6 +608,28 @@ function assertExpectedContributorSet(discoveredPaths) {
   }
 }
 
+function assertCardinalityBaseline({
+  observedGeneratedParams,
+  observedReviewedReduction,
+}) {
+  const drift = [];
+  if (observedReviewedReduction !== REVIEWED_REDUCTION) {
+    drift.push(
+      `reviewed reduction expected ${REVIEWED_REDUCTION}, observed ${observedReviewedReduction}`
+    );
+  }
+  if (observedGeneratedParams !== EXPECTED_REMAINING_GENERATED_PARAMS) {
+    drift.push(
+      `remaining generateStaticParams expected ${EXPECTED_REMAINING_GENERATED_PARAMS}, observed ${observedGeneratedParams}`
+    );
+  }
+  if (drift.length > 0) {
+    throw new Error(
+      `Museum build cardinality source estimates drifted: ${drift.join("; ")}`
+    );
+  }
+}
+
 function readBuildEvidence({
   root,
   buildDirectory = ".next",
@@ -704,6 +726,10 @@ function analyze({ root = process.cwd(), includeBuildEvidence = true } = {}) {
     (total, entry) => total + entry.estimatedParams,
     0
   );
+  assertCardinalityBaseline({
+    observedGeneratedParams,
+    observedReviewedReduction,
+  });
   const result = {
     contract: CONTRACT,
     sourceInventory: {
@@ -775,6 +801,7 @@ module.exports = {
   REVIEWED_HIGH_CARDINALITY_EXPORTS,
   REVIEWED_REDUCTION,
   analyze,
+  assertCardinalityBaseline,
   assertExpectedContributorSet,
   assertReviewedExportsAbsent,
   discoverGenerateStaticParamsFiles,

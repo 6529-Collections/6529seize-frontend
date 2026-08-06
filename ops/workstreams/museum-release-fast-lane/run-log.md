@@ -734,3 +734,20 @@
   absent from both concrete and dynamic entries in `prerender-manifest.json`.
   It still enforces the 500-concrete-route ceiling. Tests reject a missing app
   route, a route that re-enters prerendering, and a 501-route regression.
+
+## 2026-08-06 - PR 5 source-drift gate correction
+
+- Rebasing onto main `d27148d1dfd85ed8cdaa50239d59ac1e524afdc9`
+  produced signed head `9d38cdbc6aad43b76a19f25f1966d5dc495983d9`.
+  Exact-head App CI run 31084985044 passed: Museum 24m30s, quality
+  18m58s, build 6m58s, critical shell 4m09s, and smoke 3m13s.
+- Final review correctly found that the CLI reported source-cardinality drift
+  without rejecting it. The Jest suite compared the values, but `build:ci`
+  invokes the CLI and therefore did not inherit those assertions.
+- The CLI now fails closed unless the checked-in source model independently
+  resolves both the reviewed 28,060-param reduction and the 3,377-param
+  remainder. Focused mutation tests reject drift in either value. No tolerance
+  or bypass was added; an intentional source-model change must update the
+  reviewed baseline in the same PR.
+- Follow-up validation passed: 8 focused tests, live source-only CLI, changed
+  lint, 1,373-file changed TypeScript ratchet, Knip, and whitespace.
