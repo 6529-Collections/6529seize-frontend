@@ -101,6 +101,12 @@ describe("one-click production authority completion", () => {
       "Successful deployment remains bound until automatic Production E2E."
     );
     expect(completionSource).toContain(
+      'select(.name == "Reauthorize exact production mutation" and .conclusion == "success")'
+    );
+    expect(completionSource).toContain(
+      'if [ "$reauthorization_count" = 1 ]; then'
+    );
+    expect(completionSource).toContain(
       '"one-click-production-operation-${deploy_run_id}"'
     );
     expect(completionSource).toContain(

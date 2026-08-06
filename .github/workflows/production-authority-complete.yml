@@ -188,8 +188,18 @@ jobs:
               "repos/${GITHUB_REPOSITORY}/actions/runs/${WORKFLOW_RUN_ID}/artifacts?per_page=100" \
               > "$operation_listing"
             operation_count="$(jq -er --arg name "one-click-production-operation-${WORKFLOW_RUN_ID}" '[.artifacts[] | select(.name == $name)] | length' "$operation_listing")"
+            reauthorization_count="$(jq -er '[.jobs[].steps[]? | select(.name == "Reauthorize exact production mutation" and .conclusion == "success")] | length' "$jobs_file")"
             selection_digest=null
-            if [ "$operation_count" = 1 ]; then
+            if [ "$operation_count" != 0 ] && [ "$operation_count" != 1 ]; then
+              echo "::error::Production operation evidence is ambiguous; refusing failure release."
+              exit 1
+            fi
+            if [ "$reauthorization_count" != 0 ] && [ "$reauthorization_count" != 1 ]; then
+              echo "::error::Production reauthorization evidence is ambiguous; refusing failure release."
+              exit 1
+            fi
+            if [ "$reauthorization_count" = 1 ]; then
+              test "$operation_count" = 1
               operation_record="$proof_dir/operation-record.json"
               artifact_record "$operation_listing" "one-click-production-operation-${WORKFLOW_RUN_ID}" "$WORKFLOW_RUN_ID" 1048576 "$operation_record"
               operation_archive="$proof_dir/operation.zip"
@@ -211,9 +221,6 @@ jobs:
                   (.workflow_run_attempt | type == "number" and . >= 1 and . <= 1000000)
                 ' "$operation_file" >/dev/null
               selection_digest="$(jq -er '.selection_digest' "$operation_file")"
-            elif [ "$operation_count" != 0 ]; then
-              echo "::error::Production operation evidence is ambiguous; refusing failure release."
-              exit 1
             fi
 
             {
