@@ -5,6 +5,7 @@ const YAML = require("yaml");
 const {
   EXPECTED_REPOSITORY,
   createGitPlanner,
+  createGithubClient,
   createSummary,
   executeShadow,
   normalizeManifest,
@@ -210,6 +211,74 @@ describe("Deploy Hub FE dry-run planning", () => {
     expect(() =>
       git.mergeContent(SHA_D, [{ pr: 1, sha: SHA_A }], "operation-1")
     ).toThrow("unsupported");
+  });
+
+  it("fetches advertised PR refs and verifies their exact heads", () => {
+    const exec = jest.fn((_command, args: string[]) => {
+      if (args[0] === "rev-parse" && args[1] === "FETCH_HEAD") return SHA_A;
+      return "";
+    });
+    const git = createGitPlanner({ exec });
+    git.fetchExact([request(123, SHA_A, "staging")]);
+    expect(exec).toHaveBeenCalledWith(
+      "git",
+      ["fetch", "--no-tags", "origin", "refs/pull/123/head"],
+      expect.any(Object)
+    );
+    expect(exec).toHaveBeenCalledWith(
+      "git",
+      ["rev-parse", "FETCH_HEAD"],
+      expect.any(Object)
+    );
+  });
+
+  it("rejects a fetched PR ref whose tip no longer matches", () => {
+    const exec = jest.fn((_command, args: string[]) => {
+      if (args[0] === "rev-parse" && args[1] === "FETCH_HEAD") return SHA_B;
+      return "";
+    });
+    const git = createGitPlanner({ exec });
+    expect(() => git.fetchExact([request(123, SHA_A, "staging")])).toThrow(
+      "PR #123 head moved while fetching."
+    );
+  });
+});
+
+describe("Deploy Hub FE dry-run GitHub reads", () => {
+  it("reads every page of production checks and statuses", async () => {
+    const fetchImpl = jest.fn(async (url: URL) => {
+      const page = url.searchParams.get("page");
+      const firstPage = Array.from({ length: 100 }, (_, index) => ({
+        name: `check-${index}`,
+      }));
+      const body = url.pathname.endsWith("/check-runs")
+        ? { check_runs: page === "1" ? firstPage : [{ name: "check-100" }] }
+        : page === "1"
+          ? firstPage.map(({ name }) => ({ context: name }))
+          : [{ context: "check-100" }];
+      return {
+        ok: true,
+        status: 200,
+        async json() {
+          return body;
+        },
+      };
+    });
+    const github = createGithubClient({
+      apiUrl: "https://api.github.com",
+      repository: EXPECTED_REPOSITORY,
+      token: "token",
+      fetchImpl,
+    });
+    await expect(github.getCheckRuns(SHA_A)).resolves.toHaveProperty(
+      "check_runs.length",
+      101
+    );
+    await expect(github.getCombinedStatus(SHA_A)).resolves.toHaveProperty(
+      "statuses.length",
+      101
+    );
+    expect(fetchImpl).toHaveBeenCalledTimes(4);
   });
 });
 

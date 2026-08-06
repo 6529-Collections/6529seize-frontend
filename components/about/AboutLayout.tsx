@@ -3,6 +3,15 @@ import type { HTMLAttributes, TableHTMLAttributes } from "react";
 
 import styles from "./AboutLayout.module.css";
 
+export const CONTENT_PAGE_MAIN_CLASS =
+  "tailwind-scope tw-min-h-[100dvh] tw-border-0 tw-border-solid tw-border-iron-700 !tw-bg-iron-950 tw-text-iron-300 md:tw-border-l";
+export const CONTENT_PAGE_TITLE_CLASS =
+  "tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]";
+export const CONTENT_PAGE_SECTION_HEADING_CLASS =
+  "tw-text-2xl tw-font-semibold tw-leading-tight tw-text-iron-50";
+export const CONTENT_PAGE_CONTAINER_CLASS =
+  "tw-px-5 tw-pb-20 tw-pt-5 tw-text-iron-50 sm:tw-px-6 lg:tw-px-8";
+
 export const ABOUT_PAGE_HORIZONTAL_PADDING_CLASS_NAME =
   "tw-px-4 sm:tw-px-6 lg:tw-px-8";
 

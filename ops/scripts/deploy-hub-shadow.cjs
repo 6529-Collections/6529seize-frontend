@@ -108,19 +108,43 @@ function createGithubClient({ apiUrl, repository, token, fetchImpl = fetch }) {
     return response.status === 204 ? null : response.json();
   }
 
+  async function requestAll(segments, options, selectItems) {
+    const items = [];
+    for (let page = 1; page <= 10; page += 1) {
+      const payload = await request(segments, {
+        ...options,
+        query: {
+          ...(options?.query ?? {}),
+          per_page: "100",
+          page: String(page),
+        },
+      });
+      const pageItems = selectItems(payload);
+      assert(Array.isArray(pageItems), "GitHub pagination response is invalid.");
+      items.push(...pageItems);
+      if (pageItems.length < 100) return items;
+    }
+    throw new Error("GitHub result set exceeds the validation limit.");
+  }
+
   return {
     createCommitStatus: (sha, status) =>
       request(["statuses", sha], { method: "POST", body: status }),
-    getCheckRuns: (sha) =>
-      request(["commits", sha, "check-runs"], {
-        query: { filter: "latest", per_page: "100" },
-      }),
+    getCheckRuns: async (sha) => ({
+      check_runs: await requestAll(
+        ["commits", sha, "check-runs"],
+        { query: { filter: "latest" } },
+        (payload) => payload?.check_runs
+      ),
+    }),
     getCollaboratorPermission: (actor) =>
       request(["collaborators", actor, "permission"]),
     getCombinedStatus: async (sha) => ({
-      statuses: await request(["commits", sha, "statuses"], {
-        query: { per_page: "100" },
-      }),
+      statuses: await requestAll(
+        ["commits", sha, "statuses"],
+        {},
+        (payload) => payload
+      ),
     }),
     getPullRequest: (pr) => request(["pulls", String(pr)]),
     getRef: (ref) => request(["git", "ref", "heads", ...ref.split("/")]),
@@ -153,10 +177,23 @@ function createGitPlanner({ exec = execFileSync } = {}) {
 
   return {
     remoteSha,
-    fetchExact(shas) {
+    fetchExact(requests) {
       run(["fetch", "--no-tags", "origin", STAGING_REF, "main"]);
-      for (const sha of new Set(shas)) {
-        run(["fetch", "--no-tags", "origin", validSha(sha)]);
+      for (const request of requests) {
+        assert(
+          Number.isInteger(request.pr) && request.pr > 0,
+          "Pull request number is invalid."
+        );
+        run([
+          "fetch",
+          "--no-tags",
+          "origin",
+          `refs/pull/${request.pr}/head`,
+        ]);
+        assert(
+          run(["rev-parse", "FETCH_HEAD"]) === validSha(request.sha),
+          `PR #${request.pr} head moved while fetching.`
+        );
       }
     },
     readCommitMessage(sha) {
@@ -276,7 +313,7 @@ async function validateProductionChecks(github, requests) {
 function planStagingContent({ git, requests, operationId, baseRef }) {
   const stagingSha = git.remoteSha(STAGING_REF);
   const mainSha = git.remoteSha(baseRef);
-  git.fetchExact([stagingSha, mainSha, ...requests.map(({ sha }) => sha)]);
+  git.fetchExact(requests);
   const tracked = parseComposition(git.readCommitMessage(stagingSha));
   const baselineRequired = !tracked && !git.sameTree(stagingSha, mainSha);
   let active = tracked?.requests ?? [];
