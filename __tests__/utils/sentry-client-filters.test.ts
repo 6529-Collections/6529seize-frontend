@@ -8268,6 +8268,27 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(false);
   });
 
+  it("keeps events with an empty exception list", () => {
+    const result = shouldFilterBrowserExtensionWalletRejection({
+      exception: { values: [] },
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps wallet rejection bridge events without a mechanism", () => {
+    const event = createBrowserExtensionWalletRejectionEvent();
+    const value = event.exception?.values?.[0];
+    if (!value) {
+      throw new Error("Expected a wallet rejection exception value");
+    }
+    delete value.mechanism;
+
+    const result = shouldFilterBrowserExtensionWalletRejection(event);
+
+    expect(result).toBe(false);
+  });
+
   it("keeps wallet rejection bridge events with app-owned original stacks", () => {
     const event = createBrowserExtensionWalletRejectionEvent();
     const error = new Error(browserExtensionWalletRejectionMessage);
