@@ -627,6 +627,7 @@
   fixture. They were replaced with closed workflow-fixture test types;
   the metric returns to its 126 baseline. The full Jest diagnostic ratchet and
   Playwright typecheck now pass alongside the debt ratchet.
+
 ## 2026-08-05 — PR 5 local implementation: build cardinality
 
 - Audited all 23 page-level `generateStaticParams` contributors and removed
@@ -673,9 +674,9 @@
   build-evidence phase of `build:ci`.
 - Independent adversarial review found that the emitted-build gate enforced
   only a broad ceiling. It now requires all six reviewed declaration patterns
-  in Next's `dynamicRoutes` and holds concrete prerendering below 500 routes;
-  tests reject a 501-route regression and any missing request-time declaration
-  route.
+  in Next's App Router manifest, excludes them from both prerender manifests,
+  and holds concrete prerendering at or below 500 routes. Tests reject a
+  501-route regression and any missing request-time declaration route.
 
 ## 2026-08-06 - PR 5 exact-head review correction
 

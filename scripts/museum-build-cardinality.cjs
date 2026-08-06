@@ -648,11 +648,12 @@ function readBuildEvidence({
   const missingApplicationRoutes = EXPECTED_DYNAMIC_DECLARATION_ROUTES.filter(
     (route) => !applicationRoutePaths.includes(`${route}/page`)
   );
-  const unexpectedlyPrerenderedRoutes = EXPECTED_DYNAMIC_DECLARATION_ROUTES.filter(
-    (route) =>
-      prerenderedRoutePaths.includes(route) ||
-      dynamicPrerenderRoutePaths.includes(route)
-  );
+  const unexpectedlyPrerenderedRoutes =
+    EXPECTED_DYNAMIC_DECLARATION_ROUTES.filter(
+      (route) =>
+        prerenderedRoutePaths.includes(route) ||
+        dynamicPrerenderRoutePaths.includes(route)
+    );
   if (
     missingApplicationRoutes.length > 0 ||
     unexpectedlyPrerenderedRoutes.length > 0
@@ -735,16 +736,14 @@ function analyze({ root = process.cwd(), includeBuildEvidence = true } = {}) {
 }
 
 function parseArgs(argv) {
-  const options = { includeBuildEvidence: true, json: false };
+  const options = { includeBuildEvidence: true };
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--source-only") {
       options.includeBuildEvidence = false;
-    } else if (argument === "--json") {
-      options.json = true;
     } else {
       throw new Error(
-        `Museum build cardinality: unknown argument ${argument}; use --source-only or --json`
+        `Museum build cardinality: unknown argument ${argument}; use --source-only`
       );
     }
   }

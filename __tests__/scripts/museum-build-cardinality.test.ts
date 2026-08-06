@@ -87,7 +87,14 @@ describe("Museum build cardinality contract", () => {
               relativePath.includes("/versions/")
           )?.path,
         }),
-        expect.objectContaining({ estimatedParams: 4_858 }),
+        expect.objectContaining({
+          estimatedParams: 4_858,
+          path: REVIEWED_HIGH_CARDINALITY_EXPORTS.find(
+            ({ path: relativePath }) =>
+              relativePath.endsWith("/functions/[declarationKey]/page.tsx") &&
+              !relativePath.includes("/versions/")
+          )?.path,
+        }),
       ])
     );
     expect(report.cardinality).toMatchObject({
