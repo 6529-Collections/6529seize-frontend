@@ -25,7 +25,7 @@ function run(
         : ".github/workflows/production-e2e.yml",
     display_title:
       kind === "deploy"
-        ? "Web Deploy - PROD"
+        ? `Production deploy ${headSha} [frontend-prod-123456789]`
         : "Production E2E automatic 123456789",
     event: "workflow_dispatch",
     head_branch: "main",
@@ -122,6 +122,22 @@ describe("production terminal failure evidence", () => {
     expect(() => build("deploy", "failure", FOREIGN_SHA)).toThrow(
       "RUN_TARGET_SHA_MISMATCH"
     );
+  });
+
+  it("rejects an unbound deploy display title", () => {
+    const candidate = run("deploy", "failure");
+    candidate.display_title = "Web Deploy - PROD";
+    expect(() =>
+      evidence.buildFailureEvidence({
+        kind: "deploy",
+        run: candidate,
+        jobs,
+        runId: "123456789",
+        attempt: 2,
+        deployRunId: "123456789",
+        targetSha: TARGET_SHA,
+      })
+    ).toThrow("DEPLOY_TITLE");
   });
 
   it.each(["neutral", "skipped"])(

@@ -150,7 +150,7 @@ jobs:
                 (.id | tostring) == $run_id and
                 .name == "Web Deploy - PROD" and
                 .path == ".github/workflows/build-upload-deploy-prod.yml" and
-                .display_title == "Web Deploy - PROD" and
+                .display_title == ("Production deploy " + .head_sha + " [frontend-prod-" + $run_id + "]") and
                 .event == "workflow_dispatch" and
                 .head_branch == "main" and
                .repository.full_name == $repository and
@@ -272,6 +272,7 @@ jobs:
               (.id | tostring) == $run_id and
               .name == "Web Deploy - PROD" and
               .path == ".github/workflows/build-upload-deploy-prod.yml" and
+              .display_title == ("Production deploy " + .head_sha + " [frontend-prod-" + $run_id + "]") and
               .event == "workflow_dispatch" and
               .status == "completed" and
               .conclusion == "success" and

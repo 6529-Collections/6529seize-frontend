@@ -91,7 +91,9 @@ describe("one-click production authority completion", () => {
     expect(completionSource).toContain(
       '.path == ".github/workflows/build-upload-deploy-prod.yml"'
     );
-    expect(completionSource).toContain('.display_title == "Web Deploy - PROD"');
+    expect(completionSource).toContain(
+      '.display_title == ("Production deploy " + .head_sha + " [frontend-prod-" + $run_id + "]")'
+    );
     expect(completionSource).toContain(
       '"one-click-production-operation-${deploy_run_id}"'
     );

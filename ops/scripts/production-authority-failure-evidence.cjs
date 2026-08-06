@@ -103,7 +103,11 @@ function validateRun({
       ".github/workflows/build-upload-deploy-prod.yml",
       "DEPLOY_PATH"
     );
-    exactString(run.display_title, "Web Deploy - PROD", "DEPLOY_TITLE");
+    exactString(
+      run.display_title,
+      `Production deploy ${expectedTargetSha} [frontend-prod-${expectedRunId}]`,
+      "DEPLOY_TITLE"
+    );
   } else if (kind === "e2e") {
     exactString(run.name, "Production E2E", "E2E_NAME");
     exactString(run.path, ".github/workflows/production-e2e.yml", "E2E_PATH");
