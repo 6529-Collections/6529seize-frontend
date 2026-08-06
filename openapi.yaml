@@ -7849,6 +7849,192 @@ paths:
           description: >-
             Candidate state, evidence, dependency closure, controls, or exact
             head identity changed
+  /deploy/release-bus-v2/production-authority/prepare:
+    post:
+      tags:
+        - Release Bus v2
+      summary: Prepare an authoritative production operation after drain
+      operationId: prepareReleaseBusV2ProductionAuthority
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityPrepareRequest"
+      responses:
+        "200":
+          description: Unbound production authority prepared
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityPrepareResponse"
+        "400":
+          description: Invalid operation identity
+        "409":
+          description: Bounded persisted production denial
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityDenialResponse"
+        "503":
+          description: Authority dependencies unavailable
+  /deploy/release-bus-v2/production-authority/acquire-bind:
+    post:
+      tags:
+        - Release Bus v2
+      summary: Atomically acquire and bind a verified GitHub production run
+      operationId: acquireBindReleaseBusV2ProductionAuthority
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityBindRequest"
+      responses:
+        "200":
+          description: Production authority acquired and bound
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityBindResponse"
+        "400":
+          description: Invalid operation or workflow identity
+        "409":
+          description: Bounded persisted production denial
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityDenialResponse"
+        "503":
+          description: Authority dependencies unavailable
+  /deploy/release-bus-v2/production-authority/bind:
+    post:
+      tags:
+        - Release Bus v2
+      summary: Bind a prepared production authority to a verified GitHub run
+      operationId: bindReleaseBusV2ProductionAuthority
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityBindRequest"
+      responses:
+        "200":
+          description: Prepared authority bound
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityBindResponse"
+        "400":
+          description: Invalid operation or workflow identity
+        "409":
+          description: Bounded persisted production denial
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityDenialResponse"
+        "503":
+          description: Authority dependencies unavailable
+  /deploy/release-bus-v2/production-authority/reauthorize:
+    post:
+      tags:
+        - Release Bus v2
+      summary: Reauthorize a bound operation immediately before AWS mutation
+      operationId: reauthorizeReleaseBusV2ProductionAuthority
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityReauthorizeRequest"
+      responses:
+        "200":
+          description: Bound authority renewed for the exact selection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityBindResponse"
+        "400":
+          description: Invalid selection or workflow identity
+        "409":
+          description: Bounded persisted production denial
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityDenialResponse"
+        "503":
+          description: Authority dependencies unavailable
+  /deploy/release-bus-v2/production-authority/complete:
+    post:
+      tags:
+        - Release Bus v2
+      summary: Complete only with repository-specific trusted completion evidence
+      operationId: completeReleaseBusV2ProductionAuthority
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityCompleteRequest"
+      responses:
+        "200":
+          description: Production authority completed and released
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityCompletionResponse"
+        "400":
+          description: Missing selection, repository-specific qualifier, or evidence digest
+        "409":
+          description: Deploy-only completion or immutable evidence mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityDenialResponse"
+        "503":
+          description: Authority dependencies unavailable
+  /deploy/release-bus-v2/production-authority/fail:
+    post:
+      tags:
+        - Release Bus v2
+      summary: Fail a bound production operation and release its authority
+      operationId: failReleaseBusV2ProductionAuthority
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityFailRequest"
+      responses:
+        "200":
+          description: Production authority failed and released
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityCompletionResponse"
+        "400":
+          description: Invalid failure identity
+        "409":
+          description: Bounded persisted production denial
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityDenialResponse"
+        "503":
+          description: Authority dependencies unavailable
   /deploy/release-bus-v2/candidates/{id}/revoke-production-readiness:
     post:
       tags:
@@ -25459,6 +25645,269 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ReleaseBusV2Manifest"
+    ReleaseBusV2ProductionAuthorityPrepareRequest:
+      type: object
+      required:
+        - operation_id
+        - controller_identity
+        - repository
+        - environment
+        - service
+        - target_sha
+      properties:
+        operation_id:
+          type: string
+          minLength: 1
+          maxLength: 180
+          pattern: ^[A-Za-z0-9][A-Za-z0-9:._-]{0,179}$
+        controller_identity:
+          type: string
+          enum:
+            - frontend-production-workflow
+            - backend-production-workflow
+            - deploy-hub
+        repository:
+          type: string
+          enum:
+            - frontend
+            - backend
+        environment:
+          type: string
+          enum:
+            - prod
+        service:
+          type: string
+          maxLength: 100
+        target_sha:
+          type: string
+          pattern: ^[a-f0-9]{40}$
+        selection_digest:
+          type: string
+          nullable: true
+          default: null
+          description: Must be omitted or null until reauthorization.
+    ReleaseBusV2ProductionAuthorityBindRequest:
+      allOf:
+        - $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityPrepareRequest"
+        - type: object
+          required:
+            - workflow_run_id
+            - workflow_run_attempt
+          properties:
+            workflow_run_id:
+              type: string
+              pattern: ^[1-9][0-9]{0,19}$
+            workflow_run_attempt:
+              type: integer
+              minimum: 1
+              maximum: 1000000
+    ReleaseBusV2ProductionAuthorityReauthorizeRequest:
+      allOf:
+        - $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityBindRequest"
+        - type: object
+          required:
+            - selection_digest
+          properties:
+            selection_digest:
+              type: string
+              pattern: ^[a-f0-9]{64}$
+              description: Immutable artifact selection digest bound before AWS mutation.
+    ReleaseBusV2ProductionAuthorityCompleteRequest:
+      allOf:
+        - $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityReauthorizeRequest"
+        - type: object
+          required:
+            - qualifier_workflow_run_id
+            - qualifier_workflow_run_attempt
+            - evidence_digest
+          properties:
+            qualifier_workflow_run_id:
+              type: string
+              pattern: ^[1-9][0-9]{0,19}$
+            qualifier_workflow_run_attempt:
+              type: integer
+              minimum: 1
+              maximum: 1000000
+            evidence_digest:
+              type: string
+              pattern: ^[a-f0-9]{64}$
+              description: SHA-256 digest of trusted completion evidence. Frontend uses isolated Production E2E evidence; backend uses the exact bound Deploy a service run evidence.
+    ReleaseBusV2ProductionAuthorityFailRequest:
+      allOf:
+        - $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityBindRequest"
+        - type: object
+          required:
+            - reason_code
+          properties:
+            selection_digest:
+              type: string
+              nullable: true
+              pattern: ^[a-f0-9]{64}$
+              description: Null before selection discovery; otherwise the exact frozen selection digest.
+            reason_code:
+              type: string
+              enum:
+                - AWS_MUTATION_FAILED
+                - WORKFLOW_FAILED
+                - ABORTED
+                - CONTROL_REVOKED
+                - LEASE_EXPIRED
+                - LEASE_LOST
+    ReleaseBusV2ProductionAuthorityEpoch:
+      type: object
+      required:
+        - all
+        - production
+        - mode
+      properties:
+        all:
+          type: integer
+          minimum: 1
+        production:
+          type: integer
+          minimum: 1
+        mode:
+          $ref: "#/components/schemas/ReleaseBusV2Mode"
+    ReleaseBusV2ProductionAuthorityPrepareResponse:
+      allOf:
+        - $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityResponseIdentity"
+        - type: object
+          required:
+            - prepared
+            - authorized
+            - reused
+          properties:
+            prepared:
+              type: boolean
+            authorized:
+              type: boolean
+            reused:
+              type: boolean
+    ReleaseBusV2ProductionAuthorityBindResponse:
+      allOf:
+        - $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityResponseIdentity"
+        - type: object
+          required:
+            - bound
+            - authorized
+            - reused
+          properties:
+            bound:
+              type: boolean
+            authorized:
+              type: boolean
+            reused:
+              type: boolean
+    ReleaseBusV2ProductionAuthorityResponseIdentity:
+      type: object
+      required:
+        - operation_id
+        - controller_identity
+        - repository
+        - environment
+        - service
+        - target_sha
+        - selection_digest
+        - workflow_run_id
+        - workflow_run_attempt
+        - status
+        - lease_expires_at
+        - hard_expires_at
+        - control_epoch
+        - lock_row_version
+      properties:
+        operation_id:
+          type: string
+        controller_identity:
+          type: string
+        repository:
+          type: string
+          enum:
+            - frontend
+            - backend
+        environment:
+          type: string
+          enum:
+            - prod
+        service:
+          type: string
+        target_sha:
+          type: string
+          pattern: ^[a-f0-9]{40}$
+        selection_digest:
+          type: string
+          nullable: true
+        workflow_run_id:
+          type: string
+          nullable: true
+        workflow_run_attempt:
+          type: integer
+          nullable: true
+        status:
+          type: string
+          enum:
+            - PREPARED
+            - BOUND
+            - COMPLETED
+            - FAILED
+            - DENIED
+            - EXPIRED
+        lease_expires_at:
+          type: integer
+          format: int64
+          nullable: true
+        hard_expires_at:
+          type: integer
+          format: int64
+          nullable: true
+        control_epoch:
+          $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityEpoch"
+        lock_row_version:
+          type: integer
+          nullable: true
+    ReleaseBusV2ProductionAuthorityCompletionResponse:
+      type: object
+      required:
+        - operation_id
+        - status
+        - reused
+        - lock_row_version
+      properties:
+        operation_id:
+          type: string
+        status:
+          type: string
+          enum:
+            - COMPLETED
+            - FAILED
+            - DENIED
+            - EXPIRED
+        completed:
+          type: boolean
+        failed:
+          type: boolean
+        reused:
+          type: boolean
+        lock_row_version:
+          type: integer
+          nullable: true
+    ReleaseBusV2ProductionAuthorityDenialResponse:
+      type: object
+      required:
+        - authorized
+        - operation_id
+        - reason_code
+      properties:
+        authorized:
+          type: boolean
+          enum:
+            - false
+        operation_id:
+          type: string
+        reason_code:
+          type: string
+        observed_epoch:
+          $ref: "#/components/schemas/ReleaseBusV2ProductionAuthorityEpoch"
     ReleaseBusV2Mode:
       type: string
       enum:
