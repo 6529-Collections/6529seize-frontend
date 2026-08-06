@@ -7,6 +7,7 @@ export type {
 } from "./sentry-client-filters/types";
 export { LOW_VALUE_NETWORK_ERROR_SAMPLE_RATE } from "./sentry-client-filters/constants";
 export { redactDropReactionFailureIdentifiers } from "./sentry-client-filters/drop-reaction";
+export { shouldFilterChromeMobileIosInjectedGaError } from "./sentry-client-filters/chrome-ios";
 export {
   getLowValueNetworkErrorDecision,
   getLowValueNetworkErrorTargetUrl,

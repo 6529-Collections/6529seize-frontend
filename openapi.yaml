@@ -14938,7 +14938,12 @@ components:
       properties:
         content:
           type: string
-          maxLength: 25000
+          description: >-
+            Runtime validation allows at most 25,000 JavaScript UTF-16 code
+            units and 65,535 UTF-8 bytes for this part. The byte limit is
+            enforced independently by the API.
+          x-6529-max-utf16-code-units: 25000
+          x-6529-max-utf8-bytes: 65535
           nullable: true
         quoted_drop:
           anyOf:
@@ -15580,6 +15585,11 @@ components:
         parts:
           type: array
           minItems: 1
+          description: >-
+            Across all parts, runtime validation allows at most 50,000
+            JavaScript UTF-16 code units. Each part is also subject to the
+            per-part UTF-16 and UTF-8 limits documented on ApiCreateDropPart.
+          x-6529-max-total-utf16-code-units: 50000
           items:
             $ref: "#/components/schemas/ApiCreateDropPart"
         referenced_nfts:
@@ -16176,7 +16186,6 @@ components:
           format: int64
         content:
           type: string
-          maxLength: 25000
           nullable: true
         media:
           type: array
@@ -16212,7 +16221,6 @@ components:
           minimum: 1
         content:
           type: string
-          maxLength: 25000
         media:
           type: array
           items:
@@ -21257,7 +21265,6 @@ components:
       type: object
       required:
         - rememes_submission_tdh_threshold
-        - all_drops_notifications_subscribers_limit
         - memes_wave_id
         - curation_wave_id
         - distribution_admin_wallets
@@ -21267,9 +21274,6 @@ components:
         - auth
       properties:
         rememes_submission_tdh_threshold:
-          type: integer
-          format: int64
-        all_drops_notifications_subscribers_limit:
           type: integer
           format: int64
         memes_wave_id:

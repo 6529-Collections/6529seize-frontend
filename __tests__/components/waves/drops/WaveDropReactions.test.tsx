@@ -6,6 +6,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import * as commonApi from "@/services/api/common-api";
 import { __resetDropReactionMonitoringForTests } from "@/utils/monitoring/dropReactionMonitoring";
+import { __resetDropReactionAuthRecoveryForTests } from "@/hooks/drops/useDropReactionAuthRecovery";
 import {
   act,
   fireEvent,
@@ -104,6 +105,7 @@ const { fetchDropByIdBatched } = require("@/services/api/drop-api");
 const setToastMock = jest.fn();
 const mockGetEligibility = jest.fn();
 const mockUpdateEligibility = jest.fn();
+const requestAuthMock = jest.fn(async () => ({ success: true }));
 
 jest.mock("@/contexts/wave/WaveEligibilityContext", () => ({
   useWaveEligibility: jest.fn(() => ({
@@ -211,6 +213,8 @@ describe("WaveDropReactions", () => {
     // Reset call history without removing default implementations
     jest.clearAllMocks();
     __resetDropReactionMonitoringForTests();
+    __resetDropReactionAuthRecoveryForTests();
+    requestAuthMock.mockResolvedValue({ success: true });
     mockQueryCacheFindAll.mockReset();
     mockQueryCacheFindAll.mockReturnValue([]);
     mockSetQueryData.mockReset();
@@ -218,6 +222,7 @@ describe("WaveDropReactions", () => {
     mockUseAuth.mockReturnValue({
       connectedProfile: { id: "profile-1", handle: "alice" },
       activeProfileProxy: null,
+      requestAuth: requestAuthMock,
       setToast: setToastMock,
     });
     getMyStreamMock().mockReturnValue({
@@ -563,6 +568,65 @@ describe("WaveDropReactions", () => {
         type: "error",
       });
     });
+    expect(requestAuthMock).not.toHaveBeenCalled();
+  });
+
+  it("blocks reaction chips while a rejected session is recovering", async () => {
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue(
+        [
+          {
+            category: "people",
+            emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+          },
+        ],
+        () => null
+      )
+    );
+    const recovery = createDeferred<{ success: boolean }>();
+    requestAuthMock.mockReturnValueOnce(recovery.promise);
+    (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
+      createStructuredReactionError({
+        message: "Unauthorized",
+        status: 401,
+      })
+    );
+
+    render(
+      <WaveDropReactions
+        drop={
+          createMockDrop({
+            reactions: [
+              {
+                reaction: ":gm:",
+                profiles: [{ handle: "test-handle-1", id: "1" }],
+              },
+            ],
+          }) as any
+        }
+      />
+    );
+
+    const button = screen.getByRole("button");
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(requestAuthMock).toHaveBeenCalledWith({
+        serverRejected: true,
+        expectedAuthStateFingerprint: expect.any(String),
+      });
+      expect(button).toBeDisabled();
+    });
+    fireEvent.click(button);
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      recovery.resolve({ success: true });
+      await recovery.promise;
+    });
+
+    await waitFor(() => expect(button).toBeEnabled());
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
   });
 
   it("shows rate-limit guidance and rolls back chip state after a 429", async () => {

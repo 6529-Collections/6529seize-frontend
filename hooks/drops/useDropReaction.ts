@@ -46,6 +46,11 @@ import {
   type ReactionSource,
 } from "@/utils/monitoring/dropReactionMonitoring";
 import { isExpectedWaveReactionDisabledError } from "@/utils/monitoring/dropReactionErrorClassification";
+import {
+  getDropReactionAuthStateFingerprint,
+  isDropReactionAuthRecoveryPending,
+  useDropReactionAuthRecovery,
+} from "@/hooks/drops/useDropReactionAuthRecovery";
 
 interface UseDropReactionResult {
   readonly react: (reactionCode: string) => Promise<void>;
@@ -472,6 +477,8 @@ export function useDropReaction(
   const queryClient = useQueryClient();
   const websocketStatus = useWebsocketStatus();
   const locale = useBrowserLocale();
+  const { isRecoveryPending, recoverFromUnauthorized } =
+    useDropReactionAuthRecovery();
   const rollbackRef = useRef<OwnedOptimisticRollback>(null);
   const source = options?.source ?? "picker";
   const onSuccess = options?.onSuccess;
@@ -488,6 +495,7 @@ export function useDropReaction(
     waveEligibility?.authenticated_user_chat_restriction ===
       ChatRestriction.SLOW_MODE;
   const canReact =
+    !isRecoveryPending &&
     !activeProfileProxy &&
     !drop.id.startsWith("temp-") &&
     (isEligibleToChat !== false || isSlowModeOnlyBlock);
@@ -528,8 +536,9 @@ export function useDropReaction(
 
   const react = useCallback(
     async (reactionCode: string) => {
-      if (!canReact) return;
+      if (!canReact || isDropReactionAuthRecoveryPending()) return;
 
+      const authStateFingerprint = getDropReactionAuthStateFingerprint();
       const isRemoving = reactionCode === contextProfileContext?.reaction;
       const intendedReaction = isRemoving ? null : reactionCode;
       const endpoint = `drops/${drop.id}/reaction`;
@@ -584,6 +593,11 @@ export function useDropReaction(
           return;
         }
 
+        const authRecovery = recoverFromUnauthorized(
+          error,
+          authStateFingerprint
+        );
+
         if (
           isExpectedWaveReactionDisabledError({
             dropId,
@@ -607,6 +621,7 @@ export function useDropReaction(
           recordReactionRollbackApplied(mutation);
         }
         await refreshCanonicalDropAfterLatestFailure();
+        await authRecovery;
       }
 
       if (succeeded) {
@@ -626,6 +641,7 @@ export function useDropReaction(
       setToast,
       onSuccess,
       refreshCanonicalDropAfterLatestFailure,
+      recoverFromUnauthorized,
       source,
       updateEligibility,
       waveId,

@@ -1,6 +1,5 @@
 import {
   getSolidityDeclarationMetadata,
-  getVersionedSolidityDeclarationStaticParams,
   renderSolidityDeclarationRoute,
   type StreamSolidityDeclarationParams,
 } from "@/lib/public-review/streamSolidityDeclarationRoute";
@@ -8,10 +7,6 @@ import {
 type Props = {
   readonly params: Promise<StreamSolidityDeclarationParams>;
 };
-
-export function generateStaticParams() {
-  return getVersionedSolidityDeclarationStaticParams("functions");
-}
 
 export async function generateMetadata({ params }: Props) {
   return getSolidityDeclarationMetadata({
