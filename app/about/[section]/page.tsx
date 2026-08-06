@@ -1,5 +1,3 @@
-import styles from "@/styles/Home.module.css";
-
 import About from "@/components/about/About";
 import {
   getAboutSectionDocumentTitle,
@@ -41,8 +39,7 @@ export default async function AboutPage(props: Readonly<Props>) {
   return (
     <main
       className={clsx(
-        styles["main"],
-        "tailwind-scope",
+        "tailwind-scope tw-min-h-screen",
         (usesFeatureLayout || usesLegalLayout) &&
           "tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F]"
       )}
