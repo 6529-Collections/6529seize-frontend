@@ -111,6 +111,7 @@ type PortabilityInventory = MutablePortabilityInventory & {
     inputs: Array<Record<string, unknown>>;
     scan_complete: boolean;
     scan_mode: string;
+    total_bytes: number;
     [key: string]: unknown;
   };
   portability: {
@@ -765,6 +766,115 @@ describe("artifact-portability.v1", () => {
           "external-parent/nested",
         ])
       ).toThrow("escapes source root through a symlink");
+    } finally {
+      fs.rmSync(externalRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("accepts contained extracted-package symlinks and scans their alias paths", () => {
+    const fixture = makeArtifactFixture("staging");
+    fixtures.push(fixture);
+    const targetDirectory = path.join(
+      fixture.extractedRoot,
+      ".next",
+      "node_modules",
+      ".store",
+      "package"
+    );
+    const linkDirectory = path.join(
+      fixture.extractedRoot,
+      ".next",
+      "node_modules",
+      "package"
+    );
+    fs.mkdirSync(targetDirectory, { recursive: true });
+    fs.writeFileSync(
+      path.join(targetDirectory, "runtime.js"),
+      `globalThis.__API__=${JSON.stringify(FIXTURE_RUNTIME.API_ENDPOINT)};\n`
+    );
+    const canonicalInventory = fixture.build();
+    fs.symlinkSync(
+      path.relative(path.dirname(linkDirectory), targetDirectory),
+      linkDirectory,
+      "dir"
+    );
+
+    const inventory = fixture.build();
+
+    expect(inventory.package_scan.scan_complete).toBe(true);
+    expect(inventory.package_scan.file_count).toBe(
+      canonicalInventory.package_scan.file_count
+    );
+    expect(inventory.package_scan.total_bytes).toBe(
+      canonicalInventory.package_scan.total_bytes
+    );
+    expect(inventory.package_scan.inputs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "API_ENDPOINT",
+          matched: true,
+          sample_paths: expect.arrayContaining([
+            ".next/node_modules/.store/package/runtime.js",
+            ".next/node_modules/package/runtime.js",
+          ]),
+        }),
+      ])
+    );
+  });
+
+  it("rejects contained directory symlink cycles", () => {
+    const fixture = makeArtifactFixture("staging");
+    fixtures.push(fixture);
+    const cycleRoot = path.join(fixture.extractedRoot, ".next", "cycle");
+    fs.mkdirSync(cycleRoot, { recursive: true });
+    fs.symlinkSync("..", path.join(cycleRoot, "parent"), "dir");
+
+    expect(() => fixture.build()).toThrow(
+      "Extracted package symbolic-link cycle reaches"
+    );
+  });
+
+  it("rejects extracted-package symlinks that escape the package root", () => {
+    const fixture = makeArtifactFixture("staging");
+    fixtures.push(fixture);
+    const externalRoot = fs.mkdtempSync(
+      path.join(os.tmpdir(), "artifact-portability-package-external-")
+    );
+    const linkPath = path.join(fixture.extractedRoot, "escaped-package-link");
+    fs.writeFileSync(path.join(externalRoot, "runtime.js"), "external\n");
+    try {
+      fs.symlinkSync(
+        path.relative(path.dirname(linkPath), externalRoot),
+        linkPath,
+        "dir"
+      );
+      expect(() => fixture.build()).toThrow(
+        "Extracted package symbolic link lexically escapes its root"
+      );
+    } finally {
+      fs.rmSync(externalRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects a lexical escape even when a later link resolves back inside", () => {
+    const fixture = makeArtifactFixture("staging");
+    fixtures.push(fixture);
+    const canonicalTarget = path.join(fixture.extractedRoot, ".next", "server");
+    const externalRoot = fs.mkdtempSync(
+      path.join(os.tmpdir(), "artifact-portability-package-return-")
+    );
+    const returnLink = path.join(externalRoot, "return-inside");
+    const packageLink = path.join(fixture.extractedRoot, "outside-and-back");
+    try {
+      fs.symlinkSync(canonicalTarget, returnLink, "dir");
+      fs.symlinkSync(
+        path.relative(path.dirname(packageLink), returnLink),
+        packageLink,
+        "dir"
+      );
+      expect(() => fixture.build()).toThrow(
+        "Extracted package symbolic link lexically escapes its root"
+      );
     } finally {
       fs.rmSync(externalRoot, { recursive: true, force: true });
     }
