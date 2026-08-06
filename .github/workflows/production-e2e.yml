@@ -19,7 +19,7 @@ on:
 permissions:
   contents: read
 
-run-name: Production E2E ${{ inputs.release_train_id || (inputs.automatic_deploy_run_id && 'automatic') || 'manual' }}
+run-name: Production E2E ${{ inputs.release_train_id || (inputs.automatic_deploy_run_id && format('automatic {0}', inputs.automatic_deploy_run_id)) || 'manual' }}
 
 concurrency:
   group: production-e2e
@@ -443,6 +443,15 @@ jobs:
           path: production-e2e-artifacts/
           retention-days: 30
           if-no-files-found: ignore
+      - name: Upload exact automatic authority evidence
+        id: authority-evidence-upload
+        if: always() && inputs.automatic_deploy_run_id != '' && steps.e2e.outcome == 'success'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: production-authority-evidence-${{ inputs.automatic_deploy_run_id }}
+          path: production-e2e-artifacts/evidence.json
+          retention-days: 30
+          if-no-files-found: error
       - name: Return production E2E result
         if: always()
         env:
@@ -499,9 +508,12 @@ jobs:
                 .conclusion == "success" and
                 .head_branch == "main" and
                 .repository.full_name == $repository and
-                (.head_sha | test("^[a-f0-9]{40}$"))
+                .head_repository.full_name == $repository and
+                (.head_sha | test("^[a-f0-9]{40}$")) and
+                (.run_attempt | type == "number" and . >= 1 and . <= 1000000)
               ' "$response_file" >/dev/null
             resolved_sha="$(jq -r .head_sha "$response_file")"
+            echo "deploy-run-attempt=$(jq -er '.run_attempt | numbers' "$response_file")" >> "$GITHUB_OUTPUT"
           else
             [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
             [[ "$MANIFEST_ID" =~ ^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$ ]]
@@ -692,6 +704,130 @@ jobs:
                 }
               ' "$evidence_file" >/dev/null
           fi
+
+      - name: Write automatic production qualification record
+        id: qualification-record
+        if: >-
+          always() && inputs.automatic_deploy_run_id != '' &&
+          steps.release-identity.outcome == 'success' &&
+          steps.evidence-download.outcome == 'success' &&
+          steps.selection-download.outcome == 'success' &&
+          steps.isolated-evidence.outcome == 'success'
+        env:
+          AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
+          DEPLOY_RUN_ATTEMPT: ${{ steps.release-identity.outputs.deploy-run-attempt }}
+          EXPECTED_SHA: ${{ steps.release-identity.outputs.expected-sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          [[ "$AUTOMATIC_DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
+          [[ "$DEPLOY_RUN_ATTEMPT" =~ ^[1-9][0-9]{0,6}$ ]]
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+
+          qualification_dir='automatic-production-qualification'
+          mkdir -p "$qualification_dir"
+          operation_dir="$(mktemp -d)"
+          trap 'rm -rf "$operation_dir"' EXIT
+          listing_file="$operation_dir/artifacts.json"
+          gh api \
+            "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}/artifacts?per_page=100" \
+            > "$listing_file"
+          jq -e \
+            --arg name "one-click-production-operation-${AUTOMATIC_DEPLOY_RUN_ID}" \
+            --arg run_id "$AUTOMATIC_DEPLOY_RUN_ID" '
+              type == "object" and
+              (.total_count | type == "number" and . <= 100) and
+              (.artifacts | type == "array") and
+              ([.artifacts[] | select(.name == $name)] | length == 1) and
+              ([.artifacts[] | select(.name == $name)][0] |
+                .expired == false and
+                (.id | tostring | test("^[1-9][0-9]{0,19}$")) and
+                ((.workflow_run.id | tostring) == $run_id) and
+                (.size_in_bytes | type == "number" and . > 0 and . <= 1048576) and
+                (.digest == null or (.digest | type == "string" and test("^sha256:[a-f0-9]{64}$"))))
+            ' "$listing_file" >/dev/null
+          jq -e --arg name "one-click-production-operation-${AUTOMATIC_DEPLOY_RUN_ID}" \
+            '[.artifacts[] | select(.name == $name)][0]' "$listing_file" > "$operation_dir/record.json"
+          operation_id="$(jq -er '.id | tostring' "$operation_dir/record.json")"
+          declared_size="$(jq -er '.size_in_bytes | numbers' "$operation_dir/record.json")"
+          declared_digest="$(jq -r '.digest // empty' "$operation_dir/record.json")"
+          gh api \
+            --header 'Accept: application/octet-stream' \
+            "repos/${GITHUB_REPOSITORY}/actions/artifacts/${operation_id}/zip" > "$operation_dir/operation.zip"
+          test "$(stat -c %s "$operation_dir/operation.zip")" = "$declared_size"
+          test "$(stat -c %s "$operation_dir/operation.zip")" -le 1048576
+          if [ -n "$declared_digest" ]; then
+            test "$declared_digest" = "sha256:$(sha256sum "$operation_dir/operation.zip" | cut -d' ' -f1)"
+          fi
+          python3 - "$operation_dir/operation.zip" "$operation_dir/operation.json" <<'PY'
+          import os
+          import stat
+          import sys
+          import zipfile
+          from pathlib import Path
+
+          archive_path = Path(sys.argv[1])
+          output_path = Path(sys.argv[2])
+          with zipfile.ZipFile(archive_path) as archive:
+              members = archive.infolist()
+              if len(members) != 1 or members[0].filename != "operation.json":
+                  raise SystemExit("operation artifact has an unexpected member set")
+              member = members[0]
+              if member.is_dir() or member.file_size > 65536:
+                  raise SystemExit("operation evidence is invalid or too large")
+              file_type = stat.S_IFMT(member.external_attr >> 16)
+              if file_type in (stat.S_IFLNK, stat.S_IFDIR):
+                  raise SystemExit("operation evidence is a link or directory")
+              data = archive.read(member)
+          flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+          with os.fdopen(os.open(output_path, flags, 0o600), "wb") as output:
+              output.write(data)
+          PY
+          test -f "$operation_dir/operation.json"
+          test ! -L "$operation_dir/operation.json"
+          artifact_selection_digest="$(jq -er \
+            --arg deploy_run_id "$AUTOMATIC_DEPLOY_RUN_ID" \
+            --arg deploy_attempt "$DEPLOY_RUN_ATTEMPT" \
+            --arg target_sha "$EXPECTED_SHA" '
+              if type == "object" and
+                .contract == "one-click-production-operation-v1" and
+                .operation_id == ("frontend-prod-" + $deploy_run_id) and
+                .controller_identity == "frontend-production-workflow" and
+                .repository == "frontend" and
+                .environment == "prod" and
+                .service == "frontend" and
+                .target_sha == $target_sha and
+                (.selection_digest | type == "string" and test("^[a-f0-9]{64}$")) and
+                (.workflow_run_id | tostring) == $deploy_run_id and
+                (.workflow_run_attempt | tostring) == $deploy_attempt
+              then .selection_digest
+              else error("operation evidence identity mismatch")
+              end
+            ' "$operation_dir/operation.json")"
+          evidence_digest="$(sha256sum isolated-production-e2e-artifacts/evidence.json | cut -d' ' -f1)"
+          jq -n \
+            --arg contract "one-click-production-qualification-v1" \
+            --arg deploy_run_id "$AUTOMATIC_DEPLOY_RUN_ID" \
+            --argjson deploy_run_attempt "$DEPLOY_RUN_ATTEMPT" \
+            --arg target_sha "$EXPECTED_SHA" \
+            --arg e2e_run_id "$GITHUB_RUN_ID" \
+            --argjson e2e_run_attempt "$GITHUB_RUN_ATTEMPT" \
+            --arg artifact_selection_digest "$artifact_selection_digest" \
+            --arg evidence_digest "$evidence_digest" \
+            '{contract:$contract,deploy_run_id:$deploy_run_id,deploy_run_attempt:$deploy_run_attempt,target_sha:$target_sha,e2e_run_id:$e2e_run_id,e2e_run_attempt:$e2e_run_attempt,artifact_selection_digest:$artifact_selection_digest,evidence_digest:$evidence_digest}' \
+            > "$qualification_dir/qualification.json"
+          jq -e type "$qualification_dir/qualification.json" >/dev/null
+
+      - name: Upload automatic production qualification record
+        if: >-
+          always() && inputs.automatic_deploy_run_id != '' &&
+          steps.qualification-record.outcome == 'success'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: production-e2e-qualification-${{ inputs.automatic_deploy_run_id }}-a${{ github.run_attempt }}
+          path: automatic-production-qualification/qualification.json
+          retention-days: 30
+          if-no-files-found: error
 
       - name: Report structured Release Bus E2E result
         if: always() && inputs.operation_key != ''
