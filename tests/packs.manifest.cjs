@@ -75,7 +75,10 @@ const READONLY_SPECS = {
   museumInstitutionalPractice: [
     "tests/museum/institutional-practice-readonly.spec.ts",
   ],
+  museumAbout: ["tests/museum/about-readonly.spec.ts"],
   museumInsideSystem: ["tests/museum/inside-system-readonly.spec.ts"],
+  museumDataArchitecture: ["tests/museum/data-architecture-readonly.spec.ts"],
+  museumRights: ["tests/museum/rights-readonly.spec.ts"],
 };
 
 function localPack(scriptKey, description, specs, tweaks = {}) {
@@ -284,12 +287,36 @@ const PACKS = [
   ),
   museumPack({
     ...localReadonlyPack(
+      "test:e2e:museum-data-architecture",
+      "Network Museum data-architecture reading room and machine profile sweep.",
+      READONLY_SPECS.museumDataArchitecture,
+      { timeoutMinutes: 30 }
+    ),
+    triggers: ["pr-ci", "manual"],
+  }),
+  museumPack({
+    ...localReadonlyPack(
       "test:e2e:museum-institutional-practice",
       "Network Museum institutional-practice study route sweep.",
       READONLY_SPECS.museumInstitutionalPractice,
       { timeoutMinutes: 30 }
     ),
     triggers: ["manual"],
+  }),
+  museumPack(
+    localReadonlyPack(
+      "test:e2e:museum-about",
+      "Network Museum About proposition route readability and source contract.",
+      READONLY_SPECS.museumAbout
+    )
+  ),
+  museumPack({
+    ...localReadonlyPack(
+      "test:e2e:museum-rights",
+      "Network Museum rights education and object-license route sweep.",
+      READONLY_SPECS.museumRights
+    ),
+    triggers: ["pr-ci", "manual"],
   }),
   museumPack({
     ...localReadonlyPack(
@@ -483,10 +510,27 @@ const PACKS = [
   ),
   museumPack(
     stagingPack(
+      "museum-data-architecture",
+      "museum-data-architecture",
+      "Staging Network Museum data-architecture reading room and machine profile sweep.",
+      READONLY_SPECS.museumDataArchitecture,
+      { timeoutMinutes: 30 }
+    )
+  ),
+  museumPack(
+    stagingPack(
       "museum-institutional-practice",
       "museum-institutional-practice",
       "Staging Network Museum institutional-practice deployed route smoke.",
       READONLY_SPECS.museumInstitutionalPractice
+    )
+  ),
+  museumPack(
+    stagingPack(
+      "museum-about",
+      "museum-about",
+      "Staging Network Museum About proposition route smoke.",
+      READONLY_SPECS.museumAbout
     )
   ),
   museumPack(
@@ -496,6 +540,14 @@ const PACKS = [
       "Staging Network Museum Inside the System project and comparison sweep.",
       READONLY_SPECS.museumInsideSystem,
       { timeoutMinutes: 30 }
+    )
+  ),
+  museumPack(
+    stagingPack(
+      "museum-rights",
+      "museum-rights",
+      "Staging Network Museum rights education and object-license route sweep.",
+      READONLY_SPECS.museumRights
     )
   ),
 
@@ -557,11 +609,31 @@ const PACKS = [
   ),
   museumPack(
     productionPack(
+      "museum-data-architecture",
+      "Production Network Museum data-architecture reading room and machine profile sweep.",
+      READONLY_SPECS.museumDataArchitecture,
+      ["post-deploy", "manual"],
+      30,
+      [DESKTOP, MOBILE]
+    )
+  ),
+  museumPack(
+    productionPack(
       "museum-institutional-practice",
       "Production Network Museum institutional-practice deployed route smoke.",
       READONLY_SPECS.museumInstitutionalPractice,
-      ["post-deploy", "manual"],
+      ["cron", "post-deploy", "manual"],
       30,
+      [DESKTOP, MOBILE]
+    )
+  ),
+  museumPack(
+    productionPack(
+      "museum-about",
+      "Production Network Museum About proposition route smoke.",
+      READONLY_SPECS.museumAbout,
+      ["post-deploy", "manual"],
+      15,
       [DESKTOP, MOBILE]
     )
   ),
@@ -572,6 +644,16 @@ const PACKS = [
       READONLY_SPECS.museumInsideSystem,
       ["post-deploy", "manual"],
       30,
+      [DESKTOP, MOBILE]
+    )
+  ),
+  museumPack(
+    productionPack(
+      "museum-rights",
+      "Production Network Museum rights education and object-license route sweep.",
+      READONLY_SPECS.museumRights,
+      ["post-deploy", "manual"],
+      15,
       [DESKTOP, MOBILE]
     )
   ),
@@ -590,8 +672,11 @@ const PACKS = [
       ...READONLY_SPECS.publicContent,
       ...READONLY_SPECS.profileDeepLinks,
       ...READONLY_SPECS.searchWaves,
+      ...READONLY_SPECS.museumDataArchitecture,
+      ...READONLY_SPECS.museumAbout,
       ...READONLY_SPECS.museumInstitutionalPractice,
       ...READONLY_SPECS.museumInsideSystem,
+      ...READONLY_SPECS.museumRights,
     ],
     // The disjoint post-deploy packs above cover this exact spec union and may
     // run concurrently. Retain the aggregate only as an operator diagnostic.

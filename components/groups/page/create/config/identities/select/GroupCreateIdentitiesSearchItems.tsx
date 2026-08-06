@@ -6,25 +6,31 @@ import GroupCreateIdentitiesSearchItemsContent from "./GroupCreateIdentitiesSear
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 export type GroupCreateIdentitiesSearchResultsLayout = "popover" | "inline";
+export type GroupCreateIdentitiesSearchAppearance = "default" | "modal";
+
+export const GROUP_IDENTITY_MIN_SEARCH_LENGTH = 3;
 
 function GroupCreateIdentitiesSearchItems({
   open,
   searchCriteria,
   selectedWallets,
   resultsLayout = "popover",
+  appearance = "default",
   onSelect,
 }: {
   readonly open: boolean;
   readonly searchCriteria: string | null;
   readonly selectedWallets: string[];
   readonly resultsLayout?: GroupCreateIdentitiesSearchResultsLayout;
+  readonly appearance?: GroupCreateIdentitiesSearchAppearance | undefined;
   readonly onSelect: (item: CommunityMemberMinimal) => void;
 }) {
+  const normalizedSearchCriteria = searchCriteria?.trim() ?? "";
   const { data, isFetching } = useQuery<CommunityMemberMinimal[]>({
     queryKey: [
       QueryKey.PROFILE_SEARCH,
       {
-        param: searchCriteria,
+        param: normalizedSearchCriteria,
         only_profile_owners: "true",
       },
     ],
@@ -32,46 +38,61 @@ function GroupCreateIdentitiesSearchItems({
       await commonApiFetch<CommunityMemberMinimal[]>({
         endpoint: "community-members",
         params: {
-          param: searchCriteria ?? "",
+          param: normalizedSearchCriteria,
           only_profile_owners: "true",
         },
       }),
-    enabled: !!searchCriteria && searchCriteria.length >= 3,
+    enabled:
+      normalizedSearchCriteria.length >= GROUP_IDENTITY_MIN_SEARCH_LENGTH,
   });
 
+  const isModal = appearance === "modal";
+  const inlineMarginClasses = isModal ? "tw-mt-1" : "tw-mt-2";
   const wrapperClasses =
     resultsLayout === "inline"
-      ? "tw-mt-1 tw-w-full tw-rounded-lg tw-bg-iron-800 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5"
-      : "tw-absolute tw-z-[60] tw-mt-1 tw-w-full tw-rounded-lg tw-bg-iron-800 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5";
-  const panelClasses =
-    resultsLayout === "inline"
-      ? "tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10"
-      : "tw-absolute tw-z-[60] tw-mt-1 tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10";
+      ? `tw-w-full ${inlineMarginClasses}`
+      : "tw-absolute tw-left-0 tw-top-full tw-z-[60] tw-mt-2 tw-w-full";
+  const panelClasses = isModal
+    ? "tw-w-full tw-overflow-hidden"
+    : "tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-shadow-2xl tw-shadow-black/30";
+  const scrollClasses = isModal
+    ? "tw-flow-root tw-max-h-52 tw-overflow-x-hidden tw-overflow-y-auto tw-py-1 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700 desktop-hover:hover:tw-scrollbar-thumb-iron-500"
+    : "tw-flow-root tw-max-h-64 tw-overflow-x-hidden tw-overflow-y-auto tw-p-1.5 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 desktop-hover:hover:tw-scrollbar-thumb-iron-400";
+
+  const results = open ? (
+    <motion.div
+      className={wrapperClasses}
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -6 }}
+      transition={{ duration: 0.15 }}
+    >
+      <div className={panelClasses}>
+        <div className={scrollClasses}>
+          <ul
+            className={`tw-m-0 tw-flex tw-list-none tw-flex-col tw-p-0 ${
+              isModal ? "" : "tw-gap-y-1"
+            }`}
+          >
+            <GroupCreateIdentitiesSearchItemsContent
+              selectedWallets={selectedWallets}
+              loading={isFetching}
+              items={data ?? []}
+              onSelect={onSelect}
+            />
+          </ul>
+        </div>
+      </div>
+    </motion.div>
+  ) : null;
+
+  if (resultsLayout === "inline") {
+    return results;
+  }
 
   return (
     <AnimatePresence mode="wait" initial={false}>
-      {open && (
-        <motion.div
-          className={wrapperClasses}
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.2 }}
-        >
-          <div className={panelClasses}>
-            <div className="tw-py-1 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto tw-max-h-64 tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
-              <ul className="tw-flex tw-flex-col tw-gap-y-1 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
-                <GroupCreateIdentitiesSearchItemsContent
-                  selectedWallets={selectedWallets}
-                  loading={isFetching}
-                  items={data ?? []}
-                  onSelect={onSelect}
-                />
-              </ul>
-            </div>
-          </div>
-        </motion.div>
-      )}
+      {results}
     </AnimatePresence>
   );
 }

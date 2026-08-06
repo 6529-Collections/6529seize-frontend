@@ -22,17 +22,23 @@ import {
   getLowValueNetworkErrorDecision,
   getNetworkErrorMessageTargetUrl,
   getThirdPartyTelemetrySpanTargetKey,
+  redactDropReactionFailureIdentifiers,
   shouldFilterAnonymousUnsafeEvalCspError,
   shouldFilterAppleWebKitSortedTrackListTypeError,
   shouldFilterByFilenameExceptions,
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
+  shouldFilterBrowserExtensionWalletRejection,
+  shouldFilterChromeMobileIosInjectedGaError,
   shouldFilterPoperBlockerOrphanFetchRejection,
   shouldFilterExpectedWaveRequestReplacementAbort,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
+  shouldFilterInjectedIosAutoplayNotAllowedError,
   shouldFilterInjectedProviderProxyStartsWithError,
   shouldFilterInjectedWalletCollision,
+  shouldFilterInstagramPageHideBridgeError,
+  shouldFilterKnownWalletProviderObjectRejection,
   shouldFilterReactDomInsertBeforeNotFoundError,
   shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterInjectedWasmCspUnsafeEval,
@@ -142,6 +148,10 @@ function shouldFilterEvent(
     return true;
   }
 
+  if (shouldFilterKnownWalletProviderObjectRejection(event, hint)) {
+    return true;
+  }
+
   if (shouldFilterRabbyMobileUserRejectedRequest(event, hint)) {
     return true;
   }
@@ -163,6 +173,10 @@ function shouldFilterEvent(
   }
 
   if (shouldFilterBrowserExtensionSendMessageError(event, hint)) {
+    return true;
+  }
+
+  if (shouldFilterBrowserExtensionWalletRejection(event, hint)) {
     return true;
   }
 
@@ -194,6 +208,10 @@ function shouldFilterEvent(
     return true;
   }
 
+  if (shouldFilterInstagramPageHideBridgeError(event, hint)) {
+    return true;
+  }
+
   if (shouldFilterReactDomInsertBeforeNotFoundError(event)) {
     return true;
   }
@@ -212,6 +230,14 @@ function shouldFilterEvent(
   // retaining only the sampled diagnostic subset would hide genuine app errors.
 
   if (shouldFilterAppleWebKitSortedTrackListTypeError(event)) {
+    return true;
+  }
+
+  if (shouldFilterChromeMobileIosInjectedGaError(event)) {
+    return true;
+  }
+
+  if (shouldFilterInjectedIosAutoplayNotAllowedError(event)) {
     return true;
   }
 
@@ -521,6 +547,7 @@ Sentry.init({
     }
     if (networkNoiseDecision === "keep_sampled") {
       tagSampledLowValueNetworkError(event);
+      redactDropReactionFailureIdentifiers(event);
     }
 
     return sanitizeSentryEvent(event);

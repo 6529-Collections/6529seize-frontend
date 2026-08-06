@@ -1,0 +1,48 @@
+{
+  "contract": "museum-release-shadow-evidence-v1",
+  "purpose": "Exact historical code-range shadows for Museum tier selection. These are not production-release counts, performance claims, or fabricated evidence.",
+  "fixtures": [
+    {
+      "id": "museum-about-3628-p0",
+      "base_sha": "55913450cbe360cba1195b680ab47bc6a2939825",
+      "head_sha": "67068d87cdc78252d2d48d172f8386ceb1df82e7",
+      "expected_tier": "P2",
+      "expected_pr_packs": [
+        "test:e2e:museum-data-architecture",
+        "test:e2e:museum-institutional-practice",
+        "test:e2e:museum-about",
+        "test:e2e:museum-inside-system",
+        "test:e2e:museum-rights"
+      ],
+      "note": "Exact historical About typography range. The head rewrites an existing focused assertion, so the strengthened retention proof correctly escalates the range to P2."
+    },
+    {
+      "id": "museum-about-3625-test-addition-p2",
+      "base_sha": "9b90bf52828101faa09655f17cf2a3e541c89410",
+      "head_sha": "98d6ee04e84b6ee553724537b8bc9fef9a65c56d",
+      "expected_tier": "P2",
+      "expected_pr_packs": [
+        "test:e2e:museum-data-architecture",
+        "test:e2e:museum-institutional-practice",
+        "test:e2e:museum-about",
+        "test:e2e:museum-inside-system",
+        "test:e2e:museum-rights"
+      ],
+      "note": "Exact historical range with a focused test added rather than modified in place; it must not enter P0."
+    },
+    {
+      "id": "museum-classifier-control-plane-p3",
+      "base_sha": "d448d4c282c034fa2a1d5d1d95ce90fc85561e54",
+      "head_sha": "11f536d6a2d23c5d4f9eb936a4401d78712bb0c2",
+      "expected_tier": "P3",
+      "expected_pr_packs": [
+        "test:e2e:museum-data-architecture",
+        "test:e2e:museum-institutional-practice",
+        "test:e2e:museum-about",
+        "test:e2e:museum-inside-system",
+        "test:e2e:museum-rights"
+      ],
+      "note": "Exact historical classifier and release-policy range; policy changes remain P3 under the prior trusted policy."
+    }
+  ]
+}

@@ -16,8 +16,10 @@ import { logErrorSecurely } from "@/utils/error-sanitizer";
 import {
   MissingActiveProfileError,
   RoleValidationError,
+  TokenRefreshCancelledError,
 } from "@/errors/authentication";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { createDeferredPromise as createDeferred } from "@/__tests__/utils/deferredPromise";
 
 jest.mock("jwt-decode");
 jest.mock("@/services/auth/auth.utils");
@@ -51,6 +53,8 @@ const mockedTrackAuthImpactEvent = trackAuthImpactEvent as jest.MockedFunction<
 const mockedAreEqualAddresses = areEqualAddresses as jest.MockedFunction<
   typeof areEqualAddresses
 >;
+const TEST_REFRESHED_SESSION_VALUE = "fresh-access-token";
+const TEST_OTHER_ACCOUNT_SESSION_VALUE = "other-account-access-token";
 
 const validParams = {
   jwt: "jwt-token",
@@ -123,6 +127,65 @@ describe("jwt-validation.utils", () => {
     expect(mockedTrackAuthImpactEvent).not.toHaveBeenCalled();
   });
 
+  it("force-refreshes a locally current session after the server rejects it", async () => {
+    const refreshedSession = {
+      client_type: "web" as const,
+      address: "0x123",
+      role: null,
+      access_token: TEST_REFRESHED_SESSION_VALUE,
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    };
+    mockedJwtDecode
+      .mockReturnValueOnce(validPayload)
+      .mockReturnValueOnce({ ...validPayload, role: null });
+    mockedHasActiveSessionV2Auth.mockReturnValue(true);
+    mockedRefreshSessionV2.mockResolvedValue(refreshedSession);
+
+    await expect(
+      validateJwt({ ...validParams, serverRejected: true })
+    ).resolves.toEqual({
+      isValid: true,
+      refreshOutcome: "success",
+      wasCancelled: false,
+    });
+    expect(mockedRefreshSessionV2).toHaveBeenCalledWith({
+      address: "0x123",
+      abortSignal: validParams.abortSignal,
+    });
+    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(
+      refreshedSession,
+      { shouldPersist: undefined }
+    );
+  });
+
+  it("reports a failed refresh after the server rejects the session", async () => {
+    mockedJwtDecode.mockReturnValue(validPayload);
+    mockedHasActiveSessionV2Auth.mockReturnValue(true);
+    mockedRefreshSessionV2.mockRejectedValue(new Error("Failed to fetch"));
+
+    await expect(
+      validateJwt({ ...validParams, serverRejected: true })
+    ).resolves.toEqual({
+      isValid: false,
+      refreshOutcome: "failed",
+      wasCancelled: false,
+    });
+  });
+
+  it("does not trust the same local JWT after forced refresh is rejected", async () => {
+    mockedJwtDecode.mockReturnValue(validPayload);
+    mockedHasActiveSessionV2Auth.mockReturnValue(true);
+    mockedRefreshSessionV2.mockResolvedValue(null);
+
+    await expect(
+      validateJwt({ ...validParams, serverRejected: true })
+    ).resolves.toEqual({
+      isValid: false,
+      refreshOutcome: "empty",
+      wasCancelled: false,
+    });
+  });
+
   it("accepts a current session-v2 JWT without refreshing another connected account cookie", async () => {
     mockedJwtDecode.mockReturnValue(validPayload);
     mockedHasActiveSessionV2Auth.mockReturnValue(true);
@@ -130,7 +193,7 @@ describe("jwt-validation.utils", () => {
       client_type: "web",
       address: "0x456",
       role: null,
-      access_token: "other-account-access-token",
+      access_token: TEST_OTHER_ACCOUNT_SESSION_VALUE,
       access_token_expires_at: "2026-06-10T00:00:00.000Z",
     });
     mockedAreEqualAddresses.mockReturnValue(false);
@@ -200,7 +263,7 @@ describe("jwt-validation.utils", () => {
       client_type: "web" as const,
       address: "0x123",
       role: null,
-      access_token: "fresh-access-token",
+      access_token: TEST_REFRESHED_SESSION_VALUE,
       access_token_expires_at: "2026-06-10T00:00:00.000Z",
     };
     mockedJwtDecode.mockReturnValue(validPayload);
@@ -211,7 +274,10 @@ describe("jwt-validation.utils", () => {
       refreshOutcome: "success",
       wasCancelled: false,
     });
-    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(refreshedSession);
+    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(
+      refreshedSession,
+      { shouldPersist: undefined }
+    );
     expect(mockedTrackAuthImpactEvent).not.toHaveBeenCalled();
   });
 
@@ -220,7 +286,7 @@ describe("jwt-validation.utils", () => {
       client_type: "web" as const,
       address: "0x123",
       role: null,
-      access_token: "fresh-access-token",
+      access_token: TEST_REFRESHED_SESSION_VALUE,
       access_token_expires_at: "2026-06-10T00:00:00.000Z",
     };
     mockedJwtDecode
@@ -237,7 +303,10 @@ describe("jwt-validation.utils", () => {
       address: "0x123",
       abortSignal: validParams.abortSignal,
     });
-    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(refreshedSession);
+    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(
+      refreshedSession,
+      { shouldPersist: undefined }
+    );
     expect(syncWalletRoleWithServer).toHaveBeenCalledWith(null, "0x123");
     expect(mockedTrackAuthImpactEvent).toHaveBeenCalledWith(
       "Auth Session Refresh Recovered",
@@ -254,12 +323,85 @@ describe("jwt-validation.utils", () => {
     );
   });
 
+  it("does not persist a refresh after the auth state changes", async () => {
+    const refreshedSession = {
+      client_type: "web" as const,
+      address: "0x123",
+      role: null,
+      access_token: TEST_REFRESHED_SESSION_VALUE,
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    };
+    const refresh = createDeferred<typeof refreshedSession>();
+    let isCurrentAuthState = true;
+    mockedJwtDecode.mockReturnValue(validPayload);
+    mockedHasActiveSessionV2Auth.mockReturnValue(true);
+    mockedRefreshSessionV2.mockReturnValue(refresh.promise);
+
+    const validation = validateJwt({
+      ...validParams,
+      serverRejected: true,
+      shouldPersistRefreshedSession: () => isCurrentAuthState,
+    });
+
+    expect(mockedRefreshSessionV2).toHaveBeenCalled();
+    isCurrentAuthState = false;
+    refresh.resolve(refreshedSession);
+
+    await expect(validation).resolves.toEqual({
+      isValid: false,
+      refreshOutcome: "cancelled",
+      wasCancelled: true,
+    });
+    expect(mockedPersistSessionResponse).not.toHaveBeenCalled();
+  });
+
+  it("cancels a refresh when auth changes inside session persistence", async () => {
+    const refreshedSession = {
+      client_type: "web" as const,
+      address: "0x123",
+      role: null,
+      access_token: TEST_REFRESHED_SESSION_VALUE,
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    };
+    let isCurrentAuthState = true;
+    mockedJwtDecode
+      .mockReturnValueOnce(validPayload)
+      .mockReturnValueOnce({ ...validPayload, role: null });
+    mockedHasActiveSessionV2Auth.mockReturnValue(true);
+    mockedRefreshSessionV2.mockResolvedValue(refreshedSession);
+    mockedPersistSessionResponse.mockImplementationOnce(
+      async (_session, options) => {
+        expect(options?.shouldPersist?.()).toBe(true);
+        isCurrentAuthState = false;
+        expect(options?.shouldPersist?.()).toBe(false);
+        throw new TokenRefreshCancelledError();
+      }
+    );
+
+    await expect(
+      validateJwt({
+        ...validParams,
+        serverRejected: true,
+        shouldPersistRefreshedSession: () => isCurrentAuthState,
+      })
+    ).resolves.toEqual({
+      isValid: false,
+      refreshOutcome: "cancelled",
+      wasCancelled: true,
+    });
+    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(
+      refreshedSession,
+      { shouldPersist: expect.any(Function) }
+    );
+    expect(syncWalletRoleWithServer).not.toHaveBeenCalled();
+  });
+
   it("refreshes the wallet being validated instead of another active stored account", async () => {
     const refreshedSession = {
       client_type: "native" as const,
       address: "0x123",
       role: null,
-      access_token: "fresh-access-token",
+      access_token: TEST_REFRESHED_SESSION_VALUE,
       access_token_expires_at: "2026-06-10T00:00:00.000Z",
       native_refresh_token: "new-native-refresh-token",
       refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
@@ -279,7 +421,10 @@ describe("jwt-validation.utils", () => {
       address: "0x123",
       abortSignal: validParams.abortSignal,
     });
-    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(refreshedSession);
+    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(
+      refreshedSession,
+      { shouldPersist: undefined }
+    );
   });
 
   it("decodes the refreshed access token before persisting a rotated session", async () => {
@@ -287,7 +432,7 @@ describe("jwt-validation.utils", () => {
       client_type: "web" as const,
       address: "0x123",
       role: "fresh-role",
-      access_token: "fresh-access-token",
+      access_token: TEST_REFRESHED_SESSION_VALUE,
       access_token_expires_at: "2026-06-10T00:00:00.000Z",
     };
     mockedJwtDecode
@@ -302,8 +447,14 @@ describe("jwt-validation.utils", () => {
     });
 
     expect(mockedJwtDecode).toHaveBeenNthCalledWith(1, "jwt-token");
-    expect(mockedJwtDecode).toHaveBeenNthCalledWith(2, "fresh-access-token");
-    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(refreshedSession);
+    expect(mockedJwtDecode).toHaveBeenNthCalledWith(
+      2,
+      TEST_REFRESHED_SESSION_VALUE
+    );
+    expect(mockedPersistSessionResponse).toHaveBeenCalledWith(
+      refreshedSession,
+      { shouldPersist: undefined }
+    );
     expect(syncWalletRoleWithServer).toHaveBeenCalledWith(
       "fresh-role",
       "0x123"
@@ -315,7 +466,7 @@ describe("jwt-validation.utils", () => {
       client_type: "native" as const,
       address: "0x123",
       role: null,
-      access_token: "fresh-access-token",
+      access_token: TEST_REFRESHED_SESSION_VALUE,
       access_token_expires_at: "2026-06-10T00:00:00.000Z",
       native_refresh_token: "new-native-refresh-token",
       refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
@@ -331,7 +482,8 @@ describe("jwt-validation.utils", () => {
       expect.objectContaining({
         client_type: "native",
         native_refresh_token: "new-native-refresh-token",
-      })
+      }),
+      { shouldPersist: undefined }
     );
   });
 
@@ -352,7 +504,7 @@ describe("jwt-validation.utils", () => {
       client_type: "web",
       address: "0x456",
       role: null,
-      access_token: "fresh-access-token",
+      access_token: TEST_REFRESHED_SESSION_VALUE,
       access_token_expires_at: "2026-06-10T00:00:00.000Z",
     });
     mockedAreEqualAddresses.mockReturnValue(false);
@@ -375,7 +527,7 @@ describe("jwt-validation.utils", () => {
       client_type: "web",
       address: "0x123",
       role: "role-1",
-      access_token: "fresh-access-token",
+      access_token: TEST_REFRESHED_SESSION_VALUE,
       access_token_expires_at: "2026-06-10T00:00:00.000Z",
     });
 
@@ -400,7 +552,7 @@ describe("jwt-validation.utils", () => {
       client_type: "web",
       address: "0x123",
       role: "role-1",
-      access_token: "fresh-access-token",
+      access_token: TEST_REFRESHED_SESSION_VALUE,
       access_token_expires_at: "2026-06-10T00:00:00.000Z",
     });
 
@@ -420,7 +572,7 @@ describe("jwt-validation.utils", () => {
       client_type: "web",
       address: "0x123",
       role: "role-2",
-      access_token: "fresh-access-token",
+      access_token: TEST_REFRESHED_SESSION_VALUE,
       access_token_expires_at: "2026-06-10T00:00:00.000Z",
     });
 
@@ -464,7 +616,7 @@ describe("jwt-validation.utils", () => {
       client_type: "web",
       address: "0x123",
       role: null,
-      access_token: "fresh-access-token",
+      access_token: TEST_REFRESHED_SESSION_VALUE,
       access_token_expires_at: "2026-06-10T00:00:00.000Z",
     });
     mockedPersistSessionResponse.mockRejectedValue(
@@ -487,7 +639,7 @@ describe("jwt-validation.utils", () => {
       client_type: "web",
       address: "0x123",
       role: "new-role",
-      access_token: "fresh-access-token",
+      access_token: TEST_REFRESHED_SESSION_VALUE,
       access_token_expires_at: "2026-06-10T00:00:00.000Z",
     });
 

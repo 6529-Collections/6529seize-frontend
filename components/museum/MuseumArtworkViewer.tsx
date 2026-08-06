@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { CaseyArtwork } from "@/lib/museum/casey";
+import { MuseumRightsLink } from "./MuseumRightsLink";
 
 type ViewerMode = "still" | "live";
 type LoadState = "loading" | "ready" | "error";
@@ -181,18 +182,11 @@ export function MuseumArtworkViewer({
           <div className="tw-max-w-3xl">
             <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
               {artwork.creditLine}{" "}
-              {artwork.rightsUrl ? (
-                <a
-                  href={artwork.rightsUrl}
-                  target="_blank"
-                  rel="license noopener noreferrer"
-                  className="tw-text-iron-200 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-                >
-                  {artwork.rightsLabel}
-                </a>
-              ) : (
-                artwork.rightsLabel
-              )}
+              <MuseumRightsLink
+                href={artwork.rightsUrl}
+                label={artwork.rightsLabel}
+                className="tw-text-iron-200 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+              />
             </p>
             <p className="tw-m-0 tw-mt-1 tw-text-xs tw-leading-5 tw-text-iron-500">
               {t(

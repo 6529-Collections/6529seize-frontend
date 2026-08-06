@@ -35,6 +35,22 @@ const CASES = [
 }[];
 
 describe("PublicReviewStatusBanner", () => {
+  it("keeps status details wrapped through medium content widths", () => {
+    const { container } = render(
+      <PublicReviewStatusBanner
+        review={STREAM_REVIEW_DEFINITION}
+        displayedVersion={STREAM_REVIEW_DEFINITION.activeVersion}
+      />
+    );
+
+    expect(container.querySelector("section > div")).toHaveClass(
+      "@[860px]:tw-flex-row"
+    );
+    expect(container.querySelector("section > div")).not.toHaveClass(
+      "@[720px]:tw-flex-row"
+    );
+  });
+
   it.each(CASES)(
     "renders $status status from reusable review state",
     ({ auditStatus, deploymentStatus, explanation, labels, status }) => {
