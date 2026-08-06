@@ -7,7 +7,6 @@ const path = require("node:path");
 const INPUT_CONTRACT = "runner-benchmark-inputs-v1";
 const EVIDENCE_CONTRACT = "runner-benchmark-evidence-v1";
 const CONTROLLER_EVIDENCE_CONTRACT = "runner-benchmark-controller-evidence-v1";
-const inputContracts = require("./runner-benchmark-inputs.cjs");
 const {
   CANDIDATE_EVENTS,
   CANDIDATE_WORKFLOW_PATH,
@@ -42,7 +41,7 @@ const {
   validateControllerRunMetadata,
   validateRunMetadata,
   validateTrustedSource,
-} = inputContracts;
+} = require("./runner-benchmark-inputs.cjs");
 const STATUSES = Object.freeze([
   "success",
   "failure",

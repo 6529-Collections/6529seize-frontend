@@ -575,3 +575,17 @@
   binding, raw-observation forgery, and pending reconciliation. Focused suite:
   18 tests passed. No commit, push, PR, merge, deployment, runner activation,
   or settings mutation was performed.
+
+## 2026-08-06 - PR 4 hosted dead-code correction
+
+- Hosted Linux Knip rejected the input-contract helper because the consumer
+  destructured an intermediate CommonJS namespace, leaving 31 exports invisible
+  to Knip's usage graph. The consumer now destructures the helper directly and
+  the one genuinely private actor constant is no longer exported.
+- Closed two adjacent debts exposed by the now-authoritative Knip run: the
+  compatibility result interface is module-private, and the pure Museum change
+  classifier's test-only exports have the same explicit Knip disposition as
+  the repository's other adversarial policy helpers.
+- Exact follow-up validation passes full Knip, 36 focused tests, changed lint,
+  changed TypeScript, workflow syntax/expression lint, Node syntax, and
+  `codex-diff-check`. No runner or repository setting was changed.
