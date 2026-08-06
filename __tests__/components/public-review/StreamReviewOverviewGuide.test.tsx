@@ -80,48 +80,48 @@ describe("StreamReviewOverviewGuide", () => {
       )
     ).toBeInTheDocument();
     const permissionLink = screen.getByRole("link", {
-      name: "Read Curation and TDH Authorization",
+      name: "Permission details",
     });
     expect(permissionLink).toHaveAttribute(
       "href",
       "/reviews/6529-stream/curation-and-tdh-authorization"
     );
-    expect(permissionLink).toHaveTextContent("Permission details");
     expect(
-      screen.getByRole("link", { name: "Read For Artists" })
-    ).toHaveTextContent("Artist guide");
+      screen.getByRole("link", { name: "Artist guide" })
+    ).toHaveAttribute("href", "/reviews/6529-stream/for-artists");
     const artworkLifecycleLink = screen.getByRole("link", {
-      name: "Read Artwork Lifecycle",
+      name: "Artwork lifecycle",
     });
     expect(artworkLifecycleLink).toHaveAttribute(
       "href",
       "/reviews/6529-stream/artwork-lifecycle"
     );
-    expect(artworkLifecycleLink).toHaveTextContent("Artwork lifecycle");
     expect(
       screen.getByRole("link", {
-        name: "Read Fixed-Price Sales and Auctions",
+        name: "Mint and auction details",
       })
-    ).toHaveTextContent("Mint and auction details");
+    ).toHaveAttribute(
+      "href",
+      "/reviews/6529-stream/fixed-price-sales-and-auctions"
+    );
     expect(
       screen.getByRole("link", {
-        name: "Read Revenue, Splits, and Royalties",
+        name: "Payment details",
       })
-    ).toHaveTextContent("Payment details");
-    const completionLinks = screen.getAllByRole("link", {
-      name: "Read Freezing, Preservation, and Artwork Finality",
-    });
-    expect(completionLinks).toHaveLength(2);
-    expect(completionLinks[0]).toHaveAttribute(
+    ).toHaveAttribute(
+      "href",
+      "/reviews/6529-stream/revenue-splits-and-royalties"
+    );
+    expect(screen.getByRole("link", { name: "Freeze details" })).toHaveAttribute(
       "href",
       "/reviews/6529-stream/freezing-preservation-and-artwork-finality#core-freeze-fixes-a-defined-boundary"
     );
-    expect(completionLinks[0]).toHaveTextContent("Freeze details");
-    expect(completionLinks[1]).toHaveAttribute(
+    expect(
+      screen.getByRole("link", { name: "Finality details" })
+    ).toHaveAttribute(
       "href",
       "/reviews/6529-stream/freezing-preservation-and-artwork-finality#terminal-finality-is-delayed-for-a-reason"
     );
-    expect(completionLinks[1]).toHaveTextContent("Finality details");
     expect(
       screen.getByText(
         "A registered signer wallet creates permission for one exact mint or auction. Nothing happens yet."

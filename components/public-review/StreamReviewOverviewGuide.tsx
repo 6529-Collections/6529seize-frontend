@@ -234,13 +234,6 @@ export function StreamReviewOverviewGuide({
                     {t(DEFAULT_LOCALE, step.descriptionKey)}
                   </p>
                   <Link
-                    aria-label={t(
-                      DEFAULT_LOCALE,
-                      "publicReview.overviewGuide.readPage",
-                      {
-                        page: t(DEFAULT_LOCALE, page.titleKey),
-                      }
-                    )}
                     href={stepHref}
                     className="tw-group tw-mt-1 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                   >

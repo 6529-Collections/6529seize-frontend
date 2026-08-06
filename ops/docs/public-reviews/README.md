@@ -69,8 +69,8 @@ Every page includes:
 - a collapsible page-feedback rail that reads existing comments and includes a
   structured feedback form bound to the immutable displayed review version
 
-The current overview begins with a plain definition of Stream, a five-part map
-of what makes up a Stream artwork, a six-step artwork journey, and focused
+The current overview begins with a plain definition of Stream, five important
+parts of a Stream artwork, a seven-step artwork journey, and focused
 starting points for artists, collectors and minters, and auditors. A dated
 development update and six plain-language review questions follow that
 introduction. The current **For Artists** page starts with a plain artist guide
