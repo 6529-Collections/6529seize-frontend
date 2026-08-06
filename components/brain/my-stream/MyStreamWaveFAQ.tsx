@@ -8,19 +8,20 @@ import {
   ArrowTrendingUpIcon,
   ChartBarIcon,
   CheckIcon,
-  ChevronDownIcon,
   FlagIcon,
   InformationCircleIcon,
   NoSymbolIcon,
   SparklesIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useReducedMotion } from "framer-motion";
 import Link from "next/link";
-import React, { useEffect, useId, useRef, useState } from "react";
-import type { ComponentType, ReactNode, SVGProps } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { useContentTab } from "../ContentTabContext";
 import { useLayout } from "./layout/LayoutContext";
+import MyStreamWaveFAQAccordionItem from "./MyStreamWaveFAQAccordionItem";
+import type { WaveFaqSection } from "./MyStreamWaveFAQAccordionItem";
 
 interface MyStreamWaveFAQProps {
   readonly wave: ApiWave;
@@ -34,13 +35,6 @@ type FaqSectionId =
   | "submission"
   | "tdh"
   | "minting";
-
-interface FaqSection {
-  readonly id: FaqSectionId;
-  readonly title: string;
-  readonly Icon: ComponentType<SVGProps<SVGSVGElement>>;
-  readonly Content: ComponentType;
-}
 
 interface QaItem {
   readonly question: string;
@@ -76,19 +70,7 @@ const LINKS = {
 const CONTAINER_CLASS_NAME =
   "tw-w-full tw-flex tw-flex-col tw-pt-4 lg:tw-pr-2 tw-overflow-y-auto tw-no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-h-full";
 
-const FAQ_ALIGNMENT_GRID_CLASS_NAME =
-  "tw-grid tw-grid-cols-[1.25rem_minmax(0,1fr)_1.25rem] tw-gap-x-3";
-
 const FAQ_PANEL_ANIMATION_SECONDS = 0.32;
-
-const FAQ_PANEL_TRANSITION = {
-  height: {
-    duration: FAQ_PANEL_ANIMATION_SECONDS,
-    ease: [0.22, 1, 0.36, 1],
-  },
-  opacity: { duration: 0.18, ease: "easeOut" },
-  y: { duration: 0.24, ease: [0.22, 1, 0.36, 1] },
-} as const;
 
 const FAQ_SCROLL_ALIGNMENT_DELAY_MS = FAQ_PANEL_ANIMATION_SECONDS * 1000 + 40;
 
@@ -589,7 +571,7 @@ function MintingContent() {
   );
 }
 
-const FAQ_SECTIONS: readonly FaqSection[] = [
+const FAQ_SECTIONS: readonly WaveFaqSection<FaqSectionId>[] = [
   {
     id: "intro",
     title: "Intro",
@@ -633,98 +615,6 @@ const FAQ_SECTIONS: readonly FaqSection[] = [
     Content: MintingContent,
   },
 ];
-
-function FaqAccordionItem({
-  section,
-  sectionRef,
-  isOpen,
-  shouldReduceMotion,
-  onToggle,
-}: Readonly<{
-  section: FaqSection;
-  sectionRef: (element: HTMLElement | null) => void;
-  isOpen: boolean;
-  shouldReduceMotion: boolean;
-  onToggle: () => void;
-}>) {
-  const panelId = useId();
-  const buttonId = `${panelId}-button`;
-  const { Content, Icon } = section;
-
-  return (
-    <section
-      ref={sectionRef}
-      className={cx(
-        "tw-group tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none",
-        isOpen
-          ? "tw-border-primary-500/40 tw-bg-iron-900/90 tw-shadow-[inset_3px_0_0_rgba(59,130,246,0.75)]"
-          : "tw-border-white/[0.06] tw-bg-iron-950/40 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-iron-900/60"
-      )}
-    >
-      <h3 className="tw-mb-0">
-        <button
-          id={buttonId}
-          type="button"
-          aria-expanded={isOpen}
-          aria-controls={isOpen ? panelId : undefined}
-          onClick={onToggle}
-          className={cx(
-            FAQ_ALIGNMENT_GRID_CLASS_NAME,
-            "tw-min-h-12 tw-w-full tw-cursor-pointer tw-items-center tw-border-0 tw-bg-transparent tw-px-4 tw-py-3 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400/80 motion-reduce:tw-transition-none sm:tw-px-5 sm:tw-py-4 md:tw-py-3.5"
-          )}
-        >
-          <span
-            className={cx(
-              "tw-flex tw-size-5 tw-items-center tw-justify-center tw-text-iron-400 tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none",
-              isOpen
-                ? "tw-text-primary-300"
-                : "desktop-hover:group-hover:tw-text-iron-50"
-            )}
-          >
-            <Icon className="tw-size-5" aria-hidden="true" />
-          </span>
-          <span className="tw-min-w-0 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-50 md:tw-text-base">
-            {section.title}
-          </span>
-          <ChevronDownIcon
-            className={cx(
-              "tw-size-5 tw-text-iron-600 tw-transition-all tw-duration-300 motion-reduce:tw-transition-none",
-              isOpen && "tw-rotate-180 tw-text-iron-50"
-            )}
-            aria-hidden="true"
-          />
-        </button>
-      </h3>
-      <AnimatePresence initial={false}>
-        {isOpen && (
-          <motion.div
-            id={panelId}
-            role="region"
-            aria-labelledby={buttonId}
-            initial={{ height: 0, opacity: 0, y: -4 }}
-            animate={{ height: "auto", opacity: 1, y: 0 }}
-            exit={{ height: 0, opacity: 0, y: -2 }}
-            transition={
-              shouldReduceMotion ? { duration: 0 } : FAQ_PANEL_TRANSITION
-            }
-            className="tw-overflow-hidden"
-          >
-            <div
-              className={cx(
-                FAQ_ALIGNMENT_GRID_CLASS_NAME,
-                "tw-px-4 tw-pb-5 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-px-5 sm:tw-pb-6"
-              )}
-            >
-              <div className="tw-col-start-2 tw-col-end-4">
-                <Content />
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </section>
-  );
-}
 
 const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
   const { setActiveContentTab } = useContentTab();
@@ -785,7 +675,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
       <div className="tw-w-full tw-px-2 tw-pb-4 sm:tw-px-4">
         <div className="tw-flex tw-flex-col tw-gap-3">
           {FAQ_SECTIONS.map((section) => (
-            <FaqAccordionItem
+            <MyStreamWaveFAQAccordionItem
               key={section.id}
               section={section}
               sectionRef={(element) => {
