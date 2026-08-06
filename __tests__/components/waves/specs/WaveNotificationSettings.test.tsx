@@ -20,14 +20,6 @@ jest.mock("@tanstack/react-query", () => ({
   }),
 }));
 
-jest.mock("@/contexts/SeizeSettingsContext", () => ({
-  useSeizeSettings: () => ({
-    seizeSettings: {
-      all_drops_notifications_subscribers_limit: 1000,
-    },
-  }),
-}));
-
 const mockWave: ApiWave = {
   id: "wave-123",
   name: "Test Wave",
@@ -244,67 +236,11 @@ describe("WaveNotificationSettings", () => {
     ).toHaveClass("tw-text-primary-400");
   });
 
-  it("shows all-message option as unavailable when subscriber limit is reached", async () => {
-    renderComponent(mockWaveHighSubscribers);
-
-    expect(screen.getByLabelText("Open notification settings")).toBeEnabled();
-    const muteButton = screen.getByLabelText("Mute wave");
-    expect(muteButton).not.toBeDisabled();
-    expect(muteButton).toHaveAttribute(
-      "data-tooltip-content",
-      "Click to mute this wave"
-    );
-    expect(muteButton.parentElement?.parentElement).toHaveClass(
-      "tw-grid",
-      "tw-grid-cols-2"
-    );
-
-    await openNotificationMenu();
-
-    const allMentionsButton = screen.getByLabelText(
-      "Receive ALL mention notifications"
-    );
-    const allButton = screen.getByLabelText(
-      "Receive notifications for all messages"
-    );
-    expect(allMentionsButton).not.toBeDisabled();
-    expect(allButton).not.toBeDisabled();
-    expect(allButton).toHaveAttribute("aria-disabled", "true");
-    expect(allButton).toHaveAccessibleDescription(
-      "Below 1,000 followers only."
-    );
-    expect(screen.getByText("Below 1,000 followers only.")).toBeInTheDocument();
-    expect(allButton).toHaveClass("tw-cursor-not-allowed");
-    expect(allMentionsButton).toHaveClass("tw-cursor-pointer");
-    expect(allMentionsButton).not.toHaveAttribute("data-tooltip-content");
-    expect(allButton).not.toHaveAttribute("data-tooltip-content");
-  });
-
-  it("keeps unavailable all-message option focusable without firing an update", async () => {
-    const { commonApiPost } = require("@/services/api/common-api");
-
-    renderComponent(mockWaveHighSubscribers);
-
-    await openNotificationMenu();
-
-    const allButton = screen.getByLabelText(
-      "Receive notifications for all messages"
-    );
-    allButton.focus();
-
-    await userEvent.keyboard("{Enter}");
-
-    expect(commonApiPost).not.toHaveBeenCalled();
-    expect(screen.getByRole("menu")).toBeInTheDocument();
-    expect(allButton).toHaveFocus();
-  });
-
-  it("allows disabling all-message notifications when subscribed and subscriber limit reached", async () => {
+  it("enables all-message notifications for waves with many followers", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     const refetch = jest.fn();
-
     mockUseWaveNotificationSubscription.mockReturnValue({
-      data: { subscribed: true, enabled_group_notifications: [] },
+      data: { subscribed: false, enabled_group_notifications: [] },
       refetch,
     });
     commonApiPost.mockResolvedValue({});
@@ -317,15 +253,7 @@ describe("WaveNotificationSettings", () => {
       "Receive notifications for all messages"
     );
     expect(allButton).toBeEnabled();
-    expect(allButton).toHaveClass("tw-text-primary-400");
     expect(allButton).not.toHaveClass("tw-cursor-not-allowed");
-    expect(allButton.parentElement?.tagName).toBe("LI");
-    expect(allButton).toHaveAccessibleDescription(
-      "Re-enable below 1,000 followers."
-    );
-    expect(
-      screen.getByText("Re-enable below 1,000 followers.")
-    ).toBeInTheDocument();
 
     await userEvent.click(allButton);
 
@@ -333,7 +261,7 @@ describe("WaveNotificationSettings", () => {
       expect(commonApiPost).toHaveBeenCalledWith({
         endpoint: "notifications/wave-subscription/wave-456",
         body: {
-          subscribed: false,
+          subscribed: true,
           enabled_group_notifications: [],
         },
       });
@@ -488,7 +416,7 @@ describe("WaveNotificationSettings", () => {
     expect(refetch).toHaveBeenCalled();
   });
 
-  it("mutes the wave from the mute button when all-message notifications are unavailable", async () => {
+  it("mutes a wave with many followers", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     commonApiPost.mockResolvedValue({});
 
@@ -522,7 +450,7 @@ describe("WaveNotificationSettings", () => {
     });
   });
 
-  it("mutes the wave from the mute button when all-message notifications are available", async () => {
+  it("mutes the wave from the mute button", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     commonApiPost.mockResolvedValue({});
 

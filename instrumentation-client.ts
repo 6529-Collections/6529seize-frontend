@@ -28,6 +28,8 @@ import {
   shouldFilterByFilenameExceptions,
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
+  shouldFilterBrowserExtensionWalletRejection,
+  shouldFilterChromeMobileIosInjectedGaError,
   shouldFilterPoperBlockerOrphanFetchRejection,
   shouldFilterExpectedWaveRequestReplacementAbort,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
@@ -174,6 +176,10 @@ function shouldFilterEvent(
     return true;
   }
 
+  if (shouldFilterBrowserExtensionWalletRejection(event, hint)) {
+    return true;
+  }
+
   if (shouldFilterPoperBlockerOrphanFetchRejection(event, hint)) {
     return true;
   }
@@ -224,6 +230,10 @@ function shouldFilterEvent(
   // retaining only the sampled diagnostic subset would hide genuine app errors.
 
   if (shouldFilterAppleWebKitSortedTrackListTypeError(event)) {
+    return true;
+  }
+
+  if (shouldFilterChromeMobileIosInjectedGaError(event)) {
     return true;
   }
 

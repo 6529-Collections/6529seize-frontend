@@ -107,6 +107,7 @@ export const isIndexedDBError = (error: unknown): boolean => {
     /database\s+connection\s+is\s+closing/i,
     /Internal error opening backing store/i,
     /^(?:UnknownError: )?Unable to open database file on disk$/i,
+    /^(?:UnknownError: )?Attempt to get a record from database without an in-progress transaction$/i,
     /DOMException.*QuotaExceeded/i,
     /DOMException.*UnknownError/i,
     /^(?:UnknownError: )?Database deleted by request of the user$/i,

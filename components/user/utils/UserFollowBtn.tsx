@@ -36,10 +36,7 @@ export const FOLLOW_BTN_SVG_CLASSES: Record<UserFollowBtnSize, string> = {
   [UserFollowBtnSize.MEDIUM]: "tw-h-4 tw-w-4 md:tw-h-5 md:tw-w-5 -tw-ml-1",
 };
 
-const FOLLOW_BTN_LOADER_SIZES: Record<
-  UserFollowBtnSize,
-  CircleLoaderSize
-> = {
+const FOLLOW_BTN_LOADER_SIZES: Record<UserFollowBtnSize, CircleLoaderSize> = {
   [UserFollowBtnSize.SMALL]: CircleLoaderSize.SMALL,
   [UserFollowBtnSize.MEDIUM]: CircleLoaderSize.MEDIUM,
 };
@@ -168,10 +165,10 @@ export default function UserFollowBtn({
       return;
     }
     if (following) {
-      await unFollowMutation.mutateAsync();
+      unFollowMutation.mutate();
       return;
     }
-    await followMutation.mutateAsync();
+    followMutation.mutate();
   };
 
   const isDirectMessagePending =

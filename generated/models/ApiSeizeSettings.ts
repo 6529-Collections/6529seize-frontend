@@ -16,7 +16,6 @@ import { HttpFile } from '../http/http';
 
 export class ApiSeizeSettings {
     'rememes_submission_tdh_threshold': number;
-    'all_drops_notifications_subscribers_limit': number;
     'memes_wave_id': string | null;
     'curation_wave_id': string | null;
     'distribution_admin_wallets': Array<string>;
@@ -33,12 +32,6 @@ export class ApiSeizeSettings {
         {
             "name": "rememes_submission_tdh_threshold",
             "baseName": "rememes_submission_tdh_threshold",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "all_drops_notifications_subscribers_limit",
-            "baseName": "all_drops_notifications_subscribers_limit",
             "type": "number",
             "format": "int64"
         },

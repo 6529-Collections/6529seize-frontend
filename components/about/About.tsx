@@ -10,6 +10,7 @@ import {
   AboutCol as Col,
   AboutContainer as Container,
   ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS,
+  ABOUT_PAGE_SURFACE_CLASS_NAME,
   AboutRow as Row,
 } from "./AboutLayout";
 import AboutApply from "./AboutApply";
@@ -63,7 +64,9 @@ export default function About({ section }: { readonly section: AboutSection }) {
 
   if (section === AboutSection.MEMES) {
     return (
-      <div className="tw-min-h-[calc(100vh-100px)] tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F]">
+      <div
+        className={`tw-min-h-[calc(100vh-100px)] ${ABOUT_PAGE_SURFACE_CLASS_NAME}`}
+      >
         <AboutContentsDropdown
           className="tw-mx-auto !tw-mb-0 tw-w-full tw-max-w-[1400px] !tw-bg-[#0D0D0F] tw-px-4 sm:tw-px-6 lg:tw-px-8"
           currentSection={section}
@@ -92,9 +95,7 @@ export default function About({ section }: { readonly section: AboutSection }) {
           />
           <div
             className={
-              usesLegalLayout
-                ? ABOUT_LEGAL_CONTENT_CLASS
-                : "tw-w-full"
+              usesLegalLayout ? ABOUT_LEGAL_CONTENT_CLASS : "tw-w-full"
             }
           >
             <AboutSectionContent section={section} />

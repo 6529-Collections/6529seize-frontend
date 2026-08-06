@@ -3,33 +3,36 @@
 import { useSetTitle } from "@/contexts/TitleContext";
 import styles from "@/styles/Home.module.css";
 import { AboutSection } from "@/types/enums";
+import clsx from "clsx";
 import Link from "next/link";
 import {
   AboutCol as Col,
   AboutContainer as Container,
   AboutRow as Row,
+  CONTENT_PAGE_CONTAINER_CLASS,
+  CONTENT_PAGE_MAIN_CLASS,
+  CONTENT_PAGE_TITLE_CLASS,
 } from "@/components/about/AboutLayout";
 
 export default function DisputeResolutionPage() {
   useSetTitle("Dispute Resolution | 6529.io");
 
   return (
-    <main className={`${styles["main"]} tailwind-scope`}>
-      <Container>
-        <Row className="tw-pb-4 tw-pt-4">
-          <Col>
-            <h1>Dispute Resolution</h1>
+    <main className={clsx(styles["main"], CONTENT_PAGE_MAIN_CLASS)}>
+      <Container fluid className={CONTENT_PAGE_CONTAINER_CLASS}>
+        <Row>
+          <Col className="tw-max-w-4xl">
+            <h1 className={CONTENT_PAGE_TITLE_CLASS}>Dispute Resolution</h1>
           </Col>
         </Row>
-        <Row>
-          <Col>
-            <p>
+        <Row className="tw-pt-5">
+          <Col className="tw-max-w-4xl tw-pb-12 tw-text-base tw-leading-7 tw-text-iron-300">
+            <p className="tw-mb-5">
               Dispute resolution for disputes relating to the Terms shall occur
               through JAMS, an arbitration organization, under the terms noted
               below, which shall be considered part of the Terms.
             </p>
-            <br />
-            <ol>
+            <ol className="tw-mb-0 tw-space-y-5 tw-pl-6 marker:tw-text-iron-600">
               <li>
                 Any dispute, claim or controversy arising out of or relating to
                 this Agreement or the breach, termination, enforcement,
@@ -43,7 +46,6 @@ export default function DisputeResolutionPage() {
                 seeking provisional remedies in aid of arbitration from a court
                 of appropriate jurisdiction.
               </li>
-              <br />
               <li>
                 The parties shall maintain the confidential nature of the
                 arbitration proceeding and the Award, including the Hearing,
@@ -53,7 +55,6 @@ export default function DisputeResolutionPage() {
                 a judicial challenge to an Award or its enforcement, or unless
                 otherwise required by law or judicial decision.
               </li>
-              <br />
               <li>
                 This Agreement and the rights of the parties hereunder shall be
                 governed by and construed in accordance with the laws of the
@@ -65,7 +66,6 @@ export default function DisputeResolutionPage() {
                 of this Agreement shall be governed by the Federal Arbitration
                 Act (9 U.S.C., Secs. 1-16).
               </li>
-              <br />
               <li>
                 In any arbitration arising out of or related to this Agreement,
                 the arbitrator(s) shall award to the prevailing party, if any,
@@ -79,9 +79,11 @@ export default function DisputeResolutionPage() {
                 connection with the arbitration.
               </li>
             </ol>
-            <br />
-            <p>
-              <Link href={`/about/${AboutSection.TERMS_OF_SERVICE}`}>
+            <p className="tw-mb-0 tw-mt-8">
+              <Link
+                href={`/about/${AboutSection.TERMS_OF_SERVICE}`}
+                className="hover:tw-text-primary-200 tw-inline-flex tw-text-sm tw-font-semibold tw-text-primary-300 tw-no-underline focus-visible:tw-rounded-sm focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+              >
                 Back to Terms of Service
               </Link>{" "}
             </p>

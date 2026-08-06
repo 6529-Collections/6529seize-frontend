@@ -12,6 +12,8 @@ import {
   shouldFilterAppleWebKitSortedTrackListTypeError,
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
+  shouldFilterBrowserExtensionWalletRejection,
+  shouldFilterChromeMobileIosInjectedGaError,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterGifPickerTenorCategoriesError,
@@ -108,6 +110,26 @@ type AppleWebKitSortedTrackListOverrides = {
   includeBrowserContext?: boolean | undefined;
   browserName?: string | undefined;
   transaction?: string | undefined;
+};
+type ChromeMobileIosInjectedGaEventOptions = {
+  level?: string | undefined;
+  message?: string | undefined;
+  includeMessage?: boolean | undefined;
+  exceptionType?: string | undefined;
+  exceptionValue?: string | undefined;
+  mechanismType?: string | undefined;
+  handled?: boolean | undefined;
+  browserName?: string | undefined;
+  browserVersion?: string | undefined;
+  osName?: string | undefined;
+  osVersion?: string | undefined;
+  includeContexts?: boolean | undefined;
+  userAgent?: string | undefined;
+  includeUserAgent?: boolean | undefined;
+  transaction?: string | undefined;
+  requestUrl?: string | undefined;
+  frames?: SentryStackFrame[] | undefined;
+  includeAdditionalException?: boolean | undefined;
 };
 type InstagramPageHideBridgeEventOptions = {
   type?: string | undefined;
@@ -284,6 +306,50 @@ describe("sentry-client-filters", () => {
     "No matching key. session topic doesn't exist: f17f5eaa1c3041fe37871f9eb24f4de53e1b11e494ec3def4b510d09acf42e32";
   const extensionMessagingConnectionFailureMessage =
     "Could not establish connection. Receiving end does not exist.";
+  const browserExtensionWalletRejectionMessage = "User rejected the request.";
+  const browserExtensionWalletBridgePath = "app:///content-scripts/bridge.js";
+  const browserExtensionWalletBridgeFrames: SentryStackFrame[] = [
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "o",
+      lineno: 12,
+      colno: 50420,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "Ce.dispose",
+      lineno: 1,
+      colno: 30025,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "Ce._dispose",
+      lineno: 1,
+      colno: 28455,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "Object.userRejectedRequest",
+      lineno: 1,
+      colno: 15879,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "a",
+      lineno: 1,
+      colno: 16591,
+      in_app: true,
+    },
+  ];
   const poperBlockerNetworkErrorMessage =
     "Network request failed. Please check your connection and try again. (/api/dm-drops/unread)";
   const webkitExtensionMessagingTabNotFoundMessage =
@@ -1120,6 +1186,40 @@ describe("sentry-client-filters", () => {
     ...overrides,
   });
 
+  const createBrowserExtensionWalletRejectionEvent = ({
+    type = "Error",
+    value = browserExtensionWalletRejectionMessage,
+    mechanismType = "auto.browser.global_handlers.onunhandledrejection",
+    handled = false,
+    frames = browserExtensionWalletBridgeFrames,
+    additionalException,
+    eventOverrides = {},
+  }: {
+    type?: string | undefined;
+    value?: string | undefined;
+    mechanismType?: string | undefined;
+    handled?: boolean | undefined;
+    frames?: SentryStackFrame[] | undefined;
+    additionalException?: SentryExceptionValue | undefined;
+    eventOverrides?: TestSentryClientEventOverrides | undefined;
+  } = {}): TestSentryClientEvent => ({
+    ...eventOverrides,
+    exception: {
+      values: [
+        {
+          type,
+          value,
+          mechanism: {
+            type: mechanismType,
+            handled,
+          },
+          stacktrace: { frames },
+        },
+        ...(additionalException ? [additionalException] : []),
+      ],
+    },
+  });
+
   const createPoperBlockerOrphanFetchRejectionEvent = ({
     type = "TypeError",
     value = poperBlockerNetworkErrorMessage,
@@ -1310,6 +1410,167 @@ describe("sentry-client-filters", () => {
           function: "renderPage",
           in_app: true,
         },
+      },
+    ],
+  ];
+
+  const createChromeMobileIosInjectedGaFrame = (
+    overrides: Partial<SentryStackFrame> = {}
+  ): SentryStackFrame => ({
+    filename: "https://6529.io/nextgen/collection/pebbles/art",
+    function: "?",
+    lineno: 415,
+    colno: 45,
+    in_app: true,
+    ...overrides,
+  });
+
+  const createChromeMobileIosInjectedGaEvent = ({
+    level = "error",
+    message,
+    includeMessage = false,
+    exceptionType = "Error",
+    exceptionValue = "ga",
+    mechanismType = "auto.browser.global_handlers.onerror",
+    handled = false,
+    browserName = "Chrome Mobile iOS",
+    browserVersion = "150.0.7871",
+    osName = "iOS",
+    osVersion = "26.5.2",
+    includeContexts = true,
+    userAgent =
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 26_5_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/150.0.7871.1 Mobile/TEST Safari/604.1",
+    includeUserAgent = false,
+    transaction = "/nextgen/collection/:collection/art",
+    requestUrl = "https://6529.io/nextgen/collection/pebbles/art",
+    frames = [createChromeMobileIosInjectedGaFrame()],
+    includeAdditionalException = false,
+  }: ChromeMobileIosInjectedGaEventOptions = {}): TestSentryClientEvent => ({
+    level,
+    ...(includeMessage ? { message } : {}),
+    transaction,
+    request: {
+      url: requestUrl,
+      ...(includeUserAgent ? { headers: { "User-Agent": userAgent } } : {}),
+    },
+    ...(includeContexts
+      ? {
+          contexts: {
+            browser: { name: browserName, version: browserVersion },
+            os: { name: osName, version: osVersion },
+          },
+        }
+      : {}),
+    exception: {
+      values: [
+        {
+          type: exceptionType,
+          value: exceptionValue,
+          mechanism: {
+            type: mechanismType,
+            handled,
+          },
+          stacktrace: { frames },
+        },
+        ...(includeAdditionalException
+          ? [
+              {
+                type: "Error",
+                value: "Application request validation failed.",
+              },
+            ]
+          : []),
+      ],
+    },
+  });
+
+  const chromeMobileIosInjectedGaNearMisses: Array<
+    [string, ChromeMobileIosInjectedGaEventOptions]
+  > = [
+    ["a changed level", { level: "warning" }],
+    ["a top-level message", { includeMessage: true, message: "ga" }],
+    ["a changed exception type", { exceptionType: "TypeError" }],
+    ["a changed exception value", { exceptionValue: "gb" }],
+    ["a changed mechanism", { mechanismType: "generic" }],
+    ["a handled exception", { handled: true }],
+    ["a changed browser", { browserName: "Mobile Safari" }],
+    ["a changed browser version", { browserVersion: "150.0.7872" }],
+    ["a changed operating system", { osName: "macOS" }],
+    ["a changed operating system version", { osVersion: "26.5.3" }],
+    [
+      "no platform information",
+      { includeContexts: false, includeUserAgent: false },
+    ],
+    [
+      "a changed raw user agent",
+      {
+        includeContexts: false,
+        includeUserAgent: true,
+        userAgent:
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 26_5_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/150.0.7872.1 Mobile/TEST Safari/604.1",
+      },
+    ],
+    ["a changed transaction", { transaction: "/notifications" }],
+    ["a changed request URL", { requestUrl: "/notifications" }],
+    [
+      "a changed document path",
+      {
+        frames: [
+          createChromeMobileIosInjectedGaFrame({
+            filename: "app:///nextgen/collection/pebbles/about",
+          }),
+        ],
+      },
+    ],
+    [
+      "a named function",
+      {
+        frames: [
+          createChromeMobileIosInjectedGaFrame({ function: "renderArt" }),
+        ],
+      },
+    ],
+    [
+      "a whitespace-padded function",
+      {
+        frames: [createChromeMobileIosInjectedGaFrame({ function: " ? " })],
+      },
+    ],
+    [
+      "a changed line",
+      { frames: [createChromeMobileIosInjectedGaFrame({ lineno: 416 })] },
+    ],
+    [
+      "a changed column",
+      { frames: [createChromeMobileIosInjectedGaFrame({ colno: 46 })] },
+    ],
+    [
+      "a non-application frame marker",
+      { frames: [createChromeMobileIosInjectedGaFrame({ in_app: false })] },
+    ],
+    ["another exception", { includeAdditionalException: true }],
+    [
+      "another document frame",
+      {
+        frames: [
+          createChromeMobileIosInjectedGaFrame(),
+          createChromeMobileIosInjectedGaFrame(),
+        ],
+      },
+    ],
+    [
+      "an application chunk frame",
+      {
+        frames: [
+          createChromeMobileIosInjectedGaFrame(),
+          {
+            filename: "app:///_next/static/chunks/app-owned.js",
+            function: "renderArt",
+            lineno: 1,
+            colno: 1,
+            in_app: true,
+          },
+        ],
       },
     ],
   ];
@@ -5452,6 +5713,54 @@ describe("sentry-client-filters", () => {
     }
   );
 
+  it("filters the raw Chrome Mobile iOS document ga error", () => {
+    const event = createChromeMobileIosInjectedGaEvent({
+      includeContexts: false,
+      includeUserAgent: true,
+    });
+
+    const result = shouldFilterChromeMobileIosInjectedGaError(event);
+
+    expect(result).toBe(true);
+  });
+
+  it("filters the normalized Chrome Mobile iOS document ga error", () => {
+    const documentPath = "app:///nextgen/collection/pebbles/art";
+    const event = {
+      ...createChromeMobileIosInjectedGaEvent({
+        includeMessage: true,
+        message: "",
+        requestUrl: "/nextgen/collection/[collection]/art",
+        frames: [
+          {
+            filename: documentPath,
+            abs_path: documentPath,
+            lineno: 415,
+            colno: 45,
+            in_app: true,
+          },
+        ],
+      }),
+      transaction: undefined,
+      tags: { transaction: "/nextgen/collection/:collection/art" },
+    };
+
+    const result = shouldFilterChromeMobileIosInjectedGaError(event);
+
+    expect(result).toBe(true);
+  });
+
+  it.each(chromeMobileIosInjectedGaNearMisses)(
+    "does not filter the Chrome Mobile iOS document ga error with %s",
+    (_caseName, options) => {
+      const event = createChromeMobileIosInjectedGaEvent(options);
+
+      const result = shouldFilterChromeMobileIosInjectedGaError(event);
+
+      expect(result).toBe(false);
+    }
+  );
+
   it("filters Sentry route parameterization cyclic JSON errors", () => {
     // Arrange
     const event = createSentryRouteParameterizationEvent();
@@ -8077,6 +8386,176 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters the exact browser-extension wallet rejection bridge stack", () => {
+    const event = createBrowserExtensionWalletRejectionEvent();
+
+    const result = shouldFilterBrowserExtensionWalletRejection(event);
+
+    expect(result).toBe(true);
+  });
+
+  it.each([
+    [
+      "message",
+      createBrowserExtensionWalletRejectionEvent({
+        value: "User denied the request.",
+      }),
+    ],
+    [
+      "exception type",
+      createBrowserExtensionWalletRejectionEvent({ type: "TypeError" }),
+    ],
+    [
+      "capture mechanism",
+      createBrowserExtensionWalletRejectionEvent({
+        mechanismType: "auto.browser.global_handlers.onerror",
+      }),
+    ],
+    [
+      "handled state",
+      createBrowserExtensionWalletRejectionEvent({ handled: true }),
+    ],
+    [
+      "bridge path",
+      createBrowserExtensionWalletRejectionEvent({
+        frames: browserExtensionWalletBridgeFrames.map((frame, index) =>
+          index === 0
+            ? {
+                ...frame,
+                filename: "app:///content-scripts/content.js",
+                abs_path: "app:///content-scripts/content.js",
+              }
+            : frame
+        ),
+      }),
+    ],
+    [
+      "frame function",
+      createBrowserExtensionWalletRejectionEvent({
+        frames: browserExtensionWalletBridgeFrames.map((frame, index) =>
+          index === 3 ? { ...frame, function: "userRejectedRequest" } : frame
+        ),
+      }),
+    ],
+    [
+      "frame coordinate",
+      createBrowserExtensionWalletRejectionEvent({
+        frames: browserExtensionWalletBridgeFrames.map((frame, index) =>
+          index === 4 ? { ...frame, colno: 16592 } : frame
+        ),
+      }),
+    ],
+    [
+      "missing frame",
+      createBrowserExtensionWalletRejectionEvent({
+        frames: browserExtensionWalletBridgeFrames.slice(0, -1),
+      }),
+    ],
+    [
+      "extra frame",
+      createBrowserExtensionWalletRejectionEvent({
+        frames: [
+          ...browserExtensionWalletBridgeFrames,
+          {
+            filename: browserExtensionWalletBridgePath,
+            abs_path: browserExtensionWalletBridgePath,
+            function: "a",
+            lineno: 1,
+            colno: 16591,
+            in_app: true,
+          },
+        ],
+      }),
+    ],
+  ])(
+    "keeps a wallet rejection bridge near miss with changed %s",
+    (_, event) => {
+      const result = shouldFilterBrowserExtensionWalletRejection(event);
+
+      expect(result).toBe(false);
+    }
+  );
+
+  it("keeps mixed exceptions containing the wallet rejection bridge stack", () => {
+    const event = createBrowserExtensionWalletRejectionEvent({
+      additionalException: {
+        type: "TypeError",
+        value: "Application wallet state failed.",
+        stacktrace: {
+          frames: [
+            {
+              filename: "app:///services/wallet/connection.ts",
+              function: "connectWallet",
+              in_app: true,
+            },
+          ],
+        },
+      },
+    });
+
+    const result = shouldFilterBrowserExtensionWalletRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps events with an empty exception list", () => {
+    const result = shouldFilterBrowserExtensionWalletRejection({
+      exception: { values: [] },
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps wallet rejection bridge events without a mechanism", () => {
+    const event = createBrowserExtensionWalletRejectionEvent();
+    const value = event.exception?.values?.[0];
+    if (!value) {
+      throw new Error("Expected a wallet rejection exception value");
+    }
+    delete value.mechanism;
+
+    const result = shouldFilterBrowserExtensionWalletRejection(event);
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps wallet rejection bridge events with app-owned original stacks", () => {
+    const event = createBrowserExtensionWalletRejectionEvent();
+    const error = new Error(browserExtensionWalletRejectionMessage);
+    error.stack = [
+      `Error: ${browserExtensionWalletRejectionMessage}`,
+      `    at o (${browserExtensionWalletBridgePath}:12:50420)`,
+      "    at requestSignature (webpack-internal:///(app-pages-browser)/./services/wallet/signature.ts:10:1)",
+    ].join("\n");
+
+    const result = shouldFilterBrowserExtensionWalletRejection(event, {
+      originalException: error,
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it("keeps wallet rejection bridge events with app-owned serialized stacks", () => {
+    const event = createBrowserExtensionWalletRejectionEvent({
+      eventOverrides: {
+        extra: {
+          __serialized__: {
+            message: browserExtensionWalletRejectionMessage,
+            stack: [
+              `Error: ${browserExtensionWalletRejectionMessage}`,
+              `    at o (${browserExtensionWalletBridgePath}:12:50420)`,
+              "    at requestSignature (app:///services/wallet/signature.ts:10:1)",
+            ].join("\n"),
+          },
+        },
+      },
+    });
+
+    const result = shouldFilterBrowserExtensionWalletRejection(event);
+
+    expect(result).toBe(false);
+  });
+
   it("filters observed extension messaging failures from injected script frames", () => {
     // Arrange
     const event = createBrowserExtensionMessagingConnectionEvent();
@@ -9834,6 +10313,34 @@ describe("sentry-client-filters", () => {
   it("filters a Wave replacement abort at the causal time boundary", () => {
     const event = createExpectedWaveReplacementAbortEvent({
       eventTimestamp: expectedWaveAbortBreadcrumbTimestamp + 1,
+    });
+
+    const result = shouldFilterExpectedWaveRequestReplacementAbort(event);
+
+    expect(result).toBe(true);
+  });
+
+  it("filters when the newest Wave cancellation is the expected replacement", () => {
+    const event = createExpectedWaveReplacementAbortEvent({
+      breadcrumbs: [
+        {
+          category: "wave.request",
+          message: "wave_request_aborted",
+          data: {
+            request_kind: "background_sync",
+            trigger: "hook_unmounted",
+          },
+        },
+        {
+          category: "wave.request",
+          message: "wave_request_aborted",
+          timestamp: expectedWaveAbortBreadcrumbTimestamp,
+          data: {
+            request_kind: "background_sync",
+            trigger: "request_replaced",
+          },
+        },
+      ],
     });
 
     const result = shouldFilterExpectedWaveRequestReplacementAbort(event);

@@ -46,7 +46,14 @@ function getLatestRecentWaveAbortBreadcrumb(
     -maximumCausalBreadcrumbDistance
   );
 
-  return recentBreadcrumbs.reverse().find(isWaveAbortBreadcrumb);
+  for (let index = recentBreadcrumbs.length - 1; index >= 0; index -= 1) {
+    const breadcrumb = recentBreadcrumbs[index]!;
+    if (isWaveAbortBreadcrumb(breadcrumb)) {
+      return breadcrumb;
+    }
+  }
+
+  return undefined;
 }
 
 function isWithinCausalTimeWindow(

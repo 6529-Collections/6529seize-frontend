@@ -41,7 +41,9 @@ describe("production prebuild and promotion contract", () => {
     expect(buildSource).toContain("./bin/6529 run build:ci");
     expect(buildSource).not.toContain("./bin/6529 run build\n");
     expect(buildSource).toContain('artifact_contract:"production-prebuild-v1"');
-    expect(buildSource).toContain("find manifest.json target -type f -print0");
+    expect(buildSource).toContain(
+      "find manifest.json artifact-portability.json target -type f -print0"
+    );
     expect(buildSource).toContain("production-frontend-${{ github.sha }}");
     expect(job["runs-on"]).toContain("PRODUCTION_BUILD_RUNNER");
     expect(JSON.stringify(build.jobs)).not.toContain('"uses":"./.github/');

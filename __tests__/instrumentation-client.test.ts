@@ -34,6 +34,8 @@ describe("instrumentation-client", () => {
   const readOnlyEthereumProxyBreadcrumbMessage =
     "[2026-08-04T04:00:10.853Z] [[WagmiSetup] Skipping safe ethereum proxy install for read-only window.ethereum] Error: Signature request failed. Please try again.";
   const indexedDBUserDeleteMessage = "Database deleted by request of the user";
+  const indexedDBGetRecordNoTransactionMessage =
+    "Attempt to get a record from database without an in-progress transaction";
   const talismanOnboardingMessage =
     "Talisman extension has not been configured yet. Please continue with onboarding.";
   const disconnectedProviderStack =
@@ -83,6 +85,50 @@ describe("instrumentation-client", () => {
     "auto.browser.browserapierrors.setTimeout";
   const browserUnhandledRejectionMechanismType =
     "auto.browser.global_handlers.onunhandledrejection";
+  const browserExtensionWalletRejectionMessage = "User rejected the request.";
+  const browserExtensionWalletBridgePath = "app:///content-scripts/bridge.js";
+  const browserExtensionWalletBridgeFrames = [
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "o",
+      lineno: 12,
+      colno: 50420,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "Ce.dispose",
+      lineno: 1,
+      colno: 30025,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "Ce._dispose",
+      lineno: 1,
+      colno: 28455,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "Object.userRejectedRequest",
+      lineno: 1,
+      colno: 15879,
+      in_app: true,
+    },
+    {
+      filename: browserExtensionWalletBridgePath,
+      abs_path: browserExtensionWalletBridgePath,
+      function: "a",
+      lineno: 1,
+      colno: 16591,
+      in_app: true,
+    },
+  ];
   const expectedWaveAbortErrorValue = "AbortError: The user aborted a request.";
   const poperBlockerNetworkErrorMessage =
     "Network request failed. Please check your connection and try again. (/api/dm-drops/unread)";
@@ -368,6 +414,25 @@ describe("instrumentation-client", () => {
     },
   });
 
+  const createBrowserExtensionWalletRejectionEvent = (
+    frames: Array<Record<string, unknown>> = browserExtensionWalletBridgeFrames
+  ) => ({
+    ...createUnhandledRejectionEvent(browserExtensionWalletRejectionMessage),
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: browserExtensionWalletRejectionMessage,
+          mechanism: {
+            type: browserUnhandledRejectionMechanismType,
+            handled: false,
+          },
+          stacktrace: { frames },
+        },
+      ],
+    },
+  });
+
   const createDropReactionNetworkEvent = (eventId: string) => ({
     event_id: eventId,
     level: "warning",
@@ -575,6 +640,41 @@ describe("instrumentation-client", () => {
           },
           stacktrace: {
             frames,
+          },
+        },
+      ],
+    },
+  });
+
+  const createChromeMobileIosInjectedGaEvent = () => ({
+    level: "error",
+    transaction: "/nextgen/collection/:collection/art",
+    request: {
+      url: "https://6529.io/nextgen/collection/pebbles/art",
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 26_5_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/150.0.7871.1 Mobile/TEST Safari/604.1",
+      },
+    },
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: "ga",
+          mechanism: {
+            type: "auto.browser.global_handlers.onerror",
+            handled: false,
+          },
+          stacktrace: {
+            frames: [
+              {
+                filename: "app:///nextgen/collection/pebbles/art",
+                function: "?",
+                lineno: 415,
+                colno: 45,
+                in_app: true,
+              },
+            ],
           },
         },
       ],
@@ -854,6 +954,14 @@ describe("instrumentation-client", () => {
       description: "Sentry-prefixed WebKit open-failure value",
       message: "UnknownError: Unable to open database file on disk",
     },
+    {
+      description: "raw WebKit record-without-transaction message",
+      message: indexedDBGetRecordNoTransactionMessage,
+    },
+    {
+      description: "Sentry-prefixed WebKit record-without-transaction value",
+      message: `UnknownError: ${indexedDBGetRecordNoTransactionMessage}`,
+    },
   ])(
     "classifies the $description as a handled IndexedDB warning",
     ({ message }) => {
@@ -888,6 +996,10 @@ describe("instrumentation-client", () => {
     "UnknownError: Database deleted by request of the administrator",
     "UnknownError: Database deleted by request of the user during migration",
     "UnknownError: Unable to open database file on disk because it is locked",
+    `${indexedDBGetRecordNoTransactionMessage} while reopening`,
+    `UnknownError:${indexedDBGetRecordNoTransactionMessage}`,
+    "Attempt to get records from database without an in-progress transaction",
+    "Attempt to store a record in an object store without an in-progress transaction",
   ])("preserves the near-miss database failure %s", (message) => {
     const beforeSend = loadBeforeSend();
 
@@ -1855,6 +1967,50 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
+  it("drops the exact Chrome Mobile iOS document ga error", () => {
+    const beforeSend = loadBeforeSend();
+    const event = createChromeMobileIosInjectedGaEvent();
+
+    const result = beforeSend(event);
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps the Chrome Mobile iOS ga error when an application chunk frame is present", () => {
+    const beforeSend = loadBeforeSend();
+    const documentEvent = createChromeMobileIosInjectedGaEvent();
+    const [documentException] = documentEvent.exception.values;
+    if (!documentException) {
+      throw new Error("Expected the test event to contain an exception.");
+    }
+    const event = {
+      ...documentEvent,
+      exception: {
+        values: [
+          {
+            ...documentException,
+            stacktrace: {
+              frames: [
+                ...documentException.stacktrace.frames,
+                {
+                  filename: "app:///_next/static/chunks/app-owned.js",
+                  function: "renderArt",
+                  lineno: 1,
+                  colno: 1,
+                  in_app: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event);
+
+    expect(result).not.toBeNull();
+  });
+
   it.each(["app:///", "app:///waves/11111111-2222-4333-8444-555555555555"])(
     "drops the exact client-shaped injected iOS autoplay rejection from %s",
     (path) => {
@@ -2255,6 +2411,27 @@ describe("instrumentation-client", () => {
     const result = beforeSend(noiseFilterFixtures.threeV);
 
     expect(result).toBeNull();
+  });
+
+  it("drops the exact browser-extension wallet rejection bridge stack", () => {
+    const beforeSend = loadBeforeSend();
+
+    const result = beforeSend(createBrowserExtensionWalletRejectionEvent());
+
+    expect(result).toBeNull();
+  });
+
+  it("keeps a browser-extension wallet rejection with changed coordinates", () => {
+    const beforeSend = loadBeforeSend();
+    const frames = browserExtensionWalletBridgeFrames.map((frame, index) =>
+      index === 4 ? { ...frame, colno: 16592 } : frame
+    );
+
+    const result = beforeSend(
+      createBrowserExtensionWalletRejectionEvent(frames)
+    );
+
+    expect(result).not.toBeNull();
   });
 
   it("drops the exact frame-less WebKit extension tab-not-found rejection", () => {
