@@ -21257,7 +21257,6 @@ components:
       type: object
       required:
         - rememes_submission_tdh_threshold
-        - all_drops_notifications_subscribers_limit
         - memes_wave_id
         - curation_wave_id
         - distribution_admin_wallets
@@ -21267,9 +21266,6 @@ components:
         - auth
       properties:
         rememes_submission_tdh_threshold:
-          type: integer
-          format: int64
-        all_drops_notifications_subscribers_limit:
           type: integer
           format: int64
         memes_wave_id:
