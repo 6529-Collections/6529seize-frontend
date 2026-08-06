@@ -17,24 +17,59 @@ not as a slow or successful benchmark.
 ## What the benchmark does
 
 The controller is manually dispatched from `main` with an exact commit SHA, an
-explicit label, a profile, a per-candidate timeout, and a repeat count. It
-verifies that the SHA is a commit reachable from trusted `main`, dispatches the
-read-only candidate workflow, and observes only the runs bearing its own
-request identifier. If a candidate run is not created or does not reach a
-terminal state by the requested deadline, the controller requests cancellation
-of that run and records `unavailable` with the reason. It never waits
-indefinitely and never cancels an unrelated run.
+explicit label, a profile, a queue-availability timeout (90 seconds by
+default), a workload-completion timeout (30 minutes by default), and a repeat
+count. It verifies that the SHA is a commit reachable from trusted `main`,
+generates an unguessable controller nonce, and dispatches the read-only
+candidate workflow with a request identifier derived from every intended input,
+the controller run ID and first attempt, and that nonce. A direct human
+candidate dispatch is deliberately unsupported: it is scheduled on
+`ubuntu-latest` and fails before source checkout. Only a dispatch authenticated
+as `github-actions[bot]`, with a matching first-attempt controller run, may
+select dynamic candidate capacity.
 
-The candidate checks out two things separately:
+The controller observes, cancels, and records evidence only after the returned
+run metadata matches the request, the candidate workflow path,
+`workflow_dispatch`, trusted `main`, the expected main SHA, the bot actor,
+attempt 1, and the complete input-bound request identifier.
+
+The queue-availability timeout only limits how long the controller waits for a
+run to be accepted. Once a verified run exists, the separate completion
+timeout governs the build workload; the 90-second queue budget never cancels an
+accepted build. The controller derives a bounded job timeout from the repeat
+count and both budgets, then performs a final reconciliation pass. Delayed
+accepted runs are either observed to terminal state or cancelled only after a
+fresh metadata verification. Transient run-list failures remain unavailable
+and fail closed rather than authorizing an unverified cancellation.
+
+The candidate uses three trust boundaries:
+
+- an Ubuntu authorization job that authenticates the candidate run, controller
+  run, actor, attempt, and exact request binding before runner selection;
+- a measured source job that checks out two things separately:
 
 - the benchmark tool from the trusted workflow SHA; and
-- the exact source SHA being measured, which must be an ancestor of `main`.
+- the exact source SHA being measured, which must be an ancestor of `main`;
 
-It has read-only `contents` and `actions` permissions and no deployment
-credentials. Its evidence records queue, setup, checkout, dependency install,
-build, and package durations, together with non-secret runner and toolchain
-metadata. Each run writes canonical JSON and Markdown files to a unique
-immutable Actions artifact.
+- a separate Ubuntu verifier job with a fresh immutable tool checkout. The
+  measured job has no Actions API permission or `GH_TOKEN`; its output is
+  treated as untrusted data. Only the verifier may read run metadata, rebind
+  all intended inputs, and write hashed evidence.
+
+Candidate inputs are validated before the source checkout, including
+profile/label, timeout, repeat, request-ID, controller run ID/attempt, and
+nonce cross-fields. Reusable `workflow_call` invocations are forced to the
+`ubuntu-latest` control profile in both execution and evidence metadata. The
+candidate activates the repository-pinned pnpm `10.33.0` before setup-node cache
+setup or dependency installation.
+
+Evidence records queue, setup, checkout, dependency install, build, and package
+durations, together with non-secret runner and toolchain metadata. A candidate
+run must pass a final run-metadata readback and an exact raw-observation
+rebind before evidence is written. Each run writes canonical JSON and Markdown
+files to a unique immutable Actions artifact. If delayed-run reconciliation is
+incomplete, the state remains `reconciliation_pending`, cleanup is false, and
+evidence generation fails; it is never reported as completed evidence.
 
 The control profile is the same workload on `ubuntu-latest`. It is the fallback
 comparison and must remain available even after a candidate runner is adopted.

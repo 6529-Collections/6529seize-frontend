@@ -227,19 +227,29 @@ the run log as historical evidence; it is superseded for this integrated tree.
 The dispatch-only runner benchmark is implemented on the PR4 branch. It has a
 trusted `main`-only controller, exact main-ancestor source validation, an
 explicit `ubuntu-latest` control profile, and a candidate profile whose label
-is supplied by the maintainer rather than invented by workflow code. The
-controller polls only its request-correlated candidate runs and cancels only a
-run that it dispatched when the configured timeout expires; an absent or
-timed-out label is recorded as `unavailable`.
+is supplied by the maintainer rather than invented by workflow code. Candidate
+dispatch and reusable-call inputs are validated with strict cross-field rules;
+reusable calls are forced to truthful control metadata. The controller binds
+each request to a fresh nonce and verifies workflow, event, branch, SHA, title,
+and run-attempt metadata before observation, cancellation, or evidence.
+
+Queue availability and workload completion are separate budgets. The default
+90-second queue budget never cancels an accepted build; the controller derives
+a safe repeat-count-aware job timeout from the completion budget and performs a
+bounded final reconciliation for delayed runs and transient list failures.
+Unverified runs are never cancelled, and incomplete cleanup remains visible in
+controller evidence.
 
 The candidate has only read `contents`/`actions` permissions, checks out the
 benchmark tool from the trusted workflow SHA separately from the exact source
-SHA, and runs without deployment credentials. It records queue/setup,
-checkout, install, build, and package timings plus non-secret environment
-metadata in unique JSON/Markdown artifacts. The activation playbook records
-the current state: no larger-runner entitlement, no self-hosted capacity, and
-no runner variables are provisioned. No GitHub setting or runner has been
-activated by this work.
+SHA, activates exact pnpm `10.33.0` before setup-node cache/install, and runs
+without deployment credentials. `GH_TOKEN` is scoped to the final API readback
+steps and is absent from install/build. It records queue/setup, checkout,
+install, build, and package timings plus non-secret environment metadata in
+unique JSON/Markdown artifacts. The activation playbook records the current
+state: no larger-runner entitlement, no self-hosted capacity, and no runner
+variables are provisioned. No GitHub setting or runner has been activated by
+this work.
 
 ## PR 4 closeout correction
 
@@ -247,5 +257,29 @@ The source trust helper now compares exact-main requests with the declared
 trusted main SHA and accepts a distinct source only when the trusted checkout
 proves ancestry. Focused tests cover both paths. Generated benchmark evidence
 uses UTF-8 em dashes, with no mojibake in the candidate or controller Markdown
-documents. The branch remains intentionally uncommitted and has not changed
-GitHub, runner capacity, or deployment state.
+documents. The branch is preserved in signed local commits behind the final PR3
+tree; it has not changed GitHub, runner capacity, or deployment state.
+
+## PR 4 security boundary correction
+
+- Direct human candidate dispatches can never select a supplied candidate
+  label. An Ubuntu authorization job returns `ubuntu-latest` unless the
+  dispatch is authenticated as `github-actions[bot]` and the controller/run
+  binding is valid; unsupported direct candidate runs fail before source
+  checkout.
+- Request IDs now include a deterministic digest of every intended input,
+  controller run ID, controller attempt 1, repeat number, and nonce.
+  Candidate metadata requires actor `github-actions[bot]`, run attempt 1,
+  controller identity, controller attempt 1, exact workflow/path/SHA, and the
+  same input-bound request ID. Controller reruns fail before dispatch.
+- The measured source job has no `GH_TOKEN` and no Actions API permission after
+  source execution. It writes only an explicitly untrusted raw observation.
+  A fresh Ubuntu verifier checkout independently reads run/controller metadata,
+  rebinds the raw fields, and writes the immutable evidence.
+- Delayed or undiscovered runs remain `reconciliation_pending`. The controller
+  does not clear that state merely because the list endpoint succeeded; cleanup
+  must reach terminal state or controller evidence generation fails.
+
+Focused adversarial coverage now passes 18 tests. The signed worktree is ready
+for its governed PR after PR3 lands; no runner, repository setting, deployment,
+or candidate capacity has been activated.

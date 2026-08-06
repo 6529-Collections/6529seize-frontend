@@ -88,6 +88,8 @@ const FILE_PATHS = Object.freeze([
   "ops/scripts/testing-strategy.cjs",
   "ops/scripts/verify-deployment-version.cjs",
   "ops/scripts/runner-benchmark.cjs",
+  "ops/scripts/runner-benchmark-inputs.cjs",
+  "ops/scripts/runner-benchmark-workflow-contract.cjs",
   "ops/docs/developer/runner-activation-playbook.md",
   "ops/testing-strategy/mutation-endpoint-registry.json",
   "ops/testing-strategy/mutation-endpoint-registry.v1.schema.json",

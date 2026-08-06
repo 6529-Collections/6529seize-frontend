@@ -12,9 +12,14 @@ on:
         required: true
         type: string
       timeout_seconds:
-        description: Controller availability timeout recorded in evidence
+        description: Queue availability timeout recorded in evidence
         required: true
         default: 90
+        type: number
+      completion_timeout_seconds:
+        description: Maximum workload completion time after acceptance
+        required: true
+        default: 1800
         type: number
       profile:
         description: Control or candidate runner profile
@@ -29,10 +34,27 @@ on:
         required: true
         default: 1
         type: number
+      repeat_count:
+        description: Total number of sequential observations
+        required: true
+        default: 1
+        type: number
       request_id:
         description: Controller-owned request correlation identifier
         required: true
         type: string
+      controller_nonce:
+        description: Unguessable controller correlation nonce
+        required: true
+        type: string
+      controller_run_id:
+        description: Exact controller run that authenticated this dispatch
+        required: true
+        type: string
+      controller_run_attempt:
+        description: Controller attempt; only the first attempt is admissible
+        required: true
+        type: number
   workflow_call:
     inputs:
       source_sha:
@@ -44,15 +66,30 @@ on:
       timeout_seconds:
         required: true
         type: number
+      completion_timeout_seconds:
+        required: true
+        type: number
       profile:
         required: true
         type: string
       repeat_number:
         required: true
         type: number
+      repeat_count:
+        required: true
+        type: number
       request_id:
         required: true
         type: string
+      controller_nonce:
+        required: true
+        type: string
+      controller_run_id:
+        required: true
+        type: string
+      controller_run_attempt:
+        required: true
+        type: number
     secrets: {}
 
 run-name: Runner benchmark candidate / ${{ inputs.request_id }}
@@ -66,34 +103,166 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  benchmark:
-    name: Benchmark ${{ inputs.profile }} runner
-    # Reusable calls are always control-only. The controller is the supported
-    # path for selecting candidate capacity.
-    runs-on: ${{ github.event_name == 'workflow_call' && 'ubuntu-latest' || inputs.profile == 'control' && 'ubuntu-latest' || inputs.candidate_label }}
-    timeout-minutes: 30
+  authorize:
+    name: Authorize benchmark runner selection
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read
       actions: read
-    env:
-      SOURCE_SHA: ${{ inputs.source_sha }}
-      CANDIDATE_LABEL: ${{ inputs.candidate_label }}
-      TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
-      PROFILE: ${{ inputs.profile }}
-      REPEAT_NUMBER: ${{ inputs.repeat_number }}
-      REQUEST_ID: ${{ inputs.request_id }}
-      WORKFLOW_SHA: ${{ github.workflow_sha }}
-      GH_TOKEN: ${{ github.token }}
+    outputs:
+      authorized: ${{ steps.authorization.outputs.authorized }}
+      runner_label: ${{ steps.authorization.outputs.runner_label }}
+      reason: ${{ steps.authorization.outputs.reason }}
     steps:
-      - name: Require trusted repository dispatch
+      - name: Check out immutable authorization tools
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          sparse-checkout: |
+            ops/scripts/runner-benchmark.cjs
+            ops/scripts/runner-benchmark-inputs.cjs
+          sparse-checkout-cone-mode: false
+          path: trusted-tools
+          persist-credentials: false
+
+      - name: Install pinned Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.17.1"
+
+      - name: Authenticate controller dispatch before runner selection
+        id: authorization
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WORKFLOW_SHA: ${{ github.workflow_sha }}
+          EVENT_NAME: ${{ github.event_name }}
+          ACTOR: ${{ github.actor }}
+          HEAD_SHA: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          CANDIDATE_LABEL: ${{ inputs.candidate_label }}
+          TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
+          COMPLETION_TIMEOUT_SECONDS: ${{ inputs.completion_timeout_seconds }}
+          PROFILE: ${{ inputs.profile }}
+          REPEAT_NUMBER: ${{ inputs.repeat_number }}
+          REPEAT_COUNT: ${{ inputs.repeat_count }}
+          REQUEST_ID: ${{ inputs.request_id }}
+          CONTROLLER_NONCE: ${{ inputs.controller_nonce }}
+          CONTROLLER_RUN_ID: ${{ inputs.controller_run_id }}
+          CONTROLLER_RUN_ATTEMPT: ${{ inputs.controller_run_attempt }}
         run: |
           set -euo pipefail
-          test "$GITHUB_REPOSITORY" = "6529-Collections/6529seize-frontend"
-          test "$GITHUB_REF" = "refs/heads/main"
-          case "$GITHUB_EVENT_NAME" in
-            workflow_dispatch|workflow_call) ;;
-            *) echo "Unsupported benchmark event." >&2; exit 1 ;;
-          esac
+          tool_path="$GITHUB_WORKSPACE/trusted-tools/ops/scripts/runner-benchmark.cjs"
+          authorized=false
+          reason="candidate dispatch is not authenticated"
+
+          validate_inputs() {
+            node "$tool_path" validate-candidate \
+              --event-name "$EVENT_NAME" \
+              --source-sha "$SOURCE_SHA" \
+              --candidate-label "$CANDIDATE_LABEL" \
+              --timeout-seconds "$TIMEOUT_SECONDS" \
+              --completion-timeout-seconds "$COMPLETION_TIMEOUT_SECONDS" \
+              --profile "$PROFILE" \
+              --repeat-number "$REPEAT_NUMBER" \
+              --repeat-count "$REPEAT_COUNT" \
+              --request-id "$REQUEST_ID" \
+              --controller-nonce "$CONTROLLER_NONCE" \
+              --controller-run-id "$CONTROLLER_RUN_ID" \
+              --controller-run-attempt "$CONTROLLER_RUN_ATTEMPT" >/dev/null
+          }
+
+          if [ "$EVENT_NAME" = workflow_call ]; then
+            if validate_inputs; then
+              authorized=true
+              reason="reusable calls are forced to the ubuntu-latest control runner"
+            else
+              reason="reusable-call inputs failed closed validation"
+            fi
+          elif [ "$EVENT_NAME" = workflow_dispatch ]; then
+            if [ "$PROFILE" = control ]; then
+              if validate_inputs; then
+                authorized=true
+                reason="explicit control profile is fixed to ubuntu-latest"
+              else
+                reason="control inputs failed closed validation"
+              fi
+            elif [ "$ACTOR" != "github-actions[bot]" ]; then
+              reason="direct human candidate dispatch is unsupported; candidate labels remain on ubuntu-latest"
+            else
+              current_run="$RUNNER_TEMP/runner-benchmark-current-run.json"
+              controller_run="$RUNNER_TEMP/runner-benchmark-controller-run.json"
+              if ! validate_inputs; then
+                reason="candidate inputs failed closed validation"
+              elif ! gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" > "$current_run"; then
+                reason="candidate run metadata could not be read"
+              elif ! node "$tool_path" verify-run \
+                --input "$current_run" \
+                --event-name workflow_dispatch \
+                --workflow-path .github/workflows/runner-benchmark-candidate.yml \
+                --run-id "$RUN_ID" \
+                --run-attempt "$RUN_ATTEMPT" \
+                --head-sha "$HEAD_SHA" \
+                --head-branch main \
+                --display-title "Runner benchmark candidate / $REQUEST_ID" \
+                --request-id "$REQUEST_ID" \
+                --controller-nonce "$CONTROLLER_NONCE" \
+                --expected-actor github-actions[bot] >/dev/null; then
+                reason="candidate actor, attempt, or run metadata did not authenticate"
+              elif ! gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CONTROLLER_RUN_ID" > "$controller_run"; then
+                reason="controller run metadata could not be read"
+              elif ! node "$tool_path" verify-controller-run \
+                --input "$controller_run" \
+                --run-id "$CONTROLLER_RUN_ID" \
+                --run-attempt "$CONTROLLER_RUN_ATTEMPT" \
+                --head-sha "$HEAD_SHA" \
+                --head-branch main \
+                --workflow-path .github/workflows/runner-benchmark.yml >/dev/null; then
+                reason="controller run identity or attempt did not authenticate"
+              else
+                authorized=true
+                reason="controller-issued candidate dispatch authenticated"
+              fi
+            fi
+          else
+            reason="unsupported candidate event"
+          fi
+
+          runner_label="$(node "$tool_path" select-runner \
+            --event-name "$EVENT_NAME" \
+            --actor "$ACTOR" \
+            --profile "$PROFILE" \
+            --candidate-label "$CANDIDATE_LABEL" \
+            --authorized "$authorized" | jq -r '.runner_label')"
+          printf 'authorized=%s\nrunner_label=%s\nreason=%s\n' \
+            "$authorized" "$runner_label" "$reason" >> "$GITHUB_OUTPUT"
+          echo "Authorization: $reason"
+          echo "Runner selection: $runner_label"
+
+  benchmark:
+    name: Benchmark runner workload
+    needs: authorize
+    if: ${{ needs.authorize.result == 'success' }}
+    runs-on: ${{ needs.authorize.outputs.runner_label || 'ubuntu-latest' }}
+    # Input validation caps completion_timeout_seconds at 1,800 seconds.
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: none
+    steps:
+      - name: Require authenticated controller dispatch before source checkout
+        env:
+          AUTHORIZED: ${{ needs.authorize.outputs.authorized }}
+          AUTHORIZATION_REASON: ${{ needs.authorize.outputs.reason }}
+        run: |
+          set -euo pipefail
+          if [ "$AUTHORIZED" != true ]; then
+            echo "$AUTHORIZATION_REASON" >&2
+            echo "Unsupported or unauthenticated benchmark dispatch; source execution is blocked." >&2
+            exit 1
+          fi
 
       - name: Capture benchmark start
         run: |
@@ -102,19 +271,56 @@ jobs:
           echo "FIRST_STEP_MS=$(date +%s%3N)" >> "$GITHUB_ENV"
           echo "CHECKOUT_START_MS=$(date +%s%3N)" >> "$GITHUB_ENV"
 
-      - name: Check out trusted benchmark tool
+      - name: Check out trusted benchmark tool before source execution
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           ref: ${{ github.workflow_sha }}
-          sparse-checkout: ops/scripts/runner-benchmark.cjs
+          sparse-checkout: |
+            ops/scripts/runner-benchmark.cjs
+            ops/scripts/runner-benchmark-inputs.cjs
           sparse-checkout-cone-mode: false
           path: trusted-tools
           persist-credentials: false
 
+      - name: Validate strict benchmark inputs before source checkout
+        id: normalized
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          CANDIDATE_LABEL: ${{ inputs.candidate_label }}
+          TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
+          COMPLETION_TIMEOUT_SECONDS: ${{ inputs.completion_timeout_seconds }}
+          PROFILE: ${{ inputs.profile }}
+          REPEAT_NUMBER: ${{ inputs.repeat_number }}
+          REPEAT_COUNT: ${{ inputs.repeat_count }}
+          REQUEST_ID: ${{ inputs.request_id }}
+          CONTROLLER_NONCE: ${{ inputs.controller_nonce }}
+          CONTROLLER_RUN_ID: ${{ inputs.controller_run_id }}
+          CONTROLLER_RUN_ATTEMPT: ${{ inputs.controller_run_attempt }}
+        run: |
+          set -euo pipefail
+          normalized="$(node trusted-tools/ops/scripts/runner-benchmark.cjs validate-candidate \
+            --event-name "$EVENT_NAME" \
+            --source-sha "$SOURCE_SHA" \
+            --candidate-label "$CANDIDATE_LABEL" \
+            --timeout-seconds "$TIMEOUT_SECONDS" \
+            --completion-timeout-seconds "$COMPLETION_TIMEOUT_SECONDS" \
+            --profile "$PROFILE" \
+            --repeat-number "$REPEAT_NUMBER" \
+            --repeat-count "$REPEAT_COUNT" \
+            --request-id "$REQUEST_ID" \
+            --controller-nonce "$CONTROLLER_NONCE" \
+            --controller-run-id "$CONTROLLER_RUN_ID" \
+            --controller-run-attempt "$CONTROLLER_RUN_ATTEMPT")"
+          jq -e '(.contract == "runner-benchmark-inputs-v1") and (.source_sha | test("^[a-f0-9]{40}$")) and (.controller_nonce | test("^[a-f0-9]{32}$")) and (.controller_run_attempt == 1)' <<< "$normalized" >/dev/null
+          while IFS='=' read -r key value; do
+            echo "$key=$value" >> "$GITHUB_OUTPUT"
+          done < <(jq -r 'to_entries[] | "\(.key)=\(.value)"' <<< "$normalized")
+
       - name: Check out exact trusted source SHA
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
-          ref: ${{ inputs.source_sha }}
+          ref: ${{ steps.normalized.outputs.source_sha }}
           fetch-depth: 0
           path: source
           persist-credentials: false
@@ -122,6 +328,8 @@ jobs:
       - name: Verify exact source is a main ancestor
         id: verify_source
         working-directory: source
+        env:
+          SOURCE_SHA: ${{ steps.normalized.outputs.source_sha }}
         run: |
           set -euo pipefail
           git fetch --no-tags origin refs/heads/main:refs/remotes/origin/main
@@ -148,7 +356,21 @@ jobs:
         if: success()
         run: echo "INSTALL_START_MS=$(date +%s%3N)" >> "$GITHUB_ENV"
 
-      - name: Install Node.js
+      - name: Install Node.js runtime
+        if: success()
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.17.1"
+
+      - name: Activate exact pinned pnpm
+        if: success()
+        run: |
+          set -euo pipefail
+          corepack enable pnpm
+          corepack prepare pnpm@10.33.0 --activate
+          test "$(pnpm --version)" = "10.33.0"
+
+      - name: Configure pnpm-aware Node.js cache
         if: success()
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
@@ -197,7 +419,7 @@ jobs:
         working-directory: source
         env:
           NODE_ENV: production
-          VERSION: ${{ inputs.source_sha }}
+          VERSION: ${{ steps.normalized.outputs.source_sha }}
           API_ENDPOINT: https://api.6529.io
           WS_ENDPOINT: wss://ws.6529.io
           ALLOWLIST_API_ENDPOINT: https://allowlist-api.6529.io
@@ -239,15 +461,27 @@ jobs:
             echo "PACKAGE_MS=$(( $(date +%s%3N) - PACKAGE_START_MS ))" >> "$GITHUB_ENV"
           fi
 
-      - name: Write immutable candidate evidence
-        if: always()
+      - name: Write untrusted benchmark observation
+        if: ${{ always() && needs.authorize.outputs.authorized == 'true' }}
         env:
           VERIFY_OUTCOME: ${{ steps.verify_source.outcome }}
           INSTALL_OUTCOME: ${{ steps.install_frozen.outcome }}
           BUILD_OUTCOME: ${{ steps.build_exact_source.outcome }}
           PACKAGE_OUTCOME: ${{ steps.package_build_output.outcome }}
+          SOURCE_SHA: ${{ steps.normalized.outputs.source_sha }}
+          CANDIDATE_LABEL: ${{ steps.normalized.outputs.candidate_label }}
+          TIMEOUT_SECONDS: ${{ steps.normalized.outputs.timeout_seconds }}
+          COMPLETION_TIMEOUT_SECONDS: ${{ steps.normalized.outputs.completion_timeout_seconds }}
+          PROFILE: ${{ steps.normalized.outputs.profile }}
+          REPEAT_NUMBER: ${{ steps.normalized.outputs.repeat_number }}
+          REPEAT_COUNT: ${{ steps.normalized.outputs.repeat_count }}
+          REQUEST_ID: ${{ steps.normalized.outputs.request_id }}
+          CONTROLLER_NONCE: ${{ steps.normalized.outputs.controller_nonce }}
+          CONTROLLER_RUN_ID: ${{ steps.normalized.outputs.controller_run_id }}
+          CONTROLLER_RUN_ATTEMPT: ${{ steps.normalized.outputs.controller_run_attempt }}
+          EVENT_NAME: ${{ steps.normalized.outputs.event_name }}
+          WORKFLOW_SHA: ${{ github.workflow_sha }}
           RAW_OUTPUT: ${{ runner.temp }}/runner-benchmark-candidate/raw.json
-          EVIDENCE_OUTPUT: ${{ runner.temp }}/runner-benchmark-candidate
         run: |
           set -euo pipefail
           status=success
@@ -265,78 +499,190 @@ jobs:
           const fs = require("node:fs");
           const os = require("node:os");
           const { execFileSync } = require("node:child_process");
-          let queueMs = null;
-          let setupMs = null;
-          try {
-            const run = JSON.parse(
-              execFileSync(
-                "gh",
-                ["api", `repos/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`],
-                { encoding: "utf8" }
-              )
-            );
-            const createdMs = Date.parse(run.created_at);
-            const startedMs = Date.parse(run.run_started_at);
-            const firstStepMs = Number(process.env.FIRST_STEP_MS);
-            if (Number.isFinite(createdMs) && Number.isFinite(startedMs)) {
-              queueMs = Math.max(0, startedMs - createdMs);
-              if (Number.isFinite(firstStepMs)) {
-                setupMs = Math.max(0, firstStepMs - startedMs);
-              }
+          const optionalVersion = (command, args) => {
+            try {
+              return execFileSync(command, args, { encoding: "utf8" }).trim();
+            } catch {
+              return null;
             }
-          } catch {
-            // Evidence remains valid with null queue/setup timings if the read-only run readback is unavailable.
+          };
+          const environment = {
+            runner_os: process.env.RUNNER_OS,
+            runner_arch: process.env.RUNNER_ARCH,
+            runner_environment: process.env.RUNNER_ENVIRONMENT,
+            node_version: optionalVersion("node", ["--version"]),
+            pnpm_version: optionalVersion("pnpm", ["--version"]),
+            cpu_count: os.cpus().length,
+            kernel_release: os.release(),
+          };
+          for (const key of Object.keys(environment)) {
+            if (environment[key] === null || environment[key] === undefined) {
+              delete environment[key];
+            }
           }
+          const firstStepMs = Number(process.env.FIRST_STEP_MS);
+          const nowMs = Date.now();
           const raw = {
             source_sha: process.env.SOURCE_SHA,
             candidate_label: process.env.CANDIDATE_LABEL,
             timeout_seconds: Number(process.env.TIMEOUT_SECONDS),
+            completion_timeout_seconds: Number(process.env.COMPLETION_TIMEOUT_SECONDS),
             profile: process.env.PROFILE,
-            repeat_count: Number(process.env.REPEAT_NUMBER),
+            repeat_count: Number(process.env.REPEAT_COUNT),
             repeat: Number(process.env.REPEAT_NUMBER),
             status: process.env.BENCH_STATUS,
             repository: process.env.GITHUB_REPOSITORY,
             workflow_sha: process.env.WORKFLOW_SHA,
             run_id: process.env.GITHUB_RUN_ID,
             request_id: process.env.REQUEST_ID,
+            controller_nonce: process.env.CONTROLLER_NONCE,
+            controller_run_id: process.env.CONTROLLER_RUN_ID,
+            controller_run_attempt: Number(process.env.CONTROLLER_RUN_ATTEMPT),
+            event_name: process.env.EVENT_NAME,
+            metadata_verified: false,
             observed_at: new Date().toISOString(),
             timings_ms: {
-              queue_ms: queueMs,
-              setup_ms: setupMs,
+              queue_ms: null,
+              setup_ms: Number.isFinite(firstStepMs) ? Math.max(0, nowMs - firstStepMs) : null,
               checkout_ms: process.env.CHECKOUT_MS || null,
               install_ms: process.env.INSTALL_MS || null,
               build_ms: process.env.BUILD_MS || null,
               package_ms: process.env.PACKAGE_MS || null,
             },
-            environment: {
-              runner_os: process.env.RUNNER_OS,
-              runner_arch: process.env.RUNNER_ARCH,
-              runner_environment: process.env.RUNNER_ENVIRONMENT,
-              node_version: (() => {
-                try {
-                  return require("node:child_process").execFileSync("node", ["--version"], { encoding: "utf8" }).trim();
-                } catch {
-                  return "unavailable";
-                }
-              })(),
-              pnpm_version: (() => {
-                try {
-                  return require("node:child_process").execFileSync("pnpm", ["--version"], { encoding: "utf8" }).trim();
-                } catch {
-                  return "unavailable";
-                }
-              })(),
-              cpu_count: os.cpus().length,
-              kernel_release: os.release(),
-            },
+            environment,
             failure_class: process.env.BENCH_FAILURE_CLASS || null,
             failure_reason: process.env.BENCH_STATUS === "success" ? null : "one or more benchmark stages did not complete",
           };
-          fs.mkdirSync(require("node:path").dirname(process.env.RAW_OUTPUT), { recursive: true });
-          fs.writeFileSync(process.env.RAW_OUTPUT, `${JSON.stringify(raw)}\n`);
+          fs.writeFileSync(process.env.RAW_OUTPUT, `${JSON.stringify(raw)}\n`, {
+            encoding: "utf8",
+            flag: "w",
+          });
           NODE
-          node "$GITHUB_WORKSPACE/trusted-tools/ops/scripts/runner-benchmark.cjs" write-evidence \
-            --input "$RAW_OUTPUT" \
+
+      - name: Upload untrusted benchmark observation
+        if: ${{ always() && needs.authorize.outputs.authorized == 'true' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: runner-benchmark-candidate-raw-${{ github.run_id }}
+          path: ${{ runner.temp }}/runner-benchmark-candidate/raw.json
+          if-no-files-found: error
+          retention-days: 30
+
+  verify:
+    name: Verify and publish candidate evidence
+    needs:
+      - authorize
+      - benchmark
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Check out fresh immutable verifier tools
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          sparse-checkout: |
+            ops/scripts/runner-benchmark.cjs
+            ops/scripts/runner-benchmark-inputs.cjs
+          sparse-checkout-cone-mode: false
+          path: trusted-verifier
+          persist-credentials: false
+
+      - name: Install pinned Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.17.1"
+
+      - name: Download untrusted benchmark observation
+        if: ${{ needs.benchmark.result == 'success' }}
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: runner-benchmark-candidate-raw-${{ github.run_id }}
+          path: ${{ runner.temp }}/runner-benchmark-verifier/raw
+
+      - name: Verify run identity and untrusted observation
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WORKFLOW_SHA: ${{ github.workflow_sha }}
+          BENCHMARK_RESULT: ${{ needs.benchmark.result }}
+          EVENT_NAME: ${{ github.event_name }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          CANDIDATE_LABEL: ${{ inputs.candidate_label }}
+          TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
+          COMPLETION_TIMEOUT_SECONDS: ${{ inputs.completion_timeout_seconds }}
+          PROFILE: ${{ inputs.profile }}
+          REPEAT_NUMBER: ${{ inputs.repeat_number }}
+          REPEAT_COUNT: ${{ inputs.repeat_count }}
+          REQUEST_ID: ${{ inputs.request_id }}
+          CONTROLLER_NONCE: ${{ inputs.controller_nonce }}
+          CONTROLLER_RUN_ID: ${{ inputs.controller_run_id }}
+          CONTROLLER_RUN_ATTEMPT: ${{ inputs.controller_run_attempt }}
+          RAW_INPUT: ${{ runner.temp }}/runner-benchmark-verifier/raw/raw.json
+          VERIFIED_INPUT: ${{ runner.temp }}/runner-benchmark-verifier/verified-raw.json
+        run: |
+          set -euo pipefail
+          if [ "$BENCHMARK_RESULT" != success ]; then
+            echo "Measured source job did not complete successfully; no candidate evidence is admissible." >&2
+            exit 1
+          fi
+          test -s "$RAW_INPUT"
+          tool_path="$GITHUB_WORKSPACE/trusted-verifier/ops/scripts/runner-benchmark.cjs"
+          current_run="$RUNNER_TEMP/runner-benchmark-verifier/current-run.json"
+          controller_run="$RUNNER_TEMP/runner-benchmark-verifier/controller-run.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" > "$current_run"
+          node "$tool_path" verify-run \
+            --input "$current_run" \
+            --event-name "$EVENT_NAME" \
+            --workflow-path .github/workflows/runner-benchmark-candidate.yml \
+            --run-id "$GITHUB_RUN_ID" \
+            --run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --head-sha "$GITHUB_SHA" \
+            --head-branch main \
+            --display-title "Runner benchmark candidate / $REQUEST_ID" \
+            --request-id "$REQUEST_ID" \
+            --controller-nonce "$CONTROLLER_NONCE" \
+            --expected-actor github-actions[bot] >/dev/null
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CONTROLLER_RUN_ID" > "$controller_run"
+          node "$tool_path" verify-controller-run \
+            --input "$controller_run" \
+            --run-id "$CONTROLLER_RUN_ID" \
+            --run-attempt "$CONTROLLER_RUN_ATTEMPT" \
+            --head-sha "$GITHUB_SHA" \
+            --head-branch main \
+            --workflow-path .github/workflows/runner-benchmark.yml >/dev/null
+          node "$tool_path" verify-evidence \
+            --input "$RAW_INPUT" \
+            --event-name "$EVENT_NAME" \
+            --source-sha "$SOURCE_SHA" \
+            --candidate-label "$CANDIDATE_LABEL" \
+            --timeout-seconds "$TIMEOUT_SECONDS" \
+            --completion-timeout-seconds "$COMPLETION_TIMEOUT_SECONDS" \
+            --profile "$PROFILE" \
+            --repeat-number "$REPEAT_NUMBER" \
+            --repeat-count "$REPEAT_COUNT" \
+            --request-id "$REQUEST_ID" \
+            --controller-nonce "$CONTROLLER_NONCE" \
+            --controller-run-id "$CONTROLLER_RUN_ID" \
+            --controller-run-attempt "$CONTROLLER_RUN_ATTEMPT" \
+            --repository "$GITHUB_REPOSITORY" \
+            --workflow-sha "$WORKFLOW_SHA" \
+            --run-id "$GITHUB_RUN_ID" \
+            --status success > "$VERIFIED_INPUT"
+
+      - name: Write immutable candidate evidence from verified input
+        if: always()
+        env:
+          VERIFIED_INPUT: ${{ runner.temp }}/runner-benchmark-verifier/verified-raw.json
+          EVIDENCE_OUTPUT: ${{ runner.temp }}/runner-benchmark-verifier/evidence
+        run: |
+          set -euo pipefail
+          test -s "$VERIFIED_INPUT"
+          node "$GITHUB_WORKSPACE/trusted-verifier/ops/scripts/runner-benchmark.cjs" write-evidence \
+            --input "$VERIFIED_INPUT" \
             --output-dir "$EVIDENCE_OUTPUT"
 
       - name: Upload immutable candidate evidence
@@ -345,7 +691,7 @@ jobs:
         with:
           name: runner-benchmark-candidate-${{ inputs.source_sha }}-${{ inputs.request_id }}
           path: |
-            ${{ runner.temp }}/runner-benchmark-candidate/runner-benchmark-evidence.json
-            ${{ runner.temp }}/runner-benchmark-candidate/runner-benchmark-evidence.md
-          if-no-files-found: ignore
+            ${{ runner.temp }}/runner-benchmark-verifier/evidence/runner-benchmark-evidence.json
+            ${{ runner.temp }}/runner-benchmark-verifier/evidence/runner-benchmark-evidence.md
+          if-no-files-found: error
           retention-days: 30

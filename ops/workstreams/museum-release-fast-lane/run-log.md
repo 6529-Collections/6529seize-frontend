@@ -524,3 +524,54 @@
   scan, workflow-security, and diff checks after the correction. No commit,
   push, PR, merge, deployment, runner activation, or settings mutation was
   performed.
+
+## 2026-08-06 - PR 4 independent-review fixes
+
+- Superseded the initial 90-second-only observation behavior with separate
+  queue-availability and workload-completion budgets. The controller timeout
+  is now derived from repeat count and both budgets, bounded below the GitHub
+  Actions job limit, and followed by bounded final reconciliation.
+- Added strict dispatch/reusable-call candidate validation for all
+  cross-fields, request IDs, repeats, timeouts, and controller nonces.
+  Reusable calls execute and report only the truthful `ubuntu-latest` control
+  profile. Each dispatch uses a fresh 128-bit nonce, and run metadata is
+  verified for event, workflow, branch, SHA, title, ID, and attempt where
+  available before observation, cancellation, or evidence.
+- Scoped `GH_TOKEN` to API readback/dispatch-control steps; candidate install,
+  build, packaging, and evidence-writing steps do not inherit it. The candidate
+  activates pnpm `10.33.0` before pnpm-aware setup-node caching or dependency
+  installation.
+- Added delayed-run cleanup and transient-list reconciliation. Unverified
+  runs are never cancelled; unresolved cleanup remains explicit and
+  fail-closed in controller evidence. The new input and workflow-contract
+  helpers are included in the PR CI policy bundle.
+- Validation on this Windows host: focused runner suite 14 tests passed;
+  changed lint passed; changed TypeScript passed for 1,364 files; Node syntax,
+  YAML parsing, extracted workflow Bash syntax, workflow contract, and
+  `codex-diff-check` passed. The local actionlint binary timed out; the policy
+  bundle suite remains blocked by its existing Windows `O_NOFOLLOW` limitation.
+  No commit, push, PR, merge, deployment, runner activation, or settings
+  mutation was performed.
+
+## 2026-08-06 - PR 4 validated security corrections
+
+- Replaced pre-step dynamic candidate selection with an Ubuntu authorization
+  job. Direct human candidate dispatches remain on `ubuntu-latest` and fail
+  before source checkout. Dynamic candidate labels are emitted only after
+  `github-actions[bot]` actor, candidate run attempt 1, controller run ID and
+  attempt 1, trusted workflow/path/SHA, and exact request binding all pass.
+- Request IDs now contain a deterministic digest over every intended benchmark
+  input, controller identity, repeat, and nonce. Replays and input mutations
+  fail closed in the shared input contract and metadata verifier.
+- Split source measurement from evidence verification. The measured job has no
+  `GH_TOKEN` and no Actions API permission; it writes only an untrusted raw
+  observation. A fresh immutable verifier checkout on `ubuntu-latest` reads
+  run metadata, rebinds the observation, and writes hashed evidence.
+- Removed the reconciliation shortcut that cleared a missing run after a
+  successful list read. Any delayed run remains `reconciliation_pending`;
+  incomplete cleanup makes `reconciliation_completed` false and causes the
+  evidence writer to fail rather than report completion.
+- Added adversarial coverage for direct-label scheduling, bot/attempt/controller
+  binding, raw-observation forgery, and pending reconciliation. Focused suite:
+  18 tests passed. No commit, push, PR, merge, deployment, runner activation,
+  or settings mutation was performed.

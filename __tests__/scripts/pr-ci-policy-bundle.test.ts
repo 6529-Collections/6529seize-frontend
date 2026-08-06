@@ -292,6 +292,8 @@ describe("pr-ci-policy-bundle-v1", () => {
         "ops/scripts/deploy-staging-artifact.sh",
         "ops/scripts/verify-deployment-version.cjs",
         "ops/scripts/runner-benchmark.cjs",
+        "ops/scripts/runner-benchmark-inputs.cjs",
+        "ops/scripts/runner-benchmark-workflow-contract.cjs",
         "ops/docs/developer/runner-activation-playbook.md",
         "scripts/app-pr-ci-effective-plan.cjs",
         "scripts/e2e-packs.cjs",
