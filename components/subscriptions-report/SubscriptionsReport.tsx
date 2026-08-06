@@ -511,7 +511,7 @@ export default function SubscriptionsReportComponent() {
         <div>
           {upcomingRows.length > 0 ? (
             <>
-              <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800">
+              <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/60">
                 <span className="tw-sr-only">
                   Upcoming meme card subscription counts
                 </span>
@@ -600,7 +600,7 @@ export default function SubscriptionsReportComponent() {
       >
         <div>
           {redeemedCounts?.length > 0 ? (
-            <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800">
+            <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/60">
               <span className="tw-sr-only">
                 Past meme card subscription redemptions
               </span>

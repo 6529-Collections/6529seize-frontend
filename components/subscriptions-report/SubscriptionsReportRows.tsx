@@ -30,7 +30,7 @@ const REPORT_ROW_META_CLASS_NAME =
 const ACTIVE_REPORT_ROW_CLASS_NAME =
   "!tw-bg-iron-900/80 hover:!tw-bg-iron-900";
 const STANDARD_REPORT_ROW_CLASS_NAME =
-  "!tw-bg-iron-900/40 hover:!tw-bg-iron-900/70 focus-within:!tw-bg-iron-900/70";
+  "!tw-bg-iron-900/50 hover:!tw-bg-iron-900/70 focus-within:!tw-bg-iron-900/70";
 
 function formatVisibleSubscriptionCount(count: number): string {
   return `x${count > 0 ? count.toLocaleString() : "0"}`;
