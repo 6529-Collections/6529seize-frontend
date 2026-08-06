@@ -11,3 +11,14 @@ export const getAuthTokenFingerprint = (
   }
   return `${jwt.length}:${hash.toString(36)}`;
 };
+
+export const getAuthStateFingerprint = ({
+  walletAddress,
+  jwt,
+}: {
+  readonly walletAddress: string | null | undefined;
+  readonly jwt: string | null | undefined;
+}): string =>
+  [walletAddress?.toLowerCase() ?? "none", getAuthTokenFingerprint(jwt)].join(
+    ":"
+  );
