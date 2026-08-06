@@ -53,8 +53,9 @@ const {
   };
   assertReviewedExportsAbsent: (discoveredPaths: readonly string[]) => void;
   readBuildEvidence: (options: { root: string; buildDirectory?: string }) => {
-    dynamicRouteEntries: number;
-    evidencePath: string;
+    applicationRouteEntries: number;
+    dynamicPrerenderRouteEntries: number;
+    evidencePaths: readonly string[];
     maxPrerenderedRoutes: number;
     prerenderedRoutes: number;
     requiredDynamicDeclarationRoutes: readonly string[];
@@ -124,24 +125,38 @@ describe("Museum build cardinality contract", () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "museum-cardinality-"));
     try {
       fs.mkdirSync(path.join(root, ".next"), { recursive: true });
+      fs.mkdirSync(path.join(root, ".next", "server"), { recursive: true });
       fs.writeFileSync(
         path.join(root, ".next", "prerender-manifest.json"),
         JSON.stringify({
           routes: Object.fromEntries(
             Array.from({ length: 241 }, (_, index) => [`/route-${index}`, {}])
           ),
-          dynamicRoutes: Object.fromEntries(
-            EXPECTED_DYNAMIC_DECLARATION_ROUTES.map((route) => [route, {}])
-          ),
+          dynamicRoutes: {},
         })
+      );
+      fs.writeFileSync(
+        path.join(root, ".next", "server", "app-paths-manifest.json"),
+        JSON.stringify(
+          Object.fromEntries(
+            EXPECTED_DYNAMIC_DECLARATION_ROUTES.map((route) => [
+              `${route}/page`,
+              `app${route}/page.js`,
+            ])
+          )
+        )
       );
 
       expect(readBuildEvidence({ root })).toEqual({
-        dynamicRouteEntries: 6,
+        applicationRouteEntries: 6,
+        dynamicPrerenderRouteEntries: 0,
         maxPrerenderedRoutes: MAX_PRERENDERED_ROUTES,
         prerenderedRoutes: 241,
         requiredDynamicDeclarationRoutes: EXPECTED_DYNAMIC_DECLARATION_ROUTES,
-        evidencePath: ".next/prerender-manifest.json",
+        evidencePaths: [
+          ".next/prerender-manifest.json",
+          ".next/server/app-paths-manifest.json",
+        ],
       });
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
@@ -152,16 +167,26 @@ describe("Museum build cardinality contract", () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "museum-cardinality-"));
     try {
       fs.mkdirSync(path.join(root, ".next"), { recursive: true });
+      fs.mkdirSync(path.join(root, ".next", "server"), { recursive: true });
       fs.writeFileSync(
         path.join(root, ".next", "prerender-manifest.json"),
         JSON.stringify({
           routes: Object.fromEntries(
             Array.from({ length: 400 }, (_, index) => [`/route-${index}`, {}])
           ),
-          dynamicRoutes: Object.fromEntries(
-            EXPECTED_DYNAMIC_DECLARATION_ROUTES.map((route) => [route, {}])
-          ),
+          dynamicRoutes: {},
         })
+      );
+      fs.writeFileSync(
+        path.join(root, ".next", "server", "app-paths-manifest.json"),
+        JSON.stringify(
+          Object.fromEntries(
+            EXPECTED_DYNAMIC_DECLARATION_ROUTES.map((route) => [
+              `${route}/page`,
+              `app${route}/page.js`,
+            ])
+          )
+        )
       );
 
       expect(readBuildEvidence({ root }).prerenderedRoutes).toBe(400);
@@ -174,19 +199,26 @@ describe("Museum build cardinality contract", () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "museum-cardinality-"));
     try {
       fs.mkdirSync(path.join(root, ".next"), { recursive: true });
+      fs.mkdirSync(path.join(root, ".next", "server"), { recursive: true });
       fs.writeFileSync(
         path.join(root, ".next", "prerender-manifest.json"),
         JSON.stringify({
           routes: Object.fromEntries(
             Array.from({ length: 241 }, (_, index) => [`/route-${index}`, {}])
           ),
-          dynamicRoutes: Object.fromEntries(
-            EXPECTED_DYNAMIC_DECLARATION_ROUTES.slice(1).map((route) => [
-              route,
-              {},
-            ])
-          ),
+          dynamicRoutes: {},
         })
+      );
+      fs.writeFileSync(
+        path.join(root, ".next", "server", "app-paths-manifest.json"),
+        JSON.stringify(
+          Object.fromEntries(
+            EXPECTED_DYNAMIC_DECLARATION_ROUTES.slice(1).map((route) => [
+              `${route}/page`,
+              `app${route}/page.js`,
+            ])
+          )
+        )
       );
 
       expect(() => readBuildEvidence({ root })).toThrow(
@@ -197,10 +229,44 @@ describe("Museum build cardinality contract", () => {
     }
   });
 
+  it("rejects a reviewed route that re-enters Next prerendering", () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "museum-cardinality-"));
+    try {
+      fs.mkdirSync(path.join(root, ".next", "server"), { recursive: true });
+      fs.writeFileSync(
+        path.join(root, ".next", "prerender-manifest.json"),
+        JSON.stringify({
+          routes: {},
+          dynamicRoutes: {
+            [EXPECTED_DYNAMIC_DECLARATION_ROUTES[0] ?? ""]: {},
+          },
+        })
+      );
+      fs.writeFileSync(
+        path.join(root, ".next", "server", "app-paths-manifest.json"),
+        JSON.stringify(
+          Object.fromEntries(
+            EXPECTED_DYNAMIC_DECLARATION_ROUTES.map((route) => [
+              `${route}/page`,
+              `app${route}/page.js`,
+            ])
+          )
+        )
+      );
+
+      expect(() => readBuildEvidence({ root })).toThrow(
+        `prerendered=${EXPECTED_DYNAMIC_DECLARATION_ROUTES[0]}`
+      );
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
   it("rejects a build whose emitted route count regresses beyond the budget", () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "museum-cardinality-"));
     try {
       fs.mkdirSync(path.join(root, ".next"), { recursive: true });
+      fs.mkdirSync(path.join(root, ".next", "server"), { recursive: true });
       fs.writeFileSync(
         path.join(root, ".next", "prerender-manifest.json"),
         JSON.stringify({
@@ -211,6 +277,17 @@ describe("Museum build cardinality contract", () => {
             ])
           ),
         })
+      );
+      fs.writeFileSync(
+        path.join(root, ".next", "server", "app-paths-manifest.json"),
+        JSON.stringify(
+          Object.fromEntries(
+            EXPECTED_DYNAMIC_DECLARATION_ROUTES.map((route) => [
+              `${route}/page`,
+              `app${route}/page.js`,
+            ])
+          )
+        )
       );
 
       expect(() => readBuildEvidence({ root })).toThrow(

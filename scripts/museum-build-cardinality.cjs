@@ -613,35 +613,59 @@ function readBuildEvidence({
   buildDirectory = ".next",
   maxPrerenderedRoutes = MAX_PRERENDERED_ROUTES,
 }) {
-  const relativePath = normalizeRepoPath(
+  const prerenderManifestPath = normalizeRepoPath(
     path.join(buildDirectory, "prerender-manifest.json")
   );
-  const manifest = readJson(root, relativePath);
-  if (!manifest.routes || typeof manifest.routes !== "object") {
+  const appPathsManifestPath = normalizeRepoPath(
+    path.join(buildDirectory, "server", "app-paths-manifest.json")
+  );
+  const prerenderManifest = readJson(root, prerenderManifestPath);
+  const appPathsManifest = readJson(root, appPathsManifestPath);
+  if (
+    !prerenderManifest.routes ||
+    typeof prerenderManifest.routes !== "object"
+  ) {
     throw new Error(
-      `Museum build cardinality emitted evidence has no routes object: ${relativePath}`
+      `Museum build cardinality emitted evidence has no routes object: ${prerenderManifestPath}`
     );
   }
-  const prerenderedRoutes = Object.keys(manifest.routes).length;
-  const dynamicRoutes = Object.keys(manifest.dynamicRoutes ?? {});
-  const dynamicRouteEntries = dynamicRoutes.length;
+  if (!appPathsManifest || typeof appPathsManifest !== "object") {
+    throw new Error(
+      `Museum build cardinality emitted evidence has no app paths object: ${appPathsManifestPath}`
+    );
+  }
+  const prerenderedRoutePaths = Object.keys(prerenderManifest.routes);
+  const dynamicPrerenderRoutePaths = Object.keys(
+    prerenderManifest.dynamicRoutes ?? {}
+  );
+  const applicationRoutePaths = Object.keys(appPathsManifest);
+  const prerenderedRoutes = prerenderedRoutePaths.length;
   if (prerenderedRoutes > maxPrerenderedRoutes) {
     throw new Error(
       `Museum build cardinality budget exceeded: ${prerenderedRoutes} prerendered routes > ${maxPrerenderedRoutes}`
     );
   }
-  const missingDynamicRoutes = EXPECTED_DYNAMIC_DECLARATION_ROUTES.filter(
-    (route) => !dynamicRoutes.includes(route)
+  const missingApplicationRoutes = EXPECTED_DYNAMIC_DECLARATION_ROUTES.filter(
+    (route) => !applicationRoutePaths.includes(`${route}/page`)
   );
-  if (missingDynamicRoutes.length > 0) {
+  const unexpectedlyPrerenderedRoutes = EXPECTED_DYNAMIC_DECLARATION_ROUTES.filter(
+    (route) =>
+      prerenderedRoutePaths.includes(route) ||
+      dynamicPrerenderRoutePaths.includes(route)
+  );
+  if (
+    missingApplicationRoutes.length > 0 ||
+    unexpectedlyPrerenderedRoutes.length > 0
+  ) {
     throw new Error(
-      `Museum build cardinality declaration routes are not request-time dynamic: ${missingDynamicRoutes.join(", ")}`
+      `Museum build cardinality declaration routes are not request-time dynamic: missing=${missingApplicationRoutes.join(", ") || "none"}; prerendered=${unexpectedlyPrerenderedRoutes.join(", ") || "none"}`
     );
   }
   return {
-    evidencePath: relativePath,
+    evidencePaths: [prerenderManifestPath, appPathsManifestPath],
     prerenderedRoutes,
-    dynamicRouteEntries,
+    applicationRouteEntries: applicationRoutePaths.length,
+    dynamicPrerenderRouteEntries: dynamicPrerenderRoutePaths.length,
     maxPrerenderedRoutes,
     requiredDynamicDeclarationRoutes: [...EXPECTED_DYNAMIC_DECLARATION_ROUTES],
   };

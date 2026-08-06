@@ -720,3 +720,16 @@
   were removed from `helpers/Helpers.ts`; the canonical UTF-16 limit exports in
   `helpers/waves/drop-content-limits.ts` remain unchanged. This restores the
   protected Linux Knip contract without changing Stream or Museum behavior.
+
+## 2026-08-06 - PR 5 Next artifact-semantics correction
+
+- Exact-head run 31076424716 completed the optimized Next build and generated
+  3,660 pages, with all six reviewed declaration families reported by Next as
+  request-time (`ƒ`) routes. The verifier then failed because it had treated
+  `prerender-manifest.dynamicRoutes` as the inventory of all dynamic App Router
+  routes; that field contains dynamic prerender templates instead.
+- The emitted contract now cross-checks Next's two applicable artifacts. Every
+  reviewed family must exist in `server/app-paths-manifest.json` and must be
+  absent from both concrete and dynamic entries in `prerender-manifest.json`.
+  It still enforces the 500-concrete-route ceiling. Tests reject a missing app
+  route, a route that re-enters prerendering, and a 501-route regression.
