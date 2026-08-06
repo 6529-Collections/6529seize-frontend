@@ -821,7 +821,6 @@
     "__tests__/hooks/useCommunityCurationsDrops.test.ts": 4,
     "__tests__/hooks/useConnectedAccountsUnreadNotifications.test.ts": 2,
     "__tests__/hooks/useDropActionInteractionMode.test.tsx": 1,
-    "__tests__/hooks/useDropMessages.test.ts": 1,
     "__tests__/hooks/useDropReaction.test.ts": 8,
     "__tests__/hooks/useHlsPlayer.hlsSupported.test.tsx": 1,
     "__tests__/hooks/useHlsPlayer.test.tsx": 1,

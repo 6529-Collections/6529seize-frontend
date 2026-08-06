@@ -5,6 +5,7 @@ import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type {
   WsAttachmentStatusUpdateMessage,
   WsDropDeleteMessage,
+  WsDropUpdateRefMessage,
   WsDropUpdateMessage,
 } from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
@@ -39,6 +40,7 @@ import {
   type ProcessIncomingDropOptions,
   type UseWaveRealtimeUpdaterProps,
 } from "./useWaveRealtimeUpdater.helpers";
+import { useDropUpdateRefMessages } from "./useDropUpdateRefMessages";
 
 export { ProcessIncomingDropType } from "./useWaveRealtimeUpdater.helpers";
 
@@ -340,7 +342,10 @@ const useProcessIncomingDrop = ({
   removeWaveDeliveredNotifications,
   isWaveMuted,
   queryClient,
-}: UseProcessIncomingDropParams): ProcessIncomingDropFn => {
+}: UseProcessIncomingDropParams): {
+  readonly processIncomingDrop: ProcessIncomingDropFn;
+  readonly processDropUpdateRef: (messageData: unknown) => void;
+} => {
   const initiateFetchNewestCycle = useNewestMessagesSync({
     getData,
     updateData,
@@ -359,7 +364,7 @@ const useProcessIncomingDrop = ({
     initiateFetchNewestCycle
   );
 
-  return useCallback(
+  const processIncomingDrop = useCallback(
     async (
       dropData: ApiDrop,
       type: ProcessIncomingDropType,
@@ -482,6 +487,12 @@ const useProcessIncomingDrop = ({
       syncNewestMessagesAfterDropUpdate,
     ]
   );
+
+  const processDropUpdateRef = useDropUpdateRefMessages({
+    processIncomingDrop,
+  });
+
+  return { processIncomingDrop, processDropUpdateRef };
 };
 
 const useAttachmentStatusUpdate = ({
@@ -524,9 +535,15 @@ const useAttachmentStatusUpdate = ({
   );
 
 const useDropUpdateMessages = (
-  processIncomingDrop: ProcessIncomingDropFn
+  processIncomingDrop: ProcessIncomingDropFn,
+  processDropUpdateRef: (messageData: unknown) => void
 ): void => {
   const pendingDropUpdateRef = useRef<Promise<void> | null>(null);
+
+  useWebSocketMessage<WsDropUpdateRefMessage["data"]>(
+    WsMessageType.DROP_UPDATE_REF,
+    processDropUpdateRef
+  );
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,
@@ -590,7 +607,7 @@ export function useWaveRealtimeUpdater({
   processDropRemoved: (waveId: string, dropId: string) => void;
 } {
   const queryClient = useQueryClient();
-  const processIncomingDrop = useProcessIncomingDrop({
+  const { processIncomingDrop, processDropUpdateRef } = useProcessIncomingDrop({
     activeWaveId,
     getData,
     hasServerFeedSeed,
@@ -616,7 +633,7 @@ export function useWaveRealtimeUpdater({
     queryClient,
   });
 
-  useDropUpdateMessages(processIncomingDrop);
+  useDropUpdateMessages(processIncomingDrop, processDropUpdateRef);
   useDropDeleteMessages(processDropRemoved);
 
   useWebSocketMessage<WsAttachmentStatusUpdateMessage["data"]>(

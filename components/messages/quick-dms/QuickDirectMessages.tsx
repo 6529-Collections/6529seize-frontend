@@ -348,7 +348,7 @@ export default function QuickDirectMessages() {
                 : t(locale, "quickDm.openButtonAriaLabel")
             }
             title={t(locale, "quickDm.openButtonTitle")}
-            className="tw-relative tw-flex tw-size-14 tw-appearance-none tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-900 tw-p-0 tw-text-iron-100 tw-shadow-2xl tw-ring-1 tw-ring-white/15 tw-transition hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+            className="tw-relative tw-flex tw-size-14 tw-appearance-none tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-900 tw-p-0 tw-text-iron-200 tw-shadow-[0_18px_50px_rgba(0,0,0,0.48)] tw-ring-1 tw-ring-white/15 tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 active:tw-scale-95 desktop-hover:hover:tw-scale-105 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
           >
             <ChatBubbleLeftRightIcon className="tw-size-6" aria-hidden="true" />
             {hasUnread && (

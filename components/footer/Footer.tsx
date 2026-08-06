@@ -45,7 +45,7 @@ export default function Footer() {
 
   return (
     <footer
-      className="tailwind-scope tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800"
+      className="tailwind-scope tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-900"
       id="footer"
     >
       <span className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-2">

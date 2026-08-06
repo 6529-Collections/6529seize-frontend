@@ -19,21 +19,6 @@
   border: 1px solid rgb(215, 215, 215) !important;
 }
 
-.cookiePolicyTable th {
-  padding-top: 25px;
-  padding-bottom: 25px;
-}
-
-.cookiePolicyTable td {
-  width: fit-content;
-  border: 1px solid white !important;
-  padding: 10px;
-}
-
-.lastUpdateText {
-  color: rgb(154, 154, 154) !important;
-}
-
 .htmlContainer h2,
 .htmlContainer h3,
 .htmlContainer h4,
