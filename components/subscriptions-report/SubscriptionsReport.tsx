@@ -56,6 +56,8 @@ const PAGE_SIZE = 10;
 const UPCOMING_PAGE_SIZE = 5;
 const REPORT_SECTION_HEADING_CLASS_NAME =
   SUBSCRIPTIONS_SECTION_HEADING_CLASS;
+const REPORT_MAJOR_SECTION_GAP_CLASS_NAME = "tw-pt-[34px]";
+const REPORT_SECTION_CONTENT_GAP_CLASS_NAME = "tw-pt-[13px]";
 const REPORT_TABLE_HEADER_CLASS_NAME = `tw-hidden tw-gap-4 tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-2 tw-text-left tw-font-semibold tw-text-iron-400 sm:tw-grid sm:tw-px-6 sm:tw-py-3 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`;
 
 type MemeCalendarCurrentResponse = {
@@ -462,7 +464,7 @@ export default function SubscriptionsReportComponent() {
       </div>
       {activeDrop && (
         <>
-          <div className="tw-pt-3">
+          <div className={REPORT_MAJOR_SECTION_GAP_CLASS_NAME}>
             <div className="tw-flex tw-items-center tw-gap-2">
               <span
                 aria-hidden="true"
@@ -472,7 +474,7 @@ export default function SubscriptionsReportComponent() {
             </div>
           </div>
           <div
-            className="tw-pt-3"
+            className={REPORT_SECTION_CONTENT_GAP_CLASS_NAME}
             data-testid="subscriptions-report-active-drop"
           >
             <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700">
@@ -496,14 +498,14 @@ export default function SubscriptionsReportComponent() {
         </>
       )}
       <div ref={upcomingTableTopRef} />
-      <div className={activeDrop ? "tw-pt-8" : "tw-pt-3"}>
+      <div className={REPORT_MAJOR_SECTION_GAP_CLASS_NAME}>
         <div className="tw-flex tw-items-center tw-gap-3">
           <h2 className={REPORT_SECTION_HEADING_CLASS_NAME}>Upcoming Drops</h2>
           {upcomingLoading && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
         </div>
       </div>
       <div
-        className="tw-pt-3"
+        className={REPORT_SECTION_CONTENT_GAP_CLASS_NAME}
         data-testid="subscriptions-report-upcoming-drops"
       >
         <div>
@@ -541,7 +543,10 @@ export default function SubscriptionsReportComponent() {
                 </div>
               </div>
               {upcomingRows.length > UPCOMING_PAGE_SIZE && (
-                <div ref={upcomingToggleRef} className="tw-pt-3 tw-text-center">
+                <div
+                  ref={upcomingToggleRef}
+                  className={`${REPORT_SECTION_CONTENT_GAP_CLASS_NAME} tw-text-center`}
+                >
                   {upcomingVisible < upcomingRows.length ? (
                     <ShowMoreButton
                       expanded={false}
@@ -578,13 +583,19 @@ export default function SubscriptionsReportComponent() {
           )}
         </div>
       </div>
-      <div ref={pastDropsTarget} className="tw-pt-5">
+      <div
+        ref={pastDropsTarget}
+        className={REPORT_MAJOR_SECTION_GAP_CLASS_NAME}
+      >
         <div className="tw-flex tw-items-center tw-gap-3">
           <h2 className={REPORT_SECTION_HEADING_CLASS_NAME}>Past Drops</h2>
           {redeemedLoading && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
         </div>
       </div>
-      <div className="tw-pt-3" data-testid="subscriptions-report-past-drops">
+      <div
+        className={REPORT_SECTION_CONTENT_GAP_CLASS_NAME}
+        data-testid="subscriptions-report-past-drops"
+      >
         <div>
           {redeemedCounts?.length > 0 ? (
             <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800">
@@ -632,7 +643,7 @@ export default function SubscriptionsReportComponent() {
         </div>
       )}
       {shouldShowDownloadSection && (
-        <div className="tw-pt-5">
+        <div className={REPORT_MAJOR_SECTION_GAP_CLASS_NAME}>
           <div>
             <div className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-p-5`}>
               <div className="tw-flex tw-flex-col tw-gap-4 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between">
