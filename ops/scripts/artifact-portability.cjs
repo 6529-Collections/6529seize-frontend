@@ -4,6 +4,7 @@
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
+const { TextDecoder } = require("node:util");
 const { parseArgs } = require("./cli-args.cjs");
 const {
   BAKED_INPUTS,
@@ -92,9 +93,135 @@ function sha256File(filePath, label) {
   return sha256(fs.readFileSync(filePath));
 }
 
-function walkDirectory(root, relativeDirectory = "") {
+function decodeUtf8(buffer, label) {
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(buffer);
+  } catch {
+    throw new Error(`${label} is not valid UTF-8`);
+  }
+}
+
+function validateContainedPackageSymlink(root, absolutePath) {
+  let linkTargetBytes;
+  let realTarget;
+  try {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- The path is a directory entry from the closed extracted-package walk.
+    linkTargetBytes = fs.readlinkSync(absolutePath, { encoding: "buffer" });
+  } catch (error) {
+    throw new Error(
+      `Cannot read extracted-package symbolic link: ${absolutePath}: ${error.message}`
+    );
+  }
+  const linkTarget = decodeUtf8(
+    linkTargetBytes,
+    `Extracted package symbolic link target: ${absolutePath}`
+  );
+  invariant(
+    !path.isAbsolute(linkTarget),
+    `Extracted package contains an absolute symbolic link: ${absolutePath}`
+  );
+  const lexicalTarget = path.resolve(path.dirname(absolutePath), linkTarget);
+  const lexicalRelative = path.relative(root, lexicalTarget);
+  invariant(
+    lexicalRelative === "" ||
+      (!lexicalRelative.startsWith("..") && !path.isAbsolute(lexicalRelative)),
+    `Extracted package symbolic link lexically escapes its root: ${absolutePath}`
+  );
+  try {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- The path is a directory entry from the closed extracted-package walk.
+    realTarget = fs.realpathSync(absolutePath);
+  } catch (error) {
+    throw new Error(
+      `Extracted package symbolic link target is unavailable: ${absolutePath}: ${error.message}`
+    );
+  }
+
+  const relativeTarget = path.relative(root, realTarget);
+  invariant(
+    relativeTarget === "" ||
+      (!relativeTarget.startsWith("..") && !path.isAbsolute(relativeTarget)),
+    `Extracted package symbolic link escapes its root: ${absolutePath}`
+  );
+  let targetStats;
+  try {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- realTarget was resolved and proven contained above.
+    targetStats = fs.statSync(realTarget);
+  } catch (error) {
+    throw new Error(
+      `Extracted package symbolic link target is unavailable: ${absolutePath}: ${error.message}`
+    );
+  }
+  invariant(
+    targetStats.isFile() || targetStats.isDirectory(),
+    `Extracted package symbolic link has an unsupported target: ${absolutePath}`
+  );
+  return {
+    linkTarget,
+    linkTargetSha256: sha256(linkTargetBytes),
+    realTarget,
+    targetType: targetStats.isDirectory() ? "directory" : "file",
+  };
+}
+
+function walkContainedPackageSymlink({
+  root,
+  realRoot,
+  relativePath,
+  absolutePath,
+  options,
+  ancestorRealDirectories,
+}) {
+  const symlink = validateContainedPackageSymlink(realRoot, absolutePath);
+  const normalizedPath = relativePath.replaceAll(path.sep, "/");
+  const symlinkEntry = {
+    path: normalizedPath,
+    symlink_target: symlink.linkTarget.replaceAll(path.sep, "/"),
+    symlink_target_sha256: symlink.linkTargetSha256,
+    target_path: path
+      .relative(realRoot, symlink.realTarget)
+      .replaceAll(path.sep, "/"),
+    target_type: symlink.targetType,
+  };
+  if (symlink.targetType === "file") {
+    symlinkEntry.target_sha256 = sha256File(
+      symlink.realTarget,
+      "contained symbolic-link target"
+    );
+    return {
+      entries: [symlinkEntry],
+      scanFiles: [{ path: normalizedPath, realPath: symlink.realTarget }],
+    };
+  }
+
+  const walked = walkDirectory(root, relativePath, {
+    ...options,
+    realRoot,
+    physicalDirectory: symlink.realTarget,
+    ancestorRealDirectories,
+  });
+  return {
+    entries: [symlinkEntry, ...walked.entries],
+    scanFiles: walked.scanFiles,
+  };
+}
+
+function walkDirectory(root, relativeDirectory = "", options = {}) {
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- Content roots and extracted package roots are asserted operator inputs.
+  const realRoot = options.realRoot || fs.realpathSync(root);
   const entries = [];
-  const absoluteDirectory = path.join(root, relativeDirectory);
+  const scanFiles = [];
+  const absoluteDirectory =
+    options.physicalDirectory || path.join(root, relativeDirectory);
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- The directory is either below the asserted root or a validated contained link target.
+  const realDirectory = fs.realpathSync(absoluteDirectory);
+  assertRealPathWithin(realRoot, realDirectory, "walked directory");
+  const ancestorRealDirectories = options.ancestorRealDirectories || new Set();
+  invariant(
+    !ancestorRealDirectories.has(realDirectory),
+    `Extracted package symbolic-link cycle reaches: ${absoluteDirectory}`
+  );
+  const nextAncestors = new Set(ancestorRealDirectories);
+  nextAncestors.add(realDirectory);
   let children;
   try {
     // eslint-disable-next-line security/detect-non-literal-fs-filename -- Content roots are validated operator inputs.
@@ -109,14 +236,37 @@ function walkDirectory(root, relativeDirectory = "") {
     const relativePath = relativeDirectory
       ? `${relativeDirectory}/${child.name}`
       : child.name;
-    const absolutePath = path.join(root, relativePath);
+    const absolutePath = path.join(absoluteDirectory, child.name);
     if (child.isDirectory()) {
-      entries.push(...walkDirectory(root, relativePath));
+      const walked = walkDirectory(root, relativePath, {
+        ...options,
+        realRoot,
+        physicalDirectory: absolutePath,
+        ancestorRealDirectories: nextAncestors,
+      });
+      entries.push(...walked.entries);
+      scanFiles.push(...walked.scanFiles);
     } else if (child.isFile()) {
+      const normalizedPath = relativePath.replaceAll(path.sep, "/");
       entries.push({
-        path: relativePath.replaceAll(path.sep, "/"),
+        path: normalizedPath,
         sha256: sha256File(absolutePath, "content file"),
       });
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- The file is a regular entry under the asserted or validated contained directory.
+      const realPath = fs.realpathSync(absolutePath);
+      assertRealPathWithin(realRoot, realPath, "scanned file");
+      scanFiles.push({ path: normalizedPath, realPath });
+    } else if (child.isSymbolicLink() && options.allowContainedSymlinks) {
+      const walked = walkContainedPackageSymlink({
+        root,
+        realRoot,
+        relativePath,
+        absolutePath,
+        options,
+        ancestorRealDirectories: nextAncestors,
+      });
+      entries.push(...walked.entries);
+      scanFiles.push(...walked.scanFiles);
     } else {
       throw new Error(
         `Content root contains an unsupported entry: ${absolutePath}`
@@ -124,7 +274,7 @@ function walkDirectory(root, relativeDirectory = "") {
     }
   }
 
-  return entries;
+  return { entries, scanFiles };
 }
 
 function assertRealPathWithin(root, candidate, label) {
@@ -161,18 +311,33 @@ function scanExtractedPackage(extractedRoot, baked) {
       packageLiteralPatterns(baked.values.get(entry.name)),
     ])
   );
-  const files = walkDirectory(root);
+  const walked = walkDirectory(root, "", {
+    allowContainedSymlinks: true,
+    // eslint-disable-next-line security/detect-non-literal-fs-filename -- The extracted root is an asserted real directory supplied by the operator.
+    realRoot: fs.realpathSync(root),
+  });
+  const treeEntries = walked.entries;
+  const files = walked.scanFiles;
+  const canonicalFiles = new Map();
   let totalBytes = 0;
 
   for (const file of files) {
-    const absolutePath = path.join(root, file.path);
-    // eslint-disable-next-line security/detect-non-literal-fs-filename -- Every scanned path is a regular file returned by the closed directory walk.
-    const bytes = fs.readFileSync(absolutePath);
-    totalBytes += bytes.length;
-    for (const [name, patterns] of patternsByName) {
-      if (patterns.some((pattern) => bytes.includes(pattern))) {
-        matchesByName.get(name).add(file.path);
+    let canonicalFile = canonicalFiles.get(file.realPath);
+    if (!canonicalFile) {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- Every real path is a contained regular file returned by the closed directory walk.
+      const bytes = fs.readFileSync(file.realPath);
+      const matchedNames = [];
+      totalBytes += bytes.length;
+      for (const [name, patterns] of patternsByName) {
+        if (patterns.some((pattern) => bytes.includes(pattern))) {
+          matchedNames.push(name);
+        }
       }
+      canonicalFile = { matchedNames };
+      canonicalFiles.set(file.realPath, canonicalFile);
+    }
+    for (const name of canonicalFile.matchedNames) {
+      matchesByName.get(name).add(file.path);
     }
   }
 
@@ -195,8 +360,8 @@ function scanExtractedPackage(extractedRoot, baked) {
     root_name: path.basename(root),
     scan_mode: "all_regular_files_exact_utf8_and_json_literals",
     scan_complete: true,
-    tree_sha256: digestJson(files),
-    file_count: files.length,
+    tree_sha256: digestJson(treeEntries),
+    file_count: canonicalFiles.size,
     total_bytes: totalBytes,
     input_count: inputs.length,
     present_input_count: inputs.filter((input) => input.present).length,
@@ -228,7 +393,7 @@ function digestContentRoots(sourceRoot, contentRoots) {
     );
     return {
       path: normalizedRoot,
-      files: walkDirectory(realRoot),
+      files: walkDirectory(realRoot).entries,
     };
   });
 
