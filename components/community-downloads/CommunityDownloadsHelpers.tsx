@@ -1,14 +1,14 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Fragment } from "react";
 import { ABOUT_PAGE_HORIZONTAL_PADDING_CLASS_NAME } from "@/components/about/AboutLayout";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import {
   DATA_TABLE_HEADER_TEXT_CLASS_NAME,
   DATA_TABLE_INTERACTIVE_ROW_CLASS_NAME,
 } from "@/components/utils/table/tableStyles";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export const DOWNLOADS_TABLE_ROW_CLASS_NAME = `tw-group ${DATA_TABLE_INTERACTIVE_ROW_CLASS_NAME}`;
 
@@ -38,12 +38,14 @@ export function DownloadsLayout({
   readonly title: string;
   readonly children: ReactNode;
 }) {
+  const locale = useBrowserLocale();
+
   return (
     <section
       className={`tailwind-scope tw-container tw-mx-auto tw-w-full tw-pb-4 tw-pt-6 sm:tw-pt-8 ${ABOUT_PAGE_HORIZONTAL_PADDING_CLASS_NAME}`}
     >
       <h1 className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
-        {title} Downloads
+        {t(locale, "openData.downloads.pageTitle", { title })}
       </h1>
       {children}
     </section>
@@ -83,13 +85,7 @@ export function DownloadsTable<T>({
             ))}
           </tr>
         </thead>
-        <tbody>
-          {data.map((item, idx) => (
-            <Fragment key={getRandomObjectId()}>
-              {renderRow(item, idx)}
-            </Fragment>
-          ))}
-        </tbody>
+        <tbody>{data.map(renderRow)}</tbody>
       </table>
     </div>
   );

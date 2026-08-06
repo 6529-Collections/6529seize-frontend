@@ -1,6 +1,8 @@
 "use client";
 
 import { useSetTitle } from "@/contexts/TitleContext";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import {
   DOWNLOADS_TABLE_CELL_CLASS_NAME,
   DOWNLOADS_TABLE_ROW_CLASS_NAME,
@@ -15,6 +17,7 @@ interface TeamDownload {
 }
 
 export default function CommunityDownloadsTeam() {
+  const locale = useBrowserLocale();
   useSetTitle("Team | Open Data");
 
   const downloads: TeamDownload[] = [
@@ -36,7 +39,10 @@ export default function CommunityDownloadsTeam() {
     <DownloadsLayout title="Team">
       <DownloadsTable
         data={downloads}
-        columns={["Date", "Link"]}
+        columns={[
+          t(locale, "openData.downloads.columns.date"),
+          t(locale, "openData.downloads.columns.link"),
+        ]}
         renderRow={(download: TeamDownload) => (
           <tr
             className={DOWNLOADS_TABLE_ROW_CLASS_NAME}

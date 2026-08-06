@@ -6,6 +6,8 @@ import { fetchUrl } from "@/services/6529api";
 import Pagination from "@/components/pagination/Pagination";
 import type { ApiUploadsPage } from "@/generated/models/ApiUploadsPage";
 import type { ApiUploadItem } from "@/generated/models/ApiUploadItem";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 import {
   DOWNLOADS_TABLE_CELL_CLASS_NAME,
@@ -23,6 +25,7 @@ interface Props {
 }
 
 export default function CommunityDownloadsComponent(props: Readonly<Props>) {
+  const locale = useBrowserLocale();
   const [page, setPage] = useState(1);
 
   const { data, isError, isLoading } = useQuery<ApiUploadsPage>({
@@ -54,18 +57,26 @@ export default function CommunityDownloadsComponent(props: Readonly<Props>) {
   return (
     <DownloadsLayout title={props.title}>
       {isLoading && !data && (
-        <div className="tw-pb-3 tw-text-center">Loading downloads...</div>
+        <div className="tw-pb-3 tw-text-center" role="status">
+          {t(locale, "openData.downloads.loading")}
+        </div>
       )}
 
       {isError && (
-        <div className="tw-text-red-500 tw-pb-3 tw-text-center">
-          Failed to load community downloads. Please try again.
+        <div
+          className="tw-pb-3 tw-text-center tw-text-red-500"
+          role="alert"
+        >
+          {t(locale, "openData.downloads.loadError")}
         </div>
       )}
 
       <DownloadsTable
         data={downloads}
-        columns={["Date", "Link"]}
+        columns={[
+          t(locale, "openData.downloads.columns.date"),
+          t(locale, "openData.downloads.columns.link"),
+        ]}
         renderRow={(download: ApiUploadItem) => (
           <tr
             className={DOWNLOADS_TABLE_ROW_CLASS_NAME}

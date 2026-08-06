@@ -3,6 +3,8 @@
 import { useTitle } from "@/contexts/TitleContext";
 import type { Gas } from "@/entities/IGas";
 import { capitalizeEveryWord, displayDecimal } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
 import { GasRoyaltiesCollectionFocus } from "@/types/enums";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -19,6 +21,7 @@ import {
 } from "./GasRoyalties";
 
 export default function GasComponent() {
+  const locale = useBrowserLocale();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -42,7 +45,7 @@ export default function GasComponent() {
 
   const [gas, setGas] = useState<Gas[]>([]);
   const [sumGas, setSumGas] = useState(0);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState(false);
 
   const {
     dateSelection,
@@ -70,7 +73,7 @@ export default function GasComponent() {
 
   async function fetchGas() {
     setFetching(true);
-    setFetchError(null);
+    setFetchError(false);
     try {
       const res = await fetchUrl<Gas[]>(getUrlWithParams());
       res.forEach((r) => {
@@ -82,7 +85,7 @@ export default function GasComponent() {
       console.error("Failed to fetch gas data", error);
       setGas([]);
       setSumGas(0);
-      setFetchError("Failed to load gas data. Please try again.");
+      setFetchError(true);
     } finally {
       setFetching(false);
     }
@@ -140,19 +143,21 @@ export default function GasComponent() {
                     className={`${GAS_ROYALTIES_TABLE_HEADER_CELL_CLASS_NAME} tw-text-left`}
                     scope="col"
                   >
-                    Meme Card (x{gas.length})
+                    {t(locale, "memeData.columns.memeCardCount", {
+                      count: gas.length,
+                    })}
                   </th>
                   <th
                     className={`${GAS_ROYALTIES_TABLE_HEADER_CELL_CLASS_NAME} tw-text-left`}
                     scope="col"
                   >
-                    Artist
+                    {t(locale, "memeData.columns.artist")}
                   </th>
                   <th
                     className={`${GAS_ROYALTIES_TABLE_HEADER_CELL_CLASS_NAME} tw-text-right`}
                     scope="col"
                   >
-                    Gas (ETH)
+                    {t(locale, "memeData.columns.gasEth")}
                   </th>
                 </tr>
               </thead>
@@ -197,7 +202,7 @@ export default function GasComponent() {
                     colSpan={2}
                     className={`${GAS_ROYALTIES_TABLE_CELL_CLASS_NAME} tw-text-right tw-font-semibold tw-text-iron-300`}
                   >
-                    <b>TOTAL</b>
+                    <b>{t(locale, "memeData.total")}</b>
                   </td>
                   <td
                     className={`${GAS_ROYALTIES_TABLE_CELL_CLASS_NAME} tw-text-right tw-font-semibold tw-tabular-nums`}
@@ -212,17 +217,21 @@ export default function GasComponent() {
         {!fetching && gas.length === 0 && (
           <div className="tw-mt-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/80 tw-px-4 tw-py-8 tw-text-center">
             <p
+              role={fetchError ? "alert" : "status"}
               className={`tw-mb-0 tw-text-sm tw-leading-6 ${
                 fetchError ? "tw-text-error" : "tw-text-iron-400"
               }`}
             >
-              {fetchError ?? "No gas info found for selected dates"}
+              {t(
+                locale,
+                fetchError ? "memeData.gas.loadError" : "memeData.gas.empty"
+              )}
             </p>
           </div>
         )}
         {!fetching && gas.length > 0 && (
           <div className="tw-pb-3 tw-pt-3 tw-text-xs tw-leading-5 tw-text-iron-400">
-            All values are in ETH
+            {t(locale, "memeData.ethFootnote")}
           </div>
         )}
       </section>

@@ -191,6 +191,99 @@ describe("GasRoyaltiesHeader", () => {
     );
   });
 
+  it("keeps synthetic period selections visible in the shared dropdown", () => {
+    (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
+    (usePathname as jest.Mock).mockReturnValue("/meme-gas");
+
+    const sharedProps = {
+      title: "Gas",
+      fetching: false,
+      results_count: 1,
+      date_selection: DateIntervalsSelection.TODAY,
+      selected_artist: "",
+      focus: GasRoyaltiesCollectionFocus.MEMES,
+      getUrl: () => "",
+      setSelectedArtist: jest.fn(),
+      setIsPrimary: jest.fn(),
+      setIsCustomBlocks: jest.fn(),
+      setDateSelection: jest.fn(),
+      setDates: jest.fn(),
+      setBlocks: jest.fn(),
+    };
+
+    const { rerender } = render(
+      <GasRoyaltiesHeader
+        {...sharedProps}
+        is_primary={true}
+        is_custom_blocks={false}
+      />
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Period: Primary Sales" })
+    ).toBeInTheDocument();
+
+    rerender(
+      <GasRoyaltiesHeader
+        {...sharedProps}
+        is_primary={false}
+        is_custom_blocks={true}
+      />
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Period: Custom Blocks" })
+    ).toBeInTheDocument();
+
+    rerender(
+      <GasRoyaltiesHeader
+        {...sharedProps}
+        date_selection={DateIntervalsSelection.CUSTOM_DATES}
+        is_primary={false}
+        is_custom_blocks={false}
+      />
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Period: Custom Dates" })
+    ).toBeInTheDocument();
+  });
+
+  it("selects a standard period through the shared dropdown", () => {
+    (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
+    (usePathname as jest.Mock).mockReturnValue("/meme-gas");
+    const setDateSelection = jest.fn();
+
+    render(
+      <GasRoyaltiesHeader
+        title="Gas"
+        fetching={false}
+        results_count={1}
+        date_selection={DateIntervalsSelection.TODAY}
+        selected_artist=""
+        is_primary={false}
+        is_custom_blocks={false}
+        focus={GasRoyaltiesCollectionFocus.MEMES}
+        getUrl={() => ""}
+        setSelectedArtist={jest.fn()}
+        setIsPrimary={jest.fn()}
+        setIsCustomBlocks={jest.fn()}
+        setDateSelection={setDateSelection}
+        setDates={jest.fn()}
+        setBlocks={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Period: Today" }));
+    fireEvent.click(
+      screen.getByRole("menuitem", { name: "Last 7 Days" })
+    );
+
+    expect(setDateSelection).toHaveBeenCalledWith(
+      DateIntervalsSelection.LAST_7
+    );
+  });
+
   it("does not render download widget when fetching or no results", () => {
     (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
     (usePathname as jest.Mock).mockReturnValue("/meme-gas");
@@ -416,7 +509,7 @@ describe("useSharedState", () => {
       result.current.setSelectedArtist("Test Artist");
     });
 
-    expect(result.current.getUrl("gas")).toContain("&artist=Test Artist");
+    expect(result.current.getUrl("gas")).toContain("&artist=Test%20Artist");
   });
 
   it("returns empty url when collection focus not set", () => {

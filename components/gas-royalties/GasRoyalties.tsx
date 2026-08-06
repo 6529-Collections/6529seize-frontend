@@ -13,6 +13,8 @@ import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import { publicEnv } from "@/config/env";
 import type { ApiArtistNameItem } from "@/generated/models/ApiArtistNameItem";
 import { getDateFilters } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t, type MessageKey } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
 import {
   DateIntervalsSelection,
@@ -41,22 +43,24 @@ export const GAS_ROYALTIES_TABLE_ROW_CLASS_NAME = `tw-group ${DATA_TABLE_INTERAC
 export const GAS_ROYALTIES_INFO_ICON_CLASS_NAME =
   "tw-h-[18px] tw-cursor-pointer tw-text-iron-400 tw-transition-colors hover:tw-text-iron-50";
 
-const COLLECTION_FOCUS_ITEMS: CommonSelectItem<GasRoyaltiesCollectionFocus>[] =
-  [
-    {
-      key: "collection-the-memes",
-      label: "The Memes",
-      value: GasRoyaltiesCollectionFocus.MEMES,
-    },
-    {
-      key: "collection-meme-lab",
-      label: "Meme Lab",
-      value: GasRoyaltiesCollectionFocus.MEMELAB,
-    },
-  ];
-
 const PRIMARY_SALES_SELECTION = "Primary Sales";
 const CUSTOM_BLOCKS_SELECTION = "Custom Blocks";
+
+const DATE_SELECTION_MESSAGE_KEYS: Record<
+  DateIntervalsSelection,
+  MessageKey
+> = {
+  [DateIntervalsSelection.TODAY]: "memeData.filters.date.today",
+  [DateIntervalsSelection.YESTERDAY]: "memeData.filters.date.yesterday",
+  [DateIntervalsSelection.LAST_7]: "memeData.filters.date.lastSevenDays",
+  [DateIntervalsSelection.THIS_MONTH]: "memeData.filters.date.monthToDate",
+  [DateIntervalsSelection.PREVIOUS_MONTH]: "memeData.filters.date.lastMonth",
+  [DateIntervalsSelection.YEAR_TO_DATE]: "memeData.filters.date.yearToDate",
+  [DateIntervalsSelection.LAST_YEAR]: "memeData.filters.date.lastYear",
+  [DateIntervalsSelection.ALL]: "memeData.filters.date.all",
+  [DateIntervalsSelection.CUSTOM_DATES]:
+    "memeData.filters.date.customDates",
+};
 
 type DateFilterSelection =
   | DateIntervalsSelection
@@ -115,11 +119,14 @@ function getUrlParams(
     collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB
       ? "memelab"
       : "memes";
-  const artistFilter = selectedArtist ? `&artist=${selectedArtist}` : "";
+  const artistFilter = selectedArtist
+    ? `&artist=${encodeURIComponent(selectedArtist)}`
+    : "";
   return `${publicEnv.API_ENDPOINT}/api/${apiPath}/collection/${collection}?${filters}${artistFilter}`;
 }
 
 export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
+  const locale = useBrowserLocale();
   const router = useRouter();
   const pathname = usePathname();
   const [artists, setArtists] = useState<ApiArtistNameItem[]>([]);
@@ -140,31 +147,50 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
     });
   }, [props.focus]);
 
+  const getDateFilterLabel = (dateSelection: DateIntervalsSelection) =>
+    t(locale, DATE_SELECTION_MESSAGE_KEYS[dateSelection]);
+
   function getDateSelectionLabel() {
     if (props.is_primary) {
-      return "Primary Sales";
+      return t(locale, "memeData.filters.primarySales");
     }
     if (props.is_custom_blocks) {
-      return (
-        [
-          fromBlock !== undefined ? `from block: ${fromBlock}` : undefined,
-          toBlock !== undefined ? `to block: ${toBlock}` : undefined,
-        ]
-          .filter(Boolean)
-          .join(" ") || "Custom Blocks"
-      );
+      if (fromBlock !== undefined && toBlock !== undefined) {
+        return t(locale, "memeData.filters.blocks.both", {
+          from: fromBlock,
+          to: toBlock,
+        });
+      }
+      if (fromBlock !== undefined) {
+        return t(locale, "memeData.filters.blocks.from", { from: fromBlock });
+      }
+      if (toBlock !== undefined) {
+        return t(locale, "memeData.filters.blocks.to", { to: toBlock });
+      }
+      return t(locale, "memeData.filters.customBlocks");
     }
     if (props.date_selection === DateIntervalsSelection.CUSTOM_DATES) {
-      return (
-        [
-          fromDate ? `from: ${fromDate.toISOString().slice(0, 10)}` : undefined,
-          toDate ? `to: ${toDate.toISOString().slice(0, 10)}` : undefined,
-        ]
-          .filter(Boolean)
-          .join(" ") || DateIntervalsSelection.CUSTOM_DATES
-      );
+      const formattedFromDate = fromDate?.toISOString().slice(0, 10);
+      const formattedToDate = toDate?.toISOString().slice(0, 10);
+      if (formattedFromDate && formattedToDate) {
+        return t(locale, "memeData.filters.dates.both", {
+          from: formattedFromDate,
+          to: formattedToDate,
+        });
+      }
+      if (formattedFromDate) {
+        return t(locale, "memeData.filters.dates.from", {
+          from: formattedFromDate,
+        });
+      }
+      if (formattedToDate) {
+        return t(locale, "memeData.filters.dates.to", {
+          to: formattedToDate,
+        });
+      }
+      return getDateFilterLabel(DateIntervalsSelection.CUSTOM_DATES);
     }
-    return props.date_selection;
+    return getDateFilterLabel(props.date_selection);
   }
 
   function getFileName() {
@@ -188,15 +214,29 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
   const artistItems: CommonSelectItem<string>[] = [
     {
       key: "artist-all",
-      label: "All",
+      label: t(locale, "memeData.filters.all"),
       value: "",
     },
     ...artists.map((a) => ({
-      key: `artist-${a.name.replaceAll(" ", "-")}`,
+      key: `artist-${encodeURIComponent(a.name)}`,
       label: a.name,
       value: a.name,
     })),
   ];
+
+  const collectionFocusItems: CommonSelectItem<GasRoyaltiesCollectionFocus>[] =
+    [
+      {
+        key: "collection-the-memes",
+        label: t(locale, "memeData.collection.theMemes"),
+        value: GasRoyaltiesCollectionFocus.MEMES,
+      },
+      {
+        key: "collection-meme-lab",
+        label: t(locale, "memeData.collection.memeLab"),
+        value: GasRoyaltiesCollectionFocus.MEMELAB,
+      },
+    ];
 
   let activeDateSelection: DateFilterSelection = props.date_selection;
   if (props.is_primary) {
@@ -207,7 +247,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
   const dateItems: CommonSelectItem<DateFilterSelection>[] = [
     {
       key: "primary-sales",
-      label: PRIMARY_SALES_SELECTION,
+      label: t(locale, "memeData.filters.primarySales"),
       value: PRIMARY_SALES_SELECTION,
     },
     ...Object.values(DateIntervalsSelection).map((dateSelection) => ({
@@ -215,7 +255,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
       label:
         dateSelection === activeDateSelection
           ? getDateSelectionLabel()
-          : dateSelection,
+          : getDateFilterLabel(dateSelection),
       value: dateSelection,
     })),
     {
@@ -223,7 +263,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
       label:
         activeDateSelection === CUSTOM_BLOCKS_SELECTION
           ? getDateSelectionLabel()
-          : CUSTOM_BLOCKS_SELECTION,
+          : t(locale, "memeData.filters.customBlocks"),
       value: CUSTOM_BLOCKS_SELECTION,
     },
   ];
@@ -250,12 +290,12 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
             </h1>
             <div className="tw-w-fit tw-min-w-0 tw-max-w-full">
               <CommonTabs
-                items={COLLECTION_FOCUS_ITEMS}
+                items={collectionFocusItems}
                 activeItem={props.focus}
                 setSelected={(focus) => {
                   router.push(`${pathname}?focus=${focus}`);
                 }}
-                filterLabel="Collection"
+                filterLabel={t(locale, "memeData.collection.label")}
                 fill={false}
                 size="sm"
               />
@@ -265,7 +305,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
             <div className="tw-flex tw-w-full tw-flex-col tw-items-start tw-gap-y-3 sm:tw-w-auto sm:tw-flex-row sm:tw-items-center sm:tw-gap-x-5">
               <div className="tw-no-scrollbar tw-flex tw-max-w-full tw-flex-nowrap tw-items-start tw-gap-x-5 tw-overflow-x-auto tw-pb-1">
                 <CommonDropdown
-                  filterLabel="Artist"
+                  filterLabel={t(locale, "memeData.filters.artist")}
                   disabled={props.fetching}
                   items={artistItems}
                   activeItem={props.selected_artist}
@@ -276,7 +316,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                   menuMinWidth={224}
                 />
                 <CommonDropdown
-                  filterLabel="Period"
+                  filterLabel={t(locale, "memeData.filters.period")}
                   disabled={props.fetching}
                   items={dateItems}
                   activeItem={activeDateSelection}
@@ -290,7 +330,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
               {!props.fetching && props.results_count > 0 && (
                 <div className="tw-flex-none [&>button]:tw-rounded-md [&>button]:tw-px-0.5 [&>button]:tw-py-1 [&>button]:tw-text-sm [&>button]:tw-font-semibold [&>button]:!tw-text-iron-300 hover:[&>button]:!tw-text-iron-100 focus-visible:[&>button]:tw-outline focus-visible:[&>button]:tw-outline-2 focus-visible:[&>button]:tw-outline-primary-400 [&_svg]:!tw-w-4 [&_svg]:!tw-text-current">
                   <DownloadUrlWidget
-                    preview="Download"
+                    preview={t(locale, "memeData.download")}
                     name={getFileName()}
                     url={`${props.getUrl()}&download=true`}
                   />
