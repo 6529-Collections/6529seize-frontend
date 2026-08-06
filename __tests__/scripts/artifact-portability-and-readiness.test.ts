@@ -415,6 +415,44 @@ describe("adaptive Elastic Beanstalk readiness", () => {
     });
   });
 
+  it("accepts the normalized AWS adapter shape in the readiness loop", async () => {
+    const clock = makeClock();
+    const execFileImpl = async () => ({
+      stdout: JSON.stringify({
+        Environments: [
+          {
+            Health: "Green",
+            Status: "Ready",
+            VersionLabel: EXPECTED_VERSION,
+          },
+        ],
+      }),
+    });
+    const result = await readiness.waitForElasticBeanstalkReadiness({
+      environmentName: "seizeapp-env-node22",
+      expectedVersion: EXPECTED_VERSION,
+      timeoutSeconds: 30,
+      describeEnvironment: ({ timeoutMs }) =>
+        readiness.describeEnvironmentWithAws({
+          environmentName: "seizeapp-env-node22",
+          timeoutMs,
+          execFileImpl,
+        }),
+      sleep: clock.sleep,
+      now: clock.now,
+      monotonicNow: clock.monotonicNow,
+    });
+
+    expect(result.ok).toBe(true);
+    expect(result.evidence.attempts).toBe(2);
+    expect(result.evidence.result).toMatchObject({
+      health: "Green",
+      status: "Ready",
+      version_label: EXPECTED_VERSION,
+      consecutive_samples: 2,
+    });
+  });
+
   it("takes an immediate sample and requires two consecutive exact healthy samples", async () => {
     const { result, clock } = await runReadiness([
       snapshot("Green", "Ready", EXPECTED_VERSION),
