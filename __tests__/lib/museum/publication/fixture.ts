@@ -439,7 +439,6 @@ function buildBaseDocuments(): Record<string, string> {
         "https://rightsstatements.org/en/documentation/",
       rightsstatements_usage_guidelines:
         "https://rightsstatements.org/en/documentation/usage_guidelines",
-      observed_at: "2026-08-05T16:45:00Z",
       college_art_association_fair_use:
         "https://www.collegeart.org/programs/caa-fair-use/best-practices",
       us_public_display_law: "https://www.copyright.gov/title17/92chap1.html",
@@ -451,6 +450,7 @@ function buildBaseDocuments(): Record<string, string> {
         "https://wiki.creativecommons.org/wiki/NonCommercial_interpretation",
       rightsstatements_layer_guidance:
         "https://rightsstatements.org/en/2018/12/where-statements-apply.html",
+      observed_at: "2026-08-05T16:45:00Z",
     },
     expressions,
     object_assignments: CASEY_OBJECTS.map((artwork, index) => ({

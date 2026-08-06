@@ -177,3 +177,123 @@ final copy/visual sweep.
   `7a369851d70fe6e01da90f8621efdb1d919892bf`; the rights education card and
   the new paragraph structure are both retained. Exact-head checks must bind
   to the integrated tree before merge.
+
+### 2026-08-05 production closeout
+
+- Frontend PR [#3627](https://github.com/6529-Collections/6529seize-frontend/pull/3627)
+  merged as exact main `d448d4c282c034fa2a1d5d1d95ce90fc85561e54`.
+  The final integrated PR run `31040869076` passed the production build,
+  quality/contracts, smoke, critical shell, and Museum E2E jobs. Automated
+  review found no unresolved correctness, security, accessibility, or
+  data-integrity issue; all review threads were resolved before merge.
+- The exact production artifact built in run
+  [`31043144183`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/31043144183)
+  while staging built and deployed in parallel. Staging composition
+  `21f58083e5c8974319701e25a0d62406c500bec3` deployed successfully in run
+  [`31043258638`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/31043258638),
+  followed by successful automatic selected-pack E2E run
+  [`31044289420`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/31044289420).
+- Production deployment run
+  [`31045606678`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/31045606678)
+  reused the completed exact-main artifact and passed. Automatic production
+  E2E run
+  [`31046152675`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/31046152675)
+  passed. Three consecutive live version reads returned and announced exact
+  main with `stale: false`.
+- Independent staging and production checks each passed the six focused
+  desktop/mobile rights journeys. The final production sweep passed all 22
+  expression-detail routes, the artist and collector guides, CC BY-NC legal
+  text and source access, and the Casey object-to-license path. Six retained
+  production viewport checks returned 200 with no page errors, failed document
+  responses, or 390-pixel horizontal overflow. Pixel review found no release
+  defect requiring a polish patch.
+- The interval from frontend merge at `2026-08-05T20:14:28Z` to completed
+  automatic production E2E at `2026-08-05T21:04:30Z` was 50 minutes and 2
+  seconds. Staging deploy consumed 13 minutes and 1 second, staging E2E 14
+  minutes and 54 seconds, production deploy 6 minutes and 47 seconds, and
+  production E2E 11 minutes and 49 seconds.
+- The dynamic adapter now reads canonical Museum main
+  `ad8ea4338659e0825dc5a79295e824eadec876e6`, which advanced through additive
+  Museum PR #30 after the rights merge. The live page contains that exact
+  source identity, all rights routes remain green, and no frontend redeploy was
+  required for the source refresh.
+
+The rights publication is live. No implementation, review, staging,
+production, or evidence gate remains open.
+
+### 2026-08-05 Museum-practice revision in progress
+
+- Product review reopened the rights detail page. The former 2 by 3 bordered
+  grid, colored state chips, metadata pills, and boxed visitor note have been
+  removed from the revision branch.
+- The replacement is a six-row editorial register with horizontal rules,
+  ordinary 6529 typography, one plain-language posture line, and one
+  action-specific Museum-practice reading. Mobile remains a single reading
+  column. Color no longer carries status.
+- The source contract advances to rights registry 1.1.0. It retains the
+  original instrument-permission matrix and adds a required
+  `museum_practice_matrix` for all twenty-two expressions. Frontend activation
+  fails closed if the new matrix, five status definitions, or six exact
+  readings are absent.
+- Version and SPDX identifiers now appear as quiet inline metadata. The
+  visitor note sits within the editorial flow between horizontal rules.
+- The revised public copy contains no em dashes. The source validator enforces
+  the same rule across the three rights manuscripts and all practical notes.
+- Canonical source PR
+  [#33](https://github.com/6529-Collections/6529networkmuseum/pull/33)
+  merged as `42236950a8976825861b6785613e3837405f486c`. Its exact PR head
+  passed all three jobs in Museum validation run `31050398441`; post-merge
+  validation run `31050934946` also passed all three jobs. The release
+  manifest contains 345 entries with SHA-256
+  `sha256:7d0774dc4007f03f68b632adf352330fcaa29398834d2a8c950856d61b6aef23`
+  and Keccak
+  `0xf1312db8d08dc1dd7a4159e1f4797fae58bc70f5118f3157f134b52e802300cc`.
+- Local focused tests, visual evidence, frontend hosted review, and the
+  staging and production release cycle remain open at this checkpoint. The
+  first optimized build passed generation, help-index sync, and full lint,
+  then Turbopack rejected the worktree's generated external `node_modules`
+  junction. A native frozen dependency install is replacing that local-only
+  setup before the build is rerun.
+- The native frozen install completed and the exact canonical production
+  build passed in 493.6 seconds against source
+  `42236950a8976825861b6785613e3837405f486c`, including full lint, route
+  compilation, sitemap generation, and postbuild.
+- The exact local rights E2E suite passed all six desktop and mobile journeys
+  against the held production-equivalent server. The shared local API was
+  unavailable, so the read-only test used `https://api.6529.io` with the
+  mutation guard retained. Earlier harness attempts did not execute a product
+  failure: one lacked that API prerequisite, one used a mismatched dev origin,
+  and one replaced its own server during readiness probing.
+- Retained render evidence lives in
+  `ops/workstreams/museum-rights-handbook/evidence/practice-revision/`.
+  Four desktop/mobile routes returned 200 with no page errors or failed 5xx
+  responses. Both mobile captures measured 390/390/390 pixels, all rendered
+  rights copy contained zero em dashes, both detail pages rendered six
+  practice rows, and the practice section contained zero rounded status
+  elements. Pixel review found no release defect.
+- Frontend hosted review, merge, staging qualification, production release,
+  live E2E, and the Dev Team Chat release note remain open.
+- Final pre-commit gates are green: 3 focused suites / 20 tests, changed lint,
+  changed typecheck across 1,358 files, React Doctor 100/100, targeted
+  formatting, and `codex-diff-check`. Frontend base and `origin/main` both
+  resolve to `d448d4c282c034fa2a1d5d1d95ce90fc85561e54`.
+- While exact-head review was running, frontend main advanced to
+  `a888054589e7311848278c53b187033d96b1f5fb` with the Museum ontology and
+  preservation reading room. The branch was merged forward before release.
+  Four publication files overlapped. Resolution retained main's data
+  architecture and shorter internal practice-type names while preserving the
+  approved rights substance, strict 1.1.0 projection, and editorial layout.
+  The resulting tree passes 5 focused suites / 31 tests, changed lint,
+  changed typecheck across 1,358 files, React Doctor 100/100, formatting, and
+  `codex-diff-check`.
+- The first exact merge attempt was rejected because main advanced after the
+  final readback. The branch was merged forward again to
+  `af31aaaf7498d66516422d141b261de4c2774307`, which adds report-only Museum
+  release classification without changing the rights runtime. The final
+  merge tree passes 6 focused suites / 45 tests, changed lint, and changed
+  typecheck across 1,364 files.
+- A second exact merge precondition later detected main
+  `f1a8a24937d2557b91f6db1c936ead0736b89dc7`, the independently reviewed
+  compact realtime-drop update. It merged without conflict and has no Museum
+  or rights-file overlap. The final candidate therefore combines the fully
+  green exact rights head with an already merged, unrelated mainline change.

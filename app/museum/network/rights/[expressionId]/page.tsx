@@ -48,7 +48,6 @@ export default async function MuseumRightsExpressionRoute({
   return (
     <MuseumRightsExpressionPage
       expression={expression}
-      handbook={publication.rightsHandbook}
       sourceCommit={publication.identity.commit}
     />
   );

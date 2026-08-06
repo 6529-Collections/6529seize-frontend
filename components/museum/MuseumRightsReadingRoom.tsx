@@ -8,7 +8,7 @@ import type {
   MuseumRightsAction,
   MuseumRightsExpression,
   MuseumRightsHandbook,
-  MuseumRightsUseStatus,
+  MuseumRightsPracticeStatus,
 } from "@/lib/museum/publication";
 
 const TEXT_LINK_CLASS =
@@ -33,25 +33,13 @@ const ACTION_LABEL_KEYS = {
   make_commercial_use: "museum.network.rights.actions.make_commercial_use",
 } as const satisfies Record<MuseumRightsAction, MessageKey>;
 
-const STATUS_LABEL_KEYS = {
-  allowed: "museum.network.rights.status.allowed",
-  allowed_with_conditions:
-    "museum.network.rights.status.allowed_with_conditions",
-  not_licensed: "museum.network.rights.status.not_licensed",
-  status_only: "museum.network.rights.status.status_only",
-  case_by_case: "museum.network.rights.status.case_by_case",
-} as const satisfies Record<MuseumRightsUseStatus, MessageKey>;
-
-const STATUS_CLASSES = {
-  allowed: "tw-border-green-400/30 tw-bg-green-400/10 tw-text-green-100",
-  allowed_with_conditions:
-    "tw-border-primary-400/30 tw-bg-primary-400/10 tw-text-primary-100",
-  not_licensed:
-    "tw-border-orange-400/30 tw-bg-orange-400/10 tw-text-orange-100",
-  status_only: "tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200",
-  case_by_case:
-    "tw-border-yellow-400/30 tw-bg-yellow-400/10 tw-text-yellow-100",
-} as const satisfies Record<MuseumRightsUseStatus, string>;
+const PRACTICE_STATUS_LABEL_KEYS = {
+  ordinary: "museum.network.rights.practice.ordinary",
+  ordinary_with_terms: "museum.network.rights.practice.ordinary_with_terms",
+  purpose_limited: "museum.network.rights.practice.purpose_limited",
+  contextual: "museum.network.rights.practice.contextual",
+  separate_basis: "museum.network.rights.practice.separate_basis",
+} as const satisfies Record<MuseumRightsPracticeStatus, MessageKey>;
 
 function expressionGroups(handbook: MuseumRightsHandbook) {
   return [
@@ -269,11 +257,9 @@ function BulletSection({
 
 export function MuseumRightsExpressionPage({
   expression,
-  handbook,
   sourceCommit,
 }: {
   readonly expression: MuseumRightsExpression;
-  readonly handbook: MuseumRightsHandbook;
   readonly sourceCommit: string;
 }) {
   const sourceSnapshotUrl =
@@ -300,22 +286,24 @@ export function MuseumRightsExpressionPage({
         <p className="tw-m-0 tw-mt-6 tw-max-w-4xl tw-text-lg tw-leading-8 tw-text-iron-200">
           {expression.summary}
         </p>
-        <div className="tw-mt-5 tw-flex tw-flex-wrap tw-gap-2">
-          {expression.version === null ? null : (
-            <span className="tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-px-3 tw-py-1 tw-text-sm tw-text-iron-300">
-              {t(DEFAULT_LOCALE, "museum.network.rights.detail.version", {
-                version: expression.version,
-              })}
-            </span>
-          )}
-          {expression.spdxId === null ? null : (
-            <span className="tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-px-3 tw-py-1 tw-text-sm tw-text-iron-300">
-              {t(DEFAULT_LOCALE, "museum.network.rights.detail.spdx", {
-                spdx: expression.spdxId,
-              })}
-            </span>
-          )}
-        </div>
+        {expression.version === null && expression.spdxId === null ? null : (
+          <p className="tw-m-0 tw-mt-5 tw-text-sm tw-leading-6 tw-text-iron-400">
+            {[
+              expression.version === null
+                ? null
+                : t(DEFAULT_LOCALE, "museum.network.rights.detail.version", {
+                    version: expression.version,
+                  }),
+              expression.spdxId === null
+                ? null
+                : t(DEFAULT_LOCALE, "museum.network.rights.detail.spdx", {
+                    spdx: expression.spdxId,
+                  }),
+            ]
+              .filter((value): value is string => value !== null)
+              .join(" · ")}
+          </p>
+        )}
         {expression.canonicalUri === null ? null : (
           <a
             href={expression.canonicalUri}
@@ -330,7 +318,7 @@ export function MuseumRightsExpressionPage({
 
       <section
         aria-labelledby="museum-rights-visitor-note"
-        className="tw-mt-12 tw-max-w-4xl tw-border-l-2 tw-border-primary-400 tw-bg-iron-950 tw-p-6"
+        className="tw-mt-12 tw-max-w-4xl tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-800 tw-py-6"
       >
         <h2
           id="museum-rights-visitor-note"
@@ -359,22 +347,26 @@ export function MuseumRightsExpressionPage({
             "museum.network.rights.detail.useTableDescription"
           )}
         </p>
-        <dl className="tw-m-0 tw-mt-7 tw-grid tw-gap-px tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-800 md:tw-grid-cols-2">
+        <dl className="tw-m-0 tw-mt-8 tw-max-w-4xl tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-800">
           {ACTIONS.map((action) => {
-            const status = expression.useMatrix[action];
+            const reading = expression.museumPracticeMatrix[action];
             return (
-              <div key={action} className="tw-bg-black tw-p-5">
-                <dt className="tw-text-base tw-font-semibold tw-text-iron-100">
+              <div
+                key={action}
+                className="tw-grid tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-6 last:tw-border-b-0 md:tw-grid-cols-[minmax(13rem,0.7fr)_minmax(0,1.3fr)] md:tw-gap-10"
+              >
+                <dt className="tw-text-base tw-font-semibold tw-leading-7 tw-text-iron-100">
                   {t(DEFAULT_LOCALE, ACTION_LABEL_KEYS[action])}
                 </dt>
-                <dd className="tw-m-0 tw-mt-3">
-                  <span
-                    className={`tw-inline-flex tw-rounded-full tw-border tw-border-solid tw-px-3 tw-py-1 tw-text-sm tw-font-semibold ${STATUS_CLASSES[status]}`}
-                  >
-                    {t(DEFAULT_LOCALE, STATUS_LABEL_KEYS[status])}
-                  </span>
-                  <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
-                    {handbook.useStatusDefinitions[status]}
+                <dd className="tw-m-0">
+                  <p className="tw-m-0 tw-text-sm tw-font-semibold tw-leading-6 tw-text-iron-200">
+                    {t(
+                      DEFAULT_LOCALE,
+                      PRACTICE_STATUS_LABEL_KEYS[reading.status]
+                    )}
+                  </p>
+                  <p className="tw-m-0 tw-mt-2 tw-text-base tw-leading-7 tw-text-iron-400">
+                    {reading.note}
                   </p>
                 </dd>
               </div>

@@ -135,6 +135,44 @@ describe("Museum rights handbook publication boundary", () => {
     expect(result.status).toBe("unavailable");
   });
 
+  it("fails closed when a Museum-practice reading is absent or invalid", async () => {
+    const missingReading = mutatedRegistry((registry) => {
+      const expression = (
+        registry["expressions"] as Array<Record<string, unknown>>
+      )[0];
+      const matrix = expression?.["museum_practice_matrix"] as
+        | Record<string, unknown>
+        | undefined;
+      if (matrix !== undefined) delete matrix["publish_online"];
+    });
+    expect(
+      await loadFixture({
+        documentOverrides: {
+          [MUSEUM_RIGHTS_REGISTRY_PATH]: missingReading,
+        },
+      })
+    ).toEqual(expect.objectContaining({ status: "unavailable" }));
+
+    const invalidStatus = mutatedRegistry((registry) => {
+      const expression = (
+        registry["expressions"] as Array<Record<string, unknown>>
+      )[0];
+      const matrix = expression?.["museum_practice_matrix"] as
+        | Record<string, Record<string, unknown>>
+        | undefined;
+      if (matrix !== undefined) {
+        matrix["display_the_work"]!["status"] = "forbidden";
+      }
+    });
+    expect(
+      await loadFixture({
+        documentOverrides: {
+          [MUSEUM_RIGHTS_REGISTRY_PATH]: invalidStatus,
+        },
+      })
+    ).toEqual(expect.objectContaining({ status: "unavailable" }));
+  });
+
   it("rejects a legal-code commitment that does not match the fetched text", async () => {
     const registryText = mutatedRegistry((registry) => {
       const expression = (

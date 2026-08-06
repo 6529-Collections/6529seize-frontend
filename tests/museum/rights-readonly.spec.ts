@@ -95,7 +95,12 @@ test.describe("Museum rights education @surface @readonly", () => {
         "/museum/network/rights/cc-by-nc-4.0",
         "Creative Commons Attribution-NonCommercial 4.0 International"
       );
-      await expect(page.locator("dl > div")).toHaveCount(6);
+      const practice = page.locator(
+        'section[aria-labelledby="museum-rights-use-table"] dl'
+      );
+      await expect(practice.locator("dt")).toHaveCount(6);
+      await expect(practice.locator("dd")).toHaveCount(6);
+      await expect(practice.locator("[class*='rounded-full']")).toHaveCount(0);
       await expect(
         page.getByText("Make preservation copies", { exact: true })
       ).toBeVisible();
