@@ -6,6 +6,7 @@ import { MuseumDossierDocument } from "./MuseumDossierDocument";
 import { MuseumMarkdown } from "./MuseumMarkdown";
 import { MuseumPublicationUnavailable } from "./MuseumPublicationUnavailable";
 import { MuseumSourceMatrixLink } from "./MuseumSourceMatrixLink";
+import { MuseumInsideSystemDirectory } from "./MuseumInsideSystem";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -18,6 +19,7 @@ import {
   hasCompleteCaseyPublicationDossier,
 } from "@/lib/museum/casey";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
+import { CASEY_GENERATIVE_STUDIES } from "@/lib/museum/generative-studies";
 
 export function getMuseumGiftMetadata(accessionId: string): Metadata {
   return getAppMetadata({
@@ -138,6 +140,29 @@ export async function MuseumGiftPage({
       </section>
 
       <section
+        className="tw-mt-16 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
+        aria-labelledby="gift-systems-title"
+      >
+        <div className="tw-max-w-4xl">
+          <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.16em] tw-text-primary-300">
+            {t(DEFAULT_LOCALE, "museum.network.insideSystem.eyebrow")}
+          </p>
+          <h2
+            id="gift-systems-title"
+            className="tw-m-0 tw-mt-3 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50"
+          >
+            {t(DEFAULT_LOCALE, "museum.network.insideSystem.giftTitle")}
+          </h2>
+          <p className="tw-m-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">
+            {t(DEFAULT_LOCALE, "museum.network.insideSystem.giftDescription")}
+          </p>
+        </div>
+        <div className="tw-mt-8">
+          <MuseumInsideSystemDirectory studies={CASEY_GENERATIVE_STUDIES} />
+        </div>
+      </section>
+
+      <section
         className="tw-mt-16 tw-max-w-4xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
         aria-labelledby="gift-narrative-title"
       >
@@ -189,12 +214,17 @@ export async function MuseumGiftPage({
               publication,
               descriptor.path
             );
+            // React re-lists these server-rendered slots at the client boundary.
+            // Stable keys keep their identity explicit across that handoff.
             return (
               <MuseumDossierDocument
                 key={descriptor.path}
                 anchor={anchor}
                 summary={
-                  <summary className="hover:tw-text-primary-200 tw-flex tw-min-h-16 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-py-4 tw-text-base tw-font-semibold tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400">
+                  <summary
+                    key={`${descriptor.path}:summary`}
+                    className="hover:tw-text-primary-200 tw-flex tw-min-h-16 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-4 tw-py-4 tw-text-base tw-font-semibold tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                  >
                     <span>{descriptor.title}</span>
                     <span className="tw-text-sm tw-font-normal tw-text-iron-500 group-open:tw-text-primary-300">
                       {t(DEFAULT_LOCALE, "museum.network.gift.readDocument")}
@@ -202,7 +232,10 @@ export async function MuseumGiftPage({
                   </summary>
                 }
               >
-                <div className="tw-max-w-4xl tw-pb-10 tw-pt-2">
+                <div
+                  key={`${descriptor.path}:body`}
+                  className="tw-max-w-4xl tw-pb-10 tw-pt-2"
+                >
                   {document ? (
                     <MuseumMarkdown
                       sourceCommit={publication.identity.commit}

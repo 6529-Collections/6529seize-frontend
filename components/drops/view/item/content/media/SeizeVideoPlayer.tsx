@@ -129,7 +129,6 @@ export default function SeizeVideoPlayer({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const internalVideoRef = useRef<HTMLVideoElement | null>(null);
   const hideControlsTimerRef = useRef<number | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
   const [wrapperElement, setWrapperElement] = useState<HTMLDivElement | null>(
     null
   );
@@ -268,30 +267,15 @@ export default function SeizeVideoPlayer({
         ? current
         : { src: directSrc, value: video.duration }
     );
-    setProgressState({
-      src: directSrc,
-      value: Math.min(100, (video.currentTime / video.duration) * 100),
-    });
-  }
-
-  function stopProgressAnimation() {
-    if (animationFrameRef.current !== null) {
-      globalThis.window.cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
-    }
-  }
-
-  function startProgressAnimation() {
-    stopProgressAnimation();
-    const tick = () => {
-      updateProgress();
-      const video = internalVideoRef.current;
-      if (video && !video.paused && !video.ended) {
-        animationFrameRef.current =
-          globalThis.window.requestAnimationFrame(tick);
-      }
-    };
-    animationFrameRef.current = globalThis.window.requestAnimationFrame(tick);
+    const nextProgress = Math.min(
+      100,
+      (video.currentTime / video.duration) * 100
+    );
+    setProgressState((current) =>
+      current.src === directSrc && current.value === nextProgress
+        ? current
+        : { src: directSrc, value: nextProgress }
+    );
   }
 
   useEffect(() => {
@@ -369,7 +353,6 @@ export default function SeizeVideoPlayer({
   useEffect(() => {
     return () => {
       clearHideControlsTimer();
-      stopProgressAnimation();
     };
   }, []);
 
@@ -383,14 +366,12 @@ export default function SeizeVideoPlayer({
 
   function handlePlay() {
     setIsPaused(false);
-    startProgressAnimation();
     hideControlsSoon();
   }
 
   function handlePause() {
     setIsPaused(true);
     setControlsVisible(true);
-    stopProgressAnimation();
     updateProgress();
   }
 

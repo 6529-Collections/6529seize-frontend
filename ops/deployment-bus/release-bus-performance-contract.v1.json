@@ -49,8 +49,8 @@
     "production_parallelism": 3,
     "parallel_safety": "readonly",
     "post_deploy_packs": {
-      "staging": 13,
-      "production": 12,
+      "staging": 17,
+      "production": 16,
       "duplicate_spec_entries": 0
     },
     "staging_concurrency_group": "staging-e2e",

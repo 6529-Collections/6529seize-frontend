@@ -16,10 +16,11 @@ export default function CommunityMembersTableSkeleton({
       <div className="tw-hidden tw-overflow-hidden sm:tw-block">
         <div className="tw-animate-pulse">
           <div className="tw-h-10 tw-border-b tw-border-iron-800" />
+          {/* The header above is the first sibling, so odd children are even-numbered data placeholders. */}
           {rowKeys.map((key) => (
             <div
               key={key}
-              className="tw-flex tw-h-16 tw-items-center tw-gap-4 tw-border-b tw-border-iron-800 tw-px-4 odd:tw-bg-iron-900/45"
+              className="tw-flex tw-h-16 tw-items-center tw-gap-4 tw-border-b tw-border-iron-800 tw-px-4 odd:tw-bg-iron-900/70"
             >
               <div className="tw-h-4 tw-w-8 tw-rounded tw-bg-iron-800" />
               <div className="tw-h-8 tw-w-8 tw-rounded-md tw-bg-iron-800" />

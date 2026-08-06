@@ -25,19 +25,21 @@ async function loadPublication(
 }
 
 describe("institutional-practice publication aggregate", () => {
-  it("assembles the closed sixteen-manuscript inventory in declared order", async () => {
+  it("assembles the closed thirty-one-manuscript inventory in declared order", async () => {
     const publication = await loadPublication();
     const practice = publication.institutionalPractice;
     const documents = [
       practice.introduction,
       ...practice.profiles.map((profile) => profile.document),
+      practice.adjacentPractice,
+      practice.editorialStandard,
       practice.sourceRegister,
     ];
 
-    expect(INSTITUTIONAL_PRACTICE_DOCUMENT_CONTRACTS).toHaveLength(16);
-    expect(INSTITUTIONAL_PRACTICE_PROFILE_CONTRACTS).toHaveLength(14);
-    expect(INSTITUTIONAL_PRACTICE_REQUIRED_PATHS).toHaveLength(16);
-    expect(documents).toHaveLength(16);
+    expect(INSTITUTIONAL_PRACTICE_DOCUMENT_CONTRACTS).toHaveLength(31);
+    expect(INSTITUTIONAL_PRACTICE_PROFILE_CONTRACTS).toHaveLength(27);
+    expect(INSTITUTIONAL_PRACTICE_REQUIRED_PATHS).toHaveLength(31);
+    expect(documents).toHaveLength(31);
     expect(documents.map((document) => document.sourcePath)).toEqual(
       INSTITUTIONAL_PRACTICE_REQUIRED_PATHS
     );
@@ -48,7 +50,9 @@ describe("institutional-practice publication aggregate", () => {
     );
     expect(documents.map((document) => document.kind)).toEqual([
       "institutional_practice_study",
-      ...Array.from({ length: 14 }, () => "institution_profile"),
+      ...Array.from({ length: 27 }, () => "institution_profile"),
+      "institutional_practice_adjacent",
+      "scholarship_editorial_standard",
       "institutional_practice_source_register",
     ]);
     expect(practice.profiles.map((profile) => profile.slug)).toEqual(
@@ -65,15 +69,9 @@ describe("institutional-practice publication aggregate", () => {
     ).toBe(true);
     expect(
       publication.documents.filter((document) =>
-        document.sourcePath.startsWith("records/institutional-practice/")
+        documents.some((expected) => expected.id === document.id)
       )
     ).toEqual(documents);
-    expect(
-      publication.documents.some(
-        (document) =>
-          document.sourcePath === "docs/curatorial-publication-standard.md"
-      )
-    ).toBe(false);
     for (const document of documents) {
       expect(parseInstitutionalPracticeHeading(document.markdown)).toBe(
         document.title
@@ -86,15 +84,15 @@ describe("institutional-practice publication aggregate", () => {
       new Set(
         INSTITUTIONAL_PRACTICE_PROFILE_CONTRACTS.map((contract) => contract.id)
       ).size
-    ).toBe(14);
+    ).toBe(27);
     expect(
       new Set(
         INSTITUTIONAL_PRACTICE_PROFILE_CONTRACTS.map(
           (contract) => contract.slug
         )
       ).size
-    ).toBe(14);
-    expect(new Set(INSTITUTIONAL_PRACTICE_REQUIRED_PATHS).size).toBe(16);
+    ).toBe(27);
+    expect(new Set(INSTITUTIONAL_PRACTICE_REQUIRED_PATHS).size).toBe(31);
     for (const contract of INSTITUTIONAL_PRACTICE_PROFILE_CONTRACTS) {
       expect(contract.id).toBe(`institutional-practice:${contract.slug}`);
       expect(contract.path).toBe(

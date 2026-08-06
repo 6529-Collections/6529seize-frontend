@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 import {
   expect,
@@ -16,13 +16,21 @@ import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
 
 const STUDY_PATH = "/museum/network/stories/a-field-of-practice";
 const SOURCE_REPOSITORY = "6529-Collections/6529networkmuseum";
-const SOURCE_COMMIT = "f5080e1873a3b86280c5a92e1fbe6cbd7fea38a4";
 const EXACT_COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
+const REQUIRED_SOURCE_COMMIT =
+  process.env["MUSEUM_PUBLICATION_EXPECTED_COMMIT"]?.trim() || null;
 const MOBILE_PROJECT = "web-mobile-chromium";
 const MOBILE_VIEWPORT = { width: 390, height: 844 } as const;
 const LOCAL_SHELL_ALLOWED_CONSOLE_ERROR_PATTERNS = [
   /^Analytics SDK: TypeError: Failed to fetch(?:\n|$)/,
 ];
+
+if (
+  REQUIRED_SOURCE_COMMIT !== null &&
+  !EXACT_COMMIT_PATTERN.test(REQUIRED_SOURCE_COMMIT)
+) {
+  throw new Error("museum_publication_expected_commit_not_exact");
+}
 
 type StudyRoute = {
   readonly path: string;
@@ -45,6 +53,31 @@ const PROFILES = [
   ["serpentine-arts-technologies", "Serpentine Arts Technologies"],
   ["v-and-a", "Victoria and Albert Museum"],
   ["lacma", "Los Angeles County Museum of Art"],
+  ["hek-basel", "HEK Basel"],
+  ["li-ma", "LI-MA"],
+  ["v2", "V2_"],
+  ["transmediale", "transmediale"],
+  ["acmi", "ACMI — Collecting and Preserving Screen Culture"],
+  ["m-plus", "M+ — Collecting Digital and Moving-Image Culture"],
+  [
+    "nam-june-paik-art-center",
+    "Nam June Paik Art Center — Collection, Archive, and Media-Art Scholarship",
+  ],
+  [
+    "ntt-icc",
+    "NTT InterCommunication Center [ICC] — Media-Art Collection and Archive",
+  ],
+  [
+    "centro-multimedia",
+    "Centro Multimedia, CENART — Research and Production Center",
+  ],
+  [
+    "laboratorio-arte-alameda",
+    "Laboratorio Arte Alameda — Research and Documentation Center",
+  ],
+  ["dia", "Dia Art Foundation"],
+  ["walker-art-center", "Walker Art Center"],
+  ["mca-chicago", "Museum of Contemporary Art Chicago"],
 ] as const;
 
 const INDEX_ROUTE: StudyRoute = {
@@ -57,6 +90,53 @@ const SOURCE_ROUTE: StudyRoute = {
   path: `${STUDY_PATH}/sources`,
   sourcePath: "records/institutional-practice/source-register.md",
   title: "Source register: A field of practice",
+};
+
+const ADJACENT_ROUTE: StudyRoute = {
+  path: `${STUDY_PATH}/adjacent-practice`,
+  sourcePath:
+    "records/institutional-practice/adjacent-chain-native-practice.md",
+  title:
+    "Adjacent practice: platforms, archives, festivals, and chain-native systems",
+};
+
+const EDITORIAL_ROUTE: StudyRoute = {
+  path: "/museum/network/stories/scholarship-and-writing",
+  sourcePath: "docs/curatorial-publication-standard.md",
+  title: "Writing the 6529 Network Museum",
+};
+
+const CASEY_ARTIST_ROUTE: StudyRoute = {
+  path: "/museum/network/artists/casey-reas",
+  sourcePath:
+    "records/accessions/6529NM.2026.001/public/casey-reas-artist-practice.md",
+  title: "Casey REAS",
+};
+
+const CASEY_GIFT_ROUTE: StudyRoute = {
+  path: "/museum/network/gifts/6529NM.2026.001",
+  sourcePath:
+    "records/accessions/6529NM.2026.001/public/gift-into-public-trust.md",
+  title: "Gift into Public Trust",
+};
+
+const CASEY_SOURCE_ROUTE: StudyRoute = {
+  path: "/museum/network/stories/source-and-chronology",
+  sourcePath:
+    "records/accessions/6529NM.2026.001/public/source-and-chronology-matrix.md",
+  title: "Casey Reas: Sources and chronology",
+};
+
+const KEYS_AND_GATES_ROUTE: StudyRoute = {
+  path: "/museum/network/programs/6529NM-AP-01",
+  sourcePath: "records/programs/6529NM-AP-01/program.json",
+  title: "Keys and Gates",
+};
+
+const KEYS_AND_GATES_OBJECT_ROUTE: StudyRoute = {
+  path: "/museum/network/objects/6529NM-AP-01-OUT-001",
+  sourcePath: "records/programs/6529NM-AP-01/outcomes/OUT-001.json",
+  title: "Take the Key!",
 };
 
 const PROFILE_ROUTES: readonly StudyRoute[] = PROFILES.map(([slug, title]) => ({
@@ -102,6 +182,26 @@ async function expectSafeLinks(page: Page) {
   );
 
   expect(problems, problems.join("\n")).toEqual([]);
+}
+
+async function expectImagesLoaded(images: Locator) {
+  const count = await images.count();
+  for (let index = 0; index < count; index += 1) {
+    const image = images.nth(index);
+    await image.scrollIntoViewIfNeeded();
+    await expect
+      .poll(
+        () =>
+          image.evaluate(
+            (node) =>
+              node instanceof HTMLImageElement &&
+              node.complete &&
+              node.naturalWidth > 0
+          ),
+        { timeout: 30_000 }
+      )
+      .toBe(true);
+  }
 }
 
 async function expectFreshExactSource(
@@ -207,7 +307,7 @@ async function expectStudyRoute(
 test.describe("Museum institutional-practice publication @surface @large @readonly", () => {
   test.describe.configure({ mode: "serial" });
   test.setTimeout(120_000);
-  let sourceCommit: string | null = SOURCE_COMMIT;
+  let sourceCommit: string | null = REQUIRED_SOURCE_COMMIT;
 
   test.beforeEach(async ({ page }, testInfo) => {
     if (testInfo.project.name === MOBILE_PROJECT) {
@@ -216,7 +316,7 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     }
   });
 
-  test("publishes the study index and all fourteen profile links", async ({
+  test("publishes the study index, all twenty-seven profiles, and its research apparatus", async ({
     page,
   }) => {
     sourceCommit = await expectStudyRoute(page, INDEX_ROUTE, sourceCommit);
@@ -229,6 +329,15 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     await expect(
       page.locator(`a[href="${SOURCE_ROUTE.path}"]`).first()
     ).toBeVisible();
+    await expect(
+      page.locator(`a[href="${ADJACENT_ROUTE.path}"]`).first()
+    ).toBeVisible();
+    await expect(
+      page.locator(`a[href="${EDITORIAL_ROUTE.path}"]`).first()
+    ).toBeVisible();
+    await expect(page.locator("body")).not.toContainText(
+      /For this edition|retains fourteen|adds thirteen/iu
+    );
   });
 
   for (const profile of PROFILE_ROUTES) {
@@ -248,11 +357,129 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     });
   }
 
+  test("publishes the adjacent digital-art and chain-native study", async ({
+    page,
+  }) => {
+    sourceCommit = await expectStudyRoute(page, ADJACENT_ROUTE, sourceCommit);
+    await expect(page.locator("main table").first()).toBeVisible();
+    await expect(page.locator(`a[href="${STUDY_PATH}"]`).first()).toBeVisible();
+  });
+
+  test("publishes the Museum scholarship and writing standard", async ({
+    page,
+  }) => {
+    sourceCommit = await expectStudyRoute(page, EDITORIAL_ROUTE, sourceCommit);
+    await expect(
+      page.getByText("3.3 Forms demonstrated in the comparative study", {
+        exact: true,
+      })
+    ).toBeVisible();
+    await expect(page.locator(`a[href="${STUDY_PATH}"]`).first()).toBeVisible();
+  });
+
   test("publishes the complete primary-source register", async ({ page }) => {
     sourceCommit = await expectStudyRoute(page, SOURCE_ROUTE, sourceCommit);
     await expect(page.locator("main table").first()).toBeVisible();
     expect(
       await page.locator('main a[href^="https://"]').count()
     ).toBeGreaterThan(50);
+  });
+
+  test("publishes the Casey artist and gift without production labels", async ({
+    page,
+  }) => {
+    sourceCommit = await expectStudyRoute(
+      page,
+      CASEY_ARTIST_ROUTE,
+      sourceCommit
+    );
+    await expect(page.locator("body")).not.toContainText(/Standfirst/iu);
+    const artistImages = page.locator("main figure img");
+    await expect(artistImages).toHaveCount(7);
+    await expectImagesLoaded(artistImages);
+
+    sourceCommit = await expectStudyRoute(page, CASEY_GIFT_ROUTE, sourceCommit);
+    await expect(page.locator("body")).not.toContainText(/Standfirst/iu);
+    const giftImages = page.locator("main figure img");
+    await expect(giftImages).toHaveCount(7);
+    await expectImagesLoaded(giftImages);
+  });
+
+  test("publishes the edited Casey source and chronology record", async ({
+    page,
+  }) => {
+    sourceCommit = await expectStudyRoute(
+      page,
+      CASEY_SOURCE_ROUTE,
+      sourceCommit
+    );
+    await expect(page.locator("body")).not.toContainText(
+      /shared source, chronology, and factual-boundary matrix/iu
+    );
+    await expect(page.locator("main table").first()).toBeVisible();
+  });
+
+  test("publishes Keys and Gates as an art-led program", async ({ page }) => {
+    sourceCommit = await expectStudyRoute(
+      page,
+      KEYS_AND_GATES_ROUTE,
+      sourceCommit
+    );
+    await expect(
+      page.getByRole("heading", {
+        level: 2,
+        name: "16 winning photographs",
+      })
+    ).toBeVisible();
+    await expect(
+      page.getByText("Waiting for contract finalization")
+    ).toBeVisible();
+    const programImages = page.locator(
+      'main a[href^="/museum/network/objects/"] img'
+    );
+    await expect(programImages).toHaveCount(16);
+    await expectImagesLoaded(programImages);
+    await expect(programImages.first()).toHaveAttribute(
+      "srcset",
+      /\/museum\/programs\/6529NM-AP-01\/.+640\.webp 640w.+1280\.webp 1280w.+2400\.webp 2400w/u
+    );
+    await expect(
+      page.getByRole("heading", {
+        level: 2,
+        name: "Program history and curatorial record",
+      })
+    ).toBeVisible();
+    await expect(page.getByText("Selected; unminted")).toHaveCount(16);
+  });
+
+  test("publishes each Keys and Gates selection as a complete work page", async ({
+    page,
+  }) => {
+    sourceCommit = await expectStudyRoute(
+      page,
+      KEYS_AND_GATES_OBJECT_ROUTE,
+      sourceCommit
+    );
+    await expect(
+      page.getByRole("img", {
+        name: "A lone figure stands before a tall blue patterned gate as sunlight casts long geometric shadows across a stone hall.",
+      })
+    ).toBeVisible();
+    await expect(page.getByText("Selected; unminted")).toBeVisible();
+    await expect(page.getByText("A Keys and Gates winner")).toBeVisible();
+    await expect(
+      page.getByRole("link", {
+        name: "Open submitted high-resolution image",
+      })
+    ).toHaveAttribute(
+      "href",
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_61b48317-f46c-45b3-beed-cfd9054326d8/2a39fe28-4040-4a80-92a6-306384a4e735/DSCF2374-copy-2.jpg"
+    );
+    await expect(
+      page.getByRole("heading", { level: 2, name: "Artist statement" })
+    ).toBeVisible();
+    await expect(page.locator("body")).toContainText(
+      "It is not a Museum preservation master"
+    );
   });
 });

@@ -5,6 +5,7 @@ import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { faCaretLeft, faCaretRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import {
   type ChangeEvent,
   type KeyboardEvent,
@@ -17,6 +18,7 @@ interface Props {
   pageSize: number;
   totalResults: number;
   setPage(page: number): void;
+  variant?: "default" | "compact" | undefined;
 }
 
 export interface Paginated<T> {
@@ -34,6 +36,14 @@ const GO_TO_LAST_CLASS =
   "tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-base tw-text-inherit tw-[font:inherit] hover:tw-text-[rgb(179,179,179)] hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-[#528bff] disabled:tw-cursor-default disabled:tw-text-inherit disabled:tw-no-underline";
 const PAGE_INPUT_CLASS =
   "tw-w-[60px] tw-border-0 tw-border-b tw-border-solid tw-border-white tw-bg-transparent tw-text-center tw-text-base tw-[font:inherit]";
+const COMPACT_ROOT_CLASS =
+  "tw-inline-flex tw-items-center tw-gap-0.5 tw-tabular-nums tw-text-sm tw-text-iron-300";
+const COMPACT_ICON_BUTTON_CLASS =
+  "tw-inline-flex tw-size-7 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-colors hover:tw-bg-white/5 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-1 focus-visible:tw-outline-primary-400 disabled:tw-cursor-default disabled:tw-opacity-30";
+const COMPACT_PAGE_INPUT_CLASS =
+  "tw-h-7 tw-w-8 tw-cursor-text tw-border-0 tw-border-b tw-border-solid tw-border-iron-600 tw-bg-transparent tw-px-0.5 tw-text-center tw-text-sm tw-font-medium tw-text-iron-100 tw-transition-colors hover:tw-border-iron-400 focus-visible:tw-rounded-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-1 focus-visible:tw-outline-primary-400";
+const COMPACT_GO_TO_LAST_CLASS =
+  "tw-inline-flex tw-h-7 tw-min-w-7 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-sm tw-border-0 tw-bg-transparent tw-px-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-transition-colors hover:tw-bg-white/5 hover:tw-text-iron-50 hover:tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-1 focus-visible:tw-outline-primary-400 disabled:tw-cursor-default disabled:tw-text-iron-500 disabled:tw-no-underline disabled:hover:tw-bg-transparent";
 const CURRENT_PAGE_TOKEN = "__CURRENT_PAGE__";
 const TOTAL_PAGE_TOKEN = "__TOTAL_PAGE__";
 const PAGE_TOKEN_PATTERN = /(__CURRENT_PAGE__|__TOTAL_PAGE__)/;
@@ -106,23 +116,44 @@ export default function Pagination(props: Readonly<Props>) {
     setInputPage(newValue);
   }
 
+  const isCompact = props.variant === "compact";
   const lastPage = getLastPage();
+  const isOnLastPage = isLastPage();
+  let previousButtonClassName = COMPACT_ICON_BUTTON_CLASS;
+  let nextButtonClassName = COMPACT_ICON_BUTTON_CLASS;
+  if (!isCompact) {
+    const previousButtonStateClass =
+      props.page > 1 ? ICON_ENABLED_CLASS : ICON_DISABLED_CLASS;
+    const nextButtonStateClass = isOnLastPage
+      ? ICON_DISABLED_CLASS
+      : ICON_ENABLED_CLASS;
+    previousButtonClassName = `${ICON_BUTTON_CLASS} ${previousButtonStateClass}`;
+    nextButtonClassName = `${ICON_BUTTON_CLASS} ${nextButtonStateClass}`;
+  }
   const pageLabelParts = getPageLabelParts(locale);
 
   return (
     <>
       {props.totalResults > props.pageSize && (
-        <span className="tw-inline-flex tw-items-center tw-gap-2 tw-text-base">
+        <span
+          className={
+            isCompact
+              ? COMPACT_ROOT_CLASS
+              : "tw-inline-flex tw-items-center tw-gap-2 tw-text-base"
+          }
+        >
           <button
             type="button"
             onClick={pagePrevious}
-            className={`${ICON_BUTTON_CLASS} ${
-              props.page > 1 ? ICON_ENABLED_CLASS : ICON_DISABLED_CLASS
-            }`}
+            className={previousButtonClassName}
             aria-label={t(locale, "common.pagination.previousPage")}
             disabled={props.page <= 1}
           >
-            <FontAwesomeIcon icon={faCaretLeft} />
+            {isCompact ? (
+              <ChevronLeftIcon aria-hidden="true" className="tw-size-4" />
+            ) : (
+              <FontAwesomeIcon icon={faCaretLeft} />
+            )}
           </button>
           {pageLabelParts.map((part, index) => {
             if (part === CURRENT_PAGE_TOKEN) {
@@ -132,7 +163,9 @@ export default function Pagination(props: Readonly<Props>) {
                   id="page-number"
                   type="text"
                   inputMode="numeric"
-                  className={PAGE_INPUT_CLASS}
+                  className={
+                    isCompact ? COMPACT_PAGE_INPUT_CLASS : PAGE_INPUT_CLASS
+                  }
                   onFocus={() => {
                     setInputPage(props.page.toString());
                     setIsEditing(true);
@@ -157,9 +190,11 @@ export default function Pagination(props: Readonly<Props>) {
                   key={part}
                   type="button"
                   onClick={goToLast}
-                  className={GO_TO_LAST_CLASS}
+                  className={
+                    isCompact ? COMPACT_GO_TO_LAST_CLASS : GO_TO_LAST_CLASS
+                  }
                   aria-label={t(locale, "common.pagination.goToLastPage")}
-                  disabled={isLastPage()}
+                  disabled={isOnLastPage}
                 >
                   {formatInteger(locale, lastPage)}
                 </button>
@@ -167,7 +202,14 @@ export default function Pagination(props: Readonly<Props>) {
             }
 
             return (
-              <span key={`${part}-${index}`} className="tw-text-base">
+              <span
+                key={`${part}-${index}`}
+                className={
+                  isCompact
+                    ? "tw-px-0.5 tw-text-xs tw-font-normal tw-text-iron-500"
+                    : "tw-text-base"
+                }
+              >
                 {part}
               </span>
             );
@@ -175,13 +217,15 @@ export default function Pagination(props: Readonly<Props>) {
           <button
             type="button"
             onClick={pageNext}
-            className={`${ICON_BUTTON_CLASS} ${
-              isLastPage() ? ICON_DISABLED_CLASS : ICON_ENABLED_CLASS
-            }`}
+            className={nextButtonClassName}
             aria-label={t(locale, "common.pagination.nextPage")}
-            disabled={isLastPage()}
+            disabled={isOnLastPage}
           >
-            <FontAwesomeIcon icon={faCaretRight} />
+            {isCompact ? (
+              <ChevronRightIcon aria-hidden="true" className="tw-size-4" />
+            ) : (
+              <FontAwesomeIcon icon={faCaretRight} />
+            )}
           </button>
         </span>
       )}

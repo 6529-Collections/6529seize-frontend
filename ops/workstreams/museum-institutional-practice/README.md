@@ -2,12 +2,13 @@
 
 ## Charter
 
-Publish the 6529 Network Museum's comparative institutional study as a native,
-exact-source Museum section. The source package consists of *A field of
-practice*, fourteen institutional profiles, and a primary-source register. The
-frontend must treat the package atomically, keep the artwork and Museum voice
-primary, and expose the governed GitHub source and contribution route already
-used throughout the Museum.
+Publish the 6529 Network Museum's living comparative institutional study as a
+native, exact-source Museum section. The source package consists of *A field of
+practice*, twenty-seven institutional profiles, the adjacent digital-art and
+chain-native study, the Museum's public scholarship and editorial standard,
+and a primary-source register. The frontend treats the package atomically,
+keeps the artwork and Museum voice primary, and exposes the governed GitHub
+source and contribution route already used throughout the Museum.
 
 ## Reload order
 

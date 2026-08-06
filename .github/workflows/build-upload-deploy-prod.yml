@@ -142,8 +142,9 @@ jobs:
 
   build-upload-deploy:
     needs: [assert-main-ref, manual-deployment-guard]
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.PRODUCTION_BUILD_RUNNER || vars.CI_BUILD_RUNNER || 'ubuntu-latest' }}
     permissions:
+      actions: read
       contents: read
       deployments: write
     environment: production
@@ -196,122 +197,93 @@ jobs:
             --environment-url "https://6529.io" \
             --log-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-      - name: Install Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
-        with:
-          node-version: "22.17.1"
-
-      - name: Activate pinned pnpm
-        run: |
-          corepack enable pnpm
-          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
-          pnpm --version
-
-      - name: Install Socket Firewall
-        id: socket_firewall
-        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
-        with:
-          mode: firewall
-
-      - name: Assert npm lockfile is absent
-        run: ./bin/6529 guard:no-package-lock
-
-      - name: Install dependencies
+      - name: Locate successful exact production prebuild
+        id: production-artifact
+        timeout-minutes: 5
         env:
-          SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
-        run: ./bin/6529 install:frozen
-
-      - name: Lint package.json versions
-        run: ./bin/6529 lint:package-json
-
-      - name: Capture production build timestamp
-        run: printf 'VERSION_BUILD_TIMESTAMP=%s\n' "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> "$GITHUB_ENV"
-
-      - name: Build App
-        env:
-          NODE_ENV: "production"
-          API_ENDPOINT: ${{ env.API_ENDPOINT }}
-          ALLOWLIST_API_ENDPOINT: ${{ env.ALLOWLIST_API_ENDPOINT }}
-          BASE_ENDPOINT: ${{ env.BASE_ENDPOINT }}
-          VERSION: ${{ env.COMMIT_SHA }}
-          VERSION_BUILD_TIMESTAMP: ${{ env.VERSION_BUILD_TIMESTAMP }}
-          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
-          NEXTGEN_CHAIN_ID: ${{ env.NEXTGEN_CHAIN_ID }}
-          GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY || secrets.GIPHY_API_KEY }}
-          AWS_RUM_APP_ID: ${{ secrets.AWS_RUM_APP_ID }}
-          AWS_RUM_REGION: ${{ secrets.AWS_RUM_REGION }}
-          AWS_RUM_SAMPLE_RATE: ${{ secrets.AWS_RUM_SAMPLE_RATE }}
-          NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }}
-          ASSETS_FROM_S3: ${{ env.ASSETS_FROM_S3 }}
-          ANNOUNCED_VERSION_ENDPOINT: ${{ env.ANNOUNCED_VERSION_ENDPOINT }}
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: ./bin/6529 run build
-
-      - name: Build Target
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_SHA: ${{ env.COMMIT_SHA }}
         run: |
-          rm -rf target .deploy-bundle
-          mkdir -p target/_next .deploy-bundle/.next
-
-          test -f .next/standalone/server.js
-          cp -r .next/standalone/. .deploy-bundle/
-          cp -r .next/static target/_next/
-          cp -r .next/static .deploy-bundle/.next/
-          cp Procfile .deploy-bundle/
-          cp -r .ebextensions .deploy-bundle/
-          if [ -d .platform ]; then
-            cp -r .platform .deploy-bundle/
-          fi
-
-          # Next standalone can include dangling pnpm symlinks that Elastic
-          # Beanstalk trips over during StageApplication ownership fixes.
-          find .deploy-bundle -xtype l -delete
-
-          for file in BUILD_ID PUBLIC_RUNTIME.json ASSETS_FROM_S3; do
-            if [ -f ".next/$file" ]; then
-              cp ".next/$file" ".deploy-bundle/.next/$file"
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          artifact_name="production-frontend-${EXPECTED_SHA}"
+          artifact_json=''
+          for attempt in $(seq 1 12); do
+            artifact_json="$(gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=${artifact_name}&per_page=100")"
+            run_id="$(jq -er --arg sha "$EXPECTED_SHA" '
+              [.artifacts[] |
+                select(.expired == false and .workflow_run.head_sha == $sha)] |
+              sort_by(.created_at) | last | .workflow_run.id // empty
+            ' <<< "$artifact_json" 2>/dev/null || true)"
+            if [[ "$run_id" =~ ^[1-9][0-9]{0,19}$ ]]; then
+              run_json="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}")"
+              if jq -e --arg sha "$EXPECTED_SHA" '
+                .path == ".github/workflows/production-build-artifact.yml" and
+                (.event == "push" or .event == "workflow_dispatch") and
+                .conclusion == "success" and
+                .head_branch == "main" and
+                .head_sha == $sha
+              ' <<< "$run_json" >/dev/null; then
+                artifact_id="$(jq -er --arg sha "$EXPECTED_SHA" '
+                  [.artifacts[] |
+                    select(.expired == false and .workflow_run.head_sha == $sha)] |
+                  sort_by(.created_at) | last | .id
+                ' <<< "$artifact_json")"
+                [[ "$artifact_id" =~ ^[1-9][0-9]{0,19}$ ]]
+                echo "name=$artifact_name" >> "$GITHUB_OUTPUT"
+                echo "run-id=$run_id" >> "$GITHUB_OUTPUT"
+                echo "artifact-id=$artifact_id" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
             fi
+            if [ "$attempt" -lt 12 ]; then sleep 20; fi
           done
+          echo "::error::No successful exact production prebuild is available for $EXPECTED_SHA."
+          exit 1
 
-          node scripts/package-public-review-artifacts.cjs prepare \
-            --profile production \
-            --bundle-root .deploy-bundle
-          test -z "$(find target/_next -type l -print -quit)"
+      - name: Download exact production artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: ${{ steps.production-artifact.outputs.name }}
+          path: production-artifact
+          run-id: ${{ steps.production-artifact.outputs.run-id }}
+          github-token: ${{ github.token }}
 
-          (
-            cd .deploy-bundle
-            zip -yr ../target/package.zip .
-          )
-
-          zip_listing="$(mktemp)"
-          zip_extract="$(mktemp -d)"
-          trap 'rm -f "$zip_listing"; rm -rf "$zip_extract"' EXIT
-          unzip -Z1 target/package.zip > "$zip_listing"
-          node scripts/package-public-review-artifacts.cjs assert-listing \
-            --profile production \
-            --bundle-root .deploy-bundle \
-            --listing-file "$zip_listing"
-          unzip -q target/package.zip -d "$zip_extract"
-          node scripts/package-public-review-artifacts.cjs assert-zip \
-            --profile production \
-            --bundle-root .deploy-bundle \
-            --listing-file "$zip_listing" \
-            --extracted-root "$zip_extract"
-          rm -f "$zip_listing"
-          rm -rf "$zip_extract"
-          trap - EXIT
-          test -z "$(git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews)"
-
-      - name: Verify package bundle size
+      - name: Verify exact production artifact
+        env:
+          EXPECTED_SHA: ${{ env.COMMIT_SHA }}
         run: |
-          PACKAGE_SIZE_BYTES=$(stat -c%s target/package.zip)
-          PACKAGE_SIZE_MB=$((PACKAGE_SIZE_BYTES / 1024 / 1024))
-          MAX_SIZE_BYTES=$((500 * 1024 * 1024))
-          echo "package.zip size: ${PACKAGE_SIZE_MB} MB (${PACKAGE_SIZE_BYTES} bytes)"
-          if [ "$PACKAGE_SIZE_BYTES" -gt "$MAX_SIZE_BYTES" ]; then
-            echo "Elastic Beanstalk source bundle exceeds the 500 MB limit."
-            exit 1
-          fi
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test -f production-artifact/manifest.json
+          test -f production-artifact/SHA256SUMS
+          test -f production-artifact/target/package.zip
+          (cd production-artifact && sha256sum -c SHA256SUMS)
+          jq -e --arg source_sha "$EXPECTED_SHA" '
+            .schema_version == 1 and
+            .artifact_contract == "production-prebuild-v1" and
+            .repository == "frontend" and
+            .source_sha == $source_sha and
+            .environment == "production" and
+            (.package_sha256 | test("^[a-f0-9]{64}$")) and
+            (.build_timestamp | type == "string" and length >= 20)
+          ' production-artifact/manifest.json >/dev/null
+          package_digest="$(sha256sum production-artifact/target/package.zip | cut -d' ' -f1)"
+          test "$package_digest" = "$(jq -r .package_sha256 production-artifact/manifest.json)"
+          jq -e --arg source_sha "$EXPECTED_SHA" --arg package_sha256 "$package_digest" '
+            .schema_version == "artifact-portability.v1" and
+            .contract == "artifact-portability-v1" and
+            .environment == "production" and
+            .source.git_sha == $source_sha and
+            .digests.package_sha256 == $package_sha256 and
+            .portability.status == "NOT_PORTABLE" and
+            .portability.portable == false and
+            .portability.reuse_authorized == false and
+            .portability.promotion_authorized == false
+          ' production-artifact/artifact-portability.json >/dev/null
+          package_size="$(stat -c%s production-artifact/target/package.zip)"
+          test "$package_size" -le $((500 * 1024 * 1024))
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
@@ -333,7 +305,7 @@ jobs:
             --branch main
 
       - name: Upload assets to S3
-        run: aws s3 sync target "s3://${AWS_BUCKET}/web_build/${COMMIT_SHA}/"
+        run: aws s3 sync production-artifact/target "s3://${AWS_BUCKET}/web_build/${COMMIT_SHA}/"
 
       - name: Get commit message
         run: printf 'COMMIT_MESSAGE=%s\n' "$(git show -s --format=%s)" >> "$GITHUB_ENV"
@@ -433,40 +405,23 @@ jobs:
             --version-label "${{ env.COMMIT_SHA }}" \
             --option-settings "$option_settings"
 
-      - name: Check Elastic Beanstalk health and readiness (120s warmup then 20 retries with 60s delay)
-        env:
-          DEPLOYMENT_ID: ${{ steps.deployment-record.outputs.deployment_id }}
-          GITHUB_TOKEN: ${{ github.token }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      - name: Check Elastic Beanstalk health and readiness (adaptive exact-version poll)
         run: |
-          echo "Warmup..."
-          MAX_RETRIES=20
-          COUNTER=0
-          sleep 120
-          while : ; do
-            ENV_HEALTH=$(aws elasticbeanstalk describe-environments --environment-names "${BEANSTALK_ENV_NAME}" --query 'Environments[0].Health' --output text)
-            ENV_STATUS=$(aws elasticbeanstalk describe-environments --environment-names "${BEANSTALK_ENV_NAME}" --query 'Environments[0].Status' --output text)
-            echo "Environment health: $ENV_HEALTH"
-            echo "Environment status: $ENV_STATUS"
-            if [ $((COUNTER % 5)) -eq 0 ]; then
-              node ops/scripts/deployment-bus.cjs github-create-status \
-                --deployment-id "$DEPLOYMENT_ID" \
-                --state in_progress \
-                --description "Production EB health=$ENV_HEALTH status=$ENV_STATUS after $COUNTER checks" \
-                --environment-url "https://6529.io" \
-                --log-url "$RUN_URL" || true
-            fi
-            if [[ $ENV_HEALTH == "Green" && $ENV_STATUS == "Ready" ]]; then
-              echo "Environment is healthy and ready!"
-              break
-            elif [[ $COUNTER -eq $MAX_RETRIES ]]; then
-              echo "Environment did not become healthy and ready within the expected time."
-              exit 1
-            fi
-            COUNTER=$((COUNTER+1))
-            echo "Waiting for environment to become healthy and ready... Attempt: $COUNTER"
-            sleep 60
-          done
+          set -euo pipefail
+          node ops/scripts/elastic-beanstalk-readiness.cjs \
+            --environment-name "${BEANSTALK_ENV_NAME}" \
+            --expected-version "${COMMIT_SHA}" \
+            --timeout-seconds 1320 \
+            --output elastic-beanstalk-readiness.json
+
+      - name: Upload durable Elastic Beanstalk readiness evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: production-elastic-beanstalk-readiness-${{ github.run_id }}
+          path: elastic-beanstalk-readiness.json
+          if-no-files-found: error
+          retention-days: 90
 
       - name: Validate Deployment
         run: |

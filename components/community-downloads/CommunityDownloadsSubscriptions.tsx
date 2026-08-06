@@ -6,7 +6,11 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { useEffect, useState } from "react";
 
 import { useSetTitle } from "@/contexts/TitleContext";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import {
+  DOWNLOADS_TABLE_CELL_CLASS_NAME,
+  DOWNLOADS_TABLE_ROW_CLASS_NAME,
   DownloadsLayout,
   DownloadsTable,
   formatDate,
@@ -22,6 +26,7 @@ interface SubscriptionDownload {
 }
 
 export default function CommunityDownloadsSubscriptions() {
+  const locale = useBrowserLocale();
   useSetTitle("Meme Subscriptions | Open Data");
 
   const [downloads, setDownloads] = useState<SubscriptionDownload[]>();
@@ -45,12 +50,20 @@ export default function CommunityDownloadsSubscriptions() {
     <DownloadsLayout title="Meme Subscriptions">
       <DownloadsTable
         data={downloads}
-        columns={["Date", "Token ID", "Link"]}
+        columns={[
+          t(locale, "openData.downloads.columns.date"),
+          t(locale, "openData.downloads.columns.tokenId"),
+          t(locale, "openData.downloads.columns.link"),
+        ]}
         renderRow={(download: SubscriptionDownload) => (
-          <tr key={download.date}>
-            <td>{formatDate(download.date)}</td>
-            <td>#{download.token_id}</td>
-            <td>
+          <tr className={DOWNLOADS_TABLE_ROW_CLASS_NAME} key={download.date}>
+            <td className={DOWNLOADS_TABLE_CELL_CLASS_NAME}>
+              {formatDate(download.date)}
+            </td>
+            <td className={DOWNLOADS_TABLE_CELL_CLASS_NAME}>
+              #{download.token_id}
+            </td>
+            <td className={DOWNLOADS_TABLE_CELL_CLASS_NAME}>
               <a
                 href={download.upload_url}
                 target="_blank"
@@ -73,6 +86,7 @@ export default function CommunityDownloadsSubscriptions() {
               setPage(newPage);
               window.scrollTo(0, 0);
             }}
+            variant="compact"
           />
         </div>
       )}

@@ -2,6 +2,10 @@ import { render, screen } from "@testing-library/react";
 import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { MuseumShell } from "@/components/museum/MuseumShell";
 
+jest.mock("next/navigation", () => ({
+  usePathname: () => "/museum/network/collection",
+}));
+
 jest.mock("next/link", () => ({
   __esModule: true,
   default: ({
@@ -49,5 +53,27 @@ describe("MuseumShell", () => {
         "false"
       );
     }
+  });
+
+  it("marks the current Museum section in the primary navigation", () => {
+    render(
+      <MuseumShell
+        view={{
+          sourceState: "fresh",
+          publicationIdentity: null,
+          pageSources: [],
+        }}
+      >
+        <p>Collection record</p>
+      </MuseumShell>
+    );
+
+    expect(screen.getByRole("link", { name: "Collection" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    );
+    expect(screen.getByRole("link", { name: "Artists" })).not.toHaveAttribute(
+      "aria-current"
+    );
   });
 });

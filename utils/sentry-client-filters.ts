@@ -6,6 +6,8 @@ export type {
   SentryTransactionSpan,
 } from "./sentry-client-filters/types";
 export { LOW_VALUE_NETWORK_ERROR_SAMPLE_RATE } from "./sentry-client-filters/constants";
+export { redactDropReactionFailureIdentifiers } from "./sentry-client-filters/drop-reaction";
+export { shouldFilterChromeMobileIosInjectedGaError } from "./sentry-client-filters/chrome-ios";
 export {
   getLowValueNetworkErrorDecision,
   getLowValueNetworkErrorTargetUrl,
@@ -21,19 +23,23 @@ export {
   shouldFilterByFilenameExceptions,
   shouldFilterGifPickerTenorCategoriesError,
   shouldFilterInjectedWasmCspUnsafeEval,
-  shouldFilterReactDomInsertBeforeNotFoundError,
-  shouldFilterReactDomRemoveChildNotFoundError,
   shouldFilterSentryRouteParameterizationError,
   shouldFilterTwitterCurrentInsetReferenceError,
   shouldFilterTwitterConfigReferenceError,
 } from "./sentry-client-filters/errors";
+export { shouldFilterInjectedIosAutoplayNotAllowedError } from "./sentry-client-filters/media";
+export {
+  shouldFilterReactDomInsertBeforeNotFoundError,
+  shouldFilterReactDomRemoveChildNotFoundError,
+} from "./sentry-client-filters/react-dom";
+export { shouldFilterInstagramPageHideBridgeError } from "./sentry-client-filters/instagram-page-hide-bridge";
 export {
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
+  shouldFilterBrowserExtensionWalletRejection,
 } from "./sentry-client-filters/extension-messaging";
-export {
-  shouldFilterPoperBlockerOrphanFetchRejection,
-} from "./sentry-client-filters/extension-fetch";
+export { shouldFilterPoperBlockerOrphanFetchRejection } from "./sentry-client-filters/extension-fetch";
+export { shouldFilterExpectedWaveRequestReplacementAbort } from "./sentry-client-filters/wave-abort";
 export {
   shouldFilterBraveWalletPageEvaluationError,
 } from "./sentry-client-filters/brave-wallet";
@@ -42,6 +48,7 @@ export {
   shouldFilterDisconnectedWalletProviderRejection,
   shouldFilterInjectedProviderProxyStartsWithError,
   shouldFilterInjectedWalletCollision,
+  shouldFilterKnownWalletProviderObjectRejection,
   shouldFilterRabbyMobileRainbowKitNotFoundError,
   shouldFilterRabbyMobileUserRejectedRequest,
   shouldFilterTalismanExtensionOnboardingError,
