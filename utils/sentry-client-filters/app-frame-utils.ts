@@ -31,6 +31,20 @@ import {
   isFirstPartyHost,
 } from "./value-utils";
 
+const reactDomInsertBeforeRawFrameCount = 50;
+// These pre-symbolication minified names are intentionally separate from
+// REACT_DOM_INSERT_BEFORE_RUNTIME_FUNCTIONS, which contains source-mapped
+// semantic React DOM function names.
+const reactDomInsertBeforeRawRuntimeFunctions = new Set([
+  "sN",
+  "sR",
+  "lo",
+  "li",
+  "lr",
+]);
+const reactDomInsertBeforeRawRequiredFunctions = ["lo", "li", "lr"];
+const reactDomInsertBeforeRawTerminalFunctions = new Set(["sN", "sR"]);
+
 function isReactDomRuntimeFrame(frame: SentryStackFrame): boolean {
   const paths = getFramePaths(frame);
   if (
@@ -64,20 +78,122 @@ function hasOnlyReactDomRuntimeFrames(
   );
 }
 
+function hasOnlyOneNextStaticChunk(frames: SentryStackFrame[]): boolean {
+  const [firstFrame] = frames;
+  if (!firstFrame) {
+    return false;
+  }
+
+  const chunkPathToken = `${nextStaticFramePathToken}chunks/`;
+  const firstFramePaths = getFramePaths(firstFrame).map((path) => path.trim());
+  if (
+    firstFramePaths.length === 0 ||
+    firstFramePaths.some((path) => !path.includes(chunkPathToken))
+  ) {
+    return false;
+  }
+
+  const chunkPaths = new Set(firstFramePaths);
+  if (chunkPaths.size !== 1) {
+    return false;
+  }
+
+  return frames.every((frame) => {
+    const paths = getFramePaths(frame).map((path) => path.trim());
+    return (
+      paths.length > 0 &&
+      paths.every(
+        (path) => path.includes(chunkPathToken) && chunkPaths.has(path)
+      )
+    );
+  });
+}
+
+function hasRawReactDomInsertBeforeFrameSignature(
+  frames: SentryStackFrame[] | undefined
+): boolean {
+  // beforeSend sees this minified stack before Sentry applies source maps.
+  // Keep the cohort-backed shape exact so minifier drift fails open.
+  if (
+    !Array.isArray(frames) ||
+    frames.length !== reactDomInsertBeforeRawFrameCount
+  ) {
+    return false;
+  }
+
+  const terminalFunction = frames.at(-1)?.function?.trim();
+  if (
+    !terminalFunction ||
+    !reactDomInsertBeforeRawTerminalFunctions.has(terminalFunction)
+  ) {
+    return false;
+  }
+
+  const functionNames = new Set<string>();
+  for (const frame of frames) {
+    const functionName = frame.function?.trim();
+    if (
+      !functionName ||
+      !reactDomInsertBeforeRawRuntimeFunctions.has(functionName)
+    ) {
+      return false;
+    }
+    functionNames.add(functionName);
+  }
+
+  return (
+    functionNames.size ===
+      reactDomInsertBeforeRawRequiredFunctions.length + 1 &&
+    reactDomInsertBeforeRawRequiredFunctions.every((functionName) =>
+      functionNames.has(functionName)
+    ) &&
+    hasOnlyOneNextStaticChunk(frames)
+  );
+}
+
+function getReactDomNotFoundErrorValue(
+  event: SentryClientEvent,
+  message: string
+): SentryExceptionValue | undefined {
+  const values = event.exception?.values;
+  if (values?.length !== 1) {
+    return undefined;
+  }
+
+  const [value] = values;
+  if (value?.type !== "NotFoundError" || value.value !== message) {
+    return undefined;
+  }
+
+  return value;
+}
+
+function getReactDomNotFoundErrorFrames(
+  event: SentryClientEvent,
+  message: string
+): SentryStackFrame[] | undefined {
+  return getReactDomNotFoundErrorValue(event, message)?.stacktrace?.frames;
+}
+
 export function hasReactDomNotFoundErrorSignature(
   event: SentryClientEvent,
   message: string
 ): boolean {
-  const value = event.exception?.values?.[0];
-  if (value?.type !== "NotFoundError") {
-    return false;
-  }
+  return hasOnlyReactDomRuntimeFrames(
+    getReactDomNotFoundErrorFrames(event, message)
+  );
+}
 
-  if (value.value !== message) {
-    return false;
-  }
-
-  return hasOnlyReactDomRuntimeFrames(value.stacktrace?.frames);
+export function hasReactDomInsertBeforeRawNotFoundErrorSignature(
+  event: SentryClientEvent,
+  message: string
+): boolean {
+  const value = getReactDomNotFoundErrorValue(event, message);
+  return (
+    value?.mechanism?.type === "generic" &&
+    value.mechanism.handled === true &&
+    hasRawReactDomInsertBeforeFrameSignature(value.stacktrace?.frames)
+  );
 }
 
 function isAppUriFrame(frame: SentryStackFrame): boolean {
@@ -359,8 +475,7 @@ export function hasSentryRouteParameterizationFrame(
   frames: SentryStackFrame[] | undefined
 ): boolean {
   return (
-    Array.isArray(frames) &&
-    frames.some(isSentryRouteParameterizationFrame)
+    Array.isArray(frames) && frames.some(isSentryRouteParameterizationFrame)
   );
 }
 

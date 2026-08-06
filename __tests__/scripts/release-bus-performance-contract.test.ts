@@ -69,6 +69,11 @@ describe("Release Bus frontend performance contract", () => {
     ).toHaveLength(1);
 
     const appPrCi = read(".github/workflows/app-pr-ci.yml");
+    expect(appPrCi).toContain("github.event.pull_request.base.sha");
+    expect(appPrCi).not.toContain("github.base_ref");
+    expect(appPrCi).toContain(
+      'test "$(git rev-parse HEAD^1)" = "$EXPECTED_BASE_SHA"'
+    );
     expect(appPrCi).toContain("./bin/6529 run lint:changed");
     expect(appPrCi).toContain("./bin/6529 run typecheck:changed");
     expect(appPrCi).toContain("Run related Jest tests");
@@ -76,7 +81,14 @@ describe("Release Bus frontend performance contract", () => {
     expect(appPrCi).toContain("playwright install --with-deps chromium");
     expect(appPrCi).toContain("test:e2e:smoke");
     expect(appPrCi).toContain("test:e2e:critical-shell");
-    expect(appPrCi).toContain("test:e2e:museum-institutional-practice");
+    expect(appPrCi).toContain("./bin/6529 exec playwright test");
+    expect(appPrCi).toContain(
+      "tests/museum/data-architecture-readonly.spec.ts"
+    );
+    expect(appPrCi).toContain("tests/museum/about-readonly.spec.ts");
+    expect(appPrCi).toContain("tests/museum/inside-system-readonly.spec.ts");
+    expect(appPrCi).toContain("tests/museum/rights-readonly.spec.ts");
+    expect(appPrCi).not.toContain("./bin/6529 run test:e2e:museum-");
     expect(appPrCi).toContain("matrix.lane == 'playwright-museum'");
     expect(appPrCi).toContain("Restore Playwright browser");
     if (appPrCi.includes("exact-merge-tree-pr-ci-v1")) {
@@ -114,6 +126,16 @@ describe("Release Bus frontend performance contract", () => {
       'git diff --name-only -z --diff-filter=ACMR "$FORMAT_DIFF_COMMIT"'
     );
     expect(packageJson.scripts["format:changed"]).not.toContain("main...HEAD");
+  });
+
+  it("preserves the restored Release Bus Next.js cache while cleaning build output", () => {
+    expect(preflightSource).toContain(
+      "find .next -mindepth 1 -maxdepth 1 ! -name cache -exec rm -rf {} +"
+    );
+    expect(preflightSource).not.toMatch(/^\s*rm -rf \.next\s*$/mu);
+    expect(preflightSource).toContain(
+      "build_profile staging release-bus-artifact/profiles/staging\n            # Profile-specific endpoints and PUBLIC_RUNTIME are build inputs.\n            # The legacy bridge builds both profiles in one workspace, so its\n            # second build must not reuse staging's Next.js cache.\n            rm -rf .next/cache\n            build_profile production release-bus-artifact/profiles/production"
+    );
   });
 
   it("pins the build and E2E runtime to an exact Node patch", () => {
@@ -166,6 +188,24 @@ describe("Release Bus frontend performance contract", () => {
     );
     expect(preflightSource).toContain(
       '.policy_bundle_contract == "pr-ci-policy-bundle-v1"'
+    );
+    expect(preflightSource).toContain(
+      "Check out immutable Museum selection verifier"
+    );
+    expect(preflightSource).toContain(
+      "Check out exact candidate tree for Museum selection verification"
+    );
+    expect(preflightSource).toContain(
+      "Install pinned parser for immutable Museum selection verification"
+    );
+    expect(preflightSource).toContain(
+      ".museum_release_selection.classification.base_sha == .base_sha"
+    );
+    expect(preflightSource).toContain("verifySelectionDigest(selection)");
+    expect(preflightSource).toContain('node "$MUSEUM_RELEASE_SELECTION_TOOL"');
+    expect(preflightSource).toContain("cmp --silent");
+    expect(preflightSource).toContain(
+      '"$RUNNER_TEMP/actual-selection.sorted.json"'
     );
     expect(preflightSource).toContain(
       'test "$evidence_files" = "SHA256SUMS manifest.json policy-bundle.txt"'
@@ -327,7 +367,10 @@ describe("Release Bus frontend performance contract", () => {
         '[ "$ARTIFACT_CONTRACT_VERSION" = legacy-v2 ]'
       );
       expect(verification.run).toContain("artifact_contract=legacy-v2");
-      expect(deployReport.run).toContain("summary_environment=portable");
+      expect(deployReport.run).toContain(
+        'summary_environment="$ARTIFACT_ENVIRONMENT"'
+      );
+      expect(deployReport.run).not.toContain("summary_environment=portable");
       expect(deployReport.run).toContain(
         "deployment_environment:$deployment_environment"
       );
@@ -480,24 +523,32 @@ describe("Release Bus frontend performance contract", () => {
       expect(source).toContain("!isMuseumPack(pack)");
       expect(source).toContain('args+=(--exclude-pack "$museum_pack_alias")');
     }
-    for (const [definition, jobName, stepName, evidenceName] of [
+    for (const [
+      definition,
+      jobName,
+      stepName,
+      evidenceJobName,
+      evidenceName,
+    ] of [
       [
         staging,
         "staging-packs",
         "Run staging packs against staging.6529.io",
+        "staging-packs",
         "Validate exact manifest-bound E2E evidence",
       ],
       [
         production,
         "readonly",
         "Run production-safe read-only packs",
-        "Validate exact production E2E evidence",
+        "verify-evidence",
+        "Validate production E2E evidence on isolated runner",
       ],
     ] as const) {
       const packStep = definition.jobs[jobName].steps.find(
         (step: { name?: string }) => step.name === stepName
       );
-      const evidenceStep = definition.jobs[jobName].steps.find(
+      const evidenceStep = definition.jobs[evidenceJobName].steps.find(
         (step: { name?: string }) => step.name === evidenceName
       );
       const predicatePattern =
@@ -531,15 +582,80 @@ describe("Release Bus frontend performance contract", () => {
     const museumPacks = E2E_PACKS.filter(
       (pack) => pack.changeScope === "museum"
     );
-    expect(museumPacks).toHaveLength(6);
+    expect(museumPacks).toHaveLength(15);
+    const appPrCi = read(".github/workflows/app-pr-ci.yml");
     for (const pack of museumPacks.filter((candidate) =>
       candidate.environments.includes("local")
     )) {
       expect(stagingSource).not.toContain(`./bin/6529 run ${pack.scriptKey}`);
-      expect(read(".github/workflows/app-pr-ci.yml")).toContain(
-        `./bin/6529 run ${pack.scriptKey}`
-      );
+      if (pack.triggers.includes("pr-ci")) {
+        expect(pack.specs?.length).toBeGreaterThan(0);
+        for (const spec of pack.specs ?? []) {
+          expect(appPrCi).toContain(spec);
+        }
+      } else {
+        expect(appPrCi).not.toContain(`./bin/6529 run ${pack.scriptKey}`);
+      }
     }
+    expect(appPrCi).toContain("museum-release-selection.cjs");
+    expect(appPrCi).toContain("Apply protected Museum browser-lane floor");
+    expect(appPrCi).toContain("Protected Museum policy could not classify");
+    expect(appPrCi).toContain("tier.isMuseumPath(file)");
+    expect(appPrCi).toContain("tier.isPolicyPath(file)");
+    expect(appPrCi).toContain("Stage protected Museum tier policy");
+    expect(appPrCi).toContain(
+      'control_dir="$GITHUB_WORKSPACE/.museum-release-tier-control"'
+    );
+    expect(appPrCi).toContain("printf '/.museum-release-tier-control/\\n' >>");
+    expect(appPrCi).not.toContain(
+      'control_dir="$RUNNER_TEMP/museum-release-tier-control"'
+    );
+    expect(appPrCi).toContain(
+      'git show "$control_sha:scripts/museum-release-tier.cjs"'
+    );
+    expect(appPrCi).toContain("MUSEUM_RELEASE_SELECTION_CONTROL_AVAILABLE");
+    expect(appPrCi).toContain(
+      "does not yet contain museum-release-selection-v1"
+    );
+    expect(appPrCi).toContain("issues: read");
+    expect(appPrCi).toContain('--label "release-bus-museum-hold"');
+    expect(appPrCi).toContain('--hold-state "$hold_state"');
+    expect(appPrCi).toContain("MUSEUM_PUBLICATION_EXPECTED_COMMIT");
+    expect(appPrCi).toContain("--source-commit");
+    expect(appPrCi).not.toContain("vars.MUSEUM_RELEASE_TIER_MODE || 'tiered'");
+    expect(appPrCi).toContain('case "$selected_pack"');
+    expect(appPrCi).toContain('[ ! -f "$selected_spec" ]');
+    expect(appPrCi).toContain("./bin/6529 exec playwright test");
+    expect(appPrCi).not.toContain('./bin/6529 run "$selected_pack"');
+    for (const source of [stagingSource, productionSource]) {
+      expect(source).toContain("museum-release-selection.cjs");
+      expect(source).toContain("MUSEUM_RELEASE_TIER_MODE");
+      expect(source).toContain("release-bus-museum-hold");
+      expect(source).toContain("MUSEUM_SELECTED_PACKS_JSON");
+      expect(source).toContain("MUSEUM_PUBLICATION_EXPECTED_COMMIT");
+      expect(source).toContain("broader tests cannot");
+      expect(source).toContain('test "$head_sha" = "$DEPLOYED_SHA"');
+      expect(source).toContain("source_commit");
+      expect(source).toContain("museum-release-selection-v1");
+      expect(source).not.toContain("museum-e2e-change-set.cjs");
+      expect(source).not.toContain("vars.MUSEUM_RELEASE_TIER_MODE || 'tiered'");
+    }
+    const stagingUpload = staging.jobs["staging-packs"].steps.find(
+      (step: { name?: string }) =>
+        step.name === "Upload manifest-bound Playwright evidence"
+    );
+    const productionUpload = production.jobs.readonly.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Upload manifest-bound Playwright evidence"
+    );
+    expect(stagingUpload.with.path).toBe("staging-e2e-artifacts/");
+    expect(productionUpload.with.path).toBe("production-e2e-artifacts/");
+    expect(stagingSource).toContain(
+      "staging-e2e-artifacts/museum-release-selection.json"
+    );
+    expect(productionSource).toContain(
+      "isolated-production-e2e-selection/museum-release-selection.json"
+    );
     expect(stagingSource).toContain(
       '.contract == "release-bus-e2e-runner-capabilities.v1"'
     );
@@ -571,13 +687,11 @@ describe("Release Bus frontend performance contract", () => {
       "Validate exact manifest-bound E2E evidence"
     );
     expect(productionSource).toContain(
-      "Validate exact production E2E evidence"
+      "Validate production E2E evidence on isolated runner"
     );
     for (const source of [stagingSource, productionSource]) {
       expect(source).toContain('.schema_version == "release-bus-e2e-packs.v1"');
-      expect(source).toContain(
-        "(.results | map(.script_key) | unique | length) == .pack_count"
-      );
+      expect(source).toContain("unique | length) == .pack_count");
       expect(source).toContain('(.results | all(.safety == "readonly"))');
       expect(source).toContain("SERIAL_FAILED_PACK_RETRY");
       expect(source).toContain(".attempt_count == (.attempts | length)");
@@ -586,10 +700,61 @@ describe("Release Bus frontend performance contract", () => {
         '.results | all(.status == "passed" and .failure_class == null)'
       );
       expect(source).toContain("manifest_identity_sha256:$identity");
-      expect(source).toContain('test "$EVIDENCE_OUTCOME" = success');
     }
+    expect(stagingSource).toContain('test "$EVIDENCE_OUTCOME" = success');
+    expect(productionSource).toContain(
+      'test "$ISOLATED_EVIDENCE_OUTCOME" = success'
+    );
     const runnerSource = read("scripts/e2e-packs.cjs");
     expect(runnerSource).toContain("process.kill(-child.pid, signal)");
     expect(runnerSource).toContain('killGroup("SIGKILL")');
+  });
+
+  it("keeps a bilateral exact-source adapter gate and an auditable Museum hold", () => {
+    const compatibility = workflow("museum-publication-compatibility.yml");
+    const source = read(
+      ".github/workflows/museum-publication-compatibility.yml"
+    );
+
+    expect(compatibility.on.workflow_call.inputs.source_commit).toMatchObject({
+      required: true,
+      type: "string",
+    });
+    expect(compatibility.on.repository_dispatch.types).toEqual([
+      "museum-publication-main",
+    ]);
+    expect(compatibility.on.schedule).toHaveLength(1);
+    expect(source).toContain(
+      "https://github.com/6529-Collections/6529networkmuseum.git"
+    );
+    expect(source).toContain("refs/heads/main");
+    expect(source).toContain("repository: 6529-Collections/6529seize-frontend");
+    expect(source).toContain("ref: main");
+    expect(source).toContain("MUSEUM_PUBLICATION_COMPATIBILITY_COMMIT");
+    expect(source).toContain("scripts/museum-publication-compatibility.ts");
+    expect(source).toContain("--source-commit");
+    expect(source).toContain("strict-adapter.json");
+    expect(source).toContain("publication_compatibility_runner_failed");
+    expect(source).toContain("frontend_commit");
+    expect(source).not.toContain(
+      "__tests__/lib/museum/publication/corpusContracts.test.ts"
+    );
+    expect(source).toContain("MUSEUM_PUBLICATION_EXPECTED_COMMIT");
+    expect(source).toContain("--trigger cron");
+    expect(source).toContain("--pack museum-institutional-practice");
+    expect(source).toContain("release-bus-museum-hold");
+    expect(source).toContain("issues: write");
+    expect(source).toContain("authorize_hold_clear == 'true'");
+    expect(source).toContain(
+      'test "$REQUESTED_SOURCE_COMMIT" = "$canonical_commit"'
+    );
+    expect(source).toContain('state="clear_refused_foreign_issue"');
+    const holdEvidenceIndex = source.indexOf(
+      "> museum-release-hold-artifacts/hold.json"
+    );
+    const refuseClearIndex = source.lastIndexOf('[ "$refuse_clear" = true ]');
+    expect(holdEvidenceIndex).toBeGreaterThanOrEqual(0);
+    expect(refuseClearIndex).toBeGreaterThanOrEqual(0);
+    expect(holdEvidenceIndex).toBeLessThan(refuseClearIndex);
   });
 });

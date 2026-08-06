@@ -6,6 +6,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Profiler } from "react";
 
 import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 
@@ -519,6 +520,65 @@ describe("SeizeVideoPlayer", () => {
     render(<SeizeVideoPlayer src="https://example.com/video.mp4" />);
 
     expect(screen.getByRole("slider", { name: "Seek video" })).toBeDisabled();
+  });
+
+  it("keeps browser-paced progress updates bounded without animation frames", () => {
+    const onRender = jest.fn();
+    const { container } = render(
+      <Profiler id="video-progress" onRender={onRender}>
+        <SeizeVideoPlayer src="https://example.com/video.mp4" />
+      </Profiler>
+    );
+    const video = container.querySelector("video");
+    if (!video) {
+      throw new Error("Expected video element to render");
+    }
+    Object.defineProperty(video, "duration", {
+      configurable: true,
+      value: 200,
+    });
+    video.currentTime = 50;
+
+    fireEvent.durationChange(video);
+
+    const seek = screen.getByRole("slider", { name: "Seek video" });
+    expect(seek).toHaveValue("25");
+    fireEvent.timeUpdate(video);
+    const commitsAtTwentyFivePercent = onRender.mock.calls.length;
+
+    for (let eventCount = 0; eventCount < 59; eventCount += 1) {
+      fireEvent.timeUpdate(video);
+    }
+
+    expect(seek).toHaveValue("25");
+    expect(onRender).toHaveBeenCalledTimes(commitsAtTwentyFivePercent);
+
+    const requestAnimationFrame = jest.spyOn(
+      globalThis,
+      "requestAnimationFrame"
+    );
+    try {
+      fireEvent.play(video);
+
+      expect(requestAnimationFrame).not.toHaveBeenCalled();
+
+      video.currentTime = 100;
+      fireEvent.timeUpdate(video);
+
+      expect(seek).toHaveValue("50");
+      fireEvent.timeUpdate(video);
+      const commitsAtFiftyPercent = onRender.mock.calls.length;
+
+      for (let eventCount = 0; eventCount < 59; eventCount += 1) {
+        fireEvent.timeUpdate(video);
+      }
+
+      expect(seek).toHaveValue("50");
+      expect(onRender).toHaveBeenCalledTimes(commitsAtFiftyPercent);
+      expect(requestAnimationFrame).not.toHaveBeenCalled();
+    } finally {
+      requestAnimationFrame.mockRestore();
+    }
   });
 
   it("seeks minimal videos from the footer timeline", () => {

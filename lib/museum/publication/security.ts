@@ -2,7 +2,7 @@ const GITHUB_API_ORIGIN = "https://api.github.com";
 const GITHUB_RAW_ORIGIN = "https://raw.githubusercontent.com";
 const GITHUB_WEB_ORIGIN = "https://github.com";
 const MUSEUM_REPOSITORY = "6529-Collections/6529networkmuseum";
-const SUPPORTED_CONTENT_EXTENSIONS = [".json", ".md"] as const;
+const SUPPORTED_CONTENT_EXTENSIONS = [".json", ".md", ".txt"] as const;
 
 const ART_BLOCKS_HOSTS = {
   live: "generator.artblocks.io",

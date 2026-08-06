@@ -143,6 +143,14 @@ describe("About contents dropdown", () => {
     expect(trigger).not.toHaveTextContent("Contents");
   });
 
+  it("shows the modern divider for Legal sections", async () => {
+    await renderAboutSection(AboutSection.LICENSE);
+
+    expect(
+      screen.getByTestId("about-contents-menu-trigger").parentElement
+    ).toHaveClass("tw-border-b", "tw-border-white/[0.06]");
+  });
+
   it("separates dropdown items by category", async () => {
     setCookieCountry("US");
     await renderAboutSection(AboutSection.MEMES);

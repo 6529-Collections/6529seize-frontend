@@ -29,7 +29,10 @@ Use the touch drop menu to run drop actions without leaving the thread.
 - Chat drops in compact mobile/tablet layouts can also expose `Open drop
 actions` in the drop header.
 - Desktop-width layouts with hover support use desktop drop action controls
-  instead of the touch sheet, even when the hardware reports a touchscreen.
+  instead of the touch sheet, even when web hardware reports a touchscreen.
+- The native mobile app keeps the touch action button and touch sheet at every
+  viewport width, including wide iPad layouts, even if its embedded browser
+  reports hover support.
 - Desktop-width touch surfaces without hover support keep the touch sheet so
   drop actions remain reachable.
 - Hybrid touchscreen desktops/laptops use desktop drop action controls when
@@ -80,6 +83,8 @@ actions` in the drop header.
   press-and-hold.
 - Chat drops on compact mobile/tablet layouts can use `Open drop actions`
   instead of long-press.
+- The native mobile app keeps `Open drop actions` available on wide tablet
+  layouts, including when the embedded browser reports hover support.
 - Winner and participation drops support touch long-press in compact
   mobile/tablet layouts and on touch-only desktop-width surfaces without hover.
 - Leaderboard list cards keep vertical scrolling responsive until the hold
@@ -109,6 +114,8 @@ actions` in the drop header.
 - Touchscreen laptops and desktops are treated as desktop interaction surfaces
   at desktop-width viewports when hover controls are available. Touch-only
   desktop-width surfaces keep the touch sheet fallback.
+- Native mobile-app surfaces are treated as touch interaction surfaces at all
+  viewport widths.
 - Link preview visibility actions are not in this menu. Use preview-card
   controls to hide previews, and use the desktop `More` menu to restore them
   after they are hidden.

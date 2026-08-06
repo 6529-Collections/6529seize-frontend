@@ -58,6 +58,8 @@ const RELATED_SOURCE_LABEL_KEYS = {
     "museum.network.openMuseum.strip.relatedLabels.accessionRecord",
   accessionRegister:
     "museum.network.openMuseum.strip.relatedLabels.accessionRegister",
+  applicationProfile:
+    "museum.network.openMuseum.strip.relatedLabels.applicationProfile",
   collectionEssay:
     "museum.network.openMuseum.strip.relatedLabels.collectionEssay",
   foundingPrinciples:
@@ -67,6 +69,10 @@ const RELATED_SOURCE_LABEL_KEYS = {
   machineRecord: "museum.network.openMuseum.strip.relatedLabels.machineRecord",
   institutionalStudy:
     "museum.network.openMuseum.strip.relatedLabels.institutionalStudy",
+  implementationAudit:
+    "museum.network.openMuseum.strip.relatedLabels.implementationAudit",
+  machineSchedule:
+    "museum.network.openMuseum.strip.relatedLabels.machineSchedule",
   onchainTransition:
     "museum.network.openMuseum.strip.relatedLabels.onchainTransition",
   primarySourceRegister:
@@ -75,6 +81,9 @@ const RELATED_SOURCE_LABEL_KEYS = {
   programRecord: "museum.network.openMuseum.strip.relatedLabels.programRecord",
   scholarshipStandard:
     "museum.network.openMuseum.strip.relatedLabels.scholarshipStandard",
+  rightsRegistry:
+    "museum.network.openMuseum.strip.relatedLabels.rightsRegistry",
+  legalCode: "museum.network.openMuseum.strip.relatedLabels.legalCode",
   selectedWorks: "museum.network.openMuseum.strip.relatedLabels.selectedWorks",
   supportingRecord:
     "museum.network.openMuseum.strip.relatedLabels.supportingRecord",
