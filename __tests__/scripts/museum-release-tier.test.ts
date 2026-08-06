@@ -164,6 +164,14 @@ describe("Museum release report-only classifier", () => {
     expect(
       classify([{ file: "scripts/museum-release-tier.cjs", status: "M" }]).tier
     ).toBe("P3");
+    expect(
+      classify([
+        {
+          file: "ops/scripts/artifact-portability-report-source.cjs",
+          status: "M",
+        },
+      ]).tier
+    ).toBe("P3");
   });
 
   it("classifies unrelated paths as NONE", () => {

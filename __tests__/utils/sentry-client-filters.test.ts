@@ -10071,6 +10071,34 @@ describe("sentry-client-filters", () => {
     expect(result).toBe(true);
   });
 
+  it("filters when the newest Wave cancellation is the expected replacement", () => {
+    const event = createExpectedWaveReplacementAbortEvent({
+      breadcrumbs: [
+        {
+          category: "wave.request",
+          message: "wave_request_aborted",
+          data: {
+            request_kind: "background_sync",
+            trigger: "hook_unmounted",
+          },
+        },
+        {
+          category: "wave.request",
+          message: "wave_request_aborted",
+          timestamp: expectedWaveAbortBreadcrumbTimestamp,
+          data: {
+            request_kind: "background_sync",
+            trigger: "request_replaced",
+          },
+        },
+      ],
+    });
+
+    const result = shouldFilterExpectedWaveRequestReplacementAbort(event);
+
+    expect(result).toBe(true);
+  });
+
   it("keeps an AbortError when a newer Wave cancellation supersedes the match", () => {
     const event = createExpectedWaveReplacementAbortEvent({
       breadcrumbs: [
