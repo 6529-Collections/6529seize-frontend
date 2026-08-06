@@ -19,7 +19,7 @@ interface MyStreamWaveFAQAccordionItemProps {
 }
 
 const FAQ_ALIGNMENT_GRID_CLASS_NAME =
-  "tw-grid tw-grid-cols-[1.25rem_minmax(0,1fr)_1.25rem] tw-gap-x-3";
+  "tw-grid tw-grid-cols-[1.25rem_minmax(0,1fr)_1.25rem] tw-gap-x-[13px]";
 
 const FAQ_PANEL_ANIMATION_SECONDS = 0.32;
 
@@ -56,10 +56,10 @@ export default function MyStreamWaveFAQAccordionItem({
         "tw-group tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none",
         isOpen
           ? "tw-border-primary-500/40 tw-bg-iron-900/90 tw-shadow-[inset_3px_0_0_rgba(59,130,246,0.75)]"
-          : "tw-border-white/[0.06] tw-bg-iron-950/40 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-iron-900/60"
+          : "tw-border-white/[0.09] tw-bg-iron-900/60 desktop-hover:hover:tw-border-white/[0.14] desktop-hover:hover:tw-bg-iron-900/80"
       )}
     >
-      <h3 className="tw-mb-0">
+      <h3 className="tw-m-0">
         <button
           id={buttonId}
           type="button"
@@ -68,7 +68,7 @@ export default function MyStreamWaveFAQAccordionItem({
           onClick={onToggle}
           className={cx(
             FAQ_ALIGNMENT_GRID_CLASS_NAME,
-            "tw-min-h-12 tw-w-full tw-cursor-pointer tw-items-center tw-border-0 tw-bg-transparent tw-px-4 tw-py-3 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400/80 motion-reduce:tw-transition-none sm:tw-px-5 sm:tw-py-4 md:tw-py-3.5"
+            "tw-min-h-[50px] tw-w-full tw-cursor-pointer tw-items-center tw-border-0 tw-bg-transparent tw-px-[13px] tw-py-4 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400/80 motion-reduce:tw-transition-none sm:tw-px-[21px]"
           )}
         >
           <span
@@ -110,10 +110,10 @@ export default function MyStreamWaveFAQAccordionItem({
             <div
               className={cx(
                 FAQ_ALIGNMENT_GRID_CLASS_NAME,
-                "tw-px-4 tw-pb-5 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-px-5 sm:tw-pb-6"
+                "tw-px-[13px] tw-pb-[21px] tw-pt-[13px] tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-px-[21px]"
               )}
             >
-              <div className="tw-col-start-2 tw-col-end-4">
+              <div className="tw-col-start-2 tw-col-end-4 [&_h4]:tw-mt-0 [&_p]:tw-mt-0">
                 <Content />
               </div>
             </div>

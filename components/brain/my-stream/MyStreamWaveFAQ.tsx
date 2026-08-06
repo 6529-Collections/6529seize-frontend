@@ -68,7 +68,7 @@ const LINKS = {
 } as const;
 
 const CONTAINER_CLASS_NAME =
-  "tw-w-full tw-flex tw-flex-col tw-pt-4 lg:tw-pr-2 tw-overflow-y-auto tw-no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-h-full";
+  "tw-w-full tw-flex tw-flex-col tw-pt-[13px] tw-overflow-y-auto tw-no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-h-full";
 
 const FAQ_PANEL_ANIMATION_SECONDS = 0.32;
 
@@ -225,7 +225,7 @@ function FaqLink({
       rel="noopener noreferrer"
       aria-label={`${children} (opens in a new tab)`}
       className={cx(
-        "tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-md tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-400",
+        "tw-inline-flex tw-items-center tw-gap-[5px] tw-rounded-md tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-400",
         className
       )}
     >
@@ -246,7 +246,7 @@ function QaPair({
   children: ReactNode;
 }>) {
   return (
-    <div className="tw-space-y-1">
+    <div className="tw-space-y-[5px]">
       <h4 className="tw-mb-0 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-50">
         {question}
       </h4>
@@ -263,7 +263,7 @@ function QaList({
   className?: string;
 }>) {
   return (
-    <div className={cx("tw-flex tw-flex-col tw-gap-5", className)}>
+    <div className={cx("tw-flex tw-flex-col tw-gap-[21px]", className)}>
       {items.map((item) => (
         <QaPair key={item.question} question={item.question}>
           {item.answer}
@@ -275,11 +275,11 @@ function QaList({
 
 function NeatList({ items }: Readonly<{ items: readonly string[] }>) {
   return (
-    <ul className="tw-my-4 tw-flex tw-list-none tw-flex-col tw-gap-3 tw-p-0">
+    <ul className="tw-my-[13px] tw-flex tw-list-none tw-flex-col tw-gap-[8px] tw-p-0">
       {items.map((item) => (
         <li
           key={item}
-          className="tw-relative tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300 before:tw-absolute before:tw-left-0 before:tw-top-[0.7rem] before:tw-size-1 before:tw-rounded-full before:tw-bg-iron-500 before:tw-content-['']"
+          className="tw-relative tw-pl-[21px] tw-text-sm tw-leading-6 tw-text-iron-300 before:tw-absolute before:tw-left-0 before:tw-top-[0.7rem] before:tw-size-1 before:tw-rounded-full before:tw-bg-iron-500 before:tw-content-['']"
         >
           {item}
         </li>
@@ -290,7 +290,7 @@ function NeatList({ items }: Readonly<{ items: readonly string[] }>) {
 
 function AttentionBox({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <div className="tw-my-6 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/20 tw-p-4">
+    <div className="tw-my-[21px] tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/20 tw-p-[13px]">
       {children}
     </div>
   );
@@ -298,7 +298,7 @@ function AttentionBox({ children }: Readonly<{ children: ReactNode }>) {
 
 function IconList({ items }: Readonly<{ items: readonly IconListItem[] }>) {
   return (
-    <div className="tw-flex tw-flex-col tw-gap-4">
+    <div className="tw-flex tw-flex-col tw-gap-[13px]">
       {items.map((item) => {
         const Icon = item.type === "check" ? CheckIcon : XMarkIcon;
         const iconClassName =
@@ -309,11 +309,11 @@ function IconList({ items }: Readonly<{ items: readonly IconListItem[] }>) {
         return (
           <div
             key={item.key}
-            className="tw-flex tw-items-start tw-gap-3 tw-text-sm tw-leading-6 tw-text-iron-300"
+            className="tw-flex tw-items-start tw-gap-[13px] tw-text-sm tw-leading-6 tw-text-iron-300"
           >
             <Icon
               className={cx(
-                "tw-mt-1 tw-size-4 tw-flex-shrink-0",
+                "tw-mt-[3px] tw-size-4 tw-flex-shrink-0",
                 iconClassName
               )}
               aria-hidden="true"
@@ -328,7 +328,7 @@ function IconList({ items }: Readonly<{ items: readonly IconListItem[] }>) {
 
 function VotingTimeline() {
   return (
-    <div className="tw-relative tw-my-6 tw-flex tw-flex-col tw-gap-6 tw-pl-5">
+    <div className="tw-relative tw-my-[21px] tw-flex tw-flex-col tw-gap-[21px] tw-pl-[21px]">
       <div className="tw-absolute tw-bottom-1.5 tw-left-1 tw-top-1.5 tw-w-px tw-bg-gradient-to-b tw-from-iron-700 tw-via-primary-500/50 tw-to-emerald-500/70 tw-opacity-40" />
       {VOTING_PHASES.map((phase) => (
         <div key={phase.label} className="tw-relative">
@@ -338,7 +338,7 @@ function VotingTimeline() {
               phase.dotClassName
             )}
           />
-          <div className="tw-mb-1 tw-flex tw-items-end tw-justify-between tw-gap-3">
+          <div className="tw-mb-[5px] tw-flex tw-items-end tw-justify-between tw-gap-[13px]">
             <h4 className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
               {phase.label}
             </h4>
@@ -366,10 +366,10 @@ function StatsRow({
   items: ReadonlyArray<{ readonly label: string; readonly value: string }>;
 }>) {
   return (
-    <div className="tw-my-5 tw-flex tw-flex-col tw-gap-5 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.04] tw-py-4 sm:tw-flex-row sm:tw-gap-8">
+    <div className="tw-my-[21px] tw-flex tw-flex-col tw-gap-[21px] tw-border-x-0 tw-border-y tw-border-solid tw-border-white/[0.04] tw-py-[13px] sm:tw-flex-row sm:tw-gap-[34px]">
       {items.map((item) => (
         <div key={item.label}>
-          <p className="tw-mb-1 tw-text-[11px] tw-font-medium tw-uppercase tw-leading-4 tw-tracking-wider tw-text-iron-500">
+          <p className="tw-mb-[5px] tw-text-[11px] tw-font-medium tw-uppercase tw-leading-4 tw-tracking-wider tw-text-iron-500">
             {item.label}
           </p>
           <p className="tw-mb-0 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-50">
@@ -388,11 +388,11 @@ function IntroContent() {
 function GoalsContent() {
   return (
     <>
-      <p className="tw-mb-4">
+      <p className="tw-mb-[13px]">
         We are engaging in decentralized, networked curation of an important NFT
         art collection focused on decentralization.
       </p>
-      <p className="tw-mb-4">
+      <p className="tw-mb-[13px]">
         The goal is excellence, defined as a collection that will age well over
         decades.
       </p>
@@ -401,11 +401,11 @@ function GoalsContent() {
       </p>
       <NeatList items={EXCELLENCE_TYPES} />
       <AttentionBox>
-        <p className="tw-mb-3 tw-font-medium tw-text-iron-100">
+        <p className="tw-mb-[13px] tw-font-medium tw-text-iron-100">
           There is a long artist brief here that both artists and first-time
           voters should read.
         </p>
-        <p className="tw-mb-4 tw-text-[13px] tw-leading-6 tw-text-iron-400">
+        <p className="tw-mb-[13px] tw-text-[13px] tw-leading-6 tw-text-iron-400">
           It is a much more detailed FAQ than this one and if you want to be
           seriously engaged with this effort, you must read it! Otherwise you
           will bother everyone with basic questions that you could have answered
@@ -414,7 +414,7 @@ function GoalsContent() {
         </p>
         <FaqLink
           href={LINKS.artistBrief}
-          className="tw-min-h-11 tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-3 tw-py-2 desktop-hover:hover:tw-bg-white/[0.08]"
+          className="tw-min-h-11 tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.04] tw-px-[13px] tw-py-[8px] desktop-hover:hover:tw-bg-white/[0.08]"
         >
           Read Artist Brief
         </FaqLink>
@@ -434,15 +434,15 @@ function NotGoalsContent() {
 function VotingContent() {
   return (
     <>
-      <p className="tw-mb-4">
+      <p className="tw-mb-[13px]">
         Voting is a continuous leaderboard – art is submitted and it stays on
         the leaderboard until it is removed by the artist who submitted it.
       </p>
-      <p className="tw-mb-4">
+      <p className="tw-mb-[13px]">
         Three times a week, the top submission on the leaderboard is selected to
         be the next card minted.
       </p>
-      <p className="tw-mb-4">
+      <p className="tw-mb-[13px]">
         The checkpoint times are{" "}
         <span className="tw-font-medium tw-text-iron-100">
           Monday / Wednesday / Friday at 17:00 GMT
@@ -450,32 +450,32 @@ function VotingContent() {
         . The card will be minted at the next The Memes mint (e.g. Wednesday /
         Friday / Monday).
       </p>
-      <p className="tw-mb-4">
+      <p className="tw-mb-[13px]">
         The metric that determines the winner is{" "}
         <span className="tw-font-medium tw-text-iron-100">
           24-Hour Vote (24HV)
         </span>
         .
       </p>
-      <p className="tw-mb-4">
+      <p className="tw-mb-[13px]">
         24HV is a weighted average of how much TDH was voted at any point in
         time (&quot;Current Vote&quot;) during the last 24 hours before the
         checkpoint.
       </p>
-      <p className="tw-mb-7 tw-text-iron-400">
+      <p className="tw-mb-[21px] tw-text-iron-400">
         The purpose of using 24HV is to avoid last second gaming of the vote.
         You can sort by 24HV and Current Vote. 24HV converges to Current Vote
         over a 24 hour period (noting that Current Vote is constantly changing).
       </p>
 
-      <h4 className="tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-50">
+      <h4 className="tw-mb-[8px] tw-text-sm tw-font-medium tw-text-iron-50">
         You can think of the voting in three phases:
       </h4>
       <VotingTimeline />
 
       <QaList
         items={VOTING_QA}
-        className="tw-mt-8 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-pt-6"
+        className="tw-mt-[34px] tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-pt-[21px]"
       />
     </>
   );
@@ -484,16 +484,16 @@ function VotingContent() {
 function SubmissionContent() {
   return (
     <>
-      <p className="tw-mb-4">
+      <p className="tw-mb-[13px]">
         There are two ways you can be eligible to submit:
       </p>
-      <div className="tw-mb-8">
+      <div className="tw-mb-[34px]">
         <IconList items={ELIGIBILITY_RULES} />
       </div>
 
-      <div className="tw-flex tw-flex-col tw-gap-6">
+      <div className="tw-flex tw-flex-col tw-gap-[21px]">
         <QaPair question="What if I do not know how to get nominated?">
-          <p className="tw-mb-3">
+          <p className="tw-mb-[13px]">
             Go to the The Memes - Seeking Nomination wave and share your
             existing work and story and someone may nominate you:
           </p>
@@ -508,19 +508,19 @@ function SubmissionContent() {
       </div>
 
       <AttentionBox>
-        <p className="tw-mb-2 tw-font-medium tw-text-iron-100">
+        <p className="tw-mb-[8px] tw-font-medium tw-text-iron-100">
           It is very important to read the artist brief so that you don&apos;t
           waste your time:
         </p>
         <NeatList items={SUBMISSION_QUALITY_NOTES} />
       </AttentionBox>
 
-      <div className="tw-flex tw-flex-col tw-gap-6">
+      <div className="tw-flex tw-flex-col tw-gap-[21px]">
         <QaPair question="How do I get some artistic feedback as in the past?">
           DM @6529er, @teexels and @darrensrs into a group chat
         </QaPair>
         <QaPair question="What if I have general questions?">
-          <p className="tw-mb-3">
+          <p className="tw-mb-[13px]">
             Go to the The Memes - FAQ wave (after you have read the artist
             brief)
           </p>
@@ -535,12 +535,12 @@ function TdhContent() {
   return (
     <>
       <p className="tw-mb-2">TDH is the central metric of 6529 ecosystem.</p>
-      <p className="tw-mb-6">
+      <p className="tw-mb-[21px]">
         It is a quantitative metric reflecting how long you have held a 6529
         NFT, how many you have held and how diverse your holdings are. It
         primarily rewards longevity.
       </p>
-      <div className="tw-flex tw-flex-wrap tw-gap-x-6 tw-gap-y-3">
+      <div className="tw-flex tw-flex-wrap tw-gap-x-[21px] tw-gap-y-[13px]">
         <FaqLink href={LINKS.tdhTheory}>Theory</FaqLink>
         <FaqLink href={LINKS.tdhFormula}>Formula</FaqLink>
       </div>
@@ -555,15 +555,15 @@ function MintingContent() {
         Everything about minting a Meme Card stays unchanged.
       </p>
       <StatsRow items={MINT_STATS} />
-      <p className="tw-mb-4">
+      <p className="tw-mb-[13px]">
         You can mint based on the Allowlist Phase you are in based on your TDH
         (P0, P1, P2) or public (if it goes to public).
       </p>
-      <p className="tw-mb-3">
+      <p className="tw-mb-[13px]">
         You can get priority within your Phase by subscribing in advance from
         your profile page. Details are here:
       </p>
-      <FaqLink href={LINKS.subscriptions} className="tw-mb-8">
+      <FaqLink href={LINKS.subscriptions} className="tw-mb-[34px]">
         Subscriptions
       </FaqLink>
       <p className="tw-mb-0 tw-font-medium tw-text-iron-100">Welcome aboard!</p>
@@ -672,8 +672,8 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
       className={CONTAINER_CLASS_NAME}
       style={faqViewStyle}
     >
-      <div className="tw-w-full tw-px-2 tw-pb-4 sm:tw-px-4">
-        <div className="tw-flex tw-flex-col tw-gap-3">
+      <div className="tw-w-full tw-px-[8px] tw-pb-[13px] sm:tw-px-[13px]">
+        <div className="tw-flex tw-flex-col tw-gap-[13px]">
           {FAQ_SECTIONS.map((section) => (
             <MyStreamWaveFAQAccordionItem
               key={section.id}
