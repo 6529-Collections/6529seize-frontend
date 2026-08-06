@@ -119,7 +119,7 @@ function createGithubClient({ apiUrl, repository, token, fetchImpl = fetch }) {
       const payload = await request(segments, {
         ...options,
         query: {
-          ...(options?.query ?? {}),
+          ...options.query,
           per_page: "100",
           page: String(page),
         },
