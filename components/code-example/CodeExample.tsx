@@ -14,7 +14,7 @@ const CODE_TOKEN_CLASS_NAME = [
   "[&_.token.comment]:tw-text-iron-500 [&_.hljs-comment]:tw-text-iron-500",
   "[&_.token.keyword]:tw-text-primary-300 [&_.hljs-keyword]:tw-text-primary-300",
   "[&_.token.string]:tw-text-success [&_.token.template-string]:tw-text-success [&_.token.regex]:tw-text-success [&_.hljs-string]:tw-text-success [&_.hljs-regexp]:tw-text-success",
-  "[&_.token.class-name]:tw-text-primary-400 [&_.token.function]:tw-text-primary-400 [&_.hljs-title]:tw-text-primary-400 [&_.hljs-built_in]:tw-text-primary-400",
+  String.raw`[&_.token.class-name]:tw-text-primary-400 [&_.token.function]:tw-text-primary-400 [&_.hljs-title]:tw-text-primary-400 [&_.hljs-built\_in]:tw-text-primary-400`,
   "[&_.token.boolean]:tw-text-iron-100 [&_.token.constant]:tw-text-iron-100 [&_.token.number]:tw-text-iron-100 [&_.hljs-literal]:tw-text-iron-100 [&_.hljs-number]:tw-text-iron-100",
   "[&_.token.operator]:tw-text-iron-300 [&_.token.parameter]:tw-text-iron-200 [&_.token.property]:tw-text-iron-200 [&_.hljs-attr]:tw-text-iron-200 [&_.hljs-params]:tw-text-iron-200 [&_.hljs-variable]:tw-text-iron-100",
   "[&_.token.interpolation-punctuation]:tw-text-primary-300 [&_.token.punctuation]:tw-text-iron-400",
