@@ -25,17 +25,19 @@ const EXACT_COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
 const DEPLOYED_ENVIRONMENT =
   process.env["PLAYWRIGHT_ENV"] === "staging" ||
   process.env["PLAYWRIGHT_ENV"] === "production";
-const SHELL_ALLOWED_CONSOLE_ERROR_PATTERNS = DEPLOYED_ENVIRONMENT
-  ? []
-  : [
-      /^Analytics SDK: TypeError: Failed to fetch(?:\n|$)/,
-      /^Error checking Cross-Origin-Opener-Policy: Failed to fetch(?: \(6529\.io\))?(?:\n|$)/,
-      /^Failed to fetch seize settings TypeError: Failed to fetch(?:\n|$)/,
-      /^Failed to fetch seize settings Error: HTTP error! status: 429(?:\n|$)/,
-      /^Failed to fetch cookie consent status Error: Network request failed\. Please check your connection and try again\. \(https:\/\/api(?:\.staging)?\.6529\.io\/api\/policies\/country-check\)(?:\n|$)/,
-      /^Failed to fetch cookie consent status Rate limit exceeded(?:\n|$)/,
-      /^Failed to load resource: the server responded with a status of 429 \(\)$/,
-    ];
+const SHELL_ALLOWED_CONSOLE_ERROR_PATTERNS = [
+  /^Error checking Cross-Origin-Opener-Policy: Failed to fetch(?: \(6529\.io\))?(?:\n|$)/,
+  ...(DEPLOYED_ENVIRONMENT
+    ? []
+    : [
+        /^Analytics SDK: TypeError: Failed to fetch(?:\n|$)/,
+        /^Failed to fetch seize settings TypeError: Failed to fetch(?:\n|$)/,
+        /^Failed to fetch seize settings Error: HTTP error! status: 429(?:\n|$)/,
+        /^Failed to fetch cookie consent status Error: Network request failed\. Please check your connection and try again\. \(https:\/\/api(?:\.staging)?\.6529\.io\/api\/policies\/country-check\)(?:\n|$)/,
+        /^Failed to fetch cookie consent status Rate limit exceeded(?:\n|$)/,
+        /^Failed to load resource: the server responded with a status of 429 \(\)$/,
+      ]),
+];
 
 type ArchitectureRoute = {
   readonly path: string;

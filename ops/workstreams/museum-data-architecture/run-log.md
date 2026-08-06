@@ -139,3 +139,26 @@
   Current focused validation passes 8 suites / 102 tests, changed-file lint,
   typecheck across 1,364 files, whitespace checks, and the ontology no-em-dash
   scan.
+- Frontend PR #3629 merged as
+  `a888054589e7311848278c53b187033d96b1f5fb`. The production release includes
+  that runtime at exact deployed main
+  `81ddbf2a6dce7df785c87d9a3192d3ed7a74f1cf`; production workflow
+  `31061048126` passed deployment health and exact HTTP version verification.
+- Automatic staging run `31059622531` completed its evidence contract but
+  failed the terminal result during a broader staging service incident. The
+  same interval produced unrelated NextGen server-render failures, while the
+  ontology pack recorded shared-shell settings and browser-policy fetch
+  diagnostics. A strict rerun against the unchanged staging deployment then
+  passed all six desktop and mobile ontology cases.
+- Production replay exposed one test-only inconsistency: the exact
+  Cross-Origin-Opener-Policy fetch diagnostic was already classified as
+  non-actionable in the Museum's Inside the System suite, but the ontology
+  suite permitted it only outside deployed environments. The ontology suite
+  now applies that one narrow classification in every environment. It still
+  fails on all other production console errors, every page error, and every
+  failed 5xx response.
+- The corrected strict production pack passed all six desktop and mobile cases
+  against `https://6529.io` in 24.9 seconds. It verified the overview, all
+  eleven standard pages, the Casey seven-object schedule, exact-source links,
+  and mobile overflow while retaining the remaining browser and HTTP failure
+  gates.
