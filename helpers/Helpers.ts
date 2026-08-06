@@ -37,7 +37,6 @@ export {
   getTimeUntil,
 } from "./timeDisplayHelpers";
 export { getMetadataForUserPage } from "./userPageMetadataHelpers";
-
 export const MAX_DROP_UPLOAD_FILES = 8;
 
 const unicodeEmojiRegex = emojiRegex();

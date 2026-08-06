@@ -50,6 +50,40 @@ test("reports typing status and clears after timeout", () => {
   expect(result.current).toBe("");
 });
 
+test("clears typing status when a compact content update arrives", () => {
+  jest.useFakeTimers();
+  const { result } = renderHook(() => useWaveIsTyping("wave", null));
+
+  act(() => {
+    listeners[0]({
+      data: JSON.stringify({
+        type: WsMessageType.USER_IS_TYPING,
+        data: { wave_id: "wave", profile: { handle: "A", level: 1 } },
+      }),
+    });
+  });
+  act(() => jest.advanceTimersByTime(1000));
+  expect(result.current).toContain("A is typing");
+
+  act(() => {
+    listeners[0]({
+      data: JSON.stringify({
+        type: WsMessageType.DROP_UPDATE_REF,
+        data: {
+          author_id: "author-1",
+          drop_id: "drop-1",
+          wave_id: "wave",
+          serial_no: 1,
+          update_type: WsMessageType.DROP_UPDATE,
+        },
+      }),
+    });
+  });
+  act(() => jest.advanceTimersByTime(1000));
+
+  expect(result.current).toBe("");
+});
+
 test("skips websocket work while the deferred typing gate is disabled", () => {
   jest.useFakeTimers();
   const { result } = renderHook(() =>

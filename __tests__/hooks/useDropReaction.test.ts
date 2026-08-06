@@ -9,7 +9,10 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import * as commonApi from "@/services/api/common-api";
 import * as dropReactionMonitoring from "@/utils/monitoring/dropReactionMonitoring";
-import { act, renderHook } from "@testing-library/react";
+import { getAuthJwt, getWalletAddress } from "@/services/auth/auth.utils";
+import { __resetDropReactionAuthRecoveryForTests } from "@/hooks/drops/useDropReactionAuthRecovery";
+import { act, renderHook, waitFor } from "@testing-library/react";
+import { createDeferredPromise as createDeferred } from "@/__tests__/utils/deferredPromise";
 
 const setToastMock = jest.fn();
 const rollbackMock = jest.fn();
@@ -20,6 +23,7 @@ const mockQueryCacheFindAll = jest.fn(() => []);
 const mockSetQueryData = jest.fn();
 const mockGetEligibility = jest.fn();
 const mockUpdateEligibility = jest.fn();
+const requestAuthMock = jest.fn(async () => ({ success: true }));
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
@@ -39,6 +43,12 @@ jest.mock("@/contexts/wave/WaveEligibilityContext", () => ({
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
   commonApiDelete: jest.fn(),
+}));
+
+jest.mock("@/services/auth/auth.utils", () => ({
+  ...jest.requireActual("@/services/auth/auth.utils"),
+  getAuthJwt: jest.fn(),
+  getWalletAddress: jest.fn(),
 }));
 
 jest.mock("@/services/api/drop-api", () => ({
@@ -86,6 +96,10 @@ jest.mock("@/utils/monitoring/dropReactionMonitoring", () => ({
 }));
 
 const mockUseAuth = useAuth as jest.Mock;
+const mockGetAuthJwt = getAuthJwt as jest.MockedFunction<typeof getAuthJwt>;
+const mockGetWalletAddress = getWalletAddress as jest.MockedFunction<
+  typeof getWalletAddress
+>;
 const mockUseMyStream = useMyStream as jest.Mock;
 const { fetchDropByIdBatched } = require("@/services/api/drop-api");
 const {
@@ -116,17 +130,6 @@ const mockLatestOnlyMonitoringResults = () => {
   ).mockImplementation((mutation: { mutationId: string }) =>
     mutationResultFor(mutation.mutationId)
   );
-};
-
-const createDeferred = <T>() => {
-  let resolve!: (value: T) => void;
-  let reject!: (reason?: unknown) => void;
-  const promise = new Promise<T>((promiseResolve, promiseReject) => {
-    resolve = promiseResolve;
-    reject = promiseReject;
-  });
-
-  return { promise, resolve, reject };
 };
 
 const createStructuredReactionError = ({
@@ -202,6 +205,12 @@ const createNotificationQuery = ({
 describe("useDropReaction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    __resetDropReactionAuthRecoveryForTests();
+    mockGetAuthJwt.mockReturnValue("auth-token-before-recovery");
+    mockGetWalletAddress.mockReturnValue(
+      "0x1111111111111111111111111111111111111111"
+    );
+    requestAuthMock.mockResolvedValue({ success: true });
     mockSetQueryData.mockReset();
     mockGetEligibility.mockReturnValue(null);
     mockQueryCacheFindAll.mockReturnValue([]);
@@ -230,6 +239,7 @@ describe("useDropReaction", () => {
     (fetchDropByIdBatched as jest.Mock).mockResolvedValue(null);
     mockUseAuth.mockReturnValue({
       setToast: setToastMock,
+      requestAuth: requestAuthMock,
       activeProfileProxy: null,
       connectedProfile: {
         id: "identity-1",
@@ -783,7 +793,7 @@ describe("useDropReaction", () => {
     });
   });
 
-  it("maps unauthorized status when the structured body is empty", async () => {
+  it("recovers a rejected session without replaying the failed reaction", async () => {
     (commonApi.commonApiPost as jest.Mock).mockRejectedValueOnce(
       createStructuredReactionError({
         message: "Something went wrong",
@@ -803,6 +813,199 @@ describe("useDropReaction", () => {
       message: "Unauthorized",
       type: "error",
     });
+    expect(requestAuthMock).toHaveBeenCalledTimes(1);
+    expect(requestAuthMock).toHaveBeenCalledWith({
+      serverRejected: true,
+      expectedAuthStateFingerprint: expect.any(String),
+    });
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+    expect(rollbackMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not start another recovery for concurrent 401s from the same auth state", async () => {
+    const unauthorizedError = createStructuredReactionError({
+      message: "Unauthorized",
+      status: 401,
+    });
+    const firstRequest = createDeferred<ApiDrop>();
+    const secondRequest = createDeferred<ApiDrop>();
+    const recovery = createDeferred<{ success: boolean }>();
+    (commonApi.commonApiPost as jest.Mock)
+      .mockReturnValueOnce(firstRequest.promise)
+      .mockReturnValueOnce(secondRequest.promise);
+    requestAuthMock.mockReturnValueOnce(recovery.promise);
+    useSequentialMutationIds();
+    mockLatestOnlyMonitoringResults();
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    let firstReaction!: Promise<void>;
+    let secondReaction!: Promise<void>;
+    act(() => {
+      firstReaction = result.current.react(":smile:");
+      secondReaction = result.current.react(":wave:");
+    });
+
+    act(() => {
+      firstRequest.reject(unauthorizedError);
+    });
+    await waitFor(() =>
+      expect(
+        dropReactionMonitoring.recordReactionRequestFailed
+      ).toHaveBeenCalledTimes(1)
+    );
+    expect(requestAuthMock).not.toHaveBeenCalled();
+
+    act(() => {
+      secondRequest.reject(unauthorizedError);
+    });
+    await waitFor(() =>
+      expect(
+        dropReactionMonitoring.recordReactionRequestFailed
+      ).toHaveBeenCalledTimes(2)
+    );
+
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(2);
+    expect(requestAuthMock).toHaveBeenCalledTimes(1);
+    expect(requestAuthMock).toHaveBeenCalledWith({
+      serverRejected: true,
+      expectedAuthStateFingerprint: expect.any(String),
+    });
+
+    await act(async () => {
+      mockGetAuthJwt.mockReturnValue("auth-token-after-recovery");
+      recovery.resolve({ success: true });
+      await Promise.all([firstReaction, secondReaction]);
+    });
+  });
+
+  it("does not repeat recovery after the same auth state is rejected again", async () => {
+    const unauthorizedError = createStructuredReactionError({
+      message: "Unauthorized",
+      status: 401,
+    });
+    (commonApi.commonApiPost as jest.Mock)
+      .mockRejectedValueOnce(unauthorizedError)
+      .mockRejectedValueOnce(unauthorizedError);
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+    await act(async () => {
+      await result.current.react(":wave:");
+    });
+
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(2);
+    expect(requestAuthMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not repeat recovery when switching back to the same rejected account session", async () => {
+    const accountA = "0x1111111111111111111111111111111111111111";
+    const accountB = "0x2222222222222222222222222222222222222222";
+    const accountAToken = "account-a-token";
+    const accountBToken = "account-b-token";
+    const unauthorizedError = createStructuredReactionError({
+      message: "Unauthorized",
+      status: 401,
+    });
+    (commonApi.commonApiPost as jest.Mock)
+      .mockRejectedValueOnce(unauthorizedError)
+      .mockRejectedValueOnce(unauthorizedError)
+      .mockRejectedValueOnce(unauthorizedError);
+    mockGetWalletAddress.mockReturnValue(accountA);
+    mockGetAuthJwt.mockReturnValue(accountAToken);
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    mockGetWalletAddress.mockReturnValue(accountB);
+    mockGetAuthJwt.mockReturnValue(accountBToken);
+    await act(async () => {
+      await result.current.react(":wave:");
+    });
+
+    mockGetWalletAddress.mockReturnValue(accountA);
+    mockGetAuthJwt.mockReturnValue(accountAToken);
+    await act(async () => {
+      await result.current.react(":heart:");
+    });
+
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(3);
+    expect(requestAuthMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not recover a stale 401 after the auth state changes", async () => {
+    const request = createDeferred<ApiDrop>();
+    (commonApi.commonApiPost as jest.Mock).mockReturnValueOnce(request.promise);
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    let reaction!: Promise<void>;
+    act(() => {
+      reaction = result.current.react(":smile:");
+    });
+    mockGetAuthJwt.mockReturnValue("replacement-auth-token");
+
+    await act(async () => {
+      request.reject(
+        createStructuredReactionError({
+          message: "Unauthorized",
+          status: 401,
+        })
+      );
+      await reaction;
+    });
+
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+    expect(requestAuthMock).not.toHaveBeenCalled();
+    expect(rollbackMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("allows an explicit retry after recovery changes the auth state", async () => {
+    (commonApi.commonApiPost as jest.Mock)
+      .mockRejectedValueOnce(
+        createStructuredReactionError({
+          message: "Unauthorized",
+          status: 401,
+        })
+      )
+      .mockResolvedValueOnce({});
+    requestAuthMock.mockImplementationOnce(async () => {
+      mockGetAuthJwt.mockReturnValue("auth-token-after-recovery");
+      return { success: true };
+    });
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(commonApi.commonApiPost).toHaveBeenCalledTimes(2);
+    expect(requestAuthMock).toHaveBeenCalledTimes(1);
+    expect(
+      dropReactionMonitoring.recordReactionRequestSucceeded
+    ).toHaveBeenCalledTimes(1);
   });
 
   it("maps rate-limit status when the structured body is blank", async () => {

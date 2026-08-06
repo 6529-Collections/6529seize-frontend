@@ -1,0 +1,605 @@
+name: Runner benchmark controller
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact trusted main-ancestor commit to benchmark
+        required: true
+        type: string
+      candidate_label:
+        description: Explicit runner label; use ubuntu-latest only with the control profile
+        required: true
+        type: string
+      timeout_seconds:
+        description: Queue availability timeout before an unaccepted run is unavailable (default 90 seconds)
+        required: true
+        default: 90
+        type: number
+      completion_timeout_seconds:
+        description: Maximum workload completion time after a candidate run is accepted (default 1800 seconds)
+        required: true
+        default: 1800
+        type: number
+      profile:
+        description: Control uses ubuntu-latest; candidate probes the supplied label
+        required: true
+        default: candidate
+        type: choice
+        options:
+          - control
+          - candidate
+      repeat_count:
+        description: Number of sequential exact-SHA observations (1-5)
+        required: true
+        default: 1
+        type: number
+
+run-name: Runner benchmark / ${{ inputs.profile }} / ${{ inputs.source_sha }}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: runner-benchmark-controller-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate benchmark request
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      source_sha: ${{ steps.normalized.outputs.source_sha }}
+      candidate_label: ${{ steps.normalized.outputs.candidate_label }}
+      timeout_seconds: ${{ steps.normalized.outputs.timeout_seconds }}
+      completion_timeout_seconds: ${{ steps.normalized.outputs.completion_timeout_seconds }}
+      profile: ${{ steps.normalized.outputs.profile }}
+      repeat_count: ${{ steps.normalized.outputs.repeat_count }}
+      trusted_main_sha: ${{ steps.trusted_source.outputs.main_sha }}
+      controller_timeout_minutes: ${{ steps.normalized.outputs.controller_timeout_minutes }}
+    steps:
+      - name: Require trusted default-branch dispatch
+        env:
+          EXPECTED_REPOSITORY: 6529-Collections/6529seize-frontend
+          EXPECTED_REF: refs/heads/main
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = "$EXPECTED_REPOSITORY"
+          test "$GITHUB_REF" = "$EXPECTED_REF"
+          test "$GITHUB_EVENT_NAME" = workflow_dispatch
+          test "$GITHUB_RUN_ATTEMPT" = "1"
+
+      - name: Check out trusted benchmark tool
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          sparse-checkout: |
+            ops/scripts/runner-benchmark.cjs
+            ops/scripts/runner-benchmark-inputs.cjs
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Install pinned Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.17.1"
+
+      - name: Validate strict inputs
+        id: normalized
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          CANDIDATE_LABEL: ${{ inputs.candidate_label }}
+          TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
+          COMPLETION_TIMEOUT_SECONDS: ${{ inputs.completion_timeout_seconds }}
+          PROFILE: ${{ inputs.profile }}
+          REPEAT_COUNT: ${{ inputs.repeat_count }}
+        run: |
+          set -euo pipefail
+          normalized="$(node ops/scripts/runner-benchmark.cjs validate \
+            --source-sha "$SOURCE_SHA" \
+            --candidate-label "$CANDIDATE_LABEL" \
+            --timeout-seconds "$TIMEOUT_SECONDS" \
+            --completion-timeout-seconds "$COMPLETION_TIMEOUT_SECONDS" \
+            --profile "$PROFILE" \
+            --repeat-count "$REPEAT_COUNT")"
+          jq -e '(.contract == "runner-benchmark-inputs-v1") and (.source_sha | test("^[a-f0-9]{40}$"))' <<< "$normalized" >/dev/null
+          jq -e 'all(to_entries[]; (.key | test("^[a-z][a-z0-9_]*$")) and ((.value | tostring) | test("^[^=\\r\\n]*$")))' <<< "$normalized" >/dev/null
+          while IFS='=' read -r key value; do
+            case "$key" in
+              contract|source_sha|candidate_label|timeout_seconds|completion_timeout_seconds|profile|repeat_count) ;;
+              *) echo "Unexpected normalized output key: $key" >&2; exit 1 ;;
+            esac
+            printf '%s=%s\n' "$key" "$value" >> "$GITHUB_OUTPUT"
+          done < <(jq -r 'to_entries[] | "\(.key)=\(.value)"' <<< "$normalized")
+          controller_timeout="$(node ops/scripts/runner-benchmark.cjs controller-timeout \
+            --timeout-seconds "$TIMEOUT_SECONDS" \
+            --completion-timeout-seconds "$COMPLETION_TIMEOUT_SECONDS" \
+            --repeat-count "$REPEAT_COUNT")"
+          jq -e '(.timeout_minutes | type == "number") and (.timeout_minutes >= 1)' <<< "$controller_timeout" >/dev/null
+          echo "controller_timeout_minutes=$(jq -r '.timeout_minutes' <<< "$controller_timeout")" >> "$GITHUB_OUTPUT"
+
+      - name: Verify source is reachable from trusted main
+        id: trusted_source
+        env:
+          SOURCE_SHA: ${{ steps.normalized.outputs.source_sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          commit_sha="$(gh api "repos/$GITHUB_REPOSITORY/commits/$SOURCE_SHA" --jq '.sha')"
+          test "$commit_sha" = "$SOURCE_SHA"
+          main_sha="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha')"
+          compare_status="$(gh api "repos/$GITHUB_REPOSITORY/compare/$SOURCE_SHA...$main_sha" --jq '.status')"
+          case "$compare_status" in
+            identical|ahead) ;;
+            *)
+              echo "Source SHA is not a trusted main-ancestor: $compare_status" >&2
+              exit 1
+              ;;
+          esac
+          node ops/scripts/runner-benchmark.cjs verify-source \
+            --source-sha "$SOURCE_SHA" \
+            --checked-out-sha "$SOURCE_SHA" \
+            --main-sha "$main_sha" \
+            --is-ancestor true
+          echo "main_sha=$main_sha" >> "$GITHUB_OUTPUT"
+
+  dispatch:
+    name: Dispatch and observe runner candidate
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ fromJSON(needs.validate.outputs.controller_timeout_minutes) }}
+    permissions:
+      contents: read
+      actions: write
+    env:
+      SOURCE_SHA: ${{ needs.validate.outputs.source_sha }}
+      CANDIDATE_LABEL: ${{ needs.validate.outputs.candidate_label }}
+      TIMEOUT_SECONDS: ${{ needs.validate.outputs.timeout_seconds }}
+      PROFILE: ${{ needs.validate.outputs.profile }}
+      REPEAT_COUNT: ${{ needs.validate.outputs.repeat_count }}
+      COMPLETION_TIMEOUT_SECONDS: ${{ needs.validate.outputs.completion_timeout_seconds }}
+      TRUSTED_MAIN_SHA: ${{ needs.validate.outputs.trusted_main_sha }}
+      WORKFLOW_SHA: ${{ github.workflow_sha }}
+      CONTROLLER_RUN_ID: ${{ github.run_id }}
+      CONTROLLER_RUN_ATTEMPT: ${{ github.run_attempt }}
+    steps:
+      - name: Check out trusted benchmark tool
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          sparse-checkout: |
+            ops/scripts/runner-benchmark.cjs
+            ops/scripts/runner-benchmark-inputs.cjs
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Install pinned Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.17.1"
+
+      - name: Dispatch, observe, and reconcile only verified candidate runs
+        id: observe
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          evidence_dir="$RUNNER_TEMP/runner-benchmark-controller"
+          state_dir="$evidence_dir/states"
+          mkdir -p "$state_dir"
+          controller_started_ms="$(date +%s%3N)"
+          candidate_workflow_path=".github/workflows/runner-benchmark-candidate.yml"
+          tool_path="$GITHUB_WORKSPACE/ops/scripts/runner-benchmark.cjs"
+          controller_nonce="$(node -e 'process.stdout.write(require("node:crypto").randomBytes(16).toString("hex"))')"
+
+          update_state() {
+            local state_path="$1"
+            shift
+            local temporary_path="${state_path}.tmp"
+            if ! jq "$@" "$state_path" > "$temporary_path"; then
+              rm -f "$temporary_path"
+              return 1
+            fi
+            if ! jq -e 'type == "object"' "$temporary_path" >/dev/null; then
+              rm -f "$temporary_path"
+              return 1
+            fi
+            mv "$temporary_path" "$state_path"
+          }
+
+          read_verified_run() {
+            local run_id="$1"
+            local run_path="$2"
+            local title="$3"
+            local request_id="$4"
+            local nonce="$5"
+            if ! gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id" > "$run_path"; then
+              return 2
+            fi
+            if ! node "$tool_path" verify-run \
+              --input "$run_path" \
+              --event-name workflow_dispatch \
+              --workflow-path "$candidate_workflow_path" \
+              --run-id "$run_id" \
+              --head-sha "$TRUSTED_MAIN_SHA" \
+              --head-branch main \
+              --display-title "$title" \
+              --request-id "$request_id" \
+              --controller-nonce "$nonce" \
+              --expected-actor github-actions[bot] >/dev/null; then
+              return 3
+            fi
+            return 0
+          }
+
+          discover_run() {
+            local list_path="$1"
+            local run_path="$2"
+            local title="$3"
+            local request_id="$4"
+            local nonce="$5"
+            if ! gh api \
+              "repos/$GITHUB_REPOSITORY/actions/workflows/runner-benchmark-candidate.yml/runs?event=workflow_dispatch&per_page=100" \
+              > "$list_path"; then
+              return 2
+            fi
+            if ! jq -e '.workflow_runs | type == "array"' "$list_path" >/dev/null; then
+              return 2
+            fi
+            mapfile -t candidate_ids < <(jq -r \
+              --arg title "$title" \
+              '[.workflow_runs[] | select(.event == "workflow_dispatch") | select(.head_branch == "main") | select(.display_title == $title)] | sort_by(.created_at) | reverse | .[] | .id | tostring' \
+              "$list_path")
+            if [ "${#candidate_ids[@]}" -eq 0 ]; then
+              return 1
+            fi
+            for candidate_id in "${candidate_ids[@]}"; do
+              read_verified_run "$candidate_id" "$run_path" "$title" "$request_id" "$nonce"
+              verification_status=$?
+              if [ "$verification_status" -eq 0 ]; then
+                printf '%s' "$candidate_id"
+                return 0
+              fi
+              if [ "$verification_status" -eq 3 ]; then
+                return 3
+              fi
+            done
+            return 2
+          }
+
+          cancel_verified_run() {
+            local run_id="$1"
+            local run_path="$2"
+            local title="$3"
+            local request_id="$4"
+            local nonce="$5"
+            read_verified_run "$run_id" "$run_path" "$title" "$request_id" "$nonce"
+            local verification_status=$?
+            if [ "$verification_status" -ne 0 ]; then
+              return "$verification_status"
+            fi
+            if ! gh api --method POST \
+              "repos/$GITHUB_REPOSITORY/actions/runs/$run_id/cancel" >/dev/null; then
+              return 2
+            fi
+            return 0
+          }
+
+          classify_completed_run() {
+            case "$1" in
+              success)
+                status=success
+                failure_class=""
+                ;;
+              cancelled)
+                status=cancelled
+                failure_class=candidate_cancelled
+                ;;
+              *)
+                status=failure
+                failure_class=candidate_failure
+                ;;
+            esac
+          }
+
+          reconcile_pending() {
+            local reconciliation_deadline_ms
+            reconciliation_deadline_ms=$(( $(date +%s%3N) + 120000 ))
+            while [ "$(date +%s%3N)" -lt "$reconciliation_deadline_ms" ]; do
+              local pending_any=false
+              for state_path in "$state_dir"/state-*.json; do
+                [ -f "$state_path" ] || continue
+                jq -e 'type == "object" and (.needs_reconciliation | type == "boolean")' "$state_path" >/dev/null
+                needs_reconciliation="$(jq -r '.needs_reconciliation' "$state_path")"
+                [ "$needs_reconciliation" = true ] || continue
+                pending_any=true
+                repeat="$(jq -r '.repeat' "$state_path")"
+                request_id="$(jq -r '.request_id' "$state_path")"
+                nonce="$(jq -r '.controller_nonce' "$state_path")"
+                title="$(jq -r '.title' "$state_path")"
+                run_id="$(jq -r '.run_id // empty' "$state_path")"
+                request_started_ms="$(jq -r '.request_started_ms' "$state_path")"
+                run_path="$state_dir/reconcile-run-${repeat}.json"
+                list_path="$state_dir/reconcile-list-${repeat}.json"
+                if [ -z "$run_id" ]; then
+                  if discovered_run="$(discover_run "$list_path" "$run_path" "$title" "$request_id" "$nonce")"; then
+                    run_id="$discovered_run"
+                    reconciliation_now_ms="$(date +%s%3N)"
+                    dispatch_ms=$((reconciliation_now_ms - request_started_ms))
+                    update_state "$state_path" \
+                      --arg run_id "$run_id" \
+                      --argjson dispatch_ms "$dispatch_ms" \
+                      --argjson metadata_verified true \
+                      --argjson list_success_seen true \
+                      '.run_id = $run_id | .metadata_verified = $metadata_verified | .list_success_seen = $list_success_seen | .dispatch_ms = (.dispatch_ms // $dispatch_ms)'
+                  else
+                    discover_status=$?
+                    if [ "$discover_status" -eq 1 ]; then
+                      update_state "$state_path" --argjson list_success_seen true '.list_success_seen = $list_success_seen'
+                    elif [ "$discover_status" -eq 3 ]; then
+                      update_state "$state_path" --arg failure_class candidate_metadata_mismatch '.failure_class = $failure_class'
+                    fi
+                    continue
+                  fi
+                fi
+                if read_verified_run "$run_id" "$run_path" "$title" "$request_id" "$nonce"; then
+                  run_status="$(jq -r '.status // empty' "$run_path")"
+                  if [ "$run_status" = completed ]; then
+                    update_state "$state_path" \
+                      --argjson observed_ms "$(( $(date +%s%3N) - request_started_ms ))" \
+                      --argjson metadata_verified true \
+                      --argjson needs_reconciliation false \
+                      '.observed_ms = $observed_ms | .metadata_verified = $metadata_verified | .needs_reconciliation = $needs_reconciliation | .status = "unavailable" | .failure_class = (if .timed_out or .cancellation_requested then (.failure_class // "candidate_timeout") else "candidate_delayed_accepted" end)'
+                  elif cancel_verified_run "$run_id" "$run_path" "$title" "$request_id" "$nonce"; then
+                    update_state "$state_path" \
+                      --argjson cancellation_requested true \
+                      --arg failure_class candidate_reconciliation_cancelled \
+                      --argjson metadata_verified true \
+                      '.cancellation_requested = $cancellation_requested | .failure_class = $failure_class | .metadata_verified = $metadata_verified'
+                  fi
+                else
+                  verification_status=$?
+                  if [ "$verification_status" -eq 3 ]; then
+                    update_state "$state_path" --arg failure_class candidate_metadata_mismatch '.failure_class = $failure_class'
+                  fi
+                fi
+              done
+              [ "$pending_any" = true ] || break
+              sleep 5
+            done
+            # A missing run after a successful list read is still pending:
+            # discovery can lag dispatch, so it cannot be reported complete.
+          }
+
+          cleanup_invoked=false
+          on_exit() {
+            if [ "$cleanup_invoked" != true ]; then
+              reconcile_pending
+            fi
+          }
+          trap on_exit EXIT
+
+          for repeat in $(seq 1 "$REPEAT_COUNT"); do
+            request_id="$(node "$tool_path" request-id \
+              --source-sha "$SOURCE_SHA" \
+              --candidate-label "$CANDIDATE_LABEL" \
+              --timeout-seconds "$TIMEOUT_SECONDS" \
+              --completion-timeout-seconds "$COMPLETION_TIMEOUT_SECONDS" \
+              --profile "$PROFILE" \
+              --repeat-number "$repeat" \
+              --repeat-count "$REPEAT_COUNT" \
+              --controller-run-id "$CONTROLLER_RUN_ID" \
+              --controller-run-attempt "$CONTROLLER_RUN_ATTEMPT" \
+              --controller-nonce "$controller_nonce")"
+            title="Runner benchmark candidate / $request_id"
+            request_started_ms="$(date +%s%3N)"
+            state_path="$state_dir/state-${repeat}.json"
+            run_path="$state_dir/run-${repeat}.json"
+            list_path="$state_dir/list-${repeat}.json"
+            jq -n \
+              --argjson repeat "$repeat" \
+              --arg request_id "$request_id" \
+              --arg controller_nonce "$controller_nonce" \
+              --arg controller_run_id "$CONTROLLER_RUN_ID" \
+              --arg controller_run_attempt "$CONTROLLER_RUN_ATTEMPT" \
+              --arg title "$title" \
+              --argjson request_started_ms "$request_started_ms" \
+              '{repeat:$repeat,request_id:$request_id,controller_nonce:$controller_nonce,controller_run_id:$controller_run_id,controller_run_attempt:($controller_run_attempt|tonumber),title:$title,request_started_ms:$request_started_ms,run_id:null,status:"unavailable",failure_class:"dispatch_pending",dispatch_ms:null,observed_ms:null,cancellation_requested:false,metadata_verified:false,timed_out:false,needs_reconciliation:true,list_success_seen:false}' \
+              > "$state_path"
+
+            payload="$(jq -n \
+              --arg source_sha "$SOURCE_SHA" \
+              --arg candidate_label "$CANDIDATE_LABEL" \
+              --arg timeout_seconds "$TIMEOUT_SECONDS" \
+              --arg completion_timeout_seconds "$COMPLETION_TIMEOUT_SECONDS" \
+              --arg profile "$PROFILE" \
+              --arg repeat_number "$repeat" \
+              --arg repeat_count "$REPEAT_COUNT" \
+              --arg request_id "$request_id" \
+              --arg controller_nonce "$controller_nonce" \
+              --arg controller_run_id "$CONTROLLER_RUN_ID" \
+              --arg controller_run_attempt "$CONTROLLER_RUN_ATTEMPT" \
+              '{ref:"main",inputs:{source_sha:$source_sha,candidate_label:$candidate_label,timeout_seconds:$timeout_seconds,completion_timeout_seconds:$completion_timeout_seconds,profile:$profile,repeat_number:$repeat_number,repeat_count:$repeat_count,request_id:$request_id,controller_nonce:$controller_nonce,controller_run_id:$controller_run_id,controller_run_attempt:$controller_run_attempt}}')"
+            if ! printf '%s' "$payload" | gh api \
+              --method POST \
+              "repos/$GITHUB_REPOSITORY/actions/workflows/runner-benchmark-candidate.yml/dispatches" \
+              --input - >/dev/null; then
+              update_state "$state_path" --arg failure_class dispatch_failed '.failure_class = $failure_class'
+              continue
+            fi
+
+            availability_deadline_ms=$((request_started_ms + TIMEOUT_SECONDS * 1000))
+            completion_deadline_ms=""
+            run_id=""
+            status=unavailable
+            failure_class=candidate_unavailable
+            run_conclusion=""
+            dispatch_ms=""
+            observed_ms=""
+            cancellation_requested=false
+            metadata_verified=false
+            timed_out=false
+            needs_reconciliation=true
+            list_success_seen=false
+
+            while :; do
+              now_ms="$(date +%s%3N)"
+              if [ -n "$run_id" ]; then
+                if read_verified_run "$run_id" "$run_path" "$title" "$request_id" "$controller_nonce"; then
+                  metadata_verified=true
+                  list_success_seen=true
+                  if [ -z "$dispatch_ms" ]; then
+                    dispatch_ms=$((now_ms - request_started_ms))
+                  fi
+                  run_status="$(jq -r '.status // empty' "$run_path")"
+                  run_conclusion="$(jq -r '.conclusion // empty' "$run_path")"
+                  if [ "$run_status" = completed ]; then
+                    observed_ms=$((now_ms - request_started_ms))
+                    classify_completed_run "$run_conclusion"
+                    needs_reconciliation=false
+                    break
+                  fi
+                  if [ -z "$completion_deadline_ms" ]; then
+                    completion_deadline_ms=$((now_ms + COMPLETION_TIMEOUT_SECONDS * 1000))
+                  fi
+                  if [ "$now_ms" -ge "$completion_deadline_ms" ]; then
+                    observed_ms=$((now_ms - request_started_ms))
+                    status=unavailable
+                    failure_class=candidate_timeout
+                    timed_out=true
+                    if cancel_verified_run "$run_id" "$run_path" "$title" "$request_id" "$controller_nonce"; then
+                      cancellation_requested=true
+                    else
+                      failure_class=candidate_timeout_cancel_pending
+                    fi
+                    break
+                  fi
+                  sleep 5
+                  continue
+                else
+                  verification_status=$?
+                  if [ "$verification_status" -eq 3 ]; then
+                    observed_ms=$((now_ms - request_started_ms))
+                    status=unavailable
+                    failure_class=candidate_metadata_mismatch
+                    break
+                  fi
+                  if [ -n "$completion_deadline_ms" ] && [ "$now_ms" -ge "$completion_deadline_ms" ]; then
+                    observed_ms=$((now_ms - request_started_ms))
+                    status=unavailable
+                    failure_class=candidate_metadata_unavailable
+                    break
+                  fi
+                  sleep 5
+                  continue
+                fi
+              fi
+
+              if [ "$now_ms" -ge "$availability_deadline_ms" ]; then
+                observed_ms=$((now_ms - request_started_ms))
+                status=unavailable
+                failure_class=candidate_unavailable
+                break
+              fi
+              if discovered_run="$(discover_run "$list_path" "$run_path" "$title" "$request_id" "$controller_nonce")"; then
+                run_id="$discovered_run"
+                metadata_verified=true
+                list_success_seen=true
+                dispatch_ms=$((now_ms - request_started_ms))
+                completion_deadline_ms=$((now_ms + COMPLETION_TIMEOUT_SECONDS * 1000))
+                continue
+              else
+                discover_status=$?
+                if [ "$discover_status" -eq 3 ]; then
+                  observed_ms=$((now_ms - request_started_ms))
+                  status=unavailable
+                  failure_class=candidate_metadata_mismatch
+                  break
+                fi
+                if [ "$discover_status" -eq 1 ]; then
+                  list_success_seen=true
+                fi
+                sleep 5
+              fi
+            done
+
+            jq -n \
+            --argjson repeat "$repeat" \
+            --arg request_id "$request_id" \
+            --arg controller_nonce "$controller_nonce" \
+            --arg controller_run_id "$CONTROLLER_RUN_ID" \
+            --arg controller_run_attempt "$CONTROLLER_RUN_ATTEMPT" \
+            --arg run_id "$run_id" \
+              --arg status "$status" \
+              --arg failure_class "$failure_class" \
+              --argjson dispatch_ms "${dispatch_ms:-null}" \
+              --argjson observed_ms "${observed_ms:-null}" \
+              --argjson cancellation_requested "$cancellation_requested" \
+              --argjson metadata_verified "$metadata_verified" \
+              --argjson timed_out "$timed_out" \
+              --argjson needs_reconciliation "$needs_reconciliation" \
+              --argjson list_success_seen "$list_success_seen" \
+              --argjson request_started_ms "$request_started_ms" \
+              --arg title "$title" \
+            '{repeat:$repeat,request_id:$request_id,controller_nonce:$controller_nonce,controller_run_id:$controller_run_id,controller_run_attempt:($controller_run_attempt|tonumber),run_id:(if $run_id == "" then null else $run_id end),status:$status,failure_class:(if $failure_class == "" then null else $failure_class end),dispatch_ms:$dispatch_ms,observed_ms:$observed_ms,cancellation_requested:$cancellation_requested,metadata_verified:$metadata_verified,timed_out:$timed_out,needs_reconciliation:$needs_reconciliation,list_success_seen:$list_success_seen,request_started_ms:$request_started_ms,title:$title}' \
+              > "$state_path"
+          done
+
+          reconcile_pending
+          cleanup_invoked=true
+          trap - EXIT
+
+          results_json="$(jq -s '[.[] | {repeat,request_id,controller_nonce,run_id,status,failure_class,dispatch_ms,observed_ms,cancellation_requested,metadata_verified,reconciliation_pending: .needs_reconciliation}]' "$state_dir"/state-*.json)"
+          cleanup_complete="$(jq -s 'all(.[]; .needs_reconciliation != true)' "$state_dir"/state-*.json)"
+          controller_elapsed_ms=$(( $(date +%s%3N) - controller_started_ms ))
+          raw="$evidence_dir/controller-raw.json"
+          jq -n \
+            --arg source_sha "$SOURCE_SHA" \
+            --arg candidate_label "$CANDIDATE_LABEL" \
+            --arg timeout_seconds "$TIMEOUT_SECONDS" \
+            --arg completion_timeout_seconds "$COMPLETION_TIMEOUT_SECONDS" \
+            --arg profile "$PROFILE" \
+            --arg repeat_count "$REPEAT_COUNT" \
+            --arg controller_nonce "$controller_nonce" \
+            --arg repository "$GITHUB_REPOSITORY" \
+            --arg controller_run_id "$GITHUB_RUN_ID" \
+            --arg controller_run_attempt "$CONTROLLER_RUN_ATTEMPT" \
+            --arg workflow_sha "$WORKFLOW_SHA" \
+            --arg observed_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --argjson controller_elapsed_ms "$controller_elapsed_ms" \
+            --argjson reconciliation_completed "$cleanup_complete" \
+            --argjson cleanup_complete "$cleanup_complete" \
+            --argjson results "$results_json" \
+            '{source_sha:$source_sha,candidate_label:$candidate_label,timeout_seconds:($timeout_seconds|tonumber),completion_timeout_seconds:($completion_timeout_seconds|tonumber),profile:$profile,repeat_count:($repeat_count|tonumber),controller_nonce:$controller_nonce,repository:$repository,controller_run_id:$controller_run_id,controller_run_attempt:($controller_run_attempt|tonumber),workflow_sha:$workflow_sha,observed_at:$observed_at,controller_elapsed_ms:$controller_elapsed_ms,reconciliation_completed:$reconciliation_completed,cleanup_complete:$cleanup_complete,results:$results}' \
+            > "$raw"
+          if [ "$cleanup_complete" != true ]; then
+            echo "Controller reconciliation remains pending; completed evidence is forbidden." >&2
+            exit 1
+          fi
+
+      - name: Write immutable controller evidence
+        if: always()
+        env:
+          EVIDENCE_DIR: ${{ runner.temp }}/runner-benchmark-controller
+        run: |
+          set -euo pipefail
+          raw="$EVIDENCE_DIR/controller-raw.json"
+          if [ ! -s "$raw" ]; then
+            echo "Controller did not produce a complete reconciled evidence input." >&2
+            exit 1
+          fi
+          node ops/scripts/runner-benchmark.cjs write-controller-evidence \
+            --input "$raw" \
+            --output-dir "$EVIDENCE_DIR"
+
+      - name: Upload immutable controller evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: runner-benchmark-controller-${{ github.run_id }}
+          path: ${{ runner.temp }}/runner-benchmark-controller/runner-benchmark-controller-evidence.*
+          if-no-files-found: ignore
+          retention-days: 30

@@ -80,7 +80,11 @@ describe("effective App PR CI plan", () => {
   it.each([
     ".github/workflows/deploy-staging.yml",
     "ops/scripts/deploy-staging-artifact.sh",
+    "scripts/museum-release-tier.cjs",
+    "ops/testing-strategy/museum-surface-registry.v1.json",
     "tests/packs.manifest.cjs",
+    "components/museum/MuseumNetworkProposition.tsx",
+    "__tests__/components/museum/MuseumNetworkProposition.test.tsx",
   ])("requires Release Bus contracts for %s", (file) => {
     expect(executePlan([file]).checks.release_bus_contract.required).toBe(true);
   });
@@ -92,6 +96,10 @@ describe("effective App PR CI plan", () => {
     "config/museumPublicationEnv.server.ts",
     "tests/museum/institutional-practice-readonly.spec.ts",
     "i18n/messages/museum.en-US.json",
+    "styles/museum.css",
+    "public/museum/about-proposition.avif",
+    ".github/workflows/staging-e2e.yml",
+    "scripts/museum-release-selection.cjs",
   ])("requires the isolated Museum browser lane for %s", (file) => {
     const effective = executePlan([file]);
 

@@ -1,0 +1,85 @@
+[
+  {
+    "name": "no-license-desktop",
+    "url": "/museum/network/rights/in-copyright-no-public-license",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "status": 200,
+    "widths": {
+      "innerWidth": 1440,
+      "clientWidth": 1440,
+      "scrollWidth": 1410
+    },
+    "emDashCount": 0,
+    "roundedPracticeCount": 0,
+    "practiceRows": 6,
+    "errors": [],
+    "failedResponses": [],
+    "retainedScreenshot": "no-license-desktop-practice.png"
+  },
+  {
+    "name": "no-license-mobile",
+    "url": "/museum/network/rights/in-copyright-no-public-license",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "status": 200,
+    "widths": {
+      "innerWidth": 390,
+      "clientWidth": 390,
+      "scrollWidth": 390
+    },
+    "emDashCount": 0,
+    "roundedPracticeCount": 0,
+    "practiceRows": 6,
+    "errors": [],
+    "failedResponses": [],
+    "retainedScreenshots": [
+      "no-license-mobile-top-v2.png",
+      "no-license-mobile-practice.png"
+    ]
+  },
+  {
+    "name": "cc-by-nc-desktop",
+    "url": "/museum/network/rights/cc-by-nc-4.0",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "status": 200,
+    "widths": {
+      "innerWidth": 1440,
+      "clientWidth": 1440,
+      "scrollWidth": 1410
+    },
+    "emDashCount": 0,
+    "roundedPracticeCount": 0,
+    "practiceRows": 6,
+    "errors": [],
+    "failedResponses": [],
+    "retainedScreenshot": "cc-by-nc-desktop-practice.png"
+  },
+  {
+    "name": "rights-directory-mobile",
+    "url": "/museum/network/rights",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "status": 200,
+    "widths": {
+      "innerWidth": 390,
+      "clientWidth": 390,
+      "scrollWidth": 390
+    },
+    "emDashCount": 0,
+    "roundedPracticeCount": 0,
+    "practiceRows": 0,
+    "errors": [],
+    "failedResponses": [],
+    "retainedScreenshot": "rights-directory-mobile-top.png"
+  }
+]
