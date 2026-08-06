@@ -10,17 +10,19 @@ import {
   AboutCol as Col,
   AboutContainer as Container,
   AboutRow as Row,
+  CONTENT_PAGE_MAIN_CLASS,
+  CONTENT_PAGE_SECTION_HEADING_CLASS,
+  CONTENT_PAGE_TITLE_CLASS,
 } from "@/components/about/AboutLayout";
 
 const API_REFERENCE_URL = "https://api.6529.io/docs/";
 
 const inlineCodeClass =
   "tw-rounded tw-bg-iron-900 tw-px-1.5 tw-py-0.5 tw-text-sm tw-text-iron-100";
-const sectionClass = "tw-w-full tw-text-base tw-leading-7 tw-text-iron-50";
+const sectionClass = "tw-w-full tw-text-base tw-leading-7 tw-text-iron-300";
 const exampleSectionClass =
-  "tw-w-full tw-text-base tw-leading-7 tw-text-iron-50";
-const sectionHeadingClass =
-  "tw-mb-3 tw-text-2xl tw-font-semibold tw-text-iron-50";
+  "tw-w-full tw-text-base tw-leading-7 tw-text-iron-300";
+const sectionHeadingClass = `${CONTENT_PAGE_SECTION_HEADING_CLASS} tw-mb-3`;
 
 type ApiAuthSectionProps = Readonly<{
   children: ReactNode;
@@ -181,12 +183,7 @@ export async function logoutNativeSession({ address, nativeRefreshToken }) {
 
 export default function ApiAuthenticationPage() {
   return (
-    <main
-      className={clsx(
-        styles["main"],
-        "tailwind-scope tw-border-0 tw-border-solid tw-border-iron-800 !tw-bg-iron-950 md:tw-border-l"
-      )}
-    >
+    <main className={clsx(styles["main"], CONTENT_PAGE_MAIN_CLASS)}>
       <Container fluid className={ABOUT_TEXT_PAGE_CONTAINER_CLASS}>
         <Row>
           <Col>
@@ -200,10 +197,10 @@ export default function ApiAuthenticationPage() {
               <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-50">
                 {apiAuthGuideCopy.eyebrow}
               </p>
-              <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 md:tw-text-4xl">
+              <h1 className={`${CONTENT_PAGE_TITLE_CLASS} tw-mb-4`}>
                 {apiAuthGuideCopy.title}
               </h1>
-              <p className="tw-mb-0 tw-text-base tw-leading-7 tw-text-iron-50">
+              <p className="tw-mb-0 tw-text-base tw-leading-7 tw-text-iron-300">
                 {apiAuthGuideCopy.lead}
               </p>
             </header>

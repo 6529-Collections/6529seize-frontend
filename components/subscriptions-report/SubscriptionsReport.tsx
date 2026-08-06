@@ -41,10 +41,15 @@ import {
   ArrowDownTrayIcon,
   ChevronDownIcon,
 } from "@heroicons/react/24/outline";
+import {
+  CONTENT_PAGE_SECTION_HEADING_CLASS,
+  CONTENT_PAGE_TITLE_CLASS,
+} from "@/components/about/AboutLayout";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const PAGE_SIZE = 10;
 const UPCOMING_PAGE_SIZE = 5;
+const REPORT_SECTION_HEADING_CLASS_NAME = `${CONTENT_PAGE_SECTION_HEADING_CLASS} tw-m-0`;
 
 type MemeCalendarCurrentResponse = {
   readonly status: string;
@@ -432,15 +437,17 @@ export default function SubscriptionsReportComponent() {
     !upcomingLoading && !redeemedLoading && seasonOptionsLoaded;
 
   return (
-    <div className="tw-container tw-mx-auto tw-px-2 tw-py-5 lg:tw-px-6 xl:tw-px-8">
+    <div className="tw-container tw-mx-auto tw-px-5 tw-pb-20 tw-pt-5 sm:tw-px-6 lg:tw-px-8">
       <div>
         <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
-          <h1 className="tw-m-0">Subscriptions Report</h1>
+          <h1 className={`${CONTENT_PAGE_TITLE_CLASS} tw-m-0`}>
+            Subscriptions Report
+          </h1>
           <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-4 tw-gap-y-3 sm:tw-w-auto sm:tw-justify-end">
             <AboutSubscriptionsProfileButton />
             <Link
               href="/about/subscriptions"
-              className="tw-whitespace-nowrap tw-no-underline hover:tw-underline"
+              className="hover:tw-text-primary-200 tw-whitespace-nowrap tw-font-semibold tw-text-primary-300 tw-no-underline hover:tw-underline"
               aria-label="Learn more about The Memes subscriptions"
             >
               Learn More
@@ -452,16 +459,14 @@ export default function SubscriptionsReportComponent() {
         <>
           <div className="tw-pt-3">
             <div className="tw-flex tw-items-center tw-gap-3">
-              <span className="tw-text-lg tw-font-bold tw-no-underline">
-                Active Drop
-              </span>
+              <h2 className={REPORT_SECTION_HEADING_CLASS_NAME}>Active Drop</h2>
             </div>
           </div>
           <div
             className="tw-pt-3"
             data-testid="subscriptions-report-active-drop"
           >
-            <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-primary-400/40 tw-bg-iron-900">
+            <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-primary-400/30 tw-bg-iron-900">
               <span className="tw-sr-only">
                 Active meme card subscribed and airdropped subscription counts
               </span>
@@ -485,9 +490,7 @@ export default function SubscriptionsReportComponent() {
       <div ref={upcomingTableTopRef} />
       <div className={activeDrop ? "tw-pt-8" : "tw-pt-3"}>
         <div className="tw-flex tw-items-center tw-gap-3">
-          <span className="tw-text-lg tw-font-bold tw-no-underline">
-            Upcoming Drops
-          </span>
+          <h2 className={REPORT_SECTION_HEADING_CLASS_NAME}>Upcoming Drops</h2>
           {upcomingLoading && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
         </div>
       </div>
@@ -498,7 +501,7 @@ export default function SubscriptionsReportComponent() {
         <div>
           {upcomingRows.length > 0 ? (
             <>
-              <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-900">
+              <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900">
                 <span className="tw-sr-only">
                   Upcoming meme card subscription counts
                 </span>
@@ -574,16 +577,14 @@ export default function SubscriptionsReportComponent() {
       </div>
       <div ref={pastDropsTarget} className="tw-pt-5">
         <div className="tw-flex tw-items-center tw-gap-3">
-          <span className="tw-text-lg tw-font-bold tw-no-underline">
-            Past Drops
-          </span>
+          <h2 className={REPORT_SECTION_HEADING_CLASS_NAME}>Past Drops</h2>
           {redeemedLoading && <CircleLoader size={CircleLoaderSize.MEDIUM} />}
         </div>
       </div>
       <div className="tw-pt-3" data-testid="subscriptions-report-past-drops">
         <div>
           {redeemedCounts?.length > 0 ? (
-            <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-900">
+            <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900">
               <span className="tw-sr-only">
                 Past meme card subscription redemptions
               </span>
@@ -633,9 +634,11 @@ export default function SubscriptionsReportComponent() {
       {shouldShowDownloadSection && (
         <div className="tw-pt-5">
           <div>
-            <div className="tw-rounded-xl tw-border tw-border-iron-700 tw-bg-iron-900/95 tw-p-4 tw-shadow-sm md:tw-p-5">
+            <div className="tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-5">
               <div className="tw-flex tw-flex-col tw-gap-4 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between">
-                <h2 className="tw-m-0 tw-flex tw-min-h-11 tw-items-center tw-text-base tw-font-semibold tw-leading-6 tw-text-white md:tw-text-lg">
+                <h2
+                  className={`${REPORT_SECTION_HEADING_CLASS_NAME} tw-flex tw-min-h-11 tw-items-center`}
+                >
                   Redeemed Subscriptions Report
                 </h2>
                 <div className="tw-flex tw-w-full tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-stretch lg:tw-w-auto lg:tw-shrink-0">

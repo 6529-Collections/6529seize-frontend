@@ -7,13 +7,15 @@ import {
   AboutCol as Col,
   AboutContainer as Container,
   AboutRow as Row,
+  CONTENT_PAGE_MAIN_CLASS,
+  CONTENT_PAGE_TITLE_CLASS,
 } from "@/components/about/AboutLayout";
 
 export default function BuidlPage() {
   useSetTitle("BUIDL");
 
   return (
-    <main className={`${styles["main"]} tailwind-scope`}>
+    <main className={`${styles["main"]} ${CONTENT_PAGE_MAIN_CLASS}`}>
       <Container fluid className="tw-px-5 tw-py-16 sm:tw-px-6 lg:tw-px-8">
         <Row className="tw-min-h-[calc(100vh-8rem)] tw-items-center">
           <Col className="tw-text-center">
@@ -25,7 +27,7 @@ export default function BuidlPage() {
                 height={100}
                 alt="SummerGlasses"
               />
-              <h1 className="tw-mb-4 tw-mt-6 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 md:tw-text-4xl">
+              <h1 className={`${CONTENT_PAGE_TITLE_CLASS} tw-mb-4 tw-mt-6`}>
                 We are going to BUIDL together to spread the word about a
                 decentralized metaverse.
               </h1>

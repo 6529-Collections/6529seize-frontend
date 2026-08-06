@@ -11,6 +11,9 @@ import {
   AboutCol as Col,
   AboutContainer as Container,
   AboutRow as Row,
+  CONTENT_PAGE_MAIN_CLASS,
+  CONTENT_PAGE_SECTION_HEADING_CLASS,
+  CONTENT_PAGE_TITLE_CLASS,
 } from "@/components/about/AboutLayout";
 
 const API_PAGE_LOCALE = DEFAULT_LOCALE;
@@ -19,8 +22,7 @@ const API_LINK_CLASS_NAME =
   "hover:tw-text-primary-200 tw-font-semibold tw-text-primary-300 tw-no-underline focus-visible:tw-rounded-sm focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
 const API_SECTION_CLASS_NAME =
   "tw-w-full tw-max-w-4xl tw-text-base tw-leading-7 tw-text-iron-300 [&_b]:tw-font-semibold [&_b]:tw-text-iron-100 [&_li]:tw-mb-3 [&_li::marker]:tw-text-iron-600 [&_ol]:tw-mb-0 [&_ol]:tw-mt-5 [&_ol]:tw-pl-6 [&_p]:tw-mb-5 [&_ul]:tw-mb-0 [&_ul]:tw-mt-5 [&_ul]:tw-pl-6";
-const API_SECTION_HEADING_CLASS_NAME =
-  "tw-mb-3 tw-text-2xl tw-font-semibold tw-leading-tight tw-text-iron-50";
+const API_SECTION_HEADING_CLASS_NAME = `${CONTENT_PAGE_SECTION_HEADING_CLASS} tw-mb-3`;
 
 const nodeJsMediaDropExample = `import fetch from "node-fetch";
 import {readFile} from "fs/promises";
@@ -201,13 +203,14 @@ export default function AboutApi() {
     <main
       className={clsx(
         styles["main"],
-        "tailwind-scope tw-border-0 tw-border-solid tw-border-iron-800 !tw-bg-iron-950 tw-px-2 sm:tw-px-3 md:tw-border-l lg:tw-px-5"
+        CONTENT_PAGE_MAIN_CLASS,
+        "tw-px-2 sm:tw-px-3 lg:tw-px-5"
       )}
     >
       <Container fluid className="tw-pb-20 tw-pt-5">
         <Row>
           <Col className="tw-max-w-4xl">
-            <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 md:tw-text-4xl">
+            <h1 className={`${CONTENT_PAGE_TITLE_CLASS} tw-mb-4`}>
               6529.io API
             </h1>
           </Col>

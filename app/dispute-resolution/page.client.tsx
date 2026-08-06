@@ -9,17 +9,19 @@ import {
   AboutCol as Col,
   AboutContainer as Container,
   AboutRow as Row,
+  CONTENT_PAGE_MAIN_CLASS,
+  CONTENT_PAGE_TITLE_CLASS,
 } from "@/components/about/AboutLayout";
 
 export default function DisputeResolutionPage() {
   useSetTitle("Dispute Resolution | 6529.io");
 
   return (
-    <main className={`${styles["main"]} tailwind-scope`}>
+    <main className={`${styles["main"]} ${CONTENT_PAGE_MAIN_CLASS}`}>
       <Container fluid className={ABOUT_TEXT_PAGE_CONTAINER_CLASS}>
         <Row>
           <Col className="tw-max-w-4xl">
-            <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 md:tw-text-4xl">
+            <h1 className={`${CONTENT_PAGE_TITLE_CLASS} tw-mb-4`}>
               Dispute Resolution
             </h1>
           </Col>

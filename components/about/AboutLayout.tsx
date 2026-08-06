@@ -3,6 +3,12 @@ import type { HTMLAttributes, TableHTMLAttributes } from "react";
 
 import styles from "./AboutLayout.module.css";
 
+export const CONTENT_PAGE_MAIN_CLASS =
+  "tailwind-scope tw-min-h-[100dvh] tw-border-0 tw-border-solid tw-border-iron-800 !tw-bg-iron-950 tw-text-iron-300 md:tw-border-l";
+export const CONTENT_PAGE_TITLE_CLASS =
+  "tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 md:tw-text-4xl";
+export const CONTENT_PAGE_SECTION_HEADING_CLASS =
+  "tw-text-2xl tw-font-semibold tw-leading-tight tw-text-iron-50";
 export const ABOUT_TEXT_PAGE_CONTAINER_CLASS =
   "tw-px-5 tw-pb-4 tw-pt-4 tw-text-iron-50 sm:tw-px-6 lg:tw-px-8";
 

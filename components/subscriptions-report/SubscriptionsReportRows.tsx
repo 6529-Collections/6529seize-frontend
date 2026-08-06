@@ -22,9 +22,9 @@ export const STANDARD_REPORT_GRID_CLASS_NAME =
   "sm:tw-grid-cols-[minmax(0,3fr)_minmax(6rem,1fr)]";
 
 const REPORT_ROW_LINK_CLASS_NAME =
-  "tw-grid tw-w-full tw-items-center tw-gap-3 tw-border-t tw-border-iron-700 tw-px-4 tw-py-4 tw-text-white tw-no-underline tw-transition hover:tw-bg-iron-700 hover:tw-text-white hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-300 sm:tw-gap-4 sm:tw-px-6";
+  "tw-grid tw-w-full tw-items-center tw-gap-3 tw-border-t tw-border-iron-800 tw-px-4 tw-py-4 tw-text-iron-100 tw-no-underline tw-transition hover:tw-bg-iron-700 hover:tw-text-iron-50 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-300 sm:tw-gap-4 sm:tw-px-6";
 const REPORT_ROW_TITLE_CLASS_NAME =
-  "tw-text-sm tw-leading-5 tw-text-white sm:tw-text-base";
+  "tw-text-sm tw-leading-5 tw-text-iron-100 sm:tw-text-base";
 const REPORT_ROW_META_CLASS_NAME = "tw-text-sm tw-leading-5 tw-text-iron-400";
 
 function formatVisibleSubscriptionCount(count: number): string {
@@ -139,7 +139,7 @@ function ReportCountStat(
         </span>
       ) : null}
       <span
-        className="tw-text-sm tw-font-semibold tw-leading-5 tw-text-white sm:tw-text-base sm:tw-font-normal"
+        className="tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100 sm:tw-text-base sm:tw-font-normal"
         aria-hidden="true"
       >
         {props.value}
