@@ -281,7 +281,7 @@ function createStrictEvidence(root: string, mergeSha: string) {
     policy_bundle_line_count: 1,
     required_gates: [
       "package-manager-discipline",
-      "dependency-analysis-or-plan-not-required",
+      "dependency-analysis",
       "reviewbot-contract",
       "generated-agent-files",
       "release-bus-workflow-contract-or-plan-not-required",
