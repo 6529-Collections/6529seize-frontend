@@ -6,10 +6,10 @@ import { AboutSection } from "@/types/enums";
 import clsx from "clsx";
 import Link from "next/link";
 import {
-  ABOUT_TEXT_PAGE_CONTAINER_CLASS,
   AboutCol as Col,
   AboutContainer as Container,
   AboutRow as Row,
+  CONTENT_PAGE_CONTAINER_CLASS,
   CONTENT_PAGE_MAIN_CLASS,
   CONTENT_PAGE_TITLE_CLASS,
 } from "@/components/about/AboutLayout";
@@ -19,15 +19,13 @@ export default function DisputeResolutionPage() {
 
   return (
     <main className={clsx(styles["main"], CONTENT_PAGE_MAIN_CLASS)}>
-      <Container fluid className={ABOUT_TEXT_PAGE_CONTAINER_CLASS}>
+      <Container fluid className={CONTENT_PAGE_CONTAINER_CLASS}>
         <Row>
           <Col className="tw-max-w-4xl">
-            <h1 className={`${CONTENT_PAGE_TITLE_CLASS} tw-mb-4`}>
-              Dispute Resolution
-            </h1>
+            <h1 className={CONTENT_PAGE_TITLE_CLASS}>Dispute Resolution</h1>
           </Col>
         </Row>
-        <Row>
+        <Row className="tw-pt-5">
           <Col className="tw-max-w-4xl tw-pb-12 tw-text-base tw-leading-7 tw-text-iron-300">
             <p className="tw-mb-5">
               Dispute resolution for disputes relating to the Terms shall occur

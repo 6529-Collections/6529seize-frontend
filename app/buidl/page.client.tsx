@@ -28,11 +28,13 @@ export default function BuidlPage() {
                 height={100}
                 alt="SummerGlasses"
               />
-              <h1 className={`${CONTENT_PAGE_TITLE_CLASS} tw-mb-4 tw-mt-6`}>
-                We are going to BUIDL together to spread the word about a
-                decentralized metaverse.
-              </h1>
-              <p className="tw-mb-0 tw-text-base tw-leading-7 tw-text-iron-300">
+              <div className="tw-mt-6">
+                <h1 className={CONTENT_PAGE_TITLE_CLASS}>
+                  We are going to BUIDL together to spread the word about a
+                  decentralized metaverse.
+                </h1>
+              </div>
+              <p className="tw-mb-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">
                 Tools to help in this goal are coming soon.
               </p>
             </header>

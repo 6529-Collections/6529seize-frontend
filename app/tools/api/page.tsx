@@ -11,6 +11,7 @@ import {
   AboutCol as Col,
   AboutContainer as Container,
   AboutRow as Row,
+  CONTENT_PAGE_CONTAINER_CLASS,
   CONTENT_PAGE_MAIN_CLASS,
   CONTENT_PAGE_SECTION_HEADING_CLASS,
   CONTENT_PAGE_TITLE_CLASS,
@@ -200,19 +201,11 @@ run().catch((err) => {
 
 export default function AboutApi() {
   return (
-    <main
-      className={clsx(
-        styles["main"],
-        CONTENT_PAGE_MAIN_CLASS,
-        "tw-px-2 sm:tw-px-3 lg:tw-px-5"
-      )}
-    >
-      <Container fluid className="tw-pb-20 tw-pt-5">
+    <main className={clsx(styles["main"], CONTENT_PAGE_MAIN_CLASS)}>
+      <Container fluid className={CONTENT_PAGE_CONTAINER_CLASS}>
         <Row>
           <Col className="tw-max-w-4xl">
-            <h1 className={`${CONTENT_PAGE_TITLE_CLASS} tw-mb-4`}>
-              6529.io API
-            </h1>
+            <h1 className={CONTENT_PAGE_TITLE_CLASS}>6529.io API</h1>
           </Col>
         </Row>
         <Row className="tw-pt-5">

@@ -42,14 +42,21 @@ import {
   ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 import {
-  CONTENT_PAGE_SECTION_HEADING_CLASS,
+  CONTENT_PAGE_CONTAINER_CLASS,
   CONTENT_PAGE_TITLE_CLASS,
 } from "@/components/about/AboutLayout";
+import {
+  SUBSCRIPTIONS_PANEL_CLASS,
+  SUBSCRIPTIONS_SECTION_HEADING_CLASS,
+} from "@/components/about/aboutSubscriptionsStyles";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const PAGE_SIZE = 10;
 const UPCOMING_PAGE_SIZE = 5;
-const REPORT_SECTION_HEADING_CLASS_NAME = `${CONTENT_PAGE_SECTION_HEADING_CLASS} tw-m-0`;
+const REPORT_SECTION_HEADING_CLASS_NAME =
+  SUBSCRIPTIONS_SECTION_HEADING_CLASS;
+const REPORT_TABLE_HEADER_CLASS_NAME =
+  "tw-hidden tw-gap-4 tw-bg-iron-900/80 tw-px-6 tw-py-3 tw-text-left tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-grid";
 
 type MemeCalendarCurrentResponse = {
   readonly status: string;
@@ -437,12 +444,10 @@ export default function SubscriptionsReportComponent() {
     !upcomingLoading && !redeemedLoading && seasonOptionsLoaded;
 
   return (
-    <div className="tw-container tw-mx-auto tw-px-5 tw-pb-20 tw-pt-5 sm:tw-px-6 lg:tw-px-8">
+    <div className={CONTENT_PAGE_CONTAINER_CLASS}>
       <div>
         <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
-          <h1 className={`${CONTENT_PAGE_TITLE_CLASS} tw-m-0`}>
-            Subscriptions Report
-          </h1>
+          <h1 className={CONTENT_PAGE_TITLE_CLASS}>Subscriptions Report</h1>
           <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-4 tw-gap-y-3 sm:tw-w-auto sm:tw-justify-end">
             <AboutSubscriptionsProfileButton />
             <Link
@@ -466,12 +471,12 @@ export default function SubscriptionsReportComponent() {
             className="tw-pt-3"
             data-testid="subscriptions-report-active-drop"
           >
-            <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-primary-400/30 tw-bg-iron-900">
+            <div className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-overflow-hidden`}>
               <span className="tw-sr-only">
                 Active meme card subscribed and airdropped subscription counts
               </span>
               <div
-                className={`${ACTIVE_REPORT_GRID_CLASS_NAME} tw-hidden tw-gap-4 tw-bg-primary-500/10 tw-px-6 tw-py-3 tw-text-left tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-300 sm:tw-grid`}
+                className={`${ACTIVE_REPORT_GRID_CLASS_NAME} ${REPORT_TABLE_HEADER_CLASS_NAME}`}
                 aria-hidden="true"
               >
                 <span>Meme Card</span>
@@ -501,12 +506,14 @@ export default function SubscriptionsReportComponent() {
         <div>
           {upcomingRows.length > 0 ? (
             <>
-              <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900">
+              <div
+                className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-overflow-hidden`}
+              >
                 <span className="tw-sr-only">
                   Upcoming meme card subscription counts
                 </span>
                 <div
-                  className={`${STANDARD_REPORT_GRID_CLASS_NAME} tw-hidden tw-gap-4 tw-bg-iron-900 tw-px-6 tw-py-3 tw-text-left tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-300 sm:tw-grid`}
+                  className={`${STANDARD_REPORT_GRID_CLASS_NAME} ${REPORT_TABLE_HEADER_CLASS_NAME}`}
                   aria-hidden="true"
                 >
                   <span>Meme Card</span>
@@ -584,12 +591,14 @@ export default function SubscriptionsReportComponent() {
       <div className="tw-pt-3" data-testid="subscriptions-report-past-drops">
         <div>
           {redeemedCounts?.length > 0 ? (
-            <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900">
+            <div
+              className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-overflow-hidden`}
+            >
               <span className="tw-sr-only">
                 Past meme card subscription redemptions
               </span>
               <div
-                className={`${STANDARD_REPORT_GRID_CLASS_NAME} tw-hidden tw-gap-4 tw-bg-iron-900 tw-px-6 tw-py-3 tw-text-left tw-text-sm tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-300 sm:tw-grid`}
+                className={`${STANDARD_REPORT_GRID_CLASS_NAME} ${REPORT_TABLE_HEADER_CLASS_NAME}`}
                 aria-hidden="true"
               >
                 <span>Meme Card</span>
@@ -634,7 +643,7 @@ export default function SubscriptionsReportComponent() {
       {shouldShowDownloadSection && (
         <div className="tw-pt-5">
           <div>
-            <div className="tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-5">
+            <div className={`${SUBSCRIPTIONS_PANEL_CLASS} tw-p-5`}>
               <div className="tw-flex tw-flex-col tw-gap-4 lg:tw-flex-row lg:tw-items-center lg:tw-justify-between">
                 <h2
                   className={`${REPORT_SECTION_HEADING_CLASS_NAME} tw-flex tw-min-h-11 tw-items-center`}
@@ -672,8 +681,7 @@ export default function SubscriptionsReportComponent() {
                     loading={isDownloadingCsv}
                     variant="action"
                     size="lg"
-                    fullWidth
-                    className="tw-min-w-[190px] sm:tw-w-52"
+                    className="tw-self-start"
                   >
                     {isDownloadingCsv ? (
                       "Downloading"

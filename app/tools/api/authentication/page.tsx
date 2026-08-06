@@ -6,10 +6,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import {
-  ABOUT_TEXT_PAGE_CONTAINER_CLASS,
   AboutCol as Col,
   AboutContainer as Container,
   AboutRow as Row,
+  CONTENT_PAGE_CONTAINER_CLASS,
   CONTENT_PAGE_MAIN_CLASS,
   CONTENT_PAGE_SECTION_HEADING_CLASS,
   CONTENT_PAGE_TITLE_CLASS,
@@ -184,7 +184,7 @@ export async function logoutNativeSession({ address, nativeRefreshToken }) {
 export default function ApiAuthenticationPage() {
   return (
     <main className={clsx(styles["main"], CONTENT_PAGE_MAIN_CLASS)}>
-      <Container fluid className={ABOUT_TEXT_PAGE_CONTAINER_CLASS}>
+      <Container fluid className={CONTENT_PAGE_CONTAINER_CLASS}>
         <Row>
           <Col>
             <Link
@@ -197,10 +197,10 @@ export default function ApiAuthenticationPage() {
               <p className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-50">
                 {apiAuthGuideCopy.eyebrow}
               </p>
-              <h1 className={`${CONTENT_PAGE_TITLE_CLASS} tw-mb-4`}>
+              <h1 className={CONTENT_PAGE_TITLE_CLASS}>
                 {apiAuthGuideCopy.title}
               </h1>
-              <p className="tw-mb-0 tw-text-base tw-leading-7 tw-text-iron-300">
+              <p className="tw-mb-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">
                 {apiAuthGuideCopy.lead}
               </p>
             </header>

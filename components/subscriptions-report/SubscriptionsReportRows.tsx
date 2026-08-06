@@ -132,7 +132,7 @@ function ReportCountStat(
       </span>
       {showMobileLabel ? (
         <span
-          className="tw-text-[0.65rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wide tw-text-iron-400 sm:tw-hidden"
+          className="tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400 sm:tw-hidden"
           aria-hidden="true"
         >
           {props.label}
