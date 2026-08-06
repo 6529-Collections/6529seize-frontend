@@ -33,7 +33,7 @@ const RELEASE_BUS_CONTRACT_PATTERNS = [
   /^\.github\/workflows\//u,
   /^ops\/deployment-bus\//u,
   /^ops\/testing-strategy\/museum-/u,
-  /^ops\/scripts\/(?:deployment-bus|deploy-staging-artifact|release-bus-status|verify-deployment-version)\./u,
+  /^ops\/scripts\/(?:artifact-portability(?:-[A-Za-z0-9-]+)*|deployment-bus|deploy-staging-artifact|release-bus-status|verify-deployment-version)\./u,
   /^scripts\/(?:app-pr-ci-effective-plan|e2e-packs|museum-|pr-ci-policy-bundle|release-bus-|sync-e2e-manifest)/u,
   /^tests\/packs\.manifest\.cjs$/u,
   /^components\/museum\/MuseumNetworkProposition\.tsx$/u,

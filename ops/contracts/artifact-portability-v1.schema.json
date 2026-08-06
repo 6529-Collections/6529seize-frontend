@@ -1,0 +1,283 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://6529.io/contracts/artifact-portability-v1.schema.json",
+  "title": "6529 frontend artifact portability inventory v1",
+  "description": "A report-only, fail-closed inventory of the inputs that identify a frontend artifact and the runtime configuration baked into its bytes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract",
+    "mode",
+    "repository",
+    "environment",
+    "source",
+    "artifact",
+    "digests",
+    "content",
+    "toolchain",
+    "runtime_config",
+    "baked_inputs",
+    "unclassified_runtime_keys",
+    "package_scan",
+    "portability"
+  ],
+  "properties": {
+    "schema_version": { "const": "artifact-portability.v1" },
+    "contract": { "const": "artifact-portability-v1" },
+    "mode": { "const": "report_only" },
+    "repository": { "const": "frontend" },
+    "environment": { "enum": ["staging", "production"] },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["git_sha"],
+      "properties": {
+        "git_sha": { "type": "string", "pattern": "^[a-f0-9]{40}$" }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract",
+        "contract_version",
+        "manifest_sha256",
+        "package_size_bytes"
+      ],
+      "properties": {
+        "contract": { "type": ["string", "null"] },
+        "contract_version": { "type": "string", "minLength": 1 },
+        "manifest_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "package_size_bytes": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "digests": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_sha",
+        "content_sha256",
+        "toolchain_sha256",
+        "package_sha256",
+        "runtime_config_sha256"
+      ],
+      "properties": {
+        "source_sha": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "content_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "toolchain_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "package_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "runtime_config_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "content": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["roots"],
+      "properties": {
+        "roots": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["path", "sha256", "file_count"],
+            "properties": {
+              "path": { "type": "string", "minLength": 1 },
+              "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              "file_count": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    "toolchain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["digest", "inputs"],
+      "properties": {
+        "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "inputs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "package_json_sha256",
+            "pnpm_lock_sha256",
+            "node_version",
+            "pnpm_version"
+          ],
+          "properties": {
+            "package_json_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "pnpm_lock_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "node_version": { "type": "string", "minLength": 1 },
+            "pnpm_version": { "type": ["string", "null"] }
+          }
+        }
+      }
+    },
+    "runtime_config": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_paths", "sha256", "key_count"],
+      "properties": {
+        "source_paths": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "key_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "baked_inputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "category",
+          "classification",
+          "environment_bound",
+          "present",
+          "source",
+          "value_sha256"
+        ],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "category": { "type": "string", "minLength": 1 },
+          "classification": {
+            "enum": [
+              "explicit_environment_bound",
+              "known_runtime_fail_closed",
+              "unclassified_runtime_fail_closed"
+            ]
+          },
+          "environment_bound": { "type": "boolean" },
+          "present": { "type": "boolean" },
+          "source": { "type": "string", "minLength": 1 },
+          "value_sha256": {
+            "type": ["string", "null"],
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      }
+    },
+    "unclassified_runtime_keys": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "package_scan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "root_name",
+        "scan_mode",
+        "scan_complete",
+        "tree_sha256",
+        "file_count",
+        "total_bytes",
+        "input_count",
+        "present_input_count",
+        "matched_input_count",
+        "inputs"
+      ],
+      "properties": {
+        "root_name": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[^/\\\\]+$"
+        },
+        "scan_mode": {
+          "const": "all_regular_files_exact_utf8_and_json_literals"
+        },
+        "scan_complete": { "const": true },
+        "tree_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "file_count": { "type": "integer", "minimum": 1 },
+        "total_bytes": { "type": "integer", "minimum": 1 },
+        "input_count": { "type": "integer", "minimum": 1 },
+        "present_input_count": { "type": "integer", "minimum": 1 },
+        "matched_input_count": { "type": "integer", "minimum": 0 },
+        "inputs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "present",
+              "value_sha256",
+              "matched",
+              "matched_file_count",
+              "matched_paths_sha256",
+              "sample_paths"
+            ],
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "present": { "type": "boolean" },
+              "value_sha256": {
+                "type": ["string", "null"],
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "matched": { "type": "boolean" },
+              "matched_file_count": { "type": "integer", "minimum": 0 },
+              "matched_paths_sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "sample_paths": {
+                "type": "array",
+                "maxItems": 20,
+                "items": { "type": "string", "minLength": 1 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "portability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "portable",
+        "reuse_authorized",
+        "promotion_authorized",
+        "blockers"
+      ],
+      "properties": {
+        "status": { "const": "NOT_PORTABLE" },
+        "portable": { "const": false },
+        "reuse_authorized": { "const": false },
+        "promotion_authorized": { "const": false },
+        "blockers": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

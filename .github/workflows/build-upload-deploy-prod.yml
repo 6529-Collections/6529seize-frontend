@@ -271,6 +271,17 @@ jobs:
           ' production-artifact/manifest.json >/dev/null
           package_digest="$(sha256sum production-artifact/target/package.zip | cut -d' ' -f1)"
           test "$package_digest" = "$(jq -r .package_sha256 production-artifact/manifest.json)"
+          jq -e --arg source_sha "$EXPECTED_SHA" --arg package_sha256 "$package_digest" '
+            .schema_version == "artifact-portability.v1" and
+            .contract == "artifact-portability-v1" and
+            .environment == "production" and
+            .source.git_sha == $source_sha and
+            .digests.package_sha256 == $package_sha256 and
+            .portability.status == "NOT_PORTABLE" and
+            .portability.portable == false and
+            .portability.reuse_authorized == false and
+            .portability.promotion_authorized == false
+          ' production-artifact/artifact-portability.json >/dev/null
           package_size="$(stat -c%s production-artifact/target/package.zip)"
           test "$package_size" -le $((500 * 1024 * 1024))
 
@@ -394,40 +405,23 @@ jobs:
             --version-label "${{ env.COMMIT_SHA }}" \
             --option-settings "$option_settings"
 
-      - name: Check Elastic Beanstalk health and readiness (120s warmup then 20 retries with 60s delay)
-        env:
-          DEPLOYMENT_ID: ${{ steps.deployment-record.outputs.deployment_id }}
-          GITHUB_TOKEN: ${{ github.token }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      - name: Check Elastic Beanstalk health and readiness (adaptive exact-version poll)
         run: |
-          echo "Warmup..."
-          MAX_RETRIES=20
-          COUNTER=0
-          sleep 120
-          while : ; do
-            ENV_HEALTH=$(aws elasticbeanstalk describe-environments --environment-names "${BEANSTALK_ENV_NAME}" --query 'Environments[0].Health' --output text)
-            ENV_STATUS=$(aws elasticbeanstalk describe-environments --environment-names "${BEANSTALK_ENV_NAME}" --query 'Environments[0].Status' --output text)
-            echo "Environment health: $ENV_HEALTH"
-            echo "Environment status: $ENV_STATUS"
-            if [ $((COUNTER % 5)) -eq 0 ]; then
-              node ops/scripts/deployment-bus.cjs github-create-status \
-                --deployment-id "$DEPLOYMENT_ID" \
-                --state in_progress \
-                --description "Production EB health=$ENV_HEALTH status=$ENV_STATUS after $COUNTER checks" \
-                --environment-url "https://6529.io" \
-                --log-url "$RUN_URL" || true
-            fi
-            if [[ $ENV_HEALTH == "Green" && $ENV_STATUS == "Ready" ]]; then
-              echo "Environment is healthy and ready!"
-              break
-            elif [[ $COUNTER -eq $MAX_RETRIES ]]; then
-              echo "Environment did not become healthy and ready within the expected time."
-              exit 1
-            fi
-            COUNTER=$((COUNTER+1))
-            echo "Waiting for environment to become healthy and ready... Attempt: $COUNTER"
-            sleep 60
-          done
+          set -euo pipefail
+          node ops/scripts/elastic-beanstalk-readiness.cjs \
+            --environment-name "${BEANSTALK_ENV_NAME}" \
+            --expected-version "${COMMIT_SHA}" \
+            --timeout-seconds 1320 \
+            --output elastic-beanstalk-readiness.json
+
+      - name: Upload durable Elastic Beanstalk readiness evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: production-elastic-beanstalk-readiness-${{ github.run_id }}
+          path: elastic-beanstalk-readiness.json
+          if-no-files-found: ignore
+          retention-days: 90
 
       - name: Validate Deployment
         run: |

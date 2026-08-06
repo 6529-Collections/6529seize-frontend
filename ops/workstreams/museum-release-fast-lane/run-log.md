@@ -734,7 +734,6 @@
   absent from both concrete and dynamic entries in `prerender-manifest.json`.
   It still enforces the 500-concrete-route ceiling. Tests reject a missing app
   route, a route that re-enters prerendering, and a 501-route regression.
-
 ## 2026-08-06 - PR 5 source-drift gate correction
 
 - Rebasing onto main `d27148d1dfd85ed8cdaa50239d59ac1e524afdc9`
@@ -751,3 +750,129 @@
   reviewed baseline in the same PR.
 - Follow-up validation passed: 8 focused tests, live source-only CLI, changed
   lint, 1,373-file changed TypeScript ratchet, Knip, and whitespace.
+
+## 2026-08-05 — PR6 local implementation checkpoint
+
+- Implemented on `codex/museum-release-readiness`; no push, PR, merge, deploy, or
+  live-environment mutation has occurred.
+- Replaced both sanctioned Elastic Beanstalk production waits with
+  `elastic-beanstalk-readiness.cjs`: immediate observation, bounded 5/10/20/30
+  second backoff, existing 1320-second timeout, exact Green/Ready/VersionLabel
+  matching, and two consecutive successful samples. The existing `/api/version`
+  verifier remains a separate gate.
+- Added durable JSON readiness evidence and retained it as an Actions artifact
+  in both production paths.
+- Added the `artifact-portability.v1` contract and inventory producer. It records
+  source, content, toolchain, package, and runtime-configuration digests, hashes
+  baked inputs without persisting their values, and marks the current
+  environment-bound artifact `NOT_PORTABLE` with both reuse and promotion
+  disabled.
+- Added a credentials-free report workflow that compares exact staging and
+  production inventory artifacts. Its only successful outcome is report-only
+  evidence; a malformed or incomplete inventory fails closed.
+- Added the runtime-neutral migration boundary and protected the workflow,
+  schema, tests, producer, contract verifier, and readiness poller in the PR
+  policy bundle.
+
+### PR6 validation status
+
+Validation is complete locally. The focused readiness/portability suite passed
+19/19; release-bus artifact compatibility passed 16/16; the performance contract
+passed 7/7; production artifact coverage passed 2/2; staging artifact coverage
+passed 3/3; changed lint and formatting passed; typecheck passed for 1,358
+changed TypeScript files; and `codex-diff-check` passed. YAML parsing passed for
+all seven changed workflows. `actionlint` passed for the new report-only
+workflow and the production artifact workflow. The remaining release workflows
+retain baseline ShellCheck findings (SC2129/SC2155), while the two largest
+workflows exceeded the local 60-second per-file analyzer limit; these are
+reported as analyzer limitations, not treated as green. No live environment was
+mutated. The intended residual portability blocker is unchanged: the package
+continues to bake environment configuration, so build-once/promote-twice is not
+activated by this PR.
+
+## 2026-08-05 — PR6 independent Luna review corrections
+
+- Resolved all five accepted findings without committing or publishing the work.
+- Preserved pre-PR6 `legacy-v2` deploy compatibility when the new sidecar is absent;
+  the workflow emits `not-portable-pre-pr6-legacy`, and tests prove that missing v3
+  sidecars still fail.
+- Added a 30-second maximum AWS subprocess timeout bounded by the remaining global
+  deadline. Post-deadline Green/Ready/exact-version samples are ineligible.
+- Added a complete regular-file scan of the producer-supplied extracted package
+  root and closed classification for every known and observed runtime key. Evidence
+  contains hashes and bounded path samples, never raw values.
+- Split full-shape validation and source-run provenance into the protected
+  `artifact-portability-contract.cjs` module. The policy bundle remains at its
+  96-file ceiling.
+- Bound report inputs to the exact successful GitHub Actions source run and to the
+  expected artifact manifest, environment, source, contract, and inventory before
+  staging/production comparison.
+
+### Corrected validation
+
+- Readiness, portability, package-scan, closed-schema, and provenance tests: 19/19.
+- Release Bus artifact compatibility, including pre-PR6 legacy and missing-v3
+  regressions for both environments: 16/16.
+- Release Bus performance contract: 7/7.
+- Production artifact contract: 2/2.
+- Staging artifact contract: 3/3.
+- Changed lint and targeted Prettier: passed.
+- Changed typecheck: passed for 1,358 TypeScript files.
+- All seven changed workflows parse as YAML; targeted `actionlint` passes for the
+  report-only and production-artifact workflows.
+- `git diff --check` and `codex-diff-check`: passed.
+
+Residual portability boundary: exact-literal scanning does not prove absence of an
+encoded, transformed, or indirectly generated configuration value. The inventory
+therefore remains `NOT_PORTABLE`; build-once/promote-twice, reuse, and promotion stay
+disabled pending the migration proof in the implementation document.
+
+## 2026-08-05 — PR6 bounded independent re-review
+
+- The independent artifact-integrity review found four remaining gaps. All four
+  are corrected locally and remain uncommitted.
+- Deployment result summaries now carry the artifact step's explicit
+  `portability_status` as the sole authoritative portability/authorization
+  field. Legacy summaries preserve the actual `staging` or `production`
+  environment; they no longer label the environment `portable`.
+- Report-source verification now cross-binds the inventory package digest,
+  artifact contract, and artifact contract version to the downloaded manifest,
+  with an exact contract binding for every trusted producer/version pair.
+- The report workflow now obtains the artifact's independent GitHub Actions API
+  digest, requires it during source verification, and independently recomputes
+  every regular file's digest and exact membership against `SHA256SUMS`.
+- Content-root hashing rejects symlink roots and checks canonical real-path
+  containment before walking. Adversarial fixtures cover symlink roots,
+  real-path escapes, forged producer contracts, forged checksum entries, and
+  missing artifact digests.
+
+## 2026-08-06 - PR 6 full test-quality gate
+
+- The complete Jest typecheck ratchet found seven diagnostics hidden by the
+  CommonJS test imports, and the debt ratchet found one generic `any` in the
+  malformed-inventory mutation table. The harness now declares the readiness,
+  inventory, comparison, and verification boundaries explicitly and uses a
+  closed mutation target. No diagnostic or debt baseline was raised.
+- Exact local validation now passes 46/46 focused tests, the complete Jest and
+  Playwright typecheck ratchets, changed lint, Knip, the debt ratchet, all four
+  Node syntax checks, all seven workflow syntax/expression checks, Prettier, and
+  `codex-diff-check`.
+
+## 2026-08-06 - PR 6 independent provenance review
+
+- An independent Luna review found that the report workflow's sparse checkout
+  omitted the verifier module required by its CommonJS contract. The exact
+  dependency is now checked out and protected by workflow coverage.
+- Downloaded package bytes are now hashed independently and must match both the
+  producer manifest and validated inventory. Updating a self-declared
+  `SHA256SUMS` after tampering can no longer produce accepted report evidence;
+  an adversarial test proves rejection.
+- The report-source verifier is now part of the protected policy bundle and is
+  classified as P3/release-contract work by both CI planners. Tests bind all
+  three protections so the security-critical file cannot take a reduced lane.
+- Trusted producer runs must originate from the producer's closed branch set
+  (`main` for Release Bus and production artifacts; `1a-staging` for the manual
+  staging producer) and from the same head repository. Artifact metadata now
+  requires an explicit unexpired state and exact source workflow-run identity.
+- The portability decision remains `NOT_PORTABLE`; these changes strengthen
+  report provenance and do not authorize reuse, promotion, or deployment.

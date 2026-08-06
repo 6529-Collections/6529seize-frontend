@@ -283,3 +283,91 @@ tree; it has not changed GitHub, runner capacity, or deployment state.
 Focused adversarial coverage now passes 18 tests. The signed worktree is ready
 for its governed PR after PR3 lands; no runner, repository setting, deployment,
 or candidate capacity has been activated.
+
+## PR6 current boundary
+
+PR6 is implemented locally on `codex/museum-release-readiness` and has not been
+published or used to mutate any environment. The safe deliverable is deliberately
+report-only for portability:
+
+- Elastic Beanstalk readiness uses one adaptive poller with an immediate sample,
+  5/10/20/30-second bounded backoff, the existing 1320-second ceiling, and two
+  consecutive Green/Ready/exact-VersionLabel observations. Its JSON observation
+  record is separate from the exact `/api/version` verifier.
+- Environment-bound and legacy artifact producers emit an
+  `artifact-portability.v1` inventory. It separates source, content, toolchain,
+  package, and runtime-configuration digests and marks current artifacts
+  `NOT_PORTABLE` with reuse and promotion authorization disabled.
+- A read-only workflow compares staging and production inventories. It downloads
+  exact named artifacts, verifies their checksums, and can only produce a blocked
+  report; it has no deployment credentials or mutation steps.
+- The migration note defines the byte-neutrality gates for moving API, WebSocket,
+  allowlist, base URL, chain, asset, announcement, telemetry/Sentry, and
+  public-review profile values into signed runtime configuration.
+
+Residual blocker: build-once/promote-twice remains intentionally inactive until
+the runtime-neutral package and its same-byte/two-runtime proof exist. The current
+frontend package still embeds environment-specific values.
+
+PR6 validation is complete locally: the focused readiness/portability suite is
+19/19, the compatibility suite is 16/16, the performance contract is 7/7, the
+production artifact contract is 2/2, the staging artifact contract is 3/3,
+changed lint and formatting pass, typecheck passes for 1,358 changed TypeScript
+files, and `codex-diff-check` is clean. YAML parsing passes for all seven changed
+workflows. `actionlint` passes for the new report-only workflow and the production
+artifact workflow; the other existing release workflows retain baseline
+ShellCheck findings (SC2129/SC2155), and two large workflows exceeded the local
+60-second per-file analyzer limit. No live environment was touched.
+
+## PR6 independent-review correction
+
+Five valid findings from the independent review are resolved locally and remain
+uncommitted:
+
+- Pre-PR6 `legacy-v2` artifacts without a portability inventory retain their
+  immutable deploy path under an explicit `not-portable-pre-pr6-legacy` status.
+  Reuse and promotion remain unauthorized. New `environment-bound-v3` artifacts
+  still fail if the inventory is missing.
+- The Elastic Beanstalk sampler now gives each AWS subprocess a killable timeout
+  capped by both 30 seconds and the remaining overall deadline. A healthy response
+  received at or after the deadline is recorded but cannot advance readiness.
+- Every known runtime key and every additional observed key is classified. The
+  producer scans all regular files in the exact extracted package root, retaining
+  only digests, counts, and bounded path samples. The scan is exact-literal evidence;
+  encoded or transformed values remain an activation blocker.
+- Inventory validation now enforces the complete closed v1 shape, exact relevant
+  keys, cross-field digest identity, complete runtime-key and package-scan coverage,
+  and fail-closed authorization flags.
+- The report workflow verifies source repository, trusted workflow path, event,
+  successful conclusion, run ID, run head SHA, artifact name, source SHA,
+  environment, manifest digest, and contract before comparison.
+
+Corrected local validation: readiness/portability/provenance 19/19; artifact
+compatibility 16/16; performance contract 7/7; production artifact 2/2; staging
+artifact 3/3; changed lint, Prettier, YAML parsing, typecheck for 1,358 files,
+`git diff --check`, and `codex-diff-check` all pass. Targeted `actionlint` passes
+for the new report workflow and production artifact workflow. No commit, push,
+PR, deployment, or live-environment mutation occurred.
+
+## PR6 artifact-integrity corrections
+
+The independent re-review findings were resolved before the local PR6 commit:
+
+- Legacy Release Bus summaries now preserve the actual staging/production
+  environment. `portability_status` is the sole authoritative portability and
+  authorization field; the environment label is never replaced by `portable`.
+- Report-source verification requires a named GitHub Actions artifact digest
+  from the Actions API, binds it to the exact run and artifact name, and
+  independently recomputes the downloaded artifact's complete regular-file
+  membership and digests rather than trusting `SHA256SUMS` as evidence.
+- Each trusted producer/version is bound to its exact artifact contract string;
+  coherent forged manifest/inventory contracts fail closed.
+- Content roots must be real directories and their canonical real paths must
+  remain within the canonical source root before any walk begins.
+
+The complete four-suite readiness, portability, provenance, and Release Bus
+contract run passes 46/46. Changed lint, Node syntax, targeted Prettier,
+actionlint, and `codex-diff-check` also pass after extracting report-source
+validation into its own module and documenting the two canonical-path security
+boundaries. The PR6 artifact remains explicitly `NOT_PORTABLE`, report-only,
+and without deploy authority.

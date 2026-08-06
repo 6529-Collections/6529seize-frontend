@@ -80,6 +80,7 @@ describe("effective App PR CI plan", () => {
   it.each([
     ".github/workflows/deploy-staging.yml",
     "ops/scripts/deploy-staging-artifact.sh",
+    "ops/scripts/artifact-portability-report-source.cjs",
     "scripts/museum-release-tier.cjs",
     "ops/testing-strategy/museum-surface-registry.v1.json",
     "tests/packs.manifest.cjs",
