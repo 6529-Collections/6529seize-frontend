@@ -13,7 +13,7 @@ interface WaveManualOutcomeProps {
 }
 
 const renderManualItem = (item: ApiWaveOutcomeDistributionItem) =>
-  item.amount === 0 ? "-" : (item.description ?? "");
+  item.amount === 0 ? "-" : (item.description ?? "-");
 
 export const WaveManualOutcome: FC<WaveManualOutcomeProps> = ({
   outcome,

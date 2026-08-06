@@ -1,7 +1,7 @@
 "use client";
 
 import type { FC, ReactNode } from "react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import type { ApiWaveOutcomeDistributionItem } from "@/generated/models/ApiWaveOutcomeDistributionItem";
@@ -41,6 +41,7 @@ export const WaveOutcomeAccordion: FC<WaveOutcomeAccordionProps> = ({
   pool,
   metadata,
 }) => {
+  const panelId = useId();
   const shouldReduceMotion = useReducedMotion() ?? false;
   const [isOpen, setIsOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
@@ -64,6 +65,10 @@ export const WaveOutcomeAccordion: FC<WaveOutcomeAccordionProps> = ({
     typeof errorMessage === "string" && errorMessage.length > 0
       ? errorMessage
       : "Failed to load winners";
+  const viewMoreLabel = getViewMoreLabel({
+    isFetching: isFetchingNextPage,
+    remainingCount,
+  });
 
   const onViewMore = () => {
     if (!showAll) {
@@ -79,6 +84,7 @@ export const WaveOutcomeAccordion: FC<WaveOutcomeAccordionProps> = ({
       <button
         type="button"
         aria-expanded={isOpen}
+        aria-controls={panelId}
         onClick={() => setIsOpen(!isOpen)}
         className="tw-w-full tw-cursor-pointer tw-border-0 tw-bg-transparent tw-px-[13px] tw-py-[21px] tw-text-left focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400/80 sm:tw-px-[21px]"
       >
@@ -128,24 +134,26 @@ export const WaveOutcomeAccordion: FC<WaveOutcomeAccordionProps> = ({
             </motion.div>
           </div>
         </div>
-        {metadata && (
-          <div className="tw-mt-[21px] tw-grid tw-gap-[8px] tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-[13px] sm:tw-grid-cols-[minmax(0,0.35fr)_minmax(0,1fr)] sm:tw-items-baseline sm:tw-gap-[21px]">
-            <span className="tw-text-[10px] tw-font-medium tw-uppercase tw-leading-[13px] tw-tracking-[0.16em] tw-text-iron-500">
-              {metadata.label}
-            </span>
-            <span className="tw-text-sm tw-leading-5 tw-text-iron-200 sm:tw-text-right">
-              {metadata.value}
-            </span>
-          </div>
-        )}
       </button>
+      {metadata && (
+        <div className="tw-mx-[13px] tw-grid tw-gap-[8px] tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pb-[21px] tw-pt-[13px] sm:tw-mx-[21px] sm:tw-grid-cols-[minmax(0,0.35fr)_minmax(0,1fr)] sm:tw-items-baseline sm:tw-gap-[21px]">
+          <span className="tw-text-[10px] tw-font-medium tw-uppercase tw-leading-[13px] tw-tracking-[0.16em] tw-text-iron-500">
+            {metadata.label}
+          </span>
+          <span className="tw-text-sm tw-leading-5 tw-text-iron-200 sm:tw-text-right">
+            {metadata.value}
+          </span>
+        </div>
+      )}
 
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            id={panelId}
+            layout
+            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -5 }}
             transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
             className="tw-overflow-hidden"
           >
@@ -189,9 +197,7 @@ export const WaveOutcomeAccordion: FC<WaveOutcomeAccordionProps> = ({
                   onClick={onViewMore}
                   disabled={isFetchingNextPage}
                 >
-                  {isFetchingNextPage
-                    ? "Loading..."
-                    : `View ${remainingCount} more`}
+                  {viewMoreLabel}
                 </button>
               )}
             </div>
@@ -200,4 +206,17 @@ export const WaveOutcomeAccordion: FC<WaveOutcomeAccordionProps> = ({
       </AnimatePresence>
     </div>
   );
+};
+
+const getViewMoreLabel = ({
+  isFetching,
+  remainingCount,
+}: {
+  readonly isFetching: boolean;
+  readonly remainingCount: number;
+}) => {
+  if (isFetching) {
+    return "Loading...";
+  }
+  return remainingCount > 0 ? `View ${remainingCount} more` : "View more";
 };

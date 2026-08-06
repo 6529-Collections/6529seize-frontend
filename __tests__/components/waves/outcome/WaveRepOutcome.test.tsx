@@ -58,4 +58,23 @@ describe('WaveRepOutcome', () => {
     expect(viewMoreBtn).toBeInTheDocument();
     expect(viewMoreBtn).toBeDisabled();
   });
+
+  it('uses a plain view-more label when the remaining count is unknown', () => {
+    render(
+      <WaveRepOutcome
+        outcome={outcome}
+        distribution={{
+          ...distribution,
+          items: [],
+          totalCount: 0,
+          hasNextPage: true,
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button'));
+    expect(
+      screen.getByRole('button', { name: 'View more' })
+    ).toBeInTheDocument();
+  });
 });
