@@ -233,3 +233,19 @@
   deployment otherwise fails closed. The contract also proves that the build
   workflow consumes no ignored local `.github` action; introducing one must
   first narrow the trigger exclusion.
+- Post-rollout qualification of the six-PR extension found a constructor defect
+  in staging run 31099280984 and the contemporaneous production prebuilds. The
+  portability inventory was pointed at the unzipped Next.js build workspace,
+  whose standalone dependency tree legitimately contains symbolic links. The
+  verifier therefore failed closed after a successful build and package check,
+  before any deployment mutation.
+- The correction makes the manual staging, exact production prebuild, and
+  Release Bus preflight constructors inventory the package ZIP's extracted
+  bytes. Runtime configuration and the asset-profile flag are read from that
+  same extraction. Temporary Release Bus extractions are removed before the
+  artifact checksum is written or bytes are uploaded. The build workspace is
+  no longer treated as if it were the deployable package.
+- Focused workflow, production-constructor, performance, and portability tests
+  pass 39/39. Changed lint, changed TypeScript validation, targeted formatting,
+  and the Windows-aware whitespace check are green. Exact staging and
+  production reruns remain the authoritative end-to-end proof.
