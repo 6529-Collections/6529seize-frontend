@@ -68,7 +68,7 @@ function TableHeaderInfoTooltip({
         opacity={1}
         style={HEADER_TOOLTIP_STYLES}
       >
-        {children}
+        <span aria-hidden="true">{children}</span>
       </Tooltip>
     </>
   );

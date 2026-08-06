@@ -219,7 +219,7 @@ export default function GasComponent() {
             <p
               role={fetchError ? "alert" : "status"}
               className={`tw-mb-0 tw-text-sm tw-leading-6 ${
-                fetchError ? "tw-text-error" : "tw-text-iron-400"
+                fetchError ? "tw-text-red-500" : "tw-text-iron-400"
               }`}
             >
               {t(
