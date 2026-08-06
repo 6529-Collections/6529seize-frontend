@@ -1,7 +1,7 @@
 "use client";
 
 import type { CicStatement } from "@/entities/IProfile";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 
 export default function UserPageHeaderAboutStatement({
@@ -10,6 +10,33 @@ export default function UserPageHeaderAboutStatement({
   readonly statement: CicStatement | null;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [hasOverflow, setHasOverflow] = useState(false);
+  const statementRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const statementElement = statementRef.current;
+    if (!statementElement || !statement || expanded) {
+      return;
+    }
+
+    const updateOverflow = () => {
+      setHasOverflow(
+        statementElement.scrollHeight > statementElement.clientHeight + 1
+      );
+    };
+
+    updateOverflow();
+    if (typeof ResizeObserver === "undefined") {
+      globalThis.addEventListener("resize", updateOverflow);
+      return () => globalThis.removeEventListener("resize", updateOverflow);
+    }
+
+    const resizeObserver = new ResizeObserver(updateOverflow);
+    resizeObserver.observe(statementElement);
+
+    return () => resizeObserver.disconnect();
+  }, [expanded, statement]);
+
   if (!statement) {
     return (
       <div className="tw-text-sm tw-italic tw-text-iron-500 tw-transition tw-duration-200 group-focus-within:tw-text-iron-300 group-hover:tw-text-iron-300">
@@ -18,7 +45,7 @@ export default function UserPageHeaderAboutStatement({
     );
   }
 
-  const showToggle = statement.statement_value.length > 240;
+  const showToggle = expanded || hasOverflow;
   const clampClass = expanded
     ? "tw-line-clamp-none"
     : "tw-line-clamp-6 md:tw-line-clamp-none";
@@ -26,6 +53,7 @@ export default function UserPageHeaderAboutStatement({
   return (
     <div className="tw-space-y-2">
       <div
+        ref={statementRef}
         className={`tw-mb-0 tw-whitespace-pre-line tw-text-md tw-font-normal tw-leading-relaxed tw-text-iron-400 ${clampClass}`}
       >
         {statement.statement_value}

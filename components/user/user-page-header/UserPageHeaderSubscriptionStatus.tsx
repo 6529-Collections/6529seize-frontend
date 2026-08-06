@@ -8,7 +8,6 @@ import {
   formatSubscriptionCoverageDate,
   getSubscriptionCoverageActionLabel,
   getSubscriptionCoverageAnchor,
-  getSubscriptionCoverageCompactLine,
   getSubscriptionCoveragePresentation,
   type SubscriptionCoverageTone,
 } from "@/components/user/subscriptions/coverage/subscriptionCoverage.helpers";
@@ -107,10 +106,10 @@ export default function UserPageHeaderSubscriptionStatus({
       >
         <span className="tw-min-w-0">
           <span className="tw-block tw-text-[13px] tw-font-medium tw-text-iron-100">
-            {t(locale, "subscriptions.coverage.status.unknown")}
+            {t(locale, "subscriptions.coverage.header.title")}
           </span>
           <span className="tw-mt-0.5 tw-block tw-text-[11px] tw-text-iron-400">
-            {t(locale, "subscriptions.coverage.action.reviewSettings")}
+            {t(locale, "subscriptions.coverage.status.unknown")}
           </span>
         </span>
         <ArrowRightIcon
@@ -168,7 +167,7 @@ export default function UserPageHeaderSubscriptionStatus({
       </span>
       <span className="tw-min-w-0 tw-flex-1">
         <span className="tw-block tw-truncate tw-text-[13px] tw-font-medium tw-text-iron-100">
-          {getSubscriptionCoverageCompactLine(locale, coverage)}
+          {t(locale, "subscriptions.coverage.header.title")}
         </span>
         <span className="tw-mt-0.5 tw-block tw-truncate tw-text-[11px] tw-text-iron-400">
           {secondaryLine}
