@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://6529.io/schemas/museum-surface-registry.v1.schema.json",
+  "title": "6529 Network Museum surface registry",
+  "description": "Stable ownership of Museum routes, components, support files, and browser specifications.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "contract",
+    "version",
+    "repository",
+    "roots",
+    "surfaces",
+    "routes",
+    "support_files",
+    "components",
+    "e2e_specs"
+  ],
+  "properties": {
+    "$schema": { "type": "string", "format": "uri-reference" },
+    "contract": { "const": "museum-surface-registry-v1" },
+    "version": { "const": 1 },
+    "repository": { "const": "6529-Collections/6529seize-frontend" },
+    "roots": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["routes", "components", "e2e_specs"],
+      "properties": {
+        "routes": { "const": "app/museum/network" },
+        "components": { "const": "components/museum" },
+        "e2e_specs": { "const": "tests/museum" }
+      }
+    },
+    "surfaces": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "kind"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^museum\\.[a-z0-9]+(?:\\.[a-z0-9-]+)*$"
+          },
+          "title": { "type": "string", "minLength": 1 },
+          "kind": {
+            "enum": ["shell", "page", "research", "governance", "methodology"]
+          }
+        }
+      }
+    },
+    "routes": { "$ref": "#/$defs/routeList" },
+    "support_files": { "$ref": "#/$defs/ownedFileList" },
+    "components": { "$ref": "#/$defs/ownedFileList" },
+    "e2e_specs": { "$ref": "#/$defs/ownedFileList" }
+  },
+  "$defs": {
+    "ownedFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "surface_ids"],
+      "properties": {
+        "file": { "type": "string", "pattern": "^[^\\\\]+(?:/[^\\\\]+)+$" },
+        "surface_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "ownedFileList": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/ownedFile" }
+    },
+    "route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "path", "surface_ids"],
+      "properties": {
+        "file": { "type": "string", "pattern": "^[^\\\\]+(?:/[^\\\\]+)+$" },
+        "path": { "type": "string", "pattern": "^/museum/network(?:/.*)?$" },
+        "surface_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "routeList": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/route" }
+    }
+  }
+}

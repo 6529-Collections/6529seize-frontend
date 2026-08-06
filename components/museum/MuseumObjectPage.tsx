@@ -6,6 +6,7 @@ import { MuseumJsonDisclosure, MuseumMarkdown } from "./MuseumMarkdown";
 import { MuseumPublicationUnavailable } from "./MuseumPublicationUnavailable";
 import { MuseumProgramOutcomePage } from "./MuseumProgramOutcomePage";
 import { MuseumInTheSystem } from "./MuseumInsideSystem";
+import { MuseumRightsLink } from "./MuseumRightsLink";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -189,18 +190,11 @@ export async function MuseumObjectPage({
               </dt>
               <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-300">
                 {artwork.creditLine}{" "}
-                {artwork.rightsUrl ? (
-                  <a
-                    href={artwork.rightsUrl}
-                    target="_blank"
-                    rel="license noopener noreferrer"
-                    className="tw-text-iron-200 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-                  >
-                    {artwork.rightsLabel}
-                  </a>
-                ) : (
-                  artwork.rightsLabel
-                )}
+                <MuseumRightsLink
+                  href={artwork.rightsUrl}
+                  label={artwork.rightsLabel}
+                  className="tw-text-iron-200 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                />
               </dd>
             </div>
           </dl>

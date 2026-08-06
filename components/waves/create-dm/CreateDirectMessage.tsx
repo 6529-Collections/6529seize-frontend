@@ -91,27 +91,32 @@ export default function CreateDirectMessage({
 
   return (
     <CreateWaveFlow onBack={onBack} title="Create Direct Message">
-      <div className="tw-mt-4 tw-text-sm tw-text-iron-400">
+      <div className="tw-text-sm tw-text-iron-400">
         <GroupCreateIdentitiesSelect
           onIdentitySelect={onIdentitySelect}
           selectedIdentities={selectedIdentities}
           selectedWallets={[]}
           onRemove={onRemove}
+          appearance="modal"
+          resultsLayout="inline"
         />
-      </div>
-      <div className="tw-mt-4 tw-flex tw-justify-end">
-        <Button
-          disabled={selectedIdentities.length === 0 || isCreating}
-          onClick={onCreateDirectMessage}
-          loading={isCreating}
-          variant="action"
-          size="md"
-        >
-          {!isCreating && (
-            <FontAwesomeIcon icon={faPaperPlane} className="tw-h-5 tw-w-5" />
-          )}
-          <span>{isCreating ? "Creating..." : "Create"}</span>
-        </Button>
+        <div className="tw-mt-3 tw-flex tw-justify-end">
+          <Button
+            disabled={selectedIdentities.length === 0 || isCreating}
+            onClick={onCreateDirectMessage}
+            loading={isCreating}
+            variant="action"
+            size="md"
+          >
+            {!isCreating && (
+              <FontAwesomeIcon
+                icon={faPaperPlane}
+                className="-tw-ml-0.5 tw-size-3 tw-flex-shrink-0"
+              />
+            )}
+            <span>{isCreating ? "Creating..." : "Create"}</span>
+          </Button>
+        </div>
       </div>
     </CreateWaveFlow>
   );
