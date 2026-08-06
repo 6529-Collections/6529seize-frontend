@@ -687,6 +687,7 @@ jobs:
           response_file="$(mktemp)"
           trap 'rm -f "$response_file"' EXIT
           http_status="$(curl --silent --show-error \
+            --retry 4 --retry-all-errors --retry-delay 2 --retry-max-time 180 \
             --connect-timeout 10 \
             --max-time 30 \
             --output "$response_file" \
@@ -751,6 +752,7 @@ jobs:
           response_file="$(mktemp)"
           trap 'rm -f "$response_file"' EXIT
           http_status="$(curl --silent --show-error \
+            --retry 4 --retry-all-errors --retry-delay 2 --retry-max-time 180 \
             --connect-timeout 10 \
             --max-time 30 \
             --output "$response_file" \

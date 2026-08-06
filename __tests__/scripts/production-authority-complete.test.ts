@@ -123,6 +123,9 @@ describe("one-click production authority completion", () => {
     );
     expect(completionSource).toContain('"qualification.json"');
     expect(completionSource).toContain("one-click-production-qualification-v1");
+    expect(
+      completionSource.match(/--retry 4 --retry-all-errors/g)
+    ).toHaveLength(2);
     expect(completionSource).toContain("artifact_keys");
     expect(completionSource).toContain(".artifact.api_digest");
     expect(completionSource).toContain(".selection_artifact.api_digest");

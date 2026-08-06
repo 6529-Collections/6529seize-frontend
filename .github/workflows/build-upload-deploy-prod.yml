@@ -92,6 +92,7 @@ jobs:
           trap 'rm -f "$response_file"' EXIT
           if ! http_status="$(
             curl --silent --show-error \
+              --retry 4 --retry-all-errors --retry-delay 2 --retry-max-time 180 \
               --connect-timeout 10 \
               --max-time 30 \
               --output "$response_file" \
@@ -490,6 +491,7 @@ jobs:
             --selection-digest "$SELECTION_DIGEST" \
             > "$request_file"
           http_status="$(curl --silent --show-error \
+            --retry 4 --retry-all-errors --retry-delay 2 --retry-max-time 180 \
             --connect-timeout 10 --max-time 30 \
             --output "$response_file" --write-out '%{http_code}' \
             -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \

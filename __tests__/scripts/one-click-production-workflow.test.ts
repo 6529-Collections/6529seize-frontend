@@ -38,6 +38,7 @@ describe("one-click production operation", () => {
     expect(serialized).toContain("frontend-prod-${GITHUB_RUN_ID}");
     expect(serialized).toContain("selection_digest:null");
     expect(serialized).toContain("workflow_run_id:$workflow_run_id");
+    expect(serialized.match(/--retry 4 --retry-all-errors/g)).toHaveLength(1);
     expect(serialized).not.toMatch(
       /actions\/checkout|configure-aws-credentials|aws |download-artifact|production-artifact/i
     );
@@ -127,6 +128,7 @@ describe("one-click production operation", () => {
     expect(serialized).toContain(
       "/deploy/release-bus-v2/production-authority/reauthorize"
     );
+    expect(serialized.match(/--retry 4 --retry-all-errors/g)).toHaveLength(1);
     expect(serialized).toContain("selection_digest:$selection_digest");
     expect(serialized).not.toContain("Install dependencies");
     expect(serialized).not.toContain("Build App");
