@@ -41,26 +41,28 @@ export const GAS_ROYALTIES_TABLE_CELL_CLASS_NAME =
 
 export const GAS_ROYALTIES_TABLE_ROW_CLASS_NAME = `tw-group ${DATA_TABLE_INTERACTIVE_ROW_CLASS_NAME}`;
 
-export const GAS_ROYALTIES_INFO_ICON_CLASS_NAME =
+const GAS_ROYALTIES_INFO_ICON_CLASS_NAME =
   "tw-h-[18px] tw-cursor-pointer tw-text-iron-400 tw-transition-colors hover:tw-text-iron-50";
 
 const PRIMARY_SALES_SELECTION = "Primary Sales";
 const CUSTOM_BLOCKS_SELECTION = "Custom Blocks";
 
-const DATE_SELECTION_MESSAGE_KEYS: Record<
-  DateIntervalsSelection,
-  MessageKey
-> = {
-  [DateIntervalsSelection.TODAY]: "memeData.filters.date.today",
-  [DateIntervalsSelection.YESTERDAY]: "memeData.filters.date.yesterday",
-  [DateIntervalsSelection.LAST_7]: "memeData.filters.date.lastSevenDays",
-  [DateIntervalsSelection.THIS_MONTH]: "memeData.filters.date.monthToDate",
-  [DateIntervalsSelection.PREVIOUS_MONTH]: "memeData.filters.date.lastMonth",
-  [DateIntervalsSelection.YEAR_TO_DATE]: "memeData.filters.date.yearToDate",
-  [DateIntervalsSelection.LAST_YEAR]: "memeData.filters.date.lastYear",
-  [DateIntervalsSelection.ALL]: "memeData.filters.date.all",
-  [DateIntervalsSelection.CUSTOM_DATES]:
-    "memeData.filters.date.customDates",
+const DATE_SELECTION_MESSAGE_KEYS: Record<DateIntervalsSelection, MessageKey> =
+  {
+    [DateIntervalsSelection.TODAY]: "memeData.filters.date.today",
+    [DateIntervalsSelection.YESTERDAY]: "memeData.filters.date.yesterday",
+    [DateIntervalsSelection.LAST_7]: "memeData.filters.date.lastSevenDays",
+    [DateIntervalsSelection.THIS_MONTH]: "memeData.filters.date.monthToDate",
+    [DateIntervalsSelection.PREVIOUS_MONTH]: "memeData.filters.date.lastMonth",
+    [DateIntervalsSelection.YEAR_TO_DATE]: "memeData.filters.date.yearToDate",
+    [DateIntervalsSelection.LAST_YEAR]: "memeData.filters.date.lastYear",
+    [DateIntervalsSelection.ALL]: "memeData.filters.date.all",
+    [DateIntervalsSelection.CUSTOM_DATES]: "memeData.filters.date.customDates",
+  };
+
+const PAGE_HEADING_MESSAGE_KEYS: Partial<Record<string, MessageKey>> = {
+  Accounting: "memeData.heading.accounting",
+  Gas: "memeData.heading.gas",
 };
 
 type DateFilterSelection =
@@ -68,13 +70,25 @@ type DateFilterSelection =
   | typeof PRIMARY_SALES_SELECTION
   | typeof CUSTOM_BLOCKS_SELECTION;
 
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getPageHeading(locale: SupportedLocale, title: string): string {
+  const messageKey = PAGE_HEADING_MESSAGE_KEYS[title];
+  return messageKey === undefined ? title : t(locale, messageKey);
+}
+
 function getCustomDateSelectionLabel(
   locale: SupportedLocale,
   fromDate?: Date,
   toDate?: Date
 ) {
-  const formattedFromDate = fromDate?.toISOString().slice(0, 10);
-  const formattedToDate = toDate?.toISOString().slice(0, 10);
+  const formattedFromDate = fromDate ? formatLocalDate(fromDate) : undefined;
+  const formattedToDate = toDate ? formatLocalDate(toDate) : undefined;
   if (formattedFromDate && formattedToDate) {
     return t(locale, "memeData.filters.dates.both", {
       from: formattedFromDate,
@@ -214,9 +228,11 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
     } else if (props.is_custom_blocks) {
       filters = `blocks_${fromBlock}-${toBlock}`;
     } else if (props.date_selection === DateIntervalsSelection.CUSTOM_DATES) {
-      filters = `dates_${fromDate?.toISOString().slice(0, 10)}-${toDate
-        ?.toISOString()
-        .slice(0, 10)}`;
+      const formattedFromDate = fromDate
+        ? formatLocalDate(fromDate)
+        : undefined;
+      const formattedToDate = toDate ? formatLocalDate(toDate) : undefined;
+      filters = `dates_${formattedFromDate ?? ""}-${formattedToDate ?? ""}`;
     } else {
       filters = `${props.date_selection.toLowerCase().replaceAll(" ", "-")}`;
     }
@@ -298,7 +314,8 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
         <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-3 tw-gap-y-5">
           <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
             <h1 className="tw-m-0 tw-flex tw-items-center tw-gap-2 tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
-              Meme {props.title} {props.fetching && <DotLoader />}
+              {getPageHeading(locale, props.title)}{" "}
+              {props.fetching && <DotLoader />}
             </h1>
             <div className="tw-w-fit tw-min-w-0 tw-max-w-full">
               <CommonTabs

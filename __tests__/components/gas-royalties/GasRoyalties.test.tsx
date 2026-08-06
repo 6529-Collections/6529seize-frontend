@@ -44,7 +44,9 @@ jest.mock(
 );
 jest.mock(
   "@/components/datePickerModal/DatePickerModal",
-  () => (props: any) => <div data-testid={`${props.mode}-picker`} />
+  () => (props: any) => (
+    <div data-show={props.show} data-testid={`${props.mode}-picker`} />
+  )
 );
 jest.mock("next/image", () => ({
   __esModule: true,
@@ -275,12 +277,78 @@ describe("GasRoyaltiesHeader", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Period: Today" }));
-    fireEvent.click(
-      screen.getByRole("menuitem", { name: "Last 7 Days" })
-    );
+    fireEvent.click(screen.getByRole("menuitem", { name: "Last 7 Days" }));
 
     expect(setDateSelection).toHaveBeenCalledWith(
       DateIntervalsSelection.LAST_7
+    );
+  });
+
+  it("routes Primary Sales through the shared period dropdown", () => {
+    (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
+    (usePathname as jest.Mock).mockReturnValue("/meme-gas");
+    const setIsPrimary = jest.fn();
+
+    render(
+      <GasRoyaltiesHeader
+        title="Gas"
+        fetching={false}
+        results_count={1}
+        date_selection={DateIntervalsSelection.TODAY}
+        selected_artist=""
+        is_primary={false}
+        is_custom_blocks={false}
+        focus={GasRoyaltiesCollectionFocus.MEMES}
+        getUrl={() => ""}
+        setSelectedArtist={jest.fn()}
+        setIsPrimary={setIsPrimary}
+        setIsCustomBlocks={jest.fn()}
+        setDateSelection={jest.fn()}
+        setDates={jest.fn()}
+        setBlocks={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Period: Today" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Primary Sales" }));
+
+    expect(setIsPrimary).toHaveBeenCalledWith(true);
+  });
+
+  it("opens the block picker from the shared period dropdown", () => {
+    (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
+    (usePathname as jest.Mock).mockReturnValue("/meme-gas");
+
+    render(
+      <GasRoyaltiesHeader
+        title="Gas"
+        fetching={false}
+        results_count={1}
+        date_selection={DateIntervalsSelection.TODAY}
+        selected_artist=""
+        is_primary={false}
+        is_custom_blocks={false}
+        focus={GasRoyaltiesCollectionFocus.MEMES}
+        getUrl={() => ""}
+        setSelectedArtist={jest.fn()}
+        setIsPrimary={jest.fn()}
+        setIsCustomBlocks={jest.fn()}
+        setDateSelection={jest.fn()}
+        setDates={jest.fn()}
+        setBlocks={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("block-picker")).toHaveAttribute(
+      "data-show",
+      "false"
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Period: Today" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Custom Blocks" }));
+
+    expect(screen.getByTestId("block-picker")).toHaveAttribute(
+      "data-show",
+      "true"
     );
   });
 

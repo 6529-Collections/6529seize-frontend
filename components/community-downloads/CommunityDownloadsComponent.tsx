@@ -63,10 +63,7 @@ export default function CommunityDownloadsComponent(props: Readonly<Props>) {
       )}
 
       {isError && (
-        <div
-          className="tw-pb-3 tw-text-center tw-text-red-500"
-          role="alert"
-        >
+        <div className="tw-text-red-500 tw-pb-3 tw-text-center" role="alert">
           {t(locale, "openData.downloads.loadError")}
         </div>
       )}

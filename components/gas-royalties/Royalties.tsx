@@ -101,6 +101,7 @@ export default function RoyaltiesComponent() {
   const [sumVolume, setSumVolume] = useState(0);
   const [sumProceeds, setSumProceeds] = useState(0);
   const [sumArtistTake, setSumArtistTake] = useState(0);
+  const [fetchError, setFetchError] = useState(false);
 
   const {
     dateSelection,
@@ -126,9 +127,11 @@ export default function RoyaltiesComponent() {
     return getUrl("royalties");
   }
 
-  function fetchRoyalties() {
+  async function fetchRoyalties() {
     setFetching(true);
-    fetchUrl<Royalty[]>(getUrlWithParams()).then((res: Royalty[]) => {
+    setFetchError(false);
+    try {
+      const res = await fetchUrl<Royalty[]>(getUrlWithParams());
       res.forEach((r) => {
         r.volume = Math.round(r.volume * 100000) / 100000;
         r.proceeds = Math.round(r.proceeds * 100000) / 100000;
@@ -141,8 +144,16 @@ export default function RoyaltiesComponent() {
       setSumArtistTake(
         res.reduce((prev, current) => prev + current.artist_take, 0)
       );
+    } catch (error) {
+      console.error("Failed to fetch royalties data", error);
+      setRoyalties([]);
+      setSumVolume(0);
+      setSumProceeds(0);
+      setSumArtistTake(0);
+      setFetchError(true);
+    } finally {
       setFetching(false);
-    });
+    }
   }
 
   useEffect(() => {
@@ -302,10 +313,7 @@ export default function RoyaltiesComponent() {
                       {t(locale, "memeData.columns.artistSplit")}
                       <TableHeaderInfoTooltip
                         tooltipId="artist-split-tooltip"
-                        label={t(
-                          locale,
-                          "memeData.tooltip.artistSplit.label"
-                        )}
+                        label={t(locale, "memeData.tooltip.artistSplit.label")}
                         description={artistSplitDescription}
                       >
                         {getArtistSplitTooltipContent()}
@@ -362,7 +370,7 @@ export default function RoyaltiesComponent() {
                       <td
                         className={`${GAS_ROYALTIES_TABLE_CELL_CLASS_NAME} tw-text-right tw-tabular-nums`}
                       >
-                        {r.proceeds > 0
+                        {r.volume > 0
                           ? `${((r.proceeds / r.volume) * 100).toFixed(2)}%`
                           : `-`}
                       </td>
@@ -410,7 +418,7 @@ export default function RoyaltiesComponent() {
                     <td
                       className={`${GAS_ROYALTIES_TABLE_CELL_CLASS_NAME} tw-text-right tw-font-semibold tw-tabular-nums`}
                     >
-                      {sumProceeds > 0
+                      {sumVolume > 0
                         ? `${((sumProceeds / sumVolume) * 100).toFixed(2)}%`
                         : `-`}
                     </td>
@@ -421,6 +429,7 @@ export default function RoyaltiesComponent() {
                     {displayDecimal(sumArtistTake)}
                     {collectionFocus === GasRoyaltiesCollectionFocus.MEMELAB &&
                       sumArtistTake > 0 &&
+                      sumProceeds > 0 &&
                       ` (${displayDecimal(
                         (sumArtistTake * 100) / sumProceeds
                       )}%)`}
@@ -432,9 +441,18 @@ export default function RoyaltiesComponent() {
         </div>
         {!fetching && royalties.length === 0 && (
           <div className="tw-mt-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/80 tw-px-4 tw-py-8 tw-text-center">
-            <output className="tw-block tw-text-sm tw-leading-6 tw-text-iron-400">
-              {t(locale, "memeData.royalties.empty")}
-            </output>
+            {fetchError ? (
+              <p
+                className="tw-text-red-500 tw-mb-0 tw-text-sm tw-leading-6"
+                role="alert"
+              >
+                {t(locale, "memeData.royalties.loadError")}
+              </p>
+            ) : (
+              <output className="tw-block tw-text-sm tw-leading-6 tw-text-iron-400">
+                {t(locale, "memeData.royalties.empty")}
+              </output>
+            )}
           </div>
         )}
         {!fetching && royalties.length > 0 && (

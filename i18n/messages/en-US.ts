@@ -1580,6 +1580,8 @@ const OPEN_DATA_DOWNLOAD_MESSAGES = objectMessages("openData.downloads", {
 } as const);
 
 const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
+  "heading.gas": "Meme Gas",
+  "heading.accounting": "Meme Accounting",
   "collection.label": "Collection",
   "collection.theMemes": "The Memes",
   "collection.memeLab": "Meme Lab",
@@ -1616,6 +1618,8 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
   total: "TOTAL",
   "gas.loadError": "Error: Failed to load gas data. Please try again.",
   "gas.empty": "No gas info found for selected dates",
+  "royalties.loadError":
+    "Error: Failed to load royalties data. Please try again.",
   "royalties.empty": "No royalties found for selected dates",
   ethFootnote: "All values are in ETH",
   "tooltip.primaryProceeds.label": "About primary proceeds",
