@@ -8,7 +8,7 @@ const path = require("node:path");
 const YAML = require("yaml");
 
 const CONTRACT = "pr-ci-policy-bundle-v1";
-const MAX_FILE_COUNT = 96;
+const MAX_FILE_COUNT = 128;
 const MAX_SOURCE_BYTES = 4 * 1024 * 1024;
 const MAX_CANONICAL_BYTES = 64 * 1024;
 const LEGACY_NODE_PIN_WORKFLOW_SHA256 = Object.freeze({
@@ -42,6 +42,9 @@ const FILE_PATHS = Object.freeze([
   "__tests__/scripts/lint-package-json.test.ts",
   "__tests__/scripts/manual-deploy-routing-guard.test.ts",
   "__tests__/scripts/museum-release-tier.test.ts",
+  "__tests__/scripts/museum-surface-registry.test.ts",
+  "__tests__/lib/museum/publication/fixture.ts",
+  "__tests__/lib/museum/publication/corpusContracts.test.ts",
   "__tests__/scripts/package-public-review-artifacts.test.ts",
   "__tests__/scripts/pr-ci-policy-bundle.test.ts",
   "__tests__/scripts/public-review-artifact-workflows.test.ts",
@@ -78,6 +81,8 @@ const FILE_PATHS = Object.freeze([
   "ops/scripts/verify-deployment-version.cjs",
   "ops/testing-strategy/mutation-endpoint-registry.json",
   "ops/testing-strategy/mutation-endpoint-registry.v1.schema.json",
+  "ops/testing-strategy/museum-surface-registry.v1.json",
+  "ops/testing-strategy/museum-surface-registry.v1.schema.json",
   "ops/testing-strategy/validation-manifest.v1.schema.json",
   "playwright.config.ts",
   "prettier.config.mjs",
@@ -90,6 +95,7 @@ const FILE_PATHS = Object.freeze([
   "scripts/generate-openapi.cjs",
   "scripts/lint-package-json.cjs",
   "scripts/museum-release-tier.cjs",
+  "scripts/museum-surface-registry.cjs",
   "scripts/notify-ci-wave.mjs",
   "scripts/package-public-review-artifacts.cjs",
   "scripts/pr-ci-policy-bundle.cjs",
@@ -103,6 +109,7 @@ const FILE_PATHS = Object.freeze([
   "scripts/typecheck-test-baseline.json",
   "scripts/typecheck-test-ratchet.cjs",
   "tests/packs.manifest.cjs",
+  "tests/museum/about-readonly.spec.ts",
   "tsconfig.jest.json",
   "tsconfig.json",
   "tsconfig.playwright.json",
@@ -128,6 +135,7 @@ const PACKAGE_SCRIPT_KEYS = Object.freeze([
   "lint:package-json",
   "lint:quiet",
   "museum:release-tier",
+  "museum:surface-registry",
   "postbuild",
   "prebuild",
   "test:e2e:critical-shell",
@@ -135,6 +143,8 @@ const PACKAGE_SCRIPT_KEYS = Object.freeze([
   "test:e2e:production:collections-readonly",
   "test:e2e:production:delegation-readonly",
   "test:e2e:production:home-readonly",
+  "test:e2e:production:museum-about",
+  "test:e2e:production:museum-institutional-practice",
   "test:e2e:production:media-readonly",
   "test:e2e:production:network-open-data-readonly",
   "test:e2e:production:profile-deep-links-readonly",
@@ -150,6 +160,8 @@ const PACKAGE_SCRIPT_KEYS = Object.freeze([
   "test:e2e:staging:delegation-readonly",
   "test:e2e:staging:input-detection-readonly",
   "test:e2e:staging:media-readonly",
+  "test:e2e:staging:museum-about",
+  "test:e2e:staging:museum-institutional-practice",
   "test:e2e:staging:network-open-data-readonly",
   "test:e2e:staging:profile-deep-links-readonly",
   "test:e2e:staging:public-content-readonly",

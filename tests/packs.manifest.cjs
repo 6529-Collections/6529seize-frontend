@@ -75,6 +75,7 @@ const READONLY_SPECS = {
   museumInstitutionalPractice: [
     "tests/museum/institutional-practice-readonly.spec.ts",
   ],
+  museumAbout: ["tests/museum/about-readonly.spec.ts"],
   museumInsideSystem: ["tests/museum/inside-system-readonly.spec.ts"],
   museumDataArchitecture: ["tests/museum/data-architecture-readonly.spec.ts"],
   museumRights: ["tests/museum/rights-readonly.spec.ts"],
@@ -302,6 +303,13 @@ const PACKS = [
     ),
     triggers: ["manual"],
   }),
+  museumPack(
+    localReadonlyPack(
+      "test:e2e:museum-about",
+      "Network Museum About proposition route readability and source contract.",
+      READONLY_SPECS.museumAbout
+    )
+  ),
   museumPack({
     ...localReadonlyPack(
       "test:e2e:museum-rights",
@@ -519,6 +527,14 @@ const PACKS = [
   ),
   museumPack(
     stagingPack(
+      "museum-about",
+      "museum-about",
+      "Staging Network Museum About proposition route smoke.",
+      READONLY_SPECS.museumAbout
+    )
+  ),
+  museumPack(
+    stagingPack(
       "museum-inside-system",
       "museum-inside-system",
       "Staging Network Museum Inside the System project and comparison sweep.",
@@ -613,6 +629,16 @@ const PACKS = [
   ),
   museumPack(
     productionPack(
+      "museum-about",
+      "Production Network Museum About proposition route smoke.",
+      READONLY_SPECS.museumAbout,
+      ["post-deploy", "manual"],
+      15,
+      [DESKTOP, MOBILE]
+    )
+  ),
+  museumPack(
+    productionPack(
       "museum-inside-system",
       "Production Network Museum Inside the System project and comparison sweep.",
       READONLY_SPECS.museumInsideSystem,
@@ -647,6 +673,7 @@ const PACKS = [
       ...READONLY_SPECS.profileDeepLinks,
       ...READONLY_SPECS.searchWaves,
       ...READONLY_SPECS.museumDataArchitecture,
+      ...READONLY_SPECS.museumAbout,
       ...READONLY_SPECS.museumInstitutionalPractice,
       ...READONLY_SPECS.museumInsideSystem,
       ...READONLY_SPECS.museumRights,

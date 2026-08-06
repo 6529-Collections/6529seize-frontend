@@ -32,6 +32,7 @@ const SOURCE_EXTENSION = /\.(?:cjs|js|jsx|mjs|ts|tsx)$/u;
 const RELEASE_BUS_CONTRACT_PATTERNS = [
   /^\.github\/workflows\//u,
   /^ops\/deployment-bus\//u,
+  /^ops\/testing-strategy\/museum-/u,
   /^ops\/scripts\/(?:deployment-bus|deploy-staging-artifact|release-bus-status|verify-deployment-version)\./u,
   /^scripts\/(?:app-pr-ci-effective-plan|e2e-packs|museum-|pr-ci-policy-bundle|release-bus-|sync-e2e-manifest)/u,
   /^tests\/packs\.manifest\.cjs$/u,
