@@ -28,6 +28,7 @@ import {
   shouldFilterByFilenameExceptions,
   shouldFilterBrowserExtensionMessagingConnectionError,
   shouldFilterBrowserExtensionSendMessageError,
+  shouldFilterChromeMobileIosInjectedGaError,
   shouldFilterPoperBlockerOrphanFetchRejection,
   shouldFilterExpectedWaveRequestReplacementAbort,
   shouldFilterCoinbaseWalletLinkWebSocket1006,
@@ -224,6 +225,10 @@ function shouldFilterEvent(
   // retaining only the sampled diagnostic subset would hide genuine app errors.
 
   if (shouldFilterAppleWebKitSortedTrackListTypeError(event)) {
+    return true;
+  }
+
+  if (shouldFilterChromeMobileIosInjectedGaError(event)) {
     return true;
   }
 
