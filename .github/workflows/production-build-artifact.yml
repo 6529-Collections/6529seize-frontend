@@ -171,9 +171,9 @@ jobs:
           node ops/scripts/artifact-portability.cjs inventory \
             --manifest production-artifact/manifest.json \
             --package production-artifact/target/package.zip \
-            --extracted-root .production-bundle \
-            --runtime-config .production-bundle/.next/PUBLIC_RUNTIME.json \
-            --assets-flag .production-bundle/.next/ASSETS_FROM_S3 \
+            --extracted-root "$zip_extract" \
+            --runtime-config "$zip_extract/.next/PUBLIC_RUNTIME.json" \
+            --assets-flag "$zip_extract/.next/ASSETS_FROM_S3" \
             --source-root . \
             --content-roots "public,content/public-reviews,config/public-reviews,public/review-data" \
             --environment production \
