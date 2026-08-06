@@ -11,6 +11,11 @@ import {
   objectCapturedPromiseRejectionWithoutStackMessage,
   providerDisconnectedCode,
   providerDisconnectedMessage,
+  rabbyChromeExtensionContentScriptUrlPrefix,
+  rabbyChromeUserRejectedCode,
+  rabbyChromeUserRejectedMessage,
+  rabbyChromeUserRejectedStackFunction,
+  rabbyChromeUserRejectedStackHeader,
   rabbyMobileStackContextPattern,
   rabbyMobileUserRejectedCode,
   rabbyMobileUserRejectedMessage,
@@ -73,6 +78,7 @@ import {
 } from "./walletlink-websocket";
 
 const rabbyRainbowKitRawChunkPathPrefix = "app:///_next/static/chunks/";
+const stackFrameLocationSuffixPattern = /:\d+:\d+\)$/;
 
 function matchesStackPattern(
   value: string | undefined,
@@ -96,6 +102,41 @@ function hasRabbyMobileUserRejectedStack(
 ): boolean {
   return [serializedStack, getHintExceptionStack(hint)].some((stack) =>
     matchesStackPattern(stack, rabbyMobileUserRejectedStackPattern)
+  );
+}
+
+function isRabbyChromeContentScriptFrame(stackLine: string): boolean {
+  const normalizedLine = stackLine.trim();
+  return (
+    normalizedLine.startsWith("at ") &&
+    normalizedLine.includes(
+      `(${rabbyChromeExtensionContentScriptUrlPrefix}`
+    ) &&
+    stackFrameLocationSuffixPattern.test(normalizedLine)
+  );
+}
+
+function isRabbyChromeUserRejectedFrame(stackLine: string): boolean {
+  return stackLine
+    .trim()
+    .startsWith(
+      `at ${rabbyChromeUserRejectedStackFunction} (${rabbyChromeExtensionContentScriptUrlPrefix}`
+    );
+}
+
+function hasExactRabbyChromeUserRejectedStack(
+  stack: string | undefined
+): stack is string {
+  if (!stack) {
+    return false;
+  }
+
+  const [header, ...frames] = stack.split("\n");
+  return (
+    header === rabbyChromeUserRejectedStackHeader &&
+    frames.length > 0 &&
+    frames.every(isRabbyChromeContentScriptFrame) &&
+    frames.some(isRabbyChromeUserRejectedFrame)
   );
 }
 
@@ -432,7 +473,8 @@ export function shouldFilterDisconnectedWalletProviderRejection(
 }
 
 function hasSingleFramelessBrowserUnhandledRejection(
-  event: SentryClientEvent
+  event: SentryClientEvent,
+  expectedValue: string
 ): boolean {
   const values = event.exception?.values;
   if (!Array.isArray(values) || values.length !== 1) {
@@ -446,7 +488,7 @@ function hasSingleFramelessBrowserUnhandledRejection(
 
   return (
     value?.type === "UnhandledRejection" &&
-    value.value === objectCapturedPromiseRejectionWithoutStackMessage &&
+    value.value === expectedValue &&
     hasBrowserUnhandledRejectionMechanism(value) &&
     hasNoFrames
   );
@@ -458,6 +500,18 @@ function hasExactCodeAndMessageShape(
   const keys = Object.keys(serialized);
   return (
     keys.length === 2 && keys.includes("code") && keys.includes("message")
+  );
+}
+
+function hasExactCodeMessageAndStackShape(
+  serialized: Record<string, unknown>
+): boolean {
+  const keys = Object.keys(serialized);
+  return (
+    keys.length === 3 &&
+    keys.includes("code") &&
+    keys.includes("message") &&
+    keys.includes("stack")
   );
 }
 
@@ -551,7 +605,12 @@ export function shouldFilterKnownWalletProviderObjectRejection(
   event: SentryClientEvent,
   hint?: SentryEventHint
 ): boolean {
-  if (!hasSingleFramelessBrowserUnhandledRejection(event)) {
+  if (
+    !hasSingleFramelessBrowserUnhandledRejection(
+      event,
+      objectCapturedPromiseRejectionWithoutStackMessage
+    )
+  ) {
     return false;
   }
 
@@ -578,6 +637,36 @@ export function shouldFilterKnownWalletProviderObjectRejection(
     message === backpackInternalJsonRpcErrorMessage &&
     hasRecentBackpackWalletCollisionBreadcrumbs(event)
   );
+}
+
+export function shouldFilterRabbyChromeUserRejectedRequest(
+  event: SentryClientEvent,
+  hint?: SentryEventHint
+): boolean {
+  if (
+    !hasSingleFramelessBrowserUnhandledRejection(
+      event,
+      objectCapturedPromiseRejectionMessage
+    )
+  ) {
+    return false;
+  }
+
+  const serialized = getSerializedObjectRejection(event, hint);
+  if (!serialized || !hasExactCodeMessageAndStackShape(serialized)) {
+    return false;
+  }
+
+  const stack = getStringValue(serialized["stack"]);
+  if (
+    serialized["code"] !== rabbyChromeUserRejectedCode ||
+    serialized["message"] !== rabbyChromeUserRejectedMessage ||
+    !hasExactRabbyChromeUserRejectedStack(stack)
+  ) {
+    return false;
+  }
+
+  return !hasAppOwnedStackEvidence(event, stack, hint);
 }
 
 export function shouldFilterRabbyMobileUserRejectedRequest(

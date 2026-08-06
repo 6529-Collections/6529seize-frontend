@@ -135,6 +135,14 @@ export const rabbyMobileUserRejectedCode = 4001;
 export const rabbyMobileUserRejectedMessage = "Not Allowed";
 export const rabbyMobileStackContextPattern = "rabbymobile";
 export const rabbyMobileUserRejectedStackPattern = "userrejectedrequest";
+export const rabbyChromeUserRejectedCode = 4001;
+export const rabbyChromeUserRejectedMessage = "User rejected the request.";
+export const rabbyChromeUserRejectedStackHeader =
+  `Error: ${rabbyChromeUserRejectedMessage}`;
+export const rabbyChromeExtensionContentScriptUrlPrefix =
+  "chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/content-script.js:";
+export const rabbyChromeUserRejectedStackFunction =
+  "Object.userRejectedRequest";
 export const appOwnedStackPatterns = [
   "webpack-internal:///(app-pages-browser)",
   "webpack://_n_e/./",
