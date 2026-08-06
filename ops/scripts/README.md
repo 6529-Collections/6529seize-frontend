@@ -17,7 +17,9 @@ wrapper expects that location.
 - `deploy-hub-shadow.cjs`: performs the manual, permission-limited Deploy Hub
   dry run. It validates exact frontend PRs, production checks, latest-main
   staging composition, and merge conflicts without changing a branch,
-  dispatching a workflow, or touching an environment.
+  dispatching a workflow, or touching an environment. The dry run trusts
+  composition metadata already committed to the protected `1a-staging` ref;
+  this trust does not replace retained-PR validation in any live mutation path.
 - `native-surface-evidence.cjs`: executable native-surface evidence
   classifier. It reports whether current Capacitor/Electron coverage is only
   browser simulation or whether package prerequisites are present.

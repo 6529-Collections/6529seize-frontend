@@ -15,6 +15,11 @@ const {
   statusContext,
 } = require("../../ops/scripts/deploy-hub-shadow.cjs");
 
+const shadowSource = fs.readFileSync(
+  path.join(process.cwd(), "ops/scripts/deploy-hub-shadow.cjs"),
+  "utf8"
+);
+
 const SHA_A = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 const SHA_B = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 const SHA_C = "cccccccccccccccccccccccccccccccccccccccc";
@@ -53,7 +58,7 @@ function githubHarness(heads: Record<number, string>) {
       };
     },
     async getCollaboratorPermission() {
-      return { role_name: "maintain" };
+      return { permission: "maintain", role_name: "custom-maintainer" };
     },
     async getCombinedStatus() {
       return { statuses: [{ context: "DCO", state: "success" }] };
@@ -129,6 +134,8 @@ describe("Deploy Hub FE dry-run workflow", () => {
     expect(source).not.toContain("id-token:");
     expect(source).not.toContain("environment:");
     expect(source).not.toContain("aws-actions/");
+    expect(shadowSource).not.toMatch(/\bdispatchWorkflow\s*\(/);
+    expect(shadowSource).not.toMatch(/run\(\[\s*["']push["']/);
   });
 
   it("runs immutable default-branch code without checkout credentials", () => {
@@ -213,6 +220,19 @@ describe("Deploy Hub FE dry-run planning", () => {
     ).toThrow("unsupported");
   });
 
+  it("fails closed when a requested PR conflicts with the plan", () => {
+    const exec = jest.fn((_command, args: string[]) => {
+      if (args[0] === "merge-tree") {
+        throw Object.assign(new Error("conflict"), { status: 1 });
+      }
+      return "";
+    });
+    const git = createGitPlanner({ exec });
+    expect(() =>
+      git.mergeContent(SHA_D, [{ pr: 1, sha: SHA_A }], "operation-1")
+    ).toThrow("Frontend PR #1 conflicts with the plan.");
+  });
+
   it("fetches advertised PR refs and verifies their exact heads", () => {
     const exec = jest.fn((_command, args: string[]) => {
       if (args[0] === "rev-parse" && args[1] === "FETCH_HEAD") return SHA_A;
@@ -245,6 +265,26 @@ describe("Deploy Hub FE dry-run planning", () => {
 });
 
 describe("Deploy Hub FE dry-run GitHub reads", () => {
+  it("reads the exact main ref through GitHub's single-ref endpoint", async () => {
+    const fetchImpl = jest.fn(async (url: URL) => ({
+      ok: true,
+      status: 200,
+      async json() {
+        return { object: { sha: SHA_D }, path: url.pathname };
+      },
+    }));
+    const github = createGithubClient({
+      apiUrl: "https://api.github.com",
+      repository: EXPECTED_REPOSITORY,
+      token: "token",
+      fetchImpl,
+    });
+    await expect(github.getRef("main")).resolves.toMatchObject({
+      object: { sha: SHA_D },
+      path: "/repos/6529-Collections/6529seize-frontend/git/refs/heads/main",
+    });
+  });
+
   it("reads every page of production checks and statuses", async () => {
     const fetchImpl = jest.fn(async (url: URL) => {
       const page = url.searchParams.get("page");
@@ -308,9 +348,27 @@ describe("Deploy Hub FE dry-run execution", () => {
         context: "Deploy Hub Dry Run — Target: Production",
       }),
     });
-    expect(github).not.toHaveProperty("dispatchWorkflow");
-    expect(git).not.toHaveProperty("pushStaging");
     expect(createSummary(result, RUN_URL)).toContain("READ ONLY");
+  });
+
+  it("uses GitHub's canonical permission instead of a custom role name", async () => {
+    const github = githubHarness({ 1: SHA_A });
+    github.getCollaboratorPermission = async () => ({
+      permission: "read",
+      role_name: "admin",
+    });
+    await expect(
+      executeShadow({
+        operationId: "operation-permission",
+        manifestJson: JSON.stringify([request(1, SHA_A, "staging")]),
+        repository: EXPECTED_REPOSITORY,
+        baseRef: "main",
+        actor: ACTOR,
+        runUrl: RUN_URL,
+        github,
+        git: gitHarness(),
+      })
+    ).rejects.toThrow("Requester lacks frontend write access.");
   });
 
   it("fails closed when an exact PR head moved", async () => {

@@ -18,6 +18,11 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+function validSha(sha) {
+  assert(SHA_PATTERN.test(sha), "Git SHA is invalid.");
+  return sha;
+}
+
 function normalizeManifest(manifestJson, actor, repository) {
   assert(repository === EXPECTED_REPOSITORY, "Repository is not supported.");
   assert(ACTOR_PATTERN.test(actor), "GitHub actor has an invalid format.");
@@ -108,7 +113,7 @@ function createGithubClient({ apiUrl, repository, token, fetchImpl = fetch }) {
     return response.status === 204 ? null : response.json();
   }
 
-  async function requestAll(segments, options, selectItems) {
+  async function requestAll(segments, selectItems, options = {}) {
     const items = [];
     for (let page = 1; page <= 10; page += 1) {
       const payload = await request(segments, {
@@ -133,21 +138,19 @@ function createGithubClient({ apiUrl, repository, token, fetchImpl = fetch }) {
     getCheckRuns: async (sha) => ({
       check_runs: await requestAll(
         ["commits", sha, "check-runs"],
-        { query: { filter: "latest" } },
-        (payload) => payload?.check_runs
+        (payload) => payload?.check_runs,
+        { query: { filter: "latest" } }
       ),
     }),
     getCollaboratorPermission: (actor) =>
       request(["collaborators", actor, "permission"]),
     getCombinedStatus: async (sha) => ({
-      statuses: await requestAll(
-        ["commits", sha, "statuses"],
-        {},
-        (payload) => payload
+      statuses: await requestAll(["commits", sha, "statuses"], (payload) =>
+        payload
       ),
     }),
     getPullRequest: (pr) => request(["pulls", String(pr)]),
-    getRef: (ref) => request(["git", "ref", "heads", ...ref.split("/")]),
+    getRef: (ref) => request(["git", "refs", "heads", ...ref.split("/")]),
   };
 }
 
@@ -160,11 +163,6 @@ function createGitPlanner({ exec = execFileSync } = {}) {
       timeout: 60_000,
       maxBuffer: 10 * 1024 * 1024,
     }).trim();
-  }
-
-  function validSha(sha) {
-    assert(SHA_PATTERN.test(sha), "Git SHA is invalid.");
-    return sha;
   }
 
   function remoteSha(ref) {
@@ -263,7 +261,7 @@ async function publishStatus(github, requests, runUrl, state, description) {
 
 async function validateRequests(github, requests, actor, baseRef) {
   const access = await github.getCollaboratorPermission(actor);
-  const permission = access.role_name ?? access.permission;
+  const permission = access.permission;
   assert(WRITE_PERMISSIONS.has(permission), "Requester lacks frontend write access.");
   if (requests.some(({ target }) => target === "production")) {
     assert(PRODUCTION_PERMISSIONS.has(permission), "Production requires maintain access.");
@@ -315,6 +313,8 @@ function planStagingContent({ git, requests, operationId, baseRef }) {
   const mainSha = git.remoteSha(baseRef);
   git.fetchExact(requests);
   const tracked = parseComposition(git.readCommitMessage(stagingSha));
+  // This read-only planner trusts composition metadata on the protected
+  // 1a-staging ref. A live mutation path must validate retained PRs again.
   const baselineRequired = !tracked && !git.sameTree(stagingSha, mainSha);
   let active = tracked?.requests ?? [];
   const cohorts = partitionCohorts(requests).map((cohort) => {
@@ -343,7 +343,9 @@ async function executeShadow(options) {
     await validateRequests(github, requests, actor, baseRef);
     const plan = planStagingContent({ git, requests, operationId, baseRef });
     await validateProductionChecks(github, requests);
-    const githubMainSha = (await github.getRef(baseRef)).object?.sha;
+    const githubMainSha = validSha(
+      (await github.getRef(baseRef)).object?.sha ?? ""
+    );
     assert(githubMainSha === plan.mainSha, "Main moved while the dry run was executing.");
     await publishStatus(github, requests, runUrl, "success", "DRY RUN passed: exact deployment plan is valid; nothing deployed");
     return { operationId, conclusion: "success", requests, ...plan };
@@ -387,6 +389,7 @@ function createFailureSummary(reason) {
 async function main() {
   const repository = process.env.DEPLOY_HUB_REPOSITORY ?? "";
   const token = process.env.GITHUB_TOKEN ?? "";
+  const runUrl = process.env.DEPLOY_HUB_RUN_URL ?? "";
   assert(token.length > 0, "GitHub token is unavailable.");
   const result = await executeShadow({
     operationId: process.env.DEPLOY_HUB_OPERATION_ID ?? "",
@@ -394,7 +397,7 @@ async function main() {
     repository,
     baseRef: process.env.DEPLOY_HUB_BASE_REF ?? "",
     actor: process.env.DEPLOY_HUB_ACTOR ?? "",
-    runUrl: process.env.DEPLOY_HUB_RUN_URL ?? "",
+    runUrl,
     github: createGithubClient({
       apiUrl: process.env.DEPLOY_HUB_API_URL ?? "",
       repository,
@@ -402,7 +405,7 @@ async function main() {
     }),
     git: createGitPlanner(),
   });
-  process.stdout.write(createSummary(result, process.env.DEPLOY_HUB_RUN_URL));
+  process.stdout.write(createSummary(result, runUrl));
 }
 
 if (require.main === module) {
