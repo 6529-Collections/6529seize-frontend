@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { t, tRich } from "@/i18n/messages";
 import { ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS } from "../AboutLayout";
 
 import {
@@ -21,33 +21,31 @@ export default function AboutTech() {
     >
       <header className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-1 tw-pb-[34px] tw-pt-[21px] sm:tw-px-0 sm:tw-pb-[55px] sm:tw-pt-[34px] lg:tw-px-2">
         <p className="tw-m-0 tw-mb-[13px] tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.1em] tw-text-primary-300">
-          About / Tech
+          {t(locale, "about.tech.index.eyebrow")}
         </p>
         <h1 className="tw-m-0 tw-max-w-3xl tw-text-balance tw-text-3xl tw-font-semibold tw-leading-[1.03] tw-tracking-[-0.04em] tw-text-iron-50 md:tw-text-4xl">
-          Tech Updates
+          {t(locale, "about.tech.index.title")}
         </h1>
         <div className="tw-mt-[21px] tw-max-w-4xl">
           <p className="tw-m-0 tw-text-pretty tw-text-lg tw-leading-7 tw-text-iron-100">
-            This is a current casual area for longer 6529 tech updates: repo
-            work, bot notes, release context, and build reports that are too
-            large for a single wave drop.
+            {t(locale, "about.tech.index.intro")}
           </p>
           <ul className="tw-m-0 tw-mt-[21px] tw-grid tw-gap-[13px] tw-pl-[21px] tw-text-base tw-leading-7 tw-text-iron-300 marker:tw-text-iron-600">
+            <li>{t(locale, "about.tech.index.longUpdates")}</li>
             <li>
-              Long updates, repo analysis, bot context, and links back into the
-              wave conversation.
-            </li>
-            <li>
-              Shorter live repo activity still belongs in{" "}
-              <a
-                href={FOLLOW_THE_REPO_WAVE_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="hover:tw-text-primary-200 tw-rounded-sm tw-font-semibold tw-text-primary-300 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-              >
-                Follow The Repo
-              </a>
-              . This page is the linkable longer-form shelf beside it.
+              {tRich(locale, "about.tech.index.liveActivity", {
+                followTheRepo: (
+                  <a
+                    className="hover:tw-text-primary-200 tw-rounded-sm tw-font-semibold tw-text-primary-300 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-[#0D0D0F]"
+                    href={FOLLOW_THE_REPO_WAVE_URL}
+                    key="follow-the-repo"
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    {t(locale, "about.tech.index.followTheRepo")}
+                  </a>
+                ),
+              })}
             </li>
           </ul>
         </div>
@@ -61,7 +59,7 @@ export default function AboutTech() {
           id="tech-notes-heading"
           className="tw-m-0 tw-mb-[21px] tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl"
         >
-          Active Technical Notes
+          {t(locale, "about.tech.index.activeTechnicalNotes")}
         </h2>
         <Link
           href="/about/tech/wallet-authentication"
@@ -72,14 +70,13 @@ export default function AboutTech() {
           )}
         >
           <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.1em] tw-text-iron-500">
-            Auth changes
+            {t(locale, "about.tech.index.authChanges")}
           </p>
           <h3 className="tw-m-0 tw-mt-[13px] tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 tw-transition-colors group-hover:tw-text-primary-300 group-focus-visible:tw-text-primary-300 motion-reduce:tw-transition-none">
-            Wallet authentication upgrade
+            {t(locale, "about.tech.index.walletAuthenticationTitle")}
           </h3>
           <p className="tw-m-0 tw-mt-[13px] tw-max-w-4xl tw-text-sm tw-leading-6 tw-text-iron-400">
-            What is changing with the new secure session, why users may be asked
-            to upgrade, and what to expect during rollout.
+            {t(locale, "about.tech.index.walletAuthenticationDescription")}
           </p>
         </Link>
       </section>
@@ -91,20 +88,20 @@ export default function AboutTech() {
         <div className="tw-mb-[21px] tw-flex tw-flex-col tw-gap-[13px] sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
           <div>
             <p className="tw-m-0 tw-mb-[13px] tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.1em] tw-text-iron-500">
-              Index
+              {t(locale, "about.tech.index.reportsEyebrow")}
             </p>
             <h2
               id="tech-reports-heading"
               className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 sm:tw-text-xl"
             >
-              Reports
+              {t(locale, "about.tech.index.reportsTitle")}
             </h2>
           </div>
           <Link
             href={`/about/tech/${TECH_WEEKLY_PR_REPORT.slug}`}
-            className="hover:tw-text-primary-200 tw-w-fit tw-rounded-sm tw-text-sm tw-font-semibold tw-text-primary-300 tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            className="hover:tw-text-primary-200 tw-w-fit tw-rounded-sm tw-text-sm tw-font-semibold tw-text-primary-300 tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-[#0D0D0F]"
           >
-            Open latest report
+            {t(locale, "about.tech.index.openLatestReport")}
           </Link>
         </div>
 
@@ -123,7 +120,7 @@ export default function AboutTech() {
                     <h3 className="tw-m-0 tw-mt-[13px] tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 sm:tw-text-lg">
                       <Link
                         href={`/about/tech/${report.slug}`}
-                        className="hover:tw-text-primary-200 tw-rounded-sm tw-text-iron-50 tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                        className="hover:tw-text-primary-200 tw-rounded-sm tw-text-iron-50 tw-no-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
                       >
                         {report.title}
                       </Link>

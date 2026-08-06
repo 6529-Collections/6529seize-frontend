@@ -1,3 +1,11 @@
+import {
+  formatDate as formatLocalizedDate,
+  formatInteger as formatLocalizedInteger,
+  formatNumber,
+  formatPercent as formatLocalizedPercent,
+} from "@/i18n/format";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type {
   ReviewbotUsageAnalysis,
   ReviewbotUsageGroup,
@@ -18,22 +26,14 @@ interface ReviewbotUsageDashboardProps {
   readonly result: ReviewbotUsageResult;
 }
 
-const compactNumberFormatter = new Intl.NumberFormat("en-US", {
-  maximumFractionDigits: 0,
-});
-
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-  currency: "USD",
-  maximumFractionDigits: 2,
-  style: "currency",
-});
-
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
+const USAGE_DATE_FORMAT = {
   day: "numeric",
   month: "short",
   timeZone: "UTC",
   year: "numeric",
-});
+} satisfies Intl.DateTimeFormatOptions;
+
+const locale = DEFAULT_LOCALE;
 
 const LOADING_METRIC_KEYS = [
   "review-runs",
@@ -72,10 +72,16 @@ export default function ReviewbotUsageDashboard({
 
       {summary ? (
         <>
+          <span className="tw-sr-only" role="status">
+            {t(locale, "reviewbotUsage.status.loaded", {
+              dailyRows: summary.byDay.length,
+              reviewRuns: formatInteger(summary.totals.reviewRuns),
+            })}
+          </span>
           <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-4">
             <MetricCard
               icon={<ChartBarIcon aria-hidden="true" className="tw-size-5" />}
-              label="Review Runs"
+              label={t(locale, "reviewbotUsage.metrics.reviewRuns")}
               tone="tw-text-primary-300"
               value={formatInteger(summary.totals.reviewRuns)}
             />
@@ -83,7 +89,7 @@ export default function ReviewbotUsageDashboard({
               icon={
                 <DocumentTextIcon aria-hidden="true" className="tw-size-5" />
               }
-              label="Unique PRs"
+              label={t(locale, "reviewbotUsage.metrics.uniquePrs")}
               tone="tw-text-primary-300"
               value={formatInteger(summary.totals.uniquePrs)}
             />
@@ -91,7 +97,7 @@ export default function ReviewbotUsageDashboard({
               icon={
                 <CurrencyDollarIcon aria-hidden="true" className="tw-size-5" />
               }
-              label="Estimated Spend"
+              label={t(locale, "reviewbotUsage.metrics.estimatedSpend")}
               tone="tw-text-success"
               value={formatCurrency(summary.totals.costUsd)}
             />
@@ -99,7 +105,7 @@ export default function ReviewbotUsageDashboard({
               icon={
                 <CurrencyDollarIcon aria-hidden="true" className="tw-size-5" />
               }
-              label="Avg / Run"
+              label={t(locale, "reviewbotUsage.metrics.averageRun")}
               tone="tw-text-success"
               value={formatCurrency(
                 summary.totals.averageCostPerReviewRunUsd
@@ -109,13 +115,13 @@ export default function ReviewbotUsageDashboard({
               icon={
                 <CurrencyDollarIcon aria-hidden="true" className="tw-size-5" />
               }
-              label="Avg / PR"
+              label={t(locale, "reviewbotUsage.metrics.averagePr")}
               tone="tw-text-success"
               value={formatCurrency(summary.totals.averageCostPerPrUsd)}
             />
             <MetricCard
               icon={<CpuChipIcon aria-hidden="true" className="tw-size-5" />}
-              label="Tokens"
+              label={t(locale, "reviewbotUsage.metrics.tokens")}
               tone="tw-text-iron-100"
               value={formatInteger(summary.totals.totalTokens)}
             />
@@ -123,7 +129,7 @@ export default function ReviewbotUsageDashboard({
               icon={
                 <ShieldCheckIcon aria-hidden="true" className="tw-size-5" />
               }
-              label="Budget Skips"
+              label={t(locale, "reviewbotUsage.metrics.budgetSkips")}
               tone="tw-text-amber-300"
               value={formatInteger(summary.totals.budgetSkippedRuns)}
             />
@@ -133,26 +139,26 @@ export default function ReviewbotUsageDashboard({
           <UsageSection
             groups={summary.byDay}
             id="reviewbot-daily-usage"
-            keyHeader="Day"
-            title="Daily Usage"
+            keyHeader={t(locale, "reviewbotUsage.columns.day")}
+            title={t(locale, "reviewbotUsage.sections.dailyUsage")}
           />
           <UsageSection
             groups={summary.byRepo}
             id="reviewbot-repositories"
-            keyHeader="Repository"
-            title="Repositories"
+            keyHeader={t(locale, "reviewbotUsage.columns.repository")}
+            title={t(locale, "reviewbotUsage.sections.repositories")}
           />
           <UsageSection
             groups={summary.byProviderModel}
             id="reviewbot-providers-models"
-            keyHeader="Provider and Model"
-            title="Providers and Models"
+            keyHeader={t(locale, "reviewbotUsage.columns.providerModel")}
+            title={t(locale, "reviewbotUsage.sections.providersModels")}
           />
           <UsageSection
             groups={summary.byReviewKind}
             id="reviewbot-review-types"
-            keyHeader="Review Type"
-            title="Review Types"
+            keyHeader={t(locale, "reviewbotUsage.columns.reviewType")}
+            title={t(locale, "reviewbotUsage.sections.reviewTypes")}
           />
           <div className="tw-mt-6 tw-flex tw-w-fit tw-max-w-full tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-950 tw-px-3 tw-py-2 tw-ring-1 tw-ring-inset tw-ring-iron-800">
             <CalendarDaysIcon
@@ -160,8 +166,10 @@ export default function ReviewbotUsageDashboard({
               className="tw-size-4 tw-flex-none tw-text-iron-500"
             />
             <p className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-400">
-              Window: {formatDate(summary.range.from)} to{" "}
-              {formatDate(summary.range.to)}
+              {t(locale, "reviewbotUsage.window", {
+                from: formatDate(summary.range.from),
+                to: formatDate(summary.range.to),
+              })}
             </p>
           </div>
         </>
@@ -179,7 +187,7 @@ export function ReviewbotUsageLoading() {
       className="tailwind-scope tw-mx-auto tw-w-full tw-min-w-0 tw-px-3 tw-pb-12 tw-pt-8 sm:tw-px-6 lg:tw-px-8 lg:tw-pt-10"
     >
       <span className="tw-sr-only" role="status">
-        Loading 6529bot usage data.
+        {t(locale, "reviewbotUsage.status.loading")}
       </span>
       <DashboardHeader />
       <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-4">
@@ -215,13 +223,13 @@ function DashboardHeader() {
     <header className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-900 tw-pb-8">
       <div className="tw-max-w-3xl">
         <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-primary-300">
-          Open Data
+          {t(locale, "reviewbotUsage.header.eyebrow")}
         </p>
         <h1 className="tw-mb-0 tw-mt-[8px] tw-text-[22px] tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-[26px]">
-          6529bot Usage
+          {t(locale, "reviewbotUsage.header.title")}
         </h1>
         <p className="tw-mb-0 tw-mt-[13px] tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-text-base sm:tw-leading-7">
-          Public AI review activity across configured 6529 repositories.
+          {t(locale, "reviewbotUsage.header.description")}
         </p>
       </div>
     </header>
@@ -236,31 +244,31 @@ function AnalysisHighlights({
   return (
     <section className="tw-mt-6 tw-rounded-xl tw-bg-iron-950 tw-p-5 tw-ring-1 tw-ring-inset tw-ring-iron-800 sm:tw-p-6">
       <h2 className="tw-m-0 tw-text-lg tw-font-semibold tw-tracking-tight tw-text-iron-50 sm:tw-text-xl">
-        Cost Analysis
+        {t(locale, "reviewbotUsage.analysis.title")}
       </h2>
       <dl className="tw-mb-0 tw-mt-5 tw-grid tw-grid-cols-1 tw-gap-x-6 tw-gap-y-5 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
         <MetricPair
-          label="Budget Skip Rate"
+          label={t(locale, "reviewbotUsage.analysis.budgetSkipRate")}
           value={formatPercent(analysis.budgetSkipRate)}
         />
         <MetricPair
-          label="Avg Tokens / Run"
+          label={t(locale, "reviewbotUsage.analysis.averageTokensRun")}
           value={formatInteger(analysis.averageTokensPerReviewRun)}
         />
         <MetricPair
-          label="Avg Tokens / PR"
+          label={t(locale, "reviewbotUsage.analysis.averageTokensPr")}
           value={formatInteger(analysis.averageTokensPerPr)}
         />
         <MetricPair
-          label="Top Repo"
+          label={t(locale, "reviewbotUsage.analysis.topRepo")}
           value={formatTopCost(analysis.topCostRepo)}
         />
         <MetricPair
-          label="Top Provider"
+          label={t(locale, "reviewbotUsage.analysis.topProvider")}
           value={formatTopCost(analysis.topCostProviderModel)}
         />
         <MetricPair
-          label="Top Review Type"
+          label={t(locale, "reviewbotUsage.analysis.topReviewType")}
           value={formatTopCost(analysis.topCostReviewKind)}
         />
       </dl>
@@ -320,7 +328,9 @@ function UsageSection({
           {title}
         </h2>
         <span className="tw-whitespace-nowrap tw-rounded-full tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-400 tw-ring-1 tw-ring-inset tw-ring-iron-800">
-          {groups.length} rows
+          {t(locale, "reviewbotUsage.table.rows", {
+            count: groups.length,
+          })}
         </span>
       </div>
       {groups.length > 0 ? (
@@ -336,23 +346,23 @@ function UsageSection({
                 </h3>
                 <dl className="tw-mb-0 tw-mt-4 tw-grid tw-grid-cols-2 tw-gap-x-3 tw-gap-y-4">
                   <MetricPair
-                    label="Runs"
+                    label={t(locale, "reviewbotUsage.columns.runs")}
                     value={formatInteger(group.reviewRuns)}
                   />
                   <MetricPair
-                    label="Spend"
+                    label={t(locale, "reviewbotUsage.columns.spend")}
                     value={formatCurrency(group.costUsd)}
                   />
                   <MetricPair
-                    label="Avg"
+                    label={t(locale, "reviewbotUsage.columns.average")}
                     value={formatCurrency(group.averageCostUsd)}
                   />
                   <MetricPair
-                    label="Tokens"
+                    label={t(locale, "reviewbotUsage.columns.tokens")}
                     value={formatInteger(group.totalTokens)}
                   />
                   <MetricPair
-                    label="Skips"
+                    label={t(locale, "reviewbotUsage.columns.skips")}
                     value={formatInteger(group.budgetSkippedRuns)}
                   />
                 </dl>
@@ -360,7 +370,9 @@ function UsageSection({
             ))}
           </div>
           <div
-            aria-labelledby={id}
+            aria-label={t(locale, "reviewbotUsage.table.scrollableLabel", {
+              title,
+            })}
             className="tw-hidden tw-overflow-x-auto focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-iron-400 sm:tw-block"
             role="region"
             tabIndex={0}
@@ -375,7 +387,7 @@ function UsageSection({
       ) : (
         <div className="tw-bg-iron-900/40 tw-px-4 tw-py-8 sm:tw-px-5">
           <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-400">
-            No usage recorded.
+            {t(locale, "reviewbotUsage.table.empty")}
           </p>
         </div>
       )}
@@ -426,31 +438,31 @@ function UsageTable({
             className={`${TABLE_HEADER_CELL_CLASS} tw-px-4 tw-text-right`}
             scope="col"
           >
-            Runs
+            {t(locale, "reviewbotUsage.columns.runs")}
           </th>
           <th
             className={`${TABLE_HEADER_CELL_CLASS} tw-px-4 tw-text-right`}
             scope="col"
           >
-            Spend
+            {t(locale, "reviewbotUsage.columns.spend")}
           </th>
           <th
             className={`${TABLE_HEADER_CELL_CLASS} tw-px-4 tw-text-right`}
             scope="col"
           >
-            Avg
+            {t(locale, "reviewbotUsage.columns.average")}
           </th>
           <th
             className={`${TABLE_HEADER_CELL_CLASS} tw-px-4 tw-text-right`}
             scope="col"
           >
-            Tokens
+            {t(locale, "reviewbotUsage.columns.tokens")}
           </th>
           <th
             className={`${TABLE_HEADER_CELL_CLASS} tw-px-5 tw-text-right`}
             scope="col"
           >
-            Skips
+            {t(locale, "reviewbotUsage.columns.skips")}
           </th>
         </tr>
       </thead>
@@ -515,7 +527,7 @@ function UnavailableState({ message }: { readonly message: string }) {
           className="tw-m-0 tw-text-lg tw-font-semibold tw-tracking-tight tw-text-iron-50 sm:tw-text-xl"
           id="reviewbot-usage-unavailable"
         >
-          Usage Data Unavailable
+          {t(locale, "reviewbotUsage.unavailable.title")}
         </h2>
         <p className="tw-mb-0 tw-mt-2 tw-break-words tw-text-sm tw-leading-6 tw-text-iron-300">
           {message}
@@ -526,33 +538,39 @@ function UnavailableState({ message }: { readonly message: string }) {
 }
 
 function formatCurrency(value: number): string {
-  return currencyFormatter.format(value);
+  return formatNumber(locale, value, {
+    currency: "USD",
+    maximumFractionDigits: 2,
+    style: "currency",
+  });
 }
 
 function formatDate(value: string | undefined): string {
   if (!value) {
-    return "unknown";
+    return t(locale, "reviewbotUsage.values.unknown");
   }
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return "unknown";
+    return t(locale, "reviewbotUsage.values.unknown");
   }
-  return dateFormatter.format(date);
+  return formatLocalizedDate(locale, date, USAGE_DATE_FORMAT);
 }
 
 function formatInteger(value: number): string {
-  return compactNumberFormatter.format(value);
+  return formatLocalizedInteger(locale, value);
 }
 
 function formatPercent(value: number): string {
-  return `${value.toFixed(1)}%`;
+  return formatLocalizedPercent(locale, value / 100);
 }
 
 function formatTopCost(group: ReviewbotUsageAnalysis["topCostRepo"]): string {
   if (!group) {
-    return "None";
+    return t(locale, "reviewbotUsage.values.none");
   }
-  return `${group.key} (${formatCurrency(group.costUsd)}, ${formatPercent(
-    group.costSharePercent
-  )})`;
+  return t(locale, "reviewbotUsage.values.topCost", {
+    cost: formatCurrency(group.costUsd),
+    name: group.key,
+    percent: formatPercent(group.costSharePercent),
+  });
 }

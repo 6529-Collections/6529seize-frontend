@@ -1,6 +1,4 @@
-import {
-  ReviewbotUsageLoading,
-} from "@/components/reviewbot-usage/ReviewbotUsageDashboard";
+import { ReviewbotUsageLoading } from "@/components/reviewbot-usage/ReviewbotUsageDashboard";
 
 export default function Loading() {
   return (
