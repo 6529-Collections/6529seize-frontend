@@ -43,7 +43,7 @@ export default function CodeExample({ code }: CodeExampleProps) {
   return (
     <div className="tw-relative">
       <pre
-        className="tw-mb-4 tw-max-h-[32rem] tw-overflow-auto tw-rounded-xl tw-bg-black tw-p-4 tw-pt-14 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 sm:tw-max-h-[42rem]"
+        className="tw-mb-4 tw-max-h-[32rem] tw-overflow-auto tw-rounded-xl tw-border-0 tw-bg-black/50 tw-p-4 tw-pt-14 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 sm:tw-max-h-[42rem]"
         tabIndex={0}
       >
         <code
@@ -55,7 +55,7 @@ export default function CodeExample({ code }: CodeExampleProps) {
       </pre>
       <button
         type="button"
-        className="tw-absolute tw-right-3 tw-top-3 tw-min-h-11 tw-min-w-11 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800/95 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-50 tw-shadow-sm hover:tw-bg-iron-700 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+        className="tw-absolute tw-right-3 tw-top-3 tw-min-h-11 tw-min-w-11 tw-rounded-lg tw-border-0 tw-bg-iron-800/95 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-50 hover:tw-bg-iron-700 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         onClick={copyToClipboard}
         data-tooltip-id={tooltipId}
         aria-label="Copy code"
