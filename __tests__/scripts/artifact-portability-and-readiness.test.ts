@@ -656,6 +656,47 @@ describe("artifact-portability.v1", () => {
     );
   });
 
+  it("records internal package symlinks without traversing duplicate targets", () => {
+    const fixture = makeArtifactFixture("staging");
+    fixtures.push(fixture);
+    const target = path.join(fixture.extractedRoot, ".next", "server");
+    const link = path.join(fixture.extractedRoot, "server-link");
+    fs.symlinkSync(
+      target,
+      link,
+      process.platform === "win32" ? "junction" : "dir"
+    );
+
+    const inventory = fixture.build();
+
+    expect(inventory.package_scan).toMatchObject({
+      scan_complete: true,
+      file_count: 3,
+      tree_sha256: expect.stringMatching(/^[a-f0-9]{64}$/),
+    });
+  });
+
+  it("rejects package symlinks that escape the extracted artifact", () => {
+    const fixture = makeArtifactFixture("staging");
+    fixtures.push(fixture);
+    const externalRoot = fs.mkdtempSync(
+      path.join(os.tmpdir(), "artifact-portability-package-external-")
+    );
+    const link = path.join(fixture.extractedRoot, "external-link");
+    try {
+      fs.symlinkSync(
+        externalRoot,
+        link,
+        process.platform === "win32" ? "junction" : "dir"
+      );
+      expect(() => fixture.build()).toThrow(
+        "escapes source root through a symlink"
+      );
+    } finally {
+      fs.rmSync(externalRoot, { recursive: true, force: true });
+    }
+  });
+
   it("marks current environment-bound-v3 artifacts NOT_PORTABLE and disables authorization", () => {
     const fixture = makeArtifactFixture("production");
     fixtures.push(fixture);

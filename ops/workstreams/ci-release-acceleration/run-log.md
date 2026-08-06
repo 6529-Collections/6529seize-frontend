@@ -249,3 +249,12 @@
   pass 39/39. Changed lint, changed TypeScript validation, targeted formatting,
   and the Windows-aware whitespace check are green. Exact staging and
   production reruns remain the authoritative end-to-end proof.
+- The first corrected staging rerun, `31102839144`, proved that the package ZIP
+  intentionally preserves Next.js standalone dependency symlinks. Inventorying
+  the extracted ZIP was correct, but the closed tree walker still rejected the
+  package's valid internal links before deployment mutation.
+- The inventory walker now records internal package symlink paths and targets
+  in the package tree digest without rescanning their already-present target
+  files. It resolves every target and fails closed on broken links, targets
+  outside the extracted artifact, and non-file/non-directory targets. Curated
+  source content roots retain their stricter no-symlink policy.
