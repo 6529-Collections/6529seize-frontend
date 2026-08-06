@@ -201,10 +201,10 @@ export default function AboutApi() {
     <main
       className={clsx(
         styles["main"],
-        "tailwind-scope tw-px-2 sm:tw-px-3 lg:tw-px-5"
+        "tailwind-scope tw-border-0 tw-border-solid tw-border-iron-800 !tw-bg-iron-950 tw-px-2 sm:tw-px-3 md:tw-border-l lg:tw-px-5"
       )}
     >
-      <Container fluid className="tw-pb-12 tw-pt-4">
+      <Container fluid className="tw-pb-20 tw-pt-5">
         <Row>
           <Col className="tw-max-w-4xl">
             <h1 className="tw-mb-4 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-iron-50 md:tw-text-4xl">
@@ -212,7 +212,7 @@ export default function AboutApi() {
             </h1>
           </Col>
         </Row>
-        <Row className="tw-pt-4">
+        <Row className="tw-pt-5">
           <Col>
             <section
               aria-labelledby="api-introduction-heading"
@@ -248,12 +248,12 @@ export default function AboutApi() {
                 if the user is authenticated.
               </p>
 
-              <div className="tw-mb-0 tw-flex tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-4 tw-font-medium tw-text-iron-200">
+              <div className="tw-mb-0 tw-flex tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-5 tw-font-medium tw-text-iron-200">
                 <InformationCircleIcon
                   aria-hidden="true"
-                  className="tw-mt-0.5 tw-size-5 tw-flex-none tw-text-primary-300"
+                  className="tw-size-5 tw-flex-none tw-text-primary-300"
                 />
-                <p className="!tw-mb-0">
+                <p className="!tw-mb-0 !tw-mt-0">
                   Some routes are still undocumented. We plan to expand the
                   documentation over time.
                 </p>
@@ -262,11 +262,11 @@ export default function AboutApi() {
           </Col>
         </Row>
 
-        <Row className="tw-pt-6">
+        <Row className="tw-pt-8">
           <Col>
             <section
               aria-labelledby="api-authentication-guide-heading"
-              className="tw-w-full tw-max-w-4xl tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-5 tw-text-base tw-leading-7 tw-text-iron-300"
+              className="tw-w-full tw-max-w-4xl tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/70 tw-p-5 tw-text-base tw-leading-7 tw-text-iron-300"
             >
               <h2
                 id="api-authentication-guide-heading"

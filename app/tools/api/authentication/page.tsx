@@ -181,7 +181,12 @@ export async function logoutNativeSession({ address, nativeRefreshToken }) {
 
 export default function ApiAuthenticationPage() {
   return (
-    <main className={clsx(styles["main"], "tailwind-scope")}>
+    <main
+      className={clsx(
+        styles["main"],
+        "tailwind-scope tw-border-0 tw-border-solid tw-border-iron-800 !tw-bg-iron-950 md:tw-border-l"
+      )}
+    >
       <Container fluid className={ABOUT_TEXT_PAGE_CONTAINER_CLASS}>
         <Row>
           <Col>
