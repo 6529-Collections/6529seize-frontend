@@ -27,6 +27,7 @@ import type {
   ReferencedNft,
 } from "@/entities/IDrop";
 import { MaxLengthPlugin } from "../lexical/plugins/MaxLengthPlugin";
+import { MAX_DROP_PART_UTF16_UNITS } from "@/helpers/waves/drop-content-limits";
 import ToggleViewButtonPlugin from "../lexical/plugins/ToggleViewButtonPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 
@@ -344,7 +345,7 @@ const CreateDropContent = forwardRef<
                 onSelect={onHashtagAdded}
                 ref={hashtagPluginRef}
               />
-              <MaxLengthPlugin maxLength={25000} />
+              <MaxLengthPlugin maxLength={MAX_DROP_PART_UTF16_UNITS} />
               <DragDropPastePlugin
                 disabled={loading}
                 onUploadEditorStateChange={onUploadEditorStateChange}

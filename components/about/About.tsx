@@ -9,6 +9,7 @@ import { t } from "@/i18n/messages";
 import {
   AboutCol as Col,
   AboutContainer as Container,
+  ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS,
   AboutRow as Row,
 } from "./AboutLayout";
 import AboutApply from "./AboutApply";
@@ -35,12 +36,27 @@ import { AboutContentsDropdown } from "./AboutContentsDropdown";
 import {
   getAboutSectionDocumentTitle,
   isAboutFeatureSection,
+  isAboutLegalSection,
 } from "./about.routes";
+
+const ABOUT_LEGAL_CONTENT_CLASS = [
+  `tw-w-full tw-max-w-4xl tw-break-words tw-px-1 tw-pb-12 tw-pt-4 tw-text-base tw-font-normal tw-leading-7 tw-text-iron-300 sm:tw-px-2 sm:tw-pt-8 ${ABOUT_MOBILE_COLUMN_GUTTER_BREAKOUT_CLASS}`,
+  "[&_a]:tw-break-words [&_a]:tw-font-medium [&_a]:tw-text-primary-300 [&_a]:tw-underline [&_a]:tw-decoration-primary-400/50 [&_a]:tw-underline-offset-4 hover:[&_a]:tw-text-primary-200 focus-visible:[&_a]:tw-rounded-sm focus-visible:[&_a]:tw-outline-none focus-visible:[&_a]:tw-ring-2 focus-visible:[&_a]:tw-ring-primary-400",
+  "[&_b]:tw-font-semibold [&_b]:tw-text-iron-100 [&_strong]:tw-font-semibold [&_strong]:tw-text-iron-100",
+  "[&_h1]:tw-m-0 [&_h1]:tw-text-[22px] [&_h1]:tw-font-semibold [&_h1]:tw-leading-tight [&_h1]:tw-tracking-tight [&_h1]:tw-text-iron-50 sm:[&_h1]:tw-text-[26px]",
+  "[&_h2]:tw-mb-3 [&_h2]:tw-mt-8 [&_h2]:tw-text-xl [&_h2]:tw-font-semibold [&_h2]:tw-leading-tight [&_h2]:tw-tracking-tight [&_h2]:tw-text-iron-50 sm:[&_h2]:tw-mt-10 sm:[&_h2]:tw-text-2xl",
+  "[&_h3]:tw-mb-3 [&_h3]:tw-mt-8 [&_h3]:tw-text-lg [&_h3]:tw-font-semibold [&_h3]:tw-leading-7 [&_h3]:tw-text-iron-100",
+  "[&_h4]:tw-mb-3 [&_h4]:tw-mt-6 [&_h4]:tw-text-base [&_h4]:tw-font-semibold [&_h4]:tw-leading-7 [&_h4]:tw-text-iron-100",
+  "[&_li]:tw-mb-3 [&_li]:tw-text-base [&_li]:tw-leading-7 [&_li]:tw-text-iron-300 [&_li::marker]:tw-text-iron-600",
+  "[&_ol]:tw-my-5 [&_ol]:tw-pl-6 [&_p]:tw-mb-5 [&_p]:tw-text-base [&_p]:tw-leading-7 [&_p]:tw-text-iron-300 [&_ul]:tw-my-5 [&_ul]:tw-pl-6",
+].join(" ");
 
 export default function About({ section }: { readonly section: AboutSection }) {
   const locale = DEFAULT_LOCALE;
   const sectionTitle = getAboutSectionDocumentTitle(section, locale);
   const usesFeatureLayout = isAboutFeatureSection(section);
+  const usesLegalLayout = isAboutLegalSection(section);
+  const usesFullWidthLayout = usesFeatureLayout || usesLegalLayout;
   useSetTitle(
     t(locale, "about.contents.documentTitle", { section: sectionTitle })
   );
@@ -60,21 +76,27 @@ export default function About({ section }: { readonly section: AboutSection }) {
 
   return (
     <Container
-      fluid={section === AboutSection.TECH || usesFeatureLayout}
+      fluid={section === AboutSection.TECH || usesFullWidthLayout}
       className="tw-pt-2"
     >
       <Row>
         <Col>
           <AboutContentsDropdown
             className={
-              usesFeatureLayout
+              usesFullWidthLayout
                 ? "-tw-mx-6 -tw-mt-6 tw-w-[calc(100%+3rem)] tw-px-6"
                 : undefined
             }
             currentSection={section}
-            withDivider={usesFeatureLayout}
+            withDivider={usesFullWidthLayout}
           />
-          <div className="tw-w-full">
+          <div
+            className={
+              usesLegalLayout
+                ? ABOUT_LEGAL_CONTENT_CLASS
+                : "tw-w-full"
+            }
+          >
             <AboutSectionContent section={section} />
           </div>
         </Col>

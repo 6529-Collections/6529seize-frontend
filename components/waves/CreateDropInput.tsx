@@ -70,6 +70,8 @@ import RootBlockGuardPlugin from "@/components/drops/create/lexical/plugins/Root
 import { $selectEndOfRootBlock } from "@/components/drops/create/lexical/utils/rootContent";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { useDropComposerDensity } from "./CreateDropWaveWrapper";
+import { MAX_DROP_PART_UTF16_UNITS } from "@/helpers/waves/drop-content-limits";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
@@ -260,6 +262,8 @@ const CreateDropInput = forwardRef<
   ) => {
     const { isCapacitor } = useCapacitor();
     const locale = useBrowserLocale();
+    const composerDensity = useDropComposerDensity();
+    const isCompact = composerDensity === "compact";
     const editorConfig: InitialConfigType = {
       namespace: "User Drop",
       nodes: [
@@ -424,18 +428,26 @@ const CreateDropInput = forwardRef<
                       ariaLabel={placeholderText}
                       style={{ touchAction: "manipulation" }}
                       onBlur={onEditorBlur}
-                      className={`editor-input-one-liner tw-form-input tw-block tw-max-h-[40vh] tw-w-full tw-resize-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2.5 tw-pl-3 tw-text-base tw-font-normal tw-leading-6 tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 placeholder:tw-text-iron-500 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-text-sm ${
+                      className={`editor-input-one-liner tw-form-input tw-block tw-max-h-[40vh] tw-w-full tw-resize-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-pl-3 tw-font-normal tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 placeholder:tw-text-iron-500 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 ${
+                        isCompact
+                          ? "tw-py-3 tw-text-sm tw-leading-5"
+                          : "tw-pb-2 tw-pt-3 tw-text-base tw-leading-6 sm:tw-text-sm"
+                      } ${
                         submitting ? "tw-cursor-default tw-opacity-50" : ""
                       } ${isCapacitor ? "tw-pr-[35px]" : "tw-pr-[40px]"}`}
                     />
-                    <CreateDropEmojiPicker />
+                    <CreateDropEmojiPicker
+                      verticalAlignment={isCompact ? "center" : "top"}
+                    />
                   </div>
                 }
                 placeholder={
                   <span
                     className={`editor-placeholder tw-block tw-max-w-[calc(100%-3.5rem)] tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap ${
-                      submitting ? "tw-opacity-50" : ""
-                    }`}
+                      isCompact
+                        ? "tw-translate-y-0.5 tw-text-sm tw-leading-5"
+                        : "tw-translate-y-0.5 tw-text-base tw-leading-6 sm:tw-text-sm"
+                    } ${submitting ? "tw-opacity-50" : ""}`}
                   >
                     {placeholderText}
                   </span>
@@ -464,7 +476,7 @@ const CreateDropInput = forwardRef<
                 onSelect={onHashtagAdded}
                 ref={hashtagPluginRef}
               />
-              <MaxLengthPlugin maxLength={25000} />
+              <MaxLengthPlugin maxLength={MAX_DROP_PART_UTF16_UNITS} />
               <DragDropPastePlugin onAttachmentFiles={onAttachmentFiles} />
               <ListPlugin />
               <PlainTextPastePlugin />

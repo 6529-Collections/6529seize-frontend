@@ -25,6 +25,7 @@ import {
 } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import { useDebouncedQueryRefetch } from "./useDebouncedQueryRefetch";
+import { useWaveDropUpdateRefetch } from "./useWaveDropUpdateRefetch";
 
 const DEFAULT_WAVE_CURATION_DROPS_PAGE_SIZE = 20;
 
@@ -120,6 +121,8 @@ export function useWaveCurationDrops({
     isFetching,
     isFetchingNextPage,
   });
+
+  useWaveDropUpdateRefetch({ enabled, waveId, requestRefetch });
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,

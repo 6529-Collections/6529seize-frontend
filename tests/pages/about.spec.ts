@@ -95,6 +95,7 @@ test.describe("About Pages @smoke @medium @large", () => {
     await expect(layoutRoot).toHaveAttribute("data-mobile", "false");
     await expect(layoutRoot).toHaveAttribute("data-narrow", "true");
     await expect(layoutRoot).toHaveAttribute("data-right-open", "false");
+
     await page.getByRole("button", { name: "Toggle right sidebar" }).click();
     await expect(layoutRoot).toHaveAttribute("data-offcanvas", "true");
 

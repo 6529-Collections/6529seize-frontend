@@ -13,16 +13,19 @@ import LazyEmojiPicker, { type EmojiPickerSelection } from "./LazyEmojiPicker";
 interface CreateDropEmojiPickerProps {
   disabled?: boolean | undefined;
   top?: string | undefined;
+  verticalAlignment?: "top" | "center" | undefined;
 }
 
 interface CreateDropEmojiPickerContentProps {
   disabled: boolean;
   top: string;
+  verticalAlignment: "top" | "center";
 }
 
 const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
   disabled,
   top,
+  verticalAlignment,
 }) => {
   const isMobile = useIsMobileScreen();
   const { desktopZIndex, mobileZIndexClassName } =
@@ -125,7 +128,11 @@ const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
   return (
     <>
       <div
-        className={`tw-absolute tw-right-2 ${top} tw-flex tw-items-start tw-justify-center`}
+        className={`tw-absolute tw-right-2 tw-flex tw-justify-center ${
+          verticalAlignment === "center"
+            ? "tw-inset-y-0 tw-items-center"
+            : `${top} tw-items-start`
+        }`}
       >
         <button
           ref={buttonRef}
@@ -191,11 +198,13 @@ const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
 const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({
   disabled = false,
   top = "tw-top-2",
+  verticalAlignment = "top",
 }) => (
   <CreateDropEmojiPickerContent
     key={disabled ? "disabled" : "enabled"}
     disabled={disabled}
     top={top}
+    verticalAlignment={verticalAlignment}
   />
 );
 

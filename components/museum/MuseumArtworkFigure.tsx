@@ -3,6 +3,7 @@ import Link from "next/link";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { CaseyArtwork } from "@/lib/museum/casey";
+import { MuseumRightsLink } from "./MuseumRightsLink";
 
 export function MuseumArtworkFigure({
   artwork,
@@ -87,18 +88,11 @@ export function MuseumArtworkFigure({
           {image}
           <figcaption className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-4 tw-text-sm tw-leading-6 tw-text-iron-400">
             {artwork.creditLine}{" "}
-            {artwork.rightsUrl ? (
-              <a
-                href={artwork.rightsUrl}
-                target="_blank"
-                rel="license noopener noreferrer"
-                className="tw-text-iron-300 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-              >
-                {artwork.rightsLabel}
-              </a>
-            ) : (
-              artwork.rightsLabel
-            )}
+            <MuseumRightsLink
+              href={artwork.rightsUrl}
+              label={artwork.rightsLabel}
+              className="tw-text-iron-300 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            />
           </figcaption>
         </>
       )}
