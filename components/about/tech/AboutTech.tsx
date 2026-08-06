@@ -63,7 +63,7 @@ export default function AboutTech() {
         </h2>
         <Link
           href="/about/tech/wallet-authentication"
-          className="tw-group tw-block tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/55 tw-p-[21px] tw-text-current tw-no-underline tw-transition-colors tw-duration-200 hover:tw-border-primary-400/60 hover:tw-bg-iron-900/75 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-[#0D0D0F] motion-reduce:tw-transition-none"
+          className="tw-group tw-block tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/55 tw-p-[21px] tw-text-current tw-no-underline tw-transition-colors tw-duration-200 hover:tw-border-primary-400/60 hover:tw-bg-iron-900/75 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none"
           aria-label={t(
             locale,
             "about.tech.notes.walletAuthentication.ariaLabel"
