@@ -7,7 +7,7 @@ import { isExactGitCommit } from "../lib/museum/publication/security";
 
 export const COMPATIBILITY_CONTRACT = "museum-publication-compatibility-v1";
 
-export interface MuseumPublicationCompatibilityResult {
+interface MuseumPublicationCompatibilityResult {
   readonly contract: typeof COMPATIBILITY_CONTRACT;
   readonly source_commit: string;
   readonly accepted: boolean;

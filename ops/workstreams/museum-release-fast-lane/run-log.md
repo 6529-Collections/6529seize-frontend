@@ -466,3 +466,164 @@
   longer receives unused repository-content permission; the adversarial
   evidence mutation restores its fixture in `finally`; and the hold-evidence
   ordering contract proves both markers exist before comparing their offsets.
+
+## 2026-08-05 — PR 4 runner benchmark implementation
+
+- Added a dispatch-only controller and candidate workflow for exact-SHA runner
+  measurement. The controller runs on `ubuntu-latest`, validates a strict
+  source SHA/label/profile/timeout/repeat request, and retains `ubuntu-latest`
+  as the explicit control profile.
+- Added request-correlated polling with a bounded default 90-second timeout.
+  A missing or non-terminal candidate is classified as `unavailable`; only the
+  controller's own timed-out run may receive a cancellation request.
+- Added a trusted-tool/source split in the candidate workflow. The candidate
+  source is required to be an exact commit reachable from `main`; the
+  benchmark tool is checked out from the trusted workflow SHA. The candidate
+  has read-only `contents` and `actions` permissions and no deployment
+  credentials.
+- Added canonical JSON/Markdown evidence for controller and candidate runs,
+  including queue/setup, checkout, install, build, and package durations and
+  non-secret runner metadata. Unique artifact names make the uploaded evidence
+  immutable.
+- Added the runner activation playbook. Current status remains explicitly
+  unprovisioned: the organization has no larger-runner entitlement, no
+  self-hosted runners, and no repository runner variables. No activation or
+  settings mutation was performed.
+
+### PR 4 local validation
+
+- Runner workflow contract/self-check: passed.
+- Focused runner contract/evidence suite: 7 tests passed, including strict
+  input rejection, source ancestry rejection, reusable-call fallback,
+  controller/candidate permissions, hashed JSON/Markdown output, and
+  secret-shaped evidence rejection.
+- Changed lint: passed.
+- Changed TypeScript: passed for 1,358 files.
+- Jest and Playwright typecheck ratchets: passed with the existing 2,125
+  diagnostics across 872 files and no new debt.
+- Changed secret scan and workflow-security validation: passed with no
+  findings.
+- Package metadata, script syntax, `git diff --check`, and `codex-diff-check`:
+  passed.
+- The policy-bundle suite remains Linux-only on this Windows host because
+  Node does not expose `fs.constants.O_NOFOLLOW`; hosted Linux remains the
+  authoritative gate. The local `actionlint` binary timed out and is not
+  claimed as passed.
+
+## 2026-08-05 - PR 4 closeout correction
+
+- Corrected `validateTrustedSource` to compare against the declared
+  `trustedMainSha`; the earlier implementation referenced an undeclared
+  variable.
+- Added explicit regression coverage for both an exact trusted-main source
+  and a distinct source commit proven to be an ancestor of trusted main.
+- Confirmed generated evidence Markdown contains UTF-8 em dashes rather than
+  mojibake; the focused evidence test checks both candidate and controller
+  documents.
+- Re-ran the focused contract, evidence, lint, changed TypeScript, secret
+  scan, workflow-security, and diff checks after the correction. No commit,
+  push, PR, merge, deployment, runner activation, or settings mutation was
+  performed.
+
+## 2026-08-06 - PR 4 independent-review fixes
+
+- Superseded the initial 90-second-only observation behavior with separate
+  queue-availability and workload-completion budgets. The controller timeout
+  is now derived from repeat count and both budgets, bounded below the GitHub
+  Actions job limit, and followed by bounded final reconciliation.
+- Added strict dispatch/reusable-call candidate validation for all
+  cross-fields, request IDs, repeats, timeouts, and controller nonces.
+  Reusable calls execute and report only the truthful `ubuntu-latest` control
+  profile. Each dispatch uses a fresh 128-bit nonce, and run metadata is
+  verified for event, workflow, branch, SHA, title, ID, and attempt where
+  available before observation, cancellation, or evidence.
+- Scoped `GH_TOKEN` to API readback/dispatch-control steps; candidate install,
+  build, packaging, and evidence-writing steps do not inherit it. The candidate
+  activates pnpm `10.33.0` before pnpm-aware setup-node caching or dependency
+  installation.
+- Added delayed-run cleanup and transient-list reconciliation. Unverified
+  runs are never cancelled; unresolved cleanup remains explicit and
+  fail-closed in controller evidence. The new input and workflow-contract
+  helpers are included in the PR CI policy bundle.
+- Validation on this Windows host: focused runner suite 14 tests passed;
+  changed lint passed; changed TypeScript passed for 1,364 files; Node syntax,
+  YAML parsing, extracted workflow Bash syntax, workflow contract, and
+  `codex-diff-check` passed. The local actionlint binary timed out; the policy
+  bundle suite remains blocked by its existing Windows `O_NOFOLLOW` limitation.
+  No commit, push, PR, merge, deployment, runner activation, or settings
+  mutation was performed.
+
+## 2026-08-06 - PR 4 validated security corrections
+
+- Replaced pre-step dynamic candidate selection with an Ubuntu authorization
+  job. Direct human candidate dispatches remain on `ubuntu-latest` and fail
+  before source checkout. Dynamic candidate labels are emitted only after
+  `github-actions[bot]` actor, candidate run attempt 1, controller run ID and
+  attempt 1, trusted workflow/path/SHA, and exact request binding all pass.
+- Request IDs now contain a deterministic digest over every intended benchmark
+  input, controller identity, repeat, and nonce. Replays and input mutations
+  fail closed in the shared input contract and metadata verifier.
+- Split source measurement from evidence verification. The measured job has no
+  `GH_TOKEN` and no Actions API permission; it writes only an untrusted raw
+  observation. A fresh immutable verifier checkout on `ubuntu-latest` reads
+  run metadata, rebinds the observation, and writes hashed evidence.
+- Removed the reconciliation shortcut that cleared a missing run after a
+  successful list read. Any delayed run remains `reconciliation_pending`;
+  incomplete cleanup makes `reconciliation_completed` false and causes the
+  evidence writer to fail rather than report completion.
+- Added adversarial coverage for direct-label scheduling, bot/attempt/controller
+  binding, raw-observation forgery, and pending reconciliation. Focused suite:
+  18 tests passed. No commit, push, PR, merge, deployment, runner activation,
+  or settings mutation was performed.
+
+## 2026-08-06 - PR 4 hosted dead-code correction
+
+- Hosted Linux Knip rejected the input-contract helper because the consumer
+  destructured an intermediate CommonJS namespace, leaving 31 exports invisible
+  to Knip's usage graph. The consumer now destructures the helper directly and
+  the one genuinely private actor constant is no longer exported.
+- Closed two adjacent debts exposed by the now-authoritative Knip run: the
+  compatibility result interface is module-private, and the pure Museum change
+  classifier's test-only exports have the same explicit Knip disposition as
+  the repository's other adversarial policy helpers.
+- Exact follow-up validation passes full Knip, 36 focused tests, changed lint,
+  changed TypeScript, workflow syntax/expression lint, Node syntax, and
+  `codex-diff-check`. No runner or repository setting was changed.
+
+## 2026-08-06 - PR 4 exact review hardening
+
+- Raised the candidate workload ceiling to 35 minutes so the maximum
+  30-minute completion observation retains five minutes for setup, evidence
+  handoff, and cancellation; the workflow contract now derives and enforces
+  that minimum headroom.
+- Removed the runner-label fallback and re-verifies pnpm `10.33.0` immediately
+  in the frozen-install step after the second setup-node/cache action.
+- Both normalized-output bridges now admit only their closed key sets and
+  reject values containing equals signs or line breaks before writing to
+  `GITHUB_OUTPUT`.
+- Reconciliation no longer runs under `set +e`. State updates are validated as
+  JSON objects before atomic replacement, malformed state fails immediately,
+  and non-success discovery is handled explicitly without suppressing update
+  failures. The malformed unquoted jq fallback was removed.
+- Focused runner tests, changed lint/typecheck, workflow syntax/expression lint,
+  Node syntax, and the diff check pass after these corrections.
+
+## 2026-08-06 - PR 4 security-rating correction
+
+- Sonar identified workflow-level `actions: write` on the controller. The
+  workflow and validation job now hold contents-read only; Actions write is
+  granted solely to the dispatch/reconciliation job that calls the API.
+- The accompanying Sonar observations were resolved by using `Object.hasOwn`,
+  typed validation errors, and a negative splice index.
+- CodeQL alert 292 was reviewed and dismissed as a false positive. Candidate
+  source is an exact commit that immutable trusted tooling proves is a current
+  main ancestor before checkout; the measured job has no secrets, no candidate
+  token, `actions: none`, and no persisted checkout credentials, while a fresh
+  Ubuntu verifier independently binds its evidence.
+- Independent Bash review caught `event_name` missing from the new closed
+  normalized-output allowlist. The field is now admitted explicitly and the
+  workflow regression test binds that exact allowlist segment.
+- The hosted Debt Ratchet exposed two generic `any` annotations in the YAML
+  fixture. They were replaced with closed workflow-fixture test types;
+  the metric returns to its 126 baseline. The full Jest diagnostic ratchet and
+  Playwright typecheck now pass alongside the debt ratchet.
