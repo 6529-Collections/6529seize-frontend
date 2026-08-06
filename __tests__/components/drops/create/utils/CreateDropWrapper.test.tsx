@@ -397,7 +397,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
 
       let result: any;
       act(() => {
-        result = component.current?.requestDrop();
+        result = component.current!.requestDrop();
       });
 
       expect(result).toMatchObject({
@@ -428,7 +428,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
 
       let result: any;
       act(() => {
-        result = component.current?.requestDrop();
+        result = component.current!.requestDrop();
       });
 
       expect(result.is_safe_signature).toBe(true);
@@ -479,7 +479,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
 
       fireEvent.click(getByTestId("set-full-editor-state"));
 
-      const result = component.current?.getDropSnapshot();
+      const result = component.current!.getDropSnapshot();
 
       expect(setDrop).not.toHaveBeenCalled();
       expect(result.parts).toHaveLength(1);
@@ -488,7 +488,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
         quoted_drop: null,
         media: [],
       });
-      expect(result.parts[0].clientId).toEqual(expect.any(String));
+      expect(result.parts[0]!.clientId).toEqual(expect.any(String));
       expect(result).toMatchObject({
         title: "Draft title",
         metadata: [metadata],
@@ -540,8 +540,8 @@ describe("CreateDropWrapper Authentication Validation", () => {
 
       fireEvent.click(getByTestId("set-full-editor-state"));
 
-      const firstSnapshot = component.current?.getDropSnapshot();
-      const secondSnapshot = component.current?.getDropSnapshot();
+      const firstSnapshot = component.current!.getDropSnapshot();
+      const secondSnapshot = component.current!.getDropSnapshot();
 
       expect(setDrop).not.toHaveBeenCalled();
       expect(drop.parts).toHaveLength(1);
@@ -549,8 +549,8 @@ describe("CreateDropWrapper Authentication Validation", () => {
         "first part",
         "second part",
       ]);
-      expect(firstSnapshot.parts[0].clientId).toBe("existing-part");
-      expect(firstSnapshot.parts[1].clientId).toEqual(expect.any(String));
+      expect(firstSnapshot.parts[0]!.clientId).toBe("existing-part");
+      expect(firstSnapshot.parts[1]!.clientId).toEqual(expect.any(String));
       expect(secondSnapshot.parts.map((part: any) => part.content)).toEqual([
         "first part",
         "second part",
@@ -581,7 +581,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
       fireEvent.click(getByTestId("set-full-editor-state"));
       let result: any;
       act(() => {
-        result = component.current?.requestDrop();
+        result = component.current!.requestDrop();
       });
 
       expect(setDrop).toHaveBeenCalledWith(result);
@@ -613,7 +613,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
       fireEvent.click(getByTestId("set-full-editor-state"));
       fireEvent.click(getByTestId("add-full-part"));
 
-      const result = component.current?.getDropSnapshot();
+      const result = component.current!.getDropSnapshot();
 
       expect(setDrop).not.toHaveBeenCalled();
       expect(result.parts).toEqual([]);
@@ -643,10 +643,10 @@ describe("CreateDropWrapper Authentication Validation", () => {
 
       fireEvent.click(getByTestId("sync-full-upload-editor-state"));
 
-      const result = component.current?.getDropSnapshot();
+      const result = component.current!.getDropSnapshot();
 
       expect(setDrop).not.toHaveBeenCalled();
-      expect(result.parts[0].content).toBe(
+      expect(result.parts[0]!.content).toBe(
         "uploaded ![Seize](https://cdn.example/image.png)"
       );
     });
@@ -743,7 +743,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
 
       let requestResult: unknown;
       act(() => {
-        requestResult = component.current?.requestDrop();
+        requestResult = component.current!.requestDrop();
       });
       fireEvent.click(getByTestId("add-full-part"));
       fireEvent.click(getByTestId("submit-full-drop"));
@@ -835,7 +835,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
 
       let requestResult: unknown;
       act(() => {
-        requestResult = component.current?.requestDrop();
+        requestResult = component.current!.requestDrop();
       });
       fireEvent.click(getByTestId("add-full-part"));
       fireEvent.click(getByTestId("submit-full-drop"));
@@ -871,11 +871,11 @@ describe("CreateDropWrapper Authentication Validation", () => {
       fireEvent.click(getByTestId("set-full-editor-state"));
       fireEvent.click(getByTestId("add-full-part"));
 
-      const result = component.current?.getDropSnapshot();
+      const result = component.current!.getDropSnapshot();
 
       expect(setDrop).not.toHaveBeenCalled();
       expect(setIsStormMode).not.toHaveBeenCalled();
-      expect(result.parts[0].content).toBe("pending ![Seize](loading)");
+      expect(result.parts[0]!.content).toBe("pending ![Seize](loading)");
     });
 
     it("does not submit while inline image upload markdown is pending", async () => {
@@ -912,11 +912,11 @@ describe("CreateDropWrapper Authentication Validation", () => {
 
       fireEvent.click(getByTestId("submit-full-drop"));
 
-      const result = component.current?.getDropSnapshot();
+      const result = component.current!.getDropSnapshot();
 
       expect(setDrop).not.toHaveBeenCalled();
       expect(onSubmitDrop).not.toHaveBeenCalled();
-      expect(result.parts[0].content).toBe("pending ![Seize](loading)");
+      expect(result.parts[0]!.content).toBe("pending ![Seize](loading)");
     });
 
     it("saves a storm part once inline image markdown has an uploaded URL", () => {
