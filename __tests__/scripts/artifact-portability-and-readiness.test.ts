@@ -675,8 +675,8 @@ describe("artifact-portability.v1", () => {
       file_count: 3,
       tree_sha256: expect.stringMatching(/^[a-f0-9]{64}$/),
     });
-    expect(inventory.package_scan.tree_sha256).not.toBe(
-      baseline.package_scan.tree_sha256
+    expect(inventory.package_scan["tree_sha256"]).not.toBe(
+      baseline.package_scan["tree_sha256"]
     );
   });
 
@@ -692,8 +692,8 @@ describe("artifact-portability.v1", () => {
       );
     }
 
-    expect(left.build().package_scan.tree_sha256).toBe(
-      right.build().package_scan.tree_sha256
+    expect(left.build().package_scan["tree_sha256"]).toBe(
+      right.build().package_scan["tree_sha256"]
     );
   });
 
