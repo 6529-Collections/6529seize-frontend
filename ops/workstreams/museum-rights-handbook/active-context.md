@@ -297,3 +297,66 @@ production, or evidence gate remains open.
   compact realtime-drop update. It merged without conflict and has no Museum
   or rights-file overlap. The final candidate therefore combines the fully
   green exact rights head with an already merged, unrelated mainline change.
+
+### 2026-08-06 Museum-practice revision production closeout
+
+- Frontend PR
+  [#3634](https://github.com/6529-Collections/6529seize-frontend/pull/3634)
+  merged at `2026-08-05T23:53:47Z` as runtime main
+  `81ddbf2a6dce7df785c87d9a3192d3ed7a74f1cf`. The final candidate passed the
+  complete production build, 97 combined focused and Museum regression tests,
+  changed lint and typecheck, React Doctor 100/100, formatting, path checks,
+  three 6529bot review lanes, and the resolved CodeRabbit review.
+- Canonical Museum source PR
+  [#33](https://github.com/6529-Collections/6529networkmuseum/pull/33)
+  merged as `42236950a8976825861b6785613e3837405f486c`. Source main later advanced
+  through public-copy cleanup to
+  `6f7f8b2168347cb623d53eeb6b9d7fe1242d7a73`. The current 345-entry manifest
+  has SHA-256
+  `sha256:81bcb7303692014e719870f9eaf97e5262940697a17e141a384a59c6617fc84d`
+  and Keccak
+  `0xa404564ca8bb5f6debf369be758c5efdbbfa90dc637d1a7421b20e3e5dc3e65e`.
+- Staging composition `d4c26cd46c749d30f2127448c5e282bf5bafd3a9`
+  deployed successfully in run
+  [`31058873325`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/31058873325).
+  The selected-pack E2E run
+  [`31059622531`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/31059622531)
+  passed 15 of 16 packs on both attempts. The exact rights pack passed each
+  time. The only failing pack rejected Chromium's exact
+  `Cross-Origin-Opener-Policy: Failed to fetch` shell diagnostic after its
+  route, content, and source assertions passed, with no HTTP 5xx response.
+  Independent staging replays passed the rights suite 6/6 and the data
+  architecture suite 6/6 against the unchanged deployment. Test-only PR
+  [#3636](https://github.com/6529-Collections/6529seize-frontend/pull/3636)
+  later allowed only the three exact established shell transport diagnostics;
+  it retained all page-error, other console-error, and HTTP 5xx failures and
+  passed the data architecture staging suite 6/6.
+- Production deployment run
+  [`31061048126`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/31061048126)
+  reused the exact artifact and completed successfully. Three consecutive
+  `/api/version` reads returned and announced
+  `81ddbf2a6dce7df785c87d9a3192d3ed7a74f1cf` with `stale: false`.
+  Automatic production E2E run
+  [`31061460637`](https://github.com/6529-Collections/6529seize-frontend/actions/runs/31061460637)
+  passed all 15 selected read-only packs, including Museum rights, data
+  architecture, institutional practice, and Inside the System.
+- A fresh retained production rights run passed 6/6 desktop and mobile
+  journeys. The final route sweep returned HTTP 200 for the overview, artist
+  and collector guides, and all 22 rights-expression pages. Production pixel
+  checks found six editorial practice rows on both representative detail
+  pages, zero rounded status elements, zero em dashes in the revised visible
+  copy, no browser errors, and 390/390/390 mobile widths. Visual review of the
+  retained desktop and mobile captures found no release defect.
+- Frontend main later advanced through the test-only PR #3636 and a ledger-only
+  closeout. Neither changes the deployed runtime. A subsequent manual
+  production attempt for that docs-inclusive main was rejected with HTTP 409
+  by the readiness guard before any mutation. Production correctly remains on
+  the exact qualified Museum runtime above.
+- `punk6529bot` posted the production closeout to the Dev Team Chat subwave of
+  Follow The Repo as drop
+  `523c6e7e-1191-421e-98bd-22178f5f6427` (`#1274983`). The API readback
+  returned the same drop under the `punk6529bot` profile. The posted text is
+  preserved in `dev-team-chat-release-note.md` beside this ledger.
+
+The Museum-practice revision is live and fully qualified. No runtime, review,
+staging, production, or visual gate remains open.
