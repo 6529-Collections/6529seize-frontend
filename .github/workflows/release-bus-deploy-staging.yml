@@ -192,6 +192,8 @@ jobs:
                 (.package_sha256 | test("^[a-f0-9]{64}$"))
               ' manifest.json >/dev/null
             package_path=target/package.zip
+            portability_inventory=artifact-portability.json
+            portability_inventory_required=true
             artifact_contract=environment-bound-v1
             package_digest="$(sha256sum "$package_path" | cut -d' ' -f1)"
             test "$package_digest" = "$(jq -r '.package_sha256' manifest.json)"
@@ -206,6 +208,8 @@ jobs:
                 (.profiles.staging.package_sha256 | test("^[a-f0-9]{64}$"))
               ' manifest.json >/dev/null
             package_path=profiles/staging/target/package.zip
+            portability_inventory=profiles/staging/artifact-portability.json
+            portability_inventory_required=false
             artifact_contract=legacy-v2
             package_digest="$(sha256sum "$package_path" | cut -d' ' -f1)"
             test "$package_digest" = "$(jq -r '.profiles.staging.package_sha256' manifest.json)"
@@ -213,9 +217,32 @@ jobs:
             echo "Artifact schema is incompatible with $ARTIFACT_CONTRACT_VERSION." >&2
             exit 1
           fi
+          if [ -f "$portability_inventory" ]; then
+            jq -e \
+              --arg source_sha "$EXPECTED_SHA" \
+              --arg package_sha256 "$package_digest" \
+              '.schema_version == "artifact-portability.v1" and
+               .contract == "artifact-portability-v1" and
+               .environment == "staging" and
+               .source.git_sha == $source_sha and
+               .digests.package_sha256 == $package_sha256 and
+               .portability.status == "NOT_PORTABLE" and
+               .portability.portable == false and
+               .portability.reuse_authorized == false and
+               .portability.promotion_authorized == false' \
+              "$portability_inventory" >/dev/null
+            portability_status=not-portable-inventory-verified
+          elif [ "$portability_inventory_required" = true ]; then
+            echo "Required v3 artifact-portability inventory is missing." >&2
+            exit 1
+          else
+            echo "::notice::Pre-PR6 legacy-v2 artifact has no portability inventory; deploy compatibility is preserved, but reuse and promotion remain unauthorized."
+            portability_status=not-portable-pre-pr6-legacy
+          fi
           echo "artifact_digest=$artifact_digest" >> "$GITHUB_OUTPUT"
           echo "artifact_contract=$artifact_contract" >> "$GITHUB_OUTPUT"
           echo "package_digest=$package_digest" >> "$GITHUB_OUTPUT"
+          echo "portability_status=$portability_status" >> "$GITHUB_OUTPUT"
           echo "package_path=$package_path" >> "$GITHUB_OUTPUT"
           echo "schema_version=$schema_version" >> "$GITHUB_OUTPUT"
       - name: Configure AWS credentials
@@ -631,6 +658,7 @@ jobs:
           SOURCE_FAILURE_KIND: ${{ steps.source.outputs.failure_kind }}
           DOWNLOAD_OUTCOME: ${{ steps.artifact-download.outcome }}
           ARTIFACT_OUTCOME: ${{ steps.artifact.outcome }}
+          PORTABILITY_STATUS: ${{ steps.artifact.outputs.portability_status }}
           AWS_OUTCOME: ${{ steps.aws-credentials.outcome }}
           EVIDENCE_OUTCOME: ${{ steps.evidence.outcome }}
         run: |
@@ -668,9 +696,6 @@ jobs:
           fi
           deployment_environment="$ARTIFACT_ENVIRONMENT"
           summary_environment="$ARTIFACT_ENVIRONMENT"
-          if [ "$ARTIFACT_CONTRACT_VERSION" = legacy-v2 ]; then
-            summary_environment=portable
-          fi
           payload="$(jq -n \
             --arg train_id "$TRAIN_ID" \
             --arg operation_key "$OPERATION_KEY" \
@@ -691,9 +716,10 @@ jobs:
             --arg artifact_train_id "$ARTIFACT_TRAIN_ID" \
             --arg artifact_digest "$ARTIFACT_DIGEST" \
             --arg package_digest "$PACKAGE_DIGEST" \
+            --arg portability_status "$PORTABILITY_STATUS" \
             --argjson source_evidence_reused "$([ "$ARTIFACT_CONTRACT" = environment-bound-v1 ] && printf true || printf false)" \
             --argjson artifact_bytes_reused false \
-            '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"complete",status:$status,failure_class:(if $failure_class == "null" then null else $failure_class end),failure_phase:(if $failure_phase == "null" then null else $failure_phase end),retryable:$retryable,summary:{schema_version:(if $schema_version == "" then null else ($schema_version | tonumber) end),artifact_contract:(if $artifact_contract == "" then null else $artifact_contract end),artifact_contract_version:$artifact_contract_version,repository:$repository,source_sha:$source_sha,environment:$environment,deployment_environment:$deployment_environment,service:null,artifact_run_id:$artifact_run_id,artifact_train_id:$artifact_train_id,artifact_digest:(if $artifact_digest == "" then null else $artifact_digest end),package_digest:(if $package_digest == "" then null else $package_digest end),consumed_preflight_artifact:$consumed_preflight_artifact,rebuilt:false,source_evidence_reused:$source_evidence_reused,artifact_bytes_reused:$artifact_bytes_reused},stages:[],jest:null,backend_evidence:null}')"
+            '{train_id:$train_id,operation_key:$operation_key,workflow_run_id:$workflow_run_id,phase:"complete",status:$status,failure_class:(if $failure_class == "null" then null else $failure_class end),failure_phase:(if $failure_phase == "null" then null else $failure_phase end),retryable:$retryable,summary:{schema_version:(if $schema_version == "" then null else ($schema_version | tonumber) end),artifact_contract:(if $artifact_contract == "" then null else $artifact_contract end),artifact_contract_version:$artifact_contract_version,repository:$repository,source_sha:$source_sha,environment:$environment,deployment_environment:$deployment_environment,portability_status:(if $portability_status == "" then null else $portability_status end),service:null,artifact_run_id:$artifact_run_id,artifact_train_id:$artifact_train_id,artifact_digest:(if $artifact_digest == "" then null else $artifact_digest end),package_digest:(if $package_digest == "" then null else $package_digest end),consumed_preflight_artifact:$consumed_preflight_artifact,rebuilt:false,source_evidence_reused:$source_evidence_reused,artifact_bytes_reused:$artifact_bytes_reused},stages:[],jest:null,backend_evidence:null}')"
           curl --fail-with-body --silent --show-error \
             -H "Authorization: Bearer $RELEASE_BUS_WORKFLOW_AUTH_TOKEN" \
             -H 'Content-Type: application/json' \

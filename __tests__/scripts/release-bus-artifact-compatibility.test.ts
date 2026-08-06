@@ -108,17 +108,47 @@ function writeArtifact(
   root: string,
   environment: "staging" | "production",
   schema: 2 | 3,
-  overrides: Record<string, unknown> = {}
+  overrides: Record<string, unknown> = {},
+  options: { includePortability?: boolean } = {}
 ) {
   const artifactRoot = path.join(root, "release-bus-artifact");
   fs.mkdirSync(artifactRoot, { recursive: true });
   const files = new Map<string, Buffer>();
+  const portabilityInventory = (
+    profile: "staging" | "production",
+    packageDigest: string
+  ) =>
+    Buffer.from(
+      JSON.stringify({
+        schema_version: "artifact-portability.v1",
+        contract: "artifact-portability-v1",
+        environment: profile,
+        source: { git_sha: EXPECTED_SHA },
+        digests: { package_sha256: packageDigest },
+        portability: {
+          status: "NOT_PORTABLE",
+          portable: false,
+          reuse_authorized: false,
+          promotion_authorized: false,
+        },
+      })
+    );
   let manifest: Record<string, unknown>;
   if (schema === 2) {
     const staging = Buffer.from("staging-package");
     const production = Buffer.from("production-package");
     files.set("profiles/staging/target/package.zip", staging);
     files.set("profiles/production/target/package.zip", production);
+    if (options.includePortability !== false) {
+      files.set(
+        "profiles/staging/artifact-portability.json",
+        portabilityInventory("staging", sha256(staging))
+      );
+      files.set(
+        "profiles/production/artifact-portability.json",
+        portabilityInventory("production", sha256(production))
+      );
+    }
     manifest = {
       schema_version: 2,
       repository: "frontend",
@@ -134,6 +164,12 @@ function writeArtifact(
   } else {
     const packageBytes = Buffer.from(`${environment}-v3-package`);
     files.set("target/package.zip", packageBytes);
+    if (options.includePortability !== false) {
+      files.set(
+        "artifact-portability.json",
+        portabilityInventory(environment, sha256(packageBytes))
+      );
+    }
     manifest = {
       schema_version: 3,
       artifact_contract: "environment-bound-v1",
@@ -600,6 +636,75 @@ describe("Release Bus artifact rollout compatibility", () => {
       }
     });
 
+    it(`${environment} preserves pre-PR6 legacy-v2 artifacts without authorizing portability`, () => {
+      const workflow = readWorkflow(workflowName);
+      const verify = findStep(
+        workflow,
+        "deploy",
+        "Verify and bind immutable artifact"
+      );
+      const root = fs.mkdtempSync(
+        path.join(os.tmpdir(), `release-bus-${environment}-pre-pr6-`)
+      );
+      try {
+        const digest = writeArtifact(
+          root,
+          environment,
+          2,
+          {},
+          {
+            includePortability: false,
+          }
+        );
+        const output = path.join(root, "github-output");
+        const env = {
+          ...deployEnv(environment, digest, "legacy-v2"),
+          GITHUB_OUTPUT: output,
+        };
+        const result = runShell(verify.run!, { cwd: root, env });
+        expect(result.status).toBe(0);
+        expect(`${result.stdout}${result.stderr}`).toContain(
+          "reuse and promotion remain unauthorized"
+        );
+        expect(fs.readFileSync(output, "utf8")).toContain(
+          "portability_status=not-portable-pre-pr6-legacy"
+        );
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
+    });
+
+    it(`${environment} rejects a v3 artifact without its required portability inventory`, () => {
+      const workflow = readWorkflow(workflowName);
+      const verify = findStep(
+        workflow,
+        "deploy",
+        "Verify and bind immutable artifact"
+      );
+      const root = fs.mkdtempSync(
+        path.join(os.tmpdir(), `release-bus-${environment}-v3-no-inventory-`)
+      );
+      try {
+        const digest = writeArtifact(
+          root,
+          environment,
+          3,
+          {},
+          {
+            includePortability: false,
+          }
+        );
+        const env = deployEnv(environment, digest, "environment-bound-v3");
+        const result = runShell(verify.run!, { cwd: root, env });
+        expect(result.status).not.toBe(0);
+        expect(`${result.stdout}${result.stderr}`).toContain(
+          "Required v3 artifact-portability inventory is missing"
+        );
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
+    });
+
     it(`${environment} preserves ordinary CAS and proves rollback reachability without checkout`, () => {
       const workflow = readWorkflow(`release-bus-deploy-${environment}.yml`);
       const source = findStep(
@@ -703,6 +808,7 @@ describe("Release Bus artifact rollout compatibility", () => {
           MOCK_CURL_PAYLOAD: curlPayload,
           OPERATION_KEY: "rb2:compatibility:a1",
           PACKAGE_DIGEST: "d".repeat(64),
+          PORTABILITY_STATUS: "not-portable-inventory-verified",
           PATH: `${mockBin}:${process.env["PATH"]}`,
           RELEASE_BUS_API_URL: "https://release-bus.invalid",
           RELEASE_BUS_WORKFLOW_AUTH_TOKEN: "test-token",
@@ -721,6 +827,7 @@ describe("Release Bus artifact rollout compatibility", () => {
             repository: "frontend",
             source_sha: EXPECTED_SHA,
             environment,
+            portability_status: "not-portable-inventory-verified",
             service: null,
             artifact_run_id: "1234",
             artifact_train_id: TRAIN_ID,
@@ -738,6 +845,7 @@ describe("Release Bus artifact rollout compatibility", () => {
               ...reportEnv,
               ARTIFACT_CONTRACT: "legacy-v2",
               ARTIFACT_CONTRACT_VERSION: "legacy-v2",
+              PORTABILITY_STATUS: "not-portable-pre-pr6-legacy",
               SCHEMA_VERSION: "2",
             },
           }).status
@@ -750,8 +858,9 @@ describe("Release Bus artifact rollout compatibility", () => {
             artifact_contract_version: "legacy-v2",
             repository: "frontend",
             source_sha: EXPECTED_SHA,
-            environment: "portable",
+            environment,
             deployment_environment: environment,
+            portability_status: "not-portable-pre-pr6-legacy",
             service: null,
             artifact_run_id: "1234",
             artifact_train_id: TRAIN_ID,
@@ -773,6 +882,7 @@ describe("Release Bus artifact rollout compatibility", () => {
               ARTIFACT_OUTCOME: "skipped",
               JOB_STATUS: "failure",
               PACKAGE_DIGEST: "",
+              PORTABILITY_STATUS: "",
               SCHEMA_VERSION: "",
               SOURCE_FAILURE_KIND: "ref-moved",
               SOURCE_OUTCOME: "failure",
@@ -787,6 +897,7 @@ describe("Release Bus artifact rollout compatibility", () => {
           summary: {
             artifact_digest: null,
             package_digest: null,
+            portability_status: null,
             consumed_preflight_artifact: false,
             rebuilt: false,
             source_evidence_reused: false,
@@ -803,6 +914,7 @@ describe("Release Bus artifact rollout compatibility", () => {
               ARTIFACT_OUTCOME: "skipped",
               JOB_STATUS: "failure",
               PACKAGE_DIGEST: "",
+              PORTABILITY_STATUS: "",
               SCHEMA_VERSION: "",
               SOURCE_FAILURE_KIND: "rollback-not-reachable",
               SOURCE_OUTCOME: "failure",
@@ -817,6 +929,7 @@ describe("Release Bus artifact rollout compatibility", () => {
           summary: {
             artifact_digest: null,
             package_digest: null,
+            portability_status: null,
             consumed_preflight_artifact: false,
             rebuilt: false,
             source_evidence_reused: false,
@@ -843,10 +956,10 @@ describe("Release Bus artifact rollout compatibility", () => {
       );
       const evidence = findStep(
         workflow,
-        environment === "staging" ? "staging-packs" : "readonly",
+        environment === "staging" ? "staging-packs" : "verify-evidence",
         environment === "staging"
           ? "Validate exact manifest-bound E2E evidence"
-          : "Validate exact production E2E evidence"
+          : "Validate production E2E evidence on isolated runner"
       );
       const root = fs.mkdtempSync(
         path.join(os.tmpdir(), `release-bus-${environment}-runner-`)
@@ -930,6 +1043,83 @@ describe("Release Bus artifact rollout compatibility", () => {
       }
     });
   }
+
+  it("preserves retryable setup classification across the isolated production boundary", () => {
+    const workflow = readWorkflow("production-e2e.yml");
+    const report = findStep(
+      workflow,
+      "verify-evidence",
+      "Report structured Release Bus E2E result"
+    );
+    const root = fs.mkdtempSync(
+      path.join(os.tmpdir(), "release-bus-production-e2e-report-")
+    );
+    try {
+      const mockBin = path.join(root, "bin");
+      fs.mkdirSync(mockBin);
+      createMockCurl(mockBin);
+      const curlPayload = path.join(root, "report-payload.json");
+      const baseEnv = {
+        EVIDENCE_DOWNLOAD_OUTCOME: "failure",
+        GITHUB_RUN_ID: "9876",
+        IDENTITY_OUTCOME: "success",
+        ISOLATED_EVIDENCE_OUTCOME: "skipped",
+        MOCK_CURL_PAYLOAD: curlPayload,
+        OPERATION_KEY: "rb2:production:e2e:a1",
+        PATH: `${mockBin}:${process.env["PATH"]}`,
+        READONLY_EVIDENCE_UPLOAD_OUTCOME: "skipped",
+        READONLY_RESULT: "failure",
+        READONLY_SELECTION_OUTCOME: "success",
+        READONLY_SELECTION_UPLOAD_OUTCOME: "success",
+        RELEASE_BUS_API_URL: "https://release-bus.invalid",
+        RELEASE_BUS_WORKFLOW_AUTH_TOKEN: "test-token",
+        SELECTION_DOWNLOAD_OUTCOME: "success",
+        TRAIN_ID,
+        VERIFIER_TOOLING_OUTCOME: "success",
+      };
+
+      expect(
+        runShell(report.run!, {
+          cwd: root,
+          env: {
+            ...baseEnv,
+            READONLY_DEPENDENCIES_OUTCOME: "skipped",
+            READONLY_E2E_OUTCOME: "skipped",
+            READONLY_PLAYWRIGHT_OUTCOME: "skipped",
+            READONLY_SOCKET_OUTCOME: "failure",
+          },
+        }).status
+      ).toBe(0);
+      expect(JSON.parse(fs.readFileSync(curlPayload, "utf8"))).toMatchObject({
+        failure_class: "INFRASTRUCTURE",
+        failure_phase: "production_e2e_setup",
+        retryable: true,
+        status: "FAILED",
+      });
+
+      expect(
+        runShell(report.run!, {
+          cwd: root,
+          env: {
+            ...baseEnv,
+            READONLY_DEPENDENCIES_OUTCOME: "success",
+            READONLY_E2E_OUTCOME: "failure",
+            READONLY_EVIDENCE_UPLOAD_OUTCOME: "success",
+            READONLY_PLAYWRIGHT_OUTCOME: "success",
+            READONLY_SOCKET_OUTCOME: "success",
+          },
+        }).status
+      ).toBe(0);
+      expect(JSON.parse(fs.readFileSync(curlPayload, "utf8"))).toMatchObject({
+        failure_class: "E2E",
+        failure_phase: "production_e2e",
+        retryable: false,
+        status: "FAILED",
+      });
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
 
   it("rejects partial staging E2E operation identity before checkout", () => {
     const workflow = readWorkflow("staging-e2e.yml");

@@ -1,5 +1,3 @@
-import styles from "@/styles/Home.module.css";
-
 import About from "@/components/about/About";
 import {
   getAboutSectionDocumentTitle,
@@ -9,6 +7,7 @@ import {
 import {
   AboutCol as Col,
   AboutContainer as Container,
+  ABOUT_PAGE_SURFACE_CLASS_NAME,
   AboutRow as Row,
 } from "@/components/about/AboutLayout";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -41,10 +40,8 @@ export default async function AboutPage(props: Readonly<Props>) {
   return (
     <main
       className={clsx(
-        styles["main"],
-        "tailwind-scope",
-        (usesFeatureLayout || usesLegalLayout) &&
-          "tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-900 tw-bg-[#0D0D0F]"
+        "tailwind-scope tw-min-h-screen",
+        (usesFeatureLayout || usesLegalLayout) && ABOUT_PAGE_SURFACE_CLASS_NAME
       )}
     >
       {isMemes ? (
